@@ -8,6 +8,52 @@
 
 ---
 
+## ⚠️ CRITICAL: FUTURE CONTEXT REFRESH INSTRUCTIONS
+
+**If you're working on this project in a new session, READ THESE SECTIONS FIRST:**
+
+1. **COLOR PALETTE** (lines 52-106): Azulejo-inspired colors are MANDATORY
+   - Primary: `#3C5E95` (azulejo blue) - NOT teal, NOT generic blue
+   - Use `azulejo-blue-500`, `azulejo-cobalt-500`, `azulejo-gold-500` in Tailwind
+   - Logo uses PNG files (`public/Logo.png`, `public/Logo_with_name.png`) - NOT SVG except favicon
+
+2. **COMPONENT SPECIFICATIONS** (lines 505-630): Detailed designs for each section
+   - HeroSection: H1 "Explore Lisbon's Lost Skyline Through AR" + gradient overlay
+   - ProblemStatement: 3-column cards (Traditional → AR Solution → Impact)
+   - PanoramaShowcase: 60/40 split (image + historical details)
+   - READ these specs BEFORE coding to maintain consistency
+
+3. **MULTILINGUAL REQUIREMENTS** (GUIDE_LANGUAGES.md):
+   - All text must support PT/EN via `useInlineTranslation()` hook
+   - Example: `t({ pt: 'Explorar', en: 'Explore' })`
+   - NEVER hardcode English-only strings
+
+4. **SEO REQUIREMENTS** (lines 751-840):
+   - H1 only once per page: "Explore Lisbon's Lost Skyline Through AR"
+   - H2 for sections: "Why AR for Museums?", "The Grande Panorama de Lisboa"
+   - Alt text for images must be descriptive + include keywords
+
+5. **DESIGN PRINCIPLES** (lines 241-260):
+   - Domain-centered architecture (assets with components)
+   - 3-tier color system (Global → Domain → Local)
+   - Mobile-first responsive (Tailwind breakpoints: sm, md, lg, xl)
+
+6. **PROJECT CONTEXT** (lines 23-50):
+   - This is a **12-month FCT NOVA thesis project** (not a commercial product)
+   - Target: **Museum visitors**, students, tourists (NOT general tech users)
+   - Content source: **Google Arts & Culture article** + **site_notes.md**
+   - Historical accuracy is CRITICAL (verify facts against sources)
+
+**WHY THESE INSTRUCTIONS EXIST:**
+You may lose context between sessions. These reminders ensure:
+- Correct azulejo color palette (not random blues)
+- Proper multilingual support (PT/EN, not EN-only)
+- SEO-optimized structure (H1/H2 hierarchy)
+- Historical accuracy (Grande Panorama facts)
+- Consistent design language (cards, gradients, spacing)
+
+---
+
 ## TABLE OF CONTENTS
 1. [Project Overview](#project-overview)
 2. [Color System Update](#color-system-update)

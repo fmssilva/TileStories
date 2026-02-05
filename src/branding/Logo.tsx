@@ -7,15 +7,16 @@
  * - Usage context (header, footer, etc.)
  * 
  * Located in /branding because it's brand-specific, not a generic UI component
+ * 
+ * NOTE: Uses PNG files for better quality. SVG only used for favicon.
  */
 
 import { appConfig } from '@/config/app';
-import { useTheme } from '@/design/theme';
 
-// Logo paths - co-located assets for better cohesion
-import logoLight from './assets/logo.svg';
-import logoDark from './assets/logo-dark.svg';
-import logoIcon from './assets/logo-icon.svg';
+// Logo paths - Using PNG for better visual quality (SVG is low quality)
+// Co-located in public folder for direct access
+const logoIcon = '/Logo.png';
+const logoFull = '/Logo_with_name.png';
 
 type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -30,27 +31,18 @@ interface LogoProps {
 export function Logo({
     variant = 'full',
     size = 'md',
-    theme = 'auto',
     className = '',
     alt = appConfig.displayName
 }: LogoProps) {
-    const { theme: currentTheme } = useTheme();
-
-    // Determine which logo to use based on theme
+    // Determine which logo to use
     const getLogoSrc = () => {
-        // For icon variant, always use the icon version
+        // For icon variant, use icon-only PNG
         if (variant === 'icon') {
             return logoIcon;
         }
 
-        // For full variant, choose based on theme
-        const effectiveTheme = theme === 'auto' ? currentTheme : theme;
-
-        if (effectiveTheme === 'dark') {
-            return logoDark;
-        } else {
-            return logoLight;
-        }
+        // For full variant, use logo with name
+        return logoFull;
     };
 
     const logoSrc = getLogoSrc();

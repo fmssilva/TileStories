@@ -3,13 +3,15 @@
  */
 
 import HeroSection from './HeroSection';
+import ProblemStatement from './ProblemStatement';
+import PanoramaShowcase from './PanoramaShowcase';
 
 export function HomePage() {
     const handleScrollToSearch = () => {
-        // Scroll to search section (placeholder for future features)
-        const searchSection = document.getElementById('features-section');
-        if (searchSection) {
-            searchSection.scrollIntoView({
+        // Scroll to features section
+        const featuresSection = document.getElementById('features-section');
+        if (featuresSection) {
+            featuresSection.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start',
                 inline: 'nearest'
@@ -19,13 +21,19 @@ export function HomePage() {
 
     return (
         <>
+            {/* Hero Section - Main entry point */}
             <HeroSection onScrollToSearch={handleScrollToSearch} />
 
-            {/* TODO: Add TileStories sections:
-                - Problem Statement (Why AR for museums?)
-                - Grande Panorama de Lisboa showcase
+            {/* Problem Statement - Why AR for museums? */}
+            <ProblemStatement />
+
+            {/* Grande Panorama Showcase - Historical significance */}
+            <PanoramaShowcase />
+
+            {/* TODO: Add remaining TileStories sections:
                 - AR Demo/Screenshots
-                - Historical epochs overview
+                - Historical epochs overview (4 time periods)
+                - Features summary (150+ buildings, etc.)
                 - Call to action
             */}
 
