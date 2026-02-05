@@ -15,7 +15,7 @@
 
 import { ReactNode } from 'react';
 import { appConfig } from '@/config/app';
-import { useTheme } from '@/domains/theme';
+import { useTheme } from '@/design/theme';
 import { useInlineTranslation } from '@/utils/language';
 import { getFooterStyles } from '../colors';
 

@@ -15,7 +15,7 @@
  * ❌ Don't redefine base brand colors
  */
 
-import { globalColors, getThemeColors, getBrandGradient, type Theme } from '@/design/colors';
+import { globalColors, getThemeColors, getPrimaryGradient, type Theme } from '@/design/colors';
 
 // ============================================================================
 // HEADER DOMAIN CONFIGURATION
@@ -25,22 +25,22 @@ export const headerColors = {
     // Domain-specific gradients using global brand colors
     gradients: {
         // Primary header gradient with smoother white fade from left for logo visibility
-        main: `linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.25) 15%, rgba(255,255,255,0.1) 25%, ${globalColors.brand[600]} 40%, ${globalColors.brand[400]} 100%)`,
+        main: `linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.25) 15%, rgba(255,255,255,0.1) 25%, ${globalColors.primary[600]} 40%, ${globalColors.primary[400]} 100%)`,
 
         // Scrolled state (with opacity) - also smoother
         scrolled: (opacity: number = 0.95) => {
-            const hex600 = globalColors.brand[600];
-            const hex400 = globalColors.brand[400];
+            const hex600 = globalColors.primary[600];
+            const hex400 = globalColors.primary[400];
             const opacity255 = Math.round(opacity * 255).toString(16).padStart(2, '0');
             return `linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.2) 15%, rgba(255,255,255,0.08) 25%, ${hex600}${opacity255} 40%, ${hex400}${opacity255} 100%)`;
         },
 
         // Dark theme gradient
-        dark: getBrandGradient(900, 700),  // Very dark to dark teal
+        dark: getPrimaryGradient(900, 700),  // Very dark to dark azulejo blue
     },
 
     // Add primary colors for backward compatibility
-    primary: globalColors.brand,
+    primary: globalColors.primary,
 } as const;
 
 // ============================================================================
@@ -83,8 +83,8 @@ export function getFooterStyles(theme: Theme) {
         backgroundColor: colors.backgroundSoft,
         borderColor: colors.border,
         textColor: colors.text,
-        linkColor: globalColors.brand[500],
-        linkHoverColor: globalColors.brand[600],
+        linkColor: globalColors.primary[500],
+        linkHoverColor: globalColors.primary[600],
     };
 }
 

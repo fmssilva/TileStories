@@ -10,7 +10,7 @@
  */
 
 import { appConfig } from '@/config/app';
-import { useTheme } from '@/domains/theme';
+import { useTheme } from '@/design/theme';
 
 // Logo paths - co-located assets for better cohesion
 import logoLight from './assets/logo.svg';

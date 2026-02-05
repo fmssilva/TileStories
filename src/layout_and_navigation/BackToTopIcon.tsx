@@ -14,7 +14,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTheme } from '@/domains/theme';
+import { useTheme } from '@/design/theme';
 import { useInlineTranslation } from '@/utils/language';
 import { headerColors } from './colors';
 

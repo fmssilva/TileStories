@@ -1,22 +1,20 @@
 // ============================================================================
-// APPLICATION ENTRY POINT - CLINIC COMPARE PLATFORM
+// APPLICATION ENTRY POINT - TILESTORIES AR PLATFORM
 // ============================================================================
 
 /**
- * This file serves as the main entry point for Clinic Compare.
- * It demonstrates modern React patterns and serves as a foundation for 
- * healthcare provider comparison with transparent pricing.
+ * This file serves as the main entry point for TileStories.
+ * AR experiences for the Grande Panorama de Lisboa at the 
+ * Museu Nacional do Azulejo.
  */
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
 
 import App from './App';
 import './index.css';
 import { appConfig } from '@/config/app';
-import { store } from '@/store';
 import { LanguageProvider } from '@/utils/language';
 
 // Set dynamic document title from centralized configuration
@@ -41,14 +39,11 @@ root.render(
     <StrictMode>
         {/* StrictMode helps catch bugs and warns about deprecated features in development */}
         <LanguageProvider>
-            {/* Language Provider for internationalization */}
-            <Provider store={store}>
-                {/* Redux Provider for global state management */}
-                <BrowserRouter>
-                    {/* BrowserRouter enables client-side routing for the entire application */}
-                    <App />
-                </BrowserRouter>
-            </Provider>
+            {/* Redux Provider for global state management */}
+            <BrowserRouter>
+                {/* BrowserRouter enables client-side routing for the entire application */}
+                <App />
+            </BrowserRouter>
         </LanguageProvider>
     </StrictMode>
 );

@@ -1,11 +1,11 @@
 // ============================================================================
-// CLINIC COMPARE - MAIN APPLICATION COMPONENT
+// TILESTORIES - AR EXPERIENCES FOR MUSEU DO AZULEJO
 // ============================================================================
 
 /**
- * This is the root component of our clinic comparison platform.
- * It demonstrates modern React patterns and provides a clean foundation
- * for comparing healthcare providers with transparent pricing.
+ * This is the root component of TileStories.
+ * An AR experience platform for exploring the Grande Panorama de Lisboa
+ * at the Museu Nacional do Azulejo.
  */
 
 import { Routes, Route } from 'react-router-dom';

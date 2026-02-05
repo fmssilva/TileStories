@@ -17,7 +17,7 @@
 import { ReactNode } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Logo } from '@/branding';
-import { ThemeToggleIcon, useTheme } from '@/domains/theme';
+import { ThemeToggleIcon, useTheme } from '@/design/theme';
 import { useHeaderScroll } from '../hooks';
 import { getHeaderStyles, getNavLinkStyles } from '../colors';
 import { LanguageSelector } from '../../components/LanguageSelector';
@@ -38,8 +38,7 @@ export function Header({ children, logo, actions }: HeaderProps) {
 
     // Inline translations for navigation
     const homeText = useInlineTranslation('Início', 'Home');
-    const forClinicsText = useInlineTranslation('Para Clínicas', 'For Clinics');
-    const aboutText = useInlineTranslation('Para Pacientes', 'For Patients');
+    const aboutText = useInlineTranslation('Sobre', 'About');
 
     // Simplified scroll handling - use the optimized hook
     const scrollState = useHeaderScroll({
@@ -100,9 +99,6 @@ export function Header({ children, logo, actions }: HeaderProps) {
                         <NavLink to="/about" theme={theme} isActive={location.pathname === '/about'}>
                             {aboutText}
                         </NavLink>
-                        <NavLink to="/para-clinicas" theme={theme} isActive={location.pathname === '/para-clinicas'}>
-                            {forClinicsText}
-                        </NavLink>
 
                         {/* Custom navigation items */}
                         {children}
@@ -162,13 +158,13 @@ function NavLink({ to, children, theme, isActive = false, onClick }: NavLinkProp
                 color: linkStyles.color,
                 backgroundColor: linkStyles.backgroundColor,
             }}
-            onMouseEnter={(e) => {
+            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 if (!isActive) {
                     e.currentTarget.style.color = linkStyles.hoverColor;
                     e.currentTarget.style.backgroundColor = linkStyles.hoverBackgroundColor;
                 }
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 if (!isActive) {
                     e.currentTarget.style.color = linkStyles.color;
                     e.currentTarget.style.backgroundColor = linkStyles.backgroundColor;

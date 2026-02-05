@@ -13,8 +13,8 @@
 
 export const appConfig = {
     // Site Identity
-    name: import.meta.env.VITE_APP_NAME || 'Clinic Compare',
-    description: import.meta.env.VITE_APP_DESCRIPTION || 'Compare healthcare clinics and find the best prices for your medical needs',
+    name: import.meta.env.VITE_APP_NAME || 'TileStories',
+    description: import.meta.env.VITE_APP_DESCRIPTION || 'AR experiences for the Museu Nacional do Azulejo in Lisbon',
 
     // Environment Detection
     isDevelopment: import.meta.env.VITE_NODE_ENV === 'development',

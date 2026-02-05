@@ -9,7 +9,7 @@
 
 import { ReactNode, ReactElement, cloneElement, isValidElement } from 'react';
 import { getThemeColors, globalColors, type Theme } from '@/design/colors';
-import { useTheme } from '@/domains/theme';
+import { useTheme } from '@/design/theme';
 
 interface BaseButtonProps {
     children: ReactNode;
@@ -65,8 +65,8 @@ export function Button({
                     borderColor: themeColors.primary,
                     hover: {
                         backgroundColor: theme === 'light'
-                            ? globalColors.brand[600]  // Darker teal
-                            : globalColors.brand[300], // Lighter teal
+                            ? globalColors.primary[600]  // Darker azulejo blue
+                            : globalColors.primary[300], // Lighter azulejo blue
                     }
                 };
 

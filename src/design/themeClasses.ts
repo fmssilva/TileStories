@@ -15,7 +15,7 @@
 export const themeClasses = {
     // Backgrounds
     background: 'bg-white dark:bg-slate-950',
-    backgroundSoft: 'bg-gray-50 dark:bg-slate-900',
+    backgroundSoft: 'bg-azulejo-ivory-300 dark:bg-slate-900',
     surface: 'bg-white dark:bg-slate-800',
 
     // Text colors  
@@ -37,12 +37,12 @@ export const themeClasses = {
         input: 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600',
 
         // Dropdown/select options
-        option: 'hover:bg-blue-50 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100',
+        option: 'hover:bg-azulejo-blue-50 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100',
     },
 
-    // Brand-specific
-    primary: 'bg-teal-500 text-white',
-    primarySoft: 'bg-teal-50 dark:bg-teal-900/30 text-teal-800 dark:text-teal-200',
+    // Brand-specific - Using azulejo colors
+    primary: 'bg-azulejo-blue-500 text-white',
+    primarySoft: 'bg-azulejo-blue-50 dark:bg-azulejo-blue-900/30 text-azulejo-blue-800 dark:text-azulejo-blue-200',
 } as const;
 
 /**
@@ -92,7 +92,7 @@ export const componentThemeClasses = {
 
     // Form components
     form: {
-        input: `${themeClasses.interactive.input} focus:ring-2 focus:ring-teal-500`,
+        input: `${themeClasses.interactive.input} focus:ring-2 focus:ring-azulejo-blue-500`,
         label: themeClasses.textSoft,
     },
 

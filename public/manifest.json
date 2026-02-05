@@ -1,7 +1,7 @@
 {
-    "name": "Clinic Compare",
-    "short_name": "Clinic Compare",
-    "description": "Compare healthcare clinics and find the best prices for your medical needs",
+    "name": "TileStories",
+    "short_name": "TileStories",
+    "description": "AR experiences for the Museu Nacional do Azulejo in Lisbon",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

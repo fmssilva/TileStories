@@ -11,36 +11,82 @@ export default {
                 sm: 'calc(var(--radius) - 4px)',
             },
 
-            // State-of-the-art color system
+            // State-of-the-art color system - Azulejo-inspired for TileStories
             colors: {
-                // App primary colors (modern purple/blue gradient)
-                'app-primary': {
-                    50: '#f0f9ff',
-                    100: '#e0f2fe',
-                    200: '#bae6fd',
-                    300: '#7dd3fc',
-                    400: '#38bdf8',
-                    500: '#0ea5e9', // Main brand color
-                    600: '#0284c7',
-                    700: '#0369a1',
-                    800: '#075985',
-                    900: '#0c4a6e',
-                    950: '#082f49',
+                // Azulejo Blue - Primary brand color from traditional Portuguese tiles
+                'azulejo-blue': {
+                    50: '#EBF1F8',
+                    100: '#D7E3F1',
+                    200: '#AFC7E3',
+                    300: '#87ABD5',
+                    400: '#5F8FC7',
+                    500: '#3C5E95', // Main azulejo blue
+                    600: '#2F4B77',
+                    700: '#233859',
+                    800: '#17253B',
+                    900: '#0B121E',
                 },
 
-                // App accent color (vibrant emerald)
-                'app-accent': {
-                    50: '#ecfdf5',
-                    100: '#d1fae5',
-                    200: '#a7f3d0',
-                    300: '#6ee7b7',
-                    400: '#34d399', // Accent highlights
-                    500: '#10b981',
-                    600: '#059669',
-                    700: '#047857',
-                    800: '#065f46',
-                    900: '#064e3b',
+                // Azulejo Cobalt - Secondary brand color
+                'azulejo-cobalt': {
+                    50: '#EDF4FB',
+                    100: '#DBE9F7',
+                    200: '#B7D3EF',
+                    300: '#93BDE7',
+                    400: '#6FA7DF',
+                    500: '#5081B6', // Cobalt blue
+                    600: '#3F6691',
+                    700: '#2F4C6D',
+                    800: '#1F3248',
+                    900: '#101924',
                 },
+
+                // Azulejo Gold - Accent for tile decorations
+                'azulejo-gold': {
+                    50: '#FBF7E8',
+                    100: '#F7EFD1',
+                    200: '#EFDFA3',
+                    300: '#E7CF75',
+                    400: '#DFBF47',
+                    500: '#D4AF37', // Gold accent
+                    600: '#A88C2C',
+                    700: '#7E6921',
+                    800: '#544616',
+                    900: '#2A230B',
+                },
+
+                // Azulejo Terracotta - Accent for drama/earthquake sections
+                'azulejo-terracotta': {
+                    50: '#FAECE8',
+                    100: '#F5D9D1',
+                    200: '#EBB3A3',
+                    300: '#E18D75',
+                    400: '#D76747',
+                    500: '#C1440E', // Terracotta
+                    600: '#9A360B',
+                    700: '#742808',
+                    800: '#4D1B06',
+                    900: '#270D03',
+                },
+
+                // Azulejo Ivory - Accent for tile backgrounds
+                'azulejo-ivory': {
+                    50: '#FFFEFB',
+                    100: '#FFFCF7',
+                    200: '#FFF9EF',
+                    300: '#FFF8E7', // Ivory background
+                    400: '#FFF3D7',
+                    500: '#FFEEC7',
+                    600: '#E6D5B3',
+                    700: '#CCBB9F',
+                    800: '#B3A28B',
+                    900: '#998977',
+                },
+
+                // Semantic color aliases for easy reference
+                primary: '#3C5E95', // Azulejo blue
+                secondary: '#5081B6', // Cobalt
+                accent: '#D4AF37', // Gold
 
                 // Semantic colors via CSS variables (2026 standard)
                 background: 'hsl(var(--background))',
@@ -83,6 +129,14 @@ export default {
                 '18': '4.5rem',
                 '88': '22rem',
                 '128': '32rem',
+            },
+
+            // Custom background images and gradients for azulejo aesthetic
+            backgroundImage: {
+                'hero-gradient': 'linear-gradient(135deg, #2F4B77 0%, #5F8FC7 100%)',
+                'gold-gradient': 'linear-gradient(135deg, #D4AF37 0%, #DFBF47 100%)',
+                'panorama-overlay': 'linear-gradient(180deg, rgba(11, 18, 30, 0.7) 0%, rgba(60, 94, 149, 0.3) 100%)',
+                'azulejo-pattern': 'linear-gradient(135deg, #3C5E95 0%, #5081B6 50%, #D4AF37 100%)',
             },
 
             // Typography improvements

@@ -23,19 +23,54 @@
 // These define your brand and should match your logo/design system
 
 export const globalColors = {
-    // PRIMARY BRAND COLOR - Teal (matches logo and PWA icons)
-    brand: {
-        50: '#f0fdfa',
-        100: '#ccfbf1',
-        200: '#99f6e4',
-        300: '#5eead4',
-        400: '#2dd4bf',
-        500: '#14b8a6',  // 🎯 PRIMARY BRAND COLOR (logo teal)
-        600: '#0d9488',
-        700: '#0f766e',
-        800: '#115e59',
-        900: '#134e4a',
-        950: '#042f2e',
+    // PRIMARY BRAND COLOR - Azulejo Blue (from traditional Portuguese tiles)
+    primary: {
+        50: '#EBF1F8',
+        100: '#D7E3F1',
+        200: '#AFC7E3',
+        300: '#87ABD5',
+        400: '#5F8FC7',
+        500: '#3C5E95',  // 🎯 MAIN AZULEJO BLUE (traditional tile color)
+        600: '#2F4B77',
+        700: '#233859',
+        800: '#17253B',
+        900: '#0B121E',
+    },
+
+    // SECONDARY - Azulejo Cobalt (lighter accent blue)
+    secondary: {
+        50: '#EEF4F9',
+        100: '#DDE9F3',
+        200: '#BBD3E7',
+        300: '#99BDDB',
+        400: '#77A7CF',
+        500: '#5081B6',  // 🎯 COBALT ACCENT
+        600: '#406792',
+        700: '#304D6E',
+        800: '#203449',
+        900: '#101A25',
+    },
+
+    // ACCENT COLORS - From azulejo decorations
+    accent: {
+        gold: {
+            300: '#E8C96F',
+            500: '#D4AF37',  // 🎯 GOLD (from tile decorations)
+            600: '#B8962E',
+            700: '#9C7D25',
+        },
+        terracotta: {
+            300: '#E8673A',
+            500: '#C1440E',  // 🎯 TERRACOTTA (earthquake/drama sections)
+            600: '#9D360B',
+            700: '#7A2908',
+        },
+        ivory: {
+            300: '#FFFCF2',
+            500: '#FFF8E7',  // 🎯 IVORY (traditional tile background)
+            600: '#F5ECDB',
+            700: '#EBE0CF',
+        },
     },
 
     // NEUTRALS - For text, backgrounds, borders
@@ -45,7 +80,7 @@ export const globalColors = {
         200: '#e2e8f0',
         300: '#cbd5e1',
         400: '#94a3b8',
-        500: '#64748b',  // 🎯 DEFAULT TEXT COLOR
+        500: '#64748b',
         600: '#475569',
         700: '#334155',
         800: '#1e293b',
@@ -55,10 +90,10 @@ export const globalColors = {
 
     // SEMANTIC COLORS - For status/feedback (global across all domains)
     semantic: {
-        success: '#22c55e',   // Green
-        error: '#ef4444',     // Red  
-        warning: '#f59e0b',   // Orange
-        info: '#3b82f6',      // Blue
+        success: '#4CAF50',   // Keep green
+        error: '#ef4444',     // Keep red  
+        warning: '#f59e0b',   // Keep orange
+        info: '#3C5E95',      // Use primary azulejo blue
     },
 
     // PURE COLORS - For absolute values
@@ -91,8 +126,10 @@ export const themeColors = {
         borderSoft: globalColors.gray[100],
 
         // Primary brand in context
-        primary: globalColors.brand[500],
+        primary: globalColors.primary[500],
         primaryForeground: globalColors.pure.white,
+        secondary: globalColors.secondary[500],
+        accent: globalColors.accent.gold[500],
 
         // Semantic in context
         success: globalColors.semantic.success,
@@ -117,7 +154,7 @@ export const themeColors = {
         borderSoft: globalColors.gray[700],
 
         // Primary brand in context
-        primary: globalColors.brand[400],  // Lighter for dark theme
+        primary: globalColors.primary[400],  // Lighter for dark theme
         primaryForeground: globalColors.gray[900],
 
         // Semantic in context (same as light - semantic colors are universal)
@@ -144,13 +181,13 @@ export function getThemeColors(theme: Theme) {
 /**
  * Get brand color by shade
  */
-export function getBrandColor(shade: keyof typeof globalColors.brand = 500) {
-    return globalColors.brand[shade];
+export function getPrimaryColor(shade: keyof typeof globalColors.primary = 500) {
+    return globalColors.primary[shade];
 }
 
 /**
  * Create CSS gradient from brand colors
  */
-export function getBrandGradient(from: keyof typeof globalColors.brand = 600, to: keyof typeof globalColors.brand = 400): string {
-    return `linear-gradient(135deg, ${globalColors.brand[from]} 0%, ${globalColors.brand[to]} 100%)`;
+export function getPrimaryGradient(from: keyof typeof globalColors.primary = 600, to: keyof typeof globalColors.primary = 400): string {
+    return `linear-gradient(135deg, ${globalColors.primary[from]} 0%, ${globalColors.primary[to]} 100%)`;
 }
