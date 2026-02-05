@@ -15,8 +15,8 @@ import { appConfig } from '@/config/app';
 
 // Logo paths - Using PNG for better visual quality (SVG is low quality)
 // Co-located in public folder for direct access
-const logoIcon = '/Logo.png';
-const logoFull = '/Logo_with_name.png';
+const logoIcon = '/assets/Logo.png';
+const logoFull = '/assets/Logo_with_name.png';
 
 type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
