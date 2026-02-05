@@ -1,0 +1,37 @@
+{
+    "name": "Clinic Compare",
+    "short_name": "Clinic Compare",
+    "description": "Compare healthcare clinics and find the best prices for your medical needs",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#14b8a6",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icons/icon-192.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-maskable.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "maskable"
+        }
+    ],
+    "categories": [
+        "productivity",
+        "developer",
+        "utilities"
+    ],
+    "screenshots": [],
+    "shortcuts": []
+}
