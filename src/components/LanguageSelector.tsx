@@ -1,10 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLanguage, useInlineTranslation } from '@/utils/language';
+import { Z_INDEX, LAYOUT } from '@/design';
 
-export function LanguageSelector() {
+interface LanguageSelectorProps {
+    /** Icon button size in pixels (optional, defaults to 44px from LAYOUT) */
+    iconSize?: number;
+}
+
+export function LanguageSelector({ iconSize }: LanguageSelectorProps = {}) {
     const [isOpen, setIsOpen] = useState(false);
     const { language, setLanguage } = useLanguage();
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Use fixed sizes from LAYOUT constants
+    const buttonSize = iconSize || LAYOUT.ICON_BUTTON_SIZE;  // 44px default
+    const emojiSize = LAYOUT.ICON_SIZE;                      // 24px fixed
 
     // Inline translations for language selector
     const portugueseText = useInlineTranslation('Português', 'Portuguese');
@@ -41,15 +51,24 @@ export function LanguageSelector() {
             {/* Simplified button - only flag */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center justify-center w-8 h-8 text-white hover:bg-white/10 rounded-md transition-all duration-200 hover:scale-105"
+                className="flex items-center justify-center text-white hover:bg-white/10 rounded-md transition-all duration-200 hover:scale-105"
+                style={{
+                    width: `${buttonSize}px`,
+                    height: `${buttonSize}px`,
+                    fontSize: `${emojiSize}px`, // Fixed emoji size
+                    fontFamily: 'system-ui, -apple-system, "Segoe UI", "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif',
+                }}
                 aria-label={changeLanguageText}
                 title={currentLanguage?.name}
             >
-                <span className="text-lg">{currentLanguage?.flag}</span>
+                <span style={{ fontSize: 'inherit', lineHeight: 1 }}>{currentLanguage?.flag}</span>
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                <div
+                    className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+                    style={{ zIndex: Z_INDEX.FLOATING }}
+                >
                     <div className="py-1">
                         {languages.map((lang) => (
                             <button

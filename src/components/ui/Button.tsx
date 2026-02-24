@@ -1,15 +1,17 @@
 /**
- * BUTTON COMPONENT - Enhanced with asChild support
+ * BUTTON COMPONENT - Enhanced with asChild support and z-index control
  * 
  * Modern button component with flexible rendering:
  * - Standard button: <Button onClick={...}>Click me</Button>
  * - Custom element: <Button asChild><Link to="/page">Go</Link></Button>
  * - Clean design following our size and color guides
+ * - Z-index control for layering (default: Z_INDEX.CONTENT)
  */
 
 import { ReactNode, ReactElement, cloneElement, isValidElement } from 'react';
 import { getThemeColors, globalColors, type Theme } from '@/design/colors';
 import { useTheme } from '@/design/theme';
+import { Z_INDEX } from '@/design';
 
 interface BaseButtonProps {
     children: ReactNode;
@@ -17,6 +19,8 @@ interface BaseButtonProps {
     size?: 'sm' | 'md' | 'lg';
     disabled?: boolean;
     className?: string;
+    /** Z-index for button layering (default: Z_INDEX.CONTENT = 1000) */
+    zIndex?: number;
 }
 
 interface ButtonAsButton extends BaseButtonProps {
@@ -38,6 +42,7 @@ export function Button({
     disabled = false,
     asChild = false,
     className = '',
+    zIndex = Z_INDEX.CONTENT,
     ...props
 }: ButtonProps) {
     const { theme } = useTheme();
@@ -139,6 +144,7 @@ export function Button({
         backgroundColor: variantStyles.backgroundColor,
         color: variantStyles.color,
         borderColor: variantStyles.borderColor,
+        zIndex,
     };
 
     const buttonEvents = {

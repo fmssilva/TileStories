@@ -176,6 +176,34 @@
         animation: slide-up 0.3s ease-out;
     }
 
+    /* Azulejo tile pattern background (Phase 5: Polish) */
+    .azulejo-pattern {
+        position: relative;
+    }
+
+    .azulejo-pattern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.03;
+        background-image:
+            linear-gradient(45deg, #3C5E95 25%, transparent 25%),
+            linear-gradient(-45deg, #3C5E95 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #3C5E95 75%),
+            linear-gradient(-45deg, transparent 75%, #3C5E95 75%);
+        background-size: 20px 20px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .dark .azulejo-pattern::before {
+        opacity: 0.05;
+    }
+
     /* Custom scrollbar */
     .scrollbar-thin {
         scrollbar-width: thin;
@@ -214,5 +242,32 @@
 
     .animate-pulse-slow {
         animation: pulse-slow 4s ease-in-out infinite;
+    }
+
+    /* Shimmer animation for Coming Soon badge */
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    .animate-shimmer {
+        animation: shimmer 2s infinite;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
 }

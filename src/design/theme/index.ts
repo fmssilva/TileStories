@@ -10,8 +10,8 @@ export type { ThemeMode, ThemeState } from './types';
 export {
     THEME_MODES,
     THEME_STORAGE_KEY,
-    THEME_LABELS,
-    THEME_ICONS
+    THEME_ICONS,
+    useThemeLabels,
 } from './types';
 
 // Theme utilities
@@ -22,7 +22,6 @@ export {
     getNextTheme,
     saveTheme,
     loadTheme,
-    setupSystemThemeListener,
 } from './utils';
 
 // Main theme hook
@@ -32,5 +31,4 @@ export { useTheme } from './useTheme';
 export {
     ThemeToggle,
     ThemeToggleIcon,
-    ThemeToggleWithLabel
 } from './ThemeToggle';

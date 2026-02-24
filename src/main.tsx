@@ -16,6 +16,8 @@ import App from './App';
 import './index.css';
 import { appConfig } from '@/config/app';
 import { LanguageProvider } from '@/utils/language';
+import { NavigationProvider } from '@/layout_and_navigation';
+import { StickyProvider } from '@/layout_and_navigation/sticky';
 
 // Set dynamic document title from centralized configuration
 const setDocumentTitle = () => {
@@ -39,10 +41,15 @@ root.render(
     <StrictMode>
         {/* StrictMode helps catch bugs and warns about deprecated features in development */}
         <LanguageProvider>
-            {/* Redux Provider for global state management */}
+            {/* BrowserRouter enables client-side routing for the entire application */}
             <BrowserRouter>
-                {/* BrowserRouter enables client-side routing for the entire application */}
-                <App />
+                {/* NavigationProvider enables navigation context features */}
+                <NavigationProvider>
+                    {/* StickyProvider manages hierarchical sticky elements */}
+                    <StickyProvider>
+                        <App />
+                    </StickyProvider>
+                </NavigationProvider>
             </BrowserRouter>
         </LanguageProvider>
     </StrictMode>

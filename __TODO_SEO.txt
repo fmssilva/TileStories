@@ -1,0 +1,127 @@
+Based on my research, here are the most common search queries people use that you should target:
+Primary Keywords (High Search Volume)
+Location-based searches:
+
+"museums in Lisbon"
+"museus Lisboa"
+"things to do Lisbon weekend"
+"best museums Lisbon"
+"Lisbon attractions"
+"cultural experiences Lisbon"
+"places to visit Lisbon"
+
+Activity-focused searches:
+
+"interactive museums Lisbon"
+"museums near me"
+"what to do Lisbon rainy day"
+"family activities Lisbon"
+"weekend activities Lisbon"
+"museums for kids Lisbon"
+
+Innovative/Tech-focused Keywords (Growing Trend)
+Since your app uses AR/VR technology, target these emerging searches:
+
+"interactive museum experiences"
+"AR museum tours"
+"virtual reality museums"
+"immersive museum Lisbon"
+"digital museum experiences"
+"gamified museum tours"
+"tech museums Lisbon"
+
+Long-tail Keywords (Higher Conversion)
+These are 3-5 word phrases with less competition but higher intent:
+
+"interactive museum app Lisbon"
+"AR museum experience Portugal"
+"best museum technology experiences"
+"virtual museum tours Lisbon"
+"educational museum activities kids Lisbon"
+"innovative museums Portugal"
+
+SEO Strategy for Your Website
+1. Google Business Profile (Critical!)
+
+Claim and optimize your Google Business listing
+This appears in "museums near me" searches
+Include: accurate hours, photos, location, categories
+
+2. Local SEO Focus
+
+Target "Lisboa" and "Lisbon" variations
+Include neighborhood names (Belém, Alfama, etc.)
+Optimize for "near me" searches
+
+3. Content Strategy
+Create blog posts/pages about:
+
+"How AR transforms museum visits in Lisbon"
+"Interactive digital experiences at [your museum]"
+"Family-friendly tech museums in Portugal"
+"Behind the scenes: Creating digital museum twins"
+Comparison pages vs traditional museums
+
+4. Technical SEO Must-Haves
+
+Mobile-friendly design (most searches are mobile)
+Fast loading speed
+Schema markup for events
+Image optimization with alt text
+Video content (highly engaging)
+
+5. AI Agent Optimization
+For AI agents (like ChatGPT, Claude, Perplexity) to recommend your museum:
+
+Create clear, structured content about your unique AR/VR features
+Use FAQ sections with natural language
+Include detailed descriptions of what makes your experience unique
+Mention specific technologies: "augmented reality," "digital twin," "gamification"
+List concrete benefits: "identify objects in historical panels," "zoom into street views," "time-travel through Lisbon's history"
+
+Free Tools to Research Keywords
+
+Google Keyword Planner (free with Google Ads account)
+Google Search Console (shows what people already find you for)
+AnswerThePublic (free version shows question-based searches)
+Google Trends (compare keyword popularity)
+Ubersuggest (limited free searches)
+
+Competitive Advantage Messaging
+Highlight these unique selling points that differentiate you:
+
+First AR museum experience in Lisbon (if true)
+Interactive storytelling vs static displays
+Personalized tours using digital technology
+3D historical reconstructions
+Gamified learning for families
+Accessibility - view exhibits remotely via app
+
+Quick Wins for Immediate SEO
+
+List on directories:
+
+TripAdvisor
+Google Maps
+Eventbrite
+TimeOut Lisbon
+Visit Lisboa
+WhichMuseum
+
+
+Get reviews (critical for ranking)
+Create shareable content:
+
+Instagram/TikTok videos of AR features
+YouTube demos of the app
+Blog posts about technology + culture
+
+
+Partner mentions:
+
+Get links from tourism websites
+Collaborate with hotels
+Work with Lisboa Card program
+
+
+

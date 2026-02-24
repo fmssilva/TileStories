@@ -1,0 +1,626 @@
+
+
+
+
+
+
+
+==================== File: index.ts ====================
+
+Absolute path: c:\Users\franc\Desktop\TileStories\src\layout_and_navigation\hooks\index.ts
+
+
+/**
+ * HOOKS EXPORTS
+ * ==============
+ */
+
+export { useNavigation } from './useNavigation';
+export { useBreadcrumbs } from './useBreadcrumbs';
+export { useMobileMenu } from './useMobileMenu';
+export { useHeaderScroll } from './useHeaderScroll';
+export { useAdaptiveNavigation } from './useAdaptiveNavigation';
+
+
+==================================================
+
+
+
+
+
+
+
+
+==================== File: useAdaptiveNavigation.ts ====================
+
+Absolute path: c:\Users\franc\Desktop\TileStories\src\layout_and_navigation\hooks\useAdaptiveNavigation.ts
+
+
+/**
+ * USE ADAPTIVE NAVIGATION HOOK
+ * ============================
+ * 
+ * Intelligently adapts navigation display based on available space.
+ * Measures container width and determines which nav items to show as tabs,
+ * which to overflow into a "More" dropdown, or when to switch to hamburger menu.
+ * 
+ * Logic:
+ * - Measure available width using ResizeObserver
+ * - Calculate space needed for: logo, icons (3), nav items, "More" button
+ * - Show as many tabs as possible
+ * - When space < 2 tabs + More button: switch to hamburger
+ * - Otherwise: show visible tabs + More button with overflow items
+ */
+
+import { useState, useEffect, useCallback } from 'react';
+import type { NavItem, AdaptiveNavigationState, NavigationMode } from '../types';
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/** Estimated width per navigation tab (in pixels) */
+const TAB_WIDTH_ESTIMATE = 120;
+
+/** Width of the "More" button (in pixels) */
+const MORE_BUTTON_WIDTH = 80;
+
+/** Width for logo + site name (in pixels) */
+const LOGO_WIDTH = 200;
+
+/** Width for icons (language + theme + margin) (in pixels) */
+const ICONS_WIDTH = 140;
+
+/** Minimum space to stay in tabs mode (2 tabs + More button) */
+const MIN_TABS_MODE_WIDTH = LOGO_WIDTH + ICONS_WIDTH + (2 * TAB_WIDTH_ESTIMATE) + MORE_BUTTON_WIDTH + 32;
+
+/**
+ * Hook for adaptive navigation
+ * 
+ * @param navItems - All navigation items
+ * @param containerRef - Ref to the navigation container
+ * @returns Adaptive navigation state
+ * 
+ * @example
+ * const containerRef = useRef<HTMLElement>(null);
+ * const { mode, visibleItems, overflowItems, showMore, showHamburger } = 
+ *   useAdaptiveNavigation(navItems, containerRef);
+ */
+export function useAdaptiveNavigation(
+    navItems: NavItem[],
+    containerRef: React.RefObject<HTMLElement | null>
+): AdaptiveNavigationState {
+    const [state, setState] = useState<AdaptiveNavigationState>({
+        mode: 'tabs',
+        visibleItems: navItems,
+        overflowItems: [],
+        showHamburger: false,
+        showMore: false,
+    });
+
+    const calculateLayout = useCallback(() => {
+        if (!containerRef.current) return;
+
+        const containerWidth = containerRef.current.offsetWidth;
+        const totalItems = navItems.length;
+
+        // Calculate available space for navigation items
+        const availableNavSpace = containerWidth - LOGO_WIDTH - ICONS_WIDTH - 32; // 32 for padding
+
+        console.log('[useAdaptiveNavigation] Calculating layout:', {
+            containerWidth,
+            logoWidth: LOGO_WIDTH,
+            iconsWidth: ICONS_WIDTH,
+            availableNavSpace,
+            totalItems,
+            minTabsModeWidth: MIN_TABS_MODE_WIDTH - LOGO_WIDTH - ICONS_WIDTH,
+        });
+
+        // Decide mode based on available space
+        if (availableNavSpace < MIN_TABS_MODE_WIDTH - LOGO_WIDTH - ICONS_WIDTH) {
+            // Not enough space for tabs mode - switch to hamburger
+            console.log('[useAdaptiveNavigation] → HAMBURGER mode (not enough space)');
+            setState({
+                mode: 'hamburger',
+                visibleItems: [],
+                overflowItems: navItems,
+                showHamburger: true,
+                showMore: false,
+            });
+            return;
+        }
+
+        // Calculate how many tabs can fit
+        // Reserve space for "More" button if we'll need it
+        let spaceForTabs = availableNavSpace;
+        let needsMoreButton = false;
+
+        // Try to fit all items first
+        const spaceNeeded = totalItems * TAB_WIDTH_ESTIMATE;
+
+        if (spaceNeeded > spaceForTabs) {
+            // Can't fit all items - reserve space for "More" button
+            spaceForTabs -= MORE_BUTTON_WIDTH;
+            needsMoreButton = true;
+        }
+
+        // Calculate how many items can be visible
+        const maxVisibleItems = Math.max(
+            needsMoreButton ? 2 : 1, // Minimum 2 tabs if showing More button
+            Math.floor(spaceForTabs / TAB_WIDTH_ESTIMATE)
+        );
+
+        const numVisible = Math.min(maxVisibleItems, totalItems);
+        const visibleItems = navItems.slice(0, numVisible);
+        const overflowItems = navItems.slice(numVisible);
+
+        // Final mode determination
+        let mode: NavigationMode;
+        if (overflowItems.length > 0) {
+            mode = 'partial'; // Some items visible, some in More
+        } else {
+            mode = 'tabs'; // All items visible
+        }
+
+        console.log('[useAdaptiveNavigation] → Mode:', mode, {
+            visibleCount: visibleItems.length,
+            overflowCount: overflowItems.length,
+            showMore: overflowItems.length > 0,
+        });
+
+        setState({
+            mode,
+            visibleItems,
+            overflowItems,
+            showHamburger: false,
+            showMore: overflowItems.length > 0,
+        });
+    }, [navItems, containerRef]);
+
+    // Set up ResizeObserver to watch container size changes
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        // Initial calculation
+        calculateLayout();
+
+        // Create ResizeObserver
+        const resizeObserver = new ResizeObserver(() => {
+            // Use RAF to debounce and optimize
+            requestAnimationFrame(calculateLayout);
+        });
+
+        resizeObserver.observe(container);
+
+        // Also listen to window resize as a fallback
+        window.addEventListener('resize', calculateLayout);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', calculateLayout);
+        };
+    }, [calculateLayout, containerRef]);
+
+    // Recalculate when nav items change
+    useEffect(() => {
+        calculateLayout();
+    }, [navItems, calculateLayout]);
+
+    return state;
+}
+
+
+==================================================
+
+
+
+
+
+
+
+
+==================== File: useBreadcrumbs.ts ====================
+
+Absolute path: c:\Users\franc\Desktop\TileStories\src\layout_and_navigation\hooks\useBreadcrumbs.ts
+
+
+/**
+ * USE BREADCRUMBS HOOK
+ * ====================
+ * 
+ * Access breadcrumb trail for current page.
+ * Automatically generated from navigation hierarchy.
+ */
+
+import { useNavigationContext } from '../context';
+import type { NavItem } from '../types';
+
+/**
+ * Use Breadcrumbs
+ * 
+ * Returns breadcrumb trail for current page.
+ * Trail is automatically built from navigation hierarchy.
+ * 
+ * @example
+ * const breadcrumbs = useBreadcrumbs();
+ * 
+ * breadcrumbs.forEach(item => {
+ *   console.log(item.label, item.path);
+ * });
+ */
+export function useBreadcrumbs(): NavItem[] {
+    const { breadcrumbTrail } = useNavigationContext();
+    return breadcrumbTrail;
+}
+
+
+==================================================
+
+
+
+
+
+
+
+
+==================== File: useHeaderScroll.ts ====================
+
+Absolute path: c:\Users\franc\Desktop\TileStories\src\layout_and_navigation\hooks\useHeaderScroll.ts
+
+
+/**
+ * USE HEADER SCROLL HOOK
+ * ======================
+ * 
+ * Track scroll position and direction for smart header behavior.
+ * Provides scroll state for hide/show and styling effects.
+ */
+
+import { useState, useEffect, useCallback } from 'react';
+import type { ScrollState, ScrollOptions } from '../types';
+
+/**
+ * Use Header Scroll
+ * 
+ * Tracks scroll position and provides state for header behavior.
+ * Features:
+ * - Scroll direction tracking
+ * - Smart hide/show based on scroll
+ * - Debounced for performance
+ * - RAF optimized
+ * 
+ * @param options - Configuration for scroll behavior
+ * 
+ * @example
+ * const { isScrolled, isVisible, scrollY } = useHeaderScroll({
+ *   scrollThreshold: 10,
+ *   hideThreshold: 150,
+ *   enableHideShow: true
+ * });
+ */
+export function useHeaderScroll(options: ScrollOptions = {}): ScrollState {
+    const {
+        scrollThreshold = 10,
+        hideThreshold = 100,
+        enableHideShow = true,
+        debounceMs = 10,
+    } = options;
+
+    const [scrollState, setScrollState] = useState<ScrollState>({
+        isScrolled: false,
+        isVisible: true,
+        scrollY: 0,
+        scrollDirection: null,
+    });
+
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    const updateScrollState = useCallback(() => {
+        const currentScrollY = window.scrollY;
+        const scrollDiff = currentScrollY - lastScrollY;
+
+        // Determine scroll direction (with minimum threshold)
+        let direction: 'up' | 'down' | null = null;
+        if (Math.abs(scrollDiff) > 5) {
+            direction = scrollDiff > 0 ? 'down' : 'up';
+        }
+
+        // Calculate visibility based on scroll behavior
+        let isVisible = true;
+        if (enableHideShow && currentScrollY > hideThreshold) {
+            // Hide header when scrolling down, show when scrolling up
+            if (direction === 'down') {
+                isVisible = false;
+            } else if (direction === 'up') {
+                isVisible = true;
+            } else {
+                // Keep current state if no significant scroll change
+                isVisible = scrollState.isVisible;
+            }
+        }
+
+        // Always show header when near top
+        if (currentScrollY <= scrollThreshold) {
+            isVisible = true;
+        }
+
+        setScrollState({
+            isScrolled: currentScrollY > scrollThreshold,
+            isVisible,
+            scrollY: currentScrollY,
+            scrollDirection: direction,
+        });
+
+        setLastScrollY(currentScrollY);
+    }, [lastScrollY, scrollState.isVisible, scrollThreshold, hideThreshold, enableHideShow]);
+
+    useEffect(() => {
+        let rafId: number;
+        let timeoutId: NodeJS.Timeout;
+
+        const debouncedUpdate = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(updateScrollState, debounceMs);
+        };
+
+        const handleScroll = () => {
+            rafId = requestAnimationFrame(debouncedUpdate);
+        };
+
+        // Initial state
+        updateScrollState();
+
+        // Add scroll listener
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        // Cleanup
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (rafId) cancelAnimationFrame(rafId);
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [updateScrollState, debounceMs]);
+
+    return scrollState;
+}
+
+
+==================================================
+
+
+
+
+
+
+
+
+==================== File: useMobileMenu.ts ====================
+
+Absolute path: c:\Users\franc\Desktop\TileStories\src\layout_and_navigation\hooks\useMobileMenu.ts
+
+
+/**
+ * USE MOBILE MENU HOOK
+ * ====================
+ * 
+ * Manage mobile menu state (open/close/toggle).
+ * Handles body scroll locking when menu is open.
+ */
+
+import { useState, useEffect, useCallback, useRef } from 'react';
+import type { MobileMenuState } from '../types';
+
+/**
+ * Use Mobile Menu
+ * 
+ * Manages mobile menu open/close state and body scroll locking.
+ * 
+ * @example
+ * const { isOpen, open, close, toggle } = useMobileMenu();
+ * 
+ * <button onClick={toggle}>Menu</button>
+ * <MobileMenu isOpen={isOpen} onClose={close} />
+ */
+export function useMobileMenu(): MobileMenuState {
+    const [isOpen, setIsOpen] = useState(false);
+    const scrollPositionRef = useRef(0);
+
+    /**
+     * Lock body scroll when menu is open
+     * Prevents background page from scrolling
+     */
+    useEffect(() => {
+        if (isOpen) {
+            // Save current scroll position
+            scrollPositionRef.current = window.scrollY;
+
+            // Lock scroll
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollPositionRef.current}px`;
+            document.body.style.width = '100%';
+
+            return () => {
+                // Restore scroll
+                const scrollY = scrollPositionRef.current;
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                window.scrollTo(0, scrollY);
+            };
+        }
+        return undefined;
+    }, [isOpen]);
+
+    /**
+     * Close menu on escape key
+     */
+    useEffect(() => {
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isOpen) {
+                setIsOpen(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleEscape);
+        return () => window.removeEventListener('keydown', handleEscape);
+    }, [isOpen]);
+
+    const open = useCallback(() => setIsOpen(true), []);
+    const close = useCallback(() => setIsOpen(false), []);
+    const toggle = useCallback(() => setIsOpen(prev => !prev), []);
+
+    return {
+        isOpen,
+        open,
+        close,
+        toggle,
+    };
+}
+
+
+==================================================
+
+
+
+
+
+
+
+
+==================== File: useNavigation.ts ====================
+
+Absolute path: c:\Users\franc\Desktop\TileStories\src\layout_and_navigation\hooks\useNavigation.ts
+
+
+/**
+ * USE NAVIGATION HOOK
+ * ===================
+ * 
+ * Main hook for programmatic navigation.
+ * Clean API that wraps React Router and Navigation Context.
+ * 
+ * Use this instead of useNavigate directly for:
+ * - Automatic scroll position saving
+ * - History tracking
+ * - Return-after-auth flows
+ * - Convenient helper methods
+ */
+
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigationContext } from '../context';
+import type { NavigationAPI, NavigateOptions } from '../types';
+
+/**
+ * Main navigation hook
+ * 
+ * Provides clean API for all navigation operations.
+ * 
+ * @example
+ * const { goTo, goBack, canGoBack } = useNavigation();
+ * 
+ * // Navigate to a page
+ * goTo('/products');
+ * 
+ * // Go back
+ * if (canGoBack) {
+ *   goBack();
+ * } else {
+ *   goBackOrHome(); // Goes home if no history
+ * }
+ * 
+ * // Auth flow
+ * navigateWithReturn('/login'); // Saves current page
+ * // ...after login...
+ * returnFromAuth(); // Returns to saved page
+ */
+export function useNavigation(): NavigationAPI {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const navContext = useNavigationContext();
+
+    /**
+     * Navigate to a path
+     * 
+     * @param path - Target path
+     * @param options - Navigation options
+     */
+    const goTo = (path: string, options?: NavigateOptions) => {
+        // Save current scroll position unless explicitly disabled
+        if (!options?.preserveScroll) {
+            navContext.saveScrollPosition(location.pathname, window.scrollY);
+        }
+
+        const navigateOptions: { state?: unknown; replace?: boolean } = {};
+        if (options?.state !== undefined) {
+            navigateOptions.state = options.state;
+        }
+        if (options?.replace !== undefined) {
+            navigateOptions.replace = options.replace;
+        }
+
+        navigate(path, navigateOptions);
+    };
+
+    /**
+     * Go back one step in history
+     * Saves current scroll position before navigating
+     */
+    const goBack = () => {
+        navContext.saveScrollPosition(location.pathname, window.scrollY);
+        navigate(-1);
+    };
+
+    /**
+     * Go back if history exists, otherwise go home
+     * Useful for "back" buttons that should always work
+     */
+    const goBackOrHome = () => {
+        const returnPath = navContext.getReturnPath();
+        if (returnPath) {
+            navigate(-1);
+        } else {
+            navigate('/');
+        }
+    };
+
+    /**
+     * Navigate with return path for auth flows
+     * Saves current location to return to after auth
+     * 
+     * @example
+     * // User tries to access protected page
+     * navigateWithReturn('/login');
+     * // After login, call returnFromAuth()
+     */
+    const navigateWithReturn = (path: string) => {
+        navigate(path, {
+            state: { returnTo: location.pathname }
+        });
+    };
+
+    /**
+     * Return from auth to original page
+     * Uses saved returnTo path or goes home
+     */
+    const returnFromAuth = () => {
+        const state = location.state as { returnTo?: string } | null;
+        const returnTo = state?.returnTo || '/';
+        navigate(returnTo, { replace: true });
+    };
+
+    return {
+        goTo,
+        goBack,
+        goBackOrHome,
+        navigateWithReturn,
+        returnFromAuth,
+        currentPath: navContext.currentPath,
+        previousPath: navContext.previousPath,
+        canGoBack: navContext.navigationHistory.length > 0,
+    };
+}
+
+
+==================================================
+

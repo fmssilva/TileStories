@@ -1,11 +1,11 @@
 {
-    "name": "TileStories",
+    "name": "TileStories - AR for Lisbon's Grande Panorama",
     "short_name": "TileStories",
-    "description": "AR experiences for the Museu Nacional do Azulejo in Lisbon",
+    "description": "Explore Lisbon's pre-earthquake skyline through augmented reality. Interactive AR experience for the 23-meter Grande Panorama de Lisboa at Museu Nacional do Azulejo. Discover 150+ buildings across 4 historical epochs.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#14b8a6",
+    "background_color": "#FFF8E7",
+    "theme_color": "#3C5E95",
     "orientation": "portrait-primary",
     "icons": [
         {
@@ -28,9 +28,9 @@
         }
     ],
     "categories": [
-        "productivity",
-        "developer",
-        "utilities"
+        "education",
+        "travel",
+        "lifestyle"
     ],
     "screenshots": [],
     "shortcuts": []

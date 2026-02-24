@@ -3,6 +3,7 @@
  * ===============
  * 
  * Utility functions for theme management, detection, and manipulation.
+ * Simplified: detects system preference on init, then just toggles light/dark.
  */
 
 import { ThemeMode } from './types';
@@ -21,14 +22,11 @@ export function getSystemTheme(): 'light' | 'dark' {
 
 /**
  * Resolve theme mode to actual theme
- * @param mode - The theme mode ('light', 'dark', 'system')
+ * @param mode - The theme mode ('light' or 'dark')
  * @returns The resolved theme ('light' | 'dark')
  */
 export function resolveTheme(mode: ThemeMode): 'light' | 'dark' {
-    if (mode === 'system') {
-        return getSystemTheme();
-    }
-    return mode;
+    return mode; // Direct return since we removed 'system' mode
 }
 
 /**
@@ -48,15 +46,12 @@ export function applyTheme(theme: 'light' | 'dark'): void {
 }
 
 /**
- * Get the next theme in the cycle
+ * Toggle between light and dark themes
  * @param currentMode - The current theme mode
- * @returns The next theme mode in the cycle
+ * @returns The opposite theme mode
  */
 export function getNextTheme(currentMode: ThemeMode): ThemeMode {
-    const modes: ThemeMode[] = ['light', 'dark', 'system'];
-    const currentIndex = modes.indexOf(currentMode);
-    const nextIndex = (currentIndex + 1) % modes.length;
-    return modes[nextIndex] as ThemeMode;
+    return currentMode === 'light' ? 'dark' : 'light';
 }
 
 /**
@@ -74,18 +69,27 @@ export function saveTheme(mode: ThemeMode): void {
 }
 
 /**
- * Load theme from localStorage
- * @returns The saved theme mode or 'system' as default
+ * Load theme from localStorage or detect from system
+ * @returns The saved theme mode or system-detected theme
  */
 export function loadTheme(): ThemeMode {
-    if (typeof window === 'undefined') return 'system';
+    if (typeof window === 'undefined') return 'light';
 
     try {
         const saved = localStorage.getItem('app-theme') as ThemeMode;
-        return saved && ['light', 'dark', 'system'].includes(saved) ? saved : 'system';
+
+        // If we have a saved preference, use it
+        if (saved && ['light', 'dark'].includes(saved)) {
+            return saved;
+        }
+
+        // Otherwise, detect from system and save it
+        const systemTheme = getSystemTheme();
+        saveTheme(systemTheme);
+        return systemTheme;
     } catch (error) {
         console.warn('Failed to load theme from localStorage:', error);
-        return 'system';
+        return getSystemTheme();
     }
 }
 

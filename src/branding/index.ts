@@ -6,7 +6,5 @@
  */
 
 export { Logo, LogoIcon, LogoFull } from './Logo';
-
-// Future brand components could go here:
-// export { BrandIcon } from './BrandIcon';
-// export { Wordmark } from './Wordmark';
+export { LogoWithName, type LogoWithNameProps } from './LogoWithName';
+export { default as SiteName } from './SiteName';

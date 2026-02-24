@@ -1,25 +1,86 @@
-// ============================================================================
-// LAYOUT AND NAVIGATION - DOMAIN EXPORTS
-// ============================================================================
-
 /**
- * Centralized exports for layout and navigation components
- * Following domain-centered architecture patterns
+ * LAYOUT AND NAVIGATION - MAIN EXPORTS
+ * =====================================
+ * 
+ * Central export point for all layout and navigation features.
+ * 
+ * Architecture:
+ * - Config: Navigation structure (single source of truth)
+ * - Context: Navigation state management
+ * - Hooks: Clean API for components
+ * - Components: UI elements
+ * - Utils: Helper functions
  */
 
-// Core layout components
-export { Header } from './header/Header';
-export { Footer } from './footer/Footer';
-export { BackToTop } from './BackToTopIcon';
+// ============================================================================
+// COMPONENTS
+// ============================================================================
 
-// Hooks and utilities
-export { useHeaderScroll } from './hooks';
+export { Header, Footer, MainLayout, Breadcrumbs, MobileMenu, BackToTop } from './components';
 
-// Color system and styling utilities
+// ============================================================================
+// CONTEXT & PROVIDER
+// ============================================================================
+
+export { NavigationProvider, useNavigationContext } from './context';
+
+// ============================================================================
+// HOOKS
+// ============================================================================
+
+export { useNavigation, useBreadcrumbs, useMobileMenu, useHeaderScroll } from './hooks';
+
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+
+export { navigationConfig } from './config';
+
+// ============================================================================
+// UTILITIES
+// ============================================================================
+
 export {
-    headerColors,
-    getHeaderStyles,
-    getFooterStyles,
-    getNavLinkStyles
-} from './colors';// Types (if needed in future)
-// export type { HeaderProps, FooterProps } from './types';
+    // Label extraction
+    getNavItemLabel,
+    // Navigation query helpers
+    getMainNavItems,
+    getFooterNavItems,
+    findNavItemByPath,
+    getAllNavItems,
+    // Breadcrumb utilities
+    buildBreadcrumbTrail,
+    populateParentReferences,
+    isPathActive,
+    extractParam,
+    buildPath,
+    getItemDepth,
+    findNavItemById,
+    getSiblings,
+    getNextSibling,
+    getPreviousSibling,
+    // Route generation
+    generateRoutesFromConfig,
+} from './utils';
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export type {
+    NavItem,
+    NavItemMetadata,
+    NavigationState,
+    HistoryEntry,
+    NavigationAPI,
+    NavigateOptions,
+    MobileMenuState,
+    ScrollState,
+    ScrollOptions,
+    HeaderProps,
+    FooterProps,
+    MainLayoutProps,
+    BreadcrumbsProps,
+    MobileMenuProps,
+    BackToTopProps,
+} from './types';

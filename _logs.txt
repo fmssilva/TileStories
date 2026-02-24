@@ -1,0 +1,30 @@
+[StickyContext] Layer "demo-sticky-1" height measured: 60 px
+DemoSticky.tsx:64 📐 [TestCase1] Measured height: 60 px | isSticky: true | isExpanded: false
+StickyContext.tsx:240 📏 [StickyContext] Layer "demo-sticky-2-chapter" height measured: 48 px
+DemoSticky.tsx:154 📐 [Chapter] Measured height: 48 px | isSticky: true
+StickyContext.tsx:240 📏 [StickyContext] Layer "demo-sticky-2-section" height measured: 40 px
+DemoSticky.tsx:162 📐 [Section] Measured height: 40 px | isSticky: true | activeSection: 1.2
+StickyContext.tsx:240 📏 [StickyContext] Layer "demo-sticky-2-subsection" height measured: 36 px
+DemoSticky.tsx:170 📐 [Subsection] Measured height: 36 px | isSticky: true | activeSubsection: 1.2.1
+StickyContext.tsx:240 📏 [StickyContext] Layer "demo-sticky-3" height measured: 80 px
+DemoSticky.tsx:384 📐 [TestCase3] Measured height: 80 px | isSticky: true | selectedButton: null
+StickyContext.tsx:240 📏 [StickyContext] Layer "demo-sticky-4" height measured: 76 px
+DemoSticky.tsx:494 📐 [TestCase4] Measured height: 76 px | isSticky: true | openItems: [1]
+installHook.js:1 📏 [StickyContext] Layer "demo-sticky-1" height measured: 60 px
+installHook.js:1 📐 [TestCase1] Measured height: 60 px | isSticky: true | isExpanded: false
+installHook.js:1 📏 [StickyContext] Layer "demo-sticky-2-chapter" height measured: 48 px
+installHook.js:1 📐 [Chapter] Measured height: 48 px | isSticky: true
+installHook.js:1 📏 [StickyContext] Layer "demo-sticky-2-section" height measured: 40 px
+installHook.js:1 📐 [Section] Measured height: 40 px | isSticky: true | activeSection: 1.2
+installHook.js:1 📏 [StickyContext] Layer "demo-sticky-2-subsection" height measured: 36 px
+installHook.js:1 📐 [Subsection] Measured height: 36 px | isSticky: true | activeSubsection: 1.2.1
+installHook.js:1 📏 [StickyContext] Layer "demo-sticky-3" height measured: 80 px
+installHook.js:1 📐 [TestCase3] Measured height: 80 px | isSticky: true | selectedButton: null
+installHook.js:1 📏 [StickyContext] Layer "demo-sticky-4" height measured: 76 px
+installHook.js:1 📐 [TestCase4] Measured height: 76 px | isSticky: true | openItems: [1]
+StickyContext.tsx:240 📏 [StickyContext] Layer "demo-sticky-1" height measured: 236 px
+DemoSticky.tsx:64 📐 [TestCase1] Measured height: 236 px | isSticky: true | isExpanded: true
+StickyContext.tsx:240 📏 [StickyContext] Layer "demo-sticky-1" height measured: 60 px
+DemoSticky.tsx:64 📐 [TestCase1] Measured height: 60 px | isSticky: true | isExpanded: false
+StickyContext.tsx:240 📏 [StickyContext] Layer "demo-sticky-4" height measured: 76 px
+DemoSticky.tsx:494 📐 [TestCase4] Measured height: 76 px | isSticky: true | openItems: (2) [1, 2]

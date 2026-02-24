@@ -3,6 +3,7 @@
  * 
  * This component automatically chooses the right logo variant based on:
  * - Current theme (light/dark)
+ * - Current language (PT/EN)
  * - Size requirements (full logo vs icon only)
  * - Usage context (header, footer, etc.)
  * 
@@ -12,11 +13,13 @@
  */
 
 import { appConfig } from '@/config/app';
+// import { useLanguage } from '@/utils/language'; // TODO: Re-enable when Logo_with_name_eng.png is added
 
 // Logo paths - Using PNG for better visual quality (SVG is low quality)
-// Co-located in public folder for direct access
-const logoIcon = '/assets/Logo.png';
-const logoFull = '/assets/Logo_with_name.png';
+// Files are in /public folder, accessible at root path
+const logoIcon = '/Logo.png';
+const logoFullPT = '/Logo_with_name.png';
+// const logoFullEN = '/Logo_with_name_eng.png'; // TODO: Add this file to /public folder
 
 type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -34,6 +37,9 @@ export function Logo({
     className = '',
     alt = appConfig.displayName
 }: LogoProps) {
+    // Get current language for language-aware logo
+    // const { language } = useLanguage(); // TODO: Re-enable when Logo_with_name_eng.png is added
+
     // Determine which logo to use
     const getLogoSrc = () => {
         // For icon variant, use icon-only PNG
@@ -41,8 +47,10 @@ export function Logo({
             return logoIcon;
         }
 
-        // For full variant, use logo with name
-        return logoFull;
+        // For full variant, use language-specific logo with name
+        // TODO: Add Logo_with_name_eng.png to /public folder
+        // For now, use same logo for both languages
+        return logoFullPT; // language === 'pt' ? logoFullPT : logoFullEN;
     };
 
     const logoSrc = getLogoSrc();
