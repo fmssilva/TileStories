@@ -1,0 +1,153 @@
+%!TEX root = ../template.tex
+\typeout{NT FILE chapter-introduction.tex}%
+
+\chapter{Introduction}
+\label{cha:introduction}
+
+% ===================================================================
+\section{Context \& Motivation}
+\label{sec:intro-context}
+% ===================================================================
+
+The Grande Panorama de Lisboa is a 23-metre azulejo tile panel, attributed
+on stylistic grounds to the Spanish ceramic painter Gabriel del Barco and
+generally dated to around 1700 \cite{gacpanorama,baroqueartpanorama}. It
+depicts roughly 14\,km of the Tagus waterfront from Alg\'{e}s to Xabregas,
+rendering palaces, churches, convents, and ordinary dwellings across more
+than 150 identifiable structures, and survives today as the single most
+complete pictorial record of Lisbon \emph{before} the 1755 earthquake,
+which destroyed an estimated 85\% of what it depicts. A visitor standing
+before this panel at the Museu Nacional do Azulejo (MNAz) today,
+however, encounters very little beyond a single mounted label: a
+physically rich artefact containing 150 or more buildings is, in
+practice, uninterpretable without expert architectural knowledge, and
+most visitors move past it in under two minutes. Mobile AR offers a way
+to close that gap largely without cost to the institution: consumer
+smartphones equipped with ARCore and ARKit can already overlay
+interactive content onto a physical artefact, and recent bibliometric
+work suggests this is no longer a marginal research direction. Cultural-heritage AR studies have been increasing year on
+year through 2023 \cite{wang2025grand}, so the timing, if nothing else, seems right.
+
+This thesis treats the Panorama as its central motivating case, but the
+underlying problem is not specific to it. Any sufficiently large,
+content-dense heritage wall raises the same questions: how to track a
+visitor's position reliably across tens of metres, how to keep dozens or
+hundreds of points of interest legible instead of overwhelming, and how
+to serve visitors with very different backgrounds and available time.
+To keep the generalisability claim honest, not aspirational,
+a second surface is tested throughout: Chafariz Velho, a large,
+tile-covered Pombaline-era fountain in Pa\c{c}o de Arcos. If anything
+Chafariz Velho is the harder case. It is outdoor, circular, and subject
+to shifting natural light, where the Panorama is indoor and
+geometrically simpler, and (as \S\ref{sec:intro-institutional} explains)
+it ended up as this thesis's primary development surface mostly by
+accident of timing, not by original design. Both surfaces recur
+throughout this report; neither is meant to be read as the ceiling of
+what the resulting framework can support.
+
+% ===================================================================
+\section{Institutional Context \& Research Partnership}
+\label{sec:intro-institutional}
+% ===================================================================
+
+MNAz is a high-traffic, high-value setting for this work: it was
+Lisbon's most-visited national museum in 2024, with 297{,}203 recorded
+entries \cite{observador2025mnaz}. Since 1 November 2025, however, the
+museum has been closed to the public for renovation funded under
+Portugal's Plano de Recupera\c{c}\~{a}o e Resili\^{e}ncia, with no
+confirmed reopening date at the time of writing \cite{publico2025prr}.
+No formal partnership agreement with MNAz was in place when this report
+was prepared, and none is assumed by the plan that follows. Given this,
+Chafariz Velho became the primary surface for the tracking tests,
+mapping work, and early development reported in
+Chapter~\ref{ch:proposed-work}. It is permanently and freely accessible
+and needs no institutional sign-off at all. That is why it is
+treated as the guaranteed setting for this thesis's evaluation
+(\S\ref{sec:pw-evaluation}). Deployment and evaluation at MNAz itself
+remain a goal pursued opportunistically, should the museum reopen with
+enough time left before submission, but no research question,
+contribution, or evaluation claim in this thesis depends on that
+happening.
+
+% ===================================================================
+\section{Problem Statement}
+\label{sec:intro-problem}
+% ===================================================================
+
+Four related gaps motivate this thesis, expanded with full justification
+in \S\ref{sec:pw-problem-rq}. Visitors cannot currently identify
+individual buildings or orient themselves within a panel as dense as the
+Panorama; the panel fixes one historical moment with no mechanism
+connecting it to the 1755 earthquake, the Pombaline reconstruction, or
+the present-day city; passive observation of a static, label-only display
+yields low dwell time and little retained understanding; and a single
+fixed text cannot reasonably serve a child, a tourist, and an academic
+historian at once. Together, these gaps describe a more general problem:
+existing interpretation tools for large, content-dense heritage walls do
+not scale to the density of information such walls actually carry.
+
+% ===================================================================
+\section{Research Questions}
+\label{sec:intro-rqs}
+% ===================================================================
+
+This thesis is organised around one central question, decomposed into
+five sub-questions in \S\ref{sec:pw-problem-rq}: \emph{how can a mobile
+AR framework, built around an existing visual positioning service,
+provide stable multi-POI spatial registration, historically layered
+content, and visitor-adaptive personalisation across large-scale heritage
+wall surfaces --- and what engagement, usability, and learning outcomes
+does such a framework produce for real visitors?} The sub-questions
+address, in turn, tracking configuration, interface scalability,
+engagement patterns under free use, personalisation effectiveness, and
+immediate knowledge gain, each scoped specifically to what this thesis's
+evaluation plan can realistically measure.
+
+% ===================================================================
+\section{Main Contributions}
+\label{sec:intro-contributions}
+% ===================================================================
+
+This thesis's primary contribution is a configured and empirically
+tested mobile AR \emph{framework} for large-scale heritage walls. 
+It is a config-driven architecture: a new wall is added as data, and it runs on an existing visual positioning service rather than a purpose-built tracking method.
+Generalisability is supported directly by
+running the same framework, unmodified, across three structurally
+distinct surfaces, and demonstrated concretely by packaging the proven
+core as an installable Unity template and measuring how quickly a new
+wall can be integrated against it. Three further contributions follow
+from this core. The first is a temporal visualisation mechanism,
+generalised beyond any single wall's content: on the Panorama it layers
+the depicted period against later historical states and the present
+day, while the same underlying state-axis mechanism turns out to extend
+to a non-historical dimension, such as time-of-day, on a structurally
+different wall. The second is an adaptive visitor-profiling engine that
+adjusts content depth, vocabulary, and suggested route length to a
+small set of self-reported visitor profiles established during a short
+onboarding step. The third is an in-situ evaluation, conducted
+primarily at Chafariz Velho with realistic, street-recruited samples in
+the order of twenty to thirty participants and extended opportunistically
+to MNAz should it reopen in time, measuring usability, engagement
+patterns, and immediate knowledge gain. This last piece is reported as
+exploratory evidence; with fifteen to thirty participants, it cannot
+support strong statistical generalisation.
+
+% ===================================================================
+\section{Document Structure}
+\label{sec:intro-structure}
+% ===================================================================
+
+Chapter~\ref{ch:related-work} reviews digital heritage interpretation,
+AR concepts and tracking techniques, AR applications in museums and at
+large-scale surfaces specifically, and UX, personalisation, and
+evaluation practice in heritage AR, closing with the explicit gap this
+thesis addresses. Chapter~\ref{ch:proposed-work} develops the research
+questions in full, introduces the Panorama, Chafariz Velho, and a third,
+structurally distinct wall as case studies motivating a framework rather
+than a single-installation design, sets out the Design Science Research
+approach followed, presents the TileStories framework concept and its
+phased feature set, justifies the technology stack and system
+architecture, and details the evaluation plan. Chapter~\ref{ch:work-plan} reports work already completed, the
+phased development timeline with its Gantt chart, and a risk analysis
+covering the dependencies (chiefly museum access) that sit outside this
+thesis's direct control.

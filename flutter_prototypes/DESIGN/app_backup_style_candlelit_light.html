@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TileStories — Candlelit Antiquarian · Light</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Spectral:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C27B0A;
+    --gold-bright: #F59E0B;
+    --gold-light: #FEF3C7;
+    --ink: #1C1409;
+    --deep-blue: #1B2D4F;
+    --parchment: #FDF6E3;
+    --parchment-dark: #F5E9C8;
+    --stone: #E8DCC8;
+    --muted: rgba(28, 20, 9, 0.45);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: #f0e8d4;
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .phone {
+    width: 390px;
+    height: 844px;
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    background: var(--parchment);
+    box-shadow:
+      0 0 0 1px rgba(194,123,10,0.2),
+      0 0 40px rgba(194,123,10,0.1),
+      0 40px 100px rgba(0,0,0,0.25);
+    flex-shrink: 0;
+  }
+
+  .screen {
+    position: absolute; inset: 0; overflow: hidden;
+    transition: all 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .screen.hidden-right { transform: translateX(100%); opacity: 0; }
+  .screen.hidden-left  { transform: translateX(-100%); opacity: 0; }
+  .screen.visible      { transform: translateX(0); opacity: 1; }
+
+  /* Texture overlays */
+  .paper-texture {
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(194,123,10,0.015) 0px, transparent 1px, transparent 28px, rgba(194,123,10,0.015) 28px),
+      repeating-linear-gradient(90deg, rgba(194,123,10,0.008) 0px, transparent 1px, transparent 28px, rgba(194,123,10,0.008) 28px);
+    pointer-events: none;
+  }
+  .paper-grain {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 20%, rgba(245,193,90,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(194,123,10,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Status bar */
+  .status-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 44px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 28px 8px; z-index: 50;
+    font-size: 12px; font-weight: 600;
+    color: rgba(28,20,9,0.5);
+    background: linear-gradient(180deg, rgba(253,246,227,0.95) 0%, transparent 100%);
+  }
+
+  /* Animations */
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes inkDrop {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes goldPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(194,123,10,0.25); }
+    50% { box-shadow: 0 0 0 10px rgba(194,123,10,0); }
+  }
+  @keyframes expandW {
+    from { width: 0; }
+    to { width: 48px; }
+  }
+  @keyframes fillProgress {
+    from { width: 0%; }
+    to { width: 73%; }
+  }
+
+  .r1 { animation: fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+  .r2 { animation: fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+  .r3 { animation: fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.3s both; }
+  .r4 { animation: fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.4s both; }
+  .r5 { animation: fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.5s both; }
+
+  .pressable {
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .pressable:hover { transform: translateY(-2px); }
+  .pressable:active { transform: scale(0.97); }
+
+  .scroll-content { overflow-y: auto; scrollbar-width: none; }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* Card styles */
+  .parchment-card {
+    background: #fff;
+    border: 1px solid rgba(194,123,10,0.15);
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(28,20,9,0.06), 0 1px 2px rgba(28,20,9,0.04);
+    transition: all 0.2s;
+  }
+  .parchment-card:hover {
+    box-shadow: 0 8px 24px rgba(28,20,9,0.1), 0 2px 4px rgba(28,20,9,0.06);
+    border-color: rgba(194,123,10,0.25);
+  }
+
+  .gold-rule { height: 2px; background: linear-gradient(90deg, transparent, var(--gold-bright), transparent); }
+
+  /* Bottom nav light */
+  .bottom-nav-light {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
+    background: linear-gradient(180deg, transparent 0%, rgba(253,246,227,0.98) 30%);
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 0 8px 20px; z-index: 50;
+    border-top: 1px solid rgba(194,123,10,0.1);
+  }
+
+  /* Badge */
+  .gold-badge {
+    background: var(--gold-bright);
+    color: #fff;
+    border-radius: 100px;
+    padding: 3px 9px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+
+<!-- CONCEPT LABEL -->
+<div style="position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;">
+  <div style="background:var(--gold-bright);color:#fff;padding:8px 20px;border-radius:100px;font-size:13px;font-weight:700;letter-spacing:0.05em;font-family:'DM Sans',sans-serif;">
+    ① CANDLELIT · LIGHT MODE
+  </div>
+  <div id="screen-indicator" style="background:rgba(28,20,9,0.08);color:rgba(28,20,9,0.5);padding:8px 16px;border-radius:100px;font-size:12px;border:1px solid rgba(28,20,9,0.1);">
+    Screen 1 / 3
+  </div>
+</div>
+
+<button onclick="prevScreen()" style="position:fixed;left:max(20px,calc(50% - 240px));top:50%;transform:translateY(-50%);background:rgba(28,20,9,0.06);border:1px solid rgba(28,20,9,0.1);color:rgba(28,20,9,0.4);width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='rgba(194,123,10,0.12)';this.style.color='#C27B0A'" onmouseout="this.style.background='rgba(28,20,9,0.06)';this.style.color='rgba(28,20,9,0.4)'">←</button>
+<button onclick="nextScreen()" style="position:fixed;right:max(20px,calc(50% - 240px));top:50%;transform:translateY(-50%);background:rgba(28,20,9,0.06);border:1px solid rgba(28,20,9,0.1);color:rgba(28,20,9,0.4);width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='rgba(194,123,10,0.12)';this.style.color='#C27B0A'" onmouseout="this.style.background='rgba(28,20,9,0.06)';this.style.color='rgba(28,20,9,0.4)'">→</button>
+
+<div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:200;">
+  <div class="dot" onclick="goTo(0)" style="width:20px;height:8px;border-radius:100px;background:var(--gold-bright);cursor:pointer;transition:all 0.3s;"></div>
+  <div class="dot" onclick="goTo(1)" style="width:8px;height:8px;border-radius:50%;background:rgba(28,20,9,0.2);cursor:pointer;transition:all 0.3s;"></div>
+  <div class="dot" onclick="goTo(2)" style="width:8px;height:8px;border-radius:50%;background:rgba(28,20,9,0.2);cursor:pointer;transition:all 0.3s;"></div>
+</div>
+
+<div class="phone">
+
+  <!-- ═══════════════ SCREEN 1: AR SCAN ═══════════════ -->
+  <div class="screen visible" id="screen-0">
+    <div style="position:absolute;inset:0;background:var(--parchment);"></div>
+    <div class="paper-texture"></div>
+    <div class="paper-grain"></div>
+    <div class="status-bar"><span>12:32</span><span style="color:var(--gold);">◉ AR</span></div>
+
+    <!-- Header -->
+    <div style="position:absolute;top:52px;left:0;right:0;padding:16px 24px 0;">
+      <div class="r1" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--ink);font-weight:400;">Tile<em style="color:var(--gold);">Stories</em></div>
+          <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-top:2px;">Lisboa · Alfama</div>
+        </div>
+        <div style="background:rgba(194,123,10,0.1);border:1px solid rgba(194,123,10,0.2);border-radius:100px;padding:7px 14px;font-size:12px;color:var(--gold);display:flex;align-items:center;gap:6px;">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--gold-bright);animation:goldPulse 2s infinite;"></div>
+          Scanning
+        </div>
+      </div>
+    </div>
+
+    <!-- Camera viewfinder — warm toned -->
+    <div class="r2" style="position:absolute;top:138px;left:20px;right:20px;height:260px;border-radius:20px;overflow:hidden;border:1.5px solid rgba(194,123,10,0.2);box-shadow:0 4px 24px rgba(28,20,9,0.1);">
+      <!-- Warm sepia camera simulation -->
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,#e8d5b0 0%,#d4c090 40%,#c8b07a 100%);"></div>
+      <!-- Tile grid -->
+      <div style="position:absolute;inset:12px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);gap:4px;opacity:0.4;">
+        <div style="background:#1b2d4f;border-radius:4px;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;opacity:0.7;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;opacity:0.8;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;opacity:0.6;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;opacity:0.9;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;opacity:0.5;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;opacity:0.8;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;opacity:0.7;"></div>
+        <div style="background:#1b2d4f;border-radius:4px;"></div>
+      </div>
+      <!-- Scan corners -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-40%,-50%);width:100px;height:90px;">
+        <div style="position:absolute;top:0;left:0;width:22px;height:22px;border-top:2.5px solid var(--gold);border-left:2.5px solid var(--gold);border-radius:4px 0 0 0;"></div>
+        <div style="position:absolute;top:0;right:0;width:22px;height:22px;border-top:2.5px solid var(--gold);border-right:2.5px solid var(--gold);border-radius:0 4px 0 0;"></div>
+        <div style="position:absolute;bottom:0;left:0;width:22px;height:22px;border-bottom:2.5px solid var(--gold);border-left:2.5px solid var(--gold);border-radius:0 0 0 4px;"></div>
+        <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-bottom:2.5px solid var(--gold);border-right:2.5px solid var(--gold);border-radius:0 0 4px 0;"></div>
+      </div>
+      <!-- Vignette -->
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center, transparent 40%, rgba(28,20,9,0.25) 100%);"></div>
+      <div style="position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(28,20,9,0.4);">Align tile within frame</div>
+    </div>
+
+    <!-- Recognition card -->
+    <div onclick="goTo(1)" class="pressable parchment-card r3"
+      style="position:absolute;top:416px;left:20px;right:20px;padding:18px;cursor:pointer;">
+      <!-- Gold top accent -->
+      <div style="position:absolute;top:0;left:24px;right:24px;height:2px;background:linear-gradient(90deg,transparent,var(--gold-bright),transparent);border-radius:1px;"></div>
+
+      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">
+        <div style="width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#1b2d4f,#2a4a7f);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 12px rgba(27,45,79,0.3);">⚓</div>
+        <div style="flex:1;">
+          <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;font-weight:600;">Maritime History</div>
+          <div style="font-family:'Spectral',serif;font-size:18px;color:var(--ink);font-weight:600;line-height:1.2;margin-bottom:4px;">The Royal Galleon</div>
+          <div style="font-size:12px;color:var(--muted);font-style:italic;font-family:'Spectral',serif;">Nossa Senhora da Ajuda...</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;background:var(--gold-bright);border-radius:100px;padding:12px;text-align:center;font-size:12px;font-weight:700;color:#fff;letter-spacing:0.08em;text-transform:uppercase;box-shadow:0 4px 12px rgba(194,123,10,0.3);">Explore Story →</div>
+        <div style="background:rgba(28,20,9,0.05);border:1px solid rgba(28,20,9,0.1);border-radius:100px;padding:12px 16px;font-size:12px;color:var(--muted);">Save</div>
+      </div>
+    </div>
+
+    <!-- Nearby tiles strip -->
+    <div style="position:absolute;top:578px;left:0;right:0;padding:0 24px;" class="r4">
+      <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Also nearby</div>
+      <div style="display:flex;gap:10px;">
+        <div class="pressable" style="flex:1;background:#fff;border:1px solid rgba(194,123,10,0.12);border-radius:12px;padding:10px;text-align:center;box-shadow:0 2px 6px rgba(28,20,9,0.06);">
+          <div style="font-size:22px;margin-bottom:4px;">🏛️</div>
+          <div style="font-size:11px;color:var(--ink);font-family:'Spectral',serif;font-weight:600;line-height:1.2;">Terreiro do Paço</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">120m away</div>
+        </div>
+        <div class="pressable" style="flex:1;background:#fff;border:1px solid rgba(194,123,10,0.12);border-radius:12px;padding:10px;text-align:center;box-shadow:0 2px 6px rgba(28,20,9,0.06);">
+          <div style="font-size:22px;margin-bottom:4px;">⛪</div>
+          <div style="font-size:11px;color:var(--ink);font-family:'Spectral',serif;font-weight:600;line-height:1.2;">São Vicente</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">340m away</div>
+        </div>
+        <div class="pressable" style="flex:1;background:#fff;border:1px solid rgba(194,123,10,0.12);border-radius:12px;padding:10px;text-align:center;box-shadow:0 2px 6px rgba(28,20,9,0.06);">
+          <div style="font-size:22px;margin-bottom:4px;">🌊</div>
+          <div style="font-size:11px;color:var(--ink);font-family:'Spectral',serif;font-weight:600;line-height:1.2;">Aqueduto</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">2.1km away</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav-light">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:20px;">📡</div><div style="font-size:10px;color:var(--gold);font-weight:600;">Scan</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.35;"><div style="font-size:20px;">🗺️</div><div style="font-size:10px;color:var(--muted);">Explore</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.35;"><div style="font-size:20px;">📚</div><div style="font-size:10px;color:var(--muted);">Saved</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SCREEN 2: DETAIL ═══════════════ -->
+  <div class="screen hidden-right" id="screen-1">
+    <div style="position:absolute;inset:0;background:var(--parchment);"></div>
+    <div class="paper-texture"></div>
+
+    <!-- Hero — deep blue tile panel -->
+    <div style="position:absolute;top:0;left:0;right:0;height:290px;background:linear-gradient(160deg,#1b2d4f 0%,#243d6a 50%,#1b2d4f 100%);overflow:hidden;">
+      <!-- Azulejo tile grid decorative -->
+      <div style="position:absolute;inset:0;opacity:0.2;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr);gap:2px;padding:6px;">
+        <div style="background:#fff;border-radius:2px;"></div><div style="background:#fff;border-radius:2px;opacity:0.8;"></div><div style="background:#fff;border-radius:2px;"></div><div style="background:#fff;border-radius:2px;opacity:0.6;"></div><div style="background:#fff;border-radius:2px;"></div>
+        <div style="background:#fff;border-radius:2px;opacity:0.7;"></div><div style="background:#fff;border-radius:2px;"></div><div style="background:#fff;border-radius:2px;opacity:0.9;"></div><div style="background:#fff;border-radius:2px;opacity:0.5;"></div><div style="background:#fff;border-radius:2px;"></div>
+        <div style="background:#fff;border-radius:2px;"></div><div style="background:#fff;border-radius:2px;opacity:0.8;"></div><div style="background:#fff;border-radius:2px;opacity:0.6;"></div><div style="background:#fff;border-radius:2px;"></div><div style="background:#fff;border-radius:2px;opacity:0.7;"></div>
+        <div style="background:#fff;border-radius:2px;opacity:0.9;"></div><div style="background:#fff;border-radius:2px;"></div><div style="background:#fff;border-radius:2px;opacity:0.5;"></div><div style="background:#fff;border-radius:2px;"></div><div style="background:#fff;border-radius:2px;opacity:0.8;"></div>
+      </div>
+      <!-- Gold glow from center -->
+      <div style="position:absolute;top:60px;left:50%;transform:translateX(-50%);font-size:72px;filter:drop-shadow(0 0 20px rgba(245,193,90,0.4));">⚓</div>
+      <!-- Bottom gradient to parchment -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(0deg,var(--parchment) 0%,transparent 100%);"></div>
+      <!-- Gold horizontal rule at bottom -->
+      <div style="position:absolute;bottom:0;left:20px;right:20px;height:1.5px;background:linear-gradient(90deg,transparent,var(--gold-bright),transparent);"></div>
+
+      <div onclick="goTo(0)" style="position:absolute;top:52px;left:20px;background:rgba(253,246,227,0.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);border-radius:100px;padding:8px 16px;font-size:12px;color:rgba(255,255,255,0.85);cursor:pointer;">← Back</div>
+      <div style="position:absolute;top:52px;right:20px;background:rgba(253,246,227,0.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);border-radius:100px;padding:8px 16px;font-size:12px;color:rgba(255,255,255,0.85);cursor:pointer;">🔖 Save</div>
+    </div>
+
+    <div class="scroll-content" style="position:absolute;top:278px;left:0;right:0;bottom:80px;padding:0 24px 24px;">
+      <div class="r1" style="margin-bottom:4px;">
+        <span style="font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);font-weight:600;">Maritime History · 16th Century</span>
+      </div>
+      <div class="r2" style="margin-bottom:12px;">
+        <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--ink);line-height:1.1;">The Royal <em style="color:var(--gold);">Galleon</em></div>
+      </div>
+      <div class="r2" style="margin-bottom:16px;">
+        <div class="gold-rule"></div>
+      </div>
+      <div class="r3" style="margin-bottom:16px;">
+        <p style="font-family:'Spectral',serif;font-size:14px;font-style:italic;color:rgba(28,20,9,0.6);line-height:1.75;border-left:2px solid rgba(194,123,10,0.3);padding-left:14px;">"A detailed depiction of the Nossa Senhora da Ajuda, flagship of the royal fleet during the golden age of Portuguese maritime exploration."</p>
+      </div>
+
+      <!-- Info grid -->
+      <div class="r3" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:#fff;border:1px solid rgba(194,123,10,0.12);border-radius:12px;padding:13px;box-shadow:0 2px 6px rgba(28,20,9,0.05);">
+          <div style="font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Location</div>
+          <div style="font-size:13px;color:var(--ink);font-family:'Spectral',serif;font-weight:600;">Museu do Azulejo</div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(194,123,10,0.12);border-radius:12px;padding:13px;box-shadow:0 2px 6px rgba(28,20,9,0.05);">
+          <div style="font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Period</div>
+          <div style="font-size:13px;color:var(--ink);font-family:'Spectral',serif;font-weight:600;">16th–17th C.</div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(194,123,10,0.12);border-radius:12px;padding:13px;box-shadow:0 2px 6px rgba(28,20,9,0.05);">
+          <div style="font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Tiles</div>
+          <div style="font-size:13px;color:var(--ink);font-family:'Spectral',serif;font-weight:600;">1,300 panels</div>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(194,123,10,0.12);border-radius:12px;padding:13px;box-shadow:0 2px 6px rgba(28,20,9,0.05);">
+          <div style="font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Rarity</div>
+          <div style="font-size:13px;color:var(--gold);font-family:'Spectral',serif;font-weight:700;">★ Rare</div>
+        </div>
+      </div>
+
+      <div class="r4" style="margin-bottom:16px;">
+        <p style="font-family:'Spectral',serif;font-size:14px;color:rgba(28,20,9,0.6);line-height:1.7;">The panoramic panel depicts Lisbon before the 1755 earthquake, capturing the Ribeira waterfront with extraordinary detail — royal vessels, merchant ships, and the pulse of a maritime empire at its zenith.</p>
+      </div>
+
+      <div onclick="goTo(2)" class="pressable r5" style="background:var(--deep-blue);border-radius:100px;padding:15px;text-align:center;font-size:13px;font-weight:700;color:#fff;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 20px rgba(27,45,79,0.25);">
+        View Full Historical Record →
+      </div>
+    </div>
+
+    <div class="bottom-nav-light">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.35;"><div style="font-size:20px;">📡</div><div style="font-size:10px;color:var(--muted);">Scan</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.35;"><div style="font-size:20px;">🗺️</div><div style="font-size:10px;color:var(--muted);">Explore</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:20px;">📚</div><div style="font-size:10px;color:var(--gold);font-weight:600;">Saved</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SCREEN 3: SAVED ═══════════════ -->
+  <div class="screen hidden-right" id="screen-2">
+    <div style="position:absolute;inset:0;background:var(--parchment);"></div>
+    <div class="paper-texture"></div>
+    <div class="paper-grain"></div>
+    <div class="status-bar"><span>12:32</span><span>📍 Alfama</span></div>
+
+    <!-- Header -->
+    <div style="position:absolute;top:52px;left:0;right:0;padding:18px 24px 0;">
+      <div class="r1" style="margin-bottom:6px;">
+        <div style="font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);opacity:0.7;">Your Collection</div>
+      </div>
+      <div class="r1">
+        <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:400;color:var(--ink);margin-bottom:4px;">Saved <em style="color:var(--gold);">Discoveries</em></div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">6 artifacts · Lisboa</div>
+      </div>
+      <!-- Underline accent -->
+      <div class="r2" style="height:1.5px;width:0;background:linear-gradient(90deg,var(--gold-bright),rgba(194,123,10,0.2));margin-bottom:16px;animation:expandW 0.7s cubic-bezier(0.16,1,0.3,1) 0.3s both;"></div>
+      <!-- Filter pills -->
+      <div class="r2" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;">
+        <div style="background:var(--gold-bright);border-radius:100px;padding:7px 16px;font-size:12px;color:#fff;font-weight:600;white-space:nowrap;flex-shrink:0;">All</div>
+        <div style="background:#fff;border:1px solid rgba(28,20,9,0.1);border-radius:100px;padding:7px 16px;font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;">Maritime</div>
+        <div style="background:#fff;border:1px solid rgba(28,20,9,0.1);border-radius:100px;padding:7px 16px;font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;">Architecture</div>
+        <div style="background:#fff;border:1px solid rgba(28,20,9,0.1);border-radius:100px;padding:7px 16px;font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;">Religion</div>
+      </div>
+    </div>
+
+    <div class="scroll-content" style="position:absolute;top:232px;left:0;right:0;bottom:80px;padding:0 20px;">
+      <!-- Featured card -->
+      <div onclick="goTo(1)" class="pressable r2" style="border-radius:18px;overflow:hidden;margin-bottom:12px;cursor:pointer;background:linear-gradient(160deg,#1b2d4f 0%,#243d6a 100%);box-shadow:0 8px 24px rgba(27,45,79,0.25);">
+        <div style="height:100px;display:flex;align-items:center;padding:18px;gap:14px;position:relative;">
+          <div style="position:absolute;top:0;right:0;bottom:0;width:60%;background:linear-gradient(270deg,rgba(14,165,233,0.15),transparent);"></div>
+          <div style="font-size:44px;position:relative;z-index:1;">⚓</div>
+          <div style="position:relative;z-index:1;">
+            <div style="font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(245,193,90,0.9);margin-bottom:4px;font-weight:600;">Maritime · Featured</div>
+            <div style="font-family:'Playfair Display',serif;font-size:20px;color:#fff;font-weight:700;">The Royal Galleon</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;">Scanned 2 mins ago</div>
+          </div>
+        </div>
+        <div style="height:2px;background:linear-gradient(90deg,var(--gold-bright),rgba(245,193,90,0.3));"></div>
+      </div>
+
+      <!-- List items -->
+      <div class="r3" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="pressable parchment-card" style="padding:14px;display:flex;align-items:center;gap:13px;cursor:pointer;">
+          <div style="width:50px;height:50px;border-radius:10px;background:linear-gradient(135deg,#2c3e50,#3d5a80);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏛️</div>
+          <div style="flex:1;">
+            <div style="font-family:'Spectral',serif;font-size:14px;color:var(--ink);font-weight:600;margin-bottom:2px;">Terreiro do Paço</div>
+            <div style="font-size:11px;color:var(--muted);">Architecture · 15 mins ago</div>
+          </div>
+          <div style="color:rgba(194,123,10,0.5);font-size:18px;">›</div>
+        </div>
+
+        <div class="pressable parchment-card" style="padding:14px;display:flex;align-items:center;gap:13px;cursor:pointer;">
+          <div style="width:50px;height:50px;border-radius:10px;background:linear-gradient(135deg,#1a2f3a,#2a4d5e);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🌊</div>
+          <div style="flex:1;">
+            <div style="font-family:'Spectral',serif;font-size:14px;color:var(--ink);font-weight:600;margin-bottom:2px;">Aqueduto das Águas Livres</div>
+            <div style="font-size:11px;color:var(--muted);">Engineering · 1 hr ago</div>
+          </div>
+          <div style="color:rgba(194,123,10,0.5);font-size:18px;">›</div>
+        </div>
+
+        <div class="pressable parchment-card" style="padding:14px;display:flex;align-items:center;gap:13px;cursor:pointer;">
+          <div style="width:50px;height:50px;border-radius:10px;background:linear-gradient(135deg,#2a1f3a,#3d2d5e);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⛪</div>
+          <div style="flex:1;">
+            <div style="font-family:'Spectral',serif;font-size:14px;color:var(--ink);font-weight:600;margin-bottom:2px;">Igreja de São Vicente</div>
+            <div style="font-size:11px;color:var(--muted);">Religion · Yesterday</div>
+          </div>
+          <div style="color:rgba(194,123,10,0.5);font-size:18px;">›</div>
+        </div>
+
+        <!-- Progress -->
+        <div class="r4" style="background:#fff;border:1px solid rgba(194,123,10,0.12);border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(28,20,9,0.05);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:12px;color:var(--ink);font-family:'Spectral',serif;">Collection progress</div>
+            <div style="font-size:12px;color:var(--gold);font-weight:700;">73%</div>
+          </div>
+          <div style="height:4px;background:rgba(28,20,9,0.08);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;background:linear-gradient(90deg,var(--gold-bright),#fcd34d);border-radius:2px;animation:fillProgress 1.2s cubic-bezier(0.16,1,0.3,1) 0.5s both;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;">2 more tiles to complete Maritime series</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav-light">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.35;"><div style="font-size:20px;">📡</div><div style="font-size:10px;color:var(--muted);">Scan</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.35;"><div style="font-size:20px;">🗺️</div><div style="font-size:10px;color:var(--muted);">Explore</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:20px;">📚</div><div style="font-size:10px;color:var(--gold);font-weight:600;">Saved</div></div>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<div style="position:fixed;bottom:44px;left:50%;transform:translateX(-50%);display:flex;gap:32px;z-index:200;">
+  <div id="lbl-0" style="font-size:11px;color:rgba(194,123,10,0.8);font-family:'DM Sans',sans-serif;letter-spacing:0.05em;">AR SCAN</div>
+  <div id="lbl-1" style="font-size:11px;color:rgba(28,20,9,0.25);font-family:'DM Sans',sans-serif;letter-spacing:0.05em;">DETAIL VIEW</div>
+  <div id="lbl-2" style="font-size:11px;color:rgba(28,20,9,0.25);font-family:'DM Sans',sans-serif;letter-spacing:0.05em;">SAVED LIST</div>
+</div>
+
+<script>
+let current = 0;
+function goTo(idx) {
+  const dir = idx > current ? 1 : -1;
+  const prev = current; current = idx;
+  const p = document.getElementById('screen-' + prev);
+  p.classList.remove('visible','hidden-right','hidden-left');
+  p.classList.add(dir > 0 ? 'hidden-left' : 'hidden-right');
+  const n = document.getElementById('screen-' + current);
+  n.classList.remove('visible','hidden-right','hidden-left');
+  n.classList.add('visible');
+  updateUI();
+}
+function nextScreen() { if(current < 2) goTo(current+1); }
+function prevScreen() { if(current > 0) goTo(current-1); }
+function updateUI() {
+  document.getElementById('screen-indicator').textContent = `Screen ${current+1} / 3`;
+  document.querySelectorAll('.dot').forEach((d,i) => {
+    d.style.background = i === current ? '#F59E0B' : 'rgba(28,20,9,0.15)';
+    d.style.width = i === current ? '20px' : '8px';
+    d.style.borderRadius = '100px';
+  });
+  ['lbl-0','lbl-1','lbl-2'].forEach((l,i) => {
+    document.getElementById(l).style.color = i === current ? 'rgba(194,123,10,0.8)' : 'rgba(28,20,9,0.2)';
+  });
+}
+document.addEventListener('keydown', e => {
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') nextScreen();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') prevScreen();
+});
+</script>
+</body>
+</html>

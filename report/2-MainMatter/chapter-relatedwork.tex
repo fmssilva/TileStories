@@ -1,0 +1,1000 @@
+%!TEX root = ../template.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% chapter-related-work.tex
+%% Grande Panorama de Lisboa — AR Companion App
+%% Chapter 2: Related Work — SKELETON (~18 pages)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\typeout{NT FILE chapter-related-work.tex}%
+
+\chapter{Related Work}
+\label{ch:related-work}
+
+
+% ===================================================================
+\section{Digital Heritage and Interactive Museum Experiences}
+\label{sec:rw-heritage}
+% ===================================================================
+
+Museums have spent roughly four decades renegotiating their relationship
+with the visitor, moving from an institution that displays objects toward
+one that designs experiences. This section traces that shift, situates
+digital and interactive tools within it, and reviews what visitor-behaviour
+research tells us about attention, motivation, and fatigue. These three
+constraints end up shaping almost every design decision in our own AR
+panorama application.
+
+\subsection{Evolution of Museum Interpretation}
+\label{subsec:rw-museum-evolution}
+
+The so-called \emph{New Museology}, articulated by Vergo and collaborators
+\cite{vergo1989}, reframed the museum's core task. Where earlier practice
+treated the object and its label as sufficient, this paradigm argued that
+meaning is something visitors construct, not something a label transmits;
+the institution's job shifted from safeguarding objects to designing for
+that construction of meaning. That is not just a historical footnote. It
+is the theoretical justification for everything that follows in this
+chapter, since AR-mediated interpretation only makes sense once one
+accepts that the visitor's experience, not the artefact alone, is the
+unit being designed.
+
+Successive waves of interpretive technology followed this visitor-centred
+logic without abandoning it: the audio guide, then the interactive kiosk,
+then the dedicated mobile app, and now mobile AR each added interactivity
+while generally preserving physical proximity to the artefact. We read
+this less as a simple upgrade path than as a recurring negotiation
+between depth of interpretation and fidelity to the physical encounter. Recupero
+et al.\ \cite{recupero2019} make this tension concrete at Rome's Ara
+Pacis Museum, analysing an AR/VR-augmented tour through Activity Theory
+and finding that the technology succeeded when it mediated the visitor's
+relationship with the artefact, and generated friction when it competed
+with it for attention. For a project built around a single architectural
+surface, this finding is directly actionable: every interface decision
+should be tested against whether it deepens the encounter with the tile
+wall or distracts from it.
+
+\subsection{Digital Technologies in Cultural Heritage}
+\label{subsec:rw-ch-tech}
+
+Cultural heritage institutions now draw on a fairly wide spectrum of
+digital tools, ranging from static aids such as QR codes and audio guides,
+through touchscreen kiosks and dedicated apps, to spatially aware formats
+such as projection mapping and mobile AR. The axis that matters most for
+our purposes is not the technology itself but whether it is
+\emph{passive} (fixed content, the same for every visitor) or
+\emph{interactive} (responsive to where the visitor stands and what they
+are looking at). Mobile AR sits at the interactive end of that spectrum
+almost by definition, since it has no function at all without first
+detecting the visitor's position relative to the artefact.
+
+Two bibliometric surveys give us a sense of how fast this interactive end
+of the spectrum has grown. Boboc et al.\ \cite{boboc2022} analysed 1,201
+documents indexed in Scopus and Web of Science between 2012 and 2021 and
+identified eight recurring research themes, among them 3D reconstruction,
+virtual museums, education, tourism, and gamification. That spread
+suggests AR in cultural heritage is no longer a niche experiment but a
+multi-pronged research area with its own internal specialisations.
+Bekele et al.\ \cite{bekele2018}, in an earlier and more technically
+focused survey, organise the field around three recurring design
+concerns (tracking and registration, virtual-content modelling, and presentation/interaction design), which maps closely onto the three
+technical problems our own panorama application must solve: detecting
+150 POIs reliably, modelling their associated content, and presenting that
+content without overwhelming the visitor.
+
+Whether this interactivity actually helps visitors is, fortunately, not
+just a theoretical claim. Bachiller, Monzo, and Rey \cite{bachiller2023}
+compared traditional and AR-augmented visits at a technological heritage
+museum and found that more than 90\% of participants who took the
+AR-based route reported positive satisfaction, with a statistically
+significant association between visit type and both satisfaction and
+self-reported learning. Wang and Zhu \cite{wangzhu2022}, reviewing mobile
+AR museum applications more broadly, frame the underlying problem these
+results are solving: traditional museum displays tend to rely on a single,
+fixed interaction style, which raises cognitive load and leaves visitors
+with a comparatively poorer experience. Mobile AR addresses this largely
+by letting the information layer adapt to the visitor's viewpoint instead
+of the reverse. That is exactly the affordance a 23-metre,
+150-POI panorama wall needs, since no single fixed sequence of stops could
+reasonably serve every visitor's path through it.
+
+\subsection{Visitor Behaviour and Museum Learning Models}
+\label{subsec:rw-visitor-models}
+
+Falk and Dierking's Contextual Model of Learning \cite{falkdierking2000}
+remains the most widely used framework for explaining \emph{why} two
+visitors leave the same exhibit with entirely different experiences. The
+model holds that a visit is shaped by three interacting contexts: personal (prior knowledge, motivation, identity), social (companions, shared meaning-making), and physical (the space and the artefact itself). These contexts are continuously constructed by the visitor,
+not fixed by the institution. For an AR application, this
+implies that content cannot be authored for an abstract "average visitor";
+it has to leave room for the personal and social contexts to shape how
+each visitor actually uses it.
+
+Falk's later work on identity \cite{falk2009} operationalises the personal
+context into five recurring visitor identities (explorer, facilitator, experience seeker, professional/hobbyist, and recharger) each with a
+different relationship to depth of content and pacing. Around the same
+period, Pekarik, Doering, and Karns \cite{pekarik1999}, working from
+interviews across nine Smithsonian museums, proposed a complementary
+four-category model of what visitors actually find satisfying: object
+experiences (encountering the "real thing"), cognitive experiences
+(interpretive depth), introspective experiences (personal reflection),
+and social experiences (shared with companions). Taken together, these
+two models suggest that a single POI in our panorama should ideally be
+able to serve more than one of these motivations: a quick factual layer
+for the experience seeker, say, alongside an optional deeper layer for
+the professional or the introspective visitor, instead of committing to
+one fixed tone for all 150 points.
+
+This flexibility matters because attention in museum settings is a scarce
+resource and a fairly fragile one. Serrell's large-scale observational
+study across 108 exhibitions \cite{serrell1997} found that visitors
+typically spend under twenty minutes in any given exhibition regardless of
+its size or topic, and that most visitors do not stop at more than half of
+the available elements, which should temper any assumption
+that visitors will systematically work through all 150 POIs in sequence.
+Bitgood's reviews of what is generally termed \emph{museum fatigue}
+\cite{bitgood2009a, bitgood2009b} describe \emph{satiation} as the
+dominant mechanism behind this decline: attention and enjoyment both drop
+after repeated exposure to similar stimuli, independent of physical
+tiredness. Antón, Camarero, and Garrido \cite{anton2018} add a design-relevant
+nuance to this picture: visitors who follow a self-regulated, free route
+through a museum appear to reach satiation later, and report higher
+satisfaction, than those guided along a fixed, ordered path. Table
+\ref{tab:visitor-behaviour-design} summarises how these findings translate
+into concrete constraints for a 150-POI panoramic AR experience.
+
+\begin{table}[h]
+\centering
+\caption{Visitor-behaviour findings and their design implications for a
+150-POI panorama AR application.}
+\label{tab:visitor-behaviour-design}
+\small
+\begin{tabular}{p{7cm}p{7cm}}
+\toprule
+\textbf{Finding} & \textbf{Design implication} \\
+\midrule
+Visitors rarely stop at more than half the available elements; sessions
+average under 20 minutes (Serrell \cite{serrell1997}) &
+Do not design for full 150-POI coverage; support short, self-contained
+sub-sessions \\
+\addlinespace
+Satiation lowers attention/enjoyment after repeated similar stimuli,
+independent of physical fatigue (Bitgood \cite{bitgood2009a,bitgood2009b}) &
+Vary POI content format (text, audio, short reconstruction) instead of
+repeating one template 150 times \\
+\addlinespace
+Free, self-regulated routes delay satiation and increase satisfaction
+relative to fixed routes (Antón, Camarero \& Garrido \cite{anton2018}) &
+Let visitors choose their own path across the wall instead of imposing a
+single guided sequence \\
+\addlinespace
+Visitors pursue distinct motivations (explorer, experience seeker,
+recharger, etc.) (Falk \cite{falk2009}) &
+Layer content depth per POI so each motivation type can self-select how
+much it engages with \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% ===================================================================
+\section{Augmented Reality in Cultural Heritage}
+\label{sec:rw-ar-ch}
+% ===================================================================
+
+Augmented reality did not arrive in museums as a single technology so
+much as a loose family of techniques unified by one property: the
+physical object stays in view while a digital layer is added around it.
+This section first fixes what counts as AR and how it is tracked
+(\S\ref{subsec:rw-ar-concepts-tracking}), then reviews how museums have
+actually deployed it (\S\ref{subsec:rw-ar-museum-apps}). Throughout, we
+treat the Grande Panorama de Lisboa as our primary worked example, but we
+draw where useful on the Chafariz Velho fountain wall in Pa\c{c}o de
+Arcos (a contemporaneous, tile-covered, and geometrically harder heritage surface used extensively during our own development) as a
+reminder that the problems addressed in this thesis generalise beyond
+one specific panel.
+
+\subsection{AR Concepts, Taxonomy and Tracking Techniques}
+\label{subsec:rw-ar-concepts-tracking}
+
+Milgram and Kishino's reality--virtuality continuum \cite{milgram1994}
+places augmented reality close to the physical end of a spectrum that
+runs from the unmediated real world through to fully synthetic virtual
+environments. AR sits near that real end on purpose: the original
+artefact remains visible and dominant, and the virtual layer is added,
+not substituted, which is the property that makes AR
+attractive in a heritage context where the institution's primary duty is
+to the physical object. Azuma \cite{azuma1997} narrows the definition
+further into three properties a system must satisfy to count as AR at
+all: it combines real and virtual content, it interacts in real time,
+and it registers virtual objects within three-dimensional physical
+space. None of the three is trivial once an irreplaceable heritage
+surface is involved: the artefact cannot be altered to assist
+tracking, registration has to survive a visitor walking the length of
+the wall, and, as discussed below, the geometry of the surface itself
+constrains which tracking strategy is even feasible.
+
+Three broad device categories implement these properties in practice.
+\textbf{Head-mounted AR} offers the most immersive registration but remains
+largely absent from public museum settings; cost, hygiene concerns
+around shared headsets, and a degree of social stigma keep it niche even
+in recent surveys of the field \cite{wang2025grand}. \textbf{Spatial AR}, typically
+projection mapping onto a fa\c{c}ade or gallery wall, produces a shared
+experience without requiring visitors to carry any device, but it
+depends on a fixed installation and therefore cannot travel with a
+temporary exhibition or a budget-constrained museum. \textbf{Mobile AR}, run on
+the visitor's own smartphone, sacrifices some of that immersion but asks
+nothing of the host institution beyond Wi-Fi: no hardware purchase, no
+headset queue, no installation footprint on a protected surface. For an
+application intended to generalise across heritage walls of very
+different sizes, mobile AR is the only category that scales without
+site-by-site capital investment, which is why it is the device class
+this thesis adopts.
+
+Within mobile AR, four tracking strategies recur in the literature, and 
+each carries a different cost in a heritage setting. \textbf{Marker-based}
+tracking (QR codes, ArUco fiducials, printed image targets) gives
+the most reliable registration but requires physically attaching
+something to the artefact, which conservation protocols on a protected
+tile surface will rarely permit. \textbf{Markerless visual-inertial SLAM}, the
+approach underlying both ARKit and ARCore, instead fuses camera feature
+points with inertial sensor data and needs no physical modification at
+all; its weakness is that tracking quality degrades on featureless or
+highly repetitive surfaces, a genuine concern for a tile wall whose
+pattern repeats every few panels. \textbf{Area scanning or spatial mapping}
+(Vuforia Area Targets, Immersal's cloud-hosted VPS) builds a persistent
+3D anchor from a full-room scan and survives across sessions.
+\textbf{GPS-based geospatial tracking} sidesteps the surface entirely by anchoring
+content to Street-View-derived coordinates instead; Bauer, Hagler, and
+Kocur's recent outdoor mural application at Mural Harbor in Linz
+\cite{bauer2025} demonstrates this convincingly for fa\c{c}ade-scale art,
+but the approach simply does not function indoors, ruling it out for a
+gallery setting. Geometry adds a further complication that the
+literature rarely makes explicit: a flat panel only needs $x,y$ tracking
+along its length, a U-shaped wall such as the Grande Panorama
+additionally needs $z$ depth as its facing direction changes between
+panels, and a free-standing circular wall such as Chafariz Velho needs
+yaw rotation on top of that as a visitor walks its full circumference.
+A tracking approach validated only on a flat or U-shaped wall does
+not automatically generalise to a circular one. Table
+\ref{tab:tracking-comparison} summarises these trade-offs.
+
+\begin{table}[h]
+\centering
+\caption{Mobile AR tracking strategies and their constraints for
+heritage-wall applications.}
+\label{tab:tracking-comparison}
+\small
+\begin{tabular}{p{3.4cm}p{2.0cm}p{2cm}p{2.7cm}p{2.9cm}}
+\toprule
+\textbf{Strategy} & \textbf{Physical modification} & \textbf{Persistence} & \textbf{Setup burden} & \textbf{Curved surfaces} \\
+\midrule
+\textbf{Marker-based} & Required & High & Low & Yes \\
+\textbf{Markerless VI-SLAM} & None & Session-only & Low & Yes, with denser zones \\
+\textbf{Area scan / VPS} & None & High & High (controlled scan) & Yes \\
+\textbf{GPS / Geospatial} & None & High & Low--Medium & Outdoor only \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The SDK landscape implementing these strategies has consolidated
+noticeably in recent years. ARKit and ARCore remain the two OS-native
+runtimes underneath almost everything else, offering image tracking,
+plane detection, and six-degrees-of-freedom pose estimation out of the
+box \cite{wangzhu2022}. Unity's AR Foundation sits above both as a
+cross-platform abstraction layer, letting a single codebase target iOS
+and Android without forking the tracking logic, and has become the de
+facto standard for cross-platform mobile AR development largely for that
+reason \cite{wangzhu2022}. Flutter is a newer entrant to the AR space, and its ecosystem is still maturing; it allows for faster development and easier cross-platform support than Unity, but it does not yet have a first-party AR abstraction layer and relies on community plugins that bridge separately to ARKit and ARCore ~\cite{arflutterplugin2026}.
+Vuforia and Immersal occupy a narrower niche:
+Vuforia for high-precision image-target recognition and room-scale Area
+Targets, Immersal for cloud-hosted or fully
+on-device visual positioning~\cite{immersal2026faq}.
+We return to this comparison in Chapter~3, where the choice between an image-tiling
+approach and an area-scan approach is made concrete for an actual
+heritage wall.
+
+\subsection{AR Applications in Museums and Heritage Sites}
+\label{subsec:rw-ar-museum-apps}
+
+How much of this technical machinery has actually reached museum floors?
+Wang et al.'s 2025 scoping review \cite{wang2025grand} offers the most
+current answer available: starting from 5{,}368 candidate articles
+indexed across the ACM Digital Library, IEEE Xplore, and Scopus up to
+January 2024, the authors narrowed their sample to 177 empirical studies
+through a multi-stage screening process. Exhibition and museum-experience
+enhancement turned out to be the single largest application area,
+accounting for 61 of 195 coded application instances (31.2\%), ahead of
+education and learning at 24.1\%; AR and VR devices together were the
+most frequently cited device category at 29.1\%, although mobile and PC
+platforms remained the broadest deployment channel overall. Publication
+volume climbed steadily after 2017 and peaked at roughly 30 articles in
+2023 alone, a reasonably strong signal that immersive cultural-heritage
+research is still accelerating, not levelling off.
+
+Within museum-specific mobile AR, Wang and Zhu's survey \cite{wangzhu2022}
+organises applications into three recurring functions: \textbf{sensory
+stimulation}, where AR simply enriches what a visitor already sees; \textbf{guide
+design}, where it supports navigation and wayfinding; and what the authors
+term a \textbf{heart-flow experience}, combining game mechanics with interactive
+narration. Evidence on outcomes generally favours the richer end of that
+spectrum. Bachiller, Monzo, and Rey \cite{bachiller2023} compared
+AR-augmented and traditional visits at a technological heritage museum
+in Spain and found that more than 90\% of AR visitors reported positive
+satisfaction, with a statistically significant association between visit
+type and both satisfaction and self-reported learning gain. This kind of
+direct comparison remains uncommon in this literature, since most studies
+evaluate the AR condition in isolation, without a traditional
+baseline. Chen and Lai \cite{chenlai2021}, applying the ARCS motivation
+framework to a museum AR deployment, similarly found that the
+\emph{relevance} of content to a visitor's own interests predicted
+learning effectiveness more strongly than novelty alone, which suggests
+that adding AR to an exhibit buys comparatively little on its own;
+tailoring what that AR actually shows appears to matter more.
+
+A Portuguese precedent is directly instructive here. Gkatsou's 2018
+dissertation at the University of Porto \cite{gkatsou2018} developed a
+non-linear mobile AR and QR-code experience for teenage visitors at the
+Alf\^{a}ndega Museum of Transports and Communications, combining
+storytelling and gamification and validating the design through an
+expert panel spanning experience design, visitor studies, and gaming.
+The non-linear structure was a deliberate response to a constraint our
+own project shares: a museum cannot enforce a fixed visiting order in a
+real gallery, so content has to remain coherent regardless of which point
+a visitor reaches first. That same constraint, multiplied across roughly
+150 points of interest on the Grande Panorama, not just a handful of
+exhibition stops, is one of the central design problems this thesis
+returns to in the following subsection.
+
+
+
+
+
+
+
+
+
+\subsection{AR for Large-Scale and Panoramic Heritage Surfaces}
+\label{subsec:rw-large-scale}
+ 
+Almost everything surveyed so far assumes a heritage object small enough
+to fit inside a single camera frame, or a fixed installation built around
+one façade. The Grande Panorama de Lisboa (and, just as importantly, the considerably larger Chafariz Velho fountain wall in Pa\c{c}o de Arcos, which we relied on extensively during development while the Museu Nacional do Azulejo remained closed for renovation) break that
+assumption simply through length. Both are continuous, tile-covered,
+mid-eighteenth-century surfaces several tens of metres long, and neither
+fits the implicit unit of analysis in most prior AR-heritage work: one
+object, one fixed viewpoint, one short interaction. This subsection asks
+what changes once the surface itself becomes the scale problem.
+ 
+Three technical issues recur once length enters the picture. First, a
+single reference image cannot capture a 20--40\,m painted wall at the
+resolution feature-matching needs; down-sampling to one image collapses
+feature density below a usable threshold, which makes some form of
+multi-zone tiling close to unavoidable for a panel at this scale. Second,
+inertial drift in markerless VI-SLAM accumulates with horizontal travel
+distance, so a tracking solution validated on a small room rarely
+transfers cleanly to tens of metres of lateral walking without
+re-anchoring. Third, the glazed tile surface common to both the Grande
+Panorama and Chafariz Velho introduces an adversarial visual
+environment: specular highlights shift with the time of day, and the
+painted scene itself is visually dense enough to compete with any
+overlay for attention. This is not a minor concern. Scargill et al.
+\cite{scargill2024}, in a controlled study of environment-texture effects
+on AR task performance, found that visual background complexity
+significantly slowed task completion ($p = 0.003$) without any
+compensating gain in how stable the virtual content appeared to users,
+which suggests that a visually busy heritage surface actively works
+against AR legibility, not for it.
+ 
+Two further dimensions of the problem are worth separating from this
+technical core. The first is purely geometric: a flat panel only needs
+$x,y$ tracking along its length, the Grande Panorama's U-shaped
+arrangement additionally needs $z$ depth as the wall's facing direction
+changes between panels, and Chafariz Velho's free-standing circular form
+needs yaw rotation on top of that to keep content aligned as a visitor
+walks its full circumference. This distinction matters for any claim
+of generalisability, since a tracking approach proven on a flat or
+U-shaped wall does not automatically extend to a circular one. The second
+is what we call the multi-scale viewing
+problem: within the same visit, the same painted surface can be read from afar, 
+e.g. 3\,m away for a full overview of a scene, and nearby the wall from under 1\,m 
+for a single building's detail, and feature detection has to survive that transition
+without losing lock.
+ 
+Existing AR work on large or panoramic surfaces offers partial answers
+at best. Spatial AR (projection mapping at room or façade scale)
+is the closest conceptual match; Printezis and Koutsabasis's 2026
+critical review of 52 SAR studies in arts and culture \cite{printezis2026}
+proposes a clean three-scale taxonomy (object/tabletop, room/gallery,
+building/outdoor) and finds that room-scale installations are
+particularly well suited to dialogic, chaptered narratives shared by
+co-present visitors without any device at all. That same review
+classifies "time-based palimpsests" (layering different historical eras over one physical surface) among the recognised narrative
+patterns in this space, which is encouraging for any future timeline
+feature built on top of a tile wall. The catch is the same one raised in
+\S\ref{subsec:rw-ar-concepts-tracking}: SAR needs a fixed projector
+installation, which rules it out for a portable, BYOD-first application.
+Outdoors, Bauer, Hagler, and Kocur's mural application at Mural Harbor in
+Linz \cite{bauer2025} is arguably the closest published precedent in
+surface type (building-scale painted art, tracked markerlessly) but
+its GPS/Geospatial approach depends on outdoor Street View coverage and
+simply has no indoor equivalent. Sauter et al.'s AR-Explorer
+\cite{sauter2024} pushes a related idea further, retrieving and
+overlaying historical photographs at their original outdoor capture
+locations, but again the anchoring is location-based, not
+image-based, and the deployment context is outdoor public space, not
+an indoor gallery wall. None of these precedents combines a
+continuous, indoor, image-anchored heritage surface at panorama scale
+with the multi-zone hand-off problem our wall requires; Table
+\ref{tab:large-scale-precedents} makes that gap explicit.
+ 
+\begin{table}[h]
+\centering
+\caption{Closest published precedents for large-scale heritage AR and
+their relevance to a continuous indoor tile-panorama application.}
+\label{tab:large-scale-precedents}
+\small
+\begin{tabular}{p{2.3cm}p{2.6cm}p{2cm}p{2.6cm}p{3.2cm}}
+\toprule
+\textbf{Work} & \textbf{Surface type} & \textbf{Setting} & \textbf{Tracking} & \textbf{Gap vs.\ this thesis} \\
+\midrule
+Bauer et al.\ \cite{bauer2025} & Building-scale murals & Outdoor & GPS / Geospatial & No indoor equivalent \\
+Sauter et al.\ \cite{sauter2024} & Historical photographs at sites & Outdoor & Location-based & Location-, not image-anchored \\
+Printezis \& Koutsabasis \cite{printezis2026} & Room/façade installations & Indoor \& outdoor & Fixed projection & Not portable / BYOD \\
+Xu et al.\ \cite{xu2026panoramic} & Panoramic cave murals & Indoor (offline 3D) & Photogrammetry from existing images & Not a live AR tracking system \\
+\bottomrule
+\end{tabular}
+\end{table}
+ 
+\subsection{Research Gap: Multi-POI Detection on a Single Panoramic Surface}
+\label{subsec:rw-gap}
+ 
+Drawing the previous two subsections together, four distinct gaps
+emerge. None of them is specific to the Grande Panorama; all apply to
+any sufficiently large, continuous heritage wall, whether flat, U-shaped
+like the Panorama, or curved like Chafariz Velho.
+ 
+The first is technical: no published mobile AR setup has been
+demonstrated to maintain stable tracking across a single, continuous
+indoor wall of this length, flat or curved, without losing alignment or
+drifting as the visitor walks its length. Most AR tooling, and most of
+the literature reviewed above, targets small objects or room-scale
+environments, not a single elongated, reflective, repetitively
+patterned surface; this thesis directly compares a feature-matching
+zone-tiling approach against a geometric area-scan approach to establish
+which copes better with a wall at this scale, and, where Chafariz Velho
+data is available, at this geometry.
+ 
+The second concerns historical layering. Existing heritage AR
+applications generally commit to one fixed reconstruction of one
+historical moment, with no way for a visitor to move between several;
+we are not aware of one that ties a multi-era timeline directly to coordinates
+on both a physical wall and a modern map of the surrounding city in a
+single synchronised interface. Where time permits, this thesis explores
+a state-managed timeline (pre-1755, the 1755 earthquake, the Pombaline
+reconstruction, and the present day) anchored to the same coordinate
+system used for wall tracking, generalisable to any heritage surface with
+a comparably layered history.
+ 
+The third is evaluative. Most empirical studies cited in this chapter
+evaluate learning and engagement on small exhibits, single artefacts, or
+short VR sessions; we are not aware of comparable real-world data for a
+large, narrative-dense tile mural specifically. A central empirical
+contribution of this thesis is gathering and analysing in-app analytics,
+brief exit surveys, and where feasible a short follow-up questionnaire
+from real museum visitors, to begin closing that gap for this class of
+heritage object, not for any one site.
+ 
+The fourth is personalisation at scale. Section~\ref{subsec:rw-visitor-models}
+established that visitors arrive with different motivations and
+attention budgets, yet most AR frameworks still offer one fixed content
+depth and one fixed navigation structure regardless of who is using them.
+With roughly 150 points of interest available on the Grande Panorama
+alone, a one-size-fits-all interface risks the satiation effects
+discussed earlier well before a visitor reaches even a fraction of them;
+this thesis implements a lightweight onboarding step that adapts content
+depth and route suggestions to whether the visitor identifies, loosely,
+as a casual tourist, a student, or a more specialised researcher.
+ 
+Taken together, these four gaps motivate a single underlying claim: this
+thesis develops, to our knowledge, the first mobile AR framework
+explicitly designed for a continuous, large-scale heritage wall (generalisable across flat and curved geometries alike) combining
+multi-zone tracking, optional historical-timeline layering, and
+visitor-adaptive content within one application. The Grande Panorama
+remains the motivating case throughout, and Chafariz Velho the harder
+geometric test case used during development, but neither is treated as
+the limit of what the resulting framework can support.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% ===================================================================
+\section{UX, Engagement and Personalisation in Heritage AR}
+\label{sec:rw-ux}
+% ===================================================================
+
+Having established what AR can technically do on a heritage wall, this section
+turns to whether visitors actually want to use it, and how. As before, the Grande
+Panorama remains the motivating case and Chafariz Velho the harder geometric test
+case, but the design principles discussed here are argued on purpose at the
+level of ``a large heritage wall a visitor walks past,'' not at the level of one
+specific museum.
+
+\subsection{User-Centred Design Principles for Heritage AR}
+\label{subsec:rw-ucd}
+
+User-centred design, formalised in ISO~9241-210 \cite{iso9241210}, treats interface design as an
+iterative cycle (understand context, specify requirements, produce design solutions, evaluate against requirements, repeat), not a single build
+followed by a single test. Applied to a heritage AR app, this means involving
+curators and visitor-studies staff throughout development, not only at a final
+validation stage, and it means Norman's classic usability principles
+\cite{norman1988} translate fairly directly into concrete interface rules: tap
+targets need visible affordances, every interaction needs immediate visual or audio
+feedback, the number of simultaneous on-screen choices needs limiting to avoid
+decision paralysis, and any pin or marker placed on the wall needs to map
+unambiguously onto the physical building or scene it annotates.
+
+One principle recurs across the heritage AR literature specifically: virtual content
+performs better when it is anchored to the physical surface itself instead of
+floated as a screen-space overlay. This follows directly from Azuma's registration
+requirement (\S\ref{subsec:rw-ar-concepts-tracking}), but it is also an empirical
+finding in its own right. Recupero et al.\ \cite{recupero2019}, studying an
+AR/VR-augmented tour at Rome's Ara Pacis Museum, found that the technology worked
+best when it visibly mediated the visitor's relationship with the artefact and
+generated friction whenever it competed with the artefact for attention, which is
+the failure mode a screen-floating overlay risks. We treat this as a hard design
+constraint: every piece of AR content in this thesis is
+anchored to a specific building or scene on the wall, never presented as a free-
+floating screen element.
+
+A second, related principle concerns how much content to reveal at once. Wang
+et al.\ \cite{wang2025grand} identify information overload (too many simultaneous virtual elements competing for attention) as a recurring failure mode across the
+immersive cultural-heritage studies in their review, one that measurably reduces
+visitor focus instead of enriching it. A progressive-disclosure structure, where a
+short initial layer is visitor-extendable into deeper detail, addresses this directly; whether visitors actually choose to extend
+it is itself an interesting empirical question this thesis can speak to. The same
+logic applies to how much of a wall a visitor is expected to engage with at all:
+§\ref{subsec:rw-visitor-models} already established, via Bitgood's account of museum
+satiation \cite{bitgood2009a,bitgood2009b} and Ant\'on, Camarero and Garrido's finding
+that self-regulated routes delay satiation \cite{anton2018}, that visitors disengage
+well before exhausting a large exhibit, and that letting them choose their own path
+helps more than it hurts. A wall with 150 points of interest, or one with several
+dozen spread across 30--40\,m, makes this a first-order design constraint. Gkatsou's expert-validated finding that non-linear AR
+structures suit museum visitors better than enforced sequences
+\cite{gkatsou2018} reinforces the same conclusion from a different angle: a visitor's
+route through a physical space cannot realistically be controlled, so the content
+structure has to tolerate (and ideally reward) arriving at any point first.
+
+Aesthetic integration deserves separate treatment because heritage AR carries a risk
+most AR design guidance does not address: visual dissonance between a modern
+interface and a centuries-old surface. He and Wang \cite{hewang2025}, surveying 324
+museum AR visitors, found aesthetics to be a significant predictor of perceived
+enjoyment ($\beta = 0.234$, $p < 0.01$), and on a surface as visually dense as a
+glazed tile mural, this is more than a stylistic nicety. Scargill et al.\
+\cite{scargill2024} demonstrate the cost of getting it wrong directly: visually
+complex backgrounds significantly slow AR task completion ($p = 0.003$) without any
+corresponding improvement in how stable virtual content appears to the user. Since
+the tile pattern itself functions as both the tracking reference and the visual
+backdrop on a wall like the Grande Panorama or Chafariz Velho, it cannot simply be
+simplified away; the available lever is strong contrast and a spare
+UI vocabulary that does not compete with the painted scene for attention. This
+connects to a broader principle Printezis and Koutsabasis articulate in their review
+of spatial AR storytelling \cite{printezis2026}: use the smallest technological
+footprint the cultural purpose requires. If static text and a single image
+adequately tell a point of interest's story, adding 3D animation does not improve
+the experience; it just adds another visual element competing with the wall. Content
+relevance matters more than technical novelty for sustaining
+engagement in voluntary, informal visits: Chen and Lai \cite{chenlai2021}, applying
+the ARCS motivation framework to museum AR, found relevance to be the strongest
+motivational driver among the dimensions they tested, ahead of novelty. That finding
+argues for linking each point of interest to something the visitor already
+recognises (a present-day street, a still-standing building) instead of relying on
+technical spectacle to hold attention.
+
+\subsection{Personalisation and Visitor Profiling}
+\label{subsec:rw-personalisation}
+
+The visitor models introduced in \S\ref{subsec:rw-visitor-models} were largely
+descriptive: Falk's five identity-driven archetypes \cite{falk2009} and Pekarik,
+Doering and Karns's four experience types \cite{pekarik1999} explain why visitors
+differ, without by themselves prescribing what an interface should do about it.
+Roussou and Katifori's work on the CHESS project \cite{roussoukatifori2018}
+closes that gap directly in a cultural-heritage AR context: personas built from
+visitor interest and prior knowledge were used to drive personalised interactive
+storytelling at the Acropolis Museum and the Cité de l'espace, and the project
+reports that matching narrative content to visitor type measurably increased
+engagement relative to a one-size-fits-all script. A companion study from the same
+research group \cite{antoniou2016} tested how to capture that visitor type in the
+first place, comparing a short explicit quiz against indirect, behaviour-inferred
+profiling at the Acropolis Museum, and is one of relatively few heritage AR studies
+to treat the profiling mechanism itself as
+a design problem worth evaluating.
+
+The empirical case for personalising at all is, fortunately, no longer just
+theoretical. He and Wang \cite{hewang2025} found that what they call
+\emph{individuation} (the system's ability to match content to a visitor's expressed preferences) was the strongest single predictor of overall satisfaction
+among all the stimuli they tested ($\beta = 0.286$, $p < 0.001$), ahead of
+interactivity and authenticity. For a wall carrying upwards of a hundred points of
+interest, this matters more than it would for a five-exhibit gallery: without some
+mechanism for narrowing what is shown, a generalist visitor and a specialist visitor
+receive an identical, and for one of them likely poorly calibrated, experience.
+
+Following Antoniou et al.'s comparison \cite{antoniou2016}, this thesis adopts
+explicit onboarding (a short, visitor-answered set of questions) over
+inferred, behaviour-based profiling. The trade-off is real: explicit self-report
+risks a visitor selecting a socially desirable answer instead of their genuine
+interest level, where indirect profiling avoids that bias entirely. But explicit
+onboarding offers three practical advantages that matter for a museum deployment:
+it is fully transparent to the visitor, it produces deterministic behaviour with no
+cold-start period before enough interaction data accumulates, and it requires no
+behavioural data collection at all, which simplifies both privacy compliance and
+museum partnership conversations considerably. Table~\ref{tab:profile-mapping} shows
+how the resulting visitor categories map onto the identity and experience models
+already discussed, and onto four concrete content-adaptation dimensions a heritage
+wall application can vary.
+
+\begin{table}[h]
+\centering
+\caption{Mapping established visitor models onto adjustable content dimensions for
+a heritage-wall AR application.}
+\label{tab:profile-mapping}
+\small
+\begin{tabular}{p{2.5cm}p{3.2cm}p{2.6cm}p{2.6cm}p{2.6cm}}
+\toprule
+\textbf{Visitor profile} & \textbf{Relates to} & \textbf{Vocabulary} & \textbf{Depth} & \textbf{Suggested route length} \\
+\midrule
+Tourist & Experience seeker \cite{falk2009}; object experience \cite{pekarik1999} & Accessible & Overview & Short, $\leq$4 POIs \\
+Student & Explorer \cite{falk2009}; cognitive experience \cite{pekarik1999} & Accessible--intermediate & Moderate & Medium \\
+Historian/specialist & Professional/hobbyist \cite{falk2009}; cognitive experience \cite{pekarik1999} & Academic & Specialist detail & Long, self-directed \\
+Child/family & Facilitator \cite{falk2009}; social experience \cite{pekarik1999} & Simplified & Overview & Short, $\leq$2 POIs \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Whichever profile a visitor selects, the constraint established in
+\S\ref{subsec:rw-ucd} still applies: personalisation should narrow depth and route
+suggestions, not fragment the shared experience of a group visit where a tourist,
+a student, and a child may be standing in front of the same building together. A
+final, older but still relevant finding from Pekarik, Doering and Karns
+\cite{pekarik1999} reinforces why asking matters in the first place: visitors
+arrive already framing what they see through pre-existing motivations and interests;
+they are not blank slates waiting for an institution's framing. Asking directly
+(``what interests you most about this place's history?'') engages that
+pre-existing motivation instead of overriding it with a generic introduction. That
+is the underlying justification for treating onboarding as a substantive design
+decision, not a perfunctory first screen.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Gamification, Storytelling and Temporal Visualisation}
+\label{subsec:rw-gamification-storytelling}
+
+Gamification (``the use of game design elements in non-game contexts,'' in Deterding et al.'s now-standard definition \cite{deterding2011}) is one of
+the most frequently proposed engagement tools in heritage AR, but the evidence
+for which specific elements actually work is more contested than design
+guides often suggest. Souropetsis and Kyza's CompARe system \cite{souropetsis2025},
+a scaffolded, QR-triggered AR learning environment built around a sixth-century
+wall mosaic in Cyprus, shows that gamified AR \emph{can} produce real
+learning gains when game elements are tightly coupled to real content
+engagement; that qualifier matters, since a
+broader line of research (Mekler et al.'s controlled study of individual game elements and Hanus and Fox's classroom comparison among them) finds
+points, badges, and leaderboards by themselves to have an inconsistent, even
+negative, effect on intrinsic motivation \cite{mekler2017,hanusfox2015}. The
+practical implication for a wall carrying many points of interest is not
+``add a leaderboard,'' but that any reward mechanic should stay contingent on
+genuine content engagement, a point Liamruk et al.'s 2025 serious-game
+evaluation in a cultural-tourism setting reinforces from a different angle,
+framing gamified AR as most defensible when built around a learning
+objective, not engagement metrics alone \cite{liamruk2025}.
+
+Storytelling addresses a closely related but distinct problem: even where
+content is informative in its own right, digital heritage tools tend to default to
+information delivery instead of narrative, despite narrative being, on
+Bruner's account, one of the most fundamental modes of human learning
+\cite{gkatsou2018}. Xu's 2026 evaluation of the ``Hidden Stories'' AR
+application at the Chinatown Storytelling Centre \cite{xu2026chinatown} is a
+useful recent data point here: a marker-based AR experience combining
+narrative content with gamified challenges was found to foster emotional
+connection and improve knowledge retention relative to a non-narrative
+baseline, in a real heritage institution, not a laboratory mock-up.
+This connects back to the non-linear navigation principle established in
+\S\ref{subsec:rw-ucd}: AR narrative naturally wants a fixed telling order,
+while a physical wall is explored in whatever order a visitor happens to
+walk it, and resolving that tension by allowing free entry into self-contained
+thematic circuits, instead of forcing a single sequence, appears to be the
+more visitor-respecting design choice on the evidence reviewed so far
+\cite{gkatsou2018}.
+
+A third engagement technique, temporal visualisation, layers one or more
+historical states onto the present physical surface. The idea has real
+precedent outside mobile AR: Berlin's Museum f\"ur Naturkunde uses
+fixed-installation ``Jurascopes,'' look-through viewers that progressively
+animate a dinosaur skeleton through muscle, skin, and motion, to make a
+static fossil legible as a once-living animal~\cite{jurascope2026}. Printezis
+and Koutsabasis's 2026 review of spatial AR storytelling explicitly
+identifies ``time-based palimpsests'' (toggling between past and present states anchored to the same physical location) as a recurring narrative
+pattern in this space \cite{printezis2026}, and the underlying logic
+transfers reasonably well to mobile AR: a visitor-controlled toggle between
+a wall's painted historical state and its present-day surroundings, not
+an automatically-playing animation, lets each visitor set their own
+pace. Sauter et al.'s AR-Explorer \cite{sauter2024}, which retrieves and
+overlays historical photographs at their original outdoor locations, is the
+closest mobile precedent for this kind of then-and-now layering, even though
+its location-based anchoring differs from an image-anchored approach.
+Whether such reconstructions should ultimately be rendered as 3D models
+instead of flat image overlays is, on present evidence, not fully settled
+for heritage AR specifically, but Kr\"uger, Palzer, and Bodemer's controlled
+comparison of 3D and 2D AR visualisation for spatial learning found a clear
+advantage for the 3D condition \cite{kruger2021}, which is a reasonable basis for
+treating 3D reconstruction as a worthwhile, if resource-intensive, future
+upgrade for a wall already carrying simpler image-based historical content.
+
+Disaster reconstruction is a particularly sensitive special case of temporal
+visualisation, and the 1755 Lisbon earthquake (which destroyed an estimated 85\% of the city's buildings, including many depicted in pre-1755 panoramic paintings) is the obvious narrative hook for any
+heritage wall from this period. Simulating a mass-casualty historical event
+in AR raises a design obligation beyond the purely technical: any
+speculative or AI-assisted reconstruction content should be disclosed as
+such, not presented as documented fact, and dramatic spectacle should
+not be allowed to override historical accuracy or sensitivity to the human
+cost of the event being depicted. Finally, connecting a historical scene to
+its present-day surroundings (whether through a simple ``still exists / no longer exists'' marker or a fuller mapped overlay) has an
+established conceptual precedent in the Museum of London's
+\emph{Streetmuseum} app \cite{streetmuseum}, which overlaid archival photographs onto present-day
+city locations via GPS-triggered outdoor AR. The distinction worth keeping in
+mind, as in \S\ref{subsec:rw-large-scale}, is that Streetmuseum's
+location-based outdoor anchoring does not transfer directly to an
+image-anchored indoor wall; the conceptual pattern of bridging past and
+present generalises across heritage walls of very different kinds, but the
+underlying tracking mechanism has to be re-derived for each.
+
+\subsection{Evaluation Methods for Heritage AR UX}
+\label{subsec:rw-evaluation}
+
+The studies reviewed across this chapter rely on a fairly small, recurring
+toolkit of evaluation instruments. The System Usability Scale remains the
+default usability measure across the field generally, often paired with a
+domain-specific instrument such as the Museum Experience Scale used by Xu
+\cite{xu2026chinatown}, or with a validated motivation framework such as the
+ARCS model applied by Chen and Lai \cite{chenlai2021}. Comparative designs,
+where an AR condition is evaluated directly against a traditional, non-AR
+visit, remain comparatively rare; Bachiller, Monzo, and Rey's study
+\cite{bachiller2023} is one of the few examples in this chapter to use that
+structure instead of evaluating an AR prototype in isolation, and reads as
+something closer to a methodological model than an
+exception.
+
+A second pattern is the trade-off between sample size
+and ecological validity. Large, well-powered studies in this area, such as
+He and Wang's 324-respondent survey \cite{hewang2025}, are generally
+online or laboratory-based, not collected from a working museum
+floor. Studies conducted in situ at a real heritage site, by contrast, tend
+to run with considerably smaller samples: Souropetsis and Kyza's CompARe
+evaluation and Xu's Chinatown Storytelling Centre study
+\cite{souropetsis2025,xu2026chinatown} both work with samples in the
+tens, not the hundreds, reflecting how much harder it is to recruit
+and instrument real visitors than online participants. Neither approach is
+strictly better; a survey of 324 respondents establishes a statistically
+defensible effect size but says little about how a system behaves on an
+actual gallery floor, while a 47-visitor in-situ study captures real
+deployment conditions but cannot support strong statistical claims on its
+own. Table~\ref{tab:evaluation-methods} summarises this trade-off across the
+studies most directly relevant to this thesis.
+
+\begin{table}[h]
+\centering
+\caption{Evaluation approaches used across the heritage AR literature
+reviewed in this chapter.}
+\label{tab:evaluation-methods}
+\small
+\begin{tabular}{p{2.6cm}p{2.6cm}p{1.6cm}p{2.2cm}p{3.4cm}}
+\toprule
+\textbf{Study} & \textbf{Instrument(s)} & \textbf{N} & \textbf{Setting} & \textbf{Design} \\
+\midrule
+He \& Wang \cite{hewang2025} & Path/SEM survey & 324 & Online & Cross-sectional \\
+Bachiller et al.\ \cite{bachiller2023} & Satisfaction \& learning survey & --- & In-situ museum & AR vs.\ traditional comparison \\
+Souropetsis \& Kyza \cite{souropetsis2025} & Custom + motivation measures & Small & In-situ heritage site & Single-condition, in-situ \\
+Xu \cite{xu2026chinatown} & SUS + Museum Experience Scale & 47 & In-situ museum & Single-condition, in-situ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This thesis sits closer to the in-situ end of that trade-off, on
+purpose: the research gap identified in \S\ref{subsec:rw-gap}
+specifically concerns the lack of evidence for large-scale heritage walls
+evaluated with real visitors, not lab participants. Consistent with
+the modest sample sizes typical of in-situ heritage AR studies generally,
+this thesis's own evaluation (in-app analytics, brief exit surveys, and where feasible a short follow-up questionnaire) is reported as
+exploratory and context-specific, not as a basis for strong
+statistical generalisation. That is the framing the rest of this
+sub-field's evaluation literature also tends to adopt.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% ===================================================================
+\section{Summary and Research Gap}
+\label{sec:rw-summary}
+% ===================================================================
+
+\subsection{Comparative Overview of Related Work}
+\label{subsec:rw-comparative}
+
+Read across the three preceding sections, not within each one, and a
+fairly consistent shape emerges: a great deal is known about what visitors want
+from a heritage encounter (\S\ref{sec:rw-heritage}), a great deal is known
+about how to track and render AR content on a heritage object
+(\S\ref{sec:rw-ar-ch}), and a great deal is known about how to keep that
+content engaging without overwhelming the visitor
+(\S\ref{sec:rw-ux}). What is comparatively rare is a single system, or even
+a single published study, that combines all three at once on a surface
+large enough to make them all matter simultaneously. Most of the strongest
+evidence reviewed in this chapter comes from studies built around one
+object, one room, or one façade: Recupero et al.'s Ara Pacis tour
+\cite{recupero2019}, Gkatsou's Alf\^{a}ndega Museum thesis
+\cite{gkatsou2018}, Bachiller et al.'s technological heritage museum
+comparison \cite{bachiller2023}, Souropetsis and Kyza's wall-mosaic
+deployment \cite{souropetsis2025}, and Xu's Chinatown Storytelling Centre
+study \cite{xu2026chinatown} are all, in this sense, single-site, modest-scale
+systems, however methodologically strong individually. Bauer, Hagler, and
+Kocur's mural application \cite{bauer2025} is the closest in raw surface
+scale, but its outdoor GPS anchoring is unavailable indoors and its
+evaluation does not address personalisation at all. Table
+\ref{tab:comparative-overview} makes this pattern concrete across six
+representative works and the design this thesis pursues.
+
+\begin{table}[h]
+\centering
+\caption{Representative related work compared against the dimensions this
+thesis combines. \checkmark{} = addressed, $\sim$ = partially addressed,
+--- = not addressed.}
+\label{tab:comparative-overview}
+\small
+\begin{tabular}{p{3.8cm}p{1.6cm}p{1.6cm}p{1.6cm}p{1.6cm}p{1.8cm}}
+\toprule
+\textbf{Work} & \textbf{Large, multi-POI scale} & \textbf{Portable (no fixed install)} & \textbf{Persona-lisation} & \textbf{Non-linear by design} & \textbf{In-situ evaluation} \\
+\midrule
+Recupero et al.\ \cite{recupero2019} & --- & \checkmark & --- & $\sim$ & \checkmark \\
+Gkatsou \cite{gkatsou2018} & --- & \checkmark & --- & \checkmark & $\sim$ \\
+Bauer et al.\ \cite{bauer2025} & \checkmark & \checkmark & --- & $\sim$ & \checkmark \\
+Souropetsis \& Kyza \cite{souropetsis2025} & --- & \checkmark & --- & $\sim$ & \checkmark \\
+Xu \cite{xu2026chinatown} & --- & \checkmark & --- & $\sim$ & \checkmark \\
+\textbf{This thesis} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+No row above checks every column, and that gap is not evenly distributed
+across the dimensions either. Scale and portability are each individually
+solved (Bauer et al.\ show a large surface tracked without a fixed installation, just outdoors, not indoors) but personalisation is the
+column where the literature is weakest, exactly where it is most needed:
+none of the in-situ heritage AR deployments reviewed in this chapter
+adapts content depth or route suggestions to who the visitor is, even
+though \S\ref{subsec:rw-personalisation} showed personalisation to be among
+the strongest predictors of visitor satisfaction once it is actually tested
+\cite{hewang2025}. Evaluation, meanwhile, is where ambition and feasibility
+trade off most visibly: the studies with the largest, most statistically
+defensible samples \cite{hewang2025} are not conducted on a real museum
+floor, and the studies that are tend to run with the tens-of-participants
+samples discussed in \S\ref{subsec:rw-evaluation}, not hundreds.
+
+\subsection{Positioning of This Thesis}
+\label{subsec:rw-positioning}
+
+This thesis is positioned at the intersection that Table
+\ref{tab:comparative-overview} shows to be largely empty: a mobile,
+portable AR system, validated across the entire length of a large,
+multi-POI heritage wall, not a single object or room; one that adapts
+content to the visitor instead of presenting one fixed script; and one that
+is evaluated, however modestly, with real visitors in a real heritage
+setting, not only in a lab. None of the individual ingredients is
+new (mobile AR tracking, visitor personalisation, and in-situ evaluation are each well studied in isolation, as this chapter has shown at length)
+but their combination, applied to a continuous wall at the scale of tens
+of metres and on the order of a hundred or more points of interest, does
+not appear to have a close published precedent.
+
+The Grande Panorama de Lisboa remains this thesis's central motivating
+case, and its roughly 150 points of interest are the concrete number
+behind every design decision discussed above. But the framework this
+thesis develops is pitched, on purpose, at the level of ``a large
+heritage wall,'' not ``the Grande Panorama specifically.'' Chafariz Velho,
+used extensively during development while the Museu Nacional do Azulejo
+was closed for renovation, served as a harder generalisation test: outdoor, not indoor; circular,
+not U-shaped; and therefore demanding yaw tracking and variable natural lighting that the Panorama
+itself never requires (\S\ref{subsec:rw-ar-concepts-tracking}). A framework
+validated only on one flat, indoor, climate-controlled wall would say very
+little about whether it generalises; validating central design decisions
+against both surfaces is what allows this thesis to claim, with reasonable
+confidence, that its contribution extends beyond a single building's
+collection.
+
+Concretely, the literature reviewed in this chapter motivates four design
+commitments carried forward into Chapter~3. First, tracking is approached
+as a multi-zone, image-anchored problem, not a single-marker or
+single-scan one, following directly from the scale and acquisition
+constraints established in \S\ref{subsec:rw-large-scale}. Second, content
+is structured as short, non-linear, visitor-initiated circuits instead of
+one mandatory sequence, following the satiation and non-linear-navigation
+evidence in \S\ref{subsec:rw-visitor-models} and
+\S\ref{subsec:rw-ucd}. Third, a short explicit onboarding step adapts
+depth and route suggestions to a small set of visitor profiles, following
+\S\ref{subsec:rw-personalisation}'s evidence that personalisation is
+disproportionately under-served relative to its measured impact on
+satisfaction. Fourth, evaluation is planned as an in-situ,
+modest-sample exercise (in-app analytics, brief exit surveys, and where feasible a short follow-up questionnaire) in keeping with
+\S\ref{subsec:rw-evaluation}'s observation that this is how most of the
+field's strongest in-situ work is actually conducted. It does not
+attempt to claim a statistical power this kind of study cannot
+realistically support. Chapter~3 develops each of these four commitments
+into a concrete system design.

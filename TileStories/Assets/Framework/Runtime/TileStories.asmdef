@@ -1,0 +1,17 @@
+{
+    "name": "TileStories",
+    "rootNamespace": "TileStories",
+    "references": [
+        "Unity.InputSystem",
+        "Immersal.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

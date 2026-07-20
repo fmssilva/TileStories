@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prototype 1 — Obsidian Veil</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;0,9..144,700;1,9..144,200;1,9..144,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #F59E0B;
+    --gold-soft: rgba(245,158,11,0.18);
+    --gold-line: rgba(245,158,11,0.28);
+    --parchment: #f0e6cc;
+    --stone: #1a1510;
+    --deep: #0a0806;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(ellipse at 50% 30%, #1a1208 0%, #070504 100%);
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 32px 20px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  .label-title {
+    font-family: 'Fraunces', serif; font-size: 13px; font-style: italic;
+    color: rgba(245,158,11,0.55); letter-spacing: 0.08em;
+  }
+  .phone {
+    width: 390px; height: 844px; border-radius: 48px;
+    overflow: hidden; position: relative;
+    box-shadow: 0 0 0 1px rgba(245,158,11,0.12), 0 0 80px rgba(245,158,11,0.05), 0 60px 140px rgba(0,0,0,0.92);
+    flex-shrink: 0;
+  }
+  /* ── SCREENS ── */
+  .screen {
+    position: absolute; inset: 0; overflow: hidden;
+    transition: all 0.55s cubic-bezier(0.16,1,0.3,1);
+  }
+  .screen.off-right { transform: translateX(100%); opacity: 0; pointer-events: none; }
+  .screen.off-left  { transform: translateX(-55%) scale(0.93); opacity: 0; filter: blur(3px); pointer-events: none; }
+  .screen.on        { transform: none; opacity: 1; filter: none; pointer-events: all; }
+
+  /* ── PANORAMA BG — simulated painting ── */
+  .painting-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 60%, rgba(14,80,80,0.35) 0%, transparent 40%),
+      radial-gradient(ellipse at 75% 35%, rgba(70,50,10,0.4) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 80%, rgba(8,30,60,0.5) 0%, transparent 50%),
+      linear-gradient(180deg, #1a2535 0%, #2a3a28 28%, #3a4030 55%, #1a2030 75%, #0a1520 100%);
+  }
+  /* Simulated buildings silhouette using CSS shapes */
+  .city-layer {
+    position: absolute; bottom: 22%; left: 0; right: 0; height: 45%;
+    background:
+      /* buildings as dark overlapping shapes */
+      radial-gradient(ellipse 8px 60px at 12% 100%, rgba(10,15,20,0.9) 0%, transparent 100%),
+      radial-gradient(ellipse 12px 90px at 18% 100%, rgba(10,15,20,0.85) 0%, transparent 100%),
+      radial-gradient(ellipse 6px 50px at 25% 100%, rgba(10,15,20,0.9) 0%, transparent 100%),
+      radial-gradient(ellipse 10px 80px at 33% 100%, rgba(10,15,20,0.85) 0%, transparent 100%),
+      radial-gradient(ellipse 8px 55px at 40% 100%, rgba(10,15,20,0.9) 0%, transparent 100%),
+      radial-gradient(ellipse 15px 100px at 50% 100%, rgba(10,15,20,0.9) 0%, transparent 100%),
+      radial-gradient(ellipse 9px 65px at 60% 100%, rgba(10,15,20,0.85) 0%, transparent 100%),
+      radial-gradient(ellipse 7px 50px at 68% 100%, rgba(10,15,20,0.9) 0%, transparent 100%),
+      radial-gradient(ellipse 11px 78px at 76% 100%, rgba(10,15,20,0.88) 0%, transparent 100%),
+      radial-gradient(ellipse 8px 52px at 85% 100%, rgba(10,15,20,0.9) 0%, transparent 100%),
+      radial-gradient(ellipse 13px 88px at 92% 100%, rgba(10,15,20,0.85) 0%, transparent 100%);
+  }
+  .water-layer {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 22%;
+    background: linear-gradient(180deg, rgba(8,30,60,0.8) 0%, rgba(4,18,40,0.95) 100%);
+  }
+  .sky-fade {
+    position: absolute; top: 0; left: 0; right: 0; height: 45%;
+    background: linear-gradient(180deg, rgba(15,20,35,0.7) 0%, transparent 100%);
+  }
+
+  /* ── GRAIN overlay ── */
+  .grain {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 48px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 28px 10px; z-index: 60;
+    font-size: 11px; font-weight: 600; color: rgba(240,230,200,0.55);
+  }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 50;
+    padding: 52px 20px 16px;
+    background: linear-gradient(180deg, rgba(8,6,4,0.85) 0%, transparent 100%);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; color: rgba(240,230,200,0.8);
+    font-size: 16px; flex-shrink: 0;
+  }
+  .icon-btn:active { transform: scale(0.93); background: rgba(245,158,11,0.15); }
+  .top-title {
+    font-family: 'Fraunces', serif; font-size: 13px; font-style: italic;
+    color: rgba(240,230,200,0.5); letter-spacing: 0.06em;
+  }
+
+  /* ── AR TRACKING INDICATOR ── */
+  .tracking-pill {
+    position: absolute; bottom: 44%; left: 50%; transform: translateX(-50%);
+    z-index: 50;
+    background: rgba(10,8,5,0.75); border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 100px; padding: 8px 16px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: rgba(240,230,200,0.7);
+    backdrop-filter: blur(12px);
+    animation: trackPulse 2s ease-in-out infinite;
+  }
+  @keyframes trackPulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.7; }
+  }
+  .track-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(245,158,11,0.8);
+    animation: dotPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes dotPulse {
+    0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); }
+  }
+
+  /* ── POI MARKERS ── */
+  .poi-marker {
+    position: absolute; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: transform 0.15s;
+    z-index: 30;
+  }
+  .poi-marker:active { transform: scale(1.15); }
+  .marker-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 0 3px rgba(245,158,11,0.2), 0 0 16px rgba(245,158,11,0.5);
+    transition: all 0.2s;
+    position: relative;
+  }
+  .marker-dot::after {
+    content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+  .poi-marker.active .marker-dot {
+    background: #fff; width: 18px; height: 18px;
+    box-shadow: 0 0 0 4px rgba(245,158,11,0.3), 0 0 24px rgba(245,158,11,0.8);
+  }
+  .marker-label {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.05em;
+    color: rgba(240,230,200,0.75); white-space: nowrap;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  }
+  .poi-marker.dim .marker-dot { background: rgba(245,158,11,0.35); box-shadow: none; }
+  .poi-marker.dim .marker-label { opacity: 0.35; }
+
+  /* ── SUMMARY CARD ── */
+  .summary-card {
+    position: absolute; z-index: 55; width: 270px;
+    background: rgba(14,10,6,0.92);
+    border: 1px solid rgba(245,158,11,0.22);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(245,158,11,0.05) inset;
+    overflow: hidden;
+    animation: cardIn 0.3s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: scale(0.88) translateY(6px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .card-top-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .card-body { padding: 14px 16px 12px; }
+  .card-name {
+    font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700;
+    color: var(--parchment); margin-bottom: 6px; line-height: 1.2;
+  }
+  .card-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 100px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  .badge-intact  { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+  .badge-damaged { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.2); }
+  .badge-destroyed { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .card-desc {
+    font-size: 11px; color: rgba(240,230,200,0.45); line-height: 1.5; margin-bottom: 12px;
+  }
+  .card-actions { display: flex; gap: 8px; }
+  .btn-primary {
+    flex: 1; padding: 8px; border-radius: 10px; border: none; cursor: pointer;
+    background: var(--gold); color: #0a0806;
+    font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.03em; transition: all 0.15s;
+  }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-ghost {
+    padding: 8px 12px; border-radius: 10px; cursor: pointer;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(240,230,200,0.5); font-size: 16px; transition: all 0.15s;
+  }
+  .btn-ghost:active { background: rgba(245,158,11,0.1); }
+  .card-close {
+    position: absolute; top: 10px; right: 10px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(240,230,200,0.4); font-size: 12px; transition: all 0.2s;
+  }
+  .card-close:active { background: rgba(245,158,11,0.15); }
+
+  /* ── MODE TOGGLE PILL ── */
+  .mode-pill {
+    position: absolute; bottom: 28%; right: 20px; z-index: 50;
+    background: rgba(14,10,6,0.82); border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 100px; padding: 9px 16px;
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer; transition: all 0.2s;
+    backdrop-filter: blur(16px);
+    font-size: 12px; font-weight: 600; color: rgba(240,230,200,0.75);
+  }
+  .mode-pill:active { transform: scale(0.96); background: rgba(245,158,11,0.1); }
+  .mode-icon { font-size: 14px; }
+
+  /* ── TIMELINE ── */
+  .timeline-bar {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 50;
+    background: linear-gradient(0deg, rgba(8,6,4,0.96) 0%, rgba(8,6,4,0.85) 60%, transparent 100%);
+    padding: 40px 20px 28px;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .epoch-label-line {
+    display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;
+  }
+  .epoch-name {
+    font-family: 'Fraunces', serif; font-size: 14px; font-weight: 700;
+    color: var(--parchment);
+  }
+  .epoch-sub {
+    font-size: 11px; color: rgba(240,230,200,0.35);
+  }
+  .seg-row {
+    display: flex; gap: 4px;
+  }
+  .seg {
+    flex: 1; height: 36px; border-radius: 8px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.04);
+    transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
+    gap: 1px;
+  }
+  .seg:active { transform: scale(0.97); }
+  .seg.active {
+    background: rgba(245,158,11,0.12);
+    border-color: rgba(245,158,11,0.35);
+    box-shadow: 0 0 16px rgba(245,158,11,0.12);
+  }
+  .seg-year { font-size: 10px; font-weight: 700; color: rgba(240,230,200,0.5); }
+  .seg.active .seg-year { color: var(--gold); }
+  .seg-lbl { font-size: 9px; color: rgba(240,230,200,0.25); }
+  .seg.active .seg-lbl { color: rgba(245,158,11,0.6); }
+
+  /* ── FAB ── */
+  .fab {
+    position: absolute; bottom: 140px; right: 20px; z-index: 50;
+    width: 52px; height: 52px; border-radius: 16px;
+    background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+    box-shadow: 0 4px 20px rgba(245,158,11,0.35), 0 0 0 1px rgba(245,158,11,0.2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 20px; color: #0a0806; font-weight: 700;
+    transition: all 0.2s;
+  }
+  .fab:active { transform: scale(0.93); box-shadow: 0 2px 10px rgba(245,158,11,0.2); }
+  .fab-menu {
+    position: absolute; bottom: 200px; right: 20px; z-index: 50;
+    display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
+    pointer-events: none; opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .fab-menu.open { opacity: 1; pointer-events: all; }
+  .fab-item {
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .fab-item:active { transform: scale(0.96); }
+  .fab-item-label {
+    font-size: 11px; font-weight: 600; color: rgba(240,230,200,0.7);
+    background: rgba(14,10,6,0.88); border: 1px solid rgba(245,158,11,0.15);
+    padding: 6px 12px; border-radius: 100px; backdrop-filter: blur(12px);
+    white-space: nowrap;
+  }
+  .fab-item-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: rgba(14,10,6,0.88); border: 1px solid rgba(245,158,11,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; backdrop-filter: blur(12px);
+  }
+
+  /* ── DETAIL SHEET ── */
+  .detail-sheet {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 70;
+    background: rgba(12,9,6,0.97);
+    border-top: 1px solid rgba(245,158,11,0.18);
+    border-radius: 28px 28px 0 0;
+    height: 72%;
+    transform: translateY(100%);
+    transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden;
+  }
+  .detail-sheet.open { transform: translateY(0); }
+  .sheet-handle {
+    width: 40px; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.12); margin: 12px auto 0;
+  }
+  .sheet-top-line {
+    height: 1px; margin: 16px 0;
+    background: linear-gradient(90deg, transparent, rgba(245,158,11,0.2), transparent);
+  }
+  .sheet-scroll {
+    overflow-y: auto; height: calc(100% - 80px); padding: 0 20px 40px;
+    scrollbar-width: none;
+  }
+  .sheet-scroll::-webkit-scrollbar { display: none; }
+  .sheet-name {
+    font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700;
+    color: var(--parchment); line-height: 1.15; margin-bottom: 8px;
+  }
+  .sheet-epoch-line {
+    font-size: 12px; color: rgba(245,158,11,0.65);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 6px;
+  }
+  .sheet-desc {
+    font-size: 13px; color: rgba(240,230,200,0.5); line-height: 1.65; margin-bottom: 20px;
+  }
+  .then-now-box {
+    border-radius: 16px; overflow: hidden; height: 130px;
+    background: linear-gradient(135deg, #1a2535, #0d1525);
+    border: 1px solid rgba(245,158,11,0.1);
+    position: relative; margin-bottom: 20px; cursor: col-resize;
+  }
+  .then-now-divider {
+    position: absolute; top: 0; bottom: 0; left: 50%; width: 2px;
+    background: var(--gold); z-index: 5;
+  }
+  .then-now-label {
+    position: absolute; bottom: 8px; z-index: 6;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    color: rgba(240,230,200,0.7); text-transform: uppercase;
+  }
+  .then-label { left: 10px; }
+  .now-label  { right: 10px; }
+  .then-panel {
+    position: absolute; inset: 0; left: 0; width: 50%;
+    background: linear-gradient(135deg, #2a3a28, #1a2535);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; opacity: 0.6;
+  }
+  .now-panel {
+    position: absolute; inset: 0; left: 50%;
+    background: linear-gradient(135deg, #3a3a3a, #1a1a1a);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; opacity: 0.5;
+  }
+  .sheet-action-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .sheet-btn {
+    flex: 1; padding: 12px; border-radius: 12px; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.04em; transition: all 0.2s; display: flex; align-items: center;
+    justify-content: center; gap: 6px;
+  }
+  .sheet-btn-primary { background: var(--gold); color: #0a0806; }
+  .sheet-btn-secondary {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(240,230,200,0.6);
+  }
+  .sheet-btn:active { transform: scale(0.97); }
+
+  /* ── ONBOARDING OVERLAY ── */
+  .onboarding {
+    position: absolute; inset: 0; z-index: 80;
+    background: rgba(0,0,0,0.82);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px; padding: 40px;
+    animation: fadein 0.4s ease both;
+  }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  .onboarding-icon { font-size: 48px; animation: floatIcon 3s ease-in-out infinite; }
+  @keyframes floatIcon {
+    0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); }
+  }
+  .onboarding-title {
+    font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700;
+    color: var(--parchment); text-align: center;
+  }
+  .onboarding-sub {
+    font-size: 13px; color: rgba(240,230,200,0.45); text-align: center; line-height: 1.6;
+  }
+  .onboarding-btn {
+    padding: 12px 32px; border-radius: 100px; border: none; cursor: pointer;
+    background: var(--gold); color: #0a0806;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+    margin-top: 8px; transition: all 0.2s;
+  }
+  .onboarding-btn:active { transform: scale(0.97); }
+
+  /* ── NAV DOTS (prototype nav) ── */
+  .proto-nav {
+    display: flex; gap: 12px; align-items: center;
+  }
+  .proto-dot {
+    width: 8px; height: 8px; border-radius: 100px;
+    background: rgba(255,255,255,0.15); cursor: pointer;
+    transition: all 0.3s; border: none;
+  }
+  .proto-dot.on { width: 24px; background: var(--gold); }
+  .proto-label {
+    font-family: 'Fraunces', serif; font-size: 11px; font-style: italic;
+    color: rgba(245,158,11,0.4);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="label-title">Prototype 1 — Obsidian Veil · Dark Immersive</div>
+
+  <div class="phone">
+
+    <!-- ═══════════════ SCREEN 0: PANORAMA BASE ═══════════════ -->
+    <div class="screen on" id="s0">
+      <div class="painting-bg"></div>
+      <div class="city-layer"></div>
+      <div class="water-layer"></div>
+      <div class="sky-fade"></div>
+      <div class="grain"></div>
+
+      <div class="status-bar">
+        <span>9:41</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:9px;color:rgba(245,158,11,0.5);font-family:'Fraunces',serif;font-style:italic;">AR activo</span>
+          <span>●●● 100%</span>
+        </div>
+      </div>
+
+      <!-- Top bar -->
+      <div class="top-bar">
+        <div class="icon-btn" onclick="window.history.back()" title="Back">←</div>
+        <div class="top-title">Grande Panorama de Lisboa</div>
+        <div class="icon-btn" onclick="openOptions()" title="Options">⋯</div>
+      </div>
+
+      <!-- Tracking indicator -->
+      <div class="tracking-pill" id="tracking-pill">
+        <div class="track-dot"></div>
+        <span>Aponte para o painel</span>
+      </div>
+
+      <!-- POI Markers -->
+      <div class="poi-marker" style="left:18%;top:46%" id="m0" onclick="openCard(0)">
+        <div class="marker-dot"></div>
+        <div class="marker-label">Castelo</div>
+      </div>
+      <div class="poi-marker" style="left:40%;top:42%" id="m1" onclick="openCard(1)">
+        <div class="marker-dot"></div>
+        <div class="marker-label">Sé Catedral</div>
+      </div>
+      <div class="poi-marker dim" style="left:58%;top:50%" id="m2" onclick="openCard(2)">
+        <div class="marker-dot"></div>
+        <div class="marker-label">Chafariz</div>
+      </div>
+      <div class="poi-marker" style="left:72%;top:44%" id="m3" onclick="openCard(3)">
+        <div class="marker-dot"></div>
+        <div class="marker-label">Alfândega</div>
+      </div>
+      <div class="poi-marker" style="left:85%;top:48%" id="m4" onclick="openCard(4)">
+        <div class="marker-dot"></div>
+        <div class="marker-label">Arsenal</div>
+      </div>
+      <div class="poi-marker dim" style="left:28%;top:55%" id="m5" onclick="openCard(5)">
+        <div class="marker-dot"></div>
+        <!-- label suppressed by overlap rule -->
+      </div>
+
+      <!-- Summary Card (hidden by default) -->
+      <div class="summary-card" id="summary-card" style="display:none;left:30px;top:280px;">
+        <div class="card-top-line"></div>
+        <button class="card-close" onclick="closeCard()">✕</button>
+        <div class="card-body">
+          <div class="card-name" id="card-name">Sé de Lisboa</div>
+          <div class="card-badge badge-intact" id="card-badge">✓ Sobreviveu</div>
+          <div class="card-desc" id="card-desc">Catedral patriarcal, mandada construir por D. Afonso Henriques após a reconquista de Lisboa em 1147.</div>
+          <div class="card-actions">
+            <button class="btn-primary" onclick="openSheet()">Mais Info →</button>
+            <button class="btn-ghost" onclick="shareAction()">↗</button>
+            <button class="btn-ghost" onclick="bookmarkAction()">♡</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode Toggle -->
+      <div class="mode-pill" id="mode-pill" onclick="toggleMode()">
+        <span class="mode-icon">📷</span>
+        <span id="mode-label">Câmara AR</span>
+      </div>
+
+      <!-- FAB -->
+      <div class="fab" id="fab" onclick="toggleFab()" title="Acções">⊕</div>
+      <div class="fab-menu" id="fab-menu">
+        <div class="fab-item" onclick="goTo(2)">
+          <span class="fab-item-label">Progresso</span>
+          <div class="fab-item-icon">🏆</div>
+        </div>
+        <div class="fab-item" onclick="alert('Circuito iniciado')">
+          <span class="fab-item-label">Iniciar Circuito</span>
+          <div class="fab-item-icon">🗺️</div>
+        </div>
+        <div class="fab-item" onclick="alert('Guia de áudio')">
+          <span class="fab-item-label">Guia de Áudio</span>
+          <div class="fab-item-icon">🎧</div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline-bar" id="timeline-bar">
+        <div class="epoch-label-line">
+          <span class="epoch-name" id="epoch-name">Lisboa de 1700</span>
+          <span class="epoch-sub" id="epoch-sub">antes do terramoto</span>
+        </div>
+        <div class="seg-row">
+          <div class="seg active" onclick="setEpoch(0,this,'Lisboa de 1700','antes do terramoto')">
+            <div class="seg-year">1700</div>
+            <div class="seg-lbl">Pré-1755</div>
+          </div>
+          <div class="seg" onclick="setEpoch(1,this,'O Terramoto','1755 — destruição')">
+            <div class="seg-year">1755</div>
+            <div class="seg-lbl">Terramoto</div>
+          </div>
+          <div class="seg" onclick="setEpoch(2,this,'Reconstrução','Marquês de Pombal')">
+            <div class="seg-year">1780</div>
+            <div class="seg-lbl">Pombalina</div>
+          </div>
+          <div class="seg" onclick="setEpoch(3,this,'Lisboa Hoje','século XXI')">
+            <div class="seg-year">2025</div>
+            <div class="seg-lbl">Hoje</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onboarding Overlay -->
+      <div class="onboarding" id="onboarding">
+        <div class="onboarding-icon">🏛️</div>
+        <div class="onboarding-title">Aponte para o painel</div>
+        <div class="onboarding-sub">Dirija a câmara para o Grande Panorama de Lisboa para activar os marcadores de pontos de interesse.</div>
+        <button class="onboarding-btn" onclick="dismissOnboarding()">Entendido</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════ SCREEN 1: DETAIL SHEET (full) ═══════════════ -->
+    <div class="screen off-right" id="s1">
+      <div class="painting-bg"></div>
+      <div class="city-layer"></div>
+      <div class="water-layer"></div>
+      <div class="grain"></div>
+
+      <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,6,4,0) 30%,rgba(8,6,4,0.98) 60%);"></div>
+
+      <div class="detail-sheet open" id="sheet-full">
+        <div class="sheet-handle"></div>
+        <div class="sheet-top-line"></div>
+        <div style="padding:0 20px;display:flex;align-items:flex-start;justify-content:space-between;">
+          <div>
+            <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(245,158,11,0.45);font-weight:600;margin-bottom:4px;">Religioso</div>
+            <div class="sheet-name">Sé de Lisboa</div>
+          </div>
+          <button onclick="goTo(0)" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:50%;width:36px;height:36px;color:rgba(240,230,200,0.5);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:8px;">×</button>
+        </div>
+        <div style="padding:0 20px 0;">
+          <div class="card-badge badge-intact" style="margin-bottom:10px;">✓ Sobreviveu ao terramoto</div>
+        </div>
+        <div class="sheet-scroll">
+          <div class="sheet-epoch-line">
+            <span>📅</span>
+            <span>Este edifício sobreviveu ao terramoto de 1755</span>
+          </div>
+          <div class="sheet-desc">Catedral patriarcal de Lisboa, mandada construir por D. Afonso Henriques após a reconquista de 1147. Um dos mais antigos monumentos da cidade, testemunha da identidade portuguesa ao longo de nove séculos.</div>
+
+          <div style="font-size:11px;font-weight:700;color:rgba(240,230,200,0.3);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;">Então e Agora</div>
+          <div class="then-now-box" id="then-now" onmousedown="startDrag(event)" ontouchstart="startTouchDrag(event)">
+            <div class="then-panel">🎨</div>
+            <div class="now-panel">📷</div>
+            <div class="then-now-divider" id="divider" style="left:50%;"></div>
+            <div class="then-now-label then-label">1700</div>
+            <div class="then-now-label now-label">Hoje</div>
+          </div>
+
+          <div class="sheet-action-row">
+            <button class="sheet-btn sheet-btn-primary" onclick="shareAction()">↗ Partilhar</button>
+            <button class="sheet-btn sheet-btn-secondary" onclick="bookmarkAction()">♡ Guardar</button>
+          </div>
+
+          <div style="padding:14px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.08);border-radius:14px;margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:rgba(240,230,200,0.3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;">Datas Históricas</div>
+            <div style="font-size:12px;color:rgba(240,230,200,0.45);line-height:1.6;">
+              <div>⚡ Fundação: <span style="color:rgba(245,158,11,0.65);">1147</span></div>
+              <div>🔥 Grande Terramoto: <span style="color:rgba(245,158,11,0.65);">1 Nov 1755</span></div>
+              <div>🏗️ Restauro: <span style="color:rgba(245,158,11,0.65);">1756–1762</span></div>
+            </div>
+          </div>
+
+          <button class="sheet-btn sheet-btn-secondary" style="width:100%;opacity:0.4;cursor:not-allowed;">📍 Ver no Mapa — Em breve</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ SCREEN 2: PROGRESS / GAMIFICATION ═══════════════ -->
+    <div class="screen off-right" id="s2">
+      <div style="position:absolute;inset:0;background:linear-gradient(170deg,#16120e 0%,#0e1218 100%);"></div>
+      <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(245,158,11,0.03) 1px,transparent 1px);background-size:18px 18px;pointer-events:none;"></div>
+
+      <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+      <div style="position:absolute;top:52px;left:0;right:0;padding:20px 24px 0;">
+        <button onclick="goTo(0)" style="background:none;border:none;color:rgba(245,158,11,0.5);font-size:13px;cursor:pointer;margin-bottom:16px;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;">← Panorama</button>
+        <div style="font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(245,158,11,0.4);margin-bottom:6px;">A sua</div>
+        <div style="font-family:'Fraunces',serif;font-size:28px;font-weight:200;color:var(--parchment);line-height:1.1;margin-bottom:4px;">
+          <em style="color:var(--gold);font-style:italic;">Exploração</em>
+          <strong style="display:block;font-weight:700;">de Lisboa</strong>
+        </div>
+        <div style="height:2px;background:linear-gradient(90deg,var(--gold),rgba(245,158,11,0.1));border-radius:1px;margin:12px 0;width:64px;"></div>
+      </div>
+
+      <div style="position:absolute;top:240px;left:0;right:0;bottom:0;overflow-y:auto;padding:0 20px 40px;scrollbar-width:none;">
+        <!-- Progress ring card -->
+        <div style="background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.1);border-radius:20px;padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:20px;">
+          <div style="position:relative;width:72px;height:72px;flex-shrink:0;">
+            <svg width="72" height="72" style="transform:rotate(-90deg)">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(245,158,11,0.1)" stroke-width="6"/>
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#F59E0B" stroke-width="6" stroke-dasharray="188.5" stroke-dashoffset="51" stroke-linecap="round"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--parchment);">73%</div>
+          </div>
+          <div>
+            <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--parchment);margin-bottom:3px;">22 de 30 POIs descobertos</div>
+            <div style="font-size:11px;color:rgba(245,158,11,0.55);">8 edifícios por encontrar</div>
+          </div>
+        </div>
+
+        <!-- Achievements -->
+        <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(245,158,11,0.35);margin-bottom:10px;">Conquistas</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(245,158,11,0.1);border-radius:14px;padding:14px;display:flex;align-items:center;gap:14px;">
+            <div style="font-size:28px;">🏛️</div>
+            <div>
+              <div style="font-family:'Fraunces',serif;font-size:13px;color:var(--parchment);margin-bottom:2px;">Historiador</div>
+              <div style="font-size:11px;color:rgba(240,230,200,0.3);">Explorou todos os edifícios religiosos</div>
+            </div>
+            <div style="margin-left:auto;font-size:18px;">✓</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;display:flex;align-items:center;gap:14px;opacity:0.55;">
+            <div style="font-size:28px;">⚓</div>
+            <div>
+              <div style="font-family:'Fraunces',serif;font-size:13px;color:var(--parchment);margin-bottom:2px;">Marinheiro</div>
+              <div style="font-size:11px;color:rgba(240,230,200,0.3);">Explorar zona portuária</div>
+            </div>
+            <div style="margin-left:auto;font-size:11px;color:rgba(245,158,11,0.4);">4/7</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;display:flex;align-items:center;gap:14px;opacity:0.55;">
+            <div style="font-size:28px;">🔥</div>
+            <div>
+              <div style="font-family:'Fraunces',serif;font-size:13px;color:var(--parchment);margin-bottom:2px;">Sobrevivente</div>
+              <div style="font-size:11px;color:rgba(240,230,200,0.3);">Ver todos os edifícios destruídos</div>
+            </div>
+            <div style="margin-left:auto;font-size:11px;color:rgba(245,158,11,0.4);">2/5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /phone -->
+
+  <!-- Nav -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+    <div class="proto-nav">
+      <button class="proto-dot on" id="d0" onclick="goTo(0)"></button>
+      <button class="proto-dot" id="d1" onclick="goTo(1)"></button>
+      <button class="proto-dot" id="d2" onclick="goTo(2)"></button>
+    </div>
+    <div class="proto-label" id="screen-label">Panorama · Base</div>
+  </div>
+</div>
+
+<script>
+const labels = ['Panorama · Base', 'Detalhe do POI', 'Progresso'];
+let cur = 0;
+const poiData = [
+  { name: 'Castelo de São Jorge', badge: 'badge-intact', badgeText: '✓ Sobreviveu', desc: 'Fortaleza moura reaproveitada por D. Afonso Henriques, domina a cidade desde o séc. XI.', epoch: 'Este edifício sobreviveu ao terramoto de 1755' },
+  { name: 'Sé de Lisboa', badge: 'badge-intact', badgeText: '✓ Sobreviveu', desc: 'Catedral patriarcal, mandada construir por D. Afonso Henriques após a reconquista de Lisboa em 1147.', epoch: 'Este edifício sobreviveu ao terramoto de 1755' },
+  { name: 'Chafariz del-Rei', badge: 'badge-damaged', badgeText: '⚠ Danificado', desc: 'Chafariz quinhentista na zona ribeirinha, abastecia navios e população da ribeira.', epoch: 'Danificado no terramoto de 1755' },
+  { name: 'Alfândega Real', badge: 'badge-destroyed', badgeText: '✕ Destruído', desc: 'Grande edifício aduaneiro junto ao Tejo, completamente destruído no terramoto e tsunami.', epoch: 'Destruído no terramoto de 1755' },
+  { name: 'Arsenal da Ribeira', badge: 'badge-intact', badgeText: '✓ Sobreviveu', desc: 'Estaleiro real para construção e reparação de navios da Armada Portuguesa.', epoch: 'Este edifício sobreviveu ao terramoto de 1755' },
+  { name: 'Igreja do Loreto', badge: 'badge-destroyed', badgeText: '✕ Destruído', desc: 'Igreja italiana, destruída no terramoto. Reconstruída em estilo pombalino.', epoch: 'Destruído no terramoto de 1755' },
+];
+let fabOpen = false;
+let onboarded = false;
+let isARMode = true;
+let activeMarker = null;
+
+function goTo(idx) {
+  const dir = idx > cur ? 1 : -1;
+  document.getElementById('s'+cur).className = 'screen ' + (dir > 0 ? 'off-left' : 'off-right');
+  document.getElementById('s'+idx).className = 'screen on';
+  cur = idx;
+  ['d0','d1','d2'].forEach((d,i) => {
+    const el = document.getElementById(d);
+    el.className = 'proto-dot' + (i === cur ? ' on' : '');
+  });
+  document.getElementById('screen-label').textContent = labels[cur];
+}
+
+function dismissOnboarding() {
+  const o = document.getElementById('onboarding');
+  o.style.opacity = '0';
+  o.style.transition = 'opacity 0.4s';
+  setTimeout(() => o.style.display = 'none', 400);
+  onboarded = true;
+  // Simulate tracking achieved
+  const tp = document.getElementById('tracking-pill');
+  tp.innerHTML = '<div class="track-dot"></div><span style="color:rgba(245,158,11,0.8)">AR activo</span>';
+  setTimeout(() => { tp.style.opacity='0'; tp.style.transition='opacity 0.5s'; setTimeout(()=>tp.style.display='none',500); }, 2000);
+}
+
+function openCard(idx) {
+  if (!onboarded) return;
+  const d = poiData[idx];
+  document.getElementById('card-name').textContent = d.name;
+  const badge = document.getElementById('card-badge');
+  badge.className = 'card-badge ' + d.badge;
+  badge.textContent = d.badgeText;
+  document.getElementById('card-desc').textContent = d.desc;
+
+  // Position card based on marker
+  const markers = document.querySelectorAll('.poi-marker');
+  const marker = markers[idx];
+  const mLeft = parseFloat(marker.style.left) / 100 * 390;
+  const mTop = parseFloat(marker.style.top) / 100 * 844;
+  const card = document.getElementById('summary-card');
+  // flip logic
+  let cardTop = mTop - 200;
+  if (mTop < 844 * 0.33) cardTop = mTop + 30;
+  cardTop = Math.max(80, Math.min(cardTop, 560));
+  let cardLeft = mLeft - 135;
+  cardLeft = Math.max(10, Math.min(cardLeft, 110));
+
+  card.style.left = cardLeft + 'px';
+  card.style.top = cardTop + 'px';
+  card.style.display = 'block';
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'cardIn 0.3s cubic-bezier(0.16,1,0.3,1) both';
+
+  // Activate marker
+  markers.forEach(m => m.classList.remove('active'));
+  markers[idx].classList.add('active');
+  activeMarker = idx;
+
+  // Hide timeline
+  document.getElementById('timeline-bar').style.opacity = '0';
+  document.getElementById('timeline-bar').style.pointerEvents = 'none';
+}
+
+function closeCard() {
+  document.getElementById('summary-card').style.display = 'none';
+  document.querySelectorAll('.poi-marker').forEach(m => m.classList.remove('active'));
+  activeMarker = null;
+  document.getElementById('timeline-bar').style.opacity = '1';
+  document.getElementById('timeline-bar').style.pointerEvents = 'all';
+}
+
+function openSheet() {
+  closeCard();
+  goTo(1);
+}
+
+function toggleFab() {
+  fabOpen = !fabOpen;
+  document.getElementById('fab-menu').classList.toggle('open', fabOpen);
+  document.getElementById('fab').textContent = fabOpen ? '✕' : '⊕';
+}
+
+function setEpoch(idx, el, name, sub) {
+  document.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('epoch-name').textContent = name;
+  document.getElementById('epoch-sub').textContent = sub;
+  // Simulate epoch effect on markers
+  const markers = document.querySelectorAll('.poi-marker');
+  if (idx === 1) { // earthquake
+    markers[3].classList.add('dim');
+    markers[5].classList.add('dim');
+  } else if (idx >= 2) { // pombalina/today — destroyed hidden
+    markers[3].style.display = 'none';
+    markers[5].style.display = 'none';
+  } else {
+    markers.forEach(m => { m.classList.remove('dim'); m.style.display = 'flex'; });
+  }
+}
+
+function toggleMode() {
+  isARMode = !isARMode;
+  document.getElementById('mode-label').textContent = isARMode ? 'Câmara AR' : 'Painel';
+  document.getElementById('mode-pill').querySelector('.mode-icon').textContent = isARMode ? '📷' : '🖼️';
+}
+
+function shareAction() { alert('Partilhar: tilestories.app/panorama?poi=se_lisboa'); }
+function bookmarkAction() { alert('Guardado na colecção!'); }
+
+// Then vs Now drag
+let dragging = false, dragStartX = 0, startLeft = 50;
+function startDrag(e) {
+  dragging = true;
+  dragStartX = e.clientX;
+  startLeft = parseFloat(document.getElementById('divider').style.left || '50');
+  e.preventDefault();
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', () => { dragging = false; });
+}
+function startTouchDrag(e) {
+  dragging = true;
+  dragStartX = e.touches[0].clientX;
+  startLeft = parseFloat(document.getElementById('divider').style.left || '50');
+  document.addEventListener('touchmove', onTouchDrag);
+  document.addEventListener('touchend', () => { dragging = false; });
+}
+function onDrag(e) {
+  if (!dragging) return;
+  const box = document.getElementById('then-now');
+  const rect = box.getBoundingClientRect();
+  const pct = Math.max(5, Math.min(95, (e.clientX - rect.left) / rect.width * 100));
+  document.getElementById('divider').style.left = pct + '%';
+  const nowPanel = box.querySelector('.now-panel');
+  nowPanel.style.left = pct + '%';
+}
+function onTouchDrag(e) {
+  if (!dragging) return;
+  const box = document.getElementById('then-now');
+  const rect = box.getBoundingClientRect();
+  const pct = Math.max(5, Math.min(95, (e.touches[0].clientX - rect.left) / rect.width * 100));
+  document.getElementById('divider').style.left = pct + '%';
+  box.querySelector('.now-panel').style.left = pct + '%';
+}
+
+function openOptions() {
+  alert('Opções: Língua | Tema | Ajuda');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight') goTo(Math.min(cur+1,2));
+  if (e.key==='ArrowLeft') goTo(Math.max(cur-1,0));
+});
+</script>
+</body>
+</html>

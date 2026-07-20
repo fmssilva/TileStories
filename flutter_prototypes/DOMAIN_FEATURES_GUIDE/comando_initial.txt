@@ -1,0 +1,98 @@
+Quero preparar este projeto Flutter (domain-centric) para ter um sistema de contexto para AI.
+
+FASE 1 – PROJ_STRUCTURE_FLUTTER.md
+1. Cria na raiz o ficheiro PROJ_STRUCTURE_FLUTTER.md.
+2. Percorre TODAS as pastas relevantes (lib/, assets/) e escreve a árvore completa de:
+   - lib/domains/** (cada domínio, subpastas models, repositories, providers, widgets, pages, services)
+   - lib/shared/** (widgets, layouts, utils)
+   - lib/core/** (services, utils, errors, network)
+   - assets/** (data JSON, imagens base, etc.).
+3. Para cada pasta principal, adiciona uma breve descrição da responsabilidade (ex: "lib/domains/buildings – tudo do domínio Buildings: models, repos, providers, UI").
+4. Para cada ficheiro Dart, marca o estado de anotação:
+   - [ ] sem tags @index-*
+   - [~] parcialmente anotado
+   - [✓] completamente anotado
+
+FASE 2 – Anotar todos os ficheiros Dart com tags @index-*
+Para cada ficheiro em lib/ marcado [ ] ou [~] em PROJ_STRUCTURE_FLUTTER.md:
+
+1. Lê o ficheiro COMPLETO (todas as linhas, sem truncar).
+2. Identifica TODOS os itens importantes:
+   - Models/data classes (Freezed ou normais)
+   - Repositories (data access)
+   - Providers (Riverpod)
+   - Widgets (incluindo pages/screens)
+   - Services core (analytics, audio, storage, unity)
+   - Utils/helpers
+3. Para cada item, adiciona um bloco de comentário imediatamente acima com as tags:
+   - Models:
+     /// @index-model {domínio}
+     /// @layer {domain|shared|core}
+     /// @description {descrição curta}
+     /// @fields {campos principais}
+   - Repositories:
+     /// @index-repository {domínio}
+     /// @layer {domain}
+     /// @description {responsabilidade}
+     /// @depends-on {assets, services}
+   - Providers:
+     /// @index-provider {domínio}
+     /// @layer {domain}
+     /// @description {estado que gere}
+     /// @exposes {nomes dos providers principais}
+   - Widgets:
+     /// @index-widget {domínio}
+     /// @layer {domain|shared}
+     /// @kind {card|page|overlay|control}
+     /// @description {o que mostra/faz}
+     /// @uses {models/providers relevantes}
+   - Pages:
+     /// @index-page {domínio}
+     /// @layer {domain}
+     /// @description {responsabilidade da screen}
+     /// @route {/rota ou identificador}
+   - Services core:
+     /// @index-service {categoria}
+     /// @layer {core}
+     /// @description {o que fornece}
+     /// @domain-usage {domínios que usam}
+   - Utils:
+     /// @index-util {tipo}
+     /// @layer {core|shared}
+     /// @description {propósito}
+2. Usa o próprio código, nomes e imports para inferir domínio e categoria.
+3. NÃO alteres lógica nem assinaturas, apenas adiciona comentários.
+4. Atualiza PROJ_STRUCTURE_FLUTTER.md para cada ficheiro:
+   - [✓] se todos os itens principais têm tags
+   - [~] se ainda falta alguma coisa importante
+
+FASE 3 – Resumos temáticos
+Depois de anotado:
+
+1. Cria um ficheiro SUMMARY_DOMAINS.md que, para cada domínio (buildings, circuits, panorama, aiassistant, etc.), liste:
+   - models (nome + descrição)
+   - repositories (nome + descrição)
+   - providers (nome + descrição)
+   - widgets/pages principais (nome + descrição)
+2. Cria SUMMARY_SERVICES.md com todos os serviços core:
+   - AnalyticsService, AudioService, UnityBridgeService, MapsService, etc. com descrição + domínios que usam.
+3. Cria SUMMARY_STATE.md com todos os providers Riverpod:
+   - por domínio, que estado expõem e para quê.
+4. Garante que estes ficheiros têm uma estrutura simples e fácil de ler (títulos por domínio/camada).
+
+FASE 4 – Guidelines para usar estes resumos quando estiveres a gerar código
+Antes de:
+- Criar um novo model/repository/provider/widget/page/service/util
+deves SEMPRE:
+1. Consultar SUMMARY_DOMAINS.md e SUMMARY_SERVICES.md.
+2. Procurar modelos, providers, widgets e serviços com nome ou descrição semelhante.
+3. Reutilizar ou estender os existentes se fizer sentido, em vez de criar algo novo e duplicado.
+4. Respeitar a arquitetura domain-centric:
+   - código do domínio X vai para lib/domains/x/**;
+   - shared UI vai para lib/shared/widgets/** ou lib/shared/layouts/**;
+   - serviços genéricos e utils vão para lib/core/**.
+5. Explicar na tua resposta, em 1–2 frases, se:
+   - estás a reutilizar algo existente (e qual), ou
+   - estás a criar algo novo porque não existe equivalente (e porquê).
+
+Começa agora pela FASE 1 e depois passa para FASE 2.

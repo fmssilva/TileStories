@@ -1,0 +1,33 @@
+# ===================================================================
+# TileStories root .gitignore
+# ===================================================================
+# The Unity project (TileStories/) has its own .gitignore inside it.
+# This root .gitignore covers only workspace-level artifacts.
+# ===================================================================
+
+# Build artifacts (APK/AAB builds produced by Unity)
+/build/
+
+# Binary / generated / large non-source files at root level
+*.pptx
+*.pdf
+*.apk
+*.aab
+*.log
+*.tmp
+_logs.txt
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# IDE/editor workspace files
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Node / npm (if any scripts at root)
+node_modules/

@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TileStories — Legend</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ── ROOT ── */
+    :root {
+      --gold: #C9973A;
+      --gold-faint: rgba(201, 151, 58, 0.10);
+      --gold-line: rgba(201, 151, 58, 0.18);
+      --stone: #080705;
+      --panel: rgba(10, 9, 6, 0.98);
+      --parch: rgba(240, 230, 204, 0.88);
+      --mid: rgba(240, 230, 204, 0.45);
+      --dim: rgba(240, 230, 204, 0.22);
+      --ghost: rgba(240, 230, 204, 0.06);
+      --bdr: rgba(255, 255, 255, 0.065);
+
+      /* destruction spectrum */
+      --d0: #22c55e;
+      --d20: #84cc16;
+      --d40: #eab308;
+      --d60: #f97316;
+      --d80: #ef4444;
+      --d100: #991b1b;
+
+      /* type palette */
+      --religious: #7c3aed;
+      --royal: #b45309;
+      --military: #dc2626;
+      --civic: #2563be;
+      --maritime: #0891b2;
+      --infra: #6b7280;
+      --landscape: #16a34a;
+      --commerce: #ea580c;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #0a0906;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 44px 20px 80px;
+      background-image: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(201, 151, 58, 0.04) 0%, transparent 55%);
+    }
+
+    /* ── PAGE HEADER ── */
+    .pg {
+      font-family: 'Fraunces', serif;
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: .38em;
+      text-transform: uppercase;
+      color: rgba(201, 151, 58, 0.4);
+      text-align: center;
+      margin-bottom: 5px
+    }
+
+    .ps {
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-align: center;
+      margin-bottom: 44px
+    }
+
+    /* ── PHONE ── */
+    .phone-row {
+      display: flex;
+      gap: 48px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 840px
+    }
+
+    .phone-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px
+    }
+
+    .phone-tag {
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dim)
+    }
+
+    .phone {
+      width: 340px;
+      height: 640px;
+      background: #0e0c09;
+      border-radius: 40px;
+      border: 1.5px solid rgba(255, 255, 255, 0.065);
+      box-shadow: 0 0 0 6px rgba(0, 0, 0, .5), 0 28px 64px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .05);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* map */
+    .map-bg {
+      flex: 1;
+      background: #1b2130;
+      background-image: linear-gradient(rgba(255, 255, 255, .018) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .018) 1px, transparent 1px);
+      background-size: 22px 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-river {
+      position: absolute;
+      bottom: 90px;
+      left: 0;
+      right: 0;
+      height: 15px;
+      background: rgba(37, 99, 235, .14);
+      border-top: 1px solid rgba(37, 99, 235, .1)
+    }
+
+    .mb {
+      position: absolute;
+      background: rgba(255, 255, 255, .02);
+      border-radius: 3px
+    }
+
+    /* status */
+    .sbar {
+      height: 36px;
+      background: rgba(0, 0, 0, .28);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      position: relative;
+      z-index: 5;
+      backdrop-filter: blur(6px);
+      flex-shrink: 0
+    }
+
+    .sbar-t {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--parch)
+    }
+
+    .sbar-r {
+      font-size: 10px;
+      color: var(--mid);
+      letter-spacing: 1.5px
+    }
+
+    /* mock POIs */
+    .mp {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    /* ══════════════════════════════════════════
+   TRIGGER — ⓘ styled button
+══════════════════════════════════════════ */
+    .trigger-i {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(10, 9, 6, 0.92);
+      border: 1.5px solid var(--gold-line);
+      box-shadow: 0 0 0 2px var(--gold-faint), 0 4px 14px rgba(0, 0, 0, .5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 25;
+      transition: all .22s;
+      backdrop-filter: blur(8px);
+    }
+
+    .trigger-i:hover {
+      border-color: rgba(201, 151, 58, .45);
+      box-shadow: 0 0 0 3px rgba(201, 151, 58, .08), 0 4px 18px rgba(0, 0, 0, .55), 0 0 14px rgba(201, 151, 58, .14);
+    }
+
+    /* custom ⓘ SVG in brand style */
+    .trigger-i svg {
+      width: 18px;
+      height: 18px
+    }
+
+    /* ══════════════════════════════════════════
+   LEGEND PANEL
+══════════════════════════════════════════ */
+    .legend {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--panel);
+      border-top: 1px solid var(--gold-line);
+      border-radius: 18px 18px 0 0;
+      z-index: 30;
+      height: 58px;
+      overflow: hidden;
+      transition: height .44s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(24px);
+    }
+
+    .legend.open {
+      overflow-y: auto;
+      overflow-x: hidden
+    }
+
+    /* drag handle */
+    .drag {
+      width: 32px;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(201, 151, 58, .15);
+      margin: 10px auto 0
+    }
+
+    /* section header */
+    .sec {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px 7px
+    }
+
+    .sec-title {
+      font-size: 9px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: rgba(201, 151, 58, .5);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sec-title::before {
+      content: '';
+      width: 12px;
+      height: 1px;
+      background: rgba(201, 151, 58, .25)
+    }
+
+    /* details toggle */
+    .det-btn {
+      font-size: 8.5px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--dim);
+      background: none;
+      border: 1px solid rgba(255, 255, 255, .08);
+      padding: 3px 9px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all .18s;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .det-btn:hover {
+      color: var(--parch);
+      border-color: rgba(255, 255, 255, .18)
+    }
+
+    .det-btn .arr {
+      transition: transform .25s;
+      font-size: 8px;
+      line-height: 1
+    }
+
+    .det-btn.open .arr {
+      transform: rotate(180deg)
+    }
+
+    /* expandable */
+    .exp {
+      overflow: hidden;
+      height: 0;
+      transition: height .38s cubic-bezier(0.16, 1, 0.3, 1)
+    }
+
+    .exp-in {
+      padding: 0 16px 10px
+    }
+
+    /* divider */
+    .ldiv {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(201, 151, 58, .12), transparent);
+      margin: 2px 16px
+    }
+
+    /* ══════════════════════════════════════════
+   DESTRUCTION SPECTRUM
+══════════════════════════════════════════ */
+    .spec-wrap {
+      padding: 6px 16px 8px
+    }
+
+    .spec-bar {
+      height: 4px;
+      border-radius: 2px;
+      background: linear-gradient(to right, #22c55e, #84cc16, #eab308, #f97316, #ef4444, #7f1d1d);
+      margin-bottom: 10px;
+    }
+
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start
+    }
+
+    .spec-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      flex: 1
+    }
+
+    .spec-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #1c1830;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform .18s;
+    }
+
+    .spec-circle:hover {
+      transform: scale(1.1)
+    }
+
+    .spec-circle::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .12) 0%, transparent 60%);
+      pointer-events: none
+    }
+
+    /* use a tiny SVG church inside each circle */
+    .sc-inner {
+      width: 16px;
+      height: 16px;
+      position: relative;
+      z-index: 1
+    }
+
+    .spec-pct {
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: .04em
+    }
+
+    .spec-name {
+      font-size: 7.5px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-align: center
+    }
+
+    /* border styles */
+    .brow {
+      display: flex;
+      gap: 5px;
+      padding: 0 16px 10px
+    }
+
+    .bitem {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px
+    }
+
+    .bline {
+      height: 2.5px;
+      width: 100%;
+      border-radius: 2px
+    }
+
+    .blabel {
+      font-size: 7.5px;
+      letter-spacing: .07em;
+      color: var(--dim);
+      text-align: center;
+      line-height: 1.3
+    }
+
+    /* expanded destruction cards */
+    .dcards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px
+    }
+
+    .dcard {
+      border-radius: 9px;
+      padding: 8px 10px;
+      border: 1px solid
+    }
+
+    .dcard-t {
+      font-size: 9px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      letter-spacing: .02em
+    }
+
+    .dcard-d {
+      font-size: 8px;
+      color: var(--dim);
+      line-height: 1.5
+    }
+
+    /* ══════════════════════════════════════════
+   TYPE GRID — 8 types
+══════════════════════════════════════════ */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      padding: 6px 16px 10px;
+    }
+
+    .type-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 4px 7px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .02);
+      border: 1px solid rgba(255, 255, 255, .04);
+      cursor: default;
+      transition: background .15s;
+    }
+
+    .type-item:hover {
+      background: rgba(255, 255, 255, .04)
+    }
+
+    /* 3-component row: dot + svg icon + name */
+    .type-3 {
+      display: flex;
+      align-items: center;
+      gap: 4px
+    }
+
+    .type-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .type-svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0
+    }
+
+    .type-name {
+      font-size: 8px;
+      letter-spacing: .06em;
+      color: var(--dim);
+      text-align: center;
+      line-height: 1.2;
+      margin-top: 1px
+    }
+
+    /* ══════════════════════════════════════════
+   EXPANDED TYPE DETAILS
+══════════════════════════════════════════ */
+    .cat-block {
+      margin-bottom: 14px
+    }
+
+    .cat-hdr {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, .05);
+      margin-bottom: 6px;
+    }
+
+    .cat-dot-lg {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .cat-name {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase
+    }
+
+    .cat-count {
+      font-size: 8.5px;
+      color: var(--dim);
+      margin-left: auto
+    }
+
+    .cat-svg {
+      width: 16px;
+      height: 16px;
+      margin-left: 2px;
+      opacity: .6
+    }
+
+    /* sub-type rows */
+    .sub-row {
+      padding: 6px 0 6px 4px
+    }
+
+    .sub-name {
+      font-size: 9px;
+      color: var(--mid);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 3px;
+    }
+
+    .sub-name::before {
+      content: '•';
+      color: rgba(255, 255, 255, .18);
+      font-size: 11px
+    }
+
+    .sub-desc {
+      font-size: 8px;
+      color: var(--dim);
+      line-height: 1.5;
+      padding-left: 12px
+    }
+
+    .sub-div {
+      height: 1px;
+      background: rgba(255, 255, 255, .04);
+      margin: 4px 0
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="pg">TileStories · Mapa</div>
+  <div class="ps">Legend · Final · ⓘ trigger · destruction spectrum · 8 POI types</div>
+
+  <div class="phone-row">
+
+    <!-- ══════════════════════════ PHONE A ══════════════════════════ -->
+    <div class="phone-wrap">
+      <div class="phone-tag">Variant A — Bottom sheet</div>
+      <div class="phone">
+        <div class="sbar">
+          <span class="sbar-t">9:41</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.2)">Lisboa 1700</span>
+          <span class="sbar-r">▲▲▲</span>
+        </div>
+        <div class="map-bg" id="mapA" onclick="closeA()">
+          <div class="map-river"></div>
+          <div class="mb" style="top:50px;left:32px;width:60px;height:38px"></div>
+          <div class="mb" style="top:55px;left:150px;width:82px;height:30px"></div>
+          <div class="mb" style="top:120px;left:15px;width:42px;height:42px"></div>
+          <div class="mb" style="top:110px;right:25px;width:66px;height:36px"></div>
+          <div class="mb" style="top:175px;left:100px;width:55px;height:30px"></div>
+          <!-- POIs on map -->
+          <div class="mp"
+            style="top:68px;left:58px;background:#1c1830;border:2px solid #22c55e;box-shadow:0 0 7px rgba(34,197,94,.45)">
+          </div>
+          <div class="mp"
+            style="top:82px;left:182px;background:#1c1830;border:2px dashed #eab308;box-shadow:0 0 6px rgba(234,179,8,.4)">
+          </div>
+          <div class="mp"
+            style="top:138px;left:126px;background:#2a1800;border:2px dotted #ef4444;box-shadow:0 0 6px rgba(239,68,68,.35);opacity:.65">
+          </div>
+          <div class="mp"
+            style="top:158px;left:68px;background:#0e1c14;border:2px solid #84cc16;box-shadow:0 0 5px rgba(132,204,22,.4)">
+          </div>
+          <div class="mp"
+            style="top:48px;left:232px;background:#1a1010;border:2px dotted #991b1b;box-shadow:0 0 4px rgba(153,27,27,.3);opacity:.4">
+          </div>
+          <div class="mp"
+            style="top:95px;left:100px;background:#091620;border:2px solid #22c55e;box-shadow:0 0 6px rgba(34,197,94,.4)">
+          </div>
+        </div>
+
+        <!-- ⓘ TRIGGER -->
+        <button class="trigger-i" id="trigA" onclick="openA(event)">
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="rgba(201,151,58,0.65)" stroke-width="1.5" />
+            <circle cx="12" cy="8" r="1.2" fill="rgba(201,151,58,0.7)" />
+            <line x1="12" y1="11.5" x2="12" y2="16.5" stroke="rgba(201,151,58,0.7)" stroke-width="1.6"
+              stroke-linecap="round" />
+          </svg>
+        </button>
+
+        <!-- LEGEND PANEL A -->
+        <div class="legend" id="legA">
+          <div class="drag"></div>
+
+          <!-- §1 Destruction -->
+          <div class="sec">
+            <div class="sec-title">Earthquake destruction level</div>
+            <button class="det-btn" id="dA1btn" onclick="toggleExpA1()">Details <span class="arr">▾</span></button>
+          </div>
+
+          <!-- spectrum bar + 6 circles -->
+          <div class="spec-wrap">
+            <div class="spec-bar"></div>
+            <div class="spec-row">
+              <!-- 0% -->
+              <div class="spec-item">
+                <div class="spec-circle" style="border:2.5px solid #22c55e;box-shadow:0 0 8px rgba(34,197,94,.5)">
+                  <svg class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.5)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="spec-pct" style="color:#22c55e">0%</div>
+                <div class="spec-name">Intact</div>
+              </div>
+              <!-- 20% -->
+              <div class="spec-item">
+                <div class="spec-circle" style="border:2.5px solid #84cc16;box-shadow:0 0 7px rgba(132,204,22,.45)">
+                  <svg class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.5)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="spec-pct" style="color:#84cc16">20%</div>
+                <div class="spec-name">Minor</div>
+              </div>
+              <!-- 40% -->
+              <div class="spec-item">
+                <div class="spec-circle" style="border:2.5px dashed #eab308;box-shadow:0 0 7px rgba(234,179,8,.4)">
+                  <svg class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.5)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="spec-pct" style="color:#eab308">40%</div>
+                <div class="spec-name">Partial</div>
+              </div>
+              <!-- 60% -->
+              <div class="spec-item">
+                <div class="spec-circle" style="border:2.5px dashed #f97316;box-shadow:0 0 7px rgba(249,115,22,.4)">
+                  <svg class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.45)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="spec-pct" style="color:#f97316">60%</div>
+                <div class="spec-name">Heavy</div>
+              </div>
+              <!-- 80% -->
+              <div class="spec-item">
+                <div class="spec-circle"
+                  style="border:2.5px dotted #ef4444;box-shadow:0 0 6px rgba(239,68,68,.35);opacity:.75;filter:grayscale(.2)">
+                  <svg class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.35)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="spec-pct" style="color:#ef4444">80%</div>
+                <div class="spec-name">Ruins</div>
+              </div>
+              <!-- 100% -->
+              <div class="spec-item">
+                <div class="spec-circle"
+                  style="border:2.5px dotted #991b1b;box-shadow:0 0 5px rgba(153,27,27,.3);opacity:.4;filter:grayscale(.5)">
+                  <svg class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.2)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <div class="spec-pct" style="color:#991b1b">100%</div>
+                <div class="spec-name">Gone</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- border style guide -->
+          <div class="brow">
+            <div class="bitem">
+              <div class="bline" style="background:#22c55e;box-shadow:0 0 4px rgba(34,197,94,.4)"></div>
+              <div class="blabel">Solid · 0–25%</div>
+            </div>
+            <div class="bitem">
+              <div class="bline"
+                style="background:repeating-linear-gradient(90deg,#eab308 0,#eab308 5px,transparent 5px,transparent 9px)">
+              </div>
+              <div class="blabel">Long dash · 25–50%</div>
+            </div>
+            <div class="bitem">
+              <div class="bline"
+                style="background:repeating-linear-gradient(90deg,#f97316 0,#f97316 3px,transparent 3px,transparent 6px)">
+              </div>
+              <div class="blabel">Short dash · 50–75%</div>
+            </div>
+            <div class="bitem">
+              <div class="bline"
+                style="background:repeating-linear-gradient(90deg,#ef4444 0,#ef4444 2px,transparent 2px,transparent 5px)">
+              </div>
+              <div class="blabel">Dots · 75–100%</div>
+            </div>
+          </div>
+
+          <!-- EXPANDABLE: destruction details -->
+          <div class="exp" id="expA1">
+            <div class="exp-in">
+              <div class="dcards">
+                <div class="dcard" style="background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.15)">
+                  <div class="dcard-t" style="color:#22c55e">0% — Intact</div>
+                  <div class="dcard-d">No visible damage. Stands today as before 1755.</div>
+                </div>
+                <div class="dcard" style="background:rgba(132,204,22,.04);border-color:rgba(132,204,22,.12)">
+                  <div class="dcard-t" style="color:#84cc16">20% — Minor</div>
+                  <div class="dcard-d">Damage recorded but quickly repaired. Mostly unchanged.</div>
+                </div>
+                <div class="dcard" style="background:rgba(234,179,8,.04);border-color:rgba(234,179,8,.14)">
+                  <div class="dcard-t" style="color:#eab308">40% — Partial</div>
+                  <div class="dcard-d">Significant damage. Rebuilt with some alterations.</div>
+                </div>
+                <div class="dcard" style="background:rgba(249,115,22,.04);border-color:rgba(249,115,22,.12)">
+                  <div class="dcard-t" style="color:#f97316">60% — Heavy</div>
+                  <div class="dcard-d">Largely destroyed, rebuilt in new Pombaline style.</div>
+                </div>
+                <div class="dcard" style="background:rgba(239,68,68,.04);border-color:rgba(239,68,68,.12)">
+                  <div class="dcard-t" style="color:#ef4444">80% — Ruins</div>
+                  <div class="dcard-d">Only ruins remain. Sometimes preserved (Convento do Carmo).</div>
+                </div>
+                <div class="dcard" style="background:rgba(127,29,29,.06);border-color:rgba(127,29,29,.2)">
+                  <div class="dcard-t" style="color:#991b1b">100% — Vanished</div>
+                  <div class="dcard-d">Completely destroyed. Location known only from this panorama.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ldiv"></div>
+
+          <!-- §2 POI Types -->
+          <div class="sec">
+            <div class="sec-title">Point of Interest Types</div>
+            <button class="det-btn" id="dA2btn" onclick="toggleExpA2()">Details <span class="arr">▾</span></button>
+          </div>
+
+          <!-- 8 types: dot + SVG icon + name -->
+          <div class="type-grid">
+
+            <!-- Religious -->
+            <div class="type-item">
+              <div class="type-3">
+                <div class="type-dot" style="background:var(--religious);box-shadow:0 0 5px rgba(124,58,237,.5)"></div>
+                <svg class="type-svg" viewBox="0 0 20 20" fill="none">
+                  <!-- cross + arch = church -->
+                  <line x1="10" y1="2" x2="10" y2="7" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round" />
+                  <line x1="7.5" y1="4" x2="12.5" y2="4" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round" />
+                  <path d="M6 18V12C6 9.8 7.8 8 10 8C12.2 8 14 9.8 14 12V18" stroke="#7c3aed" stroke-width="1.4"
+                    stroke-linecap="round" />
+                  <line x1="6" y1="18" x2="14" y2="18" stroke="#7c3aed" stroke-width="1.4" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="type-name">Religious</div>
+            </div>
+
+            <!-- Royal -->
+            <div class="type-item">
+              <div class="type-3">
+                <div class="type-dot" style="background:var(--royal);box-shadow:0 0 5px rgba(180,83,9,.5)"></div>
+                <svg class="type-svg" viewBox="0 0 20 20" fill="none">
+                  <!-- crown -->
+                  <path d="M3 15H17L15 8L11.5 12L10 6L8.5 12L5 8Z" stroke="#b45309" stroke-width="1.4"
+                    stroke-linejoin="round" fill="rgba(180,83,9,0.12)" />
+                  <line x1="3" y1="17" x2="17" y2="17" stroke="#b45309" stroke-width="1.4" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="type-name">Royal</div>
+            </div>
+
+            <!-- Military -->
+            <div class="type-item">
+              <div class="type-3">
+                <div class="type-dot" style="background:var(--military);box-shadow:0 0 5px rgba(220,38,38,.5)"></div>
+                <svg class="type-svg" viewBox="0 0 20 20" fill="none">
+                  <!-- shield -->
+                  <path d="M10 3L4 6V11C4 14.5 7 17.5 10 18.5C13 17.5 16 14.5 16 11V6Z" stroke="#dc2626"
+                    stroke-width="1.4" stroke-linejoin="round" fill="rgba(220,38,38,0.1)" />
+                  <line x1="7" y1="10" x2="13" y2="10" stroke="#dc2626" stroke-width="1.3" stroke-linecap="round" />
+                  <line x1="10" y1="7" x2="10" y2="13" stroke="#dc2626" stroke-width="1.3" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="type-name">Military</div>
+            </div>
+
+            <!-- Civic -->
+            <div class="type-item">
+              <div class="type-3">
+                <div class="type-dot" style="background:var(--civic);box-shadow:0 0 5px rgba(37,99,190,.5)"></div>
+                <svg class="type-svg" viewBox="0 0 20 20" fill="none">
+                  <!-- columns = civic/public building -->
+                  <line x1="4" y1="17" x2="16" y2="17" stroke="#2563be" stroke-width="1.5" stroke-linecap="round" />
+                  <line x1="3" y1="7" x2="17" y2="7" stroke="#2563be" stroke-width="1.5" stroke-linecap="round" />
+                  <line x1="6" y1="7" x2="6" y2="17" stroke="#2563be" stroke-width="1.3" stroke-linecap="round" />
+                  <line x1="10" y1="7" x2="10" y2="17" stroke="#2563be" stroke-width="1.3" stroke-linecap="round" />
+                  <line x1="14" y1="7" x2="14" y2="17" stroke="#2563be" stroke-width="1.3" stroke-linecap="round" />
+                  <path d="M5 7L10 3L15 7" stroke="#2563be" stroke-width="1.3" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </div>
+              <div class="type-name">Civic</div>
+            </div>
+
+            <!-- Maritime -->
+            <div class="type-item">
+              <div class="type-3">
+                <div class="type-dot" style="background:var(--maritime);box-shadow:0 0 5px rgba(8,145,178,.5)"></div>
+                <svg class="type-svg" viewBox="0 0 20 20" fill="none">
+                  <!-- anchor -->
+                  <circle cx="10" cy="5.5" r="1.8" stroke="#0891b2" stroke-width="1.4" />
+                  <line x1="10" y1="7.5" x2="10" y2="17" stroke="#0891b2" stroke-width="1.4" stroke-linecap="round" />
+                  <path d="M5 11H15" stroke="#0891b2" stroke-width="1.4" stroke-linecap="round" />
+                  <path d="M5 11C5 11 4 15 7 17" stroke="#0891b2" stroke-width="1.3" stroke-linecap="round" />
+                  <path d="M15 11C15 11 16 15 13 17" stroke="#0891b2" stroke-width="1.3" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="type-name">Maritime</div>
+            </div>
+
+            <!-- Infrastructure -->
+            <div class="type-item">
+              <div class="type-3">
+                <div class="type-dot" style="background:var(--infra);box-shadow:0 0 4px rgba(107,114,128,.4)"></div>
+                <svg class="type-svg" viewBox="0 0 20 20" fill="none">
+                  <!-- arch bridge -->
+                  <line x1="2" y1="14" x2="18" y2="14" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" />
+                  <path d="M5 14C5 14 5 9 10 9C15 9 15 14 15 14" stroke="#6b7280" stroke-width="1.4"
+                    stroke-linecap="round" />
+                  <line x1="5" y1="10" x2="5" y2="17" stroke="#6b7280" stroke-width="1.3" stroke-linecap="round" />
+                  <line x1="15" y1="10" x2="15" y2="17" stroke="#6b7280" stroke-width="1.3" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="type-name">Infra.</div>
+            </div>
+
+            <!-- Landscape -->
+            <div class="type-item">
+              <div class="type-3">
+                <div class="type-dot" style="background:var(--landscape);box-shadow:0 0 5px rgba(22,163,74,.45)"></div>
+                <svg class="type-svg" viewBox="0 0 20 20" fill="none">
+                  <!-- hill + tree -->
+                  <path d="M2 16C2 16 6 10 10 10C14 10 18 16 18 16" stroke="#16a34a" stroke-width="1.4"
+                    stroke-linecap="round" />
+                  <line x1="10" y1="10" x2="10" y2="5" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round" />
+                  <path d="M7 7H13" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round" />
+                  <path d="M8 5H12" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="type-name">Landscape</div>
+            </div>
+
+            <!-- Commerce -->
+            <div class="type-item">
+              <div class="type-3">
+                <div class="type-dot" style="background:var(--commerce);box-shadow:0 0 5px rgba(234,88,12,.45)"></div>
+                <svg class="type-svg" viewBox="0 0 20 20" fill="none">
+                  <!-- balance scales = trade/market -->
+                  <line x1="10" y1="3" x2="10" y2="17" stroke="#ea580c" stroke-width="1.4" stroke-linecap="round" />
+                  <line x1="5" y1="8" x2="15" y2="8" stroke="#ea580c" stroke-width="1.4" stroke-linecap="round" />
+                  <circle cx="5" cy="12" r="2.5" stroke="#ea580c" stroke-width="1.3" fill="rgba(234,88,12,0.1)" />
+                  <circle cx="15" cy="12" r="2.5" stroke="#ea580c" stroke-width="1.3" fill="rgba(234,88,12,0.1)" />
+                  <line x1="7" y1="17" x2="13" y2="17" stroke="#ea580c" stroke-width="1.4" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="type-name">Commerce</div>
+            </div>
+
+          </div><!-- /type-grid -->
+
+          <!-- EXPANDABLE: type details -->
+          <div class="exp" id="expA2">
+            <div class="exp-in">
+
+              <!-- RELIGIOUS -->
+              <div class="cat-block">
+                <div class="cat-hdr">
+                  <div class="cat-dot-lg" style="background:var(--religious);box-shadow:0 0 6px rgba(124,58,237,.4)">
+                  </div>
+                  <svg class="cat-svg" viewBox="0 0 16 16" fill="none">
+                    <line x1="8" y1="1" x2="8" y2="5" stroke="#7c3aed" stroke-width="1.4" stroke-linecap="round" />
+                    <line x1="5.5" y1="3" x2="10.5" y2="3" stroke="#7c3aed" stroke-width="1.4" stroke-linecap="round" />
+                    <path d="M5 15V10C5 8.3 6.3 7 8 7C9.7 7 11 8.3 11 10V15" stroke="#7c3aed" stroke-width="1.2"
+                      stroke-linecap="round" />
+                    <line x1="5" y1="15" x2="11" y2="15" stroke="#7c3aed" stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                  <div class="cat-name" style="color:var(--religious)">Religious</div>
+                  <div class="cat-count">~67 POI</div>
+                </div>
+                <div class="sub-row">
+                  <div class="sub-name">Church</div>
+                  <div class="sub-desc">Parish churches, cathedrals. From Sé de Lisboa to riverside chapels. Dominant
+                    type in the panorama.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Convent / Monastery</div>
+                  <div class="sub-desc">Jerónimos, Carmo (famous ruin preserved), Santos, São Francisco, Trindade.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Chapel / Hermitage</div>
+                  <div class="sub-desc">Small riverside chapels, roadside shrines. Many vanished completely after 1755.
+                  </div>
+                </div>
+              </div>
+
+              <!-- ROYAL -->
+              <div class="cat-block">
+                <div class="cat-hdr">
+                  <div class="cat-dot-lg" style="background:var(--royal);box-shadow:0 0 6px rgba(180,83,9,.4)"></div>
+                  <svg class="cat-svg" viewBox="0 0 16 16" fill="none">
+                    <path d="M2.5 12H13.5L12 6L9 9.5L8 4.5L7 9.5L4 6Z" stroke="#b45309" stroke-width="1.2"
+                      stroke-linejoin="round" />
+                    <line x1="2.5" y1="13.5" x2="13.5" y2="13.5" stroke="#b45309" stroke-width="1.2"
+                      stroke-linecap="round" />
+                  </svg>
+                  <div class="cat-name" style="color:var(--royal)">Royal / Noble</div>
+                  <div class="cat-count">~26 POI</div>
+                </div>
+                <div class="sub-row">
+                  <div class="sub-name">Royal Palace</div>
+                  <div class="sub-desc">Paço da Ribeira (destroyed 1755), Palácio de Belém. Political and symbolic
+                    centre of Portugal.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Noble Palace / Quinta</div>
+                  <div class="sub-desc">Aristocratic estates, especially dense in Alcântara and Belém riverfront. Many
+                    rebuilt after earthquake.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Noble Garden / Estate</div>
+                  <div class="sub-desc">Formal gardens attached to quintas. Some still exist, many paved over in
+                    reconstruction.</div>
+                </div>
+              </div>
+
+              <!-- MILITARY -->
+              <div class="cat-block">
+                <div class="cat-hdr">
+                  <div class="cat-dot-lg" style="background:var(--military);box-shadow:0 0 6px rgba(220,38,38,.4)">
+                  </div>
+                  <svg class="cat-svg" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 2L3 4.5V9C3 11.8 5.5 14 8 15C10.5 14 13 11.8 13 9V4.5Z" stroke="#dc2626"
+                      stroke-width="1.2" stroke-linejoin="round" />
+                    <line x1="6" y1="8" x2="10" y2="8" stroke="#dc2626" stroke-width="1.1" stroke-linecap="round" />
+                    <line x1="8" y1="6" x2="8" y2="10" stroke="#dc2626" stroke-width="1.1" stroke-linecap="round" />
+                  </svg>
+                  <div class="cat-name" style="color:var(--military)">Military</div>
+                  <div class="cat-count">~14 POI</div>
+                </div>
+                <div class="sub-row">
+                  <div class="sub-name">Tower / Fortified tower</div>
+                  <div class="sub-desc">Torre de Belém, watch towers, gate towers of old Fernandine walls.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Castle / Citadel</div>
+                  <div class="sub-desc">Castelo de São Jorge (survived), smaller hilltop fortifications.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Fort / Coastal battery</div>
+                  <div class="sub-desc">Tejo river defensive forts. Some submerged post-1755 by tsunami/silting.</div>
+                </div>
+              </div>
+
+              <!-- CIVIC -->
+              <div class="cat-block">
+                <div class="cat-hdr">
+                  <div class="cat-dot-lg" style="background:var(--civic);box-shadow:0 0 6px rgba(37,99,190,.4)"></div>
+                  <svg class="cat-svg" viewBox="0 0 16 16" fill="none">
+                    <line x1="3" y1="14" x2="13" y2="14" stroke="#2563be" stroke-width="1.2" stroke-linecap="round" />
+                    <line x1="2.5" y1="6" x2="13.5" y2="6" stroke="#2563be" stroke-width="1.2" stroke-linecap="round" />
+                    <line x1="5" y1="6" x2="5" y2="14" stroke="#2563be" stroke-width="1.1" stroke-linecap="round" />
+                    <line x1="8" y1="6" x2="8" y2="14" stroke="#2563be" stroke-width="1.1" stroke-linecap="round" />
+                    <line x1="11" y1="6" x2="11" y2="14" stroke="#2563be" stroke-width="1.1" stroke-linecap="round" />
+                    <path d="M4 6L8 3L12 6" stroke="#2563be" stroke-width="1.1" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                  <div class="cat-name" style="color:var(--civic)">Civic</div>
+                  <div class="cat-count">~28 POI</div>
+                </div>
+                <div class="sub-row">
+                  <div class="sub-name">Residential block</div>
+                  <div class="sub-desc">Dense medieval housing. Alfama, Mouraria. Lower city (Baixa) entirely destroyed
+                    and rebuilt on grid.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Square / Praça</div>
+                  <div class="sub-desc">Terreiro do Paço, Rossio, smaller neighbourhood squares. Heart of civic life.
+                  </div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Hospital / Almshouse</div>
+                  <div class="sub-desc">Todos-os-Santos hospital (destroyed). Welfare institutions of 18th-century
+                    Lisbon.</div>
+                </div>
+              </div>
+
+              <!-- MARITIME -->
+              <div class="cat-block">
+                <div class="cat-hdr">
+                  <div class="cat-dot-lg" style="background:var(--maritime);box-shadow:0 0 6px rgba(8,145,178,.4)">
+                  </div>
+                  <svg class="cat-svg" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="4.5" r="1.5" stroke="#0891b2" stroke-width="1.2" />
+                    <line x1="8" y1="6" x2="8" y2="14" stroke="#0891b2" stroke-width="1.2" stroke-linecap="round" />
+                    <path d="M4 9H12" stroke="#0891b2" stroke-width="1.2" stroke-linecap="round" />
+                    <path d="M4 9C4 9 3.2 12 5.5 13.5" stroke="#0891b2" stroke-width="1.1" stroke-linecap="round" />
+                    <path d="M12 9C12 9 12.8 12 10.5 13.5" stroke="#0891b2" stroke-width="1.1" stroke-linecap="round" />
+                  </svg>
+                  <div class="cat-name" style="color:var(--maritime)">Maritime</div>
+                  <div class="cat-count">~15 POI</div>
+                </div>
+                <div class="sub-row">
+                  <div class="sub-name">Quay / Landing dock</div>
+                  <div class="sub-desc">Cais do Sodré area, Terreiro do Paço waterfront. Gateway for the Age of
+                    Discovery.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Shipyard / Arsenal</div>
+                  <div class="sub-desc">Naval yards at Alcântara and Ribeira. Critical infrastructure for Portuguese
+                    empire.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Fishing village / Beach</div>
+                  <div class="sub-desc">Praia de Belém, small fishing communities. Largely vanished after 1755 tsunami.
+                  </div>
+                </div>
+              </div>
+
+              <!-- INFRASTRUCTURE -->
+              <div class="cat-block">
+                <div class="cat-hdr">
+                  <div class="cat-dot-lg" style="background:var(--infra);box-shadow:0 0 5px rgba(107,114,128,.35)">
+                  </div>
+                  <svg class="cat-svg" viewBox="0 0 16 16" fill="none">
+                    <line x1="1.5" y1="11" x2="14.5" y2="11" stroke="#6b7280" stroke-width="1.3"
+                      stroke-linecap="round" />
+                    <path d="M4 11C4 11 4 7.5 8 7.5C12 7.5 12 11 12 11" stroke="#6b7280" stroke-width="1.2"
+                      stroke-linecap="round" />
+                    <line x1="4" y1="8.5" x2="4" y2="13" stroke="#6b7280" stroke-width="1.1" stroke-linecap="round" />
+                    <line x1="12" y1="8.5" x2="12" y2="13" stroke="#6b7280" stroke-width="1.1" stroke-linecap="round" />
+                  </svg>
+                  <div class="cat-name" style="color:var(--infra)">Infrastructure</div>
+                  <div class="cat-count">~18 POI</div>
+                </div>
+                <div class="sub-row">
+                  <div class="sub-name">Bridge</div>
+                  <div class="sub-desc">Roman bridge of Alcântara (visible clearly in panorama). Smaller creek crossings
+                    throughout city.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">City Gate</div>
+                  <div class="sub-desc">Medieval Fernandine wall gates. All destroyed after 1755; the wall itself
+                    demolished in reconstruction.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Fountain / Mill</div>
+                  <div class="sub-desc">Neptune fountain at Terreiro do Paço. Tidal mills of Alcântara. Pottery kilns of
+                    Mocambo.</div>
+                </div>
+              </div>
+
+              <!-- LANDSCAPE -->
+              <div class="cat-block">
+                <div class="cat-hdr">
+                  <div class="cat-dot-lg" style="background:var(--landscape);box-shadow:0 0 6px rgba(22,163,74,.4)">
+                  </div>
+                  <svg class="cat-svg" viewBox="0 0 16 16" fill="none">
+                    <path d="M1.5 13C1.5 13 5 8 8 8C11 8 14.5 13 14.5 13" stroke="#16a34a" stroke-width="1.2"
+                      stroke-linecap="round" />
+                    <line x1="8" y1="8" x2="8" y2="4.5" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round" />
+                    <path d="M5.5 6H10.5" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round" />
+                    <path d="M6.5 4.5H9.5" stroke="#16a34a" stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                  <div class="cat-name" style="color:var(--landscape)">Landscape</div>
+                  <div class="cat-count">~9 POI</div>
+                </div>
+                <div class="sub-row">
+                  <div class="sub-name">Hill / Viewpoint</div>
+                  <div class="sub-desc">Seven hills of Lisbon. Colina do Castelo, Santa Catarina, Chiado hilltop. Shape
+                    the city's silhouette.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Stream / Ribeira</div>
+                  <div class="sub-desc">Ribeira de Alcântara, now underground. Valleys and watercourses visible in
+                    panorama topography.</div>
+                </div>
+              </div>
+
+              <!-- COMMERCE -->
+              <div class="cat-block" style="margin-bottom:4px">
+                <div class="cat-hdr">
+                  <div class="cat-dot-lg" style="background:var(--commerce);box-shadow:0 0 6px rgba(234,88,12,.4)">
+                  </div>
+                  <svg class="cat-svg" viewBox="0 0 16 16" fill="none">
+                    <line x1="8" y1="2" x2="8" y2="14" stroke="#ea580c" stroke-width="1.2" stroke-linecap="round" />
+                    <line x1="4" y1="6" x2="12" y2="6" stroke="#ea580c" stroke-width="1.2" stroke-linecap="round" />
+                    <circle cx="4" cy="9.5" r="2" stroke="#ea580c" stroke-width="1.1" />
+                    <circle cx="12" cy="9.5" r="2" stroke="#ea580c" stroke-width="1.1" />
+                    <line x1="6" y1="14" x2="10" y2="14" stroke="#ea580c" stroke-width="1.2" stroke-linecap="round" />
+                  </svg>
+                  <div class="cat-name" style="color:var(--commerce)">Commerce</div>
+                  <div class="cat-count">~9 POI</div>
+                </div>
+                <div class="sub-row">
+                  <div class="sub-name">Market / Merchant house</div>
+                  <div class="sub-desc">Riverside market stalls, warehouses. Casa da Índia — hub for spices from the
+                    Orient.</div>
+                </div>
+                <div class="sub-div"></div>
+                <div class="sub-row">
+                  <div class="sub-name">Workshop / Manufactory</div>
+                  <div class="sub-desc">Pottery workshops of Mocambo — visible by chimneys. Produced the azulejo tiles
+                    seen in this panorama.</div>
+                </div>
+              </div>
+
+            </div>
+          </div><!-- /expA2 -->
+
+        </div><!-- /legA -->
+      </div><!-- /phone -->
+    </div><!-- /phone-wrap A -->
+
+
+    <!-- ══════════════════════════ PHONE B ══════════════════════════ -->
+    <div class="phone-wrap">
+      <div class="phone-tag">Variant B — Compact pill trigger</div>
+      <div class="phone">
+        <div class="sbar">
+          <span class="sbar-t">9:41</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.2)">Lisboa 1700</span>
+          <span class="sbar-r">▲▲▲</span>
+        </div>
+        <div class="map-bg" id="mapB" onclick="closeB()">
+          <div class="map-river"></div>
+          <div class="mb" style="top:50px;left:32px;width:60px;height:38px"></div>
+          <div class="mb" style="top:55px;left:150px;width:82px;height:30px"></div>
+          <div class="mb" style="top:120px;left:15px;width:42px;height:42px"></div>
+          <div class="mb" style="top:110px;right:25px;width:66px;height:36px"></div>
+          <div class="mb" style="top:175px;left:100px;width:55px;height:30px"></div>
+          <div class="mp"
+            style="top:68px;left:58px;background:#1c1830;border:2px solid #22c55e;box-shadow:0 0 7px rgba(34,197,94,.45)">
+          </div>
+          <div class="mp"
+            style="top:82px;left:182px;background:#2a1800;border:2px solid #b45309;box-shadow:0 0 6px rgba(180,83,9,.4)">
+          </div>
+          <div class="mp"
+            style="top:138px;left:126px;background:#1a1010;border:2px dotted #ef4444;box-shadow:0 0 6px rgba(239,68,68,.35);opacity:.65">
+          </div>
+          <div class="mp"
+            style="top:158px;left:68px;background:#091620;border:2px solid #0891b2;box-shadow:0 0 6px rgba(8,145,178,.4)">
+          </div>
+          <div class="mp"
+            style="top:48px;left:232px;background:#1a1010;border:2px dotted #991b1b;box-shadow:0 0 4px rgba(153,27,27,.3);opacity:.4">
+          </div>
+          <div class="mp"
+            style="top:95px;left:100px;background:#0e1c14;border:2px solid #16a34a;box-shadow:0 0 5px rgba(22,163,74,.4)">
+          </div>
+        </div>
+
+        <!-- trigger B: pill with ⓘ left + "Legenda" text -->
+        <button class="trigger-pill" id="trigB" onclick="openB(event)"
+          style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);height:34px;padding:0 14px 0 10px;border-radius:100px;background:rgba(10,9,6,.92);border:1.5px solid var(--gold-line);box-shadow:0 0 0 2px var(--gold-faint),0 3px 14px rgba(0,0,0,.5);display:flex;align-items:center;gap:7px;cursor:pointer;z-index:25;backdrop-filter:blur(8px);white-space:nowrap;transition:all .2s;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="rgba(201,151,58,0.6)" stroke-width="1.6" />
+            <circle cx="12" cy="8" r="1.3" fill="rgba(201,151,58,0.65)" />
+            <line x1="12" y1="11.5" x2="12" y2="16.5" stroke="rgba(201,151,58,0.65)" stroke-width="1.7"
+              stroke-linecap="round" />
+          </svg>
+          <span
+            style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mid);font-family:'DM Sans',sans-serif;">Legenda</span>
+        </button>
+
+        <!-- LEGEND PANEL B — same content -->
+        <div class="legend" id="legB" style="border-top:1px solid var(--gold-line)">
+          <div class="drag" style="background:rgba(201,151,58,.15)"></div>
+
+          <div class="sec">
+            <div class="sec-title" style="color:rgba(201,151,58,.5)">
+              <span style="font-size:8.5px;opacity:.5">①</span>
+              Earthquake destruction level
+            </div>
+            <button class="det-btn" id="dB1btn" onclick="toggleExpB1()"
+              style="border-color:rgba(201,151,58,.14);color:rgba(201,151,58,.4)">Details <span
+                class="arr">▾</span></button>
+          </div>
+
+          <div class="spec-wrap">
+            <div class="spec-bar"></div>
+            <div class="spec-row">
+              <div class="spec-item">
+                <div class="spec-circle" style="border:2.5px solid #22c55e;box-shadow:0 0 8px rgba(34,197,94,.5)"><svg
+                    class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.5)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg></div>
+                <div class="spec-pct" style="color:#22c55e">0%</div>
+                <div class="spec-name">Intact</div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-circle" style="border:2.5px solid #84cc16;box-shadow:0 0 7px rgba(132,204,22,.45)"><svg
+                    class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.5)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg></div>
+                <div class="spec-pct" style="color:#84cc16">20%</div>
+                <div class="spec-name">Minor</div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-circle" style="border:2.5px dashed #eab308;box-shadow:0 0 7px rgba(234,179,8,.4)"><svg
+                    class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.5)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg></div>
+                <div class="spec-pct" style="color:#eab308">40%</div>
+                <div class="spec-name">Partial</div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-circle" style="border:2.5px dashed #f97316;box-shadow:0 0 7px rgba(249,115,22,.4)"><svg
+                    class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.45)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg></div>
+                <div class="spec-pct" style="color:#f97316">60%</div>
+                <div class="spec-name">Heavy</div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-circle"
+                  style="border:2.5px dotted #ef4444;box-shadow:0 0 6px rgba(239,68,68,.35);opacity:.75;filter:grayscale(.2)">
+                  <svg class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.35)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg></div>
+                <div class="spec-pct" style="color:#ef4444">80%</div>
+                <div class="spec-name">Ruins</div>
+              </div>
+              <div class="spec-item">
+                <div class="spec-circle"
+                  style="border:2.5px dotted #991b1b;box-shadow:0 0 5px rgba(153,27,27,.3);opacity:.4;filter:grayscale(.5)">
+                  <svg class="sc-inner" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 1L8 3M8 3C5.8 3 4 4.8 4 7C4 9.2 5.8 11 8 11C10.2 11 12 9.2 12 7C12 4.8 10.2 3 8 3ZM6 11V15M10 11V15M5 15H11"
+                      stroke="rgba(240,230,204,0.2)" stroke-width="1.2" stroke-linecap="round" />
+                  </svg></div>
+                <div class="spec-pct" style="color:#991b1b">100%</div>
+                <div class="spec-name">Gone</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="brow">
+            <div class="bitem">
+              <div class="bline" style="background:#22c55e;box-shadow:0 0 4px rgba(34,197,94,.4)"></div>
+              <div class="blabel">Solid · 0–25%</div>
+            </div>
+            <div class="bitem">
+              <div class="bline"
+                style="background:repeating-linear-gradient(90deg,#eab308 0,#eab308 5px,transparent 5px,transparent 9px)">
+              </div>
+              <div class="blabel">Long dash · 25–50%</div>
+            </div>
+            <div class="bitem">
+              <div class="bline"
+                style="background:repeating-linear-gradient(90deg,#f97316 0,#f97316 3px,transparent 3px,transparent 6px)">
+              </div>
+              <div class="blabel">Short dash · 50–75%</div>
+            </div>
+            <div class="bitem">
+              <div class="bline"
+                style="background:repeating-linear-gradient(90deg,#ef4444 0,#ef4444 2px,transparent 2px,transparent 5px)">
+              </div>
+              <div class="blabel">Dots · 75–100%</div>
+            </div>
+          </div>
+
+          <div class="exp" id="expB1">
+            <div class="exp-in">
+              <div class="dcards">
+                <div class="dcard" style="background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.15)">
+                  <div class="dcard-t" style="color:#22c55e">0% — Intact</div>
+                  <div class="dcard-d">No visible damage. Stands today as before 1755.</div>
+                </div>
+                <div class="dcard" style="background:rgba(132,204,22,.04);border-color:rgba(132,204,22,.12)">
+                  <div class="dcard-t" style="color:#84cc16">20% — Minor</div>
+                  <div class="dcard-d">Damage recorded but quickly repaired. Mostly unchanged.</div>
+                </div>
+                <div class="dcard" style="background:rgba(234,179,8,.04);border-color:rgba(234,179,8,.14)">
+                  <div class="dcard-t" style="color:#eab308">40% — Partial</div>
+                  <div class="dcard-d">Significant damage. Rebuilt with some alterations.</div>
+                </div>
+                <div class="dcard" style="background:rgba(249,115,22,.04);border-color:rgba(249,115,22,.12)">
+                  <div class="dcard-t" style="color:#f97316">60% — Heavy</div>
+                  <div class="dcard-d">Largely destroyed, rebuilt in new Pombaline style.</div>
+                </div>
+                <div class="dcard" style="background:rgba(239,68,68,.04);border-color:rgba(239,68,68,.12)">
+                  <div class="dcard-t" style="color:#ef4444">80% — Ruins</div>
+                  <div class="dcard-d">Only ruins remain. Sometimes preserved (Convento do Carmo).</div>
+                </div>
+                <div class="dcard" style="background:rgba(127,29,29,.06);border-color:rgba(127,29,29,.2)">
+                  <div class="dcard-t" style="color:#991b1b">100% — Vanished</div>
+                  <div class="dcard-d">Completely destroyed. Location known only from this panorama.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ldiv" style="background:linear-gradient(to right,transparent,rgba(201,151,58,.12),transparent)">
+          </div>
+
+          <div class="sec" style="padding-top:10px">
+            <div class="sec-title" style="color:rgba(201,151,58,.5)">
+              <span style="font-size:8.5px;opacity:.5">②</span>
+              Point of Interest Types
+            </div>
+            <button class="det-btn" id="dB2btn" onclick="toggleExpB2()"
+              style="border-color:rgba(201,151,58,.14);color:rgba(201,151,58,.4)">Details <span
+                class="arr">▾</span></button>
+          </div>
+
+          <!-- B uses 2-col list style instead of 4-col grid, with tinted bg per type -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px 16px 10px">
+            <div
+              style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.14);border-radius:10px">
+              <div
+                style="width:9px;height:9px;border-radius:50%;background:var(--religious);flex-shrink:0;box-shadow:0 0 5px rgba(124,58,237,.5)">
+              </div>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <line x1="10" y1="2" x2="10" y2="7" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round" />
+                <line x1="7.5" y1="4" x2="12.5" y2="4" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round" />
+                <path d="M6 18V12C6 9.8 7.8 8 10 8C12.2 8 14 9.8 14 12V18" stroke="#7c3aed" stroke-width="1.4"
+                  stroke-linecap="round" />
+                <line x1="6" y1="18" x2="14" y2="18" stroke="#7c3aed" stroke-width="1.4" stroke-linecap="round" />
+              </svg>
+              <span style="font-size:8.5px;color:var(--mid)">Religious</span>
+            </div>
+            <div
+              style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:rgba(180,83,9,.06);border:1px solid rgba(180,83,9,.14);border-radius:10px">
+              <div
+                style="width:9px;height:9px;border-radius:50%;background:var(--royal);flex-shrink:0;box-shadow:0 0 5px rgba(180,83,9,.5)">
+              </div>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <path d="M3 15H17L15 8L11.5 12L10 6L8.5 12L5 8Z" stroke="#b45309" stroke-width="1.4"
+                  stroke-linejoin="round" fill="rgba(180,83,9,0.12)" />
+                <line x1="3" y1="17" x2="17" y2="17" stroke="#b45309" stroke-width="1.4" stroke-linecap="round" />
+              </svg>
+              <span style="font-size:8.5px;color:var(--mid)">Royal</span>
+            </div>
+            <div
+              style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.14);border-radius:10px">
+              <div
+                style="width:9px;height:9px;border-radius:50%;background:var(--military);flex-shrink:0;box-shadow:0 0 5px rgba(220,38,38,.5)">
+              </div>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <path d="M10 3L4 6V11C4 14.5 7 17.5 10 18.5C13 17.5 16 14.5 16 11V6Z" stroke="#dc2626"
+                  stroke-width="1.4" stroke-linejoin="round" fill="rgba(220,38,38,0.1)" />
+                <line x1="7" y1="10" x2="13" y2="10" stroke="#dc2626" stroke-width="1.3" stroke-linecap="round" />
+                <line x1="10" y1="7" x2="10" y2="13" stroke="#dc2626" stroke-width="1.3" stroke-linecap="round" />
+              </svg>
+              <span style="font-size:8.5px;color:var(--mid)">Military</span>
+            </div>
+            <div
+              style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:rgba(37,99,190,.06);border:1px solid rgba(37,99,190,.14);border-radius:10px">
+              <div
+                style="width:9px;height:9px;border-radius:50%;background:var(--civic);flex-shrink:0;box-shadow:0 0 5px rgba(37,99,190,.5)">
+              </div>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <line x1="4" y1="17" x2="16" y2="17" stroke="#2563be" stroke-width="1.5" stroke-linecap="round" />
+                <line x1="3" y1="7" x2="17" y2="7" stroke="#2563be" stroke-width="1.5" stroke-linecap="round" />
+                <line x1="6" y1="7" x2="6" y2="17" stroke="#2563be" stroke-width="1.3" stroke-linecap="round" />
+                <line x1="10" y1="7" x2="10" y2="17" stroke="#2563be" stroke-width="1.3" stroke-linecap="round" />
+                <line x1="14" y1="7" x2="14" y2="17" stroke="#2563be" stroke-width="1.3" stroke-linecap="round" />
+                <path d="M5 7L10 3L15 7" stroke="#2563be" stroke-width="1.3" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+              <span style="font-size:8.5px;color:var(--mid)">Civic</span>
+            </div>
+            <div
+              style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:rgba(8,145,178,.06);border:1px solid rgba(8,145,178,.14);border-radius:10px">
+              <div
+                style="width:9px;height:9px;border-radius:50%;background:var(--maritime);flex-shrink:0;box-shadow:0 0 5px rgba(8,145,178,.5)">
+              </div>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="5.5" r="1.8" stroke="#0891b2" stroke-width="1.4" />
+                <line x1="10" y1="7.5" x2="10" y2="17" stroke="#0891b2" stroke-width="1.4" stroke-linecap="round" />
+                <path d="M5 11H15" stroke="#0891b2" stroke-width="1.4" stroke-linecap="round" />
+                <path d="M5 11C5 11 4 15 7 17" stroke="#0891b2" stroke-width="1.3" stroke-linecap="round" />
+                <path d="M15 11C15 11 16 15 13 17" stroke="#0891b2" stroke-width="1.3" stroke-linecap="round" />
+              </svg>
+              <span style="font-size:8.5px;color:var(--mid)">Maritime</span>
+            </div>
+            <div
+              style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:rgba(107,114,128,.06);border:1px solid rgba(107,114,128,.12);border-radius:10px">
+              <div
+                style="width:9px;height:9px;border-radius:50%;background:var(--infra);flex-shrink:0;box-shadow:0 0 4px rgba(107,114,128,.4)">
+              </div>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <line x1="2" y1="14" x2="18" y2="14" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M5 14C5 14 5 9 10 9C15 9 15 14 15 14" stroke="#6b7280" stroke-width="1.4"
+                  stroke-linecap="round" />
+                <line x1="5" y1="10" x2="5" y2="17" stroke="#6b7280" stroke-width="1.3" stroke-linecap="round" />
+                <line x1="15" y1="10" x2="15" y2="17" stroke="#6b7280" stroke-width="1.3" stroke-linecap="round" />
+              </svg>
+              <span style="font-size:8.5px;color:var(--mid)">Infra.</span>
+            </div>
+            <div
+              style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:rgba(22,163,74,.06);border:1px solid rgba(22,163,74,.12);border-radius:10px">
+              <div
+                style="width:9px;height:9px;border-radius:50%;background:var(--landscape);flex-shrink:0;box-shadow:0 0 5px rgba(22,163,74,.45)">
+              </div>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <path d="M2 16C2 16 6 10 10 10C14 10 18 16 18 16" stroke="#16a34a" stroke-width="1.4"
+                  stroke-linecap="round" />
+                <line x1="10" y1="10" x2="10" y2="5" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round" />
+                <path d="M7 7H13" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round" />
+                <path d="M8 5H12" stroke="#16a34a" stroke-width="1.3" stroke-linecap="round" />
+              </svg>
+              <span style="font-size:8.5px;color:var(--mid)">Landscape</span>
+            </div>
+            <div
+              style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:rgba(234,88,12,.06);border:1px solid rgba(234,88,12,.12);border-radius:10px">
+              <div
+                style="width:9px;height:9px;border-radius:50%;background:var(--commerce);flex-shrink:0;box-shadow:0 0 5px rgba(234,88,12,.45)">
+              </div>
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <line x1="10" y1="3" x2="10" y2="17" stroke="#ea580c" stroke-width="1.4" stroke-linecap="round" />
+                <line x1="5" y1="8" x2="15" y2="8" stroke="#ea580c" stroke-width="1.4" stroke-linecap="round" />
+                <circle cx="5" cy="12" r="2.5" stroke="#ea580c" stroke-width="1.3" fill="rgba(234,88,12,0.1)" />
+                <circle cx="15" cy="12" r="2.5" stroke="#ea580c" stroke-width="1.3" fill="rgba(234,88,12,0.1)" />
+                <line x1="7" y1="17" x2="13" y2="17" stroke="#ea580c" stroke-width="1.4" stroke-linecap="round" />
+              </svg>
+              <span style="font-size:8.5px;color:var(--mid)">Commerce</span>
+            </div>
+          </div>
+
+          <!-- EXPANDABLE B2: same type details as A -->
+          <div class="exp" id="expB2">
+            <div class="exp-in" id="expB2inner"></div>
+          </div>
+
+        </div><!-- /legB -->
+      </div><!-- /phone B -->
+    </div><!-- /phone-wrap B -->
+
+  </div><!-- /phone-row -->
+
+  <script>
+    // ── PANEL A ──────────────────────────────
+    let legAOpen = false;
+
+    function openA(e) {
+      e.stopPropagation();
+      legAOpen = true;
+      updateLegA();
+    }
+    function closeA() {
+      if (!legAOpen) return;
+      legAOpen = false;
+      collapseAll('A');
+      updateLegA();
+    }
+    function collapseAll(v) {
+      ['1', '2'].forEach(n => {
+        const el = document.getElementById('exp' + v + n);
+        const btn = document.getElementById('d' + v + n + 'btn');
+        el.style.height = '0';
+        btn.classList.remove('open');
+      });
+    }
+
+    function updateLegA() {
+      const leg = document.getElementById('legA');
+      if (!legAOpen) { leg.style.height = '58px'; leg.classList.remove('open'); return; }
+      leg.classList.add('open');
+      leg.style.height = 'auto';
+      const h = leg.scrollHeight;
+      leg.style.height = '58px';
+      requestAnimationFrame(() => { leg.style.height = Math.min(h, 530) + 'px'; });
+    }
+
+    function toggleExpA1() {
+      legAOpen = true;
+      toggle('expA1', 'dA1btn');
+      setTimeout(updateLegA, 10);
+    }
+    function toggleExpA2() {
+      legAOpen = true;
+      toggle('expA2', 'dA2btn');
+      setTimeout(updateLegA, 10);
+    }
+
+    // ── PANEL B ──────────────────────────────
+    let legBOpen = false;
+
+    function openB(e) {
+      e.stopPropagation();
+      legBOpen = true;
+      updateLegB();
+    }
+    function closeB() {
+      if (!legBOpen) return;
+      legBOpen = false;
+      collapseAll('B');
+      updateLegB();
+    }
+    function updateLegB() {
+      const leg = document.getElementById('legB');
+      if (!legBOpen) { leg.style.height = '58px'; leg.classList.remove('open'); return; }
+      leg.classList.add('open');
+      leg.style.height = 'auto';
+      const h = leg.scrollHeight;
+      leg.style.height = '58px';
+      requestAnimationFrame(() => { leg.style.height = Math.min(h, 530) + 'px'; });
+    }
+    function toggleExpB1() { legBOpen = true; toggle('expB1', 'dB1btn'); setTimeout(updateLegB, 10); }
+    function toggleExpB2() { legBOpen = true; toggle('expB2', 'dB2btn'); setTimeout(updateLegB, 10); }
+
+    // ── SHARED TOGGLE ──────────────────────
+    function toggle(elId, btnId) {
+      const el = document.getElementById(elId);
+      const btn = document.getElementById(btnId);
+      const isOpen = el.style.height !== '0px' && el.style.height !== '';
+      if (isOpen) {
+        el.style.height = el.scrollHeight + 'px';
+        requestAnimationFrame(() => requestAnimationFrame(() => { el.style.height = '0'; }));
+        btn.classList.remove('open');
+      } else {
+        el.style.height = el.scrollHeight + 'px';
+        btn.classList.add('open');
+        setTimeout(() => { if (el.style.height !== '0px') el.style.height = 'auto'; }, 400);
+      }
+    }
+
+    // ── CLONE B2 details from A2 ──
+    document.getElementById('expB2inner').innerHTML = document.getElementById('expA2').querySelector('.exp-in').innerHTML;
+  </script>
+</body>
+
+</html>

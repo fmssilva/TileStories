@@ -1,0 +1,19 @@
+{
+    "name": "TileStories.Tests.Runtime",
+    "rootNamespace": "TileStories.Tests",
+    "references": [
+        "GUID:TileStories",
+        "UnityEngine.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

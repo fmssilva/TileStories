@@ -1,0 +1,103 @@
+%!TEX root = ../template.tex
+\typeout{NT FILE chapter-workplan.tex}%
+
+
+% ===================================================================
+\chapter{Work Plan}
+\label{ch:work-plan}
+% ===================================================================
+ 
+\section{Work Completed to Date}
+\label{sec:wp-completed}
+ 
+A fair share of this thesis's preparatory work happened before the
+technology decisions in \S\ref{sec:pw-techstack} were even finalised,
+so the phased plan below is laid out against what already exists.
+
+The AR tracking evaluation reported in \S\ref{sec:pw-techstack} was not
+desk research alone. All three candidate approaches, the hand-built
+anchor-and-world-coordinate system, Vuforia, and Immersal, were actually
+built and put through device tests, not just compared on paper. The Immersal
+integration now runs end-to-end on a real Android device, localising
+against a Chafariz Velho test map in roughly two to three seconds and
+spawning test points of interest at their correct positions. This is
+arguably the single most important piece of completed work, since it
+takes this thesis's biggest technical risk off the table before
+full-scale development even begins.
+
+A second, fairly substantial body of completed work is the application's
+visual identity, developed independently of any particular frontend
+framework and so left untouched by the later move from Flutter to Unity.
+The TileStories logo, colour palette, typography pairing (Fraunces for
+editorial display text, DM Sans for interface text), and motion language
+(entrance animations, press feedback, and a designed ``AR recognition''
+moment where a gold ring pulses outward as the wall locks) were all
+finalised during the Flutter prototyping phase as design decisions and carry forward unchanged into
+the Unity build. The logo itself is shown alongside the application
+concept in Figure~\ref{fig:logo} (\S\ref{subsec:pw-core-concept}).
+
+A point-of-interest marker encoding system was also designed and
+validated along the way, solving the problem of communicating a
+building's category and its earthquake fate on a small map without the
+two competing visually. Like the visual identity, this is a design
+artefact that transfers to Unity directly; it does not need to be
+redone. Finally, an earlier Flutter prototype and its accompanying
+implementation guide were built before the tracking evaluation above was
+even finished. Their specific code does not carry forward, but the UX and
+domain-separation thinking behind them fed directly into
+\S\ref{subsec:pw-core-concept} and \S\ref{sec:pw-architecture}. The
+marker system, the visual identity, and screen-level prototypes from
+this Flutter phase are presented together in Appendix~\ref{app:prototypes}.
+
+\section{Development Phases Overview}
+\label{sec:wp-overview}
+ 
+Development is organised into the six phases introduced in
+\S\ref{subsec:pw-feature-phases} (Table~\ref{tab:phases}): Core Tracking,
+POI-Level Content, Scene-Level Features, Framework Packaging, Template
+\& Third-Wall Validation, and Evaluation Readiness, plus a
+time-permitting Stretch phase. The feature-level detail is not repeated
+here; this section only adds the calendar dimension. Phase~0 also now
+includes a task that is not yet resolved at the time of writing: a site
+visit to capture reference photography of the Grande Panorama itself,
+since the prior testing reported in \S\ref{sec:wp-completed} used
+Chafariz Velho only. Whether this is even possible while MNAz remains
+under renovation is still unresolved, not a scheduled certainty,
+and is treated that way in the risk analysis below.
+ 
+\section{Gantt Chart}
+\label{sec:wp-gantt}
+ 
+The six phases are laid out against a six-month calendar in
+Appendix~\ref{app:gantt}, using relative month labels (M1--M6) instead
+of fixed dates, since the confirmed start date depends on supervisor
+sign-off following this report. Three points stand out even without
+reproducing the chart itself. Phases overlap at
+their edges on purpose, so evaluation findings from one phase can inform the next
+before it fully begins. Phase~0 carries the MVP milestone, and Phase~4
+is the point at which the framework is both packaged and validated on
+the third wall. The stretch phase is scheduled, but only as
+time-permitting; it is not a commitment.
+
+\section{Risk Analysis}
+\label{sec:wp-risks}
+
+Two of the risks most likely to affect this thesis are access-related.
+Both already have a working mitigation, not just a mention in passing:
+not being able to photograph the Grande Panorama itself while MNAz
+remains closed, and MNAz not reopening before submission at all. Neither
+threatens the thesis's core claims, since Chafariz Velho and the Alto de
+Santa Catarina mural (\S\ref{subsec:pw-chafariz},
+\S\ref{subsec:pw-generalisability}) are both permanently and publicly
+accessible, and together they are treated as a fully sufficient basis for
+every stage of development and evaluation (\S\ref{sec:pw-problem-rq},
+\S\ref{sec:pw-evaluation}). No contribution claim depends on Panorama
+access. A third risk is more of a process bottleneck than a technical
+one: the university's ethics approval for the street-recruited evaluation
+(\S\ref{sec:pw-evaluation}) has not been requested yet, and, unlike the
+museum-access risks, has no real fallback if it is slow, so it is
+started as early in Phase~0 as possible rather than left until
+Phase~5. A fuller risk table, also covering licensing cost, UI tooling
+effort, recruitment shortfall, content-production pacing, and risks
+specific to the framework's generalisability claim, is given in
+Appendix~\ref{app:risks}.

@@ -1,0 +1,31 @@
+{
+  "wall_id": "living_room",
+  "wall_name": "Living Room (Dev Test)",
+  "immersal_map_id": 146267,
+  "pois": [
+    {
+      "id": "sofa",
+      "name": "The Sofa",
+      "category": "furniture",
+      "x_norm": 0.25,
+      "y_norm": 0.5,
+      "summary": "A comfortable 3-seat sofa, circa 2019."
+    },
+    {
+      "id": "tv",
+      "name": "The TV",
+      "category": "electronics",
+      "x_norm": 0.5,
+      "y_norm": 0.6,
+      "summary": "65-inch 4K display. Rarely used for its intended purpose."
+    },
+    {
+      "id": "plant",
+      "name": "The Plant",
+      "category": "nature",
+      "x_norm": 0.75,
+      "y_norm": 0.45,
+      "summary": "A resilient pothos. Has survived two house moves."
+    }
+  ]
+}

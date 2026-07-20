@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="TileStories.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+</Solution>

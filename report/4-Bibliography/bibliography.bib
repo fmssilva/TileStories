@@ -1,0 +1,1201 @@
+% ============================================================================
+% TileStories — Thesis Preparation Report — Bibliography
+% Fully reconstructed, reference by reference, with explicit per-entry
+% platform/credibility scoring. This version supersedes all previous
+% bibliography files for this report.
+%
+% HOW TO READ EACH ENTRY:
+%   Every reference is preceded by one or more comment lines (%), never
+%   compiled or printed, that record:
+%     [BEST PLATFORM]    — the most credible platform/publisher hosting
+%                           this work, with its tier (Tier 1 / Tier 2 /
+%                           Tier N/A / Non-academic) per the venue list
+%                           you provided.
+%     [ACADEMIC SCORE]   — a 0-10 score with a short justification, using
+%                           the rubric below.
+%     [VERIFICATION NOTES] — present only where something needs tracking:
+%                           an unconfirmed statistic from an earlier draft,
+%                           a corrected misattribution, a cross-source
+%                           discrepancy, or an action item.
+%   These comment lines are where ALL the verification/process bookkeeping
+%   now lives. The reference body itself (the actual @entry) carries only
+%   standard bibliographic fields, plus a `note` field used ONLY where it
+%   is genuinely necessary to justify a non-ideal source choice to a reader
+%   of the final compiled bibliography (per your explicit instruction) —
+%   most entries below have no `note` field at all for exactly this reason.
+%
+% SCORING RUBRIC (applied consistently across all 61 entries):
+%   9-10  Tier-1 venue, very current (2023-2026), strong empirical rigour,
+%         clean/large sample.
+%   7-8   Tier-1 or strong Tier-2, current or foundational-and-unsuperseded,
+%         solid methodology.
+%   5-6   Real peer-reviewed venue but dated for a fast-moving field, OR a
+%         foundational book/monograph (respected but not journal-reviewed).
+%   3-4   Thesis/dissertation, ISO standard, practitioner classic, or an
+%         official institutional/government source used for a factual claim.
+%   1-2   Vendor documentation, museum/press pages, single-source informal
+%         precedents — legitimate for the narrow factual claim they
+%         support, but not academic literature.
+%   0     Reserved for unbacked assertions; nothing in this bibliography
+%         scores 0, because anything that would have, was independently
+%         re-verified and either fixed or removed during this pass.
+%   IMPORTANT: a low score is not a verdict that a source is "bad" — a
+%   museum's own page describing its own opening hours is a perfectly
+%   correct, appropriate citation for that specific claim, and is scored
+%   low only because it is not academic literature, not because it is
+%   misused.
+%
+% ON URLS: the most direct, credible link to the article itself is given
+% wherever I could construct or confirm one with confidence (e.g. ACM's
+% dl.acm.org/doi/ pattern, MDPI's own article URLs, PLOS, Frontiers, and
+% Nature Portfolio's confirmed URL patterns). Where I was not fully
+% confident in a hand-constructed publisher-specific URL (chiefly some
+% Elsevier/Wiley/Oxford articles), the DOI resolver link (doi.org/...) is
+% given instead, since it always resolves correctly to the publisher's own
+% page even though it is one redirect away from the final URL.
+%
+% ON PAGES: for journal articles, the standard volume/number/pages locator
+% is retained alongside the URL/DOI as normal complete bibliographic
+% practice. For books, `pages` identifies the specific chapter or section
+% the cited claim is drawn from, not a whole-book span (books don't have
+% one) — e.g. vergo1989's pages={1--5} is Vergo's own introductory essay,
+% not "the whole book."
+%
+% TWO REAL FIXES MADE DURING THIS PASS: `streetmuseum` and `iso9241210`
+% were named in the chapter prose but never actually wrapped in a \cite{}
+% command — both fixed directly in chapter-relatedwork.tex as part of this
+% pass, so neither is an orphaned reference anymore.
+% ============================================================================
+
+
+% ============================================================================
+% PART 0 — REQUIRED TEMPLATE / DISCLOSURE ENTRIES — DO NOT REMOVE OR EDIT
+% ============================================================================
+
+@misc{Suchikova:2025:GAIDeT,
+  author       = {Suchikova, Yana and others},
+  title        = {{GAIDeT} (Generative AI Disclosure in Theses): a Rubric for
+                  Documenting the Use of Generative AI in Theses},
+  year         = {2025},
+  howpublished = {arXiv preprint},
+  note         = {Required NOVAthesis/aidisclose package reference --- retained as-is}
+}
+
+@misc{Lourenco:2025:aidisclose,
+  author       = {Lourenço, João M.},
+  title        = {{aidisclose}: a {LaTeX} Package for Generative {AI} Disclosure},
+  year         = {2025},
+  note         = {Required NOVAthesis/aidisclose package reference --- retained as-is}
+}
+
+
+% ==============================================================================
+% PART 1 — FOUNDATIONAL VISITOR-STUDIES AND MUSEOLOGY REFERENCES
+% ==============================================================================
+
+% [BEST PLATFORM]: (Tier N/A — no digital platform; print academic monograph)
+% [ACADEMIC SCORE]: (6/10) foundational/canonical museology text from a respected academic press;
+%                     not journal-peer-reviewed (books go through editorial/press review, not
+%                     blind peer review), and 36 years old, but the
+%                     object-centred-vs-visitor-centred framing it introduces remains the
+%                     standard reference point in the field and has not been superseded.
+  % note      = {Cited content (object-centred vs.\ visitor-centred museology) is drawn from Vergo's own introductory chapter, pp.~1--5; no DOI exists for this 1989 edited volume.}
+@book{vergo1989,
+  editor    = {Vergo, Peter},
+  title     = {The New Museology},
+  publisher = {Reaktion Books},
+  address   = {London},
+  year      = {1989},
+  pages     = {1--5},
+  url       = {https://reaktionbooks.co.uk/work/the-new-museology/},
+  urldate   = {2026-05-18},
+}
+
+% [BEST PLATFORM]: (Tier N/A — no digital platform; print academic monograph)
+% [ACADEMIC SCORE]: (6/10) the contextual model of learning it introduces remains the field's
+%                     dominant framework for museum learning, 25 years on; book-format means no
+%                     journal peer review, and I could not locate a stable, citable open URL
+%                     for this specific edition.
+% [VERIFICATION NOTES]: No stable open-access URL identified for this monograph; omitted
+%                        rather than guessed. ISBN given instead as the locator.
+  % note      = {Cited content (the personal/social/physical Contextual Model of Learning) is drawn from Chapter~1.}
+@book{falkdierking2000,
+  author    = {Falk, John H. and Dierking, Lynn D.},
+  title     = {Learning from Museums: Visitor Experiences and the Making of Meaning},
+  publisher = {AltaMira Press},
+  address   = {Walnut Creek, CA},
+  year      = {2000},
+  pages     = {1--34},
+  isbn      = {978-0761991564},
+}
+
+% [BEST PLATFORM]: (Tier N/A — no digital platform; print academic monograph)
+% [ACADEMIC SCORE]: (6/10) same reasoning as falkdierking2000: foundational, unsuperseded, but
+%                     book-format with no journal peer review.
+  % note      = {Cited content (the five identity-related visitor motivations: explorer, facilitator, experience seeker, professional/hobbyist, recharger) is drawn from Chapter~3.}
+@book{falk2009,
+  author    = {Falk, John H.},
+  title     = {Identity and the Museum Visitor Experience},
+  publisher = {Left Coast Press},
+  address   = {Walnut Creek, CA},
+  year      = {2009},
+  pages     = {59--82},
+  url       = {https://www.routledge.com/Identity-and-the-Museum-Visitor-Experience/Falk/p/book/9781598741636},
+  urldate   = {2026-05-25},
+}
+
+% [BEST PLATFORM]: (Tier 1) Wiley Online Library
+% [ACADEMIC SCORE]: (7/10) Tier-1 peer-reviewed journal, real empirical interview-based data across
+%                     nine Smithsonian museums; held below 8 only by its age (1999) relative to
+%                     this thesis's preferred recency window, though museum-learning-typology
+%                     findings age slowly compared to AR-technology claims.
+@article{pekarik1999,
+  author    = {Pekarik, Andrew J. and Doering, Zahava D. and Karns, David A.},
+  title     = {Exploring Satisfying Experiences in Museums},
+  journal   = {Curator: The Museum Journal},
+  volume    = {42},
+  number    = {2},
+  pages     = {152--173},
+  year      = {1999},
+  publisher = {Wiley (American Museum of Natural History)},
+  doi       = {10.1111/j.2151-6952.1999.tb01137.x},
+  url       = {https://onlinelibrary.wiley.com/doi/10.1111/j.2151-6952.1999.tb01137.x},
+  urldate   = {2026-05-15}
+}
+
+% [BEST PLATFORM]: (Tier 1) Wiley Online Library
+% [ACADEMIC SCORE]: (7/10) Tier-1 journal, unusually large observational dataset for the era (108
+%                     exhibitions), strong methodology; age (1997) is the only deduction, and
+%                     dwell-time/visitor-diligence findings in museology generalise well over
+%                     time.
+% [VERIFICATION NOTES]: An earlier draft attributed a specific '<10% of labels read, <30s
+%                        dwell' statistic to this paper; that specific figure could not be
+%                        confirmed from the sections available to me and is NOT used anywhere
+%                        in the report text. Only the confirmed dwell-time/diligent-visitor
+%                        finding is cited.
+@article{serrell1997,
+  author    = {Serrell, Beverly},
+  title     = {Paying Attention: The Duration and Allocation of Visitors' Time in Museum Exhibitions},
+  journal   = {Curator: The Museum Journal},
+  volume    = {40},
+  number    = {2},
+  pages     = {108--125},
+  year      = {1997},
+  publisher = {Wiley (American Museum of Natural History)},
+  doi       = {10.1111/j.2151-6952.1997.tb01292.x},
+  url       = {https://onlinelibrary.wiley.com/doi/10.1111/j.2151-6952.1997.tb01292.x},
+  urldate   = {2026-05-10}
+}
+
+% [BEST PLATFORM]: (Tier 1) Wiley Online Library
+% [ACADEMIC SCORE]: (6/10) Tier-1 journal, but this specific piece is conceptual/argumentative
+%                     rather than reporting new empirical data, which caps it below the
+%                     empirical entries above it.
+@article{bitgood2009a,
+  author    = {Bitgood, Stephen},
+  title     = {When Is ``Museum Fatigue'' Not Fatigue?},
+  journal   = {Curator: The Museum Journal},
+  volume    = {52},
+  number    = {2},
+  pages     = {193--202},
+  year      = {2009},
+  publisher = {Wiley (American Museum of Natural History)},
+  doi       = {10.1111/j.2151-6952.2009.tb00344.x},
+  url       = {https://onlinelibrary.wiley.com/doi/10.1111/j.2151-6952.2009.tb00344.x},
+  urldate   = {2026-05-10}
+}
+
+% [BEST PLATFORM]: (Tier 1) Taylor & Francis Online
+% [ACADEMIC SCORE]: (6/10) Tier-1 publisher, companion critical-review paper to bitgood2009a; same
+%                     conceptual-rather-than-empirical reasoning.
+@article{bitgood2009b,
+  author    = {Bitgood, Stephen},
+  title     = {Museum Fatigue: A Critical Review},
+  journal   = {Visitor Studies},
+  volume    = {12},
+  number    = {2},
+  pages     = {93--111},
+  year      = {2009},
+  publisher = {Taylor \& Francis},
+  doi       = {10.1080/10645570903203406},
+  url       = {https://www.tandfonline.com/doi/full/10.1080/10645570903203406},
+  urldate   = {2026-05-10}
+}
+
+% [BEST PLATFORM]: (Tier 1) Elsevier ScienceDirect
+% [ACADEMIC SCORE]: (8/10) Tier-1 venue explicitly on your list, real empirical study design,
+%                     directly relevant finding (free-choice routes delay satiation),
+%                     reasonably current (2018).
+@article{anton2018,
+  author    = {Ant\'{o}n, Carmen and Camarero, Carmen and Garrido, Mar\'{i}a Jos\'{e}},
+  title     = {A Journey through the Museum: Visit Factors that Prevent or Further Visitor Satiation},
+  journal   = {Annals of Tourism Research},
+  volume    = {73},
+  pages     = {48--61},
+  year      = {2018},
+  publisher = {Elsevier},
+  doi       = {10.1016/j.annals.2018.09.001},
+  url       = {https://doi.org/10.1016/j.annals.2018.09.001},
+  urldate   = {2026-05-22}
+}
+
+% [BEST PLATFORM]: (Tier 2) Frontiers in Psychology — fully open access
+% [ACADEMIC SCORE]: (7/10) peer-reviewed and indexed (not on your explicit Tier-1 list, but a
+%                     reputable, widely-indexed open-access journal), real qualitative
+%                     fieldwork (Activity Theory case study at the Ara Pacis Museum); held
+%                     below 8 because it is a single-site qualitative case study rather than a
+%                     larger empirical design.
+@article{recupero2019,
+  author    = {Recupero, Annamaria and Talamo, Alessandra and Triberti, Stefano and Modesti, Camilla},
+  title     = {Bridging Museum Mission to Visitors' Experience: Activity, Meanings, Interactions, Technology},
+  journal   = {Frontiers in Psychology},
+  volume    = {10},
+  pages     = {2092},
+  year      = {2019},
+  publisher = {Frontiers Media},
+  doi       = {10.3389/fpsyg.2019.02092},
+  url       = {https://www.frontiersin.org/articles/10.3389/fpsyg.2019.02092/full},
+  urldate   = {2026-05-22}
+}
+
+% ==============================================================================
+% PART 2 — AR CONCEPTS, TAXONOMY, AND TRACKING TECHNOLOGY
+% ==============================================================================
+
+% [BEST PLATFORM]: (Tier N/A) IEICE (engineering-society journal; not one of your named Tier-1 platforms, but the paper's only host)
+% [ACADEMIC SCORE]: (7/10) the foundational, unsuperseded definitional paper for the
+%                     reality-virtuality continuum, 10,000+ citations; old (1994) for a
+%                     fast-moving field, but a definitional citation does not need recency the
+%                     way an empirical claim does.
+  % note      = {No DOI was ever registered for this 1994 article; the IEICE platform link above is the canonical and only host.}
+@article{milgram1994,
+  author    = {Milgram, Paul and Kishino, Fumio},
+  title     = {A Taxonomy of Mixed Reality Visual Displays},
+  journal   = {IEICE Transactions on Information and Systems},
+  volume    = {E77-D},
+  number    = {12},
+  pages     = {1321--1329},
+  year      = {1994},
+  publisher = {Institute of Electronics, Information and Communication Engineers (IEICE)},
+  url       = {https://globals.ieice.org/en_transactions/information/10.1587/e77-d_12_1321/_p},
+  urldate   = {2026-05-22},
+}
+
+% [BEST PLATFORM]: (Tier N/A) MIT Press Direct (not one of your named Tier-1 platforms, but a major university-press academic platform)
+% [ACADEMIC SCORE]: (7/10) canonical AR survey, ~9,000+ citations, unsuperseded as the field's
+%                     foundational definitional reference; same age-vs-foundational tradeoff as
+%                     milgram1994.
+  % note      = {An open-access author copy is also hosted at \url{https://web.cs.wpi.edu/~gogo/courses/cs525_ar/papers/01-Azuma-Survey.pdf}.}
+@article{azuma1997,
+  author    = {Azuma, Ronald T.},
+  title     = {A Survey of Augmented Reality},
+  journal   = {Presence: Teleoperators and Virtual Environments},
+  volume    = {6},
+  number    = {4},
+  pages     = {355--385},
+  year      = {1997},
+  publisher = {MIT Press},
+  doi       = {10.1162/pres.1997.6.4.355},
+  url       = {https://doi.org/10.1162/pres.1997.6.4.355},
+  urldate   = {2026-05-22},
+}
+
+% [BEST PLATFORM]: (Tier 1) Wiley/Hindawi — fully open access
+% [ACADEMIC SCORE]: (7/10) Tier-1 publisher, good recency (2022), but a survey/synthesis paper
+%                     rather than new primary empirical data, which is why it sits at 7 rather
+%                     than 8-9.
+@article{wangzhu2022,
+  author    = {Wang, Chong and Zhu, Ye},
+  title     = {A Survey of Museum Applied Research Based on Mobile Augmented Reality},
+  journal   = {Computational Intelligence and Neuroscience},
+  volume    = {2022},
+  pages     = {2926241},
+  year      = {2022},
+  publisher = {Wiley (Hindawi)},
+  doi       = {10.1155/2022/2926241},
+  url       = {https://onlinelibrary.wiley.com/doi/10.1155/2022/2926241},
+  urldate   = {2026-05-14}
+}
+
+% [BEST PLATFORM]: (Tier 2) MDPI (Applied Sciences) — fully open access
+% [ACADEMIC SCORE]: (7/10) rigorous bibliometric methodology (1,201 documents analysed across
+%                     2012--2021); MDPI journal quality varies by title, but Applied Sciences
+%                     specifically is large, Scopus-indexed, and well-established.
+% [VERIFICATION NOTES]: An earlier draft claimed this paper found Portugal absent from the
+%                        top-10 publishing countries in this field; I could not independently
+%                        confirm that specific country-level breakdown from the sections
+%                        accessible to me, and it is NOT used anywhere in the final report
+%                        text.
+@article{boboc2022,
+  author    = {Boboc, R\u{a}zvan Gabriel and B\u{a}utu, Elena and G\^{i}rbacia, Florin and Popovici, Norina and Popovici, Dorin-Mircea},
+  title     = {Augmented Reality in Cultural Heritage: An Overview of the Last Decade of Applications},
+  journal   = {Applied Sciences},
+  volume    = {12},
+  number    = {19},
+  pages     = {9859},
+  year      = {2022},
+  publisher = {MDPI},
+  doi       = {10.3390/app12199859},
+  url       = {https://www.mdpi.com/2076-3417/12/19/9859},
+  urldate   = {2026-05-14}
+}
+
+% [BEST PLATFORM]: (Tier 1) ACM Digital Library
+% [ACADEMIC SCORE]: (8/10) Tier-1 venue exactly matching your gold-standard list (ACM JOCCH),
+%                     comprehensive and highly cited survey (300+ citations); held below 9 only
+%                     because 2018 is dated for a fast-moving AR field.
+@article{bekele2018,
+  author    = {Bekele, Mafkereseb Kassahun and Pierdicca, Roberto and Frontoni, Emanuele and Malinverni, Eva Savina and Gain, James},
+  title     = {A Survey of Augmented, Virtual, and Mixed Reality for Cultural Heritage},
+  journal   = {Journal on Computing and Cultural Heritage},
+  volume    = {11},
+  number    = {2},
+  pages     = {1--36},
+  year      = {2018},
+  publisher = {Association for Computing Machinery (ACM)},
+  doi       = {10.1145/3145534},
+  url       = {https://dl.acm.org/doi/10.1145/3145534},
+  urldate   = {2026-05-14}
+}
+
+% [BEST PLATFORM]: (Tier 2) Computer Assisted Methods in Engineering and Science (CAMES), Polish Academy of Sciences — fully open access, CC BY 4.0
+% [ACADEMIC SCORE]: (8/10) not on your named Tier-1 list, but a legitimate Scopus-indexed
+%                     peer-reviewed journal with a rigorous controlled-comparison methodology
+%                     (Vuforia/Immersal/MultiSet/ARCore Geospatial) and exceptional currency
+%                     (published 2026, days old relative to the rest of this bibliography).
+@article{skabek2026,
+  author    = {Skabek, Krzysztof and Rola, Dominika and Zamarski, Wojciech},
+  title     = {Combining Indoor and Outdoor Positioning for Navigation in AR Environments},
+  journal   = {Computer Assisted Methods in Engineering and Science},
+  volume    = {33},
+  number    = {1},
+  pages     = {7--25},
+  year      = {2026},
+  publisher = {Polish Academy of Sciences (Institute of Fundamental Technological Research)},
+  doi       = {10.24423/cames.2025.1966},
+  url       = {https://cames.ippt.pan.pl/index.php/cames/article/view/1966},
+  urldate   = {2026-04-28}
+}
+
+% [BEST PLATFORM]: (Non-academic) Vendor documentation
+% [ACADEMIC SCORE]: (1/10) not an academic source by nature; correctly used as the authoritative
+%                     primary source for a vendor's own product-capability claim (on-device
+%                     localisation support), not for a research finding.
+  % note         = {Cited to confirm that offline, on-device localisation is supported alongside the cloud-hosted default workflow.}
+@misc{immersal2026faq,
+  author       = {{Immersal Oy}},
+  title        = {Immersal SDK --- Frequently Asked Questions},
+  howpublished = {\url{https://developers.immersal.com/docs/immersal-sdk/faq/}},
+  year         = {2026},
+  urldate      = {2026-04-28},
+}
+
+% [BEST PLATFORM]: (Non-academic) Open-source package documentation
+% [ACADEMIC SCORE]: (1/10) same reasoning as immersal2026faq: appropriate primary source for a
+%                     tooling-capability/maintenance-status claim, not a research finding.
+  % note         = {Cited for this plugin's community-maintained (rather than first-party) status.}
+@misc{arflutterplugin2026,
+  author       = {{ar\_flutter\_plugin\_engine contributors}},
+  title        = {ar\_flutter\_plugin\_engine},
+  howpublished = {\url{https://pub.dev/packages/ar_flutter_plugin_engine}},
+  year         = {2026},
+  urldate      = {2026-04-28},
+}
+
+% [BEST PLATFORM]: (Tier 1) Elsevier ScienceDirect — fully open access (gold OA journal)
+% [ACADEMIC SCORE]: (7/10) Tier-1 publisher, real controlled experiment ($n=150$) comparing 3D and
+%                     2D AR visualisation for spatial learning, reasonably current (2021).
+% [VERIFICATION NOTES]: Corrected from the previous bibliography version: the author's name
+%                        had a malformed umlaut escape (\texttt{Kr\{"u\}ger}, invalid LaTeX)
+%                        which would either fail to compile or render incorrectly; fixed to the
+%                        properly escaped form below.
+@article{kruger2021,
+  author    = {Kr\"{u}ger, Jule M. and Palzer, Kevin and Bodemer, Daniel},
+  title     = {Learning with Augmented Reality: Impact of Dimensionality and Spatial Abilities},
+  journal   = {Computers and Education Open},
+  volume    = {3},
+  pages     = {100065},
+  year      = {2021},
+  publisher = {Elsevier},
+  doi       = {10.1016/j.caeo.2021.100065},
+  url       = {https://www.sciencedirect.com/science/article/pii/S2666557321000367},
+  urldate   = {2026-04-22}
+}
+
+% [BEST PLATFORM]: (Tier 1) Taylor & Francis Online
+% [ACADEMIC SCORE]: (9/10) explicitly on your Tier-1 list, extremely current (2025), large and
+%                     rigorous scoping-review methodology (5,368 candidate articles screened
+%                     down to 177 empirical studies) -- one of the two or three strongest
+%                     sources in this entire bibliography.
+  % note      = {An open-access preprint is also available at \url{https://arxiv.org/abs/2412.02853}.}
+@article{wang2025grand,
+  author    = {Wang, Hanbing and Du, Junyan and Li, Yue and Zhang, Lie and Li, Xiang},
+  title     = {Grand Challenges in Immersive Technologies for Cultural Heritage},
+  journal   = {International Journal of Human-Computer Interaction},
+  year      = {2025},
+  publisher = {Taylor \& Francis},
+  doi       = {10.1080/10447318.2025.2475996},
+  url       = {https://www.tandfonline.com/doi/full/10.1080/10447318.2025.2475996},
+  urldate   = {2026-04-22},
+}
+
+% [BEST PLATFORM]: (Tier 2) Nature Portfolio (npj Heritage Science) — fully open access
+% [ACADEMIC SCORE]: (8/10) explicitly on your Tier-2 list, very current (2026), rigorous comparative
+%                     technical methodology (4-method comparison, $N=33$) for an acquisition
+%                     problem directly relevant to this thesis's own tracking constraints.
+% [VERIFICATION NOTES]: A duplicate entry under a different key in a previous bibliography
+%                        version contained additional granular statistics (specific $p$-values
+%                        for dwell time/movement distance across the M1--M4 comparison) that
+%                        are not used in the report text, which cites this paper only for the
+%                        qualitative copyright/security/conservation-barrier finding; those
+%                        more granular statistics were not independently re-verified in this
+%                        pass.
+@article{xu2026panoramic,
+  author    = {Xu, Haojun and Lu, Yiding and Song, Ying and Wang, Ning and Tian, Feng and Li, Yuzhi},
+  title     = {Transforming Panoramic Images into 3D Experiences for Online Cultural Heritage Visualization},
+  journal   = {npj Heritage Science},
+  volume    = {14},
+  pages     = {67},
+  year      = {2026},
+  publisher = {Nature Portfolio (Springer Nature)},
+  doi       = {10.1038/s40494-025-02239-z},
+  url       = {https://www.nature.com/articles/s40494-025-02239-z},
+  urldate   = {2026-04-22}
+}
+
+% ==============================================================================
+% PART 3 — AR APPLICATIONS, EVALUATION, AND PERSONALISATION
+% ==============================================================================
+
+% [BEST PLATFORM]: (Tier 2) MDPI (Applied Sciences) — fully open access
+% [ACADEMIC SCORE]: (7/10) real AR-vs-traditional-visit comparative design, which is genuinely
+%                     uncommon and valuable in this literature; MDPI venue, current (2023).
+% [VERIFICATION NOTES]: An earlier draft attributed a specific chi-square value
+%                        ($\chi^2=8.361$, $p=0.004$) to this paper; this could not be
+%                        independently confirmed from the sections accessible to me and is NOT
+%                        stated as a specific number in the report text -- only the qualitative
+%                        '>90% positive satisfaction' / 'statistically significant association'
+%                        findings are used.
+@article{bachiller2023,
+  author    = {Bachiller, Carolina and Monzo, Jose M. and Rey, Beatriz},
+  title     = {Augmented and Virtual Reality to Enhance the Didactical Experience of Technological Heritage Museums},
+  journal   = {Applied Sciences},
+  volume    = {13},
+  number    = {6},
+  pages     = {3539},
+  year      = {2023},
+  publisher = {MDPI},
+  doi       = {10.3390/app13063539},
+  url       = {https://www.mdpi.com/2076-3417/13/6/3539},
+  urldate   = {2026-04-14}
+}
+
+% [BEST PLATFORM]: (Tier N/A) SAGE Journals — general-science venue, not HCI/AR-specific
+% [ACADEMIC SCORE]: (6/10) peer-reviewed, real ARCS-framework empirical design applying a validated
+%                     motivation model to museum AR; held to 6 because Science Progress is a
+%                     general-science SAGE journal rather than an HCI/AR-specific Tier-1 venue,
+%                     and because the specific path coefficients could not be independently
+%                     confirmed.
+% [VERIFICATION NOTES]: An earlier draft attributed specific path coefficients ($\beta=0.881$,
+%                        $\beta=0.827$, $R^2=0.777$) to this paper; these could not be
+%                        independently confirmed and are NOT stated as specific numbers in the
+%                        report text -- only the qualitative relevance-over-novelty finding is
+%                        used.
+@article{chenlai2021,
+  author    = {Chen, Chun-An and Lai, Hsin-I},
+  title     = {Application of Augmented Reality in Museums --- Factors Influencing the Learning Motivation and Effectiveness},
+  journal   = {Science Progress},
+  volume    = {104},
+  number    = {3},
+  pages     = {1--16},
+  year      = {2021},
+  publisher = {SAGE Publications},
+  doi       = {10.1177/00368504211059045},
+  url       = {https://journals.sagepub.com/doi/10.1177/00368504211059045},
+  urldate   = {2026-04-14}
+}
+
+% [BEST PLATFORM]: (Tier 2) PLOS ONE — fully open access
+% [ACADEMIC SCORE]: (8/10) large, clean sample ($n=324$), strong path-analysis/SEM methodology, very
+%                     current (Oct.\ 2025); PLOS ONE is a rigorous, peer-reviewed mega-journal
+%                     though not on your explicit Tier-1 list.
+@article{hewang2025,
+  author    = {He, Ying and Wang, Wenyue},
+  title     = {Factors Influencing Visitors' Use of Augmented Reality Technology in Museum Guided Tours},
+  journal   = {PLOS ONE},
+  volume    = {20},
+  number    = {10},
+  pages     = {e0332688},
+  year      = {2025},
+  publisher = {Public Library of Science (PLOS)},
+  doi       = {10.1371/journal.pone.0332688},
+  url       = {https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0332688},
+  urldate   = {2026-04-14}
+}
+
+% [BEST PLATFORM]: (Tier N/A) Oxford Academic — major university-press platform, not on your named Tier-1 list
+% [ACADEMIC SCORE]: (6/10) reputable academic publisher (Oxford University Press), foundational and
+%                     most-cited CHESS-project source on personalised museum storytelling; kept
+%                     deliberately despite its age (2018) per this report's own stated
+%                     exception for design-principle sources that remain unsuperseded by
+%                     anything more current.
+@article{roussoukatifori2018,
+  author    = {Roussou, Maria and Katifori, Akrivi},
+  title     = {Engaging Visitors in Museums with Interactive Digital Storytelling},
+  journal   = {Digital Scholarship in the Humanities},
+  volume    = {33},
+  number    = {3},
+  pages     = {354--374},
+  year      = {2018},
+  publisher = {Oxford University Press},
+  doi       = {10.1093/llc/fqx005},
+  url       = {https://doi.org/10.1093/llc/fqx005},
+  urldate   = {2026-04-10}
+}
+
+% [BEST PLATFORM]: (Tier N/A) CEUR-WS — open-access workshop-proceedings repository, lighter review than a full conference
+% [ACADEMIC SCORE]: (4/10) real workshop paper by reputable CHESS-project researchers, but CEUR-WS
+%                     submissions undergo lighter review than a full peer-reviewed conference
+%                     or journal paper, the venue is not indexed/prestigious, and it is dated
+%                     (2016).
+@inproceedings{antoniou2016,
+  author    = {Antoniou, Angeliki and Katifori, Akrivi and Roussou, Maria and Vayanou, Maria and Karvounis, Manolis and Kyriakidi, Marialena and Pujol-Tost, Laia},
+  title     = {Capturing the Visitor Profile for a Personalized Mobile Museum Experience: An Indirect Approach},
+  booktitle = {Proceedings of HAAPIE 2016},
+  series    = {CEUR Workshop Proceedings},
+  volume    = {1618},
+  year      = {2016},
+  publisher = {CEUR-WS.org},
+  url       = {http://ceur-ws.org/Vol-1618/HAAPIE_paper1.pdf},
+  urldate   = {2026-04-10}
+}
+
+% [BEST PLATFORM]: (Tier 1) ACM Digital Library
+% [ACADEMIC SCORE]: (8/10) Tier-1 venue (ACM IMWUT), rigorous controlled experiment on AR
+%                     environment-texture complexity, current (2024).
+% [VERIFICATION NOTES]: An earlier draft cited specific task-completion seconds (279s vs.\
+%                        374s, a 26% difference, $n=30$) alongside the $p$-value; the $p=0.003$
+%                        finding itself was confirmed from the paper's own abstract language,
+%                        but the specific seconds/n figures were not independently re-confirmed
+%                        with full certainty and are NOT stated as specific numbers in the
+%                        report text.
+@article{scargill2024,
+  author    = {Scargill, Tim and Janamsetty, Ritvik and Fronk, Christian and Eom, Sangjun and Gorlatova, Maria},
+  title     = {Environment Texture Optimization for Augmented Reality},
+  journal   = {Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies},
+  volume    = {8},
+  number    = {3},
+  pages     = {121:1--121:26},
+  year      = {2024},
+  publisher = {Association for Computing Machinery (ACM)},
+  doi       = {10.1145/3678510},
+  url       = {https://dl.acm.org/doi/10.1145/3678510},
+  urldate   = {2026-04-10}
+}
+
+% [BEST PLATFORM]: (Tier 2) Frontiers in Psychology — fully open access
+% [ACADEMIC SCORE]: (7/10) strong sample size ($n=266$) and PLS-SEM methodology, very current
+%                     (2025); cited in this report as an example of the larger-sample,
+%                     higher-rigour evaluation design this thesis's own sample size cannot
+%                     reach, not as a direct empirical input.
+@article{cheng2025,
+  author    = {Cheng, Anping and Zhang, Weiru and Feng, Anran and Wu, Yunmengru and Li, Wanjun},
+  title     = {Exploring Psychological Dimensions of Augmented Reality in Education: A Study on Learning Motivation and Academic Achievement in Museums},
+  journal   = {Frontiers in Psychology},
+  volume    = {16},
+  pages     = {1514117},
+  year      = {2025},
+  publisher = {Frontiers Media},
+  doi       = {10.3389/fpsyg.2025.1514117},
+  url       = {https://www.frontiersin.org/articles/10.3389/fpsyg.2025.1514117/full},
+  urldate   = {2026-04-10}
+}
+
+% [BEST PLATFORM]: (Tier 1) ACM Digital Library
+% [ACADEMIC SCORE]: (8/10) Tier-1 venue (ACM JOCCH), solid qualitative methodology evaluating
+%                     teenage and family museum visitors specifically, current (2023).
+@article{cesarionisi2023,
+  author    = {Ces\'{a}rio, Vanessa and Nisi, Valentina},
+  title     = {Lessons Learned on Engaging Teenage Visitors in Museums with Story-Based and Game-Based Strategies},
+  journal   = {Journal on Computing and Cultural Heritage},
+  year      = {2023},
+  publisher = {Association for Computing Machinery (ACM)},
+  doi       = {10.1145/3575867},
+  url       = {https://dl.acm.org/doi/10.1145/3575867},
+  urldate   = {2026-04-16}
+}
+
+% [BEST PLATFORM]: (Tier 2) MDPI (Heritage) — fully open access
+% [ACADEMIC SCORE]: (7/10) rigorous systematic review (45 CH-AR evaluation studies analysed,
+%                     2008--2024), extremely current (Oct.\ 2025).
+@article{chatsiopoulou2025,
+  author    = {Chatsiopoulou, Anna and Michailidis, Panagiotis D.},
+  title     = {Augmented Reality in Cultural Heritage: A Narrative Review of Design, Development and Evaluation Approaches},
+  journal   = {Heritage},
+  volume    = {8},
+  number    = {10},
+  pages     = {421},
+  year      = {2025},
+  publisher = {MDPI},
+  doi       = {10.3390/heritage8100421},
+  url       = {https://www.mdpi.com/2571-9408/8/10/421},
+  urldate   = {2026-04-16}
+}
+
+% [BEST PLATFORM]: (Tier 1 publisher) Taylor & Francis — book chapter, no DOI
+% [ACADEMIC SCORE]: (6/10) the original, universally-cited definitional source for the System
+%                     Usability Scale, used in thousands of subsequent papers; a book chapter
+%                     without journal peer review, but the correct and mandatory citation for
+%                     SUS regardless.
+  % note      = {No DOI registered for this chapter; the SUS instrument it defines is, however, reproduced in numerous open sources, e.g.\ bangor2008 below.}
+@incollection{brooke1996,
+  author    = {Brooke, John},
+  title     = {SUS: A ``Quick and Dirty'' Usability Scale},
+  booktitle = {Usability Evaluation in Industry},
+  editor    = {Jordan, Patrick W. and Thomas, Bruce and Weerdmeester, Bernard A. and McClelland, Ian L.},
+  pages     = {189--194},
+  year      = {1996},
+  publisher = {Taylor \& Francis},
+  address   = {London},
+}
+
+% [BEST PLATFORM]: (Tier 1) Taylor & Francis Online
+% [ACADEMIC SCORE]: (7/10) explicitly on your Tier-1 list, real large-scale empirical
+%                     SUS-benchmarking study; dated (2008) but its score-interpretation
+%                     thresholds remain the field standard and are unsuperseded.
+@article{bangor2008,
+  author    = {Bangor, Aaron and Kortum, Philip T. and Miller, James T.},
+  title     = {An Empirical Evaluation of the System Usability Scale},
+  journal   = {International Journal of Human-Computer Interaction},
+  volume    = {24},
+  number    = {6},
+  pages     = {574--594},
+  year      = {2008},
+  publisher = {Taylor \& Francis},
+  doi       = {10.1080/10447310802205776},
+  url       = {https://www.tandfonline.com/doi/full/10.1080/10447310802205776},
+  urldate   = {2026-04-16}
+}
+
+% [BEST PLATFORM]: (Tier N/A) Institutional repository (RepositoriUM / Universidade do Porto) — fully open access
+% [ACADEMIC SCORE]: (4/10) real, openly accessible, full-methodology academic work with expert-panel
+%                     validation, but a master's thesis undergoes supervisor/jury review rather
+%                     than blind peer review, and was never subsequently published in a
+%                     peer-reviewed venue; Portuguese-context relevance makes it valuable to
+%                     this specific report despite the lower formal rigour tier.
+  % note    = {MSc dissertation rather than a journal article; cited for a directly relevant Portuguese precedent (non-linear AR, storytelling and gamification for teenage visitors at the Alf\^{a}ndega Museum, Porto).}
+@mastersthesis{gkatsou2018,
+  author  = {Gkatsou, Alexandra},
+  title   = {Enhancing the Visitor Experience in Museums with Augmented Reality},
+  school  = {Faculdade de Engenharia, Universidade do Porto},
+  year    = {2018},
+  doi     = {10.34626/byzt-aw19},
+  url     = {https://repositorio-aberto.up.pt/handle/10216/114275},
+  urldate = {2026-04-16},
+}
+
+% ==============================================================================
+% PART 4 — GAMIFICATION, STORYTELLING, AND TEMPORAL VISUALISATION
+% ==============================================================================
+
+% [BEST PLATFORM]: (Tier 1) ACM Digital Library
+% [ACADEMIC SCORE]: (7/10) the foundational, unsuperseded definitional paper for 'gamification'
+%                     (5,000+ citations); old (2011) but a definitional citation, not an
+%                     empirical claim that ages.
+@inproceedings{deterding2011,
+  author    = {Deterding, Sebastian and Sicart, Miguel and Nacke, Lennart and O'Hara, Kenton and Dixon, Dan},
+  title     = {From Game Design Elements to Gamefulness: Defining ``Gamification''},
+  booktitle = {Proceedings of the 15th International Academic MindTrek Conference},
+  year      = {2011},
+  publisher = {Association for Computing Machinery (ACM)},
+  address   = {New York, NY, USA},
+  doi       = {10.1145/2181037.2181040},
+  url       = {https://dl.acm.org/doi/10.1145/2181037.2181040},
+  urldate   = {2026-04-06}
+}
+
+% [BEST PLATFORM]: (Tier 1) ACM Digital Library
+% [ACADEMIC SCORE]: (8/10) Tier-1 venue (ACM JOCCH), current (2025), real deployed-and-evaluated
+%                     gamified AR system at a sixth-century heritage site.
+% [VERIFICATION NOTES]: An earlier draft attributed specific statistics to this paper (a '9 of
+%                        12 pairs ignored badges' finding; IMI pre/post scores 3.80$\to$4.56,
+%                        $p<.001$, $n=59$); these could not be independently confirmed from the
+%                        sections accessible to me and are NOT used as specific numbers
+%                        anywhere in the report text -- the paper is cited only for the
+%                        general, confirmed finding that gamified AR produced real learning
+%                        gains when game elements were tightly coupled to content engagement.
+@article{souropetsis2025,
+  author    = {Souropetsis, Markos and Kyza, Eleni A.},
+  title     = {CompARe: Design and Development of a Gamified Augmented Reality Learning Environment for Cultural Heritage Sites},
+  journal   = {ACM Journal on Computing and Cultural Heritage},
+  volume    = {18},
+  number    = {1},
+  pages     = {6},
+  year      = {2025},
+  publisher = {Association for Computing Machinery (ACM)},
+  doi       = {10.1145/3703917},
+  url       = {https://dl.acm.org/doi/10.1145/3703917},
+  urldate   = {2026-04-06}
+}
+
+% [BEST PLATFORM]: (Tier 1) Elsevier ScienceDirect
+% [ACADEMIC SCORE]: (7/10) Tier-1 venue, real controlled experimental design isolating individual
+%                     gamification elements; the underlying motivational-psychology question
+%                     does not depend on AR-specific recency the way a tracking-technology
+%                     claim would.
+% [VERIFICATION NOTES]: Corrected from the previous bibliography version: the co-author's name
+%                        had a malformed umlaut escape (\texttt{Br\{"u\}hlmann}, invalid LaTeX)
+%                        which would either fail to compile or render incorrectly; fixed to the
+%                        properly escaped form below.
+@article{mekler2017,
+  author    = {Mekler, Elisa D. and Br\"{u}hlmann, Florian and Tuch, Alexandre N. and Opwis, Klaus},
+  title     = {Towards Understanding the Effects of Individual Gamification Elements on Intrinsic Motivation and Performance},
+  journal   = {Computers in Human Behavior},
+  volume    = {71},
+  pages     = {525--534},
+  year      = {2017},
+  publisher = {Elsevier},
+  doi       = {10.1016/j.chb.2015.08.048},
+  url       = {https://doi.org/10.1016/j.chb.2015.08.048},
+  urldate   = {2026-04-06}
+}
+
+% [BEST PLATFORM]: (Tier 1) Elsevier ScienceDirect
+% [ACADEMIC SCORE]: (6/10) Tier-1 venue, real classroom-based controlled study; held to 6 because it
+%                     is older (2015) and set in a classroom rather than a museum/heritage
+%                     context, slightly reducing direct relevance.
+@article{hanusfox2015,
+  author    = {Hanus, Michael D. and Fox, Jesse},
+  title     = {Assessing the Effects of Gamification in the Classroom: A Longitudinal Study on Intrinsic Motivation, Social Comparison, Satisfaction, Effort, and Academic Performance},
+  journal   = {Computers \& Education},
+  volume    = {80},
+  pages     = {152--161},
+  year      = {2015},
+  publisher = {Elsevier},
+  doi       = {10.1016/j.compedu.2014.08.019},
+  url       = {https://doi.org/10.1016/j.compedu.2014.08.019},
+  urldate   = {2026-04-06}
+}
+
+% [BEST PLATFORM]: (Tier 2) Nature Portfolio (Scientific Reports) — fully open access
+% [ACADEMIC SCORE]: (7/10) explicitly on your Tier-2 list, current (2025), real serious-game
+%                     design-and-evaluation study for cultural tourism.
+@article{liamruk2025,
+  author    = {Liamruk, Pawitra and Onwong, Natnicha and Amornrat, Kiettikoon and Arayapipatkul, Ann and Sipiyaruk, Kawin},
+  title     = {Development and Evaluation of an Augmented Reality Serious Game to Enhance 21st Century Skills in Cultural Tourism},
+  journal   = {Scientific Reports},
+  volume    = {15},
+  year      = {2025},
+  publisher = {Nature Portfolio (Springer Nature)},
+  doi       = {10.1038/s41598-025-95615-5},
+  url       = {https://www.nature.com/articles/s41598-025-95615-5},
+  urldate   = {2026-04-06}
+}
+
+% [BEST PLATFORM]: (Non-academic) Museum's own exhibit description
+% [ACADEMIC SCORE]: (1/10) not an academic source; appropriately used to describe a real-world
+%                     exhibit precedent (progressive layer-reveal AR/optical interpretation),
+%                     not to support a research claim.
+  % note         = {The museum's own description of a fixed-installation viewer exhibit; cited as a real-world precedent for progressive historical-state layering.}
+@misc{jurascope2026,
+  author       = {{Museum f\"ur Naturkunde Berlin}},
+  title        = {The World of Dinosaurs --- Jurascopes},
+  howpublished = {\url{https://www.museumfuernaturkunde.berlin/en/plan-your-visit/exhibition/the-world-of-dinosaurs/}},
+  year         = {2026},
+  urldate      = {2026-04-27},
+}
+
+% [BEST PLATFORM]: (Non-academic) No single citable source exists — named commercial-app precedent
+% [ACADEMIC SCORE]: (1/10) widely referenced as a precedent across the AR-heritage literature itself
+%                     (cited by name in multiple of the academic papers in this bibliography),
+%                     but no single authoritative citation exists for this commercial app,
+%                     since it predates most academic coverage of mobile heritage AR.
+  % note         = {A widely-documented, GPS-triggered, then-and-now photo-overlay AR precedent; no canonical academic citation exists for this commercial app.}
+@misc{streetmuseum,
+  author       = {{Museum of London}},
+  title        = {Streetmuseum},
+  howpublished = {Mobile application (iOS/Android, 2010--2012)},
+  urldate      = {2026-04-27},
+}
+
+% [BEST PLATFORM]: (Tier 2) MDPI (Heritage) — fully open access
+% [ACADEMIC SCORE]: (8/10) rigorous critical review (52 spatial-AR-storytelling studies analysed),
+%                     extremely current (Jan.\ 2026).
+% [VERIFICATION NOTES]: An earlier draft misattributed this paper as 'Koutsabasis \& Vosinakis
+%                        (2026)'; the correct first author is Printezis, confirmed directly
+%                        against the publisher page.
+@article{printezis2026,
+  author    = {Printezis, Petros and Koutsabasis, Panayiotis},
+  title     = {Spatial Augmented Reality Storytelling in Arts and Culture: A Critical Review from an Interaction Design Perspective},
+  journal   = {Heritage},
+  volume    = {9},
+  number    = {1},
+  pages     = {20},
+  year      = {2026},
+  publisher = {MDPI},
+  doi       = {10.3390/heritage9010020},
+  url       = {https://www.mdpi.com/2571-9408/9/1/20},
+  urldate   = {2026-04-27}
+}
+
+% [BEST PLATFORM]: (Tier 1) ACM Digital Library
+% [ACADEMIC SCORE]: (7/10) Tier-1 publisher, current (2025), real deployed system at Mural Harbor
+%                     (Linz); held to 7 because VINCI is a smaller, more specialised conference
+%                     than CHI/ISMAR, and the evaluation design cited was described as planned
+%                     rather than fully completed at the time of citation.
+% [VERIFICATION NOTES]: The unguided-exploration evaluation design (SUS+UEQ+think-aloud) is
+%                        cited as a methodological precedent the paper plans to use, not as
+%                        completed, reported results.
+@inproceedings{bauer2025,
+  author    = {Bauer, Axel and Hagler, Juergen and Kocur, Martin},
+  title     = {Interactive Augmented Reality Experiences for Urban Art Spaces Using Markerless Tracking},
+  booktitle = {Proceedings of the 18th International Symposium on Visual Information Communication and Interaction (VINCI 2025)},
+  year      = {2025},
+  publisher = {Association for Computing Machinery (ACM)},
+  address   = {New York, NY, USA},
+  doi       = {10.1145/3769534.3769544},
+  url       = {https://dl.acm.org/doi/10.1145/3769534.3769544},
+  urldate   = {2026-04-27}
+}
+
+% [BEST PLATFORM]: (Tier 1) SpringerLink
+% [ACADEMIC SCORE]: (7/10) Tier-1 publisher (Springer LNCS, MMM 2024), current (2024), real
+%                     spatio-temporal AR photo-retrieval system; held to 7 because specific SUS
+%                     scores could not be independently re-confirmed with full certainty.
+% [VERIFICATION NOTES]: An earlier draft cited specific SUS scores (77$\to$80 across two
+%                        evaluation cycles); I could not independently re-confirm these exact
+%                        figures with full confidence, so the report text describes the finding
+%                        only qualitatively ('the good range').
+@inproceedings{sauter2024,
+  author    = {Sauter, Loris and Bachmann, Tim and Schuldt, Heiko and Rossetto, Luca},
+  title     = {Augmented Reality Photo Presentation and Content-Based Image Retrieval on Mobile Devices with AR-Explorer},
+  booktitle = {Proceedings of the International Conference on Multimedia Modeling (MMM 2024)},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {14557},
+  pages     = {265--270},
+  year      = {2024},
+  publisher = {Springer},
+  address   = {Cham, Switzerland},
+  doi       = {10.1007/978-3-031-53302-0_20},
+  url       = {https://link.springer.com/chapter/10.1007/978-3-031-53302-0_20},
+  urldate   = {2026-04-27}
+}
+
+% [BEST PLATFORM]: (Tier 1) Elsevier ScienceDirect
+% [ACADEMIC SCORE]: (8/10) explicitly on your Tier-1 list, very current (2026), real empirical study
+%                     ($n=47$) with validated instruments (System Usability Scale and a Museum
+%                     Experience Scale with factor analysis).
+@article{xu2026chinatown,
+  author    = {Xu, Wei},
+  title     = {Cultural Narratives through Augmented Reality (AR): Hidden Stories in the Chinatown Storytelling Centre},
+  journal   = {Digital Applications in Archaeology and Cultural Heritage},
+  volume    = {40},
+  pages     = {e00476},
+  year      = {2026},
+  publisher = {Elsevier},
+  doi       = {10.1016/j.daach.2025.e00476},
+  url       = {https://doi.org/10.1016/j.daach.2025.e00476},
+  urldate   = {2026-05-06}
+}
+
+% ==============================================================================
+% PART 5 — METHODOLOGY (DSR / DBR / RtD) AND SOFTWARE ENGINEERING
+% ==============================================================================
+
+% [BEST PLATFORM]: (Tier N/A) JSTOR — not on your AR/HCI Tier-1 list (different field: Information Systems)
+% [ACADEMIC SCORE]: (7/10) MIS Quarterly is the flagship journal of its own field (Information
+%                     Systems) even though it is not one of your named AR/HCI venues; this is
+%                     the foundational, 15,000+-citation definitional paper for Design Science
+%                     Research, with no real substitute.
+% [VERIFICATION NOTES]: Merged from a duplicate entry in a previous bibliography version
+%                        ('hevner2004design') that carried the same content under an unused
+%                        key; consolidated here under the key actually cited in the text.
+  % note      = {Available via JSTOR (DOI above); JSTOR access may require institutional subscription.}
+@article{hevner2004,
+  author    = {Hevner, Alan R. and March, Salvatore T. and Park, Jinsoo and Ram, Sudha},
+  title     = {Design Science in Information Systems Research},
+  journal   = {MIS Quarterly},
+  volume    = {28},
+  number    = {1},
+  pages     = {75--105},
+  year      = {2004},
+  publisher = {Management Information Systems Research Center, University of Minnesota},
+  doi       = {10.2307/25148625},
+  url       = {https://doi.org/10.2307/25148625},
+  urldate   = {2026-05-06},
+}
+
+% [BEST PLATFORM]: (Tier 1) SpringerLink
+% [ACADEMIC SCORE]: (6/10) Tier-1 publisher, foundational Design-Based Research methodology paper;
+%                     dated (2005) but a methodology citation does not need the recency an
+%                     empirical claim would.
+@article{wanghannafin2005,
+  author    = {Wang, Feng and Hannafin, Michael J.},
+  title     = {Design-Based Research and Technology-Enhanced Learning Environments},
+  journal   = {Educational Technology Research and Development},
+  volume    = {53},
+  number    = {4},
+  pages     = {5--23},
+  year      = {2005},
+  publisher = {Springer},
+  doi       = {10.1007/BF02504682},
+  url       = {https://link.springer.com/article/10.1007/BF02504682},
+  urldate   = {2026-05-06}
+}
+
+% [BEST PLATFORM]: (Tier N/A) SAGE Journals — reputable AERA-affiliated venue, not on your named Tier-1 list
+% [ACADEMIC SCORE]: (6/10) foundational decade-in-review of Design-Based Research practice from a
+%                     prestigious education-research journal; same age-vs-foundational
+%                     reasoning as wanghannafin2005.
+@article{andersonshattuck2012,
+  author    = {Anderson, Terry and Shattuck, Julie},
+  title     = {Design-Based Research: A Decade of Progress in Education Research?},
+  journal   = {Educational Researcher},
+  volume    = {41},
+  number    = {1},
+  pages     = {16--25},
+  year      = {2012},
+  publisher = {SAGE Publications (American Educational Research Association)},
+  doi       = {10.3102/0013189X11428813},
+  url       = {https://doi.org/10.3102/0013189X11428813},
+  urldate   = {2026-05-06}
+}
+
+% [BEST PLATFORM]: (Tier 1) ACM Digital Library
+% [ACADEMIC SCORE]: (7/10) Tier-1 CHI venue --- the single most prestigious HCI conference on your
+%                     list; foundational, 1,500+-citation Research-through-Design paper,
+%                     unsuperseded despite its age.
+@inproceedings{zimmerman2007,
+  author    = {Zimmerman, John and Forlizzi, Jodi and Evenson, Shelley},
+  title     = {Research through Design as a Method for Interaction Design Research in HCI},
+  booktitle = {Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI 2007)},
+  pages     = {493--502},
+  year      = {2007},
+  publisher = {Association for Computing Machinery (ACM)},
+  address   = {New York, NY, USA},
+  doi       = {10.1145/1240624.1240704},
+  url       = {https://dl.acm.org/doi/10.1145/1240624.1240704},
+  urldate   = {2026-05-06}
+}
+
+% [BEST PLATFORM]: (Tier 1) ACM Digital Library
+% [ACADEMIC SCORE]: (7/10) Tier-1 CHI venue, foundational usability-heuristics paper, unsuperseded
+%                     despite its age.
+@inproceedings{nielsen1994,
+  author    = {Nielsen, Jakob},
+  title     = {Enhancing the Explanatory Power of Usability Heuristics},
+  booktitle = {Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI '94)},
+  pages     = {152--158},
+  year      = {1994},
+  publisher = {Association for Computing Machinery (ACM)},
+  address   = {New York, NY, USA},
+  doi       = {10.1145/191666.191729},
+  url       = {https://dl.acm.org/doi/10.1145/191666.191729},
+  urldate   = {2026-05-08}
+}
+
+% [BEST PLATFORM]: (Tier N/A) Basic Books — popular/trade press crossover, no DOI
+% [ACADEMIC SCORE]: (5/10) extremely respected and foundational in HCI, arguably the field's
+%                     best-known book, but it is a popular-press title rather than
+%                     peer-reviewed academic literature, and 38 years old.
+  % note      = {No DOI; originally published as The Psychology of Everyday Things, reissued under the current title in later editions.}
+@book{norman1988,
+  author    = {Norman, Donald A.},
+  title     = {The Design of Everyday Things},
+  publisher = {Basic Books},
+  address   = {New York, NY},
+  year      = {1988},
+  isbn      = {978-0465067107},
+}
+
+% [BEST PLATFORM]: (Tier N/A) Addison-Wesley — software-engineering practitioner classic, no DOI
+% [ACADEMIC SCORE]: (4/10) foundational within its specific software-engineering niche (the 'Rule of
+%                     Three' heuristic for shared-abstraction extraction), but a practitioner
+%                     book with no formal peer review, and cited here for one narrow,
+%                     well-established point rather than a broad claim.
+  % note      = {No DOI (practitioner book); cited specifically for the 'Rule of Three' heuristic on when duplication should be extracted into a shared abstraction.}
+@book{fowler1999,
+  author    = {Fowler, Martin},
+  title     = {Refactoring: Improving the Design of Existing Code},
+  publisher = {Addison-Wesley},
+  address   = {Reading, MA},
+  year      = {1999},
+  isbn      = {978-0201485677},
+}
+
+% [BEST PLATFORM]: (Non-academic) Practitioner blog post
+% [ACADEMIC SCORE]: (2/10) widely cited and well-reasoned within software-engineering discourse, but
+%                     a blog post has no formal review process whatsoever; scored above pure
+%                     vendor documentation only because it is an original argued position by a
+%                     recognised practitioner-author, not a product-capability claim.
+  % note         = {Practitioner blog post rather than an academic source; cited for the widely-referenced argument that a wrong shared abstraction costs more to unwind than tolerated duplication, used here to justify a software-architecture decision (\S3.6).}
+@misc{metz2016,
+  author       = {Metz, Sandi},
+  title        = {The Wrong Abstraction},
+  howpublished = {\url{https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction}},
+  year         = {2016},
+  urldate      = {2026-05-08},
+}
+
+% [BEST PLATFORM]: (Tier N/A) arXiv preprint, accepted at ICLR 2015 (a top-tier peer-reviewed ML venue)
+% [ACADEMIC SCORE]: (6/10) one of the most-cited papers in machine learning (100,000+ citations) and
+%                     ICLR is a rigorously reviewed top-tier venue, but cited here only as a
+%                     tangential conceptual aside (the first-moment/momentum idea informally
+%                     adapted for a smoothing heuristic), not as load-bearing evidence for any
+%                     claim this thesis depends on.
+  % note         = {Open-access preprint; cited as the source of the momentum concept informally adapted for the hand-built tracking system's smoothing heuristic (\S3.5).}
+@misc{kingmaba2015,
+  author       = {Kingma, Diederik P. and Ba, Jimmy},
+  title        = {Adam: A Method for Stochastic Optimization},
+  howpublished = {International Conference on Learning Representations (ICLR 2015)},
+  year         = {2015},
+  url          = {https://arxiv.org/abs/1412.6980},
+  urldate      = {2026-05-08},
+}
+
+% ==============================================================================
+% PART 6 — INSTITUTIONAL, FACTUAL, AND SDK/TOOLING REFERENCES (non-academic)
+% ==============================================================================
+
+% [BEST PLATFORM]: (Non-academic) Google Arts & Culture, content sourced from the Museu Nacional do Azulejo
+% [ACADEMIC SCORE]: (2/10) official museum-sourced content, appropriate for factual/provenance
+%                     claims about the artefact itself (attribution, dating, dimensions,
+%                     coastline span), but not peer-reviewed research.
+  % note         = {Museum-sourced catalogue description, hosted on Google's platform; used for factual/provenance claims only.}
+@misc{gacpanorama,
+  author       = {{Google Arts \& Culture / Museu Nacional do Azulejo}},
+  title        = {Grand Panorama of Lisbon},
+  howpublished = {\url{https://artsandculture.google.com/story/gAWhceMYFOAfIA}},
+  year         = {2026},
+  urldate      = {2026-04-22},
+}
+
+% [BEST PLATFORM]: (Non-academic) Discover Baroque Art database, entry authored by MNAz curatorial staff
+% [ACADEMIC SCORE]: (3/10) authored directly by museum curatorial staff (Jo\~{a}o Pedro Monteiro) --
+%                     closer to a primary source than generic web content, corroborating
+%                     gacpanorama, but still not peer-reviewed academic literature.
+  % note         = {Catalogue entry authored by MNAz curatorial staff; corroborates the provenance details given in gacpanorama.}
+@misc{baroqueartpanorama,
+  author       = {Monteiro, Jo\~{a}o Pedro},
+  title        = {Grande Panorama de Lisboa},
+  howpublished = {Discover Baroque Art database. \url{https://baroqueart.museumwnf.org/database_item.php?id=object\%3BBAR\%3Bpt\%3BMus12\%3B41\%3Bpt}},
+  year         = {2026},
+  urldate      = {2026-05-08},
+}
+
+% [BEST PLATFORM]: (Non-academic) University public-outreach article (NOVA FCSH)
+% [ACADEMIC SCORE]: (3/10) academic-institution-affiliated but a public-outreach piece, not a
+%                     peer-reviewed research output; used for the panel's provenance history.
+  % note         = {University public-outreach article; cited for the panel's provenance history (Real Academia de Belas Artes $\to$ Museu Nacional de Arte Antiga $\to$ MNAz).}
+@misc{fcshpanorama,
+  author       = {{NOVA FCSH +Lisboa}},
+  title        = {O percurso ``rocambolesco'' do Grande Panorama de Lisboa},
+  howpublished = {\url{https://maislisboa.fcsh.unl.pt/percurso-rocambulesco-do-grande-panorama-lisboa/}},
+  year         = {2021},
+  urldate      = {2026-05-08},
+}
+
+% [BEST PLATFORM]: (Non-academic) National press (Observador, with Lusa wire copy)
+% [ACADEMIC SCORE]: (3/10) reputable national news outlet, appropriate for a current-events factual
+%                     claim (museum visitor statistics, closure announcement), but journalism
+%                     is not peer-reviewed research.
+  % note         = {Confirms MNAz was Lisbon's most-visited national museum in 2024 (297{,}203 entries) and the planned November 2025 closure.}
+@misc{observador2025mnaz,
+  author       = {{Observador / Ag\^{e}ncia Lusa}},
+  title        = {PRR. Museus do Azulejo e do Teatro e da Dan\c{c}a encerram para obras em novembro},
+  howpublished = {\url{https://observador.pt/2025/10/24/prr-museus-do-azulejo-e-do-teatro-e-da-danca-encerram-para-obras-em-novembro/}},
+  year         = {2025},
+  urldate      = {2026-05-18},
+}
+
+% [BEST PLATFORM]: (Non-academic) National press (P\'{U}BLICO)
+% [ACADEMIC SCORE]: (3/10) same reasoning as observador2025mnaz: reputable national newspaper,
+%                     appropriate for a current-events factual claim, not peer-reviewed
+%                     research.
+  % note         = {Confirms MNAz closure since 1 November 2025 with no reopening date confirmed at the time of writing.}
+@misc{publico2025prr,
+  author       = {{P\'{U}BLICO}},
+  title        = {2026 ser\'{a} ano decisivo para a requalifica\c{c}\~{a}o da rede de museus com o PRR},
+  howpublished = {\url{https://www.publico.pt/2025/12/13/culturaipsilon/noticia/2026-sera-ano-decisivo-requalificacao-rede-museus-prr-2157967}},
+  year         = {2025},
+  urldate      = {2026-05-18},
+}
+
+% [BEST PLATFORM]: (Non-academic) Tourism/heritage information website
+% [ACADEMIC SCORE]: (2/10) less editorial rigour than national press (a general tourism information
+%                     site rather than a newspaper with fact-checking processes); used for a
+%                     factual claim where I myself identified and flagged a cross-source dating
+%                     discrepancy rather than silently resolving it in one direction.
+% [VERIFICATION NOTES]: States a 1775 construction date and confirms the tile decoration was
+%                        added in the 1950s; a separate municipal source (oeiraschafarizes2026,
+%                        immediately below) states 1755 instead. Both are cited and the
+%                        discrepancy is stated explicitly in the report text (\S3.2) rather
+%                        than resolved unilaterally.
+% note         = {Gives a 1775 construction date; a municipal source (oeiraschafarizes2026) gives 1755 instead. Both dates are reported in \S3.2.2 rather than resolved here.}
+@misc{oeirasallabout2026,
+  author       = {{All About Portugal}},
+  title        = {Chafariz Velho de Pa\c{c}o de Arcos --- Oeiras},
+  howpublished = {\url{https://www.allaboutportugal.pt/pt/oeiras/monumentos/chafariz-velho-de-paco-de-arcos}},
+  year         = {2026},
+  urldate      = {2026-05-21},
+}
+
+% [BEST PLATFORM]: (Non-academic) Official municipal government webpage (C\^{a}mara Municipal de Oeiras)
+% [ACADEMIC SCORE]: (3/10) primary institutional source (the municipality that owns and manages the
+%                     monument) -- the strongest non-academic source category, since it is the
+%                     responsible public authority, though still not a peer-reviewed source.
+% [VERIFICATION NOTES]: States a 1755 construction date 'per the inscription', conflicting
+%                        with oeirasallabout2026's 1775. This discrepancy between two
+%                        municipal-adjacent sources is stated explicitly in the report text
+%                        (\S3.2) rather than resolved unilaterally.
+% note         = {Gives a 1755 construction date `per the inscription'; a separate source (oeirasallabout2026) gives 1775. Both dates are reported in \S3.2.2 rather than resolved here.}
+@misc{oeiraschafarizes2026,
+  author       = {{C\^{a}mara Municipal de Oeiras}},
+  title        = {Chafarizes},
+  howpublished = {\url{https://www.oeiras.pt/chafarizes}},
+  year         = {2026},
+  urldate      = {2026-05-21},
+}
+
+% [BEST PLATFORM]: (Non-academic) Local news/lifestyle outlet (New in Oeiras)
+% [ACADEMIC SCORE]: (2/10) local press coverage, no peer review; used only to establish the mural's
+%                     existence, location, artist, and installation year -- factual, low-controversy
+%                     claims for which local press is an adequate source.
+% [VERIFICATION NOTES]: Confirms the Alto de Santa Catarina / Linda-a-Velha mural, painted by
+%                        Tiago Hacke, unveiled 2023, on a wildlife/biodiversity theme.
+% note         = {Local press source for the third case-study wall's existence, artist, and installation date.}
+@misc{newinoeiras2023mural,
+  author       = {Barata, Sandra Pinto},
+  title        = {Linda-a-Velha tem um novo miradouro e um mural de arte urbana que vale a pena conhecer},
+  howpublished = {\url{https://newinoeiras.nit.pt/fora-de-casa/linda-a-velha-tem-um-novo-miradouro-e-um-mural-de-arte-urbana-que-vale-a-pena-conhecer}},
+  year         = {2023},
+  urldate      = {2026-07-02},
+}
+
+% [BEST PLATFORM]: (Non-academic) Vendor documentation/blog (Unity Technologies)
+% [ACADEMIC SCORE]: (1/10) appropriate primary source for a vendor's own tooling-capability claim
+%                     (the recommended mechanism for downloadable, on-demand content), not a
+%                     research finding.
+@misc{unityaddressables2026,
+  author       = {{Unity Technologies}},
+  title        = {Addressables: Planning and Best Practices},
+  howpublished = {\url{https://unity.com/blog/engine-platform/addressables-planning-and-best-practices}},
+  year         = {2026},
+  urldate      = {2026-05-18}
+}
+
+% [BEST PLATFORM]: (Non-academic, normative standard) International Organization for Standardization
+% [ACADEMIC SCORE]: (4/10) not peer-reviewed research, but an internationally consensus-developed
+%                     standard with its own decades-long, multi-stakeholder review process -- a
+%                     legitimate normative citation, scored above informal web sources but
+%                     below academic literature.
+% [VERIFICATION NOTES]: An earlier bibliography pass found this entry unused (the text named
+%                        'ISO 9241-210' in plain prose without a \cite{} command); fixed during
+%                        this pass by adding the citation at that sentence (\S2.3.1).
+@misc{iso9241210,
+  author  = {{International Organization for Standardization}},
+  title   = {ISO 9241-210:2019 --- Ergonomics of Human-System Interaction --- Part 210: Human-Centred Design for Interactive Systems},
+  year    = {2019},
+  url     = {https://www.iso.org/standard/77520.html},
+  urldate = {2026-05-18}
+}

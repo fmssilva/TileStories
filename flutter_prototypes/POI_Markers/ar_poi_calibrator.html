@@ -1,0 +1,1401 @@
+<!--
+  AR POI CALIBRATOR — Developer Tool
+  ====================================
+  This is a standalone HTML page for calibrating POI (x, y) coordinates
+  against the Grande Panorama reference image.
+
+  USAGE:
+    1. Open this file in any modern browser (Chrome, Edge, Firefox).
+    2. Load the panorama image via the "Load Image" button.
+    3. Click on the panorama to place POI markers — coordinates are
+       normalised to [0..1] relative to the image's natural size.
+    4. Use "Copy JSON" to export the calibrated coordinates.
+    5. Paste the JSON into assets/data/pois.json.
+
+  This tool was previously shipped in the app (lib/ar_core/utils/).
+  It is now a standalone developer utility kept here in PROJECT_GUIDES.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR POI Calibrator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161a23;
+      --surface2: #1e2330;
+      --border: #2a3045;
+      --accent: #f0a500;
+      --accent2: #e05a2b;
+      --text: #e8eaf0;
+      --text-dim: #7a8099;
+      --text-dimmer: #3d4460;
+      --green: #3dd68c;
+      --red: #e05a5a;
+      --blue: #4a9eff;
+      --radius: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      height: 52px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .logo span {
+      color: var(--text-dim);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      white-space: nowrap;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: var(--text-dimmer);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #0d0f14;
+    }
+
+    .btn-accent:hover {
+      background: #ffc02a;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid var(--red);
+    }
+
+    .btn-danger:hover {
+      background: rgba(224, 90, 90, 0.1);
+    }
+
+    .btn svg {
+      flex-shrink: 0;
+    }
+
+    /* MAIN LAYOUT */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* LEFT PANEL */
+    .panel-left {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-section {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .poi-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .poi-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .poi-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .poi-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    .poi-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.12s;
+      border: 1px solid transparent;
+      margin-bottom: 3px;
+    }
+
+    .poi-item:hover {
+      background: var(--surface2);
+    }
+
+    .poi-item.active {
+      background: var(--surface2);
+      border-color: var(--accent);
+    }
+
+    .poi-item.placed .poi-dot {
+      background: var(--green);
+    }
+
+    .poi-item.placed .poi-dot::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1px solid var(--green);
+      opacity: 0.4;
+    }
+
+    .poi-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--text-dimmer);
+      flex-shrink: 0;
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    .poi-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .poi-name {
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .poi-coords {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .poi-cat {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: var(--surface);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* CANVAS AREA */
+    .canvas-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      background: #080a0e;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .toolbar-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .zoom-indicator {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .mode-indicator {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    .mode-indicator.placing {
+      background: rgba(240, 165, 0, 0.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    #canvas-container {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #canvas-container.placing {
+      cursor: crosshair;
+    }
+
+    #image-stage {
+      position: relative;
+      transform-origin: center center;
+      transition: transform 0.05s;
+    }
+
+    #ref-image {
+      display: block;
+      max-width: none;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      height: 100%;
+      color: var(--text-dimmer);
+      text-align: center;
+    }
+
+    .empty-state .drop-zone {
+      width: 300px;
+      height: 200px;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .empty-state .drop-zone:hover,
+    .empty-state .drop-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(240, 165, 0, 0.05);
+      color: var(--accent);
+    }
+
+    .empty-state .drop-zone svg {
+      opacity: 0.4;
+    }
+
+    .empty-state .drop-zone:hover svg {
+      opacity: 0.8;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .empty-state small {
+      font-size: 11px;
+      opacity: 0.5;
+    }
+
+    /* MARKERS ON IMAGE */
+    .marker {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .marker-inner {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .marker-cross {
+      position: relative;
+      width: 20px;
+      height: 20px;
+    }
+
+    .marker-cross::before,
+    .marker-cross::after {
+      content: '';
+      position: absolute;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+
+    .marker-cross::before {
+      width: 1.5px;
+      height: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .marker-cross::after {
+      height: 1.5px;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .marker-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 0 2px rgba(240, 165, 0, 0.3);
+    }
+
+    .marker-label {
+      margin-top: 6px;
+      background: rgba(13, 15, 20, 0.88);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .marker.active .marker-cross::before,
+    .marker.active .marker-cross::after {
+      background: #fff;
+    }
+
+    .marker.active .marker-dot {
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+    }
+
+    .marker.active .marker-label {
+      border-color: #fff;
+      color: #fff;
+    }
+
+    /* RIGHT PANEL */
+    .panel-right {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-right .empty-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--text-dimmer);
+      font-size: 12px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .detail-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-title {
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.3;
+      color: var(--text);
+    }
+
+    .detail-cat {
+      display: inline-block;
+      margin-top: 5px;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: rgba(240, 165, 0, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(240, 165, 0, 0.3);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .coord-editor {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .coord-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .coord-field {
+      flex: 1;
+    }
+
+    .coord-field label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+      letter-spacing: 0.08em;
+    }
+
+    .coord-field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .coord-field input:focus {
+      border-color: var(--accent);
+    }
+
+    .coord-hint {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-row.placed {
+      background: rgba(61, 214, 140, 0.08);
+      color: var(--green);
+      border: 1px solid rgba(61, 214, 140, 0.2);
+    }
+
+    .status-row.unplaced {
+      background: rgba(240, 165, 0, 0.08);
+      color: var(--accent);
+      border: 1px solid rgba(240, 165, 0, 0.2);
+    }
+
+    .detail-desc {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-desc p {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .detail-desc .lang-tab {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .lang-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .lang-btn.active {
+      background: var(--surface2);
+      border-color: var(--text-dimmer);
+      color: var(--text);
+    }
+
+    .detail-actions {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+    }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 16px;
+      height: 32px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .stat-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .stat-dot.green {
+      background: var(--green);
+    }
+
+    .stat-dot.amber {
+      background: var(--accent);
+    }
+
+    .stat-val {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* TOAST */
+    .toast-container {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      animation: toastIn 0.2s ease, toastOut 0.3s ease 2.2s forwards;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      white-space: nowrap;
+    }
+
+    .toast.success {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .toast.info {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes toastOut {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+      }
+    }
+
+    /* SCROLLBAR global */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    input[type=file] {
+      display: none;
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    .shortcut-hint {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--text-dimmer);
+      padding: 2px 5px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      margin-left: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-left">
+      <div class="logo">AR<span>/</span>POI <span>Calibrator</span></div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('json-input').click()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14,2 14,8 20,8" />
+        </svg>
+        Load JSON
+      </button>
+      <input type="file" id="json-input" accept=".json" onchange="loadJSON(event)">
+
+      <button class="btn btn-ghost" onclick="document.getElementById('img-input').click()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21,15 16,10 5,21" />
+        </svg>
+        Load Image
+      </button>
+      <input type="file" id="img-input" accept="image/*" onchange="loadImage(event)">
+
+      <div class="toolbar-sep"></div>
+
+      <button class="btn btn-ghost" id="place-mode-btn" onclick="togglePlaceMode()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+          <circle cx="12" cy="9" r="2.5" />
+        </svg>
+        Place Mode <span class="shortcut-hint">P</span>
+      </button>
+
+      <div class="toolbar-sep"></div>
+
+      <button class="btn btn-ghost" onclick="exportJSON()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7,10 12,15 17,10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Export JSON
+      </button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- LEFT: POI LIST -->
+    <div class="panel-left">
+      <div class="panel-section">
+        <div class="panel-label">Points of Interest</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div style="margin-top:6px; font-size:11px; color:var(--text-dim);">
+          <span id="placed-count">0</span> / <span id="total-count">0</span> placed
+        </div>
+      </div>
+      <div class="poi-list" id="poi-list"></div>
+    </div>
+
+    <!-- CENTER: IMAGE CANVAS -->
+    <div class="canvas-area">
+      <div class="toolbar">
+        <button class="btn btn-ghost" onclick="zoom(-0.2)" title="Zoom out">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        </button>
+        <span class="zoom-indicator" id="zoom-label">100%</span>
+        <button class="btn btn-ghost" onclick="zoom(0.2)" title="Zoom in">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="11" y1="8" x2="11" y2="14" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        </button>
+        <button class="btn btn-ghost" onclick="resetZoom()">Fit</button>
+        <div class="toolbar-sep"></div>
+        <div class="mode-indicator" id="mode-indicator">PAN MODE</div>
+        <div style="flex:1"></div>
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dimmer)" id="cursor-coords">x: —
+          y: —</span>
+      </div>
+
+      <div id="canvas-container">
+        <div class="empty-state" id="empty-state">
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('img-input').click()">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21,15 16,10 5,21" />
+            </svg>
+            <p>Drop image here</p>
+            <small>or click to browse</small>
+          </div>
+          <small style="color:var(--text-dimmer)">Load a JSON and Image to begin calibration</small>
+        </div>
+
+        <div id="image-stage" style="display:none; position:relative;">
+          <img id="ref-image" src="" alt="Reference">
+          <div id="markers-layer" style="position:absolute;inset:0;pointer-events:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: DETAIL PANEL -->
+    <div class="panel-right">
+      <div class="empty-panel" id="detail-empty">
+        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"
+          style="opacity:0.3">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+          <circle cx="12" cy="9" r="2.5" />
+        </svg>
+        <span>Select a POI to edit</span>
+      </div>
+
+      <div id="detail-panel" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+        <div class="detail-header">
+          <div class="detail-title" id="dp-title">—</div>
+          <div class="detail-cat" id="dp-cat">—</div>
+        </div>
+
+        <div class="coord-editor">
+          <div class="panel-label">Coordinates</div>
+          <div class="coord-row">
+            <div class="coord-field">
+              <label>X (0–1)</label>
+              <input type="number" id="coord-x" min="0" max="1" step="0.001" placeholder="0.000"
+                oninput="onCoordInput()">
+            </div>
+            <div class="coord-field">
+              <label>Y (0–1)</label>
+              <input type="number" id="coord-y" min="0" max="1" step="0.001" placeholder="0.000"
+                oninput="onCoordInput()">
+            </div>
+          </div>
+          <div class="coord-hint">Click image in Place Mode to set, or type manually.</div>
+          <div class="status-row unplaced" id="dp-status">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            Not yet placed
+          </div>
+        </div>
+
+        <div class="detail-desc">
+          <div class="panel-label">Description</div>
+          <div class="lang-tab">
+            <button class="lang-btn active" onclick="setLang('pt', this)">PT</button>
+            <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+          </div>
+          <p id="dp-desc">—</p>
+        </div>
+
+        <div class="detail-actions">
+          <button class="btn btn-accent" onclick="activatePlaceMode()" id="btn-place-here">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+              <circle cx="12" cy="9" r="2.5" />
+            </svg>
+            Click to Place on Image
+          </button>
+          <button class="btn btn-danger" onclick="clearCurrentPOI()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="3,6 5,6 21,6" />
+              <path d="M19,6l-1,14H6L5,6" />
+              <path d="M10,11v6" />
+              <path d="M14,11v6" />
+              <path d="M9,6V4h6v2" />
+            </svg>
+            Clear Coordinates
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-dot green"></div> Placed: <span class="stat-val" id="stat-placed">0</span>
+    </div>
+    <div class="stat">
+      <div class="stat-dot amber"></div> Pending: <span class="stat-val" id="stat-pending">0</span>
+    </div>
+    <div class="stat">Image: <span class="stat-val" id="stat-img">—</span></div>
+    <div class="stat" style="margin-left:auto;">
+      <span style="opacity:0.4">P: place mode · scroll: zoom · drag: pan · esc: cancel</span>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script>
+    // ─── STATE ───────────────────────────────────────────────────────────────────
+    let pois = [];
+    let selectedId = null;
+    let placeMode = false;
+    let zoomLevel = 1;
+    let panX = 0, panY = 0;
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+    let imgNaturalW = 0, imgNaturalH = 0;
+    let descLang = 'pt';
+
+    // ─── LOAD JSON ────────────────────────────────────────────────────────────────
+    function loadJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          pois = Array.isArray(data) ? data : (data.pois || data.items || []);
+          // ensure x/y exist
+          pois = pois.map(p => ({ ...p, x: p.x ?? null, y: p.y ?? null }));
+          renderPOIList();
+          updateStats();
+          showToast(`Loaded ${pois.length} POIs`, 'success');
+        } catch {
+          showToast('Invalid JSON file', '');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    // ─── LOAD IMAGE ───────────────────────────────────────────────────────────────
+    function loadImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      const img = document.getElementById('ref-image');
+      img.onload = () => {
+        imgNaturalW = img.naturalWidth;
+        imgNaturalH = img.naturalHeight;
+        document.getElementById('stat-img').textContent = `${imgNaturalW}×${imgNaturalH}`;
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('image-stage').style.display = 'block';
+        fitImageToContainer();
+        renderAllMarkers();
+        showToast(`Image loaded (${imgNaturalW}×${imgNaturalH})`, 'info');
+      };
+      img.src = url;
+      e.target.value = '';
+    }
+
+    function fitImageToContainer() {
+      const container = document.getElementById('canvas-container');
+      const img = document.getElementById('ref-image');
+      const cw = container.clientWidth - 40;
+      const ch = container.clientHeight - 40;
+      const scaleX = cw / imgNaturalW;
+      const scaleY = ch / imgNaturalH;
+      zoomLevel = Math.min(scaleX, scaleY, 1);
+      panX = 0; panY = 0;
+      applyTransform();
+    }
+
+    function applyTransform() {
+      const stage = document.getElementById('image-stage');
+      stage.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+      document.getElementById('zoom-label').textContent = Math.round(zoomLevel * 100) + '%';
+    }
+
+    // ─── ZOOM & PAN ───────────────────────────────────────────────────────────────
+    function zoom(delta) {
+      zoomLevel = Math.max(0.1, Math.min(8, zoomLevel + delta));
+      applyTransform();
+    }
+
+    function resetZoom() {
+      fitImageToContainer();
+    }
+
+    document.getElementById('canvas-container').addEventListener('wheel', e => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.15 : 0.15;
+      zoomLevel = Math.max(0.1, Math.min(8, zoomLevel + delta));
+      applyTransform();
+    }, { passive: false });
+
+    document.getElementById('canvas-container').addEventListener('mousedown', e => {
+      if (placeMode) return;
+      if (e.button !== 0) return;
+      isPanning = true;
+      panStart = { x: e.clientX - panX, y: e.clientY - panY };
+      document.getElementById('canvas-container').style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (isPanning) {
+        panX = e.clientX - panStart.x;
+        panY = e.clientY - panStart.y;
+        applyTransform();
+      }
+
+      // cursor coords
+      if (document.getElementById('image-stage').style.display !== 'none') {
+        const coords = clientToNormalized(e.clientX, e.clientY);
+        if (coords && coords.x >= 0 && coords.x <= 1 && coords.y >= 0 && coords.y <= 1) {
+          document.getElementById('cursor-coords').textContent = `x: ${coords.x.toFixed(3)}  y: ${coords.y.toFixed(3)}`;
+        } else {
+          document.getElementById('cursor-coords').textContent = 'x: —  y: —';
+        }
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isPanning = false;
+      const cc = document.getElementById('canvas-container');
+      cc.style.cursor = placeMode ? 'crosshair' : 'default';
+    });
+
+    // ─── COORDINATE CONVERSION ────────────────────────────────────────────────────
+    function clientToNormalized(cx, cy) {
+      const img = document.getElementById('ref-image');
+      const rect = img.getBoundingClientRect();
+      const x = (cx - rect.left) / rect.width;
+      const y = (cy - rect.top) / rect.height;
+      return { x: Math.round(x * 1000) / 1000, y: Math.round(y * 1000) / 1000 };
+    }
+
+    function normalizedToPercent(nx, ny) {
+      return { left: nx * 100 + '%', top: ny * 100 + '%' };
+    }
+
+    // ─── PLACE MODE ───────────────────────────────────────────────────────────────
+    function togglePlaceMode() {
+      if (!selectedId) { showToast('Select a POI first', ''); return; }
+      placeMode = !placeMode;
+      updateModeUI();
+    }
+
+    function activatePlaceMode() {
+      if (!document.getElementById('ref-image').src || document.getElementById('image-stage').style.display === 'none') {
+        showToast('Load an image first', ''); return;
+      }
+      placeMode = true;
+      updateModeUI();
+    }
+
+    function updateModeUI() {
+      const cc = document.getElementById('canvas-container');
+      const indicator = document.getElementById('mode-indicator');
+      const btn = document.getElementById('place-mode-btn');
+      cc.classList.toggle('placing', placeMode);
+      if (placeMode) {
+        indicator.textContent = 'PLACE MODE — click to set POI';
+        indicator.classList.add('placing');
+        btn.style.borderColor = 'var(--accent)';
+        btn.style.color = 'var(--accent)';
+      } else {
+        indicator.textContent = 'PAN MODE';
+        indicator.classList.remove('placing');
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }
+    }
+
+    document.getElementById('canvas-container').addEventListener('click', e => {
+      if (!placeMode) return;
+      if (!selectedId) return;
+      const coords = clientToNormalized(e.clientX, e.clientY);
+      if (!coords || coords.x < 0 || coords.x > 1 || coords.y < 0 || coords.y > 1) return;
+
+      const poi = pois.find(p => p.id == selectedId);
+      if (!poi) return;
+      poi.x = coords.x;
+      poi.y = coords.y;
+
+      placeMode = false;
+      updateModeUI();
+      renderAllMarkers();
+      renderPOIList();
+      updateStats();
+      updateDetailPanel();
+      showToast(`Placed "${getPoiName(poi, 'en')}"`, 'success');
+    });
+
+    // ─── POI LIST ────────────────────────────────────────────────────────────────
+    function renderPOIList() {
+      const list = document.getElementById('poi-list');
+      list.innerHTML = '';
+      pois.forEach(poi => {
+        const placed = poi.x != null && poi.y != null;
+        const active = poi.id == selectedId;
+        const name = getPoiName(poi, 'en') || getPoiName(poi, 'pt') || poi.id;
+        const div = document.createElement('div');
+        div.className = `poi-item ${placed ? 'placed' : ''} ${active ? 'active' : ''}`;
+        div.innerHTML = `
+      <div class="poi-dot"></div>
+      <div class="poi-info">
+        <div class="poi-name">${name}</div>
+        <div class="poi-coords">${placed ? `${poi.x.toFixed(3)}, ${poi.y.toFixed(3)}` : 'not placed'}</div>
+      </div>
+      <div class="poi-cat">${poi.category || '—'}</div>
+    `;
+        div.onclick = () => selectPOI(poi.id);
+        list.appendChild(div);
+      });
+    }
+
+    function getPoiName(poi, lang) {
+      if (!poi.name) return poi.label || poi.title || '';
+      if (typeof poi.name === 'string') return poi.name;
+      return poi.name[lang] || poi.name['en'] || poi.name['pt'] || '';
+    }
+
+    function getDesc(poi, lang) {
+      if (!poi.description) return '';
+      if (typeof poi.description === 'string') return poi.description;
+      return poi.description[lang] || '';
+    }
+
+    // ─── SELECT POI ──────────────────────────────────────────────────────────────
+    function selectPOI(id) {
+      selectedId = id;
+      renderPOIList();
+      renderAllMarkers();
+      updateDetailPanel();
+      // scroll selected into view
+      const items = document.querySelectorAll('.poi-item');
+      const idx = pois.findIndex(p => p.id == id);
+      if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+    }
+
+    function updateDetailPanel() {
+      const poi = pois.find(p => p.id == selectedId);
+      const empty = document.getElementById('detail-empty');
+      const panel = document.getElementById('detail-panel');
+      if (!poi) { empty.style.display = 'flex'; panel.style.display = 'none'; return; }
+      empty.style.display = 'none';
+      panel.style.display = 'flex';
+
+      document.getElementById('dp-title').textContent = getPoiName(poi, 'en') || getPoiName(poi, 'pt');
+      document.getElementById('dp-cat').textContent = poi.category || 'uncategorized';
+      document.getElementById('dp-desc').textContent = getDesc(poi, descLang) || '—';
+
+      const placed = poi.x != null && poi.y != null;
+      const xInput = document.getElementById('coord-x');
+      const yInput = document.getElementById('coord-y');
+      xInput.value = placed ? poi.x : '';
+      yInput.value = placed ? poi.y : '';
+
+      const status = document.getElementById('dp-status');
+      if (placed) {
+        status.className = 'status-row placed';
+        status.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg> Placed at (${poi.x.toFixed(3)}, ${poi.y.toFixed(3)})`;
+      } else {
+        status.className = 'status-row unplaced';
+        status.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Not yet placed`;
+      }
+    }
+
+    function setLang(lang, btn) {
+      descLang = lang;
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateDetailPanel();
+    }
+
+    function onCoordInput() {
+      const poi = pois.find(p => p.id == selectedId);
+      if (!poi) return;
+      const x = parseFloat(document.getElementById('coord-x').value);
+      const y = parseFloat(document.getElementById('coord-y').value);
+      if (!isNaN(x) && !isNaN(y) && x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+        poi.x = Math.round(x * 1000) / 1000;
+        poi.y = Math.round(y * 1000) / 1000;
+        renderAllMarkers();
+        renderPOIList();
+        updateStats();
+        updateDetailPanel();
+      }
+    }
+
+    function clearCurrentPOI() {
+      const poi = pois.find(p => p.id == selectedId);
+      if (!poi) return;
+      poi.x = null; poi.y = null;
+      renderAllMarkers();
+      renderPOIList();
+      updateStats();
+      updateDetailPanel();
+      showToast('Coordinates cleared', '');
+    }
+
+    // ─── MARKERS ─────────────────────────────────────────────────────────────────
+    function renderAllMarkers() {
+      const layer = document.getElementById('markers-layer');
+      layer.innerHTML = '';
+      pois.forEach(poi => {
+        if (poi.x == null || poi.y == null) return;
+        const m = document.createElement('div');
+        m.className = `marker ${poi.id == selectedId ? 'active' : ''}`;
+        m.style.left = (poi.x * 100) + '%';
+        m.style.top = (poi.y * 100) + '%';
+        const name = getPoiName(poi, 'en') || getPoiName(poi, 'pt');
+        m.innerHTML = `
+      <div class="marker-inner">
+        <div class="marker-cross"><div class="marker-dot"></div></div>
+        <div class="marker-label">${name}</div>
+      </div>`;
+        layer.appendChild(m);
+      });
+    }
+
+    // ─── STATS ────────────────────────────────────────────────────────────────────
+    function updateStats() {
+      const total = pois.length;
+      const placed = pois.filter(p => p.x != null && p.y != null).length;
+      document.getElementById('placed-count').textContent = placed;
+      document.getElementById('total-count').textContent = total;
+      document.getElementById('progress-fill').style.width = total ? (placed / total * 100) + '%' : '0%';
+      document.getElementById('stat-placed').textContent = placed;
+      document.getElementById('stat-pending').textContent = total - placed;
+    }
+
+    // ─── EXPORT ───────────────────────────────────────────────────────────────────
+    function exportJSON() {
+      const data = JSON.stringify(pois, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pois_calibrated.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Exported pois_calibrated.json', 'success');
+    }
+
+    // ─── KEYBOARD ────────────────────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === 'p' || e.key === 'P') togglePlaceMode();
+      if (e.key === 'Escape') { placeMode = false; updateModeUI(); }
+      if (e.key === '+' || e.key === '=') zoom(0.2);
+      if (e.key === '-') zoom(-0.2);
+      if (e.key === 'f' || e.key === 'F') resetZoom();
+      // arrow navigation
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const idx = pois.findIndex(p => p.id == selectedId);
+        if (idx === -1) { if (pois.length) selectPOI(pois[0].id); return; }
+        const next = e.key === 'ArrowDown' ? Math.min(idx + 1, pois.length - 1) : Math.max(idx - 1, 0);
+        selectPOI(pois[next].id);
+      }
+    });
+
+    // ─── DRAG DROP ────────────────────────────────────────────────────────────────
+    const dropZone = document.getElementById('drop-zone');
+    document.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    document.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    document.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      for (const file of files) {
+        if (file.type.startsWith('image/')) {
+          const fakeE = { target: { files: [file], value: '' } };
+          loadImage(fakeE);
+        } else if (file.name.endsWith('.json')) {
+          const fakeE = { target: { files: [file], value: '' } };
+          loadJSON(fakeE);
+        }
+      }
+    });
+
+    // ─── TOAST ────────────────────────────────────────────────────────────────────
+    function showToast(msg, type) {
+      const c = document.getElementById('toasts');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 2600);
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────────
+    // Load a demo JSON so the tool shows something out of the box
+    const DEMO_POIS = [
+      { "id": "1", "name": { "pt": "Castelo de São Jorge", "en": "St. George's Castle" }, "category": "heritage", "x": null, "y": null, "description": { "pt": "Fortificação moura do século XI.", "en": "Moorish fortification from 11th century." }, "survived1755": true },
+      { "id": "2", "name": { "pt": "Mosteiro dos Jerónimos", "en": "Jerónimos Monastery" }, "category": "heritage", "x": null, "y": null, "description": { "pt": "Mosteiro manuelino do século XVI.", "en": "16th-century Manueline monastery." }, "survived1755": false },
+      { "id": "3", "name": { "pt": "Torre de Belém", "en": "Tower of Belém" }, "category": "heritage", "x": null, "y": null, "description": { "pt": "Torre manuelina do séc. XVI.", "en": "16th-century Manueline tower." }, "survived1755": true },
+      { "id": "4", "name": { "pt": "Ponte 25 de Abril", "en": "25th of April Bridge" }, "category": "landmark", "x": null, "y": null, "description": { "pt": "Ponte suspensa inaugurada em 1966.", "en": "Suspension bridge opened in 1966." }, "survived1755": false },
+      { "id": "5", "name": { "pt": "Sé de Lisboa", "en": "Lisbon Cathedral" }, "category": "heritage", "x": null, "y": null, "description": { "pt": "Catedral românica do século XII.", "en": "12th-century Romanesque cathedral." }, "survived1755": false }
+    ];
+
+    pois = DEMO_POIS;
+    renderPOIList();
+    updateStats();
+  </script>
+</body>
+
+</html>

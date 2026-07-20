@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TileStories — AR Switch Options</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #0E0C08;
+            min-height: 100vh;
+            padding: 48px 24px 64px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: rgba(240, 230, 204, 0.45);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 11px;
+            color: rgba(240, 230, 204, 0.18);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 52px;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* ─── OPTION WRAPPER ─── */
+        .option-block {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-tag {
+            font-size: 10px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: rgba(240, 230, 204, 0.2);
+            padding-left: 4px;
+        }
+
+        /* ─── THE SWITCH ROW ─── */
+        .switch-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: border-color 0.4s ease, background 0.4s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .switch-row:active {
+            transform: scale(0.985);
+        }
+
+        /* ─── PILL TRACK ─── */
+        .track {
+            position: relative;
+            width: 72px;
+            height: 40px;
+            border-radius: 100px;
+            flex-shrink: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Thumb */
+        .thumb {
+            position: absolute;
+            top: 4px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 16px;
+            flex-shrink: 0;
+            z-index: 2;
+        }
+
+        /* ─── TEXT SIDE ─── */
+        .txt {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex: 1;
+        }
+
+        .txt-title {
+            font-family: 'Fraunces', serif;
+            font-size: 17px;
+            font-weight: 700;
+            transition: color 0.35s ease;
+            line-height: 1;
+        }
+
+        .txt-sub {
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            transition: color 0.35s ease;
+            font-weight: 500;
+        }
+
+        /* ─── SCANNING INDICATOR (right side) ─── */
+        .scan-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.4s ease;
+        }
+
+        /* ════════════════════════════════════
+   VARIANT A — Green Active
+════════════════════════════════════ */
+        /* OFF */
+        .va .track {
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .va .thumb {
+            left: 4px;
+            background: #3a3a3a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .va .txt-title {
+            color: rgba(240, 230, 204, 0.35);
+        }
+
+        .va .txt-sub {
+            color: rgba(240, 230, 204, 0.2);
+        }
+
+        .va .scan-dot {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ON */
+        .va.on {
+            border-color: rgba(34, 197, 94, 0.2);
+            background: rgba(34, 197, 94, 0.04);
+        }
+
+        .va.on .track {
+            background: #16a34a;
+            box-shadow: 0 0 16px rgba(34, 197, 94, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .va.on .thumb {
+            left: 36px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .va.on .txt-title {
+            color: #4ade80;
+        }
+
+        .va.on .txt-sub {
+            color: rgba(74, 222, 128, 0.6);
+        }
+
+        .va.on .scan-dot {
+            background: #4ade80;
+            animation: blinkDot 1.4s ease-in-out infinite;
+        }
+
+        /* ════════════════════════════════════
+   VARIANT B — Azure / Sky Active
+════════════════════════════════════ */
+        .vb .track {
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .vb .thumb {
+            left: 4px;
+            background: #3a3a3a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .vb .txt-title {
+            color: rgba(240, 230, 204, 0.35);
+        }
+
+        .vb .txt-sub {
+            color: rgba(240, 230, 204, 0.2);
+        }
+
+        .vb .scan-dot {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .vb.on {
+            border-color: rgba(14, 165, 233, 0.22);
+            background: rgba(14, 165, 233, 0.04);
+        }
+
+        .vb.on .track {
+            background: #0284c7;
+            box-shadow: 0 0 16px rgba(14, 165, 233, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .vb.on .thumb {
+            left: 36px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .vb.on .txt-title {
+            color: #38bdf8;
+        }
+
+        .vb.on .txt-sub {
+            color: rgba(56, 189, 248, 0.6);
+        }
+
+        .vb.on .scan-dot {
+            background: #38bdf8;
+            animation: blinkDot 1.4s ease-in-out infinite;
+        }
+
+        /* ════════════════════════════════════
+   VARIANT C — Amber warm glow (AR feel)
+════════════════════════════════════ */
+        .vc .track {
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .vc .thumb {
+            left: 4px;
+            background: #3a3a3a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .vc .txt-title {
+            color: rgba(240, 230, 204, 0.35);
+        }
+
+        .vc .txt-sub {
+            color: rgba(240, 230, 204, 0.2);
+        }
+
+        .vc .scan-dot {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .vc.on {
+            border-color: rgba(245, 158, 11, 0.22);
+            background: rgba(245, 158, 11, 0.04);
+        }
+
+        .vc.on .track {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .vc.on .thumb {
+            left: 36px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .vc.on .txt-title {
+            color: #fbbf24;
+        }
+
+        .vc.on .txt-sub {
+            color: rgba(251, 191, 36, 0.6);
+        }
+
+        .vc.on .scan-dot {
+            background: #fbbf24;
+            animation: blinkDot 1.4s ease-in-out infinite;
+        }
+
+        /* ════════════════════════════════════
+   VARIANT D — Scan Ring on Thumb
+   (thumb shows a mini spinning ring when ON)
+════════════════════════════════════ */
+        .vd .track {
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .vd .thumb {
+            left: 4px;
+            background: #3a3a3a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .vd .txt-title {
+            color: rgba(240, 230, 204, 0.35);
+        }
+
+        .vd .txt-sub {
+            color: rgba(240, 230, 204, 0.2);
+        }
+
+        .vd .scan-dot {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .vd.on {
+            border-color: rgba(34, 197, 94, 0.2);
+            background: rgba(34, 197, 94, 0.04);
+        }
+
+        .vd.on .track {
+            background: #15803d;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .vd.on .thumb {
+            left: 36px;
+            background: #052e16;
+            box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+            animation: thumbPulse 2s ease-in-out infinite;
+        }
+
+        .vd.on .txt-title {
+            color: #4ade80;
+        }
+
+        .vd.on .txt-sub {
+            color: rgba(74, 222, 128, 0.6);
+        }
+
+        .vd.on .scan-dot {
+            background: #4ade80;
+            animation: blinkDot 1.4s ease-in-out infinite;
+        }
+
+        /* ════════════════════════════════════
+   VARIANT E — Two-tone scan sweep in track
+════════════════════════════════════ */
+        .ve .track {
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .ve .thumb {
+            left: 4px;
+            background: #3a3a3a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .ve .txt-title {
+            color: rgba(240, 230, 204, 0.35);
+        }
+
+        .ve .txt-sub {
+            color: rgba(240, 230, 204, 0.2);
+        }
+
+        .ve .scan-dot {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .ve.on {
+            border-color: rgba(14, 165, 233, 0.22);
+            background: rgba(14, 165, 233, 0.03);
+        }
+
+        .ve.on .track {
+            background: #0369a1;
+            box-shadow: 0 0 16px rgba(14, 165, 233, 0.3);
+            overflow: hidden;
+        }
+
+        .ve.on .track::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+            animation: sweepTrack 1.6s ease-in-out infinite;
+            border-radius: 100px;
+        }
+
+        .ve.on .thumb {
+            left: 36px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .ve.on .txt-title {
+            color: #7dd3fc;
+        }
+
+        .ve.on .txt-sub {
+            color: rgba(125, 211, 252, 0.6);
+        }
+
+        .ve.on .scan-dot {
+            background: #38bdf8;
+            animation: blinkDot 1.4s ease-in-out infinite;
+        }
+
+        /* ════════════════════════════════════
+   VARIANT F — Corner bracket + switch combo
+   (has scan corners that appear on thumb when ON)
+════════════════════════════════════ */
+        .vf .track {
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .vf .thumb-wrap {
+            position: relative;
+            width: 72px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+
+        .vf .track-f {
+            position: absolute;
+            inset: 0;
+            border-radius: 100px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .vf .thumb-f {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #3a3a3a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 15px;
+            z-index: 2;
+        }
+
+        .vf .txt-title {
+            color: rgba(240, 230, 204, 0.35);
+        }
+
+        .vf .txt-sub {
+            color: rgba(240, 230, 204, 0.2);
+        }
+
+        .vf .scan-dot {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .vf.on {
+            border-color: rgba(34, 197, 94, 0.2);
+            background: rgba(34, 197, 94, 0.03);
+        }
+
+        .vf.on .track-f {
+            background: #15803d;
+            box-shadow: 0 0 16px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .vf.on .thumb-f {
+            left: 36px;
+            background: #052e16;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .vf.on .txt-title {
+            color: #4ade80;
+        }
+
+        .vf.on .txt-sub {
+            color: rgba(74, 222, 128, 0.6);
+        }
+
+        .vf.on .scan-dot {
+            background: #4ade80;
+            animation: blinkDot 1.4s ease-in-out infinite;
+        }
+
+        /* Corner brackets that appear around the thumb on ON */
+        .bracket {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .bracket.tl {
+            top: 0;
+            left: 32px;
+            border-top: 1.5px solid #4ade80;
+            border-left: 1.5px solid #4ade80;
+            border-radius: 2px 0 0 0;
+        }
+
+        .bracket.tr {
+            top: 0;
+            right: 0;
+            border-top: 1.5px solid #4ade80;
+            border-right: 1.5px solid #4ade80;
+            border-radius: 0 2px 0 0;
+        }
+
+        .bracket.bl {
+            bottom: 0;
+            left: 32px;
+            border-bottom: 1.5px solid #4ade80;
+            border-left: 1.5px solid #4ade80;
+            border-radius: 0 0 0 2px;
+        }
+
+        .bracket.br {
+            bottom: 0;
+            right: 0;
+            border-bottom: 1.5px solid #4ade80;
+            border-right: 1.5px solid #4ade80;
+            border-radius: 0 0 2px 0;
+        }
+
+        .vf.on .bracket {
+            opacity: 1;
+        }
+
+        .vf.on .bracket.tl {
+            left: 30px;
+        }
+
+        .vf.on .bracket.bl {
+            left: 30px;
+        }
+
+        /* ════════ ANIMATIONS ════════ */
+        @keyframes blinkDot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.3;
+                transform: scale(0.7);
+            }
+        }
+
+        @keyframes thumbPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 0 5px rgba(74, 222, 128, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        @keyframes sweepTrack {
+            0% {
+                left: -20px;
+            }
+
+            100% {
+                left: 80px;
+            }
+        }
+
+        /* ════ DIVIDER ════ */
+        .divider {
+            width: 100%;
+            max-width: 500px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            margin: 12px 0;
+        }
+
+        /* ════ THUMB ICON EMOJI ════ */
+        .thumb-emoji {
+            font-size: 15px;
+            line-height: 1;
+            transition: filter 0.3s;
+        }
+
+        .on .thumb-emoji {
+            filter: grayscale(0);
+        }
+
+        .off .thumb-emoji {
+            filter: grayscale(1) brightness(0.5);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>AR Camera Switch</h1>
+    <div class="subtitle">TileStories · Functional Colors · Tap to toggle</div>
+
+    <div class="col">
+
+        <!-- F: GREEN + corner brackets on thumb -->
+        <div class="option-block">
+            <div class="option-tag">F · Green · scan brackets on thumb</div>
+            <div class="switch-row vf off" id="swF" onclick="tog('F')">
+                <div class="thumb-wrap">
+                    <div class="track-f"></div>
+                    <div class="thumb-f"><span class="thumb-emoji">📷</span></div>
+                    <div class="bracket tl"></div>
+                    <div class="bracket tr"></div>
+                    <div class="bracket bl"></div>
+                    <div class="bracket br"></div>
+                </div>
+                <div class="txt">
+                    <div class="txt-title">AR Camera</div>
+                    <div class="txt-sub" id="subF">Inactive</div>
+                </div>
+                <div class="scan-dot"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const states = { F: false };
+
+        const onLabels = {
+            F: 'Active · Scanning',
+        };
+
+        function tog(id) {
+            states[id] = !states[id];
+            const el = document.getElementById('sw' + id);
+            const sub = document.getElementById('sub' + id);
+            el.classList.toggle('on', states[id]);
+            el.classList.toggle('off', !states[id]);
+            sub.textContent = states[id] ? onLabels[id] : 'Inactive';
+        }
+    </script>
+
+</body>
+
+</html>

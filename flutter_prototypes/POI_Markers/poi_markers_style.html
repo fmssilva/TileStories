@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TileStories — POI Marker Prototype</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      /* App palette */
+      --gold: #C9973A;
+      --parch: rgba(240, 230, 204, 0.92);
+      --parch-mid: rgba(240, 230, 204, 0.55);
+      --parch-dim: rgba(240, 230, 204, 0.30);
+
+      /* Destruction border colours */
+      --d0: #22c55e;
+      --d20: #84cc16;
+      --d40: #eab308;
+      --d60: #f97316;
+      --d80: #ef4444;
+      --d100: #991b1b;
+
+      /* Type fill colours — DARK tinted for circle bg, icon will be white */
+      --rel-bg: #2d1a5c;
+      /* violet deep */
+      --roy-bg: #3d2200;
+      /* amber deep */
+      --mil-bg: #3d0a0a;
+      /* crimson deep */
+      --civ-bg: #0a1f4d;
+      /* cobalt deep */
+      --mar-bg: #002f3d;
+      /* teal deep */
+      --inf-bg: #1e2026;
+      /* grey deep */
+      --lan-bg: #0a2d12;
+      /* green deep */
+      --com-bg: #3d1400;
+      /* orange deep */
+
+      /* Type accent (glow / ring) */
+      --rel-ac: #7c3aed;
+      --roy-ac: #b45309;
+      --mil-ac: #dc2626;
+      --civ-ac: #2563be;
+      --mar-ac: #0891b2;
+      --inf-ac: #6b7280;
+      --lan-ac: #16a34a;
+      --com-ac: #ea580c;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #070605;
+      color: var(--parch);
+      padding: 0 0 80px;
+    }
+
+    /* ═══════════ PAGE LAYOUT ═══════════ */
+    .page-title {
+      text-align: center;
+      padding: 32px 20px 6px;
+      font-family: 'Fraunces', serif;
+      font-size: 13px;
+      font-weight: 300;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: rgba(201, 151, 58, .45);
+    }
+
+    .page-sub {
+      text-align: center;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(240, 230, 204, .2);
+      margin-bottom: 32px;
+    }
+
+    /* scale section */
+    .scale-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      padding: 0 16px;
+      margin-bottom: 40px;
+    }
+
+    .scale-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 0 10px;
+    }
+
+    .scale-label {
+      font-size: 9px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(240, 230, 204, .22);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ═══════════ PANORAMA CANVAS ═══════════ */
+    .pano-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto 48px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .06);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, .7);
+    }
+
+    .pano-img {
+      width: 100%;
+      display: block;
+      filter: brightness(0.65) saturate(0.7);
+    }
+
+    .pano-title {
+      text-align: center;
+      font-size: 9px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: rgba(240, 230, 204, .2);
+      padding: 8px 0 0;
+    }
+
+    /* ═══════════ CORE MARKER ANATOMY ═══════════ */
+    /*
+  Structure:
+    .poi-root          — position anchor, z-index management
+      .poi-ring        — animated pulse ring (selected only)
+      .poi-body        — the circle / squircle shape
+        .poi-icon      — white SVG icon inside
+      .poi-label       — text pill, positioned above-right
+*/
+
+    .poi-root {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      /* z-index by scale: scale1=10, scale2=20, scale3=30, scale4=40, selected=100 */
+    }
+
+    .poi-root:hover {
+      z-index: 50 !important;
+    }
+
+    /* ── BODY ── */
+    .poi-body {
+      position: relative;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-radius .3s ease, transform .2s ease, box-shadow .2s ease;
+      /* glass inner highlight */
+    }
+
+    .poi-body::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .18) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    /* hover lift */
+    .poi-root:hover .poi-body {
+      transform: scale(1.08) translateY(-1px);
+    }
+
+    /* ── SELECTED squircle morph ── */
+    .poi-body.selected {
+      border-radius: 30% !important;
+      transform: scale(1.18) translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, .65), 0 0 0 2px rgba(255, 255, 255, .12);
+    }
+
+    /* ── PULSE RING ── */
+    .poi-ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1.5px solid;
+      opacity: 0;
+      animation: pulseRing 2.4s ease-out infinite;
+      pointer-events: none;
+    }
+
+    .poi-ring-2 {
+      animation-delay: 1.2s;
+    }
+
+    @keyframes pulseRing {
+      0% {
+        opacity: .7;
+        transform: scale(.9);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.7);
+      }
+    }
+
+    /* ── ICON ── */
+    .poi-icon {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      /* icons are white/parch — always legible on dark bg */
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .4));
+    }
+
+    /* emoji icons get a subtle text-shadow instead */
+    .poi-icon-em {
+      font-style: normal;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .5);
+    }
+
+    /* ── LABEL ── */
+    .poi-label {
+      position: absolute;
+      /* default: anchor bottom-left of label = just right of marker top */
+      white-space: nowrap;
+      pointer-events: none;
+
+      background: rgba(6, 5, 3, .82);
+      border: 1px solid rgba(255, 255, 255, .09);
+      backdrop-filter: blur(8px);
+      border-radius: 6px;
+      padding: 3px 7px 3px 6px;
+
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(240, 230, 204, .88);
+      letter-spacing: .01em;
+      line-height: 1.3;
+
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .45);
+
+      /* default position: top-right of marker */
+      left: 60%;
+      bottom: 55%;
+      transform: none;
+
+      /* z is inherited from root + 1 */
+      z-index: 1;
+    }
+
+    /* label left-side variant (for markers near right edge) */
+    .poi-label.label-left {
+      left: auto;
+      right: 60%;
+      text-align: right;
+    }
+
+    /* label below variant */
+    .poi-label.label-below {
+      bottom: auto;
+      top: 55%;
+    }
+
+    /* selected label — slightly more opaque, gold accent */
+    .poi-label.label-sel {
+      background: rgba(8, 6, 2, .92);
+      border-color: rgba(201, 151, 58, .25);
+      color: rgba(240, 230, 204, .96);
+      font-weight: 600;
+      box-shadow: 0 3px 14px rgba(0, 0, 0, .55), 0 0 0 1px rgba(201, 151, 58, .1);
+    }
+
+    /* ── NO LABEL on tiny scales ── */
+    .poi-root.scale1 .poi-label,
+    .poi-root.scale2 .poi-label {
+      display: none;
+    }
+
+    .poi-root.scale3 .poi-label {
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .poi-root.scale3:hover .poi-label {
+      opacity: 1;
+    }
+
+    /* ═══════════ SCALE DEFINITIONS ═══════════ */
+    /* Scale 1 — city zoom ~24px, no icon, no label */
+    .poi-body.s1 {
+      width: 14px;
+      height: 14px;
+      border-width: 2px;
+    }
+
+    .poi-body.s1 .poi-icon {
+      display: none;
+    }
+
+    /* Scale 2 — district ~32px, no icon, label on hover */
+    .poi-body.s2 {
+      width: 22px;
+      height: 22px;
+      border-width: 2.5px;
+    }
+
+    .poi-body.s2 .poi-icon {
+      display: none;
+    }
+
+    /* Scale 3 — street ~44px, icon visible, label on hover */
+    .poi-body.s3 {
+      width: 36px;
+      height: 36px;
+      border-width: 2.5px;
+    }
+
+    .poi-body.s3 .poi-icon {
+      font-size: 16px;
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Scale 4 — building ~60px, icon prominent, label always */
+    .poi-body.s4 {
+      width: 52px;
+      height: 52px;
+      border-width: 3px;
+    }
+
+    .poi-body.s4 .poi-icon {
+      font-size: 24px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .poi-root.scale4 .poi-label {
+      display: block !important;
+      opacity: 1 !important;
+    }
+
+    /* Scale 5 — selected / tapped */
+    .poi-body.s5 {
+      width: 64px;
+      height: 64px;
+      border-width: 3px;
+    }
+
+    .poi-body.s5 .poi-icon {
+      font-size: 28px;
+      width: 32px;
+      height: 32px;
+    }
+
+    .poi-root.scale5 .poi-label {
+      display: block !important;
+      opacity: 1 !important;
+    }
+
+    /* ═══════════ DESTRUCTION BORDER STYLES ═══════════ */
+    /* 0–25%: solid */
+    .d-intact {
+      border-style: solid;
+      border-color: var(--d0);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .3), 0 0 10px rgba(34, 197, 94, .4);
+    }
+
+    .d-minor {
+      border-style: solid;
+      border-color: var(--d20);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .3), 0 0 9px rgba(132, 204, 22, .35);
+    }
+
+    /* 25–50%: dashed */
+    .d-partial {
+      border-style: dashed;
+      border-color: var(--d40);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .3), 0 0 8px rgba(234, 179, 8, .35);
+    }
+
+    .d-heavy {
+      border-style: dashed;
+      border-color: var(--d60);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .3), 0 0 8px rgba(249, 115, 22, .3);
+    }
+
+    /* 75–100%: dotted + fade */
+    .d-ruins {
+      border-style: dotted;
+      border-color: var(--d80);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .3), 0 0 7px rgba(239, 68, 68, .28);
+      opacity: .72;
+      filter: grayscale(.25);
+    }
+
+    .d-gone {
+      border-style: dotted;
+      border-color: var(--d100);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, .3);
+      opacity: .38;
+      filter: grayscale(.55);
+    }
+
+    /* ═══════════ ANIMATIONS ═══════════ */
+    @keyframes floatBob {
+
+      0%,
+      100% {
+        transform: translateY(0) scale(1.18);
+      }
+
+      50% {
+        transform: translateY(-3px) scale(1.18);
+      }
+    }
+
+    .poi-body.selected {
+      animation: floatBob 3s ease-in-out infinite;
+    }
+
+    /* ═══════════ SECTION HEADERS ═══════════ */
+    .section {
+      max-width: 900px;
+      margin: 0 auto 10px;
+      padding: 0 20px;
+    }
+
+    .section h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: rgba(201, 151, 58, .4);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section h2::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(201, 151, 58, .1);
+    }
+
+    .section p {
+      font-size: 10px;
+      color: rgba(240, 230, 204, .22);
+      letter-spacing: .04em;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    /* ═══════════ SCALE SHOWCASE ═══════════ */
+    .showcase-bg {
+      background: #1a1c22;
+      border-radius: 12px;
+      padding: 28px 24px 22px;
+      border: 1px solid rgba(255, 255, 255, .05);
+      display: flex;
+      gap: 32px;
+      align-items: flex-end;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+      position: relative;
+      background-image: linear-gradient(rgba(255, 255, 255, .015) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .015) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* standalone markers for showcase (not absolute positioned) */
+    .mk {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mk .poi-body {
+      position: relative;
+    }
+
+    .mk .poi-label {
+      position: relative;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      top: auto;
+      transform: none;
+      display: block !important;
+      opacity: 1 !important;
+    }
+
+    .mk .poi-ring {
+      display: none;
+    }
+
+    .mk .poi-body.selected .poi-ring {
+      display: block;
+    }
+
+    .mk-caption {
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(240, 230, 204, .22);
+      text-align: center;
+    }
+
+    /* ═══════════ GUIDE SECTION ═══════════ */
+    .guide {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .guide-card {
+      background: rgba(255, 255, 255, .022);
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin-bottom: 14px;
+    }
+
+    .guide-card h3 {
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: .6;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .guide-card h3::before {
+      content: '';
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: .5;
+    }
+
+    .guide-card p,
+    .guide-card li {
+      font-size: 10.5px;
+      color: rgba(240, 230, 204, .38);
+      line-height: 1.8;
+    }
+
+    .guide-card li {
+      margin-left: 14px;
+      margin-bottom: 4px;
+    }
+
+    .guide-card code {
+      font-family: 'DM Mono', monospace;
+      font-size: 9.5px;
+      background: rgba(255, 255, 255, .05);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: rgba(201, 151, 58, .65);
+    }
+
+    .guide-card strong {
+      color: rgba(240, 230, 204, .65);
+      font-weight: 600;
+    }
+
+    .tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+
+    .tbl th {
+      color: rgba(240, 230, 204, .3);
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      text-align: left;
+    }
+
+    .tbl td {
+      padding: 5px 8px;
+      color: rgba(240, 230, 204, .38);
+      border-bottom: 1px solid rgba(255, 255, 255, .035);
+      vertical-align: top;
+    }
+
+    .tbl td:first-child {
+      color: rgba(240, 230, 204, .55);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .dot-swatch {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page-title">TileStories · POI Marker System</div>
+  <div class="page-sub">5 scales · destruction borders · type colours · selected state · label rules</div>
+
+  <!-- ════════════════════════════════════════════════
+     §1  SCALE SHOWCASE
+════════════════════════════════════════════════ -->
+  <div class="section">
+    <h2>Scale System</h2>
+    <p>5 discrete sizes mapped to zoom level. Icon appears at Scale 3+. Label always-on at Scale 4+, hover-only at Scale
+      3, hidden below.</p>
+  </div>
+
+  <div class="section">
+    <div class="showcase-bg">
+
+      <!-- Scale 1 — city, 14px, colour+border only -->
+      <div class="mk">
+        <div class="poi-body s1 d-intact" style="background:var(--rel-bg)"></div>
+        <div class="mk-caption">Scale 1<br>14px · city</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s1 d-ruins" style="background:var(--mil-bg)"></div>
+        <div class="mk-caption">ruins</div>
+      </div>
+
+      <!-- Scale 2 — district, 22px -->
+      <div class="mk">
+        <div class="poi-body s2 d-intact" style="background:var(--mar-bg)"></div>
+        <div class="mk-caption">Scale 2<br>22px · district</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s2 d-partial" style="background:var(--roy-bg)"></div>
+        <div class="mk-caption">partial</div>
+      </div>
+
+      <!-- Scale 3 — street, 36px, icon appears -->
+      <div class="mk">
+        <div class="poi-body s3 d-intact" style="background:var(--rel-bg)">
+          <span class="poi-icon poi-icon-em" style="font-size:16px">⛪</span>
+        </div>
+        <div class="poi-label"
+          style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:4px;font-size:9px">Sé de
+          Lisboa</div>
+        <div class="mk-caption">Scale 3<br>36px · street</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s3 d-heavy" style="background:var(--mil-bg)">
+          <span class="poi-icon poi-icon-em" style="font-size:16px">🛡️</span>
+        </div>
+        <div class="poi-label"
+          style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:4px;font-size:9px">Forte do
+          Bom Sucesso</div>
+        <div class="mk-caption">heavy</div>
+      </div>
+
+      <!-- Scale 4 — building, 52px -->
+      <div class="mk">
+        <div class="poi-body s4 d-minor" style="background:var(--roy-bg)">
+          <span class="poi-icon poi-icon-em" style="font-size:24px">👑</span>
+        </div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Palácio dos<br>Duques de Bragança</div>
+        <div class="mk-caption">Scale 4<br>52px · building</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-gone" style="background:var(--com-bg)">
+          <span class="poi-icon poi-icon-em" style="font-size:24px">⚖️</span>
+        </div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Casa da Índia</div>
+        <div class="mk-caption">vanished</div>
+      </div>
+
+      <!-- Scale 5 — SELECTED squircle float -->
+      <div class="mk">
+        <div style="position:relative;display:flex;align-items:center;justify-content:center;width:90px;height:90px">
+          <!-- pulse rings -->
+          <div class="poi-ring"
+            style="border-color:var(--roy-ac);position:absolute;inset:-8px;border-radius:50%;border-width:1.5px;border-style:solid;animation:pulseRing 2.4s ease-out infinite;opacity:0">
+          </div>
+          <div class="poi-ring poi-ring-2"
+            style="border-color:var(--roy-ac);position:absolute;inset:-8px;border-radius:50%;border-width:1px;border-style:solid;animation:pulseRing 2.4s ease-out infinite 1.2s;opacity:0">
+          </div>
+          <div class="poi-body s5 d-minor selected" style="background:var(--roy-bg)">
+            <span class="poi-icon poi-icon-em" style="font-size:28px">👑</span>
+          </div>
+        </div>
+        <div class="poi-label label-sel"
+          style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:4px">Palácio do Alvito</div>
+        <div class="mk-caption">Scale 5 · SELECTED<br>squircle + float + pulse</div>
+      </div>
+
+    </div>
+  </div><!-- /section -->
+
+
+  <!-- ════════════════════════════════════════════════
+     §2  ALL DESTRUCTION STATES on one type
+════════════════════════════════════════════════ -->
+  <div class="section" style="margin-top:32px">
+    <h2>Destruction Spectrum</h2>
+    <p>Same Religious type across all 6 destruction levels. Border style + colour + opacity + grayscale all shift
+      together.</p>
+  </div>
+  <div class="section">
+    <div class="showcase-bg" style="gap:18px">
+      <div class="mk">
+        <div class="poi-body s4 d-intact" style="background:var(--rel-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">⛪</span></div>
+        <div class="poi-label"
+          style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px;color:#22c55e;border-color:rgba(34,197,94,.2)">
+          0% Intact</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-minor" style="background:var(--rel-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">⛪</span></div>
+        <div class="poi-label"
+          style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px;color:#84cc16;border-color:rgba(132,204,22,.2)">
+          20% Minor</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-partial" style="background:var(--rel-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">⛪</span></div>
+        <div class="poi-label"
+          style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px;color:#eab308;border-color:rgba(234,179,8,.2)">
+          40% Partial</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-heavy" style="background:var(--rel-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">⛪</span></div>
+        <div class="poi-label"
+          style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px;color:#f97316;border-color:rgba(249,115,22,.2)">
+          60% Heavy</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-ruins" style="background:var(--rel-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">⛪</span></div>
+        <div class="poi-label"
+          style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px;color:#ef4444;border-color:rgba(239,68,68,.2)">
+          80% Ruins</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-gone" style="background:var(--rel-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">⛪</span></div>
+        <div class="poi-label"
+          style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px;color:#7f1d1d;border-color:rgba(127,29,29,.3)">
+          100% Gone</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════
+     §3  ALL 8 TYPES at Scale 4
+════════════════════════════════════════════════ -->
+  <div class="section" style="margin-top:32px">
+    <h2>8 Type Colours</h2>
+    <p>Deep-tinted circle background ensures white/cream emoji always contrasts. Type accent colour glows through the
+      border.</p>
+  </div>
+  <div class="section">
+    <div class="showcase-bg" style="gap:20px;flex-wrap:wrap">
+      <div class="mk">
+        <div class="poi-body s4 d-intact" style="background:var(--rel-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">⛪</span></div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Religious</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-minor" style="background:var(--roy-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">👑</span></div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Royal</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-partial" style="background:var(--mil-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">🛡️</span></div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Military</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-intact" style="background:var(--civ-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">🏛️</span></div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Civic</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-minor" style="background:var(--mar-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">⚓</span></div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Maritime</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-heavy" style="background:var(--inf-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">🌉</span></div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Infra.</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-intact" style="background:var(--lan-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">🌿</span></div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Landscape</div>
+      </div>
+      <div class="mk">
+        <div class="poi-body s4 d-gone" style="background:var(--com-bg)"><span class="poi-icon poi-icon-em"
+            style="font-size:22px">⚖️</span></div>
+        <div class="poi-label" style="position:relative;left:auto;bottom:auto;display:block;opacity:1;margin-top:6px">
+          Commerce</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════
+     §4  LIVE PANORAMA — interactive
+════════════════════════════════════════════════ -->
+  <div class="section" style="margin-top:40px">
+    <h2>Live Panorama · Interactive</h2>
+    <p>Click any marker to select/deselect. Labels auto-flip when near edges. Tap map background to deselect all.</p>
+  </div>
+
+  <div class="pano-wrap" id="panoWrap">
+    <img class="pano-img" src="/mnt/user-data/uploads/1773239659047_image.png" alt="Grande Panorama de Lisboa"
+      id="panoImg" onerror="this.style.display='none';document.getElementById('panoBg').style.display='flex'">
+    <!-- fallback if image unavailable -->
+    <div id="panoBg"
+      style="display:none;width:100%;height:340px;background:linear-gradient(160deg,#1a1e2a 0%,#0d1118 40%,#181410 100%);background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:28px 28px;align-items:center;justify-content:center">
+      <span style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:rgba(240,230,204,.15)">Grande
+        Panorama de Lisboa · c.1700</span>
+      <div
+        style="position:absolute;bottom:0;left:0;right:0;height:40px;background:rgba(37,99,235,.08);border-top:1px solid rgba(37,99,235,.08)">
+      </div>
+    </div>
+
+    <!-- ── POI MARKERS on panorama ── -->
+
+    <!-- Palácio do Alvito — Royal — 20% minor — SELECTED -->
+    <div class="poi-root scale5" style="left:42%;top:44%;z-index:100" id="poi-alvito"
+      onclick="selectPoi('poi-alvito',event)">
+      <div class="poi-ring"
+        style="border-color:var(--roy-ac);position:absolute;inset:-10px;border-radius:50%;border:1.5px solid var(--roy-ac);animation:pulseRing 2.4s ease-out infinite;opacity:0;pointer-events:none">
+      </div>
+      <div class="poi-ring poi-ring-2"
+        style="border-color:var(--roy-ac);position:absolute;inset:-10px;border-radius:50%;border:1px solid var(--roy-ac);animation:pulseRing 2.4s ease-out 1.2s infinite;opacity:0;pointer-events:none">
+      </div>
+      <div class="poi-body s5 d-minor selected" style="background:var(--roy-bg)">
+        <span class="poi-icon poi-icon-em" style="font-size:26px">👑</span>
+      </div>
+      <div class="poi-label label-sel" style="left:62%;bottom:58%">Palácio do Alvito</div>
+    </div>
+
+    <!-- Palácio dos Duques de Bragança — Royal — 40% partial — scale4 -->
+    <div class="poi-root scale4" style="left:32%;top:52%;z-index:40" id="poi-braganca"
+      onclick="selectPoi('poi-braganca',event)">
+      <div class="poi-body s4 d-partial" style="background:var(--roy-bg)">
+        <span class="poi-icon poi-icon-em" style="font-size:22px">👑</span>
+      </div>
+      <div class="poi-label" style="right:62%;bottom:55%;left:auto;text-align:right">Palácio dos Duques<br>de Bragança
+      </div>
+    </div>
+
+    <!-- Sé de Lisboa — Religious — 0% intact — scale4 -->
+    <div class="poi-root scale4" style="left:62%;top:48%;z-index:40" id="poi-se" onclick="selectPoi('poi-se',event)">
+      <div class="poi-body s4 d-intact" style="background:var(--rel-bg)">
+        <span class="poi-icon poi-icon-em" style="font-size:22px">⛪</span>
+      </div>
+      <div class="poi-label" style="left:62%;bottom:55%">Sé de Lisboa</div>
+    </div>
+
+    <!-- Castelo de São Jorge — Military — 0% intact — scale3 -->
+    <div class="poi-root scale3" style="left:74%;top:28%;z-index:30" id="poi-castelo"
+      onclick="selectPoi('poi-castelo',event)">
+      <div class="poi-body s3 d-intact" style="background:var(--mil-bg)">
+        <span class="poi-icon poi-icon-em" style="font-size:15px">🛡️</span>
+      </div>
+      <div class="poi-label" style="right:58%;bottom:52%;left:auto;text-align:right">Castelo de<br>São Jorge</div>
+    </div>
+
+    <!-- Torre de Belém — Military — 0% intact — scale3 -->
+    <div class="poi-root scale3" style="left:15%;top:72%;z-index:30" id="poi-belem"
+      onclick="selectPoi('poi-belem',event)">
+      <div class="poi-body s3 d-intact" style="background:var(--mil-bg)">
+        <span class="poi-icon poi-icon-em" style="font-size:15px">🗼</span>
+      </div>
+      <div class="poi-label" style="left:62%;bottom:52%">Torre de Belém</div>
+    </div>
+
+    <!-- Convento do Carmo — Religious — 80% ruins — scale3 -->
+    <div class="poi-root scale3" style="left:54%;top:36%;z-index:30" id="poi-carmo"
+      onclick="selectPoi('poi-carmo',event)">
+      <div class="poi-body s3 d-ruins" style="background:var(--rel-bg)">
+        <span class="poi-icon poi-icon-em" style="font-size:15px">🔔</span>
+      </div>
+      <div class="poi-label" style="left:60%;bottom:52%">Convento do Carmo</div>
+    </div>
+
+    <!-- Paço da Ribeira — Royal — 100% vanished — scale3 -->
+    <div class="poi-root scale3" style="left:48%;top:78%;z-index:30" id="poi-paco"
+      onclick="selectPoi('poi-paco',event)">
+      <div class="poi-body s3 d-gone" style="background:var(--roy-bg)">
+        <span class="poi-icon poi-icon-em" style="font-size:15px">👑</span>
+      </div>
+      <div class="poi-label" style="left:62%;bottom:52%">Paço da Ribeira</div>
+    </div>
+
+    <!-- Alcântara bridge — Infra — 0% intact — scale2 -->
+    <div class="poi-root scale2" style="left:22%;top:60%;z-index:20" id="poi-alcantara"
+      onclick="selectPoi('poi-alcantara',event)">
+      <div class="poi-body s2 d-intact" style="background:var(--inf-bg)"></div>
+    </div>
+
+    <!-- Jerónimos — Religious — 0% intact — scale2 -->
+    <div class="poi-root scale2" style="left:10%;top:65%;z-index:20" id="poi-jer" onclick="selectPoi('poi-jer',event)">
+      <div class="poi-body s2 d-intact" style="background:var(--rel-bg)"></div>
+    </div>
+
+    <!-- Small church — scale1 -->
+    <div class="poi-root scale1" style="left:68%;top:55%;z-index:10" id="poi-s1a" onclick="selectPoi('poi-s1a',event)">
+      <div class="poi-body s1 d-partial" style="background:var(--rel-bg)"></div>
+    </div>
+    <div class="poi-root scale1" style="left:37%;top:30%;z-index:10" id="poi-s1b" onclick="selectPoi('poi-s1b',event)">
+      <div class="poi-body s1 d-minor" style="background:var(--civ-bg)"></div>
+    </div>
+    <div class="poi-root scale1" style="left:82%;top:45%;z-index:10" id="poi-s1c" onclick="selectPoi('poi-s1c',event)">
+      <div class="poi-body s1 d-ruins" style="background:var(--mil-bg)"></div>
+    </div>
+    <div class="poi-root scale1" style="left:28%;top:42%;z-index:10" id="poi-s1d" onclick="selectPoi('poi-s1d',event)">
+      <div class="poi-body s1 d-intact" style="background:var(--mar-bg)"></div>
+    </div>
+
+  </div><!-- /pano-wrap -->
+  <div class="pano-title">Grande Panorama de Lisboa · Dirk Stoop c.1662 — tap markers to select</div>
+
+
+  <!-- ════════════════════════════════════════════════
+     §5  IMPLEMENTATION GUIDE
+════════════════════════════════════════════════ -->
+  <div class="guide" style="margin-top:48px">
+
+    <div class="section">
+      <h2>Implementation Guide for AI Agent</h2>
+    </div>
+
+    <!-- 1. Anatomy -->
+    <div class="guide-card">
+      <h3>1 · Marker Anatomy — Layer Stack</h3>
+      <p>Each POI widget is composed of exactly <strong>4 layers</strong>, rendered bottom-to-top:</p>
+      <ul>
+        <li><strong>Layer 0 — Pulse rings</strong> (2×): Animated expanding circles. Only rendered when marker is in
+          SELECTED state. <code>border-radius: 50%</code>, <code>border: 1–1.5px solid [type-accent-colour]</code>,
+          opacity animated 0.7→0 with scale 0.9→1.7 over 2.4s. Second ring offset by 1.2s delay.</li>
+        <li><strong>Layer 1 — Body circle</strong>: The main shape. Background = deep-tinted type colour (very dark,
+          ~15% lightness). Border = destruction colour + destruction style. Inner glass highlight via
+          <code>::after</code> pseudo-element with radial-gradient top-left.</li>
+        <li><strong>Layer 2 — Icon</strong>: Emoji or white-stroke SVG. Sits centred inside body. Hidden at Scale 1–2.
+          Always renders at high contrast against dark bg.</li>
+        <li><strong>Layer 3 — Label pill</strong>: Positioned absolutely outside the body. Semi-transparent dark bg.
+          Rules below govern when it shows and where it anchors.</li>
+      </ul>
+    </div>
+
+    <!-- 2. Scale -->
+    <div class="guide-card">
+      <h3>2 · Scale System</h3>
+      <table class="tbl">
+        <tr>
+          <th>Scale</th>
+          <th>Diameter</th>
+          <th>Zoom (approx)</th>
+          <th>Icon</th>
+          <th>Label</th>
+          <th>z-index</th>
+        </tr>
+        <tr>
+          <td>1 · City</td>
+          <td>14 dp</td>
+          <td>map zoom &lt;12</td>
+          <td>Hidden</td>
+          <td>Hidden</td>
+          <td>10</td>
+        </tr>
+        <tr>
+          <td>2 · District</td>
+          <td>22 dp</td>
+          <td>zoom 12–14</td>
+          <td>Hidden</td>
+          <td>Hidden</td>
+          <td>20</td>
+        </tr>
+        <tr>
+          <td>3 · Street</td>
+          <td>36 dp</td>
+          <td>zoom 14–16</td>
+          <td>Visible (18dp)</td>
+          <td>Hover only</td>
+          <td>30</td>
+        </tr>
+        <tr>
+          <td>4 · Building</td>
+          <td>52 dp</td>
+          <td>zoom 16–18</td>
+          <td>Visible (28dp)</td>
+          <td>Always on</td>
+          <td>40</td>
+        </tr>
+        <tr>
+          <td>5 · Selected</td>
+          <td>64 dp</td>
+          <td>any zoom on tap</td>
+          <td>Visible (32dp)</td>
+          <td>Always on, gold-tinted</td>
+          <td>100</td>
+        </tr>
+      </table>
+      <p style="margin-top:10px">Scale transitions should animate: <code>width/height 280ms ease</code>. On selection,
+        simultaneously: scale to S5, morph border-radius to 30%, start float animation, start pulse rings, bring label
+        to foreground.</p>
+    </div>
+
+    <!-- 3. Type Colours -->
+    <div class="guide-card">
+      <h3>3 · Type Colour System</h3>
+      <p style="margin-bottom:8px">Each type has <strong>3 colour values</strong>: background (very dark), accent
+        (saturated mid), and glow. Icon is always white/cream — never type-coloured.</p>
+      <table class="tbl">
+        <tr>
+          <th>Type</th>
+          <th>Bg (circle fill)</th>
+          <th>Accent (border glow)</th>
+          <th>Icon</th>
+        </tr>
+        <tr>
+          <td><span class="dot-swatch" style="background:#2d1a5c"></span>Religious</td>
+          <td><code>#2d1a5c</code></td>
+          <td><code>#7c3aed</code></td>
+          <td>⛪ church</td>
+        </tr>
+        <tr>
+          <td><span class="dot-swatch" style="background:#3d2200"></span>Royal/Noble</td>
+          <td><code>#3d2200</code></td>
+          <td><code>#b45309</code></td>
+          <td>👑 crown</td>
+        </tr>
+        <tr>
+          <td><span class="dot-swatch" style="background:#3d0a0a"></span>Military</td>
+          <td><code>#3d0a0a</code></td>
+          <td><code>#dc2626</code></td>
+          <td>🛡️ shield</td>
+        </tr>
+        <tr>
+          <td><span class="dot-swatch" style="background:#0a1f4d"></span>Civic</td>
+          <td><code>#0a1f4d</code></td>
+          <td><code>#2563be</code></td>
+          <td>🏛️ columns</td>
+        </tr>
+        <tr>
+          <td><span class="dot-swatch" style="background:#002f3d"></span>Maritime</td>
+          <td><code>#002f3d</code></td>
+          <td><code>#0891b2</code></td>
+          <td>⚓ anchor</td>
+        </tr>
+        <tr>
+          <td><span class="dot-swatch" style="background:#1e2026"></span>Infrastructure</td>
+          <td><code>#1e2026</code></td>
+          <td><code>#6b7280</code></td>
+          <td>🌉 bridge</td>
+        </tr>
+        <tr>
+          <td><span class="dot-swatch" style="background:#0a2d12"></span>Landscape</td>
+          <td><code>#0a2d12</code></td>
+          <td><code>#16a34a</code></td>
+          <td>🌿 nature</td>
+        </tr>
+        <tr>
+          <td><span class="dot-swatch" style="background:#3d1400"></span>Commerce</td>
+          <td><code>#3d1400</code></td>
+          <td><code>#ea580c</code></td>
+          <td>⚖️ scales</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- 4. Destruction -->
+    <div class="guide-card">
+      <h3>4 · Destruction Encoding — Border</h3>
+      <p style="margin-bottom:8px">The border encodes <strong>3 simultaneous signals</strong>: colour, style, and
+        opacity/filter. All three must degrade together as destruction increases.</p>
+      <table class="tbl">
+        <tr>
+          <th>Range</th>
+          <th>Label</th>
+          <th>Colour</th>
+          <th>Style</th>
+          <th>Opacity</th>
+          <th>Grayscale filter</th>
+        </tr>
+        <tr>
+          <td>0%</td>
+          <td>Intact</td>
+          <td><code>#22c55e</code></td>
+          <td>solid</td>
+          <td>1.0</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>20%</td>
+          <td>Minor</td>
+          <td><code>#84cc16</code></td>
+          <td>solid</td>
+          <td>1.0</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>40%</td>
+          <td>Partial</td>
+          <td><code>#eab308</code></td>
+          <td>dashed (5px gap 4px)</td>
+          <td>1.0</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>60%</td>
+          <td>Heavy</td>
+          <td><code>#f97316</code></td>
+          <td>dashed (3px gap 3px)</td>
+          <td>1.0</td>
+          <td>0%</td>
+        </tr>
+        <tr>
+          <td>80%</td>
+          <td>Ruins</td>
+          <td><code>#ef4444</code></td>
+          <td>dotted</td>
+          <td>0.72</td>
+          <td>25%</td>
+        </tr>
+        <tr>
+          <td>100%</td>
+          <td>Gone</td>
+          <td><code>#991b1b</code></td>
+          <td>dotted</td>
+          <td>0.38</td>
+          <td>55%</td>
+        </tr>
+      </table>
+      <p style="margin-top:10px">Border width: <strong>2dp</strong> at S1, <strong>2.5dp</strong> at S2–S3,
+        <strong>3dp</strong> at S4–S5. The outer box-shadow at S3+ adds a soft glow matching the border colour at 35–45%
+        opacity.</p>
+    </div>
+
+    <!-- 5. Label -->
+    <div class="guide-card">
+      <h3>5 · Label Rules</h3>
+      <ul>
+        <li><strong>Background:</strong> <code>rgba(6,5,3, 0.82)</code> with <code>backdrop-filter: blur(8px)</code>.
+          Selected: <code>rgba(8,6,2, 0.92)</code> with <code>border: 1px solid rgba(201,151,58, 0.25)</code>.</li>
+        <li><strong>Typography:</strong> DM Sans 10dp, weight 500, colour <code>rgba(240,230,204, 0.88)</code>.
+          Selected: weight 600, opacity .96. Max 2 lines — truncate with ellipsis after that.</li>
+        <li><strong>Positioning default:</strong> Anchor bottom-left corner of label to top-right of marker. Offset:
+          +4dp right, -4dp above centre.</li>
+        <li><strong>Edge detection — flip rules:</strong> If marker x > 75% of map width → flip label left
+          (<code>right: 60%</code>, <code>left: auto</code>). If marker y > 80% of map height → flip label above
+          (<code>bottom: auto</code>, <code>top: 55%</code>). Run edge check on every render frame during pan.</li>
+        <li><strong>Collision management:</strong> Labels use <code>z-index: parent + 1</code>. When two labels overlap,
+          hide the lower-priority one (priority = scale level, then destruction % ascending — intact POIs more
+          important). At S1–S2, labels are always hidden. At S3, show only on hover/tap. At S4+, always show but subject
+          to collision suppression.</li>
+        <li><strong>Selected label:</strong> Always shown regardless of collision. Gold border tint. Sits at z-index 101
+          (above all non-selected markers).</li>
+        <li><strong>Animation:</strong> Labels fade in 160ms ease-out on appearance. No fade on position changes (snappy
+          flip).</li>
+      </ul>
+    </div>
+
+    <!-- 6. Selected State -->
+    <div class="guide-card">
+      <h3>6 · Selected State — Full Spec</h3>
+      <ul>
+        <li><strong>Shape:</strong> <code>border-radius</code> morphs from <code>50%</code> → <code>30%</code>
+          (squircle). Animate over 300ms ease.</li>
+        <li><strong>Size:</strong> Scale from current size → 64dp diameter. Animate 280ms ease.</li>
+        <li><strong>Float:</strong> CSS animation <code>translateY(0px)</code> → <code>translateY(-3px)</code> →
+          <code>translateY(0px)</code> over 3s ease-in-out, infinite. Do not combine with tap scale animation — wait for
+          tap to finish first.</li>
+        <li><strong>Shadow:</strong> Add
+          <code>box-shadow: 0 8px 28px rgba(0,0,0, 0.65), 0 0 0 2px rgba(255,255,255, 0.12)</code>.</li>
+        <li><strong>Pulse rings:</strong> 2 concentric rings, same colour as type accent. Ring 1: 1.5px border, 2.4s
+          cycle. Ring 2: 1px border, same cycle offset 1.2s. Both animate opacity 0.7→0 and scale 0.9→1.7. Start from
+          radius = marker radius + 8dp.</li>
+        <li><strong>z-index:</strong> 100 (above everything except modals).</li>
+        <li><strong>Only one marker selected at a time.</strong> Deselect on: tap another marker, tap map background,
+          tap back button.</li>
+        <li><strong>Deselection:</strong> Reverse all animations. Scale back to S4 (if was S4 before selection).
+          Border-radius returns to 50%. Float and pulse rings stop immediately (do not wait for cycle end).</li>
+      </ul>
+    </div>
+
+    <!-- 7. Z-ordering & depth -->
+    <div class="guide-card">
+      <h3>7 · Z-Index & Depth Management</h3>
+      <ul>
+        <li>Map tile layer: <code>z-index: 0</code></li>
+        <li>S1 markers: <code>z-index: 10</code></li>
+        <li>S2 markers: <code>z-index: 20</code></li>
+        <li>S3 markers: <code>z-index: 30</code></li>
+        <li>S4 markers: <code>z-index: 40</code></li>
+        <li>Hovered marker: <code>z-index: 50</code> (temporary, via JS class)</li>
+        <li>Selected marker: <code>z-index: 100</code></li>
+        <li>Legend panel: <code>z-index: 200</code></li>
+        <li>Bottom sheet / modal: <code>z-index: 300</code></li>
+        <li><strong>Within same scale:</strong> Higher destruction % = lower z-index (intact POIs sit above ruins —
+          ruins are more ghostly, intact ones more present).</li>
+        <li><strong>Labels</strong> always have z-index = parent + 1. This means label of a z:40 marker = 41. Since
+          labels are <code>position: absolute</code> children of the marker widget, they inherit the stacking context
+          correctly in Flutter.</li>
+      </ul>
+    </div>
+
+    <!-- 8. Flutter impl notes -->
+    <div class="guide-card">
+      <h3>8 · Flutter Implementation Notes</h3>
+      <ul>
+        <li>Use <strong>flutter_map</strong> with <code>MarkerLayer</code>. Each marker is a
+          <code>GestureDetector</code> wrapping a custom <code>PoiMarkerWidget</code>.</li>
+        <li>Border-style (solid/dashed/dotted) on a circle: use <strong>CustomPainter</strong> — draw dashes manually
+          with <code>canvas.drawArc</code> or a dashed path. CSS border-style has no direct Flutter equivalent.</li>
+        <li>Emoji icons: use <code>Text(emoji, style: TextStyle(fontSize: X))</code> inside the circle. Apply
+          <code>colorFilter</code> if grayscale needed. Emoji size scales with marker size.</li>
+        <li>Squircle morph: animate <code>BorderRadius</code> via <code>AnimatedContainer</code> or
+          <code>TweenAnimationBuilder&lt;BorderRadius&gt;</code>.</li>
+        <li>Float animation: <code>AnimationController</code> with <code>Curves.easeInOut</code>, translate Y with
+          <code>Transform.translate</code>.</li>
+        <li>Pulse rings: two <code>AnimatedBuilder</code> widgets with <code>Tween&lt;double&gt;</code> for opacity and
+          scale. Wrap in <code>Stack</code> behind the body circle.</li>
+        <li>Label flip: compute <code>MarkerAnchorPoint</code> in <code>build()</code> based on the marker's projected
+          screen position. Use <code>MapController.latLngToScreenPoint()</code> to get x/y, then apply flip rules.</li>
+        <li>Collision detection: maintain a <code>List&lt;Rect&gt;</code> of visible label rects. On each camera move,
+          recompute and suppress overlapping labels from lowest to highest priority.</li>
+        <li>Performance: at S1/S2 the marker is a simple <code>Container</code> with <code>BoxDecoration</code>. Avoid
+          painting pulse rings at S1/S2. Use <code>RepaintBoundary</code> around each marker widget.</li>
+      </ul>
+    </div>
+
+  </div><!-- /guide -->
+
+  <script>
+    let selectedId = 'poi-alvito'; // start with one selected
+
+    function selectPoi(id, e) {
+      e.stopPropagation();
+      if (selectedId === id) {
+        // deselect
+        deselect(id);
+        selectedId = null;
+        return;
+      }
+      if (selectedId) deselect(selectedId);
+      selectedId = id;
+      const root = document.getElementById(id);
+      const body = root.querySelector('.poi-body');
+      const label = root.querySelector('.poi-label');
+      // upgrade size
+      body.className = body.className.replace(/\bs[0-9]\b/, 's5');
+      body.classList.add('selected');
+      if (label) label.classList.add('label-sel');
+      root.style.zIndex = 100;
+    }
+
+    function deselect(id) {
+      const root = document.getElementById(id);
+      if (!root) return;
+      const body = root.querySelector('.poi-body');
+      const label = root.querySelector('.poi-label');
+      body.className = body.className.replace(/\bs[0-9]\b/, detectOrigScale(root));
+      body.classList.remove('selected');
+      if (label) label.classList.remove('label-sel');
+      // restore z
+      const cls = root.className;
+      const m = cls.match(/scale([0-9])/);
+      root.style.zIndex = m ? (parseInt(m[1]) * 10) : 40;
+    }
+
+    function detectOrigScale(root) {
+      const cls = root.className;
+      const m = cls.match(/scale([0-9])/);
+      if (!m) return 's4';
+      return 's' + m[1];
+    }
+
+    // tap map bg to deselect
+    document.getElementById('panoWrap').addEventListener('click', () => {
+      if (selectedId) { deselect(selectedId); selectedId = null; }
+    });
+  </script>
+
+</body>
+
+</html>
