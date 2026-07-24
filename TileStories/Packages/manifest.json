@@ -2,9 +2,11 @@
   "dependencies": {
     "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
     "com.immersal.core": "https://github.com/immersal/imdk-unity.git",
+    "com.unity.cloud.gltfast": "6.19.0",
     "com.unity.inputsystem": "1.19.0",
     "com.unity.mobile.android-logcat": "1.4.7",
     "com.unity.render-pipelines.universal": "17.3.0",
+    "com.unity.test-framework": "1.6.0",
     "com.unity.xr.arcore": "6.3.5",
     "com.unity.xr.arfoundation": "6.3.5",
     "com.unity.xr.arkit": "6.3.5",

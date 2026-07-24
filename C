@@ -1,15 +1,13 @@
 {
     "name": "TileStories.Tests.Runtime",
     "rootNamespace": "TileStories.Tests",
-    "optionalUnityReferences": [
-        "TestAssemblies"
-    ],
     "references": [
         "TileStories",
-        "nunit"
+        "UnityEngine.TestRunner",
+        "UnityEngine.CoreModule"
     ],
     "includePlatforms": [],
-    "excludePlatforms": [],
+    "excludePlatforms": ["Editor"],
     "allowUnsafeCode": false,
     "autoReferenced": false,
     "defineConstraints": [],

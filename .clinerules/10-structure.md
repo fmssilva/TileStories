@@ -52,3 +52,10 @@
   from the code.
 
 ---
+
+## A. Complete Project File Structure
+
+  Read in the global project guide in the file: 
+  C:\Users\franc\Desktop\TileStories\_0_work_plan.md
+  the section "## A. Complete Project File Structure", with the project structure that we should follow as base when implementing things. 
+  

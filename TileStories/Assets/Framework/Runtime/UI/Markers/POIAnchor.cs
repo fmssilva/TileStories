@@ -2,10 +2,8 @@ using UnityEngine;
 
 namespace TileStories
 {
-    /// <summary>
-    /// Data anchor for one POI in world space.
-    /// Visual marker and interaction components are attached separately.
-    /// </summary>
+    // Data holder attached to each spawned POI marker.
+    // Stores the POIData reference so other components (MarkerView, tap handler) can read it.
     public class POIAnchor : MonoBehaviour
     {
         public POIData Data { get; private set; }
@@ -13,7 +11,6 @@ namespace TileStories
         public void Initialise(POIData data)
         {
             Data = data;
-            gameObject.name = $"POI_{data.id}";
         }
     }
 }

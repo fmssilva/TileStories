@@ -66,6 +66,8 @@
   developer standing next to them — not formal prose, not restating what the line already
   says. Example: `// Immersal returns pose in map space, not world space - convert
   before spawning POIs` is useful. `// loop over the list of POIs` is not.
+  write them clean and concise and without markdowns like "<summary>". don't want things like: "/// <summary>Initialize this view from the POI's data.</summary>". Lets be clean and simple.
+
 - **Zero emojis, strict ASCII only — everywhere.** This applies to code, comments, log
   messages, editor window labels, and any text written to a file or the console. Unity's
   console and device logs (Logcat, Player.log) can mangle non-ASCII characters on some
@@ -89,3 +91,7 @@
   building a lookup table from them.
 
 ---
+
+## 3. Errors
+  After implementing things use the Unity MCP to confirm and make sure we have no errors like compilation errors or others. Example using calls like "refresh_unity", "mcpforunity://editor/state", "read_console", or others...
+  

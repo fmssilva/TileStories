@@ -33,17 +33,21 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                  *when* the thing that decides gets called. This
 │   │   │   │   │                                  is the one class in the whole project most prone
 │   │   │   │   │                                  to quietly absorbing logic over time — watch it.
+│   │   │   │   ├── WallConfigLoader.cs         ← Loads config.json from StreamingAssets at runtime;
+│   │   │   │   │                                  deserializes into WallConfigData for use by
+│   │   │   │   │                                  POIPositionResolver and other systems.
 │   │   │   │   ├── WallConfigAsset.cs          ← ScriptableObject baked from config.json; the
 │   │   │   │   │                                  only data type runtime code ever reads.
 │   │   │   │   ├── WallConfigData.cs           ← Plain C# classes mirroring config.json schema
-│   │   │   │   │                                  (POIData, CircuitData, BadgeData, etc.) used
-│   │   │   │   │                                  during baking; not used at runtime directly.
+│   │   │   │   │                                  (POIData with captured_position, CalibrationAnchor,
+│   │   │   │   │                                  CircuitData, BadgeData, etc.) used during baking;
+│   │   │   │   │                                  not used at runtime directly.
 │   │   │   │   ├── TileStoriesSettings.cs      ← ScriptableObject holding per-project settings
 │   │   │   │   │                                  (e.g. default profile, LOD thresholds, feature
 │   │   │   │   │                                  flags) — one instance per Unity project.
 │   │   │   │   └── FeatureFlags.cs             ← Static class exposing bool flags (AI guide
-│   │   │   │                                      enabled, social sharing enabled) read by every
-│   │   │   │                                      subsystem to skip entire code paths at runtime.
+│   │   │   │   │                                  enabled, social sharing enabled) read by every
+│   │   │   │   │                                  subsystem to skip entire code paths at runtime.
 │   │   │   │
 │   │   │   ├── Tracking/
 │   │   │   │   ├── IWallTracker.cs             ← Interface: ExposesPose, IsLocalised, events
@@ -82,6 +86,15 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                  the XR Space using piecewise linear interpolation
 │   │   │   │   │                                  between calibration anchors; bypassed if the POI
 │   │   │   │   │                                  has a captured_position value.
+│   │   │   │   ├── MarkerOverlapResolver.cs    ← Static; called once from WallSession.SpawnPOIs()
+│   │   │   │   │                                  after spawning. Snapshots every marker's screen
+│   │   │   │   │                                  position once, unions markers within ~40px into
+│   │   │   │   │                                  groups (union-find — never depends on spawn order),
+│   │   │   │   │                                  assigns each group a stable vertical offset. Replaced
+│   │   │   │   │                                  an earlier pairwise version with two real bugs (stale
+│   │   │   │   │                                  comparison positions; a non-idempotent offset method
+│   │   │   │   │                                  called multiple times per marker) — see Stage 1.2
+│   │   │   │   │                                  plan §0.1 if this pattern looks tempting to redo.
 │   │   │   │   ├── POIPool.cs                  ← Object pool of 5–8 recycled POIAnchor instances;
 │   │   │   │   │                                  never instantiates/destroys per-tap — acquires
 │   │   │   │   │                                  from pool and returns on hide.
@@ -370,6 +383,23 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   └── ValidationError.cs          ← Plain data class: field path, message, severity
 │   │   │   │                                      (Error / Warning); displayed in Wizard and
 │   │   │   │                                      surfaced as Unity Console messages.
+│   │   │   │
+│   │   │   ├── Authoring/
+│   │   │   │   ├── POIAuthoringToolWindow.cs ← Editor window for POI position capture: Populate Rig
+│   │   │   │   │                                  from JSON (creates marker instances under
+│   │   │   │   │                                  POIAuthoringRig) and Capture Positions to JSON
+│   │   │   │   │                                  (writes captured_position back to config). Also
+│   │   │   │   │                                  owns IsRigInSyncWithConfig(...) (rig-vs-JSON diff,
+│   │   │   │   │                                  1mm tolerance) driving a live sync indicator and
+│   │   │   │   │                                  the Clear Rig button.
+│   │   │   │   ├── POIAuthoringRigSafetyCheck.cs ← Non-blocking warning: fires if scene is saved
+│   │   │   │                                      or Play Mode entered while POIAuthoringRig still
+│   │   │   │                                      has objects (normal mid-work iteration, so this
+│   │   │   │                                      only warns, never blocks).
+│   │   │   │   └── POIAuthoringRigBuildCheck.cs ← Hard block (IPreprocessBuildWithReport): fails any
+│   │   │   │                                      build outright while POIAuthoringRig still has
+│   │   │   │                                      objects. Stricter than the check above on purpose -
+│   │   │   │                                      a build is visitor-facing, save/Play-mode aren't.
 │   │   │   │
 │   │   │   ├── Baker/
 │   │   │   │   ├── WallConfigBaker.cs          ← Reads validated config.json → deserialises into
@@ -3521,6 +3551,21 @@ behaviour, that logic hasn't been extracted yet.
 ---
 
 ## 13. Appendix: master checklist
+
+Stage 1.2 reality note (updated 2026-07-23, supersedes the 2026-07-22 note below): POI
+markers are implemented, tested (18 EditMode + 3 PlayMode, all passing — the project's
+first PlayMode tests), and confirmed on-device (2026-07-23). The one item still
+genuinely open is Workflow B (on-site tap-to-place for ambiguous positions), which
+LivingRoom never needed and stays deferred until a wall that actually needs it exists.
+Stage 1.2's own document (`_1_2_POI_markers_plan.md` §0) is now the single current
+status record for this stage — the separate status/todo/review/tasks/solver files that
+used to track this have been retired and folded into it, plus `_1_2_future_notes.md`
+for open follow-ups and developer-guide material gathered along the way.
+
+Prior note, 2026-07-22 (kept for history): core POI-marker code path and scene
+cleanup step are implemented (resolver, authoring tool, correction anchor, marker view,
+tests authored, rig cleaned), but Stage 1 should still be treated as open until
+explicit test-run and device-smoke evidence are recorded in the Stage 1.2 status files.
 
 Every exit criterion and outstanding item named across this document, in one place,
 in the order they become relevant. Nothing here is new — it is a consolidated,

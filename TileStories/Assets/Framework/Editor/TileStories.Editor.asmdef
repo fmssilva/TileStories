@@ -2,7 +2,7 @@
     "name": "TileStories.Editor",
     "rootNamespace": "TileStories.Editor",
     "references": [
-        "GUID:TileStories"
+        "GUID:9684a9acb0ad15443a3df046d245f1cb"
     ],
     "includePlatforms": [
         "Editor"

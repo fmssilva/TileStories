@@ -3,7 +3,8 @@
     "rootNamespace": "TileStories",
     "references": [
         "Unity.InputSystem",
-        "Immersal.Core"
+        "Immersal.Core",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

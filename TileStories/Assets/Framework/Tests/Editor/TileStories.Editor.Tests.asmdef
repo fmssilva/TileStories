@@ -1,21 +1,17 @@
 {
-    "name": "TileStories.Tests.Editor",
-    "rootNamespace": "TileStories.Tests",
+    "name": "TileStories.Editor.Tests",
+    "rootNamespace": "TileStories.Editor.Tests",
     "references": [
-        "GUID:TileStories",
-        "GUID:TileStories.Editor",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "TileStories.Editor",
+        "TileStories"
     ],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
+    "overrideReferences": false,
     "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],
