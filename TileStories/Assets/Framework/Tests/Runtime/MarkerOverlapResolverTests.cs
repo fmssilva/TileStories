@@ -174,5 +174,38 @@ namespace TileStories.Tests
 
             yield return null;
         }
+
+        [UnityTest]
+        public IEnumerator MarkerBillboard_CameraMoved_MarkerRotationMatchesCamera()
+        {
+            // Arrange: create a camera and a marker with MarkerBillboard at an arbitrary starting rotation
+            var camGO = new GameObject("TestCamera");
+            camGO.tag = "MainCamera";
+            var cam = camGO.AddComponent<Camera>();
+            cam.transform.position = new Vector3(0, 1.5f, -2f);
+            cam.transform.rotation = Quaternion.Euler(10f, 0f, 0f); // Arbitrary starting rotation
+
+            var markerGO = new GameObject("TestMarker");
+            markerGO.transform.position = new Vector3(0, 1.5f, 0);
+            markerGO.transform.rotation = Quaternion.Euler(45f, 90f, 30f); // Arbitrary starting rotation
+            var billboard = markerGO.AddComponent<MarkerBillboard>();
+
+             // Act: move/rotate the camera to a new pose
+             cam.transform.rotation = Quaternion.Euler(15f, 20f, 5f);
+
+             // Wait one frame so LateUpdate executes
+             yield return null;
+
+             // Assert: marker's world rotation should equal camera's world rotation
+             // (no additional offset since we removed the 180-degree yaw to prevent text mirroring)
+             var expectedRotation = cam.transform.rotation;
+             float angleDiff = Quaternion.Angle(markerGO.transform.rotation, expectedRotation);
+             Assert.Less(angleDiff, 0.1f,
+                 $"Marker rotation should match camera rotation (no offset). Angle difference: {angleDiff:F3} degrees.");
+
+            // Cleanup
+            Object.Destroy(markerGO);
+            Object.Destroy(camGO);
+        }
     }
 }
