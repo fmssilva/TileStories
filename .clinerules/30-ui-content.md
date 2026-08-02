@@ -1,4 +1,6 @@
-## 1. UI, Visual Design, and Content Rules
+
+
+## 3. UI, Visual Design, and Content Rules
 
 - **No hardcoded visual values in C# or UXML.** Colors, fonts, spacing, and corner radii
   are defined once as USS variables or a shared design-tokens ScriptableObject, and

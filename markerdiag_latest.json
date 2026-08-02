@@ -1,0 +1,1889 @@
+{
+  "success": true,
+  "message": "Retrieved 269 log entries.",
+  "data": [
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag] mode enabled=True forceAll=True focusedOnly=True focusLabel='Single circle, civic, no status' entries=44",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 32,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Single circle, civic, no status | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Single circle, civic, no status | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Single circle, civic, no status | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Single circle, civic, no status | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Single circle, civic, no status | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Single circle, civic, no status | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Single circle, civic, no status | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Sanity | Single circle, civic, no status | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] religious | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#6C8C57FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] religious | Symbol/Icon | active=True/True enabled=True sprite=IconTemple color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconTemple.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] religious | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] religious | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] religious | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] religious | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] religious | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | religious | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] royal | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#65578CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] royal | Symbol/Icon | active=True/True enabled=True sprite=IconCrown color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=17.5 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconCrown.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] royal | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] royal | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] royal | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] royal | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] royal | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | royal | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] military | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#8C5767FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] military | Symbol/Icon | active=True/True enabled=True sprite=IconShield color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=18.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconShield.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] military | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] military | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] military | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] military | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] military | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | military | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] civic | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] civic | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] civic | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] civic | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] civic | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] civic | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] civic | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | civic | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] maritime | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#588C57FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] maritime | Symbol/Icon | active=True/True enabled=True sprite=IconAnchor color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=13.6 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconAnchor.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] maritime | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] maritime | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] maritime | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] maritime | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] maritime | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | maritime | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] infra | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#8C7857FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] infra | Symbol/Icon | active=True/True enabled=True sprite=IconBridge color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=15.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconBridge.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] infra | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] infra | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] infra | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] infra | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] infra | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | infra | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] landscape | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#8C575CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] landscape | Symbol/Icon | active=True/True enabled=True sprite=IconLeaf color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=13.4 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconLeaf.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] landscape | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] landscape | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] landscape | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] landscape | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] landscape | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | landscape | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] commerce | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#59578CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] commerce | Symbol/Icon | active=True/True enabled=True sprite=IconScale color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=14.5 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconScale.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] commerce | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] commerce | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] commerce | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] commerce | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] commerce | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | commerce | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#8033CCFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture | Symbol/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | furniture | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#8C5787FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art | Symbol/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Category | art | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Circle | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Circle | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Circle | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Circle | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Circle | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Circle | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Circle | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Shape | Circle | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] RoundedSquare | Symbol | active=True/True enabled=True sprite=SymbolRoundedSquare color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=64.1 % @ Assets/Framework/Runtime/UI/Markers/Shapes/SymbolRoundedSquare.png tex=128x128 screen=80.3x80.2px tex/screen=1.59,1.60",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] RoundedSquare | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] RoundedSquare | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] RoundedSquare | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] RoundedSquare | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] RoundedSquare | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] RoundedSquare | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Shape | RoundedSquare | style=OutlineGold shape=RoundedSquare hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hexagon | Symbol | active=True/True enabled=True sprite=SymbolHexagon color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=57.9 % @ Assets/Framework/Runtime/UI/Markers/Shapes/SymbolHexagon.png tex=128x128 screen=80.3x80.2px tex/screen=1.59,1.60",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hexagon | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hexagon | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hexagon | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hexagon | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hexagon | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hexagon | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Shape | Hexagon | style=OutlineGold shape=Hexagon hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Diamond | Symbol | active=True/True enabled=True sprite=SymbolDiamond color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=36.3 % @ Assets/Framework/Runtime/UI/Markers/Shapes/SymbolDiamond.png tex=128x128 screen=80.3x80.2px tex/screen=1.59,1.60",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Diamond | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Diamond | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Diamond | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Diamond | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Diamond | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Diamond | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Shape | Diamond | style=OutlineGold shape=Diamond hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Star | Symbol | active=True/True enabled=True sprite=SymbolStar color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=22.5 % @ Assets/Framework/Runtime/UI/Markers/Shapes/SymbolStar.png tex=128x128 screen=80.3x80.2px tex/screen=1.59,1.60",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Star | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Star | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Star | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Star | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Star | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Star | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Shape | Star | style=OutlineGold shape=Star hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Ring | active=True/True enabled=True sprite=RingSolid color=#E3BD72FF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=17.6 % @ Assets/Framework/Runtime/UI/Markers/Rings/RingSolid.png tex=256x256 screen=88.3x88.3px tex/screen=2.90,2.90",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineGold | 0% Intact | style=OutlineGold shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Ring | active=True/True enabled=True sprite=RingDashLong color=#CF9F5EFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=10.6 % @ Assets/Framework/Runtime/UI/Markers/Rings/RingDashLong.png tex=256x256 screen=88.3x88.3px tex/screen=2.90,2.90",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineGold | 20% | style=OutlineGold shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Ring | active=True/True enabled=True sprite=RingDashMedium color=#BB8552FF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=8.2 % @ Assets/Framework/Runtime/UI/Markers/Rings/RingDashMedium.png tex=256x256 screen=88.3x88.3px tex/screen=2.90,2.90",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineGold | 40% | style=OutlineGold shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Ring | active=True/True enabled=True sprite=RingDashShort color=#A66A45FF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=5.8 % @ Assets/Framework/Runtime/UI/Markers/Rings/RingDashShort.png tex=256x256 screen=88.3x88.3px tex/screen=2.90,2.90",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineGold | 60% | style=OutlineGold shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Ring | active=True/True enabled=True sprite=RingDotted color=#8C4D3CFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=5.1 % @ Assets/Framework/Runtime/UI/Markers/Rings/RingDotted.png tex=256x256 screen=88.3x88.3px tex/screen=2.90,2.90",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineGold | 80% | style=OutlineGold shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Ring | active=True/True enabled=True sprite=RingDotted color=#6E332BFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=5.1 % @ Assets/Framework/Runtime/UI/Markers/Rings/RingDotted.png tex=256x256 screen=88.3x88.3px tex/screen=2.90,2.90",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineGold | 100% Gone | style=OutlineGold shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] No status axis | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] No status axis | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] No status axis | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] No status axis | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] No status axis | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] No status axis | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] No status axis | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineGold | No status axis | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Unknown fate | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#57688CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Unknown fate | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Unknown fate | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Unknown fate | Badge | active=True/True enabled=True sprite=SymbolCircle color=#8C8F94FF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=28.9x28.9px tex/screen=8.85,8.86",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Unknown fate | Badge/Icon | active=True/True enabled=True sprite=IconUnknown color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=8.3 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconUnknown.png tex=256x256 screen=16.2x16.2px tex/screen=15.81,15.83",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Unknown fate | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Unknown fate | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineGold | Unknown fate | style=OutlineGold shape=Circle hasStatus=True unknown=True hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineSameHue | 0% Intact | style=OutlineSameHue shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#505C77FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3DA rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineSameHue | 20% | style=OutlineSameHue shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#474F61FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD3B6 rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineSameHue | 40% | style=OutlineSameHue shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#3B404CFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD391 rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineSameHue | 60% | style=OutlineSameHue shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#2D3036FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD36C rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineSameHue | 80% | style=OutlineSameHue shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#1D1E20FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Symbol/Icon | active=True/True enabled=True sprite=IconColumns color=#F2ECD347 rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconColumns.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineSameHue | 100% Gone | style=OutlineSameHue shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineSameHue | No status axis | style=OutlineSameHue shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - OutlineSameHue | Unknown fate | style=OutlineSameHue shape=Circle hasStatus=True unknown=True hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Badge | active=True/True enabled=True sprite=SymbolCircle color=#E3BD72FF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=28.9x28.9px tex/screen=8.85,8.86",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 0% Intact | Badge/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - Badge | 0% Intact | style=Badge shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Badge | active=True/True enabled=True sprite=SymbolCircle color=#CF9F5EFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=28.9x28.9px tex/screen=8.85,8.86",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 20% | Badge/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - Badge | 20% | style=Badge shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Badge | active=True/True enabled=True sprite=SymbolCircle color=#BB8552FF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=28.9x28.9px tex/screen=8.85,8.86",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 40% | Badge/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - Badge | 40% | style=Badge shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Badge | active=True/True enabled=True sprite=SymbolCircle color=#A66A45FF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=28.9x28.9px tex/screen=8.85,8.86",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 60% | Badge/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - Badge | 60% | style=Badge shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Badge | active=True/True enabled=True sprite=SymbolCircle color=#8C4D3CFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=28.9x28.9px tex/screen=8.85,8.86",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 80% | Badge/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - Badge | 80% | style=Badge shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Badge | active=True/True enabled=True sprite=SymbolCircle color=#6E332BFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=28.9x28.9px tex/screen=8.85,8.86",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] 100% Gone | Badge/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - Badge | 100% Gone | style=Badge shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - Badge | No status axis | style=Badge shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Status - Badge | Unknown fate | style=Badge shape=Circle hasStatus=True unknown=True hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Standard (no label) | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#6C8C57FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Standard (no label) | Symbol/Icon | active=True/True enabled=True sprite=IconTemple color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconTemple.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Standard (no label) | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Standard (no label) | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Standard (no label) | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Standard (no label) | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Standard (no label) | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Hero | Standard (no label) | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hero (persistent label) | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#6C8C57FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hero (persistent label) | Symbol/Icon | active=True/True enabled=True sprite=IconTemple color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=24.2 % @ Assets/Framework/Runtime/UI/Markers/Icons/IconTemple.png tex=256x256 screen=45.0x44.9px tex/screen=5.69,5.70",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hero (persistent label) | Ring | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hero (persistent label) | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hero (persistent label) | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hero (persistent label) | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] Hero (persistent label) | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD380 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Hero | Hero (persistent label) | style=OutlineGold shape=Circle hasStatus=False unknown=False hero=True symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture (overridden) | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#8033CCFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture (overridden) | Symbol/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture (overridden) | Ring | active=True/True enabled=True sprite=RingSolid color=#E3BD72FF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=17.6 % @ Assets/Framework/Runtime/UI/Markers/Rings/RingSolid.png tex=256x256 screen=88.3x88.3px tex/screen=2.90,2.90",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture (overridden) | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture (overridden) | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture (overridden) | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] furniture (overridden) | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Override | furniture (overridden) | style=OutlineGold shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art (hash default) | Symbol | active=True/True enabled=True sprite=SymbolCircle color=#8C5787FF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=80.3x80.2px tex/screen=3.19,3.19",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art (hash default) | Symbol/Icon | active=True/True enabled=False sprite=NULL color=#F2ECD3FF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art (hash default) | Ring | active=True/True enabled=True sprite=RingSolid color=#E3BD72FF rect=(0.1320,0.1320) anchored=(0.0000,0.0000) alphaCoverage=17.6 % @ Assets/Framework/Runtime/UI/Markers/Rings/RingSolid.png tex=256x256 screen=88.3x88.3px tex/screen=2.90,2.90",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art (hash default) | Badge | active=False/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0432,0.0432) anchored=(0.0420,0.0420) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art (hash default) | Badge/Icon | active=True/False enabled=True sprite=NULL color=#FFFFFFFF rect=(0.0000,0.0000) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art (hash default) | Flame | active=True/True enabled=False sprite=NULL color=#FFFFFFFF rect=(0.1200,0.1200) anchored=(0.0000,0.0000) alphaCoverage=n/a tex=n/a screen=n/a n/a",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][IMAGE] art (hash default) | Halo | active=True/True enabled=False sprite=SymbolCircle color=#F2ECD300 rect=(0.1600,0.1600) anchored=(0.0000,0.0000) alphaCoverage=60.6 % @ Assets/Framework/Runtime/UI/Markers/SymbolCircle.png tex=256x256 screen=107.1x107.0px tex/screen=2.39,2.39",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 212,
+      "stackTrace": null
+    },
+    {
+      "type": "Log",
+      "message": "[MarkerGalleryDiag][SUMMARY] Override | art (hash default) | style=OutlineGold shape=Circle hasStatus=True unknown=False hero=False symbolOk=True ringOk=True badgeOk=True",
+      "file": "Assets/Framework/Runtime/DevTools/MarkerGalleryHarness.cs",
+      "line": 160,
+      "stackTrace": null
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="6" result="Passed" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.2396264">
+  <test-suite type="TestSuite" id="1015" name="TileStories" fullname="TileStories" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.239626" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1009" name="TileStories.Tests.Runtime.dll" fullname="C:/Users/franc/Desktop/TileStories/TileStories/Library/ScriptAssemblies/TileStories.Tests.Runtime.dll" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.223141" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="241536" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1010" name="TileStories" fullname="TileStories" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.222127" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1011" name="Tests" fullname="TileStories.Tests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.221566" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="MarkerOverlapResolverTests" fullname="TileStories.Tests.MarkerOverlapResolverTests" classname="TileStories.Tests.MarkerOverlapResolverTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.105009" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1003" name="ApplyOverlapOffsets_CalledTwice_ProducesSameResultBothTimes" fullname="TileStories.Tests.MarkerOverlapResolverTests.ApplyOverlapOffsets_CalledTwice_ProducesSameResultBothTimes" methodname="ApplyOverlapOffsets_CalledTwice_ProducesSameResultBothTimes" classname="TileStories.Tests.MarkerOverlapResolverTests" runstate="Runnable" seed="1525968442" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.049397" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[MarkerOverlapResolver] Grouped 2 overlapping markers: marker_a, marker_b
+]]></output>
+            </test-case>
+            <test-case id="1002" name="ApplyOverlapOffsets_FiveClusteredMarkers_AllEndUpVisuallySeparated" fullname="TileStories.Tests.MarkerOverlapResolverTests.ApplyOverlapOffsets_FiveClusteredMarkers_AllEndUpVisuallySeparated" methodname="ApplyOverlapOffsets_FiveClusteredMarkers_AllEndUpVisuallySeparated" classname="TileStories.Tests.MarkerOverlapResolverTests" runstate="Runnable" seed="462325489" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.011724" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[MarkerOverlapResolver] Grouped 5 overlapping markers: painting, painting_1, painting_2, painting_3, painting_4
+]]></output>
+            </test-case>
+            <test-case id="1004" name="ApplyOverlapOffsets_NoOverlap_LeavesPositionsUnchanged" fullname="TileStories.Tests.MarkerOverlapResolverTests.ApplyOverlapOffsets_NoOverlap_LeavesPositionsUnchanged" methodname="ApplyOverlapOffsets_NoOverlap_LeavesPositionsUnchanged" classname="TileStories.Tests.MarkerOverlapResolverTests" runstate="Runnable" seed="1927462122" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.002572" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1005" name="MarkerBillboard_CameraMoved_MarkerRotationMatchesCamera" fullname="TileStories.Tests.MarkerOverlapResolverTests.MarkerBillboard_CameraMoved_MarkerRotationMatchesCamera" methodname="MarkerBillboard_CameraMoved_MarkerRotationMatchesCamera" classname="TileStories.Tests.MarkerOverlapResolverTests" runstate="Runnable" seed="1945203846" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.011450" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1006" name="MarkerViewRuntimeTests" fullname="TileStories.Tests.MarkerViewRuntimeTests" classname="TileStories.Tests.MarkerViewRuntimeTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.114452" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1007" name="Initialise_MissingIconAndEffectWiring_RebuildsRequiredChildren" fullname="TileStories.Tests.MarkerViewRuntimeTests.Initialise_MissingIconAndEffectWiring_RebuildsRequiredChildren" methodname="Initialise_MissingIconAndEffectWiring_RebuildsRequiredChildren" classname="TileStories.Tests.MarkerViewRuntimeTests" runstate="Runnable" seed="1927012061" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.091923" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1008" name="SetIntensity_ThresholdBands_SelectExpectedFrameSet" fullname="TileStories.Tests.MarkerViewRuntimeTests.SetIntensity_ThresholdBands_SelectExpectedFrameSet" methodname="SetIntensity_ThresholdBands_SelectExpectedFrameSet" classname="TileStories.Tests.MarkerViewRuntimeTests" runstate="Runnable" seed="1402276622" result="Passed" start-time="2026-07-27 03:56:22Z" end-time="2026-07-27 03:56:22Z" duration="0.020158" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/franc/AppData/LocalLow/DefaultCompany/TileStories\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

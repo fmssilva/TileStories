@@ -1,143 +1,492 @@
-{
-    "wall_id": "living_room",
-    "wall_name": "Living Room (Dev Test)",
-    "immersal_map_id": 146267,
-    "pois": [
-        {
-            "id": "lamp",
-            "name": "Lamp",
-            "category": "furniture",
-            "x_norm": 0.10000000149011612,
-            "y_norm": 0.10000000149011612,
-            "captured_position": {
-                "x": -0.9999999403953552,
-                "y": -0.8669999837875366,
-                "z": -4.177999973297119
-            },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1784591984,
-            "summary": "POI_Lamp"
-        },
-        {
-            "id": "painting",
-            "name": "Painting",
-            "category": "art",
-            "x_norm": 0.5,
-            "y_norm": 0.30000001192092898,
-            "captured_position": {
-                "x": -1.9900000095367432,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1784591984,
-            "summary": "POI_Painting"
-        },
-        {
-            "id": "painting_1",
-            "name": "Painting_1",
-            "category": "test",
-            "x_norm": 0.5,
-            "y_norm": 0.30000001192092898,
-            "captured_position": {
-                "x": -1.985,
-                "y": 0.01,
-                "z": 0.005
-            },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1784591984,
-            "summary": "Overlap test marker 1"
-        },
-        {
-            "id": "painting_2",
-            "name": "Painting_2",
-            "category": "test",
-            "x_norm": 0.5,
-            "y_norm": 0.30000001192092898,
-            "captured_position": {
-                "x": -1.992,
-                "y": -0.008,
-                "z": -0.003
-            },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1784591984,
-            "summary": "Overlap test marker 2"
-        },
-        {
-            "id": "painting_3",
-            "name": "Painting_3",
-            "category": "test",
-            "x_norm": 0.5,
-            "y_norm": 0.30000001192092898,
-            "captured_position": {
-                "x": -1.988,
-                "y": 0.012,
-                "z": 0.002
-            },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1784591984,
-            "summary": "Overlap test marker 3"
-        },
-        {
-            "id": "painting_4",
-            "name": "Painting_4",
-            "category": "test",
-            "x_norm": 0.5,
-            "y_norm": 0.30000001192092898,
-            "captured_position": {
-                "x": -1.995,
-                "y": -0.005,
-                "z": 0.004
-            },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1784591984,
-            "summary": "Overlap test marker 4"
-        },
-        {
-            "id": "camera",
-            "name": "Camera",
-            "category": "electronics",
-            "x_norm": 0.800000011920929,
-            "y_norm": 0.699999988079071,
-            "captured_position": {
-                "x": -1.9300000667572022,
-                "y": 0.7200000286102295,
-                "z": 2.2290000915527345
-            },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1784591984,
-            "summary": "POI_Camera"
-        }
-    ],
-    "calibration_anchors": [
-        {
-            "id": "cal_left",
-            "x_norm": 0.0,
-            "y_norm": 0.5,
-            "captured_position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "has_captured_position": true
-        },
-        {
-            "id": "cal_right",
-            "x_norm": 1.0,
-            "y_norm": 0.5,
-            "captured_position": {
-                "x": 4.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "has_captured_position": true
-        }
-    ]
+﻿{
+    "wall_id":  "living_room",
+    "wall_name":  "Living Room (Dev Test)",
+    "immersal_map_id":  146267,
+    "marker_style":  "outline_gold",
+    "marker_shape":  "circle",
+    "category_styles":  [
+                            {
+                                "category":  "furniture",
+                                "icon_key":  "unknown",
+                                "color_hex":  "#8033CC"
+                            },
+                            {
+                                "category":  "art",
+                                "icon_key":  "unknown",
+                                "color_hex":  ""
+                            },
+                            {
+                                "category":  "electronics",
+                                "icon_key":  "unknown",
+                                "color_hex":  ""
+                            },
+                            {
+                                "category":  "test",
+                                "icon_key":  "unknown",
+                                "color_hex":  ""
+                            }
+                        ],
+    "pois":  [
+                 {
+                     "id":  "lamp",
+                     "name":  "The Lamp",
+                     "category":  "furniture",
+                     "x_norm":  0.1,
+                     "y_norm":  0.1,
+                     "captured_position":  {
+                                               "x":  -1.0,
+                                               "y":  -0.87,
+                                               "z":  -4.18
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_Lamp",
+                     "has_status":  true,
+                     "status_pct":  0,
+                     "is_hero":  true,
+                     "effect_mode":  "pulse,sun_contours"
+                 },
+                 {
+                     "id":  "painting",
+                     "name":  "The Painting",
+                     "category":  "art",
+                     "x_norm":  0.5,
+                     "y_norm":  0.3,
+                     "captured_position":  {
+                                               "x":  -2.0,
+                                               "y":  0.0,
+                                               "z":  0.0
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_Painting",
+                     "has_status":  true,
+                     "status_pct":  50,
+                     "is_hero":  true,
+                     "effect_mode":  "pulse,sun_circles"
+                 },
+                 {
+                     "id":  "painting_1",
+                     "name":  "The Painting (overlap test 1)",
+                     "category":  "test",
+                     "x_norm":  0.5,
+                     "y_norm":  0.3,
+                     "captured_position":  {
+                                               "x":  -1.985,
+                                               "y":  0.01,
+                                               "z":  0.005
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "Overlap test marker 1",
+                     "has_status":  true,
+                     "status_pct":  20,
+                     "is_hero":  false
+                 },
+                 {
+                     "id":  "painting_2",
+                     "name":  "The Painting (overlap test 2)",
+                     "category":  "test",
+                     "x_norm":  0.5,
+                     "y_norm":  0.3,
+                     "captured_position":  {
+                                               "x":  -1.992,
+                                               "y":  -0.008,
+                                               "z":  -0.003
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "Overlap test marker 2",
+                     "has_status":  true,
+                     "status_pct":  40,
+                     "is_hero":  false
+                 },
+                 {
+                     "id":  "painting_3",
+                     "name":  "The Painting (overlap test 3)",
+                     "category":  "test",
+                     "x_norm":  0.5,
+                     "y_norm":  0.3,
+                     "captured_position":  {
+                                               "x":  -1.988,
+                                               "y":  0.012,
+                                               "z":  0.002
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "Overlap test marker 3",
+                     "has_status":  true,
+                     "status_pct":  60,
+                     "is_hero":  false
+                 },
+                 {
+                     "id":  "painting_4",
+                     "name":  "The Painting (overlap test 4)",
+                     "category":  "test",
+                     "x_norm":  0.5,
+                     "y_norm":  0.3,
+                     "captured_position":  {
+                                               "x":  -1.995,
+                                               "y":  -0.005,
+                                               "z":  0.004
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "Overlap test marker 4",
+                     "has_status":  true,
+                     "status_pct":  80,
+                     "is_hero":  false
+                 },
+                 {
+                     "id":  "camera",
+                     "name":  "The Camera",
+                     "category":  "electronics",
+                     "x_norm":  0.8,
+                     "y_norm":  0.7,
+                     "captured_position":  {
+                                               "x":  -1.93,
+                                               "y":  0.72,
+                                               "z":  2.23
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_Camera",
+                     "has_status":  false,
+                     "is_hero":  true,
+                     "effect_mode":  "beacon"
+                 },
+                 {
+                     "id":  "shelf",
+                     "name":  "The Shelf",
+                     "category":  "furniture",
+                     "x_norm":  0.3,
+                     "y_norm":  0.5,
+                     "captured_position":  {
+                                               "x":  -0.5,
+                                               "y":  0.5,
+                                               "z":  1.0
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_Shelf",
+                     "has_status":  true,
+                     "status_unknown":  true,
+                     "is_hero":  false
+                 },
+                 {
+                     "id":  "lamp_right",
+                     "name":  "Lamp side table",
+                     "category":  "furniture",
+                     "x_norm":  0.1,
+                     "y_norm":  0.1,
+                     "captured_position":  {
+                                               "x":  -1.0,
+                                               "y":  -0.87,
+                                               "z":  -3.88
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_LampRight",
+                     "has_status":  true,
+                     "status_pct":  40,
+                     "is_hero":  false,
+                     "rotate_contour":  true
+                 },
+                 {
+                     "id":  "lamp_left",
+                     "name":  "Lamp shade",
+                     "category":  "furniture",
+                     "x_norm":  0.1,
+                     "y_norm":  0.1,
+                     "captured_position":  {
+                                               "x":  -1.0,
+                                               "y":  -0.87,
+                                               "z":  -4.48
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_LampLeft",
+                     "has_status":  false,
+                     "is_hero":  false,
+                     "effect_mode":  "ring_pulse"
+                 },
+                 {
+                     "id":  "lamp_up",
+                     "name":  "Lamp switch",
+                     "category":  "furniture",
+                     "x_norm":  0.1,
+                     "y_norm":  0.1,
+                     "captured_position":  {
+                                               "x":  -1.0,
+                                               "y":  -0.57,
+                                               "z":  -4.18
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_LampUp",
+                     "has_status":  false,
+                     "is_hero":  false,
+                     "effect_mode":  "simple_sun"
+                 },
+                 {
+                     "id":  "lamp_down",
+                     "name":  "Lamp base",
+                     "category":  "furniture",
+                     "x_norm":  0.1,
+                     "y_norm":  0.1,
+                     "captured_position":  {
+                                               "x":  -1.0,
+                                               "y":  -1.17,
+                                               "z":  -4.18
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_LampDown",
+                     "has_status":  false,
+                     "is_hero":  false,
+                     "effect_mode":  "beacon"
+                 },
+                 {
+                     "id":  "painting_right",
+                     "name":  "Painting frame right",
+                     "category":  "art",
+                     "x_norm":  0.5,
+                     "y_norm":  0.3,
+                     "captured_position":  {
+                                               "x":  -2.0,
+                                               "y":  0.0,
+                                               "z":  0.3
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_PaintingRight",
+                     "has_status":  true,
+                     "status_pct":  40,
+                     "is_hero":  false,
+                     "rotate_contour":  true
+                 },
+                 {
+                     "id":  "painting_left",
+                     "name":  "Painting frame left",
+                     "category":  "art",
+                     "x_norm":  0.5,
+                     "y_norm":  0.3,
+                     "captured_position":  {
+                                               "x":  -2.0,
+                                               "y":  0.0,
+                                               "z":  -0.3
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_PaintingLeft",
+                     "has_status":  false,
+                     "is_hero":  false,
+                     "effect_mode":  "ring_pulse"
+                 },
+                 {
+                     "id":  "painting_up",
+                     "name":  "Painting frame top",
+                     "category":  "art",
+                     "x_norm":  0.5,
+                     "y_norm":  0.3,
+                     "captured_position":  {
+                                               "x":  -2.0,
+                                               "y":  0.3,
+                                               "z":  0.0
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_PaintingUp",
+                     "has_status":  false,
+                     "is_hero":  false,
+                     "effect_mode":  "simple_sun"
+                 },
+                 {
+                     "id":  "painting_down",
+                     "name":  "Painting frame bottom",
+                     "category":  "art",
+                     "x_norm":  0.5,
+                     "y_norm":  0.3,
+                     "captured_position":  {
+                                               "x":  -2.0,
+                                               "y":  -0.3,
+                                               "z":  0.0
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_PaintingDown",
+                     "has_status":  false,
+                     "is_hero":  false,
+                     "effect_mode":  "beacon"
+                 },
+                 {
+                     "id":  "camera_right",
+                     "name":  "Camera shelf right",
+                     "category":  "electronics",
+                     "x_norm":  0.8,
+                     "y_norm":  0.7,
+                     "captured_position":  {
+                                               "x":  -1.93,
+                                               "y":  0.72,
+                                               "z":  2.53
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_CameraRight",
+                     "has_status":  true,
+                     "status_pct":  40,
+                     "is_hero":  false,
+                     "rotate_contour":  true
+                 },
+                 {
+                     "id":  "camera_left",
+                     "name":  "Camera shelf left",
+                     "category":  "electronics",
+                     "x_norm":  0.8,
+                     "y_norm":  0.7,
+                     "captured_position":  {
+                                               "x":  -1.93,
+                                               "y":  0.72,
+                                               "z":  1.93
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_CameraLeft",
+                     "has_status":  false,
+                     "is_hero":  false,
+                     "effect_mode":  "ring_pulse"
+                 },
+                 {
+                     "id":  "camera_up",
+                     "name":  "Camera shelf top",
+                     "category":  "electronics",
+                     "x_norm":  0.8,
+                     "y_norm":  0.7,
+                     "captured_position":  {
+                                               "x":  -1.93,
+                                               "y":  1.02,
+                                               "z":  2.23
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_CameraUp",
+                     "has_status":  false,
+                     "is_hero":  false,
+                     "effect_mode":  "simple_sun"
+                 },
+                 {
+                     "id":  "camera_down",
+                     "name":  "Camera shelf bottom",
+                     "category":  "electronics",
+                     "x_norm":  0.8,
+                     "y_norm":  0.7,
+                     "captured_position":  {
+                                               "x":  -1.93,
+                                               "y":  0.42,
+                                               "z":  2.23
+                                           },
+                     "has_captured_position":  true,
+                     "captured_position_source":  "workflow_a_editor",
+                     "captured_position_timestamp":  1784591984,
+                     "summary":  "POI_CameraDown",
+                     "has_status":  false,
+                     "is_hero":  false,
+                     "effect_mode":  "beacon"
+                 }
+             ],
+    "calibration_anchors":  [
+                                {
+                                    "id":  "cal_left",
+                                    "x_norm":  0.0,
+                                    "y_norm":  0.5,
+                                    "captured_position":  {
+                                                              "x":  0.0,
+                                                              "y":  0.0,
+                                                              "z":  0.0
+                                                          },
+                                    "has_captured_position":  true
+                                },
+                                {
+                                    "id":  "cal_right",
+                                    "x_norm":  1.0,
+                                    "y_norm":  0.5,
+                                    "captured_position":  {
+                                                              "x":  4.0,
+                                                              "y":  0.0,
+                                                              "z":  0.0
+                                                          },
+                                    "has_captured_position":  true
+                                }
+                            ],
+    "marker_outline_mode":  "gold",
+    "marker_use_badge":  false,
+    "outline_levels":  [
+                           {
+                               "color_hex":  "",
+                               "label":  "0%",
+                               "pct":  0,
+                               "ring_width":  3.2,
+                               "key":  "lvl_0",
+                               "line_style":  "solid"
+                           },
+                           {
+                               "color_hex":  "",
+                               "label":  "20%",
+                               "pct":  20,
+                               "ring_width":  2.8,
+                               "key":  "lvl_1",
+                               "line_style":  "dash_long"
+                           },
+                           {
+                               "color_hex":  "",
+                               "label":  "40%",
+                               "pct":  40,
+                               "ring_width":  2.4,
+                               "key":  "lvl_2",
+                               "line_style":  "dash_medium"
+                           },
+                           {
+                               "color_hex":  "",
+                               "label":  "60%",
+                               "pct":  60,
+                               "ring_width":  2,
+                               "key":  "lvl_3",
+                               "line_style":  "dash_short"
+                           },
+                           {
+                               "color_hex":  "",
+                               "label":  "80%",
+                               "pct":  80,
+                               "ring_width":  1.7,
+                               "key":  "lvl_4",
+                               "line_style":  "dotted"
+                           },
+                           {
+                               "color_hex":  "",
+                               "label":  "100%",
+                               "pct":  100,
+                               "ring_width":  1.8,
+                               "key":  "lvl_5",
+                               "line_style":  "dotted"
+                           }
+                       ]
 }

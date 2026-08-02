@@ -1,5 +1,15 @@
 ## 1. Before You Start Any Task
 
+**Evidence discipline, stated once here because it applies to every single task in
+this document**: never report a rendering/visual/behavioral task as passing without
+pointing to a specific mechanical result that proves it — an `Assert` that actually
+passed (raw output shown, not paraphrased), or a specific, itemized observation
+citing exactly what was seen. "No errors were thrown" is not evidence of
+correctness. A previous agent's summary is not evidence of correctness. Only
+independently re-derived evidence is. See §6.5 for the full protocol — this rule is
+why it exists.
+
+
 - Read the current project plan / phase plan document in full before writing anything.
 - Read every existing file relevant to the task before touching it. Never assume you know
   what a file does from its name — open it and read it.
@@ -14,7 +24,7 @@
 
 ---
 
-## 2. Think Before You Code
+## 0.1. Think Before You Code
 
 For every non-trivial feature or fix, stop and reason at two separate levels before
 opening a file to edit:
@@ -48,7 +58,7 @@ agreement, and rewrite it properly. Shortcuts that leave messy code in place bec
 ---
 
 
-## 4. General Operating Principles
+## 0.3. General Operating Principles
 
 - There is no time pressure that justifies messy or untested code. Be thorough, not fast.
 - Every task starts with a complete TODO list, including its own testing steps, written
@@ -56,4 +66,4 @@ agreement, and rewrite it properly. Shortcuts that leave messy code in place bec
 - When something about the existing code is unclear or looks wrong, stop and ask or flag
   it rather than guessing and building on top of an assumption that might be incorrect.
 
----
+

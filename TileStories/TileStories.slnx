@@ -2,6 +2,6 @@
   <Project Path="TileStories.csproj" />
   <Project Path="TileStories.Editor.csproj" />
   <Project Path="TileStories.Editor.Tests.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="TileStories.Tests.Runtime.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
 </Solution>

@@ -215,9 +215,13 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │
 │   │   │   │   ├── Markers/                    ← uGUI ONLY — World Space Canvas, 3D-positioned
 │   │   │   │   │   ├── MarkerView.cs           ← uGUI prefab: renders one POI's floating label
-│   │   │   │   │   │                              (~40px, name truncated at ~15 chars); fills
-│   │   │   │   │   │                              colour from category, draws border ring from
-│   │   │   │   │   │                              status; no ring if HasStatus == false.
+│   │   │   │   │   │                              (~40px, name truncated at ~15 chars, hero-tier
+│   │   │   │   │   │                              only); fills colour from category (optionally
+│   │   │   │   │   │                              overridden per-wall), draws status per the
+│   │   │   │   │   │                              wall's marker_style (gold ring / same-hue fade /
+│   │   │   │   │   │                              corner badge); no ring/badge if has_status ==
+│   │   │   │   │   │                              false; a distinct "?" badge if status_unknown.
+│   │   │   │   │   │                              Full design: `_2_2_Marker_Design.md`.
 │   │   │   │   │   └── ClusterIndicator.cs     ← uGUI prefab: shows "N more" badge when
 │   │   │   │   │                                  LODController collapses markers beyond threshold.
 │   │   │   │   │
@@ -406,14 +410,17 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                  WallConfigData → populates WallConfigAsset
 │   │   │   │   │                                  ScriptableObject → saves .asset file next to
 │   │   │   │   │                                  config.json; also bakes CircuitLookupTable.
-│   │   │   │   │                                  **Nullable serialization safety**: the `status`
-│   │   │   │   │                                  field must be backed by an explicit `HasStatus`
-│   │   │   │   │                                  bool (or nullable enum `Status?`) in WallConfigData
-│   │   │   │   │                                  and WallConfigAsset — never an enum that defaults
-│   │   │   │   │                                  to index-0 ("Unchanged") when the JSON key is
-│   │   │   │   │                                  absent. A wall with no `status` field (the mural)
-│   │   │   │   │                                  must bake to `HasStatus = false`; MarkerView reads
-│   │   │   │   │                                  this flag before drawing any border ring.
+│   │   │   │   │                                  **Nullable serialization safety**: `status_pct`
+│   │   │   │   │                                  must be backed by an explicit `has_status: bool`
+│   │   │   │   │                                  in WallConfigData and WallConfigAsset — never a
+│   │   │   │   │                                  float that silently reads as 0% ("Intact") when
+│   │   │   │   │                                  the JSON key is absent. A wall with no `status`
+│   │   │   │   │                                  axis (the mural) must bake to `has_status = false`;
+│   │   │   │   │                                  MarkerView reads this flag before drawing any
+│   │   │   │   │                                  ring/badge whatsoever. A third bool,
+│   │   │   │   │                                  `status_unknown`, marks a POI whose fate is a real
+│   │   │   │   │                                  historical unknown (distinct from `has_status ==
+│   │   │   │   │                                  false`) — see `_2_2_Marker_Design.md` §4/§7.
 │   │   │   │   └── BakerAssetPostprocessor.cs  ← AssetPostprocessor: auto-triggers baker when
 │   │   │   │                                      any config.json is imported or changed; shows
 │   │   │   │                                      progress bar for large POI counts.
@@ -728,7 +735,7 @@ development-only proof case or also an evaluation site (the current evaluation p
 | Date | c. 1700 | Structure 1755/1775; tiles 1950s | 2023 (artist: Tiago Hacke) |
 | Scale | 23 m | ~30–40 m (est.) | 30 m × 6 m |
 | Natural "category" axis | Religious/royal/military/civic/maritime/etc. | Wall-specific (events/figures, not buildings) | Species type: bird/mammal/amphibian/insect |
-| Natural "status" axis | Earthquake fate (intact→vanished, 4 states: unchanged / modified / destroyed / unknown) | Needs its own axis — no earthquake fate applies | **None applies at all** — there is no equivalent "fate" dimension for a painted hedgehog |
+| Natural "status" axis | Earthquake fate — `status_pct: float (0–100)` + `has_status`/`status_unknown` bools (Stage 2.3 refined this from an earlier 4-state-enum sketch into a continuous destruction scale, richer for the ring/fade/badge rendering it drives; `status_unknown` keeps "this building's fate is a real historical unknown" distinct from "this wall has no status axis") | Needs its own axis — no earthquake fate applies | **None applies at all** — there is no equivalent "fate" dimension for a painted hedgehog |
 | Access | Closed (PRR works) — opportunistic only | Guaranteed, primary dev surface | Guaranteed, public, freely accessible |
 
 The third wall proves that **both** taxonomy axes (category *and* status), not just
@@ -1140,14 +1147,30 @@ small set of high-consequence decisions that affect everything else.
    covers more than 40% of screen height; if content is very long, make the sheet
    user-expandable, never auto-expanded.
 
-2. **Marker shape and encoding system.** Already designed in the Flutter prototyping
-   phase: category encoded by fill colour + icon, earthquake fate encoded by border
-   colour + style (solid-green for intact through progressively shorter dashes to dotted-
-   red for vanished), importance hierarchy (large labelled icon for hero POIs, small
-   colour-only dot for secondary scale-proving POIs). The Stage 0 decision: **verify
+2. **Marker shape and encoding system.** Originally sketched in the Flutter
+   prototyping phase as: category encoded by fill colour + icon, earthquake fate
+   encoded by border colour + style (solid-green for intact through progressively
+   shorter dashes to dotted-red for vanished), importance hierarchy (large labelled
+   icon for hero POIs, small colour-only dot for secondary scale-proving POIs).
+   **Stage 2.3 refined the colour scheme**: the ring/badge status ramp ended up
+   gold→rust (not green→red) specifically so it never shares a hue family with any
+   category colour (a live problem the green/red sketch had — see
+   `_2_2_Marker_Design.md` §4 for the full reasoning) — dash rhythm (solid→dotted)
+   is unchanged from this sketch. Stage 2.3 also turned "one fixed encoding" into
+   3 dev-selectable `marker_style` options (gold ring / same-hue fade / corner
+   badge), of which this original sketch is one (`outline_gold`). The importance
+   hierarchy is **partially resolved**: hero POIs get a persistent label (Stage
+   2.3's `is_hero`), but "small colour-only dot for secondary" — an actual size/
+   shape reduction, not just hiding the label — is not yet built; likely belongs
+   with the LOD/marker-density system (§ below) rather than Stage 2.3's rendering
+   work, since it's a distance-driven concern, not a per-POI content concern. The
+   Stage 0 decision: **verify
    the no-status case renders cleanly** — a POI with no `status` field (such as every
    POI on the mural wall) must show no border ring at all, not a broken or empty ring.
-   Mock this case explicitly in Stage 0 before the renderer is written.
+   Mock this case explicitly in Stage 0 before the renderer is written. **Confirmed
+   in Stage 2.3**: `has_status` guards this exactly as specified, plus a third
+   `status_unknown` state for a documented-but-unresolved historical fate (see
+   `_2_2_Marker_Design.md` §4 principle 3).
 
 3. **Guide character implementation approach.** Choose between: (a) sprite-swap between
    a small set of named static frames (idle/talking/pointing-left/pointing-right/
@@ -1412,7 +1435,7 @@ validator yet, just enough structure to build against. Concrete shape to start f
       "name_pt": "Castelo de São Jorge",
       "name_en": "St. George's Castle",
       "category": ["military", "power"],
-      "status": "modified",
+      "status_pct": 60, "has_status": true, "status_unknown": false,
       "wall_position": { "x_norm": 0.72, "y_norm": 0.45 },
       "summary_pt": "...",
       "content_by_profile": {
@@ -1441,7 +1464,15 @@ in the schema from the very first draft, not patched in later.
 - *Marker shape*: colour-coded circles, not custom per-category icons, chosen
   specifically to avoid multiplying asset-creation work across every category; icons
   can be added later within the same block-rendering approach without changing the
-  marker system.
+  marker system. **Resolved in Stage 2.3**: icons implemented as an opt-in
+  `IconLibrary` lookup by category string, sphere-only-circle remaining the default
+  for any category without an authored icon — the "avoid multiplying asset work"
+  intent is preserved because icon authoring is additive, never required. Stage 2.3
+  also added `marker_style` (3 dev-selectable status renderers: gold ring / same-hue
+  fade / corner badge) and `marker_shape` (5 base silhouettes) as wall-level,
+  dev-selectable config — the single fixed "colour-coded circle" approach sketched
+  here was one option among those three, not the only one. See
+  `_2_2_Marker_Design.md` for the full design.
 - **Use a single Immersal map per wall — Immersal handles tracking stability
   automatically and the framework should not try to re-implement what the SDK already
   does.** One well-captured map per wall (per the field-work capture protocol in §1)
@@ -1883,7 +1914,13 @@ codebase's source.
 9. **Profile-variant content within blocks** — `"content_by_profile"` keys
    (tourist/student/academic/child) resolved by the existing block renderers, not new
    block types. Content taxonomy for status, concretely, for the Panorama: four
-   values — unchanged, modified (rebuilt/altered), destroyed, unknown. Closes out the
+   *narrative* categories a content author reasons in — unchanged, modified
+   (rebuilt/altered), destroyed, unknown. These map onto Stage 2.3's rendering schema
+   as: unknown → `status_unknown: true`; the other three are narrative shorthand for
+   a `status_pct` the author picks within that category's range (e.g. "modified"
+   isn't one fixed number — a content writer can place it anywhere that reads right
+   for that specific building, `status_pct` is the finer-grained field, the category
+   name is how they think about it while writing). Closes out the
    POI-level work for this stage.
 
 By the end of Stage 2: all three walls have a working set of fully-functional POIs
@@ -2996,10 +3033,19 @@ re-explaining them on every use.
 - **Category axis** — a wall-defined, free-form tag on a POI (e.g. the Panorama's
   religious/royal/military/etc.; the mural's bird/mammal/amphibian/insect). Never a
   fixed framework enum.
-- **Status axis** — a second, *optional* wall-defined tag (e.g. the Panorama's
-  unchanged/modified/destroyed/unknown earthquake fate). Optional because the mural has
-  no equivalent axis at all — this is the concrete reason status must never be assumed
-  present (§1).
+- **Status axis** — a second, *optional* wall-defined axis. For the Panorama this is
+  earthquake destruction, represented as `status_pct: float (0–100)` guarded by
+  `has_status: bool` — refined in Stage 2.3 from an earlier 4-state-enum sketch
+  (unchanged/modified/destroyed/unknown) into a continuous scale, which renders more
+  legibly across the ring/fade/badge marker styles Stage 2.3 built. The old enum's
+  "unknown" value survives as its own bool, `status_unknown` — a POI can have
+  `has_status: true` and a real historical unknown fate, which is a genuinely
+  different state from `has_status: false` (this wall doesn't track destruction at
+  all) and is rendered as its own distinct visual (a neutral "?" badge), never
+  conflated with either the "no axis" case or a known percentage. Optional because
+  the mural has no equivalent axis at all — this is the concrete reason status must
+  never be assumed present (§1). See `_2_2_Marker_Design.md` for the full rendering
+  design and the reasoning behind the enum→percentage change.
 - **Zone-based tracking** — splitting one wall's reference imagery into 4–6 overlapping
   zone images so the tracker can fail over to an adjacent zone when confidence drops in
   the current one, rather than losing the lock entirely (Stage 1).
@@ -3107,7 +3153,7 @@ per-wall folder layout.
       "name_pt": "Castelo de São Jorge",
       "name_en": "St. George's Castle",
       "category": ["military", "power"],
-      "status": "modified",
+      "status_pct": 60, "has_status": true, "status_unknown": false,
       "wall_position": { "x_norm": 0.72, "y_norm": 0.45 },
       "captured_position": { "x": 1.84, "y": 0.92, "z": -3.41 },
       "summary_pt": "Curta descrição de 2 frases, registo turístico.",
@@ -3175,7 +3221,7 @@ per-wall folder layout.
       "title_pt": "Sobrevivente 1755",
       "title_en": "Survivor of 1755",
       "icon": "⚡",
-      "trigger": { "type": "first_visit_of_status", "status": "destroyed" }
+      "trigger": { "type": "status_threshold", "status_pct_gte": 80 }
     },
     {
       "id": "explorador",
@@ -3203,19 +3249,29 @@ per-wall folder layout.
 ```
 
 Field notes that matter more than they look:
-- `category` and `status` are arrays/strings the wall itself defines — never validate
-  them against a framework-level fixed enum (§1's mural-wall finding). `status` is
-  entirely **absent**, not empty, on walls where it doesn't apply (the mural).
-  **Serialisation safety (Stage 4 bake implementation)**: `status` in `WallConfigData`
-  and `WallConfigAsset` must be backed by an explicit `HasStatus bool` (or a nullable
-  `StatusEnum?`), never a plain enum that defaults to its 0-index value ("Unchanged")
-  when the JSON key is missing. Unity's serialiser silently initialises missing enum
-  fields to their 0-index value — this would cause the mural's bird POIs to render an
-  "Unchanged (intact)" green border ring, which is wrong, not from no border at all.
-  `MarkerView` must check `HasStatus` before drawing any border ring whatsoever.
-  Test this explicitly by running the mural's config through the baker and confirming
-  `HasStatus == false` on every POI in the resulting `.asset` file — it is the
-  cheapest bug to add a test for and the most embarrassing one to discover live.
+- `category` and `status` are wall-defined, never validated against a
+  framework-level fixed enum (§1's mural-wall finding). `status` is entirely
+  **absent**, not empty, on walls where it doesn't apply (the mural). Note:
+  `category` is sketched here as an array (multi-tag POIs, e.g. `["military",
+  "power"]`) but the actual current implementation and Stage 2.3's
+  `CategoryPalette` both use a single string — build up to the array form
+  incrementally per this section's own philosophy; when it's built,
+  `CategoryPalette.ResolveColor` needs a rule for which tag decides the fill
+  colour when a POI has more than one.
+  **Serialisation safety (Stage 4 bake implementation)**: `status_pct` in
+  `WallConfigData` and `WallConfigAsset` must be backed by an explicit
+  `has_status: bool`, never a plain float that silently reads as 0 ("Intact")
+  when the JSON key is missing. Unity's serialiser silently initialises missing
+  numeric fields to 0 — this would cause the mural's bird POIs to render as
+  "0% Intact" (a fully-opaque gold ring, per Stage 2.3's actual ramp — see
+  `_2_2_Marker_Design.md`), which is wrong, not from no ring/badge at all.
+  `MarkerView` must check `has_status` before drawing any ring/badge whatsoever.
+  A third bool, `status_unknown`, marks a POI whose fate is a genuine historical
+  unknown — distinct from `has_status == false` — rendered as its own neutral
+  "?" badge regardless of `marker_style`. Test this explicitly by running the
+  mural's config through the baker and confirming `has_status == false` on
+  every POI in the resulting `.asset` file — it is the cheapest bug to add a
+  test for and the most embarrassing one to discover live.
 - `wall_position` (`x_norm`/`y_norm`) is the human-authored, draftable-from-a-photo
   value content writers reason about before any field visit; `captured_position` (a
   real 3D point under the XR Space, §3's Stage 1 coordinate-system note) is the
@@ -3228,6 +3284,12 @@ Field notes that matter more than they look:
   per wall at minimum.
 - `lapse_states` is keyed by whatever epoch/criteria names the wall actually uses — for
   the mural, these keys would be seasons or times-of-day, not `pre_1755`/`earthquake`/etc.
+  This is a completely different mechanism from Stage 2.3's marker rendering system,
+  despite both involving a "marker colour": `lapse_states` controls *whether a marker
+  is visible at all*, for a given epoch; Stage 2.3's `marker_style`/`category_styles`
+  govern *how one visible marker looks*. They compose (a marker can be visible in the
+  `earthquake` epoch AND rendered at 60% status via `outline_same_hue`) — one doesn't
+  replace or duplicate the other.
 - `media` fields are all optional per POI — a POI with only a `summary` and no audio,
   video, or 3D model is valid; not every POI needs every block.
 - `content_by_profile` keys are fixed (tourist/student/academic/child) since the
@@ -3238,7 +3300,19 @@ Field notes that matter more than they look:
   not, so this field is not optional in practice even though the schema doesn't
   enforce it until Stage 4.
 - `circuits` and `badges` live at the wall level, not nested inside individual POIs,
-  since a circuit references POIs by `id` rather than owning them.
+  since a circuit references POIs by `id` rather than owning them. Note: `badges`
+  here are gamification achievements (unlocked by a `trigger`, shown in a
+  profile/collection screen) — unrelated to `MarkerStyle.Badge` (Stage 2.3's small
+  corner-chip status renderer on a POI marker itself). Same English word, two
+  unrelated concepts; consider renaming `MarkerStyle.Badge` to
+  `MarkerStyle.CornerBadge` if this reads ambiguously once both systems exist
+  side by side and get discussed together.
+- The `sobrevivente_1755` badge's trigger changed from `first_visit_of_status:
+  "destroyed"` (exact string match) to `status_threshold: {status_pct_gte: 80}`
+  because Stage 2.3 changed `status` from a matchable enum string to a continuous
+  `status_pct` — whichever stage actually builds the trigger engine needs a
+  threshold-comparison rule type, not just equality matching, for any trigger keyed
+  on status.
 - `completion_rule: "visit_all"` and `traversal_rule: "bidirectional"` are not
   cosmetic — they are what makes flexible circuit entry points actually work rather
   than just relocating the wayfinding arrow. `completion_rule` must be a

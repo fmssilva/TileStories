@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TileStories
 {
     // Orchestrates a wall session: load config, wait for localisation, spawn POI anchors.
-    // No position-deciding logic of its own — delegates to POIPositionResolver.
+    // No position-deciding logic of its own -- delegates to POIPositionResolver.
     public class WallSession : MonoBehaviour
     {
         [Tooltip("Path inside StreamingAssets, e.g. 'LivingRoom/config.json'")]
@@ -22,6 +22,15 @@ namespace TileStories
         private readonly List<GameObject> _spawnedPOIs = new();
         private bool _didSpawn;
         private bool _configLoaded;
+
+        // Resolved once from config, then passed to every marker on spawn
+        private MarkerShape _markerShape;
+        private MarkerOutlineMode _markerOutlineMode;
+        private bool _markerUseBadge;
+        private bool _hasShapeFromConfig;
+        private bool _hasCategoryDefinitions;
+        private bool _hasOutlineLevels;
+        private SpriteKeyLibrary _wallIconLibrary;
 
         private void Awake()
         {
@@ -58,7 +67,56 @@ namespace TileStories
                 yield break;
 
             _configLoaded = true;
-            Debug.Log($"[WallSession] Loaded '{_config.wall_name}' — {_config.pois?.Count ?? 0} POIs.");
+
+            // Runtime reads only authored config and does no visual design fallbacks.
+            // Missing/invalid optional fields degrade to no-op visual behavior.
+            _hasShapeFromConfig = MarkerVisualsParser.TryParseShape(_config.marker_shape, out _markerShape);
+            if (!_hasShapeFromConfig)
+                Debug.LogWarning("[WallSession] marker_shape missing/invalid - leaving prefab symbol shape unchanged.");
+
+            if (!string.IsNullOrWhiteSpace(_config.marker_outline_mode))
+            {
+                if (!MarkerVisualsParser.TryParseOutlineMode(_config.marker_outline_mode, out _markerOutlineMode))
+                {
+                    _markerOutlineMode = MarkerOutlineMode.None;
+                    Debug.LogWarning("[WallSession] marker_outline_mode missing/invalid - disabling outline at runtime.");
+                }
+
+                _markerUseBadge = _config.marker_use_badge;
+            }
+            else if (MarkerVisualsParser.TryParseStyle(_config.marker_style, out var legacyStyle))
+            {
+                // Legacy marker_style is still accepted as explicit authored config.
+                MarkerVisualsParser.DeriveOutlineAndBadgeFromLegacyStyle(
+                    legacyStyle == MarkerStyle.Badge ? "badge" :
+                    legacyStyle == MarkerStyle.OutlineSameHue ? "outline_same_hue" : "outline_gold",
+                    out _markerOutlineMode,
+                    out _markerUseBadge);
+            }
+            else
+            {
+                _markerOutlineMode = MarkerOutlineMode.None;
+                _markerUseBadge = false;
+            }
+
+            _hasCategoryDefinitions = _config.category_styles != null && _config.category_styles.Count > 0;
+            if (_hasCategoryDefinitions) CategoryPalette.Configure(_config.category_styles);
+            else CategoryPalette.ClearOverrides();
+
+            _wallIconLibrary = null;
+            if (!string.IsNullOrWhiteSpace(_config.marker_icon_library_resources_path))
+            {
+                _wallIconLibrary = Resources.Load<SpriteKeyLibrary>(_config.marker_icon_library_resources_path.Trim());
+                if (_wallIconLibrary == null)
+                    Debug.LogWarning($"[WallSession] marker_icon_library_resources_path '{_config.marker_icon_library_resources_path}' could not be loaded from Resources. Using prefab default icon library.");
+            }
+
+            BadgeCategoryPalette.Configure(_config.badge_categories);
+
+            _hasOutlineLevels = _config.outline_levels != null && _config.outline_levels.Count > 0;
+            if (_hasOutlineLevels) StatusRamp.Configure(_config.outline_levels);
+
+            Debug.Log($"[WallSession] Loaded '{_config.wall_name}' -- {_config.pois?.Count ?? 0} POIs.");
 
             // If tracking already has a lock by the time config finishes, spawn immediately
             if (!_didSpawn && _tracker != null && _tracker.IsLocalised)
@@ -77,7 +135,7 @@ namespace TileStories
                 return;
             }
 
-            Debug.Assert(_config.pois.Count > 0, "[WallSession] POI list is empty — nothing to spawn.");
+            Debug.Assert(_config.pois.Count > 0, "[WallSession] POI list is empty -- nothing to spawn.");
             Debug.Assert(_config.pois.TrueForAll(p => !string.IsNullOrEmpty(p.id)),
                          "[WallSession] One or more POIs have empty ids.");
 
@@ -101,7 +159,7 @@ namespace TileStories
                 // Resolve position via the dedicated resolver (no position logic in this class)
                 if (!POIPositionResolver.TryResolvePosition(poi, anchors, out Vector3 localPos))
                 {
-                    Debug.LogWarning($"[WallSession] Skipping POI '{poi.id}' — position could not be resolved.");
+                    Debug.LogWarning($"[WallSession] Skipping POI '{poi.id}' -- position could not be resolved.");
                     continue;
                 }
 
@@ -117,11 +175,21 @@ namespace TileStories
                 var anchor = go.GetComponent<POIAnchor>() ?? go.AddComponent<POIAnchor>();
                 anchor.Initialise(poi);
 
-                // Initialize MarkerView to set the label text from POI data
+                // Initialize MarkerView with style/shape/effects from config
                 var markerView = go.GetComponentInChildren<MarkerView>();
                 if (markerView != null)
                 {
-                    markerView.Initialise(anchor);
+                    var effects = MarkerVisualsParser.ParseEffectFlags(poi.effect_mode);
+                    markerView.Initialise(
+                        anchor,
+                        _markerOutlineMode,
+                        _markerUseBadge,
+                        _markerShape,
+                        effects,
+                        _hasCategoryDefinitions,
+                        _hasShapeFromConfig,
+                        _hasOutlineLevels,
+                        _wallIconLibrary);
                     spawnedMarkerViews.Add(markerView);
                 }
 

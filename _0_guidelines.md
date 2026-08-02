@@ -9,6 +9,16 @@ exceptions, unless the person working with you explicitly says otherwise for tha
 
 ## 0. Before You Start Any Task
 
+**Evidence discipline, stated once here because it applies to every single task in
+this document**: never report a rendering/visual/behavioral task as passing without
+pointing to a specific mechanical result that proves it — an `Assert` that actually
+passed (raw output shown, not paraphrased), or a specific, itemized observation
+citing exactly what was seen. "No errors were thrown" is not evidence of
+correctness. A previous agent's summary is not evidence of correctness. Only
+independently re-derived evidence is. See §6.5 for the full protocol — this rule is
+why it exists.
+
+
 - Read the current project plan / phase plan document in full before writing anything.
 - Read every existing file relevant to the task before touching it. Never assume you know
   what a file does from its name — open it and read it.
@@ -312,9 +322,227 @@ asserting something that isn't actually the correct behavior), or is the logic w
 (the code isn't doing what it should)? Write out up to three possible fixes, pick the
 best one, apply it, and re-run.
 
+### 6.3 Asset Database Refresh Discipline
+
+Any edit to a `.meta`, `.prefab`, `.asset`, or raw asset file (texture, audio, model)
+made through file editing rather than Unity's own Editor UI needs an explicit
+AssetDatabase refresh before it can be trusted — Unity does not always detect and
+fully re-resolve such changes automatically, and this is documented Unity behaviour,
+not a project-specific quirk (see `AssetDatabase.Refresh`'s own scripting reference:
+*"You might need to call this method if... you have made changes to assets on disk
+from an external application while the Editor is running"*).
+
+This matters more than it looks because of an asymmetry §6.2's batch-mode test
+workflow doesn't cover: launching `Unity.exe -batchmode` starts a **fresh** process,
+which naturally re-scans the project on that launch — so an agent's own batch-mode
+compile/test run can genuinely pass right after an asset edit. But if the person is
+also running a **separate, already-open** Unity Editor window for manual Play Mode
+testing (the normal case), that long-running session was never told anything
+changed, and will keep showing stale — sometimes actively broken — asset references
+until it's explicitly refreshed. A passing batch-mode test result is not evidence
+the person's own open Editor session sees the same state.
+
+- If Unity MCP tooling is connected (e.g. `CoplayDev/unity-mcp`'s `refresh_unity` or
+  `manage_asset` reimport action), call it immediately after any asset-file edit,
+  before reporting the task done or asking the person to test — do not wait to be
+  asked.
+- If no such tooling is connected, say so explicitly in the handoff message: name
+  the specific files changed and state plainly that the person needs to trigger
+  `Assets > Reimport` (or `Reimport All` for a broader change) in their own open
+  Editor before testing — do not silently assume a file edit is equivalent to a
+  completed import.
+- If a reported bug looks identical before and after a fix that checks out correctly
+  in the file's own text, a stale Editor/Library cache is a real, common, and cheap
+  hypothesis to check before re-diagnosing the reference itself — worth explicitly
+  ruling in or out early, not treated as a last resort.
+
 ---
 
+### 6.4 Phase A/B — Isolated Verification Before Integration
+
+Any domain with a visual/rendered component (UI, AR markers, effects, animations)
+gets built and verified in two phases. Do not build the full feature and the real
+AR/data-pipeline integration together and debug both at once — this is what turned
+a marker rendering bug into several confusing debugging rounds. Isolating the
+rendering system from tracking/config-driven data removes one whole axis of
+variables before the harder integration work even starts.
+
+**Phase A — isolated test scene, zero AR/tracking/config.json.** A dedicated,
+non-shipping scene (excluded from Build Settings) that exercises every rendering
+variant of the domain directly, fed fabricated data instead of the real pipeline.
+Built incrementally: the single simplest case first, confirmed correct, only then
+the next variant — never every variant built first and debugged together. Do not
+proceed to Phase B until every Phase A variant is confirmed via §6.5's tiers.
+
+**Phase B — real pipeline integration.** Wire the now-proven-correct system into
+the real domain flow. If Phase B shows a problem Phase A didn't, that's a strong
+signal the bug is in the integration/config layer, not the rendering system — Phase
+A already proved that part correct in isolation; debug the data feeding it, not the
+rendering code itself.
+
+**Which recipe, by rendering system:**
+
+| System | Recipe |
+|---|---|
+| uGUI world-space (Markers and similar) | Grid gallery scene, positioned in 3D, no AR — see `_2_2_Marker_Design.md` §18 for a complete worked example (data-struct-driven entry list, shared harness, PlayMode assertion suite) |
+| UI Toolkit screen-space (DetailCard, quiz, toasts, GuideCharacter, Navigation, Sharing) | Two-step: (1) static layout check in Unity's **UI Builder** — zero Play Mode, zero code, catches styling/layout bugs for free; (2) a small runtime harness scene with one `UIDocument`, fed fabricated content variants (long/short text, with/without media, each state) |
+| Non-visual integrations (AI API calls, future 3D/animation work) | A minimal sandbox scene or script — call the thing in isolation, log actual request/response/error states; same "isolate before integrating" principle, different mechanism |
+
+**Not every domain needs a gallery.** Build one only when there are genuine
+combinatorial variants worth grid-testing. A single-fixed-state element gets one
+manual Play Mode check — building gallery machinery for it is the over-engineering
+§3 already warns against.
+
+**Shared conventions across all Phase A scenes**: live under `Assets/Dev/<Domain>Gallery/`;
+reuse the same backdrop photo asset across every uGUI gallery scene rather than
+re-supplying one per domain; use the same data-struct-driven entry-list pattern
+(one list of plain data, consumed by both the visual harness and the automated
+test suite, so they can never silently drift apart).
+
+### 6.4.1 Edit-Mode tooling parity (when applicable)
+
+*Applies only to domains that ship or touch an Editor-time authoring/preview
+tool (a custom `EditorWindow`, custom inspector, etc.) that instantiates or
+configures the domain's real runtime objects in the Scene view outside Play
+Mode.* Not every domain has one — skip this entirely for those that don't.
+
+This is not a third phase after A and B. It's a different *axis*: Phase A/B
+is about which pipeline drives a component (fabricated test data vs. the real
+production flow); this is about which *runtime context* renders it (Edit Mode
+vs. Play Mode). A domain can need this check regardless of where it is in
+Phase A/B, and it has its own failure class that neither phase's Play-Mode
+testing will ever catch, no matter how thorough that testing is:
+
+- `MonoBehaviour.Update()`/coroutines do not tick in Edit Mode. Anything
+  per-frame (animation, effects, timers) will not visibly run there — that's
+  expected, not a bug. Say so explicitly in the domain plan so a later agent
+  doesn't mistake it for one.
+- Editor-instantiated objects are often real, persistent scene GameObjects
+  ("hard copies"), not ephemeral runtime spawns — confirm this directly by
+  reading the tool's code rather than assuming either way. It changes what
+  "refresh" should mean: reconfigure the objects already sitting in the
+  hierarchy in place, not destroy-and-respawn them.
+- The single most common gap: a component's real configuration entry point
+  (e.g. `SomeView.Initialise(...)`) being correctly wired for the Play-Mode
+  path doesn't mean anyone remembered to call it from the Editor tool too.
+  Check this explicitly, by reading the tool's code — it's an easy, silent
+  gap. (Worked example: `_2_2_Marker_Design.md` §19.13 — the Living Room
+  POI authoring tool positioned markers correctly for a long time while
+  never once calling `MarkerView.Initialise`, so every Editor-mode preview
+  silently showed the prefab's raw default look, not the actual configured
+  marker.)
+
+Verify with the same evidence discipline as §6.5, adapted to this context:
+Tier 0 = does the tool's populate/refresh code path actually call the same
+real entry point the Play-Mode path uses (read the code, don't assume it
+does just because Play Mode works); Tier 1 = does the Scene view show the
+correct *static* composition immediately after a field changes, with zero
+Play Mode entries — not whether it animates, which isn't expected here.
+
+### 6.5 Verification Tiers and Evidence Standards
+
+Four tiers, cheapest and most-automatic first. Higher tiers exist to catch what
+lower tiers structurally cannot — never skip a cheap tier to save time by going
+straight to an expensive one, and never treat a higher tier's pass as covering what
+a lower tier should have already caught.
+
+**Tier 0 — structural assertions (language agent, always runs).** Real NUnit
+`Assert` calls, not `Debug.Log` inspection. A log line is not a pass/fail signal —
+an agent skimming log text for something that "looks plausible" is exactly the
+failure mode this tier exists to eliminate. `Assert.IsNotNull(sprite)` either
+throws or it doesn't; there is nothing to interpret. If a harness only logs and
+never asserts, add the assertions before trusting it.
+
+**Tier 0.5 — programmatic UI-quality checks (language agent, no vision needed).**
+Every one of these is exact, not approximate — the mechanism a real interaction
+uses, simulated, not inferred:
+
+*Occlusion / actually-clickable check* — simulate a tap at the element's own
+centre and confirm it, not something on top of it, receives the hit:
+```csharp
+// Confirms a UI element is genuinely the topmost raycast target at its own
+// centre point -- i.e. actually tappable, not visually present but covered by
+// something else. Requires an EventSystem in the scene.
+public static bool IsTopmostRaycastTarget(RectTransform target, Camera uiCamera = null)
+{
+    var raycaster = target.GetComponentInParent<GraphicRaycaster>();
+    if (raycaster == null || EventSystem.current == null) return false;
+
+    Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(uiCamera, target.position);
+    var pointerData = new PointerEventData(EventSystem.current) { position = screenPoint };
+    var results = new List<RaycastResult>();
+    raycaster.Raycast(pointerData, results);
+
+    return results.Count > 0 && results[0].gameObject.transform == target;
+}
+```
+
+*Contrast check* — WCAG 2.1's own formula (SC 1.4.3 text, SC 1.4.11 UI
+components), pure arithmetic on two RGB colours:
+```csharp
+// Relative luminance + contrast ratio, ported directly from the W3C formula.
+// AA thresholds: 4.5:1 normal text, 3:1 large text / UI component boundaries.
+public static class ContrastCheck
+{
+    private static float ToLinear(float c) =>
+        c <= 0.03928f ? c / 12.92f : Mathf.Pow((c + 0.055f) / 1.055f, 2.4f);
+
+    private static float RelativeLuminance(Color c) =>
+        0.2126f * ToLinear(c.r) + 0.7152f * ToLinear(c.g) + 0.0722f * ToLinear(c.b);
+
+    public static float ContrastRatio(Color a, Color b)
+    {
+        float la = RelativeLuminance(a), lb = RelativeLuminance(b);
+        float lighter = Mathf.Max(la, lb), darker = Mathf.Min(la, lb);
+        return (lighter + 0.05f) / (darker + 0.05f);
+    }
+
+    public const float MinRatioNormalText = 4.5f;
+    public const float MinRatioLargeTextOrUIComponent = 3.0f;
+}
+```
+
+*Minimum tap target* — WCAG 2.5.5: `target.rect.width >= 44f && target.rect.height >= 44f`.
+
+*Text truncation* — TextMeshPro exposes this directly: `textInfo.isTextTruncated`.
+
+These four cover most of what "does this look okay" prompts actually try to check.
+Put them in the same PlayMode suite as Tier 0's structural assertions — same cost,
+same evidence standard, still zero vision required.
+
+**Tier 1 — consolidated vision pass (vision agent, rate-limited, use deliberately).**
+Batch into as few calls as possible — one screenshot of a whole labeled gallery
+grid, not one call per marker. **Never ask "does this look correct?"** — that
+invites an agreeable answer and is exactly how the square-marker screenshot got
+rubber-stamped. Instead, hand the vision agent a numbered checklist of specific,
+falsifiable claims tied to what Tier 0/0.5 already confirmed structurally, and
+require a per-item answer citing what is actually observed:
+
+> Entry "religious": is the Symbol a filled circle, not a square or rectangle?
+> [yes/no — describe the actual shape you see]
+> Entry "60% Heavy" (OutlineGold): is a dashed ring visible around the symbol?
+> [yes/no — describe what you see instead if no]
+
+A holistic summary answer to a checklist prompt is itself a sign the check wasn't
+done properly — reject it and re-ask item by item if that's what comes back.
+
+**Tier 2 — human (rarest, most expensive).** Real device, final subjective/
+aesthetic judgment, real-world legibility. Reserved for what Tiers 0/0.5/1
+structurally cannot answer — not a catch-all for skipping the cheaper tiers.
+
+**Handoff between tiers/agents.** A handoff summary's job is to tell the next
+agent *where to look*, not *what to conclude* — efficiency (don't re-explore the
+whole project), never a substitute for independently checking. Every handoff
+includes: which files/scenes to open, which Tier 0/0.5 tests passed with their raw
+output attached (not paraphrased), and — for a Tier 1 handoff — the itemized
+checklist to run, framed explicitly as "verify these independently," never
+"confirm everything is fine." If you are the receiving agent: re-derive the
+evidence yourself for anything you report on. Trusting the prior summary's
+conclusion without checking is the exact failure this section exists to prevent.
+
 ## 7. Human-in-the-Loop Protocol (Tier C and Tier D only)
+
+
 
 Tier A, Tier B, and §6.2's automated tests need no human interaction at all — run them
 yourself and read the results. Only use this protocol for Tier C (real device build)
@@ -358,6 +586,8 @@ require a human or physical access.
 
 ## 10. Finishing a Task
 
+- If any asset-file edits were made (see §6.3), confirm the refresh/reimport step
+  was actually completed — not just proposed — before reporting the task done.
 - If a phase or project plan document exists, update it to check off what was completed,
   and note any decision that changed from the original plan because implementation
   revealed a better approach.

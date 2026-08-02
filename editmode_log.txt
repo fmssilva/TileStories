@@ -1,36 +1,11 @@
 [Licensing::Module] Trying to connect to existing licensing client channel...
 Built from '6000.3/staging' branch; Version is '6000.3.19f1 (7689f4515d75) revision 7768564'; Using compiler version '194234433'; Build Type 'Release'
 OS: 'Windows 11  (10.0.26200) Core' Language: 'en' Physical Memory: 16151 MB
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-franc" at "2026-07-23T07:45:55.5959497Z"
 BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
 System  architecture: x64
 Process architecture: x64
-Date: 2026-07-23T07:45:55Z
-[Licensing::Client] Error: HandshakeResponse reported an error:
-	ResponseCode: 505
-	ResponseStatus: Unsupported protocol version '1.18.1'.
-[Licensing::Module] Error: Failed to handshake to channel: "LicenseClient-franc"
-[Licensing::IpcConnector] LicenseClient-franc channel disconnected successfully.
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-franc-6000.3.19" at "2026-07-23T07:45:58.3119416Z"
-[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 362588, path: "C:/Program Files/Unity/Hub/Editor/6000.3.19f1/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client.exe")
-[Licensing::Module] LicensingClient has failed validation; ignoring
-[Licensing::Client] Handshaking with LicensingClient:
-  Version:                 1.18.1+9fbee8e
-  Session Id:              d64f67a0ac2347719ac9e2eaecd1a5c3
-  Correlation Id:          fa55d9063c04c80496d30decdbb45d5a
-  External correlation Id: 5285169243299832163
-  Machine Id:              PEK0PdJMuBkMmCBD5iQrDEHfDOY=
-[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-franc-6000.3.19" (connect: 0.00s, validation: 0.01s, handshake: 0.17s)
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-franc-6000.3.19-notifications" at "2026-07-23T07:45:58.4925331Z"
-[Licensing::Module] Error: Access token is unavailable; failed to update
-[Licensing::Client] Successfully resolved entitlement details
-[Licensing::Module] License group:
-  Id: 6872838427490-UnityPersXXXX
-  Product: Unity Personal
-  Type: Assigned
-  Expiration: Unlimited
-[Licensing::Client] Successfully updated license, isAsync: True, time: 0.02
-[Licensing::Module] Licensing Background thread has ended after 2.93s
+Date: 2026-08-02T08:07:11Z
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-franc" at "2026-08-02T08:07:11.3069164Z"
 
 COMMAND LINE ARGUMENTS:
 C:\Program Files\Unity\Hub\Editor\6000.3.19f1\Editor\Unity.exe
@@ -42,10 +17,9 @@ C:\Users\franc\Desktop\TileStories\TileStories
 -testPlatform
 EditMode
 -testResults
-editmode_results.xml
+C:\Users\franc\Desktop\TileStories\editmode_results.xml
 -logFile
-editmode_log.txt
--quit
+C:\Users\franc\Desktop\TileStories\editmode_log.txt
 Successfully changed project path to: C:\Users\franc\Desktop\TileStories\TileStories
 C:/Users/franc/Desktop/TileStories/TileStories
 Exiting without the bug reporter. Application will terminate with return code 1

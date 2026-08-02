@@ -1,4 +1,4 @@
-## 1. Terminal Usage (PowerShell)
+## 5. Terminal Usage (PowerShell)
 
 - Chain commands with `;`, not `&&`.
 - Do not pipe command output through filters (`| findstr`, `| Select-String`, etc.)
