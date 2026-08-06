@@ -33,3 +33,33 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 0928c7c41f4a8b14e9667e5689effe22, type: 3}
   - key: furniture
     sprite: {fileID: 7812820661483254461, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
+  - key: IconRoyal&Government
+    sprite: {fileID: 21300000, guid: b3a4cb079b5287a4881ccd6e9992a21b, type: 3}
+  - key: IconReligious
+    sprite: {fileID: 21300000, guid: 6e91ba71abccb104781d90922969e72c, type: 3}
+  - key: IconMilitary
+    sprite: {fileID: 21300000, guid: 545a8e65b929d6f4d8ea50d244b549c8, type: 3}
+  - key: IconNobel&PrivateResidence
+    sprite: {fileID: 21300000, guid: 33352929f2f628145a979bd631d5745c, type: 3}
+  - key: IconIndustry&Trade
+    sprite: {fileID: 21300000, guid: a7215a2a070570144a10dac8eaf75d5d, type: 3}
+  - key: IconInfrastructures
+    sprite: {fileID: 21300000, guid: 7963d8d83d07a6a4a8fec6f93062ac99, type: 3}
+  - key: IconIntact
+    sprite: {fileID: 21300000, guid: 16076effff8089c478086c6127ed75c2, type: 3}
+  - key: IconPartialDamage
+    sprite: {fileID: 21300000, guid: 92a33657b0c4f6f4584f3e2a4a2ecc97, type: 3}
+  - key: IconDestroyed
+    sprite: {fileID: 21300000, guid: 7f1c156043c33f847ae2c3b124b57785, type: 3}
+  - key: IconUnknownDamage
+    sprite: {fileID: 21300000, guid: 97245c3cb975a0e4b96a78926506ef6a, type: 3}
+  - key: solid
+    sprite: {fileID: 21300000, guid: d0ce2f5314391a34eaace72c78e25e2d, type: 3}
+  - key: dash_long
+    sprite: {fileID: 21300000, guid: 83686a1dccc6f55488e850eb86d9a573, type: 3}
+  - key: dash_medium
+    sprite: {fileID: 21300000, guid: aa4c02f4e8c4ddc4e87fc2ede316b356, type: 3}
+  - key: dash_short
+    sprite: {fileID: 21300000, guid: 750f7a6aca7192c47bc648bcd9e26ef1, type: 3}
+  - key: dotted
+    sprite: {fileID: 21300000, guid: 4f1e95aa3005ff041a24e9b669df857d, type: 3}

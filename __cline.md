@@ -6,26 +6,35 @@
 Do the tasks written in this file:
 C:\Users\franc\Desktop\TileStories\_2.2_Marker_Design.md
 
+and in this file:
+C:\Users\franc\Desktop\TileStories\_5.1_Editor_Tab.md
+
 
 
 # **Continue Task - Give command in plan mode first**
 I already started implementing the tasks written in this file:
 C:\Users\franc\Desktop\TileStories\_2.2_Marker_Design.md
 
-Now I want you to continue implementing the missing tasks in section 18 and 19. 
+and in this file:
+C:\Users\franc\Desktop\TileStories\_5.1_Editor_Tab.md
 
-I want to confirm some refactoring if needed and implementation of some other effects and also correct some error about the effects... so read the whole doc and then focus on executing the tasks described in 18 and 19. 
+and in this file:
+C:\Users\franc\Desktop\TileStories\_5.2_Organize_Project.md
 
+now, read them, and lets focus on section 14 of the file: 
+C:\Users\franc\Desktop\TileStories\_5.1_Editor_Tab.md
 
-# **Task Guidelines...**
+and on the tasks of the file: 
+C:\Users\franc\Desktop\TileStories\_5.2_Organize_Project.md
+
+so make a complete plan of what we need to implement and how to implement it, and where... 
+
+---
 So, before writing any code: read that file in full, then open and read the
 actual current files it references yourself — do not assume the plan's description of them is still accurate, confirm it.
 
 Follow these guidelines exactly, no exceptions:
 C:\Users\franc\Desktop\TileStories\.clinerules
-
-Read the global work plan IF you need broader context:
-C:\Users\franc\Desktop\TileStories\_0_work_plan.md
 
 Also check the real structure of folders and files that might be a bit different from the plans. For example POIAnchor.cs is in UI folder instead of POI folder. So check the structure and files of the folder: C:\Users\franc\Desktop\TileStories\TileStories\Assets 
 
@@ -55,6 +64,18 @@ an assumption that might be wrong.
 When finished: update the plan file itself to check off what's done, per
 guidelines 60-finishing, and give me a short summary in chat — files touched,
 what changed, and the resulting behavior. Don't create a separate summary file.
+
+when calling tools pay attention to the correct usage and arguments. remember the guidelines:
+### Tool Execution & Argument Validation
+- **Strict Parameter Compliance:** Always verify tool schemas before executing. Never emit missing required parameters (e.g., `path` for `read_file` or `write_to_file`; or 'regex' for `search_files`).
+- **File Reading Limits:** Do NOT attempt to read entire large files directly with `read_file`.
+  - For target edits/searches, use `search_files` or `codebase_search` first.
+  - When using `read_file` on large files, always specify `start_line` and `end_line` ranges.
+- **Error Handling & Pivot Strategy:**
+  - If a tool execution fails or returns an error response, analyze the error output immediately.
+  - Do NOT repeat the exact same failing tool call with identical arguments.
+  - If a tool continuously fails, pivot to an alternative tool or execute a shell command via `execute_command` (e.g., fallback file inspection).
+
 
 Be methodical, not fast.
 

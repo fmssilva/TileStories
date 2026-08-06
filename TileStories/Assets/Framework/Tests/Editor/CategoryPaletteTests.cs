@@ -60,7 +60,7 @@ namespace TileStories.Tests
         public void ResolveIconKey_KnownCategory_ReturnsKnownIcon()
         {
             string key = CategoryPalette.ResolveIconKey("religious");
-            Assert.AreEqual("temple", key);
+            Assert.AreEqual("IconReligious", key);
         }
 
         [Test]

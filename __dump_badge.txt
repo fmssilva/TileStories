@@ -1,0 +1,61 @@
+1:// DefaultBadgeCategories.cs
+2://
+3:// Returns the four building damage levels the authoring tool seeds into a
+4:// wall's config when it has no badge_categories yet. Editor-only data --
+5:// runtime reads whatever config.json provides, never these defaults.
+6://
+7:// Sibling factory to DefaultCategoryStyles.cs (see _5.3_Default_Icons.md
+8:// section 1). Shared pattern by naming convention, not a generic abstraction,
+9:// because badge rows and category rows use different entry types.
+10:
+11:using System.Collections.Generic;
+12:
+13:namespace TileStories.Editor
+14:{
+15:    public static class DefaultBadgeCategories
+16:    {
+17:        // The four building damage levels with their icon keys and colours.
+18:        // icon_key values match entries registered in IconLibrary.asset so the
+19:        // editor table previews resolve to real sprites. color_hex is used
+20:        // directly as the badge background tint at runtime (BadgeCategoryPalette.Configure).
+21:        public static List<BadgeCategoryEntry> Create()
+22:        {
+23:            return new List<BadgeCategoryEntry>
+24:            {
+25:                new BadgeCategoryEntry
+26:                {
+27:                    key = "intact",
+28:                    label = "Intact",
+29:                    icon_key = "IconIntact",
+30:                    color_hex = "#22C55E",
+31:                    details = "No visible damage -- building appears complete and maintained."
+32:                },
+33:                new BadgeCategoryEntry
+34:                {
+35:                    key = "partial_damage",
+36:                    label = "Partial Damage",
+37:                    icon_key = "IconPartialDamage",
+38:                    color_hex = "#F97316",
+39:                    details = "Visible damage but structure largely standing."
+40:                },
+41:                new BadgeCategoryEntry
+42:                {
+43:                    key = "destroyed",
+44:                    label = "Destroyed",
+45:                    icon_key = "IconDestroyed",
+46:                    color_hex = "#991B1B",
+47:                    details = "Severely damaged or collapsed -- little original structure remains."
+48:                },
+49:                new BadgeCategoryEntry
+50:                {
+51:                    key = "unknown_damage",
+52:                    label = "Unknown Damage",
+53:                    icon_key = "IconUnknownDamage",
+54:                    color_hex = "#71717A",
+55:                    details = "Damage state not assessed or data unavailable."
+56:                },
+57:            };
+58:        }
+59:    }
+60:}
+61:</arg_value></tool_call>

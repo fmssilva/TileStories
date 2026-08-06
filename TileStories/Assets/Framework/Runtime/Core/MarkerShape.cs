@@ -19,5 +19,9 @@ namespace TileStories
         Hexagon,
         Diamond,
         Star,
+        // No background silhouette -- the marker renders icon-only against the
+        // scene. The status ring and badge still apply per their own rules; only
+        // the filled backdrop behind the symbol is suppressed.
+        None,
     }
 }

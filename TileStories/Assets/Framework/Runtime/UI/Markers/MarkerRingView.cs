@@ -13,16 +13,48 @@ namespace TileStories
         [SerializeField] private Image ringImage;
         [SerializeField] private RingSpriteSet spriteSet;
 
+        // Extensible line-style lookup (section 20.3). When assigned, this takes
+        // precedence over the fixed 5-slot spriteSet -- a wall can author a custom
+        // line style (e.g. "line_wavy") that resolves from its icon library. The
+        // five built-in keys (solid/dash_long/dash_medium/dash_short/dotted) are
+        // registered in the same library under those exact keys.
+        [SerializeField] private SpriteKeyLibrary lineStyleLibrary;
+
         public RectTransform RectTransform => (RectTransform)transform;
+
+        // Push the active wall icon library into the ring view so custom line
+        // styles resolve from the same library that serves icons and shapes.
+        public void SetLineStyleLibrary(SpriteKeyLibrary library) => lineStyleLibrary = library;
 
         public void Apply(StatusLevel level, Color? ringColorOverride = null)
         {
             if (ringImage == null) return;
             ringImage.enabled = true;
             ringImage.color = ringColorOverride ?? level.RingColor;
-            Sprite ringSprite = spriteSet != null ? spriteSet.Get(level.RingSpriteKey) : null;
+            Sprite ringSprite = ResolveLineSprite(level.RingSpriteKey);
             if (ringSprite != null)
                 ringImage.sprite = ringSprite;
+        }
+
+        // Resolve a line-style sprite: prefer the extensible library, fall back to
+        // the fixed spriteSet, then to solid if neither has the key.
+        private Sprite ResolveLineSprite(string key)
+        {
+            if (lineStyleLibrary != null)
+            {
+                Sprite fromLibrary = lineStyleLibrary.Get(key);
+                if (fromLibrary != null)
+                    return fromLibrary;
+            }
+
+            if (spriteSet != null)
+            {
+                Sprite fromSet = spriteSet.Get(key);
+                if (fromSet != null)
+                    return fromSet;
+            }
+
+            return spriteSet != null ? spriteSet.solid : null;
         }
 
         public void Hide()

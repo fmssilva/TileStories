@@ -1,0 +1,249 @@
+using System;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+
+namespace TileStories.Editor
+{
+    public partial class POIAuthoringToolWindow
+    {
+        private void DrawGlobalSceneOptions()
+        {
+            _showGlobalMarker = EditorGUILayout.Foldout(_showGlobalMarker, "Marker", true);
+            if (_showGlobalMarker)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DrawMarkerGlobalSection();
+                }
+            }
+
+            EditorGUILayout.Space(4f);
+
+            _showGlobalBadge = EditorGUILayout.Foldout(_showGlobalBadge, "Badge", true);
+            if (_showGlobalBadge)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    _config.marker_use_badge = EditorGUILayout.Toggle("Enable badge", _config.marker_use_badge);
+                    if (_config.marker_use_badge)
+                        DrawGlobalBadgeSection();
+                    else
+                        EditorGUILayout.HelpBox("Enable badge to edit badge symbol taxonomy.", MessageType.Info);
+                }
+            }
+
+            EditorGUILayout.Space(4f);
+
+            _showGlobalOutline = EditorGUILayout.Foldout(_showGlobalOutline, "Outline", true);
+            if (_showGlobalOutline)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DrawGlobalOutlineSection();
+                }
+            }
+        }
+
+        private void DrawMarkerGlobalSection()
+        {
+            int shapeIdx = Array.IndexOf(ShapeOptions, _config.marker_shape);
+            if (shapeIdx < 0) shapeIdx = 0;
+            shapeIdx = EditorGUILayout.Popup("Background shape", shapeIdx, ShapeLabels);
+            _config.marker_shape = ShapeOptions[shapeIdx];
+
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.LabelField("Category Symbols", EditorStyles.boldLabel);
+
+            DrawWallIconLibrarySelector();
+
+            if (_config.category_styles == null)
+                _config.category_styles = new List<CategoryStyleEntry>();
+
+            // Seed defaults only if genuinely empty (section 13.2) -- not on every load.
+            if (_config.category_styles.Count == 0)
+                _config.category_styles.AddRange(DefaultCategoryStyles.Create());
+
+            DrawSymbolTable(
+                _config.category_styles,
+                () => new CategoryStyleEntry { category = "new_category", icon_key = "unknown", color_hex = string.Empty },
+                e => e.category,
+                (e, v) => e.category = v,
+                e => e.icon_key,
+                (e, v) => e.icon_key = v,
+                e => e.color_hex,
+                (e, v) => e.color_hex = v,
+                e => e.details,
+                (e, v) => e.details = v,
+                e => _config.marker_shape != "none",
+                "+ Add category",
+                "Category");
+        }
+
+        private void DrawGlobalBadgeSection()
+        {
+            if (_config.badge_categories == null)
+                _config.badge_categories = new List<BadgeCategoryEntry>();
+
+            // Badge background shape (section 13.3/20.2) -- independent of marker_shape.
+            int badgeShapeIdx = Array.IndexOf(ShapeOptions, _config.badge_shape);
+            if (badgeShapeIdx < 0) badgeShapeIdx = 0; // default to "circle"
+            badgeShapeIdx = EditorGUILayout.Popup("Badge background shape", badgeShapeIdx, ShapeLabels);
+            _config.badge_shape = ShapeOptions[badgeShapeIdx];
+
+            // Seed defaults only if genuinely empty (section 13.2) -- not on every load.
+            if (_config.badge_categories.Count == 0)
+                _config.badge_categories.AddRange(DefaultBadgeCategories.Create());
+
+            DrawSymbolTable(
+                _config.badge_categories,
+                () => new BadgeCategoryEntry { key = "new_badge", label = "New Badge", icon_key = "unknown", color_hex = "#B3B3B3" },
+                e => e.key,
+                (e, v) => e.key = v,
+                e => e.icon_key,
+                (e, v) => e.icon_key = v,
+                e => e.color_hex,
+                (e, v) => e.color_hex = v,
+                e => e.details,
+                (e, v) => e.details = v,
+                e => _config.badge_shape != "none",
+                "+ Add badge category",
+                "Badge Key");
+        }
+
+        private void DrawGlobalOutlineSection()
+        {
+            bool useOutline = !string.Equals(_config.marker_outline_mode, "none", StringComparison.OrdinalIgnoreCase);
+            useOutline = EditorGUILayout.Toggle("Enable outline", useOutline);
+
+            if (!useOutline)
+            {
+                _config.marker_outline_mode = "none";
+                EditorGUILayout.HelpBox("Outline disabled. Outline levels are ignored at runtime.", MessageType.Info);
+                return;
+            }
+
+            // "free_colors" is an editor-only mode that controls whether the color
+            // column is shown in the outline table. It is not a runtime MarkerOutlineMode
+            // enum value -- at runtime, free_colors just means the per-level color_hex
+            // values from config are used directly (StatusRamp.Configure already handles
+            // this). So we handle it here in the editor normalization, not in
+            // MarkerVisualsParser.TryParseOutlineMode.
+            string normalizedOutlineMode;
+            if (_config.marker_outline_mode == "free_colors")
+            {
+                normalizedOutlineMode = "free_colors";
+            }
+            else
+            {
+                normalizedOutlineMode = MarkerVisualsParser.TryParseOutlineMode(_config.marker_outline_mode, out var parsedOutlineMode)
+                    ? (parsedOutlineMode == MarkerOutlineMode.SameHue ? "same_hue" : "gold")
+                    : "gold";
+            }
+            int idx = Array.IndexOf(OutlineModeOptions, normalizedOutlineMode);
+            if (idx < 0) idx = 0;
+            idx = EditorGUILayout.Popup("Outline Color", idx, OutlineModeLabels);
+            _config.marker_outline_mode = OutlineModeOptions[idx];
+
+            bool isFreeColors = _config.marker_outline_mode == "free_colors";
+
+            if (_config.outline_levels == null)
+                _config.outline_levels = new List<OutlineLevelEntry>();
+
+            EditorGUILayout.Space(4f);
+
+            // Column headers for the outline table (section 13.4).
+            EditorGUILayout.LabelField("Outline Types", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "Each row is one discrete outline type a POI can be set to (e.g. \"Intact\", \"25% damaged\"). " +
+                "To add a custom line (e.g. a wavy or double line): import a transparent PNG ring/dash pattern " +
+                "as a Sprite, then use the Type column the same way as a marker/badge symbol.",
+                MessageType.Info);
+
+            // Seed defaults only if genuinely empty (section 13.2) -- a brand-new wall,
+            // not one that already has entries the developer chose.
+            if (_config.outline_levels.Count == 0)
+                _config.outline_levels.AddRange(DefaultOutlineLevels.Create());
+
+            // Column headers: Outline key | Details | Type | Preview | Color | Remove
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("Outline key", EditorStyles.miniBoldLabel, GUILayout.Width(110f));
+
+                EditorGUILayout.LabelField("Details", EditorStyles.miniBoldLabel, GUILayout.Width(26f));
+                EditorGUILayout.LabelField("Type", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
+                EditorGUILayout.LabelField("Preview", EditorStyles.miniBoldLabel, GUILayout.Width(44f));
+                if (isFreeColors)
+                    EditorGUILayout.LabelField("Color", EditorStyles.miniBoldLabel, GUILayout.Width(152f));
+                EditorGUILayout.LabelField("", GUILayout.Width(26f)); // Remove (trash)
+            }
+
+            for (int i = 0; i < _config.outline_levels.Count; i++)
+            {
+                var entry = _config.outline_levels[i] ?? new OutlineLevelEntry();
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    // Outline key: text field for the label
+                    entry.label = EditorGUILayout.TextField(entry.label, GUILayout.Width(110f));
+
+                    // Details: popup for free-text notes (same pattern as DrawSymbolTable)
+                    if (GUILayout.Button("...", GUILayout.Width(26f)))
+                        PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(entry.label ?? "Outline level", () => entry.details, v => entry.details = v));
+
+                    // Type: sprite picker with auto-register
+                    Sprite current = ResolveSpriteForKey(entry.line_style);
+                    Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false, GUILayout.Width(140f));
+                    if (chosen != current)
+                        entry.line_style = AssignSpriteToLibraryAndGetKey(chosen, entry.label);
+
+                    // Preview: thumbnail of the chosen sprite (separate from the ObjectField)
+                    DrawSpritePreview(chosen != null ? chosen : current);
+
+                    // Color swatch + hex -- only in Free Colors mode.
+                    // Gold/Same Hue modes derive colours from StatusRamp at runtime.
+                    if (isFreeColors)
+                    {
+                        string colorHex = entry.color_hex;
+                        DrawColorSwatchAndHex(ref colorHex);
+                        entry.color_hex = colorHex;
+                    }
+
+                    // Remove button
+                    if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
+                    {
+                        _config.outline_levels.RemoveAt(i);
+                        RecomputeLevelPercentSpacing(_config.outline_levels);
+                        i--;
+                        continue;
+                    }
+                }
+
+                entry.key = string.IsNullOrWhiteSpace(entry.key) ? $"level_{i + 1}" : entry.key;
+                _config.outline_levels[i] = entry;
+            }
+
+            // No cap on number of outline rows -- developers may add as many as needed.
+            if (GUILayout.Button("+ Add outline level"))
+            {
+                _config.outline_levels.Add(new OutlineLevelEntry
+                {
+                    key = "level_" + (_config.outline_levels.Count + 1),
+                    label = "Level " + (_config.outline_levels.Count + 1),
+                    line_style = "solid",
+                    color_hex = string.Empty
+                });
+                RecomputeLevelPercentSpacing(_config.outline_levels);
+            }
+        }
+
+        // Auto-space pct whenever the list changes (section 13.4).
+        private static void RecomputeLevelPercentSpacing(List<OutlineLevelEntry> levels)
+        {
+            if (levels == null || levels.Count == 0) return;
+            if (levels.Count == 1) { levels[0].pct = 0f; return; }
+
+            for (int i = 0; i < levels.Count; i++)
+                levels[i].pct = (100f / (levels.Count - 1)) * i;
+        }
+    }
+}

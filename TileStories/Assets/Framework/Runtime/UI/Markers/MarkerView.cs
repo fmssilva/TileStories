@@ -51,6 +51,7 @@ namespace TileStories
         private MarkerOutlineMode _outlineMode = MarkerOutlineMode.Gold;
         private bool _useBadge;
         private MarkerShape _shape;
+        private MarkerShape _badgeShape = MarkerShape.Circle;
         private SpriteKeyLibrary _runtimeIconLibraryOverride;
         private bool _applyCategoryVisuals = true;
         private bool _applyShapeVisuals = true;
@@ -97,7 +98,7 @@ namespace TileStories
 
         public void Initialise(POIAnchor anchor, MarkerOutlineMode outlineMode, bool useBadge, MarkerShape shape, MarkerEffectFlags effects)
         {
-            Initialise(anchor, outlineMode, useBadge, shape, effects, true, true, true, null);
+            Initialise(anchor, outlineMode, useBadge, shape, effects, true, true, true, null, MarkerShape.Circle);
         }
 
         public void Initialise(
@@ -110,7 +111,7 @@ namespace TileStories
             bool applyShapeVisuals,
             bool enableStatusVisuals)
         {
-            Initialise(anchor, outlineMode, useBadge, shape, effects, applyCategoryVisuals, applyShapeVisuals, enableStatusVisuals, null);
+            Initialise(anchor, outlineMode, useBadge, shape, effects, applyCategoryVisuals, applyShapeVisuals, enableStatusVisuals, null, MarkerShape.Circle);
         }
 
         public void Initialise(
@@ -122,13 +123,15 @@ namespace TileStories
             bool applyCategoryVisuals,
             bool applyShapeVisuals,
             bool enableStatusVisuals,
-            SpriteKeyLibrary iconLibraryOverride)
+            SpriteKeyLibrary iconLibraryOverride,
+            MarkerShape badgeShape = MarkerShape.Circle)
         {
             EnsureMarkerWiring(allowCreate: true);
             _anchor = anchor;
             _outlineMode = outlineMode;
             _useBadge = useBadge;
             _shape = shape;
+            _badgeShape = badgeShape;
             _runtimeIconLibraryOverride = iconLibraryOverride;
             _applyCategoryVisuals = applyCategoryVisuals;
             _applyShapeVisuals = applyShapeVisuals;
@@ -152,9 +155,14 @@ namespace TileStories
              bool isUnknown = poi.has_status && poi.status_unknown;
              bool knownStatus = poi.has_status && !isUnknown;
 
-             // Symbol: always present, coloured by category, shaped by marker_shape
+             // Symbol: always present, coloured by category, shaped by marker_shape.
+             // A hero POI may override just the icon via hero_icon_key (section 21) --
+             // category fill colour, ring, and badge are unaffected.
              Sprite shapeSprite = shapeLibrary?.Get(ShapeKey(_shape));
-             Sprite iconSprite = iconKey != null ? activeIconLibrary?.Get(iconKey) : null;
+             string resolvedIconKey = (poi.is_hero && !string.IsNullOrWhiteSpace(poi.hero_icon_key))
+                 ? poi.hero_icon_key
+                 : iconKey;
+             Sprite iconSprite = resolvedIconKey != null ? activeIconLibrary?.Get(resolvedIconKey) : null;
 
              // OutlineSameHue drains the FILL toward black as status worsens; the
              // other two styles keep the fill as a pure, constant category colour.
@@ -169,8 +177,18 @@ namespace TileStories
                  ? Mathf.Lerp(1f, 0.28f, Mathf.Clamp01(poi.status_pct / 100f))
                  : 1f;
 
-             if ((_applyCategoryVisuals && hasConfiguredCategory) || _applyShapeVisuals)
+             // Background shape "none" (section 20.1): hide just the symbol's
+             // backdrop while keeping the icon readable. Otherwise draw the shape
+             // backdrop as usual.
+             if (_shape == MarkerShape.None)
              {
+                 symbol?.SetBackgroundVisible(false);
+                 if (_applyCategoryVisuals && hasConfiguredCategory)
+                     symbol?.SetIcon(iconSprite, IconTint, iconOpacity);
+             }
+             else if ((_applyCategoryVisuals && hasConfiguredCategory) || _applyShapeVisuals)
+             {
+                 symbol?.SetBackgroundVisible(true);
                  if (_applyShapeVisuals && hasConfiguredCategory && shapeSprite != null)
                      symbol?.SetBackground(shapeSprite, fill);
 
@@ -205,9 +223,15 @@ namespace TileStories
              // meaningful when the ring is actually visible -- gated on showRing.
              ring?.SetRotating(showRing && poi.rotate_contour);
 
+             // Push the active icon library into the ring view so custom line
+             // styles resolve from the same wall library (section 20.3).
+             ring?.SetLineStyleLibrary(activeIconLibrary);
+
              // Badge: ordinary status badge for MarkerStyle.Badge, OR the universal "?"
-             // badge for status_unknown regardless of style.
-             Sprite circleShape = shapeLibrary?.Get("circle");
+             // badge for status_unknown regardless of style. The badge's background
+             // shape comes from badge_shape (section 20.2), independent of marker_shape.
+             Sprite badgeShapeSprite = _badgeShape == MarkerShape.None ? null : shapeLibrary?.Get(ShapeKey(_badgeShape));
+             bool badgeHasBackground = _badgeShape != MarkerShape.None;
              if (_enableStatusVisuals && isUnknown)
              {
                  // Same treatment regardless of markerStyle: a neutral-grey "?"
@@ -215,21 +239,24 @@ namespace TileStories
                  // (StatusRamp.UnknownColor), so "we don't know" never reads as
                  // an extra point on the destruction scale.
                  Sprite questionIcon = activeIconLibrary?.Get("unknown");
-                 badge?.SetBackground(circleShape, StatusRamp.UnknownColor);
+                 badge?.SetBackgroundVisible(badgeHasBackground);
+                 badge?.SetBackground(badgeShapeSprite, StatusRamp.UnknownColor);
                  badge?.SetIcon(questionIcon, IconTint, 1f);
                  badge?.SetVisible(true);
              }
              else if (_enableStatusVisuals && _useBadge && !string.IsNullOrWhiteSpace(poi.badge_category) && BadgeCategoryPalette.TryResolve(poi.badge_category, out var badgeDef))
              {
                  Sprite badgeIcon = !string.IsNullOrWhiteSpace(badgeDef.IconKey) ? activeIconLibrary?.Get(badgeDef.IconKey) : null;
-                 badge?.SetBackground(circleShape, badgeDef.Color);
+                 badge?.SetBackgroundVisible(badgeHasBackground);
+                 badge?.SetBackground(badgeShapeSprite, badgeDef.Color);
                  badge?.SetIcon(badgeIcon, IconTint, 1f);
                  badge?.SetVisible(true);
              }
              else if (_enableStatusVisuals && _useBadge && knownStatus)
              {
                  StatusLevel level = StatusRamp.Resolve(poi.status_pct);
-                 badge?.SetBackground(circleShape, level.RingColor);
+                 badge?.SetBackgroundVisible(badgeHasBackground);
+                 badge?.SetBackground(badgeShapeSprite, level.RingColor);
                  badge?.SetIcon(iconSprite, IconTint, 1f);
                  badge?.SetVisible(true);
              }
@@ -370,6 +397,9 @@ namespace TileStories
             MarkerShape.Hexagon => "hexagon",
             MarkerShape.Diamond => "diamond",
             MarkerShape.Star => "star",
+            // "none" -> null: no background sprite is looked up; ApplyVisuals tests
+            // this before drawing a backdrop behind the symbol/badge glyph.
+            MarkerShape.None => null,
             _ => "circle",
         };
 

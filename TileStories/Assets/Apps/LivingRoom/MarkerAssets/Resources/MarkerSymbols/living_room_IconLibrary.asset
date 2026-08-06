@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e6d37863aec954588af6ddc2c6a2f8, type: 3}
+  m_Name: living_room_IconLibrary
+  m_EditorClassIdentifier: TileStories::TileStories.SpriteKeyLibrary
+  entries:
+  - key: temple
+    sprite: {fileID: 21300000, guid: 3d543987e3d16c346827aacaef4864fd, type: 3}
+  - key: crown
+    sprite: {fileID: 21300000, guid: 7b3f479656585f24daca54057f724dc2, type: 3}
+  - key: shield
+    sprite: {fileID: 21300000, guid: 08fdab4768c6fda448129f07591dd96f, type: 3}
+  - key: columns
+    sprite: {fileID: 21300000, guid: ce219c83f9d67fa419359724b1a42026, type: 3}
+  - key: anchor
+    sprite: {fileID: 21300000, guid: f4f660ff7b3b9714fa6001b6ce8b130f, type: 3}
+  - key: bridge
+    sprite: {fileID: 21300000, guid: 58b9d15580574be46a735fbadaa1568d, type: 3}
+  - key: leaf
+    sprite: {fileID: 21300000, guid: 64adac1abf4a22249a934e288f9a92b7, type: 3}
+  - key: scale
+    sprite: {fileID: 21300000, guid: 650bb9c3a9e772146b5dc2e673ad8ffa, type: 3}
+  - key: unknown
+    sprite: {fileID: 21300000, guid: 0928c7c41f4a8b14e9667e5689effe22, type: 3}
+  - key: furniture
+    sprite: {fileID: 7812820661483254461, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
+  - key: art
+    sprite: {fileID: 6228371465862800648, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
+  - key: furniture_2
+    sprite: {fileID: -6346629593138849361, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
+  - key: info
+    sprite: {fileID: -2904807348406626498, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
+  - key: level_1
+    sprite: {fileID: -1869673367297931309, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
+  - key: level_1_2
+    sprite: {fileID: 21300000, guid: d0ce2f5314391a34eaace72c78e25e2d, type: 3}
+  - key: info_2
+    sprite: {fileID: 21300000, guid: 4f1e95aa3005ff041a24e9b669df857d, type: 3}
+  - key: info_3
+    sprite: {fileID: 21300000, guid: 83686a1dccc6f55488e850eb86d9a573, type: 3}
+  - key: info_4
+    sprite: {fileID: 21300000, guid: aa4c02f4e8c4ddc4e87fc2ede316b356, type: 3}
+  - key: info_5
+    sprite: {fileID: 21300000, guid: 750f7a6aca7192c47bc648bcd9e26ef1, type: 3}
+  - key: IconRoyal&Government
+    sprite: {fileID: 21300000, guid: b3a4cb079b5287a4881ccd6e9992a21b, type: 3}
+  - key: IconReligious
+    sprite: {fileID: 21300000, guid: 6e91ba71abccb104781d90922969e72c, type: 3}
+  - key: IconMilitary
+    sprite: {fileID: 21300000, guid: 545a8e65b929d6f4d8ea50d244b549c8, type: 3}
+  - key: IconNobel&PrivateResidence
+    sprite: {fileID: 21300000, guid: 33352929f2f628145a979bd631d5745c, type: 3}
+  - key: IconIndustry&Trade
+    sprite: {fileID: 21300000, guid: a7215a2a070570144a10dac8eaf75d5d, type: 3}
+  - key: IconInfrastructures
+    sprite: {fileID: 21300000, guid: 7963d8d83d07a6a4a8fec6f93062ac99, type: 3}
+  - key: IconIntact
+    sprite: {fileID: 21300000, guid: 16076effff8089c478086c6127ed75c2, type: 3}
+  - key: IconPartialDamage
+    sprite: {fileID: 21300000, guid: 92a33657b0c4f6f4584f3e2a4a2ecc97, type: 3}
+  - key: IconDestroyed
+    sprite: {fileID: 21300000, guid: 7f1c156043c33f847ae2c3b124b57785, type: 3}
+  - key: IconUnknownDamage
+    sprite: {fileID: 21300000, guid: 97245c3cb975a0e4b96a78926506ef6a, type: 3}
+  - key: solid
+    sprite: {fileID: 21300000, guid: d0ce2f5314391a34eaace72c78e25e2d, type: 3}
+  - key: dash_long
+    sprite: {fileID: 21300000, guid: 83686a1dccc6f55488e850eb86d9a573, type: 3}
+  - key: dash_medium
+    sprite: {fileID: 21300000, guid: aa4c02f4e8c4ddc4e87fc2ede316b356, type: 3}
+  - key: dash_short
+    sprite: {fileID: 21300000, guid: 750f7a6aca7192c47bc648bcd9e26ef1, type: 3}
+  - key: dotted
+    sprite: {fileID: 21300000, guid: 4f1e95aa3005ff041a24e9b669df857d, type: 3}

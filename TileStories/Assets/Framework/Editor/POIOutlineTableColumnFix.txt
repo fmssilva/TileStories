@@ -1,0 +1,62 @@
+Lines 415-423 need to be changed from:
+
+            // Column headers: Level | Type | Preview | Color | Remove
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("Level", EditorStyles.miniBoldLabel, GUILayout.Width(110f));
+                EditorGUILayout.LabelField("Type", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
+                EditorGUILayout.LabelField("Preview", EditorStyles.miniBoldLabel, GUILayout.Width(44f));
+                EditorGUILayout.LabelField("Color", EditorStyles.miniBoldLabel, GUILayout.Width(152f));
+                EditorGUILayout.LabelField("", GUILayout.Width(26f)); // Remove (trash)
+            }
+
+To:
+
+            // Column headers: Outline key | Details | Type | Preview | Color | Remove
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("Outline key", EditorStyles.miniBoldLabel, GUILayout.Width(130f));
+                EditorGUILayout.LabelField("Details", EditorStyles.miniBoldLabel, GUILayout.Width(26f));
+                EditorGUILayout.LabelField("Type", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
+                EditorGUILayout.LabelField("Preview", EditorStyles.miniBoldLabel, GUILayout.Width(44f));
+                EditorGUILayout.LabelField("Color", EditorStyles.miniBoldLabel, GUILayout.Width(152f));
+                EditorGUILayout.LabelField("", GUILayout.Width(26f)); // Remove (trash)
+            }
+
+Lines 430-431 need to be changed from:
+
+                    // Level: text field for the label
+                    entry.label = EditorGUILayout.TextField(entry.label, GUILayout.Width(110f));
+
+                    // Type: sprite picker with auto-register
+
+To:
+
+                    // Outline key: text field for the label
+                    entry.label = EditorGUILayout.TextField(entry.label, GUILayout.Width(130f));
+
+                    // Details button -- opens a popup with a text area and a Close button.
+                    if (GUILayout.Button("...", GUILayout.Width(26f)))
+                        PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(entry.label, () => entry.details, v => entry.details = v));
+
+                    // Type: sprite picker with auto-register
+
+Lines 433-437 need to be changed from:
+
+                    // Type: sprite picker with auto-register
+                    Sprite current = ResolveSpriteForKey(entry.line_style);
+                    Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false, GUILayout.Width(140f));
+                    if (chosen != current)
+                        entry.line_style = AssignSpriteToLibraryAndGetKey(chosen, entry.label);
+
+                    // Preview: thumbnail of the chosen sprite (separate from the ObjectField)
+
+To:
+
+                    // Type: sprite picker with auto-register
+                    Sprite current = ResolveSpriteForKey(entry.line_style);
+                    Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false, GUILayout.Width(140f));
+                    if (chosen != current)
+                        entry.line_style = AssignSpriteToLibraryAndGetKey(chosen, entry.label);
+
+                    // Preview: thumbnail of the chosen sprite (separate from the ObjectField)

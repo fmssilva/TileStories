@@ -1,0 +1,347 @@
+1:﻿# Stage 2.3 — POI Marker Design System
+7:**Visual reference:** `C:\Users\franc\Desktop\TileStories\_2.2_POI_design_options.html`
+15:## Implementation Status (read this first — updated 2026-08-02)
+19:Everything below §1 is the original design spec plus later additions (§17-§21);
+32:- §18.12's sun square-render fix: `MarkerCircleSpriteFactory.cs` exists and
+40:  LivingRoom/` copies, confirmed in sync) has all 20 POIs, including the
+41:  `lamp_right`/`painting_left`/etc. satellites from §19.12.
+63:  design decisions, and this file's new §20/§21 for the two runtime pieces
+74:above~~ [done 2026-08-03]; (2) ~~implement §20 (background shape `None`,
+75:per-wall `badge_shape`, extensible ring line styles) and §21 (hero icon
+76:override)~~ [done 2026-08-03, EditMode 44/44 + PlayMode 25/25 verified];
+77:(3) finish `_5.1_Editor_Tab.md`'s remaining editor UI items (§13.2 shared
+83:is already green after §20's changes.
+87:## 1. Scope
+112:### Non-goals for this stage (do not build)
+124:## 2. Required reading before touching anything
+148:## 3. Hard rule for this stage: no backward-compatibility shims
+162:guards used in `WallConfigData.cs` (§7 Step 2) — those are not compatibility shims,
+167:## 4. Design principles (read once, apply throughout)
+178:   lands on. `WallConfigData.category_styles` (§7 Step 2) is an *optional*, *additive*
+183:2. **`marker_style` and `marker_shape` ARE fixed enums.** They are a *rendering*
+195:   equally distinct case — `status_unknown` (§7 Step 2): this wall *does* track
+213:   emoji-style PNG, a downloaded icon pack, a photo — import as a Sprite (2D and UI),
+222:## 5. Where visual constants live — architecture decision
+239:### The general principle (why, not just what)
+248:Domain-Driven Design calls a **bounded context** (Evans, 2003) — each subsystem owns
+256:The resolution used throughout mature design systems (Curtis, 2020; the Design
+268:### Concrete decisions for this project
+279:uGUI UI domain is ever built that genuinely needs to share 1–2 brand colours with
+292:## 6. Step 0 — the one required refactor (do this first, before any new file)
+302:**2. `Assets/Framework/Tests/Runtime/MarkerOverlapResolverTests.cs`** — fix this
+322:2. Apply the one-line test fix above.
+334:## 7. Implementation — new and changed files
+341:### Step 1 — Core enums (new files)
+357:        // colour drift, never fades to invisible). Stage 2.3 prototype "System A".
+414:    // their enums. Kept as strings in JSON (see design principle 2 in
+415:    // _2_2_Marker_Design.md §4). An unrecognised or missing value logs once and
+457:### Step 2 — `WallConfigData.cs` (full replacement)
+605:### Step 3 — POI-domain pure logic (new files)
+615:    // an icon key. See _2_2_Marker_Design.md §4-5 for why this stays domain-owned
+623:        // Stage 2.3 prototypes. Just a lookup table, not an enforced schema -- add
+696:            // Stage 2.3 HTML prototypes' manually-tuned range.
+719:                uint hash = 2166136261;
+757:    // colour. Every level, including 100%, is fully opaque (see _2_2_Marker_Design.md
+770:            new StatusLevel(0,   new Color(0.890f, 0.741f, 0.447f), "solid",       3.2f),
+771:            new StatusLevel(20,  new Color(0.812f, 0.624f, 0.369f), "dash_long",   2.8f),
+772:            new StatusLevel(40,  new Color(0.733f, 0.522f, 0.322f), "dash_medium", 2.4f),
+773:            new StatusLevel(60,  new Color(0.651f, 0.416f, 0.271f), "dash_short",  2.0f),
+774:            new StatusLevel(80,  new Color(0.549f, 0.302f, 0.235f), "dotted",      1.7f),
+775:            new StatusLevel(100, new Color(0.431f, 0.200f, 0.169f), "dotted",      1.8f),
+802:            float s2 = s * (1f - 0.72f * t);
+803:            float v2 = Mathf.Lerp(v, 0.09f, t * 0.92f);
+804:            return Color.HSVToRGB(h, Mathf.Max(s2, 0.04f), Mathf.Max(v2, 0.07f));
+812:### Step 4 — Shared UI building blocks (new files)
+824:    // class -- see _2_2_Marker_Design.md §4 principle 4.
+954:### Step 5 — Proportional layout (new file)
+965:    // match the Stage 2.3 HTML prototype ratios (ring 44 vs symbol 40 = 1.1x,
+971:        [Range(0.2f, 0.5f)] public float badgeSizeRatio = 0.36f;
+976:        public Vector2 badgeDirection = new Vector2(0.7f, 0.7f);
+995:            Vector2 symbolSize = symbol.sizeDelta;
+1006:                Vector2 badgeSize = symbolSize * proportions.badgeSizeRatio;
+1009:                    + Vector2.Scale(proportions.badgeDirection, new Vector2(symbolRadius, symbolRadius));
+1014:                Vector2 pos = label.anchoredPosition;
+1035:### Step 6 — Effects (new files)
+1066:        [SerializeField, Min(0.1f)] private float period = 2f;
+1085:            float wave = Mathf.Sin(Time.time * Mathf.PI * 2f / period) * 0.5f + 0.5f;
+1107:        [SerializeField, Min(0.1f)] private float period = 2.4f;
+1120:            float wave = Mathf.Sin(Time.time * Mathf.PI * 2f / period) * 0.5f + 0.5f;
+1232:### Step 7 — `MarkerView.cs` (full replacement)
+1245:    // v1 project: exactly one signature for Initialise (see _2_2_Marker_Design.md §3).
+1272:        private static readonly Color IconTint = new Color(0.949f, 0.925f, 0.827f); // cream
+1311:            if (name.Length > 29) name = name.Substring(0, 26) + "...";
+1339:                ? Mathf.Lerp(1f, 0.28f, Mathf.Clamp01(data.status_pct / 100f))
+1446:### Step 8 — `WallSession.cs` (full replacement)
+1579:                    Debug.Log($"[WallSession] POI ready id={poi.id} localPos={localPos} dist={distance:F2}m inFront={forwardDot > 0f} dot={forwardDot:F3}");
+1607:## 8. Effects catalogue — what's built and why, what's deferred and why
+1626:squares instead of circles, that's not a sprite-generation bug** — see §18.12
+1638:## 9. Editor tool changes
+1695:**Insertion 2** — inside `DrawPOIList()`, right after the existing `y_norm` slider
+1722:## 10. Asset requirements (not code — art/import tasks)
+1726:   regenerate from the SVG paths embedded in `_2.2_POI_design_options.html`'s
+1727:   `ICONS` object if missing. Import each as **Sprite (2D and UI)**, Alpha Is
+1731:2. Create two `SpriteKeyLibrary` assets (`Create → TileStories → Sprite Key
+1741:## 11. Prefab wiring (manual Editor steps — cannot be scripted safely)
+1765:2. **Badge**: duplicate the whole Symbol GameObject (with its Icon child), rename to
+1783:## 12. Example config for manual testing
+1797:    "immersal_map_id": 146267,
+1812:            "is_hero": true, "has_status": true, "status_pct": 20
+1827:            "captured_position": { "x": -1.93, "y": 0.72, "z": 2.229 },
+1857:## 13. Automated tests to add
+1927:            var expected = new Color(0.5f, 0.2f, 0.8f);
+1936:            // #8033CC -> (128,51,204)/255
+1937:            Assert.AreEqual(128 / 255f, resolved.r, 0.01f);
+1938:            Assert.AreEqual(51 / 255f, resolved.g, 0.01f);
+1939:            Assert.AreEqual(204 / 255f, resolved.b, 0.01f);
+2010:            var level = StatusRamp.Resolve(72f);
+2041:            Color baseColor = new Color(0.5f, 0.2f, 0.7f);
+2044:            Color.RGBToHSV(shaded, out float h2, out _, out _);
+2045:            Assert.AreEqual(h1, h2, 0.01f);
+2051:            Color baseColor = new Color(0.5f, 0.2f, 0.7f);
+2061:            Color shaded = StatusRamp.ShadeTowardBlack(new Color(0.5f, 0.2f, 0.7f), 100f);
+2137:        private static RectTransform MakeRect(string name, Vector2 size)
+2148:            var symbol = MakeRect("Symbol", new Vector2(0.12f, 0.12f));
+2149:            var ring = MakeRect("Ring", Vector2.zero);
+2154:            Assert.AreEqual(0.132f, ring.sizeDelta.x, 0.0001f);
+2160:            var symbol = MakeRect("Symbol", new Vector2(0.12f, 0.12f));
+2161:            var badge = MakeRect("Badge", Vector2.zero);
+2162:            var proportions = new MarkerLayoutProportions { badgeSizeRatio = 0.36f, badgeDirection = new Vector2(0.7f, 0.7f) };
+2166:            Assert.AreEqual(0.12f * 0.36f, badge.sizeDelta.x, 0.0001f);
+2175:            var proportions = new MarkerLayoutProportions { badgeSizeRatio = 0.36f, badgeDirection = new Vector2(0.7f, 0.7f) };
+2177:            var smallSymbol = MakeRect("Small", new Vector2(0.12f, 0.12f));
+2178:            var smallBadge = MakeRect("SmallBadge", Vector2.zero);
+2181:            var bigSymbol = MakeRect("Big", new Vector2(0.24f, 0.24f));
+2182:            var bigBadge = MakeRect("BigBadge", Vector2.zero);
+2185:            Assert.AreEqual(smallBadge.anchoredPosition.x * 2f, bigBadge.anchoredPosition.x, 0.0001f);
+2191:            var symbol = MakeRect("Symbol", new Vector2(0.12f, 0.12f));
+2192:            var label = MakeRect("Label", Vector2.zero);
+2193:            var proportions = new MarkerLayoutProportions { labelGap = 0.02f };
+2203:            var ring = MakeRect("Ring", Vector2.zero);
+2215:## 14. Final verification checklist
+2229:- [ ] Example config (§12) loads and spawns 3 POIs without console errors.
+2231:      changes rendering, matching `_2.2_POI_design_options.html`.
+2236:- [ ] `furniture` POI in the example config (§12) renders the explicit `#8033CC`
+2253:## 15. Explicitly deferred (do not build unless separately requested)
+2265:## 16. Bibliography / references
+2270:- Evans, E. (2003). *Domain-Driven Design: Tackling Complexity in the Heart of
+2273:- Curtis, N. (2020). "Naming Tokens in Design Systems." *EightShapes*.
+2279:- Frost, B. (2016). *Atomic Design*. https://atomicdesign.bradfrost.com/ — general
+2282:- Material Design (Google). "The Color System." https://m2.material.io/design/color/
+2285:- Martin, R. C. (2002). *Agile Software Development, Principles, Patterns, and
+2305:## 17. Implementation audit & corrections (rounds 1-2)
+2309:### 17.0 (P0, addendum after round 2 — read this first)
+2322:   no Sprite sub-object at `fileID: 21300000` at all.
+2324:2. **That is not what's causing the current crash.** The Symbol Image — the one
+2327:   `m_Sprite: {fileID: 21300000, guid: 5d0eb3736734d354785c36452f21f5bf, type: 3}`,
+2350:2. If the error persists: **Assets → Reimport All** (forces every asset in the
+2380:### 17.1 (historical — the original diagnosis, now superseded by 17.0 above)
+2390:m_Sprite: {fileID: 2800000, guid: 5d0eb3736734d354785c36452f21f5bf, type: 3}
+2392:`fileID: 2800000` is Unity's fixed internal ID for the **Texture2D** sub-object of an
+2393:imported image — not the **Sprite** sub-object, which is `fileID: 21300000` for a
+2395:Texture2D is a type-mismatched reference, which Unity reports as exactly this error
+2404:`fileID: 21300000` — so the correct reference for this exact sprite is sitting right
+2418:2. Select **Symbol** → its `Image` component → the `Source Image` field currently
+2424:   `fileID: 21300000` — this sidesteps the whole class of hand-edited-YAML fileID
+2429:changing `fileID: 2800000` to `fileID: 21300000` in that one line — but **verify by
+2436:### 17.2 (P0, will surface immediately after 17.1) — Ring renders as a solid rectangle
+2459:### 17.3 (P1) — the actual sprite PNGs were never imported
+2463:sprites generated during the Stage 2.3 design work made it into this project — not
+2465:there. This single gap is the direct cause of 17.2 above, plus:
+2480:   `_2.2_POI_design_options.html`'s `ICONS`/shape definitions if you no longer have
+2481:   the originally-generated files) as **Sprite (2D and UI)**, Alpha Is Transparency on:
+2488:2. Add the 4 new shape entries to `ShapeLibrary.asset` (key = `rounded_square` /
+2496:#### 17.3b — Icon child GameObjects were never created
+2508:2. Under **Badge**: same thing — add an `Icon` child, wire it to Badge's
+2513:### 17.4 (P1) — `status_unknown` is entirely missing
+2515:This feature was added to the design partway through the Stage 2.3 conversation —
+2602:### 17.5 (P1) — `OutlineSameHue` doesn't actually drain the fill toward black
+2618:    ? Mathf.Lerp(1f, 0.28f, Mathf.Clamp01(poi.status_pct / 100f))
+2629:### 17.6 (P2) — shape key lookup will break for every multi-word shape
+2655:### 17.7 (P2) — no unit tests for `CategoryPalette` or `StatusRamp`
+2661:all. These were specified in `_2_2_Marker_Design.md` §13; add them (copy directly
+2667:### 17.8 (P3, optional, low priority)
+2670:  throughout `MarkerView.cs`, not the warm cream (`0.949, 0.925, 0.827`) specified
+2680:### 17.9 Verification checklist (specific to the 17.0-17.8 fixes above)
+2685:      (17.2/3).
+2700:## 18. Marker Gallery — verification testing strategy
+2710:### 18.1 Two tiers, not one
+2718:**Tier 2 — the real app.** If Tier 1 already proved every combination renders
+2719:correctly in isolation, Tier 2 only needs to prove the *real* pipeline wiring
+2721:`config.json`. Nothing new to build for Tier 2 — it's the app already built.
+2723:### 18.2 Mandatory build order — read this before writing any code
+2737:| 2 | Remaining groups, **one group at a time** (7 steps) | MCP tests green after *each* group before adding the next |
+2739:| 4 | Apply/confirm against the real AR app (Tier 2) | Real `config.json` POIs render correctly too |
+2741:### 18.3 Where the backdrop image goes
+2757:### 18.4 Phase 0 — empty scaffold
+2764:2. `File → New Scene` → save as `Assets/Dev/MarkerGallery/MarkerGalleryScene.unity`.
+2780:### 18.5 Phase 1 — one marker, simplest possible case
+2791:version** (grows in Phase 2, final version in §18.7):
+2823:            // Phase 1: exactly one entry. Everything else added in Phase 2, one
+2834:contains, so it never needs to change again as Phase 2 grows the list:
+2850:        [SerializeField] private float columnSpacing = 0.25f;
+2946:    // in guidelines §6.2, not standalone on-device, so UNITY_EDITOR is defined
+2967:    // run_tests tool with zero screenshots. Grows automatically as Phase 2 adds
+3049:            if (unknownEntries.Count == 0) yield break; // not added until Phase 2 step 3-5
+3069:            if (entry.Label == null) yield break; // not added until Phase 2 step 7
+3087:this one glance, move to Phase 2.**
+3091:### 18.6 Phase 2 — add one group at a time
+3099:2. **Shape spectrum** (5 entries, one per `MarkerShape`, `has_status: false`) —
+3114:6. **Hero group** (2 entries: label hidden vs. shown) — should already pass if
+3116:7. **Override group** (2 entries: `furniture` with the colour override configured,
+3118:   Two edits this step, not one: add the 2 entries to `Entries`, **and** change
+3126:**Phase 2 gate, per step**: MCP test run green for *everything added so far*, not
+3133:### 18.7 Full reference — end state after Phase 2
+3184:            // + 2 arbitrary ones (hash fallback, no icon), status off.
+3190:            // Step 2: Shape spectrum -- one per MarkerShape, status off.
+3196:                (0,"0% Intact"), (20,"20%"), (40,"40%"), (60,"60%"), (80,"80%"), (100,"100% Gone")
+3224:### 18.8 Phase 3 — full pass
+3237:### 18.9 Phase 4 — apply to the real AR app (§6.4's "Phase B")
+3240:first.** §19.12 adds 3 hero POIs (`lamp`, `painting`, `camera` — all now
+3241:`is_hero: true`, each demoing a different hero effect) plus 12 satellite
+3244:section — everything below assumes the richer 20-POI config is already in
+3247:**Correction (2026-08-01): the checklist below previously said "no
+3267:  §18.12, through the real config-driven pipeline, not fabricated gallery
+3274:§18.12's fix). What Phase B actually tests is different: does the real
+3280:.prefab` asset (not a copy), the §18.12 fix applies here automatically —
+3284:**18.9.2 — Tier A pass (Editor Play Mode, mock tracking, no device).** Enter
+3291:  non-null with transparent corners (same check as 18.12's repro, but now
+3297:- Run the two-session repro from §18.12.3 step 2 here too, not just in the
+3324:18.9.2 is clean in the Editor, most of what's left to confirm about the
+3334:**Gate before closing this domain out:** 18.9.2 clean in the Editor **and**
+3340:### 18.10 Checklist
+3346:- [x] Phase 2: all 7 steps added in order, MCP green after each before proceeding
+3349:      12/12 total PlayMode tests passed); human visual pass completed via
+3354:      `[WallSession] Loaded 'Living Room (Dev Test)' -- 20 POIs.` ->
+3355:      `[WallSession] Ready 20/20 POIs in 116ms.`; `lamp`'s sun accent confirmed
+3359:      and `LivingRoom_PlayMode_Session2.png`.
+3360:- [x] §18.12: sun-effect square-render bug root-caused (stale static sprite
+3363:      `MarkerCircleSpriteFactory`); the two-session repro from 18.12.3 confirmed
+3364:      clean after the fix, in both session 1 and session 2 via `LivingRoomScene`.
+3365:- [x] §18.9.2: Tier A pass on `LivingRoomScene` (mock tracking) clean —
+3381:### 18.11 Final hero-effect update (2026-07-31)
+3387:#### 18.11.1 Label centering
+3395:#### 18.11.2 Modular hero composition
+3407:#### 18.11.3 Sun visual behavior
+3418:#### 18.11.4 Gallery hero rows expanded
+3425:- Each group includes all 5 hero compositions listed in 18.11.2.
+3427:#### 18.11.5 Test coverage and result
+3437:#### 18.11.6 Explicit "no square sun" diagnostics
+3448:    - PlayMode: **21/21 passed**
+3452:### 18.12 Sun effect still renders as a square in the human visual pass (2026-08-01)
+3454:Despite 18.11.6's diagnostics reporting green (21/21 PlayMode, including
+3467:#### 18.12.1 Why the passing test doesn't cover this
+3481:#### 18.12.2 Leading hypothesis — stale static sprite cache surviving across Play sessions
+3486:private static Sprite GetContourInnerSprite() => s_contourInnerSprite ??= BuildRingSprite(256, 0.86f, 0.58f);
+3494:1. Any object created at runtime via `Sprite.Create`/`new Texture2D` (not an
+3496:2. If **Edit → Project Settings → Editor → Enter Play Mode Settings → Reload
+3525:#### 18.12.3 Confirm before fixing — cheap checks, in order
+3527:Per §6.2's rule (write out the fix candidates, don't guess-and-check), confirm
+3532:   direct confirmation of 18.12.2 — proceed to 18.12.4.
+3533:2. **Reproduce with two Play sessions, not one.** Via Unity MCP: enter Play
+3541:   18.12.2: confirm the Console shows no compile errors and no old duplicate
+3546:If step 2 reproduces the divergence, the diagnosis is confirmed — implement
+3547:18.12.4 and re-run the same two-session repro to confirm the fix, not just a
+3549:fix, and would silently re-create the exact gap in 18.12.1).
+3551:#### 18.12.4 The fix
+3565:        s_contourInnerSprite = BuildRingSprite(256, 0.86f, 0.58f);
+3572:        s_contourMiddleSprite = BuildRingSprite(256, 0.84f, 0.66f);
+3579:        s_contourOuterSprite = BuildRingSprite(256, 0.82f, 0.72f);
+3586:        s_filledSprite = BuildFilledCircleSprite(256, 0.84f);
+3590:// 2. Force the cache empty at the start of every logical run. This attribute
+3607:#### 18.12.5 Alternative hypotheses considered and why they're secondary
+3609:Kept here rather than silently discarded, per §6.2's "write out the
+3614:  harness were read directly (§18.12 analysis above, and the harness source)
+3624:  comparison).** Independently re-derived by hand in 18.12.1 — the alpha
+3627:#### 18.12.6 Re-verification after the fix
+3630:two-session repro from 18.12.3 step 2 (not just a single fresh session — see
+3631:the caution in 18.12.3), then a fresh human visual pass/screenshot over the
+3637:## 19. Modular effects expansion, richer test config, and Editor-tab live preview (2026-08-01)
+3645:### 19.0 The modularity questions, answered directly
+3666:  `Texture2D`/`Sprite` generation and its caching — should live in exactly
+3668:  `MarkerSunEffect` and `MarkerAccentEffect`, so §18.12's fix only has to
+3676:  effect class. It's 2-3 lines, already mirrors `MarkerPulseEffect`'s and
+3678:  shared abstraction for a two-line formula used by 2-3 call sites adds
+3681:### 19.1 Config schema additions — `WallConfigData.cs` (`POIData`)
+3695:// of 2026-08-01 -- is_hero now controls only the persistent label, not
+3711:### 19.2 `MarkerEffectFlags` — renamed from `HeroEffectMode`, extended, decoupled from `is_hero`
+3726:    // Renamed from HeroEffectMode (2026-08-01, §19.2): these effects are no
+3736:        SunCircles = 1 << 2,
+3759:### 19.3 Shared circle/ring sprite factory — new file `MarkerCircleSpriteFactory.cs`
+3762:This supersedes §18.12.4's fix-in-place sketch — **apply the domain-reload
+3763:fix here, once, not separately inside `MarkerSunEffect`.** If §18.12 hasn't
+3766:per 18.12.4 and instead do §19.4's delegation below).
+3776:    // this means the domain-reload-safety fix from §18.12 only has to exist in
+3781:        private const int TextureSize = 256;
+3786:        // §18.12: explicit null checks (not ??=) -- UnityEngine.Object's overloaded
+3813:        // ran. This is the actual fix for §18.12's stale-static-cache bug; the
+3827:            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false, true);
+3848:            return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+3853:            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false, true);
+3873:            return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+3879:### 19.4 `MarkerSunEffect.cs` — delegate to the shared factory
+3895:        _ => MarkerCircleSpriteFactory.GetRing(0.82f, 0.72f),
+3901:visual change. Re-run §18.12.6's re-verification gate after this edit, same
+3902:as if 18.12's in-place fix had been applied directly.
+3904:### 19.5 New file `MarkerAccentEffect.cs` — Simple Sun / Ring Pulse / Beacon in one class
+3928:    // never builds a Texture2D itself.
+3938:        [SerializeField] private Color baseTint = new Color(0.949f, 0.792f, 0.443f, 1f);
+3939:        [SerializeField, Range(0f, 1f)] private float baseAlpha = 0.28f;
+3940:        [SerializeField] private float size = 0.24f;
+3941:        [SerializeField, Range(0.72f, 0.98f)] private float contourOuterScale = 0.90f;
+3947:        [SerializeField, Min(0.1f)] private float period = 2.0f;
+3985:                float wave = Mathf.Sin(Time.time * Mathf.PI * 2f / period) * 0.5f + 0.5f;
+3995:                float smooth = t * t * (3f - 2f * t);
+4031:                    rect.anchorMin = new Vector2(0.5f, 0.5f);
+4032:                    rect.anchorMax = new Vector2(0.5f, 0.5f);
+4037:            accentImage.rectTransform.sizeDelta = new Vector2(size, size);
+4055:### 19.6 `MarkerRingView.cs` — `rotate_contour`
+4078:### 19.7 `MarkerView.cs` — wiring changes
+4168:// expect two of these three at once on the same marker (§19.2).
+4201:### 19.8 `MarkerVisualsParser.cs` — `ParseEffectFlags`
+4238:### 19.9 `WallSession.cs` — pass effects through
+4256:### 19.10 Phase A gallery — 4 new rows
+4351:exactly per §18.2's mandatory build order — this is Steps 8-11 continuing
+4354:### 19.11 New automated tests — `MarkerGalleryTests.cs`
+4463:### 19.12 `config.json` — richer Living Room test data
+4488:  "captured_position": { "x": -2.0, "y": 0.0, "z": 0.0 },
+4507:  "captured_position": { "x": -1.93, "y": 0.72, "z": 2.23 },
+4522:**Add these 12 new POIs** to the `pois` array (append anywhere -- order
+4526:Beacon (`*_down`) -- so between the 3 heroes and 12 satellites, every new
+4569:  "captured_position": { "x": -2.0, "y": 0.0, "z": 0.3 },
+4578:  "captured_position": { "x": -2.0, "y": 0.0, "z": -0.3 },
+4587:  "captured_position": { "x": -2.0, "y": 0.3, "z": 0.0 },
+4596:  "captured_position": { "x": -2.0, "y": -0.3, "z": 0.0 },
+4605:  "captured_position": { "x": -1.93, "y": 0.72, "z": 2.53 },
+4614:  "captured_position": { "x": -1.93, "y": 0.72, "z": 1.93 },
+4623:  "captured_position": { "x": -1.93, "y": 1.02, "z": 2.23 },
+4632:  "captured_position": { "x": -1.93, "y": 0.42, "z": 2.23 },
+4640:Result: 20 POIs total (was 8) -- 3 heroes with labels (each a different hero
+4641:effect), 12 new satellites (3 rotate-contour + 3 ring-pulse + 3 simple-sun +
+4651:### 19.13 Editor tool -- `POIAuthoringToolWindow.cs` live style/effects preview (guidelines §6.4.1)
+4683:animation feel right" gets confirmed (§18.9.2). Say this plainly in any
+4707:**19.13.2 -- live refresh as fields change, no button click needed.** Wrap
+4737:            // (per §19.2's mutual-exclusion note for the last three).
+4802:### 19.14 What belongs at which level -- confirmed
+4830:### 19.15 Build/implementation order
+4835:1. §19.1-19.2: schema + enum rename (touches many files; do this first so
+4837:2. §19.3-19.6: new/changed component files (`MarkerCircleSpriteFactory`,
+4844:5. §19.12: `config.json` expansion -- do this at the *start* of Phase B
+4850:### 19.16 Checklist
+4852:- [x] §19.1-19.2: `POIData` fields added; `HeroEffectMode` renamed to
+4855:      delegates to it (verified 2026-08-02: grepped `MarkerSunEffect.cs`,
+4856:      no leftover `s_contourInnerSprite`/`BuildRingSprite`). §18.12's
+4868:      each, per §18.2's build order.
+4871:- [x] §19.12: `config.json` (both copies, or Editor tool's "Copy to
+4872:      StreamingAssets") updated to 20 POIs -- 3 heroes + 12 satellites +
+4876:      animation itself still confirmed in Play Mode (§18.9.2), not expected
+4884:    `44/44` passed and PlayMode `23/23` passed; no compile `error CS`
+4889:## 20. Extensible background shape and ring line styles (2026-08-02)
+4897:### 20.1 `MarkerShape.None` -- a marker or badge with no background shape
+4961:### 20.2 Per-wall `badge_shape` -- badges no longer forced to circle
+4996:right before it, mirroring 20.1's symbol handling exactly.
+4998:### 20.3 Extensible ring line styles
+5037:## 21. Hero marker symbol override (2026-08-02)
+5045:### 21.1 Why this design, not an alternative rendering path
+5058:### 21.2 `POIData.hero_icon_key`
+5072:### 21.3 `MarkerView.ApplyVisuals` -- icon resolution
+5099:### 21.4 Editor exposure

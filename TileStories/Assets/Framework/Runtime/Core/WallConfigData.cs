@@ -11,14 +11,22 @@ namespace TileStories
         public string wall_name;
         public int immersal_map_id;
 
+        // LEGACY fallback only -- prefer marker_outline_mode + marker_use_badge
+        // below for new walls. Still read by
+        // MarkerVisualsParser.DeriveOutlineAndBadgeFromLegacyStyle when
+        // marker_outline_mode is absent, kept for walls authored before the split.
         // "outline_gold" / "outline_same_hue" / "badge". Missing/unrecognised falls
-        // back to MarkerVisualsParser.DefaultStyle -- unlike has_captured_position,
-        // an absent value here has one unambiguous safe meaning ("use the framework
-        // default"), so no separate has_* flag is needed.
+        // back to MarkerVisualsParser.DefaultStyle.
         public string marker_style;
 
-        // "circle" / "rounded_square" / "hexagon" / "diamond" / "star".
+        // "circle" / "rounded_square" / "hexagon" / "diamond" / "star" / "none".
         public string marker_shape;
+
+        // "circle" / "rounded_square" / "hexagon" / "diamond" / "star" / "none".
+        // Independent of marker_shape -- a wall can have a hexagon symbol with a
+        // circle badge, or a badge with no background shape at all. Missing/absent
+        // falls back to "circle", same as marker_shape's own default.
+        public string badge_shape;
 
         // Optional split-mode controls for marker visuals.
         // marker_outline_mode: "gold" / "same_hue" / "none"
@@ -62,6 +70,10 @@ namespace TileStories
         // Matches an entry key in IconLibrary.asset. Empty/omitted -> no icon
         // (colour-only circle), same as any other unlisted category.
         public string icon_key;
+
+        // Free-text note shown in the authoring tool's details popup. Not read by
+        // runtime -- purely authoring metadata for this wall's taxonomy.
+        public string details;
     }
 
     [Serializable]
@@ -78,6 +90,10 @@ namespace TileStories
 
         // Icon key from IconLibrary.asset.
         public string icon_key;
+
+        // Free-text note shown in the authoring tool's details popup. Not read by
+        // runtime -- purely authoring metadata for this wall's taxonomy.
+        public string details;
     }
 
     [Serializable]
@@ -92,7 +108,8 @@ namespace TileStories
         // Numeric anchor used by runtime resolve logic.
         public float pct;
 
-        // Ring line style key: solid/dash_long/dash_medium/dash_short/dotted.
+        // Ring line style key: solid/dash_long/dash_medium/dash_short/dotted, or
+        // any custom key present in the wall's icon library (section 20.3).
         public string line_style;
 
         // Optional "#RRGGBB" tint override.
@@ -100,6 +117,10 @@ namespace TileStories
 
         // Optional width override in UI-space units.
         public float ring_width;
+
+        // Free-text note shown in the authoring tool's details popup. Not read by
+        // runtime -- purely authoring metadata for this wall's taxonomy.
+        public string details;
     }
 
     [Serializable]
@@ -137,6 +158,14 @@ namespace TileStories
         // false when absent -- a safe default here (unlike status) because "not a
         // hero" is an ordinary, unsurprising fallback, not a data-loss risk.
         public bool is_hero;
+
+        // Optional icon key from IconLibrary.asset, overriding just the icon this
+        // hero POI's Symbol shows -- category fill colour, ring, and badge are
+        // unaffected. Only meaningful when is_hero is true; ignored otherwise, same
+        // pattern as effect_mode being independent of is_hero (section 19). A hero
+        // POI without this set falls through to its normal category-derived icon,
+        // same as any other marker.
+        public string hero_icon_key;
 
         // Comma-separated effect tokens: "pulse", "sun_contours", "sun_circles",
         // "ring_pulse", "simple_sun", "beacon". Parsed by

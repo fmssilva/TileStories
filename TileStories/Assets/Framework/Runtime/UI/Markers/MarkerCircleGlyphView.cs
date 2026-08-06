@@ -29,6 +29,15 @@ namespace TileStories
             background.color = color;
         }
 
+        // Hide just the background silhouette while keeping the icon visible.
+        // Used when marker_shape / badge_shape is "none" (icon-only marker).
+        // The companion SetIcon still runs, so category/hero icons remain readable.
+        public void SetBackgroundVisible(bool visible)
+        {
+            if (background != null)
+                background.enabled = visible;
+        }
+
         public void SetIcon(Sprite iconSprite, Color tint, float opacity = 1f)
         {
             EnsureIconReference();

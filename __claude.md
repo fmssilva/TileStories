@@ -47,9 +47,10 @@ Be good, not fast.
 
 # 3. **Finalize (the actual work order)**
 
-"We've decided on [X]. Now write the complete `_N.M_DomainX_Design.md`: a complete implementation guide for a separate low-context coding agent who has full project/Unity access but no memory of this conversation.
+"We've decided on [X]. Now write the complete `_N.M_DomainX_Design.md`: 
+so confirm again if the guides are clear and with all important details for a for a separate low-context coding agent who has full project/Unity access but no memory of this conversation, to know exacly what to do, how, where and why... 
 
-Required contents: what/how/why/where for every decision, concrete code where it de-risks the work, a explicit 'read these real files first' list, a step-order that isolates any risky refactor from new feature work, a verification checklist, the bibliography, plus a mandatory ## Implementation Status section at the very top — a living tracker, not a one-time snapshot. Every entry gets one of: ✅ confirmed correct (verified how), ❌ confirmed missing/broken (what and why), or ⚠️ needs a non-code action. Tell the implementing agent explicitly: after finishing and testing each section of this doc, update this Status block immediately, in this same file, before moving to the next section — never a separate progress file, never batched to the end.
+and so maybe the files could have content like??: what/how/why/where for every decision, concrete code where it de-risks the work, a explicit 'read these real files first' list, a step-order that isolates any risky refactor from new feature work, a verification checklist, the bibliography, plus a mandatory ## Implementation Status section at the very top — a living tracker, not a one-time snapshot. Every entry gets one of: ✅ confirmed correct (verified how), ❌ confirmed missing/broken (what and why), or ⚠️ needs a non-code action. Tell the implementing agent explicitly: after finishing and testing each section of this doc, update this Status block immediately, in this same file, before moving to the next section — never a separate progress file, never batched to the end.
 
 If this domain has any visual/rendered component (UI, AR markers, effects, animations): the doc MUST specify a two-phase build order, and the implementing agent must not skip from Phase A to Phase B:
 
@@ -74,28 +75,22 @@ Phase B — real pipeline integration:
     re-litigate what Phase A already settled.
 
 If this domain also has, or will get, an Editor-time authoring/preview tool
-that touches its real runtime objects outside Play Mode (per the Kickoff
-flag in stage 1): the doc must also apply guidelines §6.4.1 (Edit-Mode
-tooling parity) as its own subsection, not fold it silently into Phase A or
-B — it's a different axis (which runtime context renders the component),
-not a third phase after them, and it can be planned/built any time Phase B's
-prerequisite (§6.4.1's own dependencies, if any) are met. That subsection
-must, at minimum:
+that touches its real runtime objects outside Play Mode, the doc should also apply guidelines about Edit-Mode tooling parity as its own subsection, not fold it silently into Phase A or B tests... because it's a different axis (which runtime context renders the component). That subsection must, at minimum??:
   - Confirm, by reading the tool's actual code (not assuming), whether its
     populate/refresh path calls the same real configuration entry point the
     Play-Mode path uses. Working correctly in Play Mode does not imply the
-    Editor tool was ever wired to the same entry point.
+    Editor tool was ever wired to the same entry point. 
   - Confirm, by reading the code, whether the tool's Editor-time instances
     are persistent scene objects ("hard copies") or ephemeral — this changes
     whether "refresh on field change" should reconfigure objects in place or
-    destroy-and-respawn them.
+    destroy-and-respawn them??
   - State plainly that `Update()`-driven behaviour (animation, timers) will
     not preview live in Edit Mode — that's expected, not a bug — and that
     Play Mode remains the tier for confirming animation/timing feel.
 
 For every phase/step in this doc's Phase A/B (and §6.4.1, where it applies) plan, specify exactly which verification tier applies and what the pass criterion is — never just 'test it': name the specific Assert calls (Tier 0), which of the four no-vision UI-quality checks apply (Tier 0.5 — occlusion via raycast, WCAG contrast, tap-target size, text truncation), and, only where Tier 0/0.5 genuinely can't reach, the exact itemized checklist a vision agent should run (Tier 1) — never an open 'confirm it looks right' prompt. State explicitly where human-in-the-loop (Tier 2) is required and where it isn't. Write the handoff summary format this domain's language agent must produce for the next agent: what to check, not what to conclude.
 
-This file needs to contain all important details of what, how, where, why... but keep prose concise — code and structure carry the detail, not paragraphs. Lets write all important details in a concise manner.
+This file needs to contain all important details of what, how, where, why... but keep prose concise — code and structure carry the detail, not paragraphs. Lets write all important details in a concise manner. It is important for the files to be concise to avoiod ovreloading the models context window during reading or editing the file. 
 
 Then re-check the whole doc against our conversation for anything missed before you hand it to me.
 

@@ -1,0 +1,16 @@
+
+LineNumber Line                                                                    
+---------- ----                                                                    
+       236         private void RefreshRigVisuals()                                
+       336         private void ClearRig()                                         
+       365         private Transform GetExistingRig()                              
+       381         private Transform GetOrCreateRig()                              
+       399         private int GetRigChildCount()                                  
+       405         private void TryResolveSceneReferences()                        
+       418         private void PopulateRig()                                      
+       542         private void CapturePositions(bool silentWhenRigMissing = false)
+       600         private void SelectRigObjects()                                 
+       613         private void OnSceneGUI(SceneView sv)                           
+
+
+

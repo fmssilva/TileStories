@@ -1,0 +1,99 @@
+TODO: Default Heritage Category Styles in Editor Tab
+- [x] 1. Fix .meta files for 6 new PNG icons (spriteMode: 1, textureType: 8, etc.)
+      VERIFIED: IconReligious.png.meta has spriteMode=1, textureType=8, alphaIsTransparency=1.
+- [x] 2. Extend MarkerSymbolTexturePostprocessor to handle /Icons/ paths
+      DONE: existing code checks assetPath.Contains("/Icons/"); null-guard reordered.
+- [x] 3. Register new icons in IconLibrary.asset (framework + wall)
+      DONE via direct .asset edit (matching GUIDs cross-checked against PNG .meta).
+      No standalone utility class was needed -- plan approach was direct asset edit.
+- [x] 4. Update seeding logic in GlobalScene.cs and ConfigFileIO.cs
+      DONE: both call sites use `if (Count == 0) AddRange(DefaultCategoryStyles.Create())`.
+- [x] 5. Update CategoryPalette.KnownIcons with new heritage categories
+      DONE: 6 heritage categories mapped in runtime CategoryPalette.cs KnownIcons.
+- [ ~ ] 6. Update LivingRoom config.json (clear old categories, use new defaults)
+      INTENTIONALLY NOT DONE per _5.3 §4: LivingRoom uses furniture/art/electronics/test
+      categories, NOT the heritage taxonomy. Seeding heritage defaults into its
+      config.json would be wrong. The editor seeds them in-memory on load regardless;
+      saving would only happen if a dev explicitly wants the heritage taxonomy here.
+- [x] 7. Write tests for default categories
+      DONE: DefaultCategoryStylesTests.cs (EditMode, 4 tests) + 1 new PlayMode test
+      (MarkerIconLibraryRuntimeTests.DefaultHeritageIconKeys_ResolveToSprites).
+- [x] 8. Compile and run tests (Unity batch / Unity MCP)
+      DONE: zero error CS; EditMode 50/50 passed; PlayMode 29/29 passed.
+- [x] 9. Verify no error CS lines and test counts match/exceed baseline
+      BASELINE: EditMode (prior) 48/50 with 2 pre-existing failures.
+      AFTER FIX: EditMode 50/50 (the 2 pre-existing failures are now FIXED).
+      PlayMode: 29/29 (no new PlayMode tests beyond the 1 added).
+
+Additional fixes made during this task (not in original TODO):
+- [x] A. Fix latent NRE ordering in MarkerSymbolTexturePostprocessor.OnPreprocessTexture
+      (null/empty check now precedes assetPath.Contains calls).
+- [x] B. Fix path-mangling bug in MarkerSymbolTexturePostprocessorTests
+      (TestAssetPath.Replace("Assets/", dataPath+"/") mangled "MarkerAssets/").
+
+---
+
+TODO: Default Outline Level Rows in Editor Tab
+- [x] 1. Create DefaultOutlineLevels.cs factory class
+    DONE: Assets/Framework/Editor/POIAuthoring/Shared/DefaultOutlineLevels.cs
+    Returns 6 OutlineLevelEntry objects mirroring StatusRamp.Levels (0%, 20%, 40%,
+    60%, 80%, 100%) with line_style keys (solid, dash_long, dash_medium, dash_short,
+    dotted, dotted) and ring_width values matching StatusRamp. color_hex left empty
+    so runtime falls back to StatusRamp colors.
+- [x] 2. Auto-seed outline levels in LoadConfig() (ConfigFileIO.cs)
+    DONE: ConfigFileIO.cs lines 61-62 now call DefaultOutlineLevels.Create() when
+    outline_levels.Count == 0, so a freshly loaded wall with no outline_levels gets
+    the 6 defaults immediately.
+- [x] 3. Auto-seed outline levels in DrawGlobalOutlineSection() (GlobalScene.cs)
+    DONE: GlobalScene.cs lines 149-150 now call DefaultOutlineLevels.Create() when
+    outline_levels.Count == 0, replacing the old manual "Seed default outline levels"
+    button.
+- [x] 4. Register 5 ring style keys in IconLibrary.asset (framework + wall)
+    DONE: Both Assets/Framework/Runtime/UI/Markers/IconLibrary.asset and
+    Assets/Apps/LivingRoom/MarkerAssets/Resources/MarkerSymbols/living_room_IconLibrary.asset
+    now have entries for solid, dash_long, dash_medium, dash_short, dotted with
+    GUIDs matching the Ring*.png .meta files.
+- [x] 5. Write DefaultOutlineLevelsTests.cs
+    DONE: 6 EditMode tests (count, required fields, StatusRamp match, empty
+    color_hex, fresh list each call, unique keys).
+- [x] 6. Add PlayMode test for ring style key resolution
+    DONE: Added DefaultRingStyleKeys_ResolveToSprites to MarkerIconLibraryRuntimeTests.cs
+    verifying all 5 ring style keys resolve to sprites in the wall's runtime library.
+- [x] 7. Compile and run tests
+    DONE: zero error CS; EditMode 59/59 passed; PlayMode 31/31 passed.
+
+---
+
+TODO: Default Outline Level Rows -- Enhanced Features (4 levels, no cap, Free Colors)
+- [x] 1. Update DefaultOutlineLevels.cs factory to 4 levels
+    DONE: Replaced 6-level factory with 4 levels matching user spec:
+    intact (0%, solid, 3.2f), partial_damage (20%, dash_long, 2.8f),
+    destroyed (100%, dash_short, 2.0f), unknown (100%, dotted, 1.8f, #71717A).
+    color_hex empty for 3 status levels; unknown has explicit grey.
+- [x] 2. Remove row limit cap (MaxOutlineLevels)
+    DONE: Removed MaxOutlineLevels constant from POIAuthoringToolWindow.cs.
+    Removed canAdd/DisabledScope/HelpBox logic from DrawGlobalOutlineSection().
+    "+ Add outline level" button is now always enabled -- unlimited rows.
+- [x] 3. Rename UI labels
+    DONE: "Outline mode" -> "Outline Color", "Outline levels" -> "Outline Types".
+- [x] 4. Add "Free Colors" option to Constants.cs
+    DONE: OutlineModeOptions now { "gold", "same_hue", "free_colors" }.
+    OutlineModeLabels now { "Gold", "Same Hue", "Free Colors" }.
+- [x] 5. Implement Free Colors conditional logic in GlobalScene.cs
+    DONE: Added isFreeColors check. Color column header and color swatch
+    only render when isFreeColors is true. Gold/Same Hue modes hide the
+    color column entirely (runtime uses StatusRamp colors).
+- [x] 6. Fix normalization logic for free_colors mode
+    DONE: Updated DrawGlobalOutlineSection() to handle "free_colors" directly
+    in the normalization logic, since MarkerVisualsParser.TryParseOutlineMode
+    does not recognize it (it's an editor-only concept, not a runtime enum).
+- [x] 7. Update DefaultOutlineLevelsTests.cs for 4 entries
+    DONE: Create_ReturnsSixEntries -> Create_ReturnsFourEntries (Assert.AreEqual(4)).
+    Create_Levels_MatchStatusRamp -> Create_Levels_MatchSpec (checks 4 specific
+    levels with exact keys, labels, pct, line_style, ring_width, color_hex).
+    Create_ColorHex_IsEmpty_ForAllEntries -> updated to check only 3 entries
+    have empty color_hex (unknown has #71717A).
+- [x] 8. Compile and run tests
+    DONE: zero error CS; EditMode 59/59 passed; PlayMode 31/31 passed.
+
+

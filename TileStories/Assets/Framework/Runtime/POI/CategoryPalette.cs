@@ -15,16 +15,23 @@ namespace TileStories
         // Stage 2.3 prototypes. Just a lookup table, not an enforced schema -- add
         // entries here (and a matching sprite in IconLibrary.asset) as new named
         // categories get real icons drawn for them.
+        // Maps heritage category names to their icon-key in IconLibrary.asset.
+        // The six default heritage categories (seeded by the authoring tool when
+        // a wall's config.json has no category_styles) use the same key for both
+        // the category name and the icon key, so a developer can read either field
+        // and find a matching sprite. Older ad-hoc mappings (royal->crown, civic->
+        // columns, commerce->scale, infra->bridge) are removed; maritime->anchor and
+        // landscape->leaf are retained as non-default known categories.
         private static readonly Dictionary<string, string> KnownIcons = new()
         {
-            { "religious", "temple" },
-            { "royal", "crown" },
-            { "military", "shield" },
-            { "civic", "columns" },
+            { "royal_government", "IconRoyal&Government" },
+            { "religious", "IconReligious" },
+            { "military", "IconMilitary" },
+            { "residential", "IconNobel&PrivateResidence" },
+            { "economic", "IconIndustry&Trade" },
+            { "infrastructure", "IconInfrastructures" },
             { "maritime", "anchor" },
-            { "infra", "bridge" },
             { "landscape", "leaf" },
-            { "commerce", "scale" },
         };
 
         private static readonly Color DefaultColor = new Color(0.35f, 0.33f, 0.30f);

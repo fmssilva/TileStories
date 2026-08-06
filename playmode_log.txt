@@ -1,25 +1,50 @@
 [Licensing::Module] Trying to connect to existing licensing client channel...
 Built from '6000.3/staging' branch; Version is '6000.3.19f1 (7689f4515d75) revision 7768564'; Using compiler version '194234433'; Build Type 'Release'
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-franc" at "2026-08-02T08:07:37.8339675Z"
 OS: 'Windows 11  (10.0.26200) Core' Language: 'en' Physical Memory: 16151 MB
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-franc" at "2026-08-04T12:02:23.4063191Z"
 BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
 System  architecture: x64
 Process architecture: x64
-Date: 2026-08-02T08:07:37Z
+Date: 2026-08-04T12:02:23Z
+[Licensing::Client] Error: HandshakeResponse reported an error:
+	ResponseCode: 505
+	ResponseStatus: Unsupported protocol version '1.18.1'.
+[Licensing::Module] Error: Failed to handshake to channel: "LicenseClient-franc"
+[Licensing::IpcConnector] LicenseClient-franc channel disconnected successfully.
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-franc-6000.3.19" at "2026-08-04T12:02:26.3904093Z"
+[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 335348, path: "C:/Program Files/Unity/Hub/Editor/6000.3.19f1/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client.exe")
+[Licensing::Module] LicensingClient has failed validation; ignoring
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.1+9fbee8e
+  Session Id:              bbe8a34170e644ca9509c915d7fed59f
+  Correlation Id:          628dee1bcb134f10bfaa5197210b13ab
+  External correlation Id: 6745790108911899646
+  Machine Id:              PEK0PdJMuBkMmCBD5iQrDEHfDOY=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-franc-6000.3.19" (connect: 0.00s, validation: 0.02s, handshake: 0.12s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-franc-6000.3.19-notifications" at "2026-08-04T12:02:26.5268549Z"
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 6872838427490-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.01
+[Licensing::Module] Licensing Background thread has ended after 3.14s
 
 COMMAND LINE ARGUMENTS:
 C:\Program Files\Unity\Hub\Editor\6000.3.19f1\Editor\Unity.exe
 -batchmode
 -nographics
 -projectPath
-C:\Users\franc\Desktop\TileStories\TileStories
+c:\Users\franc\Desktop\TileStories
 -runTests
 -testPlatform
 PlayMode
 -testResults
-C:\Users\franc\Desktop\TileStories\playmode_results.xml
+c:\Users\franc\Desktop\TileStories\playmode_results.xml
 -logFile
-C:\Users\franc\Desktop\TileStories\playmode_log.txt
-Successfully changed project path to: C:\Users\franc\Desktop\TileStories\TileStories
-C:/Users/franc/Desktop/TileStories/TileStories
+c:\Users\franc\Desktop\TileStories\playmode_log.txt
+-quit
+Couldn't set project path to: C:/Users/franc/Desktop/TileStories/c:/Users/franc/Desktop/TileStories
 Exiting without the bug reporter. Application will terminate with return code 1

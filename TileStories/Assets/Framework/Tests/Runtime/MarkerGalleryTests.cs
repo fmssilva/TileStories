@@ -465,6 +465,76 @@ namespace TileStories.Tests
                 Assert.Fail($"Accent effect check failed for {failedCount} entries:{failures}");
         }
 
+        // Section 20.1: background shape None hides the symbol's backdrop while
+        // keeping the icon visible. The Symbol's background Image should be
+        // disabled, but the Icon child should still be enabled.
+        [UnityTest]
+        public IEnumerator NoneBackground_HidesSymbolBackdrop_KeepsIconVisible()
+        {
+            var prefab = MarkerGalleryTestFixture.LoadPrefab();
+            var entry = MarkerGalleryDefinitions.Entries.Find(e => e.Group == "None Background");
+            if (entry.Label == null) yield break;
+
+            var (go, _) = Spawn(prefab, entry);
+            yield return null;
+
+            var symbolImage = go.transform.Find("Symbol")?.GetComponent<Image>();
+            Assert.IsNotNull(symbolImage, "Symbol Image missing for None background entry.");
+
+            // The background Image must be disabled -- that's what "None" means.
+            Assert.IsFalse(symbolImage.enabled,
+                "None background: Symbol background Image should be disabled (no backdrop).");
+
+            // The Icon child must still be enabled -- "None" hides the backdrop,
+            // not the icon.
+            var iconImage = go.transform.Find("Symbol/Icon")?.GetComponent<Image>();
+            Assert.IsNotNull(iconImage, "Symbol/Icon Image missing for None background entry.");
+            Assert.IsTrue(iconImage.enabled,
+                "None background: Icon should remain visible when background shape is None.");
+
+            Object.Destroy(go);
+        }
+
+        // Section 21: hero_icon_key overrides the category-derived icon for hero
+        // POIs. We set hero_icon_key to "temple" (a known icon key) on a civic
+        // category hero POI and verify the Symbol's icon sprite is the temple
+        // sprite, not the civic "columns" sprite.
+        [UnityTest]
+        public IEnumerator HeroIconKey_OverridesCategoryIcon()
+        {
+            var prefab = MarkerGalleryTestFixture.LoadPrefab();
+            var entry = MarkerGalleryDefinitions.Entries.Find(e => e.Group == "Hero Icon Override");
+            if (entry.Label == null) yield break;
+
+            // Spawn with the gallery entry, then manually set hero_icon_key on
+            // the POIData before Initialise -- the gallery Spawn helper doesn't
+            // set hero_icon_key, so we do it here to test the override path.
+            var go = Object.Instantiate(prefab);
+            var poiData = new POIData
+            {
+                id = entry.Label, name = entry.Label, category = entry.Category,
+                is_hero = entry.IsHero, has_captured_position = true,
+                hero_icon_key = "temple",
+            };
+            var anchor = go.AddComponent<POIAnchor>();
+            anchor.Initialise(poiData);
+            var view = go.GetComponentInChildren<MarkerView>();
+            view.Initialise(anchor, entry.Style, entry.Shape, entry.EffectFlags);
+            yield return null;
+
+            var iconImage = go.transform.Find("Symbol/Icon")?.GetComponent<Image>();
+            Assert.IsNotNull(iconImage, "Symbol/Icon Image missing for hero icon override test.");
+            Assert.IsNotNull(iconImage.sprite, "Hero icon sprite should not be null.");
+
+            // "temple" is the icon key for the "religious" category. "civic"
+            // resolves to "columns". If the override works, the sprite name
+            // should contain "temple", not "columns".
+            Assert.IsTrue(iconImage.sprite.name.ToLowerInvariant().Contains("temple"),
+                $"Hero icon override: expected temple icon, got '{iconImage.sprite.name}'.");
+
+            Object.Destroy(go);
+        }
+
         [UnityTest]
         public IEnumerator HeroSunContours_UsesCenterToOuterLightFalloff()
         {

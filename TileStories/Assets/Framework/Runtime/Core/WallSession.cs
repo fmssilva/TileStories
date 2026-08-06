@@ -25,6 +25,7 @@ namespace TileStories
 
         // Resolved once from config, then passed to every marker on spawn
         private MarkerShape _markerShape;
+        private MarkerShape _badgeShape = MarkerShape.Circle;
         private MarkerOutlineMode _markerOutlineMode;
         private bool _markerUseBadge;
         private bool _hasShapeFromConfig;
@@ -73,6 +74,11 @@ namespace TileStories
             _hasShapeFromConfig = MarkerVisualsParser.TryParseShape(_config.marker_shape, out _markerShape);
             if (!_hasShapeFromConfig)
                 Debug.LogWarning("[WallSession] marker_shape missing/invalid - leaving prefab symbol shape unchanged.");
+
+            // badge_shape is independent of marker_shape (section 20.2). Missing/
+            // invalid falls back to Circle, matching the MarkerView default.
+            if (!MarkerVisualsParser.TryParseShape(_config.badge_shape, out _badgeShape))
+                _badgeShape = MarkerShape.Circle;
 
             if (!string.IsNullOrWhiteSpace(_config.marker_outline_mode))
             {
@@ -189,7 +195,8 @@ namespace TileStories
                         _hasCategoryDefinitions,
                         _hasShapeFromConfig,
                         _hasOutlineLevels,
-                        _wallIconLibrary);
+                        _wallIconLibrary,
+                        _badgeShape);
                     spawnedMarkerViews.Add(markerView);
                 }
 

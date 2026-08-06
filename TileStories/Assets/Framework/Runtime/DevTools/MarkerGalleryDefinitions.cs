@@ -141,6 +141,16 @@ namespace TileStories
             // Step 11: Beacon (thin contour, grow+fade sawtooth).
             AddAccentEffectRows(list, "Accent - Beacon", MarkerEffectFlags.Beacon);
 
+            // Step 12: Background shape None (section 20.1) -- icon-only marker,
+            // no backdrop behind the symbol. Category icon must still be visible.
+            list.Add(new MarkerGalleryEntry("None Background", "None shape, civic icon",
+                "civic", MarkerStyle.OutlineGold, MarkerShape.None, 0, false, false, false));
+
+            // Step 13: Hero icon override (section 21) -- hero POI with a
+            // hero_icon_key that overrides the category-derived icon.
+            list.Add(new MarkerGalleryEntry("Hero Icon Override", "Hero with override",
+                "civic", MarkerStyle.OutlineGold, MarkerShape.Circle, 0, false, false, true));
+
             return list;
         }
 
