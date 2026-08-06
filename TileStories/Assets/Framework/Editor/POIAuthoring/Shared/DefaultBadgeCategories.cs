@@ -4,7 +4,7 @@
 // wall's config when it has no badge_categories yet. Editor-only data --
 // runtime reads whatever config.json provides, never these defaults.
 //
-// Sibling factory to DefaultCategoryStyles.cs (see _5.3_Default_Icons.md
+// Sibling factory to DefaultCategoryStyles.cs (see _5.1.2_Default_Icons.md
 // section 1). Shared pattern by naming convention, not a generic abstraction,
 // because badge rows and category rows use different entry types.
 

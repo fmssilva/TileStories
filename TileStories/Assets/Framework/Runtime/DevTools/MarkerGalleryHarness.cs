@@ -79,6 +79,12 @@ namespace TileStories
                 has_captured_position = true,
             };
 
+            if (entry.HasStatus)
+            {
+                poiData.status_level_key = entry.StatusUnknown ? "unknown" : "partial_damage";
+                poiData.badge_category = entry.StatusUnknown ? "unknown_damage" : "partial_damage";
+            }
+
             var anchor = go.AddComponent<POIAnchor>();
             anchor.Initialise(poiData);
 
@@ -162,7 +168,7 @@ namespace TileStories
             LogImageDiagnostics(entry, "SunOuter", sunOuter);
 
             bool isUnknown = entry.HasStatus && entry.StatusUnknown;
-            bool expectRing = entry.HasStatus && !isUnknown && entry.Style != MarkerStyle.Badge;
+            bool expectRing = entry.HasStatus && entry.Style != MarkerStyle.Badge;
             bool expectBadge = entry.HasStatus && (isUnknown || entry.Style == MarkerStyle.Badge);
 
             bool hasSymbolSprite = symbol != null && symbol.enabled && symbol.sprite != null;

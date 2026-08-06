@@ -42,7 +42,7 @@ namespace TileStories.Editor.Tests
         public void Create_Levels_MatchSpec()
         {
             // The seeded defaults must match the four heritage outline types
-            // defined in _5.3_Default_Icons.md section 2: intact (0%),
+            // defined in _5.1.2_Default_Icons.md section 2: intact (0%),
             // partial_damage (20%), destroyed (100%), unknown (100% with grey).
             List<OutlineLevelEntry> defaults = DefaultOutlineLevels.Create();
             Assert.AreEqual(4, defaults.Count);

@@ -1,51 +1,51 @@
 
-# **Git commit !!!!**
+
+# **`Git commit !!!!`**
 
 
-# **New taks - Give command in plan mode first**
-Do the tasks written in this file:
+# **`New taks - Give command in plan mode first`**
+
+Read the general guidelines first: 
+C:\Users\franc\Desktop\TileStories\.clinerules
+including the code structure and organizing
+principles so you know where things actually live before reading anything else:
+C:\Users\franc\Desktop\TileStories\.clinerules\10-structure.md
+
+Now I want to focus on the "Effects of the Markers" and the Editor Tab. We already implemented these tasks in these files:
 C:\Users\franc\Desktop\TileStories\_2.2_Marker_Design.md
-
-and in this file:
+C:\Users\franc\Desktop\TileStories\_2.2.1_Marker_Design_Archive.md
 C:\Users\franc\Desktop\TileStories\_5.1_Editor_Tab.md
+C:\Users\franc\Desktop\TileStories\_5.1.1_Editor_Tab_Archive.md
+C:\Users\franc\Desktop\TileStories\_5.1.2_Default_Icons.md
 
-
-
-# **Continue Task - Give command in plan mode first**
-I already started implementing the tasks written in this file:
-C:\Users\franc\Desktop\TileStories\_2.2_Marker_Design.md
-
-and in this file:
-C:\Users\franc\Desktop\TileStories\_5.1_Editor_Tab.md
-
-and in this file:
-C:\Users\franc\Desktop\TileStories\_5.2_Organize_Project.md
-
-now, read them, and lets focus on section 14 of the file: 
-C:\Users\franc\Desktop\TileStories\_5.1_Editor_Tab.md
-
-and on the tasks of the file: 
-C:\Users\franc\Desktop\TileStories\_5.2_Organize_Project.md
-
-so make a complete plan of what we need to implement and how to implement it, and where... 
+So read what necessary so you get a clear vision of the whole structure we already have in place. 
+and open and read the actual current files in code referenceed in the files. Confirm the plan's description of those files are still accurate, and confirm what the files actually do... 
 
 ---
-So, before writing any code: read that file in full, then open and read the
-actual current files it references yourself — do not assume the plan's description of them is still accurate, confirm it.
+## **And so now I want to:**
+focus on the effects. 
+and i think that currently we have already some options of effects like pulsing marker, and then also some sun effects or beacon effects... 
+so:
+a) start by confirming all the effects we have available.
+b) confirm how these effects are used:
+b.1) If possible and easy to implement in code, I don't want to have some hard coded combination of effects... instead, we can just have those effects defined and then we can "use them and combine them" as we want in some marker??? what is the easiest cleanest way to have some effects options, example effect A,B,C and then we choose which effects we want to use, example i want to use A in one marker, B+C in other marker, B+A in other marker, etc...??
+c) having these N effects... should we have some component in the global scene options component? currently we have, marker, badge and outline component where the developer basically can add some new symbols and options etc... can we have and/or should we have also some effects component where we show the available effects? and maybe be able to configure them if appropriate?? and maybe could the user create and add some new effects that he wants to create? is this a viable option? or in practice to create some new effect the developr should create it's own effect c# file or something like that and so we can't really have some easy to add new effects button or functinality? or maybe we should have only some "Add new effect" button there in editor tab, and if developer clicks on it we just display an overlay component with the explanation of what the developer should do?
+d) having the "effects list dislplay" in the global scene component, then lets add different combinations of effects to the POI markers we have so we can test everything in a complete and detailed and compreensive way? example for example, we have currently in the config file: 
+C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\config.json
+we have 3 maine POIs: lamp, painting, camera, and then 5 neighbor POIs. so lets add different combinations of effects to each of them? example the main (paint, lamp, camera) we can add label + pulsing effect; then to the religious we can add sun?? then other beacon? then other effect? then some combination like pulsing + sun? or sun + beacon??? confirm the effects we have and the best combinations to test them. 
+e) and so in the specific POI Markers components in the editor tab, lets make sure we can select the effects we want in an easy way. example i think currently we already have some easy to use toggle buttons to select the effects we want... confirm it all works ok and well...
 
-Follow these guidelines exactly, no exceptions:
-C:\Users\franc\Desktop\TileStories\.clinerules
 
-Also check the real structure of folders and files that might be a bit different from the plans. For example POIAnchor.cs is in UI folder instead of POI folder. So check the structure and files of the folder: C:\Users\franc\Desktop\TileStories\TileStories\Assets 
 
+## **So confirm all this and the best options we have and the best plan to complete this**
+
+## **So**
 Write a full TODO list first, including test steps, before implementing
 anything (guidelines - 00-process).
 
 When implementing and testing things, you have available Unity MCP tool so you can use it (tell me right away if it is not available for some reason). 
 
-When it's time to verify: follow guidelines 40-testing exactly — check the Unity batch-mode compile log for "error CS" lines first, then run the
-EditMode/PlayMode tests and read the actual result XML, don't just report
-"it works." Implement the one PlayMode test the plan specifies.
+When it's time to verify: follow guidelines 40-testing exactly. 
 
 About tests that requires "prints" and vision, don't do those tests IF you are a language only model without the vision capability. 
 
@@ -62,7 +62,7 @@ assumes, stop and flag it to me rather than guessing and building on top of
 an assumption that might be wrong.
 
 When finished: update the plan file itself to check off what's done, per
-guidelines 60-finishing, and give me a short summary in chat — files touched,
+guidelines 60-finishing, and give me a detailed summary in chat — files touched,
 what changed, and the resulting behavior. Don't create a separate summary file.
 
 when calling tools pay attention to the correct usage and arguments. remember the guidelines:
@@ -78,6 +78,20 @@ when calling tools pay attention to the correct usage and arguments. remember th
 
 
 Be methodical, not fast.
+
+
+## **Do Big File block by block**
+
+And then, these are some big files, so we need to do this by blocks or sections or group of tasks described in the files. You cannot read everything and then do all the checks at once using only your context memory. We need to work by blocks. So I want you to write explicitely in the chat the range of lines in the files that we are reading and checking at each time. For example in chat you write:
+a) now reading lines from 0 to 180... 
+b) now checking the described tasks and confirm that the code is all well done according to the general guidelines and well tested... 
+c) now i am writing here in chat a summary of my findings
+c.1) if some correction or improvemnt or clean up should be done you should tell me right away in the chat the best solutions and why we should do them...
+d) now that this section is well concluded and vrified I will update the file to describe that "green status" and show that everything is well done and working well.
+
+And so we will do this protocol for each block of each one of those files. 
+
+
 
 
 ## **Debug Task**

@@ -166,10 +166,52 @@ namespace TileStories.Editor
                 else
                     poi.status_pct = EditorGUILayout.Slider("Status %", poi.status_pct, 0f, 100f);
 
+                bool wasUnknown = poi.status_unknown;
                 poi.status_unknown = EditorGUILayout.Toggle("Status unknown", poi.status_unknown);
+                if (!wasUnknown && poi.status_unknown)
+                    ApplyUnknownStatusDefaults(poi);
             }
 
             poi.rotate_contour = EditorGUILayout.Toggle("Rotate contour", poi.rotate_contour);
+        }
+
+        private void ApplyUnknownStatusDefaults(POIData poi)
+        {
+            if (poi == null)
+                return;
+
+            if (_config?.outline_levels != null)
+            {
+                for (int i = 0; i < _config.outline_levels.Count; i++)
+                {
+                    var level = _config.outline_levels[i];
+                    if (level == null || string.IsNullOrWhiteSpace(level.key))
+                        continue;
+
+                    if (level.key == "unknown")
+                    {
+                        poi.status_level_key = level.key;
+                        poi.status_pct = level.pct;
+                        break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(poi.badge_category) && _config?.badge_categories != null)
+            {
+                for (int i = 0; i < _config.badge_categories.Count; i++)
+                {
+                    var badge = _config.badge_categories[i];
+                    if (badge == null || string.IsNullOrWhiteSpace(badge.key))
+                        continue;
+
+                    if (badge.key == "unknown_damage")
+                    {
+                        poi.badge_category = badge.key;
+                        break;
+                    }
+                }
+            }
         }
 
         private void DrawPoiEffectsFields(POIData poi)

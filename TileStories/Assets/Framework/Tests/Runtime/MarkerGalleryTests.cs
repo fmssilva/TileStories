@@ -49,6 +49,13 @@ namespace TileStories.Tests
                 rotate_contour = entry.RotateContour,
                 has_captured_position = true,
             };
+
+            if (entry.HasStatus)
+            {
+                poiData.status_level_key = entry.StatusUnknown ? "unknown" : "partial_damage";
+                poiData.badge_category = entry.StatusUnknown ? "unknown_damage" : "partial_damage";
+            }
+
             var anchor = go.AddComponent<POIAnchor>();
             anchor.Initialise(poiData);
             var view = go.GetComponentInChildren<MarkerView>();
@@ -61,10 +68,16 @@ namespace TileStories.Tests
         {
             CategoryPalette.ClearOverrides();
             ConfigureDeclaredCategoriesForGallery();
+            ConfigureStatusAndBadgeTaxonomyForGallery();
         }
 
         [TearDown]
-        public void TearDown() => CategoryPalette.ClearOverrides();
+        public void TearDown()
+        {
+            CategoryPalette.ClearOverrides();
+            BadgeCategoryPalette.Clear();
+            StatusRamp.ResetToDefaults();
+        }
 
         private static void ConfigureDeclaredCategoriesForGallery()
         {
@@ -81,6 +94,25 @@ namespace TileStories.Tests
                 .ToList();
 
             CategoryPalette.Configure(declared);
+        }
+
+        private static void ConfigureStatusAndBadgeTaxonomyForGallery()
+        {
+            BadgeCategoryPalette.Configure(new List<BadgeCategoryEntry>
+            {
+                new BadgeCategoryEntry { key = "intact", icon_key = "IconIntact", color_hex = "#22C55E" },
+                new BadgeCategoryEntry { key = "partial_damage", icon_key = "IconPartialDamage", color_hex = "#F97316" },
+                new BadgeCategoryEntry { key = "destroyed", icon_key = "IconDestroyed", color_hex = "#991B1B" },
+                new BadgeCategoryEntry { key = "unknown_damage", icon_key = "IconUnknownDamage", color_hex = "#71717A" },
+            });
+
+            StatusRamp.Configure(new List<OutlineLevelEntry>
+            {
+                new OutlineLevelEntry { key = "intact", pct = 0f, line_style = "solid", color_hex = string.Empty, ring_width = 3.2f },
+                new OutlineLevelEntry { key = "partial_damage", pct = 20f, line_style = "dash_long", color_hex = string.Empty, ring_width = 2.8f },
+                new OutlineLevelEntry { key = "destroyed", pct = 100f, line_style = "dash_short", color_hex = string.Empty, ring_width = 2.0f },
+                new OutlineLevelEntry { key = "unknown", pct = 100f, line_style = "dotted", color_hex = "#71717A", ring_width = 1.8f },
+            });
         }
 
         [UnityTest]
@@ -117,7 +149,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator Ring_OnlyEnabledForKnownStatusAndNonBadgeStyle()
+        public IEnumerator Ring_EnabledForStatusAndNonBadgeStyle()
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             int failedCount = 0;
@@ -128,7 +160,7 @@ namespace TileStories.Tests
                 var (go, _) = Spawn(prefab, entry);
                 yield return null;
                 var ringImage = go.transform.Find("Ring")?.GetComponent<Image>();
-                bool expectRing = entry.HasStatus && !entry.StatusUnknown && entry.Style != MarkerStyle.Badge;
+                bool expectRing = entry.HasStatus && entry.Style != MarkerStyle.Badge;
                 bool actualEnabled = ringImage != null && ringImage.enabled;
                 
                 if (actualEnabled != expectRing)
@@ -194,11 +226,18 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator UnknownStatus_AlwaysRendersUnknownColorRegardlessOfStyle()
+        public IEnumerator UnknownStatus_UsesUnknownBadgeAndDottedOutlineWhenApplicable()
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             var unknownEntries = MarkerGalleryDefinitions.Entries.FindAll(e => e.StatusUnknown);
             if (unknownEntries.Count == 0) yield break; // not added until Phase 2 step 3-5
+
+            SpriteKeyLibrary iconLibrary = Resources.Load<SpriteKeyLibrary>("MarkerSymbols/living_room_IconLibrary");
+            Assert.IsNotNull(iconLibrary, "Expected wall icon library at MarkerSymbols/living_room_IconLibrary.");
+            Sprite expectedUnknownDamageIcon = iconLibrary.Get("IconUnknownDamage");
+            Assert.IsNotNull(expectedUnknownDamageIcon, "Expected IconUnknownDamage key in icon library.");
+            Sprite expectedDottedRing = iconLibrary.Get("dotted");
+            Assert.IsNotNull(expectedDottedRing, "Expected dotted line-style key in icon library.");
 
             foreach (var entry in unknownEntries)
             {
@@ -206,8 +245,25 @@ namespace TileStories.Tests
                 yield return null;
                 var badgeImage = go.transform.Find("Badge")?.GetComponent<Image>();
                 Assert.IsNotNull(badgeImage, $"{entry.Label}: expected a Badge Image for unknown status");
-                Assert.AreEqual(StatusRamp.UnknownColor, badgeImage.color,
-                    $"{entry.Label}: unknown-status badge must use StatusRamp.UnknownColor, not the ordinal ramp");
+                Color expectedUnknownTint;
+                ColorUtility.TryParseHtmlString("#71717A", out expectedUnknownTint);
+                Assert.AreEqual(expectedUnknownTint, badgeImage.color,
+                    $"{entry.Label}: unknown-status badge should use the configured unknown_damage color.");
+
+                var badgeIcon = go.transform.Find("Badge/Icon")?.GetComponent<Image>();
+                Assert.IsNotNull(badgeIcon, $"{entry.Label}: expected Badge/Icon image.");
+                Assert.AreEqual(expectedUnknownDamageIcon, badgeIcon.sprite,
+                    $"{entry.Label}: unknown-status badge should resolve IconUnknownDamage by default taxonomy.");
+
+                if (entry.Style != MarkerStyle.Badge)
+                {
+                    var ringImage = go.transform.Find("Ring")?.GetComponent<Image>();
+                    Assert.IsNotNull(ringImage, $"{entry.Label}: expected Ring image.");
+                    Assert.IsTrue(ringImage.enabled, $"{entry.Label}: unknown status should render a ring for non-badge styles.");
+                    Assert.AreEqual(expectedDottedRing, ringImage.sprite,
+                        $"{entry.Label}: unknown status ring should use dotted outline style.");
+                }
+
                 Object.Destroy(go);
             }
         }
@@ -270,8 +326,8 @@ namespace TileStories.Tests
             Assert.IsTrue(badgeIcon.enabled, "Badge icon should be enabled for Badge style known status.");
             Assert.IsNotNull(symbolIcon.sprite, "Symbol icon sprite should not be null.");
             Assert.IsNotNull(badgeIcon.sprite, "Badge icon sprite should not be null.");
-            Assert.AreEqual(symbolIcon.sprite.name, badgeIcon.sprite.name,
-                "Badge should reuse the same semantic icon as Symbol.");
+            Assert.AreEqual("IconPartialDamage", badgeIcon.sprite.name,
+                "Badge style with badge_category=partial_damage should render IconPartialDamage.");
 
             Assert.IsNotNull(symbolRect, "Symbol rect missing.");
             Assert.IsNotNull(badgeRect, "Badge rect missing.");

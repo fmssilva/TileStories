@@ -5,7 +5,7 @@
 // runtime reads whatever config.json provides, never these defaults.
 //
 // Sibling factory to DefaultCategoryStyles.cs and DefaultBadgeCategories.cs
-// (see _5.3_Default_Icons.md section 1). Shared pattern by naming convention,
+// (see _5.1.2_Default_Icons.md section 1). Shared pattern by naming convention,
 // not a generic abstraction, because outline rows use a different entry type.
 
 using System.Collections.Generic;

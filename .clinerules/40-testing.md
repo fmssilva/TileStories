@@ -3,7 +3,7 @@
 
 Two separate questions need separate answers here, and conflating them is what makes AR
 testing feel slower than it needs to be: **"how do I iterate on a feature quickly"** and
-**"how do I know a piece of logic is actually correct."** §6.1 answers the first, §6.2
+**"how do I know a piece of logic is actually correct."** §4.1 answers the first, §4.2
 the second. Do both — they're not alternatives to each other.
 
 ### 4.1 The Development Loop — Iterate Fast, Spend Real-Device Time Only Where It's Needed
@@ -44,7 +44,7 @@ on-device — that isolates "is this a device problem" from "is this a tracking 
 The one tier that can't be simulated or automated: actual localization against a
 physical wall, real camera feed quality, real tracking stability as a visitor moves.
 Requires a human physically present with the device. Use the human-in-the-loop
-protocol in §7 for this tier specifically — don't invoke it for anything Tier A, B, or
+protocol in §4.6 for this tier specifically — don't invoke it for anything Tier A, B, or
 C could have answered instead.
 
 ### 4.2 Automated Correctness Tests — What Actually Gets a Unit Test
@@ -66,19 +66,34 @@ coordinate resolution math, and any state machine governing multi-step user flow
 (progression through a sequence, epoch/state switching, achievement or trigger
 evaluation) all meet the bar. Something like a UI view's exact visual layout, or a
 one-off wall-specific data quirk, usually doesn't — that's better caught by the dev
-loop in §6.1 or an informal pass, not a maintained automated test.
+loop in §4.1 or an informal pass, not a maintained automated test.
 
-Run these with Unity Test Framework in batch mode — this needs no human interaction at
-all, the agent runs it and reads the results directly:
+**Preferred path — Unity MCP (use this first).** When `unity-mcp` (CoplayDev) is
+connected, use it exclusively for compile checks and test runs:
+
+1. `refresh_unity` (force compile) — confirms zero `error CS` before running tests.
+2. `run_tests` (EditMode) + `get_test_job` — asserts EditMode suite.
+3. `run_tests` (PlayMode) + `get_test_job` — asserts PlayMode suite.
+
+Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass count
+(e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
+failures does not.
+
+**Fallback — batch-mode (only when MCP is unavailable).** In this workspace,
+batch-mode Unity frequently exits with return code 1 and produces no test XML — this
+is a known, persistent issue. If a batch run exits 1 with no XML output, **stop
+immediately and switch to MCP**. Do not retry the batch command; do not treat
+absence of XML as a pass.
+
 ```
+# Only run these when MCP is explicitly not connected:
 Unity.exe -batchmode -nographics -projectPath "<path>" -quit -logFile compile_log.txt
 Unity.exe -batchmode -nographics -projectPath "<path>" -runTests ^
   -testPlatform EditMode -testResults editmode_results.xml -logFile editmode_log.txt
 ```
-Check the compile log for `error CS` lines first — a compile error makes every test
-result meaningless — then check the result XML for failures before considering a task
-done. Use PlayMode batch tests the same way for the rare case where scene/prefab
-wiring itself (not the logic behind it) needs verifying without a human.
+If the compile log shows zero `error CS` lines and the result XML exists and reports
+no failures, that counts. If either file is missing or contains failures, stop and
+investigate before proceeding.
 
 When a test fails, stop and think before changing anything: is the test wrong (it's
 asserting something that isn't actually the correct behavior), or is the logic wrong
@@ -95,10 +110,10 @@ not a project-specific quirk (see `AssetDatabase.Refresh`'s own scripting refere
 *"You might need to call this method if... you have made changes to assets on disk
 from an external application while the Editor is running"*).
 
-This matters more than it looks because of an asymmetry §6.2's batch-mode test
-workflow doesn't cover: launching `Unity.exe -batchmode` starts a **fresh** process,
-which naturally re-scans the project on that launch — so an agent's own batch-mode
-compile/test run can genuinely pass right after an asset edit. But if the person is
+This matters more than it looks because of an asymmetry the §4.2 test workflow
+doesn't always cover: launching `Unity.exe -batchmode` starts a **fresh** process,
+which naturally re-scans the project on that launch — so a batch-mode compile/test
+run can genuinely pass right after an asset edit. But if the person is
 also running a **separate, already-open** Unity Editor window for manual Play Mode
 testing (the normal case), that long-running session was never told anything
 changed, and will keep showing stale — sometimes actively broken — asset references
@@ -135,7 +150,7 @@ non-shipping scene (excluded from Build Settings) that exercises every rendering
 variant of the domain directly, fed fabricated data instead of the real pipeline.
 Built incrementally: the single simplest case first, confirmed correct, only then
 the next variant — never every variant built first and debugged together. Do not
-proceed to Phase B until every Phase A variant is confirmed via §6.5's tiers.
+proceed to Phase B until every Phase A variant is confirmed via §4.5's tiers.
 
 **Phase B — real pipeline integration.** Wire the now-proven-correct system into
 the real domain flow. If Phase B shows a problem Phase A didn't, that's a strong
@@ -147,20 +162,59 @@ rendering code itself.
 
 | System | Recipe |
 |---|---|
-| uGUI world-space (Markers and similar) | Grid gallery scene, positioned in 3D, no AR — see `_2_2_Marker_Design.md` §18 for a complete worked example (data-struct-driven entry list, shared harness, PlayMode assertion suite) |
+| uGUI world-space (Markers and similar) | Grid gallery scene, positioned in 3D, no AR. One data-struct entry list (group/label/variant fields) drives both the visual harness that spawns every row and the automated test suite that asserts on them — never author the gallery layout and the test list separately, or they will drift apart |
 | UI Toolkit screen-space (DetailCard, quiz, toasts, GuideCharacter, Navigation, Sharing) | Two-step: (1) static layout check in Unity's **UI Builder** — zero Play Mode, zero code, catches styling/layout bugs for free; (2) a small runtime harness scene with one `UIDocument`, fed fabricated content variants (long/short text, with/without media, each state) |
 | Non-visual integrations (AI API calls, future 3D/animation work) | A minimal sandbox scene or script — call the thing in isolation, log actual request/response/error states; same "isolate before integrating" principle, different mechanism |
 
 **Not every domain needs a gallery.** Build one only when there are genuine
 combinatorial variants worth grid-testing. A single-fixed-state element gets one
 manual Play Mode check — building gallery machinery for it is the over-engineering
-§3 already warns against.
+`20-code-quality.md` already warns against.
 
 **Shared conventions across all Phase A scenes**: live under `Assets/Dev/<Domain>Gallery/`;
 reuse the same backdrop photo asset across every uGUI gallery scene rather than
 re-supplying one per domain; use the same data-struct-driven entry-list pattern
 (one list of plain data, consumed by both the visual harness and the automated
 test suite, so they can never silently drift apart).
+
+### 4.4.1 Edit-Mode tooling parity (when applicable)
+
+*Applies only to domains that ship or touch an Editor-time authoring/preview
+tool (a custom `EditorWindow`, custom inspector, etc.) that instantiates or
+configures the domain's real runtime objects in the Scene view outside Play
+Mode.* Not every domain has one — skip this entirely for those that don't.
+
+This is not a third phase after A and B. It's a different *axis*: Phase A/B
+is about which pipeline drives a component (fabricated test data vs. the real
+production flow); this is about which *runtime context* renders it (Edit Mode
+vs. Play Mode). A domain can need this check regardless of where it is in
+Phase A/B, and it has its own failure class that neither phase's Play-Mode
+testing will ever catch, no matter how thorough that testing is:
+
+- `MonoBehaviour.Update()`/coroutines do not tick in Edit Mode. Anything
+  per-frame (animation, effects, timers) will not visibly run there — that's
+  expected, not a bug. Say so explicitly in the domain plan so a later agent
+  doesn't mistake it for one.
+- Editor-instantiated objects are often real, persistent scene GameObjects
+  ("hard copies"), not ephemeral runtime spawns — confirm this directly by
+  reading the tool's code rather than assuming either way. It changes what
+  "refresh" should mean: reconfigure the objects already sitting in the
+  hierarchy in place, not destroy-and-respawn them.
+- The single most common gap: a component's real configuration entry point
+  (e.g. `SomeView.Initialise(...)`) being correctly wired for the Play-Mode
+  path doesn't mean anyone remembered to call it from the Editor tool too.
+  Check this explicitly, by reading the tool's code — it's an easy, silent
+  gap. (This exact thing has happened before: an authoring tool positioned
+  objects correctly for a long time while never once calling the real
+  `Initialise`-equivalent method, so every Editor-mode preview silently
+  showed a prefab's raw default look, not the actual configured result.)
+
+Verify with the same evidence discipline as §4.5, adapted to this context:
+Tier 0 = does the tool's populate/refresh code path actually call the same
+real entry point the Play-Mode path uses (read the code, don't assume it
+does just because Play Mode works); Tier 1 = does the Scene view show the
+correct *static* composition immediately after a field changes, with zero
+Play Mode entries — not whether it animates, which isn't expected here.
 
 ### 4.5 Verification Tiers and Evidence Standards
 
@@ -265,9 +319,7 @@ conclusion without checking is the exact failure this section exists to prevent.
 
 ## 4.6. Human-in-the-Loop Protocol (Tier C and Tier D only)
 
-
-
-Tier A, Tier B, and §6.2's automated tests need no human interaction at all — run them
+Tier A, Tier B, and §4.2's automated tests need no human interaction at all — run them
 yourself and read the results. Only use this protocol for Tier C (real device build)
 and Tier D (real wall/AR field test), since those are the only tiers that genuinely
 require a human or physical access.

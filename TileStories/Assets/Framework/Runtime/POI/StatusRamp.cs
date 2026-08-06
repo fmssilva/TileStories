@@ -26,10 +26,17 @@ namespace TileStories
     // §4 principle 3 for why).
     public static class StatusRamp
     {
+        private const string UnknownStatusLevelKey = "unknown";
+
         // Deliberately a cool, neutral grey -- outside the warm gold/rust family used
         // for known status levels, so "unknown" reads as a genuinely different kind of
         // signal ("we don't know") rather than an extra point on the destruction scale.
         public static readonly Color UnknownColor = new Color(0.55f, 0.56f, 0.58f);
+
+        // Default representation for semantic unknown when no config-provided
+        // outline level is available. Keeps unknown distinct from known destruction.
+        public static readonly StatusLevel UnknownFallbackLevel =
+            new StatusLevel(100f, UnknownColor, "dotted", 1.8f);
 
         public static readonly StatusLevel[] Levels =
         {
@@ -42,6 +49,7 @@ namespace TileStories
         };
 
         private static StatusLevel[] _activeLevels = Levels;
+        private static Dictionary<string, StatusLevel> _activeLevelsByKey = BuildDefaultLevelKeyLookup();
 
         public static IReadOnlyList<StatusLevel> ActiveLevels => _activeLevels;
 
@@ -54,6 +62,7 @@ namespace TileStories
             }
 
             var configured = new List<StatusLevel>();
+            var configuredByKey = new Dictionary<string, StatusLevel>();
             int index = 0;
             foreach (var entry in entries)
             {
@@ -70,14 +79,35 @@ namespace TileStories
                 }
 
                 float ringWidth = entry.ring_width > 0f ? entry.ring_width : fallback.RingWidth;
-                configured.Add(new StatusLevel(entry.pct, color, lineStyle, ringWidth));
+                var level = new StatusLevel(entry.pct, color, lineStyle, ringWidth);
+                configured.Add(level);
+
+                if (!string.IsNullOrWhiteSpace(entry.key))
+                {
+                    configuredByKey[entry.key.Trim()] = level;
+                }
+
                 index++;
             }
 
             _activeLevels = configured.Count > 0 ? configured.ToArray() : Levels;
+            _activeLevelsByKey = configuredByKey.Count > 0 ? configuredByKey : BuildDefaultLevelKeyLookup();
         }
 
-        public static void ResetToDefaults() => _activeLevels = Levels;
+        public static void ResetToDefaults()
+        {
+            _activeLevels = Levels;
+            _activeLevelsByKey = BuildDefaultLevelKeyLookup();
+        }
+
+        public static bool TryResolveByKey(string key, out StatusLevel level)
+        {
+            level = default;
+            if (string.IsNullOrWhiteSpace(key) || _activeLevelsByKey == null)
+                return false;
+
+            return _activeLevelsByKey.TryGetValue(key.Trim(), out level);
+        }
 
         // Snaps an arbitrary 0-100 destruction percentage to the nearest authored
         // level. Callers MUST check POIData.has_status before calling this at all.
@@ -107,6 +137,19 @@ namespace TileStories
             float s2 = s * (1f - 0.72f * t);
             float v2 = Mathf.Lerp(v, 0.09f, t * 0.92f);
             return Color.HSVToRGB(h, Mathf.Max(s2, 0.04f), Mathf.Max(v2, 0.07f));
+        }
+
+        private static Dictionary<string, StatusLevel> BuildDefaultLevelKeyLookup()
+        {
+            // The stock ramp is percentage-based and does not encode semantic keys.
+            // We still expose well-known keys for safety fallbacks.
+            return new Dictionary<string, StatusLevel>
+            {
+                { "intact", Levels[0] },
+                { "partial_damage", Levels[1] },
+                { "destroyed", Levels[Levels.Length - 1] },
+                { UnknownStatusLevelKey, UnknownFallbackLevel },
+            };
         }
     }
 }

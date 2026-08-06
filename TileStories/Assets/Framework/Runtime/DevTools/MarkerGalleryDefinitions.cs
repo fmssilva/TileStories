@@ -165,9 +165,8 @@ namespace TileStories
         }
 
         // Step 8: Contour rotation -- independent of hero/effect tiers, applies to
-        // the status ring itself. OutlineGold and OutlineSameHue only (the ring is
-        // hidden for Badge style and for status_unknown, so rotation wouldn't be
-        // visible there).
+        // the status ring itself. OutlineGold and OutlineSameHue only (Badge style
+        // still has no ring, so rotation would not be visible there).
         private static void AddRotateContourRows(List<MarkerGalleryEntry> list)
         {
             const string group = "Contour Rotation";

@@ -3,7 +3,7 @@
 // EditMode test for the building damage levels seeded by the authoring tool
 // when a wall has no badge_categories. Pure data -- no scene, no window, no
 // Unity dependencies. Verifies the four damage levels, their icon keys, and
-// their hex colours match the spec in _5.3_Default_Icons.md.
+// their hex colours match the spec in _5.1.2_Default_Icons.md.
 
 using System.Collections.Generic;
 using System.Linq;

@@ -1,10 +1,33 @@
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace TileStories.Tests
 {
     public class StatusRampTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            CloseAuthoringWindows();
+            StatusRamp.ResetToDefaults();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            StatusRamp.ResetToDefaults();
+            CloseAuthoringWindows();
+        }
+
+        private static void CloseAuthoringWindows()
+        {
+            foreach (var window in Resources.FindObjectsOfTypeAll<TileStories.Editor.POIAuthoringToolWindow>())
+            {
+                window.Close();
+            }
+        }
+
         [Test]
         public void Resolve_ZeroPercent_ReturnsFirstLevel()
         {

@@ -11,6 +11,10 @@ why it exists.
 
 
 - Read the current project plan / phase plan document in full before writing anything.
+- **Read `10-structure.md` before creating or moving any file.** Confirm where
+  the new file belongs in the project hierarchy (Framework vs. Apps, Runtime vs. Editor,
+  which subfolder) and that no equivalent file already exists. The structure guide is
+  the single reference for what lives where — don't guess from folder names alone.
 - Read every existing file relevant to the task before touching it. Never assume you know
   what a file does from its name — open it and read it.
 - Search the project for existing types, classes, ScriptableObjects, or helper methods
@@ -24,7 +28,7 @@ why it exists.
 
 ---
 
-## 0.1. Think Before You Code
+## 2. Think Before You Code
 
 For every non-trivial feature or fix, stop and reason at two separate levels before
 opening a file to edit:
@@ -58,7 +62,7 @@ agreement, and rewrite it properly. Shortcuts that leave messy code in place bec
 ---
 
 
-## 0.3. General Operating Principles
+## 4. General Operating Principles
 
 - There is no time pressure that justifies messy or untested code. Be thorough, not fast.
 - Every task starts with a complete TODO list, including its own testing steps, written

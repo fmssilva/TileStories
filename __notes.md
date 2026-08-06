@@ -61,6 +61,13 @@ then the new marker configured in the config json and well flexible and editable
 
 		
 
+
+
+
+
+
+
+
 	hierarchy of levels of categories ... and so, in practice we can have it clear in the guide that in practice we have 3 kinds of categories of markers: we have the first category the dev wants (ex type of buildings - religious, military... ), other second category (example level of destruction, or price or whatever... ), and then the "relevance category" which determines the markers that are bigger and the ones that are smaller... 	
 
 		you said 2 levels, but maybe lets have more levels. lets have level 1 with big markers and labels, level 2 with still big markers but a bit smaller and without labels, level 3 with even smaller markers, and level 4 only little markers really 
@@ -70,6 +77,8 @@ then the new marker configured in the config json and well flexible and editable
 		and maybe even, we can, instead of hard code some possible number of levels, we can leave it flexible and allow for the dev to add as many levels as he wants, considering the marker is always the same and we just adjust the size, we can allow this flexibility easy yes? 
 
 		and maybe as default for sizes we can take the bigger size and then divide by 2 or other ratio to calculate the smaller levels markers... ?? and we can also allow in the editor panel to adjust this ratio...??? 
+
+
 
 
 

@@ -21,6 +21,10 @@ namespace TileStories
     // animates. This keeps the base marker cheap.
     public class MarkerView : MonoBehaviour
     {
+        private const string FallbackUnknownIconKey = "unknown";
+        private const string FallbackUnknownBadgeCategoryKey = "unknown_damage";
+        private const string FallbackUnknownStatusLevelKey = "unknown";
+
         private static readonly Color IconTint = new Color(0.949f, 0.925f, 0.827f);
         private static readonly Color HaloTint = new Color(0.949f, 0.925f, 0.827f, 0.2f);
 
@@ -162,7 +166,7 @@ namespace TileStories
              string resolvedIconKey = (poi.is_hero && !string.IsNullOrWhiteSpace(poi.hero_icon_key))
                  ? poi.hero_icon_key
                  : iconKey;
-             Sprite iconSprite = resolvedIconKey != null ? activeIconLibrary?.Get(resolvedIconKey) : null;
+             Sprite iconSprite = ResolveIconWithFallback(activeIconLibrary, resolvedIconKey);
 
              // OutlineSameHue drains the FILL toward black as status worsens; the
              // other two styles keep the fill as a pure, constant category colour.
@@ -196,15 +200,19 @@ namespace TileStories
                      symbol?.SetIcon(iconSprite, IconTint, iconOpacity);
              }
 
-             // Ring: only for OutlineGold and OutlineSameHue styles, and only for a known
-             // status value -- unknown suppresses the ring entirely, the "?" badge below
-             // is the sole indicator in that case, across all three styles.
+             // Ring: status-enabled non-badge visuals. Unknown can also render a
+             // ring by resolving status_level_key (or the semantic fallback key
+             // "unknown") from StatusRamp's configured levels.
              bool canRenderSameHue = _outlineMode != MarkerOutlineMode.SameHue || hasConfiguredCategory;
-             bool showRing = _enableStatusVisuals && knownStatus && _outlineMode != MarkerOutlineMode.None && canRenderSameHue;
+             bool canRenderRingByStyle = _enableStatusVisuals && poi.has_status && _outlineMode != MarkerOutlineMode.None && canRenderSameHue;
+             StatusLevel unknownRingLevel = StatusRamp.UnknownFallbackLevel;
+             bool hasUnknownRingLevel = isUnknown && TryResolveUnknownStatusLevel(poi, out unknownRingLevel);
+             bool showRing = canRenderRingByStyle && (knownStatus || hasUnknownRingLevel);
              if (showRing)
              {
-                 var level = StatusRamp.Resolve(poi.status_pct);
-                 if (_outlineMode == MarkerOutlineMode.SameHue)
+                 var level = knownStatus ? StatusRamp.Resolve(poi.status_pct) : unknownRingLevel;
+                 bool shadeWithCategoryHue = _outlineMode == MarkerOutlineMode.SameHue && knownStatus;
+                 if (shadeWithCategoryHue)
                  {
                      Color ringColor = ShadeRingTowardBlack(categoryColor, poi.status_pct);
                      ring?.Apply(level, ringColor);
@@ -234,19 +242,19 @@ namespace TileStories
              bool badgeHasBackground = _badgeShape != MarkerShape.None;
              if (_enableStatusVisuals && isUnknown)
              {
-                 // Same treatment regardless of markerStyle: a neutral-grey "?"
-                 // badge, deliberately outside the gold->rust status family
-                 // (StatusRamp.UnknownColor), so "we don't know" never reads as
-                 // an extra point on the destruction scale.
-                 Sprite questionIcon = activeIconLibrary?.Get("unknown");
+                 // Unknown status can be author-driven through badge_category. If the
+                 // selected key is missing, fallback to unknown_damage, then to the
+                 // general unknown icon key.
+                 var unknownBadgeDef = ResolveUnknownBadgeDefinition(poi);
+                 Sprite unknownIcon = ResolveIconWithFallback(activeIconLibrary, unknownBadgeDef.IconKey);
                  badge?.SetBackgroundVisible(badgeHasBackground);
-                 badge?.SetBackground(badgeShapeSprite, StatusRamp.UnknownColor);
-                 badge?.SetIcon(questionIcon, IconTint, 1f);
+                 badge?.SetBackground(badgeShapeSprite, unknownBadgeDef.Color);
+                 badge?.SetIcon(unknownIcon, IconTint, 1f);
                  badge?.SetVisible(true);
              }
              else if (_enableStatusVisuals && _useBadge && !string.IsNullOrWhiteSpace(poi.badge_category) && BadgeCategoryPalette.TryResolve(poi.badge_category, out var badgeDef))
              {
-                 Sprite badgeIcon = !string.IsNullOrWhiteSpace(badgeDef.IconKey) ? activeIconLibrary?.Get(badgeDef.IconKey) : null;
+                 Sprite badgeIcon = ResolveIconWithFallback(activeIconLibrary, badgeDef.IconKey);
                  badge?.SetBackgroundVisible(badgeHasBackground);
                  badge?.SetBackground(badgeShapeSprite, badgeDef.Color);
                  badge?.SetIcon(badgeIcon, IconTint, 1f);
@@ -277,6 +285,54 @@ namespace TileStories
              // Apply layout after all elements are configured
              ApplyLayout();
          }
+
+        private static Sprite ResolveIconWithFallback(SpriteKeyLibrary activeIconLibrary, string preferredKey)
+        {
+            if (activeIconLibrary == null)
+                return null;
+
+            if (!string.IsNullOrWhiteSpace(preferredKey))
+            {
+                Sprite preferred = activeIconLibrary.Get(preferredKey);
+                if (preferred != null)
+                    return preferred;
+            }
+
+            return activeIconLibrary.Get(FallbackUnknownIconKey);
+        }
+
+        private static BadgeCategoryPalette.BadgeDefinition ResolveUnknownBadgeDefinition(POIData poi)
+        {
+            if (poi != null &&
+                !string.IsNullOrWhiteSpace(poi.badge_category) &&
+                BadgeCategoryPalette.TryResolve(poi.badge_category, out var selectedUnknown))
+            {
+                return selectedUnknown;
+            }
+
+            if (BadgeCategoryPalette.TryResolve(FallbackUnknownBadgeCategoryKey, out var fallbackUnknown))
+                return fallbackUnknown;
+
+            return new BadgeCategoryPalette.BadgeDefinition(StatusRamp.UnknownColor, FallbackUnknownIconKey);
+        }
+
+        private static bool TryResolveUnknownStatusLevel(POIData poi, out StatusLevel level)
+        {
+            level = default;
+
+            if (poi != null &&
+                !string.IsNullOrWhiteSpace(poi.status_level_key) &&
+                StatusRamp.TryResolveByKey(poi.status_level_key, out level))
+            {
+                return true;
+            }
+
+            if (StatusRamp.TryResolveByKey(FallbackUnknownStatusLevelKey, out level))
+                return true;
+
+            level = StatusRamp.UnknownFallbackLevel;
+            return true;
+        }
 
         private void ApplyLayout()
         {

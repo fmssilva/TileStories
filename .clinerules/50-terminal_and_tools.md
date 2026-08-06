@@ -20,3 +20,14 @@
   - Do NOT repeat the exact same failing tool call with identical arguments.
   - If a tool continuously fails, pivot to an alternative tool or execute a shell command via `execute_command` (e.g., fallback file inspection).
 
+
+### Context Window Safeguards
+- **Context Threshold Monitoring:** Keep track of total tokens in the active context window.
+- **Compacting Trigger (250.000 tokens threshold):** If context consumption reaches **250.000 tokens**:
+  1. Stop initiating broad multi-tool operations.
+  2. Perform a complete, structured task summary in your next response:
+     - **Completed Subtasks:** Summarize key changes and outputs.
+     - **Current State:** Active files, ongoing modifications, and key findings.
+     - **Pending Subtasks:** Explicit step-by-step roadmap to complete the remaining goal.
+  3. Signal or request a context compaction/reset so work can resume without losing critical state.
+
