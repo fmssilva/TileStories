@@ -43,7 +43,7 @@ namespace TileStories
 
         // Optional, additive per-category colour/icon overrides. Any category not
         // listed here still falls through to CategoryPalette's deterministic hash
-        // colour and KnownIcons lookup (§7 Step 3) -- this list is a hand-picked
+        // colour and KnownIcons lookup (section 7 Step 3) -- this list is a hand-picked
         // exception list, not a replacement taxonomy.
         public List<CategoryStyleEntry> category_styles = new();
 
@@ -57,6 +57,77 @@ namespace TileStories
 
         public List<POIData> pois = new();
         public List<CalibrationAnchor> calibration_anchors = new();
+
+        // Optional wall-level effect parameter defaults. When present, these values
+        // are passed to each marker's effect components at spawn time, overriding
+        // the components' compiled-in [SerializeField] defaults. When absent/null,
+        // effects fall back to their compiled-in defaults -- fully backward compatible
+        // with configs authored before this field existed.
+        public EffectDefaults effect_defaults;
+    }
+
+    [Serializable]
+    public class EffectDefaults
+    {
+        // Gentle scale "breathing" -- cheapest "worth a look" cue.
+        public PulseDefaults pulse = new();
+
+        // Three concentric waves with center-first flow.
+        public SunDefaults sun = new();
+
+        // Single reusable accent ring/disc (RingPulse / SimpleSun / Beacon).
+        public AccentDefaults accent = new();
+
+        [Serializable]
+        public class PulseDefaults
+        {
+            [Tooltip("How much the marker grows/shrinks per cycle (0=none, 0.45=45% swing).")]
+            public float amplitude = 0.18f;
+            [Tooltip("Seconds per full pulse cycle.")]
+            public float period = 1.6f;
+        }
+
+        [Serializable]
+        public class SunDefaults
+        {
+            [Tooltip("Seconds per full sun animation cycle.")]
+            public float period = 1.8f;
+            [Tooltip("Delay (in cycle units) between inner/middle/outer wave layers.")]
+            public float stagger = 0.12f;
+            [Tooltip("Starting alpha for the innermost ring/disc.")]
+            public float innerAlpha = 0.55f;
+            [Tooltip("Starting alpha for the middle ring/disc.")]
+            public float middleAlpha = 0.36f;
+            [Tooltip("Starting alpha for the outermost ring/disc.")]
+            public float outerAlpha = 0.2f;
+            [Tooltip("Tint colour for the sun effect rings/discs (hex string, e.g. '#F2CA71').")]
+            public string tint_color_hex = "#F2CA71";
+        }
+
+        [Serializable]
+        public class AccentDefaults
+        {
+            [Tooltip("Diameter of the accent ring/disc as a fraction of the symbol size.")]
+            public float size = 0.24f;
+            [Tooltip("Starting alpha of the accent (always visible level).")]
+            public float baseAlpha = 0.28f;
+            [Tooltip("Outer radius scale for contour-style accents.")]
+            public float contourOuterScale = 0.90f;
+            [Tooltip("Inner radius scale for contour-style accents.")]
+            public float contourInnerScale = 0.80f;
+            [Tooltip("Radius scale for filled-circle-style accents.")]
+            public float filledRadiusScale = 0.84f;
+            [Tooltip("How much the accent grows per breathe cycle (0=none, 0.4=40% swing).")]
+            public float breatheAmplitude = 0.15f;
+            [Tooltip("Seconds per full breathe/beacon cycle.")]
+            public float period = 2.0f;
+            [Tooltip("Scale at cycle start for beacon motion.")]
+            public float beaconStartScale = 1.0f;
+            [Tooltip("Scale at cycle end for beacon motion.")]
+            public float beaconEndScale = 1.8f;
+            [Tooltip("Tint colour for the accent effect (hex string, e.g. '#F2CA71').")]
+            public string tint_color_hex = "#F2CA71";
+        }
     }
 
     [Serializable]

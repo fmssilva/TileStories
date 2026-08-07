@@ -1,47 +1,78 @@
 
 
-# **`Git commit !!!!`**
 
+# `Git Commit`
 
-# **`New taks - Give command in plan mode first`**
-
-Read the general guidelines first: 
+# `**Plan New Task**`
+ 
+## **Read the general guidelines first:** 
 C:\Users\franc\Desktop\TileStories\.clinerules
 including the code structure and organizing
 principles so you know where things actually live before reading anything else:
 C:\Users\franc\Desktop\TileStories\.clinerules\10-structure.md
 
-Now I want to focus on the "Effects of the Markers" and the Editor Tab. We already implemented these tasks in these files:
-C:\Users\franc\Desktop\TileStories\_2.2_Marker_Design.md
-C:\Users\franc\Desktop\TileStories\_2.2.1_Marker_Design_Archive.md
-C:\Users\franc\Desktop\TileStories\_5.1_Editor_Tab.md
-C:\Users\franc\Desktop\TileStories\_5.1.1_Editor_Tab_Archive.md
-C:\Users\franc\Desktop\TileStories\_5.1.2_Default_Icons.md
+## `**Now I want to do these tasks:**`
 
-So read what necessary so you get a clear vision of the whole structure we already have in place. 
-and open and read the actual current files in code referenceed in the files. Confirm the plan's description of those files are still accurate, and confirm what the files actually do... 
-
----
-## **And so now I want to:**
-focus on the effects. 
-and i think that currently we have already some options of effects like pulsing marker, and then also some sun effects or beacon effects... 
-so:
-a) start by confirming all the effects we have available.
-b) confirm how these effects are used:
-b.1) If possible and easy to implement in code, I don't want to have some hard coded combination of effects... instead, we can just have those effects defined and then we can "use them and combine them" as we want in some marker??? what is the easiest cleanest way to have some effects options, example effect A,B,C and then we choose which effects we want to use, example i want to use A in one marker, B+C in other marker, B+A in other marker, etc...??
-c) having these N effects... should we have some component in the global scene options component? currently we have, marker, badge and outline component where the developer basically can add some new symbols and options etc... can we have and/or should we have also some effects component where we show the available effects? and maybe be able to configure them if appropriate?? and maybe could the user create and add some new effects that he wants to create? is this a viable option? or in practice to create some new effect the developr should create it's own effect c# file or something like that and so we can't really have some easy to add new effects button or functinality? or maybe we should have only some "Add new effect" button there in editor tab, and if developer clicks on it we just display an overlay component with the explanation of what the developer should do?
-d) having the "effects list dislplay" in the global scene component, then lets add different combinations of effects to the POI markers we have so we can test everything in a complete and detailed and compreensive way? example for example, we have currently in the config file: 
-C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\config.json
-we have 3 maine POIs: lamp, painting, camera, and then 5 neighbor POIs. so lets add different combinations of effects to each of them? example the main (paint, lamp, camera) we can add label + pulsing effect; then to the religious we can add sun?? then other beacon? then other effect? then some combination like pulsing + sun? or sun + beacon??? confirm the effects we have and the best combinations to test them. 
-e) and so in the specific POI Markers components in the editor tab, lets make sure we can select the effects we want in an easy way. example i think currently we already have some easy to use toggle buttons to select the effects we want... confirm it all works ok and well...
+...
 
 
 
-## **So confirm all this and the best options we have and the best plan to complete this**
+## **So read all needed files**
+So read all needed files to have a clear vision of how all related things with these tasks currently work in the project. 
 
-## **So**
-Write a full TODO list first, including test steps, before implementing
-anything (guidelines - 00-process).
+Read all the associated files so you get a clear vision of the whole structure we already have in place. And open and read the actual files in code that might be important to implement this new set of tasks we want to do. Don't trust in the plan's description of those files - instead confirm the actual files to confirm what they do and how... 
+
+## **Do online research if needed**
+My end goal is to make a framework to be imported and used by developers in unity. So I want to make everything really easy to use, and robust, to avoid errors, and also I want to keep things familiar to unity developers so they don't really need to learn "my new framework" - they can just use it directly and easily like they do a normal project in unity. 
+
+So if you think it is usefull to confirm the best options for these tasks and this domain, you can and should confirm the best options by doing a online research in research papeprs, blogs, redit, unity documentation etc... 
+
+For that you have the browser tool that you can call: 
+The Tavily MCP server provides:
+- search, extract, map, crawl tools
+- Real-time web search capabilities through the tavily-search tool
+- Intelligent data extraction from web pages via the tavily-extract tool
+- Powerful web mapping tool that creates a structured map of website 
+- Web crawler that systematically explores websites
+
+## **Do a deep Analysis and give me a detailed plan**
+Do a deep review of the project structure we have and all the important files for this new set of tasks. Confirm how the code currently works, how it is organized, etc. And think a deep and complete plan for how to implement this new set of tasks I just described. Think the best options for, WHAT to implement? HOW to implement? WHERE to implement? (which files/folders do we need to change or add or refactor and reorganize...??) Remember the guidelines: 
+C:\Users\franc\Desktop\TileStories\.clinerules\00-process.md
+C:\Users\franc\Desktop\TileStories\.clinerules\10-structure.md
+C:\Users\franc\Desktop\TileStories\.clinerules\20-code-quality.md
+
+And so do a deep analysis and see the best options for each task and each WHAT/HOW/WHERE/WHY... and think the best options among them, and then come up with a complete and detailed plan of how to implement each task I told you. 
+
+And give me a deep plan here in the chat with all important details for me to read and review everything before we start implemeting things. So do a deep analysis and give me a very complete and detailed implementation plan to have this new features, and write here in the chat the whole and complete and detailed plan explaining all the WHAT/HOW/WHERE/WHY to implement each thing to correctly implement and test each task. 
+
+If some doubt should be resolved also before we start implementing, or if some options of implementations don't really have a clear winner, or if some tasks or suggestions I am asking to do, are really not that much good or aplicable and so we should reconsider that... so tell me those points and questions at the end so we can decide and refine the plan before moving on. 
+
+
+
+
+
+# `**Plan in New Chat**`
+
+And so we already did a plan and started implementing somethings. So confirm the file if everything looks ok or if we should update something: 
+C:\Users\franc\Desktop\TileStories\__cline_curr_plan.md
+
+
+
+
+
+# `**Implement the Task**`
+
+## **So yes lets follow this plan**
+So proceed to implement the plan. 
+I wrote the whole plan in the file:
+C:\Users\franc\Desktop\TileStories\__cline_curr_plan.md
+
+This way you can use the file as a complete TODO list for you to track progress and make sure you don't skip any step. 
+So follow the plan and execute it block by block / phase by phase. 
+Don't just have the whole TODO list in your memory and execute everything from your context memory. I want you to, in each phase, to come back to this planning document and to ground your TODO list again in this document. 
+This way we can execute the document tasks block by block, phase by phase in a clean and methodical way. 
+
+So write a full TODO list first, including test steps, before implementing anything (guidelines - 00-process).
 
 When implementing and testing things, you have available Unity MCP tool so you can use it (tell me right away if it is not available for some reason). 
 
@@ -50,20 +81,14 @@ When it's time to verify: follow guidelines 40-testing exactly.
 About tests that requires "prints" and vision, don't do those tests IF you are a language only model without the vision capability. 
 
 If you reach the device smoke-test step, stop and follow the
-Human-in-the-Loop protocol in guidelines — tell me exactly what
-physical action you need me to do, and wait. Do not skip this step or
-report it as done without me confirming it.
+Human-in-the-Loop protocol in guidelines — tell me exactly what physical action you need me to do, and wait. Do not skip this step or report it as done without me confirming it.
 
-Use PowerShell conventions from guidelines section 9 (semicolons, not &&;
-redirect output to a log file, don't pipe through findstr).
+Use PowerShell conventions from guidelines section 9 (semicolons, not &&; redirect output to a log file, don't pipe through findstr).
 
-If anything about the actual project state doesn't match what the plan
-assumes, stop and flag it to me rather than guessing and building on top of
+If anything about the actual project state doesn't match what the plan assumes, stop and flag it to me rather than guessing and building on top of
 an assumption that might be wrong.
 
-When finished: update the plan file itself to check off what's done, per
-guidelines 60-finishing, and give me a detailed summary in chat — files touched,
-what changed, and the resulting behavior. Don't create a separate summary file.
+When finished: update the plan file itself to check off what's done, and also update the project structure where needed (guidelines 60-finishing), and give me a detailed summary in chat — files touched, what changed, and the resulting behavior. Don't create a separate summary file.
 
 when calling tools pay attention to the correct usage and arguments. remember the guidelines:
 ### Tool Execution & Argument Validation
@@ -76,13 +101,18 @@ when calling tools pay attention to the correct usage and arguments. remember th
   - Do NOT repeat the exact same failing tool call with identical arguments.
   - If a tool continuously fails, pivot to an alternative tool or execute a shell command via `execute_command` (e.g., fallback file inspection).
 
-
+So yes lets proceed to implement this plan. 
 Be methodical, not fast.
 
 
-## **Do Big File block by block**
 
-And then, these are some big files, so we need to do this by blocks or sections or group of tasks described in the files. You cannot read everything and then do all the checks at once using only your context memory. We need to work by blocks. So I want you to write explicitely in the chat the range of lines in the files that we are reading and checking at each time. For example in chat you write:
+
+
+
+
+
+## **If BIG FILE**
+You cannot read everything and then do all the checks at once using only your context memory. We need to work by blocks. So I want you to write explicitely in the chat the range of lines in the files that we are reading and checking at each time. For example in chat you write:
 a) now reading lines from 0 to 180... 
 b) now checking the described tasks and confirm that the code is all well done according to the general guidelines and well tested... 
 c) now i am writing here in chat a summary of my findings

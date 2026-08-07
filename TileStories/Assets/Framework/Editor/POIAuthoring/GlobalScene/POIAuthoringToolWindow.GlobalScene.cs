@@ -43,6 +43,17 @@ namespace TileStories.Editor
                     DrawGlobalOutlineSection();
                 }
             }
+
+            EditorGUILayout.Space(4f);
+
+            _showGlobalEffects = EditorGUILayout.Foldout(_showGlobalEffects, "Effects", true);
+            if (_showGlobalEffects)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DrawGlobalEffectsSection();
+                }
+            }
         }
 
         private void DrawMarkerGlobalSection()
@@ -244,6 +255,87 @@ namespace TileStories.Editor
 
             for (int i = 0; i < levels.Count; i++)
                 levels[i].pct = (100f / (levels.Count - 1)) * i;
+        }
+
+        // Global effect defaults editor (section 19). Lets the wall developer tune
+        // the amplitude, period, and colour of each effect type from config.json
+        // rather than recompiling. Per-POI effect selection (which effects are
+        // active) is handled in the per-marker "Effects" foldout; this section
+        // only controls the shared parameters those active effects use.
+        private void DrawGlobalEffectsSection()
+        {
+            // Lazily ensure the nested EffectDefaults objects exist so the property
+            // drawers below never hit a null reference.
+            EnsureEffectDefaultsExist();
+
+            EditorGUILayout.HelpBox(
+                "These defaults control the look and timing of each effect type. " +
+                "Per-POI effect selection (which effects are active on a given marker) " +
+                "is set in each marker's 'Effects' foldout below. Changes here apply to " +
+                "all markers using the corresponding effect on this wall.",
+                MessageType.Info);
+
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.LabelField("Available Effects", EditorStyles.boldLabel);
+
+            EditorGUILayout.LabelField("Pulse - Gentle scale breathing", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("Sun Contours / Sun Circles - Three concentric waves, center-first flow", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField("Ring Pulse - Thin contour, breathing", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField("Simple Sun - Filled disc, breathing", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField("Beacon - Thin contour, grow+fade sawtooth", EditorStyles.miniLabel);
+
+            EditorGUILayout.Space(8f);
+            EditorGUILayout.LabelField("Pulse Defaults", EditorStyles.boldLabel);
+            var pulse = _config.effect_defaults.pulse;
+            pulse.amplitude = EditorGUILayout.Slider("Amplitude", pulse.amplitude, 0f, 0.45f);
+            pulse.period = EditorGUILayout.FloatField("Period (s)", pulse.period);
+
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.LabelField("Sun Defaults", EditorStyles.boldLabel);
+            var sun = _config.effect_defaults.sun;
+            sun.period = EditorGUILayout.FloatField("Period (s)", sun.period);
+            sun.stagger = EditorGUILayout.Slider("Stagger", sun.stagger, 0f, 0.25f);
+            sun.innerAlpha = EditorGUILayout.Slider("Inner alpha", sun.innerAlpha, 0f, 1f);
+            sun.middleAlpha = EditorGUILayout.Slider("Middle alpha", sun.middleAlpha, 0f, 1f);
+            sun.outerAlpha = EditorGUILayout.Slider("Outer alpha", sun.outerAlpha, 0f, 1f);
+            string sunTint = sun.tint_color_hex;
+            DrawColorSwatchAndHex(ref sunTint);
+            sun.tint_color_hex = sunTint;
+
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.LabelField("Accent Defaults", EditorStyles.boldLabel);
+            var accent = _config.effect_defaults.accent;
+            accent.size = EditorGUILayout.Slider("Size", accent.size, 0f, 1f);
+            accent.baseAlpha = EditorGUILayout.Slider("Base alpha", accent.baseAlpha, 0f, 1f);
+            accent.contourOuterScale = EditorGUILayout.Slider("Contour outer scale", accent.contourOuterScale, 0.72f, 0.98f);
+            accent.contourInnerScale = EditorGUILayout.Slider("Contour inner scale", accent.contourInnerScale, 0.5f, 0.9f);
+            accent.filledRadiusScale = EditorGUILayout.Slider("Filled radius scale", accent.filledRadiusScale, 0.85f, 1f);
+            accent.breatheAmplitude = EditorGUILayout.Slider("Breathe amplitude", accent.breatheAmplitude, 0f, 0.4f);
+            accent.period = EditorGUILayout.FloatField("Period (s)", accent.period);
+            accent.beaconStartScale = EditorGUILayout.FloatField("Beacon start scale", accent.beaconStartScale);
+            accent.beaconEndScale = EditorGUILayout.FloatField("Beacon end scale", accent.beaconEndScale);
+            string accentTint = accent.tint_color_hex;
+            DrawColorSwatchAndHex(ref accentTint);
+            accent.tint_color_hex = accentTint;
+
+            EditorGUILayout.Space(8f);
+            EditorGUILayout.HelpBox(
+                "To add a new marker effect: create a C# class inheriting MarkerEffect, " +
+                "add a flag to MarkerEffectFlags, update MarkerVisualsParser.ParseEffectFlags, " +
+                "wire it in MarkerView.ApplyHeroState, add a toggle in DrawPoiEffectsFields, " +
+                "and add a gallery entry in MarkerGalleryDefinitions.",
+                MessageType.Info);
+
+            _hasUnsavedChanges = true;
+        }
+
+        private void EnsureEffectDefaultsExist()
+        {
+            if (_config.effect_defaults == null)
+            {
+                _config.effect_defaults = new EffectDefaults();
+                _hasUnsavedChanges = true;
+            }
         }
     }
 }

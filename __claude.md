@@ -11,7 +11,7 @@ Read the full project work plan I want to implement: `_0_work_plan.md`. Read all
 
 ### **start planning**
 And now we're starting **`Domain X`**. 
-For this whole conversation, don't touch the project zip or write implementation code — we're only discussing and planning. Give me your read of what the work plan already says about this domain, and what's actually built vs. just planned, before we design anything.
+For this whole conversation don't write any implementation code — you can see the project zip to understand the current state or confirm some important implementation described in the guidelines `10-structure`, but don't execute any code implementantion - we're only discussing and planning. Give me your read of what the work plan already says about this domain, and what's actually built vs. just planned, before we design anything.
 
 Read fully. Planning only, no code. Tell me what's already said about this domain and what's actually built vs. planned.
 
@@ -50,17 +50,17 @@ Be good, not fast.
 
 # 3. **Finalize (the actual work order)**
 
-"We've decided on [X]. Now write the complete `_N.M_DomainX_Design.md`: 
-so confirm again if the guides are clear and with all important details for a for a separate low-context coding agent who has full project/Unity access but no memory of this conversation, to know exacly what to do, how, where and why... 
+So now write the complete implementation plan guide `_2.3_Marker_Hiearchy.md`: 
+Make sure to confirm that the guide is clear and with all important details for a separate coding agent who has full project/Unity access but no memory of this conversation and also a low-context memory, for it to know exacly WHAT to do, HOW, WHERE, and WHY... 
 
-and so maybe the files could have content like??: what/how/why/where for every decision, concrete code where it de-risks the work, a explicit 'read these real files first' list, a step-order that isolates any risky refactor from new feature work, a verification checklist, the bibliography, plus a mandatory ## Implementation Status section at the very top — a living tracker, not a one-time snapshot. Every entry gets one of: ✅ confirmed correct (verified how), ❌ confirmed missing/broken (what and why), or ⚠️ needs a non-code action. Tell the implementing agent explicitly: after finishing and testing each section of this doc, update this Status block immediately, in this same file, before moving to the next section — never a separate progress file, never batched to the end.
+and so maybe the file could have content like??: what/how/why/where for every decision, concrete code where it de-risks the work, a explicit 'read these real files first' list, a step-order that isolates any risky refactor from new feature work, a verification checklist, the bibliography, plus a mandatory ## Implementation Status section at the very top — a living tracker, not a one-time snapshot. Every entry gets one of: ✅ confirmed correct (verified how), ❌ confirmed missing/broken (what and why), or ⚠️ needs a non-code action. Tell the implementing agent explicitly: after finishing and testing each section of this doc, update this Status block immediately, in this same file, before moving to the next section — never a separate progress file, never batched to the end.
 
 If this domain has any visual/rendered component (UI, AR markers, effects, animations): the doc MUST specify a two-phase build order, and the implementing agent must not skip from Phase A to Phase B. Read the guidelines (40-testing.md)
 
 If this domain also has, or will get, an Editor-time authoring/preview tool
 that touches its real runtime objects outside Play Mode, the doc should also apply guidelines about Edit-Mode tooling parity as its own subsection, not fold it silently into Phase A or B tests... because it's a different axis (which runtime context renders the component). Read the guidelines (40-testing.md)
 
-For every phase/step in this doc's Phase A/B (and §6.4.1, where it applies) plan, specify exactly which verification tier applies and what the pass criterion is — never just 'test it': name the specific Assert calls (Tier 0), which of the four no-vision UI-quality checks apply (Tier 0.5 — occlusion via raycast, WCAG contrast, tap-target size, text truncation), and, only where Tier 0/0.5 genuinely can't reach, the exact itemized checklist a vision agent should run (Tier 1) — never an open 'confirm it looks right' prompt. State explicitly where human-in-the-loop (Tier 2) is required and where it isn't. Write the handoff summary format this domain's language agent must produce for the next agent: what to check, not what to conclude.
+For every phase/step in this doc's Phase A/B (and §4.4.1??, where it applies) plan, specify exactly which verification tier applies and what the pass criterion is — never just 'test it': name the specific Assert calls (Tier 0), which of the four no-vision UI-quality checks apply (Tier 0.5 — occlusion via raycast, WCAG contrast, tap-target size, text truncation), and, only where Tier 0/0.5 genuinely can't reach, the exact itemized checklist a vision agent should run (Tier 1) — never an open 'confirm it looks right' prompt. State explicitly where human-in-the-loop (Tier 2) is required and where it isn't. Write the handoff summary format this domain's language agent must produce for the next agent: what to check, not what to conclude.
 
 This file needs to contain all important details of what, how, where, why... but keep prose concise — code and structure carry the detail, not paragraphs. Lets write all important details in a concise manner. It is important for the files to be concise to avoiod ovreloading the models context window during reading or editing the file. 
 
@@ -68,8 +68,10 @@ Then re-check the whole doc against our conversation for anything missed before 
 
 Also, if this changes anything in the global work plan `_0_work_plan.md`, patch it directly and tell me what changed and why
 
+And also i send attached the current Editor guides we have... so check what we should also update there. When moving forward and implementing new things, can we use only the main `_5.1_Editor_Tab` or should i always ask for the agent to read the 3 documents: `_5.1_Editor_Tab`, `_5.1.1_Editor_Tab_Archive` and `_5.1.2_Default_Icons`? Ideally i think we should have the `_5.1_Editor_Tab` to be a more concise "here the full status of what we currently have" so a future agent can read it and understand everythign we have, instead of a complete "implementation guide with tests and so on" does it looks good?  
+
 If a lesson from this domain is a
-general process rule (not domain-specific), patch `_0_guidelines.md` instead and tell me what changed and why.
+general process rule (not domain-specific), patch the specific guidelines document in the zip `.clinerules` instead and tell me what changed and why.
 
 Be good, not fast.
 

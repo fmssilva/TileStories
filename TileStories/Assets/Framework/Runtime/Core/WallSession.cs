@@ -19,6 +19,7 @@ namespace TileStories
 
         private IWallTracker _tracker;
         private WallConfigData _config;
+        private EffectDefaults _effectDefaults;
         private readonly List<GameObject> _spawnedPOIs = new();
         private bool _didSpawn;
         private bool _configLoaded;
@@ -122,6 +123,9 @@ namespace TileStories
             _hasOutlineLevels = _config.outline_levels != null && _config.outline_levels.Count > 0;
             if (_hasOutlineLevels) StatusRamp.Configure(_config.outline_levels);
 
+            // Capture effect defaults once; passed to every marker on spawn.
+            _effectDefaults = _config.effect_defaults;
+
             Debug.Log($"[WallSession] Loaded '{_config.wall_name}' -- {_config.pois?.Count ?? 0} POIs.");
 
             // If tracking already has a lock by the time config finishes, spawn immediately
@@ -196,7 +200,8 @@ namespace TileStories
                         _hasShapeFromConfig,
                         _hasOutlineLevels,
                         _wallIconLibrary,
-                        _badgeShape);
+                        _badgeShape,
+                        _effectDefaults);
                     spawnedMarkerViews.Add(markerView);
                 }
 

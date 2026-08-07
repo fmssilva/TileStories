@@ -50,6 +50,21 @@ namespace TileStories
             EnsureCircles();
         }
 
+        // Apply per-wall effect defaults from EffectDefaults.
+        // Called by MarkerView when effect_defaults is present in the wall config;
+        // safe no-op when null (compiled-in [SerializeField] defaults are used instead).
+        public void ApplyDefaults(EffectDefaults.SunDefaults defaults)
+        {
+            if (defaults == null) return;
+            period = defaults.period;
+            stagger = defaults.stagger;
+            innerAlpha = defaults.innerAlpha;
+            middleAlpha = defaults.middleAlpha;
+            outerAlpha = defaults.outerAlpha;
+            if (!string.IsNullOrEmpty(defaults.tint_color_hex))
+                ColorUtility.TryParseHtmlString(defaults.tint_color_hex, out baseTint);
+        }
+
         public override void SetActive(bool active)
         {
             _active = active;

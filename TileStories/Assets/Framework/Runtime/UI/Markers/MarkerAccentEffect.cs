@@ -53,6 +53,25 @@ namespace TileStories
             EnsureImage();
         }
 
+        // Apply per-wall effect defaults from EffectDefaults.
+        // Called by MarkerView when effect_defaults is present in the wall config;
+        // safe no-op when null (compiled-in [SerializeField] defaults are used instead).
+        public void ApplyDefaults(EffectDefaults.AccentDefaults defaults)
+        {
+            if (defaults == null) return;
+            size = defaults.size;
+            baseAlpha = defaults.baseAlpha;
+            contourOuterScale = defaults.contourOuterScale;
+            contourInnerScale = defaults.contourInnerScale;
+            filledRadiusScale = defaults.filledRadiusScale;
+            breatheAmplitude = defaults.breatheAmplitude;
+            period = defaults.period;
+            beaconStartScale = defaults.beaconStartScale;
+            beaconEndScale = defaults.beaconEndScale;
+            if (!string.IsNullOrEmpty(defaults.tint_color_hex))
+                ColorUtility.TryParseHtmlString(defaults.tint_color_hex, out baseTint);
+        }
+
         public override void SetActive(bool active)
         {
             _active = active;

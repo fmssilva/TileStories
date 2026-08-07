@@ -5,11 +5,13 @@ using UnityEngine.SceneManagement;
 
 namespace TileStories.Editor
 {
-    // Warns if a scene is saved or Play Mode is entered while POIAuthoringRig still
-    // has objects in it - this almost always means someone forgot to run "Capture
-    // Positions to JSON" and then delete the rig, which causes duplicate-looking
-    // markers at runtime (the authoring-rig objects plus the properly spawned ones).
-    // See _1.2_final_review.md Section 2 for the full history of why this exists.
+    // Intercepts Play Mode entry and scene saving when POIAuthoringRig still
+    // has child objects. For Play Mode, delegates to
+    // POIAuthoringToolWindow.PromptBeforePlayOrBuild which shows an interactive
+    // dialog that can save positions, clear the rig, and either proceed or cancel.
+    // For scene saving, logs a non-blocking warning (the developer may be
+    // mid-placement and should not be blocked from saving).
+    // Build-time checks live in POIAuthoringRigBuildCheck.
     [InitializeOnLoad]
     public static class POIAuthoringRigSafetyCheck
     {
@@ -21,26 +23,26 @@ namespace TileStories.Editor
 
         private static void OnSceneSaving(Scene scene, string path)
         {
-            CheckForLeftoverRig("saving the scene");
-        }
-
-        private static void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state == PlayModeStateChange.ExitingEditMode)
-                CheckForLeftoverRig("entering Play Mode");
-        }
-
-        private static void CheckForLeftoverRig(string action)
-        {
             var rig = GameObject.Find("POIAuthoringRig");
             if (rig != null && rig.transform.childCount > 0)
             {
                 Debug.LogWarning(
                     $"[POIAuthoringRigSafetyCheck] POIAuthoringRig still has " +
-                    $"{rig.transform.childCount} object(s) while {action}. If you've " +
-                    "already run 'Capture Positions to JSON', delete these objects " +
-                    "now - leaving them in causes duplicate-looking markers at " +
-                    "runtime. If you haven't captured yet, ignore this warning.");
+                    $"{rig.transform.childCount} object(s) while saving the scene. " +
+                    "Clear the rig after capturing positions to JSON.");
+            }
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state != PlayModeStateChange.ExitingEditMode)
+                return;
+
+            // Delegate to the tool window's dialog. If the user cancels,
+            // abort the Play Mode transition.
+            if (!POIAuthoringToolWindow.PromptBeforePlayOrBuild(isBuild: false))
+            {
+                EditorApplication.isPlaying = false;
             }
         }
     }

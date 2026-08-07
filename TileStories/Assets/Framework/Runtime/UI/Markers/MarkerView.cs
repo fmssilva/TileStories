@@ -57,6 +57,7 @@ namespace TileStories
         private MarkerShape _shape;
         private MarkerShape _badgeShape = MarkerShape.Circle;
         private SpriteKeyLibrary _runtimeIconLibraryOverride;
+        private EffectDefaults _effectDefaults;
         private bool _applyCategoryVisuals = true;
         private bool _applyShapeVisuals = true;
         private bool _enableStatusVisuals = true;
@@ -128,7 +129,8 @@ namespace TileStories
             bool applyShapeVisuals,
             bool enableStatusVisuals,
             SpriteKeyLibrary iconLibraryOverride,
-            MarkerShape badgeShape = MarkerShape.Circle)
+            MarkerShape badgeShape = MarkerShape.Circle,
+            EffectDefaults effectDefaults = null)
         {
             EnsureMarkerWiring(allowCreate: true);
             _anchor = anchor;
@@ -137,6 +139,7 @@ namespace TileStories
             _shape = shape;
             _badgeShape = badgeShape;
             _runtimeIconLibraryOverride = iconLibraryOverride;
+            _effectDefaults = effectDefaults;
             _applyCategoryVisuals = applyCategoryVisuals;
             _applyShapeVisuals = applyShapeVisuals;
             _enableStatusVisuals = enableStatusVisuals;
@@ -147,144 +150,144 @@ namespace TileStories
             ApplyHeroState();
         }
 
-         private void ApplyVisuals()
-         {
-             if (_anchor?.Data == null) return;
+        private void ApplyVisuals()
+        {
+            if (_anchor?.Data == null) return;
 
-             var poi = _anchor.Data;
-             bool hasConfiguredCategory = CategoryPalette.TryResolveConfigured(poi.category, out var categoryColor, out var iconKey);
-             var activeIconLibrary = _runtimeIconLibraryOverride != null ? _runtimeIconLibraryOverride : iconLibrary;
+            var poi = _anchor.Data;
+            bool hasConfiguredCategory = CategoryPalette.TryResolveConfigured(poi.category, out var categoryColor, out var iconKey);
+            var activeIconLibrary = _runtimeIconLibraryOverride != null ? _runtimeIconLibraryOverride : iconLibrary;
 
-             // Determine status states
-             bool isUnknown = poi.has_status && poi.status_unknown;
-             bool knownStatus = poi.has_status && !isUnknown;
+            // Determine status states
+            bool isUnknown = poi.has_status && poi.status_unknown;
+            bool knownStatus = poi.has_status && !isUnknown;
 
-             // Symbol: always present, coloured by category, shaped by marker_shape.
-             // A hero POI may override just the icon via hero_icon_key (section 21) --
-             // category fill colour, ring, and badge are unaffected.
-             Sprite shapeSprite = shapeLibrary?.Get(ShapeKey(_shape));
-             string resolvedIconKey = (poi.is_hero && !string.IsNullOrWhiteSpace(poi.hero_icon_key))
-                 ? poi.hero_icon_key
-                 : iconKey;
-             Sprite iconSprite = ResolveIconWithFallback(activeIconLibrary, resolvedIconKey);
+            // Symbol: always present, coloured by category, shaped by marker_shape.
+            // A hero POI may override just the icon via hero_icon_key (section 21) --
+            // category fill colour, ring, and badge are unaffected.
+            Sprite shapeSprite = shapeLibrary?.Get(ShapeKey(_shape));
+            string resolvedIconKey = (poi.is_hero && !string.IsNullOrWhiteSpace(poi.hero_icon_key))
+                ? poi.hero_icon_key
+                : iconKey;
+            Sprite iconSprite = ResolveIconWithFallback(activeIconLibrary, resolvedIconKey);
 
-             // OutlineSameHue drains the FILL toward black as status worsens; the
-             // other two styles keep the fill as a pure, constant category colour.
-             // Skipped when status_unknown -- there's no known percentage to drain
-             // toward, so the fill stays the plain category colour and the universal
-             // "?" badge (ApplyStatus below) carries the whole signal instead.
-             Color fill = (_outlineMode == MarkerOutlineMode.SameHue && knownStatus)
-                 ? StatusRamp.ShadeTowardBlack(categoryColor, poi.status_pct)
-                 : categoryColor;
+            // OutlineSameHue drains the FILL toward black as status worsens; the
+            // other two styles keep the fill as a pure, constant category colour.
+            // Skipped when status_unknown -- there's no known percentage to drain
+            // toward, so the fill stays the plain category colour and the universal
+            // "?" badge (ApplyStatus below) carries the whole signal instead.
+            Color fill = (_outlineMode == MarkerOutlineMode.SameHue && knownStatus)
+                ? StatusRamp.ShadeTowardBlack(categoryColor, poi.status_pct)
+                : categoryColor;
 
-             float iconOpacity = (_outlineMode == MarkerOutlineMode.SameHue && knownStatus)
-                 ? Mathf.Lerp(1f, 0.28f, Mathf.Clamp01(poi.status_pct / 100f))
-                 : 1f;
+            float iconOpacity = (_outlineMode == MarkerOutlineMode.SameHue && knownStatus)
+                ? Mathf.Lerp(1f, 0.28f, Mathf.Clamp01(poi.status_pct / 100f))
+                : 1f;
 
-             // Background shape "none" (section 20.1): hide just the symbol's
-             // backdrop while keeping the icon readable. Otherwise draw the shape
-             // backdrop as usual.
-             if (_shape == MarkerShape.None)
-             {
-                 symbol?.SetBackgroundVisible(false);
-                 if (_applyCategoryVisuals && hasConfiguredCategory)
-                     symbol?.SetIcon(iconSprite, IconTint, iconOpacity);
-             }
-             else if ((_applyCategoryVisuals && hasConfiguredCategory) || _applyShapeVisuals)
-             {
-                 symbol?.SetBackgroundVisible(true);
-                 if (_applyShapeVisuals && hasConfiguredCategory && shapeSprite != null)
-                     symbol?.SetBackground(shapeSprite, fill);
+            // Background shape "none" (section 20.1): hide just the symbol's
+            // backdrop while keeping the icon readable. Otherwise draw the shape
+            // backdrop as usual.
+            if (_shape == MarkerShape.None)
+            {
+                symbol?.SetBackgroundVisible(false);
+                if (_applyCategoryVisuals && hasConfiguredCategory)
+                    symbol?.SetIcon(iconSprite, IconTint, iconOpacity);
+            }
+            else if ((_applyCategoryVisuals && hasConfiguredCategory) || _applyShapeVisuals)
+            {
+                symbol?.SetBackgroundVisible(true);
+                if (_applyShapeVisuals && hasConfiguredCategory && shapeSprite != null)
+                    symbol?.SetBackground(shapeSprite, fill);
 
-                 if (_applyCategoryVisuals && hasConfiguredCategory)
-                     symbol?.SetIcon(iconSprite, IconTint, iconOpacity);
-             }
+                if (_applyCategoryVisuals && hasConfiguredCategory)
+                    symbol?.SetIcon(iconSprite, IconTint, iconOpacity);
+            }
 
-             // Ring: status-enabled non-badge visuals. Unknown can also render a
-             // ring by resolving status_level_key (or the semantic fallback key
-             // "unknown") from StatusRamp's configured levels.
-             bool canRenderSameHue = _outlineMode != MarkerOutlineMode.SameHue || hasConfiguredCategory;
-             bool canRenderRingByStyle = _enableStatusVisuals && poi.has_status && _outlineMode != MarkerOutlineMode.None && canRenderSameHue;
-             StatusLevel unknownRingLevel = StatusRamp.UnknownFallbackLevel;
-             bool hasUnknownRingLevel = isUnknown && TryResolveUnknownStatusLevel(poi, out unknownRingLevel);
-             bool showRing = canRenderRingByStyle && (knownStatus || hasUnknownRingLevel);
-             if (showRing)
-             {
-                 var level = knownStatus ? StatusRamp.Resolve(poi.status_pct) : unknownRingLevel;
-                 bool shadeWithCategoryHue = _outlineMode == MarkerOutlineMode.SameHue && knownStatus;
-                 if (shadeWithCategoryHue)
-                 {
-                     Color ringColor = ShadeRingTowardBlack(categoryColor, poi.status_pct);
-                     ring?.Apply(level, ringColor);
-                 }
-                 else
-                 {
-                     ring?.Apply(level);
-                 }
-             }
-             else
-             {
-                 ring?.Hide();
-             }
+            // Ring: status-enabled non-badge visuals. Unknown can also render a
+            // ring by resolving status_level_key (or the semantic fallback key
+            // "unknown") from StatusRamp's configured levels.
+            bool canRenderSameHue = _outlineMode != MarkerOutlineMode.SameHue || hasConfiguredCategory;
+            bool canRenderRingByStyle = _enableStatusVisuals && poi.has_status && _outlineMode != MarkerOutlineMode.None && canRenderSameHue;
+            StatusLevel unknownRingLevel = StatusRamp.UnknownFallbackLevel;
+            bool hasUnknownRingLevel = isUnknown && TryResolveUnknownStatusLevel(poi, out unknownRingLevel);
+            bool showRing = canRenderRingByStyle && (knownStatus || hasUnknownRingLevel);
+            if (showRing)
+            {
+                var level = knownStatus ? StatusRamp.Resolve(poi.status_pct) : unknownRingLevel;
+                bool shadeWithCategoryHue = _outlineMode == MarkerOutlineMode.SameHue && knownStatus;
+                if (shadeWithCategoryHue)
+                {
+                    Color ringColor = ShadeRingTowardBlack(categoryColor, poi.status_pct);
+                    ring?.Apply(level, ringColor);
+                }
+                else
+                {
+                    ring?.Apply(level);
+                }
+            }
+            else
+            {
+                ring?.Hide();
+            }
 
-             // Rotate the status ring when the POI opts in (rotate_contour). Only
-             // meaningful when the ring is actually visible -- gated on showRing.
-             ring?.SetRotating(showRing && poi.rotate_contour);
+            // Rotate the status ring when the POI opts in (rotate_contour). Only
+            // meaningful when the ring is actually visible -- gated on showRing.
+            ring?.SetRotating(showRing && poi.rotate_contour);
 
-             // Push the active icon library into the ring view so custom line
-             // styles resolve from the same wall library (section 20.3).
-             ring?.SetLineStyleLibrary(activeIconLibrary);
+            // Push the active icon library into the ring view so custom line
+            // styles resolve from the same wall library (section 20.3).
+            ring?.SetLineStyleLibrary(activeIconLibrary);
 
-             // Badge: ordinary status badge for MarkerStyle.Badge, OR the universal "?"
-             // badge for status_unknown regardless of style. The badge's background
-             // shape comes from badge_shape (section 20.2), independent of marker_shape.
-             Sprite badgeShapeSprite = _badgeShape == MarkerShape.None ? null : shapeLibrary?.Get(ShapeKey(_badgeShape));
-             bool badgeHasBackground = _badgeShape != MarkerShape.None;
-             if (_enableStatusVisuals && isUnknown)
-             {
-                 // Unknown status can be author-driven through badge_category. If the
-                 // selected key is missing, fallback to unknown_damage, then to the
-                 // general unknown icon key.
-                 var unknownBadgeDef = ResolveUnknownBadgeDefinition(poi);
-                 Sprite unknownIcon = ResolveIconWithFallback(activeIconLibrary, unknownBadgeDef.IconKey);
-                 badge?.SetBackgroundVisible(badgeHasBackground);
-                 badge?.SetBackground(badgeShapeSprite, unknownBadgeDef.Color);
-                 badge?.SetIcon(unknownIcon, IconTint, 1f);
-                 badge?.SetVisible(true);
-             }
-             else if (_enableStatusVisuals && _useBadge && !string.IsNullOrWhiteSpace(poi.badge_category) && BadgeCategoryPalette.TryResolve(poi.badge_category, out var badgeDef))
-             {
-                 Sprite badgeIcon = ResolveIconWithFallback(activeIconLibrary, badgeDef.IconKey);
-                 badge?.SetBackgroundVisible(badgeHasBackground);
-                 badge?.SetBackground(badgeShapeSprite, badgeDef.Color);
-                 badge?.SetIcon(badgeIcon, IconTint, 1f);
-                 badge?.SetVisible(true);
-             }
-             else if (_enableStatusVisuals && _useBadge && knownStatus)
-             {
-                 StatusLevel level = StatusRamp.Resolve(poi.status_pct);
-                 badge?.SetBackgroundVisible(badgeHasBackground);
-                 badge?.SetBackground(badgeShapeSprite, level.RingColor);
-                 badge?.SetIcon(iconSprite, IconTint, 1f);
-                 badge?.SetVisible(true);
-             }
-             else
-             {
-                 badge?.SetVisible(false);
-             }
+            // Badge: ordinary status badge for MarkerStyle.Badge, OR the universal "?"
+            // badge for status_unknown regardless of style. The badge's background
+            // shape comes from badge_shape (section 20.2), independent of marker_shape.
+            Sprite badgeShapeSprite = _badgeShape == MarkerShape.None ? null : shapeLibrary?.Get(ShapeKey(_badgeShape));
+            bool badgeHasBackground = _badgeShape != MarkerShape.None;
+            if (_enableStatusVisuals && isUnknown)
+            {
+                // Unknown status can be author-driven through badge_category. If the
+                // selected key is missing, fallback to unknown_damage, then to the
+                // general unknown icon key.
+                var unknownBadgeDef = ResolveUnknownBadgeDefinition(poi);
+                Sprite unknownIcon = ResolveIconWithFallback(activeIconLibrary, unknownBadgeDef.IconKey);
+                badge?.SetBackgroundVisible(badgeHasBackground);
+                badge?.SetBackground(badgeShapeSprite, unknownBadgeDef.Color);
+                badge?.SetIcon(unknownIcon, IconTint, 1f);
+                badge?.SetVisible(true);
+            }
+            else if (_enableStatusVisuals && _useBadge && !string.IsNullOrWhiteSpace(poi.badge_category) && BadgeCategoryPalette.TryResolve(poi.badge_category, out var badgeDef))
+            {
+                Sprite badgeIcon = ResolveIconWithFallback(activeIconLibrary, badgeDef.IconKey);
+                badge?.SetBackgroundVisible(badgeHasBackground);
+                badge?.SetBackground(badgeShapeSprite, badgeDef.Color);
+                badge?.SetIcon(badgeIcon, IconTint, 1f);
+                badge?.SetVisible(true);
+            }
+            else if (_enableStatusVisuals && _useBadge && knownStatus)
+            {
+                StatusLevel level = StatusRamp.Resolve(poi.status_pct);
+                badge?.SetBackgroundVisible(badgeHasBackground);
+                badge?.SetBackground(badgeShapeSprite, level.RingColor);
+                badge?.SetIcon(iconSprite, IconTint, 1f);
+                badge?.SetVisible(true);
+            }
+            else
+            {
+                badge?.SetVisible(false);
+            }
 
-             // Label: set text, then apply layout
-             if (labelText != null)
-             {
-                 string name = poi.name;
-                 if (name.Length > 29)
-                     name = name.Substring(0, 26) + "...";
-                 labelText.text = name;
-             }
+            // Label: set text, then apply layout
+            if (labelText != null)
+            {
+                string name = poi.name;
+                if (name.Length > 29)
+                    name = name.Substring(0, 26) + "...";
+                labelText.text = name;
+            }
 
-             // Apply layout after all elements are configured
-             ApplyLayout();
-         }
+            // Apply layout after all elements are configured
+            ApplyLayout();
+        }
 
         private static Sprite ResolveIconWithFallback(SpriteKeyLibrary activeIconLibrary, string preferredKey)
         {
@@ -427,6 +430,10 @@ namespace TileStories
             else if (beaconActive)
                 accentEffect?.Configure(symbol.RectTransform, MarkerAccentEffect.AccentShape.Contour, MarkerAccentEffect.AccentMotion.Beacon);
 
+            // Apply defaults after Configure so the configured shape/motion is set,
+            // but defaults are applied before the first Update tick animates.
+            accentEffect?.ApplyDefaults(_effectDefaults?.accent);
+
             accentEffect?.SetActive(ringPulseActive || simpleSunActive || beaconActive);
         }
 
@@ -497,6 +504,7 @@ namespace TileStories
 
             if (pulseEffect == null && allowCreate)
                 pulseEffect = GetComponent<MarkerPulseEffect>() ?? gameObject.AddComponent<MarkerPulseEffect>();
+            pulseEffect?.ApplyDefaults(_effectDefaults?.pulse);
             pulseEffect?.Configure(symbol.RectTransform);
 
             var haloImage = EnsureHaloImage(allowCreate);
@@ -507,11 +515,12 @@ namespace TileStories
 
             if (sunEffect == null && allowCreate)
                 sunEffect = GetComponent<MarkerSunEffect>() ?? gameObject.AddComponent<MarkerSunEffect>();
+            sunEffect?.ApplyDefaults(_effectDefaults?.sun);
             sunEffect?.Configure(symbol.RectTransform);
 
             if (accentEffect == null && allowCreate)
                 accentEffect = GetComponent<MarkerAccentEffect>() ?? gameObject.AddComponent<MarkerAccentEffect>();
-
+            accentEffect?.ApplyDefaults(_effectDefaults?.accent);
         }
 
         private Image EnsureHaloImage(bool allowCreate)
@@ -547,6 +556,5 @@ namespace TileStories
             haloImage.enabled = false;
             return haloImage;
         }
-
     }
 }

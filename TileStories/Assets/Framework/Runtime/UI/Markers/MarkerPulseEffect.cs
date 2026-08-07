@@ -26,6 +26,16 @@ namespace TileStories
                 _baseScale = target.localScale;
         }
 
+        // Apply per-wall effect defaults from EffectDefaults.
+        // Called by MarkerView when effect_defaults is present in the wall config;
+        // safe no-op when null (compiled-in [SerializeField] defaults are used instead).
+        public void ApplyDefaults(EffectDefaults.PulseDefaults defaults)
+        {
+            if (defaults == null) return;
+            amplitude = defaults.amplitude;
+            period = defaults.period;
+        }
+
         public override void SetActive(bool active)
         {
             _active = active;

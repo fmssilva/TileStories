@@ -200,10 +200,17 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                  immediately fires OnWallLocalised(Pose.identity)
 │   │   │   │   │                                  with configurable offset; instantiates POIs
 │   │   │   │   │                                  relative to a flat in-scene reference plane;
-│   │   │   │   │                                  adds WASD+mouse-look keyboard control to the
+│   │   │   │   │                                  adds WASD + editor camera controls (right mouse,
+│   │   │   │   │                                  Alt + left mouse, or arrow keys for look) to the
 │   │   │   │   │                                  Main Camera for editor walk-through. Build first
-│   │   │   │   │                                  in Stage 1, before any other feature — this is
+│   │   │   │   │                                  in Stage 1, before any other feature -- this is
 │   │   │   │   │                                  Tier 1 of the three-tier testing pipeline.
+>>>>>>>
+
+│   │   │   │   ├── EditorCameraLook.cs          ← Static helper: pure yaw/pitch rotation math
+│   │   │   │   │                                  extracted from MockLocalizationProvider so the
+│   │   │   │   │                                  editor look-delta can be unit-tested without a
+│   │   │   │   │                                  scene or camera.
 │   │   │   │   ├── TrackingJitterSmoother.cs   ← [NOT YET BUILT] Planned: smooths Immersal pose
 │   │   │   │   │                                  updates via SmoothDamp + Slerp to prevent visual
 │   │   │   │   │                                  snap on re-localisation.
@@ -631,13 +638,15 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │                                                     TryResolveSceneReferences,
 │   │   │   │                                                     PopulateRig, CapturePositions,
 │   │   │   │                                                     SelectRigObjects, OnSceneGUI.
-│   │   │   ├── POIAuthoringRigSafetyCheck.cs ← Non-blocking warning: fires if scene is saved
-│   │   │   │                                      or Play Mode entered while POIAuthoringRig still
-│   │   │   │                                      has objects (normal mid-work iteration).
-│   │   │   └── POIAuthoringRigBuildCheck.cs ← Hard block (IPreprocessBuildWithReport): fails any
-│   │   │                                      build while POIAuthoringRig still has objects.
-│   │   │                                      Stricter than the check above — a build is
-│   │   │                                      visitor-facing, save/Play-mode aren't.
+│   │   │   ├── POIAuthoringRigSafetyCheck.cs ← [InitializeOnLoad] static class:
+│   │   │   │                                      non-blocking warning on scene save (dev may
+│   │   │   │                                      be mid-placement); interactive dialog on
+│   │   │   │                                      Play Mode entry (Save/Clear/Play, Continue,
+│   │   │   │                                      Cancel) via PromptBeforePlayOrBuild(false).
+│   │   │   └── POIAuthoringRigBuildCheck.cs ← IPreprocessBuildWithReport: delegates to the
+│   │   │                                      same interactive dialog (Save/Clear/Build or
+│   │   │                                      Cancel only -- no Continue without clearing);
+│   │   │                                      throws BuildFailedException only if Cancel.
 │   │   │   │
 │   │   │   ├── Baker/                 ← NOT YET BUILT. Planned: config.json -> baked ScriptableObject build step
 │   │   │   │   ├── WallConfigBaker.cs          ← Reads validated config.json → deserialises into
@@ -674,8 +683,8 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │                                          written after Stage 2 when block shapes are
 │   │   │                                          final, not speculatively before.
 │   │   │
-│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 59 tests total as of
-│   │       │                              2026-08-06. No TestFixtures/ folder — fixtures are inline.
+│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 66 tests total as of
+│   │       │                              2026-08-07. No TestFixtures/ folder — fixtures are inline.
 │   │       ├── Editor/                ← EditMode tests (run without domain reload, fast)
 │   │       │   ├── TileStories.Editor.Tests.asmdef ← Editor test assembly; references Runtime + Editor.
 │   │       │   ├── CategoryPaletteTests.cs        ← Tests category→colour/icon resolution, hash
@@ -686,6 +695,10 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │       │   │                                     produces correct 6-entry list.
 │   │       │   ├── DefaultOutlineLevelsTests.cs    ← Tests that default outline level seeding
 │   │       │   │                                     produces correct 4-entry list.
+│   │       │   ├── EditorCameraLookTests.cs        ← Tests that look-delta rotation is applied
+│   │       │   │                                     relative to the camera's current rotation
+│   │       │   │                                     (the bug where arrow keys snapped back
+│   │       │   │                                     to a zero-origin is caught here).
 │   │       │   ├── MarkerLayoutTests.cs            ← Tests pure-logic layout math (label offsets,
 │   │       │   │                                     ring sizing) independent of Unity lifecycle.
 │   │       │   ├── MarkerSymbolTexturePostprocessorTests.cs ← Tests that the AssetPostprocessor
