@@ -55,6 +55,10 @@ namespace TileStories
         // Empty/missing -> runtime falls back to StatusRamp.Levels defaults.
         public List<OutlineLevelEntry> outline_levels = new();
 
+        // Optional hierarchy levels editable per wall.
+        // Empty/missing -> runtime falls back to MarkerHierarchyResolver.Fallback.
+        public List<HierarchyLevelEntry> hierarchy_levels = new();
+
         public List<POIData> pois = new();
         public List<CalibrationAnchor> calibration_anchors = new();
 
@@ -195,6 +199,46 @@ namespace TileStories
     }
 
     [Serializable]
+    public class HierarchyLevelEntry
+    {
+        // Stable key, e.g. "level_1" -- written to POIData.hierarchy_level_key.
+        public string key;
+
+        // Developer-facing label, e.g. "1" or "Landmark".
+        public string label;
+
+        // Free text, developer's own notes (shown in the authoring tool details popup).
+        public string details;
+
+        // Symbol diameter, real-world centimetres. Converted to metres at the single
+        // call site in MarkerView (/100). One conversion, not per-POI.
+        public float size_cm;
+
+        // Persistent label visible at this level? false = no label.
+        public bool show_label;
+
+        // "none" | "sun_contours" | "sun_circles" -- parsed by MarkerHierarchyResolver.
+        public string sun_effect;
+
+        // "none" | "ring_pulse" | "simple_sun" | "beacon" -- parsed by MarkerHierarchyResolver.
+        public string accent_effect;
+
+        // Independent of both effect families above -- standalone pulse component.
+        public bool pulse;
+
+        // Meaningful only when wall outline mode != none. Controls ring rotation.
+        public bool rotate_contour;
+
+                // Seconds after spawn before fade/scale-in begins.
+        public float reveal_delay_s;
+
+        // Seconds for the fade/scale-in animation itself. 0 = instant pop-in
+        // (jarring -- use only as an explicit artistic choice). Default taper:
+        // 0.5s at Level 1 down to 0.25s at Level 5.
+        public float reveal_duration_s;
+    }
+
+    [Serializable]
     public class POIData : ISerializationCallbackReceiver
     {
         public string id;
@@ -224,32 +268,6 @@ namespace TileStories
         // the style-specific ring/fade/badge rendering for that one POI.
         public bool status_unknown;
 
-        // Marks this POI as a hierarchy "hero": persistent label and any enabled
-        // marker effects (pulse/glow) are only shown for hero POIs. Defaults to
-        // false when absent -- a safe default here (unlike status) because "not a
-        // hero" is an ordinary, unsurprising fallback, not a data-loss risk.
-        public bool is_hero;
-
-        // Optional icon key from IconLibrary.asset, overriding just the icon this
-        // hero POI's Symbol shows -- category fill colour, ring, and badge are
-        // unaffected. Only meaningful when is_hero is true; ignored otherwise, same
-        // pattern as effect_mode being independent of is_hero (section 19). A hero
-        // POI without this set falls through to its normal category-derived icon,
-        // same as any other marker.
-        public string hero_icon_key;
-
-        // Comma-separated effect tokens: "pulse", "sun_contours", "sun_circles",
-        // "ring_pulse", "simple_sun", "beacon". Parsed by
-        // MarkerVisualsParser.ParseEffectFlags (section 19.9). Independent of
-        // is_hero as of 2026-08-01 -- is_hero now controls only the persistent
-        // label. Empty/missing -> no effects, same safe default reasoning as is_hero.
-        public string effect_mode;
-
-        // Rotates the status ring (MarkerStyle.OutlineGold/OutlineSameHue only --
-        // silently does nothing otherwise, since there's no ring to rotate for
-        // Badge style or an unknown-status POI). Safe default false.
-        public bool rotate_contour;
-
         // Optional badge taxonomy key resolved from WallConfigData.badge_categories.
         // Used only when marker_use_badge is enabled.
         public string badge_category;
@@ -257,6 +275,19 @@ namespace TileStories
         // Optional discrete status level key selected in the editor.
         // Runtime still resolves with status_pct; this key is for authoring UX.
         public string status_level_key;
+
+        // Hierarchy level key: selects size/label/effects/reveal-delay from
+        // the wall's hierarchy_levels table (section 2.3). Empty/missing ->
+        // MarkerView uses MarkerHierarchyResolver.Fallback.
+        public string hierarchy_level_key;
+
+        // Hero icon replacement (section 2.3): opts into overriding just this
+        // POI's symbol icon via custom_symbol_key. Category fill colour, ring,
+        // and badge are unaffected. Only meaningful when true.
+        public bool has_custom_symbol;
+
+        // Icon key from IconLibrary.asset used when has_custom_symbol is true.
+        public string custom_symbol_key;
 
         public void OnBeforeSerialize()
         {

@@ -68,12 +68,9 @@ namespace TileStories.Editor
                         }
                     }
 
-                    _showPoiEffects = EditorGUILayout.Foldout(_showPoiEffects, "Effects", true);
-                    if (_showPoiEffects)
-                    {
-                        using (new EditorGUI.IndentLevelScope())
-                            DrawPoiEffectsFields(poi);
-                    }
+                    // Effects foldout removed: per-POI effect selection is now
+                    // driven entirely by the hierarchy level (see DrawPoiMarkerStyleFields).
+                    // Global effect *defaults* remain in the Global Scene Effects section.
                 }
 
                 EditorGUILayout.Space(6f);
@@ -115,22 +112,29 @@ namespace TileStories.Editor
         {
             poi.name = EditorGUILayout.TextField("Name", poi.name);
             poi.category = DrawCategoryDropdown("Category", poi.category);
-            poi.is_hero = EditorGUILayout.Toggle("Is hero", poi.is_hero);
 
-            // Hero icon override (section 13.6/21) -- shown only when is_hero is
-            // checked. Uses the same assign-to-wall-library-and-get-key flow as
-            // the category table. Setting it changes just this POI's icon; category
-            // colour, ring, and badge stay unchanged.
-            if (poi.is_hero)
+            // Hierarchy Level: selects this POI's size/label/effects/reveal-delay
+            // from the wall's hierarchy_levels table (section 2.3). Populated from
+            // _config.hierarchy_levels; writes poi.hierarchy_level_key.
+            poi.hierarchy_level_key = DrawHierarchyLevelDropdown("Hierarchy Level", poi.hierarchy_level_key);
+
+            // Custom symbol override (section 13.6/21) -- replaces the old "is_hero"
+            // concept. When checked, shows a Sprite field + preview. Uses the same
+            // assign-to-wall-library-and-get-key flow as the category table.
+            // Setting it changes just this POI's icon; category color, ring, and
+            // badge are unaffected.
+            poi.has_custom_symbol = EditorGUILayout.Toggle("Use Custom Symbol", poi.has_custom_symbol);
+
+            if (poi.has_custom_symbol)
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.LabelField("Hero symbol (optional)", GUILayout.MinWidth(130f));
-                    Sprite current = ResolveSpriteForKey(poi.hero_icon_key);
+                    EditorGUILayout.LabelField("Custom symbol (optional)", GUILayout.MinWidth(130f));
+                    Sprite current = ResolveSpriteForKey(poi.custom_symbol_key);
                     DrawSpritePreview(current);
                     Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false, GUILayout.MinWidth(140f));
                     if (chosen != current)
-                        poi.hero_icon_key = chosen != null ? AssignSpriteToLibraryAndGetKey(chosen, poi.id + "_hero") : null;
+                        poi.custom_symbol_key = chosen != null ? AssignSpriteToLibraryAndGetKey(chosen, poi.id + "_symbol") : null;
                 }
                 EditorGUILayout.LabelField("Overrides just this POI's icon (e.g. a small castle glyph). Category color, ring, and badge stay unchanged.", EditorStyles.wordWrappedMiniLabel);
             }
@@ -172,7 +176,8 @@ namespace TileStories.Editor
                     ApplyUnknownStatusDefaults(poi);
             }
 
-            poi.rotate_contour = EditorGUILayout.Toggle("Rotate contour", poi.rotate_contour);
+            // rotate_contour is now a hierarchy-level property, not a per-POI field.
+            // Configured in the Global Scene Hierarchy table (see DrawGlobalHierarchySection).
         }
 
         private void ApplyUnknownStatusDefaults(POIData poi)
@@ -214,19 +219,38 @@ namespace TileStories.Editor
             }
         }
 
-        private void DrawPoiEffectsFields(POIData poi)
+        // Hierarchy Level dropdown: maps level labels back to their stable keys.
+        // Follows the same pattern as DrawStatusLevelDropdown -- select by current
+        // key, display by label, write back the key. "(none)" option clears the
+        // key so the marker falls through to MarkerHierarchyResolver.Fallback.
+        private string DrawHierarchyLevelDropdown(string label, string currentKey)
         {
-            var current = MarkerVisualsParser.ParseEffectFlags(poi.effect_mode);
-            var tokens = new List<string>();
+            if (_config?.hierarchy_levels == null || _config.hierarchy_levels.Count == 0)
+            {
+                EditorGUILayout.LabelField(label, "No hierarchy levels defined (see Global Scene).", EditorStyles.miniLabel);
+                return currentKey;
+            }
 
-            if (EditorGUILayout.Toggle("Pulse", current.HasFlag(MarkerEffectFlags.Pulse))) tokens.Add("pulse");
-            if (EditorGUILayout.Toggle("Sun Contours", current.HasFlag(MarkerEffectFlags.SunContours))) tokens.Add("sun_contours");
-            if (EditorGUILayout.Toggle("Sun Circles", current.HasFlag(MarkerEffectFlags.SunCircles))) tokens.Add("sun_circles");
-            if (EditorGUILayout.Toggle("Ring Pulse", current.HasFlag(MarkerEffectFlags.RingPulse))) tokens.Add("ring_pulse");
-            if (EditorGUILayout.Toggle("Simple Sun", current.HasFlag(MarkerEffectFlags.SimpleSun))) tokens.Add("simple_sun");
-            if (EditorGUILayout.Toggle("Beacon", current.HasFlag(MarkerEffectFlags.Beacon))) tokens.Add("beacon");
+            var entries = _config.hierarchy_levels;
+            var labels = new string[entries.Count + 1];
+            labels[0] = "(none)";
 
-            poi.effect_mode = string.Join(",", tokens);
+            int selectedIndex = 0;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.key))
+                    continue;
+
+                string display = string.IsNullOrWhiteSpace(entry.label) ? entry.key : entry.label;
+                labels[i + 1] = display;
+
+                if (entry.key == currentKey)
+                    selectedIndex = i + 1;
+            }
+
+            int next = EditorGUILayout.Popup(label, selectedIndex, labels);
+            return next == 0 ? null : entries[next - 1].key;
         }
 
         private string DrawCategoryDropdown(string label, string current)

@@ -123,6 +123,8 @@ namespace TileStories
             _hasOutlineLevels = _config.outline_levels != null && _config.outline_levels.Count > 0;
             if (_hasOutlineLevels) StatusRamp.Configure(_config.outline_levels);
 
+            MarkerHierarchyResolver.Configure(_config.hierarchy_levels);
+
             // Capture effect defaults once; passed to every marker on spawn.
             _effectDefaults = _config.effect_defaults;
 
@@ -189,7 +191,7 @@ namespace TileStories
                 var markerView = go.GetComponentInChildren<MarkerView>();
                 if (markerView != null)
                 {
-                    var effects = MarkerVisualsParser.ParseEffectFlags(poi.effect_mode);
+                    var effects = MarkerEffectFlags.None;
                     markerView.Initialise(
                         anchor,
                         _markerOutlineMode,

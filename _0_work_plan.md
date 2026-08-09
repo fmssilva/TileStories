@@ -608,12 +608,14 @@ small set of high-consequence decisions that affect everything else.
    `_2_2_Marker_Design.md` §4 for the full reasoning) — dash rhythm (solid→dotted)
    is unchanged from this sketch. Stage 2.3 also turned "one fixed encoding" into
    3 dev-selectable `marker_style` options (gold ring / same-hue fade / corner
-   badge), of which this original sketch is one (`outline_gold`). The importance
-   hierarchy is **partially resolved**: hero POIs get a persistent label (Stage
-   2.3's `is_hero`), but "small colour-only dot for secondary" — an actual size/
-   shape reduction, not just hiding the label — is not yet built; likely belongs
-   with the LOD/marker-density system (§ below) rather than Stage 2.3's rendering
-   work, since it's a distance-driven concern, not a per-POI content concern. The
+   badge), of which this original sketch is one (`outline_gold`). **Superseded:**
+   this sketch's binary hero/secondary importance idea (and the `is_hero` field
+   that partially implemented it) was replaced by `_2.3_Marker_Hierarchy.md`'s
+   flexible, developer-defined level system — as many levels as a wall wants,
+   each with its own size/label/effects/reveal-delay, resolved via a per-POI
+   `hierarchy_level_key` rather than a boolean. That doc's own scope explicitly
+   excludes distance-driven size compensation and LOD/marker-count management —
+   both remain future work, not part of the hierarchy-level system itself. The
    Stage 0 decision: **verify
    the no-status case renders cleanly** — a POI with no `status` field (such as every
    POI on the mural wall) must show no border ring at all, not a broken or empty ring.
@@ -1344,20 +1346,29 @@ codebase's source.
    each position, naming the era concretely rather than leaving the visual state to
    speak for itself — for the Panorama: "Lisboa, ~1700" / "Terramoto, 1755" /
    "Reconstrução, 1760–1800" / "Lisboa Hoje."
-7. **Level-of-detail / marker-density management** — with concrete thresholds, not
-   just a principle: beyond roughly 5 metres from the wall, show only the
-   **5 highest-priority markers per visible zone** plus a numbered cluster indicator
-   for the rest (tapping it expands to individual markers); between 2–5 metres, widen
-   that to roughly **15 markers** with smaller labels; under 2 metres, show every
-   marker in the current viewport with full labels. These two numbers (5 and 15) are a
-   starting point to tune against the real marker density once a wall's hero-plus-scale
-   POIs are loaded, not a hard requirement — but pick concrete numbers now rather than
-   a vague "fewer markers far away," since "fewer" with no number is not testable.
-   **Never render all 100+ markers at once regardless of distance** — this
-   is the single most load-bearing legibility decision in the whole project, directly
-   tied to RQ2 and to the information-overload finding already established in the
-   thesis's own literature review (Wang et al., among others, on cognitive overload in
-   museum AR).
+7. **Level-of-detail, selection, clustering, density response &amp; AR zoom** —
+   deliberately not built alongside `_2.3_Marker_Hierarchy.md`; that doc implements
+   per-POI hierarchy levels (size, label, effects) but explicitly excludes
+   distance-based show/hide, and its current default renders every marker at every
+   distance. Full design now in `_2.4_LOD.md` — resolved the 5m/7m disagreement
+   noted below in favour of **7m** (matches the `LODController.cs` stub already
+   committed to code): beyond 7m show the **5 highest-priority markers** plus a
+   cluster indicator; 2–7m widen to **15**; under 2m show all. "Highest-priority"
+   reads directly off `hierarchy_level_key` (lower level number = higher priority),
+   reusing `_2.3`'s ordering rather than inventing a second ranking. `_2.4` also
+   specifies: a density-response layer beyond simple distance selection (four
+   modes — hide/cluster/continuous-shrink-and-fade/hybrid, hybrid default, named
+   after McMaster & Shea's 1992 map-generalization operators), hysteresis to
+   prevent flicker at band boundaries, frustum-culling as a cheap pre-filter, and
+   a global AR-camera zoom feature whose "effective distance" feeds directly into
+   this same selection logic. **Never render all 100+ markers at once regardless
+   of distance** — this is the single most load-bearing legibility decision in the
+   whole project, directly tied to RQ2 and to the information-overload finding
+   already established in the thesis's own literature review (Wang et al., among
+   others, on cognitive overload in museum AR). Marker/label **displacement**
+   (resolving individual overlaps, leader lines) and **search/filtering** are
+   separate, later domains — `_2.4` explicitly does not cover them; see its own
+   scope section.
 8. **Map block** — "See where it is today," linking each POI to its present-day
    location, building on Stage 1's map integration but now as a registered, reusable
    block rather than a one-off feature.
@@ -2532,9 +2543,24 @@ re-explaining them on every use.
   computing which POIs are currently in the camera's field of view from their already-
   known `wall_position` data and sending that small structured list (optionally
   bucketed into an eight-part screen-region grid) instead of an image (Stage 7).
-- **LOD (level-of-detail) / marker-density management** — distance-based rules that
-  reduce how many markers render at once as the viewer moves away from the wall (Stage
-  2, item 7) — the single most load-bearing legibility decision in the project (RQ2).
+- **LOD (level-of-detail) / selection / clustering** — distance- and density-based
+  rules that reduce how many markers render at once, and how prominently, as the
+  viewer moves and looks around a wall (Stage 2, item 7; full design
+  `_2.4_LOD.md`) — the single most load-bearing legibility decision in the
+  project (RQ2). Not to be confused with hierarchy level (below) — LOD controls
+  *how many* markers are visible and *how they're grouped*; hierarchy level
+  controls *how big* any one marker is, authored and static. Reads priority from
+  `hierarchy_level_key` rather than a second ranking. Includes a global AR camera
+  zoom feature whose effective distance feeds the same selection logic.
+- **Displacement** — a separate, later domain (not `_2.4_LOD.md`): resolving
+  individual marker/label overlaps by nudging them apart, optionally with a
+  leader line back to the true position. `MarkerOverlapResolver.cs` (built,
+  spawn-time-only) is that domain's starting point.
+- **Hierarchy level** — a wall-defined, developer-labelled tier (as many as the wall
+  needs) that determines one POI marker's size, label visibility, effect combination,
+  outline rotation, and reveal delay. Replaces the earlier binary `is_hero` concept.
+  See `_2.3_Marker_Hierarchy.md`. Distance-based size compensation and marker-count
+  LOD are explicitly separate, not-yet-built concerns.
 - **Circuit** — a named, ordered sequence of POIs forming a guided sub-experience (e.g.
   "Earthquake 1755: Before & After"). Named per Ashwell's taxonomy (§2): **Gauntlet**
   (strict linear order), **Hub-and-Spoke** (return to a central point between

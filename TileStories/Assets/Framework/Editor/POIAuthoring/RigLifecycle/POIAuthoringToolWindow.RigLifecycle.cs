@@ -13,7 +13,7 @@ namespace TileStories.Editor
             if (_config == null || _config.pois == null) return;
 
             Transform rig = GetExistingRig();
-            if (rig == null) return;
+                        if (rig == null) return;
 
             bool hasCategoryDefinitions = _config.category_styles != null && _config.category_styles.Count > 0;
             if (hasCategoryDefinitions) CategoryPalette.Configure(_config.category_styles);
@@ -23,6 +23,8 @@ namespace TileStories.Editor
 
             bool hasOutlineLevels = _config.outline_levels != null && _config.outline_levels.Count > 0;
             if (hasOutlineLevels) StatusRamp.Configure(_config.outline_levels);
+
+            MarkerHierarchyResolver.Configure(_config.hierarchy_levels);
 
             bool hasShapeFromConfig = MarkerVisualsParser.TryParseShape(_config.marker_shape, out var shape);
             MarkerVisualsParser.TryParseShape(_config.badge_shape, out var badgeShape);
@@ -61,7 +63,7 @@ namespace TileStories.Editor
                 anchor.Initialise(poi);
 
                 var markerView = child.GetComponentInChildren<MarkerView>();
-                var effects = MarkerVisualsParser.ParseEffectFlags(poi.effect_mode);
+                var effects = MarkerEffectFlags.None;
                 markerView?.Initialise(anchor, outlineMode, useBadge, shape, effects,
                     hasCategoryDefinitions,
                     hasShapeFromConfig,
@@ -242,7 +244,7 @@ namespace TileStories.Editor
                     Undo.DestroyObjectImmediate(child);
             }
 
-            var anchors = _config.calibration_anchors?.ToArray() ?? Array.Empty<CalibrationAnchor>();
+                        var anchors = _config.calibration_anchors?.ToArray() ?? Array.Empty<CalibrationAnchor>();
 
             bool hasCategoryDefinitions = _config.category_styles != null && _config.category_styles.Count > 0;
             if (hasCategoryDefinitions) CategoryPalette.Configure(_config.category_styles);
@@ -252,6 +254,8 @@ namespace TileStories.Editor
 
             bool hasOutlineLevels = _config.outline_levels != null && _config.outline_levels.Count > 0;
             if (hasOutlineLevels) StatusRamp.Configure(_config.outline_levels);
+
+            MarkerHierarchyResolver.Configure(_config.hierarchy_levels);
 
             bool hasShapeFromConfig = MarkerVisualsParser.TryParseShape(_config.marker_shape, out var shape);
             MarkerVisualsParser.TryParseShape(_config.badge_shape, out var badgeShape);
@@ -300,7 +304,7 @@ namespace TileStories.Editor
                 var markerView = instance.GetComponentInChildren<MarkerView>();
                 if (markerView != null)
                 {
-                    var effects = MarkerVisualsParser.ParseEffectFlags(poi.effect_mode);
+                    var effects = MarkerEffectFlags.None;
                     markerView.Initialise(anchor, outlineMode, useBadge, shape, effects,
                         hasCategoryDefinitions,
                         hasShapeFromConfig,

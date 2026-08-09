@@ -74,8 +74,7 @@ namespace TileStories
                 status_pct = entry.StatusPct,
                 has_status = entry.HasStatus,
                 status_unknown = entry.StatusUnknown,
-                is_hero = entry.IsHero,
-                rotate_contour = entry.RotateContour,
+                hierarchy_level_key = entry.HierarchyLevelKey,
                 has_captured_position = true,
             };
 
@@ -98,7 +97,7 @@ namespace TileStories
 
         private float ResolveColumnSpacing(string group)
         {
-            if (!string.IsNullOrEmpty(group) && group.StartsWith("Hero Effects"))
+            if (!string.IsNullOrEmpty(group) && group.StartsWith("Effect Composition"))
                 return heroColumnSpacing;
 
             return columnSpacing;
@@ -201,7 +200,7 @@ namespace TileStories
 
             Debug.Log(
                 $"[MarkerGalleryDiag][SUMMARY] {entry.Group} | {entry.Label} | style={entry.Style} shape={entry.Shape} " +
-                $"hasStatus={entry.HasStatus} unknown={entry.StatusUnknown} hero={entry.IsHero} " +
+                $"hasStatus={entry.HasStatus} unknown={entry.StatusUnknown} hier={entry.HierarchyLevelKey ?? "(none)"} " +
                 $"symbolOk={hasSymbolSprite} ringOk={ringActive == expectRing} badgeOk={badgeActive == expectBadge}");
         }
 

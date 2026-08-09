@@ -63,6 +63,8 @@ namespace TileStories
         private bool _enableStatusVisuals = true;
         private Vector2 _baseLabelSize;
         private bool _hasBaseLabelSize;
+        private HierarchyStyle _hierarchyStyle;
+        private bool _hasHierarchy;
         private bool _baseLabelWordWrapping;
         private TextOverflowModes _baseLabelOverflowMode;
         private TextAlignmentOptions _baseLabelAlignment;
@@ -147,7 +149,10 @@ namespace TileStories
             PoiId = anchor?.Data?.id ?? string.Empty;
 
             ApplyVisuals();
-            ApplyHeroState();
+            ApplyLabelState();
+
+            var reveal = GetComponent<MarkerRevealEffect>();
+                        reveal?.Play(_hierarchyStyle.RevealDelaySeconds, _hierarchyStyle.RevealDurationSeconds);
         }
 
         private void ApplyVisuals()
@@ -155,6 +160,19 @@ namespace TileStories
             if (_anchor?.Data == null) return;
 
             var poi = _anchor.Data;
+
+            // Resolve hierarchy level to get size/label/effects/reveal-delay.
+            // Falls back to MarkerHierarchyResolver.Fallback when no hierarchy_level_key
+            // is set or the resolver has not been configured -- matches the empty-state
+            // behavior of CategoryPalette/StatusRamp.
+            _hasHierarchy = MarkerHierarchyResolver.TryResolveByKey(poi.hierarchy_level_key, out _hierarchyStyle);
+            if (!_hasHierarchy) _hierarchyStyle = MarkerHierarchyResolver.Fallback;
+
+            // Apply hierarchy-driven size (cm -> metres conversion at this one call site).
+            // Cannot assign through ?. operator to RectTransform -- check null first.
+            if (symbol != null)
+                symbol.RectTransform.sizeDelta = Vector2.one * (_hierarchyStyle.SizeCm / 100f);
+
             bool hasConfiguredCategory = CategoryPalette.TryResolveConfigured(poi.category, out var categoryColor, out var iconKey);
             var activeIconLibrary = _runtimeIconLibraryOverride != null ? _runtimeIconLibraryOverride : iconLibrary;
 
@@ -163,11 +181,11 @@ namespace TileStories
             bool knownStatus = poi.has_status && !isUnknown;
 
             // Symbol: always present, coloured by category, shaped by marker_shape.
-            // A hero POI may override just the icon via hero_icon_key (section 21) --
-            // category fill colour, ring, and badge are unaffected.
+            // A POI may override just the icon via custom_symbol_key -- category fill
+            // colour, ring, and badge are unaffected.
             Sprite shapeSprite = shapeLibrary?.Get(ShapeKey(_shape));
-            string resolvedIconKey = (poi.is_hero && !string.IsNullOrWhiteSpace(poi.hero_icon_key))
-                ? poi.hero_icon_key
+            string resolvedIconKey = (poi.has_custom_symbol && !string.IsNullOrWhiteSpace(poi.custom_symbol_key))
+                ? poi.custom_symbol_key
                 : iconKey;
             Sprite iconSprite = ResolveIconWithFallback(activeIconLibrary, resolvedIconKey);
 
@@ -230,9 +248,10 @@ namespace TileStories
                 ring?.Hide();
             }
 
-            // Rotate the status ring when the POI opts in (rotate_contour). Only
-            // meaningful when the ring is actually visible -- gated on showRing.
-            ring?.SetRotating(showRing && poi.rotate_contour);
+            // Rotate the status ring when the hierarchy level opts in.
+            // Only meaningful when the ring is actually visible -- gated on showRing.
+            // rotate_contour is now a hierarchy-level property, not a per-POI field.
+            ring?.SetRotating(showRing && _hierarchyStyle.RotateContour);
 
             // Push the active icon library into the ring view so custom line
             // styles resolve from the same wall library (section 20.3).
@@ -347,11 +366,13 @@ namespace TileStories
                 layout);
         }
 
-        private void ApplyHeroState()
+        private void ApplyLabelState()
         {
             if (_anchor?.Data == null) return;
 
-            bool isHero = _anchor.Data.is_hero;
+            // Label visibility now comes from the hierarchy level, not is_hero.
+            // _hierarchyStyle is resolved once in ApplyVisuals and shared here.
+            bool showLabel = _hierarchyStyle.ShowLabel;
 
             if (labelText != null && !_hasBaseLabelSize)
             {
@@ -366,13 +387,14 @@ namespace TileStories
                 _hasBaseLabelSize = true;
             }
 
-            // Label: hero POIs show persistent label, others hide it
+            // Label: hierarchy level with showLabel=true shows a persistent label,
+            // others hide it. Otherwise identical label sizing/pivot logic as before.
             if (labelText != null)
             {
-                labelText.gameObject.SetActive(isHero);
+                labelText.gameObject.SetActive(showLabel);
 
                 var labelRect = (RectTransform)labelText.transform;
-                if (isHero)
+                if (showLabel)
                 {
                     labelText.enableWordWrapping = false;
                     labelText.overflowMode = TextOverflowModes.Overflow;
@@ -394,12 +416,15 @@ namespace TileStories
                 }
             }
 
-            // Effects are modular and independent of is_hero -- any POI can opt into
-            // any effect via effect_mode in config.json. is_hero only controls the
-            // persistent label above.
-            bool pulseActive = HasEffect(effectFlags, MarkerEffectFlags.Pulse);
-            bool sunContoursActive = HasEffect(effectFlags, MarkerEffectFlags.SunContours);
-            bool sunCirclesActive = HasEffect(effectFlags, MarkerEffectFlags.SunCircles);
+            // Effects are now driven by the hierarchy level when one is resolved.
+            // When no hierarchy level is set (hasHierarchy == false, e.g. the gallery
+            // testing arbitrary flag combinations), fall back to the effectFlags
+            // parameter as before. This is the one subtle fallback part of the refactor.
+            MarkerEffectFlags activeFlags = _hasHierarchy ? _hierarchyStyle.EffectFlags : effectFlags;
+
+            bool pulseActive = HasEffect(activeFlags, MarkerEffectFlags.Pulse);
+            bool sunContoursActive = HasEffect(activeFlags, MarkerEffectFlags.SunContours);
+            bool sunCirclesActive = HasEffect(activeFlags, MarkerEffectFlags.SunCircles);
             bool sunActive = sunContoursActive || sunCirclesActive;
 
             if (sunActive)
@@ -419,9 +444,9 @@ namespace TileStories
             // marker) -- priority order below (RingPulse > SimpleSun > Beacon) is
             // arbitrary but deterministic. Stack freely with Pulse and Sun*; don't
             // expect two of these three at once on the same marker (section 19.2).
-            bool ringPulseActive = HasEffect(effectFlags, MarkerEffectFlags.RingPulse);
-            bool simpleSunActive = HasEffect(effectFlags, MarkerEffectFlags.SimpleSun);
-            bool beaconActive = HasEffect(effectFlags, MarkerEffectFlags.Beacon);
+            bool ringPulseActive = HasEffect(activeFlags, MarkerEffectFlags.RingPulse);
+            bool simpleSunActive = HasEffect(activeFlags, MarkerEffectFlags.SimpleSun);
+            bool beaconActive = HasEffect(activeFlags, MarkerEffectFlags.Beacon);
 
             if (ringPulseActive)
                 accentEffect?.Configure(symbol.RectTransform, MarkerAccentEffect.AccentShape.Contour, MarkerAccentEffect.AccentMotion.Breathe);

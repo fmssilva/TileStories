@@ -54,6 +54,17 @@ namespace TileStories.Editor
                     DrawGlobalEffectsSection();
                 }
             }
+
+            EditorGUILayout.Space(4f);
+
+            _showGlobalHierarchy = EditorGUILayout.Foldout(_showGlobalHierarchy, "Hierarchy Levels", true);
+            if (_showGlobalHierarchy)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DrawGlobalHierarchySection();
+                }
+            }
         }
 
         private void DrawMarkerGlobalSection()
@@ -325,6 +336,116 @@ namespace TileStories.Editor
                 "wire it in MarkerView.ApplyHeroState, add a toggle in DrawPoiEffectsFields, " +
                 "and add a gallery entry in MarkerGalleryDefinitions.",
                 MessageType.Info);
+
+            _hasUnsavedChanges = true;
+        }
+
+        private void DrawGlobalHierarchySection()
+        {
+            if (_config.hierarchy_levels == null)
+                _config.hierarchy_levels = new List<HierarchyLevelEntry>();
+
+            EditorGUILayout.LabelField("Hierarchy Levels", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "Wall-configurable per-POI hierarchy levels. Each row drives one POI marker's " +
+                "size, label visibility, effect combination, outline rotation, reveal delay, " +
+                "and reveal duration. An empty table means all POIs fall through to the " +
+                "framework default (12cm, no label, no effects, 0.35s reveal).",
+                MessageType.Info);
+
+            int count = _config.hierarchy_levels.Count;
+            if (count == 0)
+            {
+                EditorGUILayout.HelpBox("No hierarchy levels defined. Add at least one row to enable hierarchy-based marker sizing.", MessageType.Info);
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                var entry = _config.hierarchy_levels[i] ?? new HierarchyLevelEntry();
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    // Column 1: Label (text field)
+                    entry.label = EditorGUILayout.TextField(entry.label, GUILayout.Width(100f));
+
+                    // Column 2: Details (...) - reuses EntryDetailsPopup exactly as-is
+                    if (GUILayout.Button("...", GUILayout.Width(26f), GUILayout.Height(22f)))
+                        PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(
+                            entry.label ?? "Hierarchy level", () => entry.details, v => entry.details = v));
+
+                    // Column 3: Size (cm) + info button
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        entry.size_cm = EditorGUILayout.FloatField(entry.size_cm, GUILayout.Width(50f));
+                        HelpInfoButton.Draw("Size (cm)",
+                            "Real-world printed size of the marker Symbol. This is not yet adjusted for viewing distance -- that's a separate future feature.");
+                    }
+
+                    // Column 4: Show Label (dropdown, explicit wording per §6)
+                    int showLabelIdx = entry.show_label ? 0 : 1;
+                    showLabelIdx = EditorGUILayout.Popup("Show Label", showLabelIdx, ShowLabelOptions, GUILayout.Width(130f));
+                    entry.show_label = showLabelIdx == 0;
+
+                    // Column 5: Sun Effect (dropdown, mutually exclusive)
+                    int sunIdx = Array.IndexOf(SunEffectOptions, entry.sun_effect);
+                    if (sunIdx < 0) sunIdx = 0;
+                    sunIdx = EditorGUILayout.Popup("Sun", sunIdx, SunEffectLabels, GUILayout.Width(110f));
+                    entry.sun_effect = SunEffectOptions[sunIdx];
+
+                    // Column 6: Accent Effect (dropdown, mutually exclusive)
+                    int accentIdx = Array.IndexOf(AccentEffectOptions, entry.accent_effect);
+                    if (accentIdx < 0) accentIdx = 0;
+                    accentIdx = EditorGUILayout.Popup("Accent", accentIdx, AccentEffectLabels, GUILayout.Width(120f));
+                    entry.accent_effect = AccentEffectOptions[accentIdx];
+
+                    // Column 7: Pulse (checkbox, standalone boolean)
+                    entry.pulse = EditorGUILayout.Toggle("Pulse", entry.pulse, GUILayout.Width(70f));
+
+                    // Column 8: Rotate Contour (checkbox, outline-gated)
+                    bool outlineEnabled = !string.Equals(_config.marker_outline_mode, "none", StringComparison.OrdinalIgnoreCase);
+                    if (outlineEnabled)
+                    {
+                        entry.rotate_contour = EditorGUILayout.Toggle("Rotate", entry.rotate_contour, GUILayout.Width(70f));
+                    }
+
+                                        // Column 9: Reveal Delay (s) + Duration (s) + info button
+                    entry.reveal_delay_s = EditorGUILayout.FloatField(entry.reveal_delay_s, GUILayout.Width(50f));
+                    entry.reveal_duration_s = EditorGUILayout.FloatField(entry.reveal_duration_s, GUILayout.Width(50f));
+                    HelpInfoButton.Draw("Reveal Delay vs Duration",
+                        "Delay: seconds after spawn before the fade/scale-in begins.\nDuration: how long the fade/scale-in animation itself takes. A longer delay staggers appearance; a longer duration makes each marker enter more slowly. Default: 0.5s L1 -> 0.25s L5.");
+
+                    // Column 10: Remove (trash button)
+                    if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
+                    {
+                        _config.hierarchy_levels.RemoveAt(i);
+                        i--;
+                        count--;
+                        _hasUnsavedChanges = true;
+                        continue;
+                    }
+                }
+
+                entry.key = string.IsNullOrWhiteSpace(entry.key) ? $"level_{i + 1}" : entry.key;
+                _config.hierarchy_levels[i] = entry;
+            }
+
+            EditorGUILayout.Space(4f);
+            if (GUILayout.Button("+ Add hierarchy level"))
+            {
+                                _config.hierarchy_levels.Add(new HierarchyLevelEntry
+                {
+                    key = "level_" + (_config.hierarchy_levels.Count + 1),
+                    label = (_config.hierarchy_levels.Count + 1).ToString(),
+                    size_cm = 12f,
+                    show_label = false,
+                    sun_effect = "none",
+                    accent_effect = "none",
+                    pulse = false,
+                    rotate_contour = false,
+                    reveal_delay_s = 0f,
+                    reveal_duration_s = 0.35f
+                });
+                _hasUnsavedChanges = true;
+            }
 
             _hasUnsavedChanges = true;
         }

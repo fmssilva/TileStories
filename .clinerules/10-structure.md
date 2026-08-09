@@ -1,4 +1,4 @@
-# 1. Project Structure & Organizing Principles
+﻿# 1. Project Structure & Organizing Principles
 
 **Read this file to get oriented on the project's structure**
 
@@ -240,6 +240,10 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                  sprite key, ring width). Defines the four built-in
 │   │   │   │   │                                  destruction levels (Intact/PartialDamage/Destroyed/
 │   │   │   │   │                                  Unknown). Consumed by MarkerRingView.
+│   │   │   │   ├── MarkerHierarchyResolver.cs  ← Resolves a wall's hierarchy_levels table into
+│   │   │   │   │                                  per-POI HierarchyStyle (size, label, effects,
+│   │   │   │   │                                  reveal delay/duration). Static Configure/
+│   │   │   │   │                                  TryResolveByKey/Fallback, same pattern as StatusRamp.
 │   │   │   │   ├── POIPool.cs                  ← [NOT YET BUILT] Object pool of recycled POIAnchor
 │   │   │   │   │                                  instances; acquire/return on show/hide.
 │   │   │   │   ├── LODController.cs            ← [NOT YET BUILT] Scene-wide distance-based LOD:
@@ -366,6 +370,11 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │   ├── MarkerView.cs           ← Root orchestrator, not just a label renderer as first
 │   │   │   │   │   │                              sketched — resolves category/hero-icon/status, wires
 │   │   │   │   │   │                              every sub-component below.
+│   │   │   │   │   ├── MarkerRevealEffect.cs       ← Handles the initial reveal animation: waits
+│   │   │   │   │   │                                  revealDelaySeconds, fades alpha 0->1 + scales
+│   │   │   │   │   │                                  0->1 over durationSeconds. Edit-Mode guard
+│   │   │   │   │   │                                  sets full alpha/scale immediately (coroutines
+│   │   │   │   │   │                                  don't tick in Edit Mode).
 │   │   │   │   │   ├── MarkerCircleGlyphView.cs← One reusable "coloured shape + centred icon" element,
 │   │   │   │   │   │                              used for both Symbol and Badge.
 │   │   │   │   │   ├── MarkerRingView.cs       ← Status ring/contour (colour + dash pattern + optional
@@ -617,9 +626,14 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │   ├── DefaultCategoryStyles.cs             ← Returns the six heritage category style
 │   │   │   │   │   │                                           defaults seeded into a new wall's config.
 │   │   │   │   │   │                                           Editor-only; runtime reads config.json.
-│   │   │   │   │   └── DefaultOutlineLevels.cs              ← Returns the four destruction-status
+│   │   │   │   │   ├── DefaultOutlineLevels.cs              ← Returns the four destruction-status
 │   │   │   │   │                                               outline level defaults seeded into a new
 │   │   │   │   │                                               wall's config. Editor-only.
+│   │   │   │   │   ├── HelpInfoPopup.cs                     ← Read-only popup for fixed, framework-authored
+│   │   │   │   │   │                                          help text (info button). Distinct from
+│   │   │   │   │   │                                          EntryDetailsPopup (which persists developer notes).
+│   │   │   │   │   └── EditorAlertPopup.cs                  ← Non-blocking alert popup rendering a scrollable
+│   │   │   │   │                                              list of validation warning items with fix guidance.
 │   │   │   │   ├── ConfigData/
 │   │   │   │   │   ├── POIAuthoringToolWindow.ConfigHistory.cs ← DrawConfigMutationScope,
 │   │   │   │   │   │                                              RecordConfigChange, undo/redo stack,

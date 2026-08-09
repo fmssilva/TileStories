@@ -1,5 +1,3 @@
-
-
 ## 2. Code Quality Rules
 
 - **MonoBehaviours stay thin.** A MonoBehaviour's job is to exist in the scene and
@@ -36,6 +34,16 @@
   or base class once the exact same logic is genuinely needed unchanged in more than one
   place — and even then, prefer the simplest possible shared shape. A wrong abstraction
   that has to be unwound later costs more than a little repetition did.
+- **Watch for this specific trap: two UI elements that look identical (a small button
+  opening a floating popup) but hold semantically different content.** A per-row,
+  developer-editable note saved into config data and a framework-authored, read-only
+  help explanation are not the same thing just because both render as an "(i)"-style
+  button and a popup — one is persisted data, the other is static documentation.
+  Sharing the exact component between them means one silently overwrites the other.
+  The right split: factor out the reusable *mechanism* (a generic "small button ->
+  floating popup" helper), but keep two distinct call sites/components for the two
+  different purposes. (Concrete instance: `EntryDetailsPopup` vs. the planned
+  `HelpInfoPopup` in `_2.3_Marker_Hierarchy.md` §7.)
 - **Use what Unity and the SDKs already give you.** Use Addressables for wall content
   packaging and loading, Unity Test Framework for tests, the Input System package for
   input, UI Toolkit for interface layout and styling, the Localization package if and

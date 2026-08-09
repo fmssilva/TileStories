@@ -45,8 +45,8 @@ namespace TileStories.Tests
             {
                 id = entry.Label, name = entry.Label, category = entry.Category,
                 status_pct = entry.StatusPct, has_status = entry.HasStatus,
-                status_unknown = entry.StatusUnknown, is_hero = entry.IsHero,
-                rotate_contour = entry.RotateContour,
+                status_unknown = entry.StatusUnknown,
+                hierarchy_level_key = entry.HierarchyLevelKey,
                 has_captured_position = true,
             };
 
@@ -289,7 +289,7 @@ namespace TileStories.Tests
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             var entry = new MarkerGalleryEntry("Adhoc", "same_hue_ring", "civic",
-                MarkerStyle.OutlineSameHue, MarkerShape.Circle, 80f, true, false, false);
+                MarkerStyle.OutlineSameHue, MarkerShape.Circle, 80f, true, false);
 
             var (go, _) = Spawn(prefab, entry);
             yield return null;
@@ -310,7 +310,7 @@ namespace TileStories.Tests
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             var entry = new MarkerGalleryEntry("Adhoc", "badge_icon", "civic",
-                MarkerStyle.Badge, MarkerShape.Circle, 60f, true, false, false);
+                MarkerStyle.Badge, MarkerShape.Circle, 60f, true, false);
 
             var (go, _) = Spawn(prefab, entry);
             yield return null;
@@ -342,7 +342,7 @@ namespace TileStories.Tests
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             var entry = new MarkerGalleryEntry("Adhoc", "contour_gap", "civic",
-                MarkerStyle.OutlineGold, MarkerShape.Circle, 40f, true, false, false);
+                MarkerStyle.OutlineGold, MarkerShape.Circle, 40f, true, false);
 
             var (go, _) = Spawn(prefab, entry);
             yield return null;
@@ -379,148 +379,6 @@ namespace TileStories.Tests
             }
         }
 
-        [Test]
-        public void HeroCoverage_IncludesAllRequestedModesAcrossAllHeroRows()
-        {
-            string[] heroGroups =
-            {
-                "Hero Effects - Simple",
-                "Hero Effects - OutlineGold",
-                "Hero Effects - OutlineSameHue",
-                "Hero Effects - Badge",
-            };
-
-            MarkerEffectFlags[] requiredModes =
-            {
-                MarkerEffectFlags.Pulse,
-                MarkerEffectFlags.SunCircles,
-                MarkerEffectFlags.SunContours,
-                MarkerEffectFlags.PulseSunCircles,
-                MarkerEffectFlags.PulseSunContours,
-            };
-
-            foreach (string group in heroGroups)
-            {
-                foreach (var mode in requiredModes)
-                {
-                    Assert.IsTrue(
-                        MarkerGalleryDefinitions.Entries.Exists(e => e.Group == group && e.EffectFlags == mode && e.IsHero),
-                        $"Missing hero coverage row for group '{group}' with mode '{mode}'.");
-                }
-            }
-        }
-
-        [UnityTest]
-        public IEnumerator HeroSunVariants_RenderCircularSprites_NotSquareQuads()
-        {
-            var prefab = MarkerGalleryTestFixture.LoadPrefab();
-            var heroSunEntries = MarkerGalleryDefinitions.Entries.FindAll(e =>
-                e.IsHero && HasEffect(e.EffectFlags, MarkerEffectFlags.SunCircles | MarkerEffectFlags.SunContours));
-
-            foreach (var entry in heroSunEntries)
-            {
-                var (go, _) = Spawn(prefab, entry);
-                yield return null;
-
-                var sunInner = go.transform.Find("SunInner")?.GetComponent<Image>();
-                var sunMiddle = go.transform.Find("SunMiddle")?.GetComponent<Image>();
-                var sunOuter = go.transform.Find("SunOuter")?.GetComponent<Image>();
-                var sunFx = go.GetComponent<MarkerSunEffect>();
-                Assert.IsNotNull(sunInner, $"{entry.Group}/{entry.Label}: SunInner missing.");
-                Assert.IsNotNull(sunMiddle, $"{entry.Group}/{entry.Label}: SunMiddle missing.");
-                Assert.IsNotNull(sunOuter, $"{entry.Group}/{entry.Label}: SunOuter missing.");
-                Assert.IsNotNull(sunFx, $"{entry.Group}/{entry.Label}: MarkerSunEffect missing.");
-
-                if (HasEffect(entry.EffectFlags, MarkerEffectFlags.SunContours))
-                    Assert.AreEqual(MarkerSunEffect.SunVisualStyle.Contours, sunFx.CurrentStyle,
-                        $"{entry.Group}/{entry.Label}: expected contour sun style.");
-                else if (HasEffect(entry.EffectFlags, MarkerEffectFlags.SunCircles))
-                    Assert.AreEqual(MarkerSunEffect.SunVisualStyle.FilledCircles, sunFx.CurrentStyle,
-                        $"{entry.Group}/{entry.Label}: expected filled-circles sun style.");
-
-                AssertSpriteLooksCircular(sunInner.sprite, $"{entry.Group}/{entry.Label} SunInner");
-                AssertSpriteLooksCircular(sunMiddle.sprite, $"{entry.Group}/{entry.Label} SunMiddle");
-                AssertSpriteLooksCircular(sunOuter.sprite, $"{entry.Group}/{entry.Label} SunOuter");
-
-                float centerAlpha = SampleCenterAlpha(sunInner.sprite);
-                if (HasEffect(entry.EffectFlags, MarkerEffectFlags.SunContours))
-                    Assert.Less(centerAlpha, 0.15f, $"{entry.Group}/{entry.Label}: contour sun should keep center transparent.");
-                if (HasEffect(entry.EffectFlags, MarkerEffectFlags.SunCircles))
-                    Assert.Greater(centerAlpha, 0.85f, $"{entry.Group}/{entry.Label}: filled sun should keep center opaque.");
-
-                Object.Destroy(go);
-            }
-        }
-
-        [UnityTest]
-        public IEnumerator Ring_RotatesOnlyWhenRotateContourIsSet()
-        {
-            var prefab = MarkerGalleryTestFixture.LoadPrefab();
-            string failures = "";
-            int failedCount = 0;
-
-            foreach (var entry in MarkerGalleryDefinitions.Entries)
-            {
-                if (entry.Group != "Contour Rotation") continue;
-
-                var (go, _) = Spawn(prefab, entry);
-                var ringTransform = go.transform.Find("Ring");
-                yield return null;
-                float angleBefore = ringTransform.localEulerAngles.z;
-                yield return null;
-                yield return null;
-                float angleAfter = ringTransform.localEulerAngles.z;
-
-                bool didRotate = Mathf.Abs(Mathf.DeltaAngle(angleBefore, angleAfter)) > 0.01f;
-                if (didRotate != entry.RotateContour)
-                {
-                    failures += $"\n{entry.Label}: rotated={didRotate} but expected={entry.RotateContour}";
-                    failedCount++;
-                }
-
-                Object.Destroy(go);
-            }
-
-            if (failedCount > 0)
-                Assert.Fail($"Contour rotation check failed for {failedCount} entries:{failures}");
-        }
-
-        [UnityTest]
-        public IEnumerator AccentEffects_ActiveRegardlessOfIsHero()
-        {
-            var prefab = MarkerGalleryTestFixture.LoadPrefab();
-            string failures = "";
-            int failedCount = 0;
-
-            foreach (var entry in MarkerGalleryDefinitions.Entries)
-            {
-                bool expectsAccent = entry.EffectFlags.HasFlag(MarkerEffectFlags.RingPulse)
-                    || entry.EffectFlags.HasFlag(MarkerEffectFlags.SimpleSun)
-                    || entry.EffectFlags.HasFlag(MarkerEffectFlags.Beacon);
-                if (!expectsAccent) continue;
-
-                var (go, _) = Spawn(prefab, entry);
-                yield return null;
-                var accentImage = go.transform.Find("Accent")?.GetComponent<Image>();
-
-                if (accentImage == null || !accentImage.enabled)
-                {
-                    failures += $"\n{entry.Label} (isHero={entry.IsHero}): Accent missing or not enabled";
-                    failedCount++;
-                }
-                else if (accentImage.sprite == null)
-                {
-                    failures += $"\n{entry.Label}: Accent sprite is null";
-                    failedCount++;
-                }
-
-                Object.Destroy(go);
-            }
-
-            if (failedCount > 0)
-                Assert.Fail($"Accent effect check failed for {failedCount} entries:{failures}");
-        }
-
         // Section 20.1: background shape None hides the symbol's backdrop while
         // keeping the icon visible. The Symbol's background Image should be
         // disabled, but the Icon child should still be enabled.
@@ -551,52 +409,13 @@ namespace TileStories.Tests
             Object.Destroy(go);
         }
 
-        // Section 21: hero_icon_key overrides the category-derived icon for hero
-        // POIs. We set hero_icon_key to "temple" (a known icon key) on a civic
-        // category hero POI and verify the Symbol's icon sprite is the temple
-        // sprite, not the civic "columns" sprite.
         [UnityTest]
-        public IEnumerator HeroIconKey_OverridesCategoryIcon()
-        {
-            var prefab = MarkerGalleryTestFixture.LoadPrefab();
-            var entry = MarkerGalleryDefinitions.Entries.Find(e => e.Group == "Hero Icon Override");
-            if (entry.Label == null) yield break;
-
-            // Spawn with the gallery entry, then manually set hero_icon_key on
-            // the POIData before Initialise -- the gallery Spawn helper doesn't
-            // set hero_icon_key, so we do it here to test the override path.
-            var go = Object.Instantiate(prefab);
-            var poiData = new POIData
-            {
-                id = entry.Label, name = entry.Label, category = entry.Category,
-                is_hero = entry.IsHero, has_captured_position = true,
-                hero_icon_key = "temple",
-            };
-            var anchor = go.AddComponent<POIAnchor>();
-            anchor.Initialise(poiData);
-            var view = go.GetComponentInChildren<MarkerView>();
-            view.Initialise(anchor, entry.Style, entry.Shape, entry.EffectFlags);
-            yield return null;
-
-            var iconImage = go.transform.Find("Symbol/Icon")?.GetComponent<Image>();
-            Assert.IsNotNull(iconImage, "Symbol/Icon Image missing for hero icon override test.");
-            Assert.IsNotNull(iconImage.sprite, "Hero icon sprite should not be null.");
-
-            // "temple" is the icon key for the "religious" category. "civic"
-            // resolves to "columns". If the override works, the sprite name
-            // should contain "temple", not "columns".
-            Assert.IsTrue(iconImage.sprite.name.ToLowerInvariant().Contains("temple"),
-                $"Hero icon override: expected temple icon, got '{iconImage.sprite.name}'.");
-
-            Object.Destroy(go);
-        }
-
-        [UnityTest]
-        public IEnumerator HeroSunContours_UsesCenterToOuterLightFalloff()
+        public IEnumerator SunContours_UsesCenterToOuterLightFalloff()
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             var entry = new MarkerGalleryEntry("Adhoc", "sun_falloff", "religious",
-                MarkerStyle.OutlineGold, MarkerShape.Circle, 0f, false, false, true, MarkerEffectFlags.SunContours);
+                MarkerStyle.OutlineGold, MarkerShape.Circle, 0f, false, false,
+                effectFlags: MarkerEffectFlags.SunContours);
 
             var (go, _) = Spawn(prefab, entry);
             yield return null;

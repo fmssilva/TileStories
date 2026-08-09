@@ -163,6 +163,7 @@ namespace TileStories.Editor
         [SerializeField] private bool _showGlobalMarker = true;
         [SerializeField] private bool _showGlobalBadge = true;
         [SerializeField] private bool _showGlobalOutline = true;
+        [SerializeField] private bool _showGlobalHierarchy = true;
         [SerializeField] private bool _showGlobalEffects = true;
         [SerializeField] private bool _showPoiPosition = true;
         [SerializeField] private bool _showPoiMarkerStyle = true;

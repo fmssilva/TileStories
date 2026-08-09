@@ -10,6 +10,11 @@ namespace TileStories.Editor
         private void SaveAllToJson()
         {
             CapturePositions(silentWhenRigMissing: true);
+
+            // Non-blocking validation: warn before saving if any POI's
+            // hierarchy_level_key does not resolve to a hierarchy_levels entry.
+            ValidateAndAlert("before save");
+
             SaveConfig();
         }
 
@@ -48,6 +53,7 @@ namespace TileStories.Editor
             if (_config.category_styles == null) _config.category_styles = new List<CategoryStyleEntry>();
             if (_config.badge_categories == null) _config.badge_categories = new List<BadgeCategoryEntry>();
             if (_config.outline_levels == null) _config.outline_levels = new List<OutlineLevelEntry>();
+            if (_config.hierarchy_levels == null) _config.hierarchy_levels = new List<HierarchyLevelEntry>();
             if (_config.pois == null) _config.pois = new List<POIData>();
 
             // Seed defaults only if genuinely empty (section 13.2) -- a brand-new wall,
@@ -66,6 +72,10 @@ namespace TileStories.Editor
             InitializeConfigHistory();
             _hasUnsavedChanges = false;
 
+            // Non-blocking validation: warn after load if any POI's
+            // hierarchy_level_key does not resolve to a hierarchy_levels entry.
+            ValidateAndAlert("after load");
+
             Debug.Log($"[POIAuthoring] Loaded {_config.pois.Count} POIs from {_configPath}");
             Repaint();
         }
@@ -82,7 +92,7 @@ namespace TileStories.Editor
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
-            File.Copy(_configPath, _streamingConfigPath, overwrite: true);
+                                    File.Copy(_configPath, _streamingConfigPath, overwrite: true);
             AssetDatabase.Refresh();
             Debug.Log($"[POIAuthoring] Copied to StreamingAssets: {_streamingConfigPath}");
         }

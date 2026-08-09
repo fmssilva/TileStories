@@ -21,7 +21,6 @@ namespace TileStories.Tests
                 category = "religious",
                 has_status = true,
                 status_pct = 85f,
-                is_hero = true
             });
 
             var symbol = CreateGlyphChild(root.transform, "Symbol");
@@ -63,7 +62,6 @@ namespace TileStories.Tests
                 category = "religious",
                 has_status = false,
                 status_unknown = false,
-                is_hero = true,
                 has_captured_position = true,
             });
 
@@ -99,7 +97,6 @@ namespace TileStories.Tests
                 category = "religious",
                 has_status = false,
                 status_unknown = false,
-                is_hero = true,
                 has_captured_position = true,
             });
 
@@ -123,7 +120,6 @@ namespace TileStories.Tests
                 category = "religious",
                 has_status = false,
                 status_unknown = false,
-                is_hero = true,
                 has_captured_position = true,
             });
 
@@ -140,78 +136,6 @@ namespace TileStories.Tests
 
             Object.Destroy(contourGo);
             Object.Destroy(circlesGo);
-        }
-
-        [UnityTest]
-        public IEnumerator Initialise_EffectsFollowFlag_LabelFollowsHero()
-        {
-            var prefab = MarkerGalleryTestFixture.LoadPrefab();
-
-            // Hero marker WITH pulse+sun effects: label visible, effects active.
-            // is_hero controls only the label; MarkerEffectFlags controls effects.
-            var heroGo = Object.Instantiate(prefab);
-            var heroAnchor = heroGo.AddComponent<POIAnchor>();
-            heroAnchor.Initialise(new POIData
-            {
-                id = "hero",
-                name = "Hero Label",
-                category = "religious",
-                has_status = false,
-                status_unknown = false,
-                is_hero = true,
-                has_captured_position = true,
-            });
-
-            var heroView = heroGo.GetComponentInChildren<MarkerView>();
-            heroView.Initialise(heroAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.PulseSunContours);
-            yield return null;
-
-            var heroLabel = heroGo.transform.Find("Label")?.gameObject;
-            Assert.IsNotNull(heroLabel, "Hero label object missing.");
-            Assert.IsTrue(heroLabel.activeSelf, "Hero label should be visible.");
-
-            var heroLabelRect = heroLabel.GetComponent<RectTransform>();
-            Assert.IsNotNull(heroLabelRect, "Hero label RectTransform missing.");
-            Assert.AreEqual(0.5f, heroLabelRect.anchorMin.x, 0.0001f, "Hero label anchorMin.x should be centered.");
-            Assert.AreEqual(0.5f, heroLabelRect.anchorMax.x, 0.0001f, "Hero label anchorMax.x should be centered.");
-            Assert.AreEqual(0.5f, heroLabelRect.pivot.x, 0.0001f, "Hero label pivot.x should be centered.");
-            Assert.AreEqual(0f, heroLabelRect.anchoredPosition.x, 0.0001f,
-                "Hero label should stay centered under the marker container.");
-
-            Assert.IsTrue(GetPrivateBool(heroGo.GetComponent<MarkerPulseEffect>(), "_active"),
-                "Pulse effect should be active when PulseSunContours flag is set.");
-            Assert.IsTrue(GetPrivateBool(heroGo.GetComponent<MarkerSunEffect>(), "_active"),
-                "Sun effect should be active when PulseSunContours flag is set.");
-
-            // Non-hero marker WITHOUT effects: label hidden, effects inactive.
-            // Proves effects follow the flag, not is_hero.
-            var normalGo = Object.Instantiate(prefab);
-            var normalAnchor = normalGo.AddComponent<POIAnchor>();
-            normalAnchor.Initialise(new POIData
-            {
-                id = "normal",
-                name = "Standard Label",
-                category = "religious",
-                has_status = false,
-                status_unknown = false,
-                is_hero = false,
-                has_captured_position = true,
-            });
-
-            var normalView = normalGo.GetComponentInChildren<MarkerView>();
-            normalView.Initialise(normalAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.None);
-            yield return null;
-
-            var normalLabel = normalGo.transform.Find("Label")?.gameObject;
-            Assert.IsNotNull(normalLabel, "Standard label object missing.");
-            Assert.IsFalse(normalLabel.activeSelf, "Standard marker label should be hidden.");
-            Assert.IsFalse(GetPrivateBool(normalGo.GetComponent<MarkerPulseEffect>(), "_active"),
-                "Pulse effect should be inactive when no effect flags are set.");
-            Assert.IsFalse(GetPrivateBool(normalGo.GetComponent<MarkerSunEffect>(), "_active"),
-                "Sun effect should be inactive when no effect flags are set.");
-
-            Object.Destroy(heroGo);
-            Object.Destroy(normalGo);
         }
 
         private static MarkerCircleGlyphView CreateGlyphChild(Transform parent, string name)
