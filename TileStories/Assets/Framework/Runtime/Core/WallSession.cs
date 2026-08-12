@@ -32,7 +32,15 @@ namespace TileStories
         private bool _hasShapeFromConfig;
         private bool _hasCategoryDefinitions;
         private bool _hasOutlineLevels;
-        private SpriteKeyLibrary _wallIconLibrary;
+                private SpriteKeyLibrary _wallIconLibrary;
+
+                // Exposed after SpawnPOIs completes so LODController and other systems
+        // can enumerate spawned markers without reaching into WallSession internals.
+        public IReadOnlyList<MarkerView> SpawnedMarkers { get; private set; } = System.Array.Empty<MarkerView>();
+
+                // Read-only access to the wall's LOD settings, used by LODController.
+        // May be null until config finishes loading in LoadConfigCoroutine.
+        public LodSettings LodSettings => _config?.lod_settings;
 
         private void Awake()
         {
@@ -227,6 +235,8 @@ namespace TileStories
 
             // Apply near-overlap detection after all markers are spawned
             MarkerOverlapResolver.ApplyOverlapOffsets(spawnedMarkerViews, Camera.main);
+
+            SpawnedMarkers = spawnedMarkerViews;
 
             stopwatch.Stop();
             Debug.Log($"[WallSession] Ready {_spawnedPOIs.Count}/{_config.pois.Count} POIs in {stopwatch.ElapsedMilliseconds}ms.");

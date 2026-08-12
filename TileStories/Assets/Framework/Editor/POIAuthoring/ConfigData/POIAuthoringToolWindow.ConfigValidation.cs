@@ -47,16 +47,44 @@ namespace TileStories.Editor
             return issues;
         }
 
+        // Soft sanity check on marker-symbol diameters: flags sizes outside the
+        // plausible range that usually indicate a unit typo (m vs cm). Warning
+        // only -- never blocks authoring, never auto-fixes.
+        internal static List<EditorAlertItem> ValidateHierarchyLevelSizeRange(
+            IEnumerable<global::TileStories.HierarchyLevelEntry> levels)
+        {
+            var issues = new List<EditorAlertItem>();
+            if (levels == null)
+                return issues;
+            foreach (var entry in levels)
+            {
+                if (entry == null)
+                    continue;
+                float s = entry.size_cm;
+                if (s < 0.5f || s > 100f)
+                {
+                    issues.Add(new EditorAlertItem(
+                        poiId: entry.key ?? "<unnamed>",
+                        value: $"{s:0.##} cm",
+                        problem: "size_cm is outside the plausible marker symbol range.",
+                        fixHint: "Real marker symbols are ~0.5cm..100cm. Check units (cm vs m)."));
+                }
+            }
+            return issues;
+        }
+
         // Runs validation after config load and shows a non-blocking alert if
-        // any hierarchy_level_key values are unresolvable.
+        // any hierarchy keys are unresolvable or level sizes look out of range.
         private void ValidateAndAlert(string context)
         {
-            var issues = ValidateHierarchyLevelKeys();
+            var issues = new List<EditorAlertItem>();
+            issues.AddRange(ValidateHierarchyLevelKeys());
+            issues.AddRange(ValidateHierarchyLevelSizeRange(_config?.hierarchy_levels));
             if (issues.Count == 0)
                 return;
 
-            string title = $"Unresolvable Hierarchy Keys ({context})";
-            string guidance = "POIs with unresolvable hierarchy_level_key values will use the framework default level (12cm, no label, no effects) at runtime. Fix the keys or add the missing level rows before building.";
+            string title = $"Hierarchy config issues ({context})";
+            string guidance = "Some hierarchy configuration needs attention before building: fix or add the missing level rows for unresolvable keys, and correct any level sizes outside 0.5-100cm (likely a cm/m unit typo). Levels with issues fall back to framework defaults at runtime until fixed.";
             PopupWindow.Show(new Rect(100, 100, 100, 100), new EditorAlertPopup(title, issues, guidance));
         }
     }

@@ -169,5 +169,83 @@ namespace TileStories.Tests
                         Assert.AreEqual(0f, MarkerHierarchyResolver.Fallback.RevealDelaySeconds);
             Assert.AreEqual(0.35f, MarkerHierarchyResolver.Fallback.RevealDurationSeconds);
         }
+
+        // priority is a pure sort key -- authored >= 1 wins over the 1-based row position.
+        [Test]
+        public void GetLevelPriority_ExplicitPriority_WinsOverPositional()
+        {
+            var entries = new List<HierarchyLevelEntry>
+            {
+                new HierarchyLevelEntry { key = "level_1", priority = 5 },
+                new HierarchyLevelEntry { key = "level_2", priority = 1 },
+                new HierarchyLevelEntry { key = "level_3", priority = 3 },
+            };
+            MarkerHierarchyResolver.Configure(entries);
+
+            Assert.AreEqual(5, MarkerHierarchyResolver.GetLevelPriority("level_1"));
+            Assert.AreEqual(1, MarkerHierarchyResolver.GetLevelPriority("level_2"));
+            Assert.AreEqual(3, MarkerHierarchyResolver.GetLevelPriority("level_3"));
+        }
+
+        // unset (<= 0 / absent) falls back to the 1-based row index: row 1 -> priority 1.
+        [Test]
+        public void GetLevelPriority_UnsetPriority_FallsBackTo1BasedRow()
+        {
+            var entries = new List<HierarchyLevelEntry>
+            {
+                new HierarchyLevelEntry { key = "level_1" },
+                new HierarchyLevelEntry { key = "level_2" },
+                new HierarchyLevelEntry { key = "level_3" },
+                new HierarchyLevelEntry { key = "level_4" },
+                new HierarchyLevelEntry { key = "level_5" },
+            };
+            MarkerHierarchyResolver.Configure(entries);
+
+            Assert.AreEqual(1, MarkerHierarchyResolver.GetLevelPriority("level_1"));
+            Assert.AreEqual(2, MarkerHierarchyResolver.GetLevelPriority("level_2"));
+            Assert.AreEqual(3, MarkerHierarchyResolver.GetLevelPriority("level_3"));
+            Assert.AreEqual(4, MarkerHierarchyResolver.GetLevelPriority("level_4"));
+            Assert.AreEqual(5, MarkerHierarchyResolver.GetLevelPriority("level_5"));
+        }
+
+        // unknown / blank / null keys have no ranking -> sort to the bottom (MaxValue).
+        [Test]
+        public void GetLevelPriority_UnknownKey_ReturnsMaxValue()
+        {
+            MarkerHierarchyResolver.Configure(_testLevels);
+
+            Assert.AreEqual(int.MaxValue, MarkerHierarchyResolver.GetLevelPriority("not_a_real_level"));
+            Assert.AreEqual(int.MaxValue, MarkerHierarchyResolver.GetLevelPriority(""));
+            Assert.AreEqual(int.MaxValue, MarkerHierarchyResolver.GetLevelPriority(null));
+            Assert.IsFalse(MarkerHierarchyResolver.TryResolvePriority("not_a_real_level", out _));
+        }
+
+        // duplicate priorities are legal -- a priority is a tie-break bucket, not an identity key.
+        [Test]
+        public void GetLevelPriority_DuplicatePrioritiesAccepted()
+        {
+            var entries = new List<HierarchyLevelEntry>
+            {
+                new HierarchyLevelEntry { key = "level_1", priority = 1 },
+                new HierarchyLevelEntry { key = "level_2", priority = 1 },
+            };
+            Assert.DoesNotThrow(() => MarkerHierarchyResolver.Configure(entries));
+            Assert.AreEqual(1, MarkerHierarchyResolver.GetLevelPriority("level_1"));
+            Assert.AreEqual(1, MarkerHierarchyResolver.GetLevelPriority("level_2"));
+        }
+
+        // empty / null table -> every key returns MaxValue (lowest possible sort rank).
+        [Test]
+        public void GetLevelPriority_EmptyAndNullTable_ReturnsMaxValue()
+        {
+            MarkerHierarchyResolver.Configure(new List<HierarchyLevelEntry>());
+            Assert.AreEqual(int.MaxValue, MarkerHierarchyResolver.GetLevelPriority("level_1"));
+            Assert.IsFalse(MarkerHierarchyResolver.TryResolvePriority("level_1", out _));
+
+            MarkerHierarchyResolver.ResetToDefaults();
+            MarkerHierarchyResolver.Configure(null);
+            Assert.AreEqual(int.MaxValue, MarkerHierarchyResolver.GetLevelPriority("level_1"));
+            Assert.IsFalse(MarkerHierarchyResolver.TryResolvePriority("level_1", out _));
+        }
     }
 }

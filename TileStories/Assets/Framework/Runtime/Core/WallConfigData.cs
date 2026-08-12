@@ -68,6 +68,10 @@ namespace TileStories
         // effects fall back to their compiled-in defaults -- fully backward compatible
         // with configs authored before this field existed.
         public EffectDefaults effect_defaults;
+
+        // Optional LOD settings. When absent, LODController uses defaults:
+        // 4-tier bands (15m/30m/60m/Inf), hybrid density, frustum cull on.
+        public LodSettings lod_settings = new();
     }
 
     [Serializable]
@@ -204,8 +208,16 @@ namespace TileStories
         // Stable key, e.g. "level_1" -- written to POIData.hierarchy_level_key.
         public string key;
 
-        // Developer-facing label, e.g. "1" or "Landmark".
+                // Developer-facing label, e.g. "1" or "Landmark".
         public string label;
+
+        // Authorable priority for this hierarchy level (lower = higher priority).
+        // Convention: a value >= 1 is an explicit developer-assigned priority; a value
+        // <= 0 (or the field absent on legacy configs) means "unset" and MarkerHierarchyResolver
+        // falls back to the level's table position (1-based). This keeps old configs working
+        // and lets a wall reorder priority without shuffling table rows. Consumed by LOD
+        // count-cap truncation (lowest priority hidden first) and future displacement tiebreak.
+        public int priority;
 
         // Free text, developer's own notes (shown in the authoring tool details popup).
         public string details;
@@ -338,6 +350,46 @@ namespace TileStories
         public string id;
         public float x_norm;
         public float y_norm;
-        public CapturedPosition captured_position;
+                public CapturedPosition captured_position;
+    }
+
+        [Serializable]
+    public class LodSettings
+    {
+        public bool enabled = true;
+        public List<LodBandEntry> bands = new(); // see defaults below
+        public float hysteresis_margin_m = 0.5f;
+        public float transition_fade_duration_s = 0.3f;
+        public float evaluation_interval_s = 0.2f;
+
+        public string density_response_mode = "hybrid"; // none|select_hide|cluster|shrink_and_fade|hybrid
+        public float density_radius_px = 40f;            // matches MarkerOverlapResolver's threshold
+        public int shrink_start_neighbor_count = 2;       // hybrid/shrink_and_fade: density response begins here
+        public int cluster_min_count = 5;                 // select_hide/cluster/hybrid: escalate to hide-or-cluster here
+        public bool density_safety_escalation_enabled = true; // see §6.2
+        public float density_safety_escalation_multiplier = 2f; // see §6.2
+        public string cluster_icon_mode = "pie_and_count"; // pie_and_count|dominant_category|count_only
+        public string displacement_tiebreak = "symmetric"; // symmetric|lower_priority_only — see §6
+
+        public bool frustum_culling_enabled = true;
+        public float fov_culling_margin_deg = 10f;
+
+        public bool zoom_enabled = true;
+        public float zoom_min = 1f;
+        public float zoom_max = 4f;          // hard clamp, see §9
+        public float zoom_tap_step = 1.5f;
+        public int zoom_tap_levels = 2;      // 3rd tap/click returns to 1x
+        public float zoom_transition_speed_s = 0.25f; // animation duration for tap/double-tap/button zoom changes
+        public bool zoom_show_ui_buttons = true;
+    }
+
+    [Serializable]
+    public class LodBandEntry
+    {
+        // band applies up to this distance (meters)
+        public float max_distance_m;
+
+        // -1 = unlimited ("show all" band)
+        public int max_visible_count;
     }
 }

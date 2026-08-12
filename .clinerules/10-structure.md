@@ -1,4 +1,4 @@
-﻿# 1. Project Structure & Organizing Principles
+﻿﻿# 1. Project Structure & Organizing Principles
 
 **Read this file to get oriented on the project's structure**
 
@@ -243,12 +243,20 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   ├── MarkerHierarchyResolver.cs  ← Resolves a wall's hierarchy_levels table into
 │   │   │   │   │                                  per-POI HierarchyStyle (size, label, effects,
 │   │   │   │   │                                  reveal delay/duration). Static Configure/
-│   │   │   │   │                                  TryResolveByKey/Fallback, same pattern as StatusRamp.
+│   │   │   │   │                                  TryResolveByKey/Fallback, plus `TryResolvePriority` (1-based ordering key that LODController and Displacement consume), same pattern as StatusRamp.
 │   │   │   │   ├── POIPool.cs                  ← [NOT YET BUILT] Object pool of recycled POIAnchor
 │   │   │   │   │                                  instances; acquire/return on show/hide.
-│   │   │   │   ├── LODController.cs            ← [NOT YET BUILT] Scene-wide distance-based LOD:
-│   │   │   │   │                                  SetActive(false) on entire POIAnchor GameObjects
-│   │   │   │   │                                  beyond 7m; top-5/15/all tiers inside that range.
+│   │   │   │   ├── LODController.cs            ← Superseded description below — full design in
+│   │   │   │   │                                  `_2.4_Marker_LOD.md`, not the one-liner this entry
+│   │   │   │   │                                  originally had (a flat 7m/top-5/15/all rule). ✅
+│   │   │   │   │                                  Confirmed via direct code read (while grounding
+│   │   │   │   │                                  `_2.5`/`_2.6`) to exist with a real, working
+│   │   │   │   │                                  7-step pipeline (frustum cull, effective distance,
+│   │   │   │   │                                  band hysteresis, density evaluation, count-cap,
+│   │   │   │   │                                  visibility). ❌ Density *response* (shrink/
+│   │   │   │   │                                  cluster/hybrid) still a documented pass-through.
+│   │   │   │   │                                  Do not trust this line alone — read `_2.4_Marker_LOD.md`'s
+│   │   │   │   │                                  own Implementation Status for the current state.
 │   │   │   │   ├── LapseStateManager.cs        ← [NOT YET BUILT] POI-level state machine for
 │   │   │   │   │                                  temporal-lapse walls; gates visibility per epoch.
 │   │   │   │   └── NearestPOIFinder.cs         ← [NOT YET BUILT] Given a list of POI IDs, returns
@@ -404,14 +412,30 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │   ├── Icons/, Rings/, Shapes/ ← Default PNGs (must stay under Runtime/, not Editor/ —
 │   │   │   │   │   │                              see `_5.1_Editor_Tab.md` §7 for why).
 │   │   │   │   │   └── ClusterIndicator.cs     ← Not yet built — "N more" badge when LODController
-│   │   │   │   │                                  (also not yet built) collapses markers past a
-│   │   │   │   │                                  threshold. Genuinely future work, unlike the rest of
-│   │   │   │   │                                  this list.
+│   │   │   │   │                                  collapses markers past a threshold.
+│   │   │   │   │                                  **Correction**: `LODController.cs` (§ elsewhere
+│   │   │   │   │                                  in this tree) is no longer accurate as "not yet
+│   │   │   │   │                                  built" — confirmed via direct code read while
+│   │   │   │   │                                  grounding `_2.5_Displacement.md` and
+│   │   │   │   │                                  `_2.6_Select_Filter_Search.md`: it exists with a
+│   │   │   │   │                                  real, working 7-step pipeline. Density
+│   │   │   │   │                                  *response* (the part that would actually collapse
+│   │   │   │   │                                  markers into a cluster) is still a documented
+│   │   │   │   │                                  pass-through, so `ClusterIndicator.cs` itself is
+│   │   │   │   │                                  still genuinely future work — just not blocked on
+│   │   │   │   │                                  `LODController` not existing at all anymore.
 │   │   │   │   │
 │   │   │   │   ├── Cards/                      ← UI Toolkit (screen overlay, UXML/USS)
 │   │   │   │   │   ├── DetailCard.uxml         ← UXML: bottom-sheet structure (≤40% screen height),
 │   │   │   │   │   │                              scroll view root, block-slot container, drag
 │   │   │   │   │   │                              handle bar, dismiss button.
+│   │   │   │   │   │                              **`_2.6_Select_Filter_Search.md` builds a
+│   │   │   │   │   │                              deliberately minimal version at this exact path
+│   │   │   │   │   │                              first** — a label and a close button, none of
+│   │   │   │   │   │                              the block-slot/scroll/spring-up system described
+│   │   │   │   │   │                              here, which remains genuinely future work. Confirm
+│   │   │   │   │   │                              which version exists before assuming this full
+│   │   │   │   │   │                              description is already built.
 │   │   │   │   │   ├── DetailCard.uss          ← USS: card corner radii, shadow, spring-up
 │   │   │   │   │   │                              transition, block spacing tokens.
 │   │   │   │   │   ├── DetailCardView.cs       ← Controller: populates block-slot container from
@@ -594,7 +618,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                                  DrawMarkerGlobalSection,
 │   │   │   │   │                                                  DrawGlobalBadgeSection,
 │   │   │   │   │                                                  DrawGlobalOutlineSection,
-│   │   │   │   │                                                  RecomputeLevelPercentSpacing.
+│   │   │   │   │                                                  RecomputeLevelPercentSpacing (+ DrawGlobalHierarchySection: Hierarchy table incl. Priority column).
 │   │   │   │   ├── SpecificMarker/
 │   │   │   │   │   └── POIAuthoringToolWindow.SpecificMarker.cs ← DrawSpecificMarkerOptions,
 │   │   │   │   │                                                    DrawPoiPositionFields,
@@ -638,6 +662,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │   ├── POIAuthoringToolWindow.ConfigHistory.cs ← DrawConfigMutationScope,
 │   │   │   │   │   │                                              RecordConfigChange, undo/redo stack,
 │   │   │   │   │   │                                              HandleUndoShortcuts.
+│   │   │   │   │   └── POIAuthoringToolWindow.ConfigFileIO.cs  POIAuthoringToolWindow.ConfigValidation.cs  ← Validates hierarchy_level_key -> level-table match (ValidateHierarchyLevelKeys) + size_cm soft range 0.5-100cm warning (ValidateHierarchyLevelSizeRange); collected before the zero-count early-return in ValidateAndAlert.
 │   │   │   │   │   └── POIAuthoringToolWindow.ConfigFileIO.cs  ← SaveAllToJson, SaveConfig,
 │   │   │   │   │                                                  LoadConfig, CopyToStreamingAssets.
 │   │   │   │   ├── AssetPaths/
@@ -697,8 +722,8 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │                                          written after Stage 2 when block shapes are
 │   │   │                                          final, not speculatively before.
 │   │   │
-│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 66 tests total as of
-│   │       │                              2026-08-07. No TestFixtures/ folder — fixtures are inline.
+│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 158 tests total as of
+│   │       │                              2026-08-11 (127 EditMode + 31 PlayMode). No TestFixtures/ folder — fixtures are inline.
 │   │       ├── Editor/                ← EditMode tests (run without domain reload, fast)
 │   │       │   ├── TileStories.Editor.Tests.asmdef ← Editor test assembly; references Runtime + Editor.
 │   │       │   ├── CategoryPaletteTests.cs        ← Tests category→colour/icon resolution, hash
@@ -713,6 +738,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │       │   │                                     relative to the camera's current rotation
 │   │       │   │                                     (the bug where arrow keys snapped back
 │   │       │   │                                     to a zero-origin is caught here).
+│   │       │   ├── HierarchyLevelSizeRangeTests.cs    ← Tests size_cm soft-sanity range (0.5-100 cm) warning logic + the ValidateAndAlert zero-count early-return guard (InRange/boundaries, OutOfRange, Null, Empty, NullEntry).
 │   │       │   ├── MarkerLayoutTests.cs            ← Tests pure-logic layout math (label offsets,
 │   │       │   │                                     ring sizing) independent of Unity lifecycle.
 │   │       │   ├── MarkerSymbolTexturePostprocessorTests.cs ← Tests that the AssetPostprocessor
@@ -736,6 +762,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │           ├── MarkerOverlapResolverTests.cs    ← Tests overlap offset assignment (clustered/
 │   │           │                                       already-separated/idempotent scenarios) and
 │   │           │                                       MarkerBillboard camera-facing rotation.
+│   │           └── MarkerViewRuntimeTests.cs        LivingRoomConfigIntegrationTests.cs  ← PlayMode integration: real StreamingAssets/LivingRoom/config.json (18 POIs, 5 hierarchy levels) loads and every hierarchy_level_key resolves.
 │   │           └── MarkerViewRuntimeTests.cs        ← Tests that MarkerView correctly wires its
 │   │                                                   sub-components given various POI configs.
 │   │
@@ -837,5 +864,3 @@ TileStories/                          ← Unity project root (open this in Unity
         ├── exit-survey.md                      ← 5-question exit survey.
         └── knowledge-check.md                  ← Pre/post factual-recall questions per wall.
 ```
-
-

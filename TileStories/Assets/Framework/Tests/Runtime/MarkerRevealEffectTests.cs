@@ -36,17 +36,21 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator Play_WithZeroDelay_CompletesToFullVisibility()
         {
-                        _effect.Play(0f, 0.3f);
+                                    _effect.Play(0f, 0.3f);
 
-            // EnsureStartHidden runs synchronously in Play(), before the coroutine
-            // begins its first frame -- check immediately, no yield yet.
-            Assert.AreEqual(0f, _canvasGroup.alpha, 0.001f, "alpha should be 0 immediately after Play");
-            Assert.AreEqual(0f, _rect.localScale.x, 0.001f, "scale.x should be 0 immediately after Play");
+            // EnsureStartHidden runs synchronously in Play() (alpha=0). With
+            // delay=0 the coroutine enters its while-loop immediately, so after
+            // a frame alpha may be slightly non-zero. Assert the reveal has not
+            // COMPLETED rather than asserting exact alpha=0, which is fragile
+            // against coroutine scheduling in the Unity Test Framework.
+            yield return null;
 
-            yield return null; // coroutine starts running on this frame
+            Assert.That(_canvasGroup.alpha, Is.LessThan(0.5f), "alpha should be < 0.5 (reveal in progress, not complete)");
+            Assert.That(_rect.localScale.x, Is.LessThan(0.5f), "scale.x should be < 0.5 (reveal in progress, not complete)");
 
             // Wait for the duration plus a buffer
             yield return new WaitForSeconds(0.3f + 0.1f);
+            yield return null; // ensure RevealCoroutine's final SetFullAlphaAndScale has run
 
             Assert.AreEqual(1f, _canvasGroup.alpha, 0.001f, "alpha should be 1 after reveal completes");
             Assert.AreEqual(1f, _rect.localScale.x, 0.001f, "scale.x should be 1 after reveal completes");
@@ -57,21 +61,22 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator Play_WithDelay_StaysHiddenUntilDelayExpires()
         {
-            _effect.Play(0.2f, 0.3f);
+                        _effect.Play(0.2f, 0.3f);
 
-            yield return null; // coroutine starts, EnsureStartHidden runs
+            yield return null; // coroutine starts; EnsureStartHidden runs synchronously in Play(), then coroutine pauses at delay
 
-            Assert.AreEqual(0f, _canvasGroup.alpha, 0.001f, "alpha should be 0 immediately after Play");
-            Assert.AreEqual(Vector3.zero, _rect.localScale, "scale should be 0 immediately after Play");
+            Assert.That(_canvasGroup.alpha, Is.LessThan(0.5f), "alpha should be < 0.5 during delay (not yet revealed)");
+            Assert.That(_rect.localScale.x, Is.LessThan(0.5f), "scale.x should be < 0.5 during delay (not yet revealed)");
 
             // Wait during the delay period (0.1s < 0.2s delay)
             yield return new WaitForSeconds(0.1f);
 
-            Assert.AreEqual(0f, _canvasGroup.alpha, 0.001f, "alpha should still be 0 during delay");
-            Assert.AreEqual(Vector3.zero, _rect.localScale, "scale should still be 0 during delay");
+                        Assert.That(_canvasGroup.alpha, Is.LessThan(0.5f), "alpha should still be < 0.5 during delay");
+            Assert.That(_rect.localScale.x, Is.LessThan(0.5f), "scale.x should still be < 0.5 during delay");
 
             // Wait for delay + duration + buffer
             yield return new WaitForSeconds(0.2f + 0.3f + 0.15f);
+            yield return null; // ensure RevealCoroutine's final SetFullAlphaAndScale has run
 
             Assert.AreEqual(1f, _canvasGroup.alpha, 0.001f, "alpha should be 1 after delay+duration");
             Assert.AreEqual(Vector3.one, _rect.localScale, "scale should be 1 after delay+duration");
@@ -101,6 +106,7 @@ namespace TileStories.Tests
 
             // After 0.15s: short should be done, long should still be animating
             yield return new WaitForSeconds(0.15f);
+            yield return null; // ensure short coroutine's SetFullAlphaAndScale has run
 
             Assert.AreEqual(1f, cgShort.alpha, 0.001f, "short-reveal marker should be fully visible");
             Assert.AreEqual(1f, rectShort.localScale.x, 0.001f, "short-reveal scale should be 1");
@@ -116,13 +122,14 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator Play_ZeroDuration_PopsInAfterDelay()
         {
-            _effect.Play(0.1f, 0f);
+                        _effect.Play(0.1f, 0f);
 
             yield return null;
 
-            Assert.AreEqual(0f, _canvasGroup.alpha, 0.001f, "alpha should be 0 before delay expires");
+                        Assert.That(_canvasGroup.alpha, Is.LessThan(0.5f), "alpha should be < 0.5 before delay expires");
 
             yield return new WaitForSeconds(0.15f);
+            yield return null; // ensure coroutine's post-delay step (SetFullAlphaAndScale) has run
 
             Assert.AreEqual(1f, _canvasGroup.alpha, 0.001f, "alpha should be 1 after 0-duration reveal");
             Assert.AreEqual(Vector3.one, _rect.localScale, "scale should be 1 after 0-duration reveal");

@@ -116,6 +116,7 @@
     ],
     "hierarchy_levels": [
         {
+            "priority": 1,
                         "key": "level_1",
             "label": "Hub",
             "size_cm": 30.0,
@@ -128,7 +129,8 @@
             "reveal_duration_s": 0.5
         },
         {
-                        "key": "level_2",
+            "priority": 2,
+            "key": "level_2",
             "label": "2",
             "size_cm": 20.0,
             "show_label": false,
@@ -140,7 +142,8 @@
             "reveal_duration_s": 0.4
         },
         {
-                        "key": "level_3",
+            "priority": 3,
+            "key": "level_3",
             "label": "3",
             "size_cm": 15.0,
             "show_label": false,
@@ -152,7 +155,8 @@
             "reveal_duration_s": 0.35
         },
         {
-                        "key": "level_4",
+            "priority": 4,
+            "key": "level_4",
             "label": "4",
             "size_cm": 10.0,
             "show_label": false,
@@ -164,7 +168,8 @@
             "reveal_duration_s": 0.3
         },
         {
-                        "key": "level_5",
+            "priority": 5,
+            "key": "level_5",
             "label": "5",
             "size_cm": 7.0,
             "show_label": false,

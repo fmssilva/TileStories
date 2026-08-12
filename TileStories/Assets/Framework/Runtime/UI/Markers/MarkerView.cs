@@ -1,3 +1,4 @@
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,9 +45,15 @@ namespace TileStories
         [SerializeField] private MarkerAccentEffect accentEffect;
         [SerializeField] private MarkerEffectFlags effectFlags = MarkerEffectFlags.None;
 
-        [Header("External assets")]
+                [Header("External assets")]
         [SerializeField] private SpriteKeyLibrary shapeLibrary;
         [SerializeField] private SpriteKeyLibrary iconLibrary;
+
+        // Shared with MarkerRevealEffect -- auto-resolved in EnsureMarkerWiring.
+        // SetVisible toggles this same CanvasGroup so LOD and reveal cannot fight
+        // over alpha values.
+        private CanvasGroup _canvasGroup;
+        private Coroutine _fadeCoroutine;
 
         // Runtime state
         private POIAnchor _anchor;
@@ -74,6 +81,10 @@ namespace TileStories
 
         // Expose the POI id for deterministic sorting in overlap resolution
         public string PoiId { get; private set; }
+
+        // Expose the hierarchy level key for priority-based LOD count cap sorting.
+        // Same source as the _hierarchyStyle resolution in ApplyVisuals.
+        public string HierarchyLevelKey => _anchor?.Data?.hierarchy_level_key ?? string.Empty;
 
         private void OnValidate()
         {
@@ -512,8 +523,11 @@ namespace TileStories
             _anchor.transform.localPosition = newPos;
         }
 
-        private void EnsureMarkerWiring(bool allowCreate)
+                private void EnsureMarkerWiring(bool allowCreate)
         {
+            if (_canvasGroup == null)
+                _canvasGroup = GetComponent<CanvasGroup>();
+
             if (symbol != null)
             {
                 if (allowCreate) symbol.EnsureIconReference();
@@ -576,10 +590,81 @@ namespace TileStories
             if (symbolBackground != null && haloImage.sprite == null)
                 haloImage.sprite = symbolBackground.sprite;
 
-            haloImage.color = HaloTint;
+                        haloImage.color = HaloTint;
             haloImage.raycastTarget = false;
             haloImage.enabled = false;
             return haloImage;
+        }
+
+        // Instantly toggle marker visibility via the shared CanvasGroup.
+        // In Edit Mode, sets alpha immediately (coroutines do not tick there).
+        public void SetVisible(bool visible)
+        {
+            if (_canvasGroup == null)
+                _canvasGroup = GetComponent<CanvasGroup>();
+            if (_canvasGroup == null) return;
+
+            if (_fadeCoroutine != null)
+            {
+                StopCoroutine(_fadeCoroutine);
+                _fadeCoroutine = null;
+            }
+
+            _canvasGroup.alpha = visible ? 1f : 0f;
+            _canvasGroup.interactable = visible;
+            _canvasGroup.blocksRaycasts = visible;
+        }
+
+        // Fade marker visibility over fadeDuration, using the shared CanvasGroup.
+        // In Edit Mode, falls back to instant (coroutines do not tick there).
+        public void SetVisible(bool visible, float fadeDuration)
+        {
+            if (!Application.isPlaying || fadeDuration <= 0f)
+            {
+                SetVisible(visible);
+                return;
+            }
+
+            if (_canvasGroup == null)
+                _canvasGroup = GetComponent<CanvasGroup>();
+            if (_canvasGroup == null) return;
+
+            if (_fadeCoroutine != null)
+                StopCoroutine(_fadeCoroutine);
+            _fadeCoroutine = StartCoroutine(FadeCoroutine(visible, fadeDuration));
+        }
+
+        // Crossfade CanvasGroup alpha from current to target; flip interaction
+        // flags at the endpoints so raycasts resume only when fully visible.
+        private IEnumerator FadeCoroutine(bool fadeIn, float duration)
+        {
+            float startAlpha = _canvasGroup.alpha;
+            float targetAlpha = fadeIn ? 1f : 0f;
+            float elapsed = 0f;
+
+            if (fadeIn)
+            {
+                _canvasGroup.interactable = true;
+                _canvasGroup.blocksRaycasts = true;
+            }
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                float smooth = t * t * (3f - 2f * t); // smoothstep
+                _canvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, smooth);
+                yield return null;
+            }
+
+            _canvasGroup.alpha = targetAlpha;
+            _fadeCoroutine = null;
+
+            if (!fadeIn)
+            {
+                _canvasGroup.interactable = false;
+                _canvasGroup.blocksRaycasts = false;
+            }
         }
     }
 }

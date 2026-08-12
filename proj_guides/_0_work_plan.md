@@ -1354,7 +1354,10 @@ codebase's source.
    noted below in favour of **7m** (matches the `LODController.cs` stub already
    committed to code): beyond 7m show the **5 highest-priority markers** plus a
    cluster indicator; 2–7m widen to **15**; under 2m show all. "Highest-priority"
-   reads directly off `hierarchy_level_key` (lower level number = higher priority),
+   reads directly off `hierarchy_level_key` — concretely, an explicit `priority`
+   int field on `HierarchyLevelEntry` (not derived from row order, which would be
+   fragile), resolved via `MarkerHierarchyResolver.TryResolvePriority`, added
+   when `_2.5` needed a real answer to a question `_2.4` had only assumed —
    reusing `_2.3`'s ordering rather than inventing a second ranking. `_2.4` also
    specifies: a density-response layer beyond simple distance selection (four
    modes — hide/cluster/continuous-shrink-and-fade/hybrid, hybrid default, named
@@ -1366,9 +1369,12 @@ codebase's source.
    whole project, directly tied to RQ2 and to the information-overload finding
    already established in the thesis's own literature review (Wang et al., among
    others, on cognitive overload in museum AR). Marker/label **displacement**
-   (resolving individual overlaps, leader lines) and **search/filtering** are
-   separate, later domains — `_2.4` explicitly does not cover them; see its own
-   scope section.
+   (resolving individual overlaps, leader lines) — full design now in
+   `_2.5_Displacement.md` — and **selection, filtering & search** (typed +
+   voice search, facet filtering, minimap/list/camera-highlight result views,
+   a minimal proof-of-life detail card) — full design now in
+   `_2.6_Select_Filter_Search.md` — are separate from `_2.4`; see each doc's
+   own scope section.
 8. **Map block** — "See where it is today," linking each POI to its present-day
    location, building on Stage 1's map integration but now as a registered, reusable
    block rather than a one-off feature.
@@ -2552,10 +2558,24 @@ re-explaining them on every use.
   controls *how big* any one marker is, authored and static. Reads priority from
   `hierarchy_level_key` rather than a second ranking. Includes a global AR camera
   zoom feature whose effective distance feeds the same selection logic.
-- **Displacement** — a separate, later domain (not `_2.4_LOD.md`): resolving
-  individual marker/label overlaps by nudging them apart, optionally with a
-  leader line back to the true position. `MarkerOverlapResolver.cs` (built,
-  spawn-time-only) is that domain's starting point.
+- **Displacement** — a separate domain from LOD/clustering, full design in
+  `_2.5_Displacement.md`: resolving individual marker/label overlaps that
+  survive `_2.4`'s selection/clustering, continuously (not the one-shot fix
+  `MarkerOverlapResolver.cs` started as), with three interchangeable
+  algorithms (fixed-axis, candidate-position, force-directed — the last
+  the default) and optional leader lines back to the true position.
+  Deliberately not called "Occlusion" — for a flat wall there's no true
+  depth occlusion, only screen-space crowding from foreshortening.
+- **Select, Filter & Search** — full design in
+  `_2.6_Select_Filter_Search.md`: tap-to-select (with optional Augmented-
+  Viewport-style zoom-in for precision on small/dense targets), facet
+  filtering across category/badge/outline/hierarchy level, typed and
+  voice keyword search (structured per-POI keyword fields plus a
+  three-tier synonym system — manual, offline WordNet-assisted, optional
+  AI-assisted), and three result views (list, minimap, camera-highlight).
+  Builds the first real content in `Runtime/UI/Cards/` (a deliberately
+  minimal proof-of-life detail card, not the future full content card)
+  and reuses the UI Toolkit foundation `_2.4` §9b built.
 - **Hierarchy level** — a wall-defined, developer-labelled tier (as many as the wall
   needs) that determines one POI marker's size, label visibility, effect combination,
   outline rotation, and reveal delay. Replaces the earlier binary `is_hero` concept.

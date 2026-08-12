@@ -367,12 +367,22 @@ namespace TileStories.Editor
                     // Column 1: Label (text field)
                     entry.label = EditorGUILayout.TextField(entry.label, GUILayout.Width(100f));
 
-                    // Column 2: Details (...) - reuses EntryDetailsPopup exactly as-is
+                    // Column 2: Priority (int) + info button
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        entry.priority = EditorGUILayout.IntField(entry.priority, GUILayout.Width(40f));
+                        HelpInfoButton.Draw("Priority",
+                            "Sort key for draw order + count-cap survival (lower = higher priority). " +
+                            "Explicit value >= 1 is author order; leave 0 to fall back to this row's " +
+                            "1-based position. Duplicates are legal; magnitude is a pure sort key.");
+                    }
+
+                    // Column 3: Details (...) - reuses EntryDetailsPopup exactly as-is
                     if (GUILayout.Button("...", GUILayout.Width(26f), GUILayout.Height(22f)))
                         PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(
                             entry.label ?? "Hierarchy level", () => entry.details, v => entry.details = v));
 
-                    // Column 3: Size (cm) + info button
+                    // Column 4: Size (cm) + info button
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         entry.size_cm = EditorGUILayout.FloatField(entry.size_cm, GUILayout.Width(50f));
@@ -380,40 +390,40 @@ namespace TileStories.Editor
                             "Real-world printed size of the marker Symbol. This is not yet adjusted for viewing distance -- that's a separate future feature.");
                     }
 
-                    // Column 4: Show Label (dropdown, explicit wording per §6)
+                    // Column 5: Show Label (dropdown, explicit wording per §6)
                     int showLabelIdx = entry.show_label ? 0 : 1;
                     showLabelIdx = EditorGUILayout.Popup("Show Label", showLabelIdx, ShowLabelOptions, GUILayout.Width(130f));
                     entry.show_label = showLabelIdx == 0;
 
-                    // Column 5: Sun Effect (dropdown, mutually exclusive)
+                    // Column 6: Sun Effect (dropdown, mutually exclusive)
                     int sunIdx = Array.IndexOf(SunEffectOptions, entry.sun_effect);
                     if (sunIdx < 0) sunIdx = 0;
                     sunIdx = EditorGUILayout.Popup("Sun", sunIdx, SunEffectLabels, GUILayout.Width(110f));
                     entry.sun_effect = SunEffectOptions[sunIdx];
 
-                    // Column 6: Accent Effect (dropdown, mutually exclusive)
+                    // Column 7: Accent Effect (dropdown, mutually exclusive)
                     int accentIdx = Array.IndexOf(AccentEffectOptions, entry.accent_effect);
                     if (accentIdx < 0) accentIdx = 0;
                     accentIdx = EditorGUILayout.Popup("Accent", accentIdx, AccentEffectLabels, GUILayout.Width(120f));
                     entry.accent_effect = AccentEffectOptions[accentIdx];
 
-                    // Column 7: Pulse (checkbox, standalone boolean)
+                    // Column 8: Pulse (checkbox, standalone boolean)
                     entry.pulse = EditorGUILayout.Toggle("Pulse", entry.pulse, GUILayout.Width(70f));
 
-                    // Column 8: Rotate Contour (checkbox, outline-gated)
+                    // Column 9: Rotate Contour (checkbox, outline-gated)
                     bool outlineEnabled = !string.Equals(_config.marker_outline_mode, "none", StringComparison.OrdinalIgnoreCase);
                     if (outlineEnabled)
                     {
                         entry.rotate_contour = EditorGUILayout.Toggle("Rotate", entry.rotate_contour, GUILayout.Width(70f));
                     }
 
-                                        // Column 9: Reveal Delay (s) + Duration (s) + info button
+                                        // Column 10: Reveal Delay (s) + Duration (s) + info button
                     entry.reveal_delay_s = EditorGUILayout.FloatField(entry.reveal_delay_s, GUILayout.Width(50f));
                     entry.reveal_duration_s = EditorGUILayout.FloatField(entry.reveal_duration_s, GUILayout.Width(50f));
                     HelpInfoButton.Draw("Reveal Delay vs Duration",
                         "Delay: seconds after spawn before the fade/scale-in begins.\nDuration: how long the fade/scale-in animation itself takes. A longer delay staggers appearance; a longer duration makes each marker enter more slowly. Default: 0.5s L1 -> 0.25s L5.");
 
-                    // Column 10: Remove (trash button)
+                    // Column 11: Remove (trash button)
                     if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
                     {
                         _config.hierarchy_levels.RemoveAt(i);
@@ -435,6 +445,7 @@ namespace TileStories.Editor
                 {
                     key = "level_" + (_config.hierarchy_levels.Count + 1),
                     label = (_config.hierarchy_levels.Count + 1).ToString(),
+                    priority = _config.hierarchy_levels.Count + 1,
                     size_cm = 12f,
                     show_label = false,
                     sun_effect = "none",

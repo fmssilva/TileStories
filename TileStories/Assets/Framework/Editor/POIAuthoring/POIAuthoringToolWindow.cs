@@ -169,7 +169,6 @@ namespace TileStories.Editor
         [SerializeField] private bool _showPoiMarkerStyle = true;
         [SerializeField] private bool _showPoiBadgeStyle = true;
         [SerializeField] private bool _showPoiOutline = true;
-        [SerializeField] private bool _showPoiEffects = true;
 
         [SerializeField] private SpriteKeyLibrary _defaultIconLibrary;
         [SerializeField] private SpriteKeyLibrary _wallIconLibrary;

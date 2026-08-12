@@ -1,0 +1,80 @@
+--- 10-structure.md
++++ 10-structure copy.md
+@@ -245,16 +245,8 @@
+ │   │   │   │   │                                  reveal delay/duration). Static Configure/
+-│   │   │   │   │                                  TryResolveByKey/Fallback, same pattern as StatusRamp.
++│   │   │   │   │                                  TryResolveByKey/Fallback, plus `TryResolvePriority` (1-based ordering key that LODController and Displacement consume), same pattern as StatusRamp.
+ │   │   │   │   ├── POIPool.cs                  ← [NOT YET BUILT] Object pool of recycled POIAnchor
+ │   │   │   │   │                                  instances; acquire/return on show/hide.
+-│   │   │   │   ├── LODController.cs            ← Superseded description below — full design in
+-│   │   │   │   │                                  `_2.4_LOD.md`, not the one-liner this entry
+-│   │   │   │   │                                  originally had (a flat 7m/top-5/15/all rule). ✅
+-│   │   │   │   │                                  Confirmed via direct code read (while grounding
+-│   │   │   │   │                                  `_2.5`/`_2.6`) to exist with a real, working
+-│   │   │   │   │                                  7-step pipeline (frustum cull, effective distance,
+-│   │   │   │   │                                  band hysteresis, density evaluation, count-cap,
+-│   │   │   │   │                                  visibility). ❌ Density *response* (shrink/
+-│   │   │   │   │                                  cluster/hybrid) still a documented pass-through.
+-│   │   │   │   │                                  Do not trust this line alone — read `_2.4_LOD.md`'s
+-│   │   │   │   │                                  own Implementation Status for the current state.
++│   │   │   │   ├── LODController.cs            ← Scene-wide distance-based LOD (count-cap via MarkerHierarchyResolver.GetLevelPriority; lower priority hidden first):
++│   │   │   │   │                                  SetActive(false) on entire POIAnchor GameObjects
++│   │   │   │   │                                  beyond 7m; top-5/15/all tiers inside that range.
+ │   │   │   │   ├── LapseStateManager.cs        ← [NOT YET BUILT] POI-level state machine for
+@@ -414,14 +406,5 @@
+ │   │   │   │   │   └── ClusterIndicator.cs     ← Not yet built — "N more" badge when LODController
+-│   │   │   │   │                                  collapses markers past a threshold.
+-│   │   │   │   │                                  **Correction**: `LODController.cs` (§ elsewhere
+-│   │   │   │   │                                  in this tree) is no longer accurate as "not yet
+-│   │   │   │   │                                  built" — confirmed via direct code read while
+-│   │   │   │   │                                  grounding `_2.5_Displacement.md` and
+-│   │   │   │   │                                  `_2.6_Select_Filter_Search.md`: it exists with a
+-│   │   │   │   │                                  real, working 7-step pipeline. Density
+-│   │   │   │   │                                  *response* (the part that would actually collapse
+-│   │   │   │   │                                  markers into a cluster) is still a documented
+-│   │   │   │   │                                  pass-through, so `ClusterIndicator.cs` itself is
+-│   │   │   │   │                                  still genuinely future work — just not blocked on
+-│   │   │   │   │                                  `LODController` not existing at all anymore.
++│   │   │   │   │                                  (also not yet built) collapses markers past a
++│   │   │   │   │                                  threshold. Genuinely future work, unlike the rest of
++│   │   │   │   │                                  this list.
+ │   │   │   │   │
+@@ -431,9 +414,2 @@
+ │   │   │   │   │   │                              handle bar, dismiss button.
+-│   │   │   │   │   │                              **`_2.6_Select_Filter_Search.md` builds a
+-│   │   │   │   │   │                              deliberately minimal version at this exact path
+-│   │   │   │   │   │                              first** — a label and a close button, none of
+-│   │   │   │   │   │                              the block-slot/scroll/spring-up system described
+-│   │   │   │   │   │                              here, which remains genuinely future work. Confirm
+-│   │   │   │   │   │                              which version exists before assuming this full
+-│   │   │   │   │   │                              description is already built.
+ │   │   │   │   │   ├── DetailCard.uss          ← USS: card corner radii, shadow, spring-up
+@@ -620,3 +596,3 @@
+ │   │   │   │   │                                                  DrawGlobalOutlineSection,
+-│   │   │   │   │                                                  RecomputeLevelPercentSpacing.
++│   │   │   │   │                                                  RecomputeLevelPercentSpacing (+ DrawGlobalHierarchySection: Hierarchy table incl. Priority column).
+ │   │   │   │   ├── SpecificMarker/
+@@ -664,2 +640,3 @@
+ │   │   │   │   │   │                                              HandleUndoShortcuts.
++│   │   │   │   │   ├── POIAuthoringToolWindow.ConfigValidation.cs  ← Validates hierarchy_level_key -> level-table match (ValidateHierarchyLevelKeys) + size_cm soft range 0.5-100cm warning (ValidateHierarchyLevelSizeRange); collected before the zero-count early-return in ValidateAndAlert.
+ │   │   │   │   │   └── POIAuthoringToolWindow.ConfigFileIO.cs  ← SaveAllToJson, SaveConfig,
+@@ -723,4 +700,4 @@
+ │   │   │
+-│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 66 tests total as of
+-│   │       │                              2026-08-07. No TestFixtures/ folder — fixtures are inline.
++│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 158 tests total as of
++│   │       │                              2026-08-11 (127 EditMode + 31 PlayMode). No TestFixtures/ folder — fixtures are inline.
+ │   │       ├── Editor/                ← EditMode tests (run without domain reload, fast)
+@@ -739,2 +716,3 @@
+ │   │       │   │                                     to a zero-origin is caught here).
++│   │       │   ├── HierarchyLevelSizeRangeTests.cs    ← Tests size_cm soft-sanity range (0.5-100 cm) warning logic + the ValidateAndAlert zero-count early-return guard (InRange/boundaries, OutOfRange, Null, Empty, NullEntry).
+ │   │       │   ├── MarkerLayoutTests.cs            ← Tests pure-logic layout math (label offsets,
+@@ -762,2 +740,3 @@
+ │   │           │                                       MarkerBillboard camera-facing rotation.
++│   │           ├── LivingRoomConfigIntegrationTests.cs ← PlayMode integration: real StreamingAssets/LivingRoom/config.json (18 POIs, 5 hierarchy levels) loads and every hierarchy_level_key resolves.
+ │   │           └── MarkerViewRuntimeTests.cs        ← Tests that MarkerView correctly wires its
+@@ -862,2 +841,4 @@
+         └── knowledge-check.md                  ← Pre/post factual-recall questions per wall.
+-```+```
++
++

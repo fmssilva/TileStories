@@ -183,5 +183,79 @@ namespace TileStories.Tests
             return tex.GetPixel(x, y).a;
         }
 
+        // SECTION 16 / Group2 (rect-ratio at all 5 sizes): assert the symbol's
+        // RectTransform.sizeDelta follows the SizeCm/100 cm->m conversion (the single
+        // call site in MarkerView.ApplyVisuals) and is strictly monotonic largest
+        // Level 1 -> smallest Level 5 across the 5 framework-default sizes.
+        [UnityTest]
+        public IEnumerator HierarchySize_RectRatioScalesBySizeCmAndIsMonotonic()
+        {
+            var levels = new HierarchyLevelEntry[]
+            {
+                new HierarchyLevelEntry { key = "level_1", size_cm = 20f, show_label = true },
+                new HierarchyLevelEntry { key = "level_2", size_cm = 15f, show_label = true },
+                new HierarchyLevelEntry { key = "level_3", size_cm = 10f, show_label = true },
+                new HierarchyLevelEntry { key = "level_4", size_cm = 5f,  show_label = false },
+                new HierarchyLevelEntry { key = "level_5", size_cm = 2f,  show_label = false },
+            };
+            MarkerHierarchyResolver.Configure(levels);
+
+            try
+            {
+                string[] keys = { "level_1", "level_2", "level_3", "level_4", "level_5" };
+                float[] expected = { 20f / 100f, 15f / 100f, 10f / 100f, 5f / 100f, 2f / 100f };
+                var observed = new float[keys.Length];
+
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    var root = new GameObject("MarkerRoot_" + keys[i]);
+                    var anchor = root.AddComponent<POIAnchor>();
+                    anchor.Initialise(new POIData
+                    {
+                        id = "poi_" + keys[i],
+                        name = keys[i] + " Label",
+                        category = "religious",
+                        hierarchy_level_key = keys[i],
+                        has_status = false,
+                    });
+
+                    // Same wiring shape as Initialise_MissingIconAndEffectWiring above
+                    // (bare root + injected glyph children) so ApplyVisuals runs through
+                    // the real Initialise path WallSession uses (Initialise->ApplyVisuals).
+                    var symbol = CreateGlyphChild(root.transform, "Symbol");
+                    var badge = CreateGlyphChild(root.transform, "Badge");
+                    var ring = CreateRingChild(root.transform, "Ring");
+                    var view = root.AddComponent<MarkerView>();
+                    SetPrivateField(view, "symbol", symbol);
+                    SetPrivateField(view, "badge", badge);
+                    SetPrivateField(view, "ring", ring);
+
+                    view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+                    yield return null; // ApplyVisuals + EnsureMarkerWiring settle
+
+                    Assert.IsNotNull(symbol, "symbol glyph must be wired.");
+                    observed[i] = symbol.RectTransform.sizeDelta.x;
+                    Object.Destroy(root);
+                }
+
+                // Absolute: sizeDelta.x == SizeCm / 100 (MarkerView cm->m call site).
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    Assert.AreEqual(expected[i], observed[i], 0.001f,
+                        $"level {keys[i]}: sizeDelta.x expected {expected[i]:F3} (SizeCm/100), got {observed[i]:F3}");
+                }
+                // Relative: strictly decreasing as size_cm decreases (Group2 ratio).
+                for (int i = 1; i < observed.Length; i++)
+                {
+                    Assert.Greater(observed[i - 1], observed[i],
+                        $"size must decrease level_{i}->level_{i + 1}: {observed[i - 1]:F3} !> {observed[i]:F3}");
+                }
+            }
+            finally
+            {
+                MarkerHierarchyResolver.ResetToDefaults();
+            }
+        }
+
     }
 }
