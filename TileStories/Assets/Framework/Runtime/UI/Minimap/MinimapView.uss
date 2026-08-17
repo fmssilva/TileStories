@@ -1,0 +1,47 @@
+.minimap-container {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 200px;
+    height: 200px;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.minimap-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: #FFFFFF;
+    border-right-color: #FFFFFF;
+    border-top-color: #FFFFFF;
+    border-bottom-color: #FFFFFF;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    unity-overflow: hidden;
+}
+
+.minimap-compass {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 11px;
+    color: #FFFFFF;
+}
+
+.minimap-scale {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    font-size: 11px;
+    color: #CCCCCC;
+}

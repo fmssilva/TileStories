@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace TileStories
@@ -40,12 +40,22 @@ namespace TileStories
         // Density-response hysteresis (§7, Decision 7): committed density state
         // per PoiId. Persists across Evaluate() cycles because units are
         // rebuilt each cycle but the threshold-crossing decision must not flicker.
-                private readonly Dictionary<string, DensityHysteresisState> _densityHysteresis = new();
+        private readonly Dictionary<string, DensityHysteresisState> _densityHysteresis = new();
+        // Snapshot of the last EvaluateDensity() result (spec section 5/11), keyed
+        // by PoiId. LOD is the only writer of density state; callers (ZoomOnSelectController,
+        // spec section 11) read a stable snapshot instead of re-running the O(n^2)
+        // density math for a single tap.
+        private Dictionary<string, int> _lastNeighborCounts = new();
 
         // Cluster lifecycle (spec §6.1): live cluster view instances pooled across
         // Evaluate() cycles so a dense-region aggregate fades rather than popping.
         private readonly List<MarkerClusterView> _activeClusterViews = new();
         [SerializeField] private GameObject _clusterPrefab;
+
+        // Cluster lifecycle state (spec §6.1): pooled aggregate views + per-signature
+        // band-index cache (hysteresis) + per-view dissolve-grace miss counters.
+        private readonly Dictionary<string, LodBand> _clusterBandCache = new();
+        private readonly Dictionary<MarkerClusterView, int> _clusterDissolveMisses = new();
 
         private void Awake()
         {
@@ -85,6 +95,8 @@ namespace TileStories
                                 _bandCache.Clear();
                 _prevEffectiveDistance.Clear();
                 _densityHysteresis.Clear();
+                _clusterBandCache.Clear();
+                _clusterDissolveMisses.Clear();
             }
         }
 
@@ -110,15 +122,29 @@ namespace TileStories
 
             // Step 4: Density evaluation (§5)
             var neighborCounts = EvaluateDensity(frustumVisible);
+            // Retain for GetNeighborCount() (spec section 11); LOD is the only writer.
+            _lastNeighborCounts = neighborCounts;
 
             // Step 5: Create visual units + apply density response (§6)
             var visualUnits = ApplyDensityResponse(frustumVisible, allMarkers, bands, distances, neighborCounts);
+
+            // Step 5b: Cluster aggregate reconciliation (spec §6.1) -- collapse dense
+            // regions of Clustered units into pooled MarkerClusterView aggregates.
+            ReconcileClusters(ref visualUnits);
 
             // Step 6: Count-cap truncation (§4 step 5)
             ApplyCountCap(visualUnits, bands);
 
             // Step 7: Apply visibility with soft transition (§4 step 6, §7)
             ApplyVisibility(visualUnits);
+        }
+
+        // Returns the screen-space neighbour count (spec section 5/11) the last
+        // Evaluate() computed for a POI, or null if it was frustum-culled / not yet
+        // evaluated this cycle. Used by ZoomOnSelectController to gate auto-zoom.
+        public int? GetNeighborCount(string poiId)
+        {
+            return _lastNeighborCounts.TryGetValue(poiId, out var n) ? (int?)n : null;
         }
 
         // Step 1: Frustum cull (§8). Returns markers whose screen position
@@ -372,6 +398,182 @@ namespace TileStories
             }
         }
 
+        // Cluster aggregate reconciliation (spec §6.1). Wired between Step 5
+        // (ApplyDensityResponse) and Step 6 (ApplyCountCap) in Evaluate(). Folds dense
+        // regions of Clustered units into pooled MarkerClusterView aggregates, reusing
+        // views across cycles; absorbed members are hidden individually and replaced
+        // by one aggregate unit (clusterView + band set by the caller, per §6.1).
+        internal void ReconcileClusters(ref List<VisualUnit> visualUnits)
+        {
+            // Guards: need camera + cluster prefab + wall config. Sweep pooled views anyway.
+            if (_settings == null || _camera == null || _clusterPrefab == null)
+            {
+                SweepStaleClusterViews(new List<MarkerClusterView>());
+                return;
+            }
+
+            // 1. Aggregatable units (density-strategy Clustered + ShouldAggregate eligible).
+            var aggregatable = new List<VisualUnit>();
+            foreach (var u in visualUnits)
+                if (u != null && u.marker != null && u.clusterMembers == null && ShouldAggregate(u, _settings))
+                    aggregatable.Add(u);
+            if (aggregatable.Count == 0)
+            {
+                SweepStaleClusterViews(new List<MarkerClusterView>());
+                return;
+            }
+
+            // 2. Screen-space proximity graph (same criterion as EvaluateDensity).
+            var screenPos = new Dictionary<string, Vector2>(aggregatable.Count);
+            for (int i = 0; i < aggregatable.Count; i++)
+            {
+                var sp = _camera.WorldToScreenPoint(aggregatable[i].worldPosition);
+                screenPos[aggregatable[i].poiId] = new Vector2(sp.x, sp.y);
+            }
+            var groups = ClusterGrouping.Group(aggregatable, screenPos, _settings.density_radius_px);
+            if (groups.Count == 0)
+            {
+                SweepStaleClusterViews(new List<MarkerClusterView>());
+                return;
+            }
+
+            var bandEntries = _settings.bands != null && _settings.bands.Count > 0 ? _settings.bands : DefaultBands();
+            var spawnRoot = _wallSession != null ? _wallSession.MarkerSpawnRoot : transform;
+            var iconLibrary = _wallSession != null ? _wallSession.WallIconLibrary : null;
+            float fade = _settings.transition_fade_duration_s;
+
+            var activeViews = new List<MarkerClusterView>(groups.Count);
+            var aggregates = new List<VisualUnit>(groups.Count);
+            var matchedViews = new HashSet<MarkerClusterView>();
+            var absorbed = new HashSet<VisualUnit>();
+
+            foreach (var group in groups)
+            {
+                // 3. Centroid effective distance (spec §10: real distance / zoom).
+                Vector3 centroid = ClusterGrouping.Centroid(group);
+                float centroidEff = ClusterGrouping.CentroidEffectiveDistance(centroid, _camera.transform.position);
+                string signature = ClusterGrouping.Signature(ClusterGrouping.MemberIds(group));
+
+                // 4. Reuse-or-create a pooled view (spec §6.1: smooth, not pop).
+                var view = FindReusableClusterView(group, matchedViews);
+                bool isNew = view == null;
+                if (isNew)
+                {
+                    var go = Instantiate(_clusterPrefab, centroid, Quaternion.identity, spawnRoot);
+                    view = go.GetComponent<MarkerClusterView>();
+                    if (view == null) continue; // prefab contract violation
+                }
+                else
+                    matchedViews.Add(view);
+                activeViews.Add(view);
+
+                // (Re)build the aggregate's visuals from the current member set.
+                // MarkerClusterView consumes List<MarkerView> (POI identity + icon),
+                // so project the VisualUnit group down to its member markers first.
+                var memberViews = new List<MarkerView>(group.Count);
+                for (int i = 0; i < group.Count; i++)
+                    if (group[i].marker != null) memberViews.Add(group[i].marker);
+                if (isNew) view.Initialize(memberViews, iconLibrary, _settings);
+                else view.Refresh(memberViews, iconLibrary, _settings);
+                view.PositionAt(centroid, spawnRoot);
+
+                // 5. Band with per-signature hysteresis (spec §7).
+                LodBand committedBand;
+                if (_settings.cluster_band_hysteresis_enabled && _clusterBandCache.TryGetValue(signature, out var prevBand))
+                    committedBand = FindBandWithHysteresis(centroidEff, bandEntries, prevBand, _settings.hysteresis_margin_m);
+                else
+                    committedBand = FindBand(centroidEff, bandEntries);
+                _clusterBandCache[signature] = committedBand;
+
+                // 6. Aggregate unit: BuildAggregate owns worldPosition/poiId/priority/members;
+                //    caller owns clusterView + band (the only two fields left unset).
+                int bestPriority = group[0].hierarchyLevelIndex;
+                for (int i = 1; i < group.Count; i++)
+                    if (group[i].hierarchyLevelIndex < bestPriority) bestPriority = group[i].hierarchyLevelIndex;
+                var agg = ClusterGrouping.BuildAggregate(group, bestPriority, _settings.cluster_band_source, centroid, centroidEff);
+                agg.clusterView = view;
+                agg.band = committedBand;
+                aggregates.Add(agg);
+
+                // 7. Absorbed members stop rendering individually.
+                for (int i = 0; i < group.Count; i++)
+                {
+                    var m = group[i];
+                    absorbed.Add(m);
+                    if (m.marker != null) m.marker.SetVisible(false, fade);
+                }
+            }
+
+            // 8. Replace absorbed members with aggregates in the visual-unit list.
+            if (absorbed.Count > 0)
+            {
+                var next = new List<VisualUnit>(visualUnits.Count - absorbed.Count + aggregates.Count);
+                foreach (var u in visualUnits)
+                    if (!absorbed.Contains(u)) next.Add(u);
+                foreach (var agg in aggregates) next.Add(agg);
+                visualUnits = next;
+            }
+
+            // 9. Dissolve grace for pooled views not reused this cycle.
+            SweepStaleClusterViews(activeViews);
+        }
+
+
+        // Reuse a pooled view whose members overlap the current group (overlap-based
+        // identity, so a group that shifts membership by one still re-uses its view).
+        private MarkerClusterView FindReusableClusterView(List<VisualUnit> group, HashSet<MarkerClusterView> alreadyUsed)
+        {
+            if (_activeClusterViews == null || _activeClusterViews.Count == 0) return null;
+            var ids = ClusterGrouping.MemberIds(group);
+            if (ids.Count == 0) return null;
+            for (int i = 0; i < _activeClusterViews.Count; i++)
+            {
+                var v = _activeClusterViews[i];
+                if (v == null || alreadyUsed.Contains(v)) continue;
+                if (ClusterGrouping.Overlaps(v.MemberPoiIds, ids)) return v;
+            }
+            return null;
+        }
+
+        // Retire pooled views not reused this cycle. Under the grace limit they stay
+        // pooled + visible; at/over it they fade out, leave the pool, and are destroyed
+        // after the fade (delayed so the coroutine finishes, spec §7).
+        private void SweepStaleClusterViews(List<MarkerClusterView> activeThisCycle)
+        {
+            if (_settings == null) return;
+            int grace = _settings.cluster_dissolve_grace_cycles;
+            float fade = _settings.transition_fade_duration_s;
+            var survivors = new List<MarkerClusterView>();
+            for (int i = 0; i < _activeClusterViews.Count; i++)
+            {
+                var view = _activeClusterViews[i];
+                if (view == null) continue;
+                if (activeThisCycle.Contains(view))
+                {
+                    _clusterDissolveMisses.Remove(view); // reset on reuse
+                    continue;
+                }
+                int miss = _clusterDissolveMisses.GetValueOrDefault(view, 0) + 1;
+                if (grace <= 0 || miss >= grace)
+                {
+                    view.SetVisible(false, fade);
+                    Destroy(view.gameObject, fade);
+                    _clusterDissolveMisses.Remove(view);
+                }
+                else
+                {
+                    _clusterDissolveMisses[view] = miss;
+                    survivors.Add(view);
+                }
+            }
+            // Pool for next cycle = views reused this cycle + grace survivors.
+            // Mutate in place -- _activeClusterViews is a readonly field.
+            _activeClusterViews.Clear();
+            for (int i = 0; i < activeThisCycle.Count; i++)
+                if (activeThisCycle[i] != null) _activeClusterViews.Add(activeThisCycle[i]);
+            for (int i = 0; i < survivors.Count; i++)
+                if (survivors[i] != null) _activeClusterViews.Add(survivors[i]);
+        }
         // ------------------------------------------------------------------
         // Static methods — Tier 0 testable without a scene
         // ------------------------------------------------------------------
@@ -506,12 +708,8 @@ namespace TileStories
             // unexpectedly far denser than cluster_min (x the multiplier), force
             // cluster behaviour for this marker this cycle -- a deterministic guard
             // so select_hide / shrink_and_fade never leave an unreadable pile.
-            if (s != null && s.density_safety_escalation_enabled && s.density_response_mode != "hybrid" && s.density_response_mode != "none")
-            {
-                float safetyThreshold = clusterMin * s.density_safety_escalation_multiplier;
-                if (neighborCount > safetyThreshold)
-                    return DensityState.Clustered;
-            }
+            if (SafetyNet.ExceedsThreshold(s, clusterMin, neighborCount))
+                return DensityState.Clustered;
 
             if (s == null) return DensityState.Normal;
 
@@ -619,6 +817,38 @@ namespace TileStories
         // clusterMin <= shrinkStart -- so this is a detection surface, not a guard.
         public static bool IsDensityConfigValid(LodSettings s) =>
             s != null && s.cluster_min_count > 0 && s.shrink_start_neighbor_count < s.cluster_min_count;
+
+        // Decision 2 (spec §6.2): decide whether a Clustered unit becomes a cluster
+        // aggregate (rendered by MarkerClusterView) or is hidden outright.
+        // - cluster / hybrid: ALWAYS aggregate (that is their purpose).
+        // - select_hide / shrink_and_fade: hide outright UNLESS the safety net fires,
+        //   in which case §6.2 forces "cluster behaviour" -> aggregate.
+        // - none: total opt-out -> never aggregate.
+        // Pure on its inputs (no scene/Camera); Tier-0 testable.
+        public static bool ShouldAggregate(VisualUnit unit, LodSettings settings)
+        {
+            if (unit == null || unit.densityState != DensityState.Clustered) return false;
+            string mode = settings?.density_response_mode;
+            if (mode == "cluster" || mode == "hybrid") return true;
+            if (mode == "none" || mode == null) return false;
+            return SafetyNet.ExceedsThreshold(settings, settings.cluster_min_count, unit.neighborCount);
+        }
+
+        // Shared safety-net threshold (§6.2). ComputeTargetDensityState and ShouldAggregate
+        // both call this so the inequality cannot drift between the provisional state
+        // decision and the aggregate-eligibility decision. Excludes hybrid (escalates
+        // on its own at cluster_min) and none (opt-out).
+        public static class SafetyNet
+        {
+            public static bool ExceedsThreshold(LodSettings s, int clusterMin, int neighborCount)
+            {
+                if (s == null || !s.density_safety_escalation_enabled) return false;
+                string mode = s.density_response_mode;
+                if (mode == "hybrid" || mode == "none") return false;
+                float threshold = clusterMin * s.density_safety_escalation_multiplier;
+                return neighborCount > threshold;
+            }
+        }
 
         // ------------------------------------------------------------------
         // Helpers

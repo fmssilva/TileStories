@@ -1,0 +1,41 @@
+@import url(../Shared/DesignTokens.uss);
+
+.search-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  height: 44px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.search-field {
+  flex-grow: 1;
+}
+
+.voice-mic-btn {
+  width: 44px;
+  height: 44px;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: 56px;
+  left: 12px;
+  right: 12px;
+  flex-direction: column;
+}
+
+.voice-activity-indicator {
+  position: absolute;
+  top: 56px;
+  left: 12px;
+  right: 12px;
+  height: 4px;
+  background-color: rgba(74, 144, 217, 0.8);
+}
+
+.voice-activity-indicator.listening {
+  opacity: 1;
+}

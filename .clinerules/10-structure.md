@@ -1,4 +1,4 @@
-﻿﻿# 1. Project Structure & Organizing Principles
+﻿﻿﻿﻿﻿﻿# 1. Project Structure & Organizing Principles
 
 **Read this file to get oriented on the project's structure**
 
@@ -151,6 +151,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │
 │   │   ├── Runtime/                  ← Ships in the UPM package. No Editor references.
 │   │   │   ├── TileStories.asmdef    ← Assembly def: Runtime assembly, no editor dependency.
+│   │   │   ├── AssemblyInfo.cs    ← Grants InternalsVisibleTo to TileStories.Editor.Tests (EditMode) and TileStories.Tests.Runtime (PlayMode); single seam at the Runtime assembly root (the duplicate formerly co-located in Core/ was removed 2026-08-14).
 │   │   │   │
 │   │   │   ├── Core/                  ← Config loading, wall session lifecycle, project-wide settings/feature flags
 │   │   │   │   ├── WallSession.cs              ← Owns the active wall's lifecycle: load config,
@@ -205,12 +206,16 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                  Main Camera for editor walk-through. Build first
 │   │   │   │   │                                  in Stage 1, before any other feature -- this is
 │   │   │   │   │                                  Tier 1 of the three-tier testing pipeline.
->>>>>>>
+│   │   │   │   │
 
 │   │   │   │   ├── EditorCameraLook.cs          ← Static helper: pure yaw/pitch rotation math
+│   │   │   │   ├── ARZoomState.cs          ← Single source of truth for the camera zoom factor; consumed by LODController (effective-distance, spec §10) and authored by ARZoomController (Block 1).
 │   │   │   │   │                                  extracted from MockLocalizationProvider so the
 │   │   │   │   │                                  editor look-delta can be unit-tested without a
 │   │   │   │   │                                  scene or camera.
+│   │   │   │   ├── ARZoomController.cs          ← Drives camera zoom via pinch gesture, double-tap,
+│   │   │   │   │                                  and UI buttons; reads LodSettings zoom params and
+│   │   │   │   │                                  writes to ARZoomState.ZoomFactor (§9).
 │   │   │   │   ├── TrackingJitterSmoother.cs   ← [NOT YET BUILT] Planned: smooths Immersal pose
 │   │   │   │   │                                  updates via SmoothDamp + Slerp to prevent visual
 │   │   │   │   │                                  snap on re-localisation.
@@ -253,12 +258,25 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                  `_2.5`/`_2.6`) to exist with a real, working
 │   │   │   │   │                                  7-step pipeline (frustum cull, effective distance,
 │   │   │   │   │                                  band hysteresis, density evaluation, count-cap,
-│   │   │   │   │                                  visibility). ❌ Density *response* (shrink/
-│   │   │   │   │                                  cluster/hybrid) still a documented pass-through.
+│   │   │   │   │                                  visibility). ✅ Density-response strategies wired (select_hide / shrink_and_fade / hybrid + safety-net);
+│   │   │   │   │                                  ✅ cluster AGGREGATE creation now wired (Instantiate + Initialize from _clusterPrefab inside ReconcileClusters, green-gated by ClusterReconcileTests);
+│   │   │   │   │                                  see _2.4 status row 6.
 │   │   │   │   │                                  Do not trust this line alone — read `_2.4_Marker_LOD.md`'s
 │   │   │   │   │                                  own Implementation Status for the current state.
+│   │   │   │   ├── POISearchIndex.cs            ← Inverted index for POI search (name/summary/keyword/category/taxonomy);
+│   │   │   │   │                                  builds token-to-POI index at Build time, supports prefix
+│   │   │   │   │                                  matching and name-prefix fuzzy matching; ConfigureWithSynonyms
+│   │   │   │   │                                  accepts IList<SynonymGroup> (Editor wiring extracts from the
+│   │   │   │   │                                  SearchSynonymGroups asset). [ok on disk; tests green 15/15]
+│   │   │   │   ├── SearchTokenizer.cs            ← Pure C# static tokenizer: NFKD normalization + diacritic
+│   │   │   │   │                                  strip, lowercase, split on whitespace/punctuation/symbols,
+│   │   │   │   │                                  deduplicate preserving first-occurrence order. No Unity deps.
+│   │   │   │   ├── SynonymGroup.cs              ← Plain C# [Serializable] data class (key + synonyms list);
+│   │   │   │   │                                  lives in Runtime so POISearchIndex can reference it without a
+│   │   │   │   │                                  Runtime->Editor assembly dependency. No UnityEditor dependency.
 │   │   │   │   ├── LapseStateManager.cs        ← [NOT YET BUILT] POI-level state machine for
 │   │   │   │   │                                  temporal-lapse walls; gates visibility per epoch.
+│   │   │   │   ├── ClusterGrouping.cs          ← Static; union-find screen-space overlap grouping (connection = sqrMagnitude <= radiusPx^2, same criterion as EvaluateDensity); deterministic member order (by poiId); builds Signature/Centroid/ResolveBand/BuildAggregate for LODController. [ok on disk; tests green 196/196]
 │   │   │   │   └── NearestPOIFinder.cs         ← [NOT YET BUILT] Given a list of POI IDs, returns
 │   │   │   │                                      the one whose resolved position is nearest to a
 │   │   │   │                                      Vector3; used by circuit entry-point resolution.
@@ -269,10 +287,12 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   ├── MarkerGalleryDefinitions.cs ← Defines `MarkerGalleryEntry` (one marker variant
 │   │   │   │   │                                  to render and assert on) and the full list of
 │   │   │   │   │                                  gallery entries built up phase by phase.
-│   │   │   │   └── MarkerGalleryHarness.cs     ← MonoBehaviour that instantiates and configures
+│   │   │   │   ├── MarkerGalleryHarness.cs     ← MonoBehaviour that instantiates and configures
 │   │   │   │                                      every MarkerGalleryEntry in the gallery scene;
 │   │   │   │                                      used by both the Dev/MarkerGallery scene and
 │   │   │   │                                      MarkerGalleryTests for automated visual assertions.
+│   │   │   │   ├── ClusterGalleryDefinitions.cs    ← Defines `ClusterGalleryEntry` (icon_mode + member_count + label) and the entry list driving both the ClusterGalleryScene and ClusterGalleryTests.
+│   │   │   │   └── ClusterGalleryHarness.cs    ← MonoBehaviour that instantiates and configures every ClusterGalleryEntry in the ClusterGalleryScene; also used by ClusterGalleryTests in PlayMode.
 │   │   │   │
 │   │   │   ├── Blocks/                ← NOT YET BUILT. Planned: detail-card content block system (text/image/audio/video/3D/map)
 │   │   │   │   ├── TileStoriesUIBlock.cs       ← Abstract base class for all six registered block
@@ -411,20 +431,38 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │   │                              instances, referenced directly by the prefab.
 │   │   │   │   │   ├── Icons/, Rings/, Shapes/ ← Default PNGs (must stay under Runtime/, not Editor/ —
 │   │   │   │   │   │                              see `_5.1_Editor_Tab.md` §7 for why).
-│   │   │   │   │   └── ClusterIndicator.cs     ← Not yet built — "N more" badge when LODController
-│   │   │   │   │                                  collapses markers past a threshold.
-│   │   │   │   │                                  **Correction**: `LODController.cs` (§ elsewhere
-│   │   │   │   │                                  in this tree) is no longer accurate as "not yet
-│   │   │   │   │                                  built" — confirmed via direct code read while
-│   │   │   │   │                                  grounding `_2.5_Displacement.md` and
-│   │   │   │   │                                  `_2.6_Select_Filter_Search.md`: it exists with a
-│   │   │   │   │                                  real, working 7-step pipeline. Density
-│   │   │   │   │                                  *response* (the part that would actually collapse
-│   │   │   │   │                                  markers into a cluster) is still a documented
-│   │   │   │   │                                  pass-through, so `ClusterIndicator.cs` itself is
-│   │   │   │   │                                  still genuinely future work — just not blocked on
-│   │   │   │   │                                  `LODController` not existing at all anymore.
+│   │   │   │   │   ├── MarkerSelectable.cs       <- Thin IPointerClickHandler on POI_Marker.prefab; publishes PoiId to SelectionEventBus (Block 2, spec _2.6 section 11).
+│   │   │   │   │   ├── SelectionEventBus.cs       <- Static pub/sub relay (OnMarkerSelected(string)/OnSelectionCleared); decouples the prefab tap target from the Highlight/Zoom responders.
+│   │   │   │   │   ├── SelectionHighlightController.cs <- Listens to SelectionEventBus; dims non-selected MarkerViews via SetVisible(float,float) when selection_highlight_enabled; IDisposable.
+│   │   │   │   │   ├── ZoomOnSelectController.cs  <- Listens to SelectionEventBus; gate via ComputeZoomTarget (density threshold) into ARZoomController.SetZoomAnimated; IDisposable.
+│   │   │   │   │   ├── MarkerClusterView.cs <- dense-region aggregate (pie + count + level-mix, spec §6.1); confirmed on disk + wired into LODController.ReconcileClusters (Instantiate + Initialize from _clusterPrefab; green-gated 222/222 EditMode + 34/34 PlayMode).
+│   │   │   │   │   └── ClusterIndicator.cs  ← Not yet built - "N more" overflow badge for count-cap (band overflow past max_visible_count); distinct from MarkerClusterView (dense-region pie+count aggregate, §6.1). Genuinely future work.
 │   │   │   │   │
+│   │   │   │   ├── Zoom/                     ← UI Toolkit (screen overlay, UXML/USS) — AR camera zoom controls
+│   │   │   │   │   ├── ZoomControlView.cs      ← Controller: pinch/double-tap/button input -> ARZoomController;
+│   │   │   │   │   │                              three buttons (Zoom In / Zoom Out / Reset), each >=44px tap target
+│   │   │   │   │   ├── ZoomControlView.uxml    ← UXML: three named buttons (zoom_in_btn / zoom_out_btn / reset_btn).
+│   │   │   │   │   └── ZoomControlView.uss     ← USS: bottom-right docking (Google-Maps-style convention),
+│   │   │   │   │                                   icon sizing, hover/active states.
+│   │   │   │   ├── Minimap/                    ← UI Toolkit (screen overlay) — 2D minimap for POI navigation
+│   │   │   │   │   ├── MinimapView.cs          ← MonoBehaviour: renders POI dots on a flat panel; tap a dot raises
+│   │   │   │   │   │                              SelectionEventBus event (same path as marker taps). (§8)
+│   │   │   │   │   ├── MinimapCoordinateConverter.cs ← Tier-0 pure-logic converter: normalized wall coords → pixel
+│   │   │   │   │   │                              positions on the minimap canvas; testable without Unity lifecycle.
+│   │   │   │   │   ├── MinimapView.uxml        ← UXML: minimap container + background panel structure.
+│   │   │   │   │   └── MinimapView.uss         ← USS: minimap background styling, dot sizing, selection highlight.
+│   │   │   │   ├── Results/                    ← UI Toolkit (screen overlay) — scrollable search results list
+│   │   │   │   │   ├── ResultsListView.cs      ← MonoBehaviour: binds POISearchIndex results to a UI Toolkit ListView;
+│   │   │   │   │   │                              handles tap → SelectionEventBus, empty state, external selection. (§9)
+│   │   │   │   │   ├── ResultsListView.uxml    ← UXML: results list container and row template.
+│   │   │   │   │   └── ResultsListView.uss     ← USS: list row styling, alternating backgrounds, empty state.
+│   │   │   │   ├── Filter/                     ← UI Toolkit (screen overlay) — collapsible facet filter tray
+│   │   │   │   │   ├── FilterTrayView.cs       ← MonoBehaviour: dynamic facet toggles from WallConfigData taxonomy;
+│   │   │   │   │   │                              "relax filters" suggestion via FilterFacetEvaluator. (§7)
+│   │   │   │   │   ├── FilterFacetEvaluator.cs ← Tier-0 pure-logic: POI facet filtering + relax-suggestion computation;
+│   │   │   │   │   │                              testable without Unity lifecycle.
+│   │   │   │   │   ├── FilterTrayView.uxml     ← UXML: filter tray container structure.
+│   │   │   │   │   └── FilterTrayView.uss      ← USS: collapsible section styling, toggle appearance.
 │   │   │   │   ├── Cards/                      ← UI Toolkit (screen overlay, UXML/USS)
 │   │   │   │   │   ├── DetailCard.uxml         ← UXML: bottom-sheet structure (≤40% screen height),
 │   │   │   │   │   │                              scroll view root, block-slot container, drag
@@ -522,6 +560,33 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │   │                              category, status (if wall has one), and free-
 │   │   │   │   │   │                              text name search; tapping a result pans view
 │   │   │   │   │   │                              to that POI's marker.
+│   │   │   │   │   ├── SearchOverlayView.uxml  ← UXML structure for the search overlay (search
+│   │   │   │   │   │                              field, mic button, suggestion rows, voice-activity
+│   │   │   │   │   │                              bar).
+│   │   │   │   │   ├── SearchOverlayView.uss   ← USS styling for search overlay layout and states.
+│   │   │   │   │   ├── VoiceActivityIndicatorView.cs ← Plain C# presenter (no MonoBehaviour):
+│   │   │   │   │   │                              parses voice_activity_indicator_style config
+│   │   │   │   │   │                              string into IndicatorStyle enum; decides mic-label
+│   │   │   │   │   │                              text and listen-bar visibility per VoiceSearchState.
+│   │   │   │   │   ├── VoiceSearchController.cs← Thin wiring over VoiceStateMachine; exposes
+│   │   │   │   │   │                              State + StateChanged; rate-limits, routes to
+│   │   │   │   │   │                              speech-to-speech or text backend per config.
+│   │   │   │   │   ├── VoiceStateMachine.cs    ← VoiceSearchState enum + state machine (Idle,
+│   │   │   │   │   │                              Listening, Processing, Result, Error).
+│   │   │   │   │   ├── ITranscriber.cs         ← Interface for voice transcription backends.
+│   │   │   │   │   ├── DebugTranscriber.cs     ← EditMode-testable ITranscriber stub emitting a
+│   │   │   │   │   │                              preset transcript on StartListening.
+│   │   │   │   │   ├── TranscriberFactory.cs   ← Creates ITranscriber (DebugTranscriber or
+│   │   │   │   │   │                              platform-backed) based on config flag.
+│   │   │   │   │   └── SearchInputGuard.cs     ← Debounces search-field input; prevents
+│   │   │   │   │                              spurious re-queries during rapid typing.
+│   │   │   │   │   ├── ViewModeControl.cs      ← Segmented control for switching between
+│   │   │   │   │   │                              List, Minimap, and CameraHighlight view modes;
+│   │   │   │   │   │                              persists preference to PlayerPrefs. (§10)
+│   │   │   │   │   ├── ViewModeParser.cs       ← Tier-0 pure-logic: parse/serialize view mode
+│   │   │   │   │   │                              strings; testable without Unity lifecycle.
+│   │   │   │   │   ├── ViewModeControl.uxml    ← UXML: segmented control button structure.
+│   │   │   │   │   ├── ViewModeControl.uss     ← USS: segmented control styling, active/inactive states.
 │   │   │   │   │   └── SettingsView.cs         ← Language, profile, audio on/off, text size,
 │   │   │   │   │                                  reset-progress toggle; writes to PlayerPrefs.
 │   │   │   │   │
@@ -589,6 +654,8 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │                                      so edit-mode tests can access `internal` members.
 │   │   │   │                                      Not a feature file — purely an assembly attribute.
 │   │   │   │
+│   │   │   ├── DevTools/              ← Editor-only prefab-wiring tools (not in Runtime assembly), kept in the Editor assembly for a clear Runtime/Editor boundary.
+│   │   │   │   └── ClusterPrefabWiring.cs                     ← Idempotent menu-item (TileStories/Cluster/Wire DominantIcon) that authors the DominantIcon child + wires the serialized reference on POI_Cluster.prefab.
 │   │   │   ├── Validation/            ← NOT YET BUILT. Planned: config.json schema validation tooling
 │   │   │   │   ├── WallConfigValidator.cs      ← Reads config.json; validates required fields,
 │   │   │   │   │                                  value ranges (x_norm 0–1), circuit POI ID
@@ -598,6 +665,9 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │                                      (Error / Warning); displayed in Wizard and
 │   │   │   │                                      surfaced as Unity Console messages.
 │   │   │   │
+│   │   │   ├── SearchSynonymGroups.cs     ← [NOT YET BUILT] Editor-only; ScriptableObject asset holding synonym
+│   │   │   │                                  groups for the search index; CreateAssetMenu menu item for authoring.
+│   │   │   │                                  Wrapped in #if UNITY_EDITOR. References SynonymGroup from Runtime.
 │   │   │   ├── POIAuthoring/           ← `POIAuthoringToolWindow` split as a `partial class` across
 │   │   │   │   │                          this folder (was one 1,750-line file; refactored 2026-08
 │   │   │   │   │                          into per-concern partial files, zero behaviour change —
@@ -614,11 +684,12 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   ├── MARKER_ASSETS_CONVENTION.md         ← Documents the naming and folder convention
 │   │   │   │   │                                          for wall-specific marker symbol assets.
 │   │   │   │   ├── GlobalScene/
-│   │   │   │   │   └── POIAuthoringToolWindow.GlobalScene.cs  ← DrawGlobalSceneOptions,
+│   │   │   │   │   ├── POIAuthoringToolWindow.GlobalScene.cs  ← DrawGlobalSceneOptions,
 │   │   │   │   │                                                  DrawMarkerGlobalSection,
 │   │   │   │   │                                                  DrawGlobalBadgeSection,
 │   │   │   │   │                                                  DrawGlobalOutlineSection,
 │   │   │   │   │                                                  RecomputeLevelPercentSpacing (+ DrawGlobalHierarchySection: Hierarchy table incl. Priority column).
+│   │   │   │   │   ├── POIAuthoringToolWindow.LodZoom.cs  ← DrawGlobalLodSection + DrawGlobalZoomSection foldouts + shared DrawScalarField/DrawToggleField/DrawIntField/DrawPopupField helpers (Block 2, Editor-only).
 │   │   │   │   ├── SpecificMarker/
 │   │   │   │   │   └── POIAuthoringToolWindow.SpecificMarker.cs ← DrawSpecificMarkerOptions,
 │   │   │   │   │                                                    DrawPoiPositionFields,
@@ -656,8 +727,9 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │   ├── HelpInfoPopup.cs                     ← Read-only popup for fixed, framework-authored
 │   │   │   │   │   │                                          help text (info button). Distinct from
 │   │   │   │   │   │                                          EntryDetailsPopup (which persists developer notes).
-│   │   │   │   │   └── EditorAlertPopup.cs                  ← Non-blocking alert popup rendering a scrollable
+│   │   │   │   │   ├── EditorAlertPopup.cs                  ← Non-blocking alert popup rendering a scrollable
 │   │   │   │   │                                              list of validation warning items with fix guidance.
+│   │   │   │   │   ├── LodAutoSuggest.cs  ← Pure Editor-only Suggest Values auto-suggestion from POI count (always 3 explicit bands).
 │   │   │   │   ├── ConfigData/
 │   │   │   │   │   ├── POIAuthoringToolWindow.ConfigHistory.cs ← DrawConfigMutationScope,
 │   │   │   │   │   │                                              RecordConfigChange, undo/redo stack,
@@ -722,8 +794,8 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │                                          written after Stage 2 when block shapes are
 │   │   │                                          final, not speculatively before.
 │   │   │
-│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 158 tests total as of
-│   │       │                              2026-08-11 (127 EditMode + 31 PlayMode). No TestFixtures/ folder — fixtures are inline.
+│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 391 tests total as of
+│   │       │                              2026-08-15 (353 EditMode + 38 PlayMode). No TestFixtures/ folder — fixtures are inline.
 │   │       ├── Editor/                ← EditMode tests (run without domain reload, fast)
 │   │       │   ├── TileStories.Editor.Tests.asmdef ← Editor test assembly; references Runtime + Editor.
 │   │       │   ├── CategoryPaletteTests.cs        ← Tests category→colour/icon resolution, hash
@@ -750,10 +822,48 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │       │   │                                     back path to WallConfigData.
 │   │       │   ├── POIPositionResolverTests.cs     ← Tests piecewise interpolation from x_norm/
 │   │       │   │                                     y_norm → 3D position with mock anchors.
-│   │       │   └── StatusRampTests.cs              ← Tests StatusRamp levels, threshold ordering,
+│   │       │   ├── StatusRampTests.cs              ← Tests StatusRamp levels, threshold ordering,
 │   │       │                                          and UnknownColor distinctness.
-│   │       └── Runtime/               ← PlayMode tests (require a running scene; use [UnityTest])
+│   │       │   ├── SearchTokenizerTests.cs            ← Tier 0 EditMode tests for SearchTokenizer (accent-folding, multi-word split, punctuation stripping, dedup, numeric/single-char preservation)
+│   │       │   ├── POISearchIndexTests.cs            ← Tier 0 EditMode tests for POISearchIndex (build, search ranking, prefix match, name/summary/keyword/taxonomy ranks, max-not-sum scoring)
+│   │       │   ├── SearchSynonymGroupsTests.cs       ← Tier 0 EditMode tests for synonym expansion path (extends search, empty groups no-change, build-after-configure preserves)
+│   │       │   ├── LodAutoSuggestTests.cs        ← Tests LodAutoSuggest.Suggest(n) exact output (n=0/10/18/150) + always-3-bands invariant; EditMode.
+│   │       │   ├── ClusterGroupingTests.cs     ← Tier-0 EditMode tests for ClusterGrouping.Group/Centroid/Signature/ResolveBand/BuildAggregate (deterministic, empty, singleton, boundary); green-gated 196/196 EditMode, 0 error CS.
+│   │       │   ├── MarkerSelectionEditModeTest.cs <- Tier-0 EditMode tests for Block 2 zoom-on-select gate (ComputeZoomTarget) + SelectionEventBus round-trip (268/268 EditMode green, 2026-08-15).
+│   │       │   └── LodAuthoringRoundTripTests.cs ← Tests LOD + Zoom foldout fields round-trip through authoring Save/Load path; EditMode.
+│   │       │   ├── ClusterReconcileTests.cs     ← EditMode tests for LODController.ReconcileClusters (band resolution, hysteresis, dissolve grace, reuse, guards); 222/222 green.
+│   │       │   ├── ClusterPrefabTests.cs    ← EditMode contract tests for POI_Cluster prefab: required children, DefaultIconImage, CountLabel, DominantIcon child + dominantIcon ref.
+│   │       │   ├── LODControllerTests.cs    ← EditMode unit tests for LODController pipeline stages (frustum cull, effective distance, band assignment, density, cluster reconciliation).
+│   │       │   ├── ARZoomMathTests.cs       ← EditMode tests for ARZoom math (clamp, step, round-trip between ZoomFactor and FOV).
+│   │       │   ├── ARZoomStateTests.cs      ← EditMode tests for ARZoomState (ZoomFactor setter/getter, BaseZoomFactor baseline, min/max enforcement).
+│   │       │   ├── ZoomControlViewEditModeTests.cs ← EditMode tests: UXML declares three named buttons (zoom_in_btn / zoom_out_btn / reset_btn); assert no ambiguity in routing.
+│   │       │   ├── Minimap/                      ← EditMode tests for Block 3 minimap
+│   │       │   │   ├── MinimapCoordinateConverterTests.cs ← Tier-0 tests: ConvertToPixel/ClampNorm with edge cases, y-inversion, element centering.
+│   │       │   │   └── MinimapViewTests.cs       ← Tier-1 tests: Initialize, RefreshDots, SetVisible, OnSelectionChanged highlighting.
+│   │       │   ├── Results/                      ← EditMode tests for Block 3 results list
+│   │       │   │   └── ResultsListViewTests.cs ← Tier-1 tests: Initialize, RefreshResults, empty state, selection events.
+│   │       │   ├── Filter/                       ← EditMode tests for Block 3 filter tray
+│   │       │   │   ├── FilterFacetEvaluatorTests.cs ← Tier-0 tests: PoiPassesFilters, CountPoisWithFacetRemoved, ComputeRelaxSuggestion.
+│   │       │   │   └── FilterTrayViewTests.cs  ← Tier-1 tests: facet generation, toggle behavior, ClearAllFilters.
+│   │       │   └── Navigation/                   ← EditMode tests for Block 3 view mode control
+│   │       │       ├── ViewModeControlTests.cs ← Tier-1 tests: mode switching, SetVisible coordination, PlayerPrefs persistence.
+│   │       │       └── ViewModeParserTests.cs  ← Tier-0 tests: Parse/ToString for all view mode strings + unknown/null fallback.
+│   │       │   ├── Search/                       ← EditMode tests for Block 4 search overlay + voice (Tier-0.5 checks)
+│   │       │   │   ├── SearchOverlayViewTests.cs ← Tier-0 + Tier-0.5 tests: debounce, recent/suggested display, mic visibility,
+│   │       │   │   │                              accessibility tooltip assertions for search field, mic button,
+│   │       │   │   │                              suggestion rows, and voice activity bar.
+│   │       │   │   ├── VoiceActivityIndicatorViewTests.cs ← Tier-0 tests: ParseStyle fallback, IsVoiceActive,
+│   │       │   │   │                              MicLabelForState, IsBarVisible, style construction defaults,
+│   │       │   │   │                              and StyleNames array. (23 tests, all green 2026-08-16)
+│   │       │   │   ├── VoiceSearchControllerTests.cs ← Tier-0 tests for voice search controller wiring + state transitions.
+│   │       │   │   ├── VoiceStateMachineTests.cs ← Tier-0 tests for VoiceSearchState enum + state machine transitions.
+│   │       │   │   ├── RecentSearchesManagerTests.cs ← Tier-0 tests for recent search persistence + recency ordering.
+│   │       │   │   ├── SuggestedSearchesManagerTests.cs ← Tier-0 tests for suggested searches category distribution.
+│   │       │   │   └── SearchInputGuardTests.cs ← Tier-0 tests for debounce timing + spurious-query suppression.
+│   │       │   └── Runtime/               ← PlayMode tests (require a running scene; use [UnityTest])
 │   │           ├── TileStories.Tests.asmdef        ← Runtime test assembly.
+│   │           ├── ARZoomRoutingTests.cs            ← Button -> ARZoomController -> ARZoomState routing; PlayMode (AddComponent Awake is deterministic). Holds the test moved out of ZoomControlViewEditModeTests.
+│   │           ├── ARZoomRoutingTests_additions.cs <- PlayMode routing proof for Block 2: SelectionEventBus tap -> ZoomOnSelectController.ComputeZoomTarget gate -> ARZoomController.SetZoomAnimated -> ARZoomState (dense zooms, sparse/unknown skipped; 38/38 PlayMode green, 2026-08-15).
 │   │           ├── MarkerGalleryTests.cs            ← Instantiates every entry from MarkerGallery-
 │   │           │                                       Definitions via MarkerGalleryHarness and
 │   │           │                                       asserts visual state is correct.
@@ -762,9 +872,15 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │           ├── MarkerOverlapResolverTests.cs    ← Tests overlap offset assignment (clustered/
 │   │           │                                       already-separated/idempotent scenarios) and
 │   │           │                                       MarkerBillboard camera-facing rotation.
-│   │           └── MarkerViewRuntimeTests.cs        LivingRoomConfigIntegrationTests.cs  ← PlayMode integration: real StreamingAssets/LivingRoom/config.json (18 POIs, 5 hierarchy levels) loads and every hierarchy_level_key resolves.
-│   │           └── MarkerViewRuntimeTests.cs        ← Tests that MarkerView correctly wires its
+│   │           ├── LivingRoomConfigIntegrationTests.cs ← PlayMode integration: real StreamingAssets/LivingRoom/config.json (18 POIs, 5 hierarchy levels) loads and every hierarchy_level_key resolves.
+│   │           ├── MarkerViewRuntimeTests.cs        ← Tests that MarkerView correctly wires its
 │   │                                                   sub-components given various POI configs.
+│   │           ├── ClusterReconcilePlayModeTests.cs ← PlayMode [UnityTest] companion to ClusterReconcileTests;
+│   │                                                   hosts the two Dissolve destroy-path tests (Destroy() is PlayMode-only).
+│   │           ├── ClusterGalleryTests.cs    ← PlayMode Phase-A test: instantiates every ClusterGalleryDefinitions entry on the real POI_Cluster prefab, asserts size/count/pie-slice/icon-mode.
+│   │           ├── ClusterPipelineIntegrationTests.cs ← PlayMode [UnityTest] real-config E2E test driving the full cluster LOD pipeline (FrustumCull->ComputeEffectiveDistances->AssignBands->EvaluateDensity->ApplyDensityResponse->ReconcileClusters->ApplyCountCap->ApplyVisibility) against the 6 real lamp_* POIs from StreamingAssets/LivingRoom/config.json; asserts one real aggregate + determinism across re-runs.
+│   │           ├── SearchOverlayRuntimeTests.cs ← PlayMode [UnityTest]: headless UIDocument driving text->search->results->select->detail, and DebugTranscriber -> transcript -> ResultsList.
+│   │           └── MarkerSelectRoutingTests.cs ← PlayMode routing tests for selection event bus -> zoom controller integration.
 │   │
 │   ├── Apps/                                   ← One sub-folder per wall. Framework has zero
 │   │   │                                          knowledge these folders exist.
@@ -774,7 +890,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │                                      and end-to-end testing before going to real
 │   │   │   │                                      walls. Uses MockLocalizationProvider or a real
 │   │   │   │                                      Immersal map. Never shipped to production.
-│   │   │   ├── config.json                     ← Working POI data (20 POIs + heritage taxonomy).
+│   │   │   ├── config.json                     ← Working POI data (18 POIs: 3 hero + 15 satellites, grouped as 3 families of 6; 2 calibration anchors; + heritage taxonomy).
 │   │   │   ├── config.json.backup              ← Previous config snapshot (manual backup).
 │   │   │   ├── LivingRoomScene.unity           ← The scene actually used for all dev iteration.
 │   │   │   ├── 146267-LivingRoom2.bytes        ← Immersal VPS map file (naming from Immersal
@@ -823,12 +939,15 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │           └── Videos/
 │   │
 │   ├── Dev/                                    ← Development harness assets. Not shipped.
-│   │   └── MarkerGallery/                      ← Scene + assets for the marker gallery dev tool.
+│   │   ├── MarkerGallery/                      ← Scene + assets for the marker gallery dev tool.
 │   │       ├── MarkerGalleryScene.unity        ← Scene that MarkerGalleryHarness populates with
 │   │       │                                      every variant from MarkerGalleryDefinitions;
 │   │       │                                      used for visual inspection and PlayMode tests.
 │   │       ├── Backdrops/backdrop.png          ← Background image used in the gallery scene.
 │   │       └── Screenshots/                    ← PNG captures from gallery sessions (dev reference).
+│   │   └── ClusterGallery/    ← Scene + assets for the cluster gallery dev tool.
+│   │       ├── ClusterGalleryScene.unity    ← Scene that ClusterGalleryHarness populates with every entry from ClusterGalleryDefinitions; used for visual inspection and PlayMode ClusterGalleryTests.
+│   │       └── (shared backdrop.png reused from MarkerGallery/)
 │   │
 │   ├── StreamingAssets/                        ← Unity runtime-readable folder (no AssetDatabase
 │   │   │                                          access needed); copied to device on build.

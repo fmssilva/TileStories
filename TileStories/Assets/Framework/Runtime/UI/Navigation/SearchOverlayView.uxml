@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns:ui="UnityEngine.UIElements">
+  <ui:VisualElement name="search-overlay" class="search-overlay">
+    <ui:TextField name="search-field" />
+    <ui:Button name="voice-mic-btn" text="Mic" />
+    <ui:VisualElement name="search-suggestions" class="search-suggestions" />
+  </ui:VisualElement>
+</UXML>

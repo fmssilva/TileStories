@@ -1,0 +1,18 @@
+<UXML xmlns="https://unity.com/ui-toolkit/schema/uxml">
+  <VisualElement name="filter-tray-root" class="filter-tray-root">
+    <Label name="filter-empty-state" class="filter-empty-state"
+           text="" display="None" />
+    <VisualElement name="facet-section-category" class="facet-section" display="None">
+      <Label text="Categories" class="facet-header" />
+    </VisualElement>
+    <VisualElement name="facet-section-badge" class="facet-section" display="None">
+      <Label text="Badges" class="facet-header" />
+    </VisualElement>
+    <VisualElement name="facet-section-status" class="facet-section" display="None">
+      <Label text="Status Levels" class="facet-header" />
+    </VisualElement>
+    <VisualElement name="facet-section-hierarchy" class="facet-section" display="None">
+      <Label text="Hierarchy Levels" class="facet-header" />
+    </VisualElement>
+  </VisualElement>
+</UXML>

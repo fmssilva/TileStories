@@ -1,0 +1,7 @@
+<UXML xmlns="https://unity.com/ui-toolkit/schema/uxml">
+  <VisualElement name="view-mode-root" class="view-mode-control">
+    <Button name="view-mode-list" text="List" class="view-mode-button" />
+    <Button name="view-mode-minimap" text="Minimap" class="view-mode-button" />
+    <Button name="view-mode-highlight" text="Highlight" class="view-mode-button" />
+  </VisualElement>
+</UXML>

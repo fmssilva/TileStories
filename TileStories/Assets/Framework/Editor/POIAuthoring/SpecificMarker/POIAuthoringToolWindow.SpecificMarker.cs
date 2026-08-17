@@ -71,6 +71,12 @@ namespace TileStories.Editor
                     // Effects foldout removed: per-POI effect selection is now
                     // driven entirely by the hierarchy level (see DrawPoiMarkerStyleFields).
                     // Global effect *defaults* remain in the Global Scene Effects section.
+                    _showPoiSearchKeywords = EditorGUILayout.Foldout(_showPoiSearchKeywords, "Search Keywords", true);
+                    if (_showPoiSearchKeywords)
+                    {
+                        using (new EditorGUI.IndentLevelScope())
+                            DrawPoiSearchKeywordsField(poi);
+                    }
                 }
 
                 EditorGUILayout.Space(6f);
@@ -341,6 +347,44 @@ namespace TileStories.Editor
             }
 
             return expanded;
+        }
+
+        // Per-POI search keywords editor (Block 5, Phase 5.1, task 4).
+        // Edits POIData.search_keywords via a multi-line TextField popup.
+        private void DrawPoiSearchKeywordsField(POIData poi)
+        {
+            if (poi == null)
+                return;
+
+            if (poi.search_keywords == null)
+                poi.search_keywords = new List<string>();
+
+            string joined = string.Join(", ", poi.search_keywords);
+            EditorGUILayout.LabelField("Keywords (comma-separated)", EditorStyles.miniLabel);
+            string edited = EditorGUILayout.TextField(joined, GUILayout.Height(60f));
+            if (edited != joined)
+            {
+                poi.search_keywords = ParseKeywordListStatic(edited);
+                _hasUnsavedChanges = true;
+            }
+        }
+
+        // Parse a comma-separated keyword string into a list, trimming empties.
+        // Duplicated from SymbolTable.cs to avoid assembly-boundary issues
+        // (this partial is in the same assembly, but keeps the method self-contained).
+        private static List<string> ParseKeywordListStatic(string text)
+        {
+            var result = new List<string>();
+            if (string.IsNullOrWhiteSpace(text))
+                return result;
+
+            foreach (string part in text.Split(','))
+            {
+                string trimmed = part.Trim();
+                if (!string.IsNullOrEmpty(trimmed))
+                    result.Add(trimmed);
+            }
+            return result;
         }
     }
 }

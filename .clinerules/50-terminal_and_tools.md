@@ -23,72 +23,72 @@
 
 ## 5.3. File Editing Discipline 
 
-**Default tier = Python repair-script; fail over to structured scripts only if python is unavailable.**
-NEVER use inline `python -c` / inline `perl -e` / inline shell with `$_ $() `` ;` or nested quotes --
-the command bridge strips quotes and backslashes and corrupts string literals. That is the single
-most common way edits go wrong in this workspace. If you are tempted, stop: write a script file instead.
+**Primary tool: the `editor` tool (direct file edit, one step). Python is fallback for edge cases.**
 
-### The one-line mental model
+### How to edit a file (the fast, smooth way)
+The `editor` tool writes directly to the file in one call. No Python script file to create, run, or
+delete. This is the default for every edit. Know its one quirk and you never need Python indirection.
+
+1. **For Create a new file**: omit `old_text` (or pass empty string). Provide `new_text` with the full
+   file content. Done in one call -- zero matching, zero whitespace issues. This is the fastest path
+   and works perfectly every time.
+
+2. **For Replace text in an existing file**: 
+   - `old_text` must match EXACTLY, **including ALL leading whitespace ON EVERY matched line**. So, copy the line verbatim from a `read_files` output into `old_text`. 
+   - **Critical bug to avoid**: if `old_text` omits the line's leading whitespace (starts
+   at a non-whitespace character mid-line), the tool PREPENDS the original line's indentation to
+   the replacement text. This causes indentation doubling (12 spaces -> 24 -> 36). So ALWAYS include the full line with its indentation in `old_text` to prevent this.
+
+3. **Column-precise edits**: use `unityMCP__apply_text_edits` with exact line/col coordinates and
+   the current `precondition_sha256` (from `unityMCP__get_sha`). This is immune to the whitespace
+   doubling bug because it operates on line/column ranges, not text matching. Drawback: requires
+   the file SHA to match (fetch a fresh SHA if the file changed). Use this when you cannot
+   reliably reproduce the exact `old_text` (e.g., whitespace you can't count).
+
+4. **Verify after every edit**: re-read the edited region with `read_files`. If it returns
+   "outdated" (stale cache after an external write), fall back to `unityMCP__get_sha` or read
+   via PowerShell `gc <path>`. Then `refresh_unity` (force compile, zero `error CS`) and
+   `run_tests` (EditMode + PlayMode, zero failures) to confirm.
+
+5. **Complex multi-edit**: if exact `old_text` matching is too fragile (e.g., you can't
+   determine exact whitespace), write a small `__edit.py` and run it. Prefer `apply_text_edits`
+   or the `editor` tool with full-line `old_text` over Python whenever possible. See the
+   Fallback section below for the pre-made helper.
+
+   > Never use inline `python -c` with nested quotes or `$_ $()` -- the command bridge strips
+   > them and corrupts string literals. Write a script file instead.
+
+### One-line mental model
 Edit = READ region verbatim -> assert-anchored single replacement -> WRITE back unchanged encoding
 -> re-READ to verify -> run the relevant test suite. Never rewrite a file from memory.
 
-### TIER 1 (DEFAULT): Python repair-script (robust, asserts, encoding-safe)
-One logical change per script. Prefix with `__`. Delete it after editing.
+### Fallback: `edit_file.py` (when `old_text` whitespace can't be matched exactly)
+A persistent helper at the workspace root. Write `__old.txt` (search text) and `__new.txt`
+(replacement), then run `python edit_file.py <path> > __out.txt 2>&1` and read `__out.txt`.
+It does exact substring matching (no whitespace counting needed), auto-detects BOM/encoding,
+strips a trailing newline to avoid CRLF mismatches, and asserts exactly one match (fails loud
+if 0 or 2+). Delete the two `.txt` files after.
 
-1. READ the exact region with `read_files` (start_line/end_line). Copy the target line(s)
-   verbatim, including ALL leading whitespace, into the script as the anchor.
-2. Write `__edit.py` at the workspace ROOT. Use this template:
+What agents forget by heart: old_text must be unique; new_text >= 3000 chars -> split into
+two sequential edits; if the assert fails with "found N times", the anchor is ambiguous --
+stop, re-read, do NOT force it.
 
-   import sys
-   path = r"TileStories\\Assets\\Framework\\Runtime\\POI\\MarkerHierarchyResolver.cs"
-   has_bom = open(path, "rb").read(3) == b"\\xef\\xbb\\xbf"
-   with open(path, "r", encoding="utf-8", newline="") as f:
-       s = f.read()
-   OLD = "    private static int _x = 0;"      # verbatim, with indentation
-   NEW = "    private static int _x = 1;"
-   n = s.count(OLD)
-   assert n == 1, f"anchor found {n} times (want exactly 1): {OLD!r}"
-   s = s.replace(OLD, NEW, 1)
-   enc = "utf-8-sig" if has_bom else "utf-8"    # preserve byte-for-byte encoding
-   with open(path, "w", encoding=enc, newline="") as f:
-       f.write(s)
-   print("[ok]", path)
-
-3. Run it: `python __edit.py > __out.txt 2>&1` (remember: `;` to chain, redirect to a log, never `| findstr`).
-   Read `__out.txt`. A missing/ambiguous anchor must fail the assert loudly -- never a silent no-op.
-4. Re-READ the edited region with `read_files` to confirm: old anchor gone, new content present,
-   indentation + braces balanced.
-5. For INSERTIONS: set `OLD` to a single unique line and `NEW = OLD + "\\n" + inserted_lines`, so the
-   anchor line survives and line numbers below stay valid. Keep each NEW under ~3000 chars.
-
-### TIER 2 (FALLBACK): structured/coordinate Unity MCP edit tools
-Use only if python is unavailable. `unityMCP__apply_text_edits` takes explicit line/col ranges
-(whitespace-exact, immune to the substring-indentation bug) -- but column counting is error-prone, so
-re-read the exact range first. `unityMCP__script_apply_edits` handles whole-method/class changes by name.
-Verify identically with a re-read + tests.
+### Alternative: coordinate-based edits via `unityMCP__apply_text_edits`
+Use when the `editor` tool cannot match exact whitespace. Takes explicit line/col ranges
+(whitespace-exact, immune to the doubling bug) -- but column counting is error-prone, so
+re-read the exact range first. `unityMCP__script_apply_edits` handles whole-method/class
+changes by name. Verify with a re-read + tests.
 
 ### Read rules (unchanged, but re-emphasized)
 - Always `read_files` with start_line/end_line; never dump a whole big file.
 - Copy anchors verbatim from that read -- never from memory or an earlier plan.
-- If a read looks stale (e.g. a region you just edited shows old content), re-read via a fresh path
-  (e.g. dump region to a temp log, then read the log) before trusting it.
-- For ASCII-only search within a known file prefer `unityMCP__find_in_file`; if it rejects a dotted
-  filename (`POIAuthoringToolWindow.GlobalScene.cs`) or a global search sweeps binary `Library/`, fall
-  back to `read_files` with line ranges. Never trust a regex over the whole repo for a single file's layout.
+- If a read looks stale after an edit, re-read via a fresh path before trusting it.
 
 ### Verify after every edit (the un-skippable gate)
 - Re-read the edited region. Balanced braces/parens, correct indentation.
-- Then `refresh_unity` (force compile) -> ZERO `error CS`; `run_tests` EditMode + PlayMode -> ZERO failures.
-- If the change touched a `.prefab`/`.asset`/texture (not just a text file), trigger an AssetDatabase
-  refresh (Rule 40 §4.3) before reporting done.
+- Then `refresh_unity` -> ZERO `error CS`; `run_tests` EditMode + PlayMode -> ZERO failures.
+- Touched a `.prefab`/`.asset`/texture? Trigger AssetDatabase refresh (Rule 40 sec.4.3)
+  before reporting done.
 
 ### Temp-file hygiene
-- All scratch files prefixed `__` and deleted after use. Keep `__TODO_work_plan.md`.
-- Do NOT delete files that look like user docs (`__claude.md`, `__cline.md`, `__models.md`, `__notes.md`).
-
-### Fail-fast
-- `s.count(OLD)` != 1 -> the anchor is ambiguous/missing: stop, re-read, do NOT force the replace.
-- `new_text >= 3000` chars -> split into two sequential edits.
-- Never rebuild a whole section/file in one edit from memory.
-- Tool fails -> read the error, pivot (don't repeat identical failing call).
-
+- All scratch files prefixed `__` and deleted after use. 

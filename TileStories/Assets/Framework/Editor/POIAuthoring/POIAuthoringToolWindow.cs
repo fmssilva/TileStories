@@ -14,6 +14,15 @@ namespace TileStories.Editor
     // - Config data mutations use a local snapshot history for Ctrl+Z / Ctrl+Y.
     public partial class POIAuthoringToolWindow : EditorWindow
     {
+
+        private enum TabSelection
+        {
+            GlobalScene,
+            SpecificMarker
+        }
+
+        private TabSelection _selectedTab = TabSelection.GlobalScene;
+
         private const string DefaultConfigPath = "Assets/Apps/LivingRoom/config.json";
         private const string DefaultStreamingConfigPath = "Assets/StreamingAssets/LivingRoom/config.json";
         private const string DefaultPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
@@ -165,10 +174,18 @@ namespace TileStories.Editor
         [SerializeField] private bool _showGlobalOutline = true;
         [SerializeField] private bool _showGlobalHierarchy = true;
         [SerializeField] private bool _showGlobalEffects = true;
+        // Block 2 (_2.4 rows 5b/12/13): LOD + AR-zoom authoring foldouts.
+        [SerializeField] private bool _showGlobalLod = true;
+        [SerializeField] private bool _showGlobalZoom = true;
+        // Block 5 (_2.6 section 3): Search & Filter authoring foldout.
+        [SerializeField] private bool _showGlobalSearchFilter = true;
+        [SerializeField] private string _searchIndexStrategy = "keyword_ranked";
+
         [SerializeField] private bool _showPoiPosition = true;
         [SerializeField] private bool _showPoiMarkerStyle = true;
         [SerializeField] private bool _showPoiBadgeStyle = true;
         [SerializeField] private bool _showPoiOutline = true;
+        [SerializeField] private bool _showPoiSearchKeywords = true;
 
         [SerializeField] private SpriteKeyLibrary _defaultIconLibrary;
         [SerializeField] private SpriteKeyLibrary _wallIconLibrary;
@@ -199,32 +216,53 @@ namespace TileStories.Editor
             SceneView.duringSceneGui -= OnSceneGUI;
         }
 
-        private void OnGUI()
+    private void OnGUI()
+    {
+        HandleUndoShortcuts();
+
+        DrawToolbar();
+        DrawTopConfigAndActions();
+        DrawSyncAndWarnings();
+
+        if (_config == null)
         {
-            HandleUndoShortcuts();
-
-            DrawToolbar();
-            DrawTopConfigAndActions();
-            DrawSyncAndWarnings();
-
-            if (_config == null)
-            {
-                EditorGUILayout.HelpBox("No config loaded. Click Load Config.", MessageType.Info);
-                return;
-            }
-
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
-
-            _showGlobalSceneOptions = DrawFramedFoldout(_showGlobalSceneOptions, "Global Scene Options", GlobalSectionColor,
-                () => DrawConfigMutationScope(DrawGlobalSceneOptions, refreshRigOnChange: true));
-
-            EditorGUILayout.Space(8f);
-
-            _showSpecificMarkerOptions = DrawFramedFoldout(_showSpecificMarkerOptions, "Specific Marker Options", GlobalSectionColor,
-                () => DrawConfigMutationScope(DrawSpecificMarkerOptions, refreshRigOnChange: true));
-
-            EditorGUILayout.EndScrollView();
+            EditorGUILayout.HelpBox("No config loaded. Click Load Config.", MessageType.Info);
+            return;
         }
+
+        _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
+
+        // Tab toolbar - replaces the previous side-by-side layout
+        // Light greenish/gray background for special "tabs buttons" per user request
+        // Left-aligned with automatic button sizing (FitToContents) for narrow windows
+        var _originalBgColor = GUI.backgroundColor;
+        GUI.backgroundColor = new Color(0.9f, 1.0f, 0.9f); // light greenish/gray
+
+        string[] tabNames = { "Global Scene", "Specific Marker" };
+        int selectedIndex = (int)_selectedTab;
+        int newSelectedIndex = GUILayout.Toolbar(selectedIndex, tabNames, GUI.skin.button, GUI.ToolbarButtonSize.FitToContents, GUILayout.Height(26f));
+        if (newSelectedIndex != selectedIndex)
+        {
+            _selectedTab = (TabSelection)newSelectedIndex;
+        }
+
+        GUI.backgroundColor = _originalBgColor; // Restore original background color
+
+        EditorGUILayout.Space(10f); // Increased from 8f for better visual separation
+
+        // Conditional content based on selected tab - only show selected tab's content
+        switch (_selectedTab)
+        {
+            case TabSelection.GlobalScene:
+                DrawConfigMutationScope(DrawGlobalSceneOptions, refreshRigOnChange: true);
+                break;
+            case TabSelection.SpecificMarker:
+                DrawConfigMutationScope(DrawSpecificMarkerOptions, refreshRigOnChange: true);
+                break;
+        }
+
+        EditorGUILayout.EndScrollView();
+    }
 
         // Draw a foldout with a coloured left border so the two top-level groups
         // (Global / Specific) read as visually distinct sections, not just plain

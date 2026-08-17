@@ -1,0 +1,35 @@
+.filter-tray-root {
+    position: absolute;
+    top: 80px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.facet-section {
+    margin-bottom: 8px;
+}
+
+.facet-header {
+    unity-font-style: bold;
+    font-size: 13px;
+    padding-left: 4px;
+    padding-bottom: 4px;
+}
+
+.facet-section .unity-toggle {
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.filter-empty-state {
+    text-align: middle-center;
+    flex-grow: 1;
+    font-size: 14px;
+    color: rgba(178, 178, 178, 1);
+    justify-content: center;
+}

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -65,6 +65,39 @@ namespace TileStories.Editor
                     DrawGlobalHierarchySection();
                 }
             }
+
+            EditorGUILayout.Space(4f);
+
+            _showGlobalLod = EditorGUILayout.Foldout(_showGlobalLod, "LOD", true);
+            if (_showGlobalLod)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DrawGlobalLodSection();
+                }
+            }
+
+                        EditorGUILayout.Space(4f);
+
+            _showGlobalZoom = EditorGUILayout.Foldout(_showGlobalZoom, "Zoom", true);
+            if (_showGlobalZoom)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DrawGlobalZoomSection();
+                }
+            }
+
+            EditorGUILayout.Space(4f);
+
+            _showGlobalSearchFilter = EditorGUILayout.Foldout(_showGlobalSearchFilter, "Search & Filter", true);
+            if (_showGlobalSearchFilter)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DrawGlobalSearchFilterSection();
+                }
+            }
         }
 
         private void DrawMarkerGlobalSection()
@@ -99,7 +132,10 @@ namespace TileStories.Editor
                 (e, v) => e.details = v,
                 e => _config.marker_shape != "none",
                 "+ Add category",
-                "Category");
+                "Category",
+                true,
+                e => e.search_keywords,
+                (e, v) => e.search_keywords = v);
         }
 
         private void DrawGlobalBadgeSection()
@@ -130,7 +166,10 @@ namespace TileStories.Editor
                 (e, v) => e.details = v,
                 e => _config.badge_shape != "none",
                 "+ Add badge category",
-                "Badge Key");
+                "Badge Key",
+                true,
+                e => e.search_keywords,
+                (e, v) => e.search_keywords = v);
         }
 
         private void DrawGlobalOutlineSection()
@@ -187,7 +226,7 @@ namespace TileStories.Editor
             if (_config.outline_levels.Count == 0)
                 _config.outline_levels.AddRange(DefaultOutlineLevels.Create());
 
-            // Column headers: Outline key | Details | Type | Preview | Color | Remove
+            // Column headers: Outline key | Details | Type | Preview | Color | Search Keywords | Remove
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("Outline key", EditorStyles.miniBoldLabel, GUILayout.Width(110f));
@@ -197,6 +236,7 @@ namespace TileStories.Editor
                 EditorGUILayout.LabelField("Preview", EditorStyles.miniBoldLabel, GUILayout.Width(44f));
                 if (isFreeColors)
                     EditorGUILayout.LabelField("Color", EditorStyles.miniBoldLabel, GUILayout.Width(152f));
+                EditorGUILayout.LabelField("Search Keywords", EditorStyles.miniBoldLabel);
                 EditorGUILayout.LabelField("", GUILayout.Width(26f)); // Remove (trash)
             }
 
@@ -229,6 +269,9 @@ namespace TileStories.Editor
                         DrawColorSwatchAndHex(ref colorHex);
                         entry.color_hex = colorHex;
                     }
+
+                    // Search keywords column
+                    entry.search_keywords = DrawKeywordListField(entry.search_keywords);
 
                     // Remove button
                     if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
@@ -390,7 +433,7 @@ namespace TileStories.Editor
                             "Real-world printed size of the marker Symbol. This is not yet adjusted for viewing distance -- that's a separate future feature.");
                     }
 
-                    // Column 5: Show Label (dropdown, explicit wording per §6)
+                    // Column 5: Show Label (dropdown, explicit wording per Â§6)
                     int showLabelIdx = entry.show_label ? 0 : 1;
                     showLabelIdx = EditorGUILayout.Popup("Show Label", showLabelIdx, ShowLabelOptions, GUILayout.Width(130f));
                     entry.show_label = showLabelIdx == 0;
@@ -467,6 +510,125 @@ namespace TileStories.Editor
             {
                 _config.effect_defaults = new EffectDefaults();
                 _hasUnsavedChanges = true;
+            }
+        }
+
+        // ---- Search & Filter foldout (Block 5, Phase 5.1) ----
+        // Exposes ONLY config fields that are read AND consumed at runtime (D1).
+        // Organized into labelled subgroups: Search / Voice / Recent & Suggested /
+        // Results & Navigation / Selection & Zoom / Ranking & Weights (conditional).
+        private void DrawGlobalSearchFilterSection()
+        {
+            if (_config == null)
+                return;
+
+            // Strategy dropdown (D6) -- always visible at the top. Toggling it
+            // controls whether the "Ranking & Weights" block is editable or dimmed.
+            DrawStrategyDropdown();
+
+            EditorGUILayout.Space(6f);
+            EditorGUILayout.LabelField("Search", EditorStyles.boldLabel);
+            _config.search_mode = DrawPopupField("Search mode", _config.search_mode,
+                SearchModeOptions, SearchModeLabels, SearchModeHelp);
+
+            // --- Ranking & Weights (strategy-conditional) ---
+            // Under "keyword_ranked" these are inert; render disabled-with-hint.
+            bool useWeighted = _config.search_index_strategy == "weighted_fields";
+            DrawRankingAndWeights(useWeighted);
+
+            EditorGUILayout.Space(6f);
+            EditorGUILayout.LabelField("Results & Navigation", EditorStyles.boldLabel);
+            _config.no_results_message = EditorGUILayout.TextField("No-results message", _config.no_results_message);
+            _config.default_result_view = DrawPopupField("Default result view", _config.default_result_view,
+                ResultViewOptions, ResultViewLabels, ResultViewHelp);
+
+            EditorGUILayout.Space(3f);
+            EditorGUILayout.LabelField("Minimap", EditorStyles.miniLabel);
+            _config.minimap_enabled = DrawToggleField("Enable minimap", _config.minimap_enabled, MinimapHelp);
+            if (_config.minimap_enabled)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    _config.minimap_visibility = DrawPopupField("Visibility", _config.minimap_visibility,
+                        MinimapVisibilityOptions, MinimapVisibilityLabels, MinimapVisibilityHelp);
+                    _config.minimap_icon_style = DrawPopupField("Icon style", _config.minimap_icon_style,
+                        MinimapIconOptions, MinimapIconLabels, MinimapIconHelp);
+                }
+            }
+
+            EditorGUILayout.Space(6f);
+            EditorGUILayout.LabelField("Recent & Suggested", EditorStyles.boldLabel);
+            _config.recent_search_count = DrawIntField("Recent search count", _config.recent_search_count, RecentCountHelp);
+            _config.show_suggested_categories = DrawToggleField("Show suggested categories", _config.show_suggested_categories, SuggestedHelp);
+            _config.suggested_source = DrawPopupField("Suggested source", _config.suggested_source,
+                SuggestedSourceOptions, SuggestedSourceLabels, SuggestedSourceHelp);
+
+            EditorGUILayout.Space(6f);
+            EditorGUILayout.LabelField("Voice", EditorStyles.boldLabel);
+            _config.voice_search_enabled = DrawToggleField("Enable voice search", _config.voice_search_enabled, VoiceEnabledHelp);
+            if (_config.voice_search_enabled)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    _config.voice_search_match_mode = DrawPopupField("Match mode", _config.voice_search_match_mode,
+                        VoiceMatchModeOptions, VoiceMatchModeLabels, VoiceMatchModeHelp);
+                    _config.voice_activity_indicator_style = DrawPopupField("Indicator style", _config.voice_activity_indicator_style,
+                        VoiceIndicatorOptions, VoiceIndicatorLabels, VoiceIndicatorHelp);
+                }
+            }
+
+            EditorGUILayout.Space(6f);
+            EditorGUILayout.LabelField("Selection & Zoom", EditorStyles.boldLabel);
+            _config.selection_highlight_enabled = DrawToggleField("Selection highlight", _config.selection_highlight_enabled, SelectionHighlightHelp);
+            _config.zoom_on_select_enabled = DrawToggleField("Zoom on select", _config.zoom_on_select_enabled, ZoomOnSelectHelp);
+            if (_config.zoom_on_select_enabled)
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    _config.zoom_on_select_trigger = (WallConfigData.ZoomOnSelectTrigger)EditorGUILayout.EnumPopup("Trigger target", _config.zoom_on_select_trigger);
+                    _config.zoom_on_select_density_threshold = DrawIntField("Density threshold", _config.zoom_on_select_density_threshold, ZoomOnSelectDensityHelp);
+                }
+            }
+
+            _hasUnsavedChanges = true;
+        }
+
+        // Strategy dropdown: keyword_ranked (default, fixed ranks) vs
+        // weighted_fields (wall-defined search_fields + four weight_*).
+        private void DrawStrategyDropdown()
+        {
+            int idx = System.Array.IndexOf(SearchIndexStrategyOptions, _config.search_index_strategy);
+            if (idx < 0) idx = 0;
+            idx = EditorGUILayout.Popup("Search index strategy", idx, SearchIndexStrategyLabels);
+            string newStrategy = SearchIndexStrategyOptions[idx];
+            if (newStrategy != _config.search_index_strategy)
+            {
+                _config.search_index_strategy = newStrategy;
+                _hasUnsavedChanges = true;
+            }
+        }
+
+        // "Ranking & Weights" block: renders the four weight_* fields.
+        // Under keyword_ranked they are disabled with a hint explaining
+        // they only apply to the weighted_fields strategy.
+        private void DrawRankingAndWeights(bool useWeighted)
+        {
+            EditorGUILayout.Space(3f);
+            EditorGUILayout.LabelField("Ranking & Weights", EditorStyles.boldLabel);
+
+            if (!useWeighted)
+            {
+                EditorGUILayout.HelpBox(
+                    "Weight fields apply only under the 'weighted_fields' strategy. " +
+                    "Switch the strategy dropdown above to edit them.", MessageType.Info);
+            }
+
+            using (new EditorGUI.DisabledScope(!useWeighted))
+            {
+                _config.weight_name = DrawScalarField("Name weight", _config.weight_name, WeightNameHelp);
+                _config.weight_custom_field = DrawScalarField("Custom field weight", _config.weight_custom_field, WeightCustomHelp);
+                _config.weight_derived_label = DrawScalarField("Derived label weight", _config.weight_derived_label, WeightDerivedHelp);
+                _config.weight_others = DrawScalarField("Others weight", _config.weight_others, WeightOthersHelp);
             }
         }
     }

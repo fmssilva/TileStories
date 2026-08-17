@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -121,7 +121,7 @@ namespace TileStories.Editor
         }
 
         // Shared symbol-table renderer for both category and badge sections (section 13.2).
-        // Driven by delegates rather than an interface hierarchy — simpler for editor-only GUI code,
+        // Driven by delegates rather than an interface hierarchy â€” simpler for editor-only GUI code,
         // no serialization constraints to satisfy.
         private void DrawSymbolTable<T>(
             List<T> entries,
@@ -136,9 +136,12 @@ namespace TileStories.Editor
             Action<T, string> setDetails,
             Func<T, bool> showColorPicker,
             string addButtonLabel,
-            string primaryLabelHeader) where T : class
+            string primaryLabelHeader,
+            bool showSearchKeywords = false,
+            Func<T, List<string>> getSearchKeywords = null,
+            Action<T, List<string>> setSearchKeywords = null) where T : class
         {
-            // Column order: Category/Key | Details | Symbol | Preview | Color (swatch+hex+remove) | Remove (trash)
+                        // Column order: Category/Key | Details | Symbol | Preview | Color (swatch+hex+remove) | Search Keywords | Remove (trash)
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField(primaryLabelHeader, EditorStyles.miniBoldLabel, GUILayout.Width(130f));
@@ -146,6 +149,8 @@ namespace TileStories.Editor
                 EditorGUILayout.LabelField("Symbol", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
                 EditorGUILayout.LabelField("Preview", EditorStyles.miniBoldLabel, GUILayout.Width(44f));
                 EditorGUILayout.LabelField("Color", EditorStyles.miniBoldLabel, GUILayout.Width(152f));
+                if (showSearchKeywords)
+                    EditorGUILayout.LabelField("Search Keywords", EditorStyles.miniBoldLabel);
                 EditorGUILayout.LabelField("", GUILayout.Width(26f)); // Remove (trash)
             }
 
@@ -201,6 +206,22 @@ namespace TileStories.Editor
                     {
                         GUILayout.Space(36f + 90f + 26f + 8f);
                     }
+
+                    // Search keywords column (optional, shown when showSearchKeywords is true).
+                    if (showSearchKeywords && getSearchKeywords != null)
+                    {
+                        var targetEntry = entry;
+                        var keywords = getSearchKeywords(targetEntry) ?? new List<string>();
+                        string joined = string.Join(", ", keywords);
+                        EditorGUILayout.TextField(joined, GUILayout.ExpandWidth(true));
+                        string buttonLabel = string.IsNullOrEmpty(joined) ? "Suggest" : "Edit";
+                        if (GUILayout.Button(buttonLabel, GUILayout.Width(60f)))
+                            PopupWindow.Show(GUILayoutUtility.GetLastRect(),
+                                new EntryDetailsPopup("Search Keywords", () => joined, v =>
+                                {
+                                    setSearchKeywords(targetEntry, ParseKeywordList(v));
+                                }));
+                    }
                 }
             }
 
@@ -250,6 +271,39 @@ namespace TileStories.Editor
         {
             Color32 c32 = color;
             return $"#{c32.r:X2}{c32.g:X2}{c32.b:X2}";
+        }
+
+        // Draw a keyword list inline in a table row, returning the edited list.
+        // Shows a TextField (comma-separated) with an Edit popup for richer
+        // editing. Used by the search_keywords column in taxonomy tables.
+        private static List<string> DrawKeywordListField(List<string> keywords)
+        {
+            if (keywords == null)
+                keywords = new List<string>();
+
+            string joined = string.Join(", ", keywords);
+            string edited = EditorGUILayout.TextField(joined, GUILayout.ExpandWidth(true));
+            if (edited != joined)
+                keywords = ParseKeywordList(edited);
+
+            return keywords;
+        }
+
+        // Parse a comma-separated keyword string into a list, trimming and
+        // dropping empties. Used by the search_keywords column's Edit popup.
+        private static List<string> ParseKeywordList(string text)
+        {
+            var result = new List<string>();
+            if (string.IsNullOrWhiteSpace(text))
+                return result;
+
+            foreach (string part in text.Split(','))
+            {
+                string trimmed = part.Trim();
+                if (!string.IsNullOrEmpty(trimmed))
+                    result.Add(trimmed);
+            }
+            return result;
         }
     }
 }

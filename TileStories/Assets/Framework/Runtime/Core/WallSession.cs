@@ -42,6 +42,19 @@ namespace TileStories
         // May be null until config finishes loading in LoadConfigCoroutine.
         public LodSettings LodSettings => _config?.lod_settings;
 
+// Read-only access to the wall's resolved icon library + calibrated AR spawn
+// root, so the cluster system can place aggregates without reaching into
+// WallSession internals (mirrors the SpawnedMarkers pattern, spec §6.1).
+public SpriteKeyLibrary WallIconLibrary => _wallIconLibrary;
+public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor : transform;
+
+        // Block 2 selection infrastructure (spec _2.6 section 11): highlight/dim
+        // and zoom-on-select. Wired once in SpawnPOIs after markers exist,
+        // disposed in OnDisable so the static SelectionEventBus holds no
+        // stale listeners across scene reloads.
+        private SelectionHighlightController _selectionHighlight;
+        private ZoomOnSelectController _zoomOnSelect;
+
         private void Awake()
         {
             _tracker = GetComponent<IWallTracker>();
@@ -67,6 +80,10 @@ namespace TileStories
         {
             if (_tracker != null)
                 _tracker.OnWallLocalised -= HandleWallLocalised;
+
+            // Block 2: release bus subscriptions and restore all markers to full.
+            _selectionHighlight?.Dispose();
+            _zoomOnSelect?.Dispose();
         }
 
         private IEnumerator LoadConfigCoroutine()
@@ -240,6 +257,19 @@ namespace TileStories
 
             stopwatch.Stop();
             Debug.Log($"[WallSession] Ready {_spawnedPOIs.Count}/{_config.pois.Count} POIs in {stopwatch.ElapsedMilliseconds}ms.");
+
+            // Block 2 selection infrastructure (spec _2.6 section 11). Markers exist
+            // now (SpawnedMarkers populated above), so wire the bus-driven highlight
+            // and zoom-on-select responders. Both are idempotent against re-entry;
+            // config is the resolved wall config. ARZoomController/LODController are
+            // scene singletons resolved here (no hard dependency if absent).
+            if (_selectionHighlight == null)
+                _selectionHighlight = new SelectionHighlightController(this, _config);
+
+            var lod = GetComponent<LODController>();
+            var zoom = GetComponent<ARZoomController>();
+            if (_zoomOnSelect == null && lod != null && zoom != null)
+                _zoomOnSelect = new ZoomOnSelectController(this, _config, zoom, lod);
         }
 
         private static GameObject CreateAnchorOnlyObject(Transform parent, string poiId)

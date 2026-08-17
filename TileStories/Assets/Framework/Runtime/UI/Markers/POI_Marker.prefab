@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 7785283805971007329}
   - component: {fileID: 5905657414925171612}
   - component: {fileID: 5405029586972800279}
+  - component: {fileID: 4911406091862798691}
   m_Layer: 5
   m_Name: POI_Marker
   m_TagString: Untagged
@@ -188,6 +189,18 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &4911406091862798691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108493152347737598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e78bbcc2612aca84a9299ef7f1fcd034, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TileStories::TileStories.MarkerSelectable
 --- !u!1 &3337972350612873654
 GameObject:
   m_ObjectHideFlags: 0
@@ -255,8 +268,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: _
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 0}
-  m_sharedMaterial: {fileID: 0}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

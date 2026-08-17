@@ -34,6 +34,7 @@ namespace TileStories
         [SerializeField] private RectTransform pieContainer;
         [SerializeField] private TextMeshProUGUI countLabel;
         [SerializeField] private Image backgroundImage;
+        [SerializeField] private Image dominantIcon;
 
         private Canvas _canvas;
         private CanvasGroup _canvasGroup;
@@ -50,6 +51,9 @@ namespace TileStories
         public IReadOnlyCollection<string> MemberPoiIds => _memberPoiIds;
         public Vector3 CentroidWorldPos => _centroid;
         public IReadOnlyDictionary<string, int> CategoryCounts => _categoryCounts;
+
+        // Exposed for Phase A gallery rendering tests (spec §4.4).
+        public Image DominantIcon => dominantIcon;
 
         private void Awake()
         {
@@ -75,6 +79,7 @@ namespace TileStories
             _members = members ?? new List<MarkerView>();
             BuildCategoryCounts();
             BuildPie(iconLibrary, settings);
+            BuildDominantIcon(iconLibrary, settings);
             UpdateCountLabel();
             ScaleByMemberCount();
         }
@@ -86,6 +91,7 @@ namespace TileStories
             ClearSlices();
             BuildCategoryCounts();
             BuildPie(iconLibrary, settings);
+            BuildDominantIcon(iconLibrary, settings);
             UpdateCountLabel();
             ScaleByMemberCount();
         }
@@ -121,6 +127,36 @@ namespace TileStories
         // pie_and_count (default): stacked Image.Filled + Radial360 slices, one per
         // category, sized by proportion, single-hue sequential ramp (Decision 6).
         // count_only: no pie, label only. dominant_category: icon + label.
+        // Single source of truth for "which category wins" -- shared by the accent
+        // colour (ResolveAccentColor, Decision 6) and the dominant_category icon so
+        // the dominant member count is computed in exactly one place.
+        private string GetDominantCategory()
+        {
+            string topCategory = null;
+            int topCount = -1;
+            foreach (var kvp in _categoryCounts)
+            {
+                if (kvp.Key == "uncategorized") continue;
+                if (kvp.Value > topCount) { topCount = kvp.Value; topCategory = kvp.Key; }
+            }
+            return topCategory;
+        }
+
+        // Renders the single category icon used ONLY in "dominant_category" mode.
+        // Inactive (hidden) in every other mode -- BuildPie handles pie/count_only and
+        // early-returns for dominant_category, so this is its visual counterpart.
+        private void BuildDominantIcon(SpriteKeyLibrary iconLibrary, LodSettings settings)
+        {
+            if (dominantIcon == null) return;
+            bool isActive = (settings?.cluster_icon_mode ?? DefaultClusterMode) == "dominant_category";
+            dominantIcon.gameObject.SetActive(isActive);
+            if (!isActive) return;
+            string category = GetDominantCategory();
+            if (string.IsNullOrEmpty(category)) return;
+            string iconKey = CategoryPalette.ResolveIconKey(category);
+            dominantIcon.sprite = iconLibrary != null ? iconLibrary.Get(iconKey) : null;
+        }
+
         private void BuildPie(SpriteKeyLibrary iconLibrary, LodSettings settings)
         {
             ClearSlices();
@@ -203,18 +239,13 @@ namespace TileStories
             // category, so cluster colour is wall-owned data, not hardcoded.
             if (_categoryCounts.Count > 0)
             {
-                string topCategory = null;
-                int topCount = -1;
-                foreach (var kvp in _categoryCounts)
-                {
-                    if (kvp.Value > topCount) { topCount = kvp.Value; topCategory = kvp.Key; }
-                }
-                if (topCategory != null && topCategory != "uncategorized" &&
-                    CategoryPalette.TryResolveConfigured(topCategory, out var color, out _))
+                string topCategory = GetDominantCategory();
+                if (topCategory != null && CategoryPalette.TryResolveConfigured(topCategory, out var color, out _))
                     return color;
             }
             return FallbackAccent;
         }
+
 
         // --- visibility (shared CanvasGroup soft-transition, identical to MarkerView) ---
 

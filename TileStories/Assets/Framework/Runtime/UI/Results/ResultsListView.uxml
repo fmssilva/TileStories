@@ -1,0 +1,13 @@
+<UXML xmlns="https://unity.com/ui-toolkit/schema/uxml">
+  <VisualElement name="results-root" class="results-list-root">
+    <ListView name="results-list-view" class="results-list-view"
+              show-alternating-row-backgrounds="true"
+              show-border="false"
+              reorderable="false">
+      <Label name="result-name" class="result-name-label" />
+      <Label name="result-category" class="result-category-label" />
+    </ListView>
+    <Label name="empty-state" class="results-empty-state"
+           text="" display="None" />
+  </VisualElement>
+</UXML>

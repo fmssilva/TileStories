@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -70,8 +70,117 @@ namespace TileStories
         public EffectDefaults effect_defaults;
 
         // Optional LOD settings. When absent, LODController uses defaults:
-        // 4-tier bands (15m/30m/60m/Inf), hybrid density, frustum cull on.
-        public LodSettings lod_settings = new();
+        // 3-tier bands (2m/7m/9999m, counts -1/15/5), hybrid density, frustum cull on.
+                public LodSettings lod_settings = new();
+
+        // --- Selection & zoom-on-select infrastructure (spec _2.6 section 11) ---
+        // Closed behaviour choice for which tap target triggers an auto-zoom.
+        // Framework-controlled (not wall-authored taxonomy), so it is an enum rather
+        // than a free-form string like marker_style / marker_shape.
+        public enum ZoomOnSelectTrigger { None, Marker, Cluster, Both }
+
+        // When true, tapping a marker dims all other markers to partial alpha so the
+        // selected one is the clear focal point; re-tapping it clears the highlight.
+        // Defaults true (the section 11 behaviour).
+        [Tooltip("Dim non-selected markers to partial alpha when a marker is selected.")]
+        public bool selection_highlight_enabled = true;
+
+        // Auto-zoom only when the selected marker has at least this many
+        // screen-space neighbours (LODController's last density evaluation). Stops
+        // us zooming in on isolated markers with nothing to disambiguate.
+        public int zoom_on_select_density_threshold = 2;
+
+        // Multiplier applied to the current ARZoomState.ZoomFactor when zoom-on-
+        // select fires (e.g. 2.0 doubles the zoom-in), clamped to [zoom_min,
+        // zoom_max] by ARZoomController.SetZoomAnimated.
+        public float zoom_on_select_factor = 2.0f;
+
+        // Master toggle for zoom-on-select: when true, selecting a dense marker
+        // auto-zooms per zoom_on_select_factor. When false, selection only
+        // highlights (if selection_highlight_enabled).
+        public bool zoom_on_select_enabled = true;
+
+        // Which tap target auto-zooms: Marker active in Block 2; Cluster/Both
+        // reserved for Block 3 cluster-tap wiring (spec _2.6 section 11).
+        public ZoomOnSelectTrigger zoom_on_select_trigger = ZoomOnSelectTrigger.Marker;
+
+        // --- Select, filter & search UI settings (spec _2.6 section 3) ---
+        // Author-selectable search interaction model.
+        // Convention values: "explicit" | "dynamic" | "scoped" | "faceted" | "auto_complete".
+                // Free-form string so future walls can use values not foreseen here.
+        // Absent/null defaults to "explicit" (plain keyword search bar).
+        public string search_mode;
+
+        // Author-selectable search indexing strategy (spec _2.6 section 5).
+        // "keyword_ranked" (default): fixed-rank max-score over name/summary/keyword/taxonomy.
+        //   Activates the standard POISearchIndex pipeline; weight_* fields are inert.
+        // "weighted_fields": wall-defined search_fields + four weight_* multipliers,
+        //   sum-scored per spec section 5.
+        // Free-form string so future walls can introduce strategies without a
+        // Framework code change.
+        public string search_index_strategy = "keyword_ranked";
+
+        // Search ranking weights (spec section 5).
+        // Controls how different field matches contribute to the result score.
+        // Exact name match = 1.0 (hard-coded); these are relative multipliers.
+        // Only consumed under the "weighted_fields" strategy.
+        public float weight_name = 3f;
+        public float weight_custom_field = 2f;
+        public float weight_derived_label = 2f;
+        public float weight_others = 1f;
+
+        // No-results message shown when a search or filter returns zero POIs.
+        // Supports {query} placeholder for the user's search term.
+        public string no_results_message = "No matches for \"{query}\" - try removing a filter.";
+
+        // How many recent search queries to remember locally (PlayerPrefs).
+        public int recent_search_count = 5;
+
+        // Whether to show suggested categories based on the wall's actual POI
+        // distribution. Computed live, not manually curated.
+        public bool show_suggested_categories = true;
+
+        // Where suggestion terms come from (spec _2.6 section 13).
+        // "category_distribution" (default): top-N categories by live POI count.
+        // "recent_first": visitor's recent queries first, then category back-fill.
+        public string suggested_source = "category_distribution";
+
+        // --- Minimap settings (spec _2.6 section 8) ---
+        // Whether the minimap feature is enabled for this wall.
+        public bool minimap_enabled = true;
+
+        // "always" shows the minimap permanently; "toggle" shows a button to
+        // expand/collapse it.
+        public string minimap_visibility = "toggle";
+
+        // "dots_only" (plain colored dots), "category_colored_dots" (dots
+        // colored by category), "mini_icons" (scaled-down marker icons).
+        public string minimap_icon_style = "category_colored_dots";
+
+        // --- View mode settings (spec _2.6 section 10) ---
+        // The result view shown by default when the wall loads.
+        // "list" | "minimap" | "camera_highlight"
+        public string default_result_view = "list";
+
+        // --- Voice search settings (spec _2.6 section 12) ---
+        // Off by default -- real permission and reliability caveats (iOS requires
+        // two separate permission prompts, on-device model needs initial download).
+        public bool voice_search_enabled = false;
+
+        // "all" requires every remaining token to match; "any" matches if any
+        // token matches. Default "all" for precision over recall.
+        public string voice_search_match_mode = "all";
+
+        // --- Voice search indicator (spec _2.6 section 12) ---
+        // How the "listening/processing" voice state is surfaced to the visitor.
+        // "mic_text" (default): the mic button text flips to "..." while listening/processing.
+        //   Behavior-identical to the legacy inline implementation, so existing walls are
+        //   unaffected unless they explicitly opt in.
+        // "listen_bar": also renders a dedicated, explicitly-labelled listen/progress bar.
+        // Free-form string so future walls can introduce styles without a Framework code
+        // change; unknown values fall back to "mic_text" (logged once) in
+        // VoiceActivityIndicatorView.ParseStyle.
+        public string voice_activity_indicator_style = "mic_text";
     }
 
     [Serializable]
@@ -153,6 +262,11 @@ namespace TileStories
         // Free-text note shown in the authoring tool's details popup. Not read by
         // runtime -- purely authoring metadata for this wall's taxonomy.
         public string details;
+
+        // Taxonomy-level search keywords: every POI with this category is
+        // automatically indexed with these terms at build time, so the wall
+        // author only enters them once per category instead of per-POI.
+        public List<string> search_keywords = new();
     }
 
     [Serializable]
@@ -173,6 +287,11 @@ namespace TileStories
         // Free-text note shown in the authoring tool's details popup. Not read by
         // runtime -- purely authoring metadata for this wall's taxonomy.
         public string details;
+
+        // Taxonomy-level search keywords: every POI with this badge type is
+        // automatically indexed with these terms at build time, so the wall
+        // author only enters them once per badge instead of per-POI.
+        public List<string> search_keywords = new();
     }
 
     [Serializable]
@@ -200,6 +319,11 @@ namespace TileStories
         // Free-text note shown in the authoring tool's details popup. Not read by
         // runtime -- purely authoring metadata for this wall's taxonomy.
         public string details;
+
+        // Taxonomy-level search keywords: every POI with this outline level is
+        // automatically indexed with these terms at build time, so the wall
+        // author only enters them once per level instead of per-POI.
+        public List<string> search_keywords = new();
     }
 
     [Serializable]
@@ -208,7 +332,7 @@ namespace TileStories
         // Stable key, e.g. "level_1" -- written to POIData.hierarchy_level_key.
         public string key;
 
-                // Developer-facing label, e.g. "1" or "Landmark".
+        // Developer-facing label, e.g. "1" or "Landmark".
         public string label;
 
         // Authorable priority for this hierarchy level (lower = higher priority).
@@ -221,6 +345,10 @@ namespace TileStories
 
         // Free text, developer's own notes (shown in the authoring tool details popup).
         public string details;
+
+        // Hierarchy-level search keywords: every POI at this level is
+        // automatically indexed with these terms at build time.
+        public List<string> search_keywords = new();
 
         // Symbol diameter, real-world centimetres. Converted to metres at the single
         // call site in MarkerView (/100). One conversion, not per-POI.
@@ -241,7 +369,7 @@ namespace TileStories
         // Meaningful only when wall outline mode != none. Controls ring rotation.
         public bool rotate_contour;
 
-                // Seconds after spawn before fade/scale-in begins.
+        // Seconds after spawn before fade/scale-in begins.
         public float reveal_delay_s;
 
         // Seconds for the fade/scale-in animation itself. 0 = instant pop-in
@@ -264,6 +392,10 @@ namespace TileStories
         public string captured_position_source;
         public long captured_position_timestamp;
         public string summary;
+
+        // Per-POI search keywords: additional terms indexed for this POI only,
+        // beyond what taxonomy-level keywords already provide.
+        public List<string> search_keywords = new();
 
         // Destruction status, 0-100. Same has_* guard as captured_position and for
         // the same reason: a POI legitimately at 0% ("fully intact") must never be
@@ -331,6 +463,13 @@ namespace TileStories
                 status_unknown = false;
                 status_level_key = null;
             }
+
+            // JSON can serialize a nullable List<T> as null; guard against it so
+            // downstream search-index code never NPEs on an absent search_keywords.
+            if (search_keywords == null)
+            {
+                search_keywords = new();
+            }
         }
     }
 
@@ -369,6 +508,9 @@ namespace TileStories
         public bool density_safety_escalation_enabled = true; // see §6.2
         public float density_safety_escalation_multiplier = 2f; // see §6.2
         public string cluster_icon_mode = "pie_and_count"; // pie_and_count|dominant_category|count_only
+        public string cluster_band_source = "centroid";            // centroid|nearest_member|farthest_member (cluster centroid band)
+        public bool cluster_band_hysteresis_enabled = true;        // reuse hysteresis_margin_m for cluster band index stability
+        public int cluster_dissolve_grace_cycles = 3;              // pooled cluster view survival cycles before fading out (0 = immediate)
         public string displacement_tiebreak = "symmetric"; // symmetric|lower_priority_only — see §6
 
         public bool frustum_culling_enabled = true;
@@ -391,5 +533,12 @@ namespace TileStories
 
         // -1 = unlimited ("show all" band)
         public int max_visible_count;
+
+        // Authoring-only per-band note surfaced by the authoring tool's
+        // "Details" popup (EntryDetailsPopup) -- same idiom as the
+        // CategoryStyleEntry / OutlineLevelEntry / BadgeCategoryEntry detail
+        // fields. The runtime LODController reads only max_distance_m and
+        // max_visible_count, so adding this introduces no runtime behavior.
+        public string details = string.Empty;
     }
 }

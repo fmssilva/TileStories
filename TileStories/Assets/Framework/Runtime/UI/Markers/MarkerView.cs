@@ -596,6 +596,27 @@ namespace TileStories
             return haloImage;
         }
 
+        private const float ALPHA_FULL = 1f;
+        private const float ALPHA_HIDDEN = 0f;
+        // Alpha at/below which a marker is treated as hidden (raycasts off).
+        private const float DIM_THRESHOLD = 0.001f;
+
+        // Selection-dim level (spec section 11) that persists across LOD ticks.
+        // When non-1, LODController's per-tick SetVisible(true, ...) targets this
+        // dimmed alpha instead of full, so selection-highlight and LOD layer their
+        // alpha writes through one seam instead of fighting over CanvasGroup.alpha
+        // (the "single source of truth" the MarkerView header documents). Default
+        // 1.0 => existing callers (LOD, reveal) see identical behaviour until a
+        // highlight is active, so there is no regression when the feature is off.
+        private float _highlightAlpha = ALPHA_FULL;
+
+        // Read-only access to this marker's hierarchy reveal duration, so
+        // SelectionHighlightController can time its highlight fade to the same
+        // curve MarkerRevealEffect uses for this marker's own spawn-in.
+        public float RevealDurationSeconds => _hasHierarchy
+            ? _hierarchyStyle.RevealDurationSeconds
+            : MarkerHierarchyResolver.Fallback.RevealDurationSeconds;
+
         // Instantly toggle marker visibility via the shared CanvasGroup.
         // In Edit Mode, sets alpha immediately (coroutines do not tick there).
         public void SetVisible(bool visible)
@@ -610,18 +631,48 @@ namespace TileStories
                 _fadeCoroutine = null;
             }
 
-            _canvasGroup.alpha = visible ? 1f : 0f;
-            _canvasGroup.interactable = visible;
-            _canvasGroup.blocksRaycasts = visible;
+            float targetAlpha = visible ? _highlightAlpha : ALPHA_HIDDEN;
+            _canvasGroup.alpha = targetAlpha;
+            bool interactive = targetAlpha > DIM_THRESHOLD;
+            _canvasGroup.interactable = interactive;
+            _canvasGroup.blocksRaycasts = interactive;
         }
 
         // Fade marker visibility over fadeDuration, using the shared CanvasGroup.
         // In Edit Mode, falls back to instant (coroutines do not tick there).
-        public void SetVisible(bool visible, float fadeDuration)
+                public void SetVisible(bool visible, float fadeDuration)
+        {
+            // Route the bool API through the float overload, mapping visible to this
+            // marker's current highlight level. This is what lets LODController's
+            // visible-call retarget to a dimmed alpha (spec section 11) instead of
+            // snapping back to full -- LOD and selection-highlight share one seam.
+            SetVisible(visible ? _highlightAlpha : ALPHA_HIDDEN, fadeDuration);
+        }
+
+        // Fade (or instantly set, at fadeDuration <= 0) to an explicit target alpha.
+        // Partial alpha implements the selection dim (spec section 11): non-selected
+        // markers sit at a dim level while remaining tappable; the selected marker
+        // targets full. Reuses the same CanvasGroup + coroutine as the bool overload
+        // so LOD and selection-highlight compose through one alpha seam.
+        public void SetVisible(float targetAlpha, float fadeDuration)
         {
             if (!Application.isPlaying || fadeDuration <= 0f)
             {
-                SetVisible(visible);
+                if (_canvasGroup == null)
+                    _canvasGroup = GetComponent<CanvasGroup>();
+                if (_canvasGroup == null) return;
+
+                if (_fadeCoroutine != null)
+                {
+                    StopCoroutine(_fadeCoroutine);
+                    _fadeCoroutine = null;
+                }
+
+                _highlightAlpha = targetAlpha > DIM_THRESHOLD ? Mathf.Clamp01(targetAlpha) : ALPHA_HIDDEN;
+                _canvasGroup.alpha = targetAlpha;
+                bool interactive = targetAlpha > DIM_THRESHOLD;
+                _canvasGroup.interactable = interactive;
+                _canvasGroup.blocksRaycasts = interactive;
                 return;
             }
 
@@ -631,18 +682,23 @@ namespace TileStories
 
             if (_fadeCoroutine != null)
                 StopCoroutine(_fadeCoroutine);
-            _fadeCoroutine = StartCoroutine(FadeCoroutine(visible, fadeDuration));
+            _fadeCoroutine = StartCoroutine(FadeCoroutine(targetAlpha, fadeDuration));
         }
 
         // Crossfade CanvasGroup alpha from current to target; flip interaction
-        // flags at the endpoints so raycasts resume only when fully visible.
-        private IEnumerator FadeCoroutine(bool fadeIn, float duration)
+        // flags at the endpoints so raycasts resume only above the hidden threshold.
+        // Stamps _highlightAlpha so a concurrent LOD tick (which calls
+        // SetVisible(true, ...) -> SetVisible(_highlightAlpha, ...)) targets the same
+        // dimmed level instead of snapping back to full -- the seam that lets
+        // selection-dimming and LOD coexist on one shared CanvasGroup.
+        private IEnumerator FadeCoroutine(float targetAlpha, float duration)
         {
             float startAlpha = _canvasGroup.alpha;
-            float targetAlpha = fadeIn ? 1f : 0f;
             float elapsed = 0f;
 
-            if (fadeIn)
+            _highlightAlpha = targetAlpha > DIM_THRESHOLD ? Mathf.Clamp01(targetAlpha) : ALPHA_HIDDEN;
+            bool willBeInteractive = targetAlpha > DIM_THRESHOLD;
+            if (willBeInteractive)
             {
                 _canvasGroup.interactable = true;
                 _canvasGroup.blocksRaycasts = true;
@@ -660,7 +716,7 @@ namespace TileStories
             _canvasGroup.alpha = targetAlpha;
             _fadeCoroutine = null;
 
-            if (!fadeIn)
+            if (!willBeInteractive)
             {
                 _canvasGroup.interactable = false;
                 _canvasGroup.blocksRaycasts = false;

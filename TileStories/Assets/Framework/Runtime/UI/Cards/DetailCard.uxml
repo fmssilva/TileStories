@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UXML xmlns:ui="UnityEngine.UIElements">
+  <ui:VisualElement name="detail-card-panel" class="detail-card-panel">
+    <ui:Label name="detail-card-label" text="" class="detail-card-label" />
+    <ui:Button name="detail-card-close" text="X" class="detail-card-close" />
+  </ui:VisualElement>
+</UXML>

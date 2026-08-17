@@ -1,0 +1,35 @@
+.view-mode-control {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    height: 36px;
+    flex-direction: row;
+    justify-content: center;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.2);
+    border-right-color: rgba(255, 255, 255, 0.2);
+    border-top-color: rgba(255, 255, 255, 0.2);
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.view-mode-button {
+    min-width: 100px;
+    min-height: 34px;
+    text-align: middle-center;
+    font-size: 13px;
+    unity-font-style: bold;
+}
+
+.view-mode-button-selected {
+    background-color: rgba(76, 128, 206, 0.8);
+    color: #FFFFFF;
+}
+
+.view-mode-button-unselected {
+    background-color: transparent;
+    color: rgba(204, 204, 204, 1);
+}

@@ -1,73 +1,39 @@
-## 1. Before You Start Any Task
+## 1. **Mode & Intent Disambiguation**
 
-**Evidence discipline, stated once here because it applies to every single task in
-this document**: never report a rendering/visual/behavioral task as passing without
-pointing to a specific mechanical result that proves it — an `Assert` that actually
-passed (raw output shown, not paraphrased), or a specific, itemized observation
-citing exactly what was seen. "No errors were thrown" is not evidence of
-correctness. A previous agent's summary is not evidence of correctness. Only
-independently re-derived evidence is. See §6.5 for the full protocol — this rule is
-why it exists.
+The workflow alternates strictly between two operating modes:
+- **PLAN MODE:** Analyzing requirements, auditing code, drafting options, and building execution roadmaps.
+- **ACT MODE:** Modifying files, running builds, executing tests, and verifying behavior.
 
-
-- Read the current project plan / phase plan document in full before writing anything.
-- **Read `10-structure.md` before creating or moving any file.** Confirm where
-  the new file belongs in the project hierarchy (Framework vs. Apps, Runtime vs. Editor,
-  which subfolder) and that no equivalent file already exists. The structure guide is
-  the single reference for what lives where — don't guess from folder names alone.
-- Read every existing file relevant to the task before touching it. Never assume you know
-  what a file does from its name — open it and read it.
-- Search the project for existing types, classes, ScriptableObjects, or helper methods
-  that already do part of what you're about to build. Extend or reuse them instead of
-  writing a duplicate.
-- Write a comprehensive TODO list of every step the task requires, including test steps,
-  before starting implementation. Do not skip steps later because the list didn't include
-  them — write the list completely up front.
-- Take your time. Quality over speed. There is no reward for finishing fast if the result
-  is messy, duplicated, or untested.
+### **Mode Sync Protocol**
+To prevent drift across context compaction, summarizations, or long task executions:
+* **Initial & Recovery Check:** At the start of a task or immediately following any context summarization/compaction, read `proj_guides/__mode.md` from the workspace root to confirm active mode and the current command that should be executed. 
+* **Mode Boundary:** Do not perform file modifications while in **PLAN MODE**. Do not redesign core architecture while in **ACT MODE** without returning to PLAN MODE first.
 
 ---
 
-## 2. Think Before You Code
+## 2. Shared Core Rules
 
-For every non-trivial feature or fix, stop and reason at two separate levels before
-opening a file to edit:
+### Architectural & Benchmark Standards
+* **Academic Reference Quality:** Write code as if this project is a reference implementation for learning. If existing code is messy or incorrect, do **not** patch around it with backward-compatibility shims, wrappers, or adapters. Propose a clean refactor, obtain agreement, and fix it properly.
+* **Patience Over Speed:** Quality and clarity supersede execution speed. Unverified, messy, or duplicate code is unacceptable.
+* **Stop & Clarify:** If existing code is ambiguous, contradictory, or appears wrong, halt immediately. Ask or flag the issue instead of building on assumptions.
 
-- **Architecture level.** Where does this thing live? Which folder, which assembly, is it
-  shared framework code or specific to one wall/app? Write out three distinct structural
-  options with their trade-offs, then pick the cleanest one. State the choice and the
-  reason in your response before implementing.
-- **Implementation level.** How is this actually written, locally, in code? Write out
-  three distinct concrete approaches (e.g. event-driven vs. direct method call,
-  ScriptableObject-driven vs. hardcoded, composition vs. inheritance), then pick the most
-  robust and simplest one.
-
-**Benchmark standard:** write this project as if it were an academic reference
-implementation that other students will read to learn from. If an existing type, class,
-or system is messy or wrong, do not patch around it with an adapter, a wrapper, or a
-backward-compatibility shim. Stop, propose the structural fix as three options, get
-agreement, and rewrite it properly. Shortcuts that leave messy code in place because
-"it still works" are not acceptable.
+### Evidence Discipline (Mandatory Verification)
+Never report a feature, fix, rendering, visual, or behavioral task as completed or passing without providing explicit, un-paraphrased mechanical proof:
+* **Valid Evidence:** Raw CLI/Test output showing an `Assert` that passed, or specific itemized observations detailing what was measured or verified.
+* **Invalid Evidence:** Statements like "No errors were thrown," "Compilation succeeded," or citations from previous agent summaries do **not** count as proof. Only independently re-derived results are accepted.
 
 ---
 
+## 3. Mode-Specific Responsibilities
 
-## 3. Writing Code
+### PLAN MODE
+For every non-trivial feature or fix, reason at two separate levels before proposing code edits:
+1. **Architecture Level (Where it lives):** Map folder, assembly, and component scope. Evaluate 3 distinct structural options with trade-offs, state the choice, and explain why.
+2. **Implementation Level (How it works):** Evaluate 3 concrete implementation choices (e.g., event-driven vs. direct call, ScriptableObject vs. hardcoded) and select the simplest, most robust option.
+3. **Execution Plan:** Draft an itemized TODO list including testing steps before requesting transition to ACT MODE.
 
-- Create the actual file and write its content into it directly. Do not draft a large
-  file in your own working memory and dump it all at once at the end — write it as you
-  go, so that if the session is interrupted partway through, the work already done is not
-  lost.
-
----
-
-
-## 4. General Operating Principles
-
-- There is no time pressure that justifies messy or untested code. Be thorough, not fast.
-- Every task starts with a complete TODO list, including its own testing steps, written
-  before implementation begins — not assembled retroactively once code already exists.
-- When something about the existing code is unclear or looks wrong, stop and ask or flag
-  it rather than guessing and building on top of an assumption that might be incorrect.
-
-
+### ACT MODE
+1. **Incremental Edits:** Write changes directly to target files step-by-step.
+2. **Strict Plan Adherence:** Execute the TODO list assembled in PLAN MODE.
+3. **Verification:** Produce mechanical evidence to validate each step before marking the task complete.

@@ -1,0 +1,10 @@
+<UXML xmlns="https://unity.com/ui-toolkit/schema/uxml">
+  <VisualElement name="minimap-root" class="minimap-container"
+                   picking-mode="Ignore">
+    <VisualElement name="minimap-background" class="minimap-background" />
+    <VisualElement name="compass-indicator" class="minimap-compass"
+                   picking-mode="Ignore" display="None" />
+    <Label name="scale-bar-label" class="minimap-scale"
+           picking-mode="Ignore" display="None" text="" />
+  </VisualElement>
+</UXML>

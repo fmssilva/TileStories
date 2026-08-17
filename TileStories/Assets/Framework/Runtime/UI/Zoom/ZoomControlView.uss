@@ -1,0 +1,54 @@
+:root {
+  --ts-zoom-strip-bg: rgba(26, 26, 29, 0.85);
+  --ts-zoom-strip-radius: 14px;
+  --ts-zoom-strip-pad: 6px 10px;
+  --ts-zoom-btn-gap: 8px;
+  --ts-zoom-btn-size: 48px;
+  --ts-zoom-btn-bg: rgba(255, 255, 255, 0.12);
+  --ts-zoom-btn-border: 1px solid rgba(255, 255, 255, 0.45);
+  --ts-zoom-btn-label: #FFFFFF;
+  --ts-zoom-btn-radius: 999px;
+  --ts-zoom-btn-font: 16px;
+}
+
+.ts-zoom-control {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ts-zoom-control__strip {
+  flex-direction: row;
+  gap: var(--ts-zoom-btn-gap);
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ts-zoom-strip-bg);
+  padding: var(--ts-zoom-strip-pad);
+  border-radius: var(--ts-zoom-strip-radius);
+}
+
+.ts-zoom-control__button {
+  min-width: 44px;
+  min-height: 44px;
+  width: var(--ts-zoom-btn-size);
+  height: var(--ts-zoom-btn-size);
+  border-radius: var(--ts-zoom-btn-radius);
+  color: var(--ts-zoom-btn-label);
+  background-color: var(--ts-zoom-btn-bg);
+  border: var(--ts-zoom-btn-border);
+  font-size: var(--ts-zoom-btn-font);
+  unity-text-align: middle-center;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.ts-zoom-control__button:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.ts-zoom-control__button:active {
+  background-color: rgba(255, 255, 255, 0.35);
+}
