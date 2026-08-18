@@ -19,33 +19,23 @@ nvidia/nemotron-3-super-120b-a12b:free (OpenRouter)
 
 # **Cheap - Text**
 deepseek/deepseek-chat (V3)
-
 Preço: ~$0.20 Input / ~$0.80 Output por 1M tokens.
-
 Porquê: O rei do custo/benefício no desenvolvimento geral.
 
 deepseek/deepseek-v4-pro
-
 Preço: ~$0.43 Input / ~$0.87 Output por 1M tokens (1M contexto).
-
 Porquê: Mantém a inteligência do DeepSeek com uma janela de contexto gigante para repositórios inteiros.
 
 qwen/qwen-2.5-coder-32b-instruct
-
 Preço: ~$0.66 Input / ~$1.00 Output por 1M tokens.
-
 Porquê: Extremamente preciso a seguir regras rígidas do .clinerules.
 
 deepseek/deepseek-r1
-
 Preço: ~$0.70 Input / ~$2.50 Output por 1M tokens.
-
 Porquê: Raciocínio em cadeia (Chain-of-Thought). Lento, mas descobre bugs que nenhum outro encontra.
 
 moonshotai/kimi-k2.6
-
 Preço: ~$0.66 Input / ~$3.41 Output por 1M tokens.
-
 Porquê: Ótimo para gerir grandes contextos de ficheiros em workflows de agentes.
 
 

@@ -333,15 +333,139 @@ namespace TileStories.Editor
 
             if (poi.search_keywords == null)
                 poi.search_keywords = new List<string>();
+            if (poi.search_keyword_fields == null)
+                poi.search_keyword_fields = new List<POISearchKeywordField>();
 
-            string joined = string.Join(", ", poi.search_keywords);
-            EditorGUILayout.LabelField("Keywords (comma-separated)", EditorStyles.miniLabel);
-            string edited = EditorGUILayout.TextField(joined, GUILayout.Height(60f));
-            if (edited != joined)
+            // --- Derived keywords (read-only: auto-applied from taxonomy assignments) ---
+            var derived = CollectDerivedKeywords(poi);
+            if (derived.Count > 0)
             {
-                poi.search_keywords = ParseKeywordListStatic(edited);
+                EditorGUILayout.LabelField("Auto-included from taxonomy (read-only)", EditorStyles.miniLabel);
+                EditorGUILayout.HelpBox(string.Join(", ", derived), MessageType.None);
+            }
+            else
+            {
+                EditorGUILayout.LabelField("No taxonomy keywords yet (assign category/badge/outline/hierarchy in the tables above).", EditorStyles.wordWrappedMiniLabel);
+            }
+
+            // --- Custom fields (one editable keyword row per SearchFieldDefinition) ---
+            if (_config?.search_fields != null && _config.search_fields.Count > 0)
+            {
+                EditorGUILayout.Space(4f);
+                EditorGUILayout.LabelField("Custom keyword fields", EditorStyles.boldLabel);
+
+                foreach (var fieldDef in _config.search_fields)
+                {
+                    if (fieldDef == null || string.IsNullOrWhiteSpace(fieldDef.key))
+                        continue;
+
+                    // Find or create the matching entry on this POI.
+                    var entry = poi.search_keyword_fields.Find(e => e.field_key == fieldDef.key);
+                    if (entry == null)
+                    {
+                        entry = new POISearchKeywordField { field_key = fieldDef.key, keywords = new List<string>() };
+                        poi.search_keyword_fields.Add(entry);
+                    }
+
+                    string displayLabel = string.IsNullOrWhiteSpace(fieldDef.label) ? fieldDef.key : fieldDef.label;
+                    bool isEmpty = entry.keywords == null || entry.keywords.Count == 0;
+
+                    // Show a warning icon next to the label when the field is forced and empty.
+                    if (fieldDef.forced && isEmpty)
+                    {
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField(
+                                EditorGUIUtility.IconContent("console.warnicon.sml"),
+                                GUILayout.Width(18f), GUILayout.Height(18f));
+                            EditorGUILayout.LabelField($"{displayLabel} (required)", EditorStyles.boldLabel);
+                        }
+                    }
+                    else
+                    {
+                        EditorGUILayout.LabelField(displayLabel, EditorStyles.miniLabel);
+                    }
+
+                    string joined = entry.keywords != null ? string.Join(", ", entry.keywords) : string.Empty;
+                    string edited = EditorGUILayout.TextField(joined);
+                    if (edited != joined)
+                    {
+                        entry.keywords = ParseKeywordListStatic(edited);
+                        _hasUnsavedChanges = true;
+                    }
+                }
+            }
+
+            // --- Others row (freeform flat keywords) ---
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.LabelField("Others (freeform)", EditorStyles.miniLabel);
+            DrawHelpButton(SearchKeywordsOthersHelp);
+            string othersJoined = string.Join(", ", poi.search_keywords);
+            string othersEdited = EditorGUILayout.TextField(othersJoined);
+            if (othersEdited != othersJoined)
+            {
+                poi.search_keywords = ParseKeywordListStatic(othersEdited);
                 _hasUnsavedChanges = true;
             }
+        }
+
+        // Collect the keywords that will be auto-included at index-build time from
+        // this POI's taxonomy assignments. Read-only in the UI -- just for developer
+        // visibility of what the index will pick up without manual entry.
+        private List<string> CollectDerivedKeywords(POIData poi)
+        {
+            var keywords = new List<string>();
+            if (_config == null)
+                return keywords;
+
+            // Category keywords.
+            if (!string.IsNullOrEmpty(poi.category) && _config.category_styles != null)
+            {
+                foreach (var entry in _config.category_styles)
+                {
+                    if (entry?.category == poi.category && entry.search_keywords != null)
+                        keywords.AddRange(entry.search_keywords);
+                }
+            }
+
+            // Badge keywords.
+            if (!string.IsNullOrEmpty(poi.badge_category) && _config.badge_categories != null)
+            {
+                foreach (var entry in _config.badge_categories)
+                {
+                    if (entry?.key == poi.badge_category && entry.search_keywords != null)
+                        keywords.AddRange(entry.search_keywords);
+                }
+            }
+
+            // Outline / status keywords.
+            if (!string.IsNullOrEmpty(poi.status_level_key) && _config.outline_levels != null)
+            {
+                foreach (var entry in _config.outline_levels)
+                {
+                    if (entry?.key == poi.status_level_key && entry.search_keywords != null)
+                        keywords.AddRange(entry.search_keywords);
+                }
+            }
+
+            // Hierarchy keywords.
+            if (!string.IsNullOrEmpty(poi.hierarchy_level_key) && _config.hierarchy_levels != null)
+            {
+                foreach (var entry in _config.hierarchy_levels)
+                {
+                    if (entry?.key == poi.hierarchy_level_key && entry.search_keywords != null)
+                        keywords.AddRange(entry.search_keywords);
+                }
+            }
+
+            return keywords;
+        }
+
+        // Render a small inline help button that opens a HelpInfoPopup.
+        private static void DrawHelpButton(string message)
+        {
+            if (GUILayout.Button("?", GUILayout.Width(26f), GUILayout.Height(16f)))
+                PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup("Help", message));
         }
 
         // Parse a comma-separated keyword string into a list, trimming empties.

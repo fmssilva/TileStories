@@ -256,5 +256,70 @@ namespace TileStories.Tests
             Assert.AreEqual(1, index.Search("new").Count);
         }
 
+        [Test]
+        public void SearchKeywordFields_AreIndexedAtKeywordRank()
+        {
+            // A POI with a custom field keyword should be findable at RANK_KEYWORD (0.7),
+            // same quality tier as flat search_keywords -- field_key is authoring-only.
+            var config = MakeConfig(
+                new POIData
+                {
+                    id = "a",
+                    name = "Chapel",
+                    search_keyword_fields = new List<POISearchKeywordField>
+                    {
+                        new POISearchKeywordField { field_key = "architect", keywords = new List<string> { "siza" } }
+                    }
+                }
+            );
+            var index = new POISearchIndex();
+            index.Build(config);
+
+            var results = index.Search("siza");
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual("a", results[0].POIId);
+            Assert.AreEqual(0.7f, results[0].Score, 0.001f);
+        }
+
+        [Test]
+        public void SearchKeywordFields_MultipleFields_AllIndexed()
+        {
+            // Keywords from different custom fields on the same POI are all indexed.
+            var config = MakeConfig(
+                new POIData
+                {
+                    id = "a",
+                    name = "Museum",
+                    search_keyword_fields = new List<POISearchKeywordField>
+                    {
+                        new POISearchKeywordField { field_key = "architect", keywords = new List<string> { "gaudi" } },
+                        new POISearchKeywordField { field_key = "period", keywords = new List<string> { "modernismo" } }
+                    }
+                }
+            );
+            var index = new POISearchIndex();
+            index.Build(config);
+
+            Assert.AreEqual(1, index.Search("gaudi").Count);
+            Assert.AreEqual(1, index.Search("modernismo").Count);
+            Assert.AreEqual(0, index.Search("unknown_term").Count);
+        }
+
+        [Test]
+        public void SearchKeywordFields_NullEntry_SkippedSafely()
+        {
+            // A null entry in search_keyword_fields must not throw.
+            var config = MakeConfig(
+                new POIData
+                {
+                    id = "a",
+                    name = "Gate",
+                    search_keyword_fields = new List<POISearchKeywordField> { null }
+                }
+            );
+            var index = new POISearchIndex();
+            Assert.DoesNotThrow(() => index.Build(config));
+        }
+
     }
 }

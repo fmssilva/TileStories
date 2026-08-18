@@ -55,6 +55,16 @@ namespace TileStories.Editor
             if (_config.outline_levels == null) _config.outline_levels = new List<OutlineLevelEntry>();
             if (_config.hierarchy_levels == null) _config.hierarchy_levels = new List<HierarchyLevelEntry>();
             if (_config.pois == null) _config.pois = new List<POIData>();
+            if (_config.search_fields == null) _config.search_fields = new List<SearchFieldDefinition>();
+
+            // Ensure every POI has non-null keyword collections (additive fields --
+            // may be absent in config.json files written before this field existed).
+            foreach (var poi in _config.pois)
+            {
+                if (poi == null) continue;
+                if (poi.search_keywords == null) poi.search_keywords = new List<string>();
+                if (poi.search_keyword_fields == null) poi.search_keyword_fields = new List<POISearchKeywordField>();
+            }
 
             // Seed defaults only if genuinely empty (section 13.2) -- a brand-new wall,
             // not one that already has entries the developer chose.

@@ -18,11 +18,6 @@ namespace TileStories.Editor.Tests
             {
                 wall_id = "search_test_wall",
                 search_mode = "dynamic",
-                search_index_strategy = "weighted_fields",
-                weight_name = 4f,
-                weight_custom_field = 3f,
-                weight_derived_label = 2f,
-                weight_others = 1f,
                 no_results_message = "No matches for \"{query}\" -- broadened.",
                 recent_search_count = 8,
                 show_suggested_categories = false,
@@ -36,13 +31,10 @@ namespace TileStories.Editor.Tests
                 voice_activity_indicator_style = "listen_bar"
             };
 
-            // Mirrors authoring SaveConfig + runtime WallConfigLoader.
             string json = JsonUtility.ToJson(config, true);
             var loaded = JsonUtility.FromJson<WallConfigData>(json);
 
-            // String-field (dropdowns)
             Assert.AreEqual("dynamic", loaded.search_mode);
-            Assert.AreEqual("weighted_fields", loaded.search_index_strategy);
             Assert.AreEqual("recent_first", loaded.suggested_source);
             Assert.AreEqual("always", loaded.minimap_visibility);
             Assert.AreEqual("dots_only", loaded.minimap_icon_style);
@@ -50,17 +42,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("any", loaded.voice_search_match_mode);
             Assert.AreEqual("listen_bar", loaded.voice_activity_indicator_style);
             Assert.AreEqual("No matches for \"{query}\" -- broadened.", loaded.no_results_message);
-
-            // Scalar fields
-            Assert.AreEqual(4f, loaded.weight_name);
-            Assert.AreEqual(3f, loaded.weight_custom_field);
-            Assert.AreEqual(2f, loaded.weight_derived_label);
-            Assert.AreEqual(1f, loaded.weight_others);
-
-            // Int fields
             Assert.AreEqual(8, loaded.recent_search_count);
-
-            // Toggle fields
             Assert.IsFalse(loaded.show_suggested_categories);
             Assert.IsFalse(loaded.minimap_enabled);
             Assert.IsTrue(loaded.voice_search_enabled);
@@ -74,14 +56,10 @@ namespace TileStories.Editor.Tests
             string json = JsonUtility.ToJson(config, true);
             var loaded = JsonUtility.FromJson<WallConfigData>(json);
 
-            Assert.AreEqual("keyword_ranked", loaded.search_index_strategy);
-            Assert.AreEqual("category_distribution", loaded.suggested_source);
-            Assert.AreEqual(3f, loaded.weight_name);
-            Assert.AreEqual(2f, loaded.weight_custom_field);
-            Assert.AreEqual(2f, loaded.weight_derived_label);
-            Assert.AreEqual(1f, loaded.weight_others);
             Assert.IsTrue(loaded.selection_highlight_enabled);
             Assert.IsTrue(loaded.zoom_on_select_enabled);
+            Assert.IsNotNull(loaded.search_fields);
+            Assert.AreEqual(0, loaded.search_fields.Count);
         }
 
         [Test]
@@ -132,10 +110,12 @@ namespace TileStories.Editor.Tests
                     BindingFlags.NonPublic | BindingFlags.Instance),
                 "_showGlobalSearchFilter state field must exist");
 
-            Assert.IsNotNull(
+            // _searchIndexStrategy was removed when the weighted_fields strategy
+            // was removed -- confirm the field is gone (no dead editor state).
+            Assert.IsNull(
                 t.GetField("_searchIndexStrategy",
                     BindingFlags.NonPublic | BindingFlags.Instance),
-                "_searchIndexStrategy state field must exist");
+                "_searchIndexStrategy must be absent -- weighted_fields strategy removed");
         }
 
         [Test]
@@ -169,7 +149,6 @@ namespace TileStories.Editor.Tests
             {
                 wall_id = "validate_wall",
                 search_mode = "dynamic",
-                search_index_strategy = "keyword_ranked",
                 voice_search_match_mode = "all",
                 voice_activity_indicator_style = "mic_text",
                 suggested_source = "category_distribution"
@@ -250,6 +229,125 @@ namespace TileStories.Editor.Tests
             var windows = Resources.FindObjectsOfTypeAll<POIAuthoringToolWindow>();
             foreach (var w in windows)
                 Object.DestroyImmediate(w);
+        }
+
+        [Test]
+        public void RoundTrip_SearchFieldDefinitions_SurvivesJsonUtility()
+        {
+            var config = new WallConfigData
+            {
+                wall_id = "fields_wall",
+                search_fields = new System.Collections.Generic.List<SearchFieldDefinition>
+                {
+                    new SearchFieldDefinition { key = "architect", label = "Architect", forced = true, details = "Main designer." },
+                    new SearchFieldDefinition { key = "period", label = "Period", forced = false, details = string.Empty }
+                }
+            };
+
+            string json = JsonUtility.ToJson(config, true);
+            var loaded = JsonUtility.FromJson<WallConfigData>(json);
+
+            Assert.AreEqual(2, loaded.search_fields.Count);
+            Assert.AreEqual("architect", loaded.search_fields[0].key);
+            Assert.AreEqual("Architect", loaded.search_fields[0].label);
+            Assert.IsTrue(loaded.search_fields[0].forced);
+            Assert.AreEqual("Main designer.", loaded.search_fields[0].details);
+            Assert.AreEqual("period", loaded.search_fields[1].key);
+            Assert.IsFalse(loaded.search_fields[1].forced);
+        }
+
+        [Test]
+        public void RoundTrip_POISearchKeywordFields_SurvivesJsonUtility()
+        {
+            var config = new WallConfigData
+            {
+                wall_id = "fields_wall",
+                pois = new System.Collections.Generic.List<POIData>
+                {
+                    new POIData
+                    {
+                        id = "poi_a",
+                        name = "Chapel",
+                        search_keyword_fields = new System.Collections.Generic.List<POISearchKeywordField>
+                        {
+                            new POISearchKeywordField
+                            {
+                                field_key = "architect",
+                                keywords = new System.Collections.Generic.List<string> { "Siza", "Alvaro" }
+                            }
+                        }
+                    }
+                }
+            };
+
+            string json = JsonUtility.ToJson(config, true);
+            var loaded = JsonUtility.FromJson<WallConfigData>(json);
+
+            Assert.AreEqual(1, loaded.pois.Count);
+            var poi = loaded.pois[0];
+            Assert.AreEqual(1, poi.search_keyword_fields.Count);
+            Assert.AreEqual("architect", poi.search_keyword_fields[0].field_key);
+            Assert.AreEqual(2, poi.search_keyword_fields[0].keywords.Count);
+            Assert.AreEqual("Siza", poi.search_keyword_fields[0].keywords[0]);
+            Assert.AreEqual("Alvaro", poi.search_keyword_fields[0].keywords[1]);
+        }
+
+        [Test]
+        public void ValidateForcedSearchFields_FlagsEmptyForcedField()
+        {
+            var window = EditorWindow.CreateInstance<POIAuthoringToolWindow>();
+            var config = new WallConfigData
+            {
+                wall_id = "forced_wall",
+                search_fields = new System.Collections.Generic.List<SearchFieldDefinition>
+                {
+                    new SearchFieldDefinition { key = "architect", label = "Architect", forced = true }
+                },
+                pois = new System.Collections.Generic.List<POIData>
+                {
+                    new POIData { id = "poi_1", name = "Chapel", search_keyword_fields = new System.Collections.Generic.List<POISearchKeywordField>() }
+                }
+            };
+
+            var configField = typeof(POIAuthoringToolWindow)
+                .GetField("_config", BindingFlags.NonPublic | BindingFlags.Instance);
+            configField.SetValue(window, config);
+
+            var validateMethod = typeof(POIAuthoringToolWindow)
+                .GetMethod("ValidateForcedSearchFields", BindingFlags.NonPublic | BindingFlags.Instance);
+            var issues = (System.Collections.Generic.List<EditorAlertItem>)validateMethod.Invoke(window, null);
+
+            Assert.AreEqual(1, issues.Count);
+            Assert.AreEqual("poi_1", issues[0].poiId);
+            Assert.IsTrue(issues[0].problem.Contains("architect") || issues[0].problem.Contains("Architect"));
+        }
+
+        [Test]
+        public void ValidateForcedSearchFields_PassesWhenOptionalEmpty()
+        {
+            var window = EditorWindow.CreateInstance<POIAuthoringToolWindow>();
+            var config = new WallConfigData
+            {
+                wall_id = "optional_wall",
+                search_fields = new System.Collections.Generic.List<SearchFieldDefinition>
+                {
+                    new SearchFieldDefinition { key = "period", label = "Period", forced = false }
+                },
+                pois = new System.Collections.Generic.List<POIData>
+                {
+                    new POIData { id = "poi_1", name = "Chapel", search_keyword_fields = new System.Collections.Generic.List<POISearchKeywordField>() }
+                }
+            };
+
+            var configField = typeof(POIAuthoringToolWindow)
+                .GetField("_config", BindingFlags.NonPublic | BindingFlags.Instance);
+            configField.SetValue(window, config);
+
+            var validateMethod = typeof(POIAuthoringToolWindow)
+                .GetMethod("ValidateForcedSearchFields", BindingFlags.NonPublic | BindingFlags.Instance);
+            var issues = (System.Collections.Generic.List<EditorAlertItem>)validateMethod.Invoke(window, null);
+
+            Assert.IsEmpty(issues, "Optional field with empty keywords should not generate a validation issue");
         }
     }
 }

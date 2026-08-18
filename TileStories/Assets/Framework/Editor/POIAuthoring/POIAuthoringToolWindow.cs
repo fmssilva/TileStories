@@ -179,7 +179,6 @@ namespace TileStories.Editor
         [SerializeField] private bool _showGlobalZoom = true;
         // Block 5 (_2.6 section 3): Search & Filter authoring foldout.
         [SerializeField] private bool _showGlobalSearchFilter = true;
-        [SerializeField] private string _searchIndexStrategy = "keyword_ranked";
 
         [SerializeField] private bool _showPoiPosition = true;
         [SerializeField] private bool _showPoiMarkerStyle = true;

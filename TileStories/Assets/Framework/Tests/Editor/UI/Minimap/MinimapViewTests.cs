@@ -166,12 +166,12 @@ namespace TileStories.Tests
         }
 
         [Test]
-        public void SearchWeights_FieldsAccessibleFromWallConfigData()
+        public void SearchFields_DefaultIsEmptyList()
         {
-            Assert.AreEqual(3f, _config.weight_name);
-            Assert.AreEqual(2f, _config.weight_custom_field);
-            Assert.AreEqual(2f, _config.weight_derived_label);
-            Assert.AreEqual(1f, _config.weight_others);
+            // search_fields replaces the removed weight_* fields as the configurable
+            // search axis system. Default must be an empty (non-null) list.
+            Assert.IsNotNull(_config.search_fields);
+            Assert.AreEqual(0, _config.search_fields.Count);
         }
 
         [Test]

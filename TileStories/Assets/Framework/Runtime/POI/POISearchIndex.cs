@@ -91,14 +91,28 @@ namespace TileStories
                     AddToNameIndices(token, index);
                 }
 
-                // POI search_keywords (rank 0.7)
+                // POI search_keywords -- the "Others" freeform bucket (rank 0.7)
                 if (poi.search_keywords != null)
                 {
                     foreach (var keyword in poi.search_keywords)
                     {
                         foreach (var token in SearchTokenizer.Tokenize(keyword))
-                        {
                             AddToIndex(token, index, RANK_KEYWORD);
+                    }
+                }
+
+                // Per-field custom keywords (rank 0.7) -- field_key is authoring-only;
+                // the runtime index treats all keyword matches at the same quality tier.
+                if (poi.search_keyword_fields != null)
+                {
+                    foreach (var fieldEntry in poi.search_keyword_fields)
+                    {
+                        if (fieldEntry?.keywords == null)
+                            continue;
+                        foreach (var keyword in fieldEntry.keywords)
+                        {
+                            foreach (var token in SearchTokenizer.Tokenize(keyword))
+                                AddToIndex(token, index, RANK_KEYWORD);
                         }
                     }
                 }

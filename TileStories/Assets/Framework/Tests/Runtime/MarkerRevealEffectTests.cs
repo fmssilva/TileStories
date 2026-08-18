@@ -134,5 +134,34 @@ namespace TileStories.Tests
             Assert.AreEqual(1f, _canvasGroup.alpha, 0.001f, "alpha should be 1 after 0-duration reveal");
             Assert.AreEqual(Vector3.one, _rect.localScale, "scale should be 1 after 0-duration reveal");
         }
+
+        // After the reveal coroutine settles, alpha and scale must stay exactly at their
+        // settled values -- no drift. This is the §5 cross-domain handoff contract:
+        // LODController (and any future distance-compensation layer) multiplies against
+        // these channels after the reveal; if the reveal kept writing to them after
+        // completing, it would silently corrupt whatever value that layer had set.
+        [UnityTest]
+        public IEnumerator Play_AfterCompletion_DoesNotDriftAlphaOrScale()
+        {
+            _effect.Play(0f, 0.1f);
+
+            // Wait for completion plus a small buffer.
+            yield return new WaitForSeconds(0.25f);
+            yield return null; // ensure final SetFullAlphaAndScale has executed
+
+            Assert.AreEqual(1f, _canvasGroup.alpha, 0.001f, "alpha must be 1 after settle");
+            Assert.AreEqual(Vector3.one, _rect.localScale, "scale must be Vector3.one after settle");
+
+            float alphaAtSettle = _canvasGroup.alpha;
+            Vector3 scaleAtSettle = _rect.localScale;
+
+            // Wait several more frames and confirm neither value drifts.
+            for (int i = 0; i < 5; i++) yield return null;
+
+            Assert.AreEqual(alphaAtSettle, _canvasGroup.alpha, 0.0001f,
+                "alpha must not drift after completion -- LODController writes to this channel next");
+            Assert.AreEqual(scaleAtSettle.x, _rect.localScale.x, 0.0001f,
+                "scale.x must not drift after completion -- distance-compensation writes to this channel next");
+        }
     }
 }

@@ -73,6 +73,14 @@ namespace TileStories
         // 3-tier bands (2m/7m/9999m, counts -1/15/5), hybrid density, frustum cull on.
                 public LodSettings lod_settings = new();
 
+        // --- Custom keyword field definitions (spec _2.6 section 3 / 15) ---
+        // Developer-defined search axes (e.g. "architect", "period", "material").
+        // Each definition appears as an editable row in every specific POI section
+        // and in the Global Scene Keyword Fields table. System axes (category/hierarchy/
+        // badge/outline) are NOT listed here -- their keywords come from the taxonomy
+        // tables and are indexed automatically at Build time.
+        public List<SearchFieldDefinition> search_fields = new();
+
         // --- Selection & zoom-on-select infrastructure (spec _2.6 section 11) ---
         // Closed behaviour choice for which tap target triggers an auto-zoom.
         // Framework-controlled (not wall-authored taxonomy), so it is an enum rather
@@ -110,24 +118,6 @@ namespace TileStories
                 // Free-form string so future walls can use values not foreseen here.
         // Absent/null defaults to "explicit" (plain keyword search bar).
         public string search_mode;
-
-        // Author-selectable search indexing strategy (spec _2.6 section 5).
-        // "keyword_ranked" (default): fixed-rank max-score over name/summary/keyword/taxonomy.
-        //   Activates the standard POISearchIndex pipeline; weight_* fields are inert.
-        // "weighted_fields": wall-defined search_fields + four weight_* multipliers,
-        //   sum-scored per spec section 5.
-        // Free-form string so future walls can introduce strategies without a
-        // Framework code change.
-        public string search_index_strategy = "keyword_ranked";
-
-        // Search ranking weights (spec section 5).
-        // Controls how different field matches contribute to the result score.
-        // Exact name match = 1.0 (hard-coded); these are relative multipliers.
-        // Only consumed under the "weighted_fields" strategy.
-        public float weight_name = 3f;
-        public float weight_custom_field = 2f;
-        public float weight_derived_label = 2f;
-        public float weight_others = 1f;
 
         // No-results message shown when a search or filter returns zero POIs.
         // Supports {query} placeholder for the user's search term.
@@ -393,9 +383,17 @@ namespace TileStories
         public long captured_position_timestamp;
         public string summary;
 
-        // Per-POI search keywords: additional terms indexed for this POI only,
-        // beyond what taxonomy-level keywords already provide.
+        // Per-POI freeform search keywords (the "Others" bucket).
+        // Indexed at keyword rank, no field-key context.
+        // Pre-existing field: kept for backward compatibility and as the default
+        // "Others" bucket when no custom search_fields are defined.
         public List<string> search_keywords = new();
+
+        // Per-custom-field keyword lists, keyed to SearchFieldDefinition.key entries
+        // on WallConfigData.search_fields. Indexed at keyword rank alongside
+        // search_keywords above -- the field key is used only by the Editor for
+        // display; the runtime index treats all keyword matches equally.
+        public List<POISearchKeywordField> search_keyword_fields = new();
 
         // Destruction status, 0-100. Same has_* guard as captured_position and for
         // the same reason: a POI legitimately at 0% ("fully intact") must never be
@@ -465,11 +463,11 @@ namespace TileStories
             }
 
             // JSON can serialize a nullable List<T> as null; guard against it so
-            // downstream search-index code never NPEs on an absent search_keywords.
+            // downstream search-index code never NPEs on absent keyword lists.
             if (search_keywords == null)
-            {
                 search_keywords = new();
-            }
+            if (search_keyword_fields == null)
+                search_keyword_fields = new();
         }
     }
 
@@ -511,7 +509,7 @@ namespace TileStories
         public string cluster_band_source = "centroid";            // centroid|nearest_member|farthest_member (cluster centroid band)
         public bool cluster_band_hysteresis_enabled = true;        // reuse hysteresis_margin_m for cluster band index stability
         public int cluster_dissolve_grace_cycles = 3;              // pooled cluster view survival cycles before fading out (0 = immediate)
-        public string displacement_tiebreak = "symmetric"; // symmetric|lower_priority_only — see §6
+        // displacement_tiebreak removed — moved to DisplacementSettings in _2.5_Displacement.md (§11 of _2.4_Marker_LOD.md).
 
         public bool frustum_culling_enabled = true;
         public float fov_culling_margin_deg = 10f;
@@ -540,5 +538,46 @@ namespace TileStories
         // fields. The runtime LODController reads only max_distance_m and
         // max_visible_count, so adding this introduces no runtime behavior.
         public string details = string.Empty;
+    }
+
+    // One developer-defined search axis (spec _2.6 section 3 / 15).
+    // Stored in WallConfigData.search_fields. System axes (category, hierarchy,
+    // badge, outline) are not in this list -- their keywords come from the
+    // respective taxonomy tables. The reserved "others" axis is never in this
+    // list either: it is always rendered last in the per-POI editor and maps to
+    // the flat POIData.search_keywords field (the legacy / freeform bucket).
+    [Serializable]
+    public class SearchFieldDefinition
+    {
+        // Stable identifier used to link this definition to per-POI keyword lists
+        // (POISearchKeywordField.field_key). Never change after authoring begins.
+        public string key;
+
+        // Human-readable label shown in the Specific Marker editor.
+        public string label;
+
+        // When true, a warning is shown (and validation fires) if a POI's keyword
+        // list for this field is empty. The developer opts specific fields into
+        // required status; most will be optional.
+        public bool forced;
+
+        // Free-text guidance note surfaced via the Details popup (same pattern
+        // as CategoryStyleEntry.details and other taxonomy entries).
+        public string details;
+    }
+
+    // Per-POI keyword list for one custom SearchFieldDefinition.
+    // Stored in POIData.search_keyword_fields.
+    // The runtime POISearchIndex indexes all keywords at RANK_KEYWORD regardless
+    // of which field they came from; field_key is purely an authoring-time seam
+    // that keeps the Editor organised.
+    [Serializable]
+    public class POISearchKeywordField
+    {
+        // Matches SearchFieldDefinition.key on the wall config.
+        public string field_key;
+
+        // The actual keyword strings for this field on this POI.
+        public List<string> keywords = new();
     }
 }

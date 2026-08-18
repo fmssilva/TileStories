@@ -372,10 +372,18 @@ namespace TileStories.Editor
                         PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(
                             entry.label ?? "Hierarchy level", () => entry.details, v => entry.details = v));
 
-                    // Column 4: Size (cm) + info button
+                    // Column 4: Size (cm) + soft sanity warning + info button.
+                    // Soft, not a hard clamp -- a genuinely large mural marker may need
+                    // a value outside 0.5-100cm, so we warn but never block the author.
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         entry.size_cm = EditorGUILayout.FloatField(entry.size_cm, GUILayout.Width(50f));
+                        if (entry.size_cm < 0.5f || entry.size_cm > 100f)
+                        {
+                            var warnContent = EditorGUIUtility.IconContent("console.warnicon.sml");
+                            warnContent.tooltip = "Unusually large or small -- is this a cm/m typo? (0.5-100cm is the expected range)";
+                            GUILayout.Label(warnContent, GUILayout.Width(20f), GUILayout.Height(18f));
+                        }
                         HelpInfoButton.Draw("Size (cm)",
                             "Real-world printed size of the marker Symbol. This is not yet adjusted for viewing distance -- that's a separate future feature.");
                     }
@@ -469,19 +477,16 @@ namespace TileStories.Editor
             if (_config == null)
                 return;
 
-            // Strategy dropdown (D6) -- always visible at the top. Toggling it
-            // controls whether the "Ranking & Weights" block is editable or dimmed.
-            DrawStrategyDropdown();
+            // --- Keyword Fields table ---
+            EditorGUILayout.Space(2f);
+            EditorGUILayout.HelpBox(SearchFieldsTableHelp, MessageType.None);
+            EditorGUILayout.Space(4f);
+            DrawSearchFieldsTable();
 
             EditorGUILayout.Space(6f);
             EditorGUILayout.LabelField("Search", EditorStyles.boldLabel);
             _config.search_mode = DrawPopupField("Search mode", _config.search_mode,
                 SearchModeOptions, SearchModeLabels, SearchModeHelp);
-
-            // --- Ranking & Weights (strategy-conditional) ---
-            // Under "keyword_ranked" these are inert; render disabled-with-hint.
-            bool useWeighted = _config.search_index_strategy == "weighted_fields";
-            DrawRankingAndWeights(useWeighted);
 
             EditorGUILayout.Space(6f);
             EditorGUILayout.LabelField("Results & Navigation", EditorStyles.boldLabel);
@@ -534,48 +539,122 @@ namespace TileStories.Editor
                 {
                     _config.zoom_on_select_trigger = (WallConfigData.ZoomOnSelectTrigger)EditorGUILayout.EnumPopup("Trigger target", _config.zoom_on_select_trigger);
                     _config.zoom_on_select_density_threshold = DrawIntField("Density threshold", _config.zoom_on_select_density_threshold, ZoomOnSelectDensityHelp);
+                    _config.zoom_on_select_factor = DrawScalarField("Zoom factor", _config.zoom_on_select_factor, ZoomOnSelectFactorHelp);
                 }
             }
 
             _hasUnsavedChanges = true;
         }
 
-        // Strategy dropdown: keyword_ranked (default, fixed ranks) vs
-        // weighted_fields (wall-defined search_fields + four weight_*).
-        private void DrawStrategyDropdown()
+        // Renders the custom keyword field definitions table.
+        // Three row types: read-only system rows (category/hierarchy/badge/outline),
+        // editable custom rows (from search_fields), and a permanent "Others" row.
+        private void DrawSearchFieldsTable()
         {
-            int idx = System.Array.IndexOf(SearchIndexStrategyOptions, _config.search_index_strategy);
-            if (idx < 0) idx = 0;
-            idx = EditorGUILayout.Popup("Search index strategy", idx, SearchIndexStrategyLabels);
-            string newStrategy = SearchIndexStrategyOptions[idx];
-            if (newStrategy != _config.search_index_strategy)
+            if (_config.search_fields == null)
+                _config.search_fields = new List<SearchFieldDefinition>();
+
+            // Column headers.
+            using (new EditorGUILayout.HorizontalScope())
             {
-                _config.search_index_strategy = newStrategy;
+                EditorGUILayout.LabelField("Key", EditorStyles.miniBoldLabel, GUILayout.Width(90f));
+                EditorGUILayout.LabelField("Label", EditorStyles.miniBoldLabel, GUILayout.Width(100f));
+                EditorGUILayout.LabelField("Forced", EditorStyles.miniBoldLabel, GUILayout.Width(50f));
+                EditorGUILayout.LabelField("Details", EditorStyles.miniBoldLabel, GUILayout.Width(50f));
+                GUILayout.FlexibleSpace();
+            }
+
+            // Read-only system rows (derived from taxonomy tables, shown for context).
+            DrawSystemKeywordRow("category", "Category");
+            DrawSystemKeywordRow("hierarchy", "Hierarchy Level");
+            DrawSystemKeywordRow("badge", "Badge");
+            DrawSystemKeywordRow("outline", "Outline / Status");
+
+            // Editable custom rows.
+            for (int i = 0; i < _config.search_fields.Count; i++)
+            {
+                var field = _config.search_fields[i];
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    // Key (editable but warn if changed after first authoring session).
+                    string newKey = EditorGUILayout.TextField(field.key ?? string.Empty, GUILayout.Width(90f));
+                    if (newKey != field.key)
+                    {
+                        field.key = newKey;
+                        _hasUnsavedChanges = true;
+                    }
+
+                    // Label.
+                    string newLabel = EditorGUILayout.TextField(field.label ?? string.Empty, GUILayout.Width(100f));
+                    if (newLabel != field.label)
+                    {
+                        field.label = newLabel;
+                        _hasUnsavedChanges = true;
+                    }
+
+                    // Forced toggle.
+                    bool newForced = EditorGUILayout.Toggle(field.forced, GUILayout.Width(50f));
+                    if (newForced != field.forced)
+                    {
+                        field.forced = newForced;
+                        _hasUnsavedChanges = true;
+                    }
+
+                    // Details popup + help.
+                    using (new EditorGUILayout.HorizontalScope(GUILayout.Width(76f)))
+                    {
+                        if (GUILayout.Button("...", GUILayout.Width(26f)))
+                            PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(
+                                field.label ?? field.key ?? "Field",
+                                () => field.details,
+                                v => { field.details = v; _hasUnsavedChanges = true; }));
+
+                        if (GUILayout.Button("?", GUILayout.Width(26f)))
+                            PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup(
+                                "Search Field Help",
+                                $"Key: {SearchFieldKeyHelp}\n\nLabel: {SearchFieldLabelHelp}\n\nForced: {SearchFieldForcedHelp}\n\nDetails: {SearchFieldDetailsHelp}"));
+                    }
+
+                    GUILayout.FlexibleSpace();
+
+                    // Remove button.
+                    if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
+                    {
+                        _config.search_fields.RemoveAt(i);
+                        _hasUnsavedChanges = true;
+                        break;
+                    }
+                }
+            }
+
+            // Permanent read-only "Others" row (the flat search_keywords bucket).
+            DrawSystemKeywordRow("others", "Others (freeform)");
+
+            // Add new field button.
+            EditorGUILayout.Space(2f);
+            if (GUILayout.Button("+ Add keyword field", GUILayout.Width(160f)))
+            {
+                _config.search_fields.Add(new SearchFieldDefinition
+                {
+                    key = "field_" + (_config.search_fields.Count + 1),
+                    label = "New Field",
+                    forced = false,
+                    details = string.Empty
+                });
                 _hasUnsavedChanges = true;
             }
         }
 
-        // "Ranking & Weights" block: renders the four weight_* fields.
-        // Under keyword_ranked they are disabled with a hint explaining
-        // they only apply to the weighted_fields strategy.
-        private void DrawRankingAndWeights(bool useWeighted)
+        // Renders one read-only labelled row in the keyword fields table.
+        private static void DrawSystemKeywordRow(string key, string label)
         {
-            EditorGUILayout.Space(3f);
-            EditorGUILayout.LabelField("Ranking & Weights", EditorStyles.boldLabel);
-
-            if (!useWeighted)
+            using (new EditorGUI.DisabledScope(true))
+            using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.HelpBox(
-                    "Weight fields apply only under the 'weighted_fields' strategy. " +
-                    "Switch the strategy dropdown above to edit them.", MessageType.Info);
-            }
-
-            using (new EditorGUI.DisabledScope(!useWeighted))
-            {
-                _config.weight_name = DrawScalarField("Name weight", _config.weight_name, WeightNameHelp);
-                _config.weight_custom_field = DrawScalarField("Custom field weight", _config.weight_custom_field, WeightCustomHelp);
-                _config.weight_derived_label = DrawScalarField("Derived label weight", _config.weight_derived_label, WeightDerivedHelp);
-                _config.weight_others = DrawScalarField("Others weight", _config.weight_others, WeightOthersHelp);
+                EditorGUILayout.TextField(key, GUILayout.Width(90f));
+                EditorGUILayout.TextField(label, GUILayout.Width(100f));
+                EditorGUILayout.Toggle(false, GUILayout.Width(50f)); // forced always false for system rows
+                GUILayout.Button("...", GUILayout.Width(26f));
             }
         }
     }

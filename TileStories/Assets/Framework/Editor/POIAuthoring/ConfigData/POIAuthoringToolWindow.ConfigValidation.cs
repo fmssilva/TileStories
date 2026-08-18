@@ -76,13 +76,15 @@ namespace TileStories.Editor
 
         // Runs validation after config load and shows a non-blocking alert if
         // any hierarchy keys are unresolvable or level sizes look out of range
-        // or any search-mode enum-string fields are unknown/inert.
+        // or any search-mode string fields are unknown/inert
+        // or any POI is missing keywords for a forced search field.
         private void ValidateAndAlert(string context)
         {
             var issues = new List<EditorAlertItem>();
             issues.AddRange(ValidateHierarchyLevelKeys());
             issues.AddRange(ValidateHierarchyLevelSizeRange(_config?.hierarchy_levels));
             issues.AddRange(ValidateSearchEnumFields());
+            issues.AddRange(ValidateForcedSearchFields());
             if (issues.Count == 0)
                 return;
 
@@ -95,7 +97,7 @@ namespace TileStories.Editor
         // have known values. Non-blocking warnings -- surfaces inert strategy
         // values (scoped/faceted/auto_complete) and unknown values for
         // search_mode, voice_search_match_mode, voice_activity_indicator_style,
-        // suggested_source, and search_index_strategy.
+        // and suggested_source.
         private List<EditorAlertItem> ValidateSearchEnumFields()
         {
             var issues = new List<EditorAlertItem>();
@@ -119,18 +121,6 @@ namespace TileStories.Editor
                     value: _config.search_mode,
                     problem: $"search_mode is {detail}.",
                     fixHint: $"Use 'dynamic' or 'explicit'. 'scoped', 'faceted', 'auto_complete' are recognized but not yet implemented."));
-            }
-
-            // search_index_strategy
-            string[] validStrategies = { "keyword_ranked", "weighted_fields" };
-            if (!string.IsNullOrEmpty(_config.search_index_strategy) &&
-                !System.Array.Exists(validStrategies, s => s.Equals(_config.search_index_strategy, StringComparison.OrdinalIgnoreCase)))
-            {
-                issues.Add(new EditorAlertItem(
-                    poiId: wallId,
-                    value: _config.search_index_strategy,
-                    problem: "search_index_strategy has an unrecognized value.",
-                    fixHint: "Use 'keyword_ranked' or 'weighted_fields'."));
             }
 
             // voice_search_match_mode
@@ -169,49 +159,45 @@ namespace TileStories.Editor
                     fixHint: "Use 'category_distribution' or 'recent_first'."));
             }
 
-            // weight_* fields (only relevant when using the weighted_fields strategy;
-            // keyword_ranked does not read them at runtime, so they are inert and need
-            // no validation when that strategy is active)
-            if (string.Equals(_config.search_index_strategy, "weighted_fields", StringComparison.OrdinalIgnoreCase))
+            return issues;
+        }
+
+        // Validates that every POI has keywords for any search field marked as forced.
+        // Non-blocking -- shows a warning icon in the SpecificMarker editor as well,
+        // but also surfaces here so the developer sees it on load/save.
+        private List<EditorAlertItem> ValidateForcedSearchFields()
+        {
+            var issues = new List<EditorAlertItem>();
+            if (_config == null || _config.pois == null || _config.search_fields == null)
+                return issues;
+
+            var forcedFields = _config.search_fields.FindAll(f => f != null && f.forced && !string.IsNullOrWhiteSpace(f.key));
+            if (forcedFields.Count == 0)
+                return issues;
+
+            foreach (var poi in _config.pois)
             {
-                if (_config.weight_name <= 0)
-                {
-                    issues.Add(new EditorAlertItem(
-                        poiId: wallId,
-                        value: _config.weight_name.ToString(),
-                        problem: "weight_name must be positive when using the 'weighted_fields' strategy.",
-                        fixHint: "Set to a positive number (default 3)."));
-                }
+                if (poi == null)
+                    continue;
 
-                if (_config.weight_custom_field <= 0)
+                foreach (var field in forcedFields)
                 {
-                    issues.Add(new EditorAlertItem(
-                        poiId: wallId,
-                        value: _config.weight_custom_field.ToString(),
-                        problem: "weight_custom_field must be positive when using the 'weighted_fields' strategy.",
-                        fixHint: "Set to a positive number (default 2)."));
-                }
-
-                if (_config.weight_derived_label <= 0)
-                {
-                    issues.Add(new EditorAlertItem(
-                        poiId: wallId,
-                        value: _config.weight_derived_label.ToString(),
-                        problem: "weight_derived_label must be positive when using the 'weighted_fields' strategy.",
-                        fixHint: "Set to a positive number (default 2)."));
-                }
-
-                if (_config.weight_others <= 0)
-                {
-                    issues.Add(new EditorAlertItem(
-                        poiId: wallId,
-                        value: _config.weight_others.ToString(),
-                        problem: "weight_others must be positive when using the 'weighted_fields' strategy.",
-                        fixHint: "Set to a positive number (default 1)."));
+                    var entry = poi.search_keyword_fields?.Find(e => e?.field_key == field.key);
+                    bool isEmpty = entry == null || entry.keywords == null || entry.keywords.Count == 0;
+                    if (isEmpty)
+                    {
+                        string displayLabel = string.IsNullOrWhiteSpace(field.label) ? field.key : field.label;
+                        issues.Add(new EditorAlertItem(
+                            poiId: poi.id ?? "<unnamed>",
+                            value: field.key,
+                            problem: $"POI is missing keywords for the required search field '{displayLabel}'.",
+                            fixHint: $"Open the Specific Marker tab, expand this POI, and fill in the '{displayLabel}' keyword field."));
+                    }
                 }
             }
 
             return issues;
         }
+
     }
 }

@@ -66,11 +66,6 @@ namespace TileStories.Editor
         private static readonly string[] ShowLabelOptions = { "Show Label", "NOT show Label" };
 
         // --- Search & Filter authoring constants (Block 5) ---
-        // Search index strategy dropdown (D6).
-        private static readonly string[] SearchIndexStrategyOptions = { "keyword_ranked", "weighted_fields" };
-        private static readonly string[] SearchIndexStrategyLabels = { "Keyword Ranked (default)", "Weighted Fields" };
-        private static readonly string SearchIndexStrategyHelp = "keyword_ranked uses fixed max-score ranks (name > prefix > keyword > summary > taxonomy). weighted_fields uses wall-defined search_fields with the four weight_* multipliers (spec section 5).";
-
         // Search mode dropdown (inert values flagged by ValidateSearchEnumFields).
         private static readonly string[] SearchModeOptions = { "dynamic", "explicit", "scoped", "faceted", "auto_complete" };
         private static readonly string[] SearchModeLabels = { "Dynamic", "Explicit", "Scoped (inert)", "Faceted (inert)", "Auto-Complete (inert)" };
@@ -110,12 +105,7 @@ namespace TileStories.Editor
         private static readonly string SelectionHighlightHelp = "Dim non-selected markers when a marker is selected.";
         private static readonly string ZoomOnSelectHelp = "Auto-zoom when selecting a marker in dense regions.";
         private static readonly string ZoomOnSelectDensityHelp = "Minimum screen-space neighbours for zoom-on-select to fire.";
-
-        // Weight fields help (only under weighted_fields).
-        private static readonly string WeightNameHelp = "Multiplier for exact name matches (default 3).";
-        private static readonly string WeightCustomHelp = "Multiplier for custom search_field matches (default 2).";
-        private static readonly string WeightDerivedHelp = "Multiplier for derived labels: category, hierarchy, badge, outline + their keywords (default 2).";
-        private static readonly string WeightOthersHelp = "Multiplier for POI-level search_keywords (the 'Others' bucket, default 1).";
+        private static readonly string ZoomOnSelectFactorHelp = "Zoom multiplier applied when zoom-on-select fires (e.g. 2.0 doubles the zoom). Clamped to the wall's zoom_min..zoom_max range.";
         private static readonly Color GlobalSectionColor = new Color(0.35f, 0.55f, 0.95f);
 
         // Tab button and container colors for the enhanced visual hierarchy.
@@ -170,5 +160,19 @@ namespace TileStories.Editor
 
         private static GUIContent _trashIcon;
         private static GUIContent TrashIcon => _trashIcon ?? (_trashIcon = EditorGUIUtility.IconContent("d_TreeEditor.Trash"));
+
+        // Keyword Fields table (Global Scene > Search & Filter).
+        private static readonly string SearchFieldKeyHelp = "Stable identifier for this search axis. Never change after authoring begins -- existing per-POI keywords reference it by key.";
+        private static readonly string SearchFieldLabelHelp = "Human-readable name shown in each POI's keyword editor.";
+        private static readonly string SearchFieldForcedHelp = "When enabled, a warning appears on any POI that leaves this field's keyword list empty. Non-blocking -- does not prevent saving.";
+        private static readonly string SearchFieldDetailsHelp = "Usage note for the authoring team: what vocabulary is useful here, any naming conventions, examples.";
+        private static readonly string SearchFieldsTableHelp =
+            "Define custom search axes (e.g. 'architect', 'period', 'material'). Each row appears as an editable keyword list in every specific POI.\n" +
+            "System axes (category / hierarchy / badge / outline) are handled automatically from their respective tables above.\n" +
+            "Synonym suggestion (WordNet EN / AI) is a planned feature -- manual keyword entry is fully functional now.";
+
+        // Per-POI keyword section labels.
+        private static readonly string SearchKeywordsDerivedHelp = "These keywords are derived automatically from the taxonomy selections above and indexed at runtime. No action needed.";
+        private static readonly string SearchKeywordsOthersHelp = "Freeform keywords that do not belong to any defined search axis (comma-separated). Indexed alongside all other keyword sources.";
     }
 }
