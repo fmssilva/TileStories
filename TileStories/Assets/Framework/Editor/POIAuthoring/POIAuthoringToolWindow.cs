@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -216,77 +216,121 @@ namespace TileStories.Editor
             SceneView.duringSceneGui -= OnSceneGUI;
         }
 
-    private void OnGUI()
-    {
-        HandleUndoShortcuts();
-
-        DrawToolbar();
-        DrawTopConfigAndActions();
-        DrawSyncAndWarnings();
-
-        if (_config == null)
+        private void OnGUI()
         {
-            EditorGUILayout.HelpBox("No config loaded. Click Load Config.", MessageType.Info);
-            return;
-        }
+            HandleUndoShortcuts();
 
-        _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
+            DrawToolbar();
+            DrawTopConfigAndActions();
+            DrawSyncAndWarnings();
 
-        // Tab toolbar - replaces the previous side-by-side layout
-        // Light greenish/gray background for special "tabs buttons" per user request
-        // Left-aligned with automatic button sizing (FitToContents) for narrow windows
-        var _originalBgColor = GUI.backgroundColor;
-        GUI.backgroundColor = new Color(0.9f, 1.0f, 0.9f); // light greenish/gray
-
-        string[] tabNames = { "Global Scene", "Specific Marker" };
-        int selectedIndex = (int)_selectedTab;
-        int newSelectedIndex = GUILayout.Toolbar(selectedIndex, tabNames, GUI.skin.button, GUI.ToolbarButtonSize.FitToContents, GUILayout.Height(26f));
-        if (newSelectedIndex != selectedIndex)
-        {
-            _selectedTab = (TabSelection)newSelectedIndex;
-        }
-
-        GUI.backgroundColor = _originalBgColor; // Restore original background color
-
-        EditorGUILayout.Space(10f); // Increased from 8f for better visual separation
-
-        // Conditional content based on selected tab - only show selected tab's content
-        switch (_selectedTab)
-        {
-            case TabSelection.GlobalScene:
-                DrawConfigMutationScope(DrawGlobalSceneOptions, refreshRigOnChange: true);
-                break;
-            case TabSelection.SpecificMarker:
-                DrawConfigMutationScope(DrawSpecificMarkerOptions, refreshRigOnChange: true);
-                break;
-        }
-
-        EditorGUILayout.EndScrollView();
-    }
-
-        // Draw a foldout with a coloured left border so the two top-level groups
-        // (Global / Specific) read as visually distinct sections, not just plain
-        // foldouts. Inner Marker/Badge/Outline foldouts use the same helper at a
-        // lighter accent colour so the nesting reads without a second method.
-        private bool DrawFramedFoldout(bool expanded, string title, Color accentColor, Action drawContent)
-        {
-            var headerStyle = new GUIStyle(EditorStyles.foldoutHeader)
+            if (_config == null)
             {
-                normal = { textColor = accentColor },
-                onNormal = { textColor = accentColor }
-            };
-            expanded = EditorGUILayout.Foldout(expanded, title, true, headerStyle);
+                EditorGUILayout.HelpBox("No config loaded. Click Load Config.", MessageType.Info);
+                return;
+            }
+
+            // Tab buttons with constant base colors (Global Scene = blue, Specific Marker = green)
+            var originalBgColor = GUI.backgroundColor;
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                // Global Scene tab button (always blue)
+                var globalTabStyle = new GUIStyle(GUI.skin.button);
+                globalTabStyle.fontStyle = FontStyle.Bold;
+                globalTabStyle.normal.textColor = TabTextColor;
+                globalTabStyle.onNormal.textColor = TabTextColor;
+                GUI.backgroundColor = GlobalSceneTabColor;
+                if (GUILayout.Button("Global Scene", globalTabStyle, GUILayout.Height(26f), GUILayout.ExpandWidth(false)))
+                    _selectedTab = TabSelection.GlobalScene;
+
+                // Specific Marker tab button (always green)
+                var specificTabStyle = new GUIStyle(GUI.skin.button);
+                specificTabStyle.fontStyle = FontStyle.Bold;
+                specificTabStyle.normal.textColor = TabTextColor;
+                specificTabStyle.onNormal.textColor = TabTextColor;
+                GUI.backgroundColor = SpecificMarkerTabColor;
+                if (GUILayout.Button("Specific Marker", specificTabStyle, GUILayout.Height(26f), GUILayout.ExpandWidth(false)))
+                    _selectedTab = TabSelection.SpecificMarker;
+            }
+
+            GUI.backgroundColor = originalBgColor;
+
+            // Tab buttons are a fixed header above; this scroll wraps only the
+            // active tab's content (each rendered inside DrawTabContentContainer's
+            // colored border) so the tab row never scrolls away. No spacer between.
+            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
+            switch (_selectedTab)
+            {
+                case TabSelection.GlobalScene:
+                    DrawConfigMutationScope(() => DrawTabContentContainer(DrawGlobalSceneOptions, GlobalSectionColor), refreshRigOnChange: true);
+                    break;
+                case TabSelection.SpecificMarker:
+                    DrawConfigMutationScope(() => DrawTabContentContainer(DrawSpecificMarkerOptions, SpecificMarkerTabColor), refreshRigOnChange: true);
+                    break;
+            }
+
+            EditorGUILayout.EndScrollView();
+        }
+
+        /// Create a bold GUIStyle for foldout headers with the specified text color.
+        private static GUIStyle CreateFoldoutStyle(Color textColor)
+        {
+            var style = new GUIStyle(EditorStyles.foldout);
+            style.fontStyle = FontStyle.Bold;
+            style.normal.textColor = textColor;
+            style.onNormal.textColor = textColor;
+            return style;
+        }
+
+        /// Draw a foldout with a bold colored title and its content when expanded.
+        private static bool DrawFramedFoldout(ref bool expanded, Action content, string title, Color titleColor)
+        {
+            var boldStyle = CreateFoldoutStyle(titleColor);
+            expanded = EditorGUILayout.Foldout(expanded, title, true, boldStyle);
 
             if (expanded)
             {
-                var rect = EditorGUILayout.BeginVertical(GUI.skin.box);
-                EditorGUI.DrawRect(new Rect(rect.x, rect.y, 2f, rect.height), accentColor);
                 using (new EditorGUI.IndentLevelScope())
-                    drawContent?.Invoke();
-                EditorGUILayout.EndVertical();
+                {
+                    content?.Invoke();
+                }
             }
 
             return expanded;
+        }
+
+        /// Draw a content container with colored top and left borders for visual section grouping.
+        private static void DrawTabContentContainer(Action content, Color containerColor, string label = "", GUIStyle labelStyle = null)
+        {
+            using (new EditorGUI.IndentLevelScope())
+            {
+                // Capture a valid start rect: when a label precedes the content we
+                // take its rect; otherwise reserve a zero-height control so GetLastRect
+                // is legal (calling it immediately after beginning a group throws
+                // "You cannot call GetLast immediately after beginning a group").
+                Rect startRect;
+                if (!string.IsNullOrEmpty(label))
+                {
+                    EditorGUILayout.LabelField(label, labelStyle ?? EditorStyles.boldLabel);
+                    startRect = GUILayoutUtility.GetLastRect();
+                }
+                else
+                {
+                    startRect = EditorGUILayout.GetControlRect(false, 0f, GUILayout.ExpandWidth(true));
+                }
+                float startY = startRect.yMax;
+
+                content?.Invoke();
+
+                Rect endRect = GUILayoutUtility.GetLastRect();
+                float height = Mathf.Max(0f, endRect.yMax - startY);
+
+                // Colored top border
+                EditorGUI.DrawRect(new Rect(startRect.x, startY, startRect.width, 2f), containerColor);
+                // Colored left border
+                EditorGUI.DrawRect(new Rect(startRect.x, startY, 3f, height), containerColor);
+            }
         }
 
         private void DrawToolbar()
@@ -299,15 +343,18 @@ namespace TileStories.Editor
         {
             TryResolveSceneReferences();
 
-            _showTopConfig = EditorGUILayout.Foldout(_showTopConfig, "Scene Configuration", true);
+            _showTopConfig = EditorGUILayout.Foldout(_showTopConfig, "Scene Configuration", true, CreateFoldoutStyle(SceneConfigSectionColor));
             if (_showTopConfig)
             {
-                DrawPathRow("Config path", ref _configPath, "json");
-                DrawPathRow("Streaming path", ref _streamingConfigPath, "json");
-                DrawPathRow("Marker prefab", ref _prefabPath, "prefab");
+                DrawTabContentContainer(() =>
+                {
+                    DrawPathRow("Config path", ref _configPath, "json");
+                    DrawPathRow("Streaming path", ref _streamingConfigPath, "json");
+                    DrawPathRow("Marker prefab", ref _prefabPath, "prefab");
 
-                _correctionAnchor = (Transform)EditorGUILayout.ObjectField("Correction anchor", _correctionAnchor, typeof(Transform), true);
-                _wallMesh = (GameObject)EditorGUILayout.ObjectField("Wall mesh (reference)", _wallMesh, typeof(GameObject), true);
+                    _correctionAnchor = (Transform)EditorGUILayout.ObjectField("Correction anchor", _correctionAnchor, typeof(Transform), true);
+                    _wallMesh = (GameObject)EditorGUILayout.ObjectField("Wall mesh (reference)", _wallMesh, typeof(GameObject), true);
+                }, SceneConfigSectionColor);
             }
 
             EditorGUILayout.Space(6f);

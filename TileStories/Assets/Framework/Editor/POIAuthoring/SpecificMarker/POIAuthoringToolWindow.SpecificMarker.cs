@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -23,35 +23,20 @@ namespace TileStories.Editor
 
                 string foldoutKey = string.IsNullOrWhiteSpace(poi.id) ? $"poi_{i}" : poi.id;
                 bool expanded = GetPoiFoldout(foldoutKey);
-                expanded = EditorGUILayout.Foldout(expanded, $"{i + 1}. {poi.name} ({poi.id})", true);
+                expanded = EditorGUILayout.Foldout(expanded, $"{i + 1}. {poi.name} ({poi.id})", true, CreateFoldoutStyle(PoiHeaderColorFor(foldoutKey, i)));
                 _poiFoldouts[foldoutKey] = expanded;
                 if (!expanded)
                     continue;
 
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    _showPoiPosition = EditorGUILayout.Foldout(_showPoiPosition, "Position", true);
-                    if (_showPoiPosition)
-                    {
-                        using (new EditorGUI.IndentLevelScope())
-                            DrawPoiPositionFields(poi);
-                    }
+                    _showPoiPosition = DrawFramedFoldout(ref _showPoiPosition, () => DrawPoiPositionFields(poi), "Position", FoldoutDefaultColor);
 
-                    _showPoiMarkerStyle = EditorGUILayout.Foldout(_showPoiMarkerStyle, "Marker Style", true);
-                    if (_showPoiMarkerStyle)
-                    {
-                        using (new EditorGUI.IndentLevelScope())
-                            DrawPoiMarkerStyleFields(poi);
-                    }
+                    _showPoiMarkerStyle = DrawFramedFoldout(ref _showPoiMarkerStyle, () => DrawPoiMarkerStyleFields(poi), "Marker Style", FoldoutDefaultColor);
 
                     if (_config.marker_use_badge)
                     {
-                        _showPoiBadgeStyle = EditorGUILayout.Foldout(_showPoiBadgeStyle, "Badge Style", true);
-                        if (_showPoiBadgeStyle)
-                        {
-                            using (new EditorGUI.IndentLevelScope())
-                                DrawPoiBadgeStyleFields(poi);
-                        }
+                        _showPoiBadgeStyle = DrawFramedFoldout(ref _showPoiBadgeStyle, () => DrawPoiBadgeStyleFields(poi), "Badge Style", FoldoutDefaultColor);
                     }
 
                     // Outline is an independent axis from badge (section 13.0) --
@@ -60,23 +45,13 @@ namespace TileStories.Editor
                     bool outlineEnabled = !string.Equals(_config.marker_outline_mode, "none", StringComparison.OrdinalIgnoreCase);
                     if (outlineEnabled)
                     {
-                        _showPoiOutline = EditorGUILayout.Foldout(_showPoiOutline, "Outline", true);
-                        if (_showPoiOutline)
-                        {
-                            using (new EditorGUI.IndentLevelScope())
-                                DrawPoiOutlineFields(poi);
-                        }
+                        _showPoiOutline = DrawFramedFoldout(ref _showPoiOutline, () => DrawPoiOutlineFields(poi), "Outline", FoldoutDefaultColor);
                     }
 
                     // Effects foldout removed: per-POI effect selection is now
                     // driven entirely by the hierarchy level (see DrawPoiMarkerStyleFields).
                     // Global effect *defaults* remain in the Global Scene Effects section.
-                    _showPoiSearchKeywords = EditorGUILayout.Foldout(_showPoiSearchKeywords, "Search Keywords", true);
-                    if (_showPoiSearchKeywords)
-                    {
-                        using (new EditorGUI.IndentLevelScope())
-                            DrawPoiSearchKeywordsField(poi);
-                    }
+                    _showPoiSearchKeywords = DrawFramedFoldout(ref _showPoiSearchKeywords, () => DrawPoiSearchKeywordsField(poi), "Search Keywords", FoldoutDefaultColor);
                 }
 
                 EditorGUILayout.Space(6f);

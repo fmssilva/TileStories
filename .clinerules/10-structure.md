@@ -691,7 +691,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                                  RecomputeLevelPercentSpacing (+ DrawGlobalHierarchySection: Hierarchy table incl. Priority column).
 │   │   │   │   │   ├── POIAuthoringToolWindow.LodZoom.cs  ← DrawGlobalLodSection + DrawGlobalZoomSection foldouts + shared DrawScalarField/DrawToggleField/DrawIntField/DrawPopupField helpers (Block 2, Editor-only).
 │   │   │   │   ├── SpecificMarker/
-│   │   │   │   │   └── POIAuthoringToolWindow.SpecificMarker.cs ← DrawSpecificMarkerOptions,
+│   │   │   │   │   └── POIAuthoringToolWindow.SpecificMarker.cs ← DrawSpecificMarkerOptions (per-POI inner\n│   │   │   │   │                                                    sections indented under each POI header via\n│   │   │   │   │                                                    EditorGUI.IndentLevelScope),
 │   │   │   │   │                                                    DrawPoiPositionFields,
 │   │   │   │   │                                                    DrawPoiMarkerStyleFields,
 │   │   │   │   │                                                    DrawPoiBadgeStyleFields,

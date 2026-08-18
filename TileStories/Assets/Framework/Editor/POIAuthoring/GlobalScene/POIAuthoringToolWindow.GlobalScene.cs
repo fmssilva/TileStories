@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -9,95 +9,42 @@ namespace TileStories.Editor
     {
         private void DrawGlobalSceneOptions()
         {
-            _showGlobalMarker = EditorGUILayout.Foldout(_showGlobalMarker, "Marker", true);
-            if (_showGlobalMarker)
-            {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    DrawMarkerGlobalSection();
-                }
-            }
+            _showGlobalMarker = DrawFramedFoldout(ref _showGlobalMarker, DrawMarkerGlobalSection, "Marker", MarkerSectionColor);
 
             EditorGUILayout.Space(4f);
 
-            _showGlobalBadge = EditorGUILayout.Foldout(_showGlobalBadge, "Badge", true);
-            if (_showGlobalBadge)
+            _showGlobalBadge = DrawFramedFoldout(ref _showGlobalBadge, () =>
             {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    _config.marker_use_badge = EditorGUILayout.Toggle("Enable badge", _config.marker_use_badge);
-                    if (_config.marker_use_badge)
-                        DrawGlobalBadgeSection();
-                    else
-                        EditorGUILayout.HelpBox("Enable badge to edit badge symbol taxonomy.", MessageType.Info);
-                }
-            }
+                _config.marker_use_badge = EditorGUILayout.Toggle("Enable badge", _config.marker_use_badge);
+                if (_config.marker_use_badge)
+                    DrawGlobalBadgeSection();
+                else
+                    EditorGUILayout.HelpBox("Enable badge to edit badge symbol taxonomy.", MessageType.Info);
+            }, "Badge", BadgeSectionColor);
 
             EditorGUILayout.Space(4f);
 
-            _showGlobalOutline = EditorGUILayout.Foldout(_showGlobalOutline, "Outline", true);
-            if (_showGlobalOutline)
-            {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    DrawGlobalOutlineSection();
-                }
-            }
+            _showGlobalOutline = DrawFramedFoldout(ref _showGlobalOutline, DrawGlobalOutlineSection, "Outline", OutlineSectionColor);
 
             EditorGUILayout.Space(4f);
 
-            _showGlobalEffects = EditorGUILayout.Foldout(_showGlobalEffects, "Effects", true);
-            if (_showGlobalEffects)
-            {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    DrawGlobalEffectsSection();
-                }
-            }
+            _showGlobalEffects = DrawFramedFoldout(ref _showGlobalEffects, DrawGlobalEffectsSection, "Effects", EffectsSectionColor);
 
             EditorGUILayout.Space(4f);
 
-            _showGlobalHierarchy = EditorGUILayout.Foldout(_showGlobalHierarchy, "Hierarchy Levels", true);
-            if (_showGlobalHierarchy)
-            {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    DrawGlobalHierarchySection();
-                }
-            }
+            _showGlobalHierarchy = DrawFramedFoldout(ref _showGlobalHierarchy, DrawGlobalHierarchySection, "Hierarchy Levels", HierarchySectionColor);
 
             EditorGUILayout.Space(4f);
 
-            _showGlobalLod = EditorGUILayout.Foldout(_showGlobalLod, "LOD", true);
-            if (_showGlobalLod)
-            {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    DrawGlobalLodSection();
-                }
-            }
-
-                        EditorGUILayout.Space(4f);
-
-            _showGlobalZoom = EditorGUILayout.Foldout(_showGlobalZoom, "Zoom", true);
-            if (_showGlobalZoom)
-            {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    DrawGlobalZoomSection();
-                }
-            }
+            _showGlobalLod = DrawFramedFoldout(ref _showGlobalLod, DrawGlobalLodSection, "LOD", LodSectionColor);
 
             EditorGUILayout.Space(4f);
 
-            _showGlobalSearchFilter = EditorGUILayout.Foldout(_showGlobalSearchFilter, "Search & Filter", true);
-            if (_showGlobalSearchFilter)
-            {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    DrawGlobalSearchFilterSection();
-                }
-            }
+            _showGlobalZoom = DrawFramedFoldout(ref _showGlobalZoom, DrawGlobalZoomSection, "Zoom", ZoomSectionColor);
+
+            EditorGUILayout.Space(4f);
+
+            _showGlobalSearchFilter = DrawFramedFoldout(ref _showGlobalSearchFilter, DrawGlobalSearchFilterSection, "Search & Filter", SearchFilterSectionColor);
         }
 
         private void DrawMarkerGlobalSection()

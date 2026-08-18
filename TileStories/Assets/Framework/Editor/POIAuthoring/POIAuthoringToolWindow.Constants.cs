@@ -62,7 +62,7 @@ namespace TileStories.Editor
         private static readonly string ZoomTransitionHelp = "Seconds the FOV animates over for double-tap steps and on-screen button taps. Pinch (continuous) does not animate -- it follows the finger directly (section 9).";
         private static readonly string ZoomUiButtonsHelp = "Shows on-screen zoom in / zoom out / fit-to-1x buttons (UI Toolkit, screen-space). Independently toggleable so devs who prefer gestures can hide the chrome.";
 
-                // Show-label options (explicit wording per §6 of 2.3 doc, clearer than bare checkbox).
+                // Show-label options (explicit wording per Â§6 of 2.3 doc, clearer than bare checkbox).
         private static readonly string[] ShowLabelOptions = { "Show Label", "NOT show Label" };
 
         // --- Search & Filter authoring constants (Block 5) ---
@@ -117,7 +117,56 @@ namespace TileStories.Editor
         private static readonly string WeightDerivedHelp = "Multiplier for derived labels: category, hierarchy, badge, outline + their keywords (default 2).";
         private static readonly string WeightOthersHelp = "Multiplier for POI-level search_keywords (the 'Others' bucket, default 1).";
         private static readonly Color GlobalSectionColor = new Color(0.35f, 0.55f, 0.95f);
-        private static readonly Color InnerSectionColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
+
+        // Tab button and container colors for the enhanced visual hierarchy.
+        private static readonly Color GlobalSceneTabColor = new Color(0.15f, 0.50f, 0.95f); // vivid blue
+        private static readonly Color SpecificMarkerTabColor = new Color(0.00f, 0.78f, 0.38f); // vivid green
+        private static readonly Color TabTextColor = Color.white;
+        private static readonly Color SceneConfigSectionColor = new Color(0.45f, 0.55f, 0.85f);
+        private static readonly Color MarkerSectionColor = new Color(0.30f, 0.80f, 0.40f);
+        private static readonly Color BadgeSectionColor = new Color(0.95f, 0.60f, 0.20f);
+        private static readonly Color OutlineSectionColor = new Color(0.60f, 0.35f, 0.90f);
+        private static readonly Color EffectsSectionColor = new Color(0.20f, 0.65f, 0.90f);
+        private static readonly Color HierarchySectionColor = new Color(0.95f, 0.80f, 0.15f);
+        private static readonly Color LodSectionColor = new Color(0.00f, 0.70f, 0.70f);
+        private static readonly Color ZoomSectionColor = new Color(0.80f, 0.20f, 0.70f);
+        private static readonly Color SearchFilterSectionColor = new Color(0.60f, 0.40f, 0.20f);
+        // Specific Marker tab: per-POI header foldouts pick a stable color from
+        // PoiHeaderPalette (deterministic FNV-1a hash of the POI id), so concrete
+        // POI header titles look varied instead of sharing one crimson. The five
+        // inner sub-section titles stay bold but render with the editor's default
+        // (uncolored) text via FoldoutDefaultColor.
+        private static readonly Color[] PoiHeaderPalette = new Color[]
+        {
+            new Color(0.95f, 0.25f, 0.25f), // red
+            new Color(0.95f, 0.55f, 0.10f), // orange
+            new Color(0.95f, 0.78f, 0.15f), // gold
+            new Color(0.45f, 0.80f, 0.20f), // lime
+            new Color(0.10f, 0.72f, 0.45f), // green
+            new Color(0.00f, 0.70f, 0.70f), // teal
+            new Color(0.15f, 0.60f, 0.95f), // sky blue
+            new Color(0.20f, 0.45f, 0.90f), // blue
+            new Color(0.45f, 0.45f, 0.95f), // indigo
+            new Color(0.70f, 0.40f, 0.95f), // violet
+            new Color(0.90f, 0.30f, 0.70f), // magenta
+            new Color(0.95f, 0.20f, 0.55f), // hot pink
+        };
+        private static Color FoldoutDefaultColor => EditorStyles.foldout.normal.textColor;
+
+        // Resolve a stable per-POI header color by hashing the POI key; the index
+        // seed is used as the hash source when the key is null/empty. Deterministic
+        // across repaints and editor sessions (no flicker), and reuses
+        // CategoryPalette's canonical FNV-1a StableHash so there is one hash
+        // implementation site shared with runtime category coloring.
+        private static Color PoiHeaderColorFor(string poiKey, int fallbackSeed)
+        {
+            Color[] p = PoiHeaderPalette;
+            if (p == null || p.Length == 0)
+                return new Color(0.80f, 0.22f, 0.28f); // defensive fallback = old crimson
+            string seed = string.IsNullOrEmpty(poiKey) ? fallbackSeed.ToString() : poiKey;
+            int idx = (CategoryPalette.StableHash(seed) & 0x7FFFFFFF) % p.Length;
+            return p[idx];
+        }
 
         private static GUIContent _trashIcon;
         private static GUIContent TrashIcon => _trashIcon ?? (_trashIcon = EditorGUIUtility.IconContent("d_TreeEditor.Trash"));

@@ -1,154 +1,214 @@
-﻿## PLAN FOR BLOCK 1 - POIAuthoring Window Tab Width Optimization
+﻿# PLAN — Vivid POI header/tab colors + fix "GetLast immediately after a group" error
 
-### 1. TARGET DOMAIN AND CONTEXT RE-GROUNDING
+## Context & what's already done
 
-__File to Modify__: `Assets/Framework/Editor/POIAuthoring/POIAuthoringToolWindow.cs`
+The prior session already: (1) added a 12-color `PoiHeaderPalette` + deterministic `PoiHeaderColorFor(string,int)` (FNV-1a via `CategoryPalette.StableHash`) for per-POI Specific-Marker header foldouts, and (2) moved the Global/Specific tab buttons above `BeginScrollView` so they're pinned. __EditMode 479/479 green already (re-confirmed via job `e117bb7b3d3f4b958453085ebaba93ab`).__
 
-- The OnGUI method (lines 235-266) contains the current tab toolbar implementation
-- Currently uses hardcoded 16f spacers and fixed-height toolbar
+## Grounded analysis of the current code
 
-### 2. DETAILED ANALYSIS OF CURRENT STRUCTURE
+__Files (live project root = `C:\Users\franc\Desktop\TileStories\TileStories`):__
 
-Current toolbar (lines 240-248):
+- `Assets/Framework/Editor/POIAuthoring/POIAuthoringToolWindow.Constants.cs`
+
+  - `PoiHeaderPalette` (lines 139–153): palette entries include muted/grayish ones — `olive (0.45,0.64,0.12)`, `brown (0.42,0.34,0.28)`, `amber (0.72,0.55,0.04)`, `plum (0.62,0.20,0.42)` — this is why titles look "grayish".
+  - `GlobalSceneTabColor (0.30,0.50,0.95)` / `SpecificMarkerTabColor (0.30,0.70,0.45)` (lines 122–123) — muted/dark, why tabs look grayish.
+  - `PoiHeaderColorFor` (161–169) already deterministic + reusable — __no change needed__.
+
+- `POIAuthoringToolWindow.cs` `DrawTabContentContainer` (304–326): __the bug.__ Lines 266 & 269 call it with no `label`, so inside the method `GUILayoutUtility.GetLastRect()` at __line 313__ runs immediately after entering the `IndentLevelScope` (and, for the tab calls, immediately after `BeginScrollView` began a group). Unity throws *"You cannot call GetLast immediately after beginning a group."* The `line 341` Scene-Config call doesn't error only because a foldout (line 338) was drawn in the same group just before.
+
+__Test constraints (must keep green):__
+
+- `Color_Constants_TabAndSceneConfigAreDistinct` — all 4 colors (`GlobalSceneTabColor`, `SpecificMarkerTabColor`, `SceneConfigSectionColor`, `GlobalSectionColor`) pairwise `ColorDistance > 0.02`.
+- `Color_Constants_PoiHeaderPalette_ArrayPresent_WithAtLeastTenColors` — length ≥ 10.
+- `Color_Constants_PoiHeaderPalette_SelfDistinct` — all pairwise `> 0.02`.
+- `Method_PoiHeaderColorFor_ReturnsPaletteMember_Stable_AndFallsBackToIndex` — membership + ≥2 distribution. __No test asserts exact RGB values__, so changing palette/tab values is safe.
+
+---
+
+## 1. WHAT — Acceptance criteria
+
+1. Per-POI Specific-Marker header titles render in __vivid, saturated__ palette colors (12 colors, all bright enough to read over Unity's dark background) — matching the vibrancy of the Global Scene section containers.
+2. The __Global Scene__ tab button uses a vivid blue; the __Specific Marker__ tab button uses a vivid green (both clearly "alive", white text).
+3. The two `GetLast immediately after beginning a group` console errors at `POIAuthoringToolWindow.cs:313` (stacks at OnGUI 266/269) are __gone__ — no console error while rendering the Global Scene or Specific Marker tabs.
+4. All existing color-distinctness tests still pass; new regression test added for the rect fix.
+5. EditMode + PlayMode suites: __zero failures__.
+
+---
+
+## 2. HOW — exact edits
+
+### 2A. `Constants.cs` — vivid POI header palette (replace array body, keep 12 entries)
+
+Replace `PoiHeaderPalette` (lines 139–153) with these 12 vivid, mutually-distinct colors (comment lines preserved):
 
 ```csharp
-GUILayout.Label(" ", GUILayout.Width(16f)); // Left spacer
-string[] tabNames = { "Global Scene", "Specific Marker" };
-int selectedIndex = (int)_selectedTab;
-int newSelectedIndex = GUILayout.Toolbar(selectedIndex, tabNames, GUILayout.Height(26f));
-GUILayout.Label(" ", GUILayout.Width(16f)); // Right spacer
+private static readonly Color[] PoiHeaderPalette = new Color[]
+{
+    new Color(0.95f, 0.25f, 0.25f), // red
+    new Color(0.95f, 0.55f, 0.10f), // orange
+    new Color(0.95f, 0.78f, 0.15f), // gold
+    new Color(0.45f, 0.80f, 0.20f), // lime
+    new Color(0.10f, 0.72f, 0.45f), // green
+    new Color(0.00f, 0.70f, 0.70f), // teal
+    new Color(0.15f, 0.60f, 0.95f), // sky blue
+    new Color(0.20f, 0.45f, 0.90f), // blue
+    new Color(0.45f, 0.45f, 0.95f), // indigo
+    new Color(0.70f, 0.40f, 0.95f), // violet
+    new Color(0.90f, 0.30f, 0.70f), // magenta
+    new Color(0.95f, 0.20f, 0.55f), // hot pink
+};
 ```
 
-### 3. ARCHITECTURE LEVEL OPTIONS EVALUATION
+All ≥ ~0.20 apart pairwise (>> 0.02 epsilon), every channel high → vivid. `PoiHeaderColorFor` logic and the `new Color(0.80f,0.22f,0.28f)` defensive fallback stay untouched.
 
-__Option A (SELECTED)__: Use `ToolbarButtonSize.FitToContents` and remove spacers
+### 2B. `Constants.cs` — vivid tab button colors (lines 122–123)
 
-- __Where__: Same file, same lines
+```csharp
+private static readonly Color GlobalSceneTabColor = new Color(0.15f, 0.50f, 0.95f);   // vivid blue
+private static readonly Color SpecificMarkerTabColor = new Color(0.00f, 0.78f, 0.38f); // vivid green
+```
 
-- __How__:
+Keep `TabTextColor = Color.white` (text already white — it was the *background* that read grayish).
 
-  - Remove left/right spacers (lines 240, 248)
-  - Add `GUILayout.Toolbar(selectedIndex, tabNames, GUILayout.Height(26f), GUILayout.ButtonStyle(GUI.skin.button))` with `FitToContents` via style or direct parameter
-  - Actually, looking more carefully - the `buttonSize` parameter goes after `style`, before `params GUILayoutOption[] options`
-  - So: `GUILayout.Toolbar(selectedIndex, tabNames, GUI.skin.button, ToolbarButtonSize.FitToContents, GUILayout.Height(26f))`
+__Distinctness check__ vs existing `SceneConfigSectionColor (0.45,0.55,0.85)` / `GlobalSectionColor (0.35,0.55,0.95)` — all pairwise distances ~0.14–0.50, all `> 0.02`. Test stays green.
 
-- __Pros__:
+### 2C. `POIAuthoringToolWindow.cs` — fix `DrawTabContentContainer` (304–326)
 
-  - Buttons auto-size to text content (minimal width)
-  - Toolbar left-aligned (starts at window edge)
-  - Always visible even when window is narrow
-  - Prepares for future additional tabs
-  - No hardcoded widths
+The empty-label case must obtain a valid rect via a real layout control (`GetControlRect`) instead of `GetLastRect` right after the group begins:
 
-- __Cons__: None significant for this scope
+```csharp
+private static void DrawTabContentContainer(Action content, Color containerColor, string label = "", GUIStyle labelStyle = null)
+{
+    using (new EditorGUI.IndentLevelScope())
+    {
+        // Capture a valid start rect: when a label precedes the content we take
+        // its rect; otherwise reserve a zero-height control so GetLastRect is
+        // legal (calling it immediately after beginning a group throws
+        // "You cannot call GetLast immediately after beginning a group").
+        Rect startRect;
+        if (!string.IsNullOrEmpty(label))
+        {
+            EditorGUILayout.LabelField(label, labelStyle ?? EditorStyles.boldLabel);
+            startRect = GUILayoutUtility.GetLastRect();
+        }
+        else
+        {
+            startRect = EditorGUILayout.GetControlRect(false, 0f, GUILayout.ExpandWidth(true));
+        }
+        float startY = startRect.yMax;
 
-### 4. IMPLEMENTATION LEVEL OPTIONS EVALUATION
+        content?.Invoke();
 
-__Selected__: Direct modification of the existing toolbar call
+        Rect endRect = GUILayoutUtility.GetLastRect();
+        float height = Mathf.Max(0f, endRect.yMax - startY);
 
-- __How__: Replace the current GUILayout.Toolbar call with one that includes `ToolbarButtonSize.FitToContents`
-- __Pros__: Minimal change, leverages existing Unity functionality
-- __Cons__: None
+        // Colored top border
+        EditorGUI.DrawRect(new Rect(startRect.x, startY, startRect.width, 2f), containerColor);
+        // Colored left border
+        EditorGUI.DrawRect(new Rect(startRect.x, startY, 3f, height), containerColor);
+    }
+}
+```
 
-### 5. DETAILED IMPLEMENTATION PLAN
+`GetControlRect` is a normal layout operation (legal right after a group begins) that reserves 0 px height, so the container keeps zero top-spacer under the tabs. This fixes both reported stacks (OnGUI 266/269) and is also correct for any future label-less call.
 
-#### WHAT: Acceptance Criteria
+### 2D. Test — add regression guard in `PoiAuthoringVisualHierarchyTests.cs`
 
-- Tab buttons sized exactly to fit their text content (Global Scene, Specific Marker)
-- Tab toolbar left-aligned (starts at window left edge)
-- Light greenish/gray background preserved (0.9f, 1.0f, 0.9f)
-- Vertical spacing preserved (10f)
-- Tab switching functionality preserved (no _hasUnsavedChanges false positives)
-- All existing functionality preserved (buttons, undo/redo, config load/save, rig handling)
+Add one Tier-0 source test asserting DrawTabContentContainer handles the empty-label path with a reserved control rect (proves the fix is on disk):
 
-#### HOW: Execution Plan
+```csharp
+// Tier-0: DrawTabContentContainer must not call GetLastRect directly after the
+// indent group begins when no label precedes the content (that throws
+// "You cannot call GetLast immediately after beginning a group").
+[Test]
+public void Source_MainFile_TabContentContainer_ReservesRectWhenNoLabel()
+{
+    string src = ReadSource(@"Framework\Editor\POIAuthoring\POIAuthoringToolWindow.cs");
+    Assert.IsTrue(src.Contains("GetControlRect(false, 0f"),
+        "Empty-label path must reserve a zero-height control rect instead of GetLastRect-after-group");
+    // GetLastRect must only appear after a drawn control (the label branch).
+    int grIdx = src.IndexOf("GetLastRect", StringComparison.Ordinal);
+    Assert.IsTrue(grIdx > src.IndexOf("LabelField", StringComparison.Ordinal),
+        "GetLastRect should only be used after a control/label has been drawn");
+}
+```
 
-__PHASE 1: PREPARATION & SETUP__
+---
 
-- Verify current mode is PLAN_MODE (confirmed via __mode.md check)
-- Read and understand current OnGUI structure (lines 219-266)
-- Confirm exact lines for toolbar modification (240-248)
+## 3. WHERE — exact disk paths
 
-__PHASE 2: CORE IMPLEMENTATION__
+- `C:\Users\franc\Desktop\TileStories\TileStories\Assets\Framework\Editor\POIAuthoring\POIAuthoringToolWindow.Constants.cs` — palette array (139–153) + tab colors (122–123).
+- `C:\Users\franc\Desktop\TileStories\TileStories\Assets\Framework\Editor\POIAuthoring\POIAuthoringToolWindow.cs` — `DrawTabContentContainer` (304–326).
+- `C:\Users\franc\Desktop\TileStories\TileStories\Assets\Framework\Tests\Editor\PoiAuthoringVisualHierarchyTests.cs` — add test.
+- Docs (finishing step): `C:\Users\franc\Desktop\TileStories\proj_guides_5.1_Editor_Tab.md`, `.clinerules\10-structure.md` (only if a file is created/moved — here only edits to existing files, so 10-structure likely unchanged).
 
-- Remove left spacer (line 240)
-- Remove right spacer (line 248)
-- Modify GUILayout.Toolbar call to use ToolbarButtonSize.FitToContents
-- Preserve light greenish/gray background (lines 237-238, 250)
-- Preserve vertical spacing (line 252)
+## 4. WHY
 
-__PHASE 3: VALIDATION & VERIFICATION__
+- Reuses the existing 12-entry static palette + `PoiHeaderColorFor` seam (No speculative/new architecture — a pure value change to existing data), keeping the deterministic FNV-1a coloring contract.
+- Vivid values match the Global Scene containers the user already likes, giving a consistent, readable-on-dark palette across both tabs.
+- The `DrawTabContentContainer` fix addresses a real, reproducible Unity GUI API misuse (documented behavior), without changing visuals or the pinned-tabs layout.
 
-- Verify code compiles with zero error CS (refresh_unity)
+## 5. TESTS (language-agent, Edit/Play Mode — vision deferred)
 
-- Run EditMode tests (zero failures)
+1. `refresh_unity` (force compile) → assert __zero `error CS`__ via console.
+2. `run_tests` EditMode + `get_test_job` → __zero failures__; confirm the new test name `Source_MainFile_TabContentContainer_ReservesRectWhenNoLabel` appears in results.
+3. `run_tests` PlayMode (40 tests) + `get_test_job` → __zero failures__ (regression sanity).
+4. Manual confirmation of no `GetLast` console error: open the authoring window in a fresh Editor session and switch both tabs (per §4.1 Tier A — no device needed).
 
-- Run PlayMode tests (zero failures)
+## 6. FINISHING
 
-- Manual verification: Open POI Authoring Tool and confirm:
+- Update `_5.1_Editor_Tab.md` §1.2 / Constants row: note vivid `PoiHeaderPalette`, vivid tab colors, and the `DrawTabContentContainer` empty-label rect fix in a numbered corrections note.
+- 10-structure.md: only add an entry if a new file is created (none here; Constants/SpecificMarker entries already exist) — leave unchanged unless a file appears.
+- Chat summary: list the 3 edited files, the exact color values, the rect fix, and the re-verified test results (EditMode + PlayMode counts, zero failures).
 
-  - Tab buttons are minimal width (just text)
-  - Toolbar is left-aligned
-  - Background color preserved
-  - Tab switching works
-  - No false unsaved changes warnings
+## 7. STATUS / VERIFICATION RESULTS (re-verified this session)
 
-### 6. EXECUTION PLAN: ITEMIZED TODO LIST
+Completed: 2A vivid palette + 2B vivid tab colors + 2C rect fix + 2D regression test.
+All edits are live on disk; confirmation is by direct file read plus the automated suite.
 
-__PHASE 1: PREPARATION & SETUP__
+Evidence (Unity MCP):
+- Compile: `refresh_unity` force-compile -> Editor console shows 0 `error CS`, 0 warnings.
+- EditMode suite: 480 total, 480 passed, 0 failed, 0 skipped (~8.9s).
+- New test explicitly run + Passed:
+  `TileStories.Tests.PoiAuthoringVisualHierarchyTests.Source_MainFile_TabContentContainer_ReservesRectWhenNoLabel`
+- PlayMode suite: 40 total, 40 passed, 0 failed, 0 skipped (~15.7s) (regression sanity).
 
-- Verify current mode is PLAN_MODE (confirmed via __mode.md check)
-- Read and understand current OnGUI structure (lines 219-266)
-- Confirm exact lines for toolbar modification (240-248)
+On-disk confirmation (read directly, not inferred):
+- Constants.cs 122-123: GlobalSceneTabColor (0.15,0.50,0.95) vivid blue,
+  SpecificMarkerTabColor (0.00,0.78,0.38) vivid green, TabTextColor = white.
+- Constants.cs 139-153: PoiHeaderPalette 12 vivid entries (red, orange, gold, lime,
+  green, teal, sky-blue, blue, indigo, violet, magenta, hot-pink); InnerSectionColor
+  removed.
+- POIAuthoringToolWindow.cs 303-332: DrawTabContentContainer empty-label path calls
+  EditorGUILayout.GetControlRect(false, 0f, GUILayout.ExpandWidth(true)) (NOT
+  GetLastRect right after the group begins); the label path draws LabelField then
+  GUILayoutUtility.GetLastRect().
 
-__PHASE 2: CORE IMPLEMENTATION__
+Numbered corrections from plan intent:
+1. (Test logic, section 2D) The plan's literal assertion used the bare tokens
+   src.IndexOf("GetLastRect") and src.IndexOf("LabelField"). Against the real source
+   this FAILS: line 309's comment "// ... GetLastRect is legal ..." carries the bare
+   token "GetLastRect" BEFORE the LabelField draw (line 315), so grIdx < labelIdx trips
+   the `grIdx > labelIdx` check. The code itself is correct per section 2C (GetLastRect
+   only follows a LabelField/content draw); the test's wording was wrong, not the logic.
+   Corrected to match the real call sites: src.IndexOf("GUILayoutUtility.GetLastRect()")
+   vs src.IndexOf("EditorGUILayout.LabelField"). Now Passes. Justification: the plan's
+   literal snippet was self-inconsistent (its own comment carried the matched token).
+2. (Editor MCP test_names filter) The MCP `run_tests` test_names filter does not match
+   short method names reliably (returns the assembly-root node with total=0). Full
+   namespace-qualified names (TileStories.Tests.PoiAuthoringVisualHierarchyTests.<Method>)
+   are required for targeted runs. Flagged so future handoffs pass fullNames.
+3. (Out of scope, NOT fixed) Constants.cs line 63 carries a pre-existing non-ASCII
+   "section sign" (U+00A7) that the committed baseline already contained and that this
+   task did not author; the working tree shows a double-encoded artifact. Left untouched:
+   it is an unrelated comment ("...per section 6 of 2.3 doc...") outside the vivid-tabs
+   work, and the original committed form was already non-ASCII. Flagging for a future
+   cleanup pass under the strict-ASCII rule.
 
-- Remove left spacer (line 240)
-- Remove right spacer (line 248)
-- Modify GUILayout.Toolbar call to use ToolbarButtonSize.FitToContents
-- Preserve light greenish/gray background (lines 237-238, 250)
-- Preserve vertical spacing (line 252)
-
-__PHASE 3: VALIDATION & VERIFICATION__
-
-- Verify code compiles with zero error CS (refresh_unity)
-- Run EditMode tests (zero failures)
-- Run PlayMode tests (zero failures)
-- Manual verification: Open POI Authoring Tool and confirm tab optimization
-
-### 7. TEST STRATEGY
-
-__Tier 0: Compilation Check__
-
-- `refresh_unity` to force compile
-- Verify zero `error CS` lines in console
-
-__Tier 1: Existing Test Regression__
-
-- Run EditMode tests via Unity MCP `run_tests`
-- Run PlayMode tests via Unity MCP `run_tests`
-- Acceptance: zero failed tests in both suites
-
-__Tier 2: Manual Verification (no automated test for EditorWindow UI)__
-
-- Open POI Authoring Tool (TileStories/POI Authoring Tool, shortcut Shift+P)
-- Confirm tab buttons are minimal width (just text width)
-- Confirm toolbar is left-aligned (starts at window edge)
-- Confirm tabs have light greenish/gray background
-- Click "Specific Marker" tab, confirm content switches
-- Switch back to "Global Scene", confirm content switches back
-- Confirm no false "unsaved changes" warning when switching tabs
-- Confirm all config load/save/rig buttons still work
-
-### 8. COMPLETE PLAN SUMMARY
-
-This plan implements user decisions:
-
-- Tab buttons sized to fit text content (minimal width)
-- Tab toolbar left-aligned (starts at window edge)
-- Tab Styling: Light greenish/gray background (0.9f, 1.0f, 0.9f) preserved
-- Initial State: Opens on Global Scene tab (_selectedTab = TabSelection.GlobalScene)
-- Extension: Designed for easy accommodation of additional tabs via enum + switch (now works better with narrow windows)
-- Bug Fix: Removed false _hasUnsavedChanges = true on tab switch (already implemented)
-- Width Optimization: Uses ToolbarButtonSize.FitToContents for automatic text-based sizing
-- Alignment: Toolbar left-aligned by removing spacers and using FitToContents
+Acceptance criteria mapping (section 1):
+1. Vivid POI header palette -> DONE (12 bright colors on disk).
+2. Vivid blue/green tab buttons -> DONE (0.15,0.50,0.95 / 0.00,0.78,0.38).
+3. GetLast-after-group errors gone -> DONE (empty-label path uses GetControlRect;
+   GetLastRect only follows a LabelField/content draw).
+4. Distinctness tests pass + new regression test -> DONE (480/480 EditMode incl. new test).
+5. EditMode + PlayMode zero failures -> DONE (480/480 + 40/40).
