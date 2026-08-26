@@ -26,7 +26,7 @@ namespace TileStories.Tests
 
             Assert.AreEqual(5, config.hierarchy_levels.Count(),
                 "LivingRoom config should declare 5 framework-default hierarchy levels.");
-            Assert.AreEqual(18, config.pois.Count(), "LivingRoom config should declare 18 POIs.");
+            Assert.AreEqual(22, config.pois.Count(), "LivingRoom config should declare 22 POIs (18 real + 4 dev displacement fixtures).");
 
             MarkerHierarchyResolver.Configure(config.hierarchy_levels);
             try

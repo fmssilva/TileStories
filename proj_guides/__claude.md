@@ -52,12 +52,12 @@ Be good, not fast.
 
 # 3. **Finalize (the actual work order)**
 
-So now write the complete implementation plan guide `_2.6_Select_Filter_Search.md`: 
-Make sure to confirm that the guide is clear and with all important details for a separate coding agent who has full project/Unity access but no memory of this conversation and also a low-context memory, for it to know exacly WHAT to do, HOW, WHERE, and WHY... 
+So now write the complete implementation plan guide `_2.7_Corrections_TODO.md`: 
+Make sure to confirm that the guide is clear and with all important details for a separate coding agent who has full project/Unity access but no memory of this conversation and also a low-context memory, for it to know exacly WHAT to do, HOW, WHERE, and WHY... for each task or group of tasks.
 
 Also, to make it clear again, I am building a framework to be used to build any app for any big heritage wall of any shape and theme... So when we have some feature or problem to solve, and then we talk about the best solutions or options, the goal is not to decide and select the best solution and implement it. Instead I want to implement ALL good solutions and options to execute, and configure each feature. So in my framework I want to have some Editor Window where the developer then can choose and try all the available good options, and also configure the main variables and params for each option. So I don't want to have some hard coded "config values or ranges or options...", instead I want to allow for them to be set up and configured by the developer in the Editor Window. So do a deep analysis and research and think all the good options we might implement, and then lets select all the good options and implemnt them all in order to create a very complete and flexible framework where the developer can choose in some Editor Window between all good options or solution for some feature, and also define the main variables or params to configre that options as he wants for his specific app.
 
-And so maybe the file could have content like??: what/how/why/where for every decision, concrete code where it de-risks the work, or concrete libraries or packages or git repos to be used (with the exact integration path, per §2 above — not just a name)... a explicit 'read these real files first' list, a step-order that isolates any risky refactor from new feature work, a verification checklist, the bibliography, plus a mandatory ## Implementation Status section at the very top — a living tracker, not a one-time snapshot. Every entry gets one of: ✅ confirmed correct (verified how), ❌ confirmed missing/broken (what and why), or ⚠️ needs a non-code action. Tell the implementing agent explicitly: after finishing and testing each section of this doc, update this Status block immediately, in this same file, before moving to the next section — never a separate progress file, never batched to the end.
+And so maybe the file could have content like??: what/how/why/where for every decision or task/group of tasks, concrete code where it de-risks the work, or concrete libraries or packages or git repos to be used (with the exact integration path, per §2 above — not just a name)... a explicit 'read these real files first' list, a step-order that isolates any risky refactor from new feature work, a verification checklist, the bibliography, plus a mandatory ## Implementation Status section at the very top — a living tracker, not a one-time snapshot. Every entry gets one of: ✅ confirmed correct (verified how), ❌ confirmed missing/broken (what and why), or ⚠️ needs a non-code action. Tell the implementing agent explicitly: after finishing and testing each section of this doc, update this Status block immediately, in this same file, before moving to the next section — never a separate progress file, never batched to the end.
 
 If this domain has any visual/rendered component (UI, AR markers, effects, animations): the doc MUST specify a two-phase build order, and the implementing agent must not skip from Phase A to Phase B. Read the guidelines (40-testing.md) 
 
@@ -68,7 +68,7 @@ For every phase/step in this doc's Phase A/B (and §4.4.1??, where it applies) p
 
 This file needs to contain all important details of what, how, where, why... but keep prose concise — code and structure carry the detail, not paragraphs. Lets write all important details in a concise manner. It is important for the files to be concise to avoiod ovreloading the models context window during reading or editing the file. 
 
-Also, if this changes anything in the global work plan `_0_work_plan.md` or in the `_5.1_Editor_Tab` or in the `.clinerules/10-structure`, patch it directly and tell me what changed and why.
+Also, if this changes anything in the global work plan `_0_work_plan.md` or in the `_5.1_Editor_Tab` or in the `.clinerules/10-structure`, or in the respective domain guides (1.2, 2.3, 2.4, 2.5, 2.6), patch it directly and tell me what changed and why.
 
 If a lesson from this domain is a
 general process rule (not domain-specific), patch the specific guidelines document in the zip `.clinerules` instead and tell me what changed and why.
@@ -78,9 +78,9 @@ Be good, not fast.
 
 ## 3.1 **Deep re-verification (mandatory, not a light pass — do this before handing the file over)**
 
-Every serious bug caught in this project so far — the `Configure()` call missing from
+Every serious bug caught in this project so far in past sessions (the `Configure()` call missing from
 two of three required wiring sites, a pipeline step running in the wrong order, a
-count-cap sorting by the wrong field — was found only because this step was explicitly
+count-cap sorting by the wrong field) was found only because this step was explicitly
 requested afterward, as a separate ask. It isn't optional, and it isn't the same thing
 as the light "re-check against our conversation" pass — it's two distinct, deliberate
 adversarial passes:

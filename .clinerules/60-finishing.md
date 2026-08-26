@@ -32,6 +32,22 @@ or a log line saying success. Before saying something is done:
   not what a plan file already claimed before this session started.
 - If a bug is found and fixed, the fix's write-up goes in that same plan
   file, in a numbered corrections section -- not a new document.
+- **Check other domains' plan files too, not just this one's.** If this
+  session's fix changes a fact a *different* domain's plan file states
+  about the code you just touched (not a forward-looking TODO note, an
+  actual factual claim — "X currently does Y," "this bug lives in file
+  Z and is not yet fixed") — that other file is now wrong and needs the
+  same immediate correction, in the same session, not left for whoever
+  next happens to open it. This was found repeatedly in a direct audit
+  (`_2.7_Corrections_TODO.md`, six separate instances across two plan
+  files: a later domain's own status header still described an earlier
+  domain's bug as open after that bug was independently fixed during the
+  earlier domain's own later work; a resolver's documented method
+  signature never got updated after the real signature changed during
+  implementation). Before closing out any task, grep sibling plan files
+  for the name of whatever you just changed (a method, a field, a
+  behavior) and check whether any of them describe it — not just the one
+  file you were told to update.
 - If the plan file has grown large and most of a domain's work is now
   done, that's a signal to archive the completed narrative out to a
   companion archive file — do this as part of finishing, not as a
@@ -74,6 +90,3 @@ chat summary.
 - State plainly what was and wasn't independently re-verified this
   session, per §6.1 -- don't blur "I re-ran this and confirmed it" together
   with "the plan file already said this was done."
-
-
-

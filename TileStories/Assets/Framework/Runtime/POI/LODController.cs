@@ -1,4 +1,4 @@
-﻿﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TileStories
@@ -54,8 +54,16 @@ namespace TileStories
 
         // Cluster lifecycle state (spec §6.1): pooled aggregate views + per-signature
         // band-index cache (hysteresis) + per-view dissolve-grace miss counters.
-        private readonly Dictionary<string, LodBand> _clusterBandCache = new();
+                private readonly Dictionary<string, LodBand> _clusterBandCache = new();
         private readonly Dictionary<MarkerClusterView, int> _clusterDissolveMisses = new();
+
+        // Step 8 (spec _2.5 section 8): displacement settings + stability states.
+        // _dispSettings resolved lazily from WallSession (config may load after Start).
+        // _displacementStability persists group membership across Evaluate() cycles;
+        // Block 7 commits membership through a 2-cycle gate (see
+        // MarkerOverlapResolver.CommitGroupMembership, mirroring CommitDensityState).
+        private DisplacementSettings _dispSettings;
+        private readonly Dictionary<string, DisplacementStabilityState> _displacementStability = new();
 
         private void Awake()
         {
@@ -73,7 +81,12 @@ namespace TileStories
                 if (_settings == null) return;
             }
 
-            if (!_settings.enabled) return;
+            // Displacement runs independently of LOD — only skip if both are disabled
+            // (spec _2.5 section 8: enabled-flag fix). Before Block 6, early-return
+            // fired whenever _settings.enabled was false, which also killed displacement.
+            bool lodEnabled = _settings.enabled;
+            bool dispEnabled = _dispSettings?.enabled ?? false;
+            if (!lodEnabled && !dispEnabled) return;
 
             var markers = _wallSession?.SpawnedMarkers;
             if (markers == null || markers.Count == 0) return;
@@ -95,48 +108,104 @@ namespace TileStories
                                 _bandCache.Clear();
                 _prevEffectiveDistance.Clear();
                 _densityHysteresis.Clear();
-                _clusterBandCache.Clear();
+                                _clusterBandCache.Clear();
                 _clusterDissolveMisses.Clear();
+            }
+
+            // Resolve displacement settings alongside LOD settings (spec _2.5 section 8).
+            // Clear stability counters when the config reference changes (e.g. config reload).
+            var dispSettings = _wallSession?.DisplacementSettings;
+            if (dispSettings != null && !ReferenceEquals(dispSettings, _dispSettings))
+            {
+                _dispSettings = dispSettings;
+                _displacementStability.Clear();
             }
         }
 
         // ------------------------------------------------------------------
-        // 7-step pipeline (spec §4)
+        // 8-step pipeline (spec §4 + _2.5 section 8: displacement is step 8)
         // ------------------------------------------------------------------
 
         public void Evaluate()
         {
             if (_settings == null || _wallSession == null) return;
 
-            var allMarkers = GetMarkers();
-            if (allMarkers.Count == 0) return;
+            bool lodEnabled = _settings.enabled;
+            bool dispEnabled = _dispSettings?.enabled ?? false;
+            if (!lodEnabled && !dispEnabled) return;
 
-            // Step 1: Frustum cull
-            var frustumVisible = FrustumCull(allMarkers);
+            List<VisualUnit> visualUnits;
 
-            // Step 2: Effective distance (§10: real distance / zoom factor)
-            var distances = ComputeEffectiveDistances(frustumVisible);
+            if (lodEnabled)
+            {
+                var allMarkers = GetMarkers();
+                if (allMarkers.Count == 0) return;
 
-            // Step 3: LOD band lookup with hysteresis (§3, §7)
-            var bands = AssignBands(distances);
+                // Step 1: Frustum cull (§8) — skip markers outside camera FOV + margin
+                var frustumVisible = FrustumCull(allMarkers);
 
-            // Step 4: Density evaluation (§5)
-            var neighborCounts = EvaluateDensity(frustumVisible);
-            // Retain for GetNeighborCount() (spec section 11); LOD is the only writer.
-            _lastNeighborCounts = neighborCounts;
+                // Step 2: Effective distance (§10: real distance / zoom factor)
+                var distances = ComputeEffectiveDistances(frustumVisible);
 
-            // Step 5: Create visual units + apply density response (§6)
-            var visualUnits = ApplyDensityResponse(frustumVisible, allMarkers, bands, distances, neighborCounts);
+                // Step 3: LOD band lookup with hysteresis (§3, §7)
+                var bands = AssignBands(distances);
 
-            // Step 5b: Cluster aggregate reconciliation (spec §6.1) -- collapse dense
-            // regions of Clustered units into pooled MarkerClusterView aggregates.
-            ReconcileClusters(ref visualUnits);
+                // Step 4: Density evaluation (§5)
+                var neighborCounts = EvaluateDensity(frustumVisible);
+                // Retain for GetNeighborCount() (spec section 11); LOD is the only writer.
+                _lastNeighborCounts = neighborCounts;
 
-            // Step 6: Count-cap truncation (§4 step 5)
-            ApplyCountCap(visualUnits, bands);
+                // Step 5: Create visual units + apply density response (§6)
+                visualUnits = ApplyDensityResponse(frustumVisible, allMarkers, bands, distances, neighborCounts);
 
-            // Step 7: Apply visibility with soft transition (§4 step 6, §7)
-            ApplyVisibility(visualUnits);
+                // Step 5b: Cluster aggregate reconciliation (spec §6.1) -- collapse dense
+                // regions of Clustered units into pooled MarkerClusterView aggregates.
+                ReconcileClusters(ref visualUnits);
+
+                // Step 6: Count-cap truncation (§4 step 5)
+                ApplyCountCap(visualUnits, bands);
+
+                // Step 7: Apply visibility with soft transition (§4 step 6, §7)
+                ApplyVisibility(visualUnits);
+            }
+            else
+            {
+                // LOD disabled — passthrough: every spawned marker is a visible
+                // unit. Displacement still runs (e.g. small wall with dense POIs
+                // where distance-based thinning isn't useful but overlap still occurs).
+                var allMarkers = GetMarkers();
+                visualUnits = BuildPassthroughVisualUnits(allMarkers);
+            }
+
+            // Step 8: Apply displacement offsets (spec _2.5 section 8) on whatever
+            // VisualUnits survived step 7 (or the passthrough if LOD is disabled).
+            if (dispEnabled && _camera != null)
+            {
+                MarkerOverlapResolver.ApplyDisplacement(
+                    visualUnits, _camera, _dispSettings, _displacementStability);
+            }
+        }
+
+        // Build VisualUnits for the LOD-disabled passthrough path: every spawned
+        // marker is a visible unit with priority from the hierarchy resolver.
+        // Tier-0 testable (static, no scene/MonoBehaviour required).
+        public static List<VisualUnit> BuildPassthroughVisualUnits(List<MarkerView> allMarkers)
+        {
+            var units = new List<VisualUnit>(allMarkers.Count);
+            foreach (var marker in allMarkers)
+            {
+                if (marker == null) continue;
+                var unit = new VisualUnit
+                {
+                    marker = marker,
+                    poiId = marker.PoiId,
+                    worldPosition = marker.transform.position,
+                    isVisible = true,
+                    hierarchyLevelIndex = MarkerHierarchyResolver.GetLevelPriority(marker.HierarchyLevelKey)
+                };
+                units.Add(unit);
+            }
+            return units;
         }
 
         // Returns the screen-space neighbour count (spec section 5/11) the last

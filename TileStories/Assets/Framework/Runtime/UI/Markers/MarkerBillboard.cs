@@ -16,15 +16,30 @@ namespace TileStories
             {
                 Debug.LogWarning("[Marker] MarkerBillboard found no Main Camera - disabling");
                 enabled = false;
+                return;
+            }
+
+            // World Space Canvases require an explicit worldCamera for proper screen-space
+            // calculations. Set it to the same camera we billboard toward.
+            var canvas = GetComponentInChildren<UnityEngine.Canvas>(true);
+            if (canvas != null && canvas.worldCamera == null)
+            {
+                canvas.worldCamera = _camera;
             }
         }
 
-         private void LateUpdate()
-         {
-             if (_camera == null) return;
+        private void Update()
+        {
+            if (_camera == null) _camera = Camera.main;
+            if (_camera != null)
+                transform.rotation = _camera.transform.rotation;
+        }
 
-             // Face the camera directly without additional rotation to prevent text mirroring
-             transform.rotation = _camera.transform.rotation;
-         }
+        private void LateUpdate()
+        {
+            if (_camera == null) _camera = Camera.main;
+            if (_camera != null)
+                transform.rotation = _camera.transform.rotation;
+        }
     }
 }

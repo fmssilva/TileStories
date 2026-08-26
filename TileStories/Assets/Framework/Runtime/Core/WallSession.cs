@@ -41,6 +41,10 @@ namespace TileStories
                 // Read-only access to the wall's LOD settings, used by LODController.
         // May be null until config finishes loading in LoadConfigCoroutine.
         public LodSettings LodSettings => _config?.lod_settings;
+        // Read-only access to the wall's displacement/overlap settings, consumed by the
+        // overlap resolver (Block 1) and the label/marker displacement algorithms (Block 2-4).
+        // Mirrors the LodSettings accessor; null only if WallConfigData fails to construct.
+        public DisplacementSettings DisplacementSettings => _config?.displacement_settings;
 
 // Read-only access to the wall's resolved icon library + calibrated AR spawn
 // root, so the cluster system can place aggregates without reaching into
@@ -250,9 +254,9 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
                 }
             }
 
-            // Apply near-overlap detection after all markers are spawned
-            MarkerOverlapResolver.ApplyOverlapOffsets(spawnedMarkerViews, Camera.main);
-
+                        // Displacement is no longer a one-shot spawn-time step. MarkerOverlapResolver.ApplyDisplacement
+            // is invoked per-cycle by LODController (step 8 of the §2.4 pipeline) over the surviving
+            // VisualUnits, so screen-space grouping stays consistent with LOD/density state.
             SpawnedMarkers = spawnedMarkerViews;
 
             stopwatch.Stop();

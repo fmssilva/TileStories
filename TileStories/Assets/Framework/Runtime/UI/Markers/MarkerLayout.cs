@@ -57,8 +57,25 @@ namespace TileStories
                 Vector2 pos = label.anchoredPosition;
                 pos.x = symbol.anchoredPosition.x;
                 pos.y = symbol.anchoredPosition.y - symbolRadius - proportions.labelGap;
-                label.anchoredPosition = pos;
+                                label.anchoredPosition = pos;
             }
+        }
+
+        // Convert a screen-space pixel offset into world metres along the camera's view
+        // plane at the given distance. Used by label-only displacement to translate a
+        // pixel ladder rung into a root-local label shift (§4 design): because MarkerView
+        // is billboarded to face the camera, the root's local X/Y map to screen X/Y, so a
+        // screen-Y delta becomes a local-Y label delta with no per-frame re-projection.
+        // Formula: worldUnitsPerPixel = (2 * tan(fov/2) * distance) / pixelHeight.
+        // Static + parameterised so Tier-0 tests exercise the math with zero Unity setup.
+        public static Vector2 ScreenPixelsToWorld(Vector2 screenPxOffset, float distanceM, Camera cam)
+        {
+            if (cam == null || distanceM <= 0f)
+                return Vector2.zero;
+
+            float worldHeightAtDistance = 2f * Mathf.Tan(Mathf.Deg2Rad * cam.fieldOfView * 0.5f) * distanceM;
+            float worldUnitsPerPixel = worldHeightAtDistance / cam.pixelHeight;
+            return screenPxOffset * worldUnitsPerPixel;
         }
     }
 }

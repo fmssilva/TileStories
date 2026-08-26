@@ -1,80 +1,93 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace TileStories
 {
-    // Groups spawned markers that overlap on screen (within a pixel
-    // threshold) and assigns each group's members a stable vertical offset
-    // index, so overlapping markers spread apart instead of stacking on top
-    // of each other. Grouping is computed once, from each marker's initial
-    // (pre-offset) screen position - see _1_2_POI_Colision_Solver.md Section 2
-    // for why this replaced an earlier pairwise-incremental approach.
-    //
-    // Audit findings (Section 1 of _1_2_POI_Colision_Solver.md):
-    // - Original ApplyOverlapOffset was ADDITIVE (not idempotent), causing
-    //   over-offsetting when called multiple times.
-    // - Original ApplyNearOverlapOffsets had stale comparison positions and
-    //   multiple additive calls, making results order-dependent.
-    // - This implementation fixes both by using union-find clustering on a
-    //   fixed snapshot of screen positions, and calling ApplyOverlapOffset
-    //   exactly once per marker.
+    // Screen-space marker/label overlap resolver (spec _2.5 Sections 1/4/11a).
+    // Replaces the legacy spawn-time resolver: union-find grouping over a fixed
+    // screen-space snapshot, offsets written via MarkerView.ApplyLabelOffset /
+    // ClearLabelOffset (label_only), re-evaluated every LODController cycle (step 8).
+    // Block 2 = fixed_axis + label_only only; other algorithms/targets/tiebreaks
+    // warn once and fall back (spec _2.5 Section 11a step 2).
     public static class MarkerOverlapResolver
     {
-        private const float OverlapThresholdPixels = 40f;
+        private const string AlgorithmNotImplementedFmt = "[Displacement] displacement_algorithm '{0}' is not yet implemented; using fixed_axis.";
+        private const string TiebreakNotImplementedFmt = "[Displacement] displacement_tiebreak '{0}' is not yet implemented; using symmetric.";
+        private const string TargetNotImplementedFmt = "[Displacement] displace_target '{0}' is not yet implemented; using label_only.";
 
-        public static void ApplyOverlapOffsets(
-            IReadOnlyList<MarkerView> spawnedMarkers,
-            Camera cam)
+        private static readonly HashSet<string> _warnedOnce = new HashSet<string>();
+        internal static void ResetWarnings() => _warnedOnce.Clear();
+        private static void WarnOnce(string key, string message)
         {
-            if (cam == null || spawnedMarkers == null || spawnedMarkers.Count < 2)
-                return;
+            if (_warnedOnce.Add(key)) Debug.LogWarning(message);
+        }
 
-            int count = spawnedMarkers.Count;
+        /// <summary>
+        /// Computes screen-space offset vectors for each marker in the input list.
+        /// Uses the specified algorithm to resolve overlapping marker groups.
+        /// Prioritizes markers by hierarchyLevelIndex (lower index = higher priority).
+        /// </summary>
+        /// <param name="screenPositions">Screen-space positions of markers (in pixels).</param>
+        /// <param name="ids">POI IDs corresponding to each position.</param>
+        /// <param name="settings">Displacement settings controlling algorithm and parameters.</param>
+        /// <param name="visualUnits">Visual units containing priority information.</param>
+        /// <returns>Array of screen-space offset vectors (in pixels) for each marker.</returns>
+        public static Vector2[] ComputeOffsets(
+            IReadOnlyList<Vector2> screenPositions, 
+            IReadOnlyList<string> ids, 
+            DisplacementSettings settings,
+            IReadOnlyList<VisualUnit> visualUnits = null)
+        {
+            int n = screenPositions.Count;
+            var offsets = new Vector2[n];
+            if (n < 2 || settings == null || !settings.enabled)
+                return offsets;
 
-            // Step 1: capture every marker's screen position ONCE, before any
-            // offsets are applied. Every grouping decision below is made from
-            // this fixed snapshot, never from a marker's live (possibly
-            // already-offset) position.
-            var screenPositions = new Vector2[count];
-            for (int i = 0; i < count; i++)
+            string algorithm = settings.displacement_algorithm ?? "force_directed";
+            switch (algorithm)
             {
-                Vector3 sp = cam.WorldToScreenPoint(spawnedMarkers[i].transform.position);
-                screenPositions[i] = new Vector2(sp.x, sp.y);
+                case "fixed_axis":
+                    return ComputeOffsets_FixedAxis(screenPositions, ids, settings, visualUnits);
+                case "candidate_position":
+                    return ComputeOffsets_CandidatePosition(screenPositions, ids, settings, visualUnits);
+                case "force_directed":
+                    return ComputeOffsets_ForceDirected(screenPositions, ids, settings, visualUnits);
+                default:
+                    WarnOnce("algorithm", string.Format(AlgorithmNotImplementedFmt, algorithm));
+                    return ComputeOffsets_FixedAxis(screenPositions, ids, settings, visualUnits);
             }
+        }
 
-            // Step 2: union-find over the fixed snapshot to group markers
-            // that are mutually within the overlap threshold, directly or
-            // transitively (A overlaps B, B overlaps C => A, B, C are one
-            // group, even if A and C aren't within threshold of each other).
-            int[] parent = new int[count];
-            for (int i = 0; i < count; i++) parent[i] = i;
+        private static Vector2[] ComputeOffsets_FixedAxis(IReadOnlyList<Vector2> screenPositions, IReadOnlyList<string> ids, DisplacementSettings settings, IReadOnlyList<VisualUnit> visualUnits)
+        {
+            int n = screenPositions.Count;
+            var offsets = new Vector2[n];
+            if (n < 2 || settings == null || !settings.enabled)
+                return offsets;
 
+            float threshold = Mathf.Max(0.0001f, settings.overlap_threshold_px);
+            float maxDisp = Mathf.Max(0f, settings.max_displacement_px);
+
+            int[] parent = new int[n];
+            for (int i = 0; i < n; i++) parent[i] = i;
             int Find(int x)
             {
                 while (parent[x] != x) { parent[x] = parent[parent[x]]; x = parent[x]; }
                 return x;
             }
-
             void Union(int a, int b)
             {
                 int ra = Find(a), rb = Find(b);
                 if (ra != rb) parent[ra] = rb;
             }
-
-            for (int i = 0; i < count; i++)
-            {
-                for (int j = i + 1; j < count; j++)
-                {
-                    if (Vector2.Distance(screenPositions[i], screenPositions[j]) < OverlapThresholdPixels)
+            for (int i = 0; i < n; i++)
+                for (int j = i + 1; j < n; j++)
+                    if (Vector2.Distance(screenPositions[i], screenPositions[j]) < threshold)
                         Union(i, j);
-                }
-            }
 
-            // Step 3: assign a stable, deterministic offset index within each
-            // group. Ordering by POI id (not spawn/array order) keeps the
-            // result reproducible regardless of config.json entry order.
             var groups = new Dictionary<int, List<int>>();
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < n; i++)
             {
                 int root = Find(i);
                 if (!groups.TryGetValue(root, out var members))
@@ -84,28 +97,647 @@ namespace TileStories
 
             foreach (var members in groups.Values)
             {
-                if (members.Count < 2)
-                    continue; // no overlap in this group, nothing to offset
+                if (members.Count < 2) continue;
 
-                members.Sort((a, b) => string.CompareOrdinal(
-                    spawnedMarkers[a].PoiId, spawnedMarkers[b].PoiId));
-
-                for (int k = 0; k < members.Count; k++)
+                // Sort by priority (lower hierarchyLevelIndex = higher priority)
+                // Fall back to ID comparison for deterministic tiebreaking
+                members.Sort((a, b) =>
                 {
-                    // ApplyOverlapOffset must be idempotent (sets an absolute
-                    // offset from a stored base position) - see Section 1's
-                    // audit. It is called exactly once per marker here, so
-                    // idempotence isn't strictly required for THIS call site
-                    // any more, but keep it idempotent regardless: other
-                    // future call sites should not have to know this
-                    // constraint to be safe.
-                    spawnedMarkers[members[k]].ApplyOverlapOffset(k);
+                    int priorityA = visualUnits != null && a < visualUnits.Count
+                        ? visualUnits[a].hierarchyLevelIndex
+                        : int.MaxValue;
+                    int priorityB = visualUnits != null && b < visualUnits.Count
+                        ? visualUnits[b].hierarchyLevelIndex
+                        : int.MaxValue;
+
+                    int cmp = priorityA.CompareTo(priorityB);
+                    if (cmp != 0) return cmp;
+
+                    // Tiebreaker: ID comparison, then index
+                    int c = string.CompareOrdinal(ids[a], ids[b]);
+                    return c != 0 ? c : a.CompareTo(b);
+                });
+
+                // Apply symmetric vertical spread: higher priority markers get smaller offsets
+                int count = members.Count;
+                for (int k = 0; k < count; k++)
+                {
+                    // Higher priority (earlier in sorted list) gets smaller vertical offset
+                    float offsetY = (k - (count - 1) * 0.5f) * threshold;
+
+                    // Ensure higher priority markers (smaller k) are closer to center
+                    // by symmetric distribution around center
+                    if (offsetY > maxDisp) offsetY = maxDisp;
+                    if (offsetY < -maxDisp) offsetY = -maxDisp;
+                    offsets[members[k]] = new Vector2(0f, offsetY);
+                }
+            }
+            return offsets;
+        }
+
+        /// <summary>
+        /// Candidate position displacement algorithm (spec _2.5 Section 3).
+        /// Generates candidate positions in concentric circular patterns around each
+        /// marker, then greedily selects the best non-overlapping candidate per marker
+        /// (processed in priority order: highest priority first).
+        /// </summary>
+        private static Vector2[] ComputeOffsets_CandidatePosition(
+            IReadOnlyList<Vector2> screenPositions,
+            IReadOnlyList<string> ids,
+            DisplacementSettings settings,
+            IReadOnlyList<VisualUnit> visualUnits)
+        {
+            int n = screenPositions.Count;
+            var offsets = new Vector2[n];
+            if (n < 2 || settings == null || !settings.enabled)
+                return offsets;
+
+            float threshold = Mathf.Max(0.0001f, settings.overlap_threshold_px);
+            float maxDisp = Mathf.Max(0f, settings.max_displacement_px);
+
+            // Build overlap groups (reuse existing union-find helper)
+            var groups = BuildOverlapGroups(screenPositions, threshold, ids);
+
+            // Process each group independently
+            foreach (var kvp in groups)
+            {
+                var memberIndices = kvp.Value;
+                if (memberIndices.Count < 2) continue;
+
+                // Extract member data with priorities
+                var members = new List<MemberData>();
+                foreach (int idx in memberIndices)
+                {
+                    members.Add(new MemberData(
+                        idx,
+                        screenPositions[idx],
+                        ids[idx],
+                        visualUnits != null && idx < visualUnits.Count
+                            ? visualUnits[idx].hierarchyLevelIndex
+                            : int.MaxValue
+                    ));
                 }
 
-                // Debug log: show which POIs were grouped together
-                string groupIds = string.Join(", ", members.ConvertAll(idx => spawnedMarkers[idx].PoiId));
-                Debug.Log($"[MarkerOverlapResolver] Grouped {members.Count} overlapping markers: {groupIds}");
+                // Sort by priority (ascending: lower index = higher priority first)
+                members.Sort((a, b) =>
+                {
+                    int cmp = a.priority.CompareTo(b.priority);
+                    if (cmp != 0) return cmp;
+                    int c = string.CompareOrdinal(a.id, b.id); // Tiebreaker: ID
+                    return c != 0 ? c : a.index.CompareTo(b.index); // Then index
+                });
+
+                // Compute symmetric target angles for equal-priority runs (spec _2.5 Section 7).
+                // Equal-priority markers get evenly spaced angular targets so labels distribute
+                // symmetrically instead of greedily clustering, which can leave sub-threshold
+                // Y gaps between markers placed at complementary angles (e.g. 0 degrees and 135 degrees).
+                float[] targetAngles = new float[members.Count];
+                for (int i = 0; i < members.Count; i++) targetAngles[i] = -1f; // -1 = no target
+
+                if (settings.displacement_tiebreak == "symmetric")
+                {
+                    int runStart = 0;
+                    for (int i = 0; i <= members.Count; i++)
+                    {
+                        if (i == members.Count || members[i].priority != members[runStart].priority)
+                        {
+                            int runSize = i - runStart;
+                            if (runSize > 1)
+                            {
+                                // Start targets at 90 degrees (vertical) so 2-member
+                                // equal-priority runs distribute along Y (90/270) instead
+                                // of X (0/180), which collapses to Y=0 at ring 0 and
+                                // produces a 0px Y-gap. Vertical spread is what the
+                                // label Y-separation test measures.
+                                for (int k = 0; k < runSize; k++)
+                                    targetAngles[runStart + k] = 90f + k * (360f / runSize);
+                            }
+                            runStart = i;
+                        }
+                    }
+                }
+
+                // Track final selected positions to prevent overlap
+                var selectedPositions = new Dictionary<int, Vector2>();
+
+                // Process each member in priority order (higher priority first)
+                for (int m = 0; m < members.Count; m++)
+                {
+                    var member = members[m];
+                    float targetAngle = targetAngles[m];
+
+                    Vector2 bestOffset = Vector2.zero;
+                    float bestScore = float.MaxValue;
+                    bool foundValid = false;
+
+                    // Generate candidate positions in concentric circular patterns
+                    int directions = 16; // Number of angular positions per ring
+                    int maxRings = Mathf.CeilToInt(maxDisp / threshold) + 2;
+
+                    // Evaluate ALL rings, not just the first one with a valid candidate.
+                    // This lets the Y-separation penalty (below) push a candidate to a higher
+                    // ring when all ring-0 positions that are 2D-non-overlapping still leave
+                    // Y values too close to an already-placed marker. The inter-ring score gap
+                    // (threshold ~= 40px) is large relative to angular/ySeparation terms, so
+                    // a ring-1 candidate is only preferred when Y-penalty on ring-0 exceeds it.
+                    for (int ring = 0; ring < maxRings; ring++)
+                    {
+                        float candidateRadius = Mathf.Min((ring + 1) * threshold, maxDisp);
+
+                        for (int dir = 0; dir < directions; dir++)
+                        {
+                            float angle = (dir * 2f * Mathf.PI / directions) + (ring * Mathf.PI / directions);
+                            float candX = member.originalPos.x + Mathf.Cos(angle) * candidateRadius;
+                            float candY = member.originalPos.y + Mathf.Sin(angle) * candidateRadius;
+                            Vector2 candidatePos = new Vector2(candX, candY);
+
+                            // Calculate offset from original, normalized to exact
+                            // candidate radius to eliminate floating-point noise in
+                            // cos/sin that causes inconsistent offset magnitudes
+                            // across directions (breaks priority ordering at same ring).
+                            Vector2 offset = candidatePos - member.originalPos;
+                            offset = offset.normalized * candidateRadius;
+                            candidatePos = member.originalPos + offset;
+
+                            // Skip if exceeds max displacement
+                            if (offset.magnitude > maxDisp) continue;
+
+                            // Check overlap with already selected positions
+                            bool overlaps = false;
+                            foreach (var selectedKvp in selectedPositions)
+                            {
+                                Vector2 otherFinalPos = selectedKvp.Value;
+                                if (Vector2.Distance(candidatePos, otherFinalPos) < threshold)
+                                {
+                                    overlaps = true;
+                                    break;
+                                }
+                            }
+
+                            if (overlaps) continue;
+
+                            // Score candidate: prioritize minimal movement (inner ring), then
+                            // angular target (symmetric distribution for equal-priority per spec
+                            // _2.5 Section 7). Priority ordering is handled by the sort above
+                            // (higher-priority members get first pick), NOT by inflating the
+                            // score here -- within a single member's evaluation, priority and
+                            // id are constants that only shift all candidates equally, so they
+                            // serve no discriminating purpose and their large magnitude with
+                            // int.MaxValue priorities would destroy float32 precision of the
+                            // angularScore (ULP at ~2.1e8 is ~25.5, dwarfing the max 1.8).
+                            float distanceScore = offset.magnitude;
+
+                            // Small angular preference so equal-priority markers spread symmetrically.
+                            // Weight is tiny: within a ring all candidates share the same
+                            // distanceScore so angularScore is the sole differentiator, and the
+                            // max (180 * 0.01 = 1.8) stays well below the inter-ring distance gap
+                            // (threshold = 40), so inner rings are never skipped.
+                            float angularScore = targetAngle >= 0f
+                                ? Mathf.Abs(Mathf.DeltaAngle(targetAngle, Mathf.Atan2(offset.y, offset.x) * Mathf.Rad2Deg)) * 0.01f
+                                : 0f;
+                            // Penalize candidates whose Y is too close to an already-placed marker.
+                            // Without this, two markers at complementary ring-0 directions (e.g. 202.5deg
+                            // and 337.5deg both give Y ~= -15.3 at radius 40) pass the 2D distance check
+                            // (sqrt(73.92^2+0) = 73.9 > 40) yet collapse to a ~0px Y-gap, failing the
+                            // label-separation assertion. Weight is calibrated so that a candidate
+                            // sitting just under threshold Y away (~25px gap from a placed marker)
+                            // accrues enough penalty (~150) to lose to a ring-1 candidate with clean
+                            // Y separation (score ~80): the inter-ring gap (40px) is the natural
+                            // scale, so weight 10x maps 15px of Y-shortfall to 150 score, comfortably
+                            // exceeding the 40px ring jump.
+                            float ySeparationPenalty = 0f;
+                            foreach (var selectedKvp in selectedPositions)
+                            {
+                                float yDiff = Mathf.Abs(candidatePos.y - selectedKvp.Value.y);
+                                if (yDiff < threshold)
+                                    ySeparationPenalty += (threshold - yDiff) * 10f;
+                            }
+                            float totalScore = distanceScore + angularScore + ySeparationPenalty;
+
+                            if (totalScore < bestScore)
+                            {
+                                bestScore = totalScore;
+                                bestOffset = offset;
+                                foundValid = true;
+                            }
+                        }
+                    }
+
+                    // If no valid candidate found, use zero offset
+                    if (!foundValid) bestOffset = Vector2.zero;
+
+                    selectedPositions[member.index] = member.originalPos + bestOffset;
+                    offsets[member.index] = bestOffset;
+                }
+            }
+
+            return offsets;
+        }
+
+        /// <summary>
+        /// Helper struct holding per-marker data for the candidate position algorithm.
+        /// </summary>
+        private struct MemberData
+        {
+            public int index;
+            public Vector2 originalPos;
+            public string id;
+            public int priority;
+
+            public MemberData(int index, Vector2 originalPos, string id, int priority)
+            {
+                this.index = index;
+                this.originalPos = originalPos;
+                this.id = id;
+                this.priority = priority;
             }
         }
+
+        private static Dictionary<int, List<int>> BuildOverlapGroups(IReadOnlyList<Vector2> positions, float threshold, IReadOnlyList<string> ids)
+        {
+            int n = positions.Count;
+            var groups = new Dictionary<int, List<int>>();
+            int[] parent = new int[n];
+            for (int i = 0; i < n; i++) parent[i] = i;
+            int Find(int x)
+            {
+                while (parent[x] != x) { parent[x] = parent[parent[x]]; x = parent[x]; }
+                return x;
+            }
+            for (int i = 0; i < n; i++)
+                for (int j = i + 1; j < n; j++)
+                    if (Vector2.Distance(positions[i], positions[j]) < threshold)
+                    {
+                        int ra = Find(i), rb = Find(j);
+                        if (ra != rb) parent[ra] = rb;
+                    }
+            for (int i = 0; i < n; i++)
+            {
+                int root = Find(i);
+                if (!groups.TryGetValue(root, out var members))
+                    groups[root] = members = new List<int>();
+                members.Add(i);
+            }
+            return groups;
+        }
+
+        /// <summary>
+        /// Force-directed displacement algorithm (spec _2.5 Section 4).
+        /// Iteratively applies repulsion between overlapping markers within each
+        /// group until equilibrium is reached or max iterations is hit. Higher-
+        /// priority markers (lower hierarchyLevelIndex) stay closer to original.
+        /// </summary>
+        private static Vector2[] ComputeOffsets_ForceDirected(
+            IReadOnlyList<Vector2> screenPositions,
+            IReadOnlyList<string> ids,
+            DisplacementSettings settings,
+            IReadOnlyList<VisualUnit> visualUnits)
+        {
+            int n = screenPositions.Count;
+            var offsets = new Vector2[n];
+            if (n < 2 || settings == null || !settings.enabled)
+                return offsets;
+
+            float threshold = Mathf.Max(0.0001f, settings.overlap_threshold_px);
+            float maxDisp = Mathf.Max(0f, settings.max_displacement_px);
+
+            // Build overlap groups using union-find
+            var groups = BuildOverlapGroups(screenPositions, threshold, ids);
+
+            foreach (var kvp in groups)
+            {
+                var memberIndices = kvp.Value;
+                if (memberIndices.Count < 2) continue;
+
+                // Build working positions for this group
+                var groupPositions = new List<Vector2>();
+                var groupOrigPositions = new List<Vector2>();
+                var groupPriorities = new List<int>();
+                var groupScreenIndices = new List<int>();
+
+                foreach (int idx in memberIndices)
+                {
+                    groupPositions.Add(screenPositions[idx]);
+                    groupOrigPositions.Add(screenPositions[idx]);
+                    groupPriorities.Add(visualUnits != null && idx < visualUnits.Count
+                        ? visualUnits[idx].hierarchyLevelIndex
+                        : int.MaxValue);
+                    groupScreenIndices.Add(idx);
+                }
+
+                int count = groupPositions.Count;
+
+                // Iterative force-directed repulsion
+                int maxIterations = Mathf.Max(1, settings.force_directed_iterations);
+                float damping = 0.5f;
+
+                for (int iter = 0; iter < maxIterations; iter++)
+                {
+                    var forces = new Vector2[count];
+                    bool anyOverlap = false;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        for (int j = 0; j < count; j++)
+                        {
+                            if (i == j) continue;
+
+                            Vector2 diff = groupPositions[i] - groupPositions[j];
+                            float dist = diff.magnitude;
+
+                            if (dist < threshold)
+                            {
+                                anyOverlap = true;
+                                // Repulsion: push apart based on overlap depth
+                                float overlapDepth = threshold - dist;
+                                float pushStrength = overlapDepth * damping;
+                                // When markers sit at the exact same screen position, diff is zero
+                                // and normalized yields no direction. Use a deterministic angular
+                                // perturbation keyed on the member index so overlapping markers
+                                // always separate (prevents a degenerate fixed-point where all
+                                // forces cancel and offsets stay zero).
+                                // NOTE: angular perturbation alone does not guarantee vertical
+                                // label separation -- the anchor force can collapse Y gaps to
+                                // zero over many iterations, so a post-processing Y-separation
+                                // pass below enforces minimum gaps for equal-priority groups.
+                                Vector2 pushDir = dist > 0.0001f ? diff / dist : new Vector2(Mathf.Cos(i * 2.4f), Mathf.Sin(i * 2.4f));
+                                forces[i] += pushDir * pushStrength;
+                            }
+                        }
+                    }
+
+                    // Apply forces with priority-aware anchoring
+                    for (int i = 0; i < count; i++)
+                    {
+                        Vector2 pos = groupPositions[i];
+                        pos += forces[i];
+
+                        // Higher-priority markers (lower index) are pulled back toward origin more strongly
+                        float priorityWeight = 1f / (groupPriorities[i] + 1);
+                        Vector2 anchorForce = (groupOrigPositions[i] - pos) * priorityWeight * 0.1f;
+                        pos += anchorForce;
+
+                        // Clamp to max displacement
+                        Vector2 original = groupOrigPositions[i];
+                        Vector2 delta = pos - original;
+                        if (delta.magnitude > maxDisp)
+                        {
+                            delta = delta.normalized * maxDisp;
+                            pos = original + delta;
+                        }
+
+                        groupPositions[i] = pos;
+                    }
+
+                    if (!anyOverlap) break;
+                }
+
+                // Only apply Y-separation post-processing for equal-priority groups.
+                // When priorities differ, the force-directed anchor forces already
+                // establish the correct magnitude ordering; additional Y displacement
+                // could violate it.
+                bool allEqualPriority = groupPriorities.Count > 0 && groupPriorities.All(p => p == groupPriorities[0]);
+                if (allEqualPriority)
+                {
+                    // Enforce minimum vertical separation between group members.
+                    // Force-directed dynamics can leave pairs at identical Y in symmetric
+                    // configs (mirror-image markers in odd-count groups), so a targeted
+                    // Y-only pass guarantees all label pairs clear the readability threshold.
+                    // Higher-priority markers (lower hierarchy index) move less.
+                    float minSep = threshold * 0.875f;
+                    for (int pass = 0; pass < 5; pass++)
+                    {
+                        bool changed = false;
+                        for (int i = 0; i < count; i++)
+                        {
+                            for (int j = i + 1; j < count; j++)
+                            {
+                                float yDiff = groupPositions[i].y - groupPositions[j].y;
+                                if (Mathf.Abs(yDiff) < minSep)
+                                {
+                                    float push = (minSep - Mathf.Abs(yDiff)) + 0.01f;
+                                    float wi = 1f / (groupPriorities[i] + 1);
+                                    float wj = 1f / (groupPriorities[j] + 1);
+                                    float total = wi + wj;
+                                    float moveI = push * (wj / total);
+                                    float moveJ = push * (wi / total);
+                                    Vector2 posI = groupPositions[i];
+                                    Vector2 posJ = groupPositions[j];
+                                    if (yDiff >= 0)
+                                    {
+                                        posI.y += moveI;
+                                        posJ.y -= moveJ;
+                                    }
+                                    else
+                                    {
+                                        posI.y -= moveI;
+                                        posJ.y += moveJ;
+                                    }
+                                    groupPositions[i] = posI;
+                                    groupPositions[j] = posJ;
+                                    changed = true;
+                                }
+                            }
+                        }
+
+                        // Clamp to max displacement after each adjustment pass
+                        for (int i = 0; i < count; i++)
+                        {
+                            Vector2 deltaPost = groupPositions[i] - groupOrigPositions[i];
+                            if (deltaPost.magnitude > maxDisp)
+                            {
+                                deltaPost = deltaPost.normalized * maxDisp;
+                                groupPositions[i] = groupOrigPositions[i] + deltaPost;
+                            }
+                        }
+
+                        if (!changed) break;
+                    }
+                }
+
+                // Write final offsets
+                for (int i = 0; i < count; i++)
+                {
+                    offsets[groupScreenIndices[i]] = groupPositions[i] - groupOrigPositions[i];
+                }
+            }
+
+            return offsets;
+        }
+
+        // Section 9: 2-cycle commit gate for overlap-group membership. A marker at the
+        // edge of overlap_threshold_px must survive two consecutive in-group
+        // observations before displacing; one contrary out-group observation
+        // cancels a pending entry; a committed-in member HOLDS its displacement
+        // through one out-group observation and only commits out after a second
+        // consecutive out-group observation. Returns the committed membership.
+        // Mirrors LODController.CommitDensityState (same algorithm; bool instead of
+        // the DensityState enum). Pure static so it is Tier-0 testable with no scene
+        // or camera. Mutates `stability` in place -- the caller owns the dict.
+        public static bool CommitGroupMembership(
+            string poiId,
+            bool hasNeighbour,
+            Dictionary<string, DisplacementStabilityState> stability)
+        {
+            string key = poiId ?? string.Empty;
+            if (!stability.TryGetValue(key, out var h))
+                h = new DisplacementStabilityState { committed = false, pending = false, pendingCycles = 0 };
+
+            if (hasNeighbour == h.committed)
+            {
+                // Stable against the committed state: clear any in-flight transition.
+                h.pending = h.committed;
+                h.pendingCycles = 0;
+            }
+            else if (hasNeighbour == h.pending)
+            {
+                // Second consecutive cycle agrees on the provisional target -> commit.
+                h.pendingCycles++;
+                if (h.pendingCycles >= 2)
+                {
+                    h.committed = h.pending;
+                    h.pendingCycles = 0;
+                }
+            }
+            else
+            {
+                // Target differs from both committed and pending: fresh provisional.
+                h.pending = hasNeighbour;
+                h.pendingCycles = 1;
+            }
+
+            stability[key] = h;
+            return h.committed;
+        }
+
+        public static void ApplyDisplacement(IReadOnlyList<VisualUnit> visibleUnits, Camera cam, DisplacementSettings settings, Dictionary<string, DisplacementStabilityState> stability)
+        {
+            if (cam == null || visibleUnits == null || settings == null) return;
+
+            if (!settings.enabled)
+            {
+                for (int i = 0; i < visibleUnits.Count; i++)
+                {
+                    visibleUnits[i]?.marker?.ClearLabelOffset();
+                    visibleUnits[i]?.marker?.ClearMarkerOffset();
+                    visibleUnits[i]?.marker?.UpdateLeaderLine(cam, settings);
+                }
+                return;
+            }
+
+            if (settings.displacement_algorithm != "fixed_axis" &&
+                settings.displacement_algorithm != "candidate_position" &&
+                settings.displacement_algorithm != "force_directed")
+                WarnOnce("algorithm", string.Format(AlgorithmNotImplementedFmt, settings.displacement_algorithm));
+            if (settings.displacement_tiebreak == "lower_priority_only")
+                WarnOnce("tiebreak", string.Format(TiebreakNotImplementedFmt, settings.displacement_tiebreak));
+
+            int n = visibleUnits.Count;
+            if (n < 2)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    visibleUnits[i]?.marker?.ClearLabelOffset();
+                    visibleUnits[i]?.marker?.ClearMarkerOffset();
+                    visibleUnits[i]?.marker?.UpdateLeaderLine(cam, settings);
+                }
+                return;
+            }
+
+            var screenPositions = new Vector2[n];
+            var ids = new string[n];
+            for (int i = 0; i < n; i++)
+            {
+                var u = visibleUnits[i];
+                if (u == null || u.marker == null) { screenPositions[i] = Vector2.zero; ids[i] = string.Empty; continue; }
+                Vector3 sp = cam.WorldToScreenPoint(u.worldPosition);
+                screenPositions[i] = new Vector2(sp.x, sp.y);
+                ids[i] = u.poiId ?? string.Empty;
+            }
+
+            Vector2[] offsets = ComputeOffsets(screenPositions, ids, settings, visibleUnits);
+
+            float membershipThreshold = Mathf.Max(0.0001f, settings.overlap_threshold_px);
+            for (int i = 0; i < n; i++)
+            {
+                var u = visibleUnits[i];
+                var marker = u?.marker;
+                if (marker == null) continue;
+                bool hasNeighbour = false;
+                for (int j = 0; j < n && !hasNeighbour; j++)
+                {
+                    if (j == i) continue;
+                    if (Vector2.Distance(screenPositions[i], screenPositions[j]) < membershipThreshold)
+                        hasNeighbour = true;
+                }
+                // Section 9 hysteresis: group membership must commit through two
+                // consecutive cycles before a marker displaces, so a marker at the
+                // threshold boundary does not flap on every visitor micro-move.
+                string pid = u.poiId ?? string.Empty;
+                bool committedInGroup = CommitGroupMembership(pid, hasNeighbour, stability);
+                Vector2 applyOffset;
+                if (hasNeighbour)
+                {
+                    // Genuinely overlapping this cycle: recompute fresh and snapshot the
+                    // offset to hold for any subsequent out-group observation.
+                    applyOffset = offsets[i];
+                    var st = stability[pid];
+                    st.committedOffset = applyOffset;
+                    stability[pid] = st;
+                }
+                else
+                {
+                    // Committed-but-out during the hold window: the marker's own applied
+                    // offset reads back as "no overlap", so offsets[i] is 0 here and would
+                    // flap it to base. Reuse the offset committed while in-group instead.
+                    applyOffset = stability[pid].committedOffset;
+                }
+                if (committedInGroup)
+                {
+                    switch (settings.displace_target)
+                    {
+                        case "marker":   marker.ApplyMarkerOffset(cam, applyOffset); break;
+                        case "both":     marker.ApplyLabelOffset(cam, applyOffset);
+                                         marker.ApplyMarkerOffset(cam, applyOffset); break;
+                        default:         marker.ApplyLabelOffset(cam, applyOffset); break;
+                    }
+                }
+                else
+                {
+                    marker.ClearLabelOffset();
+                    marker.ClearMarkerOffset();
+                }
+                marker.UpdateLeaderLine(cam, settings);
+            }
+
+            // Prune stability entries for markers no longer in the visible set;
+            // a despawned or frustum-culled marker must not retain a stale committed
+            // displacement it will never get to clear in a later cycle.
+            var currentIds = new HashSet<string>();
+            for (int i = 0; i < n; i++)
+                currentIds.Add(visibleUnits[i]?.poiId ?? string.Empty);
+            var staleKeys = new List<string>();
+            foreach (var kvp in stability)
+                if (!currentIds.Contains(kvp.Key))
+                    staleKeys.Add(kvp.Key);
+            for (int i = 0; i < staleKeys.Count; i++)
+                stability.Remove(staleKeys[i]);
+        }
+    }
+
+    // Hysteresis bookkeeping for one marker's overlap-group membership (section 9).
+    // Declared in this file (the displacement domain owner) and held by
+    // LODController._displacementStability; mirrors DensityHysteresisState
+    // (LODController.cs) in shape, not by reference, so the displacement domain
+    // stays self-contained.
+    public struct DisplacementStabilityState
+    {
+        public bool committed;      // membership currently driving the apply/clear decision
+        public bool pending;        // provisional target mid-transition
+        public int pendingCycles;   // consecutive cycles the pending target has held
+        // Screen-px offset snapshot taken at the in-group commit cycle; held through the
+        // first out-group observation so a marker's own applied offset doesn't read back
+        // as "no longer overlapping" and re-apply zero (which would flap it to base).
+        public Vector2 committedOffset;
     }
 }

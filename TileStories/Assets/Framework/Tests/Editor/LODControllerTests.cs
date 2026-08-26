@@ -1,4 +1,5 @@
-﻿﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ namespace TileStories.Tests
     public class LODControllerTests
     {
         private List<LodBandEntry> _defaultBands;
+        private readonly List<GameObject> _trackedGOs = new();
 
         [SetUp]
         public void SetUp()
@@ -21,6 +23,9 @@ namespace TileStories.Tests
         public void TearDown()
         {
             MarkerHierarchyResolver.ResetToDefaults();
+            foreach (var go in _trackedGOs)
+                if (go) UnityEngine.Object.DestroyImmediate(go);
+            _trackedGOs.Clear();
         }
 
         // --- FindBand ---
@@ -503,6 +508,86 @@ private static LodSettings MakeSettings(
             Assert.IsFalse(LODController.IsDensityConfigValid(MakeSettings("hybrid", shrinkStart: 5, clusterMin: 5)));
             Assert.IsFalse(LODController.IsDensityConfigValid(MakeSettings("hybrid", shrinkStart: 6, clusterMin: 5)));
             Assert.IsFalse(LODController.IsDensityConfigValid(MakeSettings("hybrid", shrinkStart: 2, clusterMin: 1)));
+        }
+
+        // --- BuildPassthroughVisualUnits (Block 6, LOD-disabled passthrough) ---
+        // Tier-0: static method, no scene needed. Creates lightweight MarkerView
+        // GameObjects (no full prefab wiring required because BuildPassthroughVisualUnits
+        // only reads PoiId, transform.position, and HierarchyLevelKey).
+
+        private static MarkerView MakeBareMarker(string poiId, Vector3 position)
+        {
+            var go = new GameObject("MarkerViewTest", typeof(MarkerView));
+            var pv = go.GetComponent<MarkerView>();
+            var backing = typeof(MarkerView).GetField("<PoiId>k__BackingField",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            backing?.SetValue(pv, poiId);
+            go.transform.position = position;
+            return pv;
+        }
+
+        [Test]
+        public void BuildPassthroughVisualUnits_EmptyList_ReturnsEmpty()
+        {
+            var result = LODController.BuildPassthroughVisualUnits(new List<MarkerView>());
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public void BuildPassthroughVisualUnits_NullMarkers_Skipped()
+        {
+            var markers = new List<MarkerView> { null, null };
+            var result = LODController.BuildPassthroughVisualUnits(markers);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [Test]
+        public void BuildPassthroughVisualUnits_AllUnitsVisible()
+        {
+            var m1 = MakeBareMarker("p1", Vector3.zero);
+            var m2 = MakeBareMarker("p2", Vector3.forward);
+            var result = LODController.BuildPassthroughVisualUnits(new List<MarkerView> { m1, m2 });
+            Assert.AreEqual(2, result.Count);
+            Assert.IsTrue(result[0].isVisible);
+            Assert.IsTrue(result[1].isVisible);
+        }
+
+        [Test]
+        public void BuildPassthroughVisualUnits_WorldPositionFromTransform()
+        {
+            var m1 = MakeBareMarker("p1", new Vector3(1, 2, 3));
+            var m2 = MakeBareMarker("p2", new Vector3(4, 5, 6));
+            var result = LODController.BuildPassthroughVisualUnits(new List<MarkerView> { m1, m2 });
+            Assert.AreEqual(new Vector3(1, 2, 3), result[0].worldPosition);
+            Assert.AreEqual(new Vector3(4, 5, 6), result[1].worldPosition);
+        }
+
+        [Test]
+        public void BuildPassthroughVisualUnits_UnknownKey_HierarchyLevelIndexIsMaxValue()
+        {
+            // With no _anchor set, HierarchyLevelKey returns "" and GetLevelPriority("")
+            // resolves to int.MaxValue (lowest priority).
+            var m = MakeBareMarker("p1", Vector3.zero);
+            var result = LODController.BuildPassthroughVisualUnits(new List<MarkerView> { m });
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(int.MaxValue, result[0].hierarchyLevelIndex);
+        }
+
+        [Test]
+        public void BuildPassthroughVisualUnits_PoiIdPreserved()
+        {
+            var m = MakeBareMarker("hero_poi", Vector3.zero);
+            var result = LODController.BuildPassthroughVisualUnits(new List<MarkerView> { m });
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("hero_poi", result[0].poiId);
+        }
+
+        [Test]
+        public void BuildPassthroughVisualUnits_MarkerReferencePreserved()
+        {
+            var m = MakeBareMarker("p1", Vector3.zero);
+            var result = LODController.BuildPassthroughVisualUnits(new List<MarkerView> { m });
+            Assert.AreSame(m, result[0].marker);
         }
     }
 }

@@ -177,6 +177,8 @@ namespace TileStories.Editor
         // Block 2 (_2.4 rows 5b/12/13): LOD + AR-zoom authoring foldouts.
         [SerializeField] private bool _showGlobalLod = true;
         [SerializeField] private bool _showGlobalZoom = true;
+        // Block 8 (_2.5 section 11): Displacement authoring foldout.
+        [SerializeField] private bool _showGlobalDisplacement = true;
         // Block 5 (_2.6 section 3): Search & Filter authoring foldout.
         [SerializeField] private bool _showGlobalSearchFilter = true;
 

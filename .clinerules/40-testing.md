@@ -1,4 +1,3 @@
-
 ## 4. Testing Strategy
 
 Two separate questions need separate answers here, and conflating them is what makes AR
@@ -99,6 +98,40 @@ When a test fails, stop and think before changing anything: is the test wrong (i
 asserting something that isn't actually the correct behavior), or is the logic wrong
 (the code isn't doing what it should)? Write out up to three possible fixes, pick the
 best one, apply it, and re-run.
+
+### 4.2.1 Composition/integration tests are not optional when a spec describes composition
+
+**Lesson from a direct audit finding**, found independently three
+separate times across one project (`_2.7_Corrections_TODO.md` #2.6-i,
+#2.6-al, #2.4-l — a filter-tray component, a search-synonym component,
+and an AR-zoom-state component were each individually built, each
+individually unit-tested in complete isolation, each passing green —
+and in all three cases, the actual connection to the rest of the running
+app was never built or never verified, so the feature did nothing end
+to end despite its own tests being genuinely correct and green).
+
+This is a distinct, recurring failure class from "insufficient test
+coverage" — coverage of each *piece* was fine; what was missing was a
+test of the *seam between* pieces. It's dangerous specifically because
+it's invisible from inside either piece's own test suite: Component A's
+tests pass, Component B's tests pass, and nothing anywhere asserts that
+A's output is ever actually consumed by B in the running app.
+
+**Rule:** when a domain spec explicitly describes composition between
+two or more components (e.g. "component A's output feeds directly into
+component B's input," "these two systems must stay in sync," "this is
+one result set, not two independent outputs") — write a test asserting
+the actual end-to-end composed behavior **before or alongside** writing
+each component's isolated unit tests, not after, and not only if time
+permits. A checklist question like "does toggling A visibly change B's
+output" is a stronger, cheaper, more direct test of the thing that
+actually matters than a large suite of tests that only ever exercise A
+and B separately. When auditing or reviewing a feature described as
+composed, explicitly search for a test that calls both real components
+together — the mere existence of a call site (e.g. grep for the
+method name) is not sufficient evidence the composition is exercised;
+confirm the call site is reached from the actual runtime bootstrap path
+(`WallSession` or equivalent), not only from a test file.
 
 ### 4.3 Asset Database Refresh Discipline
 

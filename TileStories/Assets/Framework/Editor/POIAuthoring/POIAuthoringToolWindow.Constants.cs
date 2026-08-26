@@ -119,7 +119,36 @@ namespace TileStories.Editor
         private static readonly Color EffectsSectionColor = new Color(0.20f, 0.65f, 0.90f);
         private static readonly Color HierarchySectionColor = new Color(0.95f, 0.80f, 0.15f);
         private static readonly Color LodSectionColor = new Color(0.00f, 0.70f, 0.70f);
-        private static readonly Color ZoomSectionColor = new Color(0.80f, 0.20f, 0.70f);
+                private static readonly Color ZoomSectionColor = new Color(0.80f, 0.20f, 0.70f);
+
+        // ---- Displacement section (Block 8 of _2.5_Marker_Displacement.md) ----
+        // Section color + option arrays + help text for the Global Scene ->
+        // Displacement Settings foldout. The draw method lives in
+        // POIAuthoringToolWindow.Displacement.cs; this file only owns the data,
+        // mirroring how the LOD/Zoom options/colors live here while their draw
+        // method lives in LodZoom.cs.
+        private static readonly Color DisplacementSectionColor = new Color(0.85f, 0.30f, 0.95f);
+        private static readonly string[] DisplaceTargetOptions = { "label_only", "marker", "both" };
+        private static readonly string[] DisplaceTargetLabels = { "Label Only", "Marker", "Both" };
+        private static readonly string[] DisplacementAlgorithmOptions = { "fixed_axis", "candidate_position", "force_directed" };
+        private static readonly string[] DisplacementAlgorithmLabels = { "Fixed Axis", "Candidate Position", "Force Directed" };
+        private static readonly string[] LeaderLineStyleOptions = { "straight", "dashed", "elbow" };
+        private static readonly string[] LeaderLineStyleLabels = { "Straight", "Dashed", "Elbow" };
+        private static readonly string[] DisplacementTiebreakOptions = { "symmetric", "lower_priority_only" };
+        private static readonly string[] DisplacementTiebreakLabels = { "Symmetric", "Lower Priority Only" };
+
+        private static readonly string DisplacementEnabledHelp = "Master switch for displacement (LODController.Evaluate step 8). When off, every visible marker renders at its base position and no offsets are computed; stability snapshots are left untouched so re-enabling settles immediately without popping.";
+        private static readonly string DisplacementOverlapThresholdHelp = "Screen-space pixel radius treated as 'these markers touch' when deciding a group needs to separate. Shared with LODController's density radius so the two systems agree on what 'touching' means.";
+        private static readonly string DisplacementTargetHelp = "Which part moves to resolve overlap: Label Only (shifts only the readable text -- the safest default; never moves the 3D anchor and reads correctly at a shallow viewing angle), Marker (shifts the 3D anchor itself), or Both.";
+        private static readonly string DisplacementAlgorithmHelp = "fixed_axis: deterministic symmetric fan-out (cheapest). candidate_position: nearest open slot per ring (Christensen et al. 1995, good for dense walls). force_directed: organic iterative repulsion with priority anchoring -- the default; cost scales with Relaxation Steps.";
+        private static readonly string ForceDirectedIterationsHelp = "Relaxation steps per Evaluate() cycle for the force_directed algorithm only. More steps separate further but cost more.";
+        private static readonly string DisplacementMaxHelp = "Cap on how far (screen px) a marker/label may travel to escape overlap; beyond it the displaced element hides instead of pushing further, keeping dense groups legible.";
+        private static readonly string LeaderLinesEnabledHelp = "Draw a line from the displaced marker back to its true baseline position so the visitor can still read which POI the shifted label belongs to.";
+        private static readonly string LeaderLineStyleHelp = "straight (single segment), dashed (clears over other markers), or elbow (two-segment poly-line to dodge overlapping content).";
+        private static readonly string LeaderLineMinDistanceHelp = "Shortest screen-px displacement before a leader line is drawn; tiny nudges get no line to avoid clutter.";
+        private static readonly string LeaderLineWidthHelp = "World-space (metre) thickness -- not pixels -- so it scales with viewing distance. Tuned per wall.";
+        private static readonly string LeaderLineOpacityHelp = "0-1 alpha multiplier over the marker's resolved category color. 1.0 = full color.";
+        private static readonly string DisplacementTiebreakHelp = "Tiebreak for two equal-priority markers that overlap: Symmetric (default) shifts both. lower_priority_only shifts only the lower-priority one -- currently deferred (falls back to Symmetric), but still schema-valid to author now.";
         private static readonly Color SearchFilterSectionColor = new Color(0.60f, 0.40f, 0.20f);
         // Specific Marker tab: per-POI header foldouts pick a stable color from
         // PoiHeaderPalette (deterministic FNV-1a hash of the POI id), so concrete

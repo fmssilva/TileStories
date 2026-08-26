@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -72,6 +72,11 @@ namespace TileStories
         // Optional LOD settings. When absent, LODController uses defaults:
         // 3-tier bands (2m/7m/9999m, counts -1/15/5), hybrid density, frustum cull on.
                 public LodSettings lod_settings = new();
+
+        // Optional marker/label displacement settings (spec _2.5 section 10). When
+        // absent, MarkerOverlapResolver.ApplyDisplacement uses these compiled-in
+        // defaults (label_only + fixed_axis, mirrors LodSettings' own default idiom).
+        public DisplacementSettings displacement_settings = new();
 
         // --- Custom keyword field definitions (spec _2.6 section 3 / 15) ---
         // Developer-defined search axes (e.g. "architect", "period", "material").
@@ -538,6 +543,47 @@ namespace TileStories
         // fields. The runtime LODController reads only max_distance_m and
         // max_visible_count, so adding this introduces no runtime behavior.
         public string details = string.Empty;
+    }
+
+    // Marker/label overlap-displacement settings (spec _2.5 section 10). Continuous,
+    // re-evaluated every LODController cycle (step 8) -- not a one-shot spawn-time fix.
+    [Serializable]
+    public class DisplacementSettings
+    {
+        public bool enabled = true;
+        public float overlap_threshold_px = 40f;                  // was a hardcoded const in MarkerOverlapResolver; now configurable
+        public string displace_target = "label_only";             // "label_only" | "marker" | "both"
+        public string displacement_algorithm = "force_directed";  // "fixed_axis" | "candidate_position" | "force_directed"
+        public int force_directed_iterations = 4;                 // relaxation steps/cycle, force_directed only
+        public float max_displacement_px = 120f;                  // cap; beyond it, hide the label
+        public bool leader_lines_enabled = true;
+        public string leader_line_style = "straight";             // "straight" | "dashed" | "elbow"
+        public float leader_line_min_distance_px = 15f;
+        public float leader_line_width = 0.01f;                // world-space width of the line (spec Section 6)
+        public float leader_line_opacity = 1.0f;               // 0-1 alpha multiplier on the category color
+        public string displacement_tiebreak = "symmetric";        // "symmetric" | "lower_priority_only"
+
+        // Parameterless constructor (required because the copy constructor below
+        // would otherwise suppress the compiler-generated default).
+        public DisplacementSettings() { }
+
+        // Copy constructor for test scenarios that need a baseline then override a few fields.
+        public DisplacementSettings(DisplacementSettings other)
+        {
+            if (other == null) return;
+            enabled = other.enabled;
+            overlap_threshold_px = other.overlap_threshold_px;
+            displace_target = other.displace_target;
+            displacement_algorithm = other.displacement_algorithm;
+            force_directed_iterations = other.force_directed_iterations;
+            max_displacement_px = other.max_displacement_px;
+            leader_lines_enabled = other.leader_lines_enabled;
+            leader_line_style = other.leader_line_style;
+            leader_line_min_distance_px = other.leader_line_min_distance_px;
+            leader_line_width = other.leader_line_width;
+            leader_line_opacity = other.leader_line_opacity;
+            displacement_tiebreak = other.displacement_tiebreak;
+        }
     }
 
     // One developer-defined search axis (spec _2.6 section 3 / 15).

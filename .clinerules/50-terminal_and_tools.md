@@ -9,19 +9,21 @@
 ---
 
 ## 5.2. Tool Usage Guidelines
-
-### Tool Execution & Argument Validation
 - **Strict Parameter Compliance:** Always verify tool schemas before executing. Never emit missing required parameters (e.g., `path` for `read_file` or `write_to_file`; or 'regex' for `search_files`).
-- **File Reading Limits:** Do NOT attempt to read entire large files directly with `read_file`.
-  - For target edits/searches, use `search_files` or `codebase_search` first.
-  - When using `read_file` on large files, always specify `start_line` and `end_line` ranges.
 - **Error Handling & Pivot Strategy:**
   - If a tool execution fails or returns an error response, analyze the error output immediately.
   - Do NOT repeat the exact same failing tool call with identical arguments.
   - If a tool continuously fails, pivot to an alternative tool or execute a shell command via `execute_command` (e.g., fallback file inspection).
 
 
-## 5.3. File Editing Discipline 
+## 5.3. Read File:
+- If `read_file` returns truncated content for big files:
+  - paginate with `start_line`/`end_line`__ (1-indexed) on the same path — e.g., read `1-200`, then `201-400`, etc. (or `start_line=500, end_line=700`).
+  - For binary/structured files like the `.prefab`, the cache can go stale; in that case, use the MCP `manage_prefabs get_hierarchy` (read-only, returns the live Unity-resolved structure)
+- For target edits/searches, use `search_files` or `codebase_search` first.
+
+
+## 5.4. File Edit:
 
 **Primary tool: the `editor` tool (direct file edit, one step). Python is fallback for edge cases.**
 

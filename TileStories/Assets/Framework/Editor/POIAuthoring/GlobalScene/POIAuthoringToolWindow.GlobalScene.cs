@@ -44,6 +44,10 @@ namespace TileStories.Editor
 
             EditorGUILayout.Space(4f);
 
+            _showGlobalDisplacement = DrawFramedFoldout(ref _showGlobalDisplacement, DrawGlobalDisplacementSection, "Displacement", DisplacementSectionColor);
+
+            EditorGUILayout.Space(4f);
+
             _showGlobalSearchFilter = DrawFramedFoldout(ref _showGlobalSearchFilter, DrawGlobalSearchFilterSection, "Search & Filter", SearchFilterSectionColor);
         }
 

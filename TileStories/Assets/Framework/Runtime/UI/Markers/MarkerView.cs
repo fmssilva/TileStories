@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -59,12 +59,23 @@ namespace TileStories
         private POIAnchor _anchor;
         private Vector3 _baseLocalPosition;
         private bool _hasBasePosition;
+
+        // Marker-root displacement (Block 4: marker/both path). Captures the root's
+        // world position at baseline and offsets it camera-relatively (not via
+        // label anchoredPosition). _baseLocalPosition/_hasBasePosition above are
+        // intentionally NOT reused here -- their localPosition semantics would be
+        // ambiguous for a root-position delta that must stay screen-aligned.
+        private Vector3 _baseWorldPosition;
+        private bool _hasWorldBasePosition;
+        private bool _hasMarkerOffset;
         private MarkerOutlineMode _outlineMode = MarkerOutlineMode.Gold;
         private bool _useBadge;
         private MarkerShape _shape;
         private MarkerShape _badgeShape = MarkerShape.Circle;
         private SpriteKeyLibrary _runtimeIconLibraryOverride;
         private EffectDefaults _effectDefaults;
+        private Color _resolvedCategoryColor;
+
         private bool _applyCategoryVisuals = true;
         private bool _applyShapeVisuals = true;
         private bool _enableStatusVisuals = true;
@@ -77,7 +88,15 @@ namespace TileStories
         private TextAlignmentOptions _baseLabelAlignment;
         private Vector2 _baseLabelAnchorMin;
         private Vector2 _baseLabelAnchorMax;
-        private Vector2 _baseLabelPivot;
+                                private Vector2 _baseLabelPivot;
+
+        // Label-only displacement (§4): absolute base anchoredPosition captured from
+        // ApplyLabelState on first layout; ApplyLabelOffset/ClearLabelOffset offset from
+        // this base, never add (idempotent). Distinct from the root _baseLocalPosition/_hasBasePosition
+        // pair above, which displaces the whole marker root (Block 4 marker/both path).
+        private Vector2 _baseLabelAnchoredPosition;
+        private bool _hasLabelPosition;
+        private bool _hasLabelOffset;
 
         // Expose the POI id for deterministic sorting in overlap resolution
         public string PoiId { get; private set; }
@@ -185,6 +204,7 @@ namespace TileStories
                 symbol.RectTransform.sizeDelta = Vector2.one * (_hierarchyStyle.SizeCm / 100f);
 
             bool hasConfiguredCategory = CategoryPalette.TryResolveConfigured(poi.category, out var categoryColor, out var iconKey);
+            _resolvedCategoryColor = categoryColor;
             var activeIconLibrary = _runtimeIconLibraryOverride != null ? _runtimeIconLibraryOverride : iconLibrary;
 
             // Determine status states
@@ -395,8 +415,12 @@ namespace TileStories
                 _baseLabelAnchorMin = baseRect.anchorMin;
                 _baseLabelAnchorMax = baseRect.anchorMax;
                 _baseLabelPivot = baseRect.pivot;
-                _hasBaseLabelSize = true;
+                                _hasBaseLabelSize = true;
             }
+
+            // Capture the layout-time base anchoredPosition for label-only displacement (§4).
+            // MarkerLayout.Apply has run by now, so this is the post-layout anchor point.
+            EnsureLabelBaseCaptured();
 
             // Label: hierarchy level with showLabel=true shows a persistent label,
             // others hide it. Otherwise identical label sizing/pivot logic as before.
@@ -502,28 +526,186 @@ namespace TileStories
             _ => "circle",
         };
 
-        // Nudge this marker up by overlapOffsetAmount * offsetIndex so it doesn't sit
-        // on top of another marker that resolved to a similar screen position.
-        // Idempotent: sets an absolute offset from the stored base position,
-        // never adds to the current position.
-        public void ApplyOverlapOffset(float offsetIndex)
+        // Shift this marker's label by screenOffsetPx (screen-space pixels) from its
+        // layout-time base position (§4). Pure, frame-stable conversion: MarkerBillboard
+        // copies the camera's rotation exactly every LateUpdate, so the root's local X/Y
+        // axes ARE screen X/Y by construction -- converting screenOffsetPx to a local-space
+        // delta via distance+FOV (MarkerLayout.ScreenPixelsToWorld) and writing it as an
+        // anchoredPosition offset needs no camera-basis reprojection, and critically, no
+        // dependency on the root's rotation at call time. A world<->screen<->world round-trip
+        // (an earlier revision of this method) bakes the root's CURRENT rotation into the
+        // result via InverseTransformPoint; since MarkerBillboard re-rotates every frame while
+        // this method is only called once per (slower) LOD evaluation cycle, that rotation
+        // goes stale by the next frame and the label visibly drifts. anchoredPosition has no
+        // such dependency -- Unity re-renders it correctly every frame regardless of how many
+        // times the parent has rotated since this was last computed. Idempotent: always
+        // computed fresh from the same base, never accumulated. label_only only (§4); the
+        // marker/both root-offset path is Block 4.
+        public void ApplyLabelOffset(Camera cam, Vector2 screenOffsetPx)
         {
-            if (_anchor == null) return;
+            if (_anchor == null || labelText == null) return;
+            if (cam == null) cam = Camera.main;
+            if (cam == null) return;
+            EnsureLabelBaseCaptured();
+            RectTransform rt = (RectTransform)labelText.transform;
 
-            // Capture the base position on first call (spawn-time position)
-            if (!_hasBasePosition)
-            {
-                _baseLocalPosition = _anchor.transform.localPosition;
-                _hasBasePosition = true;
-            }
+            // Depth along the camera's forward axis -- NOT Vector3.Distance (full Euclidean
+            // distance to the point). Camera.WorldToScreenPoint's screen-space scaling (and
+            // the FOV-based world-units-per-pixel formula in MarkerLayout.ScreenPixelsToWorld)
+            // is derived from perspective depth, which only equals Euclidean distance for a
+            // marker exactly on the optical axis (screen center). Off-center markers (the
+            // common case) have Euclidean distance > depth, which previously introduced a
+            // small but consistent pixel-conversion error growing with distance from center.
+            float depthM = Vector3.Dot(transform.position - cam.transform.position, cam.transform.forward);
+            Vector2 worldOffset = MarkerLayout.ScreenPixelsToWorld(screenOffsetPx, depthM, cam);
 
-            // Set position to base + offset, never add to current position
-            Vector3 newPos = _baseLocalPosition;
-            newPos.y += offsetIndex * 0.15f;
-            _anchor.transform.localPosition = newPos;
+            // The label's anchoredPosition is expressed in this marker root's LOCAL space,
+            // which is not guaranteed to be unscaled: MarkerRevealEffect animates this exact
+            // root's localScale 0->1 over its reveal duration right after Initialise() (see
+            // _2.3_Marker_Hierarchy.md Section 5's "settled baseline" contract -- other
+            // continuous systems, this one included, must compute correctly against this
+            // channel even mid-transition, not only once it settles at 1). A world-space
+            // offset must be divided by the root's current lossyScale to become a correct
+            // local-space delta -- skipping this collapses the offset toward zero while the
+            // root is still scaling up from its reveal-in pop (e.g. a lossyScale of 0.05
+            // shrinks an intended 40px screen separation down to ~2px), which is the actual
+            // root cause of the screen-position error/drift previously misdiagnosed as a
+            // billboard-rotation/geometry problem.
+            Vector3 rootScale = transform.lossyScale;
+            float sx = Mathf.Approximately(rootScale.x, 0f) ? 1f : rootScale.x;
+            float sy = Mathf.Approximately(rootScale.y, 0f) ? 1f : rootScale.y;
+            Vector2 localOffset = new Vector2(worldOffset.x / sx, worldOffset.y / sy);
+
+            rt.anchoredPosition = _baseLabelAnchoredPosition + localOffset;
+            _hasLabelOffset = true;
         }
 
-                private void EnsureMarkerWiring(bool allowCreate)
+        // Restore the label to its layout-time base position (below the symbol, per
+        // MarkerLayout.Apply's labelGap -- NOT the marker's center/zero).
+        public void ClearLabelOffset()
+        {
+            if (!_hasLabelOffset) return;
+            _hasLabelOffset = false;
+            if (labelText == null) return;
+
+            EnsureLabelBaseCaptured();
+            var rt = (RectTransform)labelText.transform;
+            rt.anchoredPosition = _baseLabelAnchoredPosition;
+        }
+
+        private void EnsureLabelBaseCaptured()
+        {
+            // Capture the layout-time base anchoredPosition on first use. Guarded so it is
+            // idempotent whether the first caller is ApplyLabelState (every ApplyVisuals)
+            // or ApplyLabelOffset/ClearLabelOffset (only when displacement runs).
+            if (!_hasLabelPosition && labelText != null)
+            {
+                _baseLabelAnchoredPosition = ((RectTransform)labelText.transform).anchoredPosition;
+                _hasLabelPosition = true;
+            }
+        }
+
+        // Shift this marker's ROOT transform by screenOffsetPx in screen space,
+        // converted to a camera-relative world delta (Block 4, spec Section 4).
+        // The root's world position is displaced along cam.transform.right and
+        // cam.transform.up so the offset stays screen-aligned regardless of camera
+        // orientation. This is the marker/both displace_target path; label
+        // displacement uses ApplyLabelOffset which writes to anchoredPosition instead.
+        public void ApplyMarkerOffset(Camera cam, Vector2 screenOffsetPx)
+        {
+            if (_anchor == null) return;
+            if (cam == null) cam = Camera.main;
+            if (cam == null) return;
+            EnsureMarkerWorldBaseCaptured();
+
+            // Depth along the camera's forward axis -- same perspective-depth formula
+            // as ApplyLabelOffset. NOT Euclidean distance to the marker.
+            float depthM = Vector3.Dot(transform.position - cam.transform.position, cam.transform.forward);
+
+            // Convert screen pixels to world units at this depth, then project onto
+            // the camera's right/up basis so the offset stays screen-aligned even at
+            // grazing angles (where cam.forward has no screen-axis component).
+            Vector2 world2D = MarkerLayout.ScreenPixelsToWorld(screenOffsetPx, depthM, cam);
+            Vector3 worldDelta = cam.transform.right * world2D.x + cam.transform.up * world2D.y;
+
+            transform.position = _baseWorldPosition + worldDelta;
+            _hasMarkerOffset = true;
+        }
+
+        // Restore the marker root to its baseline world position.
+        public void ClearMarkerOffset()
+        {
+            if (!_hasMarkerOffset) return;
+            _hasMarkerOffset = false;
+            if (_anchor == null) return;
+
+            transform.position = _baseWorldPosition;
+        }
+
+        private void EnsureMarkerWorldBaseCaptured()
+        {
+            // Capture the world-space baseline position on first use. Idempotent.
+            // Unlike label anchoredPosition, root world position is independent of
+            // MarkerBillboard's per-frame rotation, so no stale-rotation concern.
+            if (!_hasWorldBasePosition)
+            {
+                _baseWorldPosition = transform.position;
+                _hasWorldBasePosition = true;
+            }
+        }
+
+        // Leader line color (spec Section 6): reads the same resolved category
+        // color that the Symbol uses for its background fill. Exposed so
+        // MarkerLeaderLine can pick up the correct tint without re-resolving.
+        internal Color LeaderLineColor => _resolvedCategoryColor;
+
+        // Delegate to the MarkerLeaderLine component on this prefab, if present.
+        // Called from ApplyDisplacement every LOD cycle; the component then
+        // self-updates in LateUpdate for per-frame visibility (camera distance).
+        public void UpdateLeaderLine(Camera cam, DisplacementSettings settings)
+        {
+            if (!TryGetComponent<MarkerLeaderLine>(out var leaderLine)) return;
+            if (_hasWorldBasePosition)
+            {
+                leaderLine.Configure(_baseWorldPosition, _resolvedCategoryColor);
+            }
+            leaderLine.UpdateVisibility(cam, settings);
+        }
+
+        // Test seam (InternalsVisibleTo -> TileStories.Tests.Runtime). Exposes the live label
+        // RectTransform so Tier-0 label-displacement tests can assert its screen position.
+        internal RectTransform LabelRect => labelText != null ? (RectTransform)labelText.transform : null;
+
+        internal bool HasLabelOffset => _hasLabelOffset;
+
+        // Visual extent in world-space metres (radius from centre to outermost visual element).
+        // Combines hierarchy size (symbol + ring + badge + label) and animated effect expansions
+        // so the displacement engine can compute true bounds rather than using a static guess.
+        public float GetVisualRadiusWorld()
+        {
+            float symbolRadius = (symbol != null ? symbol.RectTransform.sizeDelta.x : (_hierarchyStyle.SizeCm / 100f)) * 0.5f;
+            float maxRadius = symbolRadius * (layout != null ? layout.ringSizeRatio : 1.18f);
+
+            // If badge is visible, badge edge extends beyond symbol radius
+            if (_useBadge && badge != null)
+            {
+                float badgeRadius = symbolRadius * (layout != null ? layout.badgeSizeRatio : 0.36f);
+                Vector2 badgeOffset = Vector2.Scale(layout != null ? layout.badgeDirection : new Vector2(0.7f, 0.7f), new Vector2(symbolRadius, symbolRadius));
+                float badgeDist = badgeOffset.magnitude + badgeRadius;
+                if (badgeDist > maxRadius) maxRadius = badgeDist;
+            }
+
+            // If pulse or sun effects are active, account for their maximum expansion envelope
+            MarkerEffectFlags activeFlags = _hasHierarchy ? _hierarchyStyle.EffectFlags : effectFlags;
+            if ((activeFlags & (MarkerEffectFlags.Pulse | MarkerEffectFlags.SunContours | MarkerEffectFlags.SunCircles | MarkerEffectFlags.Beacon | MarkerEffectFlags.SimpleSun | MarkerEffectFlags.RingPulse)) != 0)
+            {
+                maxRadius *= 1.35f; // Max envelope expansion during animated peak
+            }
+
+            return maxRadius;
+        }
+
+        private void EnsureMarkerWiring(bool allowCreate)
         {
             if (_canvasGroup == null)
                 _canvasGroup = GetComponent<CanvasGroup>();

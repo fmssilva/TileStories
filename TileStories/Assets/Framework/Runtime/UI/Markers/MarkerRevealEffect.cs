@@ -46,7 +46,7 @@ namespace TileStories
             if (_rootRect != null) _rootRect.localScale = Vector3.zero;
         }
 
-        private void SetFullAlphaAndScale()
+        public void SetFullAlphaAndScale()
         {
             if (_canvasGroup != null) _canvasGroup.alpha = 1f;
             if (_rootRect != null) _rootRect.localScale = Vector3.one;

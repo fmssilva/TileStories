@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿# 1. Project Structure & Organizing Principles
+﻿﻿# 1. Project Structure & Organizing Principles
 
 **Read this file to get oriented on the project's structure**
 
@@ -50,7 +50,49 @@
   Editor assembly whenever possible, since that's caught at compile time
   rather than relying on a preprocessor directive someone might forget.
 
-### 1.3 Domain-centered folders, not type-centered folders
+### 1.3 Menu-item and tool visibility — framework-internal vs. developer-facing
+
+**Lesson from a direct audit finding** (an app-building developer,
+looking at the top-level `TileStories` Unity menu, found it mixed real
+per-wall config actions together with a framework-maintainer-only prefab
+repair tool, with no way to tell them apart — see
+`_2.7_Corrections_TODO.md` "FW-1" for the specific incident).
+
+- **All developer-facing, per-wall configuration lives in the POI
+  Authoring window** (`TileStories/POI Authoring Tool`) — never a
+  second, separate `EditorWindow`, and never a top-level menu item that
+  performs per-wall content configuration outside that window. This is
+  the framework's single point of entry for "things a developer building
+  their own wall app needs to touch," and it must stay that way as new
+  domains are added.
+- **Framework-internal maintenance/repair tools** (one-off scripts that
+  fix or re-author the framework's own shared assets — e.g. re-wiring a
+  prefab's serialized references if it's ever rebuilt from scratch) are
+  a fundamentally different audience: whoever maintains the TileStories
+  framework itself, not an app developer. These must never appear as a
+  discoverable top-level menu item indistinguishable from real config
+  actions. Default to no menu item at all (a plain internal method,
+  documented in a code comment for how to invoke it manually if ever
+  needed again) unless there's a concrete, recurring reason a framework
+  maintainer needs frequent, easy access — in which case, group it under
+  a menu path that makes the audience unambiguous (e.g. a
+  `Framework Internal (do not use for wall content)` submenu), never
+  bare at the top level.
+- A one-time "create an authoring asset" action (e.g. a `CreateAssetMenu`
+  -style menu item) is fine as a menu item per Unity's own idiom — the
+  distinction that matters is *content configuration* (belongs in the
+  window) vs. *asset scaffolding/framework repair* (a menu item is fine,
+  but must be clearly scoped/labeled, and must not become the *only*
+  path to configure something ongoing — see the corrections file's
+  #2.6-al for a case where a menu-created asset became a structural dead
+  end specifically because nothing else ever grew a matching in-window
+  UI to manage it afterward).
+- When adding any new `[MenuItem("TileStories/...")]`, ask explicitly:
+  would an app-building developer configuring their own wall ever
+  legitimately need to click this? If no, it doesn't belong at the
+  top level of this menu.
+
+### 1.4 Domain-centered folders, not type-centered folders
 
 - Group files by what they do (`Tracking/`, `POI/`, `Content/`,
   `Analytics/`), never by generic technical category (`Scripts/`,
@@ -266,8 +308,13 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   ├── POISearchIndex.cs            ← Inverted index for POI search (name/summary/keyword/category/taxonomy);
 │   │   │   │   │                                  builds token-to-POI index at Build time, supports prefix
 │   │   │   │   │                                  matching and name-prefix fuzzy matching; ConfigureWithSynonyms
-│   │   │   │   │                                  accepts IList<SynonymGroup> (Editor wiring extracts from the
-│   │   │   │   │                                  SearchSynonymGroups asset). [ok on disk; tests green 15/15]
+│   │   │   │   │                                  accepts IList<SynonymGroup>. **Correction (audit, see
+│   │   │   │   │                                  `_2.7_Corrections_TODO.md` #2.6-al):** no such Editor wiring
+│   │   │   │   │                                  currently exists — the only callers of ConfigureWithSynonyms
+│   │   │   │   │                                  project-wide are its own tests; WallSession never calls it.
+│   │   │   │   │                                  The SearchSynonymGroups asset (below) is a dead end that
+│   │   │   │   │                                  never reaches the running app. [on disk; unit-tested in
+│   │   │   │   │                                  isolation, NOT wired to runtime — see #2.6-al for the fix]
 │   │   │   │   ├── SearchTokenizer.cs            ← Pure C# static tokenizer: NFKD normalization + diacritic
 │   │   │   │   │                                  strip, lowercase, split on whitespace/punctuation/symbols,
 │   │   │   │   │                                  deduplicate preserving first-occurrence order. No Unity deps.
@@ -292,6 +339,8 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │                                      used by both the Dev/MarkerGallery scene and
 │   │   │   │                                      MarkerGalleryTests for automated visual assertions.
 │   │   │   │   ├── ClusterGalleryDefinitions.cs    ← Defines `ClusterGalleryEntry` (icon_mode + member_count + label) and the entry list driving both the ClusterGalleryScene and ClusterGalleryTests.
+│   │   │   │   ├── DisplacementGalleryDefinitions.cs ← Phase A gallery definitions: `DisplacementGalleryEntry` entries for displacement Phase A testing (label_only/marker/both, all 3 algorithms, leader lines).
+│   │   │   │   ├── DisplacementGalleryHarness.cs     ← MonoBehaviour that instantiates gallery entries via POI_Marker.prefab for visual inspection + PlayMode tests.
 │   │   │   │   └── ClusterGalleryHarness.cs    ← MonoBehaviour that instantiates and configures every ClusterGalleryEntry in the ClusterGalleryScene; also used by ClusterGalleryTests in PlayMode.
 │   │   │   │
 │   │   │   ├── Blocks/                ← NOT YET BUILT. Planned: detail-card content block system (text/image/audio/video/3D/map)
@@ -409,6 +458,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │   │                              rotation).
 │   │   │   │   │   ├── MarkerLayout.cs         ← Pure-logic layout math, no Unity lifecycle.
 │   │   │   │   │   ├── MarkerBillboard.cs      ← Faces the marker toward the camera.
+│   │   │   │   │   ├── MarkerLeaderLine.cs    ← Leader line component (spec Section 6): LineRenderer from displaced root to true baseline position, camera-relative.
 │   │   │   │   │   ├── MarkerEffect.cs         ← Base class for the effect components below.
 │   │   │   │   │   ├── MarkerPulseEffect.cs, MarkerSunEffect.cs, MarkerAccentEffect.cs  ← hero/accent effects, see below
 │   │   │   │   │   │                            ← Hero/accent visual effects (breathing, concentric
@@ -665,13 +715,24 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │                                      (Error / Warning); displayed in Wizard and
 │   │   │   │                                      surfaced as Unity Console messages.
 │   │   │   │
-│   │   │   ├── SearchSynonymGroups.cs     ← [NOT YET BUILT] Editor-only; ScriptableObject asset holding synonym
+│   │   │   ├── SearchSynonymGroups.cs     ← **Correction (audit, see `_2.7_Corrections_TODO.md`
+│   │   │   │                                  #2.6-al):** this line previously said "[NOT YET BUILT]" —
+│   │   │   │                                  incorrect, the file exists on disk exactly as described
+│   │   │   │                                  below. Editor-only; ScriptableObject asset holding synonym
 │   │   │   │                                  groups for the search index; CreateAssetMenu menu item for authoring.
 │   │   │   │                                  Wrapped in #if UNITY_EDITOR. References SynonymGroup from Runtime.
+│   │   │   │                                  What's actually missing is downstream: no code anywhere reads
+│   │   │   │                                  this asset and calls POISearchIndex.ConfigureWithSynonyms
+│   │   │   │                                  outside of tests — see #2.6-al, which also proposes replacing
+│   │   │   │                                  this ScriptableObject approach entirely (it's structurally
+│   │   │   │                                  unable to ship to players, being #if UNITY_EDITOR-only) with a
+│   │   │   │                                  plain List<SynonymGroup> field on WallConfigData instead,
+│   │   │   │                                  matching every other taxonomy list in this codebase.
 │   │   │   ├── POIAuthoring/           ← `POIAuthoringToolWindow` split as a `partial class` across
 │   │   │   │   │                          this folder (was one 1,750-line file; refactored 2026-08
 │   │   │   │   │                          into per-concern partial files, zero behaviour change —
 │   │   │   │   │                          see `_5.1_Editor_Tab.md` for the method-to-file map).
+│   │   │   │   │                          GlobalScene/ holds wall-level foldouts: Hierarchy, Badge, Outline, LOD/Zoom, and §11 Displacement Settings.
 │   │   │   │   ├── POIAuthoringToolWindow.cs           ← Shell: fields, ShowWindow, OnEnable/OnDisable,
 │   │   │   │   │                                          OnGUI, DrawFramedFoldout, DrawToolbar,
 │   │   │   │   │                                          DrawTopConfigAndActions, DrawSyncAndWarnings.
@@ -690,6 +751,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                                  DrawGlobalOutlineSection,
 │   │   │   │   │                                                  RecomputeLevelPercentSpacing (+ DrawGlobalHierarchySection: Hierarchy table incl. Priority column).
 │   │   │   │   │   ├── POIAuthoringToolWindow.LodZoom.cs  ← DrawGlobalLodSection + DrawGlobalZoomSection foldouts + shared DrawScalarField/DrawToggleField/DrawIntField/DrawPopupField helpers (Block 2, Editor-only).
+│   │   │   │   │   ├── POIAuthoringToolWindow.Displacement.cs ← DrawGlobalDisplacementSection: §11 Displacement Settings foldout (enable, overlap threshold, displace target, algorithm + conditional relaxation steps, max displacement, leader lines + sub-fields, tiebreak).
 │   │   │   │   ├── SpecificMarker/
 │   │   │   │   │   └── POIAuthoringToolWindow.SpecificMarker.cs ← DrawSpecificMarkerOptions (per-POI inner\n│   │   │   │   │                                                    sections indented under each POI header via\n│   │   │   │   │                                                    EditorGUI.IndentLevelScope),
 │   │   │   │   │                                                    DrawPoiPositionFields,
@@ -794,8 +856,8 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │                                          written after Stage 2 when block shapes are
 │   │   │                                          final, not speculatively before.
 │   │   │
-│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 391 tests total as of
-│   │       │                              2026-08-15 (353 EditMode + 38 PlayMode). No TestFixtures/ folder — fixtures are inline.
+│   │   └── Tests/                     ← EditMode + PlayMode automated tests; 596 tests total as of
+│   │       │                              2026-08-22 (539 EditMode + 57 PlayMode). No TestFixtures/ folder — fixtures are inline.
 │   │       ├── Editor/                ← EditMode tests (run without domain reload, fast)
 │   │       │   ├── TileStories.Editor.Tests.asmdef ← Editor test assembly; references Runtime + Editor.
 │   │       │   ├── CategoryPaletteTests.cs        ← Tests category→colour/icon resolution, hash
@@ -806,6 +868,10 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │       │   │                                     produces correct 6-entry list.
 │   │       │   ├── DefaultOutlineLevelsTests.cs    ← Tests that default outline level seeding
 │   │       │   │                                     produces correct 4-entry list.
+│   │       │   ├── DisplacementHysteresisTests.cs ← Tier-0 EditMode tests for CommitGroupMembership hysteresis (commit/cancel/hold/commit-out, per-poi isolation, null/blank id) + Tier-1 PlayMode `Evaluate_FlickerAtThresholdBoundary_NoFlap`.
+│   │       │   ├── DisplacementSettingsDefaultsTests.cs ← Tier-0 EditMode tests for the DisplacementSettings
+│   │       │   │                                     schema contract (spec _2.5 §10 defaults) + WallConfigData round-trip; 2 tests, EditMode green.
+│   │       │   │                                     LeaderLineVisibilityTests.cs ← Tier-0 EditMode tests for MarkerLeaderLine visibility, position counts, and edge cases; 10 tests, green.
 │   │       │   ├── EditorCameraLookTests.cs        ← Tests that look-delta rotation is applied
 │   │       │   │                                     relative to the camera's current rotation
 │   │       │   │                                     (the bug where arrow keys snapped back
@@ -830,7 +896,11 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │       │   ├── LodAutoSuggestTests.cs        ← Tests LodAutoSuggest.Suggest(n) exact output (n=0/10/18/150) + always-3-bands invariant; EditMode.
 │   │       │   ├── ClusterGroupingTests.cs     ← Tier-0 EditMode tests for ClusterGrouping.Group/Centroid/Signature/ResolveBand/BuildAggregate (deterministic, empty, singleton, boundary); green-gated 196/196 EditMode, 0 error CS.
 │   │       │   ├── MarkerSelectionEditModeTest.cs <- Tier-0 EditMode tests for Block 2 zoom-on-select gate (ComputeZoomTarget) + SelectionEventBus round-trip (268/268 EditMode green, 2026-08-15).
-│   │       │   └── LodAuthoringRoundTripTests.cs ← Tests LOD + Zoom foldout fields round-trip through authoring Save/Load path; EditMode.
+│   │       │   ├── LodAuthoringRoundTripTests.cs ← Tests LOD + Zoom foldout fields round-trip through authoring Save/Load path; EditMode.
+│   │       │   ├── DisplacementAuthoringRoundTripTests.cs ← Tests Displacement foldout fields round-trip through authoring Save/Load path (all 12 DisplacementSettings fields); EditMode.
+│   │       │   ├── DisplacementAlgorithmTest.cs ← EditMode test for displacement algorithm candidates (fixed_axis member ordering, candidate_position angular generation, force_directed angular-preference scoring); e.g. ForceDirected_ThreeOverlappingMarkers_PriorityAware green.
+│   │       │   ├── DisplacementComputeTests.cs ← Tier-0 EditMode tests for `MarkerOverlapResolver.ApplyDisplacement` computation (guard/early-return, union-find grouping at overlap_threshold_px, deterministic poiId order, fixed_axis symmetric spread, max_displacement_px clamp, screen->label conversion); 7/7 green.
+│   │       │   ├── MarkerLayoutPxConversionTests.cs ← Tier-0 EditMode tests for `MarkerLayout.ScreenPixelsToWorld` (per-axis fov/height math, distance scaling, zero/guard cases); 5/5 green.
 │   │       │   ├── ClusterReconcileTests.cs     ← EditMode tests for LODController.ReconcileClusters (band resolution, hysteresis, dissolve grace, reuse, guards); 222/222 green.
 │   │       │   ├── ClusterPrefabTests.cs    ← EditMode contract tests for POI_Cluster prefab: required children, DefaultIconImage, CountLabel, DominantIcon child + dominantIcon ref.
 │   │       │   ├── LODControllerTests.cs    ← EditMode unit tests for LODController pipeline stages (frustum cull, effective distance, band assignment, density, cluster reconciliation).
@@ -872,7 +942,10 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │           ├── MarkerOverlapResolverTests.cs    ← Tests overlap offset assignment (clustered/
 │   │           │                                       already-separated/idempotent scenarios) and
 │   │           │                                       MarkerBillboard camera-facing rotation.
-│   │           ├── LivingRoomConfigIntegrationTests.cs ← PlayMode integration: real StreamingAssets/LivingRoom/config.json (18 POIs, 5 hierarchy levels) loads and every hierarchy_level_key resolves.
+├── LivingRoomConfigIntegrationTests.cs ← PlayMode integration: real StreamingAssets/LivingRoom/config.json (22 POIs: 18 real + 4 dev displacement fixtures, 5 hierarchy levels) loads and every hierarchy_level_key resolves.
+│   │           ├── LODControllerEvaluateTests.cs ← Tier-1 PlayMode tests for Block 6: Evaluate() step 8 wiring (lod-disabled-but-displacement-enabled passthrough, both-disabled no-op, step 8 runs after LOD). Also Phase B real-config E2E (RealConfig_DisplacementPipeline_E2E): LivingRoom lamp_* cluster through the real Evaluate() pipeline, 3-cycle hysteresis (cycle-1 no-displace <0.5px, cycle-2 displace ~95px + MinAdjacentGap>5px, cycle-3 deterministic hold <0.5px).
+│   │           ├── DisplacementGalleryTests.cs ← PlayMode Phase-A gallery: instantiates every DisplacementGalleryDefinitions entry on the real POI_Marker prefab, asserts per-`displace_target` label/marker displacement; companion to the Phase-B E2E.
+│   │           ├── DisplacementLabelTests.cs ← PlayMode tests for label-only displacement variants through `ApplyDisplacement` (no-displace, symmetric spread, max_displacement_px clamp, multi-group Y-separation); 5/5 green.
 │   │           ├── MarkerViewRuntimeTests.cs        ← Tests that MarkerView correctly wires its
 │   │                                                   sub-components given various POI configs.
 │   │           ├── ClusterReconcilePlayModeTests.cs ← PlayMode [UnityTest] companion to ClusterReconcileTests;
@@ -890,7 +963,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │                                      and end-to-end testing before going to real
 │   │   │   │                                      walls. Uses MockLocalizationProvider or a real
 │   │   │   │                                      Immersal map. Never shipped to production.
-│   │   │   ├── config.json                     ← Working POI data (18 POIs: 3 hero + 15 satellites, grouped as 3 families of 6; 2 calibration anchors; + heritage taxonomy).
+│   │   │   ├── config.json                     ← Working POI data (22 POIs: 3 hero + 15 satellites, grouped as 3 families of 6; + 4 dev displacement fixtures; 2 calibration anchors; + heritage taxonomy).
 │   │   │   ├── config.json.backup              ← Previous config snapshot (manual backup).
 │   │   │   ├── LivingRoomScene.unity           ← The scene actually used for all dev iteration.
 │   │   │   ├── 146267-LivingRoom2.bytes        ← Immersal VPS map file (naming from Immersal
