@@ -257,7 +257,18 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                  scene or camera.
 │   │   │   │   ├── ARZoomController.cs          ← Drives camera zoom via pinch gesture, double-tap,
 │   │   │   │   │                                  and UI buttons; reads LodSettings zoom params and
-│   │   │   │   │                                  writes to ARZoomState.ZoomFactor (§9).
+│   │   │ │   │                                  writes to ARZoomState.ZoomFactor (§9). Also owns the
+│   │   │   │   │                                  FOV driver (2.4-l): captures _baseFov in Start() and
+│   │   │   │   │                                  writes Camera.fieldOfView = _baseFov / ZoomFactor in
+│   │   │   │   │                                  LateUpdate, so the passthrough + markers zoom together.
+│   │   │   │   ├── ARZoomMath.cs                ← Pure static zoom/gesture math split out of the
+│   │   │   │   │                                  controller (tap levels, pinch scale, step-toward-target);
+│   │   │   │   │                                  Tier-0-tested in ARZoomMathTests.
+│   │   │   │   ├── ARZoomGestureInput.cs        ← MonoBehaviour translating EnhancedTouch input
+│   │   │   │   │                                  (project uses the new Input System only) into
+│   │   │   │   │                                  ARZoomController.OnPinch / OnDoubleTap calls; no
+│   │   │   │   │                                  detection logic of its own. Bootstrapped on the
+│   │   │   │   │                                  ZoomRig GameObject in LivingRoomScene.
 │   │   │   │   ├── TrackingJitterSmoother.cs   ← [NOT YET BUILT] Planned: smooths Immersal pose
 │   │   │   │   │                                  updates via SmoothDamp + Slerp to prevent visual
 │   │   │   │   │                                  snap on re-localisation.
@@ -274,7 +285,16 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                  within ~40px into groups (union-find, spawn-order
 │   │   │   │   │                                  independent), assigns each group a stable vertical
 │   │   │   │   │                                  offset. Idempotent: calling twice produces the same
-│   │   │   │   │                                  result.
+│   │   │   │   │                                  result. Also owns ApplyDisplacement (step 8: per-cycle
+│   │   │   │   │                                  screen-space displacement, section-9 hysteresis via
+│   │   │   │   │                                  DisplacementStabilityState, 2.5-h hide-fallback via
+│   │   │   │   │                                  ResolveLabelsToHide) and ComputeOffsets dispatch to
+│   │   │   │   │                                  the three algorithm branches.
+│   │   │   │   ├── DisplacementTieBreakStrategy.cs ← Pure static helper (2.5-g): resolves the
+│   │   │   │   │                                  "lower_priority_only" tiebreak anchor for an overlap
+│   │   │   │   │                                  group (unique-min priority; shared-min falls back to
+│   │   │   │   │                                  symmetric); consumed by all three algorithm branches
+│   │   │   │   │                                  in MarkerOverlapResolver.ComputeOffsets.
 │   │   │   │   ├── CategoryPalette.cs          ← Resolves a wall-defined `category` string into a
 │   │   │   │   │                                  fill colour and optional icon key. Optional
 │   │   │   │   │                                  Configure() call (made by WallSession) maps specific
@@ -308,13 +328,11 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   ├── POISearchIndex.cs            ← Inverted index for POI search (name/summary/keyword/category/taxonomy);
 │   │   │   │   │                                  builds token-to-POI index at Build time, supports prefix
 │   │   │   │   │                                  matching and name-prefix fuzzy matching; ConfigureWithSynonyms
-│   │   │   │   │                                  accepts IList<SynonymGroup>. **Correction (audit, see
-│   │   │   │   │                                  `_2.7_Corrections_TODO.md` #2.6-al):** no such Editor wiring
-│   │   │   │   │                                  currently exists — the only callers of ConfigureWithSynonyms
-│   │   │   │   │                                  project-wide are its own tests; WallSession never calls it.
-│   │   │   │   │                                  The SearchSynonymGroups asset (below) is a dead end that
-│   │   │   │   │                                  never reaches the running app. [on disk; unit-tested in
-│   │   │   │   │                                  isolation, NOT wired to runtime — see #2.6-al for the fix]
+│   │   │   │   │                                  accepts IList<SynonymGroup>. **Wired 2026-09-08 (#2.6-al):**
+│   │   │   │   │                                  WallSession now creates + Builds this index in LoadConfigCoroutine
+│   │   │   │   │                                  (exposed via WallSession.SearchIndex) and calls ConfigureWithSynonyms
+│   │   │   │   │                                  from WallConfigData.synonym_groups. The old Editor-only
+│   │   │   │   │                                  SearchSynonymGroups ScriptableObject asset was deleted.
 │   │   │   │   ├── SearchTokenizer.cs            ← Pure C# static tokenizer: NFKD normalization + diacritic
 │   │   │   │   │                                  strip, lowercase, split on whitespace/punctuation/symbols,
 │   │   │   │   │                                  deduplicate preserving first-occurrence order. No Unity deps.
@@ -609,7 +627,15 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │   ├── SearchOverlayView.cs    ← Full-screen search + filter panel; filters by
 │   │   │   │   │   │                              category, status (if wall has one), and free-
 │   │   │   │   │   │                              text name search; tapping a result pans view
-│   │   │   │   │   │                              to that POI's marker.
+│   │   │   │   │   │                              to that POI's marker. Owns the plain-class
+│   │   │   │   │   │                              ResultSetCoordinator (Block 4, 2.6-i): computes
+│   │   │   │   │   │                              the ONE facet-filtered candidate set and pushes
+│   │   │   │   │   │                              it to results list, minimap, scene markers
+│   │   │   │   │   │                              (SetVisible alpha seam) and camera-highlight.
+│   │   │   │   │   ├── ResultSetCoordinator.cs  ← Plain C# class (no MonoBehaviour, Tier-0-
+│   │   │   │   │   │                              testable): composes FilterFacetEvaluator's
+│   │   │   │   │   │                              pass/fail logic into a candidate POI-ID set and
+│   │   │   │   │   │                              feeds POISearchIndex.Search(candidatePoiIds).
 │   │   │   │   │   ├── SearchOverlayView.uxml  ← UXML structure for the search overlay (search
 │   │   │   │   │   │                              field, mic button, suggestion rows, voice-activity
 │   │   │   │   │   │                              bar).
@@ -715,19 +741,6 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │                                      (Error / Warning); displayed in Wizard and
 │   │   │   │                                      surfaced as Unity Console messages.
 │   │   │   │
-│   │   │   ├── SearchSynonymGroups.cs     ← **Correction (audit, see `_2.7_Corrections_TODO.md`
-│   │   │   │                                  #2.6-al):** this line previously said "[NOT YET BUILT]" —
-│   │   │   │                                  incorrect, the file exists on disk exactly as described
-│   │   │   │                                  below. Editor-only; ScriptableObject asset holding synonym
-│   │   │   │                                  groups for the search index; CreateAssetMenu menu item for authoring.
-│   │   │   │                                  Wrapped in #if UNITY_EDITOR. References SynonymGroup from Runtime.
-│   │   │   │                                  What's actually missing is downstream: no code anywhere reads
-│   │   │   │                                  this asset and calls POISearchIndex.ConfigureWithSynonyms
-│   │   │   │                                  outside of tests — see #2.6-al, which also proposes replacing
-│   │   │   │                                  this ScriptableObject approach entirely (it's structurally
-│   │   │   │                                  unable to ship to players, being #if UNITY_EDITOR-only) with a
-│   │   │   │                                  plain List<SynonymGroup> field on WallConfigData instead,
-│   │   │   │                                  matching every other taxonomy list in this codebase.
 │   │   │   ├── POIAuthoring/           ← `POIAuthoringToolWindow` split as a `partial class` across
 │   │   │   │   │                          this folder (was one 1,750-line file; refactored 2026-08
 │   │   │   │   │                          into per-concern partial files, zero behaviour change —
@@ -752,6 +765,8 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                                  RecomputeLevelPercentSpacing (+ DrawGlobalHierarchySection: Hierarchy table incl. Priority column).
 │   │   │   │   │   ├── POIAuthoringToolWindow.LodZoom.cs  ← DrawGlobalLodSection + DrawGlobalZoomSection foldouts + shared DrawScalarField/DrawToggleField/DrawIntField/DrawPopupField helpers (Block 2, Editor-only).
 │   │   │   │   │   ├── POIAuthoringToolWindow.Displacement.cs ← DrawGlobalDisplacementSection: §11 Displacement Settings foldout (enable, overlap threshold, displace target, algorithm + conditional relaxation steps, max displacement, leader lines + sub-fields, tiebreak).
+│   │   │   │   │   ├── POIAuthoringToolWindow.SearchFilter.cs ← DrawGlobalSearchFilterSection + DrawSearchFieldsTable + DrawSystemKeywordRow (split out of GlobalScene.cs 2026-08-26, spec _2.7 #5.1-b); option arrays/help strings stay in Constants.cs.
+
 │   │   │   │   ├── SpecificMarker/
 │   │   │   │   │   └── POIAuthoringToolWindow.SpecificMarker.cs ← DrawSpecificMarkerOptions (per-POI inner\n│   │   │   │   │                                                    sections indented under each POI header via\n│   │   │   │   │                                                    EditorGUI.IndentLevelScope),
 │   │   │   │   │                                                    DrawPoiPositionFields,
@@ -893,6 +908,9 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │       │   ├── SearchTokenizerTests.cs            ← Tier 0 EditMode tests for SearchTokenizer (accent-folding, multi-word split, punctuation stripping, dedup, numeric/single-char preservation)
 │   │       │   ├── POISearchIndexTests.cs            ← Tier 0 EditMode tests for POISearchIndex (build, search ranking, prefix match, name/summary/keyword/taxonomy ranks, max-not-sum scoring)
 │   │       │   ├── SearchSynonymGroupsTests.cs       ← Tier 0 EditMode tests for synonym expansion path (extends search, empty groups no-change, build-after-configure preserves)
+│   │       │   ├── SearchFilterSelectToggleTests.cs  ← Tier 0 tests for the Select/Filter/Search domain master toggle (_2.7 2.6-d): config default + WallSession.ShouldWireSelectionResponders gate.
+│   │       │   ├── HierarchyLevelKeyValidationTests.cs ← Tier 0 tests for the unset/stale hierarchy_level_key authoring warnings (_2.7 2.3-j).
+│   │       │   ├── DensityThresholdValidationTests.cs ← Tier 0 tests for the shrink/cluster threshold contradiction warning (_2.7 2.4-d).
 │   │       │   ├── LodAutoSuggestTests.cs        ← Tests LodAutoSuggest.Suggest(n) exact output (n=0/10/18/150) + always-3-bands invariant; EditMode.
 │   │       │   ├── ClusterGroupingTests.cs     ← Tier-0 EditMode tests for ClusterGrouping.Group/Centroid/Signature/ResolveBand/BuildAggregate (deterministic, empty, singleton, boundary); green-gated 196/196 EditMode, 0 error CS.
 │   │       │   ├── MarkerSelectionEditModeTest.cs <- Tier-0 EditMode tests for Block 2 zoom-on-select gate (ComputeZoomTarget) + SelectionEventBus round-trip (268/268 EditMode green, 2026-08-15).

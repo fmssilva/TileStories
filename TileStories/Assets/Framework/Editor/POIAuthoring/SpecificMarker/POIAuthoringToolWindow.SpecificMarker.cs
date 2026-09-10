@@ -12,7 +12,18 @@ namespace TileStories.Editor
             if (_config.pois == null || _config.pois.Count == 0)
             {
                 EditorGUILayout.HelpBox("No POI data loaded.", MessageType.Info);
+                // Still allow adding a new POI
+                if (GUILayout.Button("+ Add POI", GUILayout.Width(120f)))
+                {
+                    AddNewPoi();
+                }
                 return;
+            }
+
+            // Add POI button at top of list
+            if (GUILayout.Button("+ Add POI", GUILayout.Width(120f)))
+            {
+                AddNewPoi();
             }
 
             for (int i = 0; i < _config.pois.Count; i++)
@@ -30,7 +41,7 @@ namespace TileStories.Editor
 
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    _showPoiPosition = DrawFramedFoldout(ref _showPoiPosition, () => DrawPoiPositionFields(poi), "Position", FoldoutDefaultColor);
+                    _showPoiPosition = DrawFramedFoldout(ref _showPoiPosition, () => DrawPositionTabs(poi), "Position", FoldoutDefaultColor);
 
                     _showPoiMarkerStyle = DrawFramedFoldout(ref _showPoiMarkerStyle, () => DrawPoiMarkerStyleFields(poi), "Marker Style", FoldoutDefaultColor);
 
@@ -484,6 +495,34 @@ namespace TileStories.Editor
                     result.Add(trimmed);
             }
             return result;
+        }
+
+        // Add a new POI with sensible defaults (Step 19).
+        private void AddNewPoi()
+        {
+            if (_config == null) return;
+            if (_config.pois == null) _config.pois = new List<POIData>();
+
+            var newPoi = new POIData
+            {
+                id = System.Guid.NewGuid().ToString("N"),
+                name = "New POI",
+                category = "default",
+                x_norm = 0.5f,
+                y_norm = 0.5f,
+                has_captured_position = false,
+                status_pct = 0f,
+                has_status = false,
+                status_unknown = false,
+                hierarchy_level_key = null,
+                has_custom_symbol = false,
+                custom_symbol_key = null,
+                badge_category = null,
+                search_keywords = new List<string>(),
+                search_keyword_fields = new List<POISearchKeywordField>()
+            };
+
+            DrawConfigMutationScope(() => _config.pois.Add(newPoi), true);
         }
     }
 }

@@ -1,7 +1,6 @@
 
 # `Git`
-
-# ---
+# `Unity MCP Connected??`
 
 # The workflow alternates strictly between two operating modes:
 - **PLAN MODE:** Analyzing requirements, auditing code, drafting options, and building execution roadmaps.
@@ -21,7 +20,8 @@ THIS FILE IS UPDATED BY THE USER FREQUENTELY AND SHOULD ALWYAS BE THE GROUND TRU
 
 
 # ---
-
+# We are starting a new file full of tasks to implement so focus now on giving me **## 5. **Master Plan Formulation (__curr_plan_tracker.md)**** only. Skip steps #6 and #7
+# we already made a plan and maybe start implementing somthing for block 5/6?? confirm and ground everything and see if the plan is ok
 # `[CURRENT_MODE: PLAN_MODE]`
 ## [DISK_WRITE_ALLOWED: FALSE]
 ## [STATE_OVERRIDE: ALL PREVIOUS ACT_MODE AUTHORIZATIONS AND DISK-WRITE PERMISSIONS ARE REVOKED. YOU ARE STRICTLY FORBIDDEN FROM EDITING FILES, CREATING FILES, OR EXECUTING STATE-CHANGING DISK COMMANDS THIS TURN.]
@@ -31,17 +31,18 @@ THIS FILE IS UPDATED BY THE USER FREQUENTELY AND SHOULD ALWYAS BE THE GROUND TRU
 You are in PLAN MODE. Do NOT invoke any file-writing tools. Perform a critical review of the current status, audit past implementations, and prepare a granular blueprint for the next block.
 
 ## 1. **Guidelines & Architecture Re-Grounding** 
-- Workspace Rules: C:\Users\franc\Desktop\TileStories\.clinerules
-- Structure Map: C:\Users\franc\Desktop\TileStories\.clinerules\10-structure.md
+- Workspace rules: read ./.clinerules/ (specifically 00-process.md, 10-structure.md, 20-code-quality.md, 30-design-system.md, 40-testing.md, 50-terminal_and_tools.md, 60-finishing.md)
+- Structure map: read ./.clinerules/10-structure.md
 
 ## 2. **Target Domain & Context Re-Grounding**
 - Target Domain Spec: `C:\Users\franc\Desktop\TileStories\proj_guides\_2.7_Corrections_TODO.md` »» This is a set of corrections and updated we need to do to previous domains guides. 
 - Read only the referenced guide in these corrections TOOD tasks, don't just read them all by default beause they are big. Read the guide referenced in detail and the related files in code and not all of these guides: 
-  - C:\Users\franc\Desktop\TileStories\proj_guides\_1.2__Marker_Positioning_future_notes.md
+  - `C:\Users\franc\Desktop\TileStories\proj_guides\_1.2__Marker_Positioning_future_notes.md`
   - C:\Users\franc\Desktop\TileStories\proj_guides\_2.3_Marker_Hierarchy.md
   - C:\Users\franc\Desktop\TileStories\proj_guides\_2.4_Marker_LOD.md
   - C:\Users\franc\Desktop\TileStories\proj_guides\_2.5_Marker_Displacement.md
   - C:\Users\franc\Desktop\TileStories\proj_guides\_2.6_Select_Filter_Search.md
+  - `...`
 - Reference Editor Code: C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
 - Current Plan Tracker: C:\Users\franc\Desktop\TileStories\proj_guides\__curr_plan_tracker.md
  
@@ -117,28 +118,10 @@ IMPORTANT: I WANT A FULLY DETAILED PLAN!! So check if there exists already a pre
 
 # ---
 
-# `Questions`
+# `Questions:` Here are some points and decisions and questions to think about and confirm the final plan before we move to Act mode. 
 ## [CURRENT_MODE: PLAN_MODE]
-## [DISK_WRITE_ALLOWED: FALSE]
-## DECISIONS & PLAN REVISION
-Here are the decisions for the questions you raised:
-
-## `update the domain file path`
-## »» Do you bst analysis. Just remember:
-- That I want to implement a very complete and versatile Framework with all the good options and features that is good to have for this domain, and with clear "selection options of those features in the Editor Tab + clear variables and param config means" for the developer to select and adjust what he wants for its concrete App. 
-- That I want the code well organized and simple and clean as possible, with all the WHAT/HOW/WHERE/WHY questions answered according to the .clinerules/ and to the domain main plan: `C:\Users\franc\Desktop\TileStories\proj_guides\_2.5_Marker_Displacement.md`
-And so do you best analysis, reason at two separate levels: 
-1. **Architecture Level (Where it lives):** Map folder, assembly, and component scope. Evaluate 3 distinct structural options with trade-offs, state the choice, and explain why.
-2. **Implementation Level (How it works):** Evaluate 3 concrete implementation choices (e.g., event-driven vs. direct call, ScriptableObject vs. hardcoded) and select the simplest, most robust option.
-And then:
-- Pick the best option, and we use this option as the default; 
-- And then, if there are other options actually good in terms of feature or functionality for the the Framework, so lets allow for the developer to also choose the best option that he prefers for his app, and so we make available in the Editor Tab some drop down or toggle or table or other element for the developer to choose between the different available good quality options, and with the inheritent good variables and params to config that option. 
-
-
-
 ## DIRECTIVE:
 1. I already copied the full analysis report and proposed plan text that you gave me in chat to the __curr_plan_tracker.md file. Confirm the plan is correctly written in the file and well organized. IF we need to reorganize it, give me the clear sections to delete and the new text to replace, etc.    - IMPORTANT: I WANT A FULLY DETAILED PLAN!! So see all the info we currently have in the plan, and give me all that well organized and well updated and well corrected, WITHOUT THE LOSS OF INFORMATION. I WANT A VERY COMPLETE AND DETAILED PLAN. 
-
 
 2. Do a deep analysis about the questions I just answered, and think the best decisions and implications to our proposed plan that is already in the __curr_plan_tracker.md file.
 
@@ -150,8 +133,10 @@ And then:
 
 
 ## ---
+S
+# ---
 
-# So lets implement `Block 10`
+# So lets implement `Block 7`, starting in the `line 672`, in the file __curr_plan_tracker.md`
 # `[CURRENT_MODE: ACT_MODE]`
 ## [DISK_WRITE_ALLOWED: TRUE]
 ## [STATE_OVERRIDE: ALL PREVIOUS PLAN_MODE READ-ONLY RESTRICTIONS ARE REVOKED. YOU ARE EXPLICITLY AUTHORIZED AND REQUIRED TO WRITE AND MODIFY FILES ON DISK TO EXECUTE THE WORK PLAN.]
@@ -165,7 +150,7 @@ I copied your full analysis report and proposed plan text from the chat to the _
 
 ## 2. **Execute Block Tasks via 7-Step Protocol**
 For each task or group of tasks in the active block, strictly execute this cycle:
-1. **READ & ISOLATE:** Read active task specs in __curr_plan_tracker.md
+1. **READ & ISOLATE:** Read active task specs in ./proj_guides/__curr_plan_tracker.md
 2. **IMPLEMENT:** Modify only target files required for the active block.
 3. **TEST:** Compile code and execute Edit/Play Mode unit tests.
 4. **RE-READ WORK FILE:** Re-open __curr_plan_tracker.md from disk to ground context.

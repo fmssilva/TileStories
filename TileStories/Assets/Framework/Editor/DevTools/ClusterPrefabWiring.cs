@@ -8,16 +8,18 @@ namespace TileStories
     // POI_Cluster.prefab and wires MarkerClusterView.dominantIcon to it. Keeping
     // the child GameObject inactive in the asset is what lets BuildDominantIcon's
     // mode-gated SetActive(true) (dominant_category only) actually HIDE it in
-    // pie_and_count / count_only. Run via "TileStories/Cluster/Wire DominantIcon".
+    // pie_and_count / count_only.
     //
-    // This is a one-off authoring action, not runtime code: it has no place in
-    // POI_Cluster.prefab's behaviour and is kept here so the wiring can be
-    // re-applied idempotently if the prefab is ever re-baked from scratch.
+    // This is a one-off FRAMEWORK-MAINTENANCE action, not developer-facing wall
+    // configuration (spec _2.7 FW-1, .clinerules 10-structure section 1.3): it
+    // directly overwrites the shared POI_Cluster.prefab asset, so an app-building
+    // developer has no legitimate reason to run it. Deliberately NO [MenuItem] --
+    // invoke manually from an Editor script or the C# console via
+    // ClusterPrefabWiring.WireDominantIcon() if the prefab is ever re-baked.
     internal static class ClusterPrefabWiring
     {
         private const string PrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
 
-        [MenuItem("TileStories/Cluster/Wire DominantIcon")]
         public static void WireDominantIcon()
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);

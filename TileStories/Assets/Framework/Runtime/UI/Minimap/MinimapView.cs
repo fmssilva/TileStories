@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -12,7 +12,10 @@ namespace TileStories
     // (SelectionEventBus), so there is one selection system with two input surfaces.
     public class MinimapView : MonoBehaviour
     {
-        private const float DOT_SIZE_PX = 20f;
+        // Fallbacks used only when no wall config is loaded yet; the authored
+        // values live on WallConfigData (developer-tunable in the Editor Tab).
+        private const float DEFAULT_DOT_SIZE_PX = 20f;
+        private const float DEFAULT_TAP_TARGET_PX = 44f;
         private const float SELECTED_DOT_SCALE = 1.5f;
         private const float DIM_ALPHA = 0.3f;
         private WallConfigData _config;
@@ -24,8 +27,11 @@ namespace TileStories
         private float _height = 200f;
         private bool _isEnabled = true;
 
-        // Maps POI id to its dot VisualElement for lookup on tap.
+        // Maps POI id to its visible dot element (highlight scaling/dimming target).
         private readonly Dictionary<string, VisualElement> _dots = new();
+
+        // Maps POI id to its invisible hit-zone container (removal on refresh).
+        private readonly Dictionary<string, VisualElement> _hitZones = new();
 
         // Initialise with wall config and search index.
         public void Initialize(WallConfigData config, POISearchIndex searchIndex)
@@ -46,7 +52,10 @@ namespace TileStories
         }
 
         // Build the minimap background container and subscribe to events.
-        private void CreateUI(VisualElement root)
+        // Internal (not private) so the EditMode accessibility suite can build the
+        // real UI and assert authored hit-zone sizes (Runtime grants
+        // InternalsVisibleTo the editor test assembly -- same seam as DetailCardView).
+        internal void CreateUI(VisualElement root)
         {
             _container = new VisualElement()
             {
@@ -84,8 +93,47 @@ namespace TileStories
             _container.Add(_background);
             root.Add(_container);
 
+            // One background-level tap handler routes every dot tap by nearest-dot-center
+            // (spec _2.6 section 8 + _2.7 Decision 3.3): adjacent 44px hit-zones overlap at
+            // high density by design -- nearest center resolves the ambiguity deterministically.
+            _background.RegisterCallback<MouseDownEvent>(OnBackgroundTap);
+
             SelectionEventBus.OnMarkerSelected += OnSelectionChanged;
             SelectionEventBus.OnSelectionCleared += OnSelectionCleared;
+        }
+
+        // Visual dot diameter from config (developer-tunable), with sane floors.
+        private float DotSizePx => Mathf.Max(4f, _config != null ? _config.minimap_dot_size_px : DEFAULT_DOT_SIZE_PX);
+
+        // Invisible hit-zone diameter; never smaller than the visual dot itself.
+        private float TapTargetPx => Mathf.Max(DotSizePx,
+            Mathf.Max(4f, _config != null ? _config.minimap_dot_tap_target_px : DEFAULT_TAP_TARGET_PX));
+
+        // Route a tap on the minimap background to the POI whose DOT CENTER is nearest
+        // to the tap point. Hit-zones may overlap at density; nearest-center wins.
+        private void OnBackgroundTap(MouseDownEvent evt)
+        {
+            if (!_isEnabled || _dots.Count == 0)
+                return;
+
+            string nearestId = null;
+            float nearestDistSq = float.MaxValue;
+            foreach (var kvp in _dots)
+            {
+                if (kvp.Value == null)
+                    continue;
+                float distSq = (kvp.Value.worldBound.center - evt.mousePosition).sqrMagnitude;
+                if (distSq < nearestDistSq)
+                {
+                    nearestDistSq = distSq;
+                    nearestId = kvp.Key;
+                }
+            }
+
+            if (nearestId == null)
+                return;
+            evt.StopPropagation();
+            SelectionEventBus.RaiseMarkerSelected(nearestId);
         }
 
         // Render each POI as a dot positioned by normalized wall coordinates.
@@ -94,9 +142,11 @@ namespace TileStories
             if (_config == null || _config.pois == null || _background == null)
                 return;
 
-            // Clear existing dots
-            foreach (var dot in _dots.Values)
-                dot.RemoveFromHierarchy();
+            // Clear existing dots (remove the hit-zone containers; the visual
+            // dot children come with them).
+            foreach (var zone in _hitZones.Values)
+                zone.RemoveFromHierarchy();
+            _hitZones.Clear();
             _dots.Clear();
 
             foreach (var poi in _config.pois)
@@ -110,42 +160,54 @@ namespace TileStories
             }
         }
 
-        // Create a visual dot element for a POI.
+        // Create one POI marker on the minimap: a small VISUAL dot centred inside a larger
+        // INVISIBLE tap-catching zone (_2.7 Decision 3.3). Visual size and touch target are
+        // separate concerns -- compact look, WCAG-sized interaction -- and both come from
+        // WallConfigData so each wall tunes density vs. reachability.
         private VisualElement CreateDot(POIData poi)
         {
-            var dot = new VisualElement();
-            dot.name = $"minimap-dot-{poi.id}";
-            dot.tooltip = $"{poi.name} ({poi.category})";
-            dot.style.position = Position.Absolute;
-            dot.style.width = DOT_SIZE_PX;
-            dot.style.height = DOT_SIZE_PX;
-            dot.style.borderTopLeftRadius = DOT_SIZE_PX / 2f;
-            dot.style.borderTopRightRadius = DOT_SIZE_PX / 2f;
-            dot.style.borderBottomLeftRadius = DOT_SIZE_PX / 2f;
-            dot.style.borderBottomRightRadius = DOT_SIZE_PX / 2f;
-            dot.userData = poi.id;
+            float dotSize = DotSizePx;
+            float tapSize = TapTargetPx;
 
-            // Use the coordinate converter for position
+            // The container is the hit target: transparent, sized by minimap_dot_tap_target_px.
+            var hit = new VisualElement();
+            hit.name = $"minimap-hit-{poi.id}";
+            hit.tooltip = $"{poi.name} ({poi.category})";
+            hit.style.position = Position.Absolute;
+            hit.style.width = tapSize;
+            hit.style.height = tapSize;
+
+            // Use the coordinate converter for position (centres the hit zone on the POI).
             Vector2 pos = MinimapCoordinateConverter.ConvertToPixel(
                 MinimapCoordinateConverter.ClampNorm(poi.x_norm),
                 MinimapCoordinateConverter.ClampNorm(poi.y_norm),
-                _width, _height, DOT_SIZE_PX);
+                _width, _height, tapSize);
+            hit.style.left = pos.x;
+            hit.style.top = pos.y;
 
-            dot.style.left = pos.x;
-            dot.style.top = pos.y;
+            // The visible dot, centred inside the hit zone.
+            var dot = new VisualElement();
+            dot.name = $"minimap-dot-{poi.id}";
+            dot.userData = poi.id;
+            dot.style.position = Position.Absolute;
+            dot.style.width = dotSize;
+            dot.style.height = dotSize;
+            dot.style.left = (tapSize - dotSize) / 2f;
+            dot.style.top = (tapSize - dotSize) / 2f;
+            dot.style.borderTopLeftRadius = dotSize / 2f;
+            dot.style.borderTopRightRadius = dotSize / 2f;
+            dot.style.borderBottomLeftRadius = dotSize / 2f;
+            dot.style.borderBottomRightRadius = dotSize / 2f;
 
             Color dotColor = ResolveDotColor(poi);
             dot.style.backgroundColor = new StyleColor(dotColor);
 
-            // Tap handler -- same selection path as real markers
-            dot.RegisterCallback<MouseDownEvent>(evt =>
-            {
-                if (!_isEnabled) return;
-                evt.StopPropagation();
-                SelectionEventBus.RaiseMarkerSelected(poi.id);
-            });
+            hit.Add(dot);
 
-            return dot;
+            // Selection highlight scales/dims this element (OnSelectionChanged).
+            _dots[poi.id] = dot;
+            _hitZones[poi.id] = hit;
+            return hit;
         }
 
         // Resolve the dot color based on minimap icon style and POI data.
@@ -163,12 +225,31 @@ namespace TileStories
             return Color.white;
         }
 
-        // Update the minimap visibility based on config setting.
+        // Show/hide the minimap visibility based on config setting.
         public void SetVisible(bool visible)
         {
             _isEnabled = visible;
             if (_container != null)
                 _container.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        // Filter the rendered dots to the active facet's passing-id set (_2.6-i):
+        // non-matching dots (and their hit zones) are hidden; null/empty set shows all.
+        public void SetFilterCandidateIds(ICollection<string> candidateIds)
+        {
+            bool unrestricted = candidateIds == null || candidateIds.Count == 0;
+            foreach (var kvp in _hitZones)
+            {
+                if (kvp.Value == null) continue;
+                bool show = unrestricted || candidateIds.Contains(kvp.Key);
+                kvp.Value.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+            foreach (var kvp in _dots)
+            {
+                if (kvp.Value == null) continue;
+                bool show = unrestricted || candidateIds.Contains(kvp.Key);
+                kvp.Value.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
 
         // Highlight the selected POI dot, dim all others.
@@ -209,8 +290,9 @@ namespace TileStories
             CategoryPalette.Configure(_config?.category_styles);
 
             // Rebuild dots with new config
-            foreach (var dot in _dots.Values)
-                dot.RemoveFromHierarchy();
+            foreach (var zone in _hitZones.Values)
+                zone.RemoveFromHierarchy();
+            _hitZones.Clear();
             _dots.Clear();
 
             if (_background != null)

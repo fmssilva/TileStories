@@ -33,6 +33,7 @@ namespace TileStories
         private bool _hasCategoryDefinitions;
         private bool _hasOutlineLevels;
                 private SpriteKeyLibrary _wallIconLibrary;
+                private POISearchIndex _searchIndex;
 
                 // Exposed after SpawnPOIs completes so LODController and other systems
         // can enumerate spawned markers without reaching into WallSession internals.
@@ -51,6 +52,10 @@ namespace TileStories
 // WallSession internals (mirrors the SpawnedMarkers pattern, spec §6.1).
 public SpriteKeyLibrary WallIconLibrary => _wallIconLibrary;
 public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor : transform;
+
+        // Read-only access to the wall's search index, consumed by SearchOverlayView / ResultsListView / MinimapView.
+        // Built once in LoadConfigCoroutine from WallConfigData.pois; null only if WallConfigData fails to construct.
+        public POISearchIndex SearchIndex => _searchIndex;
 
         // Block 2 selection infrastructure (spec _2.6 section 11): highlight/dim
         // and zoom-on-select. Wired once in SpawnPOIs after markers exist,
@@ -153,6 +158,13 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
             if (_hasOutlineLevels) StatusRamp.Configure(_config.outline_levels);
 
             MarkerHierarchyResolver.Configure(_config.hierarchy_levels);
+
+            // Build the search index from config POIs (_2.6-al wiring).
+            // Created once here, then exposed via SearchIndex for SearchOverlayView / ResultsListView / MinimapView.
+            _searchIndex = new POISearchIndex();
+            _searchIndex.Build(_config);
+            if (_config.synonym_groups != null && _config.synonym_groups.Count > 0)
+                _searchIndex.ConfigureWithSynonyms(_config.synonym_groups);
 
             // Capture effect defaults once; passed to every marker on spawn.
             _effectDefaults = _config.effect_defaults;
@@ -267,13 +279,25 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
             // and zoom-on-select responders. Both are idempotent against re-entry;
             // config is the resolved wall config. ARZoomController/LODController are
             // scene singletons resolved here (no hard dependency if absent).
-            if (_selectionHighlight == null)
-                _selectionHighlight = new SelectionHighlightController(this, _config);
+            // Master gate (_2.7 entry 2.6-d): a wall that disables the whole
+            // Select/Filter/Search domain gets no selection responders at all.
+            if (ShouldWireSelectionResponders(_config))
+            {
+                if (_selectionHighlight == null)
+                    _selectionHighlight = new SelectionHighlightController(this, _config);
 
-            var lod = GetComponent<LODController>();
-            var zoom = GetComponent<ARZoomController>();
-            if (_zoomOnSelect == null && lod != null && zoom != null)
-                _zoomOnSelect = new ZoomOnSelectController(this, _config, zoom, lod);
+                var lod = GetComponent<LODController>();
+                var zoom = GetComponent<ARZoomController>();
+                if (_zoomOnSelect == null && lod != null && zoom != null)
+                    _zoomOnSelect = new ZoomOnSelectController(this, _config, zoom, lod);
+            }
+        }
+
+        // Single decision point for the 2.6-d master toggle: pure and Tier-0 testable,
+        // so WallSession itself stays wiring-only (no inline domain policy).
+        internal static bool ShouldWireSelectionResponders(WallConfigData config)
+        {
+            return config == null || config.search_filter_select_enabled;
         }
 
         private static GameObject CreateAnchorOnlyObject(Transform parent, string poiId)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
@@ -22,6 +23,7 @@ namespace TileStories.Tests
         [TearDown]
         public void TearDown()
         {
+            ResetZoomState();
             MarkerHierarchyResolver.ResetToDefaults();
             foreach (var go in _trackedGOs)
                 if (go) UnityEngine.Object.DestroyImmediate(go);
@@ -588,6 +590,133 @@ private static LodSettings MakeSettings(
             var m = MakeBareMarker("p1", Vector3.zero);
             var result = LODController.BuildPassthroughVisualUnits(new List<MarkerView> { m });
             Assert.AreSame(m, result[0].marker);
+        }
+
+        // --- Phase A: shallow-angle foreshortening + zoom-unlocks-markers (spec _2_4 sections 2/10; _2.7 entry 2.4-p) ---
+        // These two are the domain's most load-bearing correctness claims: distance truth under a
+        // grazing camera, and zoom actually changing the visible set through effective distance.
+
+        private static readonly System.Reflection.BindingFlags InstanceFlags =
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+
+        // Minimal controller rig for the pure distance->band->cap pipeline (no cluster prefab needed:
+        // ComputeEffectiveDistances / AssignBands / ApplyCountCap never touch it).
+        private static LODController MakePipelineController(Vector3 cameraPosition, List<GameObject> tracked)
+        {
+            var camGO = new GameObject("PipelineTestCam", typeof(Camera));
+            camGO.transform.position = cameraPosition;
+            tracked.Add(camGO);
+            var rig = new GameObject("PipelineControllerRig");
+            tracked.Add(rig);
+            var controller = rig.AddComponent<LODController>();
+            var settings = new LodSettings { enabled = true }; // empty bands -> AssignBands falls back to DefaultBands()
+            typeof(LODController)
+                .GetField("_settings", InstanceFlags)?
+                .SetValue(controller, settings);
+            typeof(LODController)
+                .GetField("_camera", InstanceFlags)?
+                .SetValue(controller, camGO.GetComponent<Camera>());
+            return controller;
+        }
+
+        // ZoomFactor is static state -- hand it back at 1x after every test so no
+        // test leaks zoom into another (folded into the single allowed TearDown).
+        private static void ResetZoomState()
+        {
+            ARZoomState.ResetToBase(0.5f, 10f);
+        }
+
+        [Test]
+        public void ShallowGrazingAngle_TrueDistanceDrivesThinning_NotScreenCloseness()
+        {
+            // Camera sits just off the wall's edge looking almost ALONG the row (grazing angle):
+            // every marker appears similarly "near the wall", but real 3D distance spans ~1m to ~5.5m.
+            // The core invariant: band assignment must follow TRUE 3D distance, so far markers land in
+            // a farther band (thinned/shrunk) even though the camera is physically near all of them.
+            var tracked = new List<GameObject>();
+            var markers = new List<MarkerView>();
+            for (int k = 0; k < 10; k++)
+                markers.Add(MakeBareMarker($"shallow_{k}", new Vector3(0f, 0f, k * 0.5f)));
+            tracked.AddRange(markers.Select(m => m.gameObject));
+
+            try
+            {
+                var camPos = new Vector3(0.3f, 0.3f, -1f); // just off the wall start, grazing down the row
+                var controller = MakePipelineController(camPos, tracked);
+                controller.transform.rotation = Quaternion.LookRotation(new Vector3(-0.3f, -0.3f, 1f));
+
+                ARZoomState.SetZoom(1f, 0.5f, 10f);
+                var distances = controller.ComputeEffectiveDistances(markers);
+
+                // Effective distances must strictly increase along the row and equal true 3D distance at 1x.
+                for (int k = 1; k < 10; k++)
+                {
+                    Assert.Greater(distances[$"shallow_{k}"], distances[$"shallow_{k - 1}"],
+                        $"marker {k} must be truly farther than marker {k - 1} despite the grazing angle");
+                    Assert.AreEqual(
+                        Vector3.Distance(camPos, markers[k].transform.position), distances[$"shallow_{k}"], 0.001f,
+                        "effective distance must equal real 3D distance at ZoomFactor=1");
+                }
+
+                // Far end of the row lands in a strictly farther band than the near end.
+                var bands = controller.AssignBands(distances);
+                Assert.Less(bands[$"shallow_0"].Index, bands[$"shallow_9"].Index,
+                    "far marker must be thinned into a farther band than the near one -- not treated as uniformly close");
+            }
+            finally
+            {
+                foreach (var go in tracked)
+                    if (go) UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void ZoomFactorIncrease_SamePositions_UnlocksMoreMarkersThroughCountCap()
+        {
+            // Section 10's reason zoom exists: same real positions, higher ZoomFactor -> smaller
+            // effectiveDistance -> nearer band -> higher count cap -> strictly more visible markers.
+            const int count = 8;
+            var tracked = new List<GameObject>();
+            var markers = new List<MarkerView>();
+            for (int k = 0; k < count; k++)
+                markers.Add(MakeBareMarker($"zoom_{k}", new Vector3(0f, 0f, 12f))); // 12m: band2 at 1x, band1 at 3x
+            tracked.AddRange(markers.Select(m => m.gameObject));
+
+            try
+            {
+                int CountVisible(float zoom)
+                {
+                    ARZoomState.SetZoom(zoom, 0.5f, 10f);
+                    // Fresh controller per pass: AssignBands' hysteresis cache must not couple the two runs.
+                    var controller = MakePipelineController(Vector3.zero, tracked);
+                    var distances = controller.ComputeEffectiveDistances(markers);
+                    var bands = controller.AssignBands(distances);
+                    var units = LODController.BuildPassthroughVisualUnits(markers);
+                    // Stamp each unit with the band/distance data ApplyDensityResponse would carry in
+                    // the full pipeline; here we exercise only the distance->band->cap seam.
+                    foreach (var u in units)
+                    {
+                        u.band = bands[u.poiId];
+                        u.effectiveDistance = distances[u.poiId];
+                    }
+                    controller.ApplyCountCap(units, bands);
+                    return units.Count(u => u.isVisible);
+                }
+
+                Assert.AreEqual(4f, 12f / 3f, 0.001f); // sanity on the fixture math itself
+                int visibleAt1x = CountVisible(1f);   // eff 12m -> band 2, cap 5
+                int visibleAt3x = CountVisible(3f);   // eff 4m  -> band 1, cap 15
+
+                Assert.LessOrEqual(visibleAt1x, 5, "at 1x the outer band's count cap must hide some markers");
+                Assert.AreEqual(count, visibleAt3x, "at 3x every marker must fit inside the mid band cap");
+                Assert.Greater(visibleAt3x, visibleAt1x,
+                    "zooming in MUST unlock more markers for identical real positions (section 10 hookup)");
+            }
+            finally
+            {
+                foreach (var go in tracked)
+                    if (go) UnityEngine.Object.DestroyImmediate(go);
+            }
         }
     }
 }

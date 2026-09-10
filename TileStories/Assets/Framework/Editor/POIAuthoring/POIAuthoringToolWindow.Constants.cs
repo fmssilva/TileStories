@@ -61,6 +61,8 @@ namespace TileStories.Editor
         private static readonly string ZoomTapLevelsHelp = "Number of double-tap steps before cycling back to 1x. 2 means: step once, step twice, third tap returns to 1x.";
         private static readonly string ZoomTransitionHelp = "Seconds the FOV animates over for double-tap steps and on-screen button taps. Pinch (continuous) does not animate -- it follows the finger directly (section 9).";
         private static readonly string ZoomUiButtonsHelp = "Shows on-screen zoom in / zoom out / fit-to-1x buttons (UI Toolkit, screen-space). Independently toggleable so devs who prefer gestures can hide the chrome.";
+   private static readonly string ZoomDoubleTapWindowHelp = "Seconds between the two taps for a double-tap gesture. Second tap must arrive within this window after the first.";
+   private static readonly string ZoomDoubleTapMoveToleranceHelp = "Maximum pixel movement allowed between the two taps for a double-tap gesture. Exceeding this distance counts as a drag, not a double-tap.";
 
                 // Show-label options (explicit wording per Â§6 of 2.3 doc, clearer than bare checkbox).
         private static readonly string[] ShowLabelOptions = { "Show Label", "NOT show Label" };
@@ -82,8 +84,16 @@ namespace TileStories.Editor
         private static readonly string[] MinimapIconOptions = { "dots_only", "category_colored_dots", "mini_icons" };
         private static readonly string[] MinimapIconLabels = { "Dots Only", "Category Colored", "Mini Icons" };
         private static readonly string MinimapHelp = "Show a 2D minimap overlay for POI navigation.";
+        private static readonly string MasterToggleHelp = "Master switch for the whole Select / Filter / Search domain (search overlay, facet filters, minimap, results list, marker selection + zoom-on-select). Off = none of it activates for this wall, mirroring the LOD and Displacement master toggles.";
+
+        // Filter mismatch behaviour (maps to WallConfigData.filter_mismatch_behaviour).
+        private static readonly string[] FilterMismatchOptions = { "hide", "dim" };
+        private static readonly string[] FilterMismatchLabels = { "Hide", "Dim" };
+        private static readonly string FilterMismatchHelp = "What happens to markers outside the active filter/search result set. Hide: fully faded out (spec section 7 default). Dim: kept faintly visible so dense walls keep their positional context.";
         private static readonly string MinimapVisibilityHelp = "always: visible permanently. toggle: shows a button to expand/collapse.";
         private static readonly string MinimapIconHelp = "dots_only: plain colored dots. category_colored_dots: dots colored by category. mini_icons: scaled-down marker icons.";
+        private static readonly string MinimapDotSizeHelp = "Visual dot diameter in px. Keep small so dense walls stay readable -- tap comfort is the separate 'Dot tap target' value below.";
+        private static readonly string MinimapTapTargetHelp = "Invisible hit-zone diameter per dot (the actual tap receiver). Defaults to the 44x44 WCAG floor; overlapping zones at high density resolve by nearest dot center.";
 
         // Recent & suggested dropdown.
         private static readonly string[] SuggestedSourceOptions = { "category_distribution", "recent_first" };

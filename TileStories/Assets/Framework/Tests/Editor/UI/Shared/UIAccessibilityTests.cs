@@ -67,5 +67,31 @@ namespace TileStories.Tests
             // rule per WCAG 2.5.5 (target spacing). We still assert the mic.
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(44f, 44f));
         }
+
+        [Test]
+        public void MeetsMinTapTarget_DeveloperCheck_DetailCardCloseButton()
+        {
+            // Builds the REAL DetailCardView UI (no mocks) and reads back the
+            // authored inline style values on the close button. Spec _2.7 #2.6-y.
+            var go = new GameObject("detail-card-tap-target-test");
+            try
+            {
+                var view = go.AddComponent<TileStories.DetailCardView>();
+                var root = new VisualElement();
+                view.CreateUI(root);
+
+                var closeButton = root.Q<Button>("detail-card-close");
+                Assert.IsNotNull(closeButton, "detail-card-close button missing from built UI");
+
+                float w = closeButton.style.width.value.value;
+                float h = closeButton.style.height.value.value;
+                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(w, h),
+                    $"DetailCard close button is {w}x{h}px, below the 44x44px WCAG minimum");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
     }
 }

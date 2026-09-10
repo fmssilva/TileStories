@@ -45,7 +45,10 @@ namespace TileStories
             SetVisible(false);
         }
 
-        private void CreateUI(VisualElement root)
+        // Internal (not private) so the EditMode accessibility suite can build the
+        // real UI and assert on it (Runtime assembly grants InternalsVisibleTo the
+        // editor test assembly). No other callers.
+        internal void CreateUI(VisualElement root)
         {
             _panel = new VisualElement
             {
@@ -85,8 +88,8 @@ namespace TileStories
             _closeButton.style.position = Position.Absolute;
             _closeButton.style.top = 6;
             _closeButton.style.right = 6;
-            _closeButton.style.width = 28;
-            _closeButton.style.height = 28;
+            _closeButton.style.width = 44; // WCAG 2.5.5 minimum tap target (spec _2.7 #2.6-y)
+            _closeButton.style.height = 44;
             _panel.Add(_closeButton);
         }
 

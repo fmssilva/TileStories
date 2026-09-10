@@ -143,10 +143,11 @@ namespace TileStories
                 _resultsListView.SetVisible(mode == ViewMode.List);
 
             if (_filterTrayView != null)
-                _filterTrayView.SetVisible(mode == ViewMode.List || mode == ViewMode.Minimap);
+                _filterTrayView.SetVisible(true); // tray available in every mode -- filtering while highlighting is the point of CameraHighlight (2.6-i decision)
 
-            // In CameraHighlight mode, SelectionHighlightController handles dimming
-            // (already wired in Block 2)
+            // CameraHighlight mode: ResultSetCoordinator drives the result-set dim through
+            // SelectionHighlightController.SetTargetCandidates (2.6-i) -- NOT the old
+            // single-tap-selection highlight, which only ever dimmed around one marker.
 
             // Persist preference
             PlayerPrefs.SetString(PREF_KEY, ViewModeParser.ToString(mode));

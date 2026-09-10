@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
@@ -191,6 +192,61 @@ namespace TileStories.Tests
         public void ShowSuggestedCategories_DefaultIsTrue()
         {
             Assert.IsTrue(_config.show_suggested_categories);
+        }
+
+        // --- Tier 0.5: dot visual size vs. tap target split (_2.7 Decision 3.3, spec _2.6 section 8) ---
+
+        [Test]
+        public void DotSizeConfig_Defaults_AreVisual20_TapTarget44()
+        {
+            // The whole point of the split: the VISUAL dot stays compact (20px) while the
+            // INVISIBLE hit zone meets the WCAG floor (44px). Both developer-tunable.
+            Assert.AreEqual(20f, _config.minimap_dot_size_px);
+            Assert.AreEqual(44f, _config.minimap_dot_tap_target_px);
+        }
+
+        [Test]
+        public void Minimap_BuildsTapZones_MeetingMinTapTarget()
+        {
+            // Builds the REAL minimap UI through the real Initialize path (project
+            // PanelSettings asset, no mocks) and reads back the authored style values on each
+            // POI's invisible hit-zone element -- same pattern as UIAccessibilityTests.
+            var panelAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>(
+                "Assets/Framework/Runtime/UI/Shared/PanelSettings.asset");
+            Assert.IsNotNull(panelAsset, "PanelSettings.asset missing at its documented path");
+
+            var go = new GameObject("minimap-taptarget-test");
+            try
+            {
+                var doc = go.AddComponent<UnityEngine.UIElements.UIDocument>();
+                doc.panelSettings = panelAsset;
+                var root = doc.rootVisualElement;
+                Assert.IsNotNull(root, "UIDocument rootVisualElement null after panel assignment");
+
+                var view = go.AddComponent<MinimapView>();
+                view.Initialize(_config, _searchIndex);
+
+                foreach (var poi in _config.pois)
+                {
+                    var hitZone = root.Q<VisualElement>($"minimap-hit-{poi.id}");
+                    Assert.IsNotNull(hitZone, $"minimap-hit-{poi.id} missing from built UI");
+
+                    float w = hitZone.style.width.value.value;
+                    float h = hitZone.style.height.value.value;
+                    Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(w, h),
+                        $"dot '{poi.id}' tap zone is {w}x{h}px, below the 44x44 WCAG minimum");
+
+                    // The visual child stays at the compact authored size (no clutter regression).
+                    var visualDot = root.Q<VisualElement>($"minimap-dot-{poi.id}");
+                    Assert.IsNotNull(visualDot, $"minimap-dot-{poi.id} missing from built UI");
+                    Assert.AreEqual(_config.minimap_dot_size_px, visualDot.style.width.value.value,
+                        "visual dot must keep its own (smaller) authored size inside the hit zone");
+                }
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
         }
     }
 }

@@ -309,12 +309,36 @@ namespace TileStories
         // `Any` returns any POI hit by >=1 token (existing behavior); `All` requires
         // every query token to match the POI (conjunction). Results are sorted by
         // score desc, then POI index asc (stable).
-        public List<SearchResult> Search(string query, SearchMatchMode matchMode = SearchMatchMode.Any)
+        public List<SearchResult> Search(string query, SearchMatchMode matchMode = SearchMatchMode.Any,
+            ICollection<string> candidatePoiIds = null)
         {
             var results = new List<SearchResult>();
 
+            // Candidate narrowing (_2.6-i): when supplied, restrict every phase of this
+            // search to POIs in the set. null/empty = unrestricted (backward compatible).
+            HashSet<int> candidateIndices = null;
+            if (candidatePoiIds != null && candidatePoiIds.Count > 0)
+            {
+                candidateIndices = new HashSet<int>();
+                for (int i = 0; i < _poiDatas.Count; i++)
+                {
+                    if (!string.IsNullOrEmpty(_poiDatas[i].id) && candidatePoiIds.Contains(_poiDatas[i].id))
+                        candidateIndices.Add(i);
+                }
+            }
+
+            // Empty query + active filter = "show the filtered set" (_2_6 section 7):
+            // facet toggles alone must update the visible result set without any typed text,
+            // so return every candidate unscored in wall-config order (deterministic).
             if (string.IsNullOrEmpty(query) || _poiDatas.Count == 0)
+            {
+                if (query != null && query.Length == 0 && candidateIndices != null && _poiDatas.Count > 0)
+                {
+                    foreach (int poiIndex in candidateIndices)
+                        results.Add(new SearchResult(poiIndex, 0f, _poiDatas[poiIndex].id));
+                }
                 return results;
+            }
 
             var queryTokens = SearchTokenizer.Tokenize(query);
             if (queryTokens.Count == 0)
@@ -334,6 +358,8 @@ namespace TileStories
                 {
                     foreach (var entry in entries)
                     {
+                        if (candidateIndices != null && !candidateIndices.Contains(entry.PoiIndex))
+                            continue; // filtered out: never scored, never returned (_2.6-i)
                         if (!bestScores.TryGetValue(entry.PoiIndex, out float current) || entry.Rank > current)
                             bestScores[entry.PoiIndex] = entry.Rank;
                         RecordMatch(matchedTokenSets, entry.PoiIndex, ti);
@@ -359,6 +385,8 @@ namespace TileStories
                     {
                         foreach (int poiIndex in _nameTokenToPoiIndices[nameToken])
                         {
+                            if (candidateIndices != null && !candidateIndices.Contains(poiIndex))
+                                continue; // filtered out: never scored, never returned
                             if (!bestScores.TryGetValue(poiIndex, out float current) || RANK_NAME_PREFIX > current)
                                 bestScores[poiIndex] = RANK_NAME_PREFIX;
                             RecordMatch(matchedTokenSets, poiIndex, ti);

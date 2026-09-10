@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -31,7 +31,22 @@ namespace TileStories.Editor
 
                 string key = poi.hierarchy_level_key;
                 if (string.IsNullOrEmpty(key))
-                    continue; // Empty key is allowed -- falls back to framework default
+                {
+                    // Spec _2_3 section 11b: an UNSET key silently degrades to
+                    // MarkerHierarchyResolver.Fallback -- surface it at authoring
+                    // time instead of letting the developer discover a generic-
+                    // looking marker at runtime. Distinguished from the stale-key
+                    // branch below so "never assigned" reads differently from
+                    // "references a deleted level".
+                    issues.Add(new EditorAlertItem(
+                        poiId: poi.id ?? "<unnamed>",
+                        value: "<empty>",
+                        problem: "hierarchy_level_key was never assigned -- this POI is rendering at MarkerHierarchyResolver.Fallback size/style, not an authored level.",
+                        fixHint: levelKeys.Count == 0
+                            ? "Add at least one hierarchy level row, then assign it to this POI."
+                            : $"Assign one of: {string.Join(", ", levelKeys)} via the Hierarchy Level dropdown."));
+                    continue;
+                }
 
                 if (!levelKeys.Contains(key))
                 {
@@ -74,10 +89,32 @@ namespace TileStories.Editor
             return issues;
         }
 
+        // Spec _2_4 section 6: shrink_start_neighbor_count must be strictly less
+        // than cluster_min_count. LODController.IsDensityConfigValid already
+        // detects violations (and DensityFactor already no-ops safely) -- this
+        // just surfaces the detector's answer at authoring time so a backwards
+        // pair cannot be saved silently.
+        private List<EditorAlertItem> ValidateDensityThresholds()
+        {
+            var issues = new List<EditorAlertItem>();
+            var lod = _config?.lod_settings;
+            if (lod == null) return issues;
+            if (!LODController.IsDensityConfigValid(lod))
+            {
+                issues.Add(new EditorAlertItem(
+                    poiId: "<LOD settings>",
+                    value: $"shrink_start_neighbor_count={lod.shrink_start_neighbor_count}, cluster_min_count={lod.cluster_min_count}",
+                    problem: "Shrink Start must be strictly less than Cluster Min, or the shrink/fade ramp never activates (DensityFactor always returns 1.0 -- a silent no-op, not a runtime error).",
+                    fixHint: "Lower Shrink Start below Cluster Min, or raise Cluster Min above Shrink Start, or use \"Suggest Values\" to regenerate both together."));
+            }
+            return issues;
+        }
+
         // Runs validation after config load and shows a non-blocking alert if
-        // any hierarchy keys are unresolvable or level sizes look out of range
+        // any hierarchy keys are unresolvable/unset or level sizes look out of range
         // or any search-mode string fields are unknown/inert
-        // or any POI is missing keywords for a forced search field.
+        // or any POI is missing keywords for a forced search field
+        // or the LOD density thresholds are configured backwards.
         private void ValidateAndAlert(string context)
         {
             var issues = new List<EditorAlertItem>();
@@ -85,6 +122,7 @@ namespace TileStories.Editor
             issues.AddRange(ValidateHierarchyLevelSizeRange(_config?.hierarchy_levels));
             issues.AddRange(ValidateSearchEnumFields());
             issues.AddRange(ValidateForcedSearchFields());
+            issues.AddRange(ValidateDensityThresholds());
             if (issues.Count == 0)
                 return;
 

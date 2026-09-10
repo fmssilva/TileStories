@@ -576,7 +576,95 @@
             "status_unknown": true,
             "badge_category": "unknown_damage",
             "status_level_key": "unknown",
-            "hierarchy_level_key": "level_5"
+                        "hierarchy_level_key": "level_5"
+        },
+        {
+            "id": "dev_disp_eq_royal",
+            "name": "Dev Disp Eq Royal",
+            "category": "royal_government",
+            "x_norm": 0.5,
+            "y_norm": 0.5,
+            "captured_position": {
+                "x": 0.5,
+                "y": -0.5,
+                "z": -3.0
+            },
+            "has_captured_position": true,
+            "captured_position_source": "dev_disp_test",
+            "captured_position_timestamp": 1786110594,
+            "summary": "dev_disp_eq_royal",
+            "status_pct": 50.0,
+            "has_status": true,
+            "status_unknown": false,
+            "badge_category": "partial_damage",
+            "status_level_key": "partial_damage",
+            "hierarchy_level_key": "level_3"
+        },
+        {
+            "id": "dev_disp_eq_mil",
+            "name": "Dev Disp Eq Mil",
+            "category": "military",
+            "x_norm": 0.5,
+            "y_norm": 0.5,
+            "captured_position": {
+                "x": 0.5,
+                "y": -0.5,
+                "z": -3.0
+            },
+            "has_captured_position": true,
+            "captured_position_source": "dev_disp_test",
+            "captured_position_timestamp": 1786110594,
+            "summary": "dev_disp_eq_mil",
+            "status_pct": 20.0,
+            "has_status": true,
+            "status_unknown": false,
+            "badge_category": "partial_damage",
+            "status_level_key": "partial_damage",
+            "hierarchy_level_key": "level_3"
+        },
+        {
+            "id": "dev_disp_eq_eco",
+            "name": "Dev Disp Eq Eco",
+            "category": "economic",
+            "x_norm": 0.5,
+            "y_norm": 0.5,
+            "captured_position": {
+                "x": 0.5,
+                "y": -0.5,
+                "z": -3.0
+            },
+            "has_captured_position": true,
+            "captured_position_source": "dev_disp_test",
+            "captured_position_timestamp": 1786110594,
+            "summary": "dev_disp_eq_eco",
+            "status_pct": 100.0,
+            "has_status": true,
+            "status_unknown": false,
+            "badge_category": "destroyed",
+            "status_level_key": "destroyed",
+            "hierarchy_level_key": "level_3"
+        },
+        {
+            "id": "dev_disp_singleton",
+            "name": "Dev Disp Singleton",
+            "category": "infrastructure",
+            "x_norm": 0.5,
+            "y_norm": 0.5,
+            "captured_position": {
+                "x": 3.0,
+                "y": 1.0,
+                "z": -5.0
+            },
+            "has_captured_position": true,
+            "captured_position_source": "dev_disp_test",
+            "captured_position_timestamp": 1786110594,
+            "summary": "dev_disp_singleton",
+            "status_pct": 0.0,
+            "has_status": true,
+            "status_unknown": false,
+            "badge_category": "intact",
+            "status_level_key": "intact",
+            "hierarchy_level_key": "level_1"
         }
     ],
     "calibration_anchors": [

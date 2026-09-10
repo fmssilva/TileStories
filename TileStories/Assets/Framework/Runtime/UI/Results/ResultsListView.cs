@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -20,6 +20,9 @@ namespace TileStories
         private Label _emptyStateLabel;
         private string _selectedPoiId = null;
         private bool _isEnabled = true;
+        // Active facet candidate set pushed by ResultSetCoordinator (_2.6-i); null/empty
+        // means unrestricted, so plain search callers keep their old behavior.
+        private ICollection<string> _filterCandidateIds;
 
         // One row in the results list.
         public class ResultRow
@@ -52,7 +55,10 @@ namespace TileStories
         }
 
         // Build the UI Toolkit list view and attach it to the root visual tree.
-        private void CreateUI(VisualElement root)
+        // Internal (not private) so the EditMode accessibility suite can build the
+        // real UI and assert authored styles (Runtime grants InternalsVisibleTo the
+        // editor test assembly -- same seam as DetailCardView).
+        internal void CreateUI(VisualElement root)
         {
             _listView = new ListView()
             {
@@ -68,6 +74,10 @@ namespace TileStories
             _listView.style.right = 12;
             _listView.style.top = 80;
             _listView.style.bottom = 80;
+            // Authored surface (2.6-af design-token decision): without this the
+            // effective background was theme-resolved and no deterministic WCAG
+            // contrast pair existed to assert against.
+            _listView.style.backgroundColor = new StyleColor(UIPalette.SurfaceDark);
 
             // Define the row template
             _listView.makeItem += MakeResultItem;
@@ -82,7 +92,7 @@ namespace TileStories
             _emptyStateLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             _emptyStateLabel.style.flexGrow = 1;
             _emptyStateLabel.style.fontSize = 14;
-            _emptyStateLabel.style.color = new StyleColor(new Color(0.7f, 0.7f, 0.7f));
+            _emptyStateLabel.style.color = new StyleColor(UIPalette.TextSecondary);
             _emptyStateLabel.style.display = DisplayStyle.None;
             root.Add(_emptyStateLabel);
 
@@ -105,6 +115,9 @@ namespace TileStories
             row.style.paddingRight = 8;
             row.style.paddingTop = 6;
             row.style.paddingBottom = 6;
+            // Authored default surface (2.6-af design-token decision); the bind
+            // step overrides it with the selection tint when the row is selected.
+            row.style.backgroundColor = new StyleColor(UIPalette.SurfaceDark);
 
             var nameLabel = new Label()
             {
@@ -114,6 +127,7 @@ namespace TileStories
             nameLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
             nameLabel.style.flexGrow = 1;
             nameLabel.style.fontSize = 14;
+            nameLabel.style.color = new StyleColor(UIPalette.TextPrimary);
             row.Add(nameLabel);
 
             var categoryLabel = new Label()
@@ -123,7 +137,7 @@ namespace TileStories
             };
             categoryLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
             categoryLabel.style.fontSize = 12;
-            categoryLabel.style.color = new StyleColor(new Color(0.7f, 0.7f, 0.7f));
+            categoryLabel.style.color = new StyleColor(UIPalette.TextSecondary);
             categoryLabel.style.marginLeft = 8;
             row.Add(categoryLabel);
 
@@ -154,7 +168,7 @@ namespace TileStories
             bool isSelected = _selectedPoiId == item.poiId;
             element.style.backgroundColor = isSelected
                 ? new StyleColor(new Color(0.3f, 0.5f, 0.8f, 0.2f))
-                : new StyleColor(Color.clear);
+                : new StyleColor(UIPalette.SurfaceDark);
         }
 
         // Search query changed -- rebuild the results list.
@@ -163,10 +177,20 @@ namespace TileStories
         // without the index needing to know who called it.
         public void RefreshResults(string query, SearchMatchMode matchMode = SearchMatchMode.Any)
         {
+            RefreshResults(query, matchMode, null);
+        }
+
+        // Candidate-narrowing overload (2.6-i): the coordinator passes the active facet's
+        // passing-id set; Search restricts to it. Empty query + candidates shows the
+        // whole filtered set (facet-only usage pattern).
+        public void RefreshResults(string query, SearchMatchMode matchMode,
+            ICollection<string> candidatePoiIds)
+        {
             if (_searchIndex == null || _listView == null)
                 return;
 
-            var results = _searchIndex.Search(query, matchMode);
+            _filterCandidateIds = candidatePoiIds;
+            var results = _searchIndex.Search(query, matchMode, candidatePoiIds);
             var rows = new List<ResultRow>();
 
             foreach (var result in results)

@@ -169,5 +169,72 @@ namespace TileStories.Tests
         {
             Assert.That(ARZoomMath.StepTowardTarget(2.0f, 2.0f, 0.25f, 0.01f), Is.EqualTo(2.0f).Within(1e-5f));
         }
+
+        // --- Task 5.2 (2.4-m): gesture pure-math helpers, Tier-0 ---
+
+        [Test]
+        public void IsDoubleTapOK_true_insideWindowAndWithinTolerance()
+        {
+            // second tap 0.1s after first, only 10px away -> qualifies.
+            Assert.IsTrue(ARZoomMath.IsDoubleTapOK(0.1f, new Vector2(10f, 0f), 0.3f, 50f));
+        }
+
+        [Test]
+        public void IsDoubleTapOK_false_WhenJustOverWindow()
+        {
+            // first tap was 0.4s ago (> 0.3s window) -> not a double tap.
+            Assert.IsFalse(ARZoomMath.IsDoubleTapOK(0.4f, new Vector2(5f, 0f), 0.3f, 50f));
+        }
+
+        [Test]
+        public void IsDoubleTapOK_false_WhenSecondTapTooFar()
+        {
+            // 200px away from the first tap -> a drag, not a double tap.
+            Assert.IsFalse(ARZoomMath.IsDoubleTapOK(0.1f, new Vector2(200f, 0f), 0.3f, 50f));
+        }
+
+        [Test]
+        public void IsDoubleTapOK_false_WhenBothWindowAndSpaceAreViolated()
+        {
+            Assert.IsFalse(ARZoomMath.IsDoubleTapOK(0.9f, new Vector2(300f, 300f), 0.3f, 50f));
+        }
+
+        [Test]
+        public void IsDoubleTapOK_false_ZeroOrNegativeWindow_RejectsAll()
+        {
+            // a 0-second window must never accept a real (positive, nonzero) delay.
+            Assert.IsFalse(ARZoomMath.IsDoubleTapOK(0.0f, Vector2.zero, 0f, 50f));
+            Assert.IsFalse(ARZoomMath.IsDoubleTapOK(0.1f, Vector2.zero, -1f, 50f));
+        }
+
+        [Test]
+        public void IsDoubleTapOK_false_ZeroTolerance_RequiresCoLocated()
+        {
+            // tolerance 0 means only a physically identical tap point qualifies.
+            Assert.IsTrue(ARZoomMath.IsDoubleTapOK(0.1f, Vector2.zero, 0.3f, 0f));
+            Assert.IsFalse(ARZoomMath.IsDoubleTapOK(0.1f, new Vector2(1f, 0f), 0.3f, 0f));
+        }
+
+        [Test]
+        public void PinchScaleForDelta_SpreadingGivesGreaterThanOne()
+        {
+            // fingers spread: distance grows 60 -> 120 => scale 2x.
+            Assert.That(ARZoomMath.PinchScaleForDelta(60f, 120f), Is.EqualTo(2f).Within(1e-5f));
+        }
+
+        [Test]
+        public void PinchScaleForDelta_PinchingGivesLessThanOne()
+        {
+            // fingers come together: 120 -> 60 => scale 0.5x.
+            Assert.That(ARZoomMath.PinchScaleForDelta(120f, 60f), Is.EqualTo(0.5f).Within(1e-5f));
+        }
+
+        [Test]
+        public void PinchScaleForDelta_FirstFrame_NoChange_WhenNoPriorDistance()
+        {
+            // prev<=0 means no pinch in flight yet -> 1 (no change), not NaN/inf/0.
+            Assert.That(ARZoomMath.PinchScaleForDelta(-1f, 80f), Is.EqualTo(1f).Within(1e-5f));
+            Assert.That(ARZoomMath.PinchScaleForDelta(0f, 80f), Is.EqualTo(1f).Within(1e-5f));
+        }
     }
 }

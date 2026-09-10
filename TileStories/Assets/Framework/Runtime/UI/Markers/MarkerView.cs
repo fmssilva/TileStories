@@ -83,6 +83,13 @@ namespace TileStories
         private bool _hasBaseLabelSize;
         private HierarchyStyle _hierarchyStyle;
         private bool _hasHierarchy;
+
+        // Single source of truth for the effect-flag fallback rule (spec _2_3 section 9):
+        // hierarchy level's flags when resolved, otherwise the serialized inspector flags.
+        // Consumed by both ApplyVisuals (rendering) and GetVisualRadiusWorld (displacement
+        // bounds, Domain 2.5) -- keep them in lockstep by construction.
+        private MarkerEffectFlags ActiveEffectFlags => _hasHierarchy ? _hierarchyStyle.EffectFlags : effectFlags;
+
         private bool _baseLabelWordWrapping;
         private TextOverflowModes _baseLabelOverflowMode;
         private TextAlignmentOptions _baseLabelAlignment;
@@ -97,6 +104,18 @@ namespace TileStories
         private Vector2 _baseLabelAnchoredPosition;
         private bool _hasLabelPosition;
         private bool _hasLabelOffset;
+
+        // Hide/show just this marker's label text only (does not affect marker offset or
+        // whole-marker visibility, which belongs to LODController per _2.5 Section 7).
+        // Used by MarkerOverlapResolver's 2.5-h hide-fallback: when displacement hits
+        // the configured max and labels still crowd each other, the resolver hides
+        // the lower-priority label rather than rendering a clamped overlap.
+        public void SetLabelVisible(bool visible)
+        {
+            if (labelText != null)
+                labelText.enabled = visible;
+        }
+
 
         // Expose the POI id for deterministic sorting in overlap resolution
         public string PoiId { get; private set; }
@@ -455,7 +474,7 @@ namespace TileStories
             // When no hierarchy level is set (hasHierarchy == false, e.g. the gallery
             // testing arbitrary flag combinations), fall back to the effectFlags
             // parameter as before. This is the one subtle fallback part of the refactor.
-            MarkerEffectFlags activeFlags = _hasHierarchy ? _hierarchyStyle.EffectFlags : effectFlags;
+            MarkerEffectFlags activeFlags = ActiveEffectFlags;
 
             bool pulseActive = HasEffect(activeFlags, MarkerEffectFlags.Pulse);
             bool sunContoursActive = HasEffect(activeFlags, MarkerEffectFlags.SunContours);
@@ -696,7 +715,7 @@ namespace TileStories
             }
 
             // If pulse or sun effects are active, account for their maximum expansion envelope
-            MarkerEffectFlags activeFlags = _hasHierarchy ? _hierarchyStyle.EffectFlags : effectFlags;
+            MarkerEffectFlags activeFlags = ActiveEffectFlags;
             if ((activeFlags & (MarkerEffectFlags.Pulse | MarkerEffectFlags.SunContours | MarkerEffectFlags.SunCircles | MarkerEffectFlags.Beacon | MarkerEffectFlags.SimpleSun | MarkerEffectFlags.RingPulse)) != 0)
             {
                 maxRadius *= 1.35f; // Max envelope expansion during animated peak

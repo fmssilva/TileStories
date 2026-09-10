@@ -13,7 +13,7 @@ namespace TileStories
     public static class MarkerOverlapResolver
     {
         private const string AlgorithmNotImplementedFmt = "[Displacement] displacement_algorithm '{0}' is not yet implemented; using fixed_axis.";
-        private const string TiebreakNotImplementedFmt = "[Displacement] displacement_tiebreak '{0}' is not yet implemented; using symmetric.";
+
         private const string TargetNotImplementedFmt = "[Displacement] displace_target '{0}' is not yet implemented; using label_only.";
 
         private static readonly HashSet<string> _warnedOnce = new HashSet<string>();
@@ -120,6 +120,19 @@ namespace TileStories
 
                 // Apply symmetric vertical spread: higher priority markers get smaller offsets
                 int count = members.Count;
+
+                // 2.5-g: under lower_priority_only the unique highest-priority member
+                // (the leader) stays pinned at its true position and the rest spread
+                // away from it; a shared-minimum tie falls back to symmetric because
+                // the strategy returns false (no arbitrary asymmetry between equals).
+                var memberPriorities = new List<int>(count);
+                foreach (int mi in members)
+                    memberPriorities.Add(visualUnits != null && mi < visualUnits.Count
+                        ? visualUnits[mi].hierarchyLevelIndex
+                        : int.MaxValue);
+                bool hasPinnedLeader = DisplacementTieBreakStrategy.TryGetPrimaryAnchorLocalIndex(
+                    settings.displacement_tiebreak, memberPriorities, out int leaderLocal);
+
                 for (int k = 0; k < count; k++)
                 {
                     // Higher priority (earlier in sorted list) gets smaller vertical offset
@@ -130,6 +143,20 @@ namespace TileStories
                     if (offsetY > maxDisp) offsetY = maxDisp;
                     if (offsetY < -maxDisp) offsetY = -maxDisp;
                     offsets[members[k]] = new Vector2(0f, offsetY);
+                }
+
+                if (hasPinnedLeader)
+                {
+                    // Re-express every member's offset relative to the leader so the
+                    // leader itself lands on zero and everyone else sits away from it,
+                    // preserving the pairwise separation the spread already produced.
+                    Vector2 leaderOffset = offsets[members[leaderLocal]];
+                    for (int k = 0; k < count; k++)
+                    {
+                        Vector2 off = offsets[members[k]] - leaderOffset;
+                        if (off.magnitude > maxDisp) off = off.normalized * maxDisp;
+                        offsets[members[k]] = off;
+                    }
                 }
             }
             return offsets;
@@ -217,6 +244,14 @@ namespace TileStories
                     }
                 }
 
+                // 2.5-g: under lower_priority_only the unique highest-priority member
+                // stays pinned at its true position (registered below so other
+                // candidates must clear it); shared-minimum ties fall back to symmetric.
+                var sortedPriorities = new List<int>(members.Count);
+                foreach (var mem in members) sortedPriorities.Add(mem.priority);
+                bool hasPinnedLeader = DisplacementTieBreakStrategy.TryGetPrimaryAnchorLocalIndex(
+                    settings.displacement_tiebreak, sortedPriorities, out int leaderLocal);
+
                 // Track final selected positions to prevent overlap
                 var selectedPositions = new Dictionary<int, Vector2>();
 
@@ -224,6 +259,18 @@ namespace TileStories
                 for (int m = 0; m < members.Count; m++)
                 {
                     var member = members[m];
+
+                    // 2.5-g: the pinned leader keeps its true wall position; registering
+                    // its original screen pos makes later (lower-priority) candidates
+                    // resolve to positions at least one threshold away from it, i.e.
+                    // radially away from the leader.
+                    if (hasPinnedLeader && m == leaderLocal)
+                    {
+                        selectedPositions[member.index] = member.originalPos;
+                        offsets[member.index] = Vector2.zero;
+                        continue;
+                    }
+
                     float targetAngle = targetAngles[m];
 
                     Vector2 bestOffset = Vector2.zero;
@@ -427,6 +474,12 @@ namespace TileStories
 
                 int count = groupPositions.Count;
 
+                // 2.5-g: under lower_priority_only the unique highest-priority member
+                // is pinned at its true position; repulsion FROM it still pushes the
+                // other members away. Shared-minimum ties fall back to symmetric.
+                bool hasPinnedLeader = DisplacementTieBreakStrategy.TryGetPrimaryAnchorLocalIndex(
+                    settings.displacement_tiebreak, groupPriorities, out int leaderLocal);
+
                 // Iterative force-directed repulsion
                 int maxIterations = Mathf.Max(1, settings.force_directed_iterations);
                 float damping = 0.5f;
@@ -469,6 +522,14 @@ namespace TileStories
                     // Apply forces with priority-aware anchoring
                     for (int i = 0; i < count; i++)
                     {
+                        // 2.5-g: the pinned leader never moves -- reset to origin every
+                        // iteration so accumulated repulsion cannot drag it off its anchor.
+                        if (hasPinnedLeader && i == leaderLocal)
+                        {
+                            groupPositions[i] = groupOrigPositions[i];
+                            continue;
+                        }
+
                         Vector2 pos = groupPositions[i];
                         pos += forces[i];
 
@@ -629,8 +690,10 @@ namespace TileStories
                 settings.displacement_algorithm != "candidate_position" &&
                 settings.displacement_algorithm != "force_directed")
                 WarnOnce("algorithm", string.Format(AlgorithmNotImplementedFmt, settings.displacement_algorithm));
-            if (settings.displacement_tiebreak == "lower_priority_only")
-                WarnOnce("tiebreak", string.Format(TiebreakNotImplementedFmt, settings.displacement_tiebreak));
+            // 2.5-g: lower_priority_only is fully implemented across all three algorithm
+            // branches via DisplacementTieBreakStrategy.TryGetPrimaryAnchorLocalIndex; no
+            // fallback warning is emitted.
+
 
             int n = visibleUnits.Count;
             if (n < 2)
@@ -655,7 +718,14 @@ namespace TileStories
                 ids[i] = u.poiId ?? string.Empty;
             }
 
+
+
             Vector2[] offsets = ComputeOffsets(screenPositions, ids, settings, visibleUnits);
+
+            // 2.5-h: decide up front (once per cycle) which lower-priority labels get
+            // hidden because displacement hit the max clamp and they still crowd a
+            // neighbour. Pure computation; consumed by the apply loop below.
+            var hiddenLabels = ResolveLabelsToHide(screenPositions, offsets, visibleUnits, settings);
 
             float membershipThreshold = Mathf.Max(0.0001f, settings.overlap_threshold_px);
             for (int i = 0; i < n; i++)
@@ -694,16 +764,31 @@ namespace TileStories
                 }
                 if (committedInGroup)
                 {
-                    switch (settings.displace_target)
+                    // 2.5-h: hide the lower-priority member's label only when the clamp cap
+                    // still leaves it crowding a neighbour. Restricted to label_only (hiding
+                    // a whole marker is out-of-scope); marker/both always apply their offsets.
+                    bool hideLabel = settings.displace_target == "label_only"
+                        && hiddenLabels.Contains(i);
+                    if (hideLabel)
                     {
-                        case "marker":   marker.ApplyMarkerOffset(cam, applyOffset); break;
-                        case "both":     marker.ApplyLabelOffset(cam, applyOffset);
-                                         marker.ApplyMarkerOffset(cam, applyOffset); break;
-                        default:         marker.ApplyLabelOffset(cam, applyOffset); break;
+                        marker.SetLabelVisible(false);
+                        marker.ClearLabelOffset();
+                    }
+                    else
+                    {
+                        marker.SetLabelVisible(true);
+                        switch (settings.displace_target)
+                        {
+                            case "marker":   marker.ApplyMarkerOffset(cam, applyOffset); break;
+                            case "both":     marker.ApplyLabelOffset(cam, applyOffset);
+                                             marker.ApplyMarkerOffset(cam, applyOffset); break;
+                            default:         marker.ApplyLabelOffset(cam, applyOffset); break;
+                        }
                     }
                 }
                 else
                 {
+                    marker.SetLabelVisible(true);
                     marker.ClearLabelOffset();
                     marker.ClearMarkerOffset();
                 }
@@ -723,6 +808,63 @@ namespace TileStories
             for (int i = 0; i < staleKeys.Count; i++)
                 stability.Remove(staleKeys[i]);
         }
+        // 2.5-h: decide which labels to hide when displacement hits the max clamp and
+        // members still crowd each other. Tier-0 testable (no Camera/MonoBehaviour dep).
+        // Returns indices whose LABEL text should be hidden; restricted to label_only
+        // (hiding a whole marker is out-of-scope, per _2.5 Section 7).
+        internal static HashSet<int> ResolveLabelsToHide(
+            IReadOnlyList<Vector2> screenPositions,
+            Vector2[] offsets,
+            IReadOnlyList<VisualUnit> visibleUnits,
+            DisplacementSettings settings)
+        {
+            var hidden = new HashSet<int>();
+            if (settings == null || settings.displace_target != "label_only")
+                return hidden;
+
+            float threshold = Mathf.Max(0.0001f, settings.overlap_threshold_px);
+            float maxDisp = Mathf.Max(0f, settings.max_displacement_px);
+            int n = screenPositions.Count;
+            if (n < 2) return hidden;
+
+            // Crowd-check post-displacement; if a pair still overlaps at build threshold and
+            // at least one member is at its clamp, hide the lower-priority member's label.
+            // Iterate with a bounded outer pass (a 3+ member group may need more than one hide).
+            for (int pass = 0; pass < n + 2; pass++)
+            {
+                bool anyHide = false;
+                for (int i = 0; i < n; i++)
+                {
+                    if (hidden.Contains(i)) continue;
+                    for (int j = i + 1; j < n; j++)
+                    {
+                        if (hidden.Contains(j)) continue;
+                        Vector2 fi = screenPositions[i] + offsets[i];
+                        Vector2 fj = screenPositions[j] + offsets[j];
+                        if (Vector2.Distance(fi, fj) >= threshold) continue;
+                        // Only hide when at least one side is pinned at its max clamp.
+                        if (offsets[i].magnitude < maxDisp - 0.001f &&
+                            offsets[j].magnitude < maxDisp - 0.001f) continue;
+                        int pi = PriorityOf(visibleUnits, i);
+                        int pj = PriorityOf(visibleUnits, j);
+                        // lower priority = larger hierarchyLevelIndex -> that label hides.
+                        int loser = pi >= pj ? i : j;
+                        hidden.Add(loser);
+                        anyHide = true;
+                        break;
+                    }
+                    if (hidden.Count >= n - 1) break;
+                }
+                if (!anyHide || hidden.Count >= n - 1) break;
+            }
+            return hidden;
+        }
+
+        private static int PriorityOf(IReadOnlyList<VisualUnit> vu, int i) =>
+            vu != null && i >= 0 && i < vu.Count && vu[i] != null
+                ? vu[i].hierarchyLevelIndex
+                : int.MaxValue;
+
     }
 
     // Hysteresis bookkeeping for one marker's overlap-group membership (section 9).

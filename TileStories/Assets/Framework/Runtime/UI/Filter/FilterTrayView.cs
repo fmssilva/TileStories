@@ -48,8 +48,11 @@ namespace TileStories
                 RefreshAllFacets();
         }
 
-        // Build the filter tray UI with collapsible sections
-        private void CreateUI(VisualElement root)
+        // Build the filter tray UI with collapsible sections.
+        // Internal (not private) so the EditMode accessibility suite can build the
+        // real UI and assert authored styles (Runtime grants InternalsVisibleTo the
+        // editor test assembly -- same seam as DetailCardView).
+        internal void CreateUI(VisualElement root)
         {
             _trayContainer = new VisualElement()
             {
@@ -60,13 +63,17 @@ namespace TileStories
             _trayContainer.style.left = 12;
             _trayContainer.style.right = 12;
             _trayContainer.style.bottom = 12;
+            // Authored surface (2.6-af design-token decision): gives the tray a
+            // deterministic background so text contrast is assertable (same
+            // overlay language as DetailCardView / results list).
+            _trayContainer.style.backgroundColor = new StyleColor(UIPalette.SurfaceDark);
 
             _emptyStateLabel = new Label();
             _emptyStateLabel.name = "filter-empty-state";
             _emptyStateLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             _emptyStateLabel.style.flexGrow = 1;
             _emptyStateLabel.style.fontSize = 14;
-            _emptyStateLabel.style.color = new StyleColor(new Color(0.7f, 0.7f, 0.7f));
+            _emptyStateLabel.style.color = new StyleColor(UIPalette.TextSecondary);
             _emptyStateLabel.style.display = DisplayStyle.None;
             _trayContainer.Add(_emptyStateLabel);
 
@@ -124,6 +131,7 @@ namespace TileStories
             header.style.fontSize = 13;
             header.style.paddingLeft = 4;
             header.style.paddingBottom = 4;
+            header.style.color = new StyleColor(UIPalette.TextPrimary);
             section.Add(header);
 
             foreach (var entry in entries)

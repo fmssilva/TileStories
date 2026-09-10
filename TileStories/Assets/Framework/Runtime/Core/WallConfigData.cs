@@ -140,6 +140,24 @@ namespace TileStories
         // "recent_first": visitor's recent queries first, then category back-fill.
         public string suggested_source = "category_distribution";
 
+        // --- Select/Filter/Search domain master switch (_2_6 section 3 via _2.7 entry 2.6-d) ---
+        // One switch to disable the whole domain, mirroring LodSettings.enabled /
+        // DisplacementSettings.enabled. When false: no search/filter/minimap/results UI
+        // activates and marker-selection responders are never wired.
+        public bool search_filter_select_enabled = true;
+
+        // --- Synonym groups for search expansion (_2.6-al via _2.7 entry 2.6-al) ---
+        // Each group defines a key term + synonyms that should also match POIs containing the key.
+        // Expanded at index-build time (zero runtime search cost) by POISearchIndex.ConfigureWithSynonyms.
+        // Matches the pattern of every other taxonomy list (category_styles, badge_categories, etc.).
+        public List<SynonymGroup> synonym_groups = new();
+
+        // What happens to markers NOT in the active filter/search result set
+        // (_2.6-i): "hide" fully fades them out (spec section 7 default);
+        // "dim" keeps them faintly visible for positional context in dense walls.
+        // Both ride the LOD-coexistent SetVisible(alpha, fade) seam.
+        public string filter_mismatch_behaviour = "hide";
+
         // --- Minimap settings (spec _2.6 section 8) ---
         // Whether the minimap feature is enabled for this wall.
         public bool minimap_enabled = true;
@@ -151,6 +169,15 @@ namespace TileStories
         // "dots_only" (plain colored dots), "category_colored_dots" (dots
         // colored by category), "mini_icons" (scaled-down marker icons).
         public string minimap_icon_style = "category_colored_dots";
+
+        // Visual dot diameter, px. Kept small so dense walls stay readable --
+        // tap comfort is handled separately by minimap_dot_tap_target_px.
+        public float minimap_dot_size_px = 20f;
+
+        // Invisible hit-zone diameter per dot, px; the actual tap receiver.
+        // Defaults to the 44x44 WCAG 2.5.5 floor. Overlapping zones at high
+        // density are expected and resolved by nearest-dot-center at runtime.
+        public float minimap_dot_tap_target_px = 44f;
 
         // --- View mode settings (spec _2.6 section 10) ---
         // The result view shown by default when the wall loads.
@@ -526,6 +553,13 @@ namespace TileStories
         public int zoom_tap_levels = 2;      // 3rd tap/click returns to 1x
         public float zoom_transition_speed_s = 0.25f; // animation duration for tap/double-tap/button zoom changes
         public bool zoom_show_ui_buttons = true;
+
+        // Double-tap gesture tunables (spec section 9 "three mechanisms"; read by
+        // ARZoomGestureInput). Seconds between the two taps, and how far the second
+        // tap may land from the first and still count as a double-tap rather than
+        // a drag. Developer-exposed, never hardcoded in the gesture script.
+        public float zoom_double_tap_window_s = 0.3f;
+        public float zoom_double_tap_move_tolerance_px = 50f;
     }
 
     [Serializable]

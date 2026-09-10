@@ -179,6 +179,8 @@ namespace TileStories.Editor
             lod.zoom_tap_levels = DrawIntField("Tap Levels", lod.zoom_tap_levels, ZoomTapLevelsHelp);
             lod.zoom_transition_speed_s = DrawScalarField("Transition Speed (s)", lod.zoom_transition_speed_s, ZoomTransitionHelp);
             lod.zoom_show_ui_buttons = DrawToggleField("Show UI Buttons", lod.zoom_show_ui_buttons, ZoomUiButtonsHelp);
+            lod.zoom_double_tap_window_s = DrawScalarField("Double-Tap Window (s)", lod.zoom_double_tap_window_s, ZoomDoubleTapWindowHelp);
+            lod.zoom_double_tap_move_tolerance_px = DrawScalarField("Double-Tap Move Tolerance (px)", lod.zoom_double_tap_move_tolerance_px, ZoomDoubleTapMoveToleranceHelp);
 
             _hasUnsavedChanges = true;
         }

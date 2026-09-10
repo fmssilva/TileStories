@@ -35,6 +35,25 @@ namespace TileStories
             return passesCategory && passesBadge && passesOutline && passesHierarchy;
         }
 
+        // Build the full candidate id set for the active facets (_2.6-i): every POI
+        // that passes PoiPassesFilters. Empty/absent active sets -> ALL ids (no filter).
+        // Single new access point so ResultsListView/minimap/markers share ONE set.
+        public static HashSet<string> GetFilterCandidateIds(List<POIData> pois,
+            HashSet<string> activeCategories,
+            HashSet<string> activeBadgeCategories,
+            HashSet<string> activeOutlineLevels,
+            HashSet<string> activeHierarchyLevels)
+        {
+            var ids = new HashSet<string>();
+            if (pois == null) return ids;
+            foreach (var poi in pois)
+            {
+                if (PoiPassesFilters(poi, activeCategories, activeBadgeCategories, activeOutlineLevels, activeHierarchyLevels))
+                    ids.Add(poi.id);
+            }
+            return ids;
+        }
+
         // Count how many POIs pass all filters when one specific facet value
         // is removed from the active set. Used by ComputeRelaxSuggestion.
         public static int CountPoisWithFacetRemoved(List<POIData> pois,

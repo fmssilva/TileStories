@@ -19,14 +19,15 @@ namespace TileStories.Tests
             };
         }
 
-        private SearchSynonymGroups MakeSynonymAsset(string key, params string[] synonyms)
+        // 2.6-al: synonyms are now plain Runtime data (List<SynonymGroup>) on WallConfigData,
+        // not an Editor-only ScriptableObject asset. The deleted SearchSynonymGroups asset was
+        // never needed -- ConfigureWithSynonyms consumes the plain data list directly.
+        private static List<SynonymGroup> MakeSynonymGroups(string key, params string[] synonyms)
         {
-            var asset = ScriptableObject.CreateInstance<SearchSynonymGroups>();
-            asset.groups = new List<SynonymGroup>
+            return new List<SynonymGroup>
             {
                 new SynonymGroup { key = key, synonyms = new List<string>(synonyms) }
             };
-            return asset;
         }
 
         [Test]
@@ -41,13 +42,12 @@ namespace TileStories.Tests
             Assert.AreEqual(0, beforeResults.Count);
 
             // After: "templo" is a synonym of "church", so POI_B should appear
-            var synonyms = MakeSynonymAsset("church", "templo");
-            index.ConfigureWithSynonyms(synonyms.groups);
+            var synonyms = MakeSynonymGroups("church", "templo");
+            index.ConfigureWithSynonyms(synonyms);
 
             var afterResults = index.Search("templo");
             Assert.AreEqual(1, afterResults.Count);
             Assert.AreEqual("b", afterResults[0].POIId);
-            Object.DestroyImmediate(synonyms);
         }
 
         [Test]
@@ -60,15 +60,12 @@ namespace TileStories.Tests
             int countBefore = index.Search("church").Count;
             Assert.AreEqual(1, countBefore);
 
-            var emptyAsset = ScriptableObject.CreateInstance<SearchSynonymGroups>();
-            emptyAsset.groups = new List<SynonymGroup>();
-            index.ConfigureWithSynonyms(emptyAsset.groups);
+            var emptyGroups = new List<SynonymGroup>();
+            index.ConfigureWithSynonyms(emptyGroups);
 
             // Existing search must be unchanged
             int countAfter = index.Search("church").Count;
             Assert.AreEqual(countBefore, countAfter);
-
-            Object.DestroyImmediate(emptyAsset);
         }
 
         [Test]
@@ -79,8 +76,8 @@ namespace TileStories.Tests
 
             // Build, configure synonyms, verify synonym search works
             index.Build(config);
-            var synonyms = MakeSynonymAsset("church", "templo");
-            index.ConfigureWithSynonyms(synonyms.groups);
+            var synonyms = MakeSynonymGroups("church", "templo");
+            index.ConfigureWithSynonyms(synonyms);
 
             Assert.AreEqual(1, index.Search("templo").Count);
 
@@ -89,10 +86,8 @@ namespace TileStories.Tests
             index.Build(config);
             Assert.AreEqual(0, index.Search("templo").Count, "Build should clear synonyms");
 
-            index.ConfigureWithSynonyms(synonyms.groups);
+            index.ConfigureWithSynonyms(synonyms);
             Assert.AreEqual(1, index.Search("templo").Count, "Re-configure should restore synonyms");
-
-            Object.DestroyImmediate(synonyms);
         }
     }
 }

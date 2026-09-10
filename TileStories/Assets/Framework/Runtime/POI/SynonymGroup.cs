@@ -9,9 +9,11 @@ namespace TileStories
     // synonyms at keyword rank (0.7).
     //
     // This is a plain C# data class with zero UnityEditor dependency so it can
-    // live in the Runtime assembly. The SearchSynonymGroups ScriptableObject
-    // that *contains* these groups lives in the Editor assembly and passes
-    // them to POISearchIndex.ConfigureWithSynonyms at build time.
+    // live in the Runtime assembly. A wall lists these directly on
+    // WallConfigData.synonym_groups (matching every other taxonomy list), and
+    // POISearchIndex.ConfigureWithSynonyms consumes them at build time.
+    // (The former SearchSynonymGroups ScriptableObject asset was deleted 2026-09-08;
+    // synonyms are now plain data in the wall config, not an Editor-only asset.)
     [Serializable]
     public class SynonymGroup
     {

@@ -35,6 +35,10 @@ namespace TileStories
         // Currently highlighted POI id (null = no highlight).
         private string _selectedId;
 
+        // Active filter/search candidate set (_2.6-i camera_highlight mode). Null =
+        // no result-set highlight (plain selection behaviour only).
+        private ICollection<string> _resultSet;
+
         // Constructed by WallSession after markers are spawned; config is the same
         // WallConfigData the session resolved, so a wall can disable highlight.
         public SelectionHighlightController(WallSession wallSession, WallConfigData config)
@@ -93,6 +97,39 @@ namespace TileStories
             if (_disposed || _config == null) return;
             RestoreAll(ResolvedFadeDuration(_selectedId));
             _selectedId = null;
+        }
+
+        // Result-set highlight for camera_highlight mode (_2.6-i): dim every marker NOT
+        // in the candidate set using the same LOD-coexistent alpha seam as selection.
+        // Null/empty set clears the result highlight (all markers back to full).
+        public void SetTargetCandidates(ICollection<string> candidateIds)
+        {
+            if (_disposed || _config == null) return;
+            var markers = _wallSession.SpawnedMarkers;
+            if (markers == null) return;
+
+            _resultSet = candidateIds;
+            bool unrestricted = candidateIds == null || candidateIds.Count == 0;
+
+            float fade = DEFAULT_FADE;
+            for (int i = 0; i < markers.Count; i++)
+            {
+                var m = markers[i];
+                if (m == null) continue;
+                bool inSet = !unrestricted && Contains(candidateIds, m.PoiId);
+                // A tap-selected marker stays full even when outside the result set
+                // (selection is a stronger signal than filtering).
+                bool isSelected = string.Equals(_selectedId, m.PoiId, StringComparison.Ordinal);
+                m.SetVisible(inSet || unrestricted || isSelected ? ALPHA_FULL : DIM_ALPHA, fade);
+            }
+        }
+
+        private static bool Contains(ICollection<string> set, string value)
+        {
+            foreach (var s in set)
+                if (string.Equals(s, value, StringComparison.Ordinal))
+                    return true;
+            return false;
         }
 
         private void RestoreAll(float fade)

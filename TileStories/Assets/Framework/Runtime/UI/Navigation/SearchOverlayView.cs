@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -49,8 +50,30 @@ namespace TileStories
                 return;
 
             _recent?.Add(query);
-            _resultsListView?.RefreshResults(query, matchMode);
+            if (_coordinator != null)
+                _coordinator.RefreshSearch(query, matchMode);
+            else
+                _resultsListView?.RefreshResults(query, matchMode);
         }
+
+        // Result-set composition seam (_2.6-i). Optional: when the filter tray /
+        // minimap / spawned markers exist, search + facets produce ONE result set
+        // pushed to every surface. Without them the overlay keeps its legacy
+        // results-list-only behaviour. Gated by the 2.6-d domain master toggle.
+        public void AttachResultCoordinator(FilterTrayView tray, MinimapView minimap,
+            Func<IReadOnlyList<MarkerView>> getSpawned,
+            SelectionHighlightController highlight = null)
+        {
+            if (_config != null && !_config.search_filter_select_enabled)
+                return; // whole domain disabled for this wall
+
+            _coordinator?.Dispose();
+            _coordinator = new ResultSetCoordinator(_searchIndexForCoordinator, _config,
+                tray, _resultsListView, minimap, getSpawned, highlight);
+        }
+
+        private POISearchIndex _searchIndexForCoordinator;
+        private ResultSetCoordinator _coordinator;
 
         // Wires config + dependencies. `uiDocument` may be injected (tests) or
         // located via FindFirstObjectByType at runtime. CreateUI is null-guarded
@@ -62,6 +85,7 @@ namespace TileStories
         {
             _config = config;
             _resultsListView = resultsListView;
+            _searchIndexForCoordinator = searchIndex;
             _recent = recent;
             _suggested = suggested;
 
@@ -236,6 +260,8 @@ namespace TileStories
         {
             if (_voice != null)
                 _voice.StateChanged -= OnVoiceStateChanged;
+            _coordinator?.Dispose();
+            _coordinator = null;
         }
     }
 
