@@ -90,8 +90,7 @@ namespace TileStories.Tests
                 Assert.IsNotNull(poi, $"Lamp family POI '{id}' must exist in LivingRoom/config.json.");
 
                 Assert.IsTrue(
-                    POIPositionResolver.TryResolvePosition(poi, _config.calibration_anchors.ToArray(),
-                        out var worldPos),
+                    POIPositionResolver.TryResolvePosition(poi, out var worldPos),
                     $"real captured_position resolution must succeed for {id}.");
                 Assert.IsTrue(float.IsFinite(worldPos.x) && float.IsFinite(worldPos.y) && float.IsFinite(worldPos.z),
                     $"real resolved position must be finite for {id}.");

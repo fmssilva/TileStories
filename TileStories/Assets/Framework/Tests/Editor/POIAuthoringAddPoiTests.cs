@@ -53,8 +53,8 @@ namespace TileStories.Tests
             Assert.IsFalse(string.IsNullOrEmpty(newPoi.id), "New POI should have a GUID id");
             Assert.AreEqual("New POI", newPoi.name);
             Assert.AreEqual("default", newPoi.category);
-            Assert.AreEqual(0.5f, newPoi.x_norm, 0.0001f);
-            Assert.AreEqual(0.5f, newPoi.y_norm, 0.0001f);
+                        Assert.AreEqual(0f, newPoi.editor_rotation_deg, 0.0001f);
+            Assert.IsNull(newPoi.captured_position);;
             Assert.IsFalse(newPoi.has_captured_position);
             Assert.AreEqual(0f, newPoi.status_pct);
             Assert.IsFalse(newPoi.has_status);

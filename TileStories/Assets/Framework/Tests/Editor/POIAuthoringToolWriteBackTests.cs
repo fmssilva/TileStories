@@ -105,27 +105,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(0f, lamp.captured_position.z, 0.001f);
         }
 
-        // Verify that calibration anchors are also captured when they have matching scene objects.
-        // Verify that calibration anchors in calibration_anchors list each have
-        // id, x_norm, y_norm, and captured_position.
-        [Test]
-        public void CalibrationAnchors_HaveRequiredFields()
-        {
-            var config = CreateTestConfig();
-
-            Assert.IsNotNull(config.calibration_anchors, "calibration_anchors list should exist.");
-            Assert.Greater(config.calibration_anchors.Count, 0, "Should have at least one calibration anchor.");
-
-            foreach (var anchor in config.calibration_anchors)
-            {
-                Assert.IsNotNull(anchor.id, "Anchor id should not be null.");
-                Assert.IsNotNull(anchor.captured_position, "Anchor captured_position should not be null.");
-                Assert.AreEqual("cal_left", anchor.id);
-                Assert.AreEqual(0f, anchor.x_norm);
-                Assert.AreEqual(0.5f, anchor.y_norm);
-            }
-        }
-
         private static WallConfigData CreateTestConfig()
         {
             return new WallConfigData
@@ -133,21 +112,14 @@ namespace TileStories.Editor.Tests
                 wall_id = "test_wall",
                 wall_name = "Test Wall",
                 immersal_map_id = 12345,
-                calibration_anchors = new List<CalibrationAnchor>
-                {
-                    new CalibrationAnchor
-                    {
-                        id = "cal_left",
-                        x_norm = 0f,
-                        y_norm = 0.5f,
-                        captured_position = new CapturedPosition { x = 0f, y = 0f, z = 0f }
-                    }
-                },
                 pois = new List<POIData>
                 {
-                    new POIData { id = "lamp", name = "The Lamp", x_norm = 0.1f, y_norm = 0.1f },
-                    new POIData { id = "painting", name = "The Painting", x_norm = 0.5f, y_norm = 0.3f },
-                    new POIData { id = "camera", name = "The Camera", x_norm = 0.8f, y_norm = 0.7f }
+                    // lamp starts captured (previously placed in a scene);
+                    // painting and camera start uncaptured so write-back tests
+                    // can assert they are only touched when actually matched.
+                    new POIData { id = "lamp", name = "The Lamp", has_captured_position = true, captured_position = new CapturedPosition { x = 0.1f, y = 0f, z = 0.1f } },
+                    new POIData { id = "painting", name = "The Painting", has_captured_position = false, captured_position = null },
+                    new POIData { id = "camera", name = "The Camera", has_captured_position = false, captured_position = null }
                 }
             };
         }
@@ -171,8 +143,6 @@ namespace TileStories.Editor.Tests
                     {
                         id = "lamp",
                         name = "The Lamp",
-                        x_norm = 0.1f,
-                        y_norm = 0.1f,
                         captured_position = new CapturedPosition { x = 1.0f, y = 2.0f, z = 3.0f },
                         has_captured_position = true
                     },
@@ -180,8 +150,6 @@ namespace TileStories.Editor.Tests
                     {
                         id = "painting",
                         name = "The Painting",
-                        x_norm = 0.5f,
-                        y_norm = 0.3f,
                         captured_position = new CapturedPosition { x = 4.0f, y = 5.0f, z = 6.0f },
                         has_captured_position = true
                     }
@@ -203,8 +171,6 @@ namespace TileStories.Editor.Tests
                     {
                         id = "lamp",
                         name = "The Lamp",
-                        x_norm = 0.1f,
-                        y_norm = 0.1f,
                         captured_position = null,
                         has_captured_position = false
                     }

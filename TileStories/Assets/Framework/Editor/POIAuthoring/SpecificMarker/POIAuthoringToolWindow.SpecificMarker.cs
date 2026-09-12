@@ -11,19 +11,18 @@ namespace TileStories.Editor
         {
             if (_config.pois == null || _config.pois.Count == 0)
             {
-                EditorGUILayout.HelpBox("No POI data loaded.", MessageType.Info);
-                // Still allow adding a new POI
-                if (GUILayout.Button("+ Add POI", GUILayout.Width(120f)))
+                EditorGUILayout.HelpBox("No POIs yet. Use the + buttons below to add your first POI.", MessageType.Info);
+                if (GUILayout.Button("+ Add first", GUILayout.Width(120f)))
                 {
                     AddNewPoi();
                 }
                 return;
             }
 
-            // Add POI button at top of list
-            if (GUILayout.Button("+ Add POI", GUILayout.Width(120f)))
+            // "+ Add first" button before the first POI
+            if (GUILayout.Button("+ Add first", GUILayout.Width(120f)))
             {
-                AddNewPoi();
+                AddNewPoi(); // adds at index 0
             }
 
             for (int i = 0; i < _config.pois.Count; i++)
@@ -41,6 +40,19 @@ namespace TileStories.Editor
 
                 using (new EditorGUI.IndentLevelScope())
                 {
+                    // Focus helper, tinted with this POI's header color so the
+                    // action reads as belonging to the marker above. Disabled
+                    // until the rig has a child named poi.id (populate first).
+                    using (new EditorGUI.DisabledScope(!CanFocusPoiInScene(poi)))
+                    {
+                        Color poiColor = PoiHeaderColorFor(foldoutKey, i);
+                        var prevBg = GUI.backgroundColor;
+                        GUI.backgroundColor = poiColor;
+                        if (GUILayout.Button("Focus in Scene", GUILayout.Width(140f)))
+                            FocusPoiInScene(poi);
+                        GUI.backgroundColor = prevBg;
+                    }
+
                     _showPoiPosition = DrawFramedFoldout(ref _showPoiPosition, () => DrawPositionTabs(poi), "Position", FoldoutDefaultColor);
 
                     _showPoiMarkerStyle = DrawFramedFoldout(ref _showPoiMarkerStyle, () => DrawPoiMarkerStyleFields(poi), "Marker Style", FoldoutDefaultColor);
@@ -63,42 +75,25 @@ namespace TileStories.Editor
                     // driven entirely by the hierarchy level (see DrawPoiMarkerStyleFields).
                     // Global effect *defaults* remain in the Global Scene Effects section.
                     _showPoiSearchKeywords = DrawFramedFoldout(ref _showPoiSearchKeywords, () => DrawPoiSearchKeywordsField(poi), "Search Keywords", FoldoutDefaultColor);
+
+                    // "+ after" button for this POI
+                    EditorGUILayout.Space(4f);
+                    if (GUILayout.Button("+ Add after this", GUILayout.Width(120f)))
+                    {
+                        AddNewPoiAfter(i);
+                    }
                 }
 
                 EditorGUILayout.Space(6f);
             }
-        }
 
-        private void DrawPoiPositionFields(POIData poi)
-        {
-            poi.x_norm = EditorGUILayout.Slider("X norm", poi.x_norm, 0f, 1f);
-            poi.y_norm = EditorGUILayout.Slider("Y norm", poi.y_norm, 0f, 1f);
-
-            bool hasCaptured = poi.has_captured_position;
-            bool wantsCaptured = EditorGUILayout.Toggle("Use captured position", hasCaptured);
-
-            if (wantsCaptured && !hasCaptured)
+            // "+ after last" button at the end of the list
+            if (GUILayout.Button("+ Add after last", GUILayout.Width(120f)))
             {
-                poi.captured_position = new CapturedPosition();
-                poi.has_captured_position = true;
-                poi.captured_position_source = "manual";
-                poi.captured_position_timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            }
-            else if (!wantsCaptured && hasCaptured)
-            {
-                poi.captured_position = null;
-                poi.has_captured_position = false;
-                poi.captured_position_source = null;
-            }
-
-            if (poi.captured_position != null)
-            {
-                var cp = poi.captured_position;
-                cp.x = EditorGUILayout.FloatField("X", cp.x);
-                cp.y = EditorGUILayout.FloatField("Y", cp.y);
-                cp.z = EditorGUILayout.FloatField("Z", cp.z);
+                AddNewPoi(); // appends at end
             }
         }
+
 
         private void DrawPoiMarkerStyleFields(POIData poi)
         {
@@ -497,19 +492,70 @@ namespace TileStories.Editor
             return result;
         }
 
-        // Add a new POI with sensible defaults (Step 19).
-        private void AddNewPoi()
+        // Whether the Focus button is clickable: rig must contain a child
+        // named after this POI's id (rig child name == poi.id binding key).
+        private bool CanFocusPoiInScene(POIData poi)
+        {
+            if (poi == null || string.IsNullOrWhiteSpace(poi.id))
+                return false;
+            Transform rig = GetExistingRig();
+            if (rig == null)
+                return false;
+            return rig.Find(poi.id) != null;
+        }
+
+        // Standard Unity workflow, automated: select the rig child (highlights
+        // it in Hierarchy, shows its Transform in Inspector so you can drag it
+        // with normal move tools), ping it, and frame a tight context box in
+        // the Scene view. FrameSelected alone uses the renderer's bounds, which
+        // for a uGUI marker is near-zero, so the view stays zoomed far out.
+        // Instead we frame a cube sized to ~4 marker-widths across, keeping the
+        // current view direction (Frame only dollies to fit). Framing only:
+        // moves no object, writes no config.
+        private void FocusPoiInScene(POIData poi)
+        {
+            if (poi == null || string.IsNullOrWhiteSpace(poi.id))
+                return;
+            Transform rig = GetExistingRig();
+            if (rig == null)
+                return;
+            Transform child = rig.Find(poi.id);
+            if (child == null)
+                return;
+            Selection.activeGameObject = child.gameObject;
+            EditorGUIUtility.PingObject(child.gameObject);
+            SceneView sceneView = SceneView.lastActiveSceneView;
+            if (sceneView == null)
+                return;
+            var markerView = child.GetComponentInChildren<MarkerView>();
+            float diameter = markerView != null
+                ? markerView.GetVisualRadiusWorld() * 2f * child.lossyScale.x
+                : 0f;
+            float width = PoiFocusResolver.ComputeFocusWidth(diameter);
+            sceneView.Frame(new Bounds(child.position, Vector3.one * width), false);
+        }
+
+        // Add a new POI with sensible defaults.
+        // If atEnd is true, appends to end; otherwise inserts at index 0 (first).
+        private void AddNewPoiInternal(bool atEnd = false)
         {
             if (_config == null) return;
             if (_config.pois == null) _config.pois = new List<POIData>();
+
+            // Determine initial rotation: first POI gets 0, subsequent inherit from previous.
+            float initialRotation = PoiRotationResolver.DefaultEditorRotationDeg;
+            if (_config.pois.Count > 0)
+            {
+                var prevPoi = atEnd ? _config.pois[_config.pois.Count - 1] : _config.pois[0];
+                initialRotation = prevPoi.editor_rotation_deg;
+            }
 
             var newPoi = new POIData
             {
                 id = System.Guid.NewGuid().ToString("N"),
                 name = "New POI",
                 category = "default",
-                x_norm = 0.5f,
-                y_norm = 0.5f,
+                editor_rotation_deg = initialRotation,
                 has_captured_position = false,
                 status_pct = 0f,
                 has_status = false,
@@ -522,7 +568,125 @@ namespace TileStories.Editor
                 search_keyword_fields = new List<POISearchKeywordField>()
             };
 
-            DrawConfigMutationScope(() => _config.pois.Add(newPoi), true);
+            DrawConfigMutationScope(() =>
+            {
+                if (atEnd)
+                    _config.pois.Add(newPoi);
+                else
+                    _config.pois.Insert(0, newPoi);
+            }, true);
+
+            // Auto-spawn + auto-focus for the new POI
+            SpawnAndFocusNewPoi(newPoi);
+        }
+
+        // Parameterless overload used by UI buttons and tests (appends to end).
+        private void AddNewPoi() => AddNewPoiInternal(true);
+
+        // Insert a new POI immediately after the given index.
+        private void AddNewPoiAfter(int index)
+        {
+            if (_config == null) return;
+            if (_config.pois == null) _config.pois = new List<POIData>();
+            if (index < 0 || index >= _config.pois.Count) return;
+
+            // Inherit rotation from the POI we're inserting after.
+            float initialRotation = _config.pois[index].editor_rotation_deg;
+
+            var newPoi = new POIData
+            {
+                id = System.Guid.NewGuid().ToString("N"),
+                name = "New POI",
+                category = "default",
+                editor_rotation_deg = initialRotation,
+                has_captured_position = false,
+                status_pct = 0f,
+                has_status = false,
+                status_unknown = false,
+                hierarchy_level_key = null,
+                has_custom_symbol = false,
+                custom_symbol_key = null,
+                badge_category = null,
+                search_keywords = new List<string>(),
+                search_keyword_fields = new List<POISearchKeywordField>()
+            };
+
+            DrawConfigMutationScope(() => _config.pois.Insert(index + 1, newPoi), true);
+
+            // Auto-spawn + auto-focus for the new POI
+            SpawnAndFocusNewPoi(_config.pois[index + 1]);
+        }
+
+        // Spawns a rig child for the given POI and focuses the Scene view on it.
+        private void SpawnAndFocusNewPoi(POIData poi)
+        {
+            var rig = GetOrCreateRig();
+            if (rig == null)
+            {
+                // No rig available (e.g. no CorrectionAnchor in scene). Warn but keep POI in config.
+                EditorGUILayout.HelpBox("No authoring rig found. Add a PlacementCorrectionAnchor to the scene to see markers in the Scene view.", MessageType.Warning);
+                return;
+            }
+
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(_prefabPath);
+            if (prefab == null)
+            {
+                Debug.LogError($"[POIAuthoring] Prefab not found at {_prefabPath}");
+                return;
+            }
+
+            // Resolve initial position: first POI at origin, subsequent at previous POI + offset.
+            Vector3 initialPosition;
+            int myIndex = _config.pois.IndexOf(poi);
+            if (myIndex == 0 && _config.pois.Count == 1)
+            {
+                // First POI ever → origin.
+                initialPosition = Vector3.zero;
+            }
+            else
+            {
+                // Find the "previous" POI in the list (the one before this one).
+                POIData prevPoi = null;
+                if (myIndex > 0)
+                {
+                    prevPoi = _config.pois[myIndex - 1];
+                }
+                else if (_config.pois.Count > 1)
+                {
+                    // Inserted at front; use the old-first as reference.
+                    prevPoi = _config.pois[1];
+                }
+
+                if (prevPoi != null)
+                {
+                    // Use previous POI's rig child position + small offset.
+                    var prevChild = GetExistingRig()?.Find(prevPoi.id);
+                    if (prevChild != null)
+                    {
+                        initialPosition = prevChild.localPosition + new Vector3(0.3f, 0f, 0.3f);
+                    }
+                    else
+                    {
+                        initialPosition = Vector3.zero;
+                    }
+                }
+                else
+                {
+                    initialPosition = Vector3.zero;
+                }
+            }
+
+            var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, GetExistingRig());
+            instance.name = poi.id;
+            instance.transform.localPosition = initialPosition;
+            instance.transform.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
+            Undo.RegisterCreatedObjectUndo(instance, "Create POI Marker");
+
+            // Reuse the same visual configuration logic as PopulateRig.
+            ConfigureRigChild(poi, instance.transform);
+
+            // Select and frame the new marker.
+            FocusPoiInScene(poi);
         }
     }
 }

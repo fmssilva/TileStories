@@ -777,40 +777,60 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │   │   │   │                                                    DrawCategoryDropdown,
 │   │   │   │   │                                                    DrawBadgeCategoryDropdown,
 │   │   │   │   │                                                    DrawStatusLevelDropdown,
-│   │   │   │   │                                                    GetPoiFoldout.
+│   │   │   │   │                                                    GetPoiFoldout, CanFocusPoiInScene +
+                                                   FocusPoiInScene (per-POI Focus
+                                                   in Scene button: Selection + ping +
+                                                   SceneView.FrameSelected).
+│   │   │   │   │   ├── POIAuthoringToolWindow.PositionTabs.cs ← DrawPositionTabs (Draft / Precise tabs inside
+│   │   │   │   │   │                                                    Position foldout): Draft shows x_norm/y_norm
+│   │   │   │   │   │                                                    + Capture Position button; Precise shows
+│   │   │   │   │   │                                                    captured_position read-only + Clear Capture
+│   │   │   │   │   │                                                    button; validation warning when Precise without
+│   │   │   │   │   │                                                    capture. Edit Rotation slider always visible
+│   │   │   │   │   │                                                    below both tabs + ApplyPoiEditorRotation
+│   │   │   │   │   │                                                    (config-driven dev-only yaw live-applied to
+│   │   │   │   │   │                                                    the rig child). CaptureSinglePoi per-POI
+│   │   │   │   │   │                                                    capture.
+│   │   │   │   │   ├── PoiFocusResolver.cs ← Pure static focus-target name check
+│   │   │   │   │                                + focus-width math
+│   │   │   │   │                                (Tier-0 tested, no UnityEditor dep).
+│   │   │   │   │   └── PoiRotationResolver.cs ← Pure yaw normalize + quaternion
+│   │   │   │   │                                map for the Edit Rotation slider;
+│   │   │   │   │                                editor-preview only (runtime
+│   │   │   │   │                                billboard always faces camera).
 │   │   │   │   ├── Shared/
 │   │   │   │   │   ├── POIAuthoringToolWindow.SymbolTable.cs ← Generic symbol-table drawer reused by
-│   │   │   │   │   │                                           category/badge/outline tables; plus
-│   │   │   │   │   │                                           DrawWallIconLibrarySelector,
-│   │   │   │   │   │                                           AssignSpriteToLibraryAndGetKey,
-│   │   │   │   │   │                                           ResolveSpriteForKey, DrawSpritePreview,
-│   │   │   │   │   │                                           DrawColorSwatchAndHex, TryParseHexColor.
+│   │   │   │   │                                           category/badge/outline tables; plus
+│   │   │   │   │                                           DrawWallIconLibrarySelector,
+│   │   │   │   │                                           AssignSpriteToLibraryAndGetKey,
+│   │   │   │   │                                           ResolveSpriteForKey, DrawSpritePreview,
+│   │   │   │   │                                           DrawColorSwatchAndHex, TryParseHexColor.
 │   │   │   │   │   ├── EntryDetailsPopup.cs                 ← Standalone PopupWindowContent (not
-│   │   │   │   │   │                                           partial) for editing a single category/
-│   │   │   │   │   │                                           badge/outline row in-place.
+│   │   │   │   │                                           partial) for editing a single category/
+│   │   │   │   │                                           badge/outline row in-place.
 │   │   │   │   │   ├── ExistingSymbolPickerPopup.cs         ← Curated sprite picker that shows only
-│   │   │   │   │   │                                           the wall's own icon library and the
-│   │   │   │   │   │                                           framework default, not every Sprite in
-│   │   │   │   │   │                                           the entire project.
+│   │   │   │   │                                           the wall's own icon library and the
+│   │   │   │   │                                           framework default, not every Sprite in
+│   │   │   │   │                                           the entire project.
 │   │   │   │   │   ├── DefaultBadgeCategories.cs            ← Returns the four building-damage badge
-│   │   │   │   │   │                                           defaults seeded into a new wall's config.
-│   │   │   │   │   │                                           Editor-only; runtime reads config.json.
+│   │   │   │   │                                           defaults seeded into a new wall's config.
+│   │   │   │   │                                           Editor-only; runtime reads config.json.
 │   │   │   │   │   ├── DefaultCategoryStyles.cs             ← Returns the six heritage category style
-│   │   │   │   │   │                                           defaults seeded into a new wall's config.
-│   │   │   │   │   │                                           Editor-only; runtime reads config.json.
+│   │   │   │   │                                           defaults seeded into a new wall's config.
+│   │   │   │   │                                           Editor-only; runtime reads config.json.
 │   │   │   │   │   ├── DefaultOutlineLevels.cs              ← Returns the four destruction-status
 │   │   │   │   │                                               outline level defaults seeded into a new
 │   │   │   │   │                                               wall's config. Editor-only.
 │   │   │   │   │   ├── HelpInfoPopup.cs                     ← Read-only popup for fixed, framework-authored
-│   │   │   │   │   │                                          help text (info button). Distinct from
-│   │   │   │   │   │                                          EntryDetailsPopup (which persists developer notes).
+│   │   │   │   │                                          help text (info button). Distinct from
+│   │   │   │   │                                          EntryDetailsPopup (which persists developer notes).
 │   │   │   │   │   ├── EditorAlertPopup.cs                  ← Non-blocking alert popup rendering a scrollable
 │   │   │   │   │                                              list of validation warning items with fix guidance.
 │   │   │   │   │   ├── LodAutoSuggest.cs  ← Pure Editor-only Suggest Values auto-suggestion from POI count (always 3 explicit bands).
 │   │   │   │   ├── ConfigData/
 │   │   │   │   │   ├── POIAuthoringToolWindow.ConfigHistory.cs ← DrawConfigMutationScope,
-│   │   │   │   │   │                                              RecordConfigChange, undo/redo stack,
-│   │   │   │   │   │                                              HandleUndoShortcuts.
+│   │   │   │   │                                              RecordConfigChange, undo/redo stack,
+│   │   │   │   │                                              HandleUndoShortcuts.
 │   │   │   │   │   └── POIAuthoringToolWindow.ConfigFileIO.cs  POIAuthoringToolWindow.ConfigValidation.cs  ← Validates hierarchy_level_key -> level-table match (ValidateHierarchyLevelKeys) + size_cm soft range 0.5-100cm warning (ValidateHierarchyLevelSizeRange); collected before the zero-count early-return in ValidateAndAlert.
 │   │   │   │   │   └── POIAuthoringToolWindow.ConfigFileIO.cs  ← SaveAllToJson, SaveConfig,
 │   │   │   │   │                                                  LoadConfig, CopyToStreamingAssets.
@@ -898,6 +918,7 @@ TileStories/                          ← Unity project root (open this in Unity
 │   │       │   │                                     correctly identifies MarkerAssets/ paths.
 │   │       │   ├── MarkerVisualsParserTests.cs     ← Tests every string→enum parse path including
 │   │       │   │                                     unknown/missing values and their fallbacks.
+│   │       │   ├── ReloadGuardChoiceTests.cs ← Tier-0 tests for the Load & Populate Rig safety guards (ResolveUncapturedRigChoice / ResolveUnsavedConfigChoice decision tables); 11 tests, EditMode.
 │   │       │   ├── POIAuthoringToolWriteBackTests.cs ← Tests that POI field edits round-trip
 │   │       │   │                                     correctly through the authoring tool's write-
 │   │       │   │                                     back path to WallConfigData.

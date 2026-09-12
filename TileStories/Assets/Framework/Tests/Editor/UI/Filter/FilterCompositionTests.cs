@@ -43,10 +43,10 @@ namespace TileStories.Tests
                 },
                 pois = new List<POIData>
                 {
-                    new POIData { id = "p_relig_1", name = "Religious One", category = "religious", hierarchy_level_key = "hero", x_norm = 0.1f, y_norm = 0.9f },
-                    new POIData { id = "p_relig_2", name = "Religious Two", category = "religious", hierarchy_level_key = "satellite", x_norm = 0.3f, y_norm = 0.7f },
-                    new POIData { id = "p_civic_1", name = "Civic Hall", category = "civic", hierarchy_level_key = "hero", x_norm = 0.6f, y_norm = 0.4f },
-                    new POIData { id = "p_civic_2", name = "Civic Tower", category = "civic", hierarchy_level_key = "satellite", x_norm = 0.8f, y_norm = 0.2f },
+                    new POIData { id = "p_relig_1", name = "Religious One", category = "religious", hierarchy_level_key = "hero", has_captured_position = true, captured_position = new CapturedPosition { x = 0.1f, y = 0f, z = 0.9f } },
+                    new POIData { id = "p_relig_2", name = "Religious Two", category = "religious", hierarchy_level_key = "satellite", has_captured_position = true, captured_position = new CapturedPosition { x = 0.3f, y = 0f, z = 0.7f } },
+                    new POIData { id = "p_civic_1", name = "Civic Hall", category = "civic", hierarchy_level_key = "hero", has_captured_position = true, captured_position = new CapturedPosition { x = 0.6f, y = 0f, z = 0.4f } },
+                    new POIData { id = "p_civic_2", name = "Civic Tower", category = "civic", hierarchy_level_key = "satellite", has_captured_position = true, captured_position = new CapturedPosition { x = 0.8f, y = 0f, z = 0.2f } },
                 },
             };
 

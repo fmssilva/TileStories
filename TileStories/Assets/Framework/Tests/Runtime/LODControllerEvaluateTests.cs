@@ -530,8 +530,7 @@ namespace TileStories.Tests
             {
                 var poi = config.pois.FirstOrDefault(p => p.id == id);
                 Assert.IsNotNull(poi, $"lamp family POI '{id}' must exist in LivingRoom/config.json.");
-                Assert.IsTrue(POIPositionResolver.TryResolvePosition(poi,
-                        config.calibration_anchors.ToArray(), out var worldPos),
+                Assert.IsTrue(POIPositionResolver.TryResolvePosition(poi, out var worldPos),
                     $"real captured_position resolution must succeed for {id}.");
                 Assert.IsTrue(float.IsFinite(worldPos.x) && float.IsFinite(worldPos.y) && float.IsFinite(worldPos.z),
                     $"resolved position must be finite for {id}.");
@@ -672,8 +671,7 @@ namespace TileStories.Tests
                 Assert.IsNotNull(poi,
                     $"family POI '{id}' must exist in LivingRoom/config.json " +
                     $"(add dev POIs to Assets/Apps/LivingRoom/config.json + sync to StreamingAssets + backup).");
-                Assert.IsTrue(POIPositionResolver.TryResolvePosition(poi,
-                        config.calibration_anchors.ToArray(), out var worldPos),
+                Assert.IsTrue(POIPositionResolver.TryResolvePosition(poi, out var worldPos),
                     $"real captured_position resolution must succeed for {id}.");
                 Assert.IsTrue(float.IsFinite(worldPos.x) && float.IsFinite(worldPos.y) && float.IsFinite(worldPos.z),
                     $"resolved position must be finite for {id}.");
@@ -722,15 +720,21 @@ namespace TileStories.Tests
 
             float maxRevealS = config.hierarchy_levels.Max(l => l.reveal_delay_s + l.reveal_duration_s);
             float settleStart = Time.time;
-            float[] prev = LabelScreenYs(markers, _camera);
-            int stable = 0;
+            // Settle detection must be drift-aware, not just frame-to-frame: the first
+            // run in a session pays one-time TMP/Canvas warm-up that drifts the label
+            // layout at under 0.1px/frame for a dozen-plus frames, which defeated the
+            // old 3-consecutive-frames check and released the loop ~1px short of final
+            // layout (source of the DeterministicAcrossRuns flake). Comparing against
+            // the reading from 10 frames ago bounds total residual drift to <0.1px.
+            var ysHistory = new List<float[]>();
             for (int s = 0; s < 360; s++)
             {
                 yield return null;
-                float[] cur = LabelScreenYs(markers, _camera);
-                if (MaxDelta(prev, cur) < 0.1f) stable++; else stable = 0;
-                prev = cur;
-                if (stable >= 3 && (Time.time - settleStart) > maxRevealS + 0.4f) break;
+                ysHistory.Add(LabelScreenYs(markers, _camera));
+                if (ysHistory.Count > 10) ysHistory.RemoveAt(0);
+                bool settled = ysHistory.Count == 10 &&
+                    MaxDelta(ysHistory[0], ysHistory[ysHistory.Count - 1]) < 0.1f;
+                if (settled && (Time.time - settleStart) > maxRevealS + 0.4f) break;
             }
             yield return null;
 
@@ -796,6 +800,27 @@ namespace TileStories.Tests
             yield return null;
         }
 
+    // ------------------------------------------------------------------
+    // KNOWN FLAKINESS NOTE (for future agents -- read before debugging):
+    // PlayMode tests here sample label SCREEN positions (WorldToScreenPoint) after a
+    // "settle" wait. Two real sources of measurement flake exist, both already
+    // accounted for -- do NOT "fix" production code for these:
+    //   1. TMP/Canvas warm-up: the FIRST run in a fresh Play session pays one-time
+    //      TextMeshPro font-atlas + Canvas layout warm-up, which drifts label layout
+    //      at under 0.1px/frame for a dozen-plus frames. A naive "3 consecutive
+    //      stable frames" settle check trips mid-drift and samples ~1px short of
+    //      final layout. RunThreeCycle's settle loop therefore compares against the
+    //      reading from 10 frames ago (bounded residual drift <0.1px), not just the
+    //      previous frame. Symptom if it regresses: DeterministicAcrossRuns fails
+    //      with run1 ~= 1.2px below run2, run2 byte-identical across sessions
+    //      (170.6486 for lamp label[5] at 2026-09 config), and the test passes on
+    //      re-run. That signature == settle flake, NOT a displacement bug: the
+    //      displacement math itself was verified byte-deterministic (per-label
+    //      diagnostics showed identical anchoredPosition/sizeDelta/scale/position).
+    //   2. Frame pacing: editor warm-up after entering Play makes the first tests in
+    //      a session run at different frame times; tolerances in this file (e.g. the
+    //      6.0f cycle-3 hold tolerance) were relaxed for this reason (Block 6.4).
+    // ------------------------------------------------------------------
         // T2: determinism -- same input (RunThreeCycle resets _displacementStability to a fresh
         // empty dict each call) must yield byte-identical cycle-2 screen-Y for every label.
         [UnityTest]

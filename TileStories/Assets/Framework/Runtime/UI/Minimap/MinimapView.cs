@@ -177,10 +177,19 @@ namespace TileStories
             hit.style.width = tapSize;
             hit.style.height = tapSize;
 
+            // Use captured_position and wall_bounds for position.
+            // Fallback to (0.5, 0.5) if no captured position or bounds available.
+            Vector2 normPos = new Vector2(0.5f, 0.5f);
+            if (poi.has_captured_position && poi.captured_position != null && _config != null && _config.wall_bounds != null && _config.wall_bounds.IsValid())
+            {
+                Vector3 worldPos = new Vector3(poi.captured_position.x, poi.captured_position.y, poi.captured_position.z);
+                normPos = _config.wall_bounds.WorldToNormalized(worldPos);
+            }
+
             // Use the coordinate converter for position (centres the hit zone on the POI).
             Vector2 pos = MinimapCoordinateConverter.ConvertToPixel(
-                MinimapCoordinateConverter.ClampNorm(poi.x_norm),
-                MinimapCoordinateConverter.ClampNorm(poi.y_norm),
+                MinimapCoordinateConverter.ClampNorm(normPos.x),
+                MinimapCoordinateConverter.ClampNorm(normPos.y),
                 _width, _height, tapSize);
             hit.style.left = pos.x;
             hit.style.top = pos.y;

@@ -39,19 +39,25 @@ namespace TileStories.Tests
                     new POIData
                     {
                         id = "poi_cathedral", name = "Cathedral",
-                        category = "religious", x_norm = 0.3f, y_norm = 0.7f,
+                        category = "religious", 
+                        has_captured_position = true,
+                        captured_position = new CapturedPosition { x = 1f, y = 0f, z = 2f },
                         summary = "A beautiful old cathedral."
                     },
                     new POIData
                     {
                         id = "poi_castle", name = "Castle",
-                        category = "defense", x_norm = 0.6f, y_norm = 0.4f,
+                        category = "defense", 
+                        has_captured_position = true,
+                        captured_position = new CapturedPosition { x = 2f, y = 0f, z = 1f },
                         summary = "A medieval castle on the hill."
                     },
                     new POIData
                     {
                         id = "poi_cave", name = "Cave",
-                        category = "nature", x_norm = 0.5f, y_norm = 0.5f,
+                        category = "nature", 
+                        has_captured_position = true,
+                        captured_position = new CapturedPosition { x = 0.5f, y = 0f, z = 0.5f },
                         summary = "A dark cave entrance."
                     }
                 }

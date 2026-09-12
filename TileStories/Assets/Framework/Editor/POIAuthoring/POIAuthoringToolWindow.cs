@@ -158,7 +158,6 @@ namespace TileStories.Editor
         }
 
         [SerializeField] private WallConfigData _config;
-        [SerializeField] private Transform _correctionAnchor;
         [SerializeField] private GameObject _wallMesh;
         [SerializeField] private string _configPath = DefaultConfigPath;
         [SerializeField] private string _streamingConfigPath = DefaultStreamingConfigPath;
@@ -207,14 +206,11 @@ namespace TileStories.Editor
 
         private void OnEnable()
         {
-            TryResolveSceneReferences();
             EnsureDefaultIconLibraryLoaded();
-            SceneView.duringSceneGui += OnSceneGUI;
         }
 
         private void OnDisable()
         {
-            SceneView.duringSceneGui -= OnSceneGUI;
         }
 
         private void OnGUI()
@@ -227,7 +223,7 @@ namespace TileStories.Editor
 
             if (_config == null)
             {
-                EditorGUILayout.HelpBox("No config loaded. Click Load Config.", MessageType.Info);
+                EditorGUILayout.HelpBox("No config loaded. Click Load & Populate Rig.", MessageType.Info);
                 return;
             }
 
@@ -342,8 +338,6 @@ namespace TileStories.Editor
 
         private void DrawTopConfigAndActions()
         {
-            TryResolveSceneReferences();
-
             _showTopConfig = EditorGUILayout.Foldout(_showTopConfig, "Scene Configuration", true, CreateFoldoutStyle(SceneConfigSectionColor));
             if (_showTopConfig)
             {
@@ -353,7 +347,6 @@ namespace TileStories.Editor
                     DrawPathRow("Streaming path", ref _streamingConfigPath, "json");
                     DrawPathRow("Marker prefab", ref _prefabPath, "prefab");
 
-                    _correctionAnchor = (Transform)EditorGUILayout.ObjectField("Correction anchor", _correctionAnchor, typeof(Transform), true);
                     _wallMesh = (GameObject)EditorGUILayout.ObjectField("Wall mesh (reference)", _wallMesh, typeof(GameObject), true);
                 }, SceneConfigSectionColor);
             }
@@ -362,11 +355,8 @@ namespace TileStories.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("Load Config", GUILayout.Height(26f)))
-                    LoadConfig();
-
-                if (GUILayout.Button("Populate Rig from JSON", GUILayout.Height(26f)))
-                    PopulateRig();
+                if (GUILayout.Button("Load & Populate Rig", GUILayout.Height(26f)))
+                    LoadAndPopulateRig();
 
                 bool hasRigChildren = GetRigChildCount() > 0;
                 var previousColor = GUI.color;
@@ -409,13 +399,6 @@ namespace TileStories.Editor
 
         private void DrawSyncAndWarnings()
         {
-            if (_correctionAnchor == null)
-            {
-                EditorGUILayout.HelpBox(
-                    "Populate/Capture need PlacementCorrectionAnchor. Assign it manually if auto-find fails.",
-                    MessageType.Warning);
-            }
-
             int rigCount = GetRigChildCount();
             if (rigCount > 0)
             {

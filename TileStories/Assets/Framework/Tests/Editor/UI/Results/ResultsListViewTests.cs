@@ -22,9 +22,9 @@ namespace TileStories.Tests
                 no_results_message = "No matches for \"{query}\" - try removing a filter.",
                 pois = new List<POIData>
                 {
-                    new POIData { id = "poi_1", name = "Cathedral", category = "religious", x_norm = 0.3f, y_norm = 0.7f, summary = "A beautiful old cathedral." },
-                    new POIData { id = "poi_2", name = "Town Hall", category = "civic", x_norm = 0.6f, y_norm = 0.4f, summary = "Historic city hall." },
-                    new POIData { id = "poi_3", name = "Market", category = "commerce", x_norm = 0.5f, y_norm = 0.5f, summary = "Old market square." },
+                    new POIData { id = "poi_1", name = "Cathedral", category = "religious", has_captured_position = true, captured_position = new CapturedPosition { x = 0.3f, y = 0f, z = 0.7f }, summary = "A beautiful old cathedral." },
+                    new POIData { id = "poi_2", name = "Town Hall", category = "civic", has_captured_position = true, captured_position = new CapturedPosition { x = 0.6f, y = 0f, z = 0.4f }, summary = "Historic city hall." },
+                    new POIData { id = "poi_3", name = "Market", category = "commerce", has_captured_position = true, captured_position = new CapturedPosition { x = 0.5f, y = 0f, z = 0.5f }, summary = "Old market square." },
                 }
             };
 

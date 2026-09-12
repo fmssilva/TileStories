@@ -31,8 +31,6 @@ namespace TileStories.Tests
                         id = "poi_1",
                         name = "Test POI",
                         category = "default",
-                        x_norm = 0.2f,
-                        y_norm = 0.3f,
                         has_captured_position = false
                     }
                 }

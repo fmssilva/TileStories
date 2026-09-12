@@ -60,7 +60,11 @@ namespace TileStories
         public List<HierarchyLevelEntry> hierarchy_levels = new();
 
         public List<POIData> pois = new();
-        public List<CalibrationAnchor> calibration_anchors = new();
+
+        // Optional wall bounds for minimap coordinate conversion (used to convert
+        // captured_position world coordinates to normalized minimap coordinates).
+        // If not set, minimap will fall back to a default 4x3m wall centered at origin.
+        public WallBounds wall_bounds;
 
         // Optional wall-level effect parameter defaults. When present, these values
         // are passed to each marker's effect components at spawn time, overriding
@@ -406,8 +410,13 @@ namespace TileStories
         public string id;
         public string name;
         public string category;
-        public float x_norm;
-        public float y_norm;
+
+        // Dev-only edit-scene yaw (degrees) around the marker's up/Y axis. The
+        // runtime MarkerBillboard always faces the marker to the camera, so this
+        // never affects the shipped look -- it only tilts the rig marker in the
+        // Editor Scene view so the developer can place/preview it from a chosen
+        // angle. Persisted so the dev's preview preference survives reloads.
+        public float editor_rotation_deg;
 
         public CapturedPosition captured_position;
         public bool has_captured_position;
@@ -513,14 +522,7 @@ namespace TileStories
         public Vector3 ToVector3() => new(x, y, z);
     }
 
-    [Serializable]
-    public class CalibrationAnchor
-    {
-        public string id;
-        public float x_norm;
-        public float y_norm;
-                public CapturedPosition captured_position;
-    }
+    
 
         [Serializable]
     public class LodSettings
@@ -659,5 +661,29 @@ namespace TileStories
 
         // The actual keyword strings for this field on this POI.
         public List<string> keywords = new();
+    }
+}
+
+// Wall bounds for minimap coordinate conversion.
+// Represents the world-space bounding box of the wall area.
+// min/max are in world space (same coordinate system as captured_position).
+[Serializable]
+public class WallBounds
+{
+    public Vector3 min;
+    public Vector3 max;
+
+    // Returns true if bounds are valid (min <= max on all axes)
+    public bool IsValid() => min.x <= max.x && min.y <= max.y && min.z <= max.z;
+
+    // Convert a world position to normalized [0,1] coordinates within these bounds.
+    // Returns (0.5, 0.5) if bounds are invalid.
+    public Vector2 WorldToNormalized(Vector3 worldPos)
+    {
+        if (!IsValid())
+            return new Vector2(0.5f, 0.5f);
+        float x = Mathf.InverseLerp(min.x, max.x, worldPos.x);
+        float y = Mathf.InverseLerp(min.y, max.y, worldPos.y);
+        return new Vector2(Mathf.Clamp01(x), Mathf.Clamp01(y));
     }
 }

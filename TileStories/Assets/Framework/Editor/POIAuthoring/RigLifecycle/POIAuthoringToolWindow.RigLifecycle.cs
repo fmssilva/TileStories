@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -13,7 +13,28 @@ namespace TileStories.Editor
             if (_config == null || _config.pois == null) return;
 
             Transform rig = GetExistingRig();
-                        if (rig == null) return;
+            if (rig == null) return;
+
+            foreach (var poi in _config.pois)
+            {
+                var child = rig.Find(poi.id);
+                if (child == null) continue;
+
+                // Config is the source of truth for the edit-scene yaw; re-apply on
+                // every visual refresh so undo/redo/field edits don't drift the
+                // Scene-view preview away from the stored angle.
+                child.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
+
+                // Reuse shared configuration logic.
+                ConfigureRigChild(poi, child);
+            }
+        }
+
+        // Configures a single rig child with all visual settings (MarkerView, POIAnchor, etc.).
+        // Shared between PopulateRig and the per-POI add-flow so both use identical setup.
+        internal void ConfigureRigChild(POIData poi, Transform child)
+        {
+            if (_config == null || child == null) return;
 
             bool hasCategoryDefinitions = _config.category_styles != null && _config.category_styles.Count > 0;
             if (hasCategoryDefinitions) CategoryPalette.Configure(_config.category_styles);
@@ -54,23 +75,22 @@ namespace TileStories.Editor
 
             var runtimeLibrary = _wallIconLibrary;
 
-            foreach (var poi in _config.pois)
-            {
-                var child = rig.Find(poi.id);
-                if (child == null) continue;
+            // Config is the source of truth for the edit-scene yaw; re-apply on
+            // every visual refresh so undo/redo/field edits don't drift the
+            // Scene-view preview away from the stored angle.
+            child.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
 
-                var anchor = child.GetComponentInChildren<POIAnchor>() ?? child.gameObject.AddComponent<POIAnchor>();
-                anchor.Initialise(poi);
+            var anchor = child.GetComponentInChildren<POIAnchor>() ?? child.gameObject.AddComponent<POIAnchor>();
+            anchor.Initialise(poi);
 
-                var markerView = child.GetComponentInChildren<MarkerView>();
-                var effects = MarkerEffectFlags.None;
-                markerView?.Initialise(anchor, outlineMode, useBadge, shape, effects,
-                    hasCategoryDefinitions,
-                    hasShapeFromConfig,
-                    hasOutlineLevels,
-                    runtimeLibrary,
-                    badgeShape);
-            }
+            var markerView = child.GetComponentInChildren<MarkerView>();
+            var effects = MarkerEffectFlags.None;
+            markerView?.Initialise(anchor, outlineMode, useBadge, shape, effects,
+                hasCategoryDefinitions,
+                hasShapeFromConfig,
+                hasOutlineLevels,
+                runtimeLibrary,
+                badgeShape);
         }
 
         internal bool IsRigInSyncWithConfig(out int outOfSyncCount)
@@ -141,18 +161,9 @@ namespace TileStories.Editor
 
         private Transform GetExistingRig()
         {
-            TryResolveSceneReferences();
-            if (_correctionAnchor == null)
-                return null;
-
-            for (int i = 0; i < _correctionAnchor.childCount; i++)
-            {
-                var child = _correctionAnchor.GetChild(i);
-                if (child.name == "POIAuthoringRig")
-                    return child;
-            }
-
-            return null;
+            // Search for POIAuthoringRig in the scene
+            var rigObject = GameObject.Find("POIAuthoringRig");
+            return rigObject != null ? rigObject.transform : null;
         }
 
         private Transform GetOrCreateRig()
@@ -161,12 +172,8 @@ namespace TileStories.Editor
             if (existing != null)
                 return existing;
 
-            if (_correctionAnchor == null)
-                return null;
-
             var go = new GameObject("POIAuthoringRig");
             Undo.RegisterCreatedObjectUndo(go, "Create POIAuthoringRig");
-            go.transform.SetParent(_correctionAnchor);
             go.transform.localPosition = Vector3.zero;
             go.transform.localRotation = Quaternion.identity;
             go.transform.localScale = Vector3.one;
@@ -179,17 +186,85 @@ namespace TileStories.Editor
             return rig != null ? rig.childCount : 0;
         }
 
-        private void TryResolveSceneReferences()
+internal enum ReloadGuardChoice
         {
-            if (_correctionAnchor == null)
+            ProceedWithSaveOrCapture = 0,
+            DiscardAndReload = 1,
+            Cancel = 2,
+        }
+
+        // Pure decision helper for Guard 1 (uncaptured rig positions).
+        // Returns null when no dialog is needed; otherwise the action the
+        // caller must take for the given dialog result.
+        internal static ReloadGuardChoice? ResolveUncapturedRigChoice(
+            bool hasConfig, bool hasRigChildren, bool rigInSync, int dialogResult)
+        {
+            if (!hasConfig || !hasRigChildren || rigInSync)
+                return null; // No dialog needed.
+            if (dialogResult == 0) return ReloadGuardChoice.ProceedWithSaveOrCapture;
+            if (dialogResult == 1) return ReloadGuardChoice.DiscardAndReload;
+            return ReloadGuardChoice.Cancel;
+        }
+
+        // Pure decision helper for Guard 2 (unsaved in-memory config edits).
+        internal static ReloadGuardChoice? ResolveUnsavedConfigChoice(
+            bool hasConfig, bool hasUnsavedChanges, int dialogResult)
+        {
+            if (!hasConfig || !hasUnsavedChanges)
+                return null; // No dialog needed.
+            if (dialogResult == 0) return ReloadGuardChoice.ProceedWithSaveOrCapture;
+            if (dialogResult == 1) return ReloadGuardChoice.DiscardAndReload;
+            return ReloadGuardChoice.Cancel;
+        }
+
+        private void LoadAndPopulateRig()
+        {
+            // Guard 1: rig markers were moved in the scene but never captured
+            // to config. PopulateRig would destroy those Transforms, so offer
+            // to capture them into the in-memory config first (CapturePositions
+            // flips _hasUnsavedChanges, so Guard 2 below then offers to save).
+            Transform existingRig = GetExistingRig();
+            int outOfSyncCount = 0;
+            bool rigNeedsDialog = _config != null
+                && existingRig != null && existingRig.childCount > 0
+                && !IsRigInSyncWithConfig(out outOfSyncCount)
+                && outOfSyncCount > 0;
+            if (rigNeedsDialog)
             {
-                var correctionAnchorObject = GameObject.Find("PlacementCorrectionAnchor");
-                if (correctionAnchorObject != null)
-                    _correctionAnchor = correctionAnchorObject.transform;
+                int choice = EditorUtility.DisplayDialogComplex(
+                    "Uncaptured rig positions",
+                    $"{outOfSyncCount} marker(s) in the rig were moved but never captured. Repopulating will destroy those moved Transforms.",
+                    "Capture & Reload",
+                    "Discard & Reload",
+                    "Cancel");
+
+                var rigChoice = ResolveUncapturedRigChoice(true, true, false, choice);
+                if (rigChoice == ReloadGuardChoice.ProceedWithSaveOrCapture)
+                    CapturePositions();
+                else if (rigChoice != ReloadGuardChoice.DiscardAndReload)
+                    return; // Cancel (or closed via X) -> stay, lose nothing.
             }
 
-            if (_wallMesh == null)
-                _wallMesh = GameObject.Find("146267-LivingRoom2-tex");
+            // Guard 2: unsaved in-memory config edits would be overwritten by
+            // the reload inside PopulateRig. Ask first, same blocking pattern
+            // as ClearRig's unsynced-positions check.
+            if (_config != null && _hasUnsavedChanges)
+            {
+                int choice = EditorUtility.DisplayDialogComplex(
+                    "Unsaved config changes",
+                    "You have unsaved config edits. Reloading from config.json will discard them.",
+                    "Save & Reload",
+                    "Discard & Reload",
+                    "Cancel");
+
+                var configChoice = ResolveUnsavedConfigChoice(true, true, choice);
+                if (configChoice == ReloadGuardChoice.ProceedWithSaveOrCapture)
+                    SaveAllToJson(); // CapturePositions + SaveConfig
+                else if (configChoice != ReloadGuardChoice.DiscardAndReload)
+                    return; // Cancel (or closed via X) -> stay, lose nothing.
+            }
+
+            PopulateRig();
         }
 
         private void PopulateRig()
@@ -244,9 +319,7 @@ namespace TileStories.Editor
                     Undo.DestroyObjectImmediate(child);
             }
 
-                        var anchors = _config.calibration_anchors?.ToArray() ?? Array.Empty<CalibrationAnchor>();
-
-            bool hasCategoryDefinitions = _config.category_styles != null && _config.category_styles.Count > 0;
+                        bool hasCategoryDefinitions = _config.category_styles != null && _config.category_styles.Count > 0;
             if (hasCategoryDefinitions) CategoryPalette.Configure(_config.category_styles);
             else CategoryPalette.ClearOverrides();
 
@@ -285,7 +358,7 @@ namespace TileStories.Editor
 
             foreach (var poi in _config.pois)
             {
-                if (!POIPositionResolver.TryResolvePosition(poi, anchors, out Vector3 localPos))
+                if (!POIPositionResolver.TryResolvePosition(poi, out Vector3 localPos))
                 {
                     Debug.LogWarning($"[POIAuthoring] Skipping POI '{poi.id}' - position could not be resolved.");
                     continue;
@@ -294,7 +367,7 @@ namespace TileStories.Editor
                 var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, rig);
                 instance.name = poi.id;
                 instance.transform.localPosition = localPos;
-                instance.transform.localRotation = Quaternion.identity;
+                instance.transform.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
 
                 Undo.RegisterCreatedObjectUndo(instance, $"Populate marker for {poi.id}");
 
@@ -352,11 +425,8 @@ namespace TileStories.Editor
                     continue;
                 }
 
-                Vector3 localPos;
-                if (_correctionAnchor != null)
-                    localPos = _correctionAnchor.InverseTransformPoint(markerTransform.position);
-                else
-                    localPos = markerTransform.localPosition;
+                // Rig is at origin, so localPosition == world position
+                Vector3 localPos = markerTransform.localPosition;
 
                 poi.captured_position = new CapturedPosition
                 {
@@ -389,28 +459,5 @@ namespace TileStories.Editor
             Selection.objects = gos.ToArray();
         }
 
-        private void OnSceneGUI(SceneView sv)
-        {
-            if (_config == null || _config.pois == null)
-                return;
-
-            var anchors = _config.calibration_anchors?.ToArray() ?? Array.Empty<CalibrationAnchor>();
-
-            Handles.color = Color.cyan;
-            foreach (var poi in _config.pois)
-            {
-                if (!POIPositionResolver.TryResolvePosition(poi, anchors, out Vector3 localPos))
-                    continue;
-
-                Vector3 worldPos;
-                if (_correctionAnchor != null)
-                    worldPos = _correctionAnchor.TransformPoint(localPos);
-                else
-                    worldPos = localPos;
-
-                float handleSize = HandleUtility.GetHandleSize(worldPos) * 0.1f;
-                Handles.SphereHandleCap(0, worldPos, Quaternion.identity, handleSize, EventType.Repaint);
-            }
-        }
     }
 }

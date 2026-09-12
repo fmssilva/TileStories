@@ -1,4 +1,49 @@
-# Cline AI Model Rankings & Execution Policy
+# `Free Models`
+Best Strategy for your C# / Unity Project in Cline:
+
+**Plan - Refactoring Steps - Architect** 
+  - LongCat 2.0 or Nemotron-3 Ultra
+**Act - Engineer**
+  - DeepSeek V4 Flash or Laguna S 2.1 
+
+1. DeepSeek V4 Flash (Top Overall Tier)
+Role Fit: Primary Software Engineer & Rapid Debugger.
+
+Why it ranks #1: Built with an efficient Mixture-of-Experts (284B total / 13B active) and a massive 1M-token context window, it hits an impressive ~79.0% on SWE-bench Verified. It is fast, highly accurate at syntax fixes, and handles multi-file C# agentic edit loops in Cline without hallucinating invalid API calls.
+
+2. Laguna S 2.1 (by Poolside)
+Role Fit: Primary Software Engineer & Code Refactoring Specialist.
+
+Why it ranks #2: Trained strictly in real RL software engineering environments, it hits 70.2% on Terminal-Bench 2.1 and 59.4% on SWE-Bench Pro. It excels at multi-file C# execution, navigating command terminal outputs, and fixing compilation errors, though its raw multi-domain reasoning sits just behind DeepSeek.
+
+3. LongCat 2.0
+Role Fit: Lead Architect (System Design & Multi-Script Planning).
+
+Why it ranks #3: A massive 1.6-trillion parameter MoE model with a 1M context window. It outperforms for high-level repository mapping and breaking down complex C# architectures into logical task lists. However, its token generation speed is slower (47.6 tok/s), making it better for planning than rapid, iterative coding loops.
+
+4. NVIDIA Nemotron-3 Ultra 550B
+Role Fit: Secondary Architect & Deep Code Reviewer.
+
+Why it ranks #4: A hybrid Mamba-Transformer MoE model with 550B total / 55B active parameters. It has strong high-level reasoning and function-calling capabilities, but real-world agent benchmarks show noticeable latency spikes and higher tool-use error rates compared to dedicated coding models like Laguna or DeepSeek.
+
+5. Muse Spark 1.3 Contributor
+Role Fit: Multimodal Visual Architect (UI/Unity Scene Inspector Analysis).
+
+Why it ranks #5: Meta’s native multimodal reasoning model is great if you pass screenshots of Unity Inspector components, UI layouts, or node graphs alongside your code tasks. For pure C# code generation and complex debugging, however, it lacks the raw coding-agent focus of the top four.
+
+6. GLM-5.3-Flash
+Role Fit: Quick Helper / Light Script Assistant.
+
+Why it ranks #6: A lightweight multimodal flash model from the GLM family. It provides rapid response times for basic C# script creation and small single-file functions, but struggles with large context maintenance across a heavy, multi-directory C# repo.
+
+7. Solar Pro 4
+Role Fit: Office Productivity & Simple Scripting.
+
+Why it ranks #7: While strong at general document-intensive tasks and simple code snippets, it is not optimized for autonomous, multi-file agentic tool calling inside extensions like Cline.
+
+
+
+# More complete list
 
 ## `Architect & Reviewer Models`
 *Prioritizes repository-wide comprehension, multi-file planning, refactoring logic, and review accuracy.*

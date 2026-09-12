@@ -199,9 +199,6 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
 
         private void SpawnPOIs()
         {
-            // Resolve calibration anchors once
-            CalibrationAnchor[] anchors = _config.calibration_anchors?.ToArray() ?? System.Array.Empty<CalibrationAnchor>();
-
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             // Collect spawned MarkerViews for overlap detection
@@ -210,7 +207,7 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
             foreach (var poi in _config.pois)
             {
                 // Resolve position via the dedicated resolver (no position logic in this class)
-                if (!POIPositionResolver.TryResolvePosition(poi, anchors, out Vector3 localPos))
+                if (!POIPositionResolver.TryResolvePosition(poi, out Vector3 localPos))
                 {
                     Debug.LogWarning($"[WallSession] Skipping POI '{poi.id}' -- position could not be resolved.");
                     continue;
