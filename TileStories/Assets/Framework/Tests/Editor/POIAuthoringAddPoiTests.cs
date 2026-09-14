@@ -89,7 +89,66 @@ namespace TileStories.Tests
                 "Editor-only icons must live under Framework/Editor per 10-structure.");
         }
     }
-}
+
+    // Tier-0 tests for the rename key decision table (Enter/Esc double-press bug).
+    public class PoiRenameKeysTests
+    {
+        [Test]
+        public void Resolve_KeyDown_Return_Commits()
+        {
+            Assert.AreEqual(PoiRenameKeys.Action.Commit,
+                PoiRenameKeys.Resolve(EventType.KeyDown, KeyCode.Return));
+        }
+
+        [Test]
+        public void Resolve_KeyDown_KeypadEnter_Commits()
+        {
+            Assert.AreEqual(PoiRenameKeys.Action.Commit,
+                PoiRenameKeys.Resolve(EventType.KeyDown, KeyCode.KeypadEnter));
+        }
+
+        [Test]
+        public void Resolve_KeyDown_Escape_Cancels()
+        {
+            Assert.AreEqual(PoiRenameKeys.Action.Cancel,
+                PoiRenameKeys.Resolve(EventType.KeyDown, KeyCode.Escape));
+        }
+
+        // Regression: the TextField consumes the first Return (event becomes
+        // Used); the resolver must never re-fire on consumed events.
+        [Test]
+        public void Resolve_Used_Return_IsNone()
+        {
+            Assert.AreEqual(PoiRenameKeys.Action.None,
+                PoiRenameKeys.Resolve(EventType.Used, KeyCode.Return));
+        }
+
+        // KeyUp must not re-fire the action after KeyDown handled it.
+        [Test]
+        public void Resolve_KeyUp_Return_IsNone()
+        {
+            Assert.AreEqual(PoiRenameKeys.Action.None,
+                PoiRenameKeys.Resolve(EventType.KeyUp, KeyCode.Return));
+        }
+
+        // Layout/Repaint passes must never trigger actions.
+        [Test]
+        public void Resolve_LayoutAndRepaint_AreNone()
+        {
+            Assert.AreEqual(PoiRenameKeys.Action.None,
+                PoiRenameKeys.Resolve(EventType.Layout, KeyCode.Return));
+            Assert.AreEqual(PoiRenameKeys.Action.None,
+                PoiRenameKeys.Resolve(EventType.Repaint, KeyCode.Escape));
+        }
+
+        // Ordinary typing keys must not commit or cancel.
+        [Test]
+        public void Resolve_KeyDown_Letter_IsNone()
+        {
+            Assert.AreEqual(PoiRenameKeys.Action.None,
+                PoiRenameKeys.Resolve(EventType.KeyDown, KeyCode.A));
+        }
+    }
 
     // Tier-0 EditMode tests for the "Add POI" button (Step 19).
     public class POIAuthoringAddPoiTests
@@ -179,3 +238,4 @@ namespace TileStories.Tests
             Assert.AreNotEqual(id1, id2, "Each POI should receive a unique GUID");
         }
     }
+}

@@ -205,6 +205,12 @@ namespace TileStories.Editor
         // never depends on the stray top-level Assets/Editor copy.
         internal const string EditIconAssetPath = "Assets/Framework/Editor/POIAuthoring/SpecificMarker/Icons/edit-icon.png";
 
+        // Focus-in-Scene help (per-POI header row, (i) button right of the Focus button).
+        internal static readonly string FocusInSceneHelpBody =
+            "Selects this POI in the Hierarchy and frames the Scene view camera on it. " +
+            "Move the marker with Unity's Move tool (toolbar or W key), then press Capture Position in the Position foldout to store the coordinates. " +
+            "Scene camera: right-drag or Alt+left-drag orbits, Alt+Ctrl+left-drag pans, mouse wheel zooms.";
+
         // Keyword Fields table (Global Scene > Search & Filter).
         private static readonly string SearchFieldKeyHelp = "Stable identifier for this search axis. Never change after authoring begins -- existing per-POI keywords reference it by key.";
         private static readonly string SearchFieldLabelHelp = "Human-readable name shown in each POI's keyword editor.";

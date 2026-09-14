@@ -58,6 +58,33 @@ namespace TileStories.Editor
                     // Edit mode: full-width text field so long names are editable.
                     string fieldRectName = $"POIName_{foldoutKey}";
                     string editValueKey = $"editValue_{foldoutKey}";
+                    var e = Event.current;
+
+                    // Resolve Enter/Escape BEFORE the TextField draws. Unity's
+                    // TextField consumes the first Return it sees (commit +
+                    // keyboard-focus release), turning the event into
+                    // EventType.Used before any post-field check could see it --
+                    // the root cause of the "press Enter twice" bug. Consuming
+                    // the event pre-field is deterministic; the decision table
+                    // lives in PoiRenameKeys (pure, Tier-0 tested).
+                    var keyAction = PoiRenameKeys.Resolve(e.type, e.keyCode);
+                    if (keyAction == PoiRenameKeys.Action.Commit)
+                    {
+                        // The draft mirror is current as of the last keystroke pass.
+                        SaveNameChange(poi, foldoutKey, editModeKey, editValueKey,
+                            SessionState.GetString(editValueKey, displayName));
+                        e.Use();
+                    }
+                    else if (keyAction == PoiRenameKeys.Action.Cancel)
+                    {
+                        // Cancel on Escape -- discard edits, keep the old name.
+                        SessionState.SetBool(editModeKey, false);
+                        SessionState.EraseString(editValueKey);
+                        SessionState.EraseString(editValueKey + "_focused");
+                        GUI.FocusControl(null);
+                        e.Use();
+                    }
+
                     GUI.SetNextControlName(fieldRectName);
                     var editRect = new Rect(headerRect.x + arrowWidth, headerRect.y, headerRect.width - arrowWidth, headerRect.height);
                     // TextField returns the live value every repaint; the SessionState
@@ -73,35 +100,10 @@ namespace TileStories.Editor
                         SessionState.SetString(editValueKey + "_focused", "1");
                     }
 
-                    // Handle Enter/Escape to exit edit mode
-                    var e = Event.current;
-                    // Gate on the keys, not focus name: the TextField can consume
-                    // the first Return (releasing focus) before this runs, which
-                    // used to swallow the first Enter and force a second press.
-                    if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape))
+                    // Click outside the field commits the rename.
+                    if (e.type == EventType.MouseDown && !editRect.Contains(e.mousePosition))
                     {
-                        if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
-                        {
-                            // Save on Enter - strips the "N. " numbering prefix.
-                            var textToSave = SessionState.GetString(editValueKey, newName);
-                            SaveNameChange(poi, foldoutKey, editModeKey, editValueKey, textToSave);
-                            e.Use();
-                        }
-                        else if (e.keyCode == KeyCode.Escape)
-                        {
-                            // Cancel on Escape -- discard edits, keep the old name.
-                            SessionState.SetBool(editModeKey, false);
-                            SessionState.EraseString(editValueKey);
-                            SessionState.EraseString(editValueKey + "_focused");
-                            GUI.FocusControl(null);
-                            e.Use();
-                        }
-                    }
-                    else if (e.type == EventType.MouseDown && !editRect.Contains(e.mousePosition))
-                    {
-                        // Click outside the field commits the rename.
-                        var textToSave = SessionState.GetString(editValueKey, newName);
-                        SaveNameChange(poi, foldoutKey, editModeKey, editValueKey, textToSave);
+                        SaveNameChange(poi, foldoutKey, editModeKey, editValueKey, newName);
                     }
                 }
                 else
@@ -143,14 +145,20 @@ namespace TileStories.Editor
                     // Focus helper, tinted with this POI's header color so the
                     // action reads as belonging to the marker above. Disabled
                     // until the rig has a child named poi.id (populate first).
-                    using (new EditorGUI.DisabledScope(!CanFocusPoiInScene(poi)))
+                    using (new EditorGUILayout.HorizontalScope())
                     {
-                        Color poiColor = PoiHeaderColorFor(foldoutKey, i);
-                        var prevBg = GUI.backgroundColor;
-                        GUI.backgroundColor = poiColor;
-                        if (GUILayout.Button("Focus in Scene", GUILayout.Width(140f)))
-                            FocusPoiInScene(poi);
-                        GUI.backgroundColor = prevBg;
+                        using (new EditorGUI.DisabledScope(!CanFocusPoiInScene(poi)))
+                        {
+                            Color poiColor = PoiHeaderColorFor(foldoutKey, i);
+                            var prevBg = GUI.backgroundColor;
+                            GUI.backgroundColor = poiColor;
+                            if (GUILayout.Button("Focus in Scene", GUILayout.Width(140f)))
+                                FocusPoiInScene(poi);
+                            GUI.backgroundColor = prevBg;
+                        }
+
+                        GUILayout.Space(10f);
+                        HelpInfoButton.Draw("Focus in Scene", FocusInSceneHelpBody);
                     }
 
                     _showPoiPosition = DrawFramedFoldout(ref _showPoiPosition, () => DrawPositionTabs(poi), "Position", FoldoutDefaultColor);
