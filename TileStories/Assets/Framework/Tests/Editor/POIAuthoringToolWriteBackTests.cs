@@ -12,7 +12,7 @@ namespace TileStories.Editor.Tests
     {
         // Simulate the Capture Positions operation: given a config with 3 POIs
         // and a set of "placed" scene objects matching only 2 of them,
-        // only those 2 POIs should have their captured_position updated.
+        // only those 2 POIs should have their position updated.
         [Test]
         public void CapturePositions_OnlyUpdatesMatchedPOIs()
         {
@@ -33,14 +33,12 @@ namespace TileStories.Editor.Tests
                     continue;
                 }
 
-                poi.captured_position = new CapturedPosition
+                poi.position = new PositionData
                 {
                     x = 1.0f,
                     y = 2.0f,
                     z = 3.0f
                 };
-                poi.captured_position_source = "workflow_a_editor";
-                poi.captured_position_timestamp = 1234567890;
                 captured++;
             }
 
@@ -49,19 +47,16 @@ namespace TileStories.Editor.Tests
 
             // Verify captured POIs have the updated position
             var lamp = config.pois.Find(p => p.id == "lamp");
-            Assert.IsNotNull(lamp.captured_position, "lamp should have captured_position.");
-            Assert.AreEqual(1.0f, lamp.captured_position.x, 0.001f);
-            Assert.AreEqual("workflow_a_editor", lamp.captured_position_source);
+            Assert.IsNotNull(lamp.position, "lamp should have position.");
+            Assert.AreEqual(1.0f, lamp.position.x, 0.001f);
 
             var painting = config.pois.Find(p => p.id == "painting");
-            Assert.IsNotNull(painting.captured_position, "painting should have captured_position.");
-            Assert.AreEqual(1.0f, painting.captured_position.x, 0.001f);
+            Assert.IsNotNull(painting.position, "painting should have position.");
+            Assert.AreEqual(1.0f, painting.position.x, 0.001f);
 
             // Verify the unmatched POI was NOT touched
             var camera = config.pois.Find(p => p.id == "camera");
-            Assert.IsNull(camera.captured_position, "camera should NOT have captured_position (was not in scene).");
-            Assert.IsNull(camera.captured_position_source, "camera source should remain null.");
-            Assert.AreEqual(0, camera.captured_position_timestamp, "camera timestamp should remain 0.");
+            Assert.IsNull(camera.position, "camera should NOT have position (was not in scene).");
         }
 
         // Verify that capturing only one POI doesn't affect other POIs' fields.
@@ -72,20 +67,18 @@ namespace TileStories.Editor.Tests
 
             // Simulate capturing only "lamp"
             var lamp = config.pois.Find(p => p.id == "lamp");
-            lamp.captured_position = new CapturedPosition { x = 1f, y = 2f, z = 3f };
-            lamp.captured_position_source = "workflow_a_editor";
-            lamp.captured_position_timestamp = 1234567890;
+            lamp.position = new PositionData { x = 1f, y = 2f, z = 3f };
 
-            // Verify lamp has captured_position
-            Assert.IsNotNull(lamp.captured_position);
-            Assert.AreEqual(1f, lamp.captured_position.x);
+            // Verify lamp has position
+            Assert.IsNotNull(lamp.position);
+            Assert.AreEqual(1f, lamp.position.x);
 
             // Verify painting and camera were NOT touched
             var painting = config.pois.Find(p => p.id == "painting");
-            Assert.IsNull(painting.captured_position, "painting should be untouched.");
+            Assert.IsNull(painting.position, "painting should be untouched.");
 
             var camera = config.pois.Find(p => p.id == "camera");
-            Assert.IsNull(camera.captured_position, "camera should be untouched.");
+            Assert.IsNull(camera.position, "camera should be untouched.");
         }
 
         // Verify that capturing a POI at the origin (0,0,0) is preserved correctly.
@@ -95,14 +88,12 @@ namespace TileStories.Editor.Tests
             var config = CreateTestConfig();
 
             var lamp = config.pois.Find(p => p.id == "lamp");
-            lamp.captured_position = new CapturedPosition { x = 0f, y = 0f, z = 0f };
-            lamp.captured_position_source = "workflow_a_editor";
-            lamp.captured_position_timestamp = 1234567890;
+            lamp.position = new PositionData { x = 0f, y = 0f, z = 0f };
 
-            Assert.IsNotNull(lamp.captured_position, "captured_position should exist (not null).");
-            Assert.AreEqual(0f, lamp.captured_position.x, 0.001f);
-            Assert.AreEqual(0f, lamp.captured_position.y, 0.001f);
-            Assert.AreEqual(0f, lamp.captured_position.z, 0.001f);
+            Assert.IsNotNull(lamp.position, "position should exist (not null).");
+            Assert.AreEqual(0f, lamp.position.x, 0.001f);
+            Assert.AreEqual(0f, lamp.position.y, 0.001f);
+            Assert.AreEqual(0f, lamp.position.z, 0.001f);
         }
 
         private static WallConfigData CreateTestConfig()
@@ -117,9 +108,9 @@ namespace TileStories.Editor.Tests
                     // lamp starts captured (previously placed in a scene);
                     // painting and camera start uncaptured so write-back tests
                     // can assert they are only touched when actually matched.
-                    new POIData { id = "lamp", name = "The Lamp", has_captured_position = true, captured_position = new CapturedPosition { x = 0.1f, y = 0f, z = 0.1f } },
-                    new POIData { id = "painting", name = "The Painting", has_captured_position = false, captured_position = null },
-                    new POIData { id = "camera", name = "The Camera", has_captured_position = false, captured_position = null }
+                    new POIData { id = "lamp", name = "The Lamp", position_verified = true, position = new PositionData { x = 0.1f, y = 0f, z = 0.1f } },
+                    new POIData { id = "painting", name = "The Painting", position_verified = false, position = null },
+                    new POIData { id = "camera", name = "The Camera", position_verified = false, position = null }
                 }
             };
         }
@@ -130,7 +121,7 @@ namespace TileStories.Editor.Tests
     public class POIAuthoringToolWindowSyncCheckTests
     {
         // Helper to create a test config with captured positions.
-        private static WallConfigData CreateConfigWithCapturedPositions()
+        private static WallConfigData CreateConfigWithPositionDatas()
         {
             return new WallConfigData
             {
@@ -143,15 +134,15 @@ namespace TileStories.Editor.Tests
                     {
                         id = "lamp",
                         name = "The Lamp",
-                        captured_position = new CapturedPosition { x = 1.0f, y = 2.0f, z = 3.0f },
-                        has_captured_position = true
+                        position = new PositionData { x = 1.0f, y = 2.0f, z = 3.0f },
+                        position_verified = true
                     },
                     new POIData
                     {
                         id = "painting",
                         name = "The Painting",
-                        captured_position = new CapturedPosition { x = 4.0f, y = 5.0f, z = 6.0f },
-                        has_captured_position = true
+                        position = new PositionData { x = 4.0f, y = 5.0f, z = 6.0f },
+                        position_verified = true
                     }
                 }
             };
@@ -171,8 +162,8 @@ namespace TileStories.Editor.Tests
                     {
                         id = "lamp",
                         name = "The Lamp",
-                        captured_position = null,
-                        has_captured_position = false
+                        position = null,
+                        position_verified = false
                     }
                 }
             };
@@ -183,8 +174,8 @@ namespace TileStories.Editor.Tests
         public void SyncCheck_AllPositionsMatch_ReportsInSync()
         {
             // Arrange: create a rig with children at known positions, and a config
-            // whose matching POIs have has_captured_position = true at those same positions.
-            var config = CreateConfigWithCapturedPositions();
+            // whose matching POIs have position_verified = true at those same positions.
+            var config = CreateConfigWithPositionDatas();
             var anchor = CreateTestAnchor();
             var rig = CreateTestRig(anchor, new Dictionary<string, Vector3>
             {
@@ -212,7 +203,7 @@ namespace TileStories.Editor.Tests
         public void SyncCheck_OnePositionMoved_ReportsOutOfSyncWithCorrectCount()
         {
             // Arrange: config has captured positions, but rig child is at a different position.
-            var config = CreateConfigWithCapturedPositions();
+            var config = CreateConfigWithPositionDatas();
             var anchor = CreateTestAnchor();
             var rig = CreateTestRig(anchor, new Dictionary<string, Vector3>
             {
@@ -240,7 +231,7 @@ namespace TileStories.Editor.Tests
         public void SyncCheck_RigChildNotMatchingPOI_ReportsOutOfSync()
         {
             // Arrange: config has "lamp" but rig has "unknown" child.
-            var config = CreateConfigWithCapturedPositions();
+            var config = CreateConfigWithPositionDatas();
             var anchor = CreateTestAnchor();
             var rig = CreateTestRig(anchor, new Dictionary<string, Vector3>
             {
@@ -264,9 +255,9 @@ namespace TileStories.Editor.Tests
 
         // Test: POI without captured position -> reports out of sync.
         [Test]
-        public void SyncCheck_POIWithoutCapturedPosition_ReportsOutOfSync()
+        public void SyncCheck_POIWithoutPositionData_ReportsOutOfSync()
         {
-            // Arrange: config has POI with has_captured_position = false.
+            // Arrange: config has POI with position_verified = false.
             var config = CreateConfigWithUncapturedPOI();
             var anchor = CreateTestAnchor();
             var rig = CreateTestRig(anchor, new Dictionary<string, Vector3>

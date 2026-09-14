@@ -9,6 +9,7 @@ namespace TileStories.Editor
     {
         private void SaveAllToJson()
         {
+            // Sync current rig positions into config before saving
             CapturePositions(silentWhenRigMissing: true);
 
             // Non-blocking validation: warn before saving if any POI's

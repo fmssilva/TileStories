@@ -6,7 +6,8 @@ using TileStories.Editor;
 
 namespace TileStories.Tests
 {
-    // Tier-0 EditMode tests for Position Draft/Precise tabs (Step 20 skeleton).
+    // Tier-0 EditMode tests for the simplified per-POI Position foldout
+    // (read-only XYZ + Verified toggle + Capture/Clear/Mark-Unverified buttons).
     public class PositionTabsTests
     {
         private static POIAuthoringToolWindow CreateWindowWithConfig(WallConfigData config)
@@ -31,55 +32,46 @@ namespace TileStories.Tests
                         id = "poi_1",
                         name = "Test POI",
                         category = "default",
-                        has_captured_position = false
+                        position_verified = false
                     }
                 }
             };
         }
 
         [Test]
-        public void DrawPositionTabs_DefaultsToDraft_ShowsDraftFields()
+        public void PositionContract_NoPosition_IsNullAndUnverified()
         {
-            // We cannot easily invoke the internal DrawPositionTabs without UI, but we can test the
-            // state machine: default tab is Draft, and CaptureSinglePoi sets has_captured_position.
-            var config = CreateMinimalConfig();
-            var window = CreateWindowWithConfig(config);
-            var poi = config.pois[0];
+            var poi = new POIData { id = "no_pos", name = "Test POI", category = "default" };
 
-            // Initially no captured position
-            Assert.IsFalse(poi.has_captured_position);
+            // Simplified-model contract: a POI with no authored position keeps the
+            // reference null (resolver falls back to origin) and starts unverified.
+            Assert.IsNull(poi.position, "A POI with no authored position must keep position null.");
+            Assert.IsFalse(poi.position_verified, "position_verified must default to false.");
 
-            // Simulate CaptureSinglePoi via reflection
-            var captureMethod = typeof(POIAuthoringToolWindow).GetMethod("CaptureSinglePoi",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.IsNotNull(captureMethod);
-
-            // We cannot actually capture without a rig, but we can verify the method exists.
-            // The test mainly ensures the method signature is present.
+            // The Position foldout entry point must exist and take exactly one POIData
+            // (proof the simplified single-foldout UI is wired, no Draft/Precise tabs).
+            var drawMethod = typeof(POIAuthoringToolWindow).GetMethod("DrawPositionTabs",
+                BindingFlags.NonPublic | BindingFlags.Instance, null,
+                new System.Type[] { typeof(POIData) }, null);
+            Assert.IsNotNull(drawMethod, "DrawPositionTabs(POIData) must exist for the Position foldout.");
         }
 
         [Test]
-        public void PositionTabs_ClearCapture_ResetsFlag()
+        public void PositionTabs_Clear_ResetsPositionAndVerified()
         {
             var config = CreateMinimalConfig();
             var poi = config.pois[0];
 
-            // Manually set captured position
-            poi.captured_position = new CapturedPosition { x = 1, y = 2, z = 3 };
-            poi.has_captured_position = true;
-            poi.captured_position_source = "scene";
-            poi.captured_position_timestamp = 12345;
+            // Simulate a captured position
+            poi.position = new PositionData { x = 1, y = 2, z = 3 };
+            poi.position_verified = true;
 
-            // Simulate clear by directly mutating (mirrors Clear Capture button logic)
-            poi.captured_position = null;
-            poi.has_captured_position = false;
-            poi.captured_position_source = null;
-            poi.captured_position_timestamp = 0;
+            // Simulate the Clear Position button: both fields reset together
+            poi.position = null;
+            poi.position_verified = false;
 
-            Assert.IsFalse(poi.has_captured_position);
-            Assert.IsNull(poi.captured_position);
-            Assert.IsNull(poi.captured_position_source);
-            Assert.AreEqual(0, poi.captured_position_timestamp);
+            Assert.IsFalse(poi.position_verified);
+            Assert.IsNull(poi.position);
         }
 
         [Test]
@@ -87,10 +79,8 @@ namespace TileStories.Tests
         {
             var config = CreateMinimalConfig();
             var poi = config.pois[0];
-            poi.captured_position = new CapturedPosition { x = 10, y = 20, z = 30 };
-            poi.has_captured_position = true;
-            poi.captured_position_source = "scene";
-            poi.captured_position_timestamp = 999999;
+            poi.position = new PositionData { x = 10, y = 20, z = 30 };
+            poi.position_verified = true;
 
             // Serialize and deserialize via JsonUtility
             string json = JsonUtility.ToJson(config);
@@ -98,13 +88,11 @@ namespace TileStories.Tests
 
             Assert.AreEqual(1, restored.pois.Count);
             var rp = restored.pois[0];
-            Assert.IsTrue(rp.has_captured_position);
-            Assert.IsNotNull(rp.captured_position);
-            Assert.AreEqual(10, rp.captured_position.x);
-            Assert.AreEqual(20, rp.captured_position.y);
-            Assert.AreEqual(30, rp.captured_position.z);
-            Assert.AreEqual("scene", rp.captured_position_source);
-            Assert.AreEqual(999999, rp.captured_position_timestamp);
+            Assert.IsTrue(rp.position_verified);
+            Assert.IsNotNull(rp.position);
+            Assert.AreEqual(10, rp.position.x);
+            Assert.AreEqual(20, rp.position.y);
+            Assert.AreEqual(30, rp.position.z);
         }
     }
 }

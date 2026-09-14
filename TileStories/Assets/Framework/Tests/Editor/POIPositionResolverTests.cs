@@ -4,88 +4,81 @@ using UnityEngine;
 
 namespace TileStories.Tests
 {
-    // Tests for the simplified POIPositionResolver: captured-position precedence
-    // plus a safe origin fallback for POIs with no capture. The old x_norm/y_norm
-    // interpolation path and calibration-anchor system have been removed.
+    // Tests for the simplified POIPositionResolver: non-null position is used,
+    // null position falls back to origin. position_verified is editor-only QA.
     public class POIPositionResolverTests
     {
-        // A POI with captured_position present must use it regardless of value —
-        // including the origin-point case [0,0,0] which must NOT be treated as missing.
         [Test]
-        public void ResolvePosition_WithCapturedPosition_ReturnsCapturedValue()
+        public void ResolvePosition_WithPosition_ReturnsValue()
         {
             var poi = new POIData
             {
                 id = "test_poi",
-                captured_position = new CapturedPosition { x = 1.5f, y = 2.0f, z = -0.5f },
-                has_captured_position = true
+                position = new PositionData { x = 1.5f, y = 2.0f, z = -0.5f },
+                position_verified = true
             };
-
 
             bool result = POIPositionResolver.TryResolvePosition(poi, out Vector3 pos);
 
-            Assert.IsTrue(result, "Should resolve successfully when captured_position is present.");
-            Assert.AreEqual(1.5f, pos.x, 0.001f, "X should match captured_position.x");
-            Assert.AreEqual(2.0f, pos.y, 0.001f, "Y should match captured_position.y");
-            Assert.AreEqual(-0.5f, pos.z, 0.001f, "Z should match captured_position.z");
+            Assert.IsTrue(result, "Should resolve successfully when position is present.");
+            Assert.AreEqual(1.5f, pos.x, 0.001f, "X should match position.x");
+            Assert.AreEqual(2.0f, pos.y, 0.001f, "Y should match position.y");
+            Assert.AreEqual(-0.5f, pos.z, 0.001f, "Z should match position.z");
         }
 
-        // A POI captured exactly at the origin (0,0,0) must still resolve as captured,
-        // never falling through to the x_norm/y_norm fallback.
         [Test]
-        public void ResolvePosition_WithCapturedPositionAtOrigin_ReturnsOrigin()
+        public void ResolvePosition_WithPositionAtOrigin_ReturnsOrigin()
         {
             var poi = new POIData
             {
                 id = "origin_poi",
-                captured_position = new CapturedPosition { x = 0f, y = 0f, z = 0f },
-                has_captured_position = true
+                position = new PositionData { x = 0f, y = 0f, z = 0f },
+                position_verified = true
             };
 
             bool result = POIPositionResolver.TryResolvePosition(poi, out Vector3 pos);
 
-            Assert.IsTrue(result, "Should resolve successfully when captured_position is (0,0,0).");
+            Assert.IsTrue(result, "Should resolve successfully when position is (0,0,0).");
             Assert.AreEqual(0f, pos.x, 0.001f);
             Assert.AreEqual(0f, pos.y, 0.001f);
             Assert.AreEqual(0f, pos.z, 0.001f);
         }
 
-        // A POI with no captured_position falls back to origin (0,0,0).
         [Test]
-        public void ResolvePosition_WithoutCapturedPosition_ReturnsOriginFallback()
+        public void ResolvePosition_WithoutPosition_ReturnsOriginFallback()
         {
             var poi = new POIData
             {
                 id = "fallback_poi",
-                captured_position = null,  // no captured position -> origin fallback
-                has_captured_position = false
+                position = null,
+                position_verified = false
             };
 
             bool result = POIPositionResolver.TryResolvePosition(poi, out Vector3 pos);
 
-            Assert.IsTrue(result, "Should resolve via origin fallback when captured_position is null.");
+            Assert.IsTrue(result, "Should resolve via origin fallback when position is null.");
             Assert.AreEqual(Vector3.zero, pos, "Fallback position must be origin.");
         }
 
-        // A POI with has_captured_position=false but a non-null captured_position
-        // must still fall back to origin (the flag is authoritative).
+        // position_verified is editor-only QA: it must never affect runtime resolution.
         [Test]
-        public void ResolvePosition_FlagFalseIgnoresCapturedObject()
+        public void ResolvePosition_UnverifiedButPresentPosition_IsUsed()
         {
             var poi = new POIData
             {
-                id = "stale_capture_poi",
-                captured_position = new CapturedPosition { x = 1f, y = 2f, z = 3f },
-                has_captured_position = false
+                id = "unverified_poi",
+                position = new PositionData { x = 1f, y = 2f, z = 3f },
+                position_verified = false
             };
 
             bool result = POIPositionResolver.TryResolvePosition(poi, out Vector3 pos);
 
-            Assert.IsTrue(result, "Should still resolve via origin fallback.");
-            Assert.AreEqual(Vector3.zero, pos, "has_captured_position=false means ignore captured_position.");
+            Assert.IsTrue(result, "Unverified position must still resolve; verified is editor-only.");
+            Assert.AreEqual(1f, pos.x, 0.001f);
+            Assert.AreEqual(2f, pos.y, 0.001f);
+            Assert.AreEqual(3f, pos.z, 0.001f);
         }
 
-        // Null POI data should return false.
         [Test]
         public void ResolvePosition_NullPOI_ReturnsFalse()
         {
@@ -94,42 +87,25 @@ namespace TileStories.Tests
             Assert.AreEqual(Vector3.zero, pos);
         }
 
-        // NaN in captured_position should return false.
         [Test]
-        public void ResolvePosition_NaNInCapturedPosition_ReturnsFalse()
+        public void ResolvePosition_NaNInPosition_ReturnsFalse()
         {
             var poi = new POIData
             {
-                id = "nan_captured",
-                captured_position = new CapturedPosition { x = float.NaN, y = 0f, z = 0f },
-                has_captured_position = true
+                id = "nan_position",
+                position = new PositionData { x = float.NaN, y = 0f, z = 0f },
+                position_verified = true
             };
 
             bool result = POIPositionResolver.TryResolvePosition(poi, out Vector3 pos, logErrors: false);
-            Assert.IsFalse(result, "NaN in captured_position should return false.");
+            Assert.IsFalse(result, "NaN in position should return false.");
         }
 
-        // An uncaptured POI still resolves via the origin fallback.
+        // A POI with no authored position must resolve to origin, whether the field is
+        // null or synthesized as (0,0,0) by JsonUtility. Under the simplified model,
+        // null vs origin is functionally equivalent -- both resolve to origin.
         [Test]
-        public void ResolvePosition_Uncaptured_ReturnsOriginFallback()
-        {
-            var poi = new POIData
-            {
-                id = "no_capture",
-                captured_position = null,
-                has_captured_position = false
-            };
-
-            bool result = POIPositionResolver.TryResolvePosition(poi, out Vector3 pos);
-            Assert.IsTrue(result, "Should still resolve via origin fallback.");
-            Assert.AreEqual(Vector3.zero, pos, "Fallback must be origin.");
-        }
-
-        // Verifies the save/load contract for uncaptured POIs: the presence flag stays
-        // false across JsonUtility round-trip, so runtime code continues to ignore any
-        // synthesized nested object and correctly uses the fallback path.
-        [Test]
-        public void JsonRoundTrip_UncapturedPOI_PreservesPresenceFlagSemantics()
+        public void JsonRoundTrip_NoPosition_ResolvesToOrigin()
         {
             var config = new WallConfigData
             {
@@ -138,29 +114,54 @@ namespace TileStories.Tests
                 {
                     new POIData
                     {
-                        id = "uncaptured_poi",
+                        id = "no_position_poi",
                         name = "Test POI",
-                        captured_position = null, // never captured - this is the case under test
-                        has_captured_position = false
+                        position = null,
+                        position_verified = false
                     }
                 }
             };
 
             string json = JsonUtility.ToJson(config);
             var reloaded = JsonUtility.FromJson<WallConfigData>(json);
-            var poi = reloaded.pois.Find(p => p.id == "uncaptured_poi");
+            var poi = reloaded.pois.Find(p => p.id == "no_position_poi");
 
             Assert.IsNotNull(poi, "The POI itself should survive the round-trip.");
-            Assert.IsFalse(poi.has_captured_position,
-                "has_captured_position must remain false after a JSON round-trip for an " +
-                "uncaptured POI. This flag is the authoritative signal that runtime code " +
-                "uses to decide whether captured_position is meaningful.");
 
             bool resolved = POIPositionResolver.TryResolvePosition(poi, out Vector3 pos);
 
-            Assert.IsTrue(resolved, "Round-tripped uncaptured POI should still resolve via origin fallback.");
-            Assert.AreEqual(Vector3.zero, pos,
-                "Resolver should ignore any synthesized nested object when has_captured_position is false.");
+            Assert.IsTrue(resolved, "Round-tripped POI without position should resolve.");
+            Assert.AreEqual(Vector3.zero, pos, "Resolver should fall back to origin.");
+        }
+
+        [Test]
+        public void JsonRoundTrip_Position_PreservesValue()
+        {
+            var config = new WallConfigData
+            {
+                wall_id = "test_wall",
+                pois = new System.Collections.Generic.List<POIData>
+                {
+                    new POIData
+                    {
+                        id = "position_poi",
+                        name = "Test POI",
+                        position = new PositionData { x = 1f, y = 2f, z = 3f },
+                        position_verified = true
+                    }
+                }
+            };
+
+            string json = JsonUtility.ToJson(config);
+            var reloaded = JsonUtility.FromJson<WallConfigData>(json);
+            var poi = reloaded.pois.Find(p => p.id == "position_poi");
+
+            Assert.IsNotNull(poi);
+            Assert.IsNotNull(poi.position);
+            Assert.AreEqual(1f, poi.position.x, 0.001f);
+            Assert.AreEqual(2f, poi.position.y, 0.001f);
+            Assert.AreEqual(3f, poi.position.z, 0.001f);
+            Assert.IsTrue(poi.position_verified);
         }
     }
 }

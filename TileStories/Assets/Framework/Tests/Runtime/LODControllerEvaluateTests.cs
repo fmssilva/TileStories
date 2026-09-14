@@ -275,12 +275,12 @@ namespace TileStories.Tests
             Assert.AreEqual(6, lampMarkers.Count, "must spawn the 6 real lamp_* markers.");
 
             // Colocate the 6 lamp markers at the centroid. SpawnLampMarkers places each at
-            // its genuine captured_position, but those are meters apart, so at the 20m
+            // its genuine position, but those are meters apart, so at the 20m
             // standoff they span well past the 40px overlap threshold and the displacement
             // in-group never forms (0px movement). Collapsing them to a single screen point
             // -- the same colocated-marker fixture the green Tier-0 tests use -- is what
             // makes the overlap->commit path exercisable with the REAL config Settings.
-            // SpawnLampMarkers above still resolves every real captured_position first.
+            // SpawnLampMarkers above still resolves every real position first.
             foreach (var m in lampMarkers)
                 m.transform.position = LampCentroid;
 
@@ -479,7 +479,7 @@ namespace TileStories.Tests
 
         private const string MarkerPrefab = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
 
-        // Real lamp_* family in LivingRoom/config.json: all has_captured_position=true,
+        // Real lamp_* family in LivingRoom/config.json: all position_verified=true,
         // clustered near the wall origin, 6 distinct heritage categories -> one overlap
         // group that force_directed displacement must resolve into separated labels.
         private static readonly (string id, string category)[] LampFamily =
@@ -520,7 +520,7 @@ namespace TileStories.Tests
         }
 
         // Spawn the 6 real lamp_* markers from the prefab at their real resolved
-        // captured_positions, initialised exactly as WallSession would. Shared so any
+        // positions, initialised exactly as WallSession would. Shared so any
         // future Phase B test can reuse the lamp family without re-deriving it here.
         private List<MarkerView> SpawnLampMarkers(WallConfigData config)
         {
@@ -531,7 +531,7 @@ namespace TileStories.Tests
                 var poi = config.pois.FirstOrDefault(p => p.id == id);
                 Assert.IsNotNull(poi, $"lamp family POI '{id}' must exist in LivingRoom/config.json.");
                 Assert.IsTrue(POIPositionResolver.TryResolvePosition(poi, out var worldPos),
-                    $"real captured_position resolution must succeed for {id}.");
+                    $"real position resolution must succeed for {id}.");
                 Assert.IsTrue(float.IsFinite(worldPos.x) && float.IsFinite(worldPos.y) && float.IsFinite(worldPos.z),
                     $"resolved position must be finite for {id}.");
 
@@ -672,7 +672,7 @@ namespace TileStories.Tests
                     $"family POI '{id}' must exist in LivingRoom/config.json " +
                     $"(add dev POIs to Assets/Apps/LivingRoom/config.json + sync to StreamingAssets + backup).");
                 Assert.IsTrue(POIPositionResolver.TryResolvePosition(poi, out var worldPos),
-                    $"real captured_position resolution must succeed for {id}.");
+                    $"real position resolution must succeed for {id}.");
                 Assert.IsTrue(float.IsFinite(worldPos.x) && float.IsFinite(worldPos.y) && float.IsFinite(worldPos.z),
                     $"resolved position must be finite for {id}.");
 

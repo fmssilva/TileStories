@@ -2,9 +2,8 @@ using UnityEngine;
 
 namespace TileStories
 {
-    // Resolves a POI's 3D position under the XR Space parent:
-    //   - If captured_position is set, use it directly as localPosition.
-    //   - Otherwise, return origin (0,0,0) as a safe fallback.
+    // Resolves a POI's 3D position: non-null position is used directly,
+    // otherwise falls back to origin. position_verified is never consulted here.
     public static class POIPositionResolver
     {
         public static bool TryResolvePosition(POIData poi, out Vector3 localPosition, bool logErrors = true)
@@ -18,23 +17,21 @@ namespace TileStories
                 return false;
             }
 
-            if (poi.has_captured_position && poi.captured_position != null)
+            if (poi.position != null)
             {
-                var cp = poi.captured_position;
-                if (float.IsNaN(cp.x) || float.IsNaN(cp.y) || float.IsNaN(cp.z) ||
-                    float.IsInfinity(cp.x) || float.IsInfinity(cp.y) || float.IsInfinity(cp.z))
+                var p = poi.position;
+                if (float.IsNaN(p.x) || float.IsNaN(p.y) || float.IsNaN(p.z) ||
+                    float.IsInfinity(p.x) || float.IsInfinity(p.y) || float.IsInfinity(p.z))
                 {
                     if (logErrors)
-                        Debug.LogError($"[POIPositionResolver] POI '{poi.id}' has invalid captured_position ({cp.x}, {cp.y}, {cp.z}).");
+                        Debug.LogError($"[POIPositionResolver] POI '{poi.id}' has invalid position ({p.x}, {p.y}, {p.z}).");
                     return false;
                 }
 
-                localPosition = new Vector3(cp.x, cp.y, cp.z);
+                localPosition = new Vector3(p.x, p.y, p.z);
                 return true;
             }
 
-            // No captured position - fallback to origin (0,0,0) as a safe default.
-            // This keeps markers from vanishing if a capture is missing.
             localPosition = Vector3.zero;
             return true;
         }

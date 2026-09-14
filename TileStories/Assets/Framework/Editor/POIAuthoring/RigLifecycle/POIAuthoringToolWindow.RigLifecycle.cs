@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -111,16 +111,16 @@ namespace TileStories.Editor
                     continue;
                 }
 
-                if (!poi.has_captured_position)
+                if (poi.position == null)
                 {
                     outOfSyncCount++;
                     continue;
                 }
 
                 Vector3 savedPos = new Vector3(
-                    poi.captured_position.x,
-                    poi.captured_position.y,
-                    poi.captured_position.z);
+                    poi.position.x,
+                    poi.position.y,
+                    poi.position.z);
 
                 float distance = Vector3.Distance(child.localPosition, savedPos);
                 if (distance > SyncPositionTolerance)
@@ -428,21 +428,18 @@ internal enum ReloadGuardChoice
                 // Rig is at origin, so localPosition == world position
                 Vector3 localPos = markerTransform.localPosition;
 
-                poi.captured_position = new CapturedPosition
+                poi.position = new PositionData
                 {
                     x = localPos.x,
                     y = localPos.y,
                     z = localPos.z
                 };
-                poi.has_captured_position = true;
-                poi.captured_position_source = "workflow_a_editor";
-                poi.captured_position_timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
                 captured++;
             }
 
             _hasUnsavedChanges = true;
-            Debug.Log($"[POIAuthoring] Captured {captured} positions (skipped {skipped} missing scene objects).");
+            Debug.Log($"[POIAuthoring] {captured} positions synced (skipped {skipped} missing scene objects).");
             Repaint();
         }
 

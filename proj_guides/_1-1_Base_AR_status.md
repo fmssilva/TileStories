@@ -107,7 +107,8 @@ Created core structure aligned to the work plan:
 ## 6) Runtime behavior implemented in code
 
 ### 6.1 Wall config model
-- WallConfigData + POIData + CapturedPosition classes.
+- WallConfigData + POIData (with `PositionData position` + `position_verified`; simplified model,
+  no CapturedPosition class; `null` position = origin fallback; position_verified is editor-only QA).
 
 ### 6.2 Tracker abstraction
 - IWallTracker interface for pluggable trackers.

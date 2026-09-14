@@ -75,7 +75,6 @@ namespace TileStories
                 has_status = entry.HasStatus,
                 status_unknown = entry.StatusUnknown,
                 hierarchy_level_key = entry.HierarchyLevelKey,
-                has_captured_position = true,
             };
 
             if (entry.HasStatus)

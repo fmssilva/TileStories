@@ -62,7 +62,7 @@ namespace TileStories
         public List<POIData> pois = new();
 
         // Optional wall bounds for minimap coordinate conversion (used to convert
-        // captured_position world coordinates to normalized minimap coordinates).
+        // position world coordinates to normalized minimap coordinates).
         // If not set, minimap will fall back to a default 4x3m wall centered at origin.
         public WallBounds wall_bounds;
 
@@ -418,10 +418,8 @@ namespace TileStories
         // angle. Persisted so the dev's preview preference survives reloads.
         public float editor_rotation_deg;
 
-        public CapturedPosition captured_position;
-        public bool has_captured_position;
-        public string captured_position_source;
-        public long captured_position_timestamp;
+        public PositionData position;
+        public bool position_verified;
         public string summary;
 
         // Per-POI freeform search keywords (the "Others" bucket).
@@ -436,7 +434,7 @@ namespace TileStories
         // display; the runtime index treats all keyword matches equally.
         public List<POISearchKeywordField> search_keyword_fields = new();
 
-        // Destruction status, 0-100. Same has_* guard as captured_position and for
+        // Destruction status, 0-100. Same has_* guard as position and for
         // the same reason: a POI legitimately at 0% ("fully intact") must never be
         // indistinguishable from a POI whose wall doesn't track status at all (e.g.
         // a mural has no "destroyed" axis). MarkerView must check has_status before
@@ -474,27 +472,14 @@ namespace TileStories
 
         public void OnBeforeSerialize()
         {
-            if (!has_captured_position)
-            {
-                captured_position = null;
-            }
         }
 
         public void OnAfterDeserialize()
         {
-            if (!has_captured_position)
-            {
-                captured_position = null;
-                if (string.IsNullOrEmpty(captured_position_source))
-                {
-                    captured_position_source = null;
-                }
-
-                if (captured_position_timestamp < 0)
-                {
-                    captured_position_timestamp = 0;
-                }
-            }
+            // Position needs no guard: JsonUtility synthesizes a zero-initialized
+            // PositionData for an absent position, and null vs (0,0,0) is functionally
+            // equivalent (both resolve to origin at runtime). No extra null-restoring
+            // flag is needed -- simpler, and the distinction has no consumer.
 
             if (!has_status)
             {
@@ -513,7 +498,7 @@ namespace TileStories
     }
 
     [Serializable]
-    public class CapturedPosition
+    public class PositionData
     {
         public float x;
         public float y;
@@ -666,7 +651,7 @@ namespace TileStories
 
 // Wall bounds for minimap coordinate conversion.
 // Represents the world-space bounding box of the wall area.
-// min/max are in world space (same coordinate system as captured_position).
+// min/max are in world space (same coordinate system as position).
 [Serializable]
 public class WallBounds
 {

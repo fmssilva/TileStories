@@ -15,12 +15,12 @@ namespace TileStories.Editor
         {
             if (poi == null) return;
 
-            bool hasCapture = poi.has_captured_position && poi.captured_position != null;
+            bool hasPosition = poi.position != null;
 
-            if (!hasCapture)
+            if (!hasPosition)
             {
-                // Not captured state: show hint + Capture Position button
-                EditorGUILayout.HelpBox("Move the marker in the Scene view, then press Capture to lock its position.", MessageType.Info);
+                // No position yet: show hint + Capture Position button
+                EditorGUILayout.HelpBox("Move the marker in the Scene view, then press Capture to store its position.", MessageType.Info);
                 EditorGUILayout.Space(4f);
                 if (GUILayout.Button("Capture Position", GUILayout.Width(140f)))
                 {
@@ -29,28 +29,41 @@ namespace TileStories.Editor
             }
             else
             {
-                // Captured state: show read-only captured position + Clear Capture button
-                var cp = poi.captured_position;
-                EditorGUILayout.LabelField("Captured Position (world space)", EditorStyles.boldLabel);
+                // Position state: show read-only position + verified toggle + clear button
+                var p = poi.position;
+                EditorGUILayout.LabelField("Position (world space)", EditorStyles.boldLabel);
                 EditorGUI.BeginDisabledGroup(true);
-                cp.x = EditorGUILayout.FloatField("X", cp.x);
-                cp.y = EditorGUILayout.FloatField("Y", cp.y);
-                cp.z = EditorGUILayout.FloatField("Z", cp.z);
+                p.x = EditorGUILayout.FloatField("X", p.x);
+                p.y = EditorGUILayout.FloatField("Y", p.y);
+                p.z = EditorGUILayout.FloatField("Z", p.z);
                 EditorGUI.EndDisabledGroup();
 
-                if (!string.IsNullOrEmpty(poi.captured_position_source))
-                    EditorGUILayout.LabelField("Source", poi.captured_position_source);
-                if (poi.captured_position_timestamp > 0)
-                    EditorGUILayout.LabelField("Timestamp", System.DateTimeOffset.FromUnixTimeSeconds(poi.captured_position_timestamp).ToLocalTime().ToString());
+                EditorGUILayout.Space(4f);
+                bool newVerified = EditorGUILayout.Toggle("Verified", poi.position_verified);
+                if (newVerified != poi.position_verified)
+                {
+                    DrawConfigMutationScope(() => { poi.position_verified = newVerified; }, true);
+                }
 
                 EditorGUILayout.Space(4f);
-                if (GUILayout.Button("Clear Capture", GUILayout.Width(120f)))
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    poi.captured_position = null;
-                    poi.has_captured_position = false;
-                    poi.captured_position_source = null;
-                    poi.captured_position_timestamp = 0;
-                    _hasUnsavedChanges = true;
+                    if (GUILayout.Button("Capture Position", GUILayout.Width(140f)))
+                    {
+                        CaptureSinglePoi(poi);
+                    }
+                    if (GUILayout.Button("Clear Position", GUILayout.Width(120f)))
+                    {
+                        DrawConfigMutationScope(() =>
+                        {
+                            poi.position = null;
+                            poi.position_verified = false;
+                        }, true);
+                    }
+                    if (GUILayout.Button("Mark Unverified", GUILayout.Width(130f)))
+                    {
+                        DrawConfigMutationScope(() => { poi.position_verified = false; }, true);
+                    }
                 }
             }
 
@@ -92,17 +105,16 @@ namespace TileStories.Editor
 
             // Capture world position of the anchor
             Vector3 worldPos = poiAnchor.transform.position;
-            poi.captured_position = new CapturedPosition
+            DrawConfigMutationScope(() =>
             {
-                x = worldPos.x,
-                y = worldPos.y,
-                z = worldPos.z
-            };
-            poi.has_captured_position = true;
-            poi.captured_position_source = "scene";
-            poi.captured_position_timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            _hasUnsavedChanges = true;
+                poi.position = new PositionData
+                {
+                    x = worldPos.x,
+                    y = worldPos.y,
+                    z = worldPos.z
+                };
+                poi.position_verified = true;
+            }, true);
         }
 
         // Apply the POI's config-driven edit-scene yaw to its rig child so the

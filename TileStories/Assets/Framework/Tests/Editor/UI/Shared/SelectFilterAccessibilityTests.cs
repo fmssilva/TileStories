@@ -40,8 +40,8 @@ namespace TileStories.Tests
                 },
                 pois = new System.Collections.Generic.List<POIData>
                 {
-                    new POIData { id = "poi_a", name = "POI A", category = "religious", has_captured_position = true, captured_position = new CapturedPosition { x = 0.25f, y = 0f, z = 0.25f } },
-                    new POIData { id = "poi_b", name = "POI B", category = "religious", has_captured_position = true, captured_position = new CapturedPosition { x = 0.75f, y = 0f, z = 0.75f } }
+                    new POIData { id = "poi_a", name = "POI A", category = "religious", position_verified = true, position = new PositionData { x = 0.25f, y = 0f, z = 0.25f } },
+                    new POIData { id = "poi_b", name = "POI B", category = "religious", position_verified = true, position = new PositionData { x = 0.75f, y = 0f, z = 0.75f } }
                 }
             };
         }

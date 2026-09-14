@@ -34,9 +34,9 @@ namespace TileStories.Tests
                 },
                 pois = new List<POIData>
                 {
-                    new POIData { id = "poi_1", name = "POI One", category = "religious", has_captured_position = true, captured_position = new CapturedPosition { x = 0.2f, y = 0f, z = 0.8f } },
-                    new POIData { id = "poi_2", name = "POI Two", category = "civic", has_captured_position = true, captured_position = new CapturedPosition { x = 0.5f, y = 0f, z = 0.5f } },
-                    new POIData { id = "poi_3", name = "POI Three", category = "religious", has_captured_position = true, captured_position = new CapturedPosition { x = 0.8f, y = 0f, z = 0.2f } },
+                    new POIData { id = "poi_1", name = "POI One", category = "religious", position_verified = true, position = new PositionData { x = 0.2f, y = 0f, z = 0.8f } },
+                    new POIData { id = "poi_2", name = "POI Two", category = "civic", position_verified = true, position = new PositionData { x = 0.5f, y = 0f, z = 0.5f } },
+                    new POIData { id = "poi_3", name = "POI Three", category = "religious", position_verified = true, position = new PositionData { x = 0.8f, y = 0f, z = 0.2f } },
                 }
             };
 
@@ -56,7 +56,7 @@ namespace TileStories.Tests
         [Test]
         public void CoordinateConversion_TopLeftPOI_MapsToBottomLeftOfMinimap()
         {
-            // POI at has_captured_position = true, captured_position = new CapturedPosition { x = 0.2f, y = 0f, z = 0.8f } -> y is inverted: (1-0.8)*200 = 40
+            // POI at position_verified = true, position = new PositionData { x = 0.2f, y = 0f, z = 0.8f } -> y is inverted: (1-0.8)*200 = 40
             Vector2 pos = MinimapCoordinateConverter.ConvertToPixel(0.2f, 0.8f, 200f, 200f, 20f);
             Assert.AreEqual(0.2f * 200f - 10f, pos.x, 0.001f);
             Assert.AreEqual((1f - 0.8f) * 200f - 10f, pos.y, 0.001f);
@@ -65,7 +65,7 @@ namespace TileStories.Tests
         [Test]
         public void CoordinateConversion_BottomRightPOI_MapsToTopRight()
         {
-            // POI at has_captured_position = true, captured_position = new CapturedPosition { x = 0.8f, y = 0f, z = 0.2f } -> y inverted: (1-0.2)*200 = 160
+            // POI at position_verified = true, position = new PositionData { x = 0.8f, y = 0f, z = 0.2f } -> y inverted: (1-0.2)*200 = 160
             Vector2 pos = MinimapCoordinateConverter.ConvertToPixel(0.8f, 0.2f, 200f, 200f, 20f);
             Assert.AreEqual(0.8f * 200f - 10f, pos.x, 0.001f);
             Assert.AreEqual((1f - 0.2f) * 200f - 10f, pos.y, 0.001f);
@@ -74,7 +74,7 @@ namespace TileStories.Tests
         [Test]
         public void CoordinateConversion_CenterPOI_MapsToCenter()
         {
-            // POI at has_captured_position = true, captured_position = new CapturedPosition { x = 0.5f, y = 0f, z = 0.5f } -> center
+            // POI at position_verified = true, position = new PositionData { x = 0.5f, y = 0f, z = 0.5f } -> center
             Vector2 pos = MinimapCoordinateConverter.ConvertToPixel(0.5f, 0.5f, 200f, 200f, 20f);
             Assert.AreEqual(100f - 10f, pos.x, 0.001f);
             Assert.AreEqual(100f - 10f, pos.y, 0.001f);

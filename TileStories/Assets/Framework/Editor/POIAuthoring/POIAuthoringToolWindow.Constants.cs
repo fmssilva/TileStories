@@ -200,6 +200,11 @@ namespace TileStories.Editor
         private static GUIContent _trashIcon;
         private static GUIContent TrashIcon => _trashIcon ?? (_trashIcon = EditorGUIUtility.IconContent("d_TreeEditor.Trash"));
 
+        // Pencil glyph for the per-POI header rename button. Loaded by asset
+        // path (not EditorGUIUtility.Load) so it survives domain reloads and
+        // never depends on the stray top-level Assets/Editor copy.
+        internal const string EditIconAssetPath = "Assets/Framework/Editor/POIAuthoring/SpecificMarker/Icons/edit-icon.png";
+
         // Keyword Fields table (Global Scene > Search & Filter).
         private static readonly string SearchFieldKeyHelp = "Stable identifier for this search axis. Never change after authoring begins -- existing per-POI keywords reference it by key.";
         private static readonly string SearchFieldLabelHelp = "Human-readable name shown in each POI's keyword editor.";

@@ -156,7 +156,7 @@
             "accent_effect": "ring_pulse",
             "pulse": true,
             "rotate_contour": true,
-            "reveal_delay_s": 0.20000000298023224,
+            "reveal_delay_s": 0.20000000298023225,
             "reveal_duration_s": 0.4000000059604645
         },
         {
@@ -187,7 +187,7 @@
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 0.800000011920929,
-            "reveal_duration_s": 0.30000001192092896
+            "reveal_duration_s": 0.30000001192092898
         },
         {
             "key": "level_5",
@@ -210,15 +210,13 @@
             "id": "lamp",
             "name": "The Lamp",
             "category": "royal_government",
-            "editor_rotation_deg": 72.0,
-            "captured_position": {
+            "editor_rotation_deg": 0.0,
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -0.8700000047683716,
                 "z": -4.179999828338623
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_Lamp",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -236,14 +234,12 @@
             "name": "Lamp - Religious",
             "category": "religious",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -1.1699999570846558,
                 "z": -4.179999828338623
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_lamp_religious",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -260,15 +256,13 @@
             "id": "lamp_military",
             "name": "Lamp - Military",
             "category": "military",
-            "editor_rotation_deg": 79.0,
-            "captured_position": {
+            "editor_rotation_deg": 0.0,
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -0.8700000047683716,
                 "z": -3.880000114440918
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_lamp_military",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -285,15 +279,13 @@
             "id": "lamp_residential",
             "name": "Lamp - Residential",
             "category": "residential",
-            "editor_rotation_deg": 52.0,
-            "captured_position": {
+            "editor_rotation_deg": 0.0,
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -0.5699999928474426,
                 "z": -4.179999828338623
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_lamp_residential",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -311,14 +303,12 @@
             "name": "Lamp - Economic",
             "category": "economic",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -0.8700000047683716,
                 "z": -4.480000019073486
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_lamp_economic",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -336,14 +326,12 @@
             "name": "Lamp - Infrastructure",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": -0.6999999284744263,
                 "y": -0.8700000047683716,
                 "z": -4.179999828338623
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_lamp_infrastructure",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -361,14 +349,12 @@
             "name": "The Painting",
             "category": "royal_government",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": -2.0,
                 "y": 0.0,
                 "z": 0.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_Painting",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -386,14 +372,12 @@
             "name": "Painting - Religious",
             "category": "religious",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": -2.0,
                 "y": 0.0,
-                "z": -0.30000001192092896
+                "z": -0.30000001192092898
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_painting_religious",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -411,14 +395,12 @@
             "name": "Painting - Military",
             "category": "military",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": -2.0,
                 "y": 0.0,
-                "z": 0.30000001192092896
+                "z": 0.30000001192092898
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_painting_military",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -436,14 +418,12 @@
             "name": "Painting - Residential",
             "category": "residential",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": -2.0,
-                "y": 0.30000001192092896,
+                "y": 0.30000001192092898,
                 "z": 0.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_painting_residential",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -461,14 +441,12 @@
             "name": "Painting - Economic",
             "category": "economic",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": -2.0,
-                "y": -0.30000001192092896,
+                "y": -0.30000001192092898,
                 "z": 0.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_painting_economic",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -486,14 +464,12 @@
             "name": "Painting - Infrastructure",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
-                "x": -1.7000000476837158,
+            "position": {
+                "x": -1.7000000476837159,
                 "y": 0.0,
                 "z": 0.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_painting_infrastructure",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -511,14 +487,12 @@
             "name": "The Camera",
             "category": "royal_government",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
-                "x": -1.9300000667572021,
+            "position": {
+                "x": -1.9300000667572022,
                 "y": 0.7200000286102295,
-                "z": 2.2300000190734863
+                "z": 2.2300000190734865
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_Camera",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -536,14 +510,12 @@
             "name": "Camera - Religious",
             "category": "religious",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
-                "x": -1.9300000667572021,
+            "position": {
+                "x": -1.9300000667572022,
                 "y": 0.7200000286102295,
-                "z": 1.9300000667572021
+                "z": 1.9300000667572022
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_camera_religious",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -561,14 +533,12 @@
             "name": "Camera - Military",
             "category": "military",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
-                "x": -1.9300000667572021,
+            "position": {
+                "x": -1.9300000667572022,
                 "y": 0.7200000286102295,
-                "z": 2.5299999713897705
+                "z": 2.5299999713897707
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_camera_military",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -586,14 +556,12 @@
             "name": "Camera - Residential",
             "category": "residential",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
-                "x": -1.9300000667572021,
+            "position": {
+                "x": -1.9300000667572022,
                 "y": 1.0199999809265137,
-                "z": 2.2300000190734863
+                "z": 2.2300000190734865
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_camera_residential",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -611,14 +579,12 @@
             "name": "Camera - Economic",
             "category": "economic",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
-                "x": -1.9300000667572021,
-                "y": 0.41999998688697815,
-                "z": 2.2300000190734863
+            "position": {
+                "x": -1.9300000667572022,
+                "y": 0.41999998688697817,
+                "z": 2.2300000190734865
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_camera_economic",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -636,14 +602,12 @@
             "name": "Camera - Infrastructure",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": -1.630000114440918,
                 "y": 0.7200000286102295,
-                "z": 2.2300000190734863
+                "z": 2.2300000190734865
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "POI_camera_infrastructure",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -661,18 +625,16 @@
             "name": "Dev Disp Eq Royal",
             "category": "royal_government",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": 0.5,
                 "y": -0.5,
                 "z": -3.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "dev_disp_eq_royal",
             "search_keywords": [],
             "search_keyword_fields": [],
-            "status_pct": 20.0,
+            "status_pct": 50.0,
             "has_status": true,
             "status_unknown": false,
             "badge_category": "partial_damage",
@@ -686,14 +648,12 @@
             "name": "Dev Disp Eq Mil",
             "category": "military",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": 0.5,
                 "y": -0.5,
                 "z": -3.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "dev_disp_eq_mil",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -711,14 +671,12 @@
             "name": "Dev Disp Eq Eco",
             "category": "economic",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": 0.5,
                 "y": -0.5,
                 "z": -3.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "dev_disp_eq_eco",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -736,14 +694,12 @@
             "name": "Dev Disp Singleton",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
-            "captured_position": {
+            "position": {
                 "x": 3.0,
                 "y": 1.0,
                 "z": -5.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1789129418,
+            "position_verified": true,
             "summary": "dev_disp_singleton",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -757,26 +713,38 @@
             "custom_symbol_key": ""
         }
     ],
+    "wall_bounds": {
+        "min": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "max": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    },
     "effect_defaults": {
         "pulse": {
-            "amplitude": 0.18000000715255737,
+            "amplitude": 0.18000000715255738,
             "period": 1.600000023841858
         },
         "sun": {
             "period": 1.7999999523162842,
             "stagger": 0.11999999731779099,
             "innerAlpha": 0.550000011920929,
-            "middleAlpha": 0.36000001430511475,
-            "outerAlpha": 0.20000000298023224,
+            "middleAlpha": 0.36000001430511477,
+            "outerAlpha": 0.20000000298023225,
             "tint_color_hex": "#F2CA71"
         },
         "accent": {
-            "size": 0.23999999463558197,
+            "size": 0.23999999463558198,
             "baseAlpha": 0.2800000011920929,
             "contourOuterScale": 0.8999999761581421,
             "contourInnerScale": 0.800000011920929,
             "filledRadiusScale": 0.8500000238418579,
-            "breatheAmplitude": 0.15000000596046448,
+            "breatheAmplitude": 0.15000000596046449,
             "period": 2.0,
             "beaconStartScale": 1.0,
             "beaconEndScale": 1.7999999523162842,
@@ -787,8 +755,8 @@
         "enabled": true,
         "bands": [],
         "hysteresis_margin_m": 0.5,
-        "transition_fade_duration_s": 0.30000001192092896,
-        "evaluation_interval_s": 0.20000000298023224,
+        "transition_fade_duration_s": 0.30000001192092898,
+        "evaluation_interval_s": 0.20000000298023225,
         "density_response_mode": "hybrid",
         "density_radius_px": 40.0,
         "shrink_start_neighbor_count": 2,
@@ -808,7 +776,7 @@
         "zoom_tap_levels": 2,
         "zoom_transition_speed_s": 0.25,
         "zoom_show_ui_buttons": true,
-        "zoom_double_tap_window_s": 0.30000001192092896,
+        "zoom_double_tap_window_s": 0.30000001192092898,
         "zoom_double_tap_move_tolerance_px": 50.0
     },
     "displacement_settings": {

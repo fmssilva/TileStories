@@ -5,9 +5,10 @@ using UnityEngine.UIElements;
 namespace TileStories
 {
     // 2D minimap overlay that renders POI positions as dots on a flat panel.
-    // Deliberately not a second RenderTexture camera -- this project already has
-    // normalized wall coordinates (POIData.x_norm / y_norm), so the minimap is
-    // a scatter-plot of positions already in the schema (spec _2.6 section 8).
+    // Deliberately not a second RenderTexture camera -- the project stores
+    // precise world-space positions (POIData.position) plus optional wall_bounds,
+    // so the minimap is a scatter-plot of positions already in the schema
+    // (spec _2.6 section 8).
     // Tap a dot -> raises the same selection event as tapping the real marker
     // (SelectionEventBus), so there is one selection system with two input surfaces.
     public class MinimapView : MonoBehaviour
@@ -177,12 +178,12 @@ namespace TileStories
             hit.style.width = tapSize;
             hit.style.height = tapSize;
 
-            // Use captured_position and wall_bounds for position.
-            // Fallback to (0.5, 0.5) if no captured position or bounds available.
+            // Use position and wall_bounds for position.
+            // Fallback to (0.5, 0.5) if no position or bounds available.
             Vector2 normPos = new Vector2(0.5f, 0.5f);
-            if (poi.has_captured_position && poi.captured_position != null && _config != null && _config.wall_bounds != null && _config.wall_bounds.IsValid())
+            if (poi.position != null && _config != null && _config.wall_bounds != null && _config.wall_bounds.IsValid())
             {
-                Vector3 worldPos = new Vector3(poi.captured_position.x, poi.captured_position.y, poi.captured_position.z);
+                Vector3 worldPos = new Vector3(poi.position.x, poi.position.y, poi.position.z);
                 normPos = _config.wall_bounds.WorldToNormalized(worldPos);
             }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -14,15 +14,15 @@ namespace TileStories.Editor
                 EditorGUILayout.HelpBox("No POIs yet. Use the + buttons below to add your first POI.", MessageType.Info);
                 if (GUILayout.Button("+ Add first", GUILayout.Width(120f)))
                 {
-                    AddNewPoi();
+                    AddNewPoi(); // adds at index 0
                 }
                 return;
             }
 
-            // "+ Add first" button before the first POI
-            if (GUILayout.Button("+ Add first", GUILayout.Width(120f)))
+            // "+ Add before first" button (down arrow) before the first POI
+            if (GUILayout.Button("+ Add POI before next ▼", GUILayout.Width(180f)))
             {
-                AddNewPoi(); // adds at index 0
+                AddNewPoiInternal(false); // insert at index 0
             }
 
             for (int i = 0; i < _config.pois.Count; i++)
@@ -33,10 +33,110 @@ namespace TileStories.Editor
 
                 string foldoutKey = string.IsNullOrWhiteSpace(poi.id) ? $"poi_{i}" : poi.id;
                 bool expanded = GetPoiFoldout(foldoutKey);
-                expanded = EditorGUILayout.Foldout(expanded, $"{i + 1}. {poi.name} ({poi.id})", true, CreateFoldoutStyle(PoiHeaderColorFor(foldoutKey, i)));
+                string editModeKey = $"editName_{foldoutKey}";
+                bool isEditing = SessionState.GetBool(editModeKey, false);
+
+                var headerStyle = CreateFoldoutStyle(PoiHeaderColorFor(foldoutKey, i));
+                var headerRect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
+
+                // Layout: [foldout arrow] [name click zone] [pencil right after name].
+                // The pencil is measured off the name text width (not pinned to
+                // headerRect.xMax) so it hugs the label even on wide windows.
+                const float arrowWidth = 14f;
+                const float pencilWidth = 22f;
+                var arrowRect = new Rect(headerRect.x, headerRect.y, arrowWidth, headerRect.height);
+                string displayName = $"{i + 1}. {poi.name}";
+                float nameWidth = headerStyle.CalcSize(new GUIContent(displayName)).x;
+                var nameRect = new Rect(headerRect.x + arrowWidth, headerRect.y, nameWidth + 4f, headerRect.height);
+                const float pencilGapX = 20f;  // breathing room between name text and pencil
+                var pencilRect = new Rect(nameRect.xMax + pencilGapX, headerRect.y, pencilWidth, headerRect.height);
+
+                // Foldout arrow (click toggles)
+                expanded = EditorGUI.Foldout(arrowRect, expanded, "", true, headerStyle);
+                if (isEditing)
+                {
+                    // Edit mode: full-width text field so long names are editable.
+                    string fieldRectName = $"POIName_{foldoutKey}";
+                    string editValueKey = $"editValue_{foldoutKey}";
+                    GUI.SetNextControlName(fieldRectName);
+                    var editRect = new Rect(headerRect.x + arrowWidth, headerRect.y, headerRect.width - arrowWidth, headerRect.height);
+                    // TextField returns the live value every repaint; the SessionState
+                    // draft mirrors it so Enter/click-outside commit the typed text.
+                    var newName = EditorGUI.TextField(editRect, SessionState.GetString(editValueKey, displayName));
+                    if (GUI.changed && GUI.GetNameOfFocusedControl() == fieldRectName)
+                        SessionState.SetString(editValueKey, newName);
+
+                    // Focus once on entering edit mode so the cursor lands inside.
+                    if (Event.current.type == EventType.Repaint && string.IsNullOrEmpty(SessionState.GetString(editValueKey + "_focused", "")))
+                    {
+                        GUI.FocusControl(fieldRectName);
+                        SessionState.SetString(editValueKey + "_focused", "1");
+                    }
+
+                    // Handle Enter/Escape to exit edit mode
+                    var e = Event.current;
+                    // Gate on the keys, not focus name: the TextField can consume
+                    // the first Return (releasing focus) before this runs, which
+                    // used to swallow the first Enter and force a second press.
+                    if (e.type == EventType.KeyDown && (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter || e.keyCode == KeyCode.Escape))
+                    {
+                        if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
+                        {
+                            // Save on Enter - strips the "N. " numbering prefix.
+                            var textToSave = SessionState.GetString(editValueKey, newName);
+                            SaveNameChange(poi, foldoutKey, editModeKey, editValueKey, textToSave);
+                            e.Use();
+                        }
+                        else if (e.keyCode == KeyCode.Escape)
+                        {
+                            // Cancel on Escape -- discard edits, keep the old name.
+                            SessionState.SetBool(editModeKey, false);
+                            SessionState.EraseString(editValueKey);
+                            SessionState.EraseString(editValueKey + "_focused");
+                            GUI.FocusControl(null);
+                            e.Use();
+                        }
+                    }
+                    else if (e.type == EventType.MouseDown && !editRect.Contains(e.mousePosition))
+                    {
+                        // Click outside the field commits the rename.
+                        var textToSave = SessionState.GetString(editValueKey, newName);
+                        SaveNameChange(poi, foldoutKey, editModeKey, editValueKey, textToSave);
+                    }
+                }
+                else
+                {
+                    // Display mode: transparent button over the name toggles the foldout.
+                    if (GUI.Button(nameRect, GUIContent.none, GUIStyle.none))
+                        expanded = !expanded;
+                    EditorGUI.LabelField(nameRect, displayName, headerStyle);
+                }
+
+                // Pencil button right after the name; hidden while this POI is in
+                // edit mode (the field replaces the label + pencil for that row).
+                if (!isEditing)
+                {
+                    Texture2D editTex = AssetDatabase.LoadAssetAtPath<Texture2D>(EditIconAssetPath);
+                    var editContent = new GUIContent(editTex);
+                    Color prevColor = GUI.color;
+                    GUI.color = new Color(0.85f, 0.85f, 0.85f, 1f);
+                    if (GUI.Button(pencilRect, editContent, GUIStyle.none))
+                    {
+                        SessionState.SetBool(editModeKey, true);
+                        SessionState.SetString($"editValue_{foldoutKey}", displayName);
+                        SessionState.EraseString($"editValue_{foldoutKey}_focused");
+                    }
+                    GUI.color = prevColor;
+                }
+
                 _poiFoldouts[foldoutKey] = expanded;
+
                 if (!expanded)
+                {
+                    if (i < _config.pois.Count - 1)
+                        DrawSeparatorButtons(i);
                     continue;
+                }
 
                 using (new EditorGUI.IndentLevelScope())
                 {
@@ -75,29 +175,48 @@ namespace TileStories.Editor
                     // driven entirely by the hierarchy level (see DrawPoiMarkerStyleFields).
                     // Global effect *defaults* remain in the Global Scene Effects section.
                     _showPoiSearchKeywords = DrawFramedFoldout(ref _showPoiSearchKeywords, () => DrawPoiSearchKeywordsField(poi), "Search Keywords", FoldoutDefaultColor);
-
-                    // "+ after" button for this POI
-                    EditorGUILayout.Space(4f);
-                    if (GUILayout.Button("+ Add after this", GUILayout.Width(120f)))
-                    {
-                        AddNewPoiAfter(i);
-                    }
                 }
+
+                // Separator buttons after this POI (except after last)
+                if (i < _config.pois.Count - 1)
+                    DrawSeparatorButtons(i);
 
                 EditorGUILayout.Space(6f);
             }
 
-            // "+ after last" button at the end of the list
-            if (GUILayout.Button("+ Add after last", GUILayout.Width(120f)))
+            // "+ Add after last" button (up arrow) after the last POI
+            if (GUILayout.Button("+ Add POI after previous ▲", GUILayout.Width(180f)))
             {
-                AddNewPoi(); // appends at end
+                AddNewPoiInternal(true); // appends at end
             }
+        }
+
+        private void DrawSeparatorButtons(int index)
+        {
+            // index is the current POI index. We are drawing separator after this POI (i.e., between index and index+1)
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.BeginHorizontal();
+            {
+                // "+ Add POI after previous ^" (up arrow) - inserts after current index
+                if (GUILayout.Button("+ Add POI after previous ▲", GUILayout.Width(180f)))
+                {
+                    AddNewPoiAfter(index);
+                }
+                // "+ Add POI before next ▼" (down arrow) - inserts before next (same insertion point)
+                if (GUILayout.Button("+ Add POI before next ▼", GUILayout.Width(180f)))
+                {
+                    AddNewPoiAfter(index);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space(4f);
         }
 
 
         private void DrawPoiMarkerStyleFields(POIData poi)
         {
-            poi.name = EditorGUILayout.TextField("Name", poi.name);
+            // Note: the POI name is renamed from the header row pencil, not here --
+            // a second name field would fight the header draft (two writers, one field).
             poi.category = DrawCategoryDropdown("Category", poi.category);
 
             // Hierarchy Level: selects this POI's size/label/effects/reveal-delay
@@ -556,7 +675,7 @@ namespace TileStories.Editor
                 name = "New POI",
                 category = "default",
                 editor_rotation_deg = initialRotation,
-                has_captured_position = false,
+                position_verified = false,
                 status_pct = 0f,
                 has_status = false,
                 status_unknown = false,
@@ -578,6 +697,10 @@ namespace TileStories.Editor
 
             // Auto-spawn + auto-focus for the new POI
             SpawnAndFocusNewPoi(newPoi);
+
+            // Auto-expand the new POI so the user can immediately rename it.
+            _poiFoldouts[newPoi.id] = true;
+            Repaint();
         }
 
         // Parameterless overload used by UI buttons and tests (appends to end).
@@ -599,7 +722,7 @@ namespace TileStories.Editor
                 name = "New POI",
                 category = "default",
                 editor_rotation_deg = initialRotation,
-                has_captured_position = false,
+                position_verified = false,
                 status_pct = 0f,
                 has_status = false,
                 status_unknown = false,
@@ -615,6 +738,10 @@ namespace TileStories.Editor
 
             // Auto-spawn + auto-focus for the new POI
             SpawnAndFocusNewPoi(_config.pois[index + 1]);
+
+            // Auto-expand the new POI so the user can immediately rename it.
+            _poiFoldouts[_config.pois[index + 1].id] = true;
+            Repaint();
         }
 
         // Spawns a rig child for the given POI and focuses the Scene view on it.
@@ -682,11 +809,49 @@ namespace TileStories.Editor
             instance.transform.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
             Undo.RegisterCreatedObjectUndo(instance, "Create POI Marker");
 
+            // Persist the initial position into config immediately (unverified).
+            // This makes the position survive Save/Load/Populate even if the user
+            // never touches the rig sync path.
+            poi.position = new PositionData
+            {
+                x = initialPosition.x,
+                y = initialPosition.y,
+                z = initialPosition.z
+            };
+            poi.position_verified = false;
+
             // Reuse the same visual configuration logic as PopulateRig.
             ConfigureRigChild(poi, instance.transform);
 
             // Select and frame the new marker.
             FocusPoiInScene(poi);
+        }
+
+        // Strip the "N. " numbering prefix the header prepends for display.
+        // "3. Lamp" -> "Lamp"; no prefix -> trimmed as-is. Pure, Tier-0 testable.
+        internal static string StripNumberPrefix(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return "";
+            int dotIndex = text.IndexOf(". ");
+            string namePart = dotIndex >= 0 ? text.Substring(dotIndex + 2) : text;
+            return namePart.Trim();
+        }
+
+        // Helper: save name change from edit mode text field
+        private void SaveNameChange(POIData poi, string foldoutKey, string editModeKey, string editValueKey, string textToSave)
+        {
+            string namePart = StripNumberPrefix(textToSave);
+
+            if (!string.IsNullOrWhiteSpace(namePart) && namePart != poi.name)
+            {
+                DrawConfigMutationScope(() => { poi.name = namePart; }, true);
+                RefreshRigVisuals();
+            }
+
+            SessionState.SetBool(editModeKey, false);
+            SessionState.EraseString($"editValue_{foldoutKey}");
+            SessionState.EraseString(editValueKey + "_focused");
         }
     }
 }

@@ -62,7 +62,7 @@ namespace TileStories.Tests
                 category = "religious",
                 has_status = false,
                 status_unknown = false,
-                has_captured_position = true,
+                position_verified = true,
             });
 
             var heroView = heroGo.GetComponentInChildren<MarkerView>();
@@ -97,7 +97,7 @@ namespace TileStories.Tests
                 category = "religious",
                 has_status = false,
                 status_unknown = false,
-                has_captured_position = true,
+                position_verified = true,
             });
 
             var contourView = contourGo.GetComponentInChildren<MarkerView>();
@@ -120,7 +120,7 @@ namespace TileStories.Tests
                 category = "religious",
                 has_status = false,
                 status_unknown = false,
-                has_captured_position = true,
+                position_verified = true,
             });
 
             var circlesView = circlesGo.GetComponentInChildren<MarkerView>();

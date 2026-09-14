@@ -23,7 +23,7 @@ namespace TileStories.Tests
     //   EvaluateDensity -> ApplyDensityResponse (x2, for 2-cycle density hysteresis
     //   to COMMIT densityState=Clustered) -> ReconcileClusters -> ApplyCountCap ->
     //   ApplyVisibility
-    // against the 6 real lamp_* POIs (all has_captured_position=true, clustered at
+    // against the 6 real lamp_* POIs (all position_verified=true, clustered at
     // the wall origin). Asserts the resulting aggregate's real member set, real
     // per-category counts (6 distinct heritage categories), real pie slices, and the
     // real "+6" count label -- then re-runs the pipeline to prove determinism.
@@ -33,7 +33,7 @@ namespace TileStories.Tests
         private const string MarkerPrefab  = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
         private const string ClusterPrefab = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
 
-        // Real lamp_* family: all captured_position, clustered near the wall origin
+        // Real lamp_* family: all position, clustered near the wall origin
         // (-0.95, -0.87, -4.18), each a distinct heritage category -> exactly one
         // real aggregate of 6 members with 6 pie slices.
         private static readonly (string id, string category)[] LampFamily =
@@ -91,7 +91,7 @@ namespace TileStories.Tests
 
                 Assert.IsTrue(
                     POIPositionResolver.TryResolvePosition(poi, out var worldPos),
-                    $"real captured_position resolution must succeed for {id}.");
+                    $"real position resolution must succeed for {id}.");
                 Assert.IsTrue(float.IsFinite(worldPos.x) && float.IsFinite(worldPos.y) && float.IsFinite(worldPos.z),
                     $"real resolved position must be finite for {id}.");
 

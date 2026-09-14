@@ -47,7 +47,7 @@ namespace TileStories.Tests
                 status_pct = entry.StatusPct, has_status = entry.HasStatus,
                 status_unknown = entry.StatusUnknown,
                 hierarchy_level_key = entry.HierarchyLevelKey,
-                has_captured_position = true,
+                position_verified = true,
             };
 
             if (entry.HasStatus)

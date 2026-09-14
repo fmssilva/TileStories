@@ -11,7 +11,7 @@ namespace TileStories
         // Convert a normalized wall coordinate (0..1) to a minimap pixel position.
         // Returns position relative to the minimap background's top-left corner.
         // Y is inverted because UI Y grows downward but wall coordinates use
-        // bottom-left origin (matching the captured_position / texture convention).
+        // bottom-left origin (matching the position / texture convention).
         public static Vector2 ConvertToPixel(float xNorm, float yNorm, float widthPx, float heightPx, float elementSizePx = 20f)
         {
             float x = xNorm * widthPx;

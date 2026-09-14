@@ -186,14 +186,12 @@
             "id": "lamp",
             "name": "The Lamp",
             "category": "royal_government",
-            "captured_position": {
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -0.8700000047683716,
                 "z": -4.179999828338623
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_Lamp",
             "status_pct": 0.0,
             "has_status": true,
@@ -206,14 +204,12 @@
             "id": "lamp_religious",
             "name": "Lamp - Religious",
             "category": "religious",
-            "captured_position": {
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -1.1699999570846558,
                 "z": -4.179999828338623
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_lamp_religious",
             "status_pct": 100.0,
             "has_status": true,
@@ -226,14 +222,12 @@
             "id": "lamp_military",
             "name": "Lamp - Military",
             "category": "military",
-            "captured_position": {
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -0.8700000047683716,
                 "z": -3.880000114440918
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_lamp_military",
             "status_pct": 20.0,
             "has_status": true,
@@ -246,14 +240,12 @@
             "id": "lamp_residential",
             "name": "Lamp - Residential",
             "category": "residential",
-            "captured_position": {
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -0.5699999928474426,
                 "z": -4.179999828338623
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_lamp_residential",
             "status_pct": 20.0,
             "has_status": true,
@@ -266,14 +258,12 @@
             "id": "lamp_economic",
             "name": "Lamp - Economic",
             "category": "economic",
-            "captured_position": {
+            "position": {
                 "x": -0.9999999403953552,
                 "y": -0.8700000047683716,
                 "z": -4.480000019073486
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_lamp_economic",
             "status_pct": 100.0,
             "has_status": true,
@@ -286,14 +276,12 @@
             "id": "lamp_infrastructure",
             "name": "Lamp - Infrastructure",
             "category": "infrastructure",
-            "captured_position": {
+            "position": {
                 "x": -0.6999999284744263,
                 "y": -0.8700000047683716,
                 "z": -4.179999828338623
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_lamp_infrastructure",
             "status_pct": 100.0,
             "has_status": true,
@@ -306,14 +294,12 @@
             "id": "painting",
             "name": "The Painting",
             "category": "royal_government",
-            "captured_position": {
+            "position": {
                 "x": -2.0,
                 "y": 0.0,
                 "z": 0.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_Painting",
             "status_pct": 0.0,
             "has_status": true,
@@ -326,14 +312,12 @@
             "id": "painting_religious",
             "name": "Painting - Religious",
             "category": "religious",
-            "captured_position": {
+            "position": {
                 "x": -2.0,
                 "y": 0.0,
                 "z": -0.30000001192092896
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_painting_religious",
             "status_pct": 0.0,
             "has_status": true,
@@ -346,14 +330,12 @@
             "id": "painting_military",
             "name": "Painting - Military",
             "category": "military",
-            "captured_position": {
+            "position": {
                 "x": -2.0,
                 "y": 0.0,
                 "z": 0.30000001192092896
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_painting_military",
             "status_pct": 20.0,
             "has_status": true,
@@ -366,14 +348,12 @@
             "id": "painting_residential",
             "name": "Painting - Residential",
             "category": "residential",
-            "captured_position": {
+            "position": {
                 "x": -2.0,
                 "y": 0.30000001192092896,
                 "z": 0.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_painting_residential",
             "status_pct": 20.0,
             "has_status": true,
@@ -386,14 +366,12 @@
             "id": "painting_economic",
             "name": "Painting - Economic",
             "category": "economic",
-            "captured_position": {
+            "position": {
                 "x": -2.0,
                 "y": -0.30000001192092896,
                 "z": 0.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_painting_economic",
             "status_pct": 100.0,
             "has_status": true,
@@ -406,14 +384,12 @@
             "id": "painting_infrastructure",
             "name": "Painting - Infrastructure",
             "category": "infrastructure",
-            "captured_position": {
+            "position": {
                 "x": -1.7000000476837158,
                 "y": 0.0,
                 "z": 0.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_painting_infrastructure",
             "status_pct": 100.0,
             "has_status": true,
@@ -426,14 +402,12 @@
             "id": "camera",
             "name": "The Camera",
             "category": "royal_government",
-            "captured_position": {
+            "position": {
                 "x": -1.9300000667572021,
                 "y": 0.7200000286102295,
                 "z": 2.2300000190734863
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_Camera",
             "status_pct": 0.0,
             "has_status": true,
@@ -446,14 +420,12 @@
             "id": "camera_religious",
             "name": "Camera - Religious",
             "category": "religious",
-            "captured_position": {
+            "position": {
                 "x": -1.9300000667572021,
                 "y": 0.7200000286102295,
                 "z": 1.9300000667572021
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_camera_religious",
             "status_pct": 0.0,
             "has_status": true,
@@ -466,14 +438,12 @@
             "id": "camera_military",
             "name": "Camera - Military",
             "category": "military",
-            "captured_position": {
+            "position": {
                 "x": -1.9300000667572021,
                 "y": 0.7200000286102295,
                 "z": 2.5299999713897705
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_camera_military",
             "status_pct": 20.0,
             "has_status": true,
@@ -486,14 +456,12 @@
             "id": "camera_residential",
             "name": "Camera - Residential",
             "category": "residential",
-            "captured_position": {
+            "position": {
                 "x": -1.9300000667572021,
                 "y": 1.0199999809265137,
                 "z": 2.2300000190734863
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_camera_residential",
             "status_pct": 20.0,
             "has_status": true,
@@ -506,14 +474,12 @@
             "id": "camera_economic",
             "name": "Camera - Economic",
             "category": "economic",
-            "captured_position": {
+            "position": {
                 "x": -1.9300000667572021,
                 "y": 0.41999998688697815,
                 "z": 2.2300000190734863
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_camera_economic",
             "status_pct": 100.0,
             "has_status": true,
@@ -526,14 +492,12 @@
             "id": "camera_infrastructure",
             "name": "Camera - Infrastructure",
             "category": "infrastructure",
-            "captured_position": {
+            "position": {
                 "x": -1.630000114440918,
                 "y": 0.7200000286102295,
                 "z": 2.2300000190734863
             },
-            "has_captured_position": true,
-            "captured_position_source": "workflow_a_editor",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "POI_camera_infrastructure",
             "status_pct": 100.0,
             "has_status": true,
@@ -546,14 +510,12 @@
             "id": "dev_disp_eq_royal",
             "name": "Dev Disp Eq Royal",
             "category": "royal_government",
-            "captured_position": {
+            "position": {
                 "x": 0.5,
                 "y": -0.5,
                 "z": -3.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "dev_disp_test",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "dev_disp_eq_royal",
             "status_pct": 50.0,
             "has_status": true,
@@ -566,14 +528,12 @@
             "id": "dev_disp_eq_mil",
             "name": "Dev Disp Eq Mil",
             "category": "military",
-            "captured_position": {
+            "position": {
                 "x": 0.5,
                 "y": -0.5,
                 "z": -3.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "dev_disp_test",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "dev_disp_eq_mil",
             "status_pct": 20.0,
             "has_status": true,
@@ -586,14 +546,12 @@
             "id": "dev_disp_eq_eco",
             "name": "Dev Disp Eq Eco",
             "category": "economic",
-            "captured_position": {
+            "position": {
                 "x": 0.5,
                 "y": -0.5,
                 "z": -3.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "dev_disp_test",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "dev_disp_eq_eco",
             "status_pct": 100.0,
             "has_status": true,
@@ -606,14 +564,12 @@
             "id": "dev_disp_singleton",
             "name": "Dev Disp Singleton",
             "category": "infrastructure",
-            "captured_position": {
+            "position": {
                 "x": 3.0,
                 "y": 1.0,
                 "z": -5.0
             },
-            "has_captured_position": true,
-            "captured_position_source": "dev_disp_test",
-            "captured_position_timestamp": 1786110594,
+            "position_verified": true,
             "summary": "dev_disp_singleton",
             "status_pct": 0.0,
             "has_status": true,

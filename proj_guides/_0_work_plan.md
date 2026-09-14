@@ -973,31 +973,16 @@ in the schema from the very first draft, not patched in later.
     no curvature problem on the Panorama's U-shape or Chafariz's circle, because
     there's no formula involved at all — the position is simply wherever you
     physically stood. Store the result as a literal 3D position field on that POI
-    (e.g. `captured_position: {x, y, z}`), separate from `x_norm`/`y_norm` (which stay
-    useful as the human-readable authoring value content writers reason about before
-    any field visit happens).
+    (a `Vector3` field; `POIData.position` in the simplified 2026-09-13 model), replacing any prior placeholder or null. No separate `captured_position` field, no `x_norm`/`y_norm` pair, and no calibration-anchor interpolation step is involved — those belonged to the earlier position model that was replaced on 2026-09-13.
+
   - **Interpolation from a handful of calibration anchors (a fallback for content
     authored remotely, not yet field-captured — and never the primary method for
-    anything a visitor will actually look at closely).** Place a small number of
-    calibration anchors using the same capture method above — at minimum one at each
-    end of a flat wall (the mural), and **one at each panel join** for the Panorama's
-    U-shape and at several points around the arc for Chafariz's circle, not just two
-    anchors at the far ends — a naive two-point linear interpolation across a curved
+    anything a visitor will actually look at closely).** This item is **superseded as of 2026-09-13** — the calibration-anchor interpolation fallback was part of the same richer position model that was replaced by the simplified `PositionData position` + `position_verified` model. Under the current model, a POI with no position simply resolves to origin `(0,0,0)` via `POIPositionResolver`; there is no `x_norm`/`y_norm` projection and no `calibration_anchors` list to interpolate between. If a future wall genuinely needs a remote-authoring fallback beyond "null → origin," it would be a new design conversation, not a revival of the old calibration-anchor mechanism.
     or multi-panel wall would place interpolated POIs *inside* the wall or floating in
     front of it wherever the surface actually bends, since it would be treating a
     curved path as a straight line between its endpoints. With anchors at every
     panel join (the same join locations already measured during the field-work
     protocol's wall-geometry pass, §1), interpolate piecewise *within* each straight
-    segment between consecutive anchors, never across a bend. This fallback exists so
-    content drafting can happen away from the physical wall (most of Stage 1–2's work)
-    without blocking on a site visit for every placeholder POI — but it is explicitly
-    a secondary, lower-accuracy path, used for the bulk of the "scale-proving" POIs
-    where approximate placement is acceptable, not for any POI a visitor will tap on
-    and expect to be precisely positioned.
-  Either way, the result — a real 3D position under the XR Space — is what actually
-  gets projected to screen space at render time (still tested explicitly at 1 m, 3 m,
-  and 8 m viewing distance, the core technical claim for RQ1). Once Stage 4's baker
-  exists, this captured or interpolated position becomes just another field baked
   into the `WallConfigAsset`, with no runtime cost either way.
 - **Marker rendering specifics**: small circle, category colour, name label
   truncated at ~15 characters to avoid overlap; when two markers are within ~40px on

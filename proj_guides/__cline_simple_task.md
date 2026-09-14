@@ -25,6 +25,14 @@ example maybe we click in "add new POI marker" and we see the default? then we c
 # No position sliders needed in the tab — scene-space movement is the primary interaction. (We could add fine-position sliders later if desired, but I would not start with them.)
 
 
+In the positioning domain, i was removing the whole drft and interpolation things... instead lets just use precise positioning using the previous POI as reference for faster deveelopement, and also some automtic auto focus... confirm how everything is in code, which will be different from these guides now for sure:???
+C:\Users\franc\Desktop\TileStories\proj_guides\_1.2_Marker_Positioning.md
+C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
+C:\Users\franc\Desktop\TileStories\proj_guides\_2.7_Corrections_TODO.md
+
+confirm the whole status of everything and what we should do to make evrything well synced and up to date, AND TO MAKE SURE I DIDN'T LET ANY DEAD CODE AROUND NOW OR BAD ORGANIZED CODE???
+
+DO A FULL SCAN ANALYSIS AND EVALUATION
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

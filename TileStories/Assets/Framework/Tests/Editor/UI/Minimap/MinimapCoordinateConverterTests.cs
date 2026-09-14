@@ -15,7 +15,7 @@ namespace TileStories.Tests
         [Test]
         public void ConvertToPixel_TopLeftCorner_MapsToZeroZero()
         {
-            // has_captured_position = true, captured_position = new CapturedPosition { x = 0f, y = 0f, z = 1f } (top-left in wall coords) -> bottom-left in UI
+            // position_verified = true, position = new PositionData { x = 0f, y = 0f, z = 1f } (top-left in wall coords) -> bottom-left in UI
             Vector2 pos = MinimapCoordinateConverter.ConvertToPixel(0f, 1f, MAP_WIDTH, MAP_HEIGHT, DOT_SIZE);
             Assert.AreEqual(0f - DOT_SIZE / 2f, pos.x, 0.001f);
             Assert.AreEqual(0f - DOT_SIZE / 2f, pos.y, 0.001f);
@@ -24,7 +24,7 @@ namespace TileStories.Tests
         [Test]
         public void ConvertToPixel_BottomRightCorner_MapsToFullWidthHeight()
         {
-            // has_captured_position = true, captured_position = new CapturedPosition { x = 1f, y = 0f, z = 0f } (bottom-right in wall coords) -> top-right in UI
+            // position_verified = true, position = new PositionData { x = 1f, y = 0f, z = 0f } (bottom-right in wall coords) -> top-right in UI
             Vector2 pos = MinimapCoordinateConverter.ConvertToPixel(1f, 0f, MAP_WIDTH, MAP_HEIGHT, DOT_SIZE);
             Assert.AreEqual(MAP_WIDTH - DOT_SIZE / 2f, pos.x, 0.001f);
             Assert.AreEqual(MAP_HEIGHT - DOT_SIZE / 2f, pos.y, 0.001f);
@@ -41,7 +41,7 @@ namespace TileStories.Tests
         [Test]
         public void ConvertToPixel_QuarterPoint_MapsCorrectly()
         {
-            // has_captured_position = true, captured_position = new CapturedPosition { x = 0.25f, y = 0f, z = 0.75f } (wall coords) -> x=50, y=50 in UI (inverted Y)
+            // position_verified = true, position = new PositionData { x = 0.25f, y = 0f, z = 0.75f } (wall coords) -> x=50, y=50 in UI (inverted Y)
             Vector2 pos = MinimapCoordinateConverter.ConvertToPixel(0.25f, 0.75f, MAP_WIDTH, MAP_HEIGHT, DOT_SIZE);
             Assert.AreEqual(50f - DOT_SIZE / 2f, pos.x, 0.001f);
             Assert.AreEqual(50f - DOT_SIZE / 2f, pos.y, 0.001f);

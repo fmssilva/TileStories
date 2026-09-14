@@ -52,8 +52,8 @@ namespace TileStories.Tests
                 },
                 pois = new List<POIData>
                 {
-                    new POIData { id = "pm_relig", name = "Religious One", category = "religious", has_captured_position = true, captured_position = new CapturedPosition { x = 0.2f, y = 0f, z = 0.8f } },
-                    new POIData { id = "pm_civic", name = "Civic Hall", category = "civic", has_captured_position = true, captured_position = new CapturedPosition { x = 0.7f, y = 0f, z = 0.3f } },
+                    new POIData { id = "pm_relig", name = "Religious One", category = "religious", position_verified = true, position = new PositionData { x = 0.2f, y = 0f, z = 0.8f } },
+                    new POIData { id = "pm_civic", name = "Civic Hall", category = "civic", position_verified = true, position = new PositionData { x = 0.7f, y = 0f, z = 0.3f } },
                 },
             };
 
