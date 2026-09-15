@@ -1923,8 +1923,8 @@ stabilised through real use:
 ### Stage 5 — Editor tooling: the Onboarding Wizard (Weeks 19–20)
 
 **Update, 2026-08: most of this stage's actual functionality already
-exists**, built early as `POIAuthoringToolWindow` (now
-`Assets/Framework/Editor/POIAuthoring/`) during Stage 2.3's marker-design
+exists**, built early as `POIEditorToolWindow` (now
+`Assets/Framework/Editor/POIEditor/`) during Stage 2.3's marker-design
 work — not because Stage 5 was pulled forward deliberately, but because
 iterating on Stage 2.3's marker rendering needed a real Editor authoring
 tool to be usable at all, and building it properly there turned out to

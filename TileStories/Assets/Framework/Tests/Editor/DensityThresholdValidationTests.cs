@@ -4,27 +4,27 @@ using UnityEditor;
 
 namespace TileStories.Tests
 {
-    // Tier-0 tests for POIAuthoringToolWindow.ValidateDensityThresholds
+    // Tier-0 tests for POIEditorToolWindow.ValidateDensityThresholds
     // (spec _2_4 section 6 via _2.7 entry 2.4-d): the shrink/cluster threshold
     // ordering rule, wired through the existing LODController.IsDensityConfigValid
     // detector. Pure data validation, no scene or rendering.
     public class DensityThresholdValidationTests
     {
-        private static TileStories.Editor.POIAuthoringToolWindow CreateWindowWithConfig(TileStories.WallConfigData config)
+        private static TileStories.Editor.POIEditorToolWindow CreateWindowWithConfig(TileStories.WallConfigData config)
         {
-            var window = EditorWindow.GetWindow<TileStories.Editor.POIAuthoringToolWindow>();
-            var field = typeof(TileStories.Editor.POIAuthoringToolWindow).GetField("_config",
+            var window = EditorWindow.GetWindow<TileStories.Editor.POIEditorToolWindow>();
+            var field = typeof(TileStories.Editor.POIEditorToolWindow).GetField("_config",
                 BindingFlags.NonPublic | BindingFlags.Instance);
             field?.SetValue(window, config);
             return window;
         }
 
         private static System.Collections.Generic.List<TileStories.Editor.EditorAlertItem> InvokeValidator(
-            TileStories.Editor.POIAuthoringToolWindow window)
+            TileStories.Editor.POIEditorToolWindow window)
         {
-            var method = typeof(TileStories.Editor.POIAuthoringToolWindow).GetMethod("ValidateDensityThresholds",
+            var method = typeof(TileStories.Editor.POIEditorToolWindow).GetMethod("ValidateDensityThresholds",
                 BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.IsNotNull(method, "ValidateDensityThresholds not found on POIAuthoringToolWindow");
+            Assert.IsNotNull(method, "ValidateDensityThresholds not found on POIEditorToolWindow");
             return (System.Collections.Generic.List<TileStories.Editor.EditorAlertItem>)method.Invoke(window, null);
         }
 

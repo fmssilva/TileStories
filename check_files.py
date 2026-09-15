@@ -10,7 +10,7 @@ files_to_check = [
     os.path.join(proj, "proj_guides", "_0_work_plan.md"),
     os.path.join(proj, "proj_guides", "_1-1_Base_AR_status.md"),
     os.path.join(proj, "proj_guides", "__curr_plan_tracker.md"),
-    os.path.join(proj, "TileStories", "Assets", "Framework", "Editor", "POIAuthoring", "POIAuthoringToolWindow.RigLifecycle.cs"),
+    os.path.join(proj, "TileStories", "Assets", "Framework", "Editor", "POIEditor", "POIEditorToolWindow.RigLifecycle.cs"),
 ]
 for f in files_to_check:
     exists = os.path.exists(f)

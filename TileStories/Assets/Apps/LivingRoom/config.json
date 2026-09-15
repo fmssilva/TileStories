@@ -207,6 +207,29 @@
     ],
     "pois": [
         {
+            "id": "3c6079ccf13a409fb973b6f79ebeb04e",
+            "name": "New POI",
+            "category": "royal_government",
+            "editor_rotation_deg": 0.0,
+            "position": {
+                "x": -0.6999999284744263,
+                "y": -0.8700000047683716,
+                "z": -3.377000093460083
+            },
+            "position_verified": false,
+            "summary": "",
+            "search_keywords": [],
+            "search_keyword_fields": [],
+            "status_pct": 0.0,
+            "has_status": true,
+            "status_unknown": false,
+            "badge_category": "intact",
+            "status_level_key": "intact",
+            "hierarchy_level_key": "level_1",
+            "has_custom_symbol": false,
+            "custom_symbol_key": ""
+        },
+        {
             "id": "lamp",
             "name": "The Lamp",
             "category": "royal_government",
@@ -214,7 +237,7 @@
             "position": {
                 "x": -0.9999999403953552,
                 "y": -0.8700000047683716,
-                "z": -4.179999828338623
+                "z": -3.677000045776367
             },
             "position_verified": true,
             "summary": "POI_Lamp",
@@ -634,7 +657,7 @@
             "summary": "dev_disp_eq_royal",
             "search_keywords": [],
             "search_keyword_fields": [],
-            "status_pct": 50.0,
+            "status_pct": 20.0,
             "has_status": true,
             "status_unknown": false,
             "badge_category": "partial_damage",

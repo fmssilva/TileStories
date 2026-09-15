@@ -260,7 +260,7 @@ namespace TileStories.Tests
         public void SearchKeywordFields_AreIndexedAtKeywordRank()
         {
             // A POI with a custom field keyword should be findable at RANK_KEYWORD (0.7),
-            // same quality tier as flat search_keywords -- field_key is authoring-only.
+            // same quality tier as flat search_keywords -- field_key is editor-only.
             var config = MakeConfig(
                 new POIData
                 {

@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace TileStories.Editor.Tests
 {
-    // Tier 0 tests for the Block 2 authoring foldouts: JSON round-trip of the
+    // Tier 0 tests for the Block 2 editor foldouts: JSON round-trip of the
     // LodSettings schema (mirrors SaveConfig via JsonUtility, and the runtime
     // WallConfigLoader deserialize path) plus structural presence of the new
     // foldout wiring.
 
-    public class LodAuthoringRoundTripTests
+    public class LodEditorRoundTripTests
     {
         [Test]
         public void RoundTrip_LodSettings_ThroughJsonUtility()
@@ -22,14 +22,14 @@ namespace TileStories.Editor.Tests
             config.lod_settings.zoom_double_tap_window_s = 0.3f;
             config.lod_settings.zoom_double_tap_move_tolerance_px = 50f;
 
-            // 3-7a: set the three new LodSettings fields that the LOD authoring
+            // 3-7a: set the three new LodSettings fields that the LOD editor
             // foldout binds to, so the round-trip asserts below cover them.
             config.lod_settings.bands[2].details = "far sentinel";
             config.lod_settings.cluster_band_source = "nearest_member";
             config.lod_settings.cluster_band_hysteresis_enabled = false;
             config.lod_settings.cluster_dissolve_grace_cycles = 7;
 
-            // Mirrors authoring SaveConfig + runtime WallConfigLoader.
+            // Mirrors editor SaveConfig + runtime WallConfigLoader.
             string json = JsonUtility.ToJson(config, true);
             var loaded = JsonUtility.FromJson<WallConfigData>(json);
 
@@ -57,13 +57,13 @@ namespace TileStories.Editor.Tests
         [Test]
         public void FoldoutSectionMethods_AndState_Exist()
         {
-            var t = typeof(POIAuthoringToolWindow);
+            var t = typeof(POIEditorToolWindow);
             Assert.IsNotNull(
                 t.GetMethod("DrawGlobalLodSection", BindingFlags.NonPublic | BindingFlags.Instance),
-                "DrawGlobalLodSection must be wired on the authoring window");
+                "DrawGlobalLodSection must be wired on the editor window");
             Assert.IsNotNull(
                 t.GetMethod("DrawGlobalZoomSection", BindingFlags.NonPublic | BindingFlags.Instance),
-                "DrawGlobalZoomSection must be wired on the authoring window");
+                "DrawGlobalZoomSection must be wired on the editor window");
             Assert.IsNotNull(
                 t.GetField("_showGlobalLod", BindingFlags.NonPublic | BindingFlags.Instance),
                 "_showGlobalLod state field must exist");

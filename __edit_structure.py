@@ -20,7 +20,7 @@ new = (
     "                                                   FocusPoiInScene (per-POI Focus\n"
     "                                                   in Scene button: Selection + ping +\n"
     "                                                   SceneView.FrameSelected).\n"
-    "\u2502   \u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500\u2500 POIAuthoringToolWindow.PositionTabs.cs \u2190 DrawPositionTabs (Draft / Precise tabs inside\n"
+    "\u2502   \u2502   \u2502   \u2502   \u2502   \u2502   \u251c\u2500\u2500\u2500 POIEditorToolWindow.PositionTabs.cs \u2190 DrawPositionTabs (Draft / Precise tabs inside\n"
     "\u2502   \u2502   \u2502   \u2502   \u2502   \u2502   \u2502                                                    "
     "Position foldout): Draft shows x_norm/y_norm\n"
     "\u2502   \u2502   \u2502   \u2502   \u2502   \u2502   \u2502                                                    "

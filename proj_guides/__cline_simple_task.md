@@ -3,36 +3,26 @@
 # `DELETE MODE && __CURR_PLAN_TRACKER!!!`
 # `Unity MCP Connected??`
 
-# `Positioning System`
-I want to verify everything we have done in this "marker positioning domain". 
+# `Marker Deesign`
+I want to verify everything we have done in the domain of the marker design system.
+
 Start by reading these files fully and check the necessary and respective code files in the prooject to confirm how everything is implemented currently: 
-- C:\Users\franc\Desktop\TileStories\proj_guides\_1.2__Marker_Positioning_future_notes.md
-- C:\Users\franc\Desktop\TileStories\proj_guides\_1.2_Marker_Positioning.md
-- C:\Users\franc\Desktop\TileStories\proj_guides\_2.7_Corrections_TODO.md
+- C:\Users\franc\Desktop\TileStories\proj_guides\_2.2_Marker_Design.md 
 - C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
 
-then tell me a summary of a "complete list of features" that we have implemented in code, and the confirmation of if all those features are "exposed" with some UI interface in the editor tab... and a simple concise explanation of how it is suposed to work and use... this way i can use it as a check list to run some "human tests and confirm how everything is working"
-
-you can write this "features list for human tests confirmation" in the file:
+then write in this file the normal user flow of actions in terms of this domain: 
 C:\Users\franc\Desktop\TileStories\proj_guides\__curr_plan_tracker.md
 
-I want you to make the file much more concise and with a natural flow of things i should do and test in order, simulating a normal user flow of actions. 
+example the user starts by creating a new POI, and what are the default fields that are created? just position or someething else? 
+and then what are the fields that should be edited and in some specifci order or not really?? and how to save things, or undo, or redo...?? 
 
-example maybe we click in "add new POI marker" and we see the default? then we click in add another and we see the displacement? then we move x, y and see it moving on the scene? then we also can "edit rtation" to turn the poi in our direction 
+then tell me if there is any features in code that is not exposed in terms of the editor tab interface and maybe should be...?? so we have clear UI to tests "by hand" if everything works... and if you can actually call the unity mcp and confirm the feature is well exposed in terms of UI, ok, but if you can't confirm, and so for example we might have some edit button or some table colum but you can't really confirm 100% sure if that feature is well exposed, so tell me also all those features that are in doubt in terms of UI exposure. 
 
-# reorder button
+then tell me if there is any feature in the guide files that is still missing to be implemented. 
 
-# No position sliders needed in the tab — scene-space movement is the primary interaction. (We could add fine-position sliders later if desired, but I would not start with them.)
+write all this with all important details BUT IN A CONCISE MANNER. I WANT TO BE ABLE TO READ IT FAST. SO ALL IMPORTANT DETAILS BUT AS CONCISE AS POSSIBLE IN A NATURAL LANGUAGE LIKE A CODER GUY TALKING TO ANOTHER CODER GUY. 
 
 
-In the positioning domain, i was removing the whole drft and interpolation things... instead lets just use precise positioning using the previous POI as reference for faster deveelopement, and also some automtic auto focus... confirm how everything is in code, which will be different from these guides now for sure:???
-C:\Users\franc\Desktop\TileStories\proj_guides\_1.2_Marker_Positioning.md
-C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
-C:\Users\franc\Desktop\TileStories\proj_guides\_2.7_Corrections_TODO.md
-
-confirm the whole status of everything and what we should do to make evrything well synced and up to date, AND TO MAKE SURE I DIDN'T LET ANY DEAD CODE AROUND NOW OR BAD ORGANIZED CODE???
-
-DO A FULL SCAN ANALYSIS AND EVALUATION
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
@@ -41,6 +31,7 @@ Before you start executing and implementing things, perform a critical review of
 ### 1.1. Guidelines & Architecture Re-Grounding
 - Workspace rules: read ./.clinerules/ (specifically 00-process.md, 10-structure.md, 20-code-quality.md, 30-design-system.md, 40-testing.md, 50-terminal_and_tools.md, 60-finishing.md)
 - Structure map: read ./.clinerules/10-structure.md
+»» read all the lines on all these files
 
 ### 1.2. Deep Codebase Audit & Gap Analysis
 - Inspect physical files on disk that might be related with this task before planning. Do NOT trust past conversation summaries alone — a prior session's summary claiming something exists or is missing must be independently verified on disk. And sometimes in previous commands you said that some files were missing and not implemented and then we found them in some other place. So actually check the existing files: 

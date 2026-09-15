@@ -13,21 +13,21 @@ namespace TileStories.Tests
         [Test]
         public void UncapturedRig_NoConfig_NoDialog()
         {
-            Assert.IsNull(POIAuthoringToolWindow.ResolveUncapturedRigChoice(
+            Assert.IsNull(POIEditorToolWindow.ResolveUncapturedRigChoice(
                 false, true, false, 0));
         }
 
         [Test]
         public void UncapturedRig_EmptyRig_NoDialog()
         {
-            Assert.IsNull(POIAuthoringToolWindow.ResolveUncapturedRigChoice(
+            Assert.IsNull(POIEditorToolWindow.ResolveUncapturedRigChoice(
                 true, false, false, 0));
         }
 
         [Test]
         public void UncapturedRig_InSync_NoDialog()
         {
-            Assert.IsNull(POIAuthoringToolWindow.ResolveUncapturedRigChoice(
+            Assert.IsNull(POIEditorToolWindow.ResolveUncapturedRigChoice(
                 true, true, true, 0));
         }
 
@@ -35,37 +35,37 @@ namespace TileStories.Tests
         public void UncapturedRig_Button0_CapturesThenReloads()
         {
             Assert.AreEqual(
-                POIAuthoringToolWindow.ReloadGuardChoice.ProceedWithSaveOrCapture,
-                POIAuthoringToolWindow.ResolveUncapturedRigChoice(true, true, false, 0));
+                POIEditorToolWindow.ReloadGuardChoice.ProceedWithSaveOrCapture,
+                POIEditorToolWindow.ResolveUncapturedRigChoice(true, true, false, 0));
         }
 
         [Test]
         public void UncapturedRig_Button1_DiscardsAndReloads()
         {
             Assert.AreEqual(
-                POIAuthoringToolWindow.ReloadGuardChoice.DiscardAndReload,
-                POIAuthoringToolWindow.ResolveUncapturedRigChoice(true, true, false, 1));
+                POIEditorToolWindow.ReloadGuardChoice.DiscardAndReload,
+                POIEditorToolWindow.ResolveUncapturedRigChoice(true, true, false, 1));
         }
 
         [Test]
         public void UncapturedRig_Cancel_StaysPut()
         {
             Assert.AreEqual(
-                POIAuthoringToolWindow.ReloadGuardChoice.Cancel,
-                POIAuthoringToolWindow.ResolveUncapturedRigChoice(true, true, false, 2));
+                POIEditorToolWindow.ReloadGuardChoice.Cancel,
+                POIEditorToolWindow.ResolveUncapturedRigChoice(true, true, false, 2));
         }
 
         [Test]
         public void UnsavedConfig_CleanState_NoDialog()
         {
-            Assert.IsNull(POIAuthoringToolWindow.ResolveUnsavedConfigChoice(
+            Assert.IsNull(POIEditorToolWindow.ResolveUnsavedConfigChoice(
                 true, false, 0));
         }
 
         [Test]
         public void UnsavedConfig_NoConfig_NoDialog()
         {
-            Assert.IsNull(POIAuthoringToolWindow.ResolveUnsavedConfigChoice(
+            Assert.IsNull(POIEditorToolWindow.ResolveUnsavedConfigChoice(
                 false, true, 0));
         }
 
@@ -73,24 +73,24 @@ namespace TileStories.Tests
         public void UnsavedConfig_Button0_SavesThenReloads()
         {
             Assert.AreEqual(
-                POIAuthoringToolWindow.ReloadGuardChoice.ProceedWithSaveOrCapture,
-                POIAuthoringToolWindow.ResolveUnsavedConfigChoice(true, true, 0));
+                POIEditorToolWindow.ReloadGuardChoice.ProceedWithSaveOrCapture,
+                POIEditorToolWindow.ResolveUnsavedConfigChoice(true, true, 0));
         }
 
         [Test]
         public void UnsavedConfig_Button1_DiscardsAndReloads()
         {
             Assert.AreEqual(
-                POIAuthoringToolWindow.ReloadGuardChoice.DiscardAndReload,
-                POIAuthoringToolWindow.ResolveUnsavedConfigChoice(true, true, 1));
+                POIEditorToolWindow.ReloadGuardChoice.DiscardAndReload,
+                POIEditorToolWindow.ResolveUnsavedConfigChoice(true, true, 1));
         }
 
         [Test]
         public void UnsavedConfig_Cancel_StaysPut()
         {
             Assert.AreEqual(
-                POIAuthoringToolWindow.ReloadGuardChoice.Cancel,
-                POIAuthoringToolWindow.ResolveUnsavedConfigChoice(true, true, 2));
+                POIEditorToolWindow.ReloadGuardChoice.Cancel,
+                POIEditorToolWindow.ResolveUnsavedConfigChoice(true, true, 2));
         }
     }
 }

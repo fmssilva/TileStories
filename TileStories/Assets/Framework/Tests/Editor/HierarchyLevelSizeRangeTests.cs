@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace TileStories.Tests
 {
     // Tier 0 tests for MarkerHierarchyResolver.ValidateHierarchyLevelSizeRange --
-    // pure static validation logic, no scene, no authoring-window instance.
+    // pure static validation logic, no scene, no editor-window instance.
     public class HierarchyLevelSizeRangeTests
     {
         // Builds a HierarchyLevelEntry by key + size. priority is left unset so
@@ -27,7 +27,7 @@ namespace TileStories.Tests
                 Make("level_3", 100f), // upper bound valid
                 Make("level_4", 0.5f)  // lower bound valid
             };
-            var issues = global::TileStories.Editor.POIAuthoringToolWindow.ValidateHierarchyLevelSizeRange(levels);
+            var issues = global::TileStories.Editor.POIEditorToolWindow.ValidateHierarchyLevelSizeRange(levels);
             Assert.IsEmpty(issues);
         }
 
@@ -40,7 +40,7 @@ namespace TileStories.Tests
                 Make("ok", 5f),
                 Make("bad_large", 200f)   // m/cm typo
             };
-            var issues = global::TileStories.Editor.POIAuthoringToolWindow.ValidateHierarchyLevelSizeRange(levels);
+            var issues = global::TileStories.Editor.POIEditorToolWindow.ValidateHierarchyLevelSizeRange(levels);
             Assert.AreEqual(2, issues.Count);
             CollectionAssert.AreEquivalent(
                 new[] { "bad_small", "bad_large" },
@@ -50,13 +50,13 @@ namespace TileStories.Tests
         [Test]
         public void NullList_ReturnsNoIssues()
         {
-            Assert.IsEmpty(global::TileStories.Editor.POIAuthoringToolWindow.ValidateHierarchyLevelSizeRange(null));
+            Assert.IsEmpty(global::TileStories.Editor.POIEditorToolWindow.ValidateHierarchyLevelSizeRange(null));
         }
 
         [Test]
         public void EmptyList_ReturnsNoIssues()
         {
-            Assert.IsEmpty(global::TileStories.Editor.POIAuthoringToolWindow.ValidateHierarchyLevelSizeRange(new List<global::TileStories.HierarchyLevelEntry>()));
+            Assert.IsEmpty(global::TileStories.Editor.POIEditorToolWindow.ValidateHierarchyLevelSizeRange(new List<global::TileStories.HierarchyLevelEntry>()));
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace TileStories.Tests
                 Make("bad", 250f),
                 null
             };
-            var issues = global::TileStories.Editor.POIAuthoringToolWindow.ValidateHierarchyLevelSizeRange(levels);
+            var issues = global::TileStories.Editor.POIEditorToolWindow.ValidateHierarchyLevelSizeRange(levels);
             Assert.AreEqual(1, issues.Count);
             Assert.AreEqual("bad", issues[0].poiId);
         }

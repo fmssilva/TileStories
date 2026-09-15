@@ -1,0 +1,12 @@
+﻿
+proj_guides\_2.7_Corrections_TODO.md:99:| 20 | **1.2 (rest of the full entry)** | Position system simplified redesign 
+— substantial, schedule as its own effort, not bundled. Depends on step 19 for 1.2-b specifically; every other 
+sub-item is independent. | [DONE] 2026-09-13 — Position model collapsed from 4 fields (`captured_position`, 
+`has_captured_position`, `captured_position_source`, `captured_position_timestamp`) to 2: `PositionData position` 
+(nullable) + `bool position_verified` (editor-only QA). x_norm/y_norm and calibration-anchor interpolation removed. 
+`POIPositionResolver` uses `poi.position != null` as sole gate; verified flag never consulted at runtime. New POIs get 
+initial position written immediately by `SpawnAndFocusNewPoi`. `CapturePositions` is a single unconditional rig→config 
+sync. Editor UI: read-only XYZ + Verified toggle + Capture/Clear/Mark-Unverified buttons. JSON configs migrated. All 
+687 tests green (623 EditMode + 64 PlayMode). |
+
+

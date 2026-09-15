@@ -9,7 +9,7 @@ namespace TileStories.Tests
     // SECTION 14 / 16 L763: end-to-end check that the shipped
     // StreamingAssets/LivingRoom/config.json loads, deserialises, and every POI's
     // hierarchy_level_key resolves against the baked level table -- i.e. the
-    // authoring -> StreamingAssets -> runtime contract holds.
+    // editor -> StreamingAssets -> runtime contract holds.
     public class LivingRoomConfigIntegrationTests
     {
         [UnityTest]

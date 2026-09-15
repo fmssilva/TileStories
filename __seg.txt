@@ -1,1 +1,1 @@
-'│   │   │   │   │   ├── POIAuthoringToolWindow.PositionTabs.cs ← DrawPositionTabs (Draft / Precise tabs inside\n'
+'│   │   │   │   │   ├── POIEditorToolWindow.PositionTabs.cs ← DrawPositionTabs (Draft / Precise tabs inside\n'

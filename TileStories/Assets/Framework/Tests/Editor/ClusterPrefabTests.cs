@@ -63,7 +63,7 @@ namespace TileStories.Tests
             }
         }
 
-        // 3-4 contract: the authoring step (ClusterPrefabWiring) embeds a DominantIcon
+        // 3-4 contract: the editor step (ClusterPrefabWiring) embeds a DominantIcon
         // child with a REAL (non-zero) fileID and leaves it INACTIVE in the asset so the
         // pie/count_only modes never leak it. Runtime-only BuildDominantIcon activates it
         // for dominant_category mode. This is the automated gate for that contract.

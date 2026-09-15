@@ -62,7 +62,7 @@ namespace TileStories.Tests
             Assert.IsNull(resolved, "Unknown keys must resolve to null.");
         }
 
-        // The authoring tool seeds six heritage default rows when a wall has no
+        // The POI Editor seeds six heritage default rows when a wall has no
         // category_styles (DefaultCategoryStyles, _5.1.2_Default_Icons.md). Each row's
         // icon_key must resolve to a real sprite in the wall's runtime icon library,
         // otherwise the spawned markers fall back to the colour-only circle and the
@@ -90,7 +90,7 @@ namespace TileStories.Tests
             }
         }
 
-        // The authoring tool seeds four building damage levels when a wall has no
+        // The POI Editor seeds four building damage levels when a wall has no
         // badge_categories (DefaultBadgeCategories, _5.1.2_Default_Icons.md). Each row's
         // icon_key must resolve to a real sprite in the wall's runtime icon library,
         // otherwise the badge preview in the editor shows a gray box and the badge
@@ -116,7 +116,7 @@ namespace TileStories.Tests
             }
         }
 
-        // The authoring tool seeds four outline levels when a wall has no
+        // The POI Editor seeds four outline levels when a wall has no
         // outline_levels (DefaultOutlineLevels, _5.1.2_Default_Icons.md). Each level's
         // line_style must resolve to a real ring sprite in the wall's runtime icon
         // library, otherwise the status ring on markers renders as a gray box and

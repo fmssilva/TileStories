@@ -25,7 +25,7 @@ Worth noting for later, not building now: this same signal is exactly what a Sta
 
 
 
-about the whole process to positioning markers: Use TileStories > POI Authoring Tool:
+about the whole process to positioning markers: Use TileStories > POI Editor:
 Load config → Populate Rig from JSON → Position markers using sphere handles → Capture Positions to JSON → Save config → Copy to StreamingAssets → Build & Run...
 One thing that the "normal unity developer will do" is to just populate the rig, and then just go to the hierarchy and click each POI and position it, and then click "Ctrl+S" and he will think everything is well done and saved to the config json?? is this probable to happen? so what should we do? maybe we can save to config json automatic when the user saves normally... so when the unity saves the prject at some moment we always save things to the config json automatic? is this good?
 
@@ -37,7 +37,7 @@ I'd argue against silently auto-running "Capture Positions to JSON" on every sce
 
 Better version of the same instinct: make the mistake loud instead of invisible, using the exact same EditorSceneManager.sceneSaving hook already planned for the rig-cleanup check (Task 2.3), upgraded to actually compare state instead of just checking presence:
 
-On scene save, for every marker currently under POIAuthoringRig, compare its current scene position against what's currently saved in config.json for the matching POI id (using a distance threshold like Vector3.Distance(a, b) > 0.001f, not exact equality — float precision noise would otherwise cause constant false alarms).
+On scene save, for every marker currently under POIEditorRig, compare its current scene position against what's currently saved in config.json for the matching POI id (using a distance threshold like Vector3.Distance(a, b) > 0.001f, not exact equality — float precision noise would otherwise cause constant false alarms).
 If anything differs, show an actual EditorUtility.DisplayDialog — a blocking popup, not a Console line easy to scroll past — with a "Capture Now" button right in the dialog that runs the capture immediately, one click, the moment the problem is caught.
 This keeps the person in control (they click, nothing happens invisibly) while making the failure mode almost impossible to walk away from unnoticed. A cheap complementary touch: an asterisk in the tool window's title when there are uncaptured changes, matching the "unsaved document" convention from basically every text editor — an ambient reminder, not just a save-time interrupt.
 
@@ -100,9 +100,9 @@ and for the badge we can use exacly the same thing. the same "editor component" 
 
 
 ---
-and then, we need to reorganize the whole POI Authoring tab into a good and well organized set of components. because currently everything is in the first level, and always visible. we need to organize things by groups or by components and so we can have some "expland" and minimize button in each component and so we can hide or expand that component information. 
+and then, we need to reorganize the whole POI Editor tab into a good and well organized set of components. because currently everything is in the first level, and always visible. we need to organize things by groups or by components and so we can have some "expland" and minimize button in each component and so we can hide or expand that component information. 
 
-and so, for starters, we should put all those buttons of "big actions" right on top of the POI Authoring.
+and so, for starters, we should put all those buttons of "big actions" right on top of the POI Editor.
 so we have the config path, the marker prefab, the correction anchor, the wall mesh reference... 
 and then we have the buttons:
 load config (and here... should we allow to add the path or to click in some "+" button and so we add the specific config we want? currently maybe it is a bit hard coded?? and we should be able to select the config we want from our wall or from any new wall??)
@@ -110,11 +110,11 @@ then the buttons populate and clear rig and capture positions to json and save c
 and about these button... lets review how many buttons and for what functions we have them?? 
 example, as soon as we click in populate the rig button, can we right away in automatic paint the "clear the rig" button in red or something or orange with some warning symbol, so the developer knows that he should clear the rig before running the app to avoid duplciates... and even we can add this message bellow to be clear to the developer why he should clear th rig before runing...?? 
 
-And then we have capture positions to json and save config... lets maybe just have a button "Save configs to json" or something like that? and so when we click it we save evrything to json (positions, symbols, styles etc.. basically evrything...) (and this button should also become orange or yellow with some warning symbol and some message, automatic, as soon as we do some change in the POI Authoring... if we change ome position or style or something... so this button become yellow so the developer knows that he should save things...??)
+And then we have capture positions to json and save config... lets maybe just have a button "Save configs to json" or something like that? and so when we click it we save evrything to json (positions, symbols, styles etc.. basically evrything...) (and this button should also become orange or yellow with some warning symbol and some message, automatic, as soon as we do some change in the POI Editor... if we change ome position or style or something... so this button become yellow so the developer knows that he should save things...??)
 and then the button copy to streamingassets is ok. 
 and then we can remove the button select all rig objects (we dont need it)
 
-and so these global button are always visible on top of the POI authoring tab...
+and so these global button are always visible on top of the POI editor tab...
 
 then we have a big componnt bellow, with a scrooll bar on the side, and we put everything else inside it (and with a scrool because we'll have many things and we won't b able to see them all without a scrooll bar)
 

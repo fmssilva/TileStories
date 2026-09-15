@@ -1,6 +1,6 @@
 import os
 
-path = r'C:\Users\franc\Desktop\TileStories\TileStories\Assets\Framework\Editor\POIAuthoring\RigLifecycle\POIAuthoringToolWindow.RigLifecycle.cs'
+path = r'C:\Users\franc\Desktop\TileStories\TileStories\Assets\Framework\Editor\POIEditor\RigLifecycle\POIEditorToolWindow.RigLifecycle.cs'
 
 with open(path, 'r', encoding='utf-8') as f:
     content = f.read()
@@ -9,7 +9,7 @@ old = '''private void CapturePositions(bool silentWhenRigMissing = false)
         {
             if (_config == null || _config.pois == null)
             {
-                Debug.LogWarning("[POIAuthoring] No config loaded.");
+                Debug.LogWarning("[POIEditor] No config loaded.");
                 return;
             }
 
@@ -17,7 +17,7 @@ old = '''private void CapturePositions(bool silentWhenRigMissing = false)
             if (rig == null || rig.childCount == 0)
             {
                 if (!silentWhenRigMissing)
-                    Debug.LogWarning("[POIAuthoring] No POIAuthoringRig with children found. Populate first.");
+                    Debug.LogWarning("[POIEditor] No POIEditorRig with children found. Populate first.");
                 return;
             }
 
@@ -59,7 +59,7 @@ old = '''private void CapturePositions(bool silentWhenRigMissing = false)
             }
 
             _hasUnsavedChanges = true;
-            Debug.Log($"[POIAuthoring] Captured {captured} positions (skipped {skipped} missing scene objects).");
+            Debug.Log($"[POIEditor] Captured {captured} positions (skipped {skipped} missing scene objects).");
             Repaint();
         }'''
 
@@ -67,7 +67,7 @@ new = '''private void CapturePositions(bool silentWhenRigMissing = false)
         {
             if (_config == null || _config.pois == null)
             {
-                Debug.LogWarning("[POIAuthoring] No config loaded.");
+                Debug.LogWarning("[POIEditor] No config loaded.");
                 return;
             }
 
@@ -75,7 +75,7 @@ new = '''private void CapturePositions(bool silentWhenRigMissing = false)
             if (rig == null || rig.childCount == 0)
             {
                 if (!silentWhenRigMissing)
-                    Debug.LogWarning("[POIAuthoring] No POIAuthoringRig with children found. Populate first.");
+                    Debug.LogWarning("[POIEditor] No POIEditorRig with children found. Populate first.");
                 return;
             }
 
@@ -114,7 +114,7 @@ new = '''private void CapturePositions(bool silentWhenRigMissing = false)
             }
 
             _hasUnsavedChanges = true;
-            Debug.Log($"[POIAuthoring] Captured {captured} positions (skipped {skipped} missing scene objects).");
+            Debug.Log($"[POIEditor] Captured {captured} positions (skipped {skipped} missing scene objects).");
             Repaint();
         }'''
 

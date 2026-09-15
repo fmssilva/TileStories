@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace TileStories.Editor.Tests
 {
-    // Tier 0 EditMode tests for the Block 8 authoring foldout: JSON round-trip of the
+    // Tier 0 EditMode tests for the Block 8 editor foldout: JSON round-trip of the
     // DisplacementSettings schema (mirrors SaveConfig via JsonUtility, and the runtime
     // WallConfigLoader deserialize path) plus structural presence of the new foldout
-    // wiring on the authoring window.
-    public class DisplacementAuthoringRoundTripTests
+    // wiring on the editor window.
+    public class DisplacementEditorRoundTripTests
     {
         [Test]
         public void RoundTrip_DisplacementSettings_ThroughJsonUtility()
@@ -29,7 +29,7 @@ namespace TileStories.Editor.Tests
             config.displacement_settings.leader_line_opacity = 0.6f;
             config.displacement_settings.displacement_tiebreak = "lower_priority_only";
 
-            // Mirrors authoring SaveConfig + runtime WallConfigLoader.
+            // Mirrors editor SaveConfig + runtime WallConfigLoader.
             string json = JsonUtility.ToJson(config, true);
             var loaded = JsonUtility.FromJson<WallConfigData>(json);
 
@@ -51,10 +51,10 @@ namespace TileStories.Editor.Tests
         [Test]
         public void FoldoutSectionMethods_AndState_Exist()
         {
-            var t = typeof(POIAuthoringToolWindow);
+            var t = typeof(POIEditorToolWindow);
             Assert.IsNotNull(
                 t.GetMethod("DrawGlobalDisplacementSection", BindingFlags.NonPublic | BindingFlags.Instance),
-                "DrawGlobalDisplacementSection must be wired on the authoring window");
+                "DrawGlobalDisplacementSection must be wired on the editor window");
             Assert.IsNotNull(
                 t.GetField("_showGlobalDisplacement", BindingFlags.NonPublic | BindingFlags.Instance),
                 "_showGlobalDisplacement state field must exist");

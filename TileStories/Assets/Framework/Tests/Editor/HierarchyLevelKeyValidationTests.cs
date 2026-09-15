@@ -5,27 +5,27 @@ using UnityEngine;
 
 namespace TileStories.Tests
 {
-    // Tier-0 tests for POIAuthoringToolWindow.ValidateHierarchyLevelKeys
+    // Tier-0 tests for POIEditorToolWindow.ValidateHierarchyLevelKeys
     // (spec _2_3 section 11b via _2.7 entry 2.3-j): covers BOTH failure modes --
     // unset key (new warning) and stale key reference (existing behaviour).
     // Pure data validation, no scene or rendering.
     public class HierarchyLevelKeyValidationTests
     {
-        private static TileStories.Editor.POIAuthoringToolWindow CreateWindowWithConfig(TileStories.WallConfigData config)
+        private static TileStories.Editor.POIEditorToolWindow CreateWindowWithConfig(TileStories.WallConfigData config)
         {
-            var window = EditorWindow.GetWindow<TileStories.Editor.POIAuthoringToolWindow>();
-            var field = typeof(TileStories.Editor.POIAuthoringToolWindow).GetField("_config",
+            var window = EditorWindow.GetWindow<TileStories.Editor.POIEditorToolWindow>();
+            var field = typeof(TileStories.Editor.POIEditorToolWindow).GetField("_config",
                 BindingFlags.NonPublic | BindingFlags.Instance);
             field?.SetValue(window, config);
             return window;
         }
 
         private static System.Collections.Generic.List<TileStories.Editor.EditorAlertItem> InvokeValidator(
-            TileStories.Editor.POIAuthoringToolWindow window, string methodName)
+            TileStories.Editor.POIEditorToolWindow window, string methodName)
         {
-            var method = typeof(TileStories.Editor.POIAuthoringToolWindow).GetMethod(methodName,
+            var method = typeof(TileStories.Editor.POIEditorToolWindow).GetMethod(methodName,
                 BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.IsNotNull(method, $"method {methodName} not found on POIAuthoringToolWindow");
+            Assert.IsNotNull(method, $"method {methodName} not found on POIEditorToolWindow");
             return (System.Collections.Generic.List<TileStories.Editor.EditorAlertItem>)method.Invoke(window, null);
         }
 

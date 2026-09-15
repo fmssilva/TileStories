@@ -1,0 +1,6 @@
+﻿
+proj_guides\_5.1_Editor_Tab.md:55:| `SpecificMarker/POIEditorToolWindow.PositionTabs.cs` | DrawPositionTabs (Position 
+foldout): shows POI name + position state. When `poi.position != null` shows read-only XYZ + Verified toggle + Capture 
+Position / Clear Position / Mark Unverified buttons. When null shows hint + Capture Position button. |
+
+

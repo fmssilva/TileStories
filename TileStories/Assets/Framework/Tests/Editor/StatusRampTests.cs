@@ -9,7 +9,7 @@ namespace TileStories.Tests
         [SetUp]
         public void SetUp()
         {
-            CloseAuthoringWindows();
+            CloseEditorWindows();
             StatusRamp.ResetToDefaults();
         }
 
@@ -17,12 +17,12 @@ namespace TileStories.Tests
         public void TearDown()
         {
             StatusRamp.ResetToDefaults();
-            CloseAuthoringWindows();
+            CloseEditorWindows();
         }
 
-        private static void CloseAuthoringWindows()
+        private static void CloseEditorWindows()
         {
-            foreach (var window in Resources.FindObjectsOfTypeAll<TileStories.Editor.POIAuthoringToolWindow>())
+            foreach (var window in Resources.FindObjectsOfTypeAll<TileStories.Editor.POIEditorToolWindow>())
             {
                 window.Close();
             }

@@ -1,6 +1,6 @@
 // DefaultOutlineLevelsTests.cs
 //
-// EditMode test for the outline-level defaults seeded by the authoring tool
+// EditMode test for the outline-level defaults seeded by the POI Editor
 // when a wall has no outline_levels. Pure data -- no scene, no window, no
 // Unity dependencies. Verifies the four heritage levels, their line styles,
 // pct/ring_width values, and that "unknown" carries an explicit grey colour.

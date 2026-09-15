@@ -1,6 +1,6 @@
 // DefaultCategoryStylesTests.cs
 //
-// EditMode test for the heritage category defaults seeded by the authoring tool
+// EditMode test for the heritage category defaults seeded by the POI Editor
 // when a wall has no category_styles. Pure data — no scene, no window, no
 // Unity dependencies. Verifies the six heritage categories, their icon keys,
 // and their hex colours match the spec in _5.3_Defaults.md.

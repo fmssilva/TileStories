@@ -1,6 +1,6 @@
 // DefaultBadgeCategoriesTests.cs
 //
-// EditMode test for the building damage levels seeded by the authoring tool
+// EditMode test for the building damage levels seeded by the POI Editor
 // when a wall has no badge_categories. Pure data -- no scene, no window, no
 // Unity dependencies. Verifies the four damage levels, their icon keys, and
 // their hex colours match the spec in _5.1.2_Default_Icons.md.
