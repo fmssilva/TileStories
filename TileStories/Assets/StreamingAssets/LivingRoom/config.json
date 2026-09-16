@@ -17,35 +17,35 @@
             "search_keywords": []
         },
         {
-            "category": "Religious",
+            "category": "religious",
             "color_hex": "#7C3AED",
             "icon_key": "IconReligious",
             "details": "Sacred Architecture (includes christian, jew, muslim and pagan)",
             "search_keywords": []
         },
         {
-            "category": "Military",
+            "category": "military",
             "color_hex": "#DC2626",
             "icon_key": "IconMilitary",
             "details": "Defense & Fortifications",
             "search_keywords": []
         },
         {
-            "category": "Residential",
+            "category": "residential",
             "color_hex": "#DB2777",
             "icon_key": "IconNobel&PrivateResidence",
             "details": "Noble & Private Housing",
             "search_keywords": []
         },
         {
-            "category": "Economic",
+            "category": "economic",
             "color_hex": "#059669",
             "icon_key": "IconIndustry&Trade",
             "details": "Trade, Industry & Harbor",
             "search_keywords": []
         },
         {
-            "category": "Infrastructure",
+            "category": "infrastructure",
             "color_hex": "#0284C7",
             "icon_key": "IconInfrastructures",
             "details": "Public Utilities & Works",
@@ -209,7 +209,7 @@
         {
             "id": "lamp",
             "name": "The Lamp",
-            "category": "royal_government",
+            "category": "Royal Government",
             "editor_rotation_deg": 0.0,
             "position": {
                 "x": -0.9999999403953552,
@@ -347,7 +347,7 @@
         {
             "id": "painting",
             "name": "The Painting",
-            "category": "royal_government",
+            "category": "Royal Government",
             "editor_rotation_deg": 0.0,
             "position": {
                 "x": -2.0,
@@ -485,7 +485,7 @@
         {
             "id": "camera",
             "name": "The Camera",
-            "category": "royal_government",
+            "category": "Royal Government",
             "editor_rotation_deg": 0.0,
             "position": {
                 "x": -1.9300000667572022,
@@ -623,7 +623,7 @@
         {
             "id": "dev_disp_eq_royal",
             "name": "Dev Disp Eq Royal",
-            "category": "royal_government",
+            "category": "Royal Government",
             "editor_rotation_deg": 0.0,
             "position": {
                 "x": 0.5,
