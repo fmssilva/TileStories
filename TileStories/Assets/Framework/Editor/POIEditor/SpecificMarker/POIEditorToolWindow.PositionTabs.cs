@@ -32,22 +32,29 @@ namespace TileStories.Editor
             var position = poi.position;
 
             // Layout order is intentionally fixed: rotation first, coords second, then verified state.
-            using (new EditorGUILayout.HorizontalScope())
+            // Shared row: label keeps a fixed width; slider takes rowWidth minus the
+            // label + spacing, inside the capped row (level-2 indent measured at call time).
+            DrawEditorRow(out float rotationRow, out _);
             {
                 EditorGUILayout.LabelField("Edit Rotation", EditorStyles.boldLabel, GUILayout.Width(92f));
                 DrawConfigMutationScope(
                     () =>
                     {
-                        poi.editor_rotation_deg = EditorGUILayout.Slider(poi.editor_rotation_deg, 0f, 360f, GUILayout.Width(240f));
+                        float sliderW = Mathf.Max(120f, rotationRow - 104f);
+                        poi.editor_rotation_deg = EditorGUILayout.Slider(poi.editor_rotation_deg, 0f, 360f,
+                            GUILayout.Width(sliderW), GUILayout.ExpandWidth(false));
                         if (GUI.changed)
                             ApplyPoiEditorRotation(poi);
                     },
                     refreshRigOnChange: false);
             }
+            EditorRowEnd();
 
             EditorGUILayout.Space(2f);
 
-            using (new EditorGUILayout.HorizontalScope())
+            // Shared row: read-only X/Y/Z triplet keeps its fixed cell widths but sits
+            // in the capped row with the same transparent spacer (level-2 indent).
+            DrawEditorRow(out float coordRow, out _);
             {
                 EditorGUI.BeginDisabledGroup(true);
                 var coordinateLabels = GetCoordinateLabels();
@@ -55,21 +62,25 @@ namespace TileStories.Editor
                 {
                     EditorGUILayout.LabelField(coordinateLabels[i] + ":", EditorStyles.miniBoldLabel, GUILayout.Width(28f));
                     float value = i == 0 ? position.x : i == 1 ? position.y : position.z;
-                    EditorGUILayout.FloatField(value, GUILayout.Width(110f));
+                    EditorGUILayout.FloatField(value, GUILayout.Width(110f), GUILayout.ExpandWidth(false));
                     EditorGUILayout.Space(8f);
                 }
                 EditorGUI.EndDisabledGroup();
             }
+            EditorRowEnd();
 
             EditorGUILayout.Space(2f);
 
-            using (new EditorGUILayout.HorizontalScope())
+            // Shared editor row: transparent indent spacer + width capped to
+            // max(MinRowWidth, min(visible panel, MaxRowWidth)). The verify button
+            // takes the capped width; the status text sits next to it in the row.
+            DrawEditorRow(out float verifyRowWidth, out _);
             {
                 string buttonLabel = poi.position_verified ? "Verified" : "Unverified";
                 Color originalColor = GUI.backgroundColor;
                 GUI.backgroundColor = poi.position_verified ? new Color(0.2f, 0.7f, 0.2f) : new Color(0.8f, 0.3f, 0.3f);
 
-                if (GUILayout.Button(buttonLabel, GUILayout.Width(120f)))
+                if (GUILayout.Button(buttonLabel, GUILayout.Width(verifyRowWidth), GUILayout.ExpandWidth(false)))
                 {
                     TogglePoiVerification(poi);
                 }
@@ -79,6 +90,7 @@ namespace TileStories.Editor
                 var statusText = poi.position_verified ? "Position locked in scene" : "Position editable in scene";
                 EditorGUILayout.LabelField(statusText, EditorStyles.miniLabel, GUILayout.MinWidth(180f));
             }
+            EditorRowEnd();
         }
 
         // Toggles a POI's verification status with confirmation gating when unlocking.

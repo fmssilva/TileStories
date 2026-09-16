@@ -327,8 +327,13 @@ namespace TileStories.Tests
             InvokeAddNewPoiBefore(window, 1);
 
             Assert.AreEqual(3, config.pois.Count, "The new POI should be inserted before the next POI.");
-            Assert.AreEqual(config.pois[1].name, "Chair", "The original next POI should remain in its original order.");
-            Assert.AreEqual(config.pois[2].category, config.pois[1].category, "The inserted POI should inherit the next POI's style when inserted before it.");
+            // AddNewPoiBefore(k) inserts AT index k, so the POI that used to sit at
+            // k shifts down by one. With [Lamp, Chair] and k=1 the list becomes
+            // [Lamp, New POI, Chair] -- Chair is still the POI immediately after the
+            // new one, it just no longer occupies its old index. (NUnit is
+            // AreEqual(expected, actual) -- keep the concrete value first.)
+            Assert.AreEqual("Chair", config.pois[2].name, "The original next POI should shift down by one, staying after the new POI.");
+            Assert.AreEqual("seating", config.pois[1].category, "The inserted POI should inherit the next POI's style when inserted before it.");
         }
     }
 }

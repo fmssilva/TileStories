@@ -52,7 +52,11 @@ namespace TileStories.Editor
 
             EditorGUILayout.Space(6f);
             EditorGUILayout.LabelField("Results & Navigation", EditorStyles.boldLabel);
-            _config.no_results_message = EditorGUILayout.TextField("No-results message", _config.no_results_message);
+            // Shared row: transparent indent spacer + labelled TextField capped to rowWidth.
+            DrawEditorRow(out float noResultsRow, out _);
+            _config.no_results_message = EditorGUILayout.TextField("No-results message", _config.no_results_message,
+                GUILayout.Width(noResultsRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             _config.default_result_view = DrawPopupField("Default result view", _config.default_result_view,
                 ResultViewOptions, ResultViewLabels, ResultViewHelp);
 
@@ -101,7 +105,11 @@ namespace TileStories.Editor
             {
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    _config.zoom_on_select_trigger = (WallConfigData.ZoomOnSelectTrigger)EditorGUILayout.EnumPopup("Trigger target", _config.zoom_on_select_trigger);
+                    // Shared row (nested scope -> deeper indent spacer, measured at call time).
+                    DrawEditorRow(out float triggerRow, out _);
+                    _config.zoom_on_select_trigger = (WallConfigData.ZoomOnSelectTrigger)EditorGUILayout.EnumPopup("Trigger target", _config.zoom_on_select_trigger,
+                        GUILayout.Width(triggerRow), GUILayout.ExpandWidth(false));
+                    EditorRowEnd();
                     _config.zoom_on_select_density_threshold = DrawIntField("Density threshold", _config.zoom_on_select_density_threshold, ZoomOnSelectDensityHelp);
                     _config.zoom_on_select_factor = DrawScalarField("Zoom factor", _config.zoom_on_select_factor, ZoomOnSelectFactorHelp);
                 }
@@ -176,7 +184,10 @@ namespace TileStories.Editor
 
             // Add new group button.
             EditorGUILayout.Space(2f);
-            if (GUILayout.Button("+ Add synonym group", GUILayout.Width(160f)))
+            // Rendered as a shared editor row: transparent indent spacer + width
+            // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
+            DrawEditorRow(out float rowWidth, out _);
+            if (GUILayout.Button("+ Add synonym group", GUILayout.Width(rowWidth), GUILayout.ExpandWidth(false)))
             {
                 _config.synonym_groups.Add(new SynonymGroup
                 {
@@ -185,6 +196,7 @@ namespace TileStories.Editor
                 });
                 _hasUnsavedChanges = true;
             }
+            EditorRowEnd();
         }
 
         // Renders the custom keyword field definitions table.
@@ -244,7 +256,8 @@ namespace TileStories.Editor
                     // Details popup + help.
                     using (new EditorGUILayout.HorizontalScope(GUILayout.Width(76f)))
                     {
-                        if (GUILayout.Button("...", GUILayout.Width(26f)))
+                        // Height pinned (512px texture would inflate the row otherwise).
+                        if (GUILayout.Button(DetailsIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
                             PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(
                                 field.label ?? field.key ?? "Field",
                                 () => field.details,
@@ -273,7 +286,10 @@ namespace TileStories.Editor
 
             // Add new field button.
             EditorGUILayout.Space(2f);
-            if (GUILayout.Button("+ Add keyword field", GUILayout.Width(160f)))
+            // Rendered as a shared editor row: transparent indent spacer + width
+            // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
+            DrawEditorRow(out float fieldRowWidth, out _);
+            if (GUILayout.Button("+ Add keyword field", GUILayout.Width(fieldRowWidth), GUILayout.ExpandWidth(false)))
             {
                 _config.search_fields.Add(new SearchFieldDefinition
                 {
@@ -284,6 +300,7 @@ namespace TileStories.Editor
                 });
                 _hasUnsavedChanges = true;
             }
+            EditorRowEnd();
         }
 
         // Renders one read-only labelled row in the keyword fields table.
@@ -295,7 +312,7 @@ namespace TileStories.Editor
                 EditorGUILayout.TextField(key, GUILayout.Width(90f));
                 EditorGUILayout.TextField(label, GUILayout.Width(100f));
                 EditorGUILayout.Toggle(false, GUILayout.Width(50f)); // forced always false for system rows
-                GUILayout.Button("...", GUILayout.Width(26f));
+                GUILayout.Button(DetailsIcon, GUILayout.Width(26f), GUILayout.Height(20f));
             }
         }
     }

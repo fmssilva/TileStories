@@ -143,8 +143,10 @@ TileStories/
         - GlobalScene/
         - SpecificMarker/
         - Shared/
+          - POIEditorToolWindow.RowLayout.cs  // EditorRowWidth + DrawEditorRow/EditorRowEnd: reusable non-table row (indent + width cap + ExpandWidth(false)); indent measured at call time so nested scopes keep deeper spacing
         - ConfigData/
         - AssetPaths/
+          - POIEditorToolWindow.AssetPaths.cs  // DrawPathRow: non-button shared row (transparent indent + labelled TextField capped to rowWidth - 36f + fixed browse button + EditorRowEnd), AbsoluteToAssetPath, GetWallLibraryDirectory
         - RigLifecycle/
       - DevTools/
         - ClusterPrefabWiring.cs

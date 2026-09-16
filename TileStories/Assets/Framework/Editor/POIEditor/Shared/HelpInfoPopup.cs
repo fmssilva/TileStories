@@ -20,7 +20,14 @@ namespace TileStories.Editor
             _body = body ?? string.Empty;
         }
 
-        public override Vector2 GetWindowSize() => new Vector2(WindowWidth, WindowHeight);
+        // Window height scales with body length so multi-paragraph help
+        // (e.g. the Symbol/picker/Preview explanation) never clips.
+        public override Vector2 GetWindowSize()
+        {
+            float lines = Mathf.CeilToInt(_body.Length / 55f) + 2f;
+            float h = Mathf.Max(WindowHeight, 46f + lines * 14f);
+            return new Vector2(WindowWidth, h);
+        }
 
         public override void OnGUI(Rect rect)
         {
@@ -48,6 +55,14 @@ namespace TileStories.Editor
         public static void Draw(string title, string bodyText)
         {
             if (GUILayout.Button("(i)", GUILayout.Width(26f), GUILayout.Height(20f)))
+                PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup(title, bodyText));
+        }
+        // Icon-only twin of Draw: 26f footprint inside a fixed-width header cell.
+        // Button itself stays 26f wide; the parent cell controls horizontal placement
+        // (e.g. a 44f cell centers it over the Preview column).
+        public static void DrawCompact(string title, string bodyText)
+        {
+            if (GUILayout.Button(POIEditorToolWindow.InfoIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
                 PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup(title, bodyText));
         }
     }

@@ -5,6 +5,49 @@ namespace TileStories.Editor
 {
     public partial class POIEditorToolWindow
     {
+        // Taxonomy table layout (marker / badge / outline tables).
+        // One rhythm for the whole window: a single gap between every logical
+        // column group, and a single gap between sibling controls inside one
+        // group. Tune both here instead of hunting per-table magic numbers.
+        private const float TableGapBetweenGroups = 6f;
+        private const float TableGapWithinGroup = 4f;
+
+        // Row layout for non-table rows (buttons, stand-alone controls).
+        // SectionRowIndent: the left pad that makes a bare GUILayout row sit at the
+        // same x as EditorGUILayout content inside a foldout (GUILayout ignores
+        // EditorGUI.indentLevel; EditorGUILayout does not -- this constant bridges
+        // that gap so buttons align with the section's table rows).
+        // MaxRowWidth: cap for non-table rows (sliders, plain fields) so they never
+        // stretch across the whole window just because the taxonomy tables are wide.
+        // Narrow window -> narrower row; wide window -> wider row, capped here.
+        private const float SectionRowIndent = 15f;
+        private const float MaxRowWidth = 480f;
+
+        // Floor for non-table rows: even on a very narrow panel a button/row must
+        // stay readable, so the width clamp is max(MinRowWidth, min(panel, MaxRowWidth)).
+        private const float MinRowWidth = 180f;
+
+        // Breathing room between a row's controls and the visible panel
+        // edge, when the panel is narrow. Used by the row width rule and must be
+        // stable across the Layout and Repaint IMGUI passes.
+        private const float AddButtonRowRightMargin = 6f;
+
+        // Header pad for the Symbol/Style column. Body rows space the three
+        // siblings with TableGapWithinGroup on each side of the 26f select
+        // button, so the header mirrors that: 36f (26 select + 10 lead) plus
+        // both within-group gaps keeps the info button flush with the previews.
+        private const float SymbolColumnPad = 36f + 2f * TableGapWithinGroup;
+
+        // Color group widths (marker / badge / outline tables).
+        // The first cell is the REAL working EditorGUILayout.ColorField, forced
+        // wide (ColorPickerWidth) so it is easy to click -- no flat draw-only
+        // swatch in front of it, which read as a dead cell. The hex field is the
+        // "color name". The pair sits flush (GUILayout's default inter-control
+        // spacing is already there), so the group width is just picker + hex.
+        private const float ColorPickerWidth = 60f;
+        private const float ColorHexFieldWidth = 90f;
+        private const float ColorGroupWidth = ColorPickerWidth + ColorHexFieldWidth;
+
         private static readonly string[] OutlineModeOptions = { "gold", "same_hue", "free_colors" };
         private static readonly string[] OutlineModeLabels = { "Gold", "Same Hue", "Free Colors" };
         private static readonly string[] LineStyleOptions = { "solid", "dash_long", "dash_medium", "dash_short", "dotted" };
@@ -199,6 +242,71 @@ namespace TileStories.Editor
 
         private static GUIContent _trashIcon;
         private static GUIContent TrashIcon => _trashIcon ?? (_trashIcon = EditorGUIUtility.IconContent("d_TreeEditor.Trash"));
+
+        // Info glyph reused for read-only explanation buttons. Unity native
+        // icon first, bundled PNG fallback -- mirrors the pencil pattern so it
+        // survives domain reloads and never depends on editor skin names.
+        public const string InfoIconAssetPath = "Assets/Framework/Editor/POIEditor/Shared/Icons/info-icon.png";
+
+        private static GUIContent _infoIcon;
+        public static GUIContent InfoIcon
+        {
+            get
+            {
+                if (_infoIcon != null)
+                    return _infoIcon;
+
+                var native = EditorGUIUtility.IconContent("_Help");
+                _infoIcon = native != null && native.image != null
+                    ? native
+                    : new GUIContent(AssetDatabase.LoadAssetAtPath<Texture2D>(InfoIconAssetPath));
+                return _infoIcon;
+            }
+        }
+
+        // Select glyph for the curated "Choose existing" picker button.
+        // Unity native assign icon first, bundled PNG fallback -- same caching
+        // pattern as TrashIcon / InfoIcon so it survives domain reloads.
+        // NOTE: the native probe uses FindTexture, NOT IconContent: on Unity 6
+        // (6000.x) "ProjectAssign" is not a registered skin name, and
+        // IconContent(name) LOGS "Unable to load the icon" for unknown names on
+        // every call before falling back. FindTexture returns null silently.
+        public const string SelectIconAssetPath = "Assets/Framework/Editor/POIEditor/Shared/Icons/select.png";
+
+        private static GUIContent _selectIcon;
+        public static GUIContent SelectIcon
+        {
+            get
+            {
+                if (_selectIcon != null)
+                    return _selectIcon;
+
+                var nativeTexture = EditorGUIUtility.FindTexture("ProjectAssign");
+                _selectIcon = nativeTexture != null
+                    ? new GUIContent(nativeTexture)
+                    : new GUIContent(AssetDatabase.LoadAssetAtPath<Texture2D>(SelectIconAssetPath));
+                return _selectIcon;
+            }
+        }
+
+        // Details glyph for the per-row edit-note buttons. Uses the bundled PNG
+        // (explicitly requested asset) with a text fallback if it ever goes
+        // missing -- unlike Info/Select there is no reliable native "three dots".
+        public const string DetailsIconAssetPath = "Assets/Framework/Editor/POIEditor/Shared/Icons/details.png";
+
+        private static GUIContent _detailsIcon;
+        public static GUIContent DetailsIcon
+        {
+            get
+            {
+                if (_detailsIcon != null)
+                    return _detailsIcon;
+
+                var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(DetailsIconAssetPath);
+                _detailsIcon = tex != null ? new GUIContent(tex, "Edit details") : new GUIContent("...");
+                return _detailsIcon;
+            }
+        }
 
         // Pencil glyph for the per-POI header rename button. Loaded by asset
         // path (not EditorGUIUtility.Load) so it survives domain reloads and

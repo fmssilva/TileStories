@@ -12,18 +12,26 @@ namespace TileStories.Editor
             if (_config.pois == null || _config.pois.Count == 0)
             {
                 EditorGUILayout.HelpBox("No POIs yet. Use the + buttons below to add your first POI.", MessageType.Info);
-                if (GUILayout.Button("+ Add first", GUILayout.Width(120f)))
+                // Rendered as a shared editor row: transparent indent spacer + width
+                // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
+                DrawEditorRow(out float firstRowWidth, out _);
+                if (GUILayout.Button("+ Add first", GUILayout.Width(firstRowWidth), GUILayout.ExpandWidth(false)))
                 {
                     AddNewPoi(); // adds at index 0
                 }
+                EditorRowEnd();
                 return;
             }
 
-            // "+ Add before first" button (down arrow) before the first POI
-            if (GUILayout.Button("+ Add POI before next ▼", GUILayout.Width(180f)))
+            // "+ Add before first" button (down arrow) before the first POI.
+            // Rendered as a shared editor row: transparent indent spacer + width
+            // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
+            DrawEditorRow(out float beforeRowWidth, out _);
+            if (GUILayout.Button("+ Add POI before next ▼", GUILayout.Width(beforeRowWidth), GUILayout.ExpandWidth(false)))
             {
                 AddNewPoiInternal(false); // insert at index 0
             }
+            EditorRowEnd();
 
             for (int i = 0; i < _config.pois.Count; i++)
             {
@@ -196,14 +204,18 @@ namespace TileStories.Editor
                     // Focus helper, tinted with this POI's header color so the
                     // action reads as belonging to the marker above. Disabled
                     // until the rig has a child named poi.id (populate first).
-                    using (new EditorGUILayout.HorizontalScope())
+                    // Shared editor row so the Focus helper aligns with the
+                    // foldout indent and stays within the capped row width.
+                    DrawEditorRow(out float focusRowWidth, out _);
                     {
                         using (new EditorGUI.DisabledScope(!CanFocusPoiInScene(poi)))
                         {
                             Color poiColor = PoiHeaderColorFor(foldoutKey, i);
                             var prevBg = GUI.backgroundColor;
                             GUI.backgroundColor = poiColor;
-                            if (GUILayout.Button("Focus in Scene", GUILayout.Width(140f)))
+                            // Leave room in the row for the trailing help button.
+                            float focusWidth = Mathf.Max(140f, focusRowWidth - 40f);
+                            if (GUILayout.Button("Focus in Scene", GUILayout.Width(focusWidth), GUILayout.ExpandWidth(false)))
                                 FocusPoiInScene(poi);
                             GUI.backgroundColor = prevBg;
                         }
@@ -211,6 +223,7 @@ namespace TileStories.Editor
                         GUILayout.Space(10f);
                         HelpInfoButton.Draw("Focus in Scene", FocusInSceneHelpBody);
                     }
+                    EditorRowEnd();
 
                     _showPoiPosition = DrawFramedFoldout(ref _showPoiPosition, () => DrawPositionTabs(poi), "Position", FoldoutDefaultColor);
 
@@ -243,31 +256,41 @@ namespace TileStories.Editor
                 EditorGUILayout.Space(6f);
             }
 
-            // "+ Add after last" button (up arrow) after the last POI
-            if (GUILayout.Button("+ Add POI after previous ▲", GUILayout.Width(180f)))
+            // "+ Add after last" button (up arrow) after the last POI.
+            // Rendered as a shared editor row: transparent indent spacer + width
+            // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
+            DrawEditorRow(out float afterRowWidth, out _);
+            if (GUILayout.Button("+ Add POI after previous ▲", GUILayout.Width(afterRowWidth), GUILayout.ExpandWidth(false)))
             {
                 AddNewPoiInternal(true); // appends at end
             }
+            EditorRowEnd();
         }
 
         private void DrawSeparatorButtons(int index)
         {
             // index is the current POI index. We are drawing separator after this POI (i.e., between index and index+1)
             EditorGUILayout.Space(4f);
-            EditorGUILayout.BeginHorizontal();
+            // Wrap the separator pair in the shared row so it gets the same
+            // indent spacer and stays within the capped row width. Two buttons,
+            // each half the row so they never exceed max(Min, min(panel, Max)).
+            DrawEditorRow(out float sepRowWidth, out _);
             {
+                string prevLabel = "+ Add POI near previous ▲";
+                string nextLabel = "+ Add POI near next ▼";
+                float sepHalf = Mathf.Max(120f, (sepRowWidth - 4f) / 2f);
                 // "+ Add POI after previous ^" (up arrow) - inserts after current index
-                if (GUILayout.Button("+ Add POI after previous ▲", GUILayout.Width(180f)))
+                if (GUILayout.Button(prevLabel, GUILayout.Width(sepHalf), GUILayout.ExpandWidth(false)))
                 {
                     AddNewPoiAfter(index);
                 }
                 // "+ Add POI before next ▼" (down arrow) - inserts before next
-                if (GUILayout.Button("+ Add POI before next ▼", GUILayout.Width(180f)))
+                if (GUILayout.Button(nextLabel, GUILayout.Width(sepHalf), GUILayout.ExpandWidth(false)))
                 {
                     AddNewPoiBefore(index + 1);
                 }
             }
-            EditorGUILayout.EndHorizontal();
+            EditorRowEnd();
             EditorGUILayout.Space(4f);
         }
 
@@ -349,19 +372,28 @@ namespace TileStories.Editor
             // assign-to-wall-library-and-get-key flow as the category table.
             // Setting it changes just this POI's icon; category color, ring, and
             // badge are unaffected.
-            poi.has_custom_symbol = EditorGUILayout.Toggle("Use Custom Symbol", poi.has_custom_symbol);
+            // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
+            DrawEditorRow(out float customToggleRow, out _);
+            poi.has_custom_symbol = EditorGUILayout.Toggle("Use Custom Symbol", poi.has_custom_symbol,
+                GUILayout.Width(customToggleRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
 
             if (poi.has_custom_symbol)
             {
-                using (new EditorGUILayout.HorizontalScope())
+                // Multi-element shared row: label + preview keep fixed widths; the
+                // ObjectField takes the remaining rowWidth, all inside the same capped row.
+                DrawEditorRow(out float symbolRow, out _);
                 {
-                    EditorGUILayout.LabelField("Custom symbol (optional)", GUILayout.MinWidth(130f));
+                    EditorGUILayout.LabelField("Custom symbol (optional)", GUILayout.Width(150f));
                     Sprite current = ResolveSpriteForKey(poi.custom_symbol_key);
                     DrawSpritePreview(current);
-                    Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false, GUILayout.MinWidth(140f));
+                    float symbolFieldW = Mathf.Max(90f, symbolRow - 150f - 36f - 12f);
+                    Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false,
+                        GUILayout.Width(symbolFieldW), GUILayout.ExpandWidth(false));
                     if (chosen != current)
                         poi.custom_symbol_key = chosen != null ? AssignSpriteToLibraryAndGetKey(chosen, poi.id + "_symbol") : null;
                 }
+                EditorRowEnd();
                 EditorGUILayout.LabelField("Overrides just this POI's icon (e.g. a small castle glyph). Category color, ring, and badge stay unchanged.", EditorStyles.wordWrappedMiniLabel);
             }
         }
@@ -374,7 +406,11 @@ namespace TileStories.Editor
         private void DrawPoiOutlineFields(POIData poi)
         {
             bool hasStatus = poi.has_status;
-            bool wantsStatus = EditorGUILayout.Toggle("Has status", hasStatus);
+            // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
+            DrawEditorRow(out float hasStatusRow, out _);
+            bool wantsStatus = EditorGUILayout.Toggle("Has status", hasStatus,
+                GUILayout.Width(hasStatusRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
 
             if (wantsStatus && !hasStatus)
             {
@@ -394,10 +430,20 @@ namespace TileStories.Editor
                 if (_config.outline_levels != null && _config.outline_levels.Count > 0)
                     DrawStatusLevelDropdown(poi);
                 else
-                    poi.status_pct = EditorGUILayout.Slider("Status %", poi.status_pct, 0f, 100f);
+                {
+                    // Shared row: transparent indent spacer + labelled Slider capped to rowWidth.
+                    DrawEditorRow(out float statusPctRow, out _);
+                    poi.status_pct = EditorGUILayout.Slider("Status %", poi.status_pct, 0f, 100f,
+                        GUILayout.Width(statusPctRow), GUILayout.ExpandWidth(false));
+                    EditorRowEnd();
+                }
 
                 bool wasUnknown = poi.status_unknown;
-                poi.status_unknown = EditorGUILayout.Toggle("Status unknown", poi.status_unknown);
+                // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
+                DrawEditorRow(out float statusUnknownRow, out _);
+                poi.status_unknown = EditorGUILayout.Toggle("Status unknown", poi.status_unknown,
+                    GUILayout.Width(statusUnknownRow), GUILayout.ExpandWidth(false));
+                EditorRowEnd();
                 if (!wasUnknown && poi.status_unknown)
                     ApplyUnknownStatusDefaults(poi);
             }
@@ -475,7 +521,11 @@ namespace TileStories.Editor
                     selectedIndex = i + 1;
             }
 
-            int next = EditorGUILayout.Popup(label, selectedIndex, labels);
+            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
+            DrawEditorRow(out float hierarchyRow, out _);
+            int next = EditorGUILayout.Popup(label, selectedIndex, labels,
+                GUILayout.Width(hierarchyRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             return next == 0 ? null : entries[next - 1].key;
         }
 
@@ -483,7 +533,11 @@ namespace TileStories.Editor
         {
             var options = CollectCategoryOptions();
             int idx = Mathf.Max(0, options.IndexOf(current));
-            int next = EditorGUILayout.Popup(label, idx, options.ToArray());
+            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
+            DrawEditorRow(out float categoryRow, out _);
+            int next = EditorGUILayout.Popup(label, idx, options.ToArray(),
+                GUILayout.Width(categoryRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             return options[next];
         }
 
@@ -502,7 +556,11 @@ namespace TileStories.Editor
             }
 
             int idx = Mathf.Max(0, options.IndexOf(current));
-            int next = EditorGUILayout.Popup(label, idx, options.ToArray());
+            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
+            DrawEditorRow(out float badgeRow, out _);
+            int next = EditorGUILayout.Popup(label, idx, options.ToArray(),
+                GUILayout.Width(badgeRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             return options[next];
         }
 
@@ -511,7 +569,11 @@ namespace TileStories.Editor
             var levels = _config.outline_levels;
             if (levels == null || levels.Count == 0)
             {
-                poi.status_pct = EditorGUILayout.Slider("Status %", poi.status_pct, 0f, 100f);
+                // Shared row: transparent indent spacer + labelled Slider capped to rowWidth.
+                DrawEditorRow(out float statusPctFallbackRow, out _);
+                poi.status_pct = EditorGUILayout.Slider("Status %", poi.status_pct, 0f, 100f,
+                    GUILayout.Width(statusPctFallbackRow), GUILayout.ExpandWidth(false));
+                EditorRowEnd();
                 return;
             }
 
@@ -527,11 +589,16 @@ namespace TileStories.Editor
                     selectedIndex = i;
             }
 
-            int next = EditorGUILayout.Popup("Status level", selectedIndex, labels);
+            // Shared row: popup takes rowWidth minus the resolved label that follows it.
+            DrawEditorRow(out float statusRow, out _);
+            float statusPopupW = Mathf.Max(80f, statusRow - 130f);
+            int next = EditorGUILayout.Popup("Status level", selectedIndex, labels,
+                GUILayout.Width(statusPopupW), GUILayout.ExpandWidth(false));
             next = Mathf.Clamp(next, 0, levels.Count - 1);
             poi.status_level_key = levels[next].key;
             poi.status_pct = levels[next].pct;
-            EditorGUILayout.LabelField("Resolved status %", poi.status_pct.ToString("0.0"));
+            EditorGUILayout.LabelField("Resolved status %", poi.status_pct.ToString("0.0"), GUILayout.Width(120f));
+            EditorRowEnd();
         }
 
         private List<string> CollectCategoryOptions()
@@ -585,7 +652,16 @@ namespace TileStories.Editor
             var derived = CollectDerivedKeywords(poi);
             if (derived.Count > 0)
             {
-                EditorGUILayout.LabelField("Auto-included from taxonomy (read-only)", EditorStyles.miniLabel);
+                // Shared row: transparent indent spacer + read-only label capped to rowWidth,
+                // with the trailing help button in the same capped row.
+                DrawEditorRow(out float derivedRow, out _);
+                {
+                    float derivedLabelW = Mathf.Max(140f, derivedRow - 40f);
+                    EditorGUILayout.LabelField("Auto-included from taxonomy (read-only)", EditorStyles.miniLabel,
+                        GUILayout.Width(derivedLabelW), GUILayout.ExpandWidth(false));
+                    DrawHelpButton(SearchKeywordsDerivedHelp);
+                }
+                EditorRowEnd();
                 EditorGUILayout.HelpBox(string.Join(", ", derived), MessageType.None);
             }
             else
@@ -618,13 +694,17 @@ namespace TileStories.Editor
                     // Show a warning icon next to the label when the field is forced and empty.
                     if (fieldDef.forced && isEmpty)
                     {
-                        using (new EditorGUILayout.HorizontalScope())
+                        // Shared row: transparent indent spacer + warning icon + required label.
+                        DrawEditorRow(out float requiredRow, out _);
                         {
                             EditorGUILayout.LabelField(
                                 EditorGUIUtility.IconContent("console.warnicon.sml"),
                                 GUILayout.Width(18f), GUILayout.Height(18f));
-                            EditorGUILayout.LabelField($"{displayLabel} (required)", EditorStyles.boldLabel);
+                            float requiredLabelW = Mathf.Max(120f, requiredRow - 30f);
+                            EditorGUILayout.LabelField($"{displayLabel} (required)", EditorStyles.boldLabel,
+                                GUILayout.Width(requiredLabelW), GUILayout.ExpandWidth(false));
                         }
+                        EditorRowEnd();
                     }
                     else
                     {
@@ -632,7 +712,11 @@ namespace TileStories.Editor
                     }
 
                     string joined = entry.keywords != null ? string.Join(", ", entry.keywords) : string.Empty;
-                    string edited = EditorGUILayout.TextField(joined);
+                    // Shared row: transparent indent spacer + TextField capped to rowWidth.
+                    DrawEditorRow(out float keywordRow, out _);
+                    string edited = EditorGUILayout.TextField(joined,
+                        GUILayout.Width(keywordRow), GUILayout.ExpandWidth(false));
+                    EditorRowEnd();
                     if (edited != joined)
                     {
                         entry.keywords = ParseKeywordListStatic(edited);
@@ -646,7 +730,11 @@ namespace TileStories.Editor
             EditorGUILayout.LabelField("Others (freeform)", EditorStyles.miniLabel);
             DrawHelpButton(SearchKeywordsOthersHelp);
             string othersJoined = string.Join(", ", poi.search_keywords);
-            string othersEdited = EditorGUILayout.TextField(othersJoined);
+            // Shared row: transparent indent spacer + TextField capped to rowWidth.
+            DrawEditorRow(out float othersRow, out _);
+            string othersEdited = EditorGUILayout.TextField(othersJoined,
+                GUILayout.Width(othersRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             if (othersEdited != othersJoined)
             {
                 poi.search_keywords = ParseKeywordListStatic(othersEdited);

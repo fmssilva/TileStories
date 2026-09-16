@@ -3,9 +3,11 @@ Best Strategy for your C# / Unity Project in Cline:
 
 **Plan - Refactoring Steps - Architect** 
   - LongCat 2.0 or Nemotron-3 Ultra
+  - 
 **Act - Engineer**
   - DeepSeek V4 Flash or Laguna S 2.1 
 
+**Details**
 1. DeepSeek V4 Flash (Top Overall Tier)
 Role Fit: Primary Software Engineer & Rapid Debugger.
 

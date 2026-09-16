@@ -10,42 +10,42 @@
     "marker_icon_library_resources_path": "MarkerSymbols/living_room_IconLibrary",
     "category_styles": [
         {
-            "category": "royal_government",
+            "category": "Royal Government",
             "color_hex": "#D97706",
             "icon_key": "IconRoyal&Government",
-            "details": "Royal & Government",
+            "details": "Royal & Government buildings",
             "search_keywords": []
         },
         {
-            "category": "religious",
+            "category": "Religious",
             "color_hex": "#7C3AED",
             "icon_key": "IconReligious",
-            "details": "Sacred Architecture",
+            "details": "Sacred Architecture (includes christian, jew, muslim and pagan)",
             "search_keywords": []
         },
         {
-            "category": "military",
+            "category": "Military",
             "color_hex": "#DC2626",
             "icon_key": "IconMilitary",
             "details": "Defense & Fortifications",
             "search_keywords": []
         },
         {
-            "category": "residential",
+            "category": "Residential",
             "color_hex": "#DB2777",
             "icon_key": "IconNobel&PrivateResidence",
             "details": "Noble & Private Housing",
             "search_keywords": []
         },
         {
-            "category": "economic",
+            "category": "Economic",
             "color_hex": "#059669",
             "icon_key": "IconIndustry&Trade",
             "details": "Trade, Industry & Harbor",
             "search_keywords": []
         },
         {
-            "category": "infrastructure",
+            "category": "Infrastructure",
             "color_hex": "#0284C7",
             "icon_key": "IconInfrastructures",
             "details": "Public Utilities & Works",
@@ -206,29 +206,6 @@
         }
     ],
     "pois": [
-        {
-            "id": "3c6079ccf13a409fb973b6f79ebeb04e",
-            "name": "New POI",
-            "category": "royal_government",
-            "editor_rotation_deg": 0.0,
-            "position": {
-                "x": -0.6999999284744263,
-                "y": -0.8700000047683716,
-                "z": -3.377000093460083
-            },
-            "position_verified": false,
-            "summary": "",
-            "search_keywords": [],
-            "search_keyword_fields": [],
-            "status_pct": 0.0,
-            "has_status": true,
-            "status_unknown": false,
-            "badge_category": "intact",
-            "status_level_key": "intact",
-            "hierarchy_level_key": "level_1",
-            "has_custom_symbol": false,
-            "custom_symbol_key": ""
-        },
         {
             "id": "lamp",
             "name": "The Lamp",

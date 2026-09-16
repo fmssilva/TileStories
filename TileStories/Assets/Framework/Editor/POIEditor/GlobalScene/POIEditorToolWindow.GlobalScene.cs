@@ -15,7 +15,11 @@ namespace TileStories.Editor
 
             _showGlobalBadge = DrawFramedFoldout(ref _showGlobalBadge, () =>
             {
-                _config.marker_use_badge = EditorGUILayout.Toggle("Enable badge", _config.marker_use_badge);
+                // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
+                DrawEditorRow(out float badgeRowWidth, out _);
+                _config.marker_use_badge = EditorGUILayout.Toggle("Enable badge", _config.marker_use_badge,
+                    GUILayout.Width(badgeRowWidth), GUILayout.ExpandWidth(false));
+                EditorRowEnd();
                 if (_config.marker_use_badge)
                     DrawGlobalBadgeSection();
                 else
@@ -55,7 +59,11 @@ namespace TileStories.Editor
         {
             int shapeIdx = Array.IndexOf(ShapeOptions, _config.marker_shape);
             if (shapeIdx < 0) shapeIdx = 0;
-            shapeIdx = EditorGUILayout.Popup("Background shape", shapeIdx, ShapeLabels);
+            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
+            DrawEditorRow(out float shapeRowWidth, out _);
+            shapeIdx = EditorGUILayout.Popup("Background shape", shapeIdx, ShapeLabels,
+                GUILayout.Width(shapeRowWidth), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             _config.marker_shape = ShapeOptions[shapeIdx];
 
             EditorGUILayout.Space(4f);
@@ -84,6 +92,8 @@ namespace TileStories.Editor
                 e => _config.marker_shape != "none",
                 "+ Add category",
                 "Category",
+                "Write more information about this category here: what it represents, when to use it, example POIs. Stored per row in config.json.",
+                "SYMBOL (ObjectField cell): lists every Sprite in the whole project. PICKER BUTTON (small icon): same list narrowed to just this wall's symbols plus the framework defaults. PREVIEW: thumbnail of whatever is currently assigned. All three write to the same field.\n\nTO ADD YOUR OWN IMAGE: drop a PNG anywhere under this wall's Assets/Apps/<Wall>/MarkerAssets/ folder -- Unity auto-imports it as a Sprite. Then pick it from either list; it registers into this wall's icon library automatically. Same flow for badges and outline ring art.",
                 true,
                 e => e.search_keywords,
                 (e, v) => e.search_keywords = v);
@@ -97,7 +107,11 @@ namespace TileStories.Editor
             // Badge background shape (section 13.3/20.2) -- independent of marker_shape.
             int badgeShapeIdx = Array.IndexOf(ShapeOptions, _config.badge_shape);
             if (badgeShapeIdx < 0) badgeShapeIdx = 0; // default to "circle"
-            badgeShapeIdx = EditorGUILayout.Popup("Badge background shape", badgeShapeIdx, ShapeLabels);
+            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
+            DrawEditorRow(out float badgeShapeRow, out _);
+            badgeShapeIdx = EditorGUILayout.Popup("Badge background shape", badgeShapeIdx, ShapeLabels,
+                GUILayout.Width(badgeShapeRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             _config.badge_shape = ShapeOptions[badgeShapeIdx];
 
             // Seed defaults only if genuinely empty (section 13.2) -- not on every load.
@@ -118,6 +132,8 @@ namespace TileStories.Editor
                 e => _config.badge_shape != "none",
                 "+ Add badge category",
                 "Badge Key",
+                "Write more information about this badge here: what it represents, when to use it, example POIs. Stored per row in config.json.",
+                "SYMBOL (ObjectField cell): lists every Sprite in the whole project. PICKER BUTTON (small icon): same list narrowed to just this wall's symbols plus the framework defaults. PREVIEW: thumbnail of whatever is currently assigned. All three write to the same field.\n\nTO ADD YOUR OWN IMAGE: drop a PNG anywhere under this wall's Assets/Apps/<Wall>/MarkerAssets/ folder -- Unity auto-imports it as a Sprite. Then pick it from either list; it registers into this wall's icon library automatically. Same flow for badges and outline ring art.",
                 true,
                 e => e.search_keywords,
                 (e, v) => e.search_keywords = v);
@@ -126,7 +142,11 @@ namespace TileStories.Editor
         private void DrawGlobalOutlineSection()
         {
             bool useOutline = !string.Equals(_config.marker_outline_mode, "none", StringComparison.OrdinalIgnoreCase);
-            useOutline = EditorGUILayout.Toggle("Enable outline", useOutline);
+            // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
+            DrawEditorRow(out float outlineEnableRowWidth, out _);
+            useOutline = EditorGUILayout.Toggle("Enable outline", useOutline,
+                GUILayout.Width(outlineEnableRowWidth), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
 
             if (!useOutline)
             {
@@ -154,7 +174,11 @@ namespace TileStories.Editor
             }
             int idx = Array.IndexOf(OutlineModeOptions, normalizedOutlineMode);
             if (idx < 0) idx = 0;
-            idx = EditorGUILayout.Popup("Outline Color", idx, OutlineModeLabels);
+            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
+            DrawEditorRow(out float outlineColorRowWidth, out _);
+            idx = EditorGUILayout.Popup("Outline Color", idx, OutlineModeLabels,
+                GUILayout.Width(outlineColorRowWidth), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             _config.marker_outline_mode = OutlineModeOptions[idx];
 
             bool isFreeColors = _config.marker_outline_mode == "free_colors";
@@ -169,7 +193,7 @@ namespace TileStories.Editor
             EditorGUILayout.HelpBox(
                 "Each row is one discrete outline type a POI can be set to (e.g. \"Intact\", \"25% damaged\"). " +
                 "To add a custom line (e.g. a wavy or double line): import a transparent PNG ring/dash pattern " +
-                "as a Sprite, then use the Type column the same way as a marker/badge symbol.",
+                "as a Sprite, then use the Outline Style column the same way as a marker/badge symbol.",
                 MessageType.Info);
 
             // Seed defaults only if genuinely empty (section 13.2) -- a brand-new wall,
@@ -177,17 +201,43 @@ namespace TileStories.Editor
             if (_config.outline_levels.Count == 0)
                 _config.outline_levels.AddRange(DefaultOutlineLevels.Create());
 
-            // Column headers: Outline key | Details | Type | Preview | Color | Search Keywords | Remove
+            // Column headers (5 groups, header mirrors rows exactly):
+            // [key+details] | [Style+picker+Preview] | [Color] | [SearchKeywords] | [trash]
             using (new EditorGUILayout.HorizontalScope())
             {
+                // Group 1: key + notes info
                 EditorGUILayout.LabelField("Outline key", EditorStyles.miniBoldLabel, GUILayout.Width(110f));
+                GUILayout.Space(TableGapWithinGroup);
+                HelpInfoButton.DrawCompact("Outline Notes",
+                    "Write more information about this outline type here: what it represents, when to use it, example POIs. Stored per row in config.json.");
 
-                EditorGUILayout.LabelField("Details", EditorStyles.miniBoldLabel, GUILayout.Width(26f));
-                EditorGUILayout.LabelField("Type", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
-                EditorGUILayout.LabelField("Preview", EditorStyles.miniBoldLabel, GUILayout.Width(44f));
+                GUILayout.Space(TableGapBetweenGroups);
+
+                // Group 2: Outline Style + picker + Preview info.
+                EditorGUILayout.LabelField("Outline Style", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
+                GUILayout.Space(SymbolColumnPad);
+                HelpInfoButton.DrawCompact("Outline Style",
+                    "STYLE (ObjectField cell): lists every Sprite in the whole project. PICKER BUTTON (small icon): " +
+                    "same list narrowed to just this wall's symbols plus the framework defaults. PREVIEW: thumbnail of " +
+                    "whatever is currently assigned. All three write to the same field.\n\n" +
+                    "TO ADD YOUR OWN RING STYLE: drop a PNG anywhere under this wall's Assets/Apps/<Wall>/MarkerAssets/ " +
+                    "folder -- Unity auto-imports it as a Sprite. Then pick it from either list; it registers into " +
+                    "this wall's icon library automatically.");
+
+                GUILayout.Space(TableGapBetweenGroups);
+
+                // Group 3: Color (free-colors mode only). When hidden, no footprint
+                // is reserved, mirroring the rows -- so the gap before keywords stays
+                // the only spacer either way and header never drifts from rows.
                 if (isFreeColors)
-                    EditorGUILayout.LabelField("Color", EditorStyles.miniBoldLabel, GUILayout.Width(152f));
+                    EditorGUILayout.LabelField("Color", EditorStyles.miniBoldLabel, GUILayout.Width(ColorGroupWidth));
+
+                // Group 4: Search keywords
+                GUILayout.Space(TableGapBetweenGroups);
                 EditorGUILayout.LabelField("Search Keywords", EditorStyles.miniBoldLabel);
+
+                // Group 5: Remove (trash) -- last column, same between-groups gap.
+                GUILayout.Space(TableGapBetweenGroups);
                 EditorGUILayout.LabelField("", GUILayout.Width(26f)); // Remove (trash)
             }
 
@@ -196,24 +246,47 @@ namespace TileStories.Editor
                 var entry = _config.outline_levels[i] ?? new OutlineLevelEntry();
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    // Outline key: text field for the label
+                    // Group 1: key + details
                     entry.label = EditorGUILayout.TextField(entry.label, GUILayout.Width(110f));
 
-                    // Details: popup for free-text notes (same pattern as DrawSymbolTable)
-                    if (GUILayout.Button("...", GUILayout.Width(26f)))
+                    // Details: popup for free-text notes (same pattern as DrawSymbolTable).
+                    GUILayout.Space(TableGapWithinGroup);
+                    if (GUILayout.Button(DetailsIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
                         PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(entry.label ?? "Outline level", () => entry.details, v => entry.details = v));
 
-                    // Type: sprite picker with auto-register
+                    GUILayout.Space(TableGapBetweenGroups);
+
+                    // Group 2: Outline Style + picker + Preview
                     Sprite current = ResolveSpriteForKey(entry.line_style);
                     Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false, GUILayout.Width(140f));
                     if (chosen != current)
                         entry.line_style = AssignSpriteToLibraryAndGetKey(chosen, entry.label);
 
+                    GUILayout.Space(TableGapWithinGroup);
+
+                    // Choose existing: curated popup over this wall's + framework
+                    // symbols only, instead of the full-project ObjectField list.
+                    if (GUILayout.Button(SelectIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
+                    {
+                        EnsureDefaultIconLibraryLoaded();
+                        var targetEntry = entry;
+                        PopupWindow.Show(GUILayoutUtility.GetLastRect(),
+                            new ExistingSymbolPickerPopup(_wallIconLibrary, _defaultIconLibrary,
+                                key => targetEntry.line_style = key));
+                    }
+
+                    GUILayout.Space(TableGapWithinGroup);
+
                     // Preview: thumbnail of the chosen sprite (separate from the ObjectField)
                     DrawSpritePreview(chosen != null ? chosen : current);
 
-                    // Color swatch + hex -- only in Free Colors mode.
-                    // Gold/Same Hue modes derive colours from StatusRamp at runtime.
+                    GUILayout.Space(TableGapBetweenGroups);
+
+                    // Group 3: Color (free-colors mode only). The real picker is the
+                    // first cell of this group -- above is the between-groups gap, and
+                    // the hex field follows inside the group after the within-gap.
+                    // Not reserved when hidden (mirrors the header), so the keywords gap
+                    // below is the same between-groups gap in both modes.
                     if (isFreeColors)
                     {
                         string colorHex = entry.color_hex;
@@ -221,10 +294,12 @@ namespace TileStories.Editor
                         entry.color_hex = colorHex;
                     }
 
-                    // Search keywords column
+                    // Group 4: Search keywords
+                    GUILayout.Space(TableGapBetweenGroups);
                     entry.search_keywords = DrawKeywordListField(entry.search_keywords);
 
-                    // Remove button
+                    // Group 5: Remove (trash) -- last column, same between-groups gap.
+                    GUILayout.Space(TableGapBetweenGroups);
                     if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
                     {
                         _config.outline_levels.RemoveAt(i);
@@ -239,7 +314,10 @@ namespace TileStories.Editor
             }
 
             // No cap on number of outline rows -- developers may add as many as needed.
-            if (GUILayout.Button("+ Add outline level"))
+            // Rendered as a shared editor row: transparent indent spacer + width
+            // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
+            DrawEditorRow(out float rowWidth, out _);
+            if (GUILayout.Button("+ Add outline level", GUILayout.Width(rowWidth), GUILayout.ExpandWidth(false)))
             {
                 _config.outline_levels.Add(new OutlineLevelEntry
                 {
@@ -250,6 +328,7 @@ namespace TileStories.Editor
                 });
                 RecomputeLevelPercentSpacing(_config.outline_levels);
             }
+            EditorRowEnd();
         }
 
         // Auto-space pct whenever the list changes (section 13.4).
@@ -292,17 +371,38 @@ namespace TileStories.Editor
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("Pulse Defaults", EditorStyles.boldLabel);
             var pulse = _config.effect_defaults.pulse;
-            pulse.amplitude = EditorGUILayout.Slider("Amplitude", pulse.amplitude, 0f, 0.45f);
-            pulse.period = EditorGUILayout.FloatField("Period (s)", pulse.period);
+            DrawEditorRow(out float pulseAmpRow, out _);
+            pulse.amplitude = EditorGUILayout.Slider("Amplitude", pulse.amplitude, 0f, 0.45f,
+                GUILayout.Width(pulseAmpRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float pulsePeriodRow, out _);
+            pulse.period = EditorGUILayout.FloatField("Period (s)", pulse.period,
+                GUILayout.Width(pulsePeriodRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
 
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Sun Defaults", EditorStyles.boldLabel);
             var sun = _config.effect_defaults.sun;
-            sun.period = EditorGUILayout.FloatField("Period (s)", sun.period);
-            sun.stagger = EditorGUILayout.Slider("Stagger", sun.stagger, 0f, 0.25f);
-            sun.innerAlpha = EditorGUILayout.Slider("Inner alpha", sun.innerAlpha, 0f, 1f);
-            sun.middleAlpha = EditorGUILayout.Slider("Middle alpha", sun.middleAlpha, 0f, 1f);
-            sun.outerAlpha = EditorGUILayout.Slider("Outer alpha", sun.outerAlpha, 0f, 1f);
+            DrawEditorRow(out float sunPeriodRow, out _);
+            sun.period = EditorGUILayout.FloatField("Period (s)", sun.period,
+                GUILayout.Width(sunPeriodRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float sunStaggerRow, out _);
+            sun.stagger = EditorGUILayout.Slider("Stagger", sun.stagger, 0f, 0.25f,
+                GUILayout.Width(sunStaggerRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float sunInnerRow, out _);
+            sun.innerAlpha = EditorGUILayout.Slider("Inner alpha", sun.innerAlpha, 0f, 1f,
+                GUILayout.Width(sunInnerRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float sunMiddleRow, out _);
+            sun.middleAlpha = EditorGUILayout.Slider("Middle alpha", sun.middleAlpha, 0f, 1f,
+                GUILayout.Width(sunMiddleRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float sunOuterRow, out _);
+            sun.outerAlpha = EditorGUILayout.Slider("Outer alpha", sun.outerAlpha, 0f, 1f,
+                GUILayout.Width(sunOuterRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             string sunTint = sun.tint_color_hex;
             DrawColorSwatchAndHex(ref sunTint);
             sun.tint_color_hex = sunTint;
@@ -310,15 +410,42 @@ namespace TileStories.Editor
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Accent Defaults", EditorStyles.boldLabel);
             var accent = _config.effect_defaults.accent;
-            accent.size = EditorGUILayout.Slider("Size", accent.size, 0f, 1f);
-            accent.baseAlpha = EditorGUILayout.Slider("Base alpha", accent.baseAlpha, 0f, 1f);
-            accent.contourOuterScale = EditorGUILayout.Slider("Contour outer scale", accent.contourOuterScale, 0.72f, 0.98f);
-            accent.contourInnerScale = EditorGUILayout.Slider("Contour inner scale", accent.contourInnerScale, 0.5f, 0.9f);
-            accent.filledRadiusScale = EditorGUILayout.Slider("Filled radius scale", accent.filledRadiusScale, 0.85f, 1f);
-            accent.breatheAmplitude = EditorGUILayout.Slider("Breathe amplitude", accent.breatheAmplitude, 0f, 0.4f);
-            accent.period = EditorGUILayout.FloatField("Period (s)", accent.period);
-            accent.beaconStartScale = EditorGUILayout.FloatField("Beacon start scale", accent.beaconStartScale);
-            accent.beaconEndScale = EditorGUILayout.FloatField("Beacon end scale", accent.beaconEndScale);
+            DrawEditorRow(out float accentSizeRow, out _);
+            accent.size = EditorGUILayout.Slider("Size", accent.size, 0f, 1f,
+                GUILayout.Width(accentSizeRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float accentAlphaRow, out _);
+            accent.baseAlpha = EditorGUILayout.Slider("Base alpha", accent.baseAlpha, 0f, 1f,
+                GUILayout.Width(accentAlphaRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float accentOuterRow, out _);
+            accent.contourOuterScale = EditorGUILayout.Slider("Contour outer scale", accent.contourOuterScale, 0.72f, 0.98f,
+                GUILayout.Width(accentOuterRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float accentInnerRow, out _);
+            accent.contourInnerScale = EditorGUILayout.Slider("Contour inner scale", accent.contourInnerScale, 0.5f, 0.9f,
+                GUILayout.Width(accentInnerRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float accentFilledRow, out _);
+            accent.filledRadiusScale = EditorGUILayout.Slider("Filled radius scale", accent.filledRadiusScale, 0.85f, 1f,
+                GUILayout.Width(accentFilledRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float accentBreatheRow, out _);
+            accent.breatheAmplitude = EditorGUILayout.Slider("Breathe amplitude", accent.breatheAmplitude, 0f, 0.4f,
+                GUILayout.Width(accentBreatheRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float accentPeriodRow, out _);
+            accent.period = EditorGUILayout.FloatField("Period (s)", accent.period,
+                GUILayout.Width(accentPeriodRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float accentBeaconStartRow, out _);
+            accent.beaconStartScale = EditorGUILayout.FloatField("Beacon start scale", accent.beaconStartScale,
+                GUILayout.Width(accentBeaconStartRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            DrawEditorRow(out float accentBeaconEndRow, out _);
+            accent.beaconEndScale = EditorGUILayout.FloatField("Beacon end scale", accent.beaconEndScale,
+                GUILayout.Width(accentBeaconEndRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
             string accentTint = accent.tint_color_hex;
             DrawColorSwatchAndHex(ref accentTint);
             accent.tint_color_hex = accentTint;
@@ -371,8 +498,8 @@ namespace TileStories.Editor
                             "1-based position. Duplicates are legal; magnitude is a pure sort key.");
                     }
 
-                    // Column 3: Details (...) - reuses EntryDetailsPopup exactly as-is
-                    if (GUILayout.Button("...", GUILayout.Width(26f), GUILayout.Height(22f)))
+                    // Column 3: Details (icon) - reuses EntryDetailsPopup exactly as-is
+                    if (GUILayout.Button(DetailsIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
                         PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(
                             entry.label ?? "Hierarchy level", () => entry.details, v => entry.details = v));
 
@@ -441,9 +568,13 @@ namespace TileStories.Editor
             }
 
             EditorGUILayout.Space(4f);
-            if (GUILayout.Button("+ Add hierarchy level"))
+            // No cap on hierarchy rows -- developers may add as many as needed.
+            // Rendered as a shared editor row: transparent indent spacer + width
+            // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
+            DrawEditorRow(out float rowWidth, out _);
+            if (GUILayout.Button("+ Add hierarchy level", GUILayout.Width(rowWidth), GUILayout.ExpandWidth(false)))
             {
-                                _config.hierarchy_levels.Add(new HierarchyLevelEntry
+                _config.hierarchy_levels.Add(new HierarchyLevelEntry
                 {
                     key = "level_" + (_config.hierarchy_levels.Count + 1),
                     label = (_config.hierarchy_levels.Count + 1).ToString(),
@@ -459,6 +590,7 @@ namespace TileStories.Editor
                 });
                 _hasUnsavedChanges = true;
             }
+            EditorRowEnd();
 
             _hasUnsavedChanges = true;
         }

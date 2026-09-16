@@ -14,52 +14,59 @@ namespace TileStories.Editor
 {
     public partial class POIEditorToolWindow
     {
-        // ---- Shared, reusable field drawers for the LOD/Zoom foldouts ----
-        // Each returns the edited value and draws an inline "(i)" help button
-        // when helpText is non-empty. Genuine reuse -- every scalar/toggle/
-        // popup in these two sections goes through one of these.
-
-        private static float DrawScalarField(string label, float value, string helpText = "")
+        // ---- Shared, reusable field drawers used by LOD / Zoom / Displacement /
+        // SearchFilter foldouts ----
+        // Each is a shared editor row: transparent indent spacer + width capped to
+        // max(MinRowWidth, min(visible panel, MaxRowWidth)). The labelled field takes
+        // rowWidth (minus a help-button allowance when helpText is set); ExpandWidth(false)
+        // keeps the control from stretching the panel. The spacer is measured at call time,
+        // so rows inside a nested IndentLevelScope keep their own deeper indent.
+        internal static float DrawScalarField(string label, float value, string helpText = "")
         {
-            EditorGUILayout.BeginHorizontal();
-            value = EditorGUILayout.FloatField(label, value);
+            DrawEditorRow(out float rowWidth, out _);
+            float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
+            value = EditorGUILayout.FloatField(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
             if (!string.IsNullOrEmpty(helpText))
                 HelpInfoButton.Draw(label, helpText);
-            EditorGUILayout.EndHorizontal();
+            EditorRowEnd();
             return value;
         }
 
-        private static int DrawIntField(string label, int value, string helpText = "")
+        internal static int DrawIntField(string label, int value, string helpText = "")
         {
-            EditorGUILayout.BeginHorizontal();
-            value = EditorGUILayout.IntField(label, value);
+            DrawEditorRow(out float rowWidth, out _);
+            float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
+            value = EditorGUILayout.IntField(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
             if (!string.IsNullOrEmpty(helpText))
                 HelpInfoButton.Draw(label, helpText);
-            EditorGUILayout.EndHorizontal();
+            EditorRowEnd();
             return value;
         }
 
-        private static bool DrawToggleField(string label, bool value, string helpText = "")
+        internal static bool DrawToggleField(string label, bool value, string helpText = "")
         {
-            EditorGUILayout.BeginHorizontal();
-            value = EditorGUILayout.Toggle(label, value);
+            DrawEditorRow(out float rowWidth, out _);
+            float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
+            value = EditorGUILayout.Toggle(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
             if (!string.IsNullOrEmpty(helpText))
                 HelpInfoButton.Draw(label, helpText);
-            EditorGUILayout.EndHorizontal();
+            EditorRowEnd();
             return value;
         }
 
-        private static string DrawPopupField(string label, string current, string[] options, string[] labels, string helpText = "")
+        internal static string DrawPopupField(string label, string current, string[] options, string[] labels, string helpText = "")
         {
-            EditorGUILayout.BeginHorizontal();
+            DrawEditorRow(out float rowWidth, out _);
+            float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
             int idx = Array.IndexOf(options, current);
             if (idx < 0) idx = 0;
-            idx = EditorGUILayout.Popup(label, idx, labels);
+            idx = EditorGUILayout.Popup(label, idx, labels, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
             if (!string.IsNullOrEmpty(helpText))
                 HelpInfoButton.Draw(label, helpText);
-            EditorGUILayout.EndHorizontal();
+            EditorRowEnd();
             return idx >= 0 ? options[idx] : current;
         }
+
 
         // ---- LOD section ----
         private void DrawGlobalLodSection()
@@ -112,22 +119,28 @@ namespace TileStories.Editor
                 EditorGUILayout.EndHorizontal();
             }
 
-            if (GUILayout.Button("+ Add band"))
+            // Rendered as a shared editor row: transparent indent spacer + width
+            // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
+            DrawEditorRow(out float rowWidth, out _);
+            if (GUILayout.Button("+ Add band", GUILayout.Width(rowWidth), GUILayout.ExpandWidth(false)))
             {
                 // Default to a far sentinel; the developer edits the distance.
                 lod.bands.Add(new LodBandEntry { max_distance_m = 9999f, max_visible_count = 5 });
                 _hasUnsavedChanges = true;
             }
+            EditorRowEnd();
 
             EditorGUILayout.HelpBox(
                 "Suggest Values computes a POI-count-driven starting set (3 bands + cluster_min + shrink_start) and writes ordinary field values -- hand-tune afterward.",
                 MessageType.Info);
-            if (GUILayout.Button("Suggest Values"))
+            DrawEditorRow(out float suggestWidth, out _);
+            if (GUILayout.Button("Suggest Values", GUILayout.Width(suggestWidth), GUILayout.ExpandWidth(false)))
             {
                 _config.lod_settings = LodAutoSuggest.Suggest(_config.pois?.Count ?? 0);
                 lod = _config.lod_settings; // rebind: Suggest replaces the object
                 _hasUnsavedChanges = true;
             }
+            EditorRowEnd();
 
             EditorGUILayout.Space(6f);
             EditorGUILayout.LabelField("Density Response", EditorStyles.boldLabel);

@@ -261,8 +261,6 @@ namespace TileStories.Editor
 
         [SerializeField] private bool _showTopConfig = true;
 
-        [SerializeField] private bool _showGlobalSceneOptions = true;
-        [SerializeField] private bool _showSpecificMarkerOptions = true;
         [SerializeField] private bool _showGlobalMarker = true;
         [SerializeField] private bool _showGlobalBadge = true;
         [SerializeField] private bool _showGlobalOutline = true;
@@ -314,9 +312,7 @@ namespace TileStories.Editor
         {
             HandleUndoShortcuts();
 
-            DrawToolbar();
             DrawTopConfigAndActions();
-            DrawSyncAndWarnings();
 
             if (_config == null)
             {
@@ -427,12 +423,6 @@ namespace TileStories.Editor
             }
         }
 
-        private void DrawToolbar()
-        {
-            GUILayout.Label("POI Editor", EditorStyles.boldLabel);
-            EditorGUILayout.Space(4f);
-        }
-
         private void DrawTopConfigAndActions()
         {
             _showTopConfig = EditorGUILayout.Foldout(_showTopConfig, "Scene Configuration", true, CreateFoldoutStyle(SceneConfigSectionColor));
@@ -440,19 +430,29 @@ namespace TileStories.Editor
             {
                 DrawTabContentContainer(() =>
                 {
-                    DrawPathRow("Config path", ref _configPath, "json");
-                    DrawPathRow("Streaming path", ref _streamingConfigPath, "json");
-                    DrawPathRow("Marker prefab", ref _prefabPath, "prefab");
+                    DrawPathRow("Config path", ref _configPath, "json", out _, out _, out _);
+                    DrawPathRow("Streaming path", ref _streamingConfigPath, "json", out _, out _, out _);
+                    DrawPathRow("Marker prefab", ref _prefabPath, "prefab", out _, out _, out _);
 
-                    _wallMesh = (GameObject)EditorGUILayout.ObjectField("Wall mesh (reference)", _wallMesh, typeof(GameObject), true);
+                    // Shared row: transparent indent spacer + width capped to
+                    // max(MinRowWidth, min(visible panel, MaxRowWidth)). Here the
+                    // stretchy element is the ObjectField; it takes the full rowWidth.
+                    DrawEditorRow(out float meshRowWidth, out _);
+                    _wallMesh = (GameObject)EditorGUILayout.ObjectField("Wall mesh (reference)", _wallMesh, typeof(GameObject), true,
+                        GUILayout.Width(meshRowWidth), GUILayout.ExpandWidth(false));
+                    EditorRowEnd();
                 }, SceneConfigSectionColor);
             }
 
             EditorGUILayout.Space(6f);
 
-            using (new EditorGUILayout.HorizontalScope())
+            // Shared row: transparent indent spacer + width capped to
+            // max(MinRowWidth, min(visible panel, MaxRowWidth)). Two buttons
+            // share the capped row; each gets ~half minus the inter-button gap.
+            DrawEditorRow(out float rigRowWidth, out _);
             {
-                if (GUILayout.Button("Load & Populate Rig", GUILayout.Height(26f)))
+                float rigShare = Mathf.Max(0f, (rigRowWidth - 4f) / 2f);
+                if (GUILayout.Button("Load & Populate Rig", GUILayout.Height(26f), GUILayout.Width(rigShare), GUILayout.ExpandWidth(false)))
                     LoadAndPopulateRig();
 
                 bool hasRigChildren = GetRigChildCount() > 0;
@@ -460,24 +460,30 @@ namespace TileStories.Editor
                 if (hasRigChildren)
                     GUI.color = new Color(0.95f, 0.55f, 0.25f);
 
-                if (GUILayout.Button("Clear Rig", GUILayout.Height(26f)))
+                if (GUILayout.Button("Clear Rig", GUILayout.Height(26f), GUILayout.Width(rigShare), GUILayout.ExpandWidth(false)))
                     ClearRig();
 
                 GUI.color = previousColor;
             }
+            EditorRowEnd();
 
-            using (new EditorGUILayout.HorizontalScope())
+            // Shared row: transparent indent spacer + width capped to
+            // max(MinRowWidth, min(visible panel, MaxRowWidth)). Undo/Redo
+            // keep their fixed 85px; Save and Copy share the remaining width.
+            DrawEditorRow(out float saveRowWidth, out _);
             {
+                float fixedButtons = 85f + 85f + 12f; // Undo + Redo + three ~4px gaps
+                float actionShare = Mathf.Max(0f, (saveRowWidth - fixedButtons) / 2f);
                 var previousColor = GUI.color;
                 if (_hasUnsavedChanges)
                     GUI.color = new Color(0.96f, 0.78f, 0.25f);
 
-                if (GUILayout.Button("Save All to JSON", GUILayout.Height(26f)))
+                if (GUILayout.Button("Save All to JSON", GUILayout.Height(26f), GUILayout.Width(actionShare), GUILayout.ExpandWidth(false)))
                     SaveAllToJson();
 
                 GUI.color = previousColor;
 
-                if (GUILayout.Button("Copy to StreamingAssets", GUILayout.Height(26f)))
+                if (GUILayout.Button("Copy to StreamingAssets", GUILayout.Height(26f), GUILayout.Width(actionShare), GUILayout.ExpandWidth(false)))
                     CopyToStreamingAssets();
 
                 using (new EditorGUI.DisabledScope(!CanUndoConfigChange()))
@@ -492,39 +498,8 @@ namespace TileStories.Editor
                         RedoConfigChange();
                 }
             }
-        }
+            EditorRowEnd();
 
-        private void DrawSyncAndWarnings()
-        {
-            int rigCount = GetRigChildCount();
-            if (rigCount > 0)
-            {
-                EditorGUILayout.HelpBox(
-                    "Rig currently contains generated markers. Clear Rig before final play/runtime checks to avoid duplicates.",
-                    MessageType.Warning);
-            }
-
-            if (_hasUnsavedChanges)
-            {
-                EditorGUILayout.HelpBox(
-                    "Config has unsaved changes. Use Save All to JSON to persist category/badge/outline/marker edits.",
-                    MessageType.Warning);
-            }
-
-            Transform rig = GetExistingRig();
-            if (rig != null && rig.childCount > 0)
-            {
-                bool inSync = IsRigInSyncWithConfig(out int outOfSyncCount);
-                var originalColor = GUI.color;
-                GUI.color = inSync ? Color.green : Color.red;
-                string label = inSync
-                    ? "Rig matches config.json"
-                    : $"Rig OUT OF SYNC - {outOfSyncCount} marker(s) differ from config.json";
-                EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
-                GUI.color = originalColor;
-            }
-
-            EditorGUILayout.Space(8f);
         }
     }
 }

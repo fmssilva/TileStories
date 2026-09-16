@@ -3,6 +3,10 @@
 # `DELETE MODE && __CURR_PLAN_TRACKER!!!`
 # `Unity MCP Connected??`
 
+
+# TODO
+» fazer label board in ui toolit pra mostrar automatico primeira vez que corremo app e dp usar pode escolher fechar e escolher nao voltar a motrar... 
+
 # `Marker Deesign`
 I want to verify everything we have done in the domain of the marker design system.
 
@@ -20,7 +24,38 @@ then tell me if there is any features in code that is not exposed in terms of th
 
 then tell me if there is any feature in the guide files that is still missing to be implemented. 
 
+then add to the begining of the file a section "ORDERED TODO", basically a practical reasoning of your findings and your own analysis of what things should we do now? What is the order of things to do to finish this domain? should we implement some missing feature, should we correct or clean or refactor or run more tests to confirm some exiting feature, should we just start testing everything by hand basically following the normal "user flow of tasks"? you are the lead arhitect of this project, so what is the sequence of tasks that we should do now? Add that section to the begining of the file. 
+
+
 write all this with all important details BUT IN A CONCISE MANNER. I WANT TO BE ABLE TO READ IT FAST. SO ALL IMPORTANT DETAILS BUT AS CONCISE AS POSSIBLE IN A NATURAL LANGUAGE LIKE A CODER GUY TALKING TO ANOTHER CODER GUY. 
+
+
+
+
+
+# Design Domain
+Do a full analysis of the "design domain related things. read these guides (which might be out of date) and respective code to confirm how everything atually works:
+C:\Users\franc\Desktop\TileStories\proj_guides\_2.2_Marker_Design.md
+C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
+
+pay special attention to the different tables we have for the marker, badge and outline. 
+
+these tables are already almoust well formated. but there are still bugs.
+
+so, in terms of "constants" maybe lets define a "gap_between_groups" constant for us to use in different places in those tables? 
+and also the "space between same group elements" constant??
+
+
+this gap is to be used in between each group in the table. 
+
+example marker table has group category + details - symbol + choose + previwe - color demo + color name - keywords + suggested - delete button. 
+
+so i want to have the space between group and between elements of the groups well set up... 
+
+it i very confusing the whole struture of the table and it is not being easy to format in an easy way. see if you can cleear see where are the "boundaries that i told: 
+category + details - symbol + choose + previwe - color demo + color name - keywords + suggested - delete button
+
+and add the corect spaces.
 
 
 
@@ -118,3 +153,33 @@ Act as a **Senior Staff Engineer** planning and implementing the whole plan, AND
 
 
 # ---
+
+
+# Editor Rows command (all element types)
+
+## 1) Open the shared row INSIDE the section's OnGUI/IndentLevel scope:
+DrawEditorRow(out float rowWidth, out _);
+  -> transparent indent spacer + rowWidth = max(180, min(panel width - margin - indent, 480))
+
+## 2) Draw your elements, each capped to a SHARE of rowWidth:
+  - single Button:                      GUILayout.Width(rowWidth)
+  - labelled TextField (no trailing ctl): GUILayout.Width(rowWidth)
+  - labelled ObjectField:                 GUILayout.Width(rowWidth)
+  - field + browse button:   field GUILayout.Width(rowWidth - 36f); button fixed
+  - n equal buttons:          each GUILayout.Width((rowWidth - gap(n)) / n)
+  - fixed + flexible buttons: fixed free, flexible get (rowWidth - fixedTotal - gaps) / count
+ALL elements: + GUILayout.ExpandWidth(false) -- MANDATORY, or the stretchy style wins
+
+## 3) Close:
+EditorRowEnd();
+
+## Multi-element rows: split rowWidth LOCALLY per row. No generic multi-button
+abstraction (rule 20: simple duplication over fragile generics).
+
+## Helpers: Shared/POIEditorToolWindow.RowLayout.cs
+## Constants: Constants.cs -> MinRowWidth=180, MaxRowWidth=480, AddButtonRowRightMargin=6
+## Traps (do NOT simplify): width from currentViewWidth ONLY; never a just-drawn
+## GetLastRect; ExpandWidth(false)+Width on every control; spacer = real button w/
+## whiteTexture bg + zero-alpha tint (never background=null, never GUILayout.Space).
+
+#

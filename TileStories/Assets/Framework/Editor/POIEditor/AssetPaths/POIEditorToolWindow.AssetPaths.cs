@@ -8,24 +8,41 @@ namespace TileStories.Editor
 {
     public partial class POIEditorToolWindow
     {
-        private void DrawPathRow(string label, ref string path, string extension)
+        // A Scene Configuration row: labelled text field + "..." browse button.
+        // Non-button row -- the same shared row layout applies (transparent indent
+        // spacer + width capped to max(MinRowWidth, min(visible panel, MaxRowWidth))):
+        // here the TEXT FIELD is the stretchy element, so it gets most of rowWidth
+        // and the browse button keeps its fixed 30px. Exposed internal static with
+        // out rects so the EditMode render harness can measure the real geometry.
+        internal static void DrawPathRow(string label, ref string path, string extension,
+            out Rect spacerRect, out Rect fieldRect, out Rect browseRect)
         {
-            using (new EditorGUILayout.HorizontalScope())
+            // Shared row: transparent indent spacer + rowWidth = max(MinRowWidth,
+            // min(visible panel width, MaxRowWidth)).
+            DrawEditorRow(out float rowWidth, out spacerRect);
+
+            // The TextField is labelled and defaults to filling the panel; cap the
+            // whole label+field control to rowWidth minus the browse button (30px)
+            // and flow spacing, exactly the same capping recipe as a button row.
+            float fieldWidth = Mathf.Max(0f, rowWidth - 36f);
+            path = EditorGUILayout.TextField(label, path, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            fieldRect = GUILayoutUtility.GetLastRect();
+
+            if (GUILayout.Button("...", GUILayout.Width(30f)))
             {
-                path = EditorGUILayout.TextField(label, path);
-                if (GUILayout.Button("...", GUILayout.Width(30f)))
+                string abs = EditorUtility.OpenFilePanel("Select " + label, Application.dataPath, extension);
+                if (!string.IsNullOrWhiteSpace(abs))
                 {
-                    string abs = EditorUtility.OpenFilePanel($"Select {label}", Application.dataPath, extension);
-                    if (!string.IsNullOrWhiteSpace(abs))
-                    {
-                        string rel = AbsoluteToAssetPath(abs);
-                        if (!string.IsNullOrWhiteSpace(rel))
-                            path = rel;
-                        else
-                            EditorUtility.DisplayDialog("Invalid path", "Please choose a file inside this Unity project.", "OK");
-                    }
+                    string rel = AbsoluteToAssetPath(abs);
+                    if (!string.IsNullOrWhiteSpace(rel))
+                        path = rel;
+                    else
+                        EditorUtility.DisplayDialog("Invalid path", "Please choose a file inside this Unity project.", "OK");
                 }
             }
+            browseRect = GUILayoutUtility.GetLastRect();
+
+            EditorRowEnd();
         }
 
         private static string AbsoluteToAssetPath(string absolutePath)
