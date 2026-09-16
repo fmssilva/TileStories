@@ -358,6 +358,8 @@ namespace TileStories.Editor
 
         private void DrawPoiMarkerStyleFields(POIData poi)
         {
+            using (new EditorGUI.IndentLevelScope(-1))
+            {
             // Note: the POI name is renamed from the header row pencil, not here --
             // a second name field would fight the header draft (two writers, one field).
             poi.category = DrawCategoryDropdown("Category", poi.category);
@@ -396,15 +398,21 @@ namespace TileStories.Editor
                 EditorRowEnd();
                 EditorGUILayout.LabelField("Overrides just this POI's icon (e.g. a small castle glyph). Category color, ring, and badge stay unchanged.", EditorStyles.wordWrappedMiniLabel);
             }
+            }
         }
 
         private void DrawPoiBadgeStyleFields(POIData poi)
         {
+            using (new EditorGUI.IndentLevelScope(-1))
+            {
             poi.badge_category = DrawBadgeCategoryDropdown("Badge category", poi.badge_category);
+            }
         }
 
         private void DrawPoiOutlineFields(POIData poi)
         {
+            using (new EditorGUI.IndentLevelScope(-1))
+            {
             bool hasStatus = poi.has_status;
             // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
             DrawEditorRow(out float hasStatusRow, out _);
@@ -450,6 +458,7 @@ namespace TileStories.Editor
 
             // rotate_contour is now a hierarchy-level property, not a per-POI field.
             // Configured in the Global Scene Hierarchy table (see DrawGlobalHierarchySection).
+            }
         }
 
         private void ApplyUnknownStatusDefaults(POIData poi)
@@ -589,15 +598,14 @@ namespace TileStories.Editor
                     selectedIndex = i;
             }
 
-            // Shared row: popup takes rowWidth minus the resolved label that follows it.
+            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth
+            // (no trailing resolved-status label).
             DrawEditorRow(out float statusRow, out _);
-            float statusPopupW = Mathf.Max(80f, statusRow - 130f);
             int next = EditorGUILayout.Popup("Status level", selectedIndex, labels,
-                GUILayout.Width(statusPopupW), GUILayout.ExpandWidth(false));
+                GUILayout.Width(statusRow), GUILayout.ExpandWidth(false));
             next = Mathf.Clamp(next, 0, levels.Count - 1);
             poi.status_level_key = levels[next].key;
             poi.status_pct = levels[next].pct;
-            EditorGUILayout.LabelField("Resolved status %", poi.status_pct.ToString("0.0"), GUILayout.Width(120f));
             EditorRowEnd();
         }
 
@@ -640,6 +648,8 @@ namespace TileStories.Editor
         // Edits POIData.search_keywords via a multi-line TextField popup.
         private void DrawPoiSearchKeywordsField(POIData poi)
         {
+            using (new EditorGUI.IndentLevelScope(-1))
+            {
             if (poi == null)
                 return;
 
@@ -739,6 +749,7 @@ namespace TileStories.Editor
             {
                 poi.search_keywords = ParseKeywordListStatic(othersEdited);
                 _hasUnsavedChanges = true;
+            }
             }
         }
 
