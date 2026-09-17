@@ -80,8 +80,19 @@ namespace TileStories.Tests
                 "The axis letter must have a real width -- a sliver here is exactly the bug");
             Assert.That(label.height, Is.GreaterThan(8f), "The axis label must occupy a real line");
             Assert.That(value.x, Is.GreaterThan(label.x), "The value field sits right of its axis letter");
-            Assert.That(value.x - (label.x + label.width), Is.LessThan(10f),
-                "The letter must sit immediately left of its value field, not far left of a wide gap");
+            Assert.That(value.x - (label.x + label.width), Is.LessThanOrEqualTo(0.5f),
+                "The letter must sit FLUSH against its own value field with no visible gap -- both " +
+                "styles' default 3px GUIStyle.margin were zeroed out specifically so this gap is exactly " +
+                "0, not just 'small'");
+            Assert.That(value.width, Is.LessThanOrEqualTo(90f),
+                "The value field must stay a compact bounded width like every other read-only numeric " +
+                "field in this window -- stretching it to fill the row leaves a huge empty box next to " +
+                "a tiny axis letter, which reads as a big gap around the letter");
+            Assert.That(label.width, Is.GreaterThanOrEqualTo(10f).And.LessThanOrEqualTo(16f),
+                "The axis letter's allocated width should track its OWN glyph size (EditorStyles." +
+                "boldLabel.CalcSize(\"X\") measures ~10.3px on this font/DPI, +2px buffer), not a much " +
+                "larger guessed constant -- a wider-than-needed label rect is dead space between the " +
+                "letter and the value field, which is the exact bug this row keeps regressing to");
         }
 
         [UnityTest]

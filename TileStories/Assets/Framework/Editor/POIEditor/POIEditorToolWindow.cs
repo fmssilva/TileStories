@@ -104,26 +104,22 @@ namespace TileStories.Editor
             if (poi == null)
                 return;
 
-            if (!poi.position_verified)
-            {
-                // Live two-way sync: while the developer rotates a marker with Unity's
-                // Rotate tool, read the child's euler angles back into config so the
-                // "Edit Rotation" (Y) slider and the persisted X/Z stay in lockstep.
-                // Runs in OnSceneGUI -- outside the window's DrawConfigMutationScope --
-                // so it never feeds back through the scope's JSON diff (which would spam
-                // undo history and refresh the rig on every Scene repaint).
-                if (Event.current.type == EventType.MouseDrag || Event.current.type == EventType.MouseUp)
-                {
-                    if (SyncPoiRotationFromScene(poi, target.localRotation.eulerAngles))
-                    {
-                        _hasUnsavedChanges = true;
-                        Repaint();
-                    }
-                }
+            if (Event.current.type != EventType.MouseDrag && Event.current.type != EventType.MouseUp)
                 return;
+
+            // Rotation is always freely editable with Unity's own Rotate tool, verified
+            // or not -- only position locks once a POI is Verified. Sync first, so the
+            // config (and the "Edit Rotation" Y slider) reflect the live rotation
+            // regardless of verified state. Runs in OnSceneGUI -- outside the window's
+            // DrawConfigMutationScope -- so it never feeds back through the scope's JSON
+            // diff (which would spam undo history and refresh the rig on every repaint).
+            if (SyncPoiRotationFromScene(poi, target.localRotation.eulerAngles))
+            {
+                _hasUnsavedChanges = true;
+                Repaint();
             }
 
-            if (Event.current.type != EventType.MouseDrag && Event.current.type != EventType.MouseUp)
+            if (!poi.position_verified)
                 return;
 
             Vector3 lastVerifiedPosition = GetLastVerifiedPositionForPoi(poi);
@@ -132,9 +128,14 @@ namespace TileStories.Editor
 
             Undo.RecordObject(target, "Revert verified POI position");
             target.localPosition = correctedPosition;
-            target.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
 
-            if (sceneView != null)
+            // With Tool Handle Position set to Center, Unity's Rotate gizmo can nudge
+            // localPosition as a side effect of spinning around the visual bounds center
+            // rather than the transform's own origin -- that is incidental drift from
+            // rotating, not an intentional position edit, so correct it silently instead
+            // of surfacing the "already verified" notification (which should only ever
+            // fire for a genuine Move-tool drag).
+            if (sceneView != null && Tools.current != Tool.Rotate)
                 sceneView.ShowNotification(new GUIContent(message));
         }
 
@@ -318,11 +319,13 @@ namespace TileStories.Editor
         // Block 5 (_2.6 section 3): Search & Filter editor foldout.
         [SerializeField] private bool _showGlobalSearchFilter = true;
 
-        [SerializeField] private bool _showPoiPosition = true;
-        [SerializeField] private bool _showPoiMarkerStyle = true;
-        [SerializeField] private bool _showPoiBadgeStyle = true;
-        [SerializeField] private bool _showPoiOutline = true;
-        [SerializeField] private bool _showPoiSearchKeywords = true;
+        // Default collapsed: a POI's inner sections open one at a time, on request,
+        // instead of dumping all five at once every time a POI is expanded.
+        [SerializeField] private bool _showPoiPosition = false;
+        [SerializeField] private bool _showPoiMarkerStyle = false;
+        [SerializeField] private bool _showPoiBadgeStyle = false;
+        [SerializeField] private bool _showPoiOutline = false;
+        [SerializeField] private bool _showPoiSearchKeywords = false;
 
         [SerializeField] private SpriteKeyLibrary _defaultIconLibrary;
         [SerializeField] private SpriteKeyLibrary _wallIconLibrary;
@@ -432,12 +435,52 @@ namespace TileStories.Editor
         /// Draw a foldout with a bold colored title and its content when expanded.
         /// When drawHeaderTrailing is provided it is drawn on the SAME row, right of the
         /// title (e.g. a help "(i)" button), so a section can carry its own help inline.
-        private static bool DrawFramedFoldout(ref bool expanded, Action content, string title, Color titleColor, Action drawHeaderTrailing = null)
+        /// By default the trailing content sits a fixed step after the title, and the row
+        /// spans the container's own (often much wider than 480) width. Pass
+        /// rightAlignTrailing: true to instead cap the WHOLE header row to the same shared
+        /// row-width convention every other row in this window uses (see
+        /// EditorRowWidthForIndent / the file-level "Reusable Row-Layout Command" note):
+        /// the title occupies the available space up to that cap, and the trailing content
+        /// (e.g. Position's Verified + help buttons) sits right-aligned at the capped row's
+        /// own right edge, not the container's.
+        private static bool DrawFramedFoldout(ref bool expanded, Action content, string title, Color titleColor, Action drawHeaderTrailing = null, bool rightAlignTrailing = false)
         {
             var boldStyle = CreateFoldoutStyle(titleColor);
             if (drawHeaderTrailing == null)
             {
                 expanded = EditorGUILayout.Foldout(expanded, title, true, boldStyle);
+            }
+            else if (rightAlignTrailing)
+            {
+                // Same indent + capped-width formula as DrawEditorRow, but that helper's
+                // own BeginHorizontal is deliberately UNconstrained (every other caller
+                // sizes its individual controls to rowWidth instead) -- here the row needs
+                // GUILayout.FlexibleSpace() to fill exactly up to a capped boundary, which
+                // only works if the enclosing horizontal group itself is width-constrained.
+                //
+                // NO manual indent spacer here (unlike DrawEditorRow's real spacer Button):
+                // this row's first control is EditorGUI.Foldout, which -- unlike a plain
+                // GUILayout.Button -- already lands at the same x as a sibling plain
+                // EditorGUILayout.Foldout row (e.g. "Marker Style" right below) with zero
+                // extra spacing; GUILayoutUtility.GetRect here is not itself indent-aware,
+                // but neither is the sibling's implicit position, so the two already agree.
+                // Adding GUILayout.Space(indent) in front (a previous version of this code
+                // did) double-shifted this row's arrow past its siblings' -- confirmed by a
+                // real screenshot showing Position's arrow sitting well right of Marker
+                // Style's. The capped WIDTH still needs to reserve indent+rowWidth (not just
+                // rowWidth) so the trailing content's right edge doesn't shift left along
+                // with this fix -- only the leading spacer was ever the bug.
+                float indent = EditorGUI.IndentedRect(new Rect(0f, 0f, 0f, 0f)).x;
+                float rowWidth = EditorRowWidthForIndent(EditorGUIUtility.currentViewWidth, AddButtonRowRightMargin, indent);
+                using (new EditorGUILayout.HorizontalScope(GUILayout.Width(indent + rowWidth)))
+                {
+                    float titleWidth = boldStyle.CalcSize(new GUIContent(title)).x + 20f;
+                    Rect foldoutRect = GUILayoutUtility.GetRect(
+                        new GUIContent(title), boldStyle, GUILayout.Width(titleWidth), GUILayout.ExpandWidth(false));
+                    expanded = EditorGUI.Foldout(foldoutRect, expanded, title, true, boldStyle);
+                    GUILayout.FlexibleSpace();
+                    drawHeaderTrailing();
+                }
             }
             else
             {

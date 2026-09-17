@@ -46,23 +46,25 @@ namespace TileStories.Editor
         }
     }
 
+    // The ONE help-button look for this whole window: every "(i)" affordance anywhere
+    // in the POI Editor (Position/Rotation rows, taxonomy table headers, LOD/Zoom
+    // fields, ...) goes through this single method instead of each call site picking
+    // its own size/style -- that per-call-site drift is exactly what previously made
+    // Position's help button render bigger than Rotation's despite both being meant to
+    // look identical. Built on the same DrawIconButton primitive (real button
+    // background + hover/press feedback) the POI header row's icon cluster uses, so
+    // every icon button in the tool -- help or otherwise -- shares one visual family.
     internal static class HelpInfoButton
     {
-        // Draws a small "(i)" button; on click opens HelpInfoPopup anchored to the
-        // button's own last-drawn rect. Call from any partial-class file.
-        // Use where a column's purpose isn't self-evident from its label alone --
-        // not blanket-applied to every field (visual noise).
-        public static void Draw(string title, string bodyText)
+        // Use where a field/section's purpose isn't self-evident from its label alone
+        // -- not blanket-applied to every field (visual noise). `size` only needs to be
+        // overridden to line up with a specific neighboring column (e.g. a 36px-wide
+        // taxonomy table's Preview column); leave it at the default everywhere else.
+        public static void Draw(string title, string bodyText, float size = POIEditorToolWindow.IconButtonSize)
         {
-            if (GUILayout.Button("(i)", GUILayout.Width(26f), GUILayout.Height(20f)))
-                PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup(title, bodyText));
-        }
-        // Icon-only twin of Draw: 26f footprint in a fixed-width header cell by
-        // default. Callers that sit above the 36f Preview column pass 36f so the
-        // button aligns with the preview's width for clean vertical stacking.
-        public static void DrawCompact(string title, string bodyText, float width = 26f)
-        {
-            if (GUILayout.Button(POIEditorToolWindow.InfoIcon, GUILayout.Width(width), GUILayout.Height(20f)))
+            bool clicked = POIEditorToolWindow.DrawIconButtonLayout(
+                (Texture2D)POIEditorToolWindow.InfoIcon.image, title, size, iconInset: 2f);
+            if (clicked)
                 PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup(title, bodyText));
         }
     }

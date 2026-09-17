@@ -147,11 +147,15 @@ namespace TileStories.Tests
                 BindingFlags.NonPublic | BindingFlags.Static);
             Assert.IsNotNull(m, "DrawFramedFoldout should still exist");
             var ps = m.GetParameters();
-            Assert.AreEqual(5, ps.Length);
+            // 6th param (rightAlignTrailing, bool) added so a caller like Position's
+            // header row can push its trailing content (Verified + help) to the row's
+            // far right edge instead of the default fixed-step placement.
+            Assert.AreEqual(6, ps.Length);
             Assert.AreEqual(typeof(Action), ps[1].ParameterType);
             Assert.AreEqual(typeof(string), ps[2].ParameterType);
             Assert.AreEqual(typeof(Color), ps[3].ParameterType);
             Assert.AreEqual(typeof(Action), ps[4].ParameterType);
+            Assert.AreEqual(typeof(bool), ps[5].ParameterType);
         }
 
         // The outer-container helper is retained for the 2 big tab containers.

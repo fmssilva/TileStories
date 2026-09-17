@@ -286,7 +286,7 @@ namespace TileStories.Editor
                 // assume they are renaming the key.
                 EditorGUILayout.LabelField("Outline label", EditorStyles.miniBoldLabel, GUILayout.Width(110f));
                 GUILayout.Space(TableGapWithinGroup);
-                HelpInfoButton.DrawCompact("Outline Notes",
+                HelpInfoButton.Draw("Outline Notes",
                     "Write more information about this outline type here: what it represents, when to use it, example POIs. Stored per row in config.json.");
 
                 GUILayout.Space(TableGapBetweenGroups);
@@ -294,7 +294,7 @@ namespace TileStories.Editor
                 // Group 2: Outline Style + interactive Preview info (preview = curated picker).
                 EditorGUILayout.LabelField("Outline Style", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
                 GUILayout.Space(SymbolColumnPad);
-                HelpInfoButton.DrawCompact("Outline Style",
+                HelpInfoButton.Draw("Outline Style",
                     "STYLE (ObjectField cell): lists every Sprite in the whole project. " +
                     "CLICK THE THUMBNAIL PREVIEW: opens the curated picker narrowed to just this wall's symbols plus the " +
                     "framework defaults. All cells write to the same field.\n\n" +

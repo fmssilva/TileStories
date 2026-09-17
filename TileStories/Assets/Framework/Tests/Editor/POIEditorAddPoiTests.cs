@@ -187,11 +187,11 @@ namespace TileStories.Tests
             return _testWindow;
         }
 
-        private static void InvokeAddNewPoi(POIEditorToolWindow window)
+        private static void InvokeAddFirstPoi(POIEditorToolWindow window)
         {
-            var method = typeof(POIEditorToolWindow).GetMethod("AddNewPoi",
+            var method = typeof(POIEditorToolWindow).GetMethod("AddFirstPoi",
                 BindingFlags.NonPublic | BindingFlags.Instance, null, System.Type.EmptyTypes, null);
-            Assert.IsNotNull(method, "AddNewPoi method not found");
+            Assert.IsNotNull(method, "AddFirstPoi method not found");
             method.Invoke(window, null);
         }
 
@@ -200,14 +200,6 @@ namespace TileStories.Tests
             var method = typeof(POIEditorToolWindow).GetMethod("AddNewPoiAfter",
                 BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(int) }, null);
             Assert.IsNotNull(method, "AddNewPoiAfter method not found");
-            method.Invoke(window, new object[] { index });
-        }
-
-        private static void InvokeAddNewPoiBefore(POIEditorToolWindow window, int index)
-        {
-            var method = typeof(POIEditorToolWindow).GetMethod("AddNewPoiBefore",
-                BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(int) }, null);
-            Assert.IsNotNull(method, "AddNewPoiBefore method not found");
             method.Invoke(window, new object[] { index });
         }
 
@@ -244,22 +236,22 @@ namespace TileStories.Tests
         }
 
         [Test]
-        public void AddNewPoi_IncrementsListAndSetsDefaults()
+        public void AddFirstPoi_IncrementsListAndSetsDefaults()
         {
             var config = CreateMinimalConfig();
             var window = CreateWindowWithConfig(config);
 
             int beforeCount = config.pois.Count;
-            InvokeAddNewPoi(window);
+            InvokeAddFirstPoi(window);
             int afterCount = config.pois.Count;
 
             Assert.AreEqual(beforeCount + 1, afterCount, "POI list should increment by one");
 
-            var newPoi = config.pois[config.pois.Count - 1];
+            var newPoi = config.pois[0];
             Assert.IsFalse(string.IsNullOrEmpty(newPoi.id), "New POI should have a GUID id");
             Assert.AreEqual("New POI", newPoi.name);
             Assert.AreEqual("default", newPoi.category);
-                        Assert.AreEqual(0f, newPoi.editor_rotation_deg, 0.0001f);
+            Assert.AreEqual(0f, newPoi.editor_rotation_deg, 0.0001f);
             Assert.IsFalse(newPoi.position_verified);
             Assert.AreEqual(0f, newPoi.status_pct);
             Assert.IsFalse(newPoi.has_status);
@@ -270,21 +262,6 @@ namespace TileStories.Tests
             Assert.IsNull(newPoi.badge_category);
             Assert.IsNotNull(newPoi.search_keywords);
             Assert.IsNotNull(newPoi.search_keyword_fields);
-        }
-
-        [Test]
-        public void AddNewPoi_GeneratesUniqueIds()
-        {
-            var config = CreateMinimalConfig();
-            var window = CreateWindowWithConfig(config);
-
-            InvokeAddNewPoi(window);
-            var id1 = config.pois[0].id;
-
-            InvokeAddNewPoi(window);
-            var id2 = config.pois[1].id;
-
-            Assert.AreNotEqual(id1, id2, "Each POI should receive a unique GUID");
         }
 
         [Test]
@@ -304,13 +281,13 @@ namespace TileStories.Tests
 
             InvokeAddNewPoiAfter(window, 0);
 
-            Assert.AreEqual(3, config.pois.Count, "The new POI should be inserted after the previous POI.");
-            Assert.AreEqual(config.pois[0].category, config.pois[1].category, "The inserted POI should inherit the previous POI's style.");
-            Assert.AreEqual(config.pois[0].editor_rotation_deg, config.pois[1].editor_rotation_deg, 0.0001f, "The inserted POI should inherit the previous POI's rotation.");
+            Assert.AreEqual(3, config.pois.Count, "The new POI should be inserted after the source POI.");
+            Assert.AreEqual(config.pois[0].category, config.pois[1].category, "The inserted POI should inherit the source POI's style.");
+            Assert.AreEqual(config.pois[0].editor_rotation_deg, config.pois[1].editor_rotation_deg, 0.0001f, "The inserted POI should inherit the source POI's rotation.");
         }
 
         [Test]
-        public void AddNewPoiBefore_UsesNextPoiAsTemplate()
+        public void AddNewPoiAfter_GeneratesUniqueIds()
         {
             var config = new WallConfigData
             {
@@ -318,22 +295,40 @@ namespace TileStories.Tests
                 wall_name = "Test Wall",
                 pois = new System.Collections.Generic.List<POIData>
                 {
-                    new POIData { id = "poi_1", name = "Lamp", category = "default", editor_rotation_deg = 30f, hierarchy_level_key = "level_a", has_status = true, status_pct = 0.4f },
-                    new POIData { id = "poi_2", name = "Chair", category = "seating", editor_rotation_deg = 90f, hierarchy_level_key = "level_b", has_status = false, status_pct = 0f }
+                    new POIData { id = "poi_1", name = "Lamp", category = "default" }
                 }
             };
             var window = CreateWindowWithConfig(config);
 
-            InvokeAddNewPoiBefore(window, 1);
+            InvokeAddNewPoiAfter(window, 0);
+            InvokeAddNewPoiAfter(window, 0);
 
-            Assert.AreEqual(3, config.pois.Count, "The new POI should be inserted before the next POI.");
-            // AddNewPoiBefore(k) inserts AT index k, so the POI that used to sit at
-            // k shifts down by one. With [Lamp, Chair] and k=1 the list becomes
-            // [Lamp, New POI, Chair] -- Chair is still the POI immediately after the
-            // new one, it just no longer occupies its old index. (NUnit is
-            // AreEqual(expected, actual) -- keep the concrete value first.)
-            Assert.AreEqual("Chair", config.pois[2].name, "The original next POI should shift down by one, staying after the new POI.");
-            Assert.AreEqual("seating", config.pois[1].category, "The inserted POI should inherit the next POI's style when inserted before it.");
+            Assert.AreEqual(3, config.pois.Count);
+            Assert.AreNotEqual(config.pois[1].id, config.pois[2].id, "Each POI should receive a unique GUID");
+        }
+
+        [Test]
+        public void AddNewPoiAfter_OnLastPoi_AppendsToEnd()
+        {
+            // The per-row "+" button on the LAST POI is now the only way to append at
+            // the end (the old dedicated "+ Add POI near previous" trailing button was
+            // removed as part of simplifying the add-near-POI flow).
+            var config = new WallConfigData
+            {
+                wall_id = "test_wall",
+                wall_name = "Test Wall",
+                pois = new System.Collections.Generic.List<POIData>
+                {
+                    new POIData { id = "poi_1", name = "Lamp", category = "default" },
+                    new POIData { id = "poi_2", name = "Chair", category = "seating" }
+                }
+            };
+            var window = CreateWindowWithConfig(config);
+
+            InvokeAddNewPoiAfter(window, config.pois.Count - 1);
+
+            Assert.AreEqual(3, config.pois.Count);
+            Assert.AreEqual("New POI", config.pois[2].name, "Adding after the last POI must append at the end.");
         }
     }
 }

@@ -141,9 +141,10 @@ TileStories/
         - POIEditorToolWindow.cs
         - POIEditorToolWindow.Constants.cs
         - GlobalScene/
-        - SpecificMarker/  // per-POI editor (header row: rename pencil + focus-icon.png crosshair + reorder + delete; Position/rotation, Marker Style, Badge Style, Outline, Search Keywords) + Icons/ (edit-icon.png, focus-icon.png)
+        - SpecificMarker/  // per-POI editor (header row: focus-icon.png crosshair + rename pencil + reorder + add-near "+" + delete; POI foldout and all sections default collapsed; Position/rotation, Marker Style, Badge Style, Outline, Search Keywords) + Icons/ (edit-icon.png, focus-icon.png)
         - Shared/
           - POIEditorToolWindow.RowLayout.cs  // EditorRowWidth + DrawEditorRow/EditorRowEnd: reusable non-table row (indent + width cap + ExpandWidth(false)); indent measured at call time so nested scopes keep deeper spacing
+          - POIEditorToolWindow.IconButton.cs  // DrawIconButton (Rect) + DrawIconButtonLayout (GUILayout): the one shared icon-only-button look (miniButton bg + hover, DrawTexture-scaled glyph) used by the POI header row's icon cluster AND HelpInfoButton, so every icon/help button in the window is visually identical by construction
           - IdentityRenameResolver.cs  // Pure commit rule for renaming any identity string a taxonomy table's POIs reference (category, badge key, status level key, hierarchy level key): rejects blank/colliding names, rewrites every referencing POI; CountReferences + concrete per-identity rewrites for delete guards
           - IdentityRenameEditState.cs  // Commit-style edit session (SessionState draft, Enter/ESC/blur commit) any identity-cell TextField uses via GetLabel/SetLabel; reads rows/POIs through providers so it survives undo/reload wholesale config swaps
           - IdentityDeleteGuard.cs  // Confirm dialog before deleting a taxonomy row whose identity POIs still reference (a rename can propagate; a delete cannot)

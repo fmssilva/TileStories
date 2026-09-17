@@ -320,6 +320,24 @@ namespace TileStories.Editor
         // Crosshair glyph for the per-POI header focus button (selects + frames the marker).
         internal const string FocusIconAssetPath = "Assets/Framework/Editor/POIEditor/SpecificMarker/Icons/focus-icon.png";
 
+        // Green plus glyph for the per-POI header ADD-NEAR button (adds a new POI below
+        // this one, using it as the template).
+        internal const string AddIconAssetPath = "Assets/Framework/Editor/POIEditor/SpecificMarker/Icons/add-icon.png";
+
+        private static GUIContent _addIcon;
+        internal static GUIContent AddIcon
+        {
+            get
+            {
+                if (_addIcon != null)
+                    return _addIcon;
+
+                var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(AddIconAssetPath);
+                _addIcon = new GUIContent(tex, "Add a new POI below this one, copied from it");
+                return _addIcon;
+            }
+        }
+
         // Red trash glyph for the per-POI header DELETE button. Bundled PNG (the dev's own
         // asset) so the danger affordance is the ICON itself, which keeps the button at the
         // same height as its sibling reorder/focus buttons -- a dark-red button FILL read as
@@ -341,13 +359,49 @@ namespace TileStories.Editor
             }
         }
 
+        // POI header row icon-cluster help ((i) button between "+" and delete).
+        internal static readonly string PoiHeaderIconsHelpBody =
+            "What each icon on this row does, left to right after the name:\n\n" +
+            "Crosshair (focus): selects this POI's marker and moves the Scene view camera " +
+            "to frame it, without expanding this POI's foldout.\n\n" +
+            "Pencil: renames this POI (edits its display name only).\n\n" +
+            "Up / Down arrows: reorders this POI earlier or later in the list. This is the " +
+            "config's own save order, not a spatial position.\n\n" +
+            "+ (add near): adds a new POI directly below this one, copied from it (category, " +
+            "hierarchy level, rotation, etc). Use the crosshair on the new row, then Unity's " +
+            "normal Move tool, to place it where you actually want it.\n\n" +
+            "Trash (delete): permanently removes this POI from the config and from the Scene " +
+            "rig, after a confirmation prompt.";
+
         // Position & rotation setup help (Position foldout title row, (i) button).
         internal static readonly string PositionSetupHelpBody =
-            "Click the crosshair icon on this POI's title row to select it and frame it in the Scene view. " +
-            "Then use Unity's Move tool to place the marker, and the Rotate tool to tilt it (pitch/roll/yaw). " +
-            "The yaw stays in sync with the 'Edit Rotation' slider below, and all three angles are saved to config JSON on Save. " +
-            "When the position is final, click 'Verified' to lock it (turns green).\n\n" +
-            "Note: rotation is editor-preview only -- at runtime each marker always faces the camera.";
+            "How to place this marker, step by step:\n\n" +
+            "1. Select it. A newly added POI is auto-focused already; otherwise click the " +
+            "crosshair icon on this POI's title row to select it and frame it in the Scene view.\n\n" +
+            "2. Move it. Use Unity's normal Move tool (same as any other GameObject) to drag the " +
+            "marker in the Scene view to where it should sit on the wall.\n\n" +
+            "3. Lock it in. Once the position looks right, click 'Verified' (next to this help " +
+            "button) to lock it -- turns green. A verified position is protected: if the marker " +
+            "gets bumped in the Scene view afterward, it snaps back automatically until you " +
+            "unlock it again by clicking Verified a second time.\n\n" +
+            "Note on rotation: the Rotation slider below (and Unity's Rotate tool) is NOT covered " +
+            "by Verified and never needs to be locked. It only sets an editor-preview angle to " +
+            "help you look at the marker while placing it -- at runtime every marker always turns " +
+            "to face the camera (billboard), so whatever rotation is saved here never changes what " +
+            "a visitor actually sees.";
+
+        // Edit Rotation row help ((i) button next to the slider itself).
+        internal static readonly string EditRotationHelpBody =
+            "This angle is an editor-only preview aid -- at runtime every marker always " +
+            "faces the camera (billboard), so nothing saved here ever changes what a visitor sees.\n\n" +
+            "This slider controls yaw (rotation around Y) and stays in sync in both directions with " +
+            "Unity's Rotate tool: dragging the slider turns the marker in the Scene view, and rotating " +
+            "the marker with the Rotate tool updates this slider live.\n\n" +
+            "There is no slider for pitch/roll (X/Z) -- use Unity's Rotate tool directly for those. " +
+            "All three axes are captured live and saved to config JSON, then re-applied automatically " +
+            "next time the rig is populated.\n\n" +
+            "Rotation is always free to edit, even after this POI's position is Verified -- the " +
+            "Verified lock only ever applies to position.";
 
         // Keyword Fields table (Global Scene > Search & Filter).
         private static readonly string SearchFieldKeyHelp = "Stable identifier for this search axis. Never change after editing begins -- existing per-POI keywords reference it by key.";

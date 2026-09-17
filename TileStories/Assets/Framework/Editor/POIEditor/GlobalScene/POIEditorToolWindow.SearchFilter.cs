@@ -284,10 +284,8 @@ namespace TileStories.Editor
                                 () => field.details,
                                 v => { field.details = v; _hasUnsavedChanges = true; }));
 
-                        if (GUILayout.Button("?", GUILayout.Width(26f)))
-                            PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup(
-                                "Search Field Help",
-                                $"Key: {SearchFieldKeyHelp}\n\nLabel: {SearchFieldLabelHelp}\n\nForced: {SearchFieldForcedHelp}\n\nDetails: {SearchFieldDetailsHelp}"));
+                        HelpInfoButton.Draw("Search Field Help",
+                            $"Key: {SearchFieldKeyHelp}\n\nLabel: {SearchFieldLabelHelp}\n\nForced: {SearchFieldForcedHelp}\n\nDetails: {SearchFieldDetailsHelp}");
                     }
 
                     GUILayout.FlexibleSpace();

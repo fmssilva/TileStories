@@ -33,12 +33,29 @@ write all this with all important details BUT IN A CONCISE MANNER. I WANT TO BE 
 # future task?? 
 A *stable `key` + `label`* split for categories (like `badge_categories` already has) is architecturally "cleaner" but is a __schema + every-consumer change__ (schema, CategoryPalette, search/filter/minimap/results, editor dropdowns, tests, config backfill) — big and risky for one wall today. The propagated-string approach keeps the current schema, fixes your exact failure, matches the existing POI-rename pattern, and is genuinely small. If a second wall later needs real display-name independence, the `key`/`label` migration can happen then (badge is the template
 
-# do a deep analysis of the related code and the guideline, necessary to implment the following tasks: 
-C:\Users\franc\Desktop\TileStories\proj_guides\__curr_plan_tracker.md
+# `claude agent`
+- **GATE TASK:** start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
 
-read all the code and guidelines: 
+- **CLAUDE.md:** I don't have it in this project. Instead i have this .clinerules folder with these files which are the general guidelines for this project:
+  .clinerules\00-process.md
+  .clinerules\10-structure.md
+  .clinerules\20-code-quality.md
+  .clinerules\30-ui-content.md
+  .clinerules\40-testing.md
+  .clinerules\50-terminal_and_tools.md
+  .clinerules\60-finishing.md
+So start by reading them all. 
+
+- and now, in the specific markers tab, i send attached a print... and also this whole edit tab guide for better context:
 C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
 
+and so now: 
+a) lets change the order of the "focus in scene" icon with the "edit name" icon. so we have the edit icon after the focus in that row. 
+
+b) lets make the default view of the POI compnents to be colapse. similar to the image i attaache. 
+
+c) the "+ add near prev" and "add near after". lets simplify that.
+and so instead of us having 2 buttons in between POI markers lines, lets instead put a simple "+" button in the same line of the POI title, right after the arrow up and arrow down icons, and so when the deveeloper clicks on that icon, we use that concrete POI as the "source to be copied" and then we add the new poi in the line bellow that "origin POI". and so make a deep analysis and see the whole set of "add near prev and add near next logic we have, and lets simplify that and just add near this cncrete POI of this line. 
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
@@ -135,33 +152,3 @@ Act as a **Senior Staff Engineer** planning and implementing the whole plan, AND
 
 
 # ---
-
-
-# Editor Rows command (all element types)
-
-## 1) Open the shared row INSIDE the section's OnGUI/IndentLevel scope:
-DrawEditorRow(out float rowWidth, out _);
-  -> transparent indent spacer + rowWidth = max(180, min(panel width - margin - indent, 480))
-
-## 2) Draw your elements, each capped to a SHARE of rowWidth:
-  - single Button:                      GUILayout.Width(rowWidth)
-  - labelled TextField (no trailing ctl): GUILayout.Width(rowWidth)
-  - labelled ObjectField:                 GUILayout.Width(rowWidth)
-  - field + browse button:   field GUILayout.Width(rowWidth - 36f); button fixed
-  - n equal buttons:          each GUILayout.Width((rowWidth - gap(n)) / n)
-  - fixed + flexible buttons: fixed free, flexible get (rowWidth - fixedTotal - gaps) / count
-ALL elements: + GUILayout.ExpandWidth(false) -- MANDATORY, or the stretchy style wins
-
-## 3) Close:
-EditorRowEnd();
-
-## Multi-element rows: split rowWidth LOCALLY per row. No generic multi-button
-abstraction (rule 20: simple duplication over fragile generics).
-
-## Helpers: Shared/POIEditorToolWindow.RowLayout.cs
-## Constants: Constants.cs -> MinRowWidth=180, MaxRowWidth=480, AddButtonRowRightMargin=6
-## Traps (do NOT simplify): width from currentViewWidth ONLY; never a just-drawn
-## GetLastRect; ExpandWidth(false)+Width on every control; spacer = real button w/
-## whiteTexture bg + zero-alpha tint (never background=null, never GUILayout.Space).
-
-#

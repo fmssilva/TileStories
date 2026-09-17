@@ -210,13 +210,15 @@
             "id": "lamp",
             "name": "The Lamp",
             "category": "Royal Government",
-            "editor_rotation_deg": 0.0,
+            "editor_rotation_deg": 151.98159790039063,
+            "editor_rotation_x_deg": 342.31494140625,
+            "editor_rotation_z_deg": 8.911751747131348,
             "position": {
-                "x": -0.9999999403953552,
-                "y": -0.8700000047683716,
-                "z": -3.677000045776367
+                "x": -0.859000027179718,
+                "y": -1.1419999599456788,
+                "z": -3.8570001125335695
             },
-            "position_verified": true,
+            "position_verified": false,
             "summary": "POI_Lamp",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -234,6 +236,8 @@
             "name": "Lamp - Religious",
             "category": "religious",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -0.9999999403953552,
                 "y": -1.1699999570846558,
@@ -256,7 +260,9 @@
             "id": "lamp_military",
             "name": "Lamp - Military",
             "category": "military",
-            "editor_rotation_deg": 0.0,
+            "editor_rotation_deg": 335.6123962402344,
+            "editor_rotation_x_deg": 345.4466857910156,
+            "editor_rotation_z_deg": 6.499139785766602,
             "position": {
                 "x": -0.9999999403953552,
                 "y": -0.8700000047683716,
@@ -280,6 +286,8 @@
             "name": "Lamp - Residential",
             "category": "residential",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -0.9999999403953552,
                 "y": -0.5699999928474426,
@@ -303,6 +311,8 @@
             "name": "Lamp - Economic",
             "category": "economic",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -0.9999999403953552,
                 "y": -0.8700000047683716,
@@ -326,6 +336,8 @@
             "name": "Lamp - Infrastructure",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -0.6999999284744263,
                 "y": -0.8700000047683716,
@@ -349,6 +361,8 @@
             "name": "The Painting",
             "category": "Royal Government",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -2.0,
                 "y": 0.0,
@@ -372,6 +386,8 @@
             "name": "Painting - Religious",
             "category": "religious",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -2.0,
                 "y": 0.0,
@@ -395,6 +411,8 @@
             "name": "Painting - Military",
             "category": "military",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -2.0,
                 "y": 0.0,
@@ -418,6 +436,8 @@
             "name": "Painting - Residential",
             "category": "residential",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -2.0,
                 "y": 0.30000001192092898,
@@ -441,6 +461,8 @@
             "name": "Painting - Economic",
             "category": "economic",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -2.0,
                 "y": -0.30000001192092898,
@@ -464,6 +486,8 @@
             "name": "Painting - Infrastructure",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -1.7000000476837159,
                 "y": 0.0,
@@ -487,6 +511,8 @@
             "name": "The Camera",
             "category": "Royal Government",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -1.9300000667572022,
                 "y": 0.7200000286102295,
@@ -510,6 +536,8 @@
             "name": "Camera - Religious",
             "category": "religious",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -1.9300000667572022,
                 "y": 0.7200000286102295,
@@ -533,6 +561,8 @@
             "name": "Camera - Military",
             "category": "military",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -1.9300000667572022,
                 "y": 0.7200000286102295,
@@ -556,6 +586,8 @@
             "name": "Camera - Residential",
             "category": "residential",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -1.9300000667572022,
                 "y": 1.0199999809265137,
@@ -579,6 +611,8 @@
             "name": "Camera - Economic",
             "category": "economic",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -1.9300000667572022,
                 "y": 0.41999998688697817,
@@ -602,6 +636,8 @@
             "name": "Camera - Infrastructure",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": -1.630000114440918,
                 "y": 0.7200000286102295,
@@ -625,6 +661,8 @@
             "name": "Dev Disp Eq Royal",
             "category": "Royal Government",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": 0.5,
                 "y": -0.5,
@@ -648,6 +686,8 @@
             "name": "Dev Disp Eq Mil",
             "category": "military",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": 0.5,
                 "y": -0.5,
@@ -671,6 +711,8 @@
             "name": "Dev Disp Eq Eco",
             "category": "economic",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": 0.5,
                 "y": -0.5,
@@ -694,6 +736,8 @@
             "name": "Dev Disp Singleton",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
             "position": {
                 "x": 3.0,
                 "y": 1.0,

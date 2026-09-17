@@ -333,7 +333,7 @@ namespace TileStories.Tests
             // SpecificMarker level-2 field rows (status toggles/slider, custom symbol, keyword fields).
             AssertFieldRowsUseSharedRow(specific, new string[] { "Use Custom Symbol", "Has status", "Status unknown", "Status %", "Custom symbol (optional)" });
             // Position rotation slider + XYZ row.
-            AssertFieldRowsUseSharedRow(position, new string[] { "Edit Rotation", "X" });
+            AssertFieldRowsUseSharedRow(position, new string[] { "Rotation", "X" });
         }
 
         // A labelled FIELD row is a shared row if DrawEditorRow(out float ..Row) opens it,
@@ -368,7 +368,11 @@ namespace TileStories.Tests
             AssertSharedRow(search, "+ Add synonym group", "Synonym group");
             AssertSharedRow(search, "+ Add keyword field", "Keyword field");
             AssertSharedRow(specific, "+ Add first", "SpecificMarker first");
-            AssertSharedRow(position, "Verified", "Position verify");
+            // "Verified" is intentionally NOT a shared row anymore: it moved from a
+            // standalone full-width row inside the Position foldout's content to a
+            // compact inline button on the foldout's own HEADER row (right-aligned next
+            // to the "Position" title, via DrawFramedFoldout's rightAlignTrailing), so it
+            // sizes to its own text instead of the shared row's capped width.
         }
 
         // A button is a shared row: DrawEditorRow + GUILayout.Width(rowWidth) +

@@ -17,21 +17,11 @@ namespace TileStories.Editor
                 DrawEditorRow(out float firstRowWidth, out _);
                 if (GUILayout.Button("+ Add first POI", GUILayout.Width(firstRowWidth), GUILayout.ExpandWidth(false)))
                 {
-                    AddNewPoi(); // adds at index 0
+                    AddFirstPoi();
                 }
                 EditorRowEnd();
                 return;
             }
-
-            // "+ Add before first" button (down arrow) before the first POI.
-            // Rendered as a shared editor row: transparent indent spacer + width
-            // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
-            DrawEditorRow(out float beforeRowWidth, out _);
-            if (GUILayout.Button("+ Add POI near next ▼", GUILayout.Width(beforeRowWidth), GUILayout.ExpandWidth(false)))
-            {
-                AddNewPoiInternal(false); // insert at index 0
-            }
-            EditorRowEnd();
 
             for (int i = 0; i < _config.pois.Count; i++)
             {
@@ -51,23 +41,56 @@ namespace TileStories.Editor
                 var headerLabelStyle = CreateHeaderLabelStyle(PoiHeaderColorFor(foldoutKey, i));
                 var headerRect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
 
-                // Layout: [foldout arrow] [name click zone] [pencil right after name].
-                // The pencil is measured off the name text width (not pinned to
-                // headerRect.xMax) so it hugs the label even on wide windows.
+                // Row width follows the same shared convention as every other non-table
+                // row in this window (see DrawEditorRow / EditorRowWidthForIndent): capped
+                // to max(MinRowWidth, min(panel - margin - indent, MaxRowWidth)), so the
+                // header row's right edge lines up with every other row's, not the raw
+                // window edge. headerRect.x already IS this row's runtime indent (Unity
+                // auto-indents GetControlRect), so it's reused directly as that indent.
+                float rowWidth = EditorRowWidthForIndent(EditorGUIUtility.currentViewWidth, AddButtonRowRightMargin, headerRect.x);
+                float rowRight = headerRect.x + rowWidth;
+
+                // Layout: [foldout arrow] [flexible name] [icon cluster pinned to the row's
+                // right edge: focus, pencil, up, down, +, (i), delete]. The icon cluster is
+                // fixed width and computed right-to-left off rowRight FIRST, so it stays put
+                // regardless of name length; the name then flexes to fill whatever space is
+                // left between the arrow and the cluster (never overlaps it). Delete is the
+                // SAME width as its siblings -- the danger affordance is the icon's own red
+                // color, not an oversized button.
                 const float arrowWidth = 14f;
                 const float pencilWidth = 22f;
+                const float reorderButtonWidth = 22f;
+                const float addButtonWidth = 22f;
+                const float infoButtonWidth = 22f;
+                const float deleteButtonWidth = 22f;
+                const float iconGapX = 4f;
+                const float nameToIconsGapX = 12f;
                 var arrowRect = new Rect(headerRect.x, headerRect.y, arrowWidth, headerRect.height);
+
+                var deleteRect = new Rect(rowRight - deleteButtonWidth, headerRect.y, deleteButtonWidth, headerRect.height);
+                var infoRect = new Rect(deleteRect.x - iconGapX - infoButtonWidth, headerRect.y, infoButtonWidth, headerRect.height);
+                var addRect = new Rect(infoRect.x - iconGapX - addButtonWidth, headerRect.y, addButtonWidth, headerRect.height);
+                var downRect = new Rect(addRect.x - iconGapX - reorderButtonWidth, headerRect.y, reorderButtonWidth, headerRect.height);
+                var upRect = new Rect(downRect.x - iconGapX - reorderButtonWidth, headerRect.y, reorderButtonWidth, headerRect.height);
+                var pencilRect = new Rect(upRect.x - iconGapX - pencilWidth, headerRect.y, pencilWidth, headerRect.height);
+                var focusRect = new Rect(pencilRect.x - iconGapX - pencilWidth, headerRect.y, pencilWidth, headerRect.height);
+
                 string displayName = $"{i + 1}. {poi.name}";
-                float nameWidth = headerLabelStyle.CalcSize(new GUIContent(displayName)).x;
-                var nameRect = new Rect(headerRect.x + arrowWidth, headerRect.y, nameWidth + 4f, headerRect.height);
-                const float pencilGapX = 20f;  // breathing room between name text and pencil
-                var pencilRect = new Rect(nameRect.xMax + pencilGapX, headerRect.y, pencilWidth, headerRect.height);
+                // CalcSize slightly under-measures this bold label's real rendered width
+                // (confirmed by screenshot: even a 10f pad still clipped the last glyph on
+                // longer names) -- pad generously; this only matters when
+                // nameAvailableWidth is the smaller of the two, so it never over-reserves.
+                float nameNaturalWidth = headerLabelStyle.CalcSize(new GUIContent(displayName)).x + 18f;
+                float nameAvailableWidth = Mathf.Max(20f, focusRect.x - nameToIconsGapX - (headerRect.x + arrowWidth));
+                var nameRect = new Rect(headerRect.x + arrowWidth, headerRect.y, Mathf.Min(nameNaturalWidth, nameAvailableWidth), headerRect.height);
 
                 // Foldout arrow (click toggles)
                 expanded = EditorGUI.Foldout(arrowRect, expanded, "", true, headerStyle);
                 if (isEditing)
                 {
-                    // Edit mode: full-width text field so long names are editable.
+                    // Edit mode: text field spans the row's own width (not the whole
+                    // window) so long names edit inside the same capped row as everything
+                    // else, consistent with the shared row-width convention.
                     string fieldRectName = $"POIName_{foldoutKey}";
                     string editValueKey = $"editValue_{foldoutKey}";
                     var e = Event.current;
@@ -98,7 +121,7 @@ namespace TileStories.Editor
                     }
 
                     GUI.SetNextControlName(fieldRectName);
-                    var editRect = new Rect(headerRect.x + arrowWidth, headerRect.y, headerRect.width - arrowWidth, headerRect.height);
+                    var editRect = new Rect(headerRect.x + arrowWidth, headerRect.y, rowWidth - arrowWidth, headerRect.height);
                     // TextField returns the live value every repaint; the SessionState
                     // draft mirrors it so Enter/click-outside commit the typed text.
                     var newName = EditorGUI.TextField(editRect, SessionState.GetString(editValueKey, displayName));
@@ -126,36 +149,19 @@ namespace TileStories.Editor
                     EditorGUI.LabelField(nameRect, displayName, headerLabelStyle);
                 }
 
-                // Pencil button right after the name; hidden while this POI is in
-                // edit mode (the field replaces the label + pencil for that row).
+                // Header row controls, right-aligned to the row's own right edge (rowRight,
+                // computed above): focus (crosshair), edit (pencil), reorder up/down,
+                // add-near (+), help (i), delete. Hidden while this POI is in edit mode (the
+                // text field replaces name + pencil for that row). Rects already computed
+                // above (right-to-left off rowRight) so the name's available width can be
+                // derived from them before the name itself is drawn.
                 if (!isEditing)
                 {
-                    Texture2D editTex = AssetDatabase.LoadAssetAtPath<Texture2D>(EditIconAssetPath);
-                    var editContent = new GUIContent(editTex);
-                    Color prevColor = GUI.color;
-                    GUI.color = new Color(0.85f, 0.85f, 0.85f, 1f);
-                    if (GUI.Button(pencilRect, editContent, GUIStyle.none))
-                    {
-                        SessionState.SetBool(editModeKey, true);
-                        SessionState.SetString($"editValue_{foldoutKey}", displayName);
-                        SessionState.EraseString($"editValue_{foldoutKey}_focused");
-                    }
-                    GUI.color = prevColor;
-                }
-
-                // Minimal reorder controls: move this POI earlier/later in the config list.
-                // The config list is the canonical order persisted to JSON, and the save flow
-                // already serializes the whole object so there is no custom file rewrite logic.
-                if (!isEditing)
-                {
-                    const float reorderButtonWidth = 22f;
-                    const float deleteButtonWidth = 34f;
-                    const float reorderGapX = 4f;
-                    const float deleteGapX = 6f;
-                    var focusRect = new Rect(pencilRect.xMax + reorderGapX, headerRect.y, reorderButtonWidth, headerRect.height);
-                    var upRect = new Rect(focusRect.xMax + reorderGapX, headerRect.y, reorderButtonWidth, headerRect.height);
-                    var downRect = new Rect(upRect.xMax + reorderGapX, headerRect.y, reorderButtonWidth, headerRect.height);
-                    var deleteRect = new Rect(downRect.xMax + deleteGapX, headerRect.y, deleteButtonWidth, headerRect.height);
+                    // All six icon buttons share one look now: a real miniButton background
+                    // (so every one of them gets the standard hover/press highlight, not just
+                    // up/down/delete) with the icon drawn separately via DrawIconButton so its
+                    // visual size is controlled by inset, not by the source texture's native
+                    // pixel size.
 
                     // Focus (crosshair) button: selects + frames this marker in the Scene
                     // view without expanding the foldout (the old big "Focus in Scene" row
@@ -164,9 +170,16 @@ namespace TileStories.Editor
                     using (new EditorGUI.DisabledScope(!CanFocusPoiInScene(poi)))
                     {
                         Texture2D focusTex = AssetDatabase.LoadAssetAtPath<Texture2D>(FocusIconAssetPath);
-                        var focusContent = new GUIContent(focusTex, "Focus in Scene");
-                        if (GUI.Button(focusRect, focusContent, GUIStyle.none))
+                        if (DrawIconButton(focusRect, focusTex, "Focus in Scene"))
                             FocusPoiInScene(poi);
+                    }
+
+                    Texture2D editTex = AssetDatabase.LoadAssetAtPath<Texture2D>(EditIconAssetPath);
+                    if (DrawIconButton(pencilRect, editTex, "Rename"))
+                    {
+                        SessionState.SetBool(editModeKey, true);
+                        SessionState.SetString($"editValue_{foldoutKey}", displayName);
+                        SessionState.EraseString($"editValue_{foldoutKey}_focused");
                     }
 
                     using (new EditorGUI.DisabledScope(i == 0))
@@ -185,39 +198,45 @@ namespace TileStories.Editor
                         }
                     }
 
-                    // Same HEIGHT as the sibling buttons (the old fixedHeight=24f made the
-                    // delete control overhang the 18px header row). The danger affordance is
-                    // the red icon itself, so there is no dark-red button fill.
-                    var deleteStyle = new GUIStyle(EditorStyles.miniButton);
-                    deleteStyle.alignment = TextAnchor.MiddleCenter;
-                    deleteStyle.padding = new RectOffset(1, 1, 1, 1);
-                    deleteStyle.imagePosition = ImagePosition.ImageOnly;
-                    deleteStyle.fixedWidth = deleteButtonWidth;
-                    deleteStyle.fixedHeight = headerRect.height;
+                    // Add a new POI right below this one, using this POI as the template
+                    // (style, hierarchy level, rotation, ...) and spatial reference. This is
+                    // the ONLY way to insert a POI other than the empty-list "+ Add first POI"
+                    // -- replaces the old pair of "near previous/near next" separator buttons.
+                    if (DrawIconButton(addRect, (Texture2D)AddIcon.image, "Add a new POI below this one, copied from it"))
+                    {
+                        AddNewPoiAfter(i);
+                    }
 
-                    if (GUI.Button(deleteRect, DeleteIcon, deleteStyle))
+                    // Explains the whole icon cluster (focus/rename/reorder/add/delete) in
+                    // one place, since none of the icon-only buttons carry a visible label.
+                    // A smaller inset than its siblings so the glyph itself reads clearly.
+                    if (DrawIconButton(infoRect, (Texture2D)InfoIcon.image, "Row icons help", iconInset: 2f))
+                        PopupWindow.Show(infoRect, new HelpInfoPopup("POI Row Icons", PoiHeaderIconsHelpBody));
+
+                    // Same width/height as its sibling icon buttons (previously wider, which
+                    // read as a bigger, misaligned control). The danger affordance is the red
+                    // icon itself, so there is no dark-red button fill.
+                    if (DrawIconButton(deleteRect, (Texture2D)DeleteIcon.image, "Delete POI"))
                         TryDeletePoiAt(i, poi);
                 }
 
                 _poiFoldouts[foldoutKey] = expanded;
 
                 if (!expanded)
-                {
-                    if (i < _config.pois.Count - 1)
-                        DrawSeparatorButtons(i);
                     continue;
-                }
 
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    // Focus + help now live together on one place: the crosshair icon on the
-                    // POI title row (focus), and the "(i)" on the Position foldout (setup help).
+                    // Focus lives on the POI title row (crosshair). Verified + help live
+                    // together on the Position foldout's own header row, right-aligned, so
+                    // "commit this position" and "how do I do this" sit next to each other.
                     _showPoiPosition = DrawFramedFoldout(
                         ref _showPoiPosition,
                         () => DrawPositionTabs(poi),
                         "Position",
                         FoldoutDefaultColor,
-                        () => HelpInfoButton.Draw("Position", PositionSetupHelpBody));
+                        () => DrawPositionHeaderTrailing(poi),
+                        rightAlignTrailing: true);
 
                     _showPoiMarkerStyle = DrawFramedFoldout(ref _showPoiMarkerStyle, () => DrawPoiMarkerStyleFields(poi), "Marker Style", FoldoutDefaultColor);
 
@@ -241,51 +260,9 @@ namespace TileStories.Editor
                     _showPoiSearchKeywords = DrawFramedFoldout(ref _showPoiSearchKeywords, () => DrawPoiSearchKeywordsField(poi), "Search Keywords", FoldoutDefaultColor);
                 }
 
-                // Separator buttons after this POI (except after last)
-                if (i < _config.pois.Count - 1)
-                    DrawSeparatorButtons(i);
-
                 EditorGUILayout.Space(6f);
             }
-
-            // "+ Add after last" button (up arrow) after the last POI.
-            // Rendered as a shared editor row: transparent indent spacer + width
-            // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
-            DrawEditorRow(out float afterRowWidth, out _);
-            if (GUILayout.Button("+ Add POI near previous ▲", GUILayout.Width(afterRowWidth), GUILayout.ExpandWidth(false)))
-            {
-                AddNewPoiInternal(true); // appends at end
-            }
-            EditorRowEnd();
         }
-
-        private void DrawSeparatorButtons(int index)
-        {
-            // index is the current POI index. We are drawing separator after this POI (i.e., between index and index+1)
-            EditorGUILayout.Space(4f);
-            // Wrap the separator pair in the shared row so it gets the same
-            // indent spacer and stays within the capped row width. Two buttons,
-            // each half the row so they never exceed max(Min, min(panel, Max)).
-            DrawEditorRow(out float sepRowWidth, out _);
-            {
-                string prevLabel = "+ Add POI near previous ▲";
-                string nextLabel = "+ Add POI near next ▼";
-                float sepHalf = Mathf.Max(120f, (sepRowWidth - 4f) / 2f);
-                // "+ Add POI after previous ^" (up arrow) - inserts after current index
-                if (GUILayout.Button(prevLabel, GUILayout.Width(sepHalf), GUILayout.ExpandWidth(false)))
-                {
-                    AddNewPoiAfter(index);
-                }
-                // "+ Add POI before next ▼" (down arrow) - inserts before next
-                if (GUILayout.Button(nextLabel, GUILayout.Width(sepHalf), GUILayout.ExpandWidth(false)))
-                {
-                    AddNewPoiBefore(index + 1);
-                }
-            }
-            EditorRowEnd();
-            EditorGUILayout.Space(4f);
-        }
-
 
         internal static void ReorderPoi(List<POIData> pois, int index, int direction)
         {
@@ -634,10 +611,13 @@ namespace TileStories.Editor
             if (string.IsNullOrWhiteSpace(key))
                 return true;
 
+            // Default collapsed: a wall with a dozen-plus POIs is unreadable if every
+            // row opens expanded on load. Newly-added POIs are the one exception --
+            // SpawnAndFocusNewPoi explicitly opens the one just created.
             if (!_poiFoldouts.TryGetValue(key, out bool expanded))
             {
-                expanded = true;
-                _poiFoldouts[key] = true;
+                expanded = false;
+                _poiFoldouts[key] = false;
             }
 
             return expanded;
@@ -668,7 +648,7 @@ namespace TileStories.Editor
                     float derivedLabelW = Mathf.Max(140f, derivedRow - 40f);
                     EditorGUILayout.LabelField("Auto-included from taxonomy (read-only)", EditorStyles.miniLabel,
                         GUILayout.Width(derivedLabelW), GUILayout.ExpandWidth(false));
-                    DrawHelpButton(SearchKeywordsDerivedHelp);
+                    HelpInfoButton.Draw("Auto-Included Keywords", SearchKeywordsDerivedHelp);
                 }
                 EditorRowEnd();
                 EditorGUILayout.HelpBox(string.Join(", ", derived), MessageType.None);
@@ -737,7 +717,7 @@ namespace TileStories.Editor
             // --- Others row (freeform flat keywords) ---
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Others (freeform)", EditorStyles.miniLabel);
-            DrawHelpButton(SearchKeywordsOthersHelp);
+            HelpInfoButton.Draw("Others (Freeform Keywords)", SearchKeywordsOthersHelp);
             string othersJoined = string.Join(", ", poi.search_keywords);
             // Shared row: transparent indent spacer + TextField capped to rowWidth.
             DrawEditorRow(out float othersRow, out _);
@@ -804,12 +784,8 @@ namespace TileStories.Editor
             return keywords;
         }
 
-        // Render a small inline help button that opens a HelpInfoPopup.
-        private static void DrawHelpButton(string message)
-        {
-            if (GUILayout.Button("?", GUILayout.Width(26f), GUILayout.Height(16f)))
-                PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup("Help", message));
-        }
+        // DrawIconButton lives in Shared/POIEditorToolWindow.IconButton.cs now (it's the
+        // shared look for every icon-only button in this window, not just this row's).
 
         // Parse a comma-separated keyword string into a list, trimming empties.
         // Duplicated from SymbolTable.cs to avoid assembly-boundary issues
@@ -915,36 +891,23 @@ namespace TileStories.Editor
             DrawConfigMutationScope(() => _config.pois.Insert(index, poi), true);
         }
 
-        // Add a new POI with sensible defaults.
-        private void AddNewPoiInternal(bool afterPrevious = true)
+        // Add the very first POI to an empty config (the "+ Add first POI" button --
+        // the only add path with no existing POI to use as a source/template).
+        private void AddFirstPoi()
         {
             if (_config == null) return;
             if (_config.pois == null) _config.pois = new List<POIData>();
 
-            if (_config.pois.Count == 0)
-            {
-                var fallbackPoi = CreateDefaultPoi(PoiRotationResolver.DefaultEditorRotationDeg);
-                InsertPoiAt(0, fallbackPoi);
-                SpawnAndFocusNewPoi(fallbackPoi);
-                _poiFoldouts[fallbackPoi.id] = true;
-                Repaint();
-                return;
-            }
-
-            if (afterPrevious)
-            {
-                AddNewPoiAfter(_config.pois.Count - 1);
-            }
-            else
-            {
-                AddNewPoiBefore(0);
-            }
+            var newPoi = CreateDefaultPoi(PoiRotationResolver.DefaultEditorRotationDeg);
+            InsertPoiAt(0, newPoi);
+            SpawnAndFocusNewPoi(newPoi);
+            _poiFoldouts[newPoi.id] = true;
+            Repaint();
         }
 
-        // Parameterless overload used by UI buttons and tests (appends to end).
-        private void AddNewPoi() => AddNewPoiInternal(true);
-
-        // Insert a new POI immediately after the given index, using that POI as the template and spatial reference.
+        // Insert a new POI immediately after the given index, using that POI as the
+        // template and spatial reference. This is the ONLY way to add a POI to a
+        // non-empty list -- driven by the per-row "+" button on the header row.
         private void AddNewPoiAfter(int index)
         {
             if (_config == null) return;
@@ -954,23 +917,6 @@ namespace TileStories.Editor
             var sourcePoi = _config.pois[index];
             var newPoi = CreateDefaultPoi(sourcePoi.editor_rotation_deg, sourcePoi);
             InsertPoiAt(index + 1, newPoi);
-
-            SpawnAndFocusNewPoi(newPoi, sourcePoi);
-            _poiFoldouts[newPoi.id] = true;
-            Repaint();
-        }
-
-        // Insert a new POI immediately before the given index, using the next POI as the template and spatial reference.
-        private void AddNewPoiBefore(int index)
-        {
-            if (_config == null) return;
-            if (_config.pois == null) _config.pois = new List<POIData>();
-            if (index < 0 || index > _config.pois.Count) return;
-
-            var sourcePoi = index < _config.pois.Count ? _config.pois[index] : null;
-            var newPoi = CreateDefaultPoi(sourcePoi != null ? sourcePoi.editor_rotation_deg : PoiRotationResolver.DefaultEditorRotationDeg, sourcePoi);
-            int insertIndex = index;
-            InsertPoiAt(insertIndex, newPoi);
 
             SpawnAndFocusNewPoi(newPoi, sourcePoi);
             _poiFoldouts[newPoi.id] = true;
@@ -995,51 +941,15 @@ namespace TileStories.Editor
                 return;
             }
 
-            // Resolve initial position using the relevant adjacent POI as the source template.
-            Vector3 initialPosition;
+            // Resolve initial position offset from the source POI's own rig child, when
+            // there is one (AddFirstPoi has no source -- the very first POI spawns at
+            // the rig origin instead).
+            Vector3 initialPosition = Vector3.zero;
             if (referencePoi != null)
             {
                 var referenceChild = GetExistingRig()?.Find(referencePoi.id);
                 if (referenceChild != null)
-                {
                     initialPosition = referenceChild.localPosition + new Vector3(0.3f, 0f, 0.3f);
-                }
-                else
-                {
-                    initialPosition = Vector3.zero;
-                }
-            }
-            else
-            {
-                int myIndex = _config.pois.IndexOf(poi);
-                if (myIndex == 0 && _config.pois.Count == 1)
-                {
-                    initialPosition = Vector3.zero;
-                }
-                else
-                {
-                    POIData prevPoi = null;
-                    if (myIndex > 0)
-                    {
-                        prevPoi = _config.pois[myIndex - 1];
-                    }
-                    else if (_config.pois.Count > 1)
-                    {
-                        prevPoi = _config.pois[1];
-                    }
-
-                    if (prevPoi != null)
-                    {
-                        var prevChild = GetExistingRig()?.Find(prevPoi.id);
-                        initialPosition = prevChild != null
-                            ? prevChild.localPosition + new Vector3(0.3f, 0f, 0.3f)
-                            : Vector3.zero;
-                    }
-                    else
-                    {
-                        initialPosition = Vector3.zero;
-                    }
-                }
             }
 
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, GetExistingRig());

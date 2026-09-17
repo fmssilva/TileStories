@@ -36,22 +36,29 @@ namespace TileStories.Editor
 
             var position = poi.position;
 
-            // Layout order is intentionally fixed: rotation first, coords second, then verified state.
+            // Layout order is intentionally fixed: rotation first, coords second. The
+            // Verified toggle now lives on this foldout's own header row (see
+            // DrawPositionHeaderTrailing) instead of at the bottom of this content, so it
+            // reads as "commit this position" next to the foldout title itself.
             // Shared row: label keeps a fixed width; slider takes rowWidth minus the
             // label + spacing, inside the capped row (level-2 indent measured at call time).
             DrawEditorRow(out float rotationRow, out _);
             {
-                EditorGUILayout.LabelField("Edit Rotation", EditorStyles.boldLabel, GUILayout.Width(92f));
+                EditorGUILayout.LabelField("Rotation", EditorStyles.boldLabel, GUILayout.Width(92f));
                 DrawConfigMutationScope(
                     () =>
                     {
-                        float sliderW = Mathf.Max(120f, rotationRow - 104f);
+                        const float infoButtonWidth = 26f;
+                        const float infoButtonGap = 4f;
+                        float sliderW = Mathf.Max(120f, rotationRow - 104f - infoButtonWidth - infoButtonGap);
                         poi.editor_rotation_deg = EditorGUILayout.Slider(poi.editor_rotation_deg, 0f, 360f,
                             GUILayout.Width(sliderW), GUILayout.ExpandWidth(false));
                         if (GUI.changed)
                             ApplyPoiEditorRotation(poi);
                     },
                     refreshRigOnChange: false);
+                GUILayout.Space(4f);
+                HelpInfoButton.Draw("Rotation", EditRotationHelpBody);
             }
             EditorRowEnd();
 
@@ -61,33 +68,36 @@ namespace TileStories.Editor
             // drawn OUTSIDE any disabled scope (see DrawCoordinateRow) -- this row is the
             // only one in the window whose label sat inside BeginDisabledGroup(true), and
             // it is the only label that never showed up.
-            DrawCoordinateRow(position.x, position.y, position.z, out _, out _, out _);
-
-            EditorGUILayout.Space(2f);
-
-            // Shared editor row: transparent indent spacer + width capped to
-            // max(MinRowWidth, min(visible panel, MaxRowWidth)). The verify button
-            // takes the capped width (no trailing status text). Nested two indent
-            // levels deeper than the coordinate rows so it reads as the final
-            // "commit this position" action rather than another coordinate line.
+            // Extra +2 indent so this row's left edge matches "Rotation" above it.
+            // Verified via direct pixel measurement of a real screenshot (GUILayoutUtility
+            // rects logged via Debug.Log were NOT reliable evidence here -- they reported
+            // both rows starting at the same x while the actual rendered pixels showed
+            // the Rotation row's glyph starting at x=68 and this row's at x=40, a real 28px
+            // gap close to two indent levels).
             using (new EditorGUI.IndentLevelScope(2))
             {
-                DrawEditorRow(out float verifyRowWidth, out _);
-                {
-                    string buttonLabel = poi.position_verified ? "Verified" : "Unverified";
-                    Color originalColor = GUI.backgroundColor;
-                    GUI.backgroundColor = poi.position_verified ? new Color(0.2f, 0.7f, 0.2f) : new Color(0.8f, 0.3f, 0.3f);
-
-                    if (GUILayout.Button(buttonLabel, GUILayout.Width(verifyRowWidth), GUILayout.ExpandWidth(false)))
-                    {
-                        TogglePoiVerification(poi);
-                    }
-
-                    GUI.backgroundColor = originalColor;
-                }
-                EditorRowEnd();
+                DrawCoordinateRow(position.x, position.y, position.z, out _, out _, out _);
             }
+
             }
+        }
+
+        // Header-row trailing content for the Position foldout (drawn right-aligned,
+        // after the "Position" title): the Verified/Unverified toggle -- the actual
+        // "commit this position" action -- followed by the "?" help button (now just
+        // HelpInfoButton.Draw's own default size, IconButtonSize, same as every other
+        // icon button in this window -- no per-call-site override needed anymore).
+        private void DrawPositionHeaderTrailing(POIData poi)
+        {
+            string buttonLabel = poi.position_verified ? "Verified" : "Unverified";
+            Color originalColor = GUI.backgroundColor;
+            GUI.backgroundColor = poi.position_verified ? new Color(0.2f, 0.7f, 0.2f) : new Color(0.8f, 0.3f, 0.3f);
+            if (GUILayout.Button(buttonLabel, GUILayout.Height(20f)))
+                TogglePoiVerification(poi);
+            GUI.backgroundColor = originalColor;
+
+            GUILayout.Space(4f);
+            HelpInfoButton.Draw("Position", PositionSetupHelpBody);
         }
 
         // One compact read-only row: x [val]  y [val]  z [val].
@@ -112,26 +122,72 @@ namespace TileStories.Editor
 
             DrawEditorRow(out float coordRow, out _);
 
-            const float axisLabelWidth = 16f;
-            const float pairGapWidth = 6f;
-            float valueWidth = Mathf.Max(60f, (coordRow - 3f * axisLabelWidth - 2f * pairGapWidth) / 3f);
+            // axisLabelWidth is the MEASURED glyph width, not a guess: EditorStyles.
+            // boldLabel.CalcSize(GUIContent) reports "X"/"Y"/"Z" at ~10.3-10.5px on this
+            // font/DPI. An earlier pass fixed this at 40f based on a binary search done
+            // under the OLD GUILayout-auto-layout rendering path (before the indent-
+            // compounding bug below was fixed and before this method switched to manual
+            // Rect splitting) -- 16f/24f failed to render THEN because of that separate
+            // layout bug, not because the glyph itself needs 40px. Now that label and
+            // value are two explicitly-split adjacent rects, the label only needs to be as
+            // wide as its own glyph; anything wider is dead space between the letter and
+            // the value field, which is exactly the "space between letter and coord field"
+            // this row keeps getting reported for.
+            float axisLabelWidth = Mathf.Ceil(EditorStyles.boldLabel.CalcSize(new GUIContent("X")).x) + 2f;
+            const float minValueWidth = 40f;
+            const float maxValueWidth = 90f;
+            const float groupGap = 8f; // deliberate visual gap between "X val" / "Y val" / "Z val"
+            // Shared-row convention (see RowLayout.cs / DrawEditorRow): coordRow already
+            // has the row's right margin baked in via AddButtonRowRightMargin, same as
+            // every other row in this window (e.g. the Load & Populate Rig / Clear Rig
+            // pair: rigShare = (rigRowWidth - 4f) / 2f). This row's own fixed content is
+            // 3 label glyphs + 2 inter-group gaps; the 3 value fields split whatever
+            // remains -- no extra ad-hoc margin on top of coordRow, which would just make
+            // this row's right margin inconsistent with every other row's.
+            float valueWidth = Mathf.Clamp((coordRow - 3f * axisLabelWidth - 2f * groupGap) / 3f, minValueWidth, maxValueWidth);
+            float pairWidth = axisLabelWidth + valueWidth;
 
-            string[] axes = GetCoordinateLabels();
-            float[] axisValues = { x, y, z };
-            for (int i = 0; i < axes.Length; i++)
+            // GUIStyle.margin was NOT the source of the gap -- verified directly: zeroing
+            // both styles' margin to (0,0,0,0) left the measured label-to-value gap
+            // unchanged at exactly 3px. EditorGUILayout's automatic horizontal layout is
+            // inserting that spacing through some other internal mechanism that resists
+            // styling. Rather than keep fighting the auto-layout system, each letter+value
+            // PAIR now reserves one combined rect via GUILayoutUtility.GetRect and splits
+            // it manually in two: labelRect ends exactly where valueRect begins, drawn with
+            // EditorGUI (immediate mode, explicit rects), which does not insert any
+            // automatic inter-control spacing at all. This guarantees a true zero-pixel
+            // gap by construction instead of hoping a style property is honored.
+            int savedIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            try
             {
-                GUILayout.Label(axes[i], EditorStyles.boldLabel, GUILayout.Width(axisLabelWidth));
-                if (i == 0)
-                    firstAxisLabelRect = GUILayoutUtility.GetLastRect();
+                string[] axes = GetCoordinateLabels();
+                float[] axisValues = { x, y, z };
+                float lineHeight = EditorGUIUtility.singleLineHeight;
+                for (int i = 0; i < axes.Length; i++)
+                {
+                    if (i > 0)
+                        GUILayout.Space(groupGap);
 
-                using (new EditorGUI.DisabledScope(true))
-                    EditorGUILayout.FloatField(axisValues[i], GUILayout.Width(valueWidth), GUILayout.ExpandWidth(false));
-                if (i == 0)
-                    firstAxisValueRect = GUILayoutUtility.GetLastRect();
-                lastAxisValueRect = GUILayoutUtility.GetLastRect();
+                    Rect pairRect = GUILayoutUtility.GetRect(pairWidth, lineHeight, GUILayout.Width(pairWidth), GUILayout.ExpandWidth(false));
+                    Rect labelRect = new Rect(pairRect.x, pairRect.y, axisLabelWidth, pairRect.height);
+                    Rect valueRect = new Rect(pairRect.x + axisLabelWidth, pairRect.y, valueWidth, pairRect.height);
 
-                if (i < axes.Length - 1)
-                    GUILayout.Space(pairGapWidth);
+                    EditorGUI.LabelField(labelRect, axes[i], EditorStyles.boldLabel);
+                    using (new EditorGUI.DisabledScope(true))
+                        EditorGUI.FloatField(valueRect, axisValues[i]);
+
+                    if (i == 0)
+                    {
+                        firstAxisLabelRect = labelRect;
+                        firstAxisValueRect = valueRect;
+                    }
+                    lastAxisValueRect = valueRect;
+                }
+            }
+            finally
+            {
+                EditorGUI.indentLevel = savedIndent;
             }
 
             EditorRowEnd();

@@ -136,14 +136,18 @@ namespace TileStories.Editor
                 // Group 1: primary key + notes info
                 EditorGUILayout.LabelField(primaryLabelHeader, EditorStyles.miniBoldLabel, GUILayout.Width(130f));
                 GUILayout.Space(TableGapWithinGroup);
-                HelpInfoButton.DrawCompact(primaryLabelHeader + " Notes", detailsColumnHelp);
+                HelpInfoButton.Draw(primaryLabelHeader + " Notes", detailsColumnHelp);
 
                 GUILayout.Space(TableGapBetweenGroups);
 
                 // Group 2: Symbol + interactive Preview info (preview = curated picker).
+                // Explicit 36f (wider than the shared 22px default): this button sits
+                // directly above the Preview column's own 36f-wide thumbnails, and lining
+                // up with THAT column matters more here than matching every other help
+                // button's width.
                 EditorGUILayout.LabelField("Symbol", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
                 GUILayout.Space(SymbolColumnPad);
-                HelpInfoButton.DrawCompact(primaryLabelHeader + " Symbols", symbolColumnHelp, 36f);
+                HelpInfoButton.Draw(primaryLabelHeader + " Symbols", symbolColumnHelp, 36f);
 
                 GUILayout.Space(TableGapBetweenGroups);
 
