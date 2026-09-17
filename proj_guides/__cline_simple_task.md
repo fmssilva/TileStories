@@ -30,32 +30,14 @@ then add to the begining of the file a section "ORDERED TODO", basically a pract
 write all this with all important details BUT IN A CONCISE MANNER. I WANT TO BE ABLE TO READ IT FAST. SO ALL IMPORTANT DETAILS BUT AS CONCISE AS POSSIBLE IN A NATURAL LANGUAGE LIKE A CODER GUY TALKING TO ANOTHER CODER GUY. 
 
 
+# future task?? 
+A *stable `key` + `label`* split for categories (like `badge_categories` already has) is architecturally "cleaner" but is a __schema + every-consumer change__ (schema, CategoryPalette, search/filter/minimap/results, editor dropdowns, tests, config backfill) — big and risky for one wall today. The propagated-string approach keeps the current schema, fixes your exact failure, matches the existing POI-rename pattern, and is genuinely small. If a second wall later needs real display-name independence, the `key`/`label` migration can happen then (badge is the template
 
+# do a deep analysis of the related code and the guideline, necessary to implment the following tasks: 
+C:\Users\franc\Desktop\TileStories\proj_guides\__curr_plan_tracker.md
 
-
-# Design Domain
-Do a full analysis of the "design domain related things. read these guides (which might be out of date) and respective code to confirm how everything atually works:
-C:\Users\franc\Desktop\TileStories\proj_guides\_2.2_Marker_Design.md
+read all the code and guidelines: 
 C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
-
-pay special attention to the different tables we have for the marker, badge and outline. 
-
-these tables are already almoust well formated. but there are still bugs.
-
-so, in terms of "constants" maybe lets define a "gap_between_groups" constant for us to use in different places in those tables? 
-and also the "space between same group elements" constant??
-
-
-this gap is to be used in between each group in the table. 
-
-example marker table has group category + details - symbol + choose + previwe - color demo + color name - keywords + suggested - delete button. 
-
-so i want to have the space between group and between elements of the groups well set up... 
-
-it i very confusing the whole struture of the table and it is not being easy to format in an easy way. see if you can cleear see where are the "boundaries that i told: 
-category + details - symbol + choose + previwe - color demo + color name - keywords + suggested - delete button
-
-and add the corect spaces.
 
 
 

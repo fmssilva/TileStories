@@ -64,9 +64,14 @@ namespace TileStories.Editor
             for (int i = 0; i < coordinateLabels.Length; i++)
             {
                 DrawEditorRow(out float coordRow, out _);
-                EditorGUILayout.LabelField(coordinateLabels[i] + ":", EditorStyles.miniBoldLabel, GUILayout.Width(28f));
+                // Compact pair: the axis letter is drawn at its natural text width and the
+                // value field follows immediately, so it reads as one unit ("X  -0.99")
+                // instead of a letter stranded at the far left of a wide field. The width
+                // rule now guarantees the row fits, so the letter can no longer be squeezed
+                // to an invisible sliver by an overflowing field.
+                EditorGUILayout.LabelField(coordinateLabels[i], EditorStyles.boldLabel, GUILayout.Width(16f));
                 float value = i == 0 ? position.x : i == 1 ? position.y : position.z;
-                EditorGUILayout.FloatField(value, GUILayout.Width(coordRow - 36f), GUILayout.ExpandWidth(false));
+                EditorGUILayout.FloatField(value, GUILayout.Width(coordRow - 20f), GUILayout.ExpandWidth(false));
                 EditorRowEnd();
             }
             EditorGUI.EndDisabledGroup();
@@ -75,21 +80,26 @@ namespace TileStories.Editor
 
             // Shared editor row: transparent indent spacer + width capped to
             // max(MinRowWidth, min(visible panel, MaxRowWidth)). The verify button
-            // takes the capped width (no trailing status text).
-            DrawEditorRow(out float verifyRowWidth, out _);
+            // takes the capped width (no trailing status text). Nested two indent
+            // levels deeper than the coordinate rows so it reads as the final
+            // "commit this position" action rather than another coordinate line.
+            using (new EditorGUI.IndentLevelScope(2))
             {
-                string buttonLabel = poi.position_verified ? "Verified" : "Unverified";
-                Color originalColor = GUI.backgroundColor;
-                GUI.backgroundColor = poi.position_verified ? new Color(0.2f, 0.7f, 0.2f) : new Color(0.8f, 0.3f, 0.3f);
-
-                if (GUILayout.Button(buttonLabel, GUILayout.Width(verifyRowWidth), GUILayout.ExpandWidth(false)))
+                DrawEditorRow(out float verifyRowWidth, out _);
                 {
-                    TogglePoiVerification(poi);
-                }
+                    string buttonLabel = poi.position_verified ? "Verified" : "Unverified";
+                    Color originalColor = GUI.backgroundColor;
+                    GUI.backgroundColor = poi.position_verified ? new Color(0.2f, 0.7f, 0.2f) : new Color(0.8f, 0.3f, 0.3f);
 
-                GUI.backgroundColor = originalColor;
+                    if (GUILayout.Button(buttonLabel, GUILayout.Width(verifyRowWidth), GUILayout.ExpandWidth(false)))
+                    {
+                        TogglePoiVerification(poi);
+                    }
+
+                    GUI.backgroundColor = originalColor;
+                }
+                EditorRowEnd();
             }
-            EditorRowEnd();
             }
         }
 
@@ -163,7 +173,7 @@ namespace TileStories.Editor
             Transform child = rig.Find(poi.id);
             if (child == null)
                 return;
-            child.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
+            child.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
         }
     }
 }

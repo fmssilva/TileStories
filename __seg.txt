@@ -1,1 +1,0 @@
-'│   │   │   │   │   ├── POIEditorToolWindow.PositionTabs.cs ← DrawPositionTabs (Draft / Precise tabs inside\n'

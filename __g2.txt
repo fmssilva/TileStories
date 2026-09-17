@@ -1,4 +1,0 @@
-﻿
-proj_guides\_2.7_Corrections_TODO.md:2967:3. Leave `Rig Safety Prompt on Play/Build` untouched.
-
-

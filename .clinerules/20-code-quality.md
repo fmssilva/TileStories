@@ -50,6 +50,12 @@
   when text localization is implemented, and the Immersal SDK's own APIs for tracking —
   do not hand-roll a custom content loader, input handler, or localization system that
   duplicates what an installed package already does correctly.
+- **Prove it isn't already built before you build it.** Before adding a mechanism
+  (propagation, refresh, parsing, validation, a resolver, a loader), search the repo --
+  especially the bootstrap/session/orchestrator layer and any editor windows -- for code
+  that already does that job. Duplicating an existing mechanism is worse than a wrong
+  abstraction: it forks the behaviour so a later fix lands in only one of the copies. If
+  it exists and is wrong, fix it in place; build new only when a real search finds nothing.
 - **No speculative code.** Implement only what the current task actually needs. Do not
   add a parameter, a flag, an interface method, or a config field because it "might be
   useful for a future wall" unless a concrete, currently-known requirement needs it.

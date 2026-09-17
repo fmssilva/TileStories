@@ -1,4 +1,0 @@
-﻿
-proj_guides\_2.7_Corrections_TODO.md:2923:  exact kind of toggle. **No action required** — flagged here only so
-
-

@@ -5,8 +5,13 @@
 Do not report a task as finished on the strength of the code looking right
 or a log line saying success. Before saying something is done:
 
-- Compile check: zero `error CS` lines, confirmed via Unity MCP `refresh_unity`
-  (preferred) or batch-mode compile log (`40-testing.md` §4.2).
+- Compile check: zero `error CS` lines. `refresh_unity` "compiling -> idle/ready" or a
+  passing run is NOT enough by itself: one compile error silently leaves Unity on the
+  last-good assemblies (counts freeze, console looks clean). Confirm the compile really
+  ran -- Editor.log tail (`error CS` / `ExitCode`), a `Library/ScriptAssemblies/*.dll`
+  timestamp that moved, or the new type present in the loaded assemblies (`unity_reflect`).
+  If new files/edits aren't showing up, force it via MCP `execute_code`:
+  `AssetDatabase.Refresh(ForceSynchronousImport)` + `CompilationPipeline.RequestScriptCompilation()`.
 - If the change touched an asset file rather than only going through
   Unity's own Editor UI: confirm the AssetDatabase refresh actually
   happened (`40-testing.md` §4.3), not just that the file on disk changed.
@@ -14,7 +19,8 @@ or a log line saying success. Before saying something is done:
   `run_tests` + `get_test_job` (preferred) or batch-mode XML. Acceptance gate:
   **zero failed tests** — never a fixed count. If the task added or changed a test,
   confirm that specific test's name appears in the results, not just that a count
-  went up.
+  went up -- and a total that did not move after you added tests is the stale-build
+  signal, not a pass.
 - If the task involved a claim from an earlier session or a different
   agent ("this was already implemented," "the config is already correct"),
   that claim gets verified against the actual current files before being

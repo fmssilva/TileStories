@@ -147,10 +147,11 @@ namespace TileStories.Tests
                 BindingFlags.NonPublic | BindingFlags.Static);
             Assert.IsNotNull(m, "DrawFramedFoldout should still exist");
             var ps = m.GetParameters();
-            Assert.AreEqual(4, ps.Length);
+            Assert.AreEqual(5, ps.Length);
             Assert.AreEqual(typeof(Action), ps[1].ParameterType);
             Assert.AreEqual(typeof(string), ps[2].ParameterType);
             Assert.AreEqual(typeof(Color), ps[3].ParameterType);
+            Assert.AreEqual(typeof(Action), ps[4].ParameterType);
         }
 
         // The outer-container helper is retained for the 2 big tab containers.

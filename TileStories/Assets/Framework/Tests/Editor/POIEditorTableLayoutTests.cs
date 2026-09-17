@@ -58,14 +58,15 @@ namespace TileStories.Tests
                 "Within-group element spacing should be tighter than between-group spacing so columns still read as groups");
         }
 
-        // The header pad for the Symbol/Style column is derived from the within-group
-        // gap; if either moves the info button no longer lands flush with the previews.
+        // The header pad for the Symbol/Style column is just the within-group gap
+        // (no separate select button any more), so the info button sits DIRECTLY
+        // OVER the preview thumbnail column.
         [Test]
         public void SymbolColumnPad_DerivedFromWithinGroupGap()
         {
             float within = ReflectGapConstant("TableGapWithinGroup");
-            Assert.That(ReflectGapConstant("SymbolColumnPad"), Is.EqualTo(36f + 2f * within).Within(0.001f),
-                "Header pad must keep the info button flush with the preview thumbnails' right edge");
+            Assert.That(ReflectGapConstant("SymbolColumnPad"), Is.EqualTo(within).Within(0.001f),
+                "Header pad must equal the within-group gap so the info button is directly over the preview column");
         }
 
         // The three old per-table magic gaps must be gone from the compiled class,
@@ -226,6 +227,39 @@ namespace TileStories.Tests
                 "Very narrow panel must be raised to MinRowWidth (readability floor)");
             Assert.That(global::TileStories.Editor.POIEditorToolWindow.EditorRowWidth(0f), Is.EqualTo(floor),
                 "Zero visible panel must still meet MinRowWidth");
+        }
+
+        // The INDENT is part of the width budget: the row's right edge is
+        // min(visible panel, MaxRowWidth) measured from x=0, so deepening the indent
+        // narrows the content instead of pushing the right edge further out. This is the
+        // invariant behind "change the indent and the right limit always stays aligned" --
+        // before it, indent + MaxRowWidth drifted the right edge rightwards by the indent,
+        // which is why the (extra-indented) Verified button overhung the coordinate fields.
+        [Test]
+        public void EditorRowWidthForIndent_RightEdgeStaysAlignedAcrossIndents()
+        {
+            float margin = ReflectGapConstant("AddButtonRowRightMargin");
+            float cap = ReflectGapConstant("MaxRowWidth");
+            const float view = 900f; // wide panel -> the MaxRowWidth cap is the active limit
+
+            float rightEdgeAt0 = 0f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 0f);
+            float rightEdgeAt1 = 15f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 15f);
+            float rightEdgeAt2 = 30f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 30f);
+
+            Assert.That(rightEdgeAt0, Is.EqualTo(Mathf.Min(view - margin, cap)).Within(0.001f),
+                "The row's right edge must land on min(visible panel, MaxRowWidth)");
+            Assert.That(rightEdgeAt1, Is.EqualTo(rightEdgeAt0).Within(0.001f),
+                "Right edge must not move when the indent deepens (one level)");
+            Assert.That(rightEdgeAt2, Is.EqualTo(rightEdgeAt0).Within(0.001f),
+                "Right edge must not move when the indent deepens (two levels)");
+
+            // On a NARROW panel the panel itself is the limit, and the edge still holds.
+            const float narrow = 300f;
+            float narrowEdgeAt0 = 0f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(narrow, margin, 0f);
+            float narrowEdgeAt2 = 30f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(narrow, margin, 30f);
+            Assert.That(narrowEdgeAt0, Is.EqualTo(narrow - margin).Within(0.001f));
+            Assert.That(narrowEdgeAt2, Is.EqualTo(narrowEdgeAt0).Within(0.001f),
+                "Right edge must stay pinned to the narrow panel across indents too");
         }
 
         // The +Add button under the taxonomy table delegates to the shared

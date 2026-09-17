@@ -23,7 +23,7 @@ namespace TileStories.Editor
                 // Config is the source of truth for the edit-scene yaw; re-apply on
                 // every visual refresh so undo/redo/field edits don't drift the
                 // Scene-view preview away from the stored angle.
-                child.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
+                child.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
 
                 // Reuse shared configuration logic.
                 ConfigureRigChild(poi, child);
@@ -78,7 +78,7 @@ namespace TileStories.Editor
             // Config is the source of truth for the edit-scene yaw; re-apply on
             // every visual refresh so undo/redo/field edits don't drift the
             // Scene-view preview away from the stored angle.
-            child.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
+            child.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
 
             var anchor = child.GetComponentInChildren<POIAnchor>() ?? child.gameObject.AddComponent<POIAnchor>();
             anchor.Initialise(poi);
@@ -367,7 +367,7 @@ internal enum ReloadGuardChoice
                 var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, rig);
                 instance.name = poi.id;
                 instance.transform.localPosition = localPos;
-                instance.transform.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
+                instance.transform.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
 
                 Undo.RegisterCreatedObjectUndo(instance, $"Populate marker for {poi.id}");
 
@@ -434,6 +434,15 @@ internal enum ReloadGuardChoice
                     y = localPos.y,
                     z = localPos.z
                 };
+
+                // Capture the marker's full edit-scene rotation (pitch/yaw/roll) so the
+                // developer's scene-rotate tool changes persist into config on Save. The
+                // Y axis maps to the legacy editor_rotation_deg (yaw); X/Z are the new
+                // pitch/roll fields added alongside it.
+                Vector3 euler = markerTransform.localRotation.eulerAngles;
+                poi.editor_rotation_x_deg = PoiRotationResolver.NormalizeAngleDeg(euler.x);
+                poi.editor_rotation_deg = PoiRotationResolver.NormalizeAngleDeg(euler.y);
+                poi.editor_rotation_z_deg = PoiRotationResolver.NormalizeAngleDeg(euler.z);
 
                 captured++;
             }

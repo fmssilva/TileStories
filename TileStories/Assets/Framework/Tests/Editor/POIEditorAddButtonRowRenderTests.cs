@@ -103,16 +103,18 @@ namespace TileStories.Tests
                 "The transparent spacer button must be exactly as wide as the runtime-measured indent of the rows");
         }
 
-        // The real button is capped at min(remaining visible row width,
-        // MaxRowWidth). On a WIDE panel that is exactly MaxRowWidth.
+        // The real button is capped so the row's right edge lands on
+        // min(visible panel, MaxRowWidth) -- with the indent INSIDE that budget, so on a
+        // WIDE panel the content width is MaxRowWidth minus this row's indent.
         [UnityTest]
         public IEnumerator AddButtonRow_RealButtonWidthCappedAtMaxRowWidth()
         {
             yield return DrawOnce(900f);
 
             Rect button = AddButtonRowHarness.ButtonRect;
-            float expected = global::TileStories.Editor.POIEditorToolWindow.EditorRowWidth(
-                Mathf.Max(0f, AddButtonRowHarness.ViewWidthAtDraw - ReflectConst("AddButtonRowRightMargin") - AddButtonRowHarness.RuntimeIndentAtDraw));
+            float expected = global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(
+                AddButtonRowHarness.ViewWidthAtDraw, ReflectConst("AddButtonRowRightMargin"),
+                AddButtonRowHarness.RuntimeIndentAtDraw);
             Assert.That(AddButtonRowHarness.ViewWidthAtDraw, Is.GreaterThan(700f),
                 "Probe sanity: wide panel should actually be wide");
             Assert.That(button.width, Is.EqualTo(expected).Within(2f),
@@ -127,8 +129,9 @@ namespace TileStories.Tests
             yield return DrawOnce(300f);
 
             Rect button = AddButtonRowHarness.ButtonRect;
-            float expected = global::TileStories.Editor.POIEditorToolWindow.EditorRowWidth(
-                Mathf.Max(0f, AddButtonRowHarness.ViewWidthAtDraw - ReflectConst("AddButtonRowRightMargin") - AddButtonRowHarness.RuntimeIndentAtDraw));
+            float expected = global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(
+                AddButtonRowHarness.ViewWidthAtDraw, ReflectConst("AddButtonRowRightMargin"),
+                AddButtonRowHarness.RuntimeIndentAtDraw);
             Assert.That(AddButtonRowHarness.ViewWidthAtDraw, Is.LessThan(400f),
                 "Probe sanity: narrow panel should actually be narrow");
             Assert.That(button.width, Is.LessThan(ReflectConst("MaxRowWidth")),
@@ -209,8 +212,9 @@ namespace TileStories.Tests
             Assert.That(Mathf.Abs(spacer.y - field.y), Is.LessThan(5f),
                 "Spacer and field must be on the same horizontal line");
 
-            float expected = global::TileStories.Editor.POIEditorToolWindow.EditorRowWidth(
-                Mathf.Max(0f, PathRowHarness.ViewWidthAtDraw - ReflectConst("AddButtonRowRightMargin") - PathRowHarness.RuntimeIndentAtDraw));
+            float expected = global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(
+                PathRowHarness.ViewWidthAtDraw, ReflectConst("AddButtonRowRightMargin"),
+                PathRowHarness.RuntimeIndentAtDraw);
             Assert.That(PathRowHarness.ViewWidthAtDraw, Is.GreaterThan(700f),
                 "Probe sanity: wide panel should actually be wide");
             Assert.That(field.width, Is.EqualTo(expected - 36f).Within(2f),

@@ -78,11 +78,17 @@ namespace TileStories.Editor
             if (_config.category_styles.Count == 0)
                 _config.category_styles.AddRange(DefaultCategoryStyles.Create());
 
+            // Resolve Enter/ESC for an in-progress rename BEFORE the shared TextField
+            // draws (Unity's TextField consumes the first Return when it sees it --
+            // the same "press Enter twice" trap PoiRenameKeys was built to avoid).
+            // Click-outside also commits the draft.
+            CategoryRenameEdit.HandleEditEvents();
+
             DrawSymbolTable(
                 _config.category_styles,
                 () => new CategoryStyleEntry { category = "new_category", icon_key = "unknown", color_hex = string.Empty },
-                e => e.category,
-                (e, v) => e.category = v,
+                CategoryRenameEdit.GetLabel,
+                CategoryRenameEdit.SetLabel,
                 e => e.icon_key,
                 (e, v) => e.icon_key = v,
                 e => e.color_hex,
@@ -93,11 +99,54 @@ namespace TileStories.Editor
                 "+ Add category",
                 "Category",
                 "Write more information about this category here: what it represents, when to use it, example POIs. Stored per row in config.json.",
-                "SYMBOL (ObjectField cell): lists every Sprite in the whole project. PICKER BUTTON (small icon): same list narrowed to just this wall's symbols plus the framework defaults. PREVIEW: thumbnail of whatever is currently assigned. All three write to the same field.\n\nTO ADD YOUR OWN IMAGE: drop a PNG anywhere under this wall's Assets/Apps/<Wall>/MarkerAssets/ folder -- Unity auto-imports it as a Sprite. Then pick it from either list; it registers into this wall's icon library automatically. Same flow for badges and outline ring art.",
+                "SYMBOL (ObjectField cell): lists every Sprite in the whole project. CLICK THE THUMBNAIL PREVIEW: opens the curated picker narrowed to just this wall's symbols plus the framework defaults. All cells write to the same field.\n\nTO ADD YOUR OWN IMAGE: drop a PNG anywhere under this wall's Assets/Apps/<Wall>/MarkerAssets/ folder -- Unity auto-imports it as a Sprite. Then pick it from either list; it registers into this wall's icon library automatically. Same flow for badges and outline ring art.",
                 true,
                 e => e.search_keywords,
-                (e, v) => e.search_keywords = v);
+                (e, v) => e.search_keywords = v,
+                // Deleting a category POIs still reference cannot propagate anywhere,
+                // so ask first and say how many POIs would be orphaned.
+                entry => IdentityRenameResolver.CountReferences(
+                    _config.pois, IdentityRenameResolver.PoiUsesCategory, entry.category));
         }
+
+        // ---- Commit-style identity renames (category + badge key) ----
+        // In both tables the primary cell IS the identity their POIs reference, so
+        // renaming a row must propagate to every POI holding the old string.
+        // Editing is buffered in SessionState: keystrokes only update the draft,
+        // the row's identity stays pristine until Commit writes it once and
+        // IdentityRenameResolver rewrites the POIs. ESC discards the draft (no
+        // change); Enter or a click outside the field commits the final word,
+        // mirroring the PoiRenameKeys pattern the POI header rename uses.
+        //
+        // Each state object is built once and reused. It reads rows/POIs through
+        // providers, so it keeps pointing at the live _config even after undo
+        // replaces it wholesale (ApplyConfigSnapshot) or a reload swaps in a fresh
+        // WallConfigData -- a captured list reference would silently detach.
+        private IdentityRenameEditState<CategoryStyleEntry> _categoryRenameEdit;
+        private IdentityRenameEditState<BadgeCategoryEntry> _badgeRenameEdit;
+
+        private IdentityRenameEditState<CategoryStyleEntry> CategoryRenameEdit =>
+            _categoryRenameEdit ??= new IdentityRenameEditState<CategoryStyleEntry>(
+                "TileStories.CategoryEdit",
+                () => _config?.category_styles,
+                e => e.category,
+                (e, v) => e.category = v,
+                () => _config?.pois,
+                IdentityRenameResolver.CategoryRewrite);
+
+        private IdentityRenameEditState<BadgeCategoryEntry> BadgeRenameEdit =>
+            _badgeRenameEdit ??= new IdentityRenameEditState<BadgeCategoryEntry>(
+                "TileStories.BadgeEdit",
+                () => _config?.badge_categories,
+                e => e.key,
+                (e, v) => e.key = v,
+                () => _config?.pois,
+                IdentityRenameResolver.BadgeKeyRewrite);
+
+        // The get/set pair for the primary cell now lives on IdentityRenameEditState:
+        // it owns the "is this keystroke a draft or the committed word?" decision, so
+        // both tables call CategoryRenameEdit.GetLabel / .SetLabel directly instead of
+        // each partial re-implementing the SessionState dance.
 
         private void DrawGlobalBadgeSection()
         {
@@ -118,11 +167,19 @@ namespace TileStories.Editor
             if (_config.badge_categories.Count == 0)
                 _config.badge_categories.AddRange(DefaultBadgeCategories.Create());
 
+            // Same commit-style rename protection the category table has: the badge
+            // key IS the identity POIData.badge_category references, so a raw
+            // keystroke straight into it would orphan every POI that uses this badge
+            // (badge icon lost, badge keyword index lost, Badges facet broken).
+            // Resolve Enter/ESC before the shared TextField draws -- see the
+            // PoiRenameKeys note on Unity's TextField eating the first Return.
+            BadgeRenameEdit.HandleEditEvents();
+
             DrawSymbolTable(
                 _config.badge_categories,
                 () => new BadgeCategoryEntry { key = "new_badge", label = "New Badge", icon_key = "unknown", color_hex = "#B3B3B3" },
-                e => e.key,
-                (e, v) => e.key = v,
+                BadgeRenameEdit.GetLabel,
+                BadgeRenameEdit.SetLabel,
                 e => e.icon_key,
                 (e, v) => e.icon_key = v,
                 e => e.color_hex,
@@ -133,11 +190,28 @@ namespace TileStories.Editor
                 "+ Add badge category",
                 "Badge Key",
                 "Write more information about this badge here: what it represents, when to use it, example POIs. Stored per row in config.json.",
-                "SYMBOL (ObjectField cell): lists every Sprite in the whole project. PICKER BUTTON (small icon): same list narrowed to just this wall's symbols plus the framework defaults. PREVIEW: thumbnail of whatever is currently assigned. All three write to the same field.\n\nTO ADD YOUR OWN IMAGE: drop a PNG anywhere under this wall's Assets/Apps/<Wall>/MarkerAssets/ folder -- Unity auto-imports it as a Sprite. Then pick it from either list; it registers into this wall's icon library automatically. Same flow for badges and outline ring art.",
+                "SYMBOL (ObjectField cell): lists every Sprite in the whole project. CLICK THE THUMBNAIL PREVIEW: opens the curated picker narrowed to just this wall's symbols plus the framework defaults. All cells write to the same field.\n\nTO ADD YOUR OWN IMAGE: drop a PNG anywhere under this wall's Assets/Apps/<Wall>/MarkerAssets/ folder -- Unity auto-imports it as a Sprite. Then pick it from either list; it registers into this wall's icon library automatically. Same flow for badges and outline ring art.",
                 true,
                 e => e.search_keywords,
-                (e, v) => e.search_keywords = v);
+                (e, v) => e.search_keywords = v,
+                // Deleting a badge key POIs still reference cannot propagate anywhere,
+                // so ask first and say how many POIs would be orphaned.
+                entry => IdentityRenameResolver.CountReferences(
+                    _config.pois, IdentityRenameResolver.PoiUsesBadgeKey, entry.key));
         }
+
+
+        // How many POIs still name this outline level. Outline level keys are
+        // identity (POIData.status_level_key stores them) but they are generated
+        // (level_N), never typed, so they cannot be renamed out from under a POI --
+        // deleting the row is the only way to orphan one, hence the guard below.
+        private int CountPoisUsingStatusLevel(string key) =>
+            IdentityRenameResolver.CountReferences(_config.pois, IdentityRenameResolver.PoiUsesStatusLevelKey, key);
+
+        // Same for hierarchy levels: POIData.hierarchy_level_key stores the row key,
+        // so removing a level in use drops those markers to the framework fallback.
+        private int CountPoisUsingHierarchyLevel(string key) =>
+            IdentityRenameResolver.CountReferences(_config.pois, IdentityRenameResolver.PoiUsesHierarchyLevelKey, key);
 
         private void DrawGlobalOutlineSection()
         {
@@ -202,27 +276,31 @@ namespace TileStories.Editor
                 _config.outline_levels.AddRange(DefaultOutlineLevels.Create());
 
             // Column headers (5 groups, header mirrors rows exactly):
-            // [key+details] | [Style+picker+Preview] | [Color] | [SearchKeywords] | [trash]
+            // [key+details] | [Style + interactive Preview] | [Color] | [SearchKeywords] | [trash]
             using (new EditorGUILayout.HorizontalScope())
             {
                 // Group 1: key + notes info
-                EditorGUILayout.LabelField("Outline key", EditorStyles.miniBoldLabel, GUILayout.Width(110f));
+                // The cell below edits entry.label, while entry.key (the identity
+                // POIData.status_level_key references, e.g. "level_2") is generated
+                // after the row loop. Header must say which one it is or developers
+                // assume they are renaming the key.
+                EditorGUILayout.LabelField("Outline label", EditorStyles.miniBoldLabel, GUILayout.Width(110f));
                 GUILayout.Space(TableGapWithinGroup);
                 HelpInfoButton.DrawCompact("Outline Notes",
                     "Write more information about this outline type here: what it represents, when to use it, example POIs. Stored per row in config.json.");
 
                 GUILayout.Space(TableGapBetweenGroups);
 
-                // Group 2: Outline Style + picker + Preview info.
+                // Group 2: Outline Style + interactive Preview info (preview = curated picker).
                 EditorGUILayout.LabelField("Outline Style", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
                 GUILayout.Space(SymbolColumnPad);
                 HelpInfoButton.DrawCompact("Outline Style",
-                    "STYLE (ObjectField cell): lists every Sprite in the whole project. PICKER BUTTON (small icon): " +
-                    "same list narrowed to just this wall's symbols plus the framework defaults. PREVIEW: thumbnail of " +
-                    "whatever is currently assigned. All three write to the same field.\n\n" +
+                    "STYLE (ObjectField cell): lists every Sprite in the whole project. " +
+                    "CLICK THE THUMBNAIL PREVIEW: opens the curated picker narrowed to just this wall's symbols plus the " +
+                    "framework defaults. All cells write to the same field.\n\n" +
                     "TO ADD YOUR OWN RING STYLE: drop a PNG anywhere under this wall's Assets/Apps/<Wall>/MarkerAssets/ " +
                     "folder -- Unity auto-imports it as a Sprite. Then pick it from either list; it registers into " +
-                    "this wall's icon library automatically.");
+                    "this wall's icon library automatically.", 36f);
 
                 GUILayout.Space(TableGapBetweenGroups);
 
@@ -256,7 +334,8 @@ namespace TileStories.Editor
 
                     GUILayout.Space(TableGapBetweenGroups);
 
-                    // Group 2: Outline Style + picker + Preview
+                    // Group 2: Outline Style + interactive Preview (the preview IS
+                    // the curated "choose" affordance -- no separate select button).
                     Sprite current = ResolveSpriteForKey(entry.line_style);
                     Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false, GUILayout.Width(140f));
                     if (chosen != current)
@@ -264,21 +343,14 @@ namespace TileStories.Editor
 
                     GUILayout.Space(TableGapWithinGroup);
 
-                    // Choose existing: curated popup over this wall's + framework
-                    // symbols only, instead of the full-project ObjectField list.
-                    if (GUILayout.Button(SelectIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
-                    {
-                        EnsureDefaultIconLibraryLoaded();
-                        var targetEntry = entry;
-                        PopupWindow.Show(GUILayoutUtility.GetLastRect(),
+                    // Clicking the preview opens the curated wall + framework picker
+                    // (section 14.7). Capture per-iteration: PopupWindow.Show is async.
+                    EnsureDefaultIconLibraryLoaded();
+                    var targetEntry = entry;
+                    DrawSpritePreview(chosen != null ? chosen : current,
+                        () => PopupWindow.Show(GUILayoutUtility.GetLastRect(),
                             new ExistingSymbolPickerPopup(_wallIconLibrary, _defaultIconLibrary,
-                                key => targetEntry.line_style = key));
-                    }
-
-                    GUILayout.Space(TableGapWithinGroup);
-
-                    // Preview: thumbnail of the chosen sprite (separate from the ObjectField)
-                    DrawSpritePreview(chosen != null ? chosen : current);
+                                key => targetEntry.line_style = key)));
 
                     GUILayout.Space(TableGapBetweenGroups);
 
@@ -302,10 +374,15 @@ namespace TileStories.Editor
                     GUILayout.Space(TableGapBetweenGroups);
                     if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
                     {
-                        _config.outline_levels.RemoveAt(i);
-                        RecomputeLevelPercentSpacing(_config.outline_levels);
-                        i--;
-                        continue;
+                        // Deleting a level cannot propagate to the POIs that name it,
+                        // so confirm with a count when any still do (see IdentityDeleteGuard).
+                        if (IdentityDeleteGuard.Confirm("Outline level", entry.key, CountPoisUsingStatusLevel(entry.key)))
+                        {
+                            _config.outline_levels.RemoveAt(i);
+                            RecomputeLevelPercentSpacing(_config.outline_levels);
+                            i--;
+                            continue;
+                        }
                     }
                 }
 
@@ -457,8 +534,6 @@ namespace TileStories.Editor
                 "wire it in MarkerView.ApplyHeroState, add a toggle in DrawPoiEffectsFields, " +
                 "and add a gallery entry in MarkerGalleryDefinitions.",
                 MessageType.Info);
-
-            _hasUnsavedChanges = true;
         }
 
         private void DrawGlobalHierarchySection()
@@ -555,11 +630,15 @@ namespace TileStories.Editor
                     // Column 11: Remove (trash button)
                     if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
                     {
-                        _config.hierarchy_levels.RemoveAt(i);
-                        i--;
-                        count--;
-                        _hasUnsavedChanges = true;
-                        continue;
+                        // Same rule as outline levels: the row key is identity, so a
+                        // delete that orphans POIs asks first. Nothing to propagate.
+                        if (IdentityDeleteGuard.Confirm("Hierarchy level", entry.key, CountPoisUsingHierarchyLevel(entry.key)))
+                        {
+                            _config.hierarchy_levels.RemoveAt(i);
+                            i--;
+                            count--;
+                            continue;
+                        }
                     }
                 }
 
@@ -591,8 +670,6 @@ namespace TileStories.Editor
                 _hasUnsavedChanges = true;
             }
             EditorRowEnd();
-
-            _hasUnsavedChanges = true;
         }
 
         private void EnsureEffectDefaultsExist()

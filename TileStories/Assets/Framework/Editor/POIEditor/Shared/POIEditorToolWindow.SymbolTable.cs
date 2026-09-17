@@ -126,10 +126,11 @@ namespace TileStories.Editor
             string symbolColumnHelp = "",
             bool showSearchKeywords = false,
             Func<T, List<string>> getSearchKeywords = null,
-            Action<T, List<string>> setSearchKeywords = null) where T : class
+            Action<T, List<string>> setSearchKeywords = null,
+            Func<T, int> countPoiReferences = null) where T : class
         {
             // Column order (5 groups, header mirrors rows exactly):
-            // [key+details] | [Symbol+picker+Preview] | [Color] | [SearchKeywords] | [trash]
+            // [key+details] | [Symbol + interactive Preview] | [Color] | [SearchKeywords] | [trash]
             using (new EditorGUILayout.HorizontalScope())
             {
                 // Group 1: primary key + notes info
@@ -139,10 +140,10 @@ namespace TileStories.Editor
 
                 GUILayout.Space(TableGapBetweenGroups);
 
-                // Group 2: Symbol + picker + Preview info.
+                // Group 2: Symbol + interactive Preview info (preview = curated picker).
                 EditorGUILayout.LabelField("Symbol", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
                 GUILayout.Space(SymbolColumnPad);
-                HelpInfoButton.DrawCompact(primaryLabelHeader + " Symbols", symbolColumnHelp);
+                HelpInfoButton.DrawCompact(primaryLabelHeader + " Symbols", symbolColumnHelp, 36f);
 
                 GUILayout.Space(TableGapBetweenGroups);
 
@@ -176,7 +177,8 @@ namespace TileStories.Editor
 
                     GUILayout.Space(TableGapBetweenGroups);
 
-                    // Group 2: Symbol + picker + Preview
+                    // Group 2: Symbol + interactive Preview (the preview IS the
+                    // curated "choose" affordance -- no separate select button).
                     Sprite current = ResolveSpriteForKey(getIconKey(entry));
                     Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false, GUILayout.Width(140f));
                     if (chosen != current)
@@ -184,25 +186,15 @@ namespace TileStories.Editor
 
                     GUILayout.Space(TableGapWithinGroup);
 
-                    // Choose existing: curated popup over this wall's + framework
-                    // symbols only (section 14.7), instead of the ObjectField picker
-                    // which lists every Sprite in the whole project. Icon-only so
-                    // the row keeps the same 26f width as the other icon buttons.
-                    if (GUILayout.Button(SelectIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
-                    {
-                        // Capture per-iteration: PopupWindow.Show is async, so a
-                        // lambda must not close over the loop variable directly.
-                        EnsureDefaultIconLibraryLoaded();
-                        var targetEntry = entry;
-                        PopupWindow.Show(GUILayoutUtility.GetLastRect(),
+                    // Clicking the preview opens the curated wall + framework picker
+                    // (section 14.7). Capture per-iteration: PopupWindow.Show is async,
+                    // so a lambda must not close over the loop variable directly.
+                    EnsureDefaultIconLibraryLoaded();
+                    var previewEntry = entry;
+                    DrawSpritePreview(chosen != null ? chosen : current,
+                        () => PopupWindow.Show(GUILayoutUtility.GetLastRect(),
                             new ExistingSymbolPickerPopup(_wallIconLibrary, _defaultIconLibrary,
-                                key => setIconKey(targetEntry, key)));
-                    }
-
-                    GUILayout.Space(TableGapWithinGroup);
-
-                    // Preview: thumbnail of the chosen sprite (separate from the ObjectField).
-                    DrawSpritePreview(chosen != null ? chosen : current);
+                                key => setIconKey(previewEntry, key))));
 
                     GUILayout.Space(TableGapBetweenGroups);
 
@@ -225,29 +217,50 @@ namespace TileStories.Editor
                     GUILayout.Space(TableGapBetweenGroups);
 
                     // Group 4: Search keywords (optional, shown when showSearchKeywords is true).
+                    // The inline cell is a REAL editor for the same field the Edit popup
+                    // edits: both go through get/set on every pass, so the two can never
+                    // disagree -- the same bidirectional-sync rule as the color picker +
+                    // hex pair in DrawColorSwatchAndHex. The popup exists only because this
+                    // column is too narrow to read a long keyword list comfortably.
                     if (showSearchKeywords && getSearchKeywords != null)
                     {
                         var targetEntry = entry;
                         var keywords = getSearchKeywords(targetEntry) ?? new List<string>();
                         string joined = string.Join(", ", keywords);
-                        EditorGUILayout.TextField(joined, GUILayout.ExpandWidth(true));
+
+                        string edited = EditorGUILayout.TextField(joined, GUILayout.ExpandWidth(true));
+                        if (edited != joined)
+                            setSearchKeywords(targetEntry, ParseKeywordList(edited));
+
                         GUILayout.Space(TableGapWithinGroup);
                         string buttonLabel = string.IsNullOrEmpty(joined) ? "Suggest" : "Edit";
                         if (GUILayout.Button(buttonLabel, GUILayout.Width(60f)))
+                        {
+                            // The popup reads the field live rather than the string captured
+                            // at click time, so an inline edit made a moment earlier is what
+                            // the popup opens with.
                             PopupWindow.Show(GUILayoutUtility.GetLastRect(),
-                                new EntryDetailsPopup("Search Keywords", () => joined, v =>
-                                {
-                                    setSearchKeywords(targetEntry, ParseKeywordList(v));
-                                }));
+                                new EntryDetailsPopup("Search Keywords",
+                                    () => string.Join(", ", getSearchKeywords(targetEntry) ?? new List<string>()),
+                                    v => setSearchKeywords(targetEntry, ParseKeywordList(v))));
+                        }
                     }
 
                     // Group 5: Remove (trash) -- last column, same between-groups gap.
                     GUILayout.Space(TableGapBetweenGroups);
                     if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
                     {
-                        entries.RemoveAt(i);
-                        i--;
-                        continue;
+                        // Callers whose rows carry a POI-referenced identity pass
+                        // countPoiReferences so deleting a row that is still in use asks
+                        // first (see IdentityDeleteGuard). Callers with no referencing data
+                        // omit it and keep the single-click delete.
+                        int references = countPoiReferences != null ? countPoiReferences(entry) : 0;
+                        if (IdentityDeleteGuard.Confirm(primaryLabelHeader, getPrimaryLabel(entry), references))
+                        {
+                            entries.RemoveAt(i);
+                            i--;
+                            continue;
+                        }
                     }
                 }
             }
@@ -276,13 +289,29 @@ namespace TileStories.Editor
             EditorRowEnd();
         }
 
-        private void DrawSpritePreview(Sprite sprite)
+        // Draws a 36f thumbnail of the symbol. With onPick == null it is a plain
+        // box (read-only). With onPick set it becomes a BUTTON -- the preview is
+        // then the interactive "choose" affordance: hover/tooltip says it opens the
+        // curated wall + framework picker, and clicking calls onPick.
+        private void DrawSpritePreview(Sprite sprite, System.Action onPick = null)
         {
             Texture preview = null;
             if (sprite != null)
                 preview = AssetPreview.GetAssetPreview(sprite) ?? AssetPreview.GetMiniThumbnail(sprite);
 
-            GUILayout.Box(preview ?? Texture2D.grayTexture, GUILayout.Width(36f), GUILayout.Height(36f));
+            if (onPick == null)
+            {
+                GUILayout.Box(preview ?? Texture2D.grayTexture, GUILayout.Width(36f), GUILayout.Height(36f));
+                return;
+            }
+
+            // Empty symbol shows the "choose" hand glyph as the placeholder so the
+            // cell reads as an interactive pick target, not a dead grey box.
+            Texture display = preview ?? SelectIcon.image;
+            var content = new GUIContent(display,
+                "Click to choose a symbol from this wall + framework defaults");
+            if (GUILayout.Button(content, GUILayout.Width(36f), GUILayout.Height(36f)))
+                onPick();
         }
 
         // Color group cell pair: the REAL editor color picker (forced wide so it is

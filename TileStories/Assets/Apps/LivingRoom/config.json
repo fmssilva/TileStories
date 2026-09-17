@@ -11,42 +11,42 @@
     "category_styles": [
         {
             "category": "Royal Government",
-            "color_hex": "#D97706",
+            "color_hex": "#FFC786",
             "icon_key": "IconRoyal&Government",
             "details": "Royal & Government buildings",
             "search_keywords": []
         },
         {
             "category": "religious",
-            "color_hex": "#7C3AED",
+            "color_hex": "#CB80FF",
             "icon_key": "IconReligious",
             "details": "Sacred Architecture (includes christian, jew, muslim and pagan)",
             "search_keywords": []
         },
         {
             "category": "military",
-            "color_hex": "#DC2626",
+            "color_hex": "#B44848",
             "icon_key": "IconMilitary",
             "details": "Defense & Fortifications",
             "search_keywords": []
         },
         {
             "category": "residential",
-            "color_hex": "#DB2777",
+            "color_hex": "#FF9FFC",
             "icon_key": "IconNobel&PrivateResidence",
             "details": "Noble & Private Housing",
             "search_keywords": []
         },
         {
             "category": "economic",
-            "color_hex": "#059669",
+            "color_hex": "#8F5E48",
             "icon_key": "IconIndustry&Trade",
             "details": "Trade, Industry & Harbor",
             "search_keywords": []
         },
         {
             "category": "infrastructure",
-            "color_hex": "#0284C7",
+            "color_hex": "#9DDEFF",
             "icon_key": "IconInfrastructures",
             "details": "Public Utilities & Works",
             "search_keywords": []
@@ -56,7 +56,7 @@
         {
             "key": "intact",
             "label": "Intact",
-            "color_hex": "#22C55E",
+            "color_hex": "#67FF90",
             "icon_key": "IconIntact",
             "details": "No visible damage -- building appears complete and maintained.",
             "search_keywords": []
@@ -64,7 +64,7 @@
         {
             "key": "partial_damage",
             "label": "Partial Damage",
-            "color_hex": "#F97316",
+            "color_hex": "#FFFF9B",
             "icon_key": "IconPartialDamage",
             "details": "Visible damage but structure largely standing.",
             "search_keywords": []
@@ -72,7 +72,7 @@
         {
             "key": "destroyed",
             "label": "Destroyed",
-            "color_hex": "#991B1B",
+            "color_hex": "#D97079",
             "icon_key": "IconDestroyed",
             "details": "Severely damaged or collapsed -- little original structure remains.",
             "search_keywords": []

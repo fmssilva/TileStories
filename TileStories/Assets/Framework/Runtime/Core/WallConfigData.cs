@@ -418,6 +418,15 @@ namespace TileStories
         // angle. Persisted so the dev's preview preference survives reloads.
         public float editor_rotation_deg;
 
+        // Dev-only edit-scene pitch/roll (degrees) around the marker's X and Z axes.
+        // Added alongside the yaw-only editor_rotation_deg (the Y axis, kept under its
+        // original name for backward compatibility with existing config.json files).
+        // Together the three angles fully orient the rig marker in the Scene view.
+        // Like yaw, all three are editor-preview only: the runtime marker always faces
+        // the camera, so they never change the shipped look.
+        public float editor_rotation_x_deg;
+        public float editor_rotation_z_deg;
+
         public PositionData position;
         public bool position_verified;
         public string summary;

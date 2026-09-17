@@ -57,12 +57,12 @@ namespace TileStories.Editor
             if (GUILayout.Button("(i)", GUILayout.Width(26f), GUILayout.Height(20f)))
                 PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup(title, bodyText));
         }
-        // Icon-only twin of Draw: 26f footprint inside a fixed-width header cell.
-        // Button itself stays 26f wide; the parent cell controls horizontal placement
-        // (e.g. a 44f cell centers it over the Preview column).
-        public static void DrawCompact(string title, string bodyText)
+        // Icon-only twin of Draw: 26f footprint in a fixed-width header cell by
+        // default. Callers that sit above the 36f Preview column pass 36f so the
+        // button aligns with the preview's width for clean vertical stacking.
+        public static void DrawCompact(string title, string bodyText, float width = 26f)
         {
-            if (GUILayout.Button(POIEditorToolWindow.InfoIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
+            if (GUILayout.Button(POIEditorToolWindow.InfoIcon, GUILayout.Width(width), GUILayout.Height(20f)))
                 PopupWindow.Show(GUILayoutUtility.GetLastRect(), new HelpInfoPopup(title, bodyText));
         }
     }

@@ -141,9 +141,14 @@ TileStories/
         - POIEditorToolWindow.cs
         - POIEditorToolWindow.Constants.cs
         - GlobalScene/
-        - SpecificMarker/
+        - SpecificMarker/  // per-POI editor (header row: rename pencil + focus-icon.png crosshair + reorder + delete; Position/rotation, Marker Style, Badge Style, Outline, Search Keywords) + Icons/ (edit-icon.png, focus-icon.png)
         - Shared/
           - POIEditorToolWindow.RowLayout.cs  // EditorRowWidth + DrawEditorRow/EditorRowEnd: reusable non-table row (indent + width cap + ExpandWidth(false)); indent measured at call time so nested scopes keep deeper spacing
+          - IdentityRenameResolver.cs  // Pure commit rule for renaming any identity string a taxonomy table's POIs reference (category, badge key, status level key, hierarchy level key): rejects blank/colliding names, rewrites every referencing POI; CountReferences + concrete per-identity rewrites for delete guards
+          - IdentityRenameEditState.cs  // Commit-style edit session (SessionState draft, Enter/ESC/blur commit) any identity-cell TextField uses via GetLabel/SetLabel; reads rows/POIs through providers so it survives undo/reload wholesale config swaps
+          - IdentityDeleteGuard.cs  // Confirm dialog before deleting a taxonomy row whose identity POIs still reference (a rename can propagate; a delete cannot)
+          - SearchFieldReferenceResolver.cs  // The one nested identity shape: SearchFieldDefinition.key -> POI.search_keyword_fields[].field_key in-place rename, PoiHasField test, reference count
+          - POIEditorToolWindow.SymbolTable.cs  // DrawSymbolTable (shared marker/badge/outline taxonomy table), DrawSpritePreview: the thumbnail IS the curated "choose" affordance (click opens ExistingSymbolPickerPopup, no separate Choose column); Search-Keywords cell editable inline + Edit popup; optional countPoiReferences delete guard
         - ConfigData/
         - AssetPaths/
           - POIEditorToolWindow.AssetPaths.cs  // DrawPathRow: non-button shared row (transparent indent + labelled TextField capped to rowWidth - 36f + fixed browse button + EditorRowEnd), AbsoluteToAssetPath, GetWallLibraryDirectory

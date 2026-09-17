@@ -123,8 +123,6 @@ namespace TileStories.Editor
                 "search terms. At build time, any POI indexed with the key term will also match its synonyms.",
                 MessageType.None);
             DrawSynonymGroupsTable();
-
-            _hasUnsavedChanges = true;
         }
 
         // Renders the synonym groups table: key + synonyms list + add/remove.
@@ -199,6 +197,25 @@ namespace TileStories.Editor
             EditorRowEnd();
         }
 
+        // Commit-style rename for the custom keyword field keys. A
+        // SearchFieldDefinition.key is the identity each POI's
+        // search_keyword_fields[].field_key points at. Left as a raw TextField, a
+        // rename stranded the authored keywords on the old key forever, and the
+        // per-POI editor then silently auto-added a SECOND, empty list under the
+        // new key -- silent data growth plus silently lost search terms. The
+        // rewrite (SearchFieldReferenceResolver) renames field_key in place, so the
+        // entries and their keywords move with the row instead of being duplicated.
+        private IdentityRenameEditState<SearchFieldDefinition> _searchFieldRenameEdit;
+
+        private IdentityRenameEditState<SearchFieldDefinition> SearchFieldRenameEdit =>
+            _searchFieldRenameEdit ??= new IdentityRenameEditState<SearchFieldDefinition>(
+                "TileStories.SearchFieldEdit",
+                () => _config?.search_fields,
+                e => e.key,
+                (e, v) => e.key = v,
+                () => _config?.pois,
+                SearchFieldReferenceResolver.RenameFieldKey);
+
         // Renders the custom keyword field definitions table.
         // Three row types: read-only system rows (category/hierarchy/badge/outline),
         // editable custom rows (from search_fields), and a permanent "Others" row.
@@ -206,6 +223,11 @@ namespace TileStories.Editor
         {
             if (_config.search_fields == null)
                 _config.search_fields = new List<SearchFieldDefinition>();
+
+            // Resolve Enter/ESC for an in-progress key rename BEFORE the row's
+            // TextField draws -- Unity's TextField consumes the first Return, so
+            // checking afterwards would mean pressing Enter twice (PoiRenameKeys).
+            SearchFieldRenameEdit.HandleEditEvents();
 
             // Column headers.
             using (new EditorGUILayout.HorizontalScope())
@@ -229,13 +251,12 @@ namespace TileStories.Editor
                 var field = _config.search_fields[i];
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    // Key (editable but warn if changed after the first editing session).
-                    string newKey = EditorGUILayout.TextField(field.key ?? string.Empty, GUILayout.Width(90f));
-                    if (newKey != field.key)
-                    {
-                        field.key = newKey;
-                        _hasUnsavedChanges = true;
-                    }
+                    // Key: the identity every POI's search_keyword_fields[].field_key
+                    // points at, so it edits through the same commit-style state as the
+                    // category and badge keys -- the new key is only written once the
+                    // draft is committed, and committing propagates it to every POI.
+                    SearchFieldRenameEdit.SetLabel(field,
+                        EditorGUILayout.TextField(SearchFieldRenameEdit.GetLabel(field), GUILayout.Width(90f)));
 
                     // Label.
                     string newLabel = EditorGUILayout.TextField(field.label ?? string.Empty, GUILayout.Width(100f));
@@ -274,9 +295,15 @@ namespace TileStories.Editor
                     // Remove button.
                     if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
                     {
-                        _config.search_fields.RemoveAt(i);
-                        _hasUnsavedChanges = true;
-                        break;
+                        // A delete cannot propagate: any POI still holding a keyword list
+                        // under this key would point at a field that no longer exists.
+                        // Confirm with the count first (see IdentityDeleteGuard).
+                        if (IdentityDeleteGuard.Confirm("Keyword field", field.key,
+                                SearchFieldReferenceResolver.CountPoisUsingField(_config.pois, field.key)))
+                        {
+                            _config.search_fields.RemoveAt(i);
+                            break;
+                        }
                     }
                 }
             }

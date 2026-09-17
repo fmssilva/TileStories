@@ -15,7 +15,7 @@ namespace TileStories.Editor
                 // Rendered as a shared editor row: transparent indent spacer + width
                 // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
                 DrawEditorRow(out float firstRowWidth, out _);
-                if (GUILayout.Button("+ Add first", GUILayout.Width(firstRowWidth), GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("+ Add first POI", GUILayout.Width(firstRowWidth), GUILayout.ExpandWidth(false)))
                 {
                     AddNewPoi(); // adds at index 0
                 }
@@ -27,7 +27,7 @@ namespace TileStories.Editor
             // Rendered as a shared editor row: transparent indent spacer + width
             // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
             DrawEditorRow(out float beforeRowWidth, out _);
-            if (GUILayout.Button("+ Add POI before next ▼", GUILayout.Width(beforeRowWidth), GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button("+ Add POI near next ▼", GUILayout.Width(beforeRowWidth), GUILayout.ExpandWidth(false)))
             {
                 AddNewPoiInternal(false); // insert at index 0
             }
@@ -45,6 +45,10 @@ namespace TileStories.Editor
                 bool isEditing = SessionState.GetBool(editModeKey, false);
 
                 var headerStyle = CreateFoldoutStyle(PoiHeaderColorFor(foldoutKey, i));
+                // Separate LABEL style for the name text: a foldout style carries the arrow
+                // texture as its background, so handing it to LabelField painted a SECOND
+                // foldout arrow right beside the real one.
+                var headerLabelStyle = CreateHeaderLabelStyle(PoiHeaderColorFor(foldoutKey, i));
                 var headerRect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
 
                 // Layout: [foldout arrow] [name click zone] [pencil right after name].
@@ -54,7 +58,7 @@ namespace TileStories.Editor
                 const float pencilWidth = 22f;
                 var arrowRect = new Rect(headerRect.x, headerRect.y, arrowWidth, headerRect.height);
                 string displayName = $"{i + 1}. {poi.name}";
-                float nameWidth = headerStyle.CalcSize(new GUIContent(displayName)).x;
+                float nameWidth = headerLabelStyle.CalcSize(new GUIContent(displayName)).x;
                 var nameRect = new Rect(headerRect.x + arrowWidth, headerRect.y, nameWidth + 4f, headerRect.height);
                 const float pencilGapX = 20f;  // breathing room between name text and pencil
                 var pencilRect = new Rect(nameRect.xMax + pencilGapX, headerRect.y, pencilWidth, headerRect.height);
@@ -119,7 +123,7 @@ namespace TileStories.Editor
                     // Display mode: transparent button over the name toggles the foldout.
                     if (GUI.Button(nameRect, GUIContent.none, GUIStyle.none))
                         expanded = !expanded;
-                    EditorGUI.LabelField(nameRect, displayName, headerStyle);
+                    EditorGUI.LabelField(nameRect, displayName, headerLabelStyle);
                 }
 
                 // Pencil button right after the name; hidden while this POI is in
@@ -148,9 +152,22 @@ namespace TileStories.Editor
                     const float deleteButtonWidth = 34f;
                     const float reorderGapX = 4f;
                     const float deleteGapX = 6f;
-                    var upRect = new Rect(pencilRect.xMax + reorderGapX, headerRect.y, reorderButtonWidth, headerRect.height);
+                    var focusRect = new Rect(pencilRect.xMax + reorderGapX, headerRect.y, reorderButtonWidth, headerRect.height);
+                    var upRect = new Rect(focusRect.xMax + reorderGapX, headerRect.y, reorderButtonWidth, headerRect.height);
                     var downRect = new Rect(upRect.xMax + reorderGapX, headerRect.y, reorderButtonWidth, headerRect.height);
                     var deleteRect = new Rect(downRect.xMax + deleteGapX, headerRect.y, deleteButtonWidth, headerRect.height);
+
+                    // Focus (crosshair) button: selects + frames this marker in the Scene
+                    // view without expanding the foldout (the old big "Focus in Scene" row
+                    // was folded into this header icon). Disabled when the rig has no child
+                    // named after this POI -- same guard the old row button used.
+                    using (new EditorGUI.DisabledScope(!CanFocusPoiInScene(poi)))
+                    {
+                        Texture2D focusTex = AssetDatabase.LoadAssetAtPath<Texture2D>(FocusIconAssetPath);
+                        var focusContent = new GUIContent(focusTex, "Focus in Scene");
+                        if (GUI.Button(focusRect, focusContent, GUIStyle.none))
+                            FocusPoiInScene(poi);
+                    }
 
                     using (new EditorGUI.DisabledScope(i == 0))
                     {
@@ -168,26 +185,18 @@ namespace TileStories.Editor
                         }
                     }
 
+                    // Same HEIGHT as the sibling buttons (the old fixedHeight=24f made the
+                    // delete control overhang the 18px header row). The danger affordance is
+                    // the red icon itself, so there is no dark-red button fill.
                     var deleteStyle = new GUIStyle(EditorStyles.miniButton);
-                    deleteStyle.fontSize = 14;
-                    deleteStyle.fontStyle = FontStyle.Bold;
                     deleteStyle.alignment = TextAnchor.MiddleCenter;
-                    deleteStyle.padding = new RectOffset(0, 0, 0, 0);
-                    deleteStyle.border = new RectOffset(1, 1, 1, 1);
-                    deleteStyle.fixedHeight = 24f;
-                    deleteStyle.fixedWidth = 34f;
-                    deleteStyle.normal.textColor = new Color(1f, 0.82f, 0.82f, 1f);
-                    deleteStyle.hover.textColor = Color.white;
-                    deleteStyle.active.textColor = Color.white;
-                    deleteStyle.focused.textColor = Color.white;
+                    deleteStyle.padding = new RectOffset(1, 1, 1, 1);
+                    deleteStyle.imagePosition = ImagePosition.ImageOnly;
+                    deleteStyle.fixedWidth = deleteButtonWidth;
+                    deleteStyle.fixedHeight = headerRect.height;
 
-                    Color prevBg = GUI.backgroundColor;
-                    GUI.backgroundColor = new Color(0.72f, 0.18f, 0.18f, 1f);
-                    if (GUI.Button(deleteRect, TrashIcon, deleteStyle))
-                    {
+                    if (GUI.Button(deleteRect, DeleteIcon, deleteStyle))
                         TryDeletePoiAt(i, poi);
-                    }
-                    GUI.backgroundColor = prevBg;
                 }
 
                 _poiFoldouts[foldoutKey] = expanded;
@@ -201,31 +210,14 @@ namespace TileStories.Editor
 
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    // Focus helper, tinted with this POI's header color so the
-                    // action reads as belonging to the marker above. Disabled
-                    // until the rig has a child named poi.id (populate first).
-                    // Shared editor row so the Focus helper aligns with the
-                    // foldout indent and stays within the capped row width.
-                    DrawEditorRow(out float focusRowWidth, out _);
-                    {
-                        using (new EditorGUI.DisabledScope(!CanFocusPoiInScene(poi)))
-                        {
-                            Color poiColor = PoiHeaderColorFor(foldoutKey, i);
-                            var prevBg = GUI.backgroundColor;
-                            GUI.backgroundColor = poiColor;
-                            // Leave room in the row for the trailing help button.
-                            float focusWidth = Mathf.Max(140f, focusRowWidth - 40f);
-                            if (GUILayout.Button("Focus in Scene", GUILayout.Width(focusWidth), GUILayout.ExpandWidth(false)))
-                                FocusPoiInScene(poi);
-                            GUI.backgroundColor = prevBg;
-                        }
-
-                        GUILayout.Space(10f);
-                        HelpInfoButton.Draw("Focus in Scene", FocusInSceneHelpBody);
-                    }
-                    EditorRowEnd();
-
-                    _showPoiPosition = DrawFramedFoldout(ref _showPoiPosition, () => DrawPositionTabs(poi), "Position", FoldoutDefaultColor);
+                    // Focus + help now live together on one place: the crosshair icon on the
+                    // POI title row (focus), and the "(i)" on the Position foldout (setup help).
+                    _showPoiPosition = DrawFramedFoldout(
+                        ref _showPoiPosition,
+                        () => DrawPositionTabs(poi),
+                        "Position",
+                        FoldoutDefaultColor,
+                        () => HelpInfoButton.Draw("Position", PositionSetupHelpBody));
 
                     _showPoiMarkerStyle = DrawFramedFoldout(ref _showPoiMarkerStyle, () => DrawPoiMarkerStyleFields(poi), "Marker Style", FoldoutDefaultColor);
 
@@ -260,7 +252,7 @@ namespace TileStories.Editor
             // Rendered as a shared editor row: transparent indent spacer + width
             // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
             DrawEditorRow(out float afterRowWidth, out _);
-            if (GUILayout.Button("+ Add POI after previous ▲", GUILayout.Width(afterRowWidth), GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button("+ Add POI near previous ▲", GUILayout.Width(afterRowWidth), GUILayout.ExpandWidth(false)))
             {
                 AddNewPoiInternal(true); // appends at end
             }
@@ -388,7 +380,14 @@ namespace TileStories.Editor
                 {
                     EditorGUILayout.LabelField("Custom symbol (optional)", GUILayout.Width(150f));
                     Sprite current = ResolveSpriteForKey(poi.custom_symbol_key);
-                    DrawSpritePreview(current);
+                    // Clicking the preview opens the curated wall + framework picker
+                    // and assigns the chosen key to this POI's custom_symbol_key.
+                    EnsureDefaultIconLibraryLoaded();
+                    var targetPoi = poi;
+                    DrawSpritePreview(current,
+                        () => PopupWindow.Show(GUILayoutUtility.GetLastRect(),
+                            new ExistingSymbolPickerPopup(_wallIconLibrary, _defaultIconLibrary,
+                                key => targetPoi.custom_symbol_key = key)));
                     float symbolFieldW = Mathf.Max(90f, symbolRow - 150f - 36f - 12f);
                     Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false,
                         GUILayout.Width(symbolFieldW), GUILayout.ExpandWidth(false));
@@ -904,6 +903,8 @@ namespace TileStories.Editor
                 poi.search_keywords = sourcePoi.search_keywords != null ? new List<string>(sourcePoi.search_keywords) : new List<string>();
                 poi.search_keyword_fields = sourcePoi.search_keyword_fields != null ? new List<POISearchKeywordField>(sourcePoi.search_keyword_fields) : new List<POISearchKeywordField>();
                 poi.editor_rotation_deg = sourcePoi.editor_rotation_deg;
+                poi.editor_rotation_x_deg = sourcePoi.editor_rotation_x_deg;
+                poi.editor_rotation_z_deg = sourcePoi.editor_rotation_z_deg;
             }
 
             return poi;
@@ -1044,7 +1045,7 @@ namespace TileStories.Editor
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, GetExistingRig());
             instance.name = poi.id;
             instance.transform.localPosition = initialPosition;
-            instance.transform.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
+            instance.transform.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
             Undo.RegisterCreatedObjectUndo(instance, "Create POI Marker");
 
             // Persist the initial position into config immediately (unverified).

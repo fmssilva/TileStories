@@ -101,8 +101,27 @@ namespace TileStories.Editor
                 return;
 
             var poi = _config.pois.FirstOrDefault(p => p.id == target.name);
-            if (poi == null || !poi.position_verified)
+            if (poi == null)
                 return;
+
+            if (!poi.position_verified)
+            {
+                // Live two-way sync: while the developer rotates a marker with Unity's
+                // Rotate tool, read the child's euler angles back into config so the
+                // "Edit Rotation" (Y) slider and the persisted X/Z stay in lockstep.
+                // Runs in OnSceneGUI -- outside the window's DrawConfigMutationScope --
+                // so it never feeds back through the scope's JSON diff (which would spam
+                // undo history and refresh the rig on every Scene repaint).
+                if (Event.current.type == EventType.MouseDrag || Event.current.type == EventType.MouseUp)
+                {
+                    if (SyncPoiRotationFromScene(poi, target.localRotation.eulerAngles))
+                    {
+                        _hasUnsavedChanges = true;
+                        Repaint();
+                    }
+                }
+                return;
+            }
 
             if (Event.current.type != EventType.MouseDrag && Event.current.type != EventType.MouseUp)
                 return;
@@ -113,10 +132,35 @@ namespace TileStories.Editor
 
             Undo.RecordObject(target, "Revert verified POI position");
             target.localPosition = correctedPosition;
-            target.localRotation = PoiRotationResolver.ToYawQuaternion(poi.editor_rotation_deg);
+            target.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
 
             if (sceneView != null)
                 sceneView.ShowNotification(new GUIContent(message));
+        }
+
+        // Write a rig child's scene euler angles back into the POI's rotation fields,
+        // returning true when anything actually changed. Y maps to editor_rotation_deg
+        // (the Edit Rotation slider), X/Z to the pitch/roll fields. Normalizes each axis
+        // into [0, 360) so dragging past a full turn or through negative wraps cleanly.
+        // Pure (no SceneView), so it is Tier-0 testable.
+        internal static bool SyncPoiRotationFromScene(POIData poi, Vector3 euler)
+        {
+            if (poi == null)
+                return false;
+
+            float x = PoiRotationResolver.NormalizeAngleDeg(euler.x);
+            float y = PoiRotationResolver.NormalizeAngleDeg(euler.y);
+            float z = PoiRotationResolver.NormalizeAngleDeg(euler.z);
+
+            if (Mathf.Abs(x - poi.editor_rotation_x_deg) < 0.001f &&
+                Mathf.Abs(y - poi.editor_rotation_deg) < 0.001f &&
+                Mathf.Abs(z - poi.editor_rotation_z_deg) < 0.001f)
+                return false;
+
+            poi.editor_rotation_x_deg = x;
+            poi.editor_rotation_deg = y;
+            poi.editor_rotation_z_deg = z;
+            return true;
         }
 
         // ---- Static safety infrastructure ----
@@ -373,11 +417,40 @@ namespace TileStories.Editor
             return style;
         }
 
+        /// Create a bold LABEL style carrying the same header color.
+        /// Used for the POI header NAME text. A foldout style must not be handed to
+        /// EditorGUI.LabelField: its normal/onNormal state carries the foldout-arrow
+        /// texture as a background, so the label paints a SECOND arrow next to the real
+        /// foldout arrow. A boldLabel-derived style has no such background.
+        private static GUIStyle CreateHeaderLabelStyle(Color textColor)
+        {
+            var style = new GUIStyle(EditorStyles.boldLabel);
+            style.normal.textColor = textColor;
+            return style;
+        }
+
         /// Draw a foldout with a bold colored title and its content when expanded.
-        private static bool DrawFramedFoldout(ref bool expanded, Action content, string title, Color titleColor)
+        /// When drawHeaderTrailing is provided it is drawn on the SAME row, right of the
+        /// title (e.g. a help "(i)" button), so a section can carry its own help inline.
+        private static bool DrawFramedFoldout(ref bool expanded, Action content, string title, Color titleColor, Action drawHeaderTrailing = null)
         {
             var boldStyle = CreateFoldoutStyle(titleColor);
-            expanded = EditorGUILayout.Foldout(expanded, title, true, boldStyle);
+            if (drawHeaderTrailing == null)
+            {
+                expanded = EditorGUILayout.Foldout(expanded, title, true, boldStyle);
+            }
+            else
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    expanded = EditorGUILayout.Foldout(expanded, title, true, boldStyle);
+                    // Left-aligned a fixed step after the title (NOT FlexibleSpace), so the
+                    // trailing help reads as part of the section heading instead of being
+                    // pinned to the far right edge of the row.
+                    GUILayout.Space(40f);
+                    drawHeaderTrailing();
+                }
+            }
 
             if (expanded)
             {

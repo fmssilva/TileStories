@@ -32,11 +32,12 @@ namespace TileStories.Editor
         // stable across the Layout and Repaint IMGUI passes.
         private const float AddButtonRowRightMargin = 6f;
 
-        // Header pad for the Symbol/Style column. Body rows space the three
-        // siblings with TableGapWithinGroup on each side of the 26f select
-        // button, so the header mirrors that: 36f (26 select + 10 lead) plus
-        // both within-group gaps keeps the info button flush with the previews.
-        private const float SymbolColumnPad = 36f + 2f * TableGapWithinGroup;
+        // Header pad for the Symbol/Style column: only the single within-group
+        // gap that also separates the ObjectField from the preview in the body
+        // rows. That puts the info button DIRECTLY OVER the preview thumbnail
+        // (the preview is the curated picker now -- there is no separate select
+        // button to make room for).
+        private const float SymbolColumnPad = TableGapWithinGroup;
 
         // Color group widths (marker / badge / outline tables).
         // The first cell is the REAL working EditorGUILayout.ColorField, forced
@@ -313,11 +314,37 @@ namespace TileStories.Editor
         // never depends on the stray top-level Assets/Editor copy.
         internal const string EditIconAssetPath = "Assets/Framework/Editor/POIEditor/SpecificMarker/Icons/edit-icon.png";
 
-        // Focus-in-Scene help (per-POI header row, (i) button right of the Focus button).
-        internal static readonly string FocusInSceneHelpBody =
-            "Selects this POI in the Hierarchy and frames the Scene view camera on it. " +
-            "Move the marker with Unity's Move tool (toolbar or W key), then use Save All to JSON to persist the coordinates. " +
-            "Scene camera: right-drag or Alt+left-drag orbits, Alt+Ctrl+left-drag pans, mouse wheel zooms.";
+        // Crosshair glyph for the per-POI header focus button (selects + frames the marker).
+        internal const string FocusIconAssetPath = "Assets/Framework/Editor/POIEditor/SpecificMarker/Icons/focus-icon.png";
+
+        // Red trash glyph for the per-POI header DELETE button. Bundled PNG (the dev's own
+        // asset) so the danger affordance is the ICON itself, which keeps the button at the
+        // same height as its sibling reorder/focus buttons -- a dark-red button FILL read as
+        // a bigger control that overhung the header row. Distinct from TrashIcon (Unity's
+        // native glyph) which the taxonomy tables still use.
+        internal const string DeleteIconAssetPath = "Assets/Framework/Editor/POIEditor/SpecificMarker/Icons/delete-icon.png";
+
+        private static GUIContent _deleteIcon;
+        internal static GUIContent DeleteIcon
+        {
+            get
+            {
+                if (_deleteIcon != null)
+                    return _deleteIcon;
+
+                var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(DeleteIconAssetPath);
+                _deleteIcon = new GUIContent(tex, "Delete POI");
+                return _deleteIcon;
+            }
+        }
+
+        // Position & rotation setup help (Position foldout title row, (i) button).
+        internal static readonly string PositionSetupHelpBody =
+            "Click the crosshair icon on this POI's title row to select it and frame it in the Scene view. " +
+            "Then use Unity's Move tool to place the marker, and the Rotate tool to tilt it (pitch/roll/yaw). " +
+            "The yaw stays in sync with the 'Edit Rotation' slider below, and all three angles are saved to config JSON on Save. " +
+            "When the position is final, click 'Verified' to lock it (turns green).\n\n" +
+            "Note: rotation is editor-preview only -- at runtime each marker always faces the camera.";
 
         // Keyword Fields table (Global Scene > Search & Filter).
         private static readonly string SearchFieldKeyHelp = "Stable identifier for this search axis. Never change after editing begins -- existing per-POI keywords reference it by key.";

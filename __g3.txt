@@ -1,6 +1,0 @@
-﻿
-proj_guides\_2.7_Corrections_TODO.md:2107:| 1.2-f | Non-destructive Precise→Draft reversion (data preserved, grayed, 
-not deleted) + separate explicit destructive reset action | ✅ SUPERSEDED, equivalent built differently — "Mark 
-Unverified" (non-destructive flag flip) and "Clear Position" (destructive) are separate buttons in PositionTabs.cs |
-
-

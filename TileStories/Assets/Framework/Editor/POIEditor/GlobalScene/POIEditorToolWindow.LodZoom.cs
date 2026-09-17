@@ -171,8 +171,6 @@ namespace TileStories.Editor
             lod.frustum_culling_enabled = DrawToggleField("Frustum Culling", lod.frustum_culling_enabled, LodFrustumHelp);
             if (lod.frustum_culling_enabled)
                 lod.fov_culling_margin_deg = DrawScalarField("  FOV Margin (deg)", lod.fov_culling_margin_deg, LodFovMarginHelp);
-
-            _hasUnsavedChanges = true;
         }
         // ---- Zoom section ----
         private void DrawGlobalZoomSection()
@@ -194,8 +192,6 @@ namespace TileStories.Editor
             lod.zoom_show_ui_buttons = DrawToggleField("Show UI Buttons", lod.zoom_show_ui_buttons, ZoomUiButtonsHelp);
             lod.zoom_double_tap_window_s = DrawScalarField("Double-Tap Window (s)", lod.zoom_double_tap_window_s, ZoomDoubleTapWindowHelp);
             lod.zoom_double_tap_move_tolerance_px = DrawScalarField("Double-Tap Move Tolerance (px)", lod.zoom_double_tap_move_tolerance_px, ZoomDoubleTapMoveToleranceHelp);
-
-            _hasUnsavedChanges = true;
         }
     }
 }

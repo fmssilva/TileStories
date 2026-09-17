@@ -58,8 +58,6 @@ namespace TileStories.Editor
             }
 
             disp.displacement_tiebreak = DrawPopupField("Tiebreak", disp.displacement_tiebreak, DisplacementTiebreakOptions, DisplacementTiebreakLabels, DisplacementTiebreakHelp);
-
-            _hasUnsavedChanges = true;
         }
     }
 }
