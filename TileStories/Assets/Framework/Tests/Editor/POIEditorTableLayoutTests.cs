@@ -242,15 +242,15 @@ namespace TileStories.Tests
             float cap = ReflectGapConstant("MaxRowWidth");
             const float view = 900f; // wide panel -> the MaxRowWidth cap is the active limit
 
-            float rightEdgeAt0 = 0f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 0f);
-            float rightEdgeAt1 = 15f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 15f);
-            float rightEdgeAt2 = 30f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 30f);
+            float wideEdgeAt0 = 0f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 0f);
+            float wideEdgeAt1 = 15f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 15f);
+            float wideEdgeAt2 = 30f + global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 30f);
 
-            Assert.That(rightEdgeAt0, Is.EqualTo(Mathf.Min(view - margin, cap)).Within(0.001f),
+            Assert.That(wideEdgeAt0, Is.EqualTo(Mathf.Min(view - margin, cap)).Within(0.001f),
                 "The row's right edge must land on min(visible panel, MaxRowWidth)");
-            Assert.That(rightEdgeAt1, Is.EqualTo(rightEdgeAt0).Within(0.001f),
+            Assert.That(wideEdgeAt1, Is.EqualTo(wideEdgeAt0).Within(0.001f),
                 "Right edge must not move when the indent deepens (one level)");
-            Assert.That(rightEdgeAt2, Is.EqualTo(rightEdgeAt0).Within(0.001f),
+            Assert.That(wideEdgeAt2, Is.EqualTo(wideEdgeAt0).Within(0.001f),
                 "Right edge must not move when the indent deepens (two levels)");
 
             // On a NARROW panel the panel itself is the limit, and the edge still holds.
@@ -260,6 +260,12 @@ namespace TileStories.Tests
             Assert.That(narrowEdgeAt0, Is.EqualTo(narrow - margin).Within(0.001f));
             Assert.That(narrowEdgeAt2, Is.EqualTo(narrowEdgeAt0).Within(0.001f),
                 "Right edge must stay pinned to the narrow panel across indents too");
+
+            // Content must actually shrink as the indent deepens (not just stay put).
+            float wideContentAt0 = global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 0f);
+            float wideContentAt2 = global::TileStories.Editor.POIEditorToolWindow.EditorRowWidthForIndent(view, margin, 30f);
+            Assert.That(wideContentAt2, Is.LessThan(wideContentAt0),
+                "Deeper indent must narrow the content when the cap is active");
         }
 
         // The +Add button under the taxonomy table delegates to the shared

@@ -1,142 +1,134 @@
 # %%
 """
 ===========================================================================
-Prática 02 (P1, 2a-feira) — IPCE 2026/2027
+GUIA DE SESSÃO — Prática 02 (P1, 2a-feira 10:10-13:00) — IPCE 2026/2027
 ===========================================================================
 Cobre os guiões 02a (ex. 9-15) e 02b (ex. 16-18).
 
----------------------------------------------------------------------------
-ESTRUTURA DA AULA (visão geral)
----------------------------------------------------------------------------
-[10:10] (5 min)   Abertura — logística e recap da aula 1
-[10:35] (20 min)  BLOCO A — funções com parâmetros/retorno, encadeamento
-                   de chamadas, primer de // e %  (+ EXTRA 1: testar na
-                   consola sem main/print)
-[11:00] (25 min)  BLOCO B — ex. 9, 10, 11 (trovoada, h/m/s)
-[11:15] (15 min)  BLOCO C — ex. 12, 13 (pêndulo, paralelepípedo)
-                   (+ EXTRA 2: o que é uma precondição)
-[11:35] (20 min)  INTERVALO
-[11:50] (15 min)  BLOCO D — ex. 14, 15 (queda de pedra: visão e som)
-[12:20] (30 min)  BLOCO E — if/elif/else, comparação e lógicos
-                   (+ EXTRA 3: quiz de "gotchas" para os testes)
-[12:50] (30 min)  BLOCO F — ex. 16, 17, 18 (máximo, triângulo, nota final)
-[13:00] (10 min)  EXTRA 4 — teaser de ciclos for e recursividade + fecho
-
----------------------------------------------------------------------------
-ESTRATÉGIA PEDAGÓGICA (como conduzir cada bloco)
----------------------------------------------------------------------------
-Regra geral, em 3 passos, para CADA exercício ou mini-grupo de exercícios:
-
-  1. DEMONSTRAR (2-5 min) — tu explicas/mostras um exemplo parecido
-     (nunca o exercício exato) no projetor, pensando em voz alta.
-  2. TENTAREM SOZINHOS/PARES (tempo definido, ver cada bloco) — eles
-     escrevem no Spyder. Circulas pela sala. Não respondas logo às
-     dúvidas — faz perguntas que os levem à resposta ("o que é que essa
-     linha faz?").
-  3. CORRIGIR EM CONJUNTO (2-5 min) — projetas a tua solução, mas não a
-     "despejes": pergunta "quem fez diferente?", discute o raciocínio,
-     não só o código. Nomeia o erro mais comum que viste a circular.
-
-Quando parar a turma mais cedo? Pergunta "mãos no ar quem já tem isto a
-funcionar". Se for menos de metade, para tudo e faz em conjunto no
-projetor. Se for mais de metade, dá só mais 2 minutos e depois corrige.
-
-Exercícios "rápidos" (9, 16) — não vale a pena dar tempo de trabalho
-autónomo longo, resolve-os quase em conjunto, é só para aquecer.
-
-Exercícios "desafio" (15, e a alínea final de 17) — não travar a turma
-toda à espera de quem está preso; qualifica-os como bónus/opcional e
-avança se o tempo apertar.
-
-Mantém sempre um tom leve: "não faz mal errar, o Python diz-te logo onde
-está o erro" — o objetivo de hoje é ganharem confiança a escrever
-código, não escrever código perfeito à primeira.
+Durante a aula ir variando a forma de ensinar exercícios/blocos:
+[DEMO/EXPLAIN]  — eu explico e demonstro ao vivo e alunos acompanham. 
+                  (exercícios iniciais, etc..) 
+[DIÁLOGO]       — eu vou perguntando ideias de solução e como escrever o código
+                  espero por respostas e depois vou fazendo
+[SOZINHOS]      — eles fazem sozinhos/pares e falam entre eles.
+                  eu vou passando pela sala a ver como vai e tirar duvidas. 
+                  passado um tempo mostro uma solução e falamos raciocínio.
 """
 
 # %%
 """
 ===========================================================================
-[10:10] ABERTURA (5 min)
+ABERTURA (10:10-10:18, 8 min)
 ===========================================================================
-Fazer/dizer:
-- Bom dia, chamada visual rápida (quem não tem Spyder aberto?).
-- Recap de 30 segundos da aula 1: "vimos tipos (int, float, str, bool),
-  cast, input/output. Hoje começamos mesmo a PROGRAMAR — se sabes montar
-  um Lego seguindo instruções, sabes escrever estes programas."
-- Plano do dia em 1 frase: "vamos escrever várias funções pequenas,
-  sempre pelo mesmo processo: perceber o problema, pensar na fórmula ou
-  na lógica, e traduzir para Python."
-- Lembrar: Mooshak precisa de Eduroam/VPN — quem não tem, avisa já.
-"""
+1. Folha Presenças; Vão ligando Spyder... 
+2. Dúvidas aula passada? 
+    - Todos tem Spyder a funcionar? 
+    - Testaram VPN + Mooshak? 
+    - Têm wifi eduroam a funcionar? 
+    - Dúvidas sobre tipos de dados, cast, input/print?
 
+3. MOTIVAÇAO: 
+    Hoje vamos treinar a programar para resolver problemas práticos do mundo real. 
+    Vão ver que, assim que conseguimos pensar uma solução "matemática" do problema, 
+    depois implementar isso em python é fácil (a gramática/syntax aprende-se rápido) 
+    
+3. ESTRUTURA DA AULA: 
+    BLOCO A — funções, parâmetros/retorno, encadeamento de chamadas, operadores /, // e %
+    BLOCO B — ex. 9, 10, 11 (trovoada, h/m/s)
+    BLOCO C — ex. 12, 13 (pêndulo, paralelepípedo)
+    INTERVALO
+    BLOCO D — ex. 14, 15 (queda de pedra: visão e som)
+    BLOCO E — if/elif/else, comparação/lógicos + ex. 16
+    BLOCO F — ex. 17, 18 (triângulo, nota final)
+    TEASER - ciclos for e recursividade
+"""
 # %%
 """
 ===========================================================================
-[BLOCO A] (10:15-10:35, 20 min) — Funções, parâmetros, retorno,
-encadeamento de chamadas + primer de // e %
+[BLOCO A] (10:18-10:40, 22 min) — Funções, parâmetros, retorno,
+encadeamento de chamadas + operadores /, // e %
 ===========================================================================
-NÃO uses o exemplo do guião de hoje (evita "queimar" um exercício antes
-da hora). Este bloco é só para consolidar o mecanismo de "uma função
-chama outra função, usando o resultado de uma como entrada da seguinte"
-— que é exatamente a técnica que precisam para os ex. 10 e 11.
 
-O QUE FAZER:
-1) (2 min) Escreve ao vivo o mini-exemplo dos ovos (primer de // e %).
-   Pergunta antes de correr: "20 ovos, caixas de 6 — quantas caixas
-   cheias? quantos sobram?"
+A.1) [DEMO/EXPLAIN] operadores /, // e %
 """
-ovos = 20
-caixas = ovos // 6
-sobra = ovos % 6
-print(f"{caixas} caixas cheias, sobram {sobra} ovos")
+num = 20
+div = 20 / 6
+parte_inteira = 20//6
+modulo = 20 % 6
+
+print("div: ", div)
+print("parte_inteira: ", parte_inteira)
+print("modulo", modulo)
+
+
 
 # %%
 """
-2) (10 min) Demo principal — "decompor um valor em notas": dado um total
-   em euros (inteiro), quantas notas de 20€, depois de 10€, e quanto
-   sobra. Mostra que cada função faz UMA coisa, e a main() é só quem
-   pergunta/mostra, chamando as funções por esta ordem.
-
-   Enquanto escreves, verbaliza: "reparem que passo o RESULTADO desta
-   função como ENTRADA da próxima — é isto que se chama encadear
-   chamadas. Vão precisar disto mesmo a seguir, no exercício 11."
+A.2) [DIALOGO] operadores /, // e % - exemplo aplicação
+   
+   Dado um valor, 
+   Quantas notas de 20€ e 10€, e moedas de 1€, são precisas para obter esse valor? 
+   
 """
-def num_notas_20(total: int) -> int:
-    """ Número de notas de 20€ num valor total em euros.
+
+
+
+
+
+
+
+
+valor = 57
+notas_20 = 57 // 20
+resto = valor % 20
+notas_10 = resto // 10
+moedas = resto % 10 
+print(f"{valor}€ = {notas_20} notas 20€ + {notas_10} notas 10€ + {moedas} moedas 1€")
+
+# %%
+"""
+A.3) [DEMO/EXPLAIN] main() + funçoes()
+   
+    O problema anterior, num programa bem organizado poderia: 
+        - ter main() para: 
+                - IO - receber input
+                - chamar funções auxiliares (o main não faz contas - chama funções que fazem essas contas)
+                - encadear chamadas - receber o resultado de uma função 
+                    e passar para a função seguinte 
+                - IO - print resultados (output) 
+        - ter funções que implementam a lógica do programa
+            estas funções podem ser complexas, e chamar outras funções, encadeiar resultados etc. e no fim retornam o resultado final 
+"""
+def num_notas(total: int, nota: int) -> int:
+    """ retorna o numero máximo de notas do valor indicado 
+        que cabem dentro do valor total
         Precondition: total >= 0
     """
-    return total // 20
+    return total // nota
 
-def resto_depois_notas_20(total: int) -> int:
-    """ O que sobra depois de tirar as notas de 20€. """
-    return total % 20
-
-def num_notas_10(resto: int) -> int:
-    """ Número de notas de 10€ no resto que já não dá para notas de 20€. """
-    return resto // 10
-
-def resto_final(resto: int) -> int:
-    """ O que sobra depois de tirar também as notas de 10€. """
-    return resto % 10
+def resto(total: int, nota: int) -> int:
+    """ retorna o que sobra depois de darmos o máximo em notas do valor indicado"""
+    return total % nota
 
 def main() -> None:
     total = int(input("Valor total em euros: "))
-    n20 = num_notas_20(total)
-    r1 = resto_depois_notas_20(total)
-    n10 = num_notas_10(r1)
-    r2 = resto_final(r1)
+    n20 = num_notas(total, 20)
+    r1 = resto(total, 20)
+    n10 = num_notas(r1, 10)
+    r2 = resto(r1, 10)
     print(f"{n20} notas de 20€, {n10} notas de 10€, sobra {r2}€")
 
 main()
+
 
 # %%
 """
 ---------------------------------------------------------------------------
 [EXTRA 1] Testar funções sem main() nem print() — e porquê os testes pedem isto
 ---------------------------------------------------------------------------
-(3-5 min, mesmo a seguir à demo acima)
+[DEMO/EXPLAIN] (5 min, mesmo a seguir à demo acima)
 
-Depois de correr a célula anterior, as funções ficam disponíveis na
+Depois de correres a célula anterior, as funções ficam disponíveis na
 consola do Spyder (canto inferior direito). Mostra ao vivo:
 
     >>> num_notas_20(97)
@@ -147,10 +139,9 @@ consola do Spyder (canto inferior direito). Mostra ao vivo:
 Diz-lhes: "reparem nos testes que vos vou passar hoje — quase todas as
 perguntas de código dizem 'não programe main, nem use input ou print'.
 Não é implicância dos professores: é para testarem SÓ a lógica da vossa
-função, sem se preocuparem com a parte de interação (que é sempre igual
-e menos interessante de avaliar). E para vocês: testar assim na consola
-é muito mais rápido do que escrever um input() sempre que querem
-verificar se uma função está certa."
+função, sem se preocuparem com a parte de interação. E para vocês:
+testar assim na consola é muito mais rápido do que escrever um input()
+sempre que querem verificar se uma função está certa."
 
 Mostra os cabeçalhos de 2-3 exercícios dos testes anexos (ex: is_root,
 zeno, christmas) como prova viva disto — todos sem main.
@@ -160,20 +151,44 @@ print(resto_depois_notas_20(97))
 
 # %%
 """
-===========================================================================
-[BLOCO B] (10:35-11:00, 25 min) — Guião 02a, exercícios 9, 10, 11
-===========================================================================
-Gestão de tempo sugerida dentro do bloco:
-  - Ex. 9: 5 min (quase em conjunto, é de aquecimento)
-  - Ex. 10: 8 min (5 sozinhos + 3 de correção)
-  - Ex. 11: 12 min (7 sozinhos + 5 de correção — é o mais rico dos três,
-    porque tem 3 funções auxiliares; liga explicitamente à demo do
-    Bloco A: "é literalmente a mesma técnica das notas, mas ao contrário:
-    em vez de juntar h/m/s para dar segundos, agora separam segundos em
-    h/m/s")
+---------------------------------------------------------------------------
+[BÓNUS] O poder de dar bons nomes às funções (3 min, ainda dentro do Bloco A)
+---------------------------------------------------------------------------
+[DEMO/EXPLAIN] Não é para escreverem, é só para verem o efeito. Projeta e
+lê em voz alta, sem correr (tem nomes por definir, não corre):
+
+Se as funções tiverem nomes bem escolhidos, o código de alto nível
+quase se lê como português. Exemplo:
+
+    def register_user(id, name, email) -> str:
+        if not (is_free_id(id) and is_free_email(email)):
+            return "id ou email já usados"
+        if not is_email_valid(email):
+            return "email inválido"
+        add_user_to_db(id, name, email)
+        return "utilizador registado com sucesso"
+
+Sem saberem como is_free_id ou is_email_valid funcionam por dentro, já
+percebem o que register_user faz, só pelos nomes. É esta a mesma ideia
+que estão a aplicar hoje com num_notas_20, e vão aplicar já a seguir com
+is_proper_triangle: dividir um problema em peças pequenas e bem
+nomeadas, e depois combiná-las. Um bom nome poupa comentários.
 """
 
-# ---- Ex. 9 — Trovoada -----------------------------------------------
+# %%
+"""
+===========================================================================
+[BLOCO B] (10:40-11:01, 21 min) — Guião 02a, exercícios 9, 10, 11
+===========================================================================
+  - Ex. 9: [DIÁLOGO] 4 min
+  - Ex. 10: [DIÁLOGO] 6 min
+  - Ex. 11: [DIÁLOGO] para a 1ª função + [SOZINHOS] para o resto, 11 min
+    (liga explicitamente à demo do Bloco A: "é literalmente a mesma
+    técnica das notas, mas ao contrário: em vez de juntar h/m/s para
+    dar segundos, agora separam segundos em h/m/s")
+"""
+
+# ---- Ex. 9 — Trovoada [DIÁLOGO] --------------------------------------
 def distancia_trovoada(segundos: int) -> int:
     """ Distância (m) a que está uma trovoada, dado o nº de segundos
         entre o relâmpago e o trovão. Velocidade do som: 340 m/s.
@@ -188,7 +203,7 @@ def main() -> None:
 main()
 
 # %%
-# ---- Ex. 10 — h/m/s -> segundos --------------------------------------
+# ---- Ex. 10 — h/m/s -> segundos [DIÁLOGO] ----------------------------
 def to_seconds(h: int, m: int, s: int) -> int:
     """ Converte uma duração dada em horas, minutos e segundos, para o
         total de segundos.
@@ -206,7 +221,13 @@ main()
 # Exemplo do guião: h=1, m=1, s=1 -> 3661. Corre e confirma com a turma.
 
 # %%
-# ---- Ex. 11 — segundos -> h/m/s (3 funções auxiliares + main) --------
+# ---- Ex. 11 — segundos -> h/m/s [DIÁLOGO + SOZINHOS] -----------------
+"""
+Sugestão de condução: faz get_seconds em conjunto (diálogo, ~2 min,
+perguntando "que operador nos dá só o resto de uma divisão?"), depois
+dá-lhes ~6 min sozinhos para get_minutes, get_hours e main, e fecha com
+~3 min de correção.
+"""
 def get_seconds(total: int) -> int:
     """ Segundos (0-59) duma duração total dada em segundos. """
     return total % 60
@@ -236,15 +257,14 @@ main()
 # %%
 """
 ===========================================================================
-[BLOCO C] (11:00-11:15, 15 min) — Guião 02a, exercícios 12 e 13
+[BLOCO C] (11:01-11:14, 13 min) — Guião 02a, exercícios 12 e 13
 ===========================================================================
-  - Ex. 12: 5 min (é curto, mas a pergunta "inteiros ou reais?" do
-    enunciado dá pé a uma discussão rápida e importante)
-  - EXTRA 2: 3 min (encaixa mesmo aqui, antes do ex. 13)
-  - Ex. 13: 7 min (3-4 sozinhos + correção rápida)
+  - Ex. 12: [DIÁLOGO] 4 min
+  - EXTRA 2: [DEMO/EXPLAIN] 3 min (encaixa mesmo aqui, antes do ex. 13)
+  - Ex. 13: [SOZINHOS] 6 min
 """
 
-# ---- Ex. 12 — Período do pêndulo -------------------------------------
+# ---- Ex. 12 — Período do pêndulo [DIÁLOGO] ---------------------------
 import math
 
 def periodo_pendulo(L: float) -> float:
@@ -268,6 +288,8 @@ main()
 ---------------------------------------------------------------------------
 [EXTRA 2] O que é uma "Precondition"?
 ---------------------------------------------------------------------------
+[DEMO/EXPLAIN]
+
 Repara nos testes anexos: quase todas as funções trazem no comentário uma
 linha "Precondition: ...". Por exemplo, no Teste 2 de 25/26:
 "Precondition: len(l) >= 2".
@@ -294,7 +316,7 @@ mais tarde no triangle_kind).
 """
 
 # %%
-# ---- Ex. 13 — Paralelepípedo -----------------------------------------
+# ---- Ex. 13 — Paralelepípedo [SOZINHOS] ------------------------------
 def comprimento_arestas(a: float, b: float, c: float) -> float:
     """ Comprimento total das 12 arestas dum paralelepípedo a x b x c.
         Precondition: a > 0 and b > 0 and c > 0
@@ -329,24 +351,24 @@ main()
 # %%
 """
 ===========================================================================
-INTERVALO (11:15-11:35, 20 min)
+INTERVALO (11:14-11:34, 20 min)
 ===========================================================================
 """
 
 # %%
 """
 ===========================================================================
-[BLOCO D] (11:35-11:50, 15 min) — Guião 02a, exercício 14 (obrigatório)
-e exercício 15 (desafio opcional)
+[BLOCO D] (11:34-11:48, 14 min) — Guião 02a, exercício 14 e exercício 15
 ===========================================================================
-  - Ex. 14: 8 min (é direto, uma fórmula só)
-  - Ex. 15: 7 min — apresenta como "quem acabou o 14 depressa, aqui está
-    o desafio da aula". NÃO travar a turma toda por causa deste. Fazer
-    a dedução no quadro só se sobrar tempo real, senão passa a solução
-    já feita e explica o raciocínio verbalmente em 2 minutos.
+  - Ex. 14: [DIÁLOGO] 6 min (é direto, uma fórmula só)
+  - Ex. 15: [DEMO/EXPLAIN] 8 min — demasiado avançado para resolverem
+    sozinhos no tempo disponível (envolve resolver uma equação de 2º
+    grau à mão). Apresenta como "o desafio da aula" e faz a dedução
+    tu mesmo, mas mantendo-os no diálogo (pergunta "e agora, o que
+    fazemos com isto?" em vez de despejar a fórmula de repente).
 """
 
-# ---- Ex. 14 — Altura do precipício (visão) ---------------------------
+# ---- Ex. 14 — Altura do precipício (visão) [DIÁLOGO] -----------------
 def altura_precipicio(t: int) -> float:
     """ Altura (m) dum precipício, a partir do tempo (s) que uma pedra
         demora a chegar ao fundo (o observador VÊ a pedra a chegar).
@@ -363,7 +385,7 @@ def main() -> None:
 main()
 
 # %%
-# ---- Ex. 15 — Altura do precipício (som) — DESAFIO -------------------
+# ---- Ex. 15 — Altura do precipício (som) [DEMO/EXPLAIN] — DESAFIO -----
 """
 Raciocínio (mostrar no quadro, resumido):
   d = 0.5 * a * t_queda^2         (queda livre da pedra)
@@ -400,22 +422,22 @@ main()
 # %%
 """
 ===========================================================================
-[BLOCO E] (11:50-12:20, 30 min) — if / elif / else, operadores de
-comparação e lógicos
+[BLOCO E] (11:48-12:21, 33 min) — if / elif / else, operadores de
+comparação e lógicos + exercício 16
 ===========================================================================
-Isto é matéria NOVA para eles nesta aula prática (a teórica só vem à
-tarde) — por isso, ao contrário dos blocos anteriores, aqui começa-se
-SEMPRE com uma demonstração tua antes de qualquer exercício do guião.
+Matéria NOVA para eles nesta aula prática (a teórica só vem à tarde) —
+por isso, ao contrário dos blocos anteriores, aqui começa-se SEMPRE com
+uma demonstração tua antes de qualquer exercício do guião.
 
-  - Aquecimento "desconto": 5 min
-  - Demo "triagem" (se/elif, ordem importa): 8 min
-  - EXTRA 3 — quiz de gotchas: 12 min
-  - Ex. 16 (máximo): 5 min (rápido, quase em conjunto)
+  - Aquecimento "desconto": [DIÁLOGO] 6 min
+  - Demo "triagem" (if/elif, ordem importa): [DEMO/EXPLAIN] 6 min
+  - Ex. 16 (máximo): [DIÁLOGO] 4 min (aplicação imediata, mantém o embalo)
+  - EXTRA 3 — quiz de 6 gotchas: [DIÁLOGO] 17 min
 
-O guião propriamente dito (17, 18) fica para o Bloco F.
+O guião 02b continua no Bloco F (ex. 17, 18).
 """
 
-# ---- Aquecimento: desconto numa loja ----------------------------------
+# ---- Aquecimento: desconto numa loja [DIÁLOGO] -------------------------
 """
 Regra: um cliente tem desconto SE for sócio E gastar mais de 50€,
 OU SE não for sócio mas gastar mais de 100€.
@@ -434,7 +456,7 @@ print(tem_desconto(False, 80))    # False - não sócio, só 80 (< 100)
 
 # %%
 """
----- Demo principal: triagem hospitalar (if / elif / else) ------------
+---- Demo principal: triagem hospitalar (if / elif / else) [DEMO/EXPLAIN]
 Regras (por ordem de gravidade):
   - Dificuldade a respirar E febre >= 39   -> VERMELHO (urgente)
   - Dificuldade a respirar OU febre >= 39  -> AMARELO (atenção)
@@ -461,9 +483,25 @@ print(triagem(38.0, False))  # VERDE
 print(triagem(36.5, False))  # AZUL
 
 # %%
+# ---- Ex. 16 — Máximo de dois inteiros [DIÁLOGO] -----------------------
+def maximum(a: int, b: int) -> int:
+    """ Máximo entre dois valores inteiros. """
+    if a >= b:
+        return a
+    else:
+        return b
+
+def main() -> None:
+    x = int(input("Primeiro valor: "))
+    y = int(input("Segundo valor: "))
+    print(f"O máximo é {maximum(x, y)}")
+
+main()
+
+# %%
 """
 ===========================================================================
-[EXTRA 3] Quiz de "gotchas" — armadilhas típicas dos testes
+[EXTRA 3] Quiz de "gotchas" [DIÁLOGO] — armadilhas típicas dos testes
 ===========================================================================
 Formato sugerido: lê a pergunta em voz alta, dá 20-30 segundos para
 arriscarem oralmente, só depois corres a célula para revelar.
@@ -477,7 +515,7 @@ print("2 < 5 < 3  ->", 2 < 5 < 3)
 # Explicação: em Python podes encadear comparações — "a < b < c" equivale
 # a "(a < b) and (b < c)". Aqui 2<5 é True, mas 5<3 é False, por isso o
 # resultado final é False. Isto NÃO é assim em todas as linguagens!
-# Repara que já usaram isto sem saber no ex.17 (a == b == c).
+# Repara que vão usar isto já a seguir no ex.17 (a == b == c).
 
 # %%
 # --- Gotcha 2: = vs == ---------------------------------------------------
@@ -513,6 +551,7 @@ Alguém escreveu:
         print("erro")
 
 Testa com a=5 (válido) e b=-3 (INVÁLIDO). O que achas que acontece?
+(Esta é a resposta definitiva à pergunta "tem de haver parênteses?")
 """
 a, b = 5, -3
 resultado = not a > 0 and b > 0
@@ -558,35 +597,45 @@ print("Versão com bug:", triagem_errada(39.5, True))
 # específicas/graves têm de vir sempre primeiro.
 
 # %%
+# --- Gotcha 6: "or" com um valor solto (confusão and/or) ---------------
 """
-===========================================================================
-[BLOCO F] (12:20-12:50, 30 min) — Guião 02b, exercícios 16, 17, 18
-===========================================================================
-  - Ex. 16: 5 min (rápido, aplicação direta do que acabaram de ver)
-  - Ex. 17: 15 min (o mais rico — 6 sozinhos/pares + 9 de correção com
-    bastante discussão, porque tem is_proper_triangle + elif + o "a==b==c"
-    que liga diretamente ao Gotcha 1)
-  - Ex. 18: 10 min (mais rápido do que parece — a main() já vem feita
-    no guião, só faltam as 3 funções)
+Pergunta: alguém quer verificar se x é 1 OU 2, e escreve:
+
+    if x == 1 or 2:
+        print("é 1 ou 2")
+
+Testa com x = 99. O que achas que imprime?
 """
-
-# ---- Ex. 16 — Máximo de dois inteiros ---------------------------------
-def maximum(a: int, b: int) -> int:
-    """ Máximo entre dois valores inteiros. """
-    if a >= b:
-        return a
-    else:
-        return b
-
-def main() -> None:
-    x = int(input("Primeiro valor: "))
-    y = int(input("Segundo valor: "))
-    print(f"O máximo é {maximum(x, y)}")
-
-main()
+x = 99
+if x == 1 or 2:
+    print("é 1 ou 2")
+# Isto imprime SEMPRE "é 1 ou 2", seja qual for o x! Porquê? Porque
+# "x == 1 or 2" é lido como "(x == 1) or (2)", e em Python qualquer
+# número diferente de zero conta como "verdadeiro" (truthy) quando usado
+# como condição. Logo a segunda parte (o simples "2") é sempre True, e o
+# "or" todo dá sempre True, independentemente do x.
+#
+# Forma CORRETA:
+if x == 1 or x == 2:
+    print("é 1 ou 2 (agora sim)")
+else:
+    print("não é 1 nem 2")
+# LIÇÃO: cada lado de "and"/"or" tem de ser uma condição COMPLETA por si
+# só. Nunca "if x == 1 or 2", sempre "if x == 1 or x == 2".
 
 # %%
-# ---- Ex. 17 — Tipo de triângulo ---------------------------------------
+"""
+===========================================================================
+[BLOCO F] (12:21-12:47, 26 min) — Guião 02b, exercícios 17 e 18
+===========================================================================
+  - Ex. 17: [SOZINHOS] 16 min (o mais rico — 7 min sozinhos/pares + 9 min
+    de correção com bastante discussão, porque tem is_proper_triangle +
+    elif + o "a==b==c" que liga diretamente ao Gotcha 1)
+  - Ex. 18: [SOZINHOS] 10 min (mais rápido do que parece — a main() já
+    vem feita no guião, só faltam as 3 funções)
+"""
+
+# ---- Ex. 17 — Tipo de triângulo [SOZINHOS] -----------------------------
 def is_proper_triangle(a: float, b: float, c: float) -> bool:
     """ Verifica se a, b, c definem um triângulo próprio (área > 0).
         Precondition: nenhuma (a função valida tudo sozinha, incluindo
@@ -629,7 +678,7 @@ main()
 #    "0 se não definirem um triângulo próprio".
 
 # %%
-# ---- Ex. 18 — Nota final de IPCE ---------------------------------------
+# ---- Ex. 18 — Nota final de IPCE [SOZINHOS] -----------------------------
 def average(grade1: float, grade2: float) -> float:
     """ Média de duas notas. """
     return (grade1 + grade2) / 2
@@ -663,14 +712,14 @@ main()
 # %%
 """
 ===========================================================================
-[EXTRA 4] (12:50-13:00, 10 min) — Teaser de ciclos for e recursividade
+[EXTRA 4] (12:47-13:00, 13 min) — Teaser de ciclos for e recursividade
 ===========================================================================
 Vão ver isto formalmente na teórica desta tarde. Aqui é só um "trailer"
 rápido — NÃO é para ficarem a perceber tudo, é para ficarem com vontade
 de aprender mais. Corre ao vivo, sem te alongares em explicações.
 """
 
-# --- Ciclo for: repetir sem copiar-colar --------------------------------
+# --- Ciclo for: repetir sem copiar-colar [DEMO/EXPLAIN] (2 min) -----------
 """
 Pergunta retórica: "e se eu tivesse 1000 preços numa lista de compras,
 ia escrever 1000 linhas de 'total = total + preco'?"
@@ -684,27 +733,59 @@ print(f"Total da fatura: {total}€")
 # 5 vezes seguidas. Com 1000 preços, o for nem precisa de mudar.
 
 # %%
-# --- Recursividade #1: traduzir uma fórmula matemática direta ----------
+# --- Recursividade: a "receita" de 3 passos [DEMO/EXPLAIN] (3 min) --------
 """
-Explicar em 1 frase: "uma função pode chamar-se a si própria — é como
-uma boneca russa, cada camada resolve um bocadinho e passa o resto para
-a camada seguinte, até chegar a um caso base muito simples."
+Antes do código, dá-lhes a receita mental (isto é o mais importante do
+bloco — mais do que o código em si):
+
+  1. Qual é o caso mais simples que sei resolver diretamente, sem
+     precisar de mais nada? (o "caso base")
+  2. Se eu já soubesse resolver uma versão mais PEQUENA deste problema,
+     conseguia usar essa resposta para resolver a versão maior?
+  3. Traduzir as duas respostas para código: if (caso base): ...
+     else: usa a chamada recursiva.
+
+Se a resposta a (2) for "sim, consigo pegar na solução da parte mais
+pequena e construir a solução do problema todo a partir dela" — isso é
+o "clique mental" da recursividade (a mesma ideia que, em cadeiras
+futuras, vão reconhecer como o coração da programação dinâmica).
+
+Quando a fórmula matemática já é recursiva, o passo 3 é quase copiar-
+colar. Exemplo: soma de 1 até n.
 """
 def soma_ate(n: int) -> int:
     """ Soma de 1 até n.
         Fórmula: soma_ate(n) = n + soma_ate(n-1), e soma_ate(0) = 0
         Precondition: n >= 0
     """
-    if n == 0:
+    if n == 0:              # <- caso base (passo 1)
         return 0
-    else:
+    else:                   # <- usa a versão mais pequena (passo 2)
         return n + soma_ate(n - 1)
 
 print(soma_ate(5))  # 1+2+3+4+5 = 15
-# Reparem: o código é quase uma cópia direta da fórmula matemática.
 
 # %%
-# --- Recursividade #2: o "poder" a sério — procura binária -------------
+"""
+Mais um exemplo de "traduzir a fórmula diretamente" — mesmo padrão a
+repetir-se. Se o tempo apertar, só mostra o código sem correr e diz
+"fica para espreitarem em casa, é só mais um exemplo da mesma receita".
+"""
+def fibonacci(n: int) -> int:
+    """ n-ésimo termo da sucessão de Fibonacci: 0,1,1,2,3,5,8,13,...
+        Fórmula: fibonacci(n) = fibonacci(n-1) + fibonacci(n-2),
+        com fibonacci(0)=0 e fibonacci(1)=1
+        Precondition: n >= 0
+    """
+    if n <= 1:               # caso base
+        return n
+    else:
+        return fibonacci(n - 1) + fibonacci(n - 2)
+
+print(fibonacci(10))  # 55
+
+# %%
+# --- Recursividade "a sério": busca binária [DEMO/EXPLAIN] (4 min) --------
 """
 Analogia (dizer antes de correr): "pensa no jogo de adivinhar um número
 entre 1 e 100 — perguntas 'é maior que 50?' e cada resposta elimina
@@ -732,17 +813,76 @@ print(procura_binaria(numeros, 8, 0, len(numeros) - 1))   # False
 # Com 1 milhão de números ordenados, isto encontra qualquer valor em
 # cerca de 20 passos — em vez de, no pior caso, 1 milhão de passos a
 # percorrer um a um. É por isto que a recursividade (bem aplicada) é
-# tão usada em problemas a sério.
+# tão usada em problemas a sério. (Coisas como quicksort ou programação
+# dinâmica ficam para uma aula futura dedicada a isto — hoje é só para
+# verem o potencial.)
 
 # %%
 """
 ===========================================================================
-FECHO (últimos 1-2 min)
+FECHO (últimos 3 min)
 ===========================================================================
-Dizer:
-- "Hoje à tarde, na teórica, vão ver 'a sério' o for e a recursividade
-  que acabámos de espreitar — agora já não vos vai soar a chinês."
-- "Qualquer dúvida dos exercícios que não deu para acabar, tragam para
-  a próxima aula ou usem o Mooshak para praticar mais em casa."
-- Lembrete rápido: Mooshak precisa de Eduroam/VPN fora do campus.
+1. "Hoje à tarde, na teórica, vão ver 'a sério' o for e a recursividade
+   que acabámos de espreitar — agora já não vos vai soar a chinês."
+
+2. [REGRA DA CASA] Como (não) usar IA nesta cadeira — vale a pena dizer
+   isto devagar, é importante:
+   - Tentem SEMPRE sozinhos primeiro. Mesmo que demore, é isso que vos
+     ensina a programar.
+   - Só depois de umas boas tentativas (10 minutos a sofrer sem
+     conseguir) faz sentido perguntar a uma IA (ChatGPT, Claude, etc.).
+   - Regra de ouro do prompt: NUNCA peçam "resolve-me isto". Peçam para
+     vos EXPLICAREM o conceito em que estão presos, ou para darem mais
+     exemplos parecidos.
+   - Outra boa técnica: escrevam a vossa tentativa e peçam uma "análise
+     crítica" — o que está errado, o que pode melhorar — em vez de
+     pedirem logo a solução certa.
+   - Ótima técnica de estudo: peguem num teste de anos anteriores (como
+     os que vos vou disponibilizar) e peçam à IA "dá-me mais 3
+     exercícios parecidos com o exercício X deste teste, com
+     dificuldade semelhante" — ótimo para treinar para a avaliação.
+   - Resumindo: usem a IA como um professor particular que vos ensina,
+     não como alguém que vos faz os trabalhos de casa. Se copiarem sem
+     perceber, no teste (sem consulta!) ninguém vos vai safar.
+
+3. Dúvidas finais dos exercícios que não deu para acabar — tragam para
+   a próxima aula ou pratiquem mais no Mooshak (lembrete: precisa de
+   Eduroam/VPN fora do campus).
+"""
+
+# %%
+"""
+===========================================================================
+BACKLOG — ideias para aulas FUTURAS (não é para hoje, só para não perder)
+===========================================================================
+Matéria explicitamente adiada para não sobrecarregar a aula 2:
+
+- Boas práticas de nomes (snake_case para funções/variáveis, CAPSLOCK
+  para constantes, nomes de booleanos como pergunta: is_valid, has_...)
+- Efeitos laterais em funções (o que são, porque evitar)
+- Pass by value vs pass by reference, com exemplos práticos
+- Variáveis globais vs locais — regras dentro de funções e ciclos
+- Tipagem dinâmica em Python (i=2 depois i="2" sem erro) vs tipagem
+  estática (Java/C, falha à compilação). Python é interpretado, o tipo
+  "vive" no objeto, não na variável — boa forma de o explicar.
+- f-strings: reforçar que dentro de {} pode ir qualquer EXPRESSÃO, não
+  só uma variável, e falar em formatação (".2f", etc.)
+- Separação de responsabilidades: interação com utilizador (I/O) vs
+  lógica de negócio — pensar "frontend vs backend" como metáfora
+- Refactoring: extrair lógica repetida para uma função só
+- Testar um ficheiro inteiro de funções pondo vários casos de teste
+  dentro do próprio main() do ficheiro (útil sobretudo para o projeto —
+  complementa o que já ensinamos hoje sobre testar na consola)
+- Recursividade "a sério": programação dinâmica, quicksort, ou outro
+  exemplo com o mesmo "clique mental" de dividir para conquistar. Fica
+  para uma aula dedicada, mais para a frente, quando já tiverem ciclos
+  bem consolidados. Hoje só entrou o teaser leve (Extra 4).
+
+Ideia em aberto (conversar mais tarde, não decidir já):
+- Reorganizar o "guia de acompanhamento" (o ficheiro que levam para
+  casa, tipo aula_1_complement.py) por TÓPICO (ciclos.py, if.py,
+  funcoes.py, recursividade.py) em vez de por aula, como referência
+  viva que vai crescendo — complementar aos ficheiros por aula, não
+  substituto. Vale mais a pena falar nisto com mais aulas já dadas,
+  para termos massa crítica de conteúdo para organizar assim.
 """

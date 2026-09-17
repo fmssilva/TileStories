@@ -443,10 +443,18 @@ namespace TileStories.Editor
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    expanded = EditorGUILayout.Foldout(expanded, title, true, boldStyle);
-                    // Left-aligned a fixed step after the title (NOT FlexibleSpace), so the
-                    // trailing help reads as part of the section heading instead of being
-                    // pinned to the far right edge of the row.
+                    // Size the foldout to its title with a FIXED left-anchored rect so it
+                    // does NOT auto-expand: laying a default EditorGUILayout.Foldout out
+                    // directly eats the whole row, which would push the trailing help to
+                    // the far right edge regardless of the Space below. EditorGUILayout's
+                    // Foldout overload takes no GUILayoutOption, so the width is fixed via
+                    // an explicit GUI rect instead (matching IMGUI's left/width rules).
+                    // Width = measured title text + the arrow affordance. The trailing help
+                    // then sits a fixed step after the title, inside the heading zone.
+                    float titleWidth = boldStyle.CalcSize(new GUIContent(title)).x + 20f;
+                    Rect foldoutRect = GUILayoutUtility.GetRect(
+                        new GUIContent(title), boldStyle, GUILayout.Width(titleWidth), GUILayout.ExpandWidth(false));
+                    expanded = EditorGUI.Foldout(foldoutRect, expanded, title, true, boldStyle);
                     GUILayout.Space(40f);
                     drawHeaderTrailing();
                 }

@@ -31,17 +31,19 @@ Sou professor das aulas práticas do turno **P1** (2a-feira de manhã), ano leti
 - - Marca estes extras com `[EXTRA]` para eu saber que são adições/complemento à aula que não estão no guia, e apresentá-los de forma clara no local correto a falar disso na sessão, e bem explicados para eu saber bem o que fazer, como fazer, porquê, etc.. 
 - - Exemplo para estes possíveis casos, alguns exercicios complementares ao guia da aula prática caso isso enriqueça esta aula prática. Algum conceito extra ou exercicio extra ou explicação extra que seja bom eu explicar-lhes e que não está no guia da aula prática mas que é uma boa adição? Exemplo algum conceito de cultura geral ou para melhor pereceberem como as coisas funcionam ou como se fazem ou edge cases ou exercicios parecidos com os dos testes anteriores em termos de dificuldade e "tipologia" etc..?? alguma boa adição a fazer à aula? 
 - - Exemplo adicionar pequenos blocos complementares a salientar algum conceito que é bom eles saberem para o teste ou para cultura geral... para os motivar e eles sentirem que ficam a saber mais que os outros... exemplo conceitos como tipagem forte ou fraca quando falei dos tipos de dados... ou exemplo explicar que binário igual pode ser lido como tipo diferente daí a importancia dos tipos etc... isto são exemplos simples da aula 1... agora pensa o que será bom eu dar na aula 2 para a tornar melhor e mais rica e mais interessante e mais viva? MAS LEMBRA-TE QUE ISTO É "INTRODUÇÃO À PROGRAMAÇÃO" - Quero entusiasmar e motivar a classe, não falar conceitos muito além das suas capacidades para não os perder. 
-  
-- No fim corre o ficheiro do início ao fim antes de entregar (atenção especial a `input()` — testar com respostas simuladas via `printf "resposta\n" | python3 ficheiro.py`).
-
-- E neste guia de sessão, na primeira célula, escreve umas notas para mim sobre como eu devo conduzir a aula? Basicamente uma espécie de sumário dos blocos que constituem o guia de sessão e depois em cada célula explicamos o que fazer em cada bloco... E pensa então qual o melhor estilo para dar esta aula? exemplo eu explico algum conceito base ou teorico antes de tudo? ou começo simplesmente a seguir o guia e talvez fazer o 1º exercício com os alunos todos juntos... ou mais exercícios?? ou a certa altura digo para eles continuarem sozinhos e qualquer dúvida digo para chamarem e se depois vir que muitos estão encravados então paramos e continuamos todos juntos?? ou dou-lhes uns minutos para cada exercicio e depois corro eu também no projetor a solução...?? qual é a melhor estratégia para conduzir esta aula prática e este tipo de exercícios? então pensa o bom plano de sesão e como eu devo explicar/demonstrar/fazer com eles / mandar fazer a matéria... 
 
 - Depois pensa também em termos de tempo, o tempo que devo dar para cada exercício ou bloco de exercícios para assim ser fácil de gerir a aula. Escreve então o tempo por exemplo
 `[10:20] (10 minutos)` bloco a... 
 `[10:45] (25 minutos)` bloco b...
 ...
-- significa que o bloco A deve ser dado em 25 minutos, até às 10:20, o bloco B deve ser dado em 25 minutos, até às 10:45, etc...
-- não esqueças de contar os intervalos, bem como tempo inicial para "logistica e anúncios..."
+» significa que o bloco A deve ser dado em 25 minutos, até às 10:20, o bloco B deve ser dado em 25 minutos, até às 10:45, etc...
+» não esqueças de contar os intervalos, bem como tempo inicial para "logistica e anúncios..."
+
+
+- Mantém o documento organizado por blocos e com anotações do tipo de ensino [DEMO/EXPLAIN], [DIÁLOGO], [SOZINHOS] e com os tempos para cada bloco... 
+    MAS de resto em termos da forma de explicar as coisas, escreve tudo como se fossem comentários de um "coder" para outro "coder". Não escrevas como se fosse tu "claude" a dizer-me a mim "professor" como ensinar os alunos. Escreve simplesmente a explicação dos conceitos e resolução dos exercícios de forma direta. assim depois este guia fica pronto a entregar no final da aula aos alunos, sem ter lá texto tipo "depois explica aos alunos desta forma e faz estas perguntas...". 
+
+- No fim corre o ficheiro do início ao fim antes de entregar (atenção especial a `input()` — testar com respostas simuladas via `printf "resposta\n" | python3 ficheiro.py`).
 
 - E de resto, algum outro aspeto que aches importante eu pensar desde já para preparar este guia de sessão? Podes adicionar etiquetas extra ou ideias extra caso aches que sejam uma boa adição. 
   

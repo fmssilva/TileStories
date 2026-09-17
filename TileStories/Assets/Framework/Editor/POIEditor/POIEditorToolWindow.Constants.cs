@@ -27,10 +27,13 @@ namespace TileStories.Editor
         // stay readable, so the width clamp is max(MinRowWidth, min(panel, MaxRowWidth)).
         private const float MinRowWidth = 180f;
 
-        // Breathing room between a row's controls and the visible panel
-        // edge, when the panel is narrow. Used by the row width rule and must be
-        // stable across the Layout and Repaint IMGUI passes.
-        private const float AddButtonRowRightMargin = 6f;
+        // Right spacing between a row's controls and the visible panel edge, when the
+        // panel is narrow. This must clear the ScrollView's VERTICAL SCROLLBAR (~15px in
+        // the Pro skin): with the old 6f the row's right edge landed underneath the
+        // scrollbar whenever the list was long enough to scroll, so the last few pixels
+        // of every row were hidden. Used by the row width rule and must be stable across
+        // the Layout and Repaint IMGUI passes.
+        private const float AddButtonRowRightMargin = 20f;
 
         // Header pad for the Symbol/Style column: only the single within-group
         // gap that also separates the ObjectField from the preview in the body

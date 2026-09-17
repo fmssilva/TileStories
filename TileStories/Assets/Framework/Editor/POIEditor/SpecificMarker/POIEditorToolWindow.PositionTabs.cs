@@ -57,24 +57,11 @@ namespace TileStories.Editor
 
             EditorGUILayout.Space(2f);
 
-            // Shared rows: each coordinate (X / Y / Z) is its own read-only row with
-            // the transparent indent spacer + width capped to rowWidth (level-2 indent).
-            EditorGUI.BeginDisabledGroup(true);
-            var coordinateLabels = GetCoordinateLabels();
-            for (int i = 0; i < coordinateLabels.Length; i++)
-            {
-                DrawEditorRow(out float coordRow, out _);
-                // Compact pair: the axis letter is drawn at its natural text width and the
-                // value field follows immediately, so it reads as one unit ("X  -0.99")
-                // instead of a letter stranded at the far left of a wide field. The width
-                // rule now guarantees the row fits, so the letter can no longer be squeezed
-                // to an invisible sliver by an overflowing field.
-                EditorGUILayout.LabelField(coordinateLabels[i], EditorStyles.boldLabel, GUILayout.Width(16f));
-                float value = i == 0 ? position.x : i == 1 ? position.y : position.z;
-                EditorGUILayout.FloatField(value, GUILayout.Width(coordRow - 20f), GUILayout.ExpandWidth(false));
-                EditorRowEnd();
-            }
-            EditorGUI.EndDisabledGroup();
+            // One compact read-only row: x [val]  y [val]  z [val]. The axis letters are
+            // drawn OUTSIDE any disabled scope (see DrawCoordinateRow) -- this row is the
+            // only one in the window whose label sat inside BeginDisabledGroup(true), and
+            // it is the only label that never showed up.
+            DrawCoordinateRow(position.x, position.y, position.z, out _, out _, out _);
 
             EditorGUILayout.Space(2f);
 
@@ -101,6 +88,53 @@ namespace TileStories.Editor
                 EditorRowEnd();
             }
             }
+        }
+
+        // One compact read-only row: x [val]  y [val]  z [val].
+        //
+        // WHY THE LETTERS LIVE OUTSIDE ANY DISABLED SCOPE: for a long time this was the
+        // only row in the whole window that drew its label inside
+        // EditorGUI.BeginDisabledGroup(true), and it was the only label that never showed
+        // up. Every other visible label here ("Edit Rotation", "Category", "Has status")
+        // is drawn un-disabled with the same EditorStyles.boldLabel and renders fine, so
+        // the disabled scope was the one structural difference. The fix is therefore
+        // structural too: only the VALUE FIELDS are read-only; the axis letters are
+        // ordinary un-disabled labels.
+        //
+        // The first label/value rects are returned via out params so a real OnGUI render
+        // test can assert the geometry (same pattern as DrawAddButtonRow).
+        internal static void DrawCoordinateRow(float x, float y, float z,
+            out Rect firstAxisLabelRect, out Rect firstAxisValueRect, out Rect lastAxisValueRect)
+        {
+            firstAxisLabelRect = default;
+            firstAxisValueRect = default;
+            lastAxisValueRect = default;
+
+            DrawEditorRow(out float coordRow, out _);
+
+            const float axisLabelWidth = 16f;
+            const float pairGapWidth = 6f;
+            float valueWidth = Mathf.Max(60f, (coordRow - 3f * axisLabelWidth - 2f * pairGapWidth) / 3f);
+
+            string[] axes = GetCoordinateLabels();
+            float[] axisValues = { x, y, z };
+            for (int i = 0; i < axes.Length; i++)
+            {
+                GUILayout.Label(axes[i], EditorStyles.boldLabel, GUILayout.Width(axisLabelWidth));
+                if (i == 0)
+                    firstAxisLabelRect = GUILayoutUtility.GetLastRect();
+
+                using (new EditorGUI.DisabledScope(true))
+                    EditorGUILayout.FloatField(axisValues[i], GUILayout.Width(valueWidth), GUILayout.ExpandWidth(false));
+                if (i == 0)
+                    firstAxisValueRect = GUILayoutUtility.GetLastRect();
+                lastAxisValueRect = GUILayoutUtility.GetLastRect();
+
+                if (i < axes.Length - 1)
+                    GUILayout.Space(pairGapWidth);
+            }
+
+            EditorRowEnd();
         }
 
         // Toggles a POI's verification status with confirmation gating when unlocking.
