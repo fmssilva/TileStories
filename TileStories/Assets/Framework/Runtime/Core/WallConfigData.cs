@@ -83,9 +83,8 @@ namespace TileStories
         public DisplacementSettings displacement_settings = new();
 
         // Optional marker/label/badge/cluster orientation settings (spec _2.1 section 7).
-        // Absent -> OrientationSettings' own field defaults, chosen so an existing
-        // config.json with no orientation_settings block behaves exactly as the app
-        // did before this domain shipped (screen_aligned, no roll snap, no pitch clamp).
+        // Absent -> OrientationSettings' own field defaults: world_up vertical alignment,
+        // always_facing_camera facing, every_frame updates.
         public OrientationSettings orientation_settings = new();
 
         // --- Custom keyword field definitions (spec _2.6 section 3 / 15) ---
@@ -409,10 +408,10 @@ namespace TileStories
         // 0.5s at Level 1 down to 0.25s at Level 5.
         public float reveal_duration_s;
 
-        // Empty string = inherit the wall's marker_orientation_mode. Lets hero levels
-        // stay screen_aligned for legibility while background levels sit flat on the
-        // wall (_2.1_Marker_Orientation.md section 4.3).
-        public string orientation_mode_override = "";
+        // Empty string = inherit the wall's facing_mode. Lets hero levels stay
+        // always_facing_camera for legibility while background levels sit flat on the
+        // wall via wall_fixed (_2.1_Marker_Orientation.md section 4.3).
+        public string facing_mode_override = "";
     }
 
     [Serializable]
@@ -423,24 +422,17 @@ namespace TileStories
         public string category;
 
         // Edit-scene yaw (degrees) around the marker's up/Y axis, authored via the Scene
-        // view Rotate tool or the Position foldout's rotation slider. For every
-        // orientation_mode EXCEPT wall_fixed, MarkerBillboard ignores this and always
-        // faces the marker to the camera -- this only tilts the rig marker in the Editor
-        // Scene view so the developer can place/preview it from a chosen angle.
-        // CORRECTED (_2.1_Marker_Orientation.md Block 4, 2026-09-18): this was
-        // previously documented as dead-at-runtime data unconditionally; that stopped
-        // being true once marker_orientation_mode == "wall_fixed" shipped, which reads
-        // this value at runtime as the marker's actual painted-on-the-wall rotation
-        // (WallSession.SpawnPOIs sets the spawned marker's initial localRotation from
-        // this field, which MarkerBillboard.Configure then captures as "authored").
+        // view Rotate tool or the Specific Marker Facing Options slider. Which facing_mode
+        // values actually read this at runtime (_2.1_Marker_Orientation.md section 4):
+        // wall_fixed uses all three authored angles unchanged; yaw_only uses X/Z (the wall
+        // tilt) but replaces this Y value with a live camera-facing yaw every frame;
+        // always_facing_camera ignores all three and always faces the camera. Kept under
+        // its original name for backward compatibility with existing config.json files.
         public float editor_rotation_deg;
 
-        // Edit-scene pitch/roll (degrees) around the marker's X and Z axes. Added
-        // alongside the yaw-only editor_rotation_deg (the Y axis, kept under its
-        // original name for backward compatibility with existing config.json files).
-        // Together the three angles fully orient the rig marker in the Scene view, and
-        // (as of orientation_mode == "wall_fixed" - see editor_rotation_deg's own comment
-        // above) the runtime marker when that mode is selected.
+        // Edit-scene pitch/roll (degrees) around the marker's X and Z axes, authored
+        // alongside editor_rotation_deg (the Y/yaw axis). See that field's comment for
+        // which facing_mode values read these at runtime.
         public float editor_rotation_x_deg;
         public float editor_rotation_z_deg;
 
@@ -633,42 +625,37 @@ namespace TileStories
         }
     }
 
-    // Marker / label / badge / cluster orientation settings (spec _2.1 section 4).
-    // Every field is developer-selectable in the POI Editor's Global Scene >
-    // Orientation section -- nothing here is a hardcoded framework choice.
+    // Marker / label / badge / cluster orientation settings (_2.1_Marker_Orientation.md
+    // v4). Two orthogonal domains: Vertical Alignment (which way "up" is) and Facing
+    // Options (what the marker points at), plus Update Cost. Every field is
+    // developer-selectable in the POI Editor's Global Scene > Orientation section --
+    // nothing here is a hardcoded framework choice, except the small always-on rotation
+    // smoothing and always_facing_camera's degenerate-angle pitch guard, which are
+    // implementation details, not developer decisions (v3 exposed both as fields and
+    // that turned out to be unnecessary complexity for a first version).
     [Serializable]
     public class OrientationSettings
     {
-        // --- marker root ---
-        public string marker_orientation_mode = "screen_aligned";
-            // screen_aligned | world_up | yaw_only | wall_fixed | none
-        public string facing_basis = "view_plane";        // view_plane | camera_position
-        public string up_reference  = "world_gravity";    // world_gravity | spawn_root | custom
+        // --- Vertical Alignment ---
+        public string vertical_alignment_mode = "world_up";        // world_up | screen_up (marker root)
+        public string label_vertical_alignment_mode = "inherit";   // inherit | world_up | screen_up
+        public string badge_vertical_alignment_mode = "inherit";   // inherit | world_up | screen_up
+        public string cluster_vertical_alignment_mode = "inherit"; // inherit | world_up | screen_up
+        public string up_reference = "world_gravity";              // world_gravity | spawn_root | custom
         public float custom_up_x = 0f, custom_up_y = 1f, custom_up_z = 0f;
 
-        // --- roll / pitch conditioning ---
-        public string roll_snap_mode = "none";            // none | quarter_turns | screen_orientation
-        public float roll_snap_hysteresis_deg = 15f;
-        public bool  clamp_pitch_enabled = false;
-        public float max_pitch_deg = 75f;
-        public float rotation_smoothing_time_s = 0f;      // 0 = instant
+        // --- Facing Options ---
+        public string facing_mode = "always_facing_camera";
+            // wall_fixed | yaw_only | always_facing_camera
+        public string facing_basis = "view_plane";                 // view_plane | camera_position (always_facing_camera only)
 
-        // --- child elements ---
-        public string label_orientation_mode = "inherit"; // inherit | screen_up | world_up
-        public string badge_orientation_mode = "inherit"; // inherit | screen_up | world_up
-        public string badge_corner_mode = "inherit";      // inherit | screen_fixed
-
-        // --- cluster aggregates ---
-        public string cluster_orientation_mode = "inherit";
-            // inherit | screen_aligned | world_up | yaw_only | none
-
-        // --- cost control ---
+        // --- Update Cost ---
         public string update_mode = "every_frame";        // every_frame | interval | on_camera_delta
         public float update_interval_s = 0.05f;
         public float camera_delta_deg  = 0.5f;
 
-        // --- editor ---
-        public bool edit_mode_preview_enabled = false;    // section 14
+        // --- Test ---
+        public bool edit_mode_preview_enabled = false;
 
         // Parameterless constructor (required because the copy constructor below
         // would otherwise suppress the compiler-generated default).
@@ -680,21 +667,16 @@ namespace TileStories
         public OrientationSettings(OrientationSettings other)
         {
             if (other == null) return;
-            marker_orientation_mode = other.marker_orientation_mode;
-            facing_basis = other.facing_basis;
+            vertical_alignment_mode = other.vertical_alignment_mode;
+            label_vertical_alignment_mode = other.label_vertical_alignment_mode;
+            badge_vertical_alignment_mode = other.badge_vertical_alignment_mode;
+            cluster_vertical_alignment_mode = other.cluster_vertical_alignment_mode;
             up_reference = other.up_reference;
             custom_up_x = other.custom_up_x;
             custom_up_y = other.custom_up_y;
             custom_up_z = other.custom_up_z;
-            roll_snap_mode = other.roll_snap_mode;
-            roll_snap_hysteresis_deg = other.roll_snap_hysteresis_deg;
-            clamp_pitch_enabled = other.clamp_pitch_enabled;
-            max_pitch_deg = other.max_pitch_deg;
-            rotation_smoothing_time_s = other.rotation_smoothing_time_s;
-            label_orientation_mode = other.label_orientation_mode;
-            badge_orientation_mode = other.badge_orientation_mode;
-            badge_corner_mode = other.badge_corner_mode;
-            cluster_orientation_mode = other.cluster_orientation_mode;
+            facing_mode = other.facing_mode;
+            facing_basis = other.facing_basis;
             update_mode = other.update_mode;
             update_interval_s = other.update_interval_s;
             camera_delta_deg = other.camera_delta_deg;

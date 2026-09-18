@@ -501,12 +501,12 @@ internal enum ReloadGuardChoice
                 var child = rig.Find(poi.id);
                 if (child == null) continue;
 
-                string modeOverride = MarkerHierarchyResolver.ResolveOrientationOverride(poi.hierarchy_level_key);
+                string facingModeOverride = MarkerHierarchyResolver.ResolveFacingModeOverride(poi.hierarchy_level_key);
                 Quaternion authored = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
 
                 var result = MarkerOrientationResolver.ResolveRootRotation(
-                    settings, modeOverride, child.position, previewCamera.transform.position, previewCamera.transform.forward,
-                    screenUp, upReference, parentRotation, authored, 0f, ScreenOrientationSource.Current);
+                    settings, facingModeOverride, child.position, previewCamera.transform.position, previewCamera.transform.forward,
+                    screenUp, upReference, parentRotation, authored);
 
                 if (result.Resolved)
                     child.rotation = result.Rotation;

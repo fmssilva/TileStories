@@ -31,7 +31,15 @@ write all this with all important details BUT IN A CONCISE MANNER. I WANT TO BE 
 
 
 # future task?? 
-A *stable `key` + `label`* split for categories (like `badge_categories` already has) is architecturally "cleaner" but is a __schema + every-consumer change__ (schema, CategoryPalette, search/filter/minimap/results, editor dropdowns, tests, config backfill) — big and risky for one wall today. The propagated-string approach keeps the current schema, fixes your exact failure, matches the existing POI-rename pattern, and is genuinely small. If a second wall later needs real display-name independence, the `key`/`label` migration can happen then (badge is the template
+A *stable `key` + `label`* split for categories (like `badge_categories` already has) is argitchitecturally "cleaner" but is a __schema + every-consumer change__ (schema, CategoryPalette, search/filter/minimap/results, editor dropdowns, tests, config backfill) — big and risky for one wall today. The propagated-string approach keeps the current schema, fixes your exact failure, matches the existing POI-rename pattern, and is genuinely small. If a second wall later needs real display-name independence, the `key`/`label` migration can happen then (badge is the template
+
+
+# `Change Task - No Backward compatibility - No dead code`
+So do a deep analyis of all these reorganization ideas i said now. Confirm if they are good ideas and more simple and clear and easy to use and understand... AND confirm if we can implement them in an easy way with simple clean and wwell organized code... AND so confirm if we do it in a clean way and changing everything necessary in the files etc... because this is the first vrsion of the project, so lets not have backward compatibility concerns, for example trying to keep the plan described in the guide proj_guides\_2.1_Marker_Orientation.md... lets just think the best way to implement things in a clean way, and if needed we implement everything new and we change things as we want to make them clear and well organized... and then also make sure we don't leave any deade code from the previous plan...
+
+so this is a big task... make a good plan before you act...
+
+
 
 # `claude agent`
 - **GATE TASK:** start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
@@ -47,12 +55,24 @@ A *stable `key` + `label`* split for categories (like `badge_categories` already
 So start by reading them all. 
 
 ## `and now:`
-- lets make a deep review of the "orientation domain". read the file:
+- i was already implementing all the features of the "orientation domain" describeed in the file: 
 C:\Users\franc\Desktop\TileStories\proj_guides\_2.1_Marker_Orientation.md
-and so confirm step by step, block by block what we already implemented and tested well in this project and what is missing. 
 
-- also when needed check the editor window guide for better context:
+also when needed check the editor window guide for better context:
 C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
+
+and so lets confirm and refine some things in the whole Orientation domain/component:
+
+a) in the Test sub component, we have those 2 rows, each with "info" buttons.
+but lets simplify things. 
+lets leave the Edit Mode Preview row as is... and then bellow, instead of having a row with a "i" button, lets instead put that whole information text with the steps of how to test each field in the scene and/or play mode... so lets put that text directly in a big text field like if it was a normal row... so we can have it always visible in an easy way while we execute the test procedures... or if you think is better and easy... maybe we can even put it in a sort of detached window that we can  drag and place like any other window like the "hierarchy" or Console", and so this way we an have that "test guide" open at the same time we do other things... 
+
+b) the "up reference" and the Facing Basis" rows have some too big ident... can you see in the image? coonfirm what is wrong and make those rows to be aligned left vertially with the other rows
+AND, in fact, lets also change the other rows themselves... so lets move this whole "third level" identation a bit closer to the left side, so a narrower identation... make it for example just 1cm after the second level rows (Vertical Alignemnt, Facing Options, etc..). For you to see an example, see the specific marker tab, where we have already some good formating third level of rows, not too much idented forward. and so maybe use the same identation, and maybe just a bit less... 
+AND, can we standardize this whole identation distances for second and third level rows? and so we use some sort of constant or something so we make it easy to configure and update and change... AND if it is a good idea, think the best way to implement it, and then update the file to reflect that guideline for future agents to know how to make good rows well formated right from the begining:
+C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
+AND if we indeed create this sort of "global row identation system"... so maybe we can also include there the spacing we also put on the right side to avoid the scroll bar then covring up the right edge f the rows... formating system or row identation on the left 
+AND so if we implemnt some better global system foor this whole row identation and spacing management... so update the 5_Editor file, AND also update all rows in the whole Editor Window in all components and sub components to use those measurements etc... 
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

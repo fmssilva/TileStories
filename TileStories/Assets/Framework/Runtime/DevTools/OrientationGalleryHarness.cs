@@ -115,14 +115,12 @@ namespace TileStories
 
             var settings = new OrientationSettings
             {
-                marker_orientation_mode = entry.MarkerMode,
+                vertical_alignment_mode = entry.VerticalAlignmentMode,
+                facing_mode = entry.FacingMode,
                 facing_basis = entry.FacingBasis,
                 up_reference = entry.UpReference,
-                label_orientation_mode = entry.LabelMode,
-                badge_orientation_mode = entry.BadgeMode,
-                badge_corner_mode = entry.BadgeCornerMode,
-                roll_snap_mode = entry.RollSnapMode,
-                clamp_pitch_enabled = entry.ClampPitch,
+                label_vertical_alignment_mode = entry.LabelMode,
+                badge_vertical_alignment_mode = entry.BadgeMode,
             };
 
             var billboard = mgo.GetComponent<MarkerBillboard>();

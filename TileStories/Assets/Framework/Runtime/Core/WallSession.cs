@@ -224,11 +224,10 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
 
                 go.transform.localPosition = localPos;
                 // The POI's authored editor rotation, so MarkerBillboard.Configure (below)
-                // captures it as the "authored" rotation wall_fixed mode uses at runtime
-                // (_2.1_Marker_Orientation.md section 13 point 2 - editor_rotation_x/y/z_deg
-                // stops being Editor-preview-only dead data once wall_fixed ships). Every
-                // other mode ignores this value entirely, so setting it unconditionally here
-                // changes nothing for screen_aligned/world_up/yaw_only/none.
+                // captures it as the "authored" rotation wall_fixed uses fully and yaw_only
+                // uses partially (X/Z) at runtime (_2.1_Marker_Orientation.md section 13
+                // point 2). always_facing_camera ignores this value entirely, so setting it
+                // unconditionally here changes nothing for that facing mode.
                 go.transform.localRotation = Quaternion.Euler(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
                 go.name = poi.id;
 
@@ -262,8 +261,8 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
                 var billboard = go.GetComponentInChildren<MarkerBillboard>();
                 if (billboard != null)
                 {
-                    string orientationOverride = MarkerHierarchyResolver.ResolveOrientationOverride(poi.hierarchy_level_key);
-                    billboard.Configure(_config.orientation_settings, orientationOverride, MarkerSpawnRoot);
+                    string facingModeOverride = MarkerHierarchyResolver.ResolveFacingModeOverride(poi.hierarchy_level_key);
+                    billboard.Configure(_config.orientation_settings, facingModeOverride, MarkerSpawnRoot);
                 }
 
                 _spawnedPOIs.Add(go);

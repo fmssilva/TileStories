@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace TileStories.Tests
 {
-    // Phase A tests for the orientation domain (_2.1_Marker_Orientation.md Block 3 / section
+    // Phase A tests for the orientation domain (_2.1_Marker_Orientation.md v4 section
     // 15). Driven by OrientationGalleryDefinitions.Entries, spawned through the same
     // OrientationGalleryHarness.SpawnEntry path the visual harness uses -- the composition
     // guarantee 40-testing.md 4.2.1 asks for (a real call site, not a hand-built stand-in).
@@ -79,9 +79,20 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator Entry1_ScreenAligned_Defaults_RootUpMatchesScreenUp()
+        public IEnumerator Entry1_WorldUp_AlwaysFacingCamera_Default_RootUpMatchesGravity_DespiteCameraRoll()
         {
             var entry = OrientationGalleryDefinitions.Entries[0];
+            var go = Spawn(entry, 0);
+            _cam.transform.rotation = Quaternion.Euler(0f, 0f, 45f); // roll only (see Entry2's own pitch+roll note)
+            yield return null;
+
+            Assert.Less(Vector3.Angle(go.transform.rotation * Vector3.up, Vector3.up), 0.5f);
+        }
+
+        [UnityTest]
+        public IEnumerator Entry2_ScreenUp_AlwaysFacingCamera_RootUpMatchesScreenUp()
+        {
+            var entry = OrientationGalleryDefinitions.Entries[1];
             var go = Spawn(entry, 0);
             _cam.transform.rotation = Quaternion.Euler(10f, 15f, 20f); // includes roll
             yield return null;
@@ -91,25 +102,9 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator Entry3_WorldUp_RootUpMatchesGravity_DespiteCameraRoll()
+        public IEnumerator Entry4_WallFixed_UsesAuthoredLocalRotation()
         {
-            var entry = OrientationGalleryDefinitions.Entries[2]; // world_up / view_plane / world_gravity
-            var go = Spawn(entry, 0);
-            // Roll only, no pitch: when the camera's forward has pitch, an orthonormal
-            // LookRotation basis mathematically cannot keep up exactly at world gravity AND
-            // forward exactly at that pitch (up must stay perpendicular to forward) - the
-            // roll-independence guarantee this mode makes is about ROLL, not pitch (mirrors
-            // the Block 2 resolver test's own camera setup).
-            _cam.transform.rotation = Quaternion.Euler(0f, 0f, 45f);
-            yield return null;
-
-            Assert.Less(Vector3.Angle(go.transform.rotation * Vector3.up, Vector3.up), 0.5f);
-        }
-
-        [UnityTest]
-        public IEnumerator Entry8_WallFixed_UsesAuthoredLocalRotation()
-        {
-            var entry = OrientationGalleryDefinitions.Entries[7]; // wall_fixed
+            var entry = OrientationGalleryDefinitions.Entries[3]; // world_up / wall_fixed
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
 
             // Author a local rotation before spawn - SpawnEntry's MarkerBillboard.Configure
@@ -122,7 +117,7 @@ namespace TileStories.Tests
             var go = Object.Instantiate(prefab);
             _spawned.Add(go);
             go.transform.localRotation = authored;
-            var settings = new OrientationSettings { marker_orientation_mode = entry.MarkerMode };
+            var settings = new OrientationSettings { vertical_alignment_mode = entry.VerticalAlignmentMode, facing_mode = entry.FacingMode };
             var anchor = go.GetComponent<POIAnchor>() ?? go.AddComponent<POIAnchor>();
             anchor.Initialise(new POIData { id = "wallfixed", name = "wallfixed", category = "religious" });
             var view = go.GetComponentInChildren<MarkerView>();
@@ -134,6 +129,21 @@ namespace TileStories.Tests
             yield return null;
 
             Assert.Less(Quaternion.Angle(go.transform.rotation, authored), 0.01f);
+        }
+
+        [UnityTest]
+        public IEnumerator Entry5_YawOnly_RollHasNoEffect()
+        {
+            var entry = OrientationGalleryDefinitions.Entries[4]; // world_up / yaw_only
+            var go = Spawn(entry, 0);
+            yield return null;
+            Quaternion beforeRoll = go.transform.rotation;
+
+            _cam.transform.rotation = Quaternion.Euler(0f, 0f, 70f); // roll only, no yaw/pitch change
+            yield return null;
+
+            Assert.Less(Quaternion.Angle(beforeRoll, go.transform.rotation), 1f,
+                "yaw_only must not react to camera roll at all - only camera position drives its yaw");
         }
 
         [UnityTest]
@@ -153,19 +163,20 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator Entry12_ScreenAlignedLabelScreenUp_RootMatchesEntry1()
+        public IEnumerator Entry8_WorldUpLabelScreenUp_RootMatchesEntry1()
         {
             var entry1 = OrientationGalleryDefinitions.Entries[0];
-            var entry12 = OrientationGalleryDefinitions.Entries[11];
-            Assert.AreEqual("screen_aligned", entry12.MarkerMode);
-            Assert.AreEqual("screen_up", entry12.LabelMode);
+            var entry8 = OrientationGalleryDefinitions.Entries[7];
+            Assert.AreEqual("world_up", entry8.VerticalAlignmentMode);
+            Assert.AreEqual("screen_up", entry8.LabelMode);
 
             var go1 = Spawn(entry1, 0);
-            var go12 = Spawn(entry12, 1);
+            var go8 = Spawn(entry8, 1);
             _cam.transform.rotation = Quaternion.Euler(8f, 12f, 25f);
             yield return null;
 
-            Assert.Less(Quaternion.Angle(go1.transform.rotation, go12.transform.rotation), 0.1f);
+            Assert.Less(Quaternion.Angle(go1.transform.rotation, go8.transform.rotation), 0.1f,
+                "an independent Label vertical-alignment override must never change the root's own rotation");
         }
 
         // Tier 0.5 - occlusion / actually-clickable check (40-testing.md section 4.5).
@@ -184,24 +195,17 @@ namespace TileStories.Tests
             Assert.IsTrue(IsTopmostRaycastTarget(symbolRect, _cam), "Symbol should be the topmost raycast target at its own centre");
         }
 
-        // Tier 0.5 - minimum tap target, in projected form (40-testing.md section 4.5 /
-        // WCAG 2.5.5). yaw_only at max pitch foreshortens the Symbol; assert its projected
-        // screen height still clears 44px at the gallery's reference distance.
+        // Tier 0.5 - minimum tap target (40-testing.md section 4.5 / WCAG 2.5.5). A
+        // visitor standing almost directly below an always_facing_camera marker is the
+        // one geometry that could tip it edge-on; the resolver's hardcoded pitch clamp
+        // (MarkerOrientationResolver.AlwaysFacingCameraMaxPitchDeg) exists specifically
+        // to stop that. Assert the projected Symbol height still clears 44px there.
         [UnityTest]
-        public IEnumerator Entry7_YawOnlyClampPitch_SymbolProjectedHeightMeetsMinimumTapTarget()
+        public IEnumerator Entry1_AlwaysFacingCamera_NearCameraBelow_SymbolProjectedHeightMeetsMinimumTapTarget()
         {
-            var entry = OrientationGalleryDefinitions.Entries[6]; // yaw_only / clamp pitch on
+            var entry = OrientationGalleryDefinitions.Entries[0]; // world_up / always_facing_camera
             var go = Spawn(entry, 0);
-            // Reference distance: a plausible close-up AR interaction distance, not the
-            // gallery's default 3m (at 1.5m+ with a default ~60deg FOV camera, this 12cm
-            // fallback-hierarchy Symbol projects under 10px REGARDLESS of angle - that's
-            // just camera/distance geometry, not the orientation-specific foreshortening
-            // this check exists to catch; verified empirically before settling on 0.4m).
-            const float viewDistance = 0.4f;
-            const float elevationDeg = 45f; // steep viewing angle up the wall
-            float horizontal = viewDistance * Mathf.Cos(elevationDeg * Mathf.Deg2Rad);
-            float vertical = viewDistance * Mathf.Sin(elevationDeg * Mathf.Deg2Rad);
-            _cam.transform.position = new Vector3(0f, vertical, -horizontal);
+            _cam.transform.position = new Vector3(0.05f, -0.35f, 0f); // almost straight below, close range
             _cam.transform.LookAt(go.transform.position);
             yield return null;
 

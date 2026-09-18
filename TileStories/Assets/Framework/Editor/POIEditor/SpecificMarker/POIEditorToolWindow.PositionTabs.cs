@@ -36,21 +36,25 @@ namespace TileStories.Editor
 
             var position = poi.position;
 
-            // Layout order is intentionally fixed: rotation first, coords second. The
+            // Layout order is intentionally fixed: facing options first, coords second. The
             // Verified toggle now lives on this foldout's own header row (see
             // DrawPositionHeaderTrailing) instead of at the bottom of this content, so it
             // reads as "commit this position" next to the foldout title itself.
             // Shared row: label keeps a fixed width; slider takes rowWidth minus the
             // label + spacing, inside the capped row (level-2 indent measured at call time).
-            DrawEditorRow(out float rotationRow, out _);
+            // Named "Facing Options" (not "Rotation") to match the global Orientation
+            // section's own Facing Options domain -- this Y slider (plus the Scene view's
+            // X/Z rotate gizmo) is exactly the per-POI angle data that domain's Wall Fixed
+            // and Y Rotation Only modes read at runtime (_2.1_Marker_Orientation.md v4).
+            DrawEditorRow(out float facingRow, out _);
             {
-                EditorGUILayout.LabelField("Rotation", EditorStyles.boldLabel, GUILayout.Width(92f));
+                EditorGUILayout.LabelField("Facing", EditorStyles.boldLabel, GUILayout.Width(92f));
                 DrawConfigMutationScope(
                     () =>
                     {
                         const float infoButtonWidth = 26f;
                         const float infoButtonGap = 4f;
-                        float sliderW = Mathf.Max(120f, rotationRow - 104f - infoButtonWidth - infoButtonGap);
+                        float sliderW = Mathf.Max(120f, facingRow - 104f - infoButtonWidth - infoButtonGap);
                         poi.editor_rotation_deg = EditorGUILayout.Slider(poi.editor_rotation_deg, 0f, 360f,
                             GUILayout.Width(sliderW), GUILayout.ExpandWidth(false));
                         if (GUI.changed)
@@ -58,7 +62,7 @@ namespace TileStories.Editor
                     },
                     refreshRigOnChange: false);
                 GUILayout.Space(4f);
-                HelpInfoButton.Draw("Rotation", EditRotationHelpBody);
+                HelpInfoButton.Draw("Facing Options", EditRotationHelpBody);
             }
             EditorRowEnd();
 

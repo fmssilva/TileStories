@@ -631,16 +631,16 @@ namespace TileStories.Editor
                     HelpInfoButton.Draw("Reveal Delay vs Duration",
                         "Delay: seconds after spawn before the fade/scale-in begins.\nDuration: how long the fade/scale-in animation itself takes. A longer delay staggers appearance; a longer duration makes each marker enter more slowly. Default: 0.5s L1 -> 0.25s L5.");
 
-                    // Column 11: Orientation override (_2.1_Marker_Orientation.md section 4.3).
-                    // "" = inherit the wall's marker_orientation_mode.
+                    // Column 11: Facing Options override (_2.1_Marker_Orientation.md section 4.3).
+                    // "" = inherit the wall's facing_mode.
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        int orientIdx = Array.IndexOf(OrientationOverrideOptions, entry.orientation_mode_override ?? "");
-                        if (orientIdx < 0) orientIdx = 0;
-                        orientIdx = EditorGUILayout.Popup("Orientation", orientIdx, OrientationOverrideLabels, GUILayout.Width(150f));
-                        entry.orientation_mode_override = OrientationOverrideOptions[orientIdx];
-                        HelpInfoButton.Draw("Orientation Override",
-                            "Overrides the wall's Marker Orientation mode for POIs at this hierarchy level only. Inherit (default) uses the wall setting above. Lets hero levels stay Screen Aligned for legibility while background levels sit flat on the wall (Wall Fixed).");
+                        int facingIdx = Array.IndexOf(FacingModeOverrideOptions, entry.facing_mode_override ?? "");
+                        if (facingIdx < 0) facingIdx = 0;
+                        facingIdx = EditorGUILayout.Popup("Facing", facingIdx, FacingModeOverrideLabels, GUILayout.Width(150f));
+                        entry.facing_mode_override = FacingModeOverrideOptions[facingIdx];
+                        HelpInfoButton.Draw("Facing Options Override",
+                            "Overrides the wall's Facing Options mode for POIs at this hierarchy level only. Inherit (default) uses the wall setting above. Lets hero levels stay Always Facing Camera for legibility while background levels sit flat on the wall (Wall Fixed).");
                     }
 
                     // Column 12: Remove (trash button)

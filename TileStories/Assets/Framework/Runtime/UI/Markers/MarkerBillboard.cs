@@ -9,43 +9,52 @@ namespace TileStories
     // on top. DO NOT RENAME this class - POI_Marker.prefab references it by script GUID.
     public class MarkerBillboard : MonoBehaviour
     {
+        // Always-on smoothing against AR pose jitter. Not developer-exposed
+        // (_2.1_Marker_Orientation.md v4: "just implement it to work normally and
+        // smooth" -- v3's exposed 0=instant toggle was unnecessary complexity).
+        private const float RotationSmoothingTimeS = 0.12f;
+
         private Camera _camera;
 
         private OrientationSettings _settings = new();
-        private string _modeOverride = "";
+        private string _facingModeOverride = "";
         private Transform _spawnRoot;
         private Quaternion _authoredLocalRotation = Quaternion.identity;
         private MarkerChildOrientation[] _children = Array.Empty<MarkerChildOrientation>();
 
-        private float _snappedRollDeg;
         private float _lastUpdateTime;
         private Vector3 _lastCamForward;
         private bool _hasLastCamForward;
+        private bool _hasResolvedOnce;
 
         // Test-only visibility into the settings this marker was actually configured
         // with, so integration tests can assert the real WallSession -> Configure
         // composition without reaching for reflection on a private field.
         internal OrientationSettings ConfiguredSettings => _settings;
-        internal string ConfiguredModeOverride => _modeOverride;
+        internal string ConfiguredModeOverride => _facingModeOverride;
 
         // The ONE entry point for driving this marker's orientation. Called by
         // WallSession.SpawnPOIs at runtime, by the Editor rig path (section 14), and by
         // the orientation gallery harness/tests. Never called per frame. Snapshots the
-        // marker's current localRotation as the "authored" rotation wall_fixed mode uses.
-        public void Configure(OrientationSettings settings, string modeOverride, Transform spawnRoot)
+        // marker's current localRotation as the "authored" rotation wall_fixed/yaw_only use.
+        public void Configure(OrientationSettings settings, string facingModeOverride, Transform spawnRoot)
         {
             _settings = settings ?? new OrientationSettings();
-            _modeOverride = modeOverride ?? "";
+            _facingModeOverride = facingModeOverride ?? "";
             _spawnRoot = spawnRoot;
             _authoredLocalRotation = transform.localRotation;
+            // Re-Configure (e.g. a pooled cluster view reused for a different aggregate)
+            // must snap to the new correct rotation immediately, not smooth in from
+            // whatever rotation this object happened to have from its previous use.
+            _hasResolvedOnce = false;
 
             _children = GetComponentsInChildren<MarkerChildOrientation>(true);
             foreach (var child in _children)
             {
                 if (child.gameObject.name == "Label")
-                    child.Configure(_settings.label_orientation_mode, "inherit");
+                    child.Configure(_settings.label_vertical_alignment_mode);
                 else if (child.gameObject.name == "Badge")
-                    child.Configure(_settings.badge_orientation_mode, _settings.badge_corner_mode);
+                    child.Configure(_settings.badge_vertical_alignment_mode);
             }
         }
 
@@ -94,15 +103,20 @@ namespace TileStories
             Quaternion parentRotation = transform.parent != null ? transform.parent.rotation : Quaternion.identity;
 
             var result = MarkerOrientationResolver.ResolveRootRotation(
-                _settings, _modeOverride, transform.position, _camera.transform.position, _camera.transform.forward,
-                screenUp, upReference, parentRotation, _authoredLocalRotation, _snappedRollDeg, ScreenOrientationSource.Current);
+                _settings, _facingModeOverride, transform.position, _camera.transform.position, _camera.transform.forward,
+                screenUp, upReference, parentRotation, _authoredLocalRotation);
 
             if (result.Resolved)
             {
-                _snappedRollDeg = result.SnappedRollDeg;
-                transform.rotation = _settings.rotation_smoothing_time_s > 0f
-                    ? Quaternion.Slerp(transform.rotation, result.Rotation, 1f - Mathf.Exp(-Time.deltaTime / _settings.rotation_smoothing_time_s))
+                // The very first resolve after (re)Configure snaps immediately - a freshly
+                // spawned or reused marker must already show its correct orientation on its
+                // first visible frame, never visibly rotate in from an arbitrary starting
+                // pose. Smoothing only applies to subsequent frames, against real camera
+                // movement / AR pose jitter.
+                transform.rotation = _hasResolvedOnce
+                    ? Quaternion.Slerp(transform.rotation, result.Rotation, 1f - Mathf.Exp(-Time.deltaTime / RotationSmoothingTimeS))
                     : result.Rotation;
+                _hasResolvedOnce = true;
             }
             // else: degenerate input this frame - keep the previous rotation unchanged.
 

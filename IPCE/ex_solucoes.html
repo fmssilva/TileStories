@@ -1,0 +1,2628 @@
+
+<!-- saved from url=(0055)http://mooshak.di.fct.unl.pt/~moo-amd/ampola/zsols.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
+<body>
+
+<pre>---------------------------
+09
+
+def distance(sec: int) -&gt; int:
+    return 340 * sec
+
+def main() -&gt; None:
+    s = int(input("Segundos: "))
+    print(f"A trovoada está a {distance(s)} metros de distância.")
+
+main()
+
+---------------------------
+10
+
+def seconds(h: int, m: int, s: int) -&gt; int:
+    return h * 3600 + m * 60 + s
+
+def main() -&gt; None:
+    h = int(input("Horas: "))
+    m = int(input("Minutos: "))
+    s = int(input("Segundos: "))
+    print(seconds(h, m, s))
+
+main()
+
+---------------------------
+11
+
+def seconds(t: int) -&gt; int:
+    return t % 60
+
+def minutes(t: int) -&gt; int:
+    return (t // 60) % 60
+
+def hours(t: int) -&gt; int:
+    return t // (60 * 60)
+
+def main() -&gt; None:
+    t = int(input("Duração: "))
+    print(f"Duração {t} corresponde a {hours(t)} horas, {minutes(t)} minutos e {seconds(t)} segundos.")
+
+main()
+
+
+---------------------------
+13
+
+def length(a: float, b: float, c: float) -&gt; float:
+    """ Length of a parallelepiped. """
+    return 4 * (a + b + c)
+
+def area(a: float, b: float, c: float) -&gt; float:
+    """ Area of a parallelepiped. """
+    return 2 * (a * b + b * c + a * c)
+
+def volume(a: float, b: float, c: float) -&gt; float:
+    """ Volume of a parallelepiped. """
+    return a * b * c
+
+def main() -&gt; None:
+    a = int(input("A: "))
+    b = int(input("B: "))
+    c = int(input("C: "))
+    print(f"Comprimento = {length(a, b, c)}")
+    print(f"Área = {area(a, b, c)}")
+    print(f"Volume = {volume(a, b, c)}")
+
+main()
+
+---------------------------
+15
+
+Equações:
+
+t = tempo até ouvir-se a pedra (valor conhecido)
+q = tempo a cair
+s = tempo do som a viajar para cima
+x = altura que se pretende obter
+
+t = q+s
+x = 340*s
+x = 0.5*9.8*q^2
+
+Resolver o sistema com três equações e três incógnitas. Queremos obter o valor de "x" em função de "t".
+
+Vale a pena discutir este problema no quadro, mas resolver o sistema até ao fim não é muito importante.
+
+Eliminar q e s:
+
+q = t-s
+s = x/340
+x = 0.5*9.8*(t-s)^2
+
+Fica só:
+
+x = 4.9*(t-x/340)^2
+
+Escrever sob a forma de equação quadrática sobre a variável&nbsp;x:
+
+x = 4.9 * (t^2 - 2*t*x/340 + (x/340)^2)
+(4.9/340^2)*x^2 - (1 + 9.8*t/340)*x + (4.9*t^2) = 0
+
+a = 4.9/340^2
+b = -(1 + 9.8*t/340)
+c = 4.9*t^2
+x = (-b +- sqrt(b^2-4ac))/(2*a)
+
+import math
+
+def height(t: float) -&gt; float:
+    """ Height of a cliff.
+        Precondition: t &gt;= 0
+    """
+    a = 4.9/(340**2)
+    b = -(1 + 9.8*t/340)
+    c = 4.9*t**2
+    return (-b - math.sqrt(b**2-4*a*c))/(2*a)
+
+def main() -&gt; None:
+    time = float(input("T: "))
+    if not time &gt;= 0:
+        print("Argumento inválido")
+    else:
+        print(height(time))
+
+main()
+
+
+
+
+---------------------------
+16
+
+def maximum(a: int, b: int) -&gt; int:
+    if a &gt;= b:
+        return a
+    else:
+        return b
+
+def main() -&gt; None:
+    a = int(input("A: "))
+    b = int(input("B: "))
+    print(maximum(a,b))
+
+main()
+
+---------------------------
+17
+
+def is_proper_triangle(a: float, b: float, c: float) -&gt; bool:
+    return a &gt; 0 and b &gt; 0 and c &gt; 0 and a + b &gt; c and a + c &gt; b and b + c &gt; a
+
+def triangle_kind(a: float, b: float, c: float) -&gt; float:
+    if is_proper_triangle(a, b, c):
+        if a == b and b == c:
+            return 1       # Equilateral triangle
+        else:
+            if a == b or a == c or b == c:
+                return 2  # Isosceles triangle
+        	else:
+                return 3  # Scalene triangle
+    else:
+        return 0  # Invalid triangle
+
+def main() -&gt; None:
+    a = float(input("A: "))
+    b = float(input("B: "))
+    c = float(input("C: "))
+    print(triangle_kind(a, b, c))
+
+main()
+
+---------------------------
+18
+
+def average(grade1: float, grade2: float) -&gt; float:
+    return (grade1 + grade2) / 2
+
+def passed(test1: float, test2: float, proj: float) -&gt; bool:
+    return pr &gt;= 9.5 and average(t1, t2) &gt;= 9.5
+
+def final_grade(test1: float, test2: float, proj: float) -&gt; float:
+    """ Precondition: passed(test1, test2, proj) """
+    return test1 * 0.4 + test2 * 0.4 + proj * 0.2
+
+def main() -&gt; None:
+    t1 = float(input("T1: "))
+    t2 = float(input("T2: "))
+    pr = float(input("PR: "))
+    if passed(t1, t2, pr):
+        print(final_grade(t1, t2, pr))
+    else:
+        print("REPROVADO")
+
+main()
+
+---------------------------
+19a
+
+def sum(n: int) -&gt; int:
+    sum = 0
+    for i in range(0,n,1):
+        sum = sum + i
+    return sum
+
+def main() -&gt; None:
+    x = int(input("Introduza um número natural: "))
+    print(sum(x))
+
+main()
+
+---------------------------
+19b
+
+def sum(n: int) -&gt; int:
+    sum = 0
+    for i in range(0,n,1):
+        sum = sum + i*i
+    return sum
+
+def main() -&gt; None:
+    x = int(input("Introduza um número natural: "))
+    print(sum(x))
+
+main()
+
+---------------------------
+20
+
+def is_leap_year(year: int) -&gt; bool:
+    return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+
+def year_length(year: int) -&gt; int:
+    if is_leap_year(year):
+        return 366
+    else:
+        return 365
+
+def main() -&gt; None:
+    a = int(input("A: "))
+    b = int(input("B: "))
+    for i in range(a, b + 1):
+        print(f"{i} {year_length(i)}")
+
+main()
+
+---------------------------
+21
+
+def read_and_sum(n: int) -&gt; int:
+    sum = 0
+    for i in range(0,n,1):
+        x = int(input(f"{i}&gt; "))
+        sum = sum + x
+    return sum
+
+def main() -&gt; None:
+    n = int(input("Introduza a quantidade de números a somar: "))
+    print(read_and_sum(n))
+
+main()
+
+---------------------------
+22
+
+
+---------------------------
+23
+
+def is_leap_year(year: int) -&gt; bool:
+    return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+
+def month_length(month: int, year: int) -&gt; int:
+    """ pre: 1 &lt;= month and month &lt;= 12 """"
+    if month in {1, 3, 5, 7, 8, 10, 12}:
+        return 31
+    elif month in {4, 6, 9, 11}:
+        return 30
+    elif is_leap_year(year):
+        return 29
+    else:
+        return 28
+
+def main() -&gt; None:
+    month = int(input("Mês: "))
+    year = int(input("Ano: "))
+    print(month_length(month, year))
+
+main()
+
+---------------------------
+24
+
+def is_leap_year(year: int) -&gt; bool:
+    return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+
+def month_length(month: int, year: int) -&gt; int:
+    """ Precondition: 1 &lt;= month &lt;= 12 """
+    if month in [1, 3, 5, 7, 8, 10, 12]:
+        return 31
+    elif month in [4, 6, 9, 11]:
+        return 30
+    elif is_leap_year(year):
+        return 29
+    else:
+        return 28
+
+def is_date_valid(day: int, month: int, year: int) -&gt; bool:
+    return (1 &lt;= month &lt;= 12
+            and 1 &lt;= day &lt;= month_length(month, year))
+
+def day_order(day: int, month: int, year: int) -&gt; int:
+    """ Precondition: is_date_valid(day, month, year) """
+    sum = day
+    for m in range(1, month):
+        sum += month_length(m, year)
+    return sum
+
+def main() -&gt; None:
+    day = int(input("Dia: "))
+    month = int(input("Mês: "))
+    year = int(input("Ano: "))
+    if is_date_valid(day, month, year):
+        print(day_order(day, month, year))
+    else:
+        print("DATA INVÁLIDA")
+
+main()
+
+---------------------------
+25
+
+def and_(a: bool, b: bool) -&gt; bool:
+    """ AND - Boolean operation. """
+    if a:
+        return b
+    else:
+        return False
+
+def or_(a: bool, b: bool) -&gt; bool:
+    """ OR - Boolean operation. """
+    if a:
+        return True
+    else:
+        return b
+
+def not_(a: bool) -&gt; bool:
+    """ NOT - Boolean operation. """
+    if a:
+        return False
+    else:
+        return True
+
+---------------------------
+26
+
+def quadratic_polynomial_value(a: float, b: float, c: float, x: float) -&gt; float:
+    """ Eval a quadratic polynomial for the given value x """
+    return a * x * x + b * x + c
+
+def print_table(a: float, b: float, c: float,
+                lower_bound: float, upper_bound: float,
+                n: int) -&gt; None:                # no result
+    """ Print table of values for a quadratic polynomial in a interval.
+        Precondition: lower_bound &lt; upper_bound and n &gt; 1
+    """
+    step = (upper_bound - lower_bound) / (n - 1)
+    for i in range(0,n,1):
+        x = lower_bound + i * step
+        y = quadratic_polynomial_value(a, b, c, x)
+        print(f"{x:.6f} {y:.6f}")
+
+def main() -&gt; None:
+    a = float(input("A: "))
+    b = float(input("B: "))
+    c = float(input("C: "))
+    lower_bound = float(input("LOWER: "))
+    upper_bound = float(input("UPPER: "))
+    n_points = int(input("N: "))
+    if not lower_bound &lt; upper_bound and n &gt; 1:
+        print("Argumentos inválidos")
+    else:
+        print_table(a, b, c, lower_bound, upper_bound, n_points)
+
+main()
+
+
+---------------------------
+27
+
+import math
+
+def discriminant(a: float, b: float, c: float) -&gt; float:
+    """ """
+    return b*b - 4*a*c
+
+def how_many_roots(a: float, b: float, c: float) -&gt; int:
+    """ """
+    d = discriminant(a, b, c)
+    if d &lt; 0:
+        return 0
+    elif d == 0:
+        return 1
+    else:
+        return 2
+
+def root_left(a: float, b: float, c: float) -&gt; float:
+    """ """
+    if a &gt; 0:
+        return (-b - math.sqrt(discriminant(a, b, c))) / (2*a)
+    else:
+        return (-b + math.sqrt(discriminant(a, b, c))) / (2*a)
+
+def root_right(a: float, b: float, c: float) -&gt; float:
+    """ """
+    if a &gt; 0:
+        return (-b + math.sqrt(discriminant(a, b, c)))/ (2*a)
+    else:
+        return (-b - math.sqrt(discriminant(a, b, c)))/ (2*a)
+
+def main() -&gt; None:
+    a = float(input("A: "))
+    b = float(input("B: "))
+    c = float(input("C: "))
+    n = how_many_roots(a, b, c)
+    if n == 0:
+        print("0")
+    elif n == 1:
+        print(f"1 {root_left(a,b,c)}")
+    else:
+        print(f"2 {root_left(a,b,c)} {root_right(a,b,c)}")
+
+main()
+
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+28
+
+import math
+
+def degrees_to_radians(degrees: float) -&gt; float:
+    """ pre: 0 &lt;= degrees and degrees &lt;= 360 """
+    return (degrees / 360) * 2 * math.pi
+
+def main() -&gt; None:
+    degrees = float(input("Introduza graus: "))
+    radians = degrees_to_radians(degrees)
+    print(f"{radians} radianos")
+
+main()
+
+---------------------------
+29
+
+import math
+  
+def log16(x: float) -&gt; float:
+    """ pre: x &gt; 0 """
+    return math.log(x)/math.log(16)
+
+def decimal_part(x: float) -&gt; float:
+    """ pre: x &gt; 0 """
+    return x - math.floor(x)
+        # return x % 1
+        # return x - int(x)
+        # return math.modf(x)
+
+def round_hundredths(x: float) -&gt; float:
+    """ pre: x &gt; 0 """
+    return math.floor(x * 100 + 0.5) / 100
+    # return round(x, 2)
+
+def main() -&gt; None:
+  # ler
+    x = float(input("Introduza um real positivo: "))
+  # calcular  
+    log_result = log16(x)
+    decimal_result = decimal_part(x)
+    rounded_result = round_hundredths(x)
+  # escrever  
+    print(f"log16({x:0.8f}) = {log_result:0.8f}")
+    print(f"decimal_part({x:0.8f}) = {decimal_result:0.8f}")
+    print(f"round_hundredths({x:0.8f}) = {rounded_result:0.8f}")
+
+main()
+
+---------------------------
+30
+
+import math
+
+def taylor_sin(x: float, n: int) -&gt; float:
+    signal = 1
+    sum = 0.0
+    num = x
+    den = 1.0
+    for i in range(0,n,1):
+        sum += signal * num / den
+        signal *= -1
+        num *= x * x
+        den *= (i * 2 + 2) * (i * 2 + 3)
+    return sum
+
+def main() -&gt; None:
+  # ler
+    x = float(input("X: "))
+    n = int(input("N: "))
+  # calcular  
+    sin_x = math.sin(x)
+    taylor_x = taylor_sin(x, n)
+  # escrever  
+    print(f"   sin({x}) = {sin_x:.15f}")
+    print(f"taylor({x}) = {taylor_x:.15f}")
+
+main()
+
+##################################
+# outra maneira
+def taylor_sin(x: float, n: int) -&gt; float:
+    sum = 0.0
+    for i in range(0,n,1):
+        sum += (-1) ** i * (x ** (2 * i + 1)) / math.factorial(2 * i + 1)
+    return sum
+
+---------------------------
+31
+
+import math
+
+def f(x: float) -&gt; float:
+    return math.sin(x) / x
+
+def print_table_f(h: float, n: int) -&gt; None:
+    print("    h      f(h)")
+    for i in range(0,n,1):
+       print(f"{h:.6f} {f(h):.6f}")
+       h /= 2
+
+def main() -&gt; None:
+    h = float(input("H: "))
+    n = int(input("N: "))
+    print_table_f(h, n)
+
+main()
+
+---------------------------
+32
+
+def draw_line(c: str, n: int) -&gt; None:
+    
+    for i in range(0,n,1):
+        print(c, end='')
+    print()
+
+def draw_square(c: str, n: int) -&gt; None:
+    for i in range(0,n,1):
+        draw_line(c, n)
+
+def main() -&gt; None:
+    n = int(input("Introduza o tamanho do lado: "))
+    draw_square('*', n)
+
+main()
+
+******
+******
+******
+******
+******
+******
+
+---------------------------
+33
+
+def draw_line(c: str, n: int) -&gt; None:
+    for i in range(0,n,1):
+        print(c, end='')
+    print()
+
+def draw_triangle(c: str, n: int) -&gt; None:
+    for i in range(0,n,1):
+        draw_line(c, i+1)
+
+def main() -&gt; None:
+    n = int(input("Introduza o tamanho do lado: "))
+    draw_triangle('*', n)
+
+main()
+
+*
+**
+***
+****
+*****
+******
+
+---------------------------
+34
+
+def draw_line(c: str, n: int) -&gt; None:
+    for i in range(0,n,1):
+        print(c, end='')
+    print()
+
+def draw_triangle_rev(c: str, n: int) -&gt; None:
+    for i in range(n-1,-1,-1):
+        draw_line(c, i+1)
+
+def main() -&gt; None:
+    n = int(input("Introduza o tamanho do lado: "))
+    draw_triangle_rev('*', n)
+
+main()
+
+******
+*****
+****
+***
+**
+*
+
+---------------------------
+35
+
+def draw_line(c: str, n: int) -&gt; None:
+    for i in range(0,n,1):
+        print(c, end='')
+    print()
+
+def f(x: float) -&gt; float:
+    return (x * x) / 6
+
+def draw_histogram(c: str, lim: int) -&gt; None:
+    for i in range(-lim,lim+1,1):
+        v = f(i)
+        r = round(v)
+        draw_line(c, r)
+
+def main() -&gt; None:
+    lim = int(input("Introduza o valor do limite: "))
+    draw_histogram('*', lim)
+
+main()
+
+*******************************************************************
+************************************************************
+******************************************************
+************************************************
+*******************************************
+**************************************
+*********************************
+****************************
+************************
+********************
+*****************
+**************
+***********
+********
+******
+****
+***
+**
+*
+
+
+
+*
+**
+***
+****
+******
+********
+***********
+**************
+*****************
+********************
+************************
+****************************
+*********************************
+**************************************
+*******************************************
+************************************************
+******************************************************
+************************************************************
+*******************************************************************
+
+---------------------------
+36
+
+def draw_full_line(c: str, n: int) -&gt; None:
+    for i in range(0,n,1):
+        print(c, end='')
+    print()
+
+def draw_hollow_line(c: str, n: int) -&gt; None:
+    if n == 0:
+        pass
+    elif n == 1:
+        print(c)
+    else:
+		print(c, end='')
+		for i in range(0,n-2,1):
+		    print(' ', end='')
+		print(c)
+
+def draw_frame(c: str, n: int) -&gt; None:
+    if n == 0:
+        pass
+    elif n == 1:
+        print(c)
+    else:
+        draw_full_line(c, n)
+        for i in range(0,n-2,1):
+            draw_hollow_line(c, n)
+        draw_full_line(c, n)
+
+def main() -&gt; None:
+    n = int(input("Introduza o tamanho do lado: "))
+    draw_frame('*', n)
+
+main()
+
+******
+*    *
+*    *
+*    *
+*    *
+******
+
+---------------------------
+37
+
+def draw_segment(c: str, n: int) -&gt; None:
+    for i in range(0,n,1):
+        print(c, end='')
+
+def draw_funny_line(a: str, b: str, c: str, n: int, i: int) -&gt; None:
+    draw_segment(a, n - i - 1)
+    print(b, end='')
+    draw_segment(c, i)
+    print()
+
+def draw_funny_square(a: str, b: str, c: str, lim: int) -&gt; None:
+    for i in range(0,lim,1):
+        draw_funny_line(a, b, c, lim, i)
+
+def main() -&gt; None:
+    lim = int(input("Introduza o tamanho do lado: "))
+    draw_funny_square('*', '0', '#', lim)
+
+main()
+
+*****0
+****0#
+***0##
+**0###
+*0####
+0#####
+
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+38
+
+type IList = list[int]
+
+def sum_even_values(l: IList) -&gt; int:
+    sum = 0
+    for v in l:
+        if v % 2 == 0:
+            sum += v
+    return sum
+
+def sum_values_at_even_positions(l: IList) -&gt; int:
+    n = len(l)
+    sum = 0
+    for i in range(n):
+        if i % 2 == 0:
+            sum += l[i]
+    return sum
+
+def main() -&gt; None:
+    l = [ 34,  56,   1, -4,  3,  2, 7,  6, 66, 666,
+          77, 777, 978, -2, -2, 56, 7, -1, -2,  88 ] 
+    print(sum_even_values(l))
+    print(sum_values_at_even_positions(l))
+
+main()
+
+
+---------------------------
+39
+
+Ficheiro "zlists-sol.py" 
+
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+40
+
+def is_char(c: str) -&gt; bool:
+    return len(c) == 1
+
+def next_char(c: str) -&gt; str:
+    """ pre: is_char(c) """
+    n = ord(c)
+    c2 = chr(n+1)
+    return c2
+
+def next_char_(c: str) -&gt; str:    # outra maneira
+    """ pre: is_char(c) """
+    return chr(ord(c)+1)
+
+def main() -&gt; None:
+    c = input("Introduza um caráter: ")
+    print(f"Seguinte = {next_char(c)}")
+
+main()
+
+---------------------------
+41
+
+def is_char(c: str) -&gt; bool:
+    return len(c) == 1
+
+def print_chars(start: str, end: str) -&gt; None:
+    """ pre: is_char(start) and is_char(end) """
+    m = ord(start)
+    n = ord(end)
+    for i in range(m, n+1):
+        c = chr(i)
+        print(' ' + c, end='')
+    print()
+
+def print_chars_(start: str, end: str) -&gt; None:          # outra maneira
+    """ pre: is_char(start) and is_char(end) """
+    for i in range(ord(start), ord(end)+1):
+        print(chr(i), end='')
+    print()
+ 
+def main() -&gt; None:
+    print_chars('!', '~')
+
+main()
+
+---------------------------
+42
+
+def is_char(c: str) -&gt; bool:
+    return len(c) == 1
+
+def header(name: str, start: str, end: str) -&gt; None:
+    """ pre: is_char(start) and is_char(end) """
+    m = ord(start)
+    n = ord(end)
+    how_many = n - m + 1
+    print('-'*len(name))
+    print(f"{name} ({how_many} carateres)")
+
+def body(cols: int, start: str, end: str) -&gt; None:
+    """ pre: is_char(start) and is_char(end) """
+    n = ord(end) - ord(start) + 1
+    start = ord(start)
+    for i in range(n):
+        c = chr(i + start)
+        print(' ' + c, end='')
+        if i % cols == cols-1:
+           print()
+    if i % cols != cols-1:
+        print()
+
+def body_(cols: int, start: str, end: str) -&gt; None:     # outra maneira
+    """ pre: is_char(start) and is_char(end) """
+    m = ord(start)
+    n = ord(end)
+    j = 0
+    for i in range(m, n+1):
+        c = chr(i)
+        print(' ' + c, end='')
+        if j % cols == cols-1:
+           print()
+        j += 1
+    if j % cols != cols-1:
+        print()
+
+def tail(name: str) -&gt; None:
+    print('-'*len(name))
+
+def print_char_table(name: str, cols: int, start: str, end: str) -&gt; None:
+    header(name, start, end)
+    body(cols, start, end)
+    tail(name)
+
+def main() -&gt; None:
+    s = input("TESTE: ")
+    if s == "1":
+        print_char_table("ascii", 30, ' ', '~')
+    elif s == "2":
+        print_char_table("hiragana", 30, 'ぁ', 'ゖ')
+    elif s == "3":
+        print_char_table("katakana", 30, 'ァ', 'ヿ')
+    elif s == "4":
+        print_char_table("grego", 30, 'α', 'ω')
+    elif s == "5":
+        print_char_table("chinês + kanji", 30, '一', '龥')
+    elif s == "6":
+        print_char_table("emoji", 30, '😀', '😫')
+    else:
+        print("No test")
+
+main()
+
+---------------------------
+43
+
+def is_char(c: str) -&gt; bool:
+    return len(c) == 1
+
+def make_str_range(start: str, end: str) -&gt; str:
+    """ pre: is_char(start) and is_char(end) """
+    s = ""
+    m = ord(start)
+    n = ord(end)
+    for i in range(m, n+1):
+        s += chr(i)
+    return s
+
+def main() -&gt; None:
+    s = make_str_range(' ', '~')
+    print(s)
+
+main()
+
+---------------------------
+44
+
+def is_char(c: str) -&gt; bool:
+    return len(c) == 1
+
+def is_basic_upper(c: str) -&gt; bool:    # verifica maiúscula sem acento
+    return is_char(c) and 'A' &lt;= c and c &lt;= 'Z'
+
+def next_char(c: str) -&gt; str:
+    """ pre: is_char(c) """
+    return chr(ord(c)+1)
+
+def next_alpha(c: str) -&gt; str:
+    """ pre: is_basic_upper(c) """
+    if c == 'Z':
+        return 'A'
+    else:
+        return next_char(c)
+
+def translate(s: str) -&gt; str:
+    acc = ""
+    for c in s:
+        if is_basic_upper(c):
+            acc += next_alpha(c)
+        else:
+            acc += c
+    return acc
+
+def main() -&gt; None:
+    s = input(": ")
+    print(translate(s))
+
+main()
+
+---------------------------
+45
+
+def f(n: int) -&gt; None:
+    i = 0
+    while i &lt; n:
+        if i % 2 == 0:
+            print(i)
+        i += 1
+
+def g(m: int, n: int) -&gt; None:
+    i = 0
+    while i &lt; m:
+        j = 0
+        while j &lt; n:
+            if i % 2 == 0 and j % 2 == 0:
+                print((i,j))
+            j += 1
+        i += 1
+
+
+---------------------------
+46
+
+import random
+
+MAX_HILO = 1023
+
+def ask_guess() -&gt; int:
+    guess = int(input("Tente adivinhar: "))
+    return guess
+
+def final_message(attempts: int, guess: int) -&gt; None:
+    print(f"Parabéns! Acertou em {attempts} tentativas! O número secreto era {guess}!")
+
+def play_hilo(lo: int, hi: int) -&gt; None:
+    secret = random.randint(lo, hi)    # geração do número secreto!!! É assim que se faz!
+    attempts = 0
+    while True:
+        guess = ask_guess()
+        attempts += 1
+        if guess &lt; secret:
+            print('&gt;')
+        elif guess &gt; secret:
+            print('&lt;')
+        else:
+            print('=')
+            break;
+    final_message(attempts, guess)
+
+def main() -&gt; None:
+    print("JOGO HI-LO")
+    play_hilo(0, MAX_HILO)
+
+main()
+
+
+---------------------------
+47
+
+MAX_HILO = 1023
+
+def initial_request(lo: int, hi: int) -&gt; None:
+    print(f"Pense num número secreto entre {lo} e {hi}!")
+    input("Já pensou? <enter> ")
+
+def ask(guess: int) -&gt; str:
+    while True:
+        prompt = f"A minha tentativa é {guess}. "
+        prompt += "O número secreto é maior (&gt;), menor (&lt;) ou igual (=) ? "
+        reply = input(prompt)
+        if reply in {'&gt;', '&lt;', '='}:
+            return reply
+
+def final_message(lo: int, hi: int, attempts: int, guess: int) -&gt; None:
+    if lo &gt; hi:
+        print("Voce é batoteiro!")
+    else:
+        print(f"Viva! Acertei em {attempts} tentativas! O número secreto é {guess}!")
+
+def play_hilo_reverse(lo: int, hi: int) -&gt; None:
+    initial_request(lo, hi)
+    attempts = 0
+    while lo &lt;= hi:
+        guess = (lo + hi) // 2      # guess = meio do intervalo corrente
+        attempts += 1
+        reply = ask(guess)
+        if reply == '&gt;':
+            lo = guess + 1
+        elif reply == '&lt;':
+            hi = guess - 1
+        else:                        # reply == '=' de certeza
+            break
+    final_message(lo, hi, attempts, guess)
+
+def main() -&gt; None:
+    print("JOGO HI-LO (REVERSE)")
+    play_hilo_reverse(0, MAX_HILO)
+
+main()
+
+
+
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+---------------------------
+48 -- NOVO
+
+type GList = list           # lista genérica
+type GMatrix = list[GList]       # matriz genérica
+
+type IList = list[int]          # lista de inteiros
+type IMatrix = list[IList]      # matriz de inteiros
+
+def create(nr: int, nc: int, value: any) -&gt; GMatrix:
+    """ Create and initialize a matrix with nr rows and nc columns.
+        Precondition: nr &gt;= 0 and nc &gt;= 0
+    """
+    m = [None]*nr         # cria espaço para as linhas
+    for i in range(nr):   # preenche as várias linhas
+        m[i] = [value]*nc
+    return m
+
+def is_valid(m: GMatrix) -&gt; bool:
+    """ Check if all the lines have the same length. """
+    nr = len(m)
+    for i in range(nr-1):  # verifica se todas as linhas têm igual comprimento
+        if len(m[i]) != len(m[i+1]):
+            return False
+    return True
+
+def nrows(m: GMatrix) -&gt; int:
+    """ Number of rows of the matrix
+        Precondition: is_valid(m)
+    """
+    return len(m)             # número de linhas
+
+def is_empty(m: GMatrix) -&gt; int:
+    """ Is the matrix empty? """
+    return nrows(m) == 0      # testa se matriz vazia 
+
+def ncols(m: GMatrix) -&gt; int:
+    """ Number of columns of the matrix.
+        Precondition: is_valid(m)
+    """
+    if is_empty(m):           # a matriz vazia tem 0 colunas
+        return 0
+    else:
+        return len(m[0])      # número de colunas é o comprimento duma linha
+
+def row(m: GMatrix, i: int) -&gt; GList:
+    """ Get the row i of the matrix.
+        Precondition: is_valid(m) and i in range(nrows(m))
+    """
+    return m[i].copy()      # faz cópia porque col também faz cópia
+
+def col(m: GMatrix, j: int) -&gt; GList:
+    """ Get the column j of the matrix.
+        Precondition: is_valid(m) and j in range(ncols(m))
+    """
+    col = []
+    for r in m:             # acumula os vários elementos da coluna j
+        col.append(r[j])
+    return col
+
+def input_int_matrix() -&gt; IMatrix:
+    """ Interactive matrix reading. """
+    l = input("ROWS COLS: ").split()
+    nr, rc = int(l[0]), int(l[1])
+    m = []
+    for i in range(nr):
+        l = []
+        for j in range(rc):
+            x = int(input(f"m[{i}][{j}] = "))
+            l.append(x)
+        m.append(l)
+    return m
+
+def maximum(m: IMatrix) -&gt; int:
+    """ pre: is_valid(m) and not is_empty(m) """
+    max = m[0][0]
+    for r in m:
+        for v in r:
+            if v &gt; max:
+                max = v
+    return v
+
+def multiply(m: IMatrix, scalar: int) -&gt; IMatrix:
+    """ Multiply matriz by scalar.
+        Precondition: is_valid(m)
+    """
+    nr, nc = nrows(m), ncols(m)
+    m2 = create(nr, nc, 0)
+    for i in range(nr):
+        for j in range(nc):
+            m2[i][j] = m[i][j] * scalar
+    return m2
+
+def diagonals(m: GMatrix) -&gt; tuple[GList, GList]:
+    """ Get the two diagonals of the matrix.
+        Precondition: is_valid(m) and nrows(m) == ncols(m)
+    """
+    nr = nrows(m)
+    l1 = []
+    l2 = []
+    for i in range(nr):
+        l1.append(m[i][i])
+        l2.append(m[i][nr-i-1])
+    return (l1, l2)
+
+def transpose(m: GMatrix) -&gt; GMatrix:
+    """ Transpose of matrix .
+        Precondition: is_valid(m)
+    """
+    nr, nc = nrows(m), ncols(m)
+    m2 = create(nc, nr, 0)
+    for i in range(nr):
+        for j in range(nc):
+            m2[j][i] = m[i][j]
+    return m2
+
+def product(m1: IMatrix, m2: IMatrix) -&gt; IMatrix:
+    """ Multiply two matrices.
+        Precondition: is_valid(m1) and is_valid(m2)
+                      and ncols(m1) == nrows(m2)
+    """
+    nr, nc = nrows(m1), ncols(m2)
+    n = ncols(m1)
+    m3 = create(nr, nc, 0)
+    for i in range(nr):
+        for j in range(nc):
+            sum = 0
+            for k in range(n):
+                sum += m1[i][k] * m2[k][j]
+            m3[i][j] = sum
+    return m3
+
+def main() -&gt; None:
+    m1 = [ [1, 2, 3, 4],
+           [5, 6, 7, 8] ]
+    
+    m2 = [ [ 1,  2,  3],
+           [ 4,  5,  6],
+           [ 7,  8,  9],
+           [10, 11, 12] ]
+    
+    m3 = [ [1,  2,  3],
+           [4,  5,  6],
+           [7,  8,  9] ]
+    
+    s = input("TESTE: ")
+    if s == "1":
+        max = maximum(m1)
+        print(max)
+    elif s == "2":
+        m = multiply(m1, 5)
+        print(m)
+    elif s == "3":
+        t = diagonals(m3)
+        print(t)
+    elif s == "4":
+        m = transpose(m1)
+        print(m)
+    elif s == "5":
+        m = product(m1, m2)
+        print(m)
+    else:
+        print("No test")
+
+main()
+
+
+---------------------------
+48
+
+type GList = list[any]           # lista genérica
+type GMatrix = list[GList]       # matriz genérica
+
+type IList = GList[int]          # lista de inteiros
+type IMatrix = GMatrix[int]      # matriz de inteiros
+
+def create(nr: int, nc: int, value: any) -&gt; GMatrix:
+    """ Create and initialize a matrix with nr rows and nc columns.
+        Precondition: nr &gt;= 0 and nc &gt;= 0
+    """
+    m = [None]*nr         # cria espaço para as linhas
+    for i in range(nr):   # preenche as várias linhas
+        m[i] = [value]*nc
+    return m
+
+def is_valid(m: GMatrix) -&gt; bool:
+    """ Check if all the lines have the same length. """
+    nr = len(m)
+    for i in range(nr-1):  # verifica se todas as linhas têm igual comprimento
+        if len(m[i]) != len(m[i+1]):
+            return False
+    return True
+
+def nrows(m: GMatrix) -&gt; int:
+    """ Number of rows of the matrix
+        Precondition: is_valid(m)
+    """
+    return len(m)             # número de linhas
+
+def is_empty(m: GMatrix) -&gt; int:
+    """ Is the matrix empty? """
+    return nrows(m) == 0      # testa se matriz vazia 
+
+def ncols(m: GMatrix) -&gt; int:
+    """ Number of columns of the matrix.
+        Precondition: is_valid(m)
+    """
+    if is_empty(m):           # a matriz vazia tem 0 colunas
+        return 0
+    else:
+        return len(m[0])      # número de colunas é o comprimento duma linha
+
+def row(m: GMatrix, i: int) -&gt; GList:
+    """ Get the row i of the matrix.
+        Precondition: is_valid(m) and i in range(nrows(m))
+    """
+    return m[i].copy()      # faz cópia porque col também faz cópia
+
+def col(m: GMatrix, j: int) -&gt; GList:
+    """ Get the column j of the matrix.
+        Precondition: is_valid(m) and j in range(ncols(m))
+    """
+    col = []
+    for r in m:             # acumula os vários elementos da coluna j
+        col.append(r[j])
+    return col
+
+def input_int_matrix() -&gt; IMatrix:
+    """ Interactive matrix reading. """
+    l = input("ROWS COLS: ").split()
+    nr, rc = int(l[0]), int(l[1])
+    m = []
+    for i in range(nr):
+        l = []
+        for j in range(rc):
+            x = int(input(f"m[{i}][{j}] = "))
+            l.append(x)
+        m.append(l)
+    return m
+
+def maximum(m: GMatrix) -&gt; int:
+    """ pre: is_valid(m) and not is_empty(m) """
+    max = m[0][0]
+    for r in m:
+        for v in r:
+            if v &gt; max:
+                max = v
+    return v
+
+def multiply(m: IMatrix, scalar: int) -&gt; IMatrix:
+    """ Multiply matriz by scalar.
+        Precondition: is_valid(m)
+    """
+    nr, nc = nrows(m), ncols(m)
+    m2 = create(nr, nc, 0)
+    for i in range(nr):
+        for j in range(nc):
+            m2[i][j] = m[i][j] * scalar
+    return m2
+
+def diagonals(m: GMatrix) -&gt; (GList, GList):
+    """ Get the two diagonals of the matrix.
+        Precondition: is_valid(m) and nrows(m) == ncols(m)
+    """
+    nr = nrows(m)
+    l1 = []
+    l2 = []
+    for i in range(nr):
+        l1.append(m[i][i])
+        l2.append(m[i][nr-i-1])
+    return (l1, l2)
+
+def transpose(m: GMatrix) -&gt; GMatrix:
+    """ Transpose of matrix .
+        Precondition: is_valid(m)
+    """
+    nr, nc = nrows(m), ncols(m)
+    m2 = create(nc, nr, 0)
+    for i in range(nr):
+        for j in range(nc):
+            m2[j][i] = m[i][j]
+    return m2
+
+def product(m1: IMatrix, m2: IMatrix) -&gt; IMatrix:
+    """ Multiply two matrices.
+        Precondition: is_valid(m1) and is_valid(m2)
+                      and ncols(m1) == nrows(m2)
+    """
+    nr, nc = nrows(m1), ncols(m2)
+    n = ncols(m1)
+    m3 = create(nr, nc, 0)
+    for i in range(nr):
+        for j in range(nc):
+            sum = 0
+            for k in range(n):
+                sum += m1[i][k] * m2[k][j]
+            m3[i][j] = sum
+    return m3
+
+def main() -&gt; None:
+    m1 = [ [1, 2, 3, 4],
+           [5, 6, 7, 8] ]
+    
+    m2 = [ [ 1,  2,  3],
+           [ 4,  5,  6],
+           [ 7,  8,  9],
+           [10, 11, 12] ]
+    
+    m3 = [ [1,  2,  3],
+           [4,  5,  6],
+           [7,  8,  9] ]
+    
+    s = input("TESTE: ")
+    if s == "1":
+        max = maximum(m1)
+        print(max)
+    elif s == "2":
+        m = multiply(m1, 5)
+        print(m)
+    elif s == "3":
+        t = diagonals(m3)
+        print(t)
+    elif s == "4":
+        m = transpose(m1)
+        print(m)
+    elif s == "5":
+        m = product(m1, m2)
+        print(m)
+    else:
+        print("No test")
+
+main()
+
+---------------------------
+49 NEW
+
+from __future__ import annotations; import math
+
+############# class Date #############
+
+class Date:
+    
+    END_MARK = ''
+    
+    # Static methods - methods without "self"
+        
+    def is_leap(year: int) -&gt; bool:
+        """ Check if the year is a leap year. """
+        return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+    
+    def month_length(month: int, year: int) -&gt; int:
+        """ Number of days of a given month (in a given year).
+            Precondition: 1 &lt;= month &lt;= 12
+        """
+        MONTH_DURATIONS = (None, 31, 28, 31, 30, 31, 30,
+                                31, 31, 30, 31, 30, 31)
+        if month == 2 and Date.is_leap(year):
+            return MONTH_DURATIONS[month] + 1
+        else:
+            return MONTH_DURATIONS[month]
+    
+    def input(prompt: str) -&gt; Date:
+        """ Input a date. """
+        s = input(prompt)
+        if s == Date.END_MARK:
+            return None
+        day, month, year = s.split("/")
+        return Date(int(day), int(month), int(year))
+    
+    # Instance methods - methods with "self"
+    
+    def __init__(self: Date, day: int, month: int, year: int) -&gt; None:
+        """ Initialize a date. """
+        self.day = day
+        self.month = month
+        self.year = year
+   
+    def is_valid(self: Date) -&gt; bool:
+        """ Is a date valid? """
+        return (self.year &gt; 0
+            and 1 &lt;= self.month &lt;= 12
+            and 1 &lt;= self.day
+                    &lt;= Date.month_length(self.month, self.year))
+    
+    def __str__(self: Date) -&gt; str:
+        """ Date as string """
+        return f"{self.day}/{self.month}/{self.year}"
+    
+    def __lt__(self: Date, other: Date) -&gt; bool:
+        """ Check if self &lt; other.
+            Precondition: self.is_valid() and other.is_valid()
+        """
+        if self.year != other.year:
+            return self.year &lt; other.year
+        elif self.month != other.month:
+            return self.month1 &lt; other.month
+        else:
+            return self.day &lt; other.day
+    
+    def __eq__(self: Date, other: Date) -&gt; bool:
+        """ Check if self == other.
+            Precondition: self.is_valid() and other.is_valid()
+        """
+        return (self.day == other.day
+            and self.month == other.month
+            and self.year == other.year)
+    
+    def order(self: Date) -&gt; int:
+        """ The position of a date within the respective year, starting with 1.
+            Precondition: self.is_valid()
+        """
+        sum = 0
+        for m in range(1, self.month):
+            sum += Date.month_length(m, self.year)
+        return sum + self.day
+    
+    def next(self: Date) -&gt; Date:
+        """ Create the date of the next day.
+            Precondition: self.is_valid()
+        """
+        if self.day == 31 and self.month == 12:
+        	return Date(1, 1, self.year + 1)
+        elif self.day == Date.month_length(self.month, self.year):
+        	return Date(1, self.month + 1, self.year)
+        else:
+        	return Date(self.day + 1, self.month, self.year)
+    
+    def prev(self: Date) -&gt; Date:
+        """ Create the date of the previous day.
+            Precondition: self.is_valid()
+        """
+        res = Date(self.day, self.month, self.year) # copy
+        if res.day &gt; 1:
+            res.day -= 1
+        elif res.month &gt; 1:
+            res.day = Date.month_length(res.month-1, res.year)
+            res.month -= 1
+        else:
+           res.day = 31
+           res.month = 12
+           res.year -= 1
+        return res
+
+############# class Dates #############
+
+class Dates:
+    
+    def input(prompt1: str, prompt2: str) -&gt; Dates:
+        """ Interactive date sequence reading. """
+        print(prompt1)
+        l = []
+        while True:
+            dt = Date.input(prompt2)
+            if dt is None:
+                break
+            l.append(dt)
+        return Dates(l)
+        
+    def __init__(self: Dates, dates: list[Date]) -&gt; None:
+         self.dates = dates
+    
+    def __len__(self: Dates) -&gt; int:
+    	return len(self.dates)
+    
+    def print(self: Dates) -&gt; None:
+        """ Print a sequence of dates """
+        for d in self.dates:
+            print(d)
+    
+    def maximum(self: Dates) -&gt; Date:
+        """ Precondition: len(self.dates) &gt; 0 """
+        max = self.dates[0]
+        for d in self.dates:
+            if max &lt; d:
+                max = d
+        return max
+    
+    def minimum(self: Dates) -&gt; Date:
+        """ Precondition: len(self.dates) &gt; 0 """
+        min = self.dates[0]
+        for d in self.dates:
+            if d &lt; min:
+                min = d
+        return min
+    
+############# main #############
+
+def main() -&gt; None:
+    ds = Dates.input(
+    	("Introduza uma data por linha, "
+    	+ "tudo terminado por uma linha vazia:"),
+    	"D/M/Y: ")
+    if len(ds) == 0:
+        print("Não há datas!")
+    else:
+        max = ds.maximum()
+        min = ds.minimum()
+        print(f"Data máxima: {max}")
+        print(f"Data mínima: {min}")
+        print(f"Ord max: {max.order()}")
+        print(f"Next max: {max.next()}")
+        print(f"Prev max: {max.prev()}")
+
+main()
+
+---------------------------
+49 OLD
+
+############# type Date #############
+
+type Date = (int, int, int)   # (day, month, year)
+
+def is_leap_year(year: int) -&gt; bool:
+    """ Check if the year is a leap year. """
+    return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+
+def month_length(month: int, year: int) -&gt; int:
+    """ Number of days of a given month (in a given year).
+        Precondition: 1 &lt;= month &lt;= 12
+    """
+    MONTHS = (None, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+    if month == 2 and is_leap_year(year):
+        return MONTHS[2] + 1
+    else:
+        return MONTHS[month]
+
+def date_is_valid(dt: Date) -&gt; bool:
+    """ Is the data valid? """
+    day, month, year = dt
+    return (year &gt; 0          # estamos só interessados na "Era Comum"
+        and 1 &lt;= month &lt;= 12
+        and 1 &lt;= day &lt;= month_length(month, year))
+
+def date(day: int, month: int, year) -&gt; Date:
+    """ Create a date.
+        Precondition: nr &gt;= 0 and nc &gt;= 0
+    """
+    return (day, month, year)
+
+def date_input(prompt: str) -&gt; Date:
+    s = input(prompt)
+    if s == END_MARK:
+        return None
+    l = s.split("/")
+    day, month, year = [int(x) for x in l]
+    return date(day, month, year)
+
+def date_as_str(dt: Date) -&gt; str:
+    day, month, year = dt
+    return f"{day}/{month}/{year}"
+
+def date_print(dt: Date) -&gt; None:
+    print(date_as_str(dt))
+
+def date_is_less(dt1: Date, dt2: Date) -&gt; bool:
+    """ pre: is_date_valid(dt1) and is_date_valid(dt2) """
+    day1, month1, year1 = dt1
+    day2, month2, year2 = dt2
+    if year1 != year2:
+        return year1 &lt; year2
+    elif month1 != month2:
+        return month1 &lt; month2
+    else:
+        return day1 &lt; day2
+
+def date_is_equal(dt1: Date, dt2: Date) -&gt; bool:
+    """ pre: is_date_valid(dt1) and is_date_valid(dt2) """
+    return dt1 == dt2
+
+def date_order(dt: Date) -&gt; int:
+    """ pre: is_date_valid(dt) """
+    day, month, year = dt
+    sum = 0
+    for m in range(1, month):
+        sum += month_length(m, year)
+    return sum + day
+
+def date_next(dt: Date) -&gt; Date:
+    """ pre: is_date_valid(dt) """
+    day, month, year = dt
+    if day &lt; month_length(month, year):
+        day += 1
+    elif month &lt; 12:
+        day = 1
+        month += 1
+    else:
+       day = 1
+       month = 1
+       year += 1
+    return date(day, month, year)
+
+def date_next(dt: Date) -&gt; Date:
+    """ pre: is_date_valid(dt) """
+    day, month, year = dt
+    if day &lt; month_length(month, year):
+        day += 1
+    elif month &lt; 12:
+        day = 1
+        month += 1
+    else:
+       day = 1
+       month = 1
+       year += 1
+    return date(day, month, year)
+
+def date_prev(dt: Date) -&gt; Date:
+    """ pre: is_date_valid(dt) """
+    day, month, year = dt
+    if day &gt; 1:
+        day -= 1
+    elif month &gt; 1:
+        day = month_length(month-1, year)
+        month -= 1
+    else:
+       day = 31
+       month = 12
+       year -= 1
+    return date(day, month, year)
+
+############# type Dates #############
+
+END_MARK = ''
+
+type Dates = list[Date]
+
+def dates_input(prompt1: str, prompt2: str) -&gt; Dates:
+    """ Interactive date sequence reading. """
+    print(prompt1)
+    l = []
+    while True:
+        dt = date_input(prompt2)
+        if dt == None:
+            break
+        l.append(dt)
+    return l
+
+def dates_print(dts: Dates) -&gt; None:
+    """ Print a sequence of dates.
+        Precondition:
+           all([valid_date(dt) for dt in dts])
+    """
+    for dt in dts:
+        date_print(dt)
+
+def dates_maximum(dts: Dates) -&gt; Date:
+    """ pre: len(dts) &gt; 0 """
+    max = dts[0]
+    for dt in dts:
+        if date_is_less(max, dt):
+            max = dt
+    return max
+
+def dates_minimum(dts: Dates) -&gt; Date:
+    """ pre: len(dts) &gt; 0 """
+    min = dts[0]
+    for dt in dts:
+        if date_is_less(dt, min):
+            min = dt
+    return min
+    
+############# main #############
+
+def main() -&gt; None:
+    dts = dates_input(
+    	("Introduza uma data por linha, "
+    	+ "tudo terminado por uma linha vazia:"),
+    	"D/M/Y: ")
+    if dts == []:
+        print("Não há datas!")
+    else:
+        max = dates_maximum(dts)
+        min = dates_minimum(dts)
+        print(f"Data máxima: {date_as_str(max)}")
+        print(f"Data mínima: {date_as_str(min)}")
+        print(f"Ord max: {date_order(max)}")
+        print(f"Next max: {date_as_str(date_next(max))}")
+        print(f"Prev max: {date_as_str(date_prev(max))}")
+
+main()
+
+---------------------------
+---------------------------
+
+---------------------------
+---------------------------
+---------------------------
+50
+
+from __future__ import annotations
+
+class Rational:
+    def __init__(self: Rational, num: int, den: int) -&gt; None:
+        self.num = num
+        self.den = den
+        self.simplify()
+    
+    def gcd(m: int, n: int) -&gt; int:
+        x = abs(m)
+        y = abs(n)
+        while x != y:
+            if x &gt; y:
+                x -= y
+            else:
+                y -= x
+        return x
+    
+    def simplify(self: Rational) -&gt; Rational:
+        common_divisor = Rational.gcd(self.num, self.den)
+        self.num //= common_divisor
+        self.den //= common_divisor
+        if self.den &lt; 0:
+            self.num *= -1
+            self.den *= -1
+    
+    def __str__(self: Rational) -&gt; str:
+        return f"{self.num}/{self.den}"
+    
+    def __add__(self: Rational, other: Rational) -&gt; Rational:
+        result = Rational(self.num * other.den + other.num * self.den, self.den * other.den)
+        result.simplify()
+        return result
+    
+    def __sub__(self: Rational, other: Rational) -&gt; Rational:
+        result = Rational(self.num * other.den - other.num * self.den, self.den * other.den)
+        result.simplify()
+        return result
+    
+    def __mul__(self: Rational, other: Rational) -&gt; Rational:
+        result = Rational(self.num * other.num, self.den * other.den)
+        result.simplify()
+        return result
+    
+    def __truediv__(self: Rational, other: Rational) -&gt; Rational:
+        result = Rational(self.num * other.den, self.den * other.num)
+        result.simplify()
+        return result
+    
+    def test() -&gt; None:
+        a = Rational(-30,-50)
+        b = Rational(2,-1)
+        print(a)
+        print(b)
+        print(a+b)
+        print(a-b)
+        print(a*b)
+        print(a/b)
+
+class UI:   # User Interface dum programa sem estado
+    def make_rational(self: UI, s: str) -&gt; Rational:
+        """ Create a rational number from the format: 'n/d'. """
+        n,d = s.split('/')
+        return Rational(int(n), int(d))
+    
+    def process_input(self: UI, s: str) -&gt; (Rational, str, Rational):
+        """ Process the format: 'n/d op n/d'. """
+        r1, op, r2 = s.split()
+        x = self.make_rational(r1)
+        y = self.make_rational(r2)
+        return (x, op, y)
+    
+    def eval_input(self: UI, s: str) -&gt; Rational:
+        """ Recode the input and perform an operation. """
+        x, op, y = self.process_input(s)
+        if op == '+':
+            return x+y
+        elif op == '-':
+            return x-y
+        elif op == '*':
+            return x*y
+        elif op == '/':
+            return x/y
+        else:
+            return None
+    
+    def run(self: UI) -&gt; None:
+        s = input("A/B OP C/D: ")
+        print(self.eval_input(s))
+
+def main() -&gt; None:
+    ui = UI()
+    ui.run()
+
+main()
+
+
+"""
+&gt;&gt;&gt; main()
+A/B OP C/D: 3/5 + 2/1
+13/5
+&gt;&gt;&gt; main()
+A/B OP C/D: -30/-50 * 1/1
+3/5
+&gt;&gt;&gt; main()
+A/B OP C/D: 2/5 / 1/2
+4/5
+"""
+
+---------------------------
+51
+
+from __future__ import annotations
+
+class Ingredient:
+    def __init__(self: Ingredient, name: str, percent: float) -&gt; None:
+        self.name = name
+        self.percent = percent
+
+class CakeVariety:
+    def __init__(self: CakeVariety, name: str, amount: int, ingredients: list[Ingredient]) -&gt; None:
+        self.name = name
+        self.amount = amount
+        self.ingredients = tuple(ingredients)
+    
+    def main_ingredient(self: CakeVariety) -&gt; Ingredient:
+        if len(self.ingredients) == 0:
+            return None
+        else:
+            max = self.ingredients[0]
+            for ingr in self.ingredients:
+                if ingr.percent &gt; max.percent:
+                    max = ingr
+            return max
+    
+    def sell(self: CakeVariety, units: int) -&gt; int:
+        if units &lt;= self.amount:
+            sold = units
+        else:
+            sold = self.amount
+        self.amount -= sold
+        return sold
+
+class CakeShop:
+    def __init__(self: CakeShop, stock: list[CakeVariety]) -&gt; None:
+        self.stock = stock
+    
+    def size(self: CakeShop) -&gt; int:
+        return len(self.stock)
+    
+    def find_variety(self: CakeShop, vname: str) -&gt; CakeVariety:
+        for cake in self.stock:
+            if cake.name == vname:
+                return cake
+        return None
+   
+    def sell(self: CakeShop, vname: str, units: int) -&gt; int:
+        cake = self.find_variety(vname)
+        if cake == None:
+            return None
+        return cake.sell(units)
+
+class UI:   # User Interface
+    END_MARK = "fim"
+    
+    def __init__(self: UI) -&gt; None:
+        self.shop = self.input_shop()   # A UI guarda e faz a manutenção duma CakeShop
+    
+    def make_ingredient(self: UI, line: str) -&gt; Ingredient:
+        name, percentage = line.split()
+        return Ingredient(name, float(percentage))
+    
+    def make_cake_variety(self: UI, line: str) -&gt; CakeVariety:
+        name, amount, n_ingredients = line.split()
+        n_ingredients = int(n_ingredients)
+        l = []
+        for _ in range(n_ingredients):
+            line = input()
+            i = self.make_ingredient(line)
+            l.append(i)
+        return CakeVariety(name, int(amount), l)
+    
+    def input_shop(self: UI) -&gt; CakeShop:
+        l = []
+        while True:
+            line = input()
+            if line == UI.END_MARK:
+                break
+            cake = self.make_cake_variety(line)
+            l.append(cake)
+        return CakeShop(l)
+    
+    def process(self: UI, name: str, units: int) -&gt; None:
+        sold = self.shop.sell(name, units)
+        if sold == None:
+            print(f"Não existe {name}")
+        else:
+            print(f"Vendidas {sold} unidades de {name}")
+            cake = self.shop.find_variety(name)
+            ingr = cake.main_ingredient()
+            if ingr == None:
+                print("Ingrediente principal: Sem ingredientes")
+            else:
+                print(f"Ingrediente principal: {ingr.name}")
+    
+    def run(self: UI) -&gt; None:
+        name = input("BOLO: ")            # pergunta o nome do bolo
+        units = int(input("UNIDADES: "))  # pergunta a quantidade
+        self.process(name, units)         # processa o pedido
+
+def main() -&gt; None:
+    ui = UI()
+    ui.run()
+
+main()
+
+"""
+&gt;&gt;&gt; main()
+Puro-açúcar 230 4
+Leite-Condensado 0.1
+Açúcar 0.76
+Farinha 0.12
+Fermento 0.02
+Delícia-compacta 127 2
+Farinha 0.99
+Leite 0.01
+fim
+BOLO: Delícia-compacta
+UNIDADES: 1000
+Vendidas 127 unidades de Delícia-compacta
+Ingrediente principal: Farinha
+"""
+
+
+"""
+Puro-ar 230 0
+fim
+Puro-ar
+100
+Vendidas 100 unidades de Puro-ar
+Ingrediente principal: Sem ingredientes
+"""
+
+
+---------------------------
+---------------------------
+
+
+
+
+
+---------------------------
+---------------------------
+---------------------------
+50
+
+type WordList = list[str]
+
+def has_duplicates(l: WordList) -&gt; None:
+    return len(l) != len(set(l))
+
+def same_words(a: WordList, b: WordList) -&gt; bool:
+    return set(a) == set(b)
+
+def main() -&gt; None:
+    a = ['a', 'mera', 'gnosiologia', 'explícita', 'ou', 'deliberadamente', 'divorciada', 'da',
+         'axiologia', 'por', 'um', 'lado', 'e', 'da', 'ontologia', 'por', 'outro', 'não', 'se',
+         'converte', 'sem', 'mais', 'em', 'fundamentação', 'deontológica', 'em', 'razão', 'do',
+         'dever', 'ser']
+    b = ['a', 'mera', 'gnosiologia', 'simples', 'afirmação', 'teorética', 'deliberadamente',
+         'divorciada', 'da', 'axiologia', 'e', 'da', 'ontologia', 'não', 'nos', 'pode', 'fornecer',
+         'uma', 'fundamentação', 'deontológica']
+    c = ['a', 'axiologia', 'converte', 'da', 'deliberadamente', 'deontológica', 'dever', 'divorciada',
+         'do', 'e', 'em', 'em', 'explícita', 'fundamentação', 'gnosiologia', 'lado', 'mais', 'mera',
+         'não', 'ontologia', 'ou', 'outro', 'por', 'por', 'razão', 'se', 'sem', 'ser', 'um']    
+    l = [has_duplicates(wl) for wl in [a, b, c]]
+    print(l)
+    l = [same_words(wl1, wl2) for (wl1,wl2) in [(a,b), (a,c), (b,c)]]
+    print(l)
+
+main()
+
+"""
+&gt;&gt;&gt; main()
+[True, True, True]
+[False, True, False]
+"""
+---------------------------
+51
+
+type WordList = list[str]
+
+def how_many_of_each(l:  WordList) -&gt; dict[str, int]:
+    d = dict()
+    for w in l:f
+        if w not in d:
+            d[w] = 0
+        d[w] = d[w] + 1
+    return d
+
+def main() -&gt; None:
+    a = ['a', 'mera', 'gnosiologia', 'explícita', 'ou', 'deliberadamente', 'divorciada', 'da',
+         'axiologia', 'por', 'um', 'lado', 'e', 'da', 'ontologia', 'por', 'outro', 'não', 'se',
+         'converte', 'sem', 'mais', 'em', 'fundamentação', 'deontológica', 'em', 'razão', 'do',
+         'dever', 'ser']
+    b = ['a', 'mera', 'gnosiologia', 'simples', 'afirmação', 'teorética', 'deliberadamente',
+         'divorciada', 'da', 'axiologia', 'e', 'da', 'ontologia', 'não', 'nos', 'pode', 'fornecer',
+         'uma', 'fundamentação', 'deontológica']
+    c = ['a', 'axiologia', 'converte', 'da', 'deliberadamente', 'deontológica', 'dever', 'divorciada',
+         'do', 'e', 'em', 'em', 'explícita', 'fundamentação', 'gnosiologia', 'lado', 'mais', 'mera',
+         'não', 'ontologia', 'ou', 'outro', 'por', 'por', 'razão', 'se', 'sem', 'ser', 'um']    
+    for wl in [a,b,c]:
+        print(how_many_of_each(wl))
+
+main()
+
+"""
+&gt;&gt;&gt; main()
+{'a': 1, 'mera': 1, 'gnosiologia': 1, 'explícita': 1, 'ou': 1, 'deliberadamente': 1, 'divorciada': 1, 'da': 2, 'axiologia': 1, 'por': 2, 'um': 1, 'lado': 1, 'e': 1, 'ontologia': 1, 'outro': 1, 'não': 1, 'se': 1, 'converte': 1, 'sem': 1, 'mais': 1, 'em': 2, 'fundamentação': 1, 'deontológica': 1, 'razão': 1, 'do': 1, 'dever': 1, 'ser': 1}
+{'a': 1, 'mera': 1, 'gnosiologia': 1, 'simples': 1, 'afirmação': 1, 'teorética': 1, 'deliberadamente': 1, 'divorciada': 1, 'da': 2, 'axiologia': 1, 'e': 1, 'ontologia': 1, 'não': 1, 'nos': 1, 'pode': 1, 'fornecer': 1, 'uma': 1, 'fundamentação': 1, 'deontológica': 1}
+{'a': 1, 'axiologia': 1, 'converte': 1, 'da': 1, 'deliberadamente': 1, 'deontológica': 1, 'dever': 1, 'divorciada': 1, 'do': 1, 'e': 1, 'em': 2, 'explícita': 1, 'fundamentação': 1, 'gnosiologia': 1, 'lado': 1, 'mais': 1, 'mera': 1, 'não': 1, 'ontologia': 1, 'ou': 1, 'outro': 1, 'por': 2, 'razão': 1, 'se': 1, 'sem': 1, 'ser': 1, 'um': 1}
+"""
+
+---------------------------
+52
+
+type Atlas = dict[str, str]            # país -&gt; capital
+
+END_MARK = "fim"
+
+def interaction(atlas: Atlas) -&gt; None:
+    while True:
+        contry = input("PAÍS: ")
+        if contry == END_MARK:
+            break
+        if contry in atlas:
+            capital = atlas[contry] 
+            print(f"{contry} -&gt; {capital}")
+        else:
+            capital = input(f"Não conheço a capital de {contry}. Por favor ensine-me: ")
+            atlas[contry] = capital
+
+
+def main() -&gt; None:  
+    atlas = {"Portugal":"Lisboa", "Espanha":"Madrid", "França":"Paris"}
+    interaction(atlas)
+
+main()
+
+
+"""
+&gt;&gt;&gt; main()
+PAÍS: Portugal
+Portugal -&gt; Lisboa
+PAÍS: Alemanha
+Não conheço a capital de Alemanha. Por favor ensine-me: Berlim
+PAÍS: Burkina Faso
+Não conheço a capital de Burkina Faso. Por favor ensine-me: Ouagadougou
+PAÍS: Espanha
+Espanha -&gt; Madrid
+PAÍS: Alemanha
+Alemanha -&gt; Berlim
+PAÍS: Burkina Faso
+Burkina Faso -&gt; Ouagadougou
+PAÍS: fim
+"""
+
+---------------------------
+53
+
+# Copia para a lista 'visible' as ocorrências de 'c' em 'secret' 
+def update_visible(visible: list[str], secret: str, c: str) -&gt; None:
+    n = len(secret)
+    for i in range(n):
+        if secret[i] == c:
+            visible[i] = c
+
+def print_visible(visible: list[str]) -&gt; None:
+    print(' '.join(visible))
+
+def got_it_right(visible: list[str], secret: str) -&gt; bool:
+    return ''.join(visible) == secret
+
+def input_letter(prompt: str) -&gt; str:
+    while True:
+        s = input(prompt)
+        if len(s) == 1 and s.isalpha():
+            return s
+
+def end_game(visible: list[str], secret: str, attempts: int) -&gt; str:
+    if got_it_right(visible, secret):
+        print(f"Parabéns! Adivinhou em {attempts} tentativas o segredo '{secret}'!")
+    else:
+        print(f"Lamento, mas esgotou o número de tentativas. O segredo era '{secret}'.")
+
+def interaction(secret: str, max_attempts: int) -&gt; None:
+    visible = ['#'] * len(secret)   # é preciso usar uma lista mutável, uma string não serve
+    attempts = 0
+    print("Bem-vindo ao Jogo da Forca!")
+    print_visible(visible)
+    for i in range(max_attempts):
+        attempts += 1
+        letter = input_letter(f"{attempts:02d} - Adivinhe uma letra: ")
+        if letter in secret:
+            update_visible(visible, secret, letter)
+            if got_it_right(visible, secret):
+                break
+        else:
+            print(f"A letra '{letter}' não faz parte do segredo.")
+        print(' '.join(visible))
+    end_game(visible, secret, attempts)
+
+def main() -&gt; None:
+    MAX_ATTEMPTS = 10
+    interaction("ananas", MAX_ATTEMPTS)
+
+main()
+
+
+"
+&gt;&gt;&gt; main()
+Bem-vindo ao Jogo da Forca!
+# # # # # #
+01 - Adivinhe uma letra: a
+a # a # a #
+02 - Adivinhe uma letra: g
+A letra 'g' não faz parte do segredo.
+a # a # a #
+03 - Adivinhe uma letra: i
+A letra 'i' não faz parte do segredo.
+a # a # a #
+04 - Adivinhe uma letra: s
+a # a # a s
+05 - Adivinhe uma letra: z
+A letra 'z' não faz parte do segredo.
+a # a # a s
+06 - Adivinhe uma letra: n
+Parabéns! Adivinhou em 6 tentativas o segredo 'ananas'!
+
+
+
+
+&gt;&gt;&gt; main()
+Bem-vindo ao Jogo da Forca!
+# # # # # #
+01 - Adivinhe uma letra: a
+a # a # a #
+02 - Adivinhe uma letra: a
+a # a # a #
+03 - Adivinhe uma letra: a
+a # a # a #
+04 - Adivinhe uma letra: a
+a # a # a #
+05 - Adivinhe uma letra: a
+a # a # a #
+06 - Adivinhe uma letra: a
+a # a # a #
+07 - Adivinhe uma letra: a
+a # a # a #
+08 - Adivinhe uma letra: a
+a # a # a #
+09 - Adivinhe uma letra: a
+a # a # a #
+10 - Adivinhe uma letra: a
+a # a # a #
+Lamento, mas esgotou o número de tentativas. O segredo era 'ananas'.
+
+"""
+
+
+---------------------------
+---------------------------
+---------------------------
+56
+
+def file_exists(file_name: str) -&gt; bool:
+    try:
+       f = open(file_name, 'r')
+       f.close()
+       return True
+    except FileNotFoundError:
+       return False
+
+def get_words(s: str) -&gt; list[str]:
+    s2 = ''
+    for c in s:
+        if c.isalpha():
+            s2 += c
+        else:
+            s2 += ' '
+    return s2.split()
+
+def process_file(file_name: str, search_str: str) -&gt; list[int]:
+    """ pre: file_exists(file_name) """
+    f = open(file_name, 'r')
+    n_lines = n_find_lines = n_finds = 0
+    for line in f:
+        n_lines += 1
+        if search_str in line:
+            n_find_lines += 1
+            n_finds += get_words(line).count(search_str)
+    f.close()
+    return [n_lines, n_find_lines, n_finds]
+
+def main() -&gt; None:
+    SEARCH = "Alice"
+    file_name = input("Nome do ficheiro: ")
+    if file_exists(file_name):
+        res = process_file(file_name, SEARCH)
+        print(res)
+    else:
+        print("Não foi possível abrir o ficheiro")
+
+main()
+
+---------------------------
+57
+
+def file_exists(file_name: str) -&gt; bool:
+    try:
+       f = open(file_name, 'r')
+       f.close()
+       return True
+    except FileNotFoundError:
+       return False
+
+def print_file(file_name: str) -&gt; None:
+    """ pre: file_exists(file_name) """
+    f = open(file_name, 'r')
+    for line in f:
+        print(line, end='')
+    f.close()
+
+def convert_file(src_name: str, target_name: str) -&gt; None:
+    """ pre: file_exists(src_name) """
+    f = open(src_name, 'r')
+    g = open(target_name, 'w')
+    for line in f:
+        line = line.rstrip()
+        line2 = next(f).rstrip()
+        print(f"{line} {line2}", file=g)
+    f.close()
+    g.close()
+
+def main() -&gt; None:
+    src_name = input("Nome do ficheiro: ")
+    target_name = src_name.replace(".txt","_new.txt")
+    if file_exists(src_name):
+        convert_file(src_name, target_name)
+        print_file(target_name)
+    else:
+        print("Não foi possível abrir o ficheiro")
+
+main()
+
+---------------------------
+58
+
+def file_exists(file_name: str) -&gt; bool:
+    try:
+       f = open(file_name, 'r')
+       f.close()
+       return True
+    except FileNotFoundError:
+       return False
+
+def get_level_map(file_name: str, level: int) -&gt; list[str]:
+    """ pre: file_exists(file_name) """
+    f = open(file_name, 'r')
+    map = []
+    curr_level = 0
+    for line in f:
+        if curr_level == level:     # the level we want
+            if line == "\n":        # empty line
+                break
+            else:
+                map.append(line.rstrip())
+        elif line == "\n":          # empty line
+            curr_level += 1
+    f.close()
+    return map
+
+def main() -&gt; None:
+    file_name = input("Nome do ficheiro: ")
+    level = int(input("Nível: "))
+    if file_exists(file_name):
+        lines = get_level_map(file_name, level)
+        for line in lines:
+            print(line)
+    else:
+        print("Não foi possível abrir o ficheiro")
+
+main()
+
+---------------------------
+58 
+
+type Atlas = dict[str, str]            # país -&gt; capital
+
+ATLAS_FILE_NAME = "atlas.txt"
+END_MARK = "fim"
+
+def file_exists(file_name: str) -&gt; bool:
+    try:
+       f = open(file_name, 'r')
+       f.close()
+       return True
+    except FileNotFoundError:
+       return False
+
+def load_atlas(file_name: str) -&gt; Atlas:
+    atlas = dict()
+    if file_exists(file_name):
+        f = open(file_name, 'r')
+        for line in f:
+            line2 = next(f)
+            atlas[line.rstrip()] = line2.rstrip()
+        f.close()
+    return atlas 
+
+def store_atlas(file_name: str, atlas: Atlas) -&gt; None:
+    f = open(file_name, 'w')
+    for p in atlas:
+        print(p, file=f)
+        print(atlas[p], file=f)
+    f.close()
+
+def interaction(atlas: Atlas) -&gt; None:
+    while True:
+        contry = input("PAÍS: ")
+        if contry == END_MARK:
+            break
+        if contry in atlas:
+            capital = atlas[contry] 
+            print(f"{contry} -&gt; {capital}")
+        else:
+            capital = input(f"Não conheço a capital de {contry}. Por favor ensine-me: ")
+            atlas[contry] = capital
+
+def main() -&gt; None:  
+    at = load_atlas(ATLAS_FILE_NAME)
+    print(f"{len(at)} países carregados")
+    interaction(at)
+    store_atlas(ATLAS_FILE_NAME, at)
+    print(f"{len(at)} países armazenados")
+
+main()
+
+
+"""
+Nome do ficheiro: paises.txt
+0 países carregados
+PAÍS: Portugal
+Não conheço a capital de Portugal. Por favor ensine-me: Lisboa
+PAÍS: Espanha
+Não conheço a capital de Espanha. Por favor ensine-me: Madrid
+PAÍS: França
+Não conheço a capital de França. Por favor ensine-me: Paris
+PAÍS: fim
+3 países armazenados
+
+&gt;&gt;&gt; main()
+Nome do ficheiro: paises.txt
+3 países carregados
+PAÍS: Portugal
+Portugal -&gt; Lisboa
+PAÍS: Angola
+Não conheço a capital de Angola. Por favor ensine-me: Luanda
+PAÍS: fim
+4 países armazenados
+
+"""
+
+
+---------------------------
+59
+
+from __future__ import annotations
+
+type File = _io.TextIOWrapper   # tipo dos ficheiros
+
+def file_exists(file_name: str) -&gt; bool:
+    try:
+       f = open(file_name, 'r')
+       f.close()
+       return True
+    except FileNotFoundError:
+       return False
+
+class Ingredient:
+    def __init__(self: Ingredient, name: str, percent: float) -&gt; None:
+        self.name = name
+        self.percent = percent
+
+class CakeVariety:
+    def __init__(self: CakeVariety, name: str, amount: int, ingredients: list[Ingredient]) -&gt; None:
+        self.name = name
+        self.amount = amount
+        self.ingredients = tuple(ingredients)
+    
+    def main_ingredient(self: CakeVariety) -&gt; Ingredient:
+        if len(self.ingredients) == 0:
+            return None
+        else:
+            max = self.ingredients[0]
+            for ingr in self.ingredients:
+                if ingr.percent &gt; max.percent:
+                    max = ingr
+            return max
+    
+    def sell(self: CakeVariety, units: int) -&gt; int:
+        if units &lt;= self.amount:
+            sold = units
+        else:
+            sold = self.amount
+        self.amount -= sold
+        return sold
+
+class CakeShop:
+    def __init__(self: CakeShop, stock: list[CakeVariety]) -&gt; None:
+        self.stock = stock
+    
+    def size(self: CakeShop) -&gt; int:
+        return len(self.stock)
+    
+    def find_variety(self: CakeShop, vname: str) -&gt; CakeVariety:
+        for cake in self.stock:
+            if cake.name == vname:
+                return cake
+        return None
+   
+    def sell(self: CakeShop, vname: str, units: int) -&gt; int:
+        cake = self.find_variety(vname)
+        if cake == None:
+            return None
+        return cake.sell(units)
+
+class UI:   # User Interface
+    CAKE_SHOP_FILE_NAME = "pastelaria.txt"
+    
+    def __init__(self: UI) -&gt; None:   # A UI guarda e faz a manutenção duma CakeShop
+        """ Read a shop and store it. The UI will need to deal with the shop.
+            Precondition: file_exists(UI.CAKE_SHOP_FILE_NAME)
+        """
+        self.shop = self.load_shop(UI.CAKE_SHOP_FILE_NAME)
+    
+    def make_ingredient(self: UI, line: str) -&gt; Ingredient:
+        name, percentage = line.split()
+        return Ingredient(name, float(percentage))
+    
+    def make_cake_variety(self: UI, line: str, f: File) -&gt; CakeVariety:
+        name, amount, n_ingredients = line.split()
+        n_ingredients = int(n_ingredients)
+        l = []
+        for _ in range(n_ingredients):
+            line = next(f)
+            i = self.make_ingredient(line)
+            l.append(i)
+        return CakeVariety(name, int(amount), l)
+    
+    def load_shop(self: UI, file_name: str) -&gt; CakeShop:
+        """ Load the data of the shop.
+            Precondition: file_exists(file_name)
+        """
+        f = open(file_name, 'r')
+        l = []
+        for line in f:
+            cake = self.make_cake_variety(line, f)
+            l.append(cake)
+        f.close()
+        return CakeShop(l)
+    
+    def store_shop(self: UI, file_name: str) -&gt; None:
+        g = open(file_name, 'w')
+        for cake in self.shop.stock:
+            print(f"{cake.name} {cake.amount} {len(cake.ingredients)}", file=g)
+            for ingr in cake.ingredients:
+                print(f"{ingr.name} {ingr.percent}", file=g)
+        g.close()
+    
+    def process(self: UI, name: str, units: int) -&gt; None:
+        sold = self.shop.sell(name, units)
+        if sold == None:
+            print(f"Não existe {name}")
+        else:
+            print(f"Vendidas {sold} unidades de {name}")
+            cake = self.shop.find_variety(name)
+            ingr = cake.main_ingredient()
+            if ingr == None:
+                print("Ingrediente principal: Sem ingredientes")
+            else:
+                print(f"Ingrediente principal: {ingr.name}")
+    
+    def run(self: UI) -&gt; None:
+        name = input("BOLO: ")            # pergunta o nome do bolo
+        units = int(input("UNIDADES: "))  # pergunta a quantidade
+        self.process(name, units)         # processa o pedido
+        self.store_shop(CAKE_SHOP_FILE_NAME)
+
+def main() -&gt; None:
+    if not file_exists(UI.CAKE_SHOP_FILE_NAME):
+        print("Não foi possível abrir o ficheiro")
+    else:
+        ui = UI()
+        ui.run()
+
+main()
+
+"""
+FILE
+Puro-açúcar 230 4
+Leite-Condensado 0.1
+Açúcar 0.76
+Farinha 0.12
+Fermento 0.02
+Delícia-compacta 127 2
+Farinha 0.99
+Leite 0.01
+Puro-ar 230 0
+"""
+
+"""
+&gt;&gt;&gt; main()
+BOLO: Delícia-compacta
+UNIDADES: 1000
+Vendidas 127 unidades de Delícia-compacta
+Ingrediente principal: Farinha
+
+"""
+&gt;&gt;&gt; main()
+BOLO: Puro-ar
+UNIDADES: 100
+Vendidas 100 unidades de Puro-ar
+Ingrediente principal: Sem ingredientes
+"""
+
+
+
+
+</enter></pre></body></html>

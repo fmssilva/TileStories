@@ -2,21 +2,27 @@ using UnityEngine;
 
 namespace TileStories
 {
-    // Result of one orientation resolution call (_2.1_Marker_Orientation.md section 8).
-    // The resolver is stateless: everything it needs to remember between frames is
-    // passed in (previousSnappedRollDeg) and handed back here, so the caller (the
-    // MonoBehaviour) owns all state and the resolver stays deterministic and testable.
+    // Result of one orientation resolution call (_2.1_Marker_Orientation.md v4 section 8).
+    // The resolver is stateless: it takes everything it needs as parameters and returns
+    // this, so the caller (the MonoBehaviour) owns all state and the resolver stays
+    // deterministic and testable.
     public struct OrientationResult
     {
-        public Quaternion Rotation;      // the world rotation to write
-        public float SnappedRollDeg;     // feed back as previousSnappedRollDeg next frame
-        public bool Resolved;            // false = degenerate input; caller keeps its previous rotation
+        public Quaternion Rotation; // the world rotation to write
+        public bool Resolved;       // false = degenerate input; caller keeps its previous rotation
     }
 
     // Pure orientation math for markers, labels, badges and clusters (_2.1_Marker_Orientation.md).
     // Stateless and static so every decision here is Tier-0 testable with no scene running.
     public static class MarkerOrientationResolver
     {
+        // Safety guard for always_facing_camera only: stops a marker swinging to a near
+        // edge-on angle when a visitor stands very close to or directly below/above it.
+        // Not developer-exposed (_2.1_Marker_Orientation.md v4: roll/pitch conditioning
+        // was a whole configurable domain in v3; keeping one hardcoded safety clamp is
+        // simpler and covers the one real failure mode without the exposed complexity).
+        private const float AlwaysFacingCameraMaxPitchDeg = 80f;
+
         // Screen "up" as a world-space direction, read from the camera's real projection so it
         // stays correct whether AR Foundation compensates for device rotation in the camera
         // transform or in the display matrix. Never assume cam.transform.up.
@@ -31,56 +37,56 @@ namespace TileStories
             return d.sqrMagnitude > 1e-12f ? d.normalized : cam.transform.up;
         }
 
-        // Resolve the world rotation for a marker root. wall_fixed and none ignore the
-        // facing/up computation entirely and return the parent-relative rotation directly;
-        // every other mode picks a forward + up basis, guards against a degenerate
-        // LookRotation, then applies roll snapping and pitch clamp on top.
+        // Resolve which "up" direction a Vertical Alignment mode ("world_up" | "screen_up")
+        // actually means, given the caller's already-resolved screen-up and up-reference
+        // vectors. Shared by the root, the cluster, and (via ResolveChildLocalRotation) the
+        // label/badge, so "world_up" and "screen_up" mean exactly the same thing everywhere.
+        public static Vector3 ResolveVerticalUp(string verticalAlignmentMode, Vector3 screenUpWorld, Vector3 upReference)
+        {
+            return verticalAlignmentMode == "screen_up" ? screenUpWorld : upReference; // default world_up
+        }
+
+        // Resolve the world rotation for a marker root. facing_mode picks the strategy:
+        // wall_fixed returns the authored rotation untouched; yaw_only keeps the authored
+        // X/Z wall tilt and replaces only the Y (yaw) with a live camera-facing value;
+        // always_facing_camera ignores authored angles entirely and looks at the camera
+        // using the resolved vertical-alignment up.
         public static OrientationResult ResolveRootRotation(
             OrientationSettings settings,
-            string modeOverride,
+            string facingModeOverride,
             Vector3 markerWorldPos, Vector3 camPos, Vector3 camForward,
             Vector3 screenUpWorld, Vector3 upReference,
-            Quaternion parentRotation, Quaternion authoredLocalRotation,
-            float previousSnappedRollDeg,
-            ScreenOrientation screenOrientation)
+            Quaternion parentRotation, Quaternion authoredLocalRotation)
         {
-            string mode = string.IsNullOrEmpty(modeOverride) ? settings.marker_orientation_mode : modeOverride;
+            string facingMode = string.IsNullOrEmpty(facingModeOverride) ? settings.facing_mode : facingModeOverride;
+            Vector3 up = ResolveVerticalUp(settings.vertical_alignment_mode, screenUpWorld, upReference);
 
-            if (mode == "wall_fixed")
+            if (facingMode == "wall_fixed")
             {
-                return new OrientationResult
+                return new OrientationResult { Rotation = parentRotation * authoredLocalRotation, Resolved = true };
+            }
+
+            if (facingMode == "yaw_only")
+            {
+                // Wall tilt (X/Z) stays exactly as authored; only yaw tracks the camera,
+                // computed the same way the editor's Y slider already means "yaw" (Unity's
+                // Quaternion.Euler applies Y as the outermost/world-space rotation).
+                Vector3 camFwdFlat = Vector3.ProjectOnPlane(camPos - markerWorldPos, up);
+                if (camFwdFlat.sqrMagnitude < 1e-12f)
                 {
-                    Rotation = parentRotation * authoredLocalRotation,
-                    SnappedRollDeg = previousSnappedRollDeg,
-                    Resolved = true
-                };
+                    return new OrientationResult { Rotation = parentRotation * authoredLocalRotation, Resolved = false };
+                }
+
+                float liveYawDeg = Quaternion.LookRotation(camFwdFlat, up).eulerAngles.y;
+                Vector3 authoredEuler = authoredLocalRotation.eulerAngles;
+                Quaternion yawOnly = parentRotation * Quaternion.Euler(authoredEuler.x, liveYawDeg, authoredEuler.z);
+                return new OrientationResult { Rotation = yawOnly, Resolved = true };
             }
 
-            if (mode == "none")
-            {
-                return new OrientationResult
-                {
-                    Rotation = parentRotation,
-                    SnappedRollDeg = previousSnappedRollDeg,
-                    Resolved = true
-                };
-            }
-
-            Vector3 fwd;
-            Vector3 up;
-
-            if (mode == "yaw_only")
-            {
-                up = upReference;
-                fwd = Vector3.ProjectOnPlane(camPos - markerWorldPos, up);
-            }
-            else // screen_aligned | world_up
-            {
-                up = mode == "world_up" ? upReference : screenUpWorld;
-                fwd = settings.facing_basis == "camera_position"
-                    ? markerWorldPos - camPos
-                    : camForward;
-            }
+            // always_facing_camera
+            Vector3 fwd = settings.facing_basis == "camera_position"
+                ? markerWorldPos - camPos
+                : camForward;
 
             // Degenerate LookRotation guard: view direction nearly parallel to the up
             // reference (e.g. looking straight down at a world_up marker) would produce
@@ -88,49 +94,43 @@ namespace TileStories
             if (fwd.sqrMagnitude < 1e-12f || up.sqrMagnitude < 1e-12f ||
                 Mathf.Abs(Vector3.Dot(fwd.normalized, up.normalized)) > 0.999f)
             {
-                return new OrientationResult { Rotation = parentRotation, SnappedRollDeg = previousSnappedRollDeg, Resolved = false };
+                return new OrientationResult { Rotation = parentRotation, Resolved = false };
             }
 
             Quaternion rotation = Quaternion.LookRotation(fwd, up);
+            rotation = ClampPitch(rotation, up, AlwaysFacingCameraMaxPitchDeg);
 
-            float measuredRollDeg = RootRollDeg(rotation, screenUpWorld);
-            float snappedRollDeg = SnapRollDeg(measuredRollDeg, settings.roll_snap_mode, settings.roll_snap_hysteresis_deg, previousSnappedRollDeg, screenOrientation);
-            float rollCorrectionDeg = snappedRollDeg - measuredRollDeg;
-            if (Mathf.Abs(rollCorrectionDeg) > 1e-4f)
-            {
-                rotation = Quaternion.AngleAxis(rollCorrectionDeg, fwd.normalized) * rotation;
-            }
-
-            if (settings.clamp_pitch_enabled)
-            {
-                rotation = ClampPitch(rotation, up, settings.max_pitch_deg);
-            }
-
-            return new OrientationResult { Rotation = rotation, SnappedRollDeg = snappedRollDeg, Resolved = true };
+            return new OrientationResult { Rotation = rotation, Resolved = true };
         }
 
-        // Child LOCAL rotation (pure Z) so the child's up matches the desired basis.
-        // Returns identity for "inherit". Pure Z means it never disturbs anchoredPosition.
+        // Child LOCAL rotation (pure Z) so the child's up matches the desired vertical
+        // alignment. Returns identity for "inherit". Pure Z means it never disturbs
+        // anchoredPosition -- the badge's screen corner is never independently held; it
+        // simply goes wherever the root's own rotation puts it (_2.1_Marker_Orientation.md
+        // v4: v3's badge_corner_mode "screen_fixed" was removed as unneeded complexity).
         public static Quaternion ResolveChildLocalRotation(
-            string childMode, Quaternion rootWorldRotation,
+            string childVerticalAlignmentMode, Quaternion rootWorldRotation,
             Vector3 screenUpWorld, Vector3 upReference)
         {
-            if (string.IsNullOrEmpty(childMode) || childMode == "inherit") return Quaternion.identity;
+            if (string.IsNullOrEmpty(childVerticalAlignmentMode) || childVerticalAlignmentMode == "inherit")
+                return Quaternion.identity;
 
-            Vector3 desiredUp = childMode == "screen_up" ? screenUpWorld : upReference;
+            Vector3 desiredUp = ResolveVerticalUp(childVerticalAlignmentMode, screenUpWorld, upReference);
             float angle = Vector3.SignedAngle(rootWorldRotation * Vector3.up, desiredUp, rootWorldRotation * Vector3.forward);
             return Quaternion.Euler(0f, 0f, angle);
         }
 
-        // The signed roll of the root about its own forward, relative to screen up.
-        // Shared by ResolveChildLocalRotation's callers, the badge corner hold and Block 5.
+        // The signed roll of the root about its own forward, relative to screen up. Used by
+        // MarkerView.ApplyLabelOffset's roll compensation (_2.1_Marker_Orientation.md
+        // section 17) so displaced label offsets land in the right screen direction
+        // regardless of the root's current vertical alignment.
         public static float RootRollDeg(Quaternion rootWorldRotation, Vector3 screenUpWorld)
         {
             return Vector3.SignedAngle(screenUpWorld, rootWorldRotation * Vector3.up, rootWorldRotation * Vector3.forward);
         }
 
-        // Rotate a 2D offset by degrees (standard CCW rotation matrix). Used for the
-        // badge corner hold and Block 5's label offset compensation.
+        // Rotate a 2D offset by degrees (standard CCW rotation matrix). Used by
+        // MarkerView.ApplyLabelOffset's roll compensation.
         public static Vector2 Rotate2D(Vector2 v, float degrees)
         {
             float rad = degrees * Mathf.Deg2Rad;
@@ -139,45 +139,8 @@ namespace TileStories
             return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
         }
 
-        // Snap a measured roll to the nearest quarter turn (or to the OS's committed
-        // screen orientation), with hysteresis so the snap cannot flicker at a boundary.
-        public static float SnapRollDeg(
-            float rollDeg, string snapMode, float hysteresisDeg,
-            float previousSnappedDeg, ScreenOrientation screenOrientation)
-        {
-            if (string.IsNullOrEmpty(snapMode) || snapMode == "none") return rollDeg;
-
-            if (snapMode == "screen_orientation")
-            {
-                float? mapped = MapScreenOrientationDeg(screenOrientation);
-                if (mapped.HasValue) return mapped.Value;
-                // AutoRotation / unknown: fall back to quarter_turns behaviour on the measured roll.
-            }
-
-            float nearestQuarter = Mathf.Round(rollDeg / 90f) * 90f;
-            nearestQuarter = ((nearestQuarter % 360f) + 360f) % 360f;
-
-            float distanceFromPrevious = Mathf.Abs(Mathf.DeltaAngle(rollDeg, previousSnappedDeg));
-            if (distanceFromPrevious <= 45f + hysteresisDeg) return previousSnappedDeg;
-
-            return nearestQuarter;
-        }
-
-        private static float? MapScreenOrientationDeg(ScreenOrientation orientation)
-        {
-            switch (orientation)
-            {
-                case ScreenOrientation.Portrait: return 0f;
-                case ScreenOrientation.LandscapeLeft: return 90f;
-                case ScreenOrientation.PortraitUpsideDown: return 180f;
-                case ScreenOrientation.LandscapeRight: return 270f;
-                default: return null;
-            }
-        }
-
-        // Clamp how far the marker can pitch up/down away from its up reference's
-        // horizontal plane, so a marker never tips fully edge-on when a visitor looks
-        // steeply up a tall wall.
+        // Clamp how far a rotation can pitch away from upReference's horizontal plane, so
+        // always_facing_camera never tips a marker fully edge-on toward a nearby camera.
         public static Quaternion ClampPitch(Quaternion target, Vector3 upReference, float maxPitchDeg)
         {
             Vector3 up = upReference.normalized;
@@ -210,7 +173,8 @@ namespace TileStories
             }
         }
 
-        // Resolve the world_up / yaw_only "up" vector from the wall's up_reference choice.
+        // Resolve the "world_up" vertical-alignment "up" vector from the wall's
+        // up_reference choice. screen_up alignment uses ScreenUpWorld directly instead.
         public static Vector3 ResolveUpReference(OrientationSettings s, Transform spawnRoot)
         {
             switch (s.up_reference)

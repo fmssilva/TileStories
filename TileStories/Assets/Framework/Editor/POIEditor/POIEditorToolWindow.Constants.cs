@@ -23,6 +23,25 @@ namespace TileStories.Editor
         private const float SectionRowIndent = 15f;
         private const float MaxRowWidth = 480f;
 
+        // The ONE way a conditional/dependent field row (e.g. "Up Reference" showing
+        // only when something is set to World Up, "Relaxation Steps" only for the
+        // force_directed algorithm) sits visually a bit deeper than its section's own
+        // base fields: pass this as the `extraIndentPixels` argument to
+        // DrawScalarField/DrawIntField/DrawToggleField/DrawPopupField (or DrawEditorRow
+        // directly). This is a RAW pixel nudge, not a whole EditorGUI.IndentLevelScope
+        // step -- a full indent level (~15px) also makes the row's own EditorGUILayout
+        // control re-apply the ambient indentLevel a second time on its label (this
+        // file's row-layout Lesson 4), and reads as noticeably too far forward for a
+        // merely-conditional row (confirmed directly, developer feedback 2026-09-18).
+        // Roughly half of one indent level. A doubly-conditional field (e.g. "Custom Up
+        // X/Y/Z", which only shows when Up Reference is ALSO Custom) uses
+        // `SubFieldIndentPixels * 2`, not a second nested level.
+        // Never fake this with leading spaces inside a label string -- that only shifts
+        // the label's glyphs inside its own fixed-width column, not the row itself, and
+        // renders inconsistently across labels/fonts (_5.1_Editor_Tab.md
+        // "Row Indentation & Spacing").
+        private const float SubFieldIndentPixels = 8f;
+
         // Floor for non-table rows: even on a very narrow panel a button/row must
         // stay readable, so the width clamp is max(MinRowWidth, min(panel, MaxRowWidth)).
         private const float MinRowWidth = 180f;
@@ -114,44 +133,54 @@ namespace TileStories.Editor
                 // Show-label options (explicit wording per Â§6 of 2.3 doc, clearer than bare checkbox).
         private static readonly string[] ShowLabelOptions = { "Show Label", "NOT show Label" };
 
-        // --- Orientation editor constants (_2.1_Marker_Orientation.md Block 6) ---
-        private static readonly string[] MarkerOrientationModeOptions = { "screen_aligned", "world_up", "yaw_only", "wall_fixed", "none" };
-        private static readonly string[] MarkerOrientationModeLabels = { "Screen Aligned", "World Up", "Yaw Only", "Wall Fixed", "None" };
-        private static readonly string[] FacingBasisOptions = { "view_plane", "camera_position" };
-        private static readonly string[] FacingBasisLabels = { "View Plane", "Camera Position" };
+        // --- Orientation editor constants (_2.1_Marker_Orientation.md v4) ---
+        // Vertical Alignment domain.
+        private static readonly string[] VerticalAlignmentModeOptions = { "world_up", "screen_up" };
+        private static readonly string[] VerticalAlignmentModeLabels = { "World Up", "Screen Up" };
+        private static readonly string[] ChildVerticalAlignmentModeOptions = { "inherit", "world_up", "screen_up" };
+        private static readonly string[] ChildVerticalAlignmentModeLabels = { "Inherit", "World Up", "Screen Up" };
         private static readonly string[] UpReferenceOptions = { "world_gravity", "spawn_root", "custom" };
         private static readonly string[] UpReferenceLabels = { "World Gravity", "Spawn Root", "Custom" };
-        private static readonly string[] RollSnapModeOptions = { "none", "quarter_turns", "screen_orientation" };
-        private static readonly string[] RollSnapModeLabels = { "None", "Quarter Turns", "Screen Orientation" };
-        private static readonly string[] ChildOrientationModeOptions = { "inherit", "screen_up", "world_up" };
-        private static readonly string[] ChildOrientationModeLabels = { "Inherit", "Screen Up", "World Up" };
-        private static readonly string[] BadgeCornerModeOptions = { "inherit", "screen_fixed" };
-        private static readonly string[] BadgeCornerModeLabels = { "Inherit", "Screen Fixed" };
-        private static readonly string[] ClusterOrientationModeOptions = { "inherit", "screen_aligned", "world_up", "yaw_only", "none" };
-        private static readonly string[] ClusterOrientationModeLabels = { "Inherit", "Screen Aligned", "World Up", "Yaw Only", "None" };
+
+        // Facing Options domain.
+        private static readonly string[] FacingModeOptions = { "wall_fixed", "yaw_only", "always_facing_camera" };
+        private static readonly string[] FacingModeLabels = { "Wall Fixed", "Y Rotation Only", "Always Facing Camera" };
+        private static readonly string[] FacingBasisOptions = { "view_plane", "camera_position" };
+        private static readonly string[] FacingBasisLabels = { "View Plane", "Camera Position" };
+        // Hierarchy Levels table's per-level override column (section 4.3): "" = inherit the wall setting.
+        private static readonly string[] FacingModeOverrideOptions = { "", "wall_fixed", "yaw_only", "always_facing_camera" };
+        private static readonly string[] FacingModeOverrideLabels = { "Inherit", "Wall Fixed", "Y Rotation Only", "Always Facing Camera" };
+
+        // Update Cost domain.
         private static readonly string[] OrientationUpdateModeOptions = { "every_frame", "interval", "on_camera_delta" };
         private static readonly string[] OrientationUpdateModeLabels = { "Every Frame", "Interval", "On Camera Delta" };
-        // Hierarchy Levels table's per-level override column (section 4.3): "" = inherit the wall setting.
-        private static readonly string[] OrientationOverrideOptions = { "", "screen_aligned", "world_up", "yaw_only", "wall_fixed", "none" };
-        private static readonly string[] OrientationOverrideLabels = { "Inherit", "Screen Aligned", "World Up", "Yaw Only", "Wall Fixed", "None" };
 
-        private static readonly string MarkerOrientationModeHelp = "How the marker root is rotated. Screen Aligned (default): always parallel to the camera's near plane, never foreshortens, maximum legibility. World Up: faces the viewer but stays upright in the real world, so turning the phone does not spin it. Yaw Only: classic cylindrical billboard, rotates about the up axis only - foreshortens when looking steeply up/down. Wall Fixed: painted flat onto the wall surface using the POI's authored rotation. None: no rotation applied beyond the parent's.";
-        private static readonly string FacingBasisHelp = "How the marker's forward direction is chosen (Screen Aligned / World Up only). View Plane (default): every marker parallel to the camera's near plane, no perspective skew anywhere on screen. Camera Position: each marker's forward points away from the camera individually, which reads as more physical for large markers but introduces slight skew off-centre.";
-        private static readonly string UpReferenceHelp = "The 'up' direction used by World Up and Yaw Only. World Gravity (default): real-world up, no gyroscope needed since AR world space is already gravity-aligned. Spawn Root: the wall's own placement anchor up - use when the map frame is not gravity-aligned. Custom: an authored vector below.";
+        private static readonly string VerticalAlignmentModeHelp = "Which way is 'up' for the whole marker (Symbol, Ring and everything that doesn't override it below). World Up (default): stays upright against real-world gravity, so turning the phone does not spin it. Screen Up: always aligned to the phone's own screen edges instead.";
+        private static readonly string ChildVerticalAlignmentHelp = "Inherit (default): follows the marker's own Vertical Alignment above, rigidly. World Up / Screen Up: overrides just this element's vertical alignment independently of the marker root - this is how 'marker stays upright in the world, but the label always reads screen-horizontal' (or the reverse) is achieved without moving the root.";
+        private static readonly string UpReferenceHelp = "The real-world 'up' direction used wherever Vertical Alignment is World Up. World Gravity (default): true real-world up - no gyroscope needed, since AR world space is already gravity-aligned. Spawn Root: the wall's own placement anchor up instead - use only if this wall's map was scanned at a tilt and isn't gravity-aligned. Custom: an authored vector below.";
         private static readonly string CustomUpHelp = "The custom up-reference vector, used only when Up Reference is set to Custom.";
-        private static readonly string RollSnapModeHelp = "Conditions the marker's measured roll before it is applied. None (default): continuous, unsnapped roll. Quarter Turns: snaps the measured roll to the nearest 90 degrees so a hand-held tilt never leaves a permanently skewed label. Screen Orientation: reads the OS's committed screen orientation instead of measured roll - steadier once the device has settled, but does nothing while the app is orientation-locked.";
-        private static readonly string RollSnapHysteresisHelp = "Degrees of deadband around a roll-snap boundary, so a tilt sitting right at the boundary cannot flicker between the two nearest snap values every frame.";
-        private static readonly string ClampPitchHelp = "Stops a marker tipping fully edge-on when a visitor looks steeply up or down a tall wall.";
-        private static readonly string MaxPitchHelp = "The pitch angle, in degrees, beyond which Clamp Pitch holds the marker instead of following the camera further.";
-        private static readonly string RotationSmoothingHelp = "Seconds of exponential damping applied against AR pose jitter. 0 (default) applies the resolved rotation instantly, with no smoothing.";
-        private static readonly string LabelOrientationHelp = "Independent orientation for the Label, applied as a pure Z counter-rotation on top of the root. Inherit (default): the label rotates rigidly with the root. Screen Up / World Up: the label's own up stays aligned to that basis regardless of the root's orientation - this is how 'marker faces the camera, label always reads upright' is achieved without moving the root.";
-        private static readonly string BadgeOrientationHelp = "Same as Label Orientation, but for the Badge.";
-        private static readonly string BadgeCornerModeHelp = "Only meaningful when Badge Orientation is not Inherit. Screen Fixed re-rotates the badge's fixed corner offset by the root's own roll, so the badge holds its screen corner as the device rotates instead of drifting to a different corner.";
-        private static readonly string ClusterOrientationModeHelp = "Orientation mode used by cluster aggregate markers. Inherit (default): same mode as the wall's Marker Orientation above. Any other value overrides it for clusters only - useful when individual markers and their aggregates should behave differently.";
-        private static readonly string OrientationUpdateModeHelp = "Cost control for how often orientation is re-resolved. Every Frame (default): always up to date, highest cost. Interval: re-resolves at most every Update Interval seconds. On Camera Delta: re-resolves only once the camera has rotated past Camera Delta degrees since the last resolve.";
+        private static readonly string FacingModeHelp = "What the marker points at. Wall Fixed: painted flat onto the wall using this POI's authored Facing Options angles (Specific Marker tab) - never moves at runtime. Y Rotation Only: keeps the authored X/Z wall tilt fixed, but continuously turns left/right (yaw) to face the visitor. Always Facing Camera (default): ignores the authored angles entirely and always looks straight at the visitor, like a classic billboard.";
+        private static readonly string FacingBasisHelp = "How the marker's forward direction is chosen (Always Facing Camera only). View Plane (default): every marker parallel to the camera's near plane, no perspective skew anywhere on screen. Camera Position: each marker's forward points away from the camera individually, which reads as more physical for large markers but introduces slight skew off-centre.";
+        private static readonly string OrientationUpdateModeHelp = "Cost control for how often orientation is re-resolved. Every Frame (default, recommended): always up to date, avoids a subtle stale-rotation mismatch with the label/badge displacement system (see the Update Mode help below) - the CPU cost is negligible even at 150 markers. Interval: re-resolves at most every Update Interval seconds. On Camera Delta: re-resolves only once the camera has rotated past Camera Delta degrees since the last resolve. Both non-default modes can make label/badge offsets lag the marker's own rotation for a moment after a fast camera turn - use them only if a real profiling pass shows a need.";
         private static readonly string OrientationUpdateIntervalHelp = "Seconds between orientation re-resolves, used only when Update Mode is Interval.";
         private static readonly string OrientationCameraDeltaHelp = "Degrees the camera must rotate before orientation re-resolves, used only when Update Mode is On Camera Delta.";
-        private static readonly string EditModePreviewHelp = "Shows what World Up / Yaw Only will look like directly in the Scene view, without entering Play Mode. Smoothing and Update Mode are ignored in preview since there is no per-frame tick to smooth over.";
+        private static readonly string EditModePreviewHelp = "Shows the resolved Vertical Alignment / Facing Options directly in the Scene view, without entering Play Mode. Nothing animates here (Edit Mode does not tick per-frame) - this checks the static result at the Scene camera's current angle only. See the Test section's own help for the full click-by-click workflow.";
+
+        private static readonly string OrientationTestWorkflowHelp =
+            "HOW TO TEST YOUR ORIENTATION CHOICES\n\n" +
+            "IN SCENE MODE (no Play Mode, instant):\n" +
+            "1. Turn on 'Edit-Mode Preview' above.\n" +
+            "2. Click 'Load & Populate Rig' if the rig isn't already loaded.\n" +
+            "3. In the Scene view, hold the right mouse button and move the mouse (or use the view gizmo, top-right of the Scene view) to orbit and tilt the Scene camera around the markers.\n" +
+            "4. Watch the markers rotate live as you move the Scene camera - this uses the exact same math as the real app. Turn 'Edit-Mode Preview' off when done; it never touches your saved rotation values.\n\n" +
+            "IN PLAY MODE (the real running app, in the Editor Game view):\n" +
+            "1. Press the Play button at the top of the Unity Editor.\n" +
+            "2. The app uses a mock camera in the Editor (no real phone needed): click into the Game view, then:\n" +
+            "   - W/A/S/D moves the camera through the wall.\n" +
+            "   - Hold the right mouse button and move the mouse to look around (yaw/pitch) - this is what 'turning the phone left/right/up/down' means.\n" +
+            "   - Z and C keys roll the camera left/right - this simulates physically tilting the phone sideways (e.g. toward landscape), which is the single most important test for Vertical Alignment: with World Up selected, markers must stay upright as you roll; with Screen Up, they should tilt together with the roll.\n" +
+            "3. Watch the markers, labels and badges while you do this. World Up should keep them level with the real world; Screen Up should keep them level with the phone screen edges; Wall Fixed should never move at all; Y Rotation Only should turn to follow you left/right but never tip up/down.\n\n" +
+            "For a wider, side-by-side comparison across every combination at once, open Assets/Dev/OrientationGallery/OrientationGalleryScene.unity and press Play - the Camera Rig Sweep fields on the OrientationGalleryHarness component let you orbit/pitch/roll the gallery camera by hand and watch every row react together.";
 
         // --- Search & Filter editor constants (Block 5) ---
         // Search mode dropdown (inert values flagged by ValidateSearchEnumFields).
@@ -424,23 +453,24 @@ namespace TileStories.Editor
             "button) to lock it -- turns green. A verified position is protected: if the marker " +
             "gets bumped in the Scene view afterward, it snaps back automatically until you " +
             "unlock it again by clicking Verified a second time.\n\n" +
-            "Note on rotation: the Rotation slider below (and Unity's Rotate tool) is NOT covered " +
-            "by Verified and never needs to be locked. It only sets an editor-preview angle to " +
-            "help you look at the marker while placing it -- at runtime every marker always turns " +
-            "to face the camera (billboard), so whatever rotation is saved here never changes what " +
-            "a visitor actually sees.";
+            "Note on facing: the Facing slider below (and Unity's Rotate tool) is NOT covered " +
+            "by Verified and never needs to be locked. Whether these angles matter at runtime " +
+            "depends on the wall's global Facing Options mode (Global Scene > Orientation) -- see " +
+            "that row's own help button for which mode reads which axis.";
 
-        // Edit Rotation row help ((i) button next to the slider itself).
+        // Facing Options row help ((i) button next to the slider itself).
         internal static readonly string EditRotationHelpBody =
-            "This angle is an editor-only preview aid -- at runtime every marker always " +
-            "faces the camera (billboard), so nothing saved here ever changes what a visitor sees.\n\n" +
-            "This slider controls yaw (rotation around Y) and stays in sync in both directions with " +
-            "Unity's Rotate tool: dragging the slider turns the marker in the Scene view, and rotating " +
-            "the marker with the Rotate tool updates this slider live.\n\n" +
-            "There is no slider for pitch/roll (X/Z) -- use Unity's Rotate tool directly for those. " +
-            "All three axes are captured live and saved to config JSON, then re-applied automatically " +
-            "next time the rig is populated.\n\n" +
-            "Rotation is always free to edit, even after this POI's position is Verified -- the " +
+            "This slider controls yaw (rotation around Y); Unity's Rotate tool also lets you set " +
+            "pitch/roll (X/Z) directly in the Scene view. All three axes are captured live and saved " +
+            "to config JSON, then re-applied automatically next time the rig is populated.\n\n" +
+            "Whether these angles are used at runtime depends on the wall's Facing Options mode " +
+            "(Global Scene > Orientation > Facing Options):\n" +
+            "- Wall Fixed: all three angles are used exactly as authored -- this marker never moves.\n" +
+            "- Y Rotation Only: the X/Z tilt is used as authored, but Y is replaced every frame by a " +
+            "live camera-facing yaw, so this slider only sets a STARTING yaw for preview purposes.\n" +
+            "- Always Facing Camera: none of these three angles are used at runtime at all -- the " +
+            "marker always fully faces the visitor, so this slider is an editor-preview aid only.\n\n" +
+            "Facing is always free to edit, even after this POI's position is Verified -- the " +
             "Verified lock only ever applies to position.";
 
         // Keyword Fields table (Global Scene > Search & Filter).

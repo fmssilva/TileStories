@@ -3,46 +3,27 @@ using UnityEngine;
 namespace TileStories
 {
     // One instance on the Label and one on the Badge (_2.1_Marker_Orientation.md section 9.2).
-    // Counter-rotates a child (pure Z) so its up matches label_orientation_mode /
-    // badge_orientation_mode independently of the root's own orientation, and, for a
-    // badge with badge_corner_mode == "screen_fixed", holds its screen corner as the
-    // root rolls. Does nothing at all when its mode is "inherit".
+    // Counter-rotates a child (pure Z) so its up matches its own Vertical Alignment mode
+    // independently of the root's, and does nothing at all when that mode is "inherit".
+    // The badge's screen position is never independently held (_2.1_Marker_Orientation.md
+    // v4: v3's "screen_fixed" badge-corner mechanism was removed) -- it simply goes
+    // wherever the root's own rotation puts it, like every other child.
     public class MarkerChildOrientation : MonoBehaviour
     {
-        private string _mode = "inherit";
-        private string _badgeCornerMode = "inherit";
-        private RectTransform _rect;
-        private Vector2 _baseAnchoredPosition;
-        private bool _baseCaptured;
+        private string _verticalAlignmentMode = "inherit";
 
         // Called once by MarkerBillboard.Configure - never per frame.
-        public void Configure(string mode, string badgeCornerMode)
+        public void Configure(string verticalAlignmentMode)
         {
-            _mode = string.IsNullOrEmpty(mode) ? "inherit" : mode;
-            _badgeCornerMode = string.IsNullOrEmpty(badgeCornerMode) ? "inherit" : badgeCornerMode;
-            _rect = GetComponent<RectTransform>();
+            _verticalAlignmentMode = string.IsNullOrEmpty(verticalAlignmentMode) ? "inherit" : verticalAlignmentMode;
         }
 
         // Called by MarkerBillboard.LateUpdate after the root's rotation for this frame is
         // final, so the roll measured against it is correct.
         public void Tick(Quaternion rootWorldRotation, Vector3 screenUpWorld, Vector3 upReference)
         {
-            if (_rect == null) _rect = GetComponent<RectTransform>();
-            if (_rect == null) return;
-
-            if (!_baseCaptured)
-            {
-                _baseAnchoredPosition = _rect.anchoredPosition;
-                _baseCaptured = true;
-            }
-
-            transform.localRotation = MarkerOrientationResolver.ResolveChildLocalRotation(_mode, rootWorldRotation, screenUpWorld, upReference);
-
-            if (_badgeCornerMode == "screen_fixed")
-            {
-                float rollDeg = MarkerOrientationResolver.RootRollDeg(rootWorldRotation, screenUpWorld);
-                _rect.anchoredPosition = MarkerOrientationResolver.Rotate2D(_baseAnchoredPosition, -rollDeg);
-            }
+            transform.localRotation = MarkerOrientationResolver.ResolveChildLocalRotation(
+                _verticalAlignmentMode, rootWorldRotation, screenUpWorld, upReference);
         }
     }
 }

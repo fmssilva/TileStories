@@ -47,7 +47,7 @@ namespace TileStories.Tests
             var config = new WallConfigData
             {
                 wall_id = "test_wall",
-                orientation_settings = new OrientationSettings { marker_orientation_mode = "world_up", edit_mode_preview_enabled = true }
+                orientation_settings = new OrientationSettings { vertical_alignment_mode = "world_up", facing_mode = "always_facing_camera", edit_mode_preview_enabled = true }
             };
             config.pois.Add(poiA);
             config.pois.Add(poiB);
@@ -153,7 +153,7 @@ namespace TileStories.Tests
         public void ApplyOrientationPreview_WallFixed_MatchesResolveRootRotation_ForSameInputs()
         {
             var config = BuildConfig(out var poiA, out _);
-            config.orientation_settings.marker_orientation_mode = "wall_fixed";
+            config.orientation_settings.facing_mode = "wall_fixed";
             SetConfig(_window, config);
 
             Quaternion authoredA = PoiRotationResolver.ToEulerQuaternion(poiA.editor_rotation_x_deg, poiA.editor_rotation_deg, poiA.editor_rotation_z_deg);
@@ -167,7 +167,7 @@ namespace TileStories.Tests
 
             var expected = MarkerOrientationResolver.ResolveRootRotation(
                 config.orientation_settings, "", _childA.transform.position, cam.transform.position, cam.transform.forward,
-                MarkerOrientationResolver.ScreenUpWorld(cam), Vector3.up, _rigGO.transform.rotation, authoredA, 0f, ScreenOrientation.Portrait);
+                MarkerOrientationResolver.ScreenUpWorld(cam), Vector3.up, _rigGO.transform.rotation, authoredA);
 
             Assert.Less(Quaternion.Angle(_childA.transform.rotation, expected.Rotation), 0.01f,
                 "wall_fixed Edit-Mode preview must equal ResolveRootRotation's own result for the same inputs - Edit Mode and Play Mode agree exactly here.");

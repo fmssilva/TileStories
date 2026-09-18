@@ -126,6 +126,8 @@ against disk on 2026-09-18.
         - marker_gallery_phase3.png  -- captured Tier 1 vision-pass reference
     - ClusterGallery/
       - ClusterGalleryScene.unity  -- grid of cluster-aggregate variants
+    - OrientationGallery/
+      - OrientationGalleryScene.unity  -- rotatable camera rig (orbit/pitch/roll) for hand-testing every Vertical Alignment / Facing Options combination live; drives OrientationGalleryHarness, excluded from Build Settings
     - PoiEditorLayout/  [EMPTY SCAFFOLD]  -- saved POI Editor window layouts
   - Framework/
     - Runtime/  -- ships to device
@@ -163,13 +165,13 @@ against disk on 2026-09-18.
         - SynonymGroup.cs  -- synonym expansion, stored as plain config data
       - UI/
         - Markers/  -- the ONLY uGUI World-Space Canvas domain in the project
-          - POI_Marker.prefab  -- the marker outer container. Root holds Canvas + POIAnchor + MarkerView + MarkerBillboard + MarkerRevealEffect + MarkerSelectable + MarkerLeaderLine; children are Label, Symbol, Ring, Badge. Label and Badge each also carry MarkerChildOrientation (see _2.1 Block 4)
-          - POI_Cluster.prefab  -- LOD aggregate marker; children PieContainer, CountLabel, BackgroundImage, DominantIcon. Root also carries MarkerBillboard (see _2.1 Block 4)
+          - POI_Marker.prefab  -- the marker outer container. Root holds Canvas + POIAnchor + MarkerView + MarkerBillboard + MarkerRevealEffect + MarkerSelectable + MarkerLeaderLine; children are Label, Symbol, Ring, Badge. Label and Badge each also carry MarkerChildOrientation (see _2.1)
+          - POI_Cluster.prefab  -- LOD aggregate marker; children PieContainer, CountLabel, BackgroundImage, DominantIcon. Root also carries MarkerBillboard (see _2.1 section 6.4)
           - POIAnchor.cs  -- holds this marker's POIData so other components can read it
           - MarkerView.cs  -- applies all visual state to the prefab's children; owns label and marker displacement write-back
-          - MarkerBillboard.cs  -- orientation of the marker root (see _2.1). Referenced from POI_Marker.prefab by script GUID -- do NOT rename
-          - MarkerOrientationResolver.cs  -- pure, stateless orientation math (see _2.1): ScreenUpWorld, ResolveRootRotation, ResolveChildLocalRotation, RootRollDeg, Rotate2D, SnapRollDeg, ClampPitch, ShouldUpdate, ResolveUpReference
-          - MarkerChildOrientation.cs  -- per-child (Label/Badge) counter-rotation and badge corner hold (see _2.1); not yet baked into the prefab, added dynamically by the gallery harness until Block 4
+          - MarkerBillboard.cs  -- orientation of the marker root, Vertical Alignment + Facing Options (see _2.1). Referenced from POI_Marker.prefab by script GUID -- do NOT rename
+          - MarkerOrientationResolver.cs  -- pure, stateless orientation math (see _2.1): ScreenUpWorld, ResolveVerticalUp, ResolveRootRotation, ResolveChildLocalRotation, RootRollDeg, Rotate2D, ClampPitch, ShouldUpdate, ResolveUpReference
+          - MarkerChildOrientation.cs  -- per-child (Label/Badge) independent vertical-alignment counter-rotation (see _2.1); baked onto POI_Marker.prefab's Label and Badge children
           - MarkerLayout.cs  -- symbol/label/badge sizing ratios and ScreenPixelsToWorld conversion
           - MarkerCircleGlyphView.cs  -- draws one circular glyph (symbol or badge) from a sprite + tint
           - MarkerCircleSpriteFactory.cs  -- generates circle and ring textures once, shared by every effect
@@ -253,7 +255,7 @@ against disk on 2026-09-18.
         - ClusterGalleryHarness.cs  -- spawns cluster variants
         - DisplacementGalleryDefinitions.cs  -- data list of overlap group sizes, angles and algorithms
         - DisplacementGalleryHarness.cs  -- spawns displacement scenarios
-        - OrientationGalleryDefinitions.cs  -- data list of the 16 orientation gallery entries (see _2.1 section 12)
+        - OrientationGalleryDefinitions.cs  -- data list of the 11 orientation gallery entries (see _2.1 section 11)
         - OrientationGalleryHarness.cs  -- orbit/pitch/roll camera rig + SpawnEntry (shared by the visual harness and OrientationGalleryTests)
       - Blocks/  [EMPTY SCAFFOLD]  -- the per-POI content block system (text/image/audio/video/model/map)
       - Circuits/  [EMPTY SCAFFOLD]  -- circuit state machine and entry-point resolution
@@ -269,8 +271,8 @@ against disk on 2026-09-18.
         - POIEditorToolWindow.Constants.cs  -- option and label arrays, section colors, layout constants, help strings
         - MarkerSymbolTexturePostprocessor.cs  -- forces correct import settings on marker symbol textures
         - GlobalScene/  -- wall-wide settings sections
-          - POIEditorToolWindow.GlobalScene.cs  -- section dispatch plus Marker, Badge, Outline, Effects and Hierarchy Levels (now also carries the per-level Orientation override column, see _2.1 Block 6)
-          - POIEditorToolWindow.Orientation.cs  -- Orientation section: marker root mode, facing basis, up reference, roll/pitch conditioning, label/badge modes, cluster mode, update cost, edit-mode preview toggle (_2.1 Block 6)
+          - POIEditorToolWindow.GlobalScene.cs  -- section dispatch plus Marker, Badge, Outline, Effects and Hierarchy Levels (now also carries the per-level Facing override column, see _2.1 section 4.3)
+          - POIEditorToolWindow.Orientation.cs  -- Orientation section, 4 sub-foldouts: Vertical Alignment, Facing Options, Update Cost, Test (see _2.1 section 8)
           - POIEditorToolWindow.LodZoom.cs  -- LOD and Zoom sections, plus the four shared field-row helpers every section uses
           - POIEditorToolWindow.Displacement.cs  -- displacement algorithm, thresholds and leader-line settings
           - POIEditorToolWindow.SearchFilter.cs  -- search keyword fields and synonym groups
@@ -282,7 +284,7 @@ against disk on 2026-09-18.
           - PoiRotationResolver.cs  -- pure editor-preview rotation math (X/Y/Z to quaternion, angle normalisation)
           - Icons/  -- add, delete, edit and focus button PNGs
         - RigLifecycle/
-          - POIEditorToolWindow.RigLifecycle.cs  -- creates, refreshes, captures from and clears the Edit-Mode marker rig; calls the real Initialise methods; also owns the orientation preview (ApplyOrientationPreview, RestoreRigRotationsFromConfig, see _2.1 Block 7)
+          - POIEditorToolWindow.RigLifecycle.cs  -- creates, refreshes, captures from and clears the Edit-Mode marker rig; calls the real Initialise methods; also owns the orientation preview (ApplyOrientationPreview, RestoreRigRotationsFromConfig, see _2.1 section 9)
         - ConfigData/
           - POIEditorToolWindow.ConfigFileIO.cs  -- load, save and copy-to-StreamingAssets
           - POIEditorToolWindow.ConfigHistory.cs  -- JSON-snapshot undo/redo, separate from Unity's Undo
@@ -322,14 +324,14 @@ against disk on 2026-09-18.
         - DisplacementComputeTests.cs, DisplacementAlgorithmTest.cs, DisplacementHysteresisTests.cs, DisplacementTieBreakStrategyTests.cs, DisplacementSettingsDefaultsTests.cs, DisplacementAuthoringRoundTripTests.cs  -- displacement math, defaults and authoring round-trip
         - LODControllerTests.cs, LodAutoSuggestTests.cs, LodAuthoringRoundTripTests.cs, DensityThresholdValidationTests.cs, LeaderLineVisibilityTests.cs  -- LOD logic and authoring
         - POIPositionResolverTests.cs  -- null position falls back to origin
-        - MarkerOrientationResolverTests.cs  -- Tier-0 tests for the orientation resolver (_2.1 Block 2): mode resolution, roll snap, pitch clamp, update gating
+        - MarkerOrientationResolverTests.cs  -- Tier-0 tests for the orientation resolver (_2.1 section 5): vertical alignment, facing modes, degenerate/pitch-clamp guards, update gating
         - POISearchIndexTests.cs, POISearchIndexMatchModeTests.cs, SearchTokenizerTests.cs, SearchSynonymGroupsTests.cs  -- search index behaviour
-        - EditorCameraLookTests.cs  -- mock-camera look math including roll (_2.1 Block 0)
+        - EditorCameraLookTests.cs  -- mock-camera look math including roll (_2.1 section 13.3)
         - PoiRotationResolverTests.cs, PoiFocusResolverTests.cs, PositionTabsTests.cs  -- per-POI editor math and Position foldout shape
         - IdentityRenameResolverTests.cs, IdentityRenameCompositionTests.cs  -- rename rule and its composition across tables
         - HierarchyLevelKeyValidationTests.cs, HierarchyLevelSizeRangeTests.cs  -- config validation
-        - OrientationEditorRoundTripTests.cs  -- OrientationSettings JSON round-trip, no-block defaults, editor foldout field-existence (_2.1 Block 6)
-        - OrientationEditModePreviewTests.cs  -- Edit-Mode orientation preview: non-destructive guarantee, on/off cycle byte-identical, CapturePositions guard, wall_fixed Edit/Play-Mode agreement (_2.1 Block 7)
+        - OrientationEditorRoundTripTests.cs  -- OrientationSettings JSON round-trip, no-block defaults, editor foldout field-existence, deleted-field absence checks (_2.1 section 7)
+        - OrientationEditModePreviewTests.cs  -- Edit-Mode orientation preview: non-destructive guarantee, on/off cycle byte-identical, CapturePositions guard, wall_fixed Edit/Play-Mode agreement (_2.1 section 9)
         - DefaultCategoryStylesTests.cs, DefaultBadgeCategoriesTests.cs, DefaultOutlineLevelsTests.cs  -- seeding defaults
         - POIEditorToolWriteBackTests.cs, POIEditorAddPoiTests.cs, POIEditorToolSearchRoundTripTests.cs, ReloadGuardChoiceTests.cs  -- editor data flow
         - POIEditorTableLayoutTests.cs, POIEditorAddButtonRowRenderTests.cs, POIEditorCoordinateRowRenderTests.cs, POIEditorVisualHierarchyTests.cs, POIEditorWindowChromeTests.cs  -- real IMGUI geometry measurement
@@ -353,8 +355,8 @@ against disk on 2026-09-18.
         - FilterCompositionPlayModeTests.cs  -- filter fades, which need coroutines
         - ARZoomRoutingTests.cs, ARZoomRoutingTests_additions.cs, ARZoomCameraFovTests.cs  -- zoom routing and real FOV change
         - LivingRoomConfigIntegrationTests.cs  -- editor to StreamingAssets to runtime config contract
-        - OrientationWallSessionIntegrationTests.cs  -- real WallSession.SpawnPOIs orientation wiring + hierarchy override + real-marker occlusion check (_2.1 Block 4)
-        - OrientationClusterIntegrationTests.cs  -- real LODController cluster spawn path gets MarkerBillboard.Configure; cluster rotation changes when camera rotates (_2.1 Block 4, S7 regression)
+        - OrientationWallSessionIntegrationTests.cs  -- real WallSession.SpawnPOIs orientation wiring + hierarchy override + real-marker occlusion check (_2.1 section 6)
+        - OrientationClusterIntegrationTests.cs  -- real LODController cluster spawn path gets MarkerBillboard.Configure; cluster rotation changes when camera rotates (_2.1 section 6.4)
         - Search/SearchOverlayRuntimeTests.cs  -- search overlay with a real UIDocument
       - EditMode/  [EMPTY SCAFFOLD]  -- legacy folder, superseded by Tests/Editor
   - StreamingAssets/

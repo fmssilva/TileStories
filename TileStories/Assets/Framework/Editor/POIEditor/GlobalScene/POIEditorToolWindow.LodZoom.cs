@@ -21,9 +21,9 @@ namespace TileStories.Editor
         // rowWidth (minus a help-button allowance when helpText is set); ExpandWidth(false)
         // keeps the control from stretching the panel. The spacer is measured at call time,
         // so rows inside a nested IndentLevelScope keep their own deeper indent.
-        internal static float DrawScalarField(string label, float value, string helpText = "")
+        internal static float DrawScalarField(string label, float value, string helpText = "", float extraIndentPixels = 0f)
         {
-            DrawEditorRow(out float rowWidth, out _);
+            DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
             float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
             value = EditorGUILayout.FloatField(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
             if (!string.IsNullOrEmpty(helpText))
@@ -32,9 +32,9 @@ namespace TileStories.Editor
             return value;
         }
 
-        internal static int DrawIntField(string label, int value, string helpText = "")
+        internal static int DrawIntField(string label, int value, string helpText = "", float extraIndentPixels = 0f)
         {
-            DrawEditorRow(out float rowWidth, out _);
+            DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
             float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
             value = EditorGUILayout.IntField(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
             if (!string.IsNullOrEmpty(helpText))
@@ -43,9 +43,9 @@ namespace TileStories.Editor
             return value;
         }
 
-        internal static bool DrawToggleField(string label, bool value, string helpText = "")
+        internal static bool DrawToggleField(string label, bool value, string helpText = "", float extraIndentPixels = 0f)
         {
-            DrawEditorRow(out float rowWidth, out _);
+            DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
             float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
             value = EditorGUILayout.Toggle(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
             if (!string.IsNullOrEmpty(helpText))
@@ -54,9 +54,9 @@ namespace TileStories.Editor
             return value;
         }
 
-        internal static string DrawPopupField(string label, string current, string[] options, string[] labels, string helpText = "")
+        internal static string DrawPopupField(string label, string current, string[] options, string[] labels, string helpText = "", float extraIndentPixels = 0f)
         {
-            DrawEditorRow(out float rowWidth, out _);
+            DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
             float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
             int idx = Array.IndexOf(options, current);
             if (idx < 0) idx = 0;
@@ -153,13 +153,13 @@ namespace TileStories.Editor
             {
                 lod.cluster_icon_mode = DrawPopupField("Cluster Icon", lod.cluster_icon_mode, ClusterIconOptions, ClusterIconLabels, "");
                 lod.cluster_band_source = DrawPopupField("Band Source", lod.cluster_band_source, ClusterBandSourceOptions, ClusterBandSourceLabels, LodClusterBandSourceHelp);
-                lod.cluster_band_hysteresis_enabled = DrawToggleField("  Band Hysteresis", lod.cluster_band_hysteresis_enabled, LodClusterBandHysteresisHelp);
-                lod.cluster_dissolve_grace_cycles = DrawIntField("  Dissolve Grace (cycles)", lod.cluster_dissolve_grace_cycles, LodClusterDissolveGraceHelp);
+                lod.cluster_band_hysteresis_enabled = DrawToggleField("Band Hysteresis", lod.cluster_band_hysteresis_enabled, LodClusterBandHysteresisHelp, SubFieldIndentPixels);
+                lod.cluster_dissolve_grace_cycles = DrawIntField("Dissolve Grace (cycles)", lod.cluster_dissolve_grace_cycles, LodClusterDissolveGraceHelp, SubFieldIndentPixels);
             }
 
             lod.density_safety_escalation_enabled = DrawToggleField("Safety Escalation", lod.density_safety_escalation_enabled, LodSafetyEscalationHelp);
             if (lod.density_safety_escalation_enabled)
-                lod.density_safety_escalation_multiplier = DrawScalarField("  Multiplier", lod.density_safety_escalation_multiplier, LodSafetyEscalationHelp);
+                lod.density_safety_escalation_multiplier = DrawScalarField("Multiplier", lod.density_safety_escalation_multiplier, LodSafetyEscalationHelp, SubFieldIndentPixels);
 
             EditorGUILayout.Space(6f);
             EditorGUILayout.LabelField("Transitions", EditorStyles.boldLabel);
@@ -170,7 +170,7 @@ namespace TileStories.Editor
             EditorGUILayout.LabelField("Performance", EditorStyles.boldLabel);
             lod.frustum_culling_enabled = DrawToggleField("Frustum Culling", lod.frustum_culling_enabled, LodFrustumHelp);
             if (lod.frustum_culling_enabled)
-                lod.fov_culling_margin_deg = DrawScalarField("  FOV Margin (deg)", lod.fov_culling_margin_deg, LodFovMarginHelp);
+                lod.fov_culling_margin_deg = DrawScalarField("FOV Margin (deg)", lod.fov_culling_margin_deg, LodFovMarginHelp, SubFieldIndentPixels);
         }
         // ---- Zoom section ----
         private void DrawGlobalZoomSection()

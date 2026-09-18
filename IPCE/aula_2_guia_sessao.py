@@ -21,18 +21,19 @@ Durante a aula ir variando a forma de ensinar exercícios/blocos:
 ABERTURA (10:10-10:18, 8 min)
 ===========================================================================
 1. Folha Presenças; Vão ligando Spyder...
-2. Dúvidas aula passada?
+2. Todos conseguem ler inglês? Próximos guiões podem ser inglês? 
+3. Dúvidas aula passada?
     - Todos tem Spyder a funcionar?
     - Testaram VPN + Mooshak?
     - Têm wifi eduroam a funcionar?
     - Dúvidas sobre tipos de dados, cast, input/print?
 
-3. MOTIVAÇÃO:
+4. MOTIVAÇÃO:
     Hoje vamos treinar a programar para resolver problemas práticos do mundo real.
     Vão ver que, assim que conseguimos pensar uma solução "matemática" do problema,
     depois implementar isso em python é fácil (a gramática/syntax aprende-se rápido)
 
-4. ESTRUTURA DA AULA:
+5. ESTRUTURA DA AULA:
     BLOCO A — funções, parâmetros/retorno, encadeamento de chamadas, operadores /, // e %
     BLOCO B — ex. 9, 10, 11 (trovoada, h/m/s)
     BLOCO C — ex. 12, 13 (pêndulo, paralelepípedo)
@@ -244,7 +245,7 @@ B.3) Ex. 11 — segundos -> h/m/s [THEY DO] (11 min)
 
 def get_hours(total: int) -> int:
     """ Horas duma duração total dada em segundos. """
-    return total // 3600
+    return total // 3600 # ou total // (60 * 60)
 
 def get_minutes(total: int) -> int:
     """ Minutos duma duração total dada em segundos. """
@@ -302,16 +303,11 @@ main()
 
 # %%
 """
-C.2) EXTRA 2 [EXPLAIN] (3 min) — encaixa mesmo aqui, antes do ex. 13
 
----------------------------------------------------------------------------
-[EXTRA 2] O que é uma "Precondition"?
----------------------------------------------------------------------------
-[EXPLAIN]
+C.2) EXTRA 2 [EXPLAIN] (3 min) - "Precondition"
 
-Repara nos testes anexos: quase todas as funções trazem no comentário uma
-linha "Precondition: ...". Por exemplo, no Teste 2 de 25/26:
-"Precondition: len(l) >= 2".
+Já vimos acima algumas vezes préconditions nos comentários. 
+Por exemplo no exercicio anterior assumimos que o comprimento L é > 0. 
 
 Uma precondição é um CONTRATO, não uma validação. A função não se
 preocupa em verificar se recebeu argumentos válidos — ela simplesmente
@@ -416,20 +412,19 @@ Substituindo e reescrevendo como A*x^2 + B*x + C = 0, com x = t_queda:
   0.5*a*t_queda^2 + v_som*t_queda - v_som*t_total = 0
 Resolve-se com a fórmula resolvente, ficando só com a raiz positiva.
 """
-import math
 
 def altura_precipicio_som(t_total: int) -> float:
     """ Altura (m) dum precipício, a partir do tempo total (s) entre
         largar a pedra e OUVIR o som do impacto.
         Precondition: t_total >= 0
     """
-    a = 9.8
+    g = 9.8 # aceleração da gravidade
     v_som = 340.0
-    A = 0.5 * a
+    A = 0.5 * g
     B = v_som
     C = -v_som * t_total
     t_queda = (-B + math.sqrt(B ** 2 - 4 * A * C)) / (2 * A)
-    return 0.5 * a * (t_queda ** 2)
+    return 0.5 * g * (t_queda ** 2)
 
 def main() -> None:
     t_total = int(input("Segundos até se ouvir o som do impacto: "))
@@ -438,6 +433,64 @@ def main() -> None:
 main()
 # t_total=3 -> cerca de 40.65 metros (menor que no ex.14 com o mesmo t,
 # porque parte do tempo é gasto pelo som a viajar de volta).
+
+# %%
+"""
+outra solução:
+    
+Equações:
+
+t = tempo até ouvir-se a pedra (valor conhecido)
+q = tempo a cair
+s = tempo do som a viajar para cima
+x = altura que se pretende obter
+
+t = q+s
+x = 340*s
+x = 0.5*9.8*q^2
+
+Resolver o sistema com três equações e três incógnitas. Queremos obter o valor de "x" em função de "t".
+
+Vale a pena discutir este problema no quadro, mas resolver o sistema até ao fim não é muito importante.
+
+Eliminar q e s:
+
+q = t-s
+s = x/340
+x = 0.5*9.8*(t-s)^2
+
+Fica só:
+
+x = 4.9*(t-x/340)^2
+
+Escrever sob a forma de equação quadrática sobre a variável x:
+x = 4.9 * (t^2 - 2*t*x/340 + (x/340)^2)
+(4.9/340^2)*x^2 - (1 + 9.8*t/340)*x + (4.9*t^2) = 0
+
+a = 4.9/340^2
+b = -(1 + 9.8*t/340)
+c = 4.9*t^2
+x = (-b +- sqrt(b^2-4ac))/(2*a)
+
+"""
+
+def height(t: float) -> float:
+    """ Height of a cliff.
+        Precondition: t >= 0
+    """
+    a = 4.9/(340**2)
+    b = -(1 + 9.8*t/340)
+    c = 4.9*t**2
+    return (-b - math.sqrt(b**2-4*a*c))/(2*a)
+
+def main() -> None:
+    time = float(input("T: "))
+    if not time >= 0:
+        print("Argumento inválido")
+    else:
+        print(height(time))
+
+main()
 
 # %%
 """

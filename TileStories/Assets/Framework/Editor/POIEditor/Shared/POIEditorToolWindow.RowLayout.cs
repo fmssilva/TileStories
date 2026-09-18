@@ -61,11 +61,21 @@ namespace TileStories.Editor
         // with GUILayout.Width(rowWidth) (+ GUILayout.ExpandWidth(false) for
         // buttons), then calls EditorRowEnd(). Exposed as internal static so an
         // EditMode test can run it inside a real EditorWindow.OnGUI pass.
-        internal static void DrawEditorRow(out float rowWidth, out Rect spacerRect)
+        //
+        // extraIndentPixels: an optional RAW pixel nudge on top of the runtime
+        // indent, for a conditional/dependent row that should sit only slightly
+        // deeper than its section's own base fields -- narrower than a whole
+        // EditorGUI.IndentLevelScope step (which also makes every EditorGUILayout
+        // control inside the row re-apply the ambient indentLevel a second time on
+        // its own label, see this file's row-layout Lesson 4). A raw pixel nudge
+        // only moves the spacer/row start; it does not touch EditorGUI.indentLevel,
+        // so the field's own internal indent stays identical to its sibling rows.
+        // See SubFieldIndentPixels (Constants.cs) for the one shared value.
+        internal static void DrawEditorRow(out float rowWidth, out Rect spacerRect, float extraIndentPixels = 0f)
         {
             EditorGUILayout.BeginHorizontal();
 
-            float indent = EditorGUI.IndentedRect(new Rect(0f, 0f, 0f, 0f)).x;
+            float indent = EditorGUI.IndentedRect(new Rect(0f, 0f, 0f, 0f)).x + extraIndentPixels;
             // TRANSPARENT indent spacer: a real button (so it occupies exact
             // layout pixels and is measurable as geometry) with its border
             // stripped, so no visible border or fill. Zero-alpha tint means

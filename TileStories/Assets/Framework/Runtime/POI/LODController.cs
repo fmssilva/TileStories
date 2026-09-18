@@ -129,16 +129,23 @@ namespace TileStories
             }
 
             // Resolve orientation settings alongside LOD/displacement (section 13).
-            // Effective cluster settings are computed once here, not per spawn: when
-            // cluster_orientation_mode == "inherit" the wall settings are used unchanged;
-            // otherwise a single copy with marker_orientation_mode overridden.
+            // Effective cluster settings are computed once here, not per spawn: clusters
+            // are dynamic LOD aggregates with no authored per-POI rotation, so they always
+            // face the camera (facing_mode is forced, never inherited/configurable for
+            // clusters); only vertical alignment is developer-choosable, via
+            // cluster_vertical_alignment_mode ("inherit" = the wall's own vertical_alignment_mode).
             var orientationSettings = _wallSession?.OrientationSettings;
             if (orientationSettings != null && !ReferenceEquals(orientationSettings, _orientationSettings))
             {
                 _orientationSettings = orientationSettings;
-                _effectiveClusterOrientation = _orientationSettings.cluster_orientation_mode == "inherit"
-                    ? _orientationSettings
-                    : new OrientationSettings(_orientationSettings) { marker_orientation_mode = _orientationSettings.cluster_orientation_mode };
+                string clusterVerticalMode = _orientationSettings.cluster_vertical_alignment_mode == "inherit"
+                    ? _orientationSettings.vertical_alignment_mode
+                    : _orientationSettings.cluster_vertical_alignment_mode;
+                _effectiveClusterOrientation = new OrientationSettings(_orientationSettings)
+                {
+                    vertical_alignment_mode = clusterVerticalMode,
+                    facing_mode = "always_facing_camera"
+                };
             }
         }
 

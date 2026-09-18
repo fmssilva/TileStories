@@ -46,7 +46,7 @@ namespace TileStories
         private static Dictionary<string, HierarchyStyle> _stylesByKey = new();
         private static Dictionary<string, int> _levelIndexByKey = new();
         private static Dictionary<string, int> _priorityByKey = new();
-        private static Dictionary<string, string> _orientationOverrideByKey = new();
+        private static Dictionary<string, string> _facingModeOverrideByKey = new();
 
         // Parse an effect-mode string into MarkerEffectFlags. Local to this file
         // -- this is the only consumer of sun_effect/accent_effect parsing.
@@ -90,7 +90,7 @@ namespace TileStories
             _stylesByKey.Clear();
             _levelIndexByKey.Clear();
             _priorityByKey.Clear();
-            _orientationOverrideByKey.Clear();
+            _facingModeOverrideByKey.Clear();
 
             if (entries == null)
             {
@@ -115,7 +115,7 @@ namespace TileStories
                 _stylesByKey[entry.key.Trim()] = style;
                 _levelIndexByKey[entry.key.Trim()] = count;
                 _priorityByKey[entry.key.Trim()] = entry.priority;
-                _orientationOverrideByKey[entry.key.Trim()] = entry.orientation_mode_override ?? "";
+                _facingModeOverrideByKey[entry.key.Trim()] = entry.facing_mode_override ?? "";
                 count++;
             }
 
@@ -127,16 +127,16 @@ namespace TileStories
             _stylesByKey = new Dictionary<string, HierarchyStyle>();
             _levelIndexByKey = new Dictionary<string, int>();
             _priorityByKey = new Dictionary<string, int>();
-            _orientationOverrideByKey = new Dictionary<string, string>();
+            _facingModeOverrideByKey = new Dictionary<string, string>();
         }
 
-        // Resolve a hierarchy level key to its orientation_mode_override (spec _2.1
+        // Resolve a hierarchy level key to its facing_mode_override (spec _2.1
         // section 4.3). Empty/missing key or unknown key both mean "inherit the wall
         // setting" -- returns "" in either case, never throws.
-        public static string ResolveOrientationOverride(string key)
+        public static string ResolveFacingModeOverride(string key)
         {
-            if (!string.IsNullOrWhiteSpace(key) && _orientationOverrideByKey != null &&
-                _orientationOverrideByKey.TryGetValue(key.Trim(), out var modeOverride))
+            if (!string.IsNullOrWhiteSpace(key) && _facingModeOverrideByKey != null &&
+                _facingModeOverrideByKey.TryGetValue(key.Trim(), out var modeOverride))
             {
                 return modeOverride;
             }

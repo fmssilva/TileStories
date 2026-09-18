@@ -213,14 +213,15 @@ namespace TileStories.Tests
         }
 
         // Block 5 (_2.1_Marker_Orientation.md): ApplyLabelOffset's roll compensation.
-        // rootRollDeg is 0 for the default screen_aligned mode, so the first case proves
-        // the default path is unchanged; the second proves the requested screen-space
-        // offset still lands correctly once the root is rolled (world_up + a rolled camera).
+        // rootRollDeg is 0 with an unrolled camera regardless of vertical alignment mode,
+        // so the first case proves the default (unrolled) path is unchanged; the second
+        // proves the requested screen-space offset still lands correctly once the root is
+        // actually rolled (world_up + a rolled camera).
         [UnityTest]
-        public IEnumerator ApplyLabelOffset_ScreenAlignedNoRoll_ScreenOffsetMatchesRequest()
+        public IEnumerator ApplyLabelOffset_UnrolledCamera_ScreenOffsetMatchesRequest()
         {
             var m0 = SpawnMarker(new Vector2(400, 300), "m0");
-            yield return null; // let MarkerBillboard's default screen_aligned LateUpdate settle
+            yield return null; // let MarkerBillboard's default (unrolled) LateUpdate settle
 
             Vector2 markerCentre = ScreenPos(m0.transform.position);
             var requested = new Vector2(30f, 0f);
@@ -237,7 +238,7 @@ namespace TileStories.Tests
             var m0 = SpawnMarker(new Vector2(400, 300), "m0");
             var billboard = m0.GetComponent<MarkerBillboard>();
             Assert.IsNotNull(billboard);
-            billboard.Configure(new OrientationSettings { marker_orientation_mode = "world_up" }, "", null);
+            billboard.Configure(new OrientationSettings { vertical_alignment_mode = "world_up", facing_mode = "always_facing_camera" }, "", null);
 
             _cam.transform.rotation = Quaternion.Euler(0f, 0f, 45f);
             yield return null; // let LateUpdate resolve the rolled, world_up rotation

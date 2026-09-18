@@ -142,7 +142,8 @@
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 0.0,
-            "reveal_duration_s": 0.5
+            "reveal_duration_s": 0.5,
+            "facing_mode_override": ""
         },
         {
             "key": "level_2",
@@ -157,7 +158,8 @@
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 0.20000000298023225,
-            "reveal_duration_s": 0.4000000059604645
+            "reveal_duration_s": 0.4000000059604645,
+            "facing_mode_override": ""
         },
         {
             "key": "level_3",
@@ -172,7 +174,8 @@
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 0.5,
-            "reveal_duration_s": 0.3499999940395355
+            "reveal_duration_s": 0.3499999940395355,
+            "facing_mode_override": ""
         },
         {
             "key": "level_4",
@@ -187,7 +190,8 @@
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 0.800000011920929,
-            "reveal_duration_s": 0.30000001192092898
+            "reveal_duration_s": 0.30000001192092898,
+            "facing_mode_override": ""
         },
         {
             "key": "level_5",
@@ -202,7 +206,8 @@
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 1.0,
-            "reveal_duration_s": 0.25
+            "reveal_duration_s": 0.25,
+            "facing_mode_override": ""
         }
     ],
     "pois": [
@@ -212,7 +217,7 @@
             "category": "Royal Government",
             "editor_rotation_deg": 151.98159790039063,
             "editor_rotation_x_deg": 342.31494140625,
-            "editor_rotation_z_deg": 8.911751747131348,
+            "editor_rotation_z_deg": 8.911750793457032,
             "position": {
                 "x": -0.859000027179718,
                 "y": -1.1419999599456788,
@@ -836,6 +841,22 @@
         "leader_line_width": 0.009999999776482582,
         "leader_line_opacity": 1.0,
         "displacement_tiebreak": "symmetric"
+    },
+    "orientation_settings": {
+        "vertical_alignment_mode": "screen_up",
+        "label_vertical_alignment_mode": "inherit",
+        "badge_vertical_alignment_mode": "inherit",
+        "cluster_vertical_alignment_mode": "inherit",
+        "up_reference": "world_gravity",
+        "custom_up_x": 0.0,
+        "custom_up_y": 1.0,
+        "custom_up_z": 0.0,
+        "facing_mode": "always_facing_camera",
+        "facing_basis": "view_plane",
+        "update_mode": "every_frame",
+        "update_interval_s": 0.05000000074505806,
+        "camera_delta_deg": 0.5,
+        "edit_mode_preview_enabled": true
     },
     "search_fields": [],
     "selection_highlight_enabled": true,

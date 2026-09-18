@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TileStories.Tests
 {
-    // Pure Tier-0 tests for MarkerOrientationResolver (_2.1_Marker_Orientation.md Block 2).
+    // Pure Tier-0 tests for MarkerOrientationResolver (_2.1_Marker_Orientation.md v4).
     // No scene, no MonoBehaviour -- every call is a plain static function.
     public class MarkerOrientationResolverTests
     {
@@ -29,16 +29,16 @@ namespace TileStories.Tests
         }
 
         [Test]
-        public void ResolveRootRotation_ScreenAligned_MarkerUpMatchesScreenUp()
+        public void ResolveRootRotation_ScreenUp_AlwaysFacingCamera_MarkerUpMatchesScreenUp()
         {
             var go = CreateCamera(new Vector3(0, 0, -2), Quaternion.Euler(10f, 20f, 33f));
             var cam = go.GetComponent<Camera>();
-            var settings = new OrientationSettings { marker_orientation_mode = "screen_aligned" };
+            var settings = new OrientationSettings { vertical_alignment_mode = "screen_up", facing_mode = "always_facing_camera" };
             Vector3 screenUp = MarkerOrientationResolver.ScreenUpWorld(cam);
 
             var result = MarkerOrientationResolver.ResolveRootRotation(
                 settings, "", Vector3.zero, cam.transform.position, cam.transform.forward,
-                screenUp, Vector3.up, Quaternion.identity, Quaternion.identity, 0f, ScreenOrientation.Portrait);
+                screenUp, Vector3.up, Quaternion.identity, Quaternion.identity);
 
             Assert.IsTrue(result.Resolved);
             Assert.Less(Vector3.Angle(result.Rotation * Vector3.up, screenUp), 0.5f);
@@ -48,16 +48,16 @@ namespace TileStories.Tests
         [TestCase(0f)]
         [TestCase(45f)]
         [TestCase(90f)]
-        public void ResolveRootRotation_WorldUp_MarkerUpMatchesGravity_RegardlessOfCameraRoll(float rollDeg)
+        public void ResolveRootRotation_WorldUp_AlwaysFacingCamera_MarkerUpMatchesGravity_RegardlessOfCameraRoll(float rollDeg)
         {
             var go = CreateCamera(new Vector3(0, 0, -2), Quaternion.Euler(0f, 0f, rollDeg));
             var cam = go.GetComponent<Camera>();
-            var settings = new OrientationSettings { marker_orientation_mode = "world_up" };
+            var settings = new OrientationSettings { vertical_alignment_mode = "world_up", facing_mode = "always_facing_camera" };
             Vector3 screenUp = MarkerOrientationResolver.ScreenUpWorld(cam);
 
             var result = MarkerOrientationResolver.ResolveRootRotation(
                 settings, "", Vector3.zero, cam.transform.position, cam.transform.forward,
-                screenUp, Vector3.up, Quaternion.identity, Quaternion.identity, 0f, ScreenOrientation.Portrait);
+                screenUp, Vector3.up, Quaternion.identity, Quaternion.identity);
 
             Assert.IsTrue(result.Resolved);
             Assert.Less(Vector3.Angle(result.Rotation * Vector3.up, Vector3.up), 0.5f);
@@ -70,13 +70,13 @@ namespace TileStories.Tests
             var camPos = new Vector3(3, 1, -2);
             var go = CreateCamera(camPos, Quaternion.identity);
             var cam = go.GetComponent<Camera>();
-            var settings = new OrientationSettings { marker_orientation_mode = "screen_aligned", facing_basis = "camera_position" };
+            var settings = new OrientationSettings { vertical_alignment_mode = "screen_up", facing_mode = "always_facing_camera", facing_basis = "camera_position" };
             Vector3 markerPos = Vector3.zero;
             Vector3 screenUp = MarkerOrientationResolver.ScreenUpWorld(cam);
 
             var result = MarkerOrientationResolver.ResolveRootRotation(
                 settings, "", markerPos, camPos, cam.transform.forward,
-                screenUp, Vector3.up, Quaternion.identity, Quaternion.identity, 0f, ScreenOrientation.Portrait);
+                screenUp, Vector3.up, Quaternion.identity, Quaternion.identity);
 
             // Same forward sign convention as view_plane's camForward (points from camera
             // into the scene), just computed per-marker instead of shared across all markers.
@@ -91,61 +91,84 @@ namespace TileStories.Tests
             var camPos = new Vector3(0, 5, -2); // camera well above the marker
             var go = CreateCamera(camPos, Quaternion.identity);
             var cam = go.GetComponent<Camera>();
-            var settings = new OrientationSettings { marker_orientation_mode = "yaw_only" };
+            var settings = new OrientationSettings { vertical_alignment_mode = "world_up", facing_mode = "yaw_only" };
             Vector3 markerPos = Vector3.zero;
             Vector3 screenUp = MarkerOrientationResolver.ScreenUpWorld(cam);
 
             var result = MarkerOrientationResolver.ResolveRootRotation(
                 settings, "", markerPos, camPos, cam.transform.forward,
-                screenUp, Vector3.up, Quaternion.identity, Quaternion.identity, 0f, ScreenOrientation.Portrait);
+                screenUp, Vector3.up, Quaternion.identity, Quaternion.identity);
 
             Assert.IsTrue(result.Resolved);
             Vector3 fwd = result.Rotation * Vector3.forward;
-            Assert.Less(Mathf.Abs(fwd.y), 0.01f, "yaw_only forward must stay in the horizontal plane");
+            Assert.Less(Mathf.Abs(fwd.y), 0.01f, "yaw_only with zero authored tilt must stay in the horizontal plane");
+        }
+
+        [Test]
+        public void ResolveRootRotation_YawOnly_KeepsAuthoredXZTilt_RegardlessOfCameraRoll()
+        {
+            var camPos = new Vector3(2, 0, -2);
+            var go = CreateCamera(camPos, Quaternion.Euler(0f, 0f, 60f)); // roll must not affect yaw_only at all
+            var cam = go.GetComponent<Camera>();
+            var settings = new OrientationSettings { vertical_alignment_mode = "world_up", facing_mode = "yaw_only" };
+            Quaternion authored = Quaternion.Euler(15f, 0f, 8f); // authored wall tilt on X/Z
+
+            var result = MarkerOrientationResolver.ResolveRootRotation(
+                settings, "", Vector3.zero, camPos, cam.transform.forward,
+                Vector3.up, Vector3.up, Quaternion.identity, authored);
+
+            Assert.IsTrue(result.Resolved);
+            Vector3 authoredEuler = authored.eulerAngles;
+            Vector3 resultEuler = result.Rotation.eulerAngles;
+            Assert.AreEqual(authoredEuler.x, resultEuler.x, 0.01f, "yaw_only must preserve the authored X tilt exactly");
+            Assert.AreEqual(authoredEuler.z, resultEuler.z, 0.01f, "yaw_only must preserve the authored Z tilt exactly");
             Object.DestroyImmediate(go);
         }
 
         [Test]
         public void ResolveRootRotation_WallFixed_ReturnsParentTimesAuthored()
         {
-            var settings = new OrientationSettings { marker_orientation_mode = "wall_fixed" };
+            var settings = new OrientationSettings { facing_mode = "wall_fixed" };
             Quaternion parent = Quaternion.Euler(0f, 30f, 0f);
             Quaternion authored = Quaternion.Euler(10f, 0f, 5f);
 
             var result = MarkerOrientationResolver.ResolveRootRotation(
                 settings, "", Vector3.zero, Vector3.zero, Vector3.forward,
-                Vector3.up, Vector3.up, parent, authored, 0f, ScreenOrientation.Portrait);
+                Vector3.up, Vector3.up, parent, authored);
 
             Assert.IsTrue(result.Resolved);
             Assert.Less(Quaternion.Angle(result.Rotation, parent * authored), 0.01f);
         }
 
         [Test]
-        public void ResolveRootRotation_None_ReturnsParentRotation()
+        public void ResolveRootRotation_WallFixed_UnaffectedByCameraPose()
         {
-            var settings = new OrientationSettings { marker_orientation_mode = "none" };
-            Quaternion parent = Quaternion.Euler(5f, 10f, 15f);
+            var settings = new OrientationSettings { facing_mode = "wall_fixed" };
+            Quaternion authored = Quaternion.Euler(10f, 0f, 5f);
 
-            var result = MarkerOrientationResolver.ResolveRootRotation(
-                settings, "", Vector3.zero, Vector3.zero, Vector3.forward,
-                Vector3.up, Vector3.up, parent, Quaternion.identity, 0f, ScreenOrientation.Portrait);
+            var resultA = MarkerOrientationResolver.ResolveRootRotation(
+                settings, "", Vector3.zero, new Vector3(0, 0, -2), Vector3.forward,
+                Vector3.up, Vector3.up, Quaternion.identity, authored);
+            var resultB = MarkerOrientationResolver.ResolveRootRotation(
+                settings, "", Vector3.zero, new Vector3(9, 4, 3), new Vector3(0.5f, 0.5f, 0.5f).normalized,
+                Vector3.up, Vector3.up, Quaternion.identity, authored);
 
-            Assert.IsTrue(result.Resolved);
-            Assert.Less(Quaternion.Angle(result.Rotation, parent), 0.01f);
+            Assert.Less(Quaternion.Angle(resultA.Rotation, resultB.Rotation), 0.01f);
         }
 
         [Test]
         public void ResolveRootRotation_ModeOverride_BeatsWallSetting()
         {
-            var settings = new OrientationSettings { marker_orientation_mode = "screen_aligned" };
+            var settings = new OrientationSettings { facing_mode = "always_facing_camera" };
             Quaternion parent = Quaternion.Euler(5f, 10f, 15f);
+            Quaternion authored = Quaternion.identity;
 
             var result = MarkerOrientationResolver.ResolveRootRotation(
-                settings, "none", Vector3.zero, Vector3.zero, Vector3.forward,
-                Vector3.up, Vector3.up, parent, Quaternion.identity, 0f, ScreenOrientation.Portrait);
+                settings, "wall_fixed", Vector3.zero, Vector3.zero, Vector3.forward,
+                Vector3.up, Vector3.up, parent, authored);
 
             Assert.IsTrue(result.Resolved);
-            Assert.Less(Quaternion.Angle(result.Rotation, parent), 0.01f);
+            Assert.Less(Quaternion.Angle(result.Rotation, parent * authored), 0.01f);
         }
 
         [Test]
@@ -153,15 +176,58 @@ namespace TileStories.Tests
         {
             // Camera directly above a world_up marker: forward is parallel to the up reference.
             var camPos = new Vector3(0, 5, 0);
-            var settings = new OrientationSettings { marker_orientation_mode = "world_up" };
+            var settings = new OrientationSettings { vertical_alignment_mode = "world_up", facing_mode = "always_facing_camera" };
             Vector3 markerPos = Vector3.zero;
             Vector3 camForward = (markerPos - camPos).normalized; // straight down
 
             var result = MarkerOrientationResolver.ResolveRootRotation(
                 settings, "", markerPos, camPos, camForward,
-                Vector3.up, Vector3.up, Quaternion.identity, Quaternion.identity, 0f, ScreenOrientation.Portrait);
+                Vector3.up, Vector3.up, Quaternion.identity, Quaternion.identity);
 
             Assert.IsFalse(result.Resolved);
+        }
+
+        [Test]
+        public void ResolveRootRotation_AlwaysFacingCamera_NearCameraDoesNotFlipEdgeOn()
+        {
+            // Visitor standing close to and mostly below a marker: a raw LookRotation would
+            // tip the marker to an ~85-degree pitch (steep, but NOT the near-parallel case
+            // ResolveRootRotation_DegenerateLookDirection_ReturnsNotResolved already covers -
+            // that guard triggers past ~87.4 degrees (dot > 0.999); this case must stay
+            // resolved and instead get caught by the hardcoded safety clamp).
+            var settings = new OrientationSettings { vertical_alignment_mode = "world_up", facing_mode = "always_facing_camera" };
+            var camPos = new Vector3(0.26f, -3f, 0f);
+
+            var result = MarkerOrientationResolver.ResolveRootRotation(
+                settings, "", Vector3.zero, camPos, (Vector3.zero - camPos).normalized,
+                Vector3.up, Vector3.up, Quaternion.identity, Quaternion.identity);
+
+            Assert.IsTrue(result.Resolved, "an ~85-degree pitch is steep but not degenerate - it must still resolve");
+            Vector3 fwd = result.Rotation * Vector3.forward;
+            float pitchFromHorizontal = Vector3.Angle(Vector3.ProjectOnPlane(fwd, Vector3.up), fwd);
+            Assert.LessOrEqual(pitchFromHorizontal, 80.5f, "the hardcoded pitch clamp must stop the marker tipping fully edge-on");
+        }
+
+        [Test]
+        public void ResolveVerticalUp_ScreenUp_ReturnsScreenUpWorld()
+        {
+            Vector3 screenUp = new Vector3(0.1f, 0.9f, 0f).normalized;
+            Vector3 upReference = Vector3.up;
+
+            Vector3 result = MarkerOrientationResolver.ResolveVerticalUp("screen_up", screenUp, upReference);
+
+            Assert.Less(Vector3.Angle(result, screenUp), 0.01f);
+        }
+
+        [Test]
+        public void ResolveVerticalUp_WorldUp_ReturnsUpReference()
+        {
+            Vector3 screenUp = new Vector3(0.1f, 0.9f, 0f).normalized;
+            Vector3 upReference = new Vector3(0f, 0.7f, 0.7f).normalized;
+
+            Vector3 result = MarkerOrientationResolver.ResolveVerticalUp("world_up", screenUp, upReference);
+
+            Assert.Less(Vector3.Angle(result, upReference), 0.01f);
         }
 
         [Test]
@@ -211,41 +277,6 @@ namespace TileStories.Tests
 
             Assert.AreEqual(0f, result.x, 0.001f);
             Assert.AreEqual(1f, result.y, 0.001f);
-        }
-
-        [Test]
-        public void SnapRollDeg_QuarterTurns_SnapsToNearest90()
-        {
-            float result = MarkerOrientationResolver.SnapRollDeg(100f, "quarter_turns", 15f, 0f, ScreenOrientation.AutoRotation);
-
-            // 100 is far enough from previous snap (0) to cross the hysteresis boundary.
-            Assert.AreEqual(90f, result, 0.01f);
-        }
-
-        [Test]
-        public void SnapRollDeg_WithinHysteresis_KeepsPreviousValue()
-        {
-            // 50 degrees is close to the 0/90 boundary (45) but within the 15-degree
-            // hysteresis band around the previous snapped value (0) -- must not flicker.
-            float result = MarkerOrientationResolver.SnapRollDeg(50f, "quarter_turns", 15f, 0f, ScreenOrientation.AutoRotation);
-
-            Assert.AreEqual(0f, result, 0.01f);
-        }
-
-        [Test]
-        public void SnapRollDeg_ScreenOrientationMode_LandscapeLeftGives90()
-        {
-            float result = MarkerOrientationResolver.SnapRollDeg(5f, "screen_orientation", 15f, 0f, ScreenOrientation.LandscapeLeft);
-
-            Assert.AreEqual(90f, result, 0.01f);
-        }
-
-        [Test]
-        public void SnapRollDeg_ScreenOrientationMode_AutoRotationFallsBackToMeasuredRoll()
-        {
-            float result = MarkerOrientationResolver.SnapRollDeg(100f, "screen_orientation", 15f, 0f, ScreenOrientation.AutoRotation);
-
-            Assert.AreEqual(90f, result, 0.01f);
         }
 
         [Test]

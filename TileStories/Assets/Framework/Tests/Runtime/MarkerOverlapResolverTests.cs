@@ -53,13 +53,15 @@ namespace TileStories.Tests
             // Wait one frame so LateUpdate executes
             yield return null;
 
-            // Assert: marker faces the camera with SCREEN up, not camera-transform up
-            // (_2.1_Marker_Orientation.md Block 1 - this deliberately supersedes the old
-            // "matches camera rotation exactly" contract, which broke under device roll).
-            var expectedRotation = Quaternion.LookRotation(cam.transform.forward, MarkerOrientationResolver.ScreenUpWorld(cam));
+            // Assert: marker faces the camera using the resolver's own default basis - world
+            // gravity up (_2.1_Marker_Orientation.md v4: world_up + always_facing_camera is
+            // the framework default), not a raw copy of camera-transform rotation and not
+            // screen-up (that was v3's default; a wall developer who wants screen-up now
+            // sets vertical_alignment_mode explicitly).
+            var expectedRotation = Quaternion.LookRotation(cam.transform.forward, Vector3.up);
             float angleDiff = Quaternion.Angle(markerGO.transform.rotation, expectedRotation);
             Assert.Less(angleDiff, 0.1f,
-                $"Marker rotation should face the camera with screen-up as its basis. Angle difference: {angleDiff:F3} degrees.");
+                $"Marker rotation should face the camera with world-gravity up as its default basis. Angle difference: {angleDiff:F3} degrees.");
 
             // Cleanup
             Object.Destroy(markerGO);

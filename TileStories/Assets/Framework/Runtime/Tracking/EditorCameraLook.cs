@@ -52,19 +52,4 @@ namespace TileStories
             return Quaternion.Euler(pitch, yaw, roll);
         }
     }
-
-    /// <summary>
-    /// Source of the current screen orientation, overridable in the Editor since
-    /// Screen.orientation there reflects the Game View aspect selection, not a real
-    /// device - needed so roll_snap_mode == screen_orientation is testable in Tier A.
-    /// </summary>
-    public static class ScreenOrientationSource
-    {
-        private static ScreenOrientation? _editorOverride;
-
-        public static ScreenOrientation Current =>
-            _editorOverride ?? Screen.orientation;
-
-        public static void SetEditorOverride(ScreenOrientation? value) => _editorOverride = value;
-    }
 }

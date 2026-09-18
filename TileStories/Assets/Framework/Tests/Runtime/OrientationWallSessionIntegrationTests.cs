@@ -123,7 +123,7 @@ namespace TileStories.Tests
             // hard-set localRotation = Quaternion.identity before MarkerBillboard.Configure
             // captured it as the "authored" rotation, so wall_fixed markers could never
             // reflect editor_rotation_x/y/z_deg at runtime. Fixed in the same session.
-            _config.orientation_settings.marker_orientation_mode = "wall_fixed";
+            _config.orientation_settings.facing_mode = "wall_fixed";
             var poi = _config.pois.First();
             poi.editor_rotation_x_deg = 12f;
             poi.editor_rotation_deg = 34f;
@@ -146,7 +146,7 @@ namespace TileStories.Tests
             // Pick a real hierarchy level and give it an override programmatically - no
             // shipped wall config authors this field yet since it is brand new.
             var overriddenLevel = _config.hierarchy_levels.First();
-            overriddenLevel.orientation_mode_override = "wall_fixed";
+            overriddenLevel.facing_mode_override = "wall_fixed";
             MarkerHierarchyResolver.Configure(_config.hierarchy_levels); // re-apply with the override
 
             var poiOnThatLevel = _config.pois.First(p => p.hierarchy_level_key == overriddenLevel.key);

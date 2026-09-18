@@ -546,14 +546,14 @@ namespace TileStories
         };
 
         // Shift this marker's label by screenOffsetPx (screen-space pixels) from its
-        // layout-time base position (§4). Pure, frame-stable conversion: for
-        // marker_orientation_mode == screen_aligned (the default) the root's local X/Y
-        // axes ARE screen X/Y by construction, so no roll compensation is needed there.
-        // For world_up / yaw_only / wall_fixed the root can be rolled relative to the
-        // screen, so the world-space offset is rotated by -rootRollDeg before becoming a
-        // local-space delta (_2.1_Marker_Orientation.md Block 5) -- this reduces to the
-        // original zero-roll behaviour exactly when the root is screen-aligned, since
-        // rootRollDeg is 0 there. Converting screenOffsetPx to a local-space delta via
+        // layout-time base position (§4). Pure, frame-stable conversion: only when the
+        // root has zero roll relative to the screen (e.g. vertical_alignment_mode ==
+        // "screen_up") do the root's local X/Y axes equal screen X/Y by construction. In
+        // every other case the root can be rolled relative to the screen, so the
+        // world-space offset is rotated by -rootRollDeg before becoming a local-space
+        // delta (_2.1_Marker_Orientation.md Block 5) -- this reduces to the original
+        // zero-roll behaviour exactly when the root is screen-aligned, since rootRollDeg
+        // is 0 there. Converting screenOffsetPx to a local-space delta via
         // distance+FOV (MarkerLayout.ScreenPixelsToWorld) and writing it as an
         // anchoredPosition offset needs no camera-basis reprojection, and critically, no
         // dependency on the root's rotation at call time. A world<->screen<->world round-trip
