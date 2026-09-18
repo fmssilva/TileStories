@@ -20,9 +20,13 @@ namespace TileStories.Editor
             _showGlobalBadge = DrawFramedFoldout(ref _showGlobalBadge, () =>
             {
                 // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
+                // indentLevel zeroed around the control only -- see "Background shape" above.
                 DrawEditorRow(out float badgeRowWidth, out _);
+                int savedBadgeIndent = EditorGUI.indentLevel;
+                EditorGUI.indentLevel = 0;
                 _config.marker_use_badge = EditorGUILayout.Toggle("Enable badge", _config.marker_use_badge,
                     GUILayout.Width(badgeRowWidth), GUILayout.ExpandWidth(false));
+                EditorGUI.indentLevel = savedBadgeIndent;
                 EditorRowEnd();
                 if (_config.marker_use_badge)
                     DrawGlobalBadgeSection();
@@ -64,9 +68,17 @@ namespace TileStories.Editor
             int shapeIdx = Array.IndexOf(ShapeOptions, _config.marker_shape);
             if (shapeIdx < 0) shapeIdx = 0;
             // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
+            // indentLevel zeroed around the control only (not the spacer): a labelled
+            // EditorGUILayout control re-applies the ambient indent a second time via its
+            // own internal PrefixLabel, invisible to GetLastRect (Lesson 6) but visible on
+            // screen as this row sitting deeper than a plain sibling label like "Category
+            // Symbols" -- see LodZoom.cs's shared field drawers for the same fix.
             DrawEditorRow(out float shapeRowWidth, out _);
+            int savedShapeIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
             shapeIdx = EditorGUILayout.Popup("Background shape", shapeIdx, ShapeLabels,
                 GUILayout.Width(shapeRowWidth), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedShapeIndent;
             EditorRowEnd();
             _config.marker_shape = ShapeOptions[shapeIdx];
 
@@ -161,9 +173,13 @@ namespace TileStories.Editor
             int badgeShapeIdx = Array.IndexOf(ShapeOptions, _config.badge_shape);
             if (badgeShapeIdx < 0) badgeShapeIdx = 0; // default to "circle"
             // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
+            // indentLevel zeroed around the control only -- see "Background shape" above.
             DrawEditorRow(out float badgeShapeRow, out _);
-            badgeShapeIdx = EditorGUILayout.Popup("Badge background shape", badgeShapeIdx, ShapeLabels,
+            int savedBadgeShapeIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            badgeShapeIdx = EditorGUILayout.Popup("Badge back shape", badgeShapeIdx, ShapeLabels,
                 GUILayout.Width(badgeShapeRow), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedBadgeShapeIndent;
             EditorRowEnd();
             _config.badge_shape = ShapeOptions[badgeShapeIdx];
 
@@ -221,9 +237,13 @@ namespace TileStories.Editor
         {
             bool useOutline = !string.Equals(_config.marker_outline_mode, "none", StringComparison.OrdinalIgnoreCase);
             // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
+            // indentLevel zeroed around the control only -- see "Background shape" above.
             DrawEditorRow(out float outlineEnableRowWidth, out _);
+            int savedOutlineEnableIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
             useOutline = EditorGUILayout.Toggle("Enable outline", useOutline,
                 GUILayout.Width(outlineEnableRowWidth), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedOutlineEnableIndent;
             EditorRowEnd();
 
             if (!useOutline)
@@ -253,9 +273,13 @@ namespace TileStories.Editor
             int idx = Array.IndexOf(OutlineModeOptions, normalizedOutlineMode);
             if (idx < 0) idx = 0;
             // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
+            // indentLevel zeroed around the control only -- see "Background shape" above.
             DrawEditorRow(out float outlineColorRowWidth, out _);
+            int savedOutlineColorIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
             idx = EditorGUILayout.Popup("Outline Color", idx, OutlineModeLabels,
                 GUILayout.Width(outlineColorRowWidth), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedOutlineColorIndent;
             EditorRowEnd();
             _config.marker_outline_mode = OutlineModeOptions[idx];
 
@@ -290,8 +314,10 @@ namespace TileStories.Editor
                 // assume they are renaming the key.
                 EditorGUILayout.LabelField("Outline label", EditorStyles.miniBoldLabel, GUILayout.Width(110f));
                 GUILayout.Space(TableGapWithinGroup);
+                // Sized to match the per-row Details button's own width (26f) directly
+                // below it, same fix as the Marker Table's header (_5.1_Editor_Tab.md).
                 HelpInfoButton.Draw("Outline Notes",
-                    "Write more information about this outline type here: what it represents, when to use it, example POIs. Stored per row in config.json.");
+                    "Write more information about this outline type here: what it represents, when to use it, example POIs. Stored per row in config.json.", 26f);
 
                 GUILayout.Space(TableGapBetweenGroups);
 
@@ -321,6 +347,11 @@ namespace TileStories.Editor
                 // Group 5: Remove (trash) -- last column, same between-groups gap.
                 GUILayout.Space(TableGapBetweenGroups);
                 EditorGUILayout.LabelField("", GUILayout.Width(26f)); // Remove (trash)
+
+                // Right-edge scrollbar clearance (_5.1_Editor_Tab.md "Row Indentation &
+                // Spacing"): taxonomy tables build their own row layout instead of going
+                // through DrawEditorRow, so this needs restating by hand per table.
+                GUILayout.Space(AddButtonRowRightMargin);
             }
 
             for (int i = 0; i < _config.outline_levels.Count; i++)
@@ -366,7 +397,7 @@ namespace TileStories.Editor
                     if (isFreeColors)
                     {
                         string colorHex = entry.color_hex;
-                        DrawColorSwatchAndHex(ref colorHex);
+                        DrawColorSwatchAndHex(ref colorHex, out _, out _);
                         entry.color_hex = colorHex;
                     }
 
@@ -376,7 +407,12 @@ namespace TileStories.Editor
 
                     // Group 5: Remove (trash) -- last column, same between-groups gap.
                     GUILayout.Space(TableGapBetweenGroups);
-                    if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
+                    bool deleteOutlineClicked = DeleteButton.DrawLayout($"Delete outline level: {entry.key}");
+
+                    // Same right-edge scrollbar clearance as the header row above.
+                    GUILayout.Space(AddButtonRowRightMargin);
+
+                    if (deleteOutlineClicked)
                     {
                         // Deleting a level cannot propagate to the POIs that name it,
                         // so confirm with a count when any still do (see IdentityDeleteGuard).
@@ -452,83 +488,35 @@ namespace TileStories.Editor
             EditorGUILayout.Space(8f);
             EditorGUILayout.LabelField("Pulse Defaults", EditorStyles.boldLabel);
             var pulse = _config.effect_defaults.pulse;
-            DrawEditorRow(out float pulseAmpRow, out _);
-            pulse.amplitude = EditorGUILayout.Slider("Amplitude", pulse.amplitude, 0f, 0.45f,
-                GUILayout.Width(pulseAmpRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float pulsePeriodRow, out _);
-            pulse.period = EditorGUILayout.FloatField("Period (s)", pulse.period,
-                GUILayout.Width(pulsePeriodRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
+            pulse.amplitude = DrawSliderField("Amplitude", pulse.amplitude, 0f, 0.45f);
+            pulse.period = DrawScalarField("Period (s)", pulse.period);
 
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Sun Defaults", EditorStyles.boldLabel);
             var sun = _config.effect_defaults.sun;
-            DrawEditorRow(out float sunPeriodRow, out _);
-            sun.period = EditorGUILayout.FloatField("Period (s)", sun.period,
-                GUILayout.Width(sunPeriodRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float sunStaggerRow, out _);
-            sun.stagger = EditorGUILayout.Slider("Stagger", sun.stagger, 0f, 0.25f,
-                GUILayout.Width(sunStaggerRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float sunInnerRow, out _);
-            sun.innerAlpha = EditorGUILayout.Slider("Inner alpha", sun.innerAlpha, 0f, 1f,
-                GUILayout.Width(sunInnerRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float sunMiddleRow, out _);
-            sun.middleAlpha = EditorGUILayout.Slider("Middle alpha", sun.middleAlpha, 0f, 1f,
-                GUILayout.Width(sunMiddleRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float sunOuterRow, out _);
-            sun.outerAlpha = EditorGUILayout.Slider("Outer alpha", sun.outerAlpha, 0f, 1f,
-                GUILayout.Width(sunOuterRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
+            sun.period = DrawScalarField("Period (s)", sun.period);
+            sun.stagger = DrawSliderField("Stagger", sun.stagger, 0f, 0.25f);
+            sun.innerAlpha = DrawSliderField("Inner alpha", sun.innerAlpha, 0f, 1f);
+            sun.middleAlpha = DrawSliderField("Middle alpha", sun.middleAlpha, 0f, 1f);
+            sun.outerAlpha = DrawSliderField("Outer alpha", sun.outerAlpha, 0f, 1f);
             string sunTint = sun.tint_color_hex;
-            DrawColorSwatchAndHex(ref sunTint);
+            DrawColorField("Tint Color", ref sunTint);
             sun.tint_color_hex = sunTint;
 
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Accent Defaults", EditorStyles.boldLabel);
             var accent = _config.effect_defaults.accent;
-            DrawEditorRow(out float accentSizeRow, out _);
-            accent.size = EditorGUILayout.Slider("Size", accent.size, 0f, 1f,
-                GUILayout.Width(accentSizeRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float accentAlphaRow, out _);
-            accent.baseAlpha = EditorGUILayout.Slider("Base alpha", accent.baseAlpha, 0f, 1f,
-                GUILayout.Width(accentAlphaRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float accentOuterRow, out _);
-            accent.contourOuterScale = EditorGUILayout.Slider("Contour outer scale", accent.contourOuterScale, 0.72f, 0.98f,
-                GUILayout.Width(accentOuterRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float accentInnerRow, out _);
-            accent.contourInnerScale = EditorGUILayout.Slider("Contour inner scale", accent.contourInnerScale, 0.5f, 0.9f,
-                GUILayout.Width(accentInnerRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float accentFilledRow, out _);
-            accent.filledRadiusScale = EditorGUILayout.Slider("Filled radius scale", accent.filledRadiusScale, 0.85f, 1f,
-                GUILayout.Width(accentFilledRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float accentBreatheRow, out _);
-            accent.breatheAmplitude = EditorGUILayout.Slider("Breathe amplitude", accent.breatheAmplitude, 0f, 0.4f,
-                GUILayout.Width(accentBreatheRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float accentPeriodRow, out _);
-            accent.period = EditorGUILayout.FloatField("Period (s)", accent.period,
-                GUILayout.Width(accentPeriodRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float accentBeaconStartRow, out _);
-            accent.beaconStartScale = EditorGUILayout.FloatField("Beacon start scale", accent.beaconStartScale,
-                GUILayout.Width(accentBeaconStartRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            DrawEditorRow(out float accentBeaconEndRow, out _);
-            accent.beaconEndScale = EditorGUILayout.FloatField("Beacon end scale", accent.beaconEndScale,
-                GUILayout.Width(accentBeaconEndRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
+            accent.size = DrawSliderField("Size", accent.size, 0f, 1f);
+            accent.baseAlpha = DrawSliderField("Base alpha", accent.baseAlpha, 0f, 1f);
+            accent.contourOuterScale = DrawSliderField("Contour outer scale", accent.contourOuterScale, 0.72f, 0.98f);
+            accent.contourInnerScale = DrawSliderField("Contour inner scale", accent.contourInnerScale, 0.5f, 0.9f);
+            accent.filledRadiusScale = DrawSliderField("Filled radius scale", accent.filledRadiusScale, 0.85f, 1f);
+            accent.breatheAmplitude = DrawSliderField("Breathe amplitude", accent.breatheAmplitude, 0f, 0.4f);
+            accent.period = DrawScalarField("Period (s)", accent.period);
+            accent.beaconStartScale = DrawScalarField("Beacon start scale", accent.beaconStartScale);
+            accent.beaconEndScale = DrawScalarField("Beacon end scale", accent.beaconEndScale);
             string accentTint = accent.tint_color_hex;
-            DrawColorSwatchAndHex(ref accentTint);
+            DrawColorField("Tint Color", ref accentTint);
             accent.tint_color_hex = accentTint;
 
             EditorGUILayout.Space(8f);
@@ -644,7 +632,14 @@ namespace TileStories.Editor
                     }
 
                     // Column 12: Remove (trash button)
-                    if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
+                    bool deleteHierarchyClicked = DeleteButton.DrawLayout($"Delete hierarchy level: {entry.key}");
+
+                    // Right-edge scrollbar clearance (_5.1_Editor_Tab.md "Row Indentation &
+                    // Spacing"): this table builds its own row layout instead of going
+                    // through DrawEditorRow, so this needs restating by hand.
+                    GUILayout.Space(AddButtonRowRightMargin);
+
+                    if (deleteHierarchyClicked)
                     {
                         // Same rule as outline levels: the row key is identity, so a
                         // delete that orphans POIs asks first. Nothing to propagate.

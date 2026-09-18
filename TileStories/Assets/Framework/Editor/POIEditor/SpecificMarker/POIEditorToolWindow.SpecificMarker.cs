@@ -213,10 +213,10 @@ namespace TileStories.Editor
                     if (DrawIconButton(infoRect, (Texture2D)InfoIcon.image, "Row icons help", iconInset: 2f))
                         PopupWindow.Show(infoRect, new HelpInfoPopup("POI Row Icons", PoiHeaderIconsHelpBody));
 
-                    // Same width/height as its sibling icon buttons (previously wider, which
-                    // read as a bigger, misaligned control). The danger affordance is the red
-                    // icon itself, so there is no dark-red button fill.
-                    if (DrawIconButton(deleteRect, (Texture2D)DeleteIcon.image, "Delete POI"))
+                    // Same width/height as its sibling icon buttons. Goes through the
+                    // shared DeleteButton (Marker Table's trash glyph) like every other
+                    // delete affordance in the window now.
+                    if (DeleteButton.Draw(deleteRect, "Delete POI"))
                         TryDeletePoiAt(i, poi);
                 }
 

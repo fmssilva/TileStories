@@ -127,7 +127,13 @@ namespace TileStories.Editor
             bool showSearchKeywords = false,
             Func<T, List<string>> getSearchKeywords = null,
             Action<T, List<string>> setSearchKeywords = null,
-            Func<T, int> countPoiReferences = null) where T : class
+            Func<T, int> countPoiReferences = null,
+            // Test-observability seam only (default no-op, zero cost when unused): the
+            // first data row reports its landmark rects (preview thumbnail, color
+            // picker, color hex, keywords/Suggest-Edit button, delete button) so a real
+            // OnGUI render test can assert on ACTUAL measured geometry instead of
+            // guessing -- same rationale as DrawCoordinateRow's out-Rect params.
+            Action<Rect, Rect, Rect, Rect, Rect> captureFirstRowRects = null) where T : class
         {
             // Column order (5 groups, header mirrors rows exactly):
             // [key+details] | [Symbol + interactive Preview] | [Color] | [SearchKeywords] | [trash]
@@ -136,7 +142,9 @@ namespace TileStories.Editor
                 // Group 1: primary key + notes info
                 EditorGUILayout.LabelField(primaryLabelHeader, EditorStyles.miniBoldLabel, GUILayout.Width(130f));
                 GUILayout.Space(TableGapWithinGroup);
-                HelpInfoButton.Draw(primaryLabelHeader + " Notes", detailsColumnHelp);
+                // Sized to match the per-row Details button's own width (26f) directly
+                // below it, instead of the shared 22px default every other help button uses.
+                HelpInfoButton.Draw(primaryLabelHeader + " Notes", detailsColumnHelp, 26f);
 
                 GUILayout.Space(TableGapBetweenGroups);
 
@@ -149,7 +157,11 @@ namespace TileStories.Editor
                 GUILayout.Space(SymbolColumnPad);
                 HelpInfoButton.Draw(primaryLabelHeader + " Symbols", symbolColumnHelp, 36f);
 
-                GUILayout.Space(TableGapBetweenGroups);
+                // Extra gap (not the standard between-groups gap) before Color: the
+                // Preview thumbnail sits directly next to the (intentionally narrow)
+                // color swatch, so this boundary needs more breathing room than the
+                // other column boundaries to read as clearly separate.
+                GUILayout.Space(TableGapBeforeColor);
 
                 // Group 3: Color
                 EditorGUILayout.LabelField("Color", EditorStyles.miniBoldLabel, GUILayout.Width(ColorGroupWidth));
@@ -161,9 +173,18 @@ namespace TileStories.Editor
                 if (showSearchKeywords)
                     EditorGUILayout.LabelField("Search Keywords", EditorStyles.miniBoldLabel);
 
-                // Group 5: Remove (trash) -- last column, same between-groups gap.
-                GUILayout.Space(TableGapBetweenGroups);
+                // Group 5: Remove (trash) -- last column. Extra gap (not the standard
+                // between-groups gap) so the destructive action reads as clearly set apart
+                // from the keyword group next to it, not just another column boundary.
+                GUILayout.Space(TableGapBeforeDelete);
                 EditorGUILayout.LabelField("", GUILayout.Width(26f)); // Remove (trash)
+
+                // Right-edge scrollbar clearance (_5.1_Editor_Tab.md "Row Indentation &
+                // Spacing"): non-table rows get this for free from DrawEditorRow/
+                // EditorRowWidthForIndent, but taxonomy tables build their own row layout
+                // and were never given it, so their last column's pixels could sit
+                // underneath the ScrollView's vertical scrollbar on a long table.
+                GUILayout.Space(AddButtonRowRightMargin);
             }
 
             for (int i = 0; i < entries.Count; i++)
@@ -199,17 +220,21 @@ namespace TileStories.Editor
                         () => PopupWindow.Show(GUILayoutUtility.GetLastRect(),
                             new ExistingSymbolPickerPopup(_wallIconLibrary, _defaultIconLibrary,
                                 key => setIconKey(previewEntry, key))));
+                    Rect previewRect = GUILayoutUtility.GetLastRect();
 
-                    GUILayout.Space(TableGapBetweenGroups);
+                    // Extra gap (not the standard between-groups gap) before Color --
+                    // same reason as the header above.
+                    GUILayout.Space(TableGapBeforeColor);
 
                     // Group 3: Color (real picker + hex). The picker CELL is the first
                     // thing in this group -- the between-groups gap above is the only
                     // spacer before it, and the hex field is spaced by the within-group
                     // gap inside the group. No draw-only swatch in front of the picker.
+                    Rect colorPickerRect = default, colorHexRect = default;
                     if (showColorPicker(entry))
                     {
                         string colorHex = getColorHex(entry);
-                        DrawColorSwatchAndHex(ref colorHex);
+                        DrawColorSwatchAndHex(ref colorHex, out colorPickerRect, out colorHexRect);
                         setColorHex(entry, colorHex);
                     }
                     else
@@ -226,6 +251,7 @@ namespace TileStories.Editor
                     // disagree -- the same bidirectional-sync rule as the color picker +
                     // hex pair in DrawColorSwatchAndHex. The popup exists only because this
                     // column is too narrow to read a long keyword list comfortably.
+                    Rect keywordsTailRect = default;
                     if (showSearchKeywords && getSearchKeywords != null)
                     {
                         var targetEntry = entry;
@@ -248,11 +274,23 @@ namespace TileStories.Editor
                                     () => string.Join(", ", getSearchKeywords(targetEntry) ?? new List<string>()),
                                     v => setSearchKeywords(targetEntry, ParseKeywordList(v))));
                         }
+                        keywordsTailRect = GUILayoutUtility.GetLastRect();
                     }
 
-                    // Group 5: Remove (trash) -- last column, same between-groups gap.
-                    GUILayout.Space(TableGapBetweenGroups);
-                    if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
+                    // Group 5: Remove (trash) -- last column. Extra gap (not the standard
+                    // between-groups gap) so the destructive action reads as clearly set
+                    // apart from the keyword group next to it.
+                    GUILayout.Space(TableGapBeforeDelete);
+                    bool deleteClicked = DeleteButton.DrawLayout($"Delete {primaryLabelHeader}: {getPrimaryLabel(entry)}");
+                    Rect deleteRect = GUILayoutUtility.GetLastRect();
+
+                    // Same right-edge scrollbar clearance as the header row above.
+                    GUILayout.Space(AddButtonRowRightMargin);
+
+                    if (i == 0)
+                        captureFirstRowRects?.Invoke(previewRect, colorPickerRect, colorHexRect, keywordsTailRect, deleteRect);
+
+                    if (deleteClicked)
                     {
                         // Callers whose rows carry a POI-referenced identity pass
                         // countPoiReferences so deleting a row that is still in use asks
@@ -325,17 +363,46 @@ namespace TileStories.Editor
         // No explicit within-group spacer here: GUILayout's default inter-control
         // spacing (~3px) already separates the pair, and the measured layout shows
         // that is all there is between them. Both cells stay in bidirectional sync.
-        private void DrawColorSwatchAndHex(ref string colorHex)
+        // internal (not private) + out rects: a real OnGUI render test
+        // (POIEditorColorGroupRenderTests) calls this directly and asserts on the
+        // ACTUAL GUILayoutUtility rects, the same pattern DrawCoordinateRow uses.
+        internal static void DrawColorSwatchAndHex(ref string colorHex, out Rect pickerRect, out Rect hexRect)
         {
             Color parsed = TryParseHexColor(colorHex, out var c) ? c : Color.white;
 
-            EditorGUI.BeginChangeCheck();
-            Color picked = EditorGUILayout.ColorField(GUIContent.none, parsed, false, false, false,
-                GUILayout.Width(ColorPickerWidth));
-            if (EditorGUI.EndChangeCheck())
-                colorHex = ToHexRgb(picked);
+            // Root cause of the big gap between the picker and the hex field: this pair
+            // is drawn inside an ambient indented context (every call site sits inside a
+            // DrawFramedFoldout's IndentLevelScope), and TWO EditorGUILayout controls
+            // sharing one row each independently re-apply EditorGUI.indentLevel to their
+            // own rect (see _5.1_Editor_Tab.md Lesson 4 -- the exact same bug that hit the
+            // Position foldout's X/Y/Z coordinate row). Zeroing indentLevel for just these
+            // two controls, restored right after, removes the double-indent so the pair
+            // sits at its intended flush ~3px GUILayout auto-spacing -- without switching
+            // either control away from a real GUILayout ColorField/TextField.
+            //
+            // ExpandWidth(false) added on both controls per this file's own "Reusable
+            // Row-Layout Command" rule ("ALL elements + GUILayout.ExpandWidth(false) --
+            // MANDATORY, or the stretchy default style wins") -- this pair never had it,
+            // unlike every properly-converted row elsewhere in the window.
+            int savedIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            try
+            {
+                EditorGUI.BeginChangeCheck();
+                Color picked = EditorGUILayout.ColorField(GUIContent.none, parsed, false, false, false,
+                    GUILayout.Width(ColorPickerWidth), GUILayout.ExpandWidth(false));
+                if (EditorGUI.EndChangeCheck())
+                    colorHex = ToHexRgb(picked);
+                pickerRect = GUILayoutUtility.GetLastRect();
 
-            colorHex = EditorGUILayout.TextField(colorHex ?? string.Empty, GUILayout.Width(ColorHexFieldWidth));
+                colorHex = EditorGUILayout.TextField(colorHex ?? string.Empty,
+                    GUILayout.Width(ColorHexFieldWidth), GUILayout.ExpandWidth(false));
+                hexRect = GUILayoutUtility.GetLastRect();
+            }
+            finally
+            {
+                EditorGUI.indentLevel = savedIndent;
+            }
         }
 
         private static bool TryParseHexColor(string hex, out Color color)

@@ -294,6 +294,7 @@ against disk on 2026-09-18.
         - Shared/  -- reusable pieces every section draws through
           - POIEditorToolWindow.RowLayout.cs  -- DrawEditorRow / EditorRowEnd: the one shared indent + width-capped row
           - POIEditorToolWindow.IconButton.cs  -- the one icon-only button look, used by every icon and help button
+          - POIEditorToolWindow.DeleteButton.cs  -- the one shared destructive-delete-button look (Marker Table's trash glyph, IconButtonSize default), used by every delete affordance in the window
           - POIEditorToolWindow.SymbolTable.cs  -- the shared taxonomy table renderer and sprite preview/picker
           - HelpInfoPopup.cs  -- read-only framework help popup plus HelpInfoButton.Draw
           - EntryDetailsPopup.cs  -- editable per-row notes persisted into config; NOT the same as help
@@ -334,7 +335,7 @@ against disk on 2026-09-18.
         - OrientationEditModePreviewTests.cs  -- Edit-Mode orientation preview: non-destructive guarantee, on/off cycle byte-identical, CapturePositions guard, wall_fixed Edit/Play-Mode agreement (_2.1 section 9)
         - DefaultCategoryStylesTests.cs, DefaultBadgeCategoriesTests.cs, DefaultOutlineLevelsTests.cs  -- seeding defaults
         - POIEditorToolWriteBackTests.cs, POIEditorAddPoiTests.cs, POIEditorToolSearchRoundTripTests.cs, ReloadGuardChoiceTests.cs  -- editor data flow
-        - POIEditorTableLayoutTests.cs, POIEditorAddButtonRowRenderTests.cs, POIEditorCoordinateRowRenderTests.cs, POIEditorVisualHierarchyTests.cs, POIEditorWindowChromeTests.cs  -- real IMGUI geometry measurement
+        - POIEditorTableLayoutTests.cs, POIEditorAddButtonRowRenderTests.cs, POIEditorCoordinateRowRenderTests.cs, POIEditorColorGroupRenderTests.cs, POIEditorVisualHierarchyTests.cs, POIEditorWindowChromeTests.cs  -- real IMGUI geometry measurement
         - MarkerSelectionEditModeTest.cs, MarkerSymbolTexturePostprocessorTests.cs, PanelSettingsTests.cs, SafeAreaHelperTests.cs, SearchFilterSelectToggleTests.cs, ZoomControlViewEditModeTests.cs  -- assorted contracts
         - UI/  -- UI Toolkit view tests, mirroring Runtime/UI's folder names
           - Cards/DetailCardViewTests.cs

@@ -21,11 +21,27 @@ namespace TileStories.Editor
         // rowWidth (minus a help-button allowance when helpText is set); ExpandWidth(false)
         // keeps the control from stretching the panel. The spacer is measured at call time,
         // so rows inside a nested IndentLevelScope keep their own deeper indent.
+        //
+        // EditorGUI.indentLevel is zeroed around the labelled control itself (2026-09-18,
+        // developer screenshot feedback): DrawEditorRow's spacer already pays the row's
+        // indent once as real layout width, but a labelled EditorGUILayout control (Popup/
+        // Toggle/FloatField/IntField) independently re-applies the ambient indentLevel a
+        // SECOND time via its own internal PrefixLabel -- not as a rect.x shift (invisible
+        // to GUILayoutUtility.GetLastRect, this file's Lesson 6 trap) but as extra padding
+        // before the label glyph itself, which is exactly why these rows sat visibly
+        // deeper than a plain sibling section label (e.g. "Category Symbols") despite
+        // rect-based measurements not showing it. Zeroing indentLevel here does not affect
+        // extraIndentPixels' own nudge (a raw pixel add to the spacer's width, independent
+        // of indentLevel) or the spacer's own reserved space.
         internal static float DrawScalarField(string label, float value, string helpText = "", float extraIndentPixels = 0f)
         {
             DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
             float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
-            value = EditorGUILayout.FloatField(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            int savedIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            using (new FieldLabelWidthCompensationScope(extraIndentPixels))
+                value = EditorGUILayout.FloatField(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedIndent;
             if (!string.IsNullOrEmpty(helpText))
                 HelpInfoButton.Draw(label, helpText);
             EditorRowEnd();
@@ -36,7 +52,11 @@ namespace TileStories.Editor
         {
             DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
             float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
-            value = EditorGUILayout.IntField(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            int savedIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            using (new FieldLabelWidthCompensationScope(extraIndentPixels))
+                value = EditorGUILayout.IntField(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedIndent;
             if (!string.IsNullOrEmpty(helpText))
                 HelpInfoButton.Draw(label, helpText);
             EditorRowEnd();
@@ -47,7 +67,11 @@ namespace TileStories.Editor
         {
             DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
             float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
-            value = EditorGUILayout.Toggle(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            int savedIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            using (new FieldLabelWidthCompensationScope(extraIndentPixels))
+                value = EditorGUILayout.Toggle(label, value, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedIndent;
             if (!string.IsNullOrEmpty(helpText))
                 HelpInfoButton.Draw(label, helpText);
             EditorRowEnd();
@@ -60,11 +84,57 @@ namespace TileStories.Editor
             float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
             int idx = Array.IndexOf(options, current);
             if (idx < 0) idx = 0;
-            idx = EditorGUILayout.Popup(label, idx, labels, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            int savedIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            using (new FieldLabelWidthCompensationScope(extraIndentPixels))
+                idx = EditorGUILayout.Popup(label, idx, labels, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedIndent;
             if (!string.IsNullOrEmpty(helpText))
                 HelpInfoButton.Draw(label, helpText);
             EditorRowEnd();
             return idx >= 0 ? options[idx] : current;
+        }
+
+        // Same shared-row shape as DrawScalarField, for a min/max-clamped slider
+        // instead of a free-typed float (Effects section defaults: amplitude, alpha
+        // ramps, scale factors, all 0-1 or similarly bounded).
+        internal static float DrawSliderField(string label, float value, float min, float max, string helpText = "", float extraIndentPixels = 0f)
+        {
+            DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
+            float fieldWidth = string.IsNullOrEmpty(helpText) ? rowWidth : Mathf.Max(40f, rowWidth - 36f);
+            int savedIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            using (new FieldLabelWidthCompensationScope(extraIndentPixels))
+                value = EditorGUILayout.Slider(label, value, min, max, GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedIndent;
+            if (!string.IsNullOrEmpty(helpText))
+                HelpInfoButton.Draw(label, helpText);
+            EditorRowEnd();
+            return value;
+        }
+
+        // Same shared-row shape again, for a LABELLED standalone color field (picker +
+        // hex) outside a taxonomy table -- e.g. the Effects section's Sun/Accent tint
+        // colors, which previously had no row wrapper, no indent, and no label at all
+        // (2026-09-18 audit finding: they rendered as two bare, unlabeled, left-edge
+        // controls stacked vertically instead of a proper row). PrefixLabel draws the
+        // label column exactly like every other field row's built-in label; the actual
+        // picker + hex pair still goes through DrawColorSwatchAndHex unchanged, so the
+        // taxonomy tables' own (unlabelled) call sites are unaffected.
+        internal static void DrawColorField(string label, ref string colorHex, string helpText = "", float extraIndentPixels = 0f)
+        {
+            DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
+            int savedIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            using (new FieldLabelWidthCompensationScope(extraIndentPixels))
+                EditorGUILayout.PrefixLabel(label);
+            string hex = colorHex;
+            DrawColorSwatchAndHex(ref hex, out _, out _);
+            colorHex = hex;
+            EditorGUI.indentLevel = savedIndent;
+            if (!string.IsNullOrEmpty(helpText))
+                HelpInfoButton.Draw(label, helpText);
+            EditorRowEnd();
         }
 
 
@@ -109,7 +179,14 @@ namespace TileStories.Editor
                             v => { targetBand.details = v; _hasUnsavedChanges = true; }));
                 }
 
-                if (GUILayout.Button(TrashIcon, GUILayout.Width(24f), GUILayout.Height(20f)))
+                bool deleteBandClicked = DeleteButton.DrawLayout("Delete LOD band");
+
+                // Right-edge scrollbar clearance (_5.1_Editor_Tab.md "Row Indentation &
+                // Spacing"): this table builds its own row layout instead of going
+                // through DrawEditorRow, so this needs restating by hand.
+                GUILayout.Space(AddButtonRowRightMargin);
+
+                if (deleteBandClicked)
                 {
                     lod.bands.RemoveAt(i);
                     _hasUnsavedChanges = true;

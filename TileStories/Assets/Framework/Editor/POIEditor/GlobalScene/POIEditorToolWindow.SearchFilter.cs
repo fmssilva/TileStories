@@ -53,9 +53,16 @@ namespace TileStories.Editor
             EditorGUILayout.Space(6f);
             EditorGUILayout.LabelField("Results & Navigation", EditorStyles.boldLabel);
             // Shared row: transparent indent spacer + labelled TextField capped to rowWidth.
+            // indentLevel zeroed around the control only: a labelled EditorGUILayout
+            // control re-applies the ambient indent a second time via its own internal
+            // PrefixLabel (invisible to GetLastRect, this file's Lesson 6) -- see
+            // LodZoom.cs's shared field drawers for the same fix.
             DrawEditorRow(out float noResultsRow, out _);
+            int savedNoResultsIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
             _config.no_results_message = EditorGUILayout.TextField("No-results message", _config.no_results_message,
                 GUILayout.Width(noResultsRow), GUILayout.ExpandWidth(false));
+            EditorGUI.indentLevel = savedNoResultsIndent;
             EditorRowEnd();
             _config.default_result_view = DrawPopupField("Default result view", _config.default_result_view,
                 ResultViewOptions, ResultViewLabels, ResultViewHelp);
@@ -65,15 +72,17 @@ namespace TileStories.Editor
             _config.minimap_enabled = DrawToggleField("Enable minimap", _config.minimap_enabled, MinimapHelp);
             if (_config.minimap_enabled)
             {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    _config.minimap_visibility = DrawPopupField("Visibility", _config.minimap_visibility,
-                        MinimapVisibilityOptions, MinimapVisibilityLabels, MinimapVisibilityHelp);
-                    _config.minimap_icon_style = DrawPopupField("Icon style", _config.minimap_icon_style,
-                        MinimapIconOptions, MinimapIconLabels, MinimapIconHelp);
-                    _config.minimap_dot_size_px = DrawScalarField("Dot size (px)", _config.minimap_dot_size_px, MinimapDotSizeHelp);
-                    _config.minimap_dot_tap_target_px = DrawScalarField("Dot tap target (px)", _config.minimap_dot_tap_target_px, MinimapTapTargetHelp);
-                }
+                // Conditional rows nest via the raw-pixel SubFieldIndentPixels nudge
+                // (_5.1_Editor_Tab.md "Row Indentation & Spacing"), never a whole
+                // EditorGUI.IndentLevelScope -- a full level shifts the VALUE box too
+                // (compensated automatically by each field-drawer's
+                // FieldLabelWidthCompensationScope, which only fires for extraIndentPixels).
+                _config.minimap_visibility = DrawPopupField("Visibility", _config.minimap_visibility,
+                    MinimapVisibilityOptions, MinimapVisibilityLabels, MinimapVisibilityHelp, SubFieldIndentPixels);
+                _config.minimap_icon_style = DrawPopupField("Icon style", _config.minimap_icon_style,
+                    MinimapIconOptions, MinimapIconLabels, MinimapIconHelp, SubFieldIndentPixels);
+                _config.minimap_dot_size_px = DrawScalarField("Dot size (px)", _config.minimap_dot_size_px, MinimapDotSizeHelp, SubFieldIndentPixels);
+                _config.minimap_dot_tap_target_px = DrawScalarField("Dot tap target (px)", _config.minimap_dot_tap_target_px, MinimapTapTargetHelp, SubFieldIndentPixels);
             }
 
             EditorGUILayout.Space(6f);
@@ -88,13 +97,11 @@ namespace TileStories.Editor
             _config.voice_search_enabled = DrawToggleField("Enable voice search", _config.voice_search_enabled, VoiceEnabledHelp);
             if (_config.voice_search_enabled)
             {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    _config.voice_search_match_mode = DrawPopupField("Match mode", _config.voice_search_match_mode,
-                        VoiceMatchModeOptions, VoiceMatchModeLabels, VoiceMatchModeHelp);
-                    _config.voice_activity_indicator_style = DrawPopupField("Indicator style", _config.voice_activity_indicator_style,
-                        VoiceIndicatorOptions, VoiceIndicatorLabels, VoiceIndicatorHelp);
-                }
+                // Raw-pixel nudge, not IndentLevelScope -- see Minimap above.
+                _config.voice_search_match_mode = DrawPopupField("Match mode", _config.voice_search_match_mode,
+                    VoiceMatchModeOptions, VoiceMatchModeLabels, VoiceMatchModeHelp, SubFieldIndentPixels);
+                _config.voice_activity_indicator_style = DrawPopupField("Indicator style", _config.voice_activity_indicator_style,
+                    VoiceIndicatorOptions, VoiceIndicatorLabels, VoiceIndicatorHelp, SubFieldIndentPixels);
             }
 
             EditorGUILayout.Space(6f);
@@ -103,16 +110,17 @@ namespace TileStories.Editor
             _config.zoom_on_select_enabled = DrawToggleField("Zoom on select", _config.zoom_on_select_enabled, ZoomOnSelectHelp);
             if (_config.zoom_on_select_enabled)
             {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    // Shared row (nested scope -> deeper indent spacer, measured at call time).
-                    DrawEditorRow(out float triggerRow, out _);
+                // Raw-pixel nudge, not IndentLevelScope -- see Minimap above.
+                DrawEditorRow(out float triggerRow, out _, SubFieldIndentPixels);
+                int savedTriggerIndent = EditorGUI.indentLevel;
+                EditorGUI.indentLevel = 0;
+                using (new FieldLabelWidthCompensationScope(SubFieldIndentPixels))
                     _config.zoom_on_select_trigger = (WallConfigData.ZoomOnSelectTrigger)EditorGUILayout.EnumPopup("Trigger target", _config.zoom_on_select_trigger,
                         GUILayout.Width(triggerRow), GUILayout.ExpandWidth(false));
-                    EditorRowEnd();
-                    _config.zoom_on_select_density_threshold = DrawIntField("Density threshold", _config.zoom_on_select_density_threshold, ZoomOnSelectDensityHelp);
-                    _config.zoom_on_select_factor = DrawScalarField("Zoom factor", _config.zoom_on_select_factor, ZoomOnSelectFactorHelp);
-                }
+                EditorGUI.indentLevel = savedTriggerIndent;
+                EditorRowEnd();
+                _config.zoom_on_select_density_threshold = DrawIntField("Density threshold", _config.zoom_on_select_density_threshold, ZoomOnSelectDensityHelp, SubFieldIndentPixels);
+                _config.zoom_on_select_factor = DrawScalarField("Zoom factor", _config.zoom_on_select_factor, ZoomOnSelectFactorHelp, SubFieldIndentPixels);
             }
 
             // --- Synonym groups (_2.6-al) ---
@@ -137,6 +145,10 @@ namespace TileStories.Editor
                 EditorGUILayout.LabelField("Key (canonical term)", EditorStyles.miniBoldLabel, GUILayout.Width(140f));
                 EditorGUILayout.LabelField("Synonyms (comma-separated)", EditorStyles.miniBoldLabel, GUILayout.Width(200f));
                 GUILayout.FlexibleSpace();
+                // Right-edge scrollbar clearance (_5.1_Editor_Tab.md "Row Indentation &
+                // Spacing"): this table builds its own row layout instead of going
+                // through DrawEditorRow, so this needs restating by hand.
+                GUILayout.Space(AddButtonRowRightMargin);
             }
 
             // Editable rows.
@@ -171,7 +183,12 @@ namespace TileStories.Editor
                     GUILayout.FlexibleSpace();
 
                     // Remove button.
-                    if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
+                    bool deleteSynonymClicked = DeleteButton.DrawLayout($"Delete synonym group: {group.key}");
+
+                    // Same right-edge scrollbar clearance as the header row above.
+                    GUILayout.Space(AddButtonRowRightMargin);
+
+                    if (deleteSynonymClicked)
                     {
                         _config.synonym_groups.RemoveAt(i);
                         _hasUnsavedChanges = true;
@@ -237,6 +254,10 @@ namespace TileStories.Editor
                 EditorGUILayout.LabelField("Forced", EditorStyles.miniBoldLabel, GUILayout.Width(50f));
                 EditorGUILayout.LabelField("Details", EditorStyles.miniBoldLabel, GUILayout.Width(50f));
                 GUILayout.FlexibleSpace();
+                // Right-edge scrollbar clearance (_5.1_Editor_Tab.md "Row Indentation &
+                // Spacing"): this table builds its own row layout instead of going
+                // through DrawEditorRow, so this needs restating by hand.
+                GUILayout.Space(AddButtonRowRightMargin);
             }
 
             // Read-only system rows (derived from taxonomy tables, shown for context).
@@ -291,7 +312,12 @@ namespace TileStories.Editor
                     GUILayout.FlexibleSpace();
 
                     // Remove button.
-                    if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
+                    bool deleteFieldClicked = DeleteButton.DrawLayout($"Delete keyword field: {field.key}");
+
+                    // Same right-edge scrollbar clearance as the header row above.
+                    GUILayout.Space(AddButtonRowRightMargin);
+
+                    if (deleteFieldClicked)
                     {
                         // A delete cannot propagate: any POI still holding a keyword list
                         // under this key would point at a field that no longer exists.
@@ -338,6 +364,9 @@ namespace TileStories.Editor
                 EditorGUILayout.TextField(label, GUILayout.Width(100f));
                 EditorGUILayout.Toggle(false, GUILayout.Width(50f)); // forced always false for system rows
                 GUILayout.Button(DetailsIcon, GUILayout.Width(26f), GUILayout.Height(20f));
+                GUILayout.FlexibleSpace();
+                // Right-edge scrollbar clearance, matching the table's editable rows above.
+                GUILayout.Space(AddButtonRowRightMargin);
             }
         }
     }

@@ -312,20 +312,23 @@ namespace TileStories.Editor
 
         [SerializeField] private bool _showTopConfig = true;
 
-        [SerializeField] private bool _showGlobalMarker = true;
+        // Default collapsed: matches the Specific Marker tab's default-collapsed POI
+        // sections, so a wall with many sections opens as a scannable list of closed
+        // foldouts instead of dumping every Global Scene section open at once.
+        [SerializeField] private bool _showGlobalMarker = false;
         // Block 6 (_2.1_Marker_Orientation.md): Orientation editor foldout, between Marker and Badge.
-        [SerializeField] private bool _showGlobalOrientation = true;
-        [SerializeField] private bool _showGlobalBadge = true;
-        [SerializeField] private bool _showGlobalOutline = true;
-        [SerializeField] private bool _showGlobalHierarchy = true;
-        [SerializeField] private bool _showGlobalEffects = true;
+        [SerializeField] private bool _showGlobalOrientation = false;
+        [SerializeField] private bool _showGlobalBadge = false;
+        [SerializeField] private bool _showGlobalOutline = false;
+        [SerializeField] private bool _showGlobalHierarchy = false;
+        [SerializeField] private bool _showGlobalEffects = false;
         // Block 2 (_2.4 rows 5b/12/13): LOD + AR-zoom editor foldouts.
-        [SerializeField] private bool _showGlobalLod = true;
-        [SerializeField] private bool _showGlobalZoom = true;
+        [SerializeField] private bool _showGlobalLod = false;
+        [SerializeField] private bool _showGlobalZoom = false;
         // Block 8 (_2.5 section 11): Displacement editor foldout.
-        [SerializeField] private bool _showGlobalDisplacement = true;
+        [SerializeField] private bool _showGlobalDisplacement = false;
         // Block 5 (_2.6 section 3): Search & Filter editor foldout.
-        [SerializeField] private bool _showGlobalSearchFilter = true;
+        [SerializeField] private bool _showGlobalSearchFilter = false;
 
         // Default collapsed: a POI's inner sections open one at a time, on request,
         // instead of dumping all five at once every time a POI is expanded.

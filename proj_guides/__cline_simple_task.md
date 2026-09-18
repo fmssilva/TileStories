@@ -55,24 +55,19 @@ so this is a big task... make a good plan before you act...
 So start by reading them all. 
 
 ## `and now:`
-- i was already implementing all the features of the "orientation domain" describeed in the file: 
-C:\Users\franc\Desktop\TileStories\proj_guides\_2.1_Marker_Orientation.md
+in the orientation domain, lets now confirm that the global orintation setings about facing are well wired up with the spcific markers facing setings. 
+a) currently we have only a side bar for changing the y rotation. lets add also a side bar for the x and z rotation. AND lets syncroonize them with the normal unity rotation feature so they don't fight each other, and so we can also use the unity rotation feature normally and the sliders mve accordingly... and so we save these rotation degrees in memory... and when we click save we save them to the config json file... 
 
-also when needed check the editor window guide for better context:
-C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
+b) and about the "locking and usage of those rotations fields": currently we have the orientation to be freely changed even if the "verified" button is green/lcked. BUT we need to change that. Lets make the facing values and updates to also be allowed only if the verified button is not green. 
 
-and so lets confirm and refine some things in the whole Orientation domain/component:
+c) and then lets add some notes in the info button explaining the whole facing  feature we have and logic and variablity according to the selected facing option in the global scene tab - orientation - facing field: if the option is camera facing - we doon't really care about these saved facing valuses; if the options is y only, so we care about the x,z rotation values because they will be used; if the option is wall glued so we care about all the 3 x,y,z values and so we must set them all well. BUT in terms of the sliders maybe we can make them all the same and don't really have "logic" ifs to impose these diffrent options "robusteness of facing values... lets just put the 3 sliders fr x,y,z facing values and the developer chooses as he wants. 
 
-a) in the Test sub component, we have those 2 rows, each with "info" buttons.
-but lets simplify things. 
-lets leave the Edit Mode Preview row as is... and then bellow, instead of having a row with a "i" button, lets instead put that whole information text with the steps of how to test each field in the scene and/or play mode... so lets put that text directly in a big text field like if it was a normal row... so we can have it always visible in an easy way while we execute the test procedures... or if you think is better and easy... maybe we can even put it in a sort of detached window that we can  drag and place like any other window like the "hierarchy" or Console", and so this way we an have that "test guide" open at the same time we do other things... 
+d) lets also use as default facing values, (0,0,0) if we are creating the first POI, and the rotation values of the POI we just "copied" when clicking the "+" icon. (similar to what we do already for the position values x,y,z)
 
-b) the "up reference" and the Facing Basis" rows have some too big ident... can you see in the image? coonfirm what is wrong and make those rows to be aligned left vertially with the other rows
-AND, in fact, lets also change the other rows themselves... so lets move this whole "third level" identation a bit closer to the left side, so a narrower identation... make it for example just 1cm after the second level rows (Vertical Alignemnt, Facing Options, etc..). For you to see an example, see the specific marker tab, where we have already some good formating third level of rows, not too much idented forward. and so maybe use the same identation, and maybe just a bit less... 
-AND, can we standardize this whole identation distances for second and third level rows? and so we use some sort of constant or something so we make it easy to configure and update and change... AND if it is a good idea, think the best way to implement it, and then update the file to reflect that guideline for future agents to know how to make good rows well formated right from the begining:
-C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
-AND if we indeed create this sort of "global row identation system"... so maybe we can also include there the spacing we also put on the right side to avoid the scroll bar then covring up the right edge f the rows... formating system or row identation on the left 
-AND so if we implemnt some better global system foor this whole row identation and spacing management... so update the 5_Editor file, AND also update all rows in the whole Editor Window in all components and sub components to use those measurements etc... 
+e) when we click in the scene in some concrete POI marker AND we start moving or rotating it (when we have these 2 conditions met), can we autmatic open the specific marker tab and we open that concrete POI sub component and we automatic scroll down there - so the developer sees right away the changes he is doing to the POI? is it simple to implement? (and then we already have some pop ups and warning messages in case the POI is "verified" to avoid accidental changes... and so those pop ups should also trigger now for the rotation editings... and so pay attention to it when you are doing tests - if a pop up appears confirm if you can click on it, and if not, so avoid tests that trigger those pop ups maybe??)
+
+
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

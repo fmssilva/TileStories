@@ -92,14 +92,42 @@ namespace TileStories.Tests
             }
         }
 
-        // The shared marker/badge renderer must insert the between-groups gap at all
-        // 4 boundaries in both the header row and the data rows (8 call sites).
+        // The shared marker/badge renderer must insert the between-groups gap at 2 of
+        // its 4 boundaries in both the header row and the data rows (4 call sites) --
+        // the Symbol-to-Color boundary uses the larger TableGapBeforeColor and the
+        // pre-delete boundary uses the larger TableGapBeforeDelete (see the next tests),
+        // both because the standard gap read as visually too tight there (developer
+        // screenshot feedback, 2026-09-18).
         [Test]
         public void SharedSymbolTable_GapBetweenGroups_AllBoundaries()
         {
             string src = ReadSource(@"Framework\Editor\POIEditor\Shared\POIEditorToolWindow.SymbolTable.cs");
-            Assert.That(CountOccurrences(src, "GUILayout.Space(TableGapBetweenGroups)"), Is.GreaterThanOrEqualTo(8),
-                "Marker/badge renderer needs the between-groups gap at all 4 boundaries x (header + rows)");
+            Assert.That(CountOccurrences(src, "GUILayout.Space(TableGapBetweenGroups)"), Is.GreaterThanOrEqualTo(4),
+                "Marker/badge renderer needs the between-groups gap at 2 of its 4 boundaries x (header + rows)");
+        }
+
+        // The Symbol-to-Color boundary (header + row) uses the larger, dedicated
+        // TableGapBeforeColor gap instead of the standard between-groups gap.
+        [Test]
+        public void SharedSymbolTable_GapBeforeColor_LargerThanBetweenGroups()
+        {
+            string src = ReadSource(@"Framework\Editor\POIEditor\Shared\POIEditorToolWindow.SymbolTable.cs");
+            Assert.That(CountOccurrences(src, "GUILayout.Space(TableGapBeforeColor)"), Is.GreaterThanOrEqualTo(2),
+                "Marker/badge renderer needs the larger pre-color gap in both the header and the rows");
+            Assert.That(ReflectGapConstant("TableGapBeforeColor"), Is.GreaterThan(ReflectGapConstant("TableGapBetweenGroups")),
+                "The pre-color gap must be larger than the standard between-groups gap");
+        }
+
+        // The delete button boundary (header + row) uses the larger, dedicated
+        // TableGapBeforeDelete gap instead of the standard between-groups gap.
+        [Test]
+        public void SharedSymbolTable_GapBeforeDelete_LargerThanBetweenGroups()
+        {
+            string src = ReadSource(@"Framework\Editor\POIEditor\Shared\POIEditorToolWindow.SymbolTable.cs");
+            Assert.That(CountOccurrences(src, "GUILayout.Space(TableGapBeforeDelete)"), Is.GreaterThanOrEqualTo(2),
+                "Marker/badge renderer needs the larger pre-delete gap in both the header and the rows");
+            Assert.That(ReflectGapConstant("TableGapBeforeDelete"), Is.GreaterThan(ReflectGapConstant("TableGapBetweenGroups")),
+                "The pre-delete gap must be larger than the standard between-groups gap");
         }
 
         // Same invariant for the outline table's own inline renderer.

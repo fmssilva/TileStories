@@ -12,6 +12,19 @@ namespace TileStories.Editor
         private const float TableGapBetweenGroups = 6f;
         private const float TableGapWithinGroup = 4f;
 
+        // Extra breathing room before the Color group (Marker/Badge tables only) --
+        // developer screenshot feedback (2026-09-18) confirmed the standard
+        // between-groups gap read as visually too tight once the Symbol group's preview
+        // thumbnail sits directly next to the (now correctly narrow) color swatch.
+        private const float TableGapBeforeColor = 20f;
+
+        // Extra breathing room before the Marker Table's destructive delete button --
+        // bigger than the standard between-groups gap so the danger affordance reads as
+        // clearly separated from the (non-destructive) keyword group next to it, not
+        // just another column boundary. Widened 16f -> 28f (2026-09-18, developer
+        // screenshot feedback): 16f still read as visually too close to the standard gap.
+        private const float TableGapBeforeDelete = 28f;
+
         // Row layout for non-table rows (buttons, stand-alone controls).
         // SectionRowIndent: the left pad that makes a bare GUILayout row sit at the
         // same x as EditorGUILayout content inside a foldout (GUILayout ignores
@@ -67,7 +80,16 @@ namespace TileStories.Editor
         // swatch in front of it, which read as a dead cell. The hex field is the
         // "color name". The pair sits flush (GUILayout's default inter-control
         // spacing is already there), so the group width is just picker + hex.
-        private const float ColorPickerWidth = 60f;
+        // Narrowed from 60f (2026-09-18, developer screenshot feedback): 60f x
+        // singleLineHeight (~18f) is a 3.3:1 bar, not the "square-like" swatch a color
+        // picker cell should read as. 32f keeps it above the ColorGroup_WidthConstants_
+        // DerivedCorrectly test's 30f floor while getting close to square against the
+        // fixed row height. Note this constant itself was NEVER widened by the
+        // indent-doubling fix (Lesson 4) -- that bug was clipping the RENDERED width
+        // down to roughly a third of this constant, so fixing it made the picker jump
+        // from a broken ~20px back UP to whatever this constant said, which is why it
+        // suddenly looked "too wide" right after the gap fix landed.
+        private const float ColorPickerWidth = 32f;
         private const float ColorHexFieldWidth = 90f;
         private const float ColorGroupWidth = ColorPickerWidth + ColorHexFieldWidth;
 
@@ -313,8 +335,11 @@ namespace TileStories.Editor
             return p[idx];
         }
 
+        // The Marker Table's trash glyph -- also the default icon for the shared
+        // DeleteButton (Shared/POIEditorToolWindow.DeleteButton.cs), so every delete
+        // affordance in the window uses the same glyph by construction.
         private static GUIContent _trashIcon;
-        private static GUIContent TrashIcon => _trashIcon ?? (_trashIcon = EditorGUIUtility.IconContent("d_TreeEditor.Trash"));
+        internal static GUIContent TrashIcon => _trashIcon ?? (_trashIcon = EditorGUIUtility.IconContent("d_TreeEditor.Trash"));
 
         // Info glyph reused for read-only explanation buttons. Unity native
         // icon first, bundled PNG fallback -- mirrors the pencil pattern so it
@@ -404,27 +429,6 @@ namespace TileStories.Editor
                 var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(AddIconAssetPath);
                 _addIcon = new GUIContent(tex, "Add a new POI below this one, copied from it");
                 return _addIcon;
-            }
-        }
-
-        // Red trash glyph for the per-POI header DELETE button. Bundled PNG (the dev's own
-        // asset) so the danger affordance is the ICON itself, which keeps the button at the
-        // same height as its sibling reorder/focus buttons -- a dark-red button FILL read as
-        // a bigger control that overhung the header row. Distinct from TrashIcon (Unity's
-        // native glyph) which the taxonomy tables still use.
-        internal const string DeleteIconAssetPath = "Assets/Framework/Editor/POIEditor/SpecificMarker/Icons/delete-icon.png";
-
-        private static GUIContent _deleteIcon;
-        internal static GUIContent DeleteIcon
-        {
-            get
-            {
-                if (_deleteIcon != null)
-                    return _deleteIcon;
-
-                var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(DeleteIconAssetPath);
-                _deleteIcon = new GUIContent(tex, "Delete POI");
-                return _deleteIcon;
             }
         }
 

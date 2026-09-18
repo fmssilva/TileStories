@@ -105,5 +105,33 @@ namespace TileStories.Editor
         {
             EditorGUILayout.EndHorizontal();
         }
+
+        // Compensates a labelled field row's reserved label column by exactly the
+        // same extraIndentPixels its own DrawEditorRow spacer was widened by, so a
+        // nested/conditional row's VALUE box lands at the same x as its shallower
+        // siblings instead of drifting right by the nudge amount. Deliberately LOCAL,
+        // not a global indent-level-to-label-width lookup table: extraIndentPixels
+        // already IS the one piece of data needed (how much wider this row's spacer
+        // is than a sibling's), so this just re-spends it on the label column instead
+        // of introducing a second, parallel source of truth that could drift out of
+        // sync with it. See _5.1_Editor_Tab.md "Row Indentation & Spacing" for the
+        // full reasoning and the screenshot that prompted this (Orientation's "Up
+        // Reference" / "Facing Basis" value boxes sitting right of their siblings').
+        internal readonly struct FieldLabelWidthCompensationScope : IDisposable
+        {
+            private readonly float _savedLabelWidth;
+
+            public FieldLabelWidthCompensationScope(float extraIndentPixels)
+            {
+                _savedLabelWidth = EditorGUIUtility.labelWidth;
+                if (extraIndentPixels > 0f)
+                    EditorGUIUtility.labelWidth = Mathf.Max(10f, _savedLabelWidth - extraIndentPixels);
+            }
+
+            public void Dispose()
+            {
+                EditorGUIUtility.labelWidth = _savedLabelWidth;
+            }
+        }
     }
 }

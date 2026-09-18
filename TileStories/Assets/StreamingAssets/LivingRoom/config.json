@@ -843,10 +843,10 @@
         "displacement_tiebreak": "symmetric"
     },
     "orientation_settings": {
-        "vertical_alignment_mode": "screen_up",
-        "label_vertical_alignment_mode": "inherit",
-        "badge_vertical_alignment_mode": "inherit",
-        "cluster_vertical_alignment_mode": "inherit",
+        "vertical_alignment_mode": "world_up",
+        "label_vertical_alignment_mode": "screen_up",
+        "badge_vertical_alignment_mode": "screen_up",
+        "cluster_vertical_alignment_mode": "world_up",
         "up_reference": "world_gravity",
         "custom_up_x": 0.0,
         "custom_up_y": 1.0,
