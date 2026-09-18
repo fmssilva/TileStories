@@ -46,6 +46,10 @@ namespace TileStories
         // overlap resolver (Block 1) and the label/marker displacement algorithms (Block 2-4).
         // Mirrors the LodSettings accessor; null only if WallConfigData fails to construct.
         public DisplacementSettings DisplacementSettings => _config?.displacement_settings;
+        // Read-only access to the wall's marker/label/badge/cluster orientation settings
+        // (_2.1_Marker_Orientation.md section 7), consumed by MarkerBillboard.Configure
+        // and by LODController for the cluster spawn path. Mirrors DisplacementSettings.
+        public OrientationSettings OrientationSettings => _config?.orientation_settings;
 
 // Read-only access to the wall's resolved icon library + calibrated AR spawn
 // root, so the cluster system can place aggregates without reaching into
@@ -219,7 +223,13 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
                     : CreateAnchorOnlyObject(correctionAnchor != null ? correctionAnchor : transform, poi.id);
 
                 go.transform.localPosition = localPos;
-                go.transform.localRotation = Quaternion.identity;
+                // The POI's authored editor rotation, so MarkerBillboard.Configure (below)
+                // captures it as the "authored" rotation wall_fixed mode uses at runtime
+                // (_2.1_Marker_Orientation.md section 13 point 2 - editor_rotation_x/y/z_deg
+                // stops being Editor-preview-only dead data once wall_fixed ships). Every
+                // other mode ignores this value entirely, so setting it unconditionally here
+                // changes nothing for screen_aligned/world_up/yaw_only/none.
+                go.transform.localRotation = Quaternion.Euler(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
                 go.name = poi.id;
 
                 var anchor = go.GetComponent<POIAnchor>() ?? go.AddComponent<POIAnchor>();
@@ -243,6 +253,17 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
                         _badgeShape,
                         _effectDefaults);
                     spawnedMarkerViews.Add(markerView);
+                }
+
+                // Orient this marker per the wall's OrientationSettings, next to the
+                // MarkerView.Initialise call above (_2.1_Marker_Orientation.md section 13).
+                // The level override is read through the same hierarchy-key lookup
+                // MarkerView already uses for size/effects/reveal timing.
+                var billboard = go.GetComponentInChildren<MarkerBillboard>();
+                if (billboard != null)
+                {
+                    string orientationOverride = MarkerHierarchyResolver.ResolveOrientationOverride(poi.hierarchy_level_key);
+                    billboard.Configure(_config.orientation_settings, orientationOverride, MarkerSpawnRoot);
                 }
 
                 _spawnedPOIs.Add(go);

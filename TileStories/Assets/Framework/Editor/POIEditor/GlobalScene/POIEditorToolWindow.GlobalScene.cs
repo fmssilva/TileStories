@@ -13,6 +13,10 @@ namespace TileStories.Editor
 
             EditorGUILayout.Space(4f);
 
+            _showGlobalOrientation = DrawFramedFoldout(ref _showGlobalOrientation, DrawGlobalOrientationSection, "Orientation", OrientationSectionColor);
+
+            EditorGUILayout.Space(4f);
+
             _showGlobalBadge = DrawFramedFoldout(ref _showGlobalBadge, () =>
             {
                 // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
@@ -627,7 +631,19 @@ namespace TileStories.Editor
                     HelpInfoButton.Draw("Reveal Delay vs Duration",
                         "Delay: seconds after spawn before the fade/scale-in begins.\nDuration: how long the fade/scale-in animation itself takes. A longer delay staggers appearance; a longer duration makes each marker enter more slowly. Default: 0.5s L1 -> 0.25s L5.");
 
-                    // Column 11: Remove (trash button)
+                    // Column 11: Orientation override (_2.1_Marker_Orientation.md section 4.3).
+                    // "" = inherit the wall's marker_orientation_mode.
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        int orientIdx = Array.IndexOf(OrientationOverrideOptions, entry.orientation_mode_override ?? "");
+                        if (orientIdx < 0) orientIdx = 0;
+                        orientIdx = EditorGUILayout.Popup("Orientation", orientIdx, OrientationOverrideLabels, GUILayout.Width(150f));
+                        entry.orientation_mode_override = OrientationOverrideOptions[orientIdx];
+                        HelpInfoButton.Draw("Orientation Override",
+                            "Overrides the wall's Marker Orientation mode for POIs at this hierarchy level only. Inherit (default) uses the wall setting above. Lets hero levels stay Screen Aligned for legibility while background levels sit flat on the wall (Wall Fixed).");
+                    }
+
+                    // Column 12: Remove (trash button)
                     if (GUILayout.Button(TrashIcon, GUILayout.Width(26f), GUILayout.Height(22f)))
                     {
                         // Same rule as outline levels: the row key is identity, so a

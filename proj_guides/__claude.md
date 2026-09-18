@@ -1,10 +1,7 @@
 # 1. **Kickoff (context + explicit "planning only, no code yet")**
 
-- `Attach rules zip, global work plan, and any existing prototypes/docs for this domain if they exist.`
-- **Attach the project zip even if this domain hasn't been formally started yet.**
-  Related runtime code has shown up unannounced before (e.g. `MarkerOverlapResolver.cs`
-  already existed, fully working, before Displacement was ever discussed) — "no domain
-  doc yet" does not mean "no code yet." Check for it regardless.
+- `Attach rules zip, project zip, global work plan, and any existing prototypes/docs for this domain if they exist.`
+
 
 Read the general guidelines first (clinerules zip).
 Including the code structure and organizing
@@ -14,7 +11,7 @@ Read the full project work plan I want to implement: `_0_work_plan.md`. Read all
 
 
 ### **start planning**
-And now we're starting **`Domain X`**. 
+And now we're starting **`Orientation`**. 
 For this whole conversation don't write any implementation code — you can see the project zip to understand the current state or confirm some important implementation described in the guidelines `10-structure`, but don't execute any code implementantion - we're only discussing and planning. Give me your read of what the work plan already says about this domain, and what's actually built vs. just planned, before we design anything.
 
 Read fully. Planning only, no code. Tell me what's already said about this domain and what's actually built vs. planned.
@@ -77,13 +74,6 @@ Be good, not fast.
 
 
 ## 3.1 **Deep re-verification (mandatory, not a light pass — do this before handing the file over)**
-
-Every serious bug caught in this project so far in past sessions (the `Configure()` call missing from
-two of three required wiring sites, a pipeline step running in the wrong order, a
-count-cap sorting by the wrong field) was found only because this step was explicitly
-requested afterward, as a separate ask. It isn't optional, and it isn't the same thing
-as the light "re-check against our conversation" pass — it's two distinct, deliberate
-adversarial passes:
 
 **Pass 1 — features/config, against the chat, not the doc.** Re-read the full chat
 history for this domain, block by block. For every feature, option, or variable

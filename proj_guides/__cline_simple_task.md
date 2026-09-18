@@ -46,16 +46,13 @@ A *stable `key` + `label`* split for categories (like `badge_categories` already
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-- and now, in the specific markers tab, i send attached a print... and also this whole edit tab guide for better context:
+## `and now:`
+- lets make a deep review of the "orientation domain". read the file:
+C:\Users\franc\Desktop\TileStories\proj_guides\_2.1_Marker_Orientation.md
+and so confirm step by step, block by block what we already implemented and tested well in this project and what is missing. 
+
+- also when needed check the editor window guide for better context:
 C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
-
-and so now: 
-a) lets change the order of the "focus in scene" icon with the "edit name" icon. so we have the edit icon after the focus in that row. 
-
-b) lets make the default view of the POI compnents to be colapse. similar to the image i attaache. 
-
-c) the "+ add near prev" and "add near after". lets simplify that.
-and so instead of us having 2 buttons in between POI markers lines, lets instead put a simple "+" button in the same line of the POI title, right after the arrow up and arrow down icons, and so when the deveeloper clicks on that icon, we use that concrete POI as the "source to be copied" and then we add the new poi in the line bellow that "origin POI". and so make a deep analysis and see the whole set of "add near prev and add near next logic we have, and lets simplify that and just add near this cncrete POI of this line. 
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

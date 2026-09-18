@@ -337,6 +337,7 @@ GameObject:
   - component: {fileID: 7344947909463993050}
   - component: {fileID: 7301002227059623258}
   - component: {fileID: 5672387908731003400}
+  - component: {fileID: 260628333047578766}
   m_Layer: 5
   m_Name: Label
   m_TagString: Untagged
@@ -463,6 +464,18 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &260628333047578766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3337972350612873654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f979cc5e3ea0f86408fc762b3ca20f2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TileStories::TileStories.MarkerChildOrientation
 --- !u!1 &4123588257030972941
 GameObject:
   m_ObjectHideFlags: 0
@@ -663,6 +676,7 @@ GameObject:
   - component: {fileID: 781877913231160640}
   - component: {fileID: 4912041028524192338}
   - component: {fileID: 1659557396039892733}
+  - component: {fileID: 2364367699426313261}
   m_Layer: 0
   m_Name: Badge
   m_TagString: Untagged
@@ -742,3 +756,15 @@ MonoBehaviour:
   background: {fileID: 4912041028524192338}
   icon: {fileID: 0}
   iconSizeRatio: 0.56
+--- !u!114 &2364367699426313261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8775874905549072434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f979cc5e3ea0f86408fc762b3ca20f2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TileStories::TileStories.MarkerChildOrientation

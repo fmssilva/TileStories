@@ -24,6 +24,19 @@ LOD, content cards, circuits, the timeline) can then be built and tested entirel
 this mock, in seconds per iteration. Only drop out of this tier when the thing you're
 actually testing is tracking-layer behavior itself.
 
+**Before planning any verification, confirm Tier A can actually produce the input
+the feature responds to.** A mock/harness is only as good as the states it can
+reach, and an agent that plans a whole test matrix against a harness that
+structurally cannot generate the relevant input will discover this at the end,
+after the plan is written. Concrete instance from this project: the entire
+marker-orientation domain hangs on device *roll*, and the mock camera's look
+controller returned `Quaternion.Euler(pitch, yaw, 0f)` — roll hard-zeroed — so
+no roll-dependent behaviour was reachable in the Editor at all. The fix (one
+extra parameter) was trivial; discovering the need late would not have been.
+Make "can the harness reach this state?" an explicit first step of the plan, and
+if it can't, extending the harness is its own prerequisite task, sequenced
+*before* the feature work rather than folded into it.
+
 **Tier B — Unity's XR Simulation (AR Foundation plumbing, still no device).**
 Unity ships this as part of AR Foundation (`Project Settings -> XR Plugin Management ->
 Simulation`) — no extra package needed. It simulates AR session lifecycle, device
@@ -132,6 +145,23 @@ together — the mere existence of a call site (e.g. grep for the
 method name) is not sufficient evidence the composition is exercised;
 confirm the call site is reached from the actual runtime bootstrap path
 (`WallSession` or equivalent), not only from a test file.
+
+**A comment asserting an invariant is not a verified invariant — and it is more
+dangerous than no comment at all.** A second, related failure mode found in a
+direct audit: component B's code carried a detailed comment explaining that it
+was safe *because* component A guarantees some property ("A copies the camera's
+rotation exactly, so this object's local axes ARE screen axes by construction"),
+and that guarantee was real in the common case and false in an edge case nobody
+had tested. The comment was load-bearing, confidently worded, and never asserted
+anywhere. Every later reader trusted it instead of checking, which is precisely
+what a well-written comment earns.
+
+**Rule:** when you find a comment in one component that states a guarantee made
+by a *different* component, treat it as an untested claim, not as documentation.
+Either write the test that asserts the guarantee end to end, or rewrite the
+comment to say which conditions it actually holds under. Grepping for the
+guarantee's phrasing across the repo is a cheap way to find every place that
+silently depends on it before you change the component that provides it.
 
 ### 4.3 Asset Database Refresh Discipline
 

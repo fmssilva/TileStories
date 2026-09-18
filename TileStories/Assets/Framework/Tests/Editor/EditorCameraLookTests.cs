@@ -87,5 +87,23 @@ namespace TileStories.Tests
             // 290 unwrapped -> -70; -70 - 200 = -270 -> clamped to -80 -> 280
             Assert.AreEqual(280f, result.eulerAngles.x, 0.1f);
         }
+
+        // Block 0 (_2.1_Marker_Orientation.md S8): roll is reachable via the new
+        // 4-argument overload, and the existing 3-argument overload still zeroes it.
+        [Test]
+        public void ApplyDelta_WithRoll_WritesRequestedRoll()
+        {
+            var result = EditorCameraLook.ApplyDelta(Quaternion.identity, Vector2.zero, Dt, roll: 45f);
+
+            Assert.AreEqual(45f, result.eulerAngles.z, 0.01f);
+        }
+
+        [Test]
+        public void ApplyDelta_ThreeArgumentOverload_RollIsZero()
+        {
+            var result = EditorCameraLook.ApplyDelta(Quaternion.identity, Vector2.zero, Dt);
+
+            Assert.AreEqual(0f, result.eulerAngles.z, 0.01f);
+        }
     }
 }

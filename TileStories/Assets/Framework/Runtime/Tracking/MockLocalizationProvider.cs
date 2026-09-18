@@ -21,6 +21,11 @@ namespace TileStories
         [Tooltip("Mouse-look sensitivity in the Editor.")]
         [SerializeField] private float lookSensitivity = 2f;
 
+        [Tooltip("Roll speed for Z/C keys in the Editor (degrees/sec).")]
+        [SerializeField] private float rollSpeed = 45f;
+
+        private float _rollDeg;
+
         public bool IsLocalised { get; private set; }
         public Pose CurrentPose { get; private set; }
 
@@ -78,6 +83,16 @@ namespace TileStories
                 }
             }
 
+            // --- ROLL (Z/C) so roll-dependent orientation behaviour is reachable in
+            // the Editor - see _2.1_Marker_Orientation.md S8. ---
+            if (kb != null)
+            {
+                if (kb.zKey.isPressed) _rollDeg -= rollSpeed * Time.deltaTime;
+                if (kb.cKey.isPressed) _rollDeg += rollSpeed * Time.deltaTime;
+                if (kb.zKey.isPressed || kb.cKey.isPressed)
+                    ApplyLookDelta(Vector2.zero);
+            }
+
             // --- MOVEMENT (unchanged) ---
             if (kb == null) return;
             var move = Vector3.zero;
@@ -95,7 +110,7 @@ namespace TileStories
         private void ApplyLookDelta(Vector2 delta)
         {
             var cam = Camera.main.transform;
-            cam.localRotation = EditorCameraLook.ApplyDelta(cam.localRotation, delta, Time.deltaTime);
+            cam.localRotation = EditorCameraLook.ApplyDelta(cam.localRotation, delta, Time.deltaTime, _rollDeg);
         }
 #endif
     }

@@ -1,10 +1,14 @@
 namespace TileStories.Editor
 {
-    // Pure rotation-math for the per-POI "Edit Rotation" slider. The runtime
-    // MarkerBillboard always screen-aligns markers to the camera, so this only
-    // tilts the rig marker in the Editor Scene view for placement/preview. All
-    // math is pure and parameterised so it can be Tier-0 tested without a
-    // SceneView. The window applies the returned Quaternion to the rig child.
+    // Pure rotation-math for the per-POI "Edit Rotation" slider. For every
+    // orientation_mode except "wall_fixed", the runtime MarkerBillboard always
+    // screen-aligns markers to the camera, so this only tilts the rig marker in the
+    // Editor Scene view for placement/preview; in wall_fixed mode the same angles
+    // become the runtime marker's actual rotation too (_2.1_Marker_Orientation.md
+    // Block 4 - corrected 2026-09-18, this comment previously said the runtime
+    // marker unconditionally always faces the camera). All math is pure and
+    // parameterised so it can be Tier-0 tested without a SceneView. The window
+    // applies the returned Quaternion to the rig child.
     public static class PoiRotationResolver
     {
         // Default angle used when a POI is created (identity facing).

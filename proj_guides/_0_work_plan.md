@@ -984,6 +984,19 @@ in the schema from the very first draft, not patched in later.
     panel join (the same join locations already measured during the field-work
     protocol's wall-geometry pass, §1), interpolate piecewise *within* each straight
   into the `WallConfigAsset`, with no runtime cost either way.
+- **Marker orientation** (added 2026-09-18; this axis was previously absent from the
+  plan entirely, even though it is a required property of every world-space marker):
+  markers are uGUI World-Space Canvases, so how they ROTATE relative to the camera,
+  the screen and gravity is a real design decision with several defensible answers,
+  not a detail. It is owned by `_2.1_Marker_Orientation.md`, which ships all of them
+  as developer-selectable config rather than hardcoding one: screen-aligned (always
+  upright on the phone screen), world-up (upright against the real wall, so turning
+  the phone does not spin the markers), yaw-only cylindrical, wall-fixed (flat on the
+  wall surface, using the authored per-POI angles), and none -- plus independent
+  label/badge orientation, so a wall can keep markers screen-aligned while labels stay
+  readable against gravity. Note for scheduling: this lands inside Stage 2 alongside
+  the other marker domains, and one part of it (cluster aggregates never facing the
+  camera) is a live defect in the Stage 2 LOD work, not new scope.
 - **Marker rendering specifics**: small circle, category colour, name label
   truncated at ~15 characters to avoid overlap; when two markers are within ~40px on
   screen, apply a vertical offset rather than letting them overlap.

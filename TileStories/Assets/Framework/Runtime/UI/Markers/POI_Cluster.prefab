@@ -199,6 +199,7 @@ GameObject:
   - component: {fileID: 6675392666566279177}
   - component: {fileID: 9098189061231437212}
   - component: {fileID: 8428496341408604250}
+  - component: {fileID: 9135734629306642152}
   m_Layer: 5
   m_Name: POI_Cluster
   m_TagString: Untagged
@@ -320,6 +321,18 @@ MonoBehaviour:
   countLabel: {fileID: 5795333068302511377}
   backgroundImage: {fileID: 6744344934286269005}
   dominantIcon: {fileID: 816373240478602768}
+--- !u!114 &9135734629306642152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6562719482188906945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 862249da00818e9438b5ec33e50b5b18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TileStories::TileStories.MarkerBillboard
 --- !u!1 &8804915429198877258
 GameObject:
   m_ObjectHideFlags: 0

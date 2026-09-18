@@ -22,8 +22,20 @@ namespace TileStories
         /// The delta is always relative to currentRotation, never to a hardcoded
         /// zero-origin. This is the fix for the bug where arrow-key look snapped the
         /// camera back to identity when mouse-look had already rotated it.
+        /// Kept for existing call sites; delegates to the roll-aware overload with roll = 0.
         /// </summary>
         public static Quaternion ApplyDelta(Quaternion currentRotation, Vector2 delta, float deltaTime)
+        {
+            return ApplyDelta(currentRotation, delta, deltaTime, roll: 0f);
+        }
+
+        /// <summary>
+        /// Same as the 3-argument overload, but also writes an explicit roll (Z) angle,
+        /// so the Editor mock camera can reach device-roll-dependent orientation
+        /// behaviour that a hard-zeroed Z otherwise makes unreachable in Tier A
+        /// (_2.1_Marker_Orientation.md S8 / .clinerules/40-testing.md 4.1).
+        /// </summary>
+        public static Quaternion ApplyDelta(Quaternion currentRotation, Vector2 delta, float deltaTime, float roll)
         {
             // Read yaw and pitch from the camera's actual current rotation.
             float yaw   = currentRotation.eulerAngles.y;
@@ -37,7 +49,22 @@ namespace TileStories
             pitch -= delta.y * deltaTime * 10f;
             pitch  = Mathf.Clamp(pitch, -PitchClamp, PitchClamp);
 
-            return Quaternion.Euler(pitch, yaw, 0f);
+            return Quaternion.Euler(pitch, yaw, roll);
         }
+    }
+
+    /// <summary>
+    /// Source of the current screen orientation, overridable in the Editor since
+    /// Screen.orientation there reflects the Game View aspect selection, not a real
+    /// device - needed so roll_snap_mode == screen_orientation is testable in Tier A.
+    /// </summary>
+    public static class ScreenOrientationSource
+    {
+        private static ScreenOrientation? _editorOverride;
+
+        public static ScreenOrientation Current =>
+            _editorOverride ?? Screen.orientation;
+
+        public static void SetEditorOverride(ScreenOrientation? value) => _editorOverride = value;
     }
 }

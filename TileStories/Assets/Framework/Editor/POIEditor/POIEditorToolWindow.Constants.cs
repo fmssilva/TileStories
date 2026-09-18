@@ -114,6 +114,45 @@ namespace TileStories.Editor
                 // Show-label options (explicit wording per Â§6 of 2.3 doc, clearer than bare checkbox).
         private static readonly string[] ShowLabelOptions = { "Show Label", "NOT show Label" };
 
+        // --- Orientation editor constants (_2.1_Marker_Orientation.md Block 6) ---
+        private static readonly string[] MarkerOrientationModeOptions = { "screen_aligned", "world_up", "yaw_only", "wall_fixed", "none" };
+        private static readonly string[] MarkerOrientationModeLabels = { "Screen Aligned", "World Up", "Yaw Only", "Wall Fixed", "None" };
+        private static readonly string[] FacingBasisOptions = { "view_plane", "camera_position" };
+        private static readonly string[] FacingBasisLabels = { "View Plane", "Camera Position" };
+        private static readonly string[] UpReferenceOptions = { "world_gravity", "spawn_root", "custom" };
+        private static readonly string[] UpReferenceLabels = { "World Gravity", "Spawn Root", "Custom" };
+        private static readonly string[] RollSnapModeOptions = { "none", "quarter_turns", "screen_orientation" };
+        private static readonly string[] RollSnapModeLabels = { "None", "Quarter Turns", "Screen Orientation" };
+        private static readonly string[] ChildOrientationModeOptions = { "inherit", "screen_up", "world_up" };
+        private static readonly string[] ChildOrientationModeLabels = { "Inherit", "Screen Up", "World Up" };
+        private static readonly string[] BadgeCornerModeOptions = { "inherit", "screen_fixed" };
+        private static readonly string[] BadgeCornerModeLabels = { "Inherit", "Screen Fixed" };
+        private static readonly string[] ClusterOrientationModeOptions = { "inherit", "screen_aligned", "world_up", "yaw_only", "none" };
+        private static readonly string[] ClusterOrientationModeLabels = { "Inherit", "Screen Aligned", "World Up", "Yaw Only", "None" };
+        private static readonly string[] OrientationUpdateModeOptions = { "every_frame", "interval", "on_camera_delta" };
+        private static readonly string[] OrientationUpdateModeLabels = { "Every Frame", "Interval", "On Camera Delta" };
+        // Hierarchy Levels table's per-level override column (section 4.3): "" = inherit the wall setting.
+        private static readonly string[] OrientationOverrideOptions = { "", "screen_aligned", "world_up", "yaw_only", "wall_fixed", "none" };
+        private static readonly string[] OrientationOverrideLabels = { "Inherit", "Screen Aligned", "World Up", "Yaw Only", "Wall Fixed", "None" };
+
+        private static readonly string MarkerOrientationModeHelp = "How the marker root is rotated. Screen Aligned (default): always parallel to the camera's near plane, never foreshortens, maximum legibility. World Up: faces the viewer but stays upright in the real world, so turning the phone does not spin it. Yaw Only: classic cylindrical billboard, rotates about the up axis only - foreshortens when looking steeply up/down. Wall Fixed: painted flat onto the wall surface using the POI's authored rotation. None: no rotation applied beyond the parent's.";
+        private static readonly string FacingBasisHelp = "How the marker's forward direction is chosen (Screen Aligned / World Up only). View Plane (default): every marker parallel to the camera's near plane, no perspective skew anywhere on screen. Camera Position: each marker's forward points away from the camera individually, which reads as more physical for large markers but introduces slight skew off-centre.";
+        private static readonly string UpReferenceHelp = "The 'up' direction used by World Up and Yaw Only. World Gravity (default): real-world up, no gyroscope needed since AR world space is already gravity-aligned. Spawn Root: the wall's own placement anchor up - use when the map frame is not gravity-aligned. Custom: an authored vector below.";
+        private static readonly string CustomUpHelp = "The custom up-reference vector, used only when Up Reference is set to Custom.";
+        private static readonly string RollSnapModeHelp = "Conditions the marker's measured roll before it is applied. None (default): continuous, unsnapped roll. Quarter Turns: snaps the measured roll to the nearest 90 degrees so a hand-held tilt never leaves a permanently skewed label. Screen Orientation: reads the OS's committed screen orientation instead of measured roll - steadier once the device has settled, but does nothing while the app is orientation-locked.";
+        private static readonly string RollSnapHysteresisHelp = "Degrees of deadband around a roll-snap boundary, so a tilt sitting right at the boundary cannot flicker between the two nearest snap values every frame.";
+        private static readonly string ClampPitchHelp = "Stops a marker tipping fully edge-on when a visitor looks steeply up or down a tall wall.";
+        private static readonly string MaxPitchHelp = "The pitch angle, in degrees, beyond which Clamp Pitch holds the marker instead of following the camera further.";
+        private static readonly string RotationSmoothingHelp = "Seconds of exponential damping applied against AR pose jitter. 0 (default) applies the resolved rotation instantly, with no smoothing.";
+        private static readonly string LabelOrientationHelp = "Independent orientation for the Label, applied as a pure Z counter-rotation on top of the root. Inherit (default): the label rotates rigidly with the root. Screen Up / World Up: the label's own up stays aligned to that basis regardless of the root's orientation - this is how 'marker faces the camera, label always reads upright' is achieved without moving the root.";
+        private static readonly string BadgeOrientationHelp = "Same as Label Orientation, but for the Badge.";
+        private static readonly string BadgeCornerModeHelp = "Only meaningful when Badge Orientation is not Inherit. Screen Fixed re-rotates the badge's fixed corner offset by the root's own roll, so the badge holds its screen corner as the device rotates instead of drifting to a different corner.";
+        private static readonly string ClusterOrientationModeHelp = "Orientation mode used by cluster aggregate markers. Inherit (default): same mode as the wall's Marker Orientation above. Any other value overrides it for clusters only - useful when individual markers and their aggregates should behave differently.";
+        private static readonly string OrientationUpdateModeHelp = "Cost control for how often orientation is re-resolved. Every Frame (default): always up to date, highest cost. Interval: re-resolves at most every Update Interval seconds. On Camera Delta: re-resolves only once the camera has rotated past Camera Delta degrees since the last resolve.";
+        private static readonly string OrientationUpdateIntervalHelp = "Seconds between orientation re-resolves, used only when Update Mode is Interval.";
+        private static readonly string OrientationCameraDeltaHelp = "Degrees the camera must rotate before orientation re-resolves, used only when Update Mode is On Camera Delta.";
+        private static readonly string EditModePreviewHelp = "Shows what World Up / Yaw Only will look like directly in the Scene view, without entering Play Mode. Smoothing and Update Mode are ignored in preview since there is no per-frame tick to smooth over.";
+
         // --- Search & Filter editor constants (Block 5) ---
         // Search mode dropdown (inert values flagged by ValidateSearchEnumFields).
         private static readonly string[] SearchModeOptions = { "dynamic", "explicit", "scoped", "faceted", "auto_complete" };
@@ -171,6 +210,7 @@ namespace TileStories.Editor
         private static readonly Color TabTextColor = Color.white;
         private static readonly Color SceneConfigSectionColor = new Color(0.45f, 0.55f, 0.85f);
         private static readonly Color MarkerSectionColor = new Color(0.30f, 0.80f, 0.40f);
+        private static readonly Color OrientationSectionColor = new Color(0.50f, 0.50f, 0.95f);
         private static readonly Color BadgeSectionColor = new Color(0.95f, 0.60f, 0.20f);
         private static readonly Color OutlineSectionColor = new Color(0.60f, 0.35f, 0.90f);
         private static readonly Color EffectsSectionColor = new Color(0.20f, 0.65f, 0.90f);

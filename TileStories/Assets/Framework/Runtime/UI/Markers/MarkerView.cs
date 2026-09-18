@@ -546,10 +546,15 @@ namespace TileStories
         };
 
         // Shift this marker's label by screenOffsetPx (screen-space pixels) from its
-        // layout-time base position (§4). Pure, frame-stable conversion: MarkerBillboard
-        // copies the camera's rotation exactly every LateUpdate, so the root's local X/Y
-        // axes ARE screen X/Y by construction -- converting screenOffsetPx to a local-space
-        // delta via distance+FOV (MarkerLayout.ScreenPixelsToWorld) and writing it as an
+        // layout-time base position (§4). Pure, frame-stable conversion: for
+        // marker_orientation_mode == screen_aligned (the default) the root's local X/Y
+        // axes ARE screen X/Y by construction, so no roll compensation is needed there.
+        // For world_up / yaw_only / wall_fixed the root can be rolled relative to the
+        // screen, so the world-space offset is rotated by -rootRollDeg before becoming a
+        // local-space delta (_2.1_Marker_Orientation.md Block 5) -- this reduces to the
+        // original zero-roll behaviour exactly when the root is screen-aligned, since
+        // rootRollDeg is 0 there. Converting screenOffsetPx to a local-space delta via
+        // distance+FOV (MarkerLayout.ScreenPixelsToWorld) and writing it as an
         // anchoredPosition offset needs no camera-basis reprojection, and critically, no
         // dependency on the root's rotation at call time. A world<->screen<->world round-trip
         // (an earlier revision of this method) bakes the root's CURRENT rotation into the
@@ -577,6 +582,14 @@ namespace TileStories
             // small but consistent pixel-conversion error growing with distance from center.
             float depthM = Vector3.Dot(transform.position - cam.transform.position, cam.transform.forward);
             Vector2 worldOffset = MarkerLayout.ScreenPixelsToWorld(screenOffsetPx, depthM, cam);
+
+            // Compensate for the root's roll relative to the screen (_2.1_Marker_Orientation.md
+            // Block 5). rootRollDeg is 0 whenever the root is screen-aligned (the default and
+            // the only mode this method shipped against before Block 5), so this is a no-op
+            // there and only takes effect for world_up / yaw_only / wall_fixed.
+            Vector3 screenUpWorld = MarkerOrientationResolver.ScreenUpWorld(cam);
+            float rootRollDeg = MarkerOrientationResolver.RootRollDeg(transform.rotation, screenUpWorld);
+            worldOffset = MarkerOrientationResolver.Rotate2D(worldOffset, -rootRollDeg);
 
             // The label's anchoredPosition is expressed in this marker root's LOCAL space,
             // which is not guaranteed to be unscaled: MarkerRevealEffect animates this exact

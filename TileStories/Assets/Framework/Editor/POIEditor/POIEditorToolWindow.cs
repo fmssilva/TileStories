@@ -113,7 +113,13 @@ namespace TileStories.Editor
             // regardless of verified state. Runs in OnSceneGUI -- outside the window's
             // DrawConfigMutationScope -- so it never feeds back through the scope's JSON
             // diff (which would spam undo history and refresh the rig on every repaint).
-            if (SyncPoiRotationFromScene(poi, target.localRotation.eulerAngles))
+            // Skipped while Edit-Mode orientation preview is active (_2.1_Marker_Orientation.md
+            // section 14): the preview writes localRotation itself every repaint, and a
+            // Scene-view camera orbit drag is also a MouseDrag event, so without this guard
+            // the previewed (not authored) rotation would get silently captured as if the
+            // developer had rotated the marker by hand.
+            bool previewActive = _config.orientation_settings?.edit_mode_preview_enabled == true;
+            if (!previewActive && SyncPoiRotationFromScene(poi, target.localRotation.eulerAngles))
             {
                 _hasUnsavedChanges = true;
                 Repaint();
@@ -307,6 +313,8 @@ namespace TileStories.Editor
         [SerializeField] private bool _showTopConfig = true;
 
         [SerializeField] private bool _showGlobalMarker = true;
+        // Block 6 (_2.1_Marker_Orientation.md): Orientation editor foldout, between Marker and Badge.
+        [SerializeField] private bool _showGlobalOrientation = true;
         [SerializeField] private bool _showGlobalBadge = true;
         [SerializeField] private bool _showGlobalOutline = true;
         [SerializeField] private bool _showGlobalHierarchy = true;
@@ -348,11 +356,14 @@ namespace TileStories.Editor
         {
             SceneView.duringSceneGui -= HandleSceneGui;
             SceneView.duringSceneGui += HandleSceneGui;
+            SceneView.duringSceneGui -= HandleOrientationPreviewSceneGui;
+            SceneView.duringSceneGui += HandleOrientationPreviewSceneGui;
             EnsureDefaultIconLibraryLoaded();
         }
 
         private void OnDisable()
         {
+            SceneView.duringSceneGui -= HandleOrientationPreviewSceneGui;
         }
 
         private void OnGUI()

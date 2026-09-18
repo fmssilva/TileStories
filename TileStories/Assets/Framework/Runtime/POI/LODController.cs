@@ -65,6 +65,13 @@ namespace TileStories
         private DisplacementSettings _dispSettings;
         private readonly Dictionary<string, DisplacementStabilityState> _displacementStability = new();
 
+        // Orientation settings (_2.1_Marker_Orientation.md section 13), resolved lazily
+        // alongside LOD/displacement. _effectiveClusterOrientation is computed once when
+        // the wall settings reference changes, not per spawn -- cluster views are pooled
+        // and re-used, so recomputing per-spawn would be wasted work on every reuse.
+        private OrientationSettings _orientationSettings;
+        private OrientationSettings _effectiveClusterOrientation;
+
         private void Awake()
         {
             if (_wallSession == null)
@@ -119,6 +126,19 @@ namespace TileStories
             {
                 _dispSettings = dispSettings;
                 _displacementStability.Clear();
+            }
+
+            // Resolve orientation settings alongside LOD/displacement (section 13).
+            // Effective cluster settings are computed once here, not per spawn: when
+            // cluster_orientation_mode == "inherit" the wall settings are used unchanged;
+            // otherwise a single copy with marker_orientation_mode overridden.
+            var orientationSettings = _wallSession?.OrientationSettings;
+            if (orientationSettings != null && !ReferenceEquals(orientationSettings, _orientationSettings))
+            {
+                _orientationSettings = orientationSettings;
+                _effectiveClusterOrientation = _orientationSettings.cluster_orientation_mode == "inherit"
+                    ? _orientationSettings
+                    : new OrientationSettings(_orientationSettings) { marker_orientation_mode = _orientationSettings.cluster_orientation_mode };
             }
         }
 
@@ -531,6 +551,12 @@ namespace TileStories
                     var go = Instantiate(_clusterPrefab, centroid, Quaternion.identity, spawnRoot);
                     view = go.GetComponent<MarkerClusterView>();
                     if (view == null) continue; // prefab contract violation
+
+                    // New cluster views only -- pooled/reused views already have theirs
+                    // configured and cluster orientation settings do not change per-cycle.
+                    var clusterBillboard = go.GetComponent<MarkerBillboard>();
+                    if (clusterBillboard != null && _effectiveClusterOrientation != null)
+                        clusterBillboard.Configure(_effectiveClusterOrientation, "", spawnRoot);
                 }
                 else
                     matchedViews.Add(view);

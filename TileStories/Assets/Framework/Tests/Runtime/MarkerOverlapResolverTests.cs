@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -52,16 +53,27 @@ namespace TileStories.Tests
             // Wait one frame so LateUpdate executes
             yield return null;
 
-            // Assert: marker's world rotation should equal camera's world rotation
-            // (no additional offset since we removed the 180-degree yaw to prevent text mirroring)
-            var expectedRotation = cam.transform.rotation;
+            // Assert: marker faces the camera with SCREEN up, not camera-transform up
+            // (_2.1_Marker_Orientation.md Block 1 - this deliberately supersedes the old
+            // "matches camera rotation exactly" contract, which broke under device roll).
+            var expectedRotation = Quaternion.LookRotation(cam.transform.forward, MarkerOrientationResolver.ScreenUpWorld(cam));
             float angleDiff = Quaternion.Angle(markerGO.transform.rotation, expectedRotation);
             Assert.Less(angleDiff, 0.1f,
-                $"Marker rotation should match camera rotation (no offset). Angle difference: {angleDiff:F3} degrees.");
+                $"Marker rotation should face the camera with screen-up as its basis. Angle difference: {angleDiff:F3} degrees.");
 
             // Cleanup
             Object.Destroy(markerGO);
             Object.Destroy(camGO);
+        }
+
+        [Test]
+        public void MarkerBillboard_HasNoUpdateMethod_OnlyLateUpdate()
+        {
+            // Structural guarantee: rotation is written exactly once per frame, in
+            // LateUpdate, since the camera's final pose for the frame is only known
+            // after every Update has run (_2.1_Marker_Orientation.md section 4.4).
+            var updateMethod = typeof(MarkerBillboard).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.IsNull(updateMethod, "MarkerBillboard must not define Update() - rotation is written only in LateUpdate.");
         }
     }
 }

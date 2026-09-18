@@ -438,11 +438,17 @@ internal enum ReloadGuardChoice
                 // Capture the marker's full edit-scene rotation (pitch/yaw/roll) so the
                 // developer's scene-rotate tool changes persist into config on Save. The
                 // Y axis maps to the legacy editor_rotation_deg (yaw); X/Z are the new
-                // pitch/roll fields added alongside it.
-                Vector3 euler = markerTransform.localRotation.eulerAngles;
-                poi.editor_rotation_x_deg = PoiRotationResolver.NormalizeAngleDeg(euler.x);
-                poi.editor_rotation_deg = PoiRotationResolver.NormalizeAngleDeg(euler.y);
-                poi.editor_rotation_z_deg = PoiRotationResolver.NormalizeAngleDeg(euler.z);
+                // pitch/roll fields added alongside it. Skipped while Edit-Mode orientation
+                // preview is active (_2.1_Marker_Orientation.md section 14) -- the rig's
+                // current localRotation is the PREVIEW, not an authored edit, and capturing
+                // it would silently corrupt the stored angles.
+                if (_config.orientation_settings?.edit_mode_preview_enabled != true)
+                {
+                    Vector3 euler = markerTransform.localRotation.eulerAngles;
+                    poi.editor_rotation_x_deg = PoiRotationResolver.NormalizeAngleDeg(euler.x);
+                    poi.editor_rotation_deg = PoiRotationResolver.NormalizeAngleDeg(euler.y);
+                    poi.editor_rotation_z_deg = PoiRotationResolver.NormalizeAngleDeg(euler.z);
+                }
 
                 captured++;
             }
@@ -450,6 +456,77 @@ internal enum ReloadGuardChoice
             _hasUnsavedChanges = true;
             Debug.Log($"[POIEditor] {captured} positions synced (skipped {skipped} missing scene objects).");
             Repaint();
+        }
+
+        // Block 7 (_2.1_Marker_Orientation.md section 14): Edit-Mode orientation preview.
+        // True only while a preview tick has actually run this session; used to know
+        // whether the rig's rotations need restoring when the toggle switches off.
+        private bool _orientationPreviewWasActive;
+
+        private void HandleOrientationPreviewSceneGui(SceneView sceneView)
+        {
+            bool active = _config?.orientation_settings?.edit_mode_preview_enabled == true;
+            if (!active)
+            {
+                if (_orientationPreviewWasActive)
+                    RestoreRigRotationsFromConfig();
+                _orientationPreviewWasActive = false;
+                return;
+            }
+
+            if (sceneView == null || sceneView.camera == null) return;
+            ApplyOrientationPreview(sceneView.camera);
+            _orientationPreviewWasActive = true;
+            sceneView.Repaint();
+        }
+
+        // The single orientation evaluation per repaint, decoupled from SceneView so it
+        // is directly testable (mirrors SyncPoiRotationFromScene's own "pure logic,
+        // Tier-0 testable" split). Calls the SAME MarkerOrientationResolver the Play-Mode
+        // path (MarkerBillboard.LateUpdate) uses -- never a parallel implementation.
+        // MonoBehaviour.LateUpdate does not tick in Edit Mode, which is why this exists
+        // at all rather than just letting the rig's MarkerBillboard components run.
+        internal void ApplyOrientationPreview(Camera previewCamera)
+        {
+            Transform rig = GetExistingRig();
+            if (rig == null || _config?.pois == null || previewCamera == null) return;
+
+            var settings = _config.orientation_settings ?? new OrientationSettings();
+            Vector3 screenUp = MarkerOrientationResolver.ScreenUpWorld(previewCamera);
+            Vector3 upReference = MarkerOrientationResolver.ResolveUpReference(settings, rig);
+            Quaternion parentRotation = rig.rotation;
+
+            foreach (var poi in _config.pois)
+            {
+                var child = rig.Find(poi.id);
+                if (child == null) continue;
+
+                string modeOverride = MarkerHierarchyResolver.ResolveOrientationOverride(poi.hierarchy_level_key);
+                Quaternion authored = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
+
+                var result = MarkerOrientationResolver.ResolveRootRotation(
+                    settings, modeOverride, child.position, previewCamera.transform.position, previewCamera.transform.forward,
+                    screenUp, upReference, parentRotation, authored, 0f, ScreenOrientationSource.Current);
+
+                if (result.Resolved)
+                    child.rotation = result.Rotation;
+            }
+        }
+
+        // Restores every rig child's localRotation from the stored config angles.
+        // Called when preview switches off, so a preview session never leaves the rig
+        // showing a rotation that was never actually authored.
+        internal void RestoreRigRotationsFromConfig()
+        {
+            Transform rig = GetExistingRig();
+            if (rig == null || _config?.pois == null) return;
+
+            foreach (var poi in _config.pois)
+            {
+                var child = rig.Find(poi.id);
+                if (child == null) continue;
+                child.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
+            }
         }
 
         private void SelectRigObjects()
