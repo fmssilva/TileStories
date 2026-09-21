@@ -9,15 +9,15 @@ namespace TileStories.Editor
     public static class FacingEditAdvice
     {
         public const string AlwaysFacingCameraMessage =
-            "Facing is Always Facing Camera and Edit-Mode Preview is ON (Global Scene > Orientation): " +
+            "Facing is Always Facing Camera and Scene-Mode Preview is ON (Global Scene > Orientation): " +
             "the marker always faces the camera, so changing the X/Y/Z facing shows no change here.";
 
         public const string YawOnlyMessage =
-            "Facing is Y Rotation Only and Edit-Mode Preview is ON (Global Scene > Orientation): " +
+            "Facing is Y Rotation Only and Scene-Mode Preview is ON (Global Scene > Orientation): " +
             "Y is replaced by the live camera yaw, so changing the Y facing shows no change here. X and Z do apply.";
 
         public const string GizmoOverriddenMessage =
-            "Facing is Y Rotation Only and Edit-Mode Preview is ON (Global Scene > Orientation): " +
+            "Facing is Y Rotation Only and Scene-Mode Preview is ON (Global Scene > Orientation): " +
             "the preview overrides the Rotate gizmo. Use the X/Z Facing sliders, or turn the preview off to rotate by hand.";
 
         // The mode that really applies to a POI: its hierarchy level's override, else the wall's.

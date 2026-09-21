@@ -1,5 +1,6 @@
 using System.Reflection;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 using TileStories;
 using TileStories.Editor;
@@ -173,6 +174,50 @@ namespace TileStories.Tests
                 "wall_fixed Edit-Mode preview must equal ResolveRootRotation's own result for the same inputs - Edit Mode and Play Mode agree exactly here.");
             Assert.Less(Quaternion.Angle(_childA.transform.rotation, authoredA), 0.01f,
                 "wall_fixed must reproduce the authored rotation exactly (parentRotation is identity here).");
+        }
+
+        // Real POI_Marker prefab under a 45-degree rolled Scene camera: the root stays World Up,
+        // so a Label set to Screen Up must counter-rotate until ITS up matches the screen's up.
+        // Badge stays Inherit and must not move. Turning the preview off must undo all of it.
+        [Test]
+        public void ApplyOrientationPreview_TicksLabelAndBadge_AndRestoreResetsThem()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab");
+            Assert.IsNotNull(prefab, "The real marker prefab must load.");
+            Object.DestroyImmediate(_childA);
+            Object.DestroyImmediate(_childB);
+            var marker = (GameObject)PrefabUtility.InstantiatePrefab(prefab, _rigGO.transform);
+            marker.name = "poi_a";
+            marker.transform.localPosition = new Vector3(2f, 0f, 0f);
+            Transform label = marker.transform.Find("Label");
+            Transform badge = marker.transform.Find("Badge");
+            Assert.IsNotNull(label, "prefab must have a Label child");
+            Assert.IsNotNull(badge, "prefab must have a Badge child");
+
+            var config = BuildConfig(out var poiA, out _);
+            config.pois.RemoveAll(p => p.id != "poi_a");
+            config.orientation_settings.label_vertical_alignment_mode = "screen_up";
+            config.orientation_settings.badge_vertical_alignment_mode = "inherit";
+            SetConfig(_window, config);
+
+            var cam = _camGO.GetComponent<Camera>();
+            cam.transform.position = new Vector3(0f, 1f, -6f);
+            cam.transform.rotation = Quaternion.Euler(0f, 0f, 45f);
+            Vector3 screenUp = MarkerOrientationResolver.ScreenUpWorld(cam);
+
+            _window.ApplyOrientationPreview(cam);
+
+            Assert.Greater(Vector3.Angle(marker.transform.up, screenUp), 30f,
+                "precondition: a World Up root must NOT already match the rolled screen up, or this test proves nothing.");
+            Assert.Less(Vector3.Angle(label.up, screenUp), 1f,
+                "Label = Screen Up must end up aligned with the screen's up in the preview.");
+            Assert.Less(Quaternion.Angle(badge.localRotation, Quaternion.identity), 0.01f,
+                "Badge = Inherit must not be rotated by the preview.");
+
+            _window.RestoreRigRotationsFromConfig();
+
+            Assert.Less(Quaternion.Angle(label.localRotation, Quaternion.identity), 0.01f,
+                "turning the preview off must put the Label back to its authored (identity) rotation.");
         }
     }
 }

@@ -419,11 +419,11 @@
             "editor_rotation_x_deg": 0.0,
             "editor_rotation_z_deg": 0.0,
             "position": {
-                "x": -2.0,
-                "y": 0.0,
-                "z": 0.30000001192092898
+                "x": -2.242000102996826,
+                "y": 0.16369999945163728,
+                "z": 0.2750000059604645
             },
-            "position_verified": true,
+            "position_verified": false,
             "summary": "POI_painting_military",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -444,11 +444,11 @@
             "editor_rotation_x_deg": 0.0,
             "editor_rotation_z_deg": 0.0,
             "position": {
-                "x": -2.0,
-                "y": 0.30000001192092898,
-                "z": 0.0
+                "x": -2.1640000343322756,
+                "y": 0.20399999618530274,
+                "z": -0.7289999723434448
             },
-            "position_verified": true,
+            "position_verified": false,
             "summary": "POI_painting_residential",
             "search_keywords": [],
             "search_keyword_fields": [],
@@ -846,12 +846,12 @@
         "vertical_alignment_mode": "world_up",
         "label_vertical_alignment_mode": "screen_up",
         "badge_vertical_alignment_mode": "screen_up",
-        "cluster_vertical_alignment_mode": "world_up",
+        "cluster_vertical_alignment_mode": "screen_up",
         "up_reference": "world_gravity",
         "custom_up_x": 0.0,
         "custom_up_y": 1.0,
         "custom_up_z": 0.0,
-        "facing_mode": "always_facing_camera",
+        "facing_mode": "yaw_only",
         "facing_basis": "view_plane",
         "update_mode": "every_frame",
         "update_interval_s": 0.05000000074505806,

@@ -255,7 +255,7 @@ namespace TileStories.Tests
             Assert.AreEqual(FacingEditAdvice.AlwaysFacingCameraMessage, FacingEditAdvice.GetSliderWarning(s, null, false, false, true));
             Assert.AreEqual(FacingEditAdvice.AlwaysFacingCameraMessage, FacingEditAdvice.GetGizmoWarning(s, null));
             StringAssert.Contains("Always Facing Camera", FacingEditAdvice.AlwaysFacingCameraMessage);
-            StringAssert.Contains("Edit-Mode Preview", FacingEditAdvice.AlwaysFacingCameraMessage);
+            StringAssert.Contains("Scene-Mode Preview", FacingEditAdvice.AlwaysFacingCameraMessage);
         }
 
         [Test]

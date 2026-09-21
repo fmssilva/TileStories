@@ -518,6 +518,24 @@ internal enum ReloadGuardChoice
 
                 if (result.Resolved)
                     child.rotation = result.Rotation;
+
+                TickPreviewChildren(child, settings, screenUp, upReference);
+            }
+        }
+
+        // Label and Badge counter-rotate independently of the root (MarkerChildOrientation).
+        // MarkerBillboard.Configure is NOT used here: it snapshots the root's localRotation as
+        // "authored", and under preview that rotation is the preview itself. Configure only the
+        // children, then Tick them against the root's final rotation, like MarkerBillboard does.
+        private static void TickPreviewChildren(Transform marker, OrientationSettings settings, Vector3 screenUp, Vector3 upReference)
+        {
+            foreach (var childOrientation in marker.GetComponentsInChildren<MarkerChildOrientation>(true))
+            {
+                string mode = childOrientation.gameObject.name == "Label" ? settings.label_vertical_alignment_mode
+                    : childOrientation.gameObject.name == "Badge" ? settings.badge_vertical_alignment_mode
+                    : "inherit";
+                childOrientation.Configure(mode);
+                childOrientation.Tick(marker.rotation, screenUp, upReference);
             }
         }
 
@@ -534,6 +552,9 @@ internal enum ReloadGuardChoice
                 var child = rig.Find(poi.id);
                 if (child == null) continue;
                 child.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
+
+                // "inherit" resolves to identity, so this puts Label/Badge back exactly as authored.
+                TickPreviewChildren(child, new OrientationSettings(), Vector3.up, Vector3.up);
             }
         }
 

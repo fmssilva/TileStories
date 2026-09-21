@@ -655,7 +655,7 @@ namespace TileStories
         public float camera_delta_deg  = 0.5f;
 
         // --- Test ---
-        public bool edit_mode_preview_enabled = false;
+        public bool edit_mode_preview_enabled = true;
 
         // Parameterless constructor (required because the copy constructor below
         // would otherwise suppress the compiler-generated default).

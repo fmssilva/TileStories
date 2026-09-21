@@ -76,7 +76,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("always_facing_camera", loaded.orientation_settings.facing_mode);
             Assert.AreEqual("view_plane", loaded.orientation_settings.facing_basis);
             Assert.AreEqual("every_frame", loaded.orientation_settings.update_mode);
-            Assert.AreEqual(false, loaded.orientation_settings.edit_mode_preview_enabled);
+            Assert.AreEqual(true, loaded.orientation_settings.edit_mode_preview_enabled, "Scene-Mode Preview defaults to ON");
         }
 
         [Test]
@@ -114,7 +114,7 @@ namespace TileStories.Editor.Tests
             Assert.IsNotNull(ot.GetField("update_mode"), "OrientationSettings.update_mode must exist for the Update Mode popup");
             Assert.IsNotNull(ot.GetField("update_interval_s"), "OrientationSettings.update_interval_s must exist for the Update Interval field");
             Assert.IsNotNull(ot.GetField("camera_delta_deg"), "OrientationSettings.camera_delta_deg must exist for the Camera Delta field");
-            Assert.IsNotNull(ot.GetField("edit_mode_preview_enabled"), "OrientationSettings.edit_mode_preview_enabled must exist for the Edit-Mode Preview toggle");
+            Assert.IsNotNull(ot.GetField("edit_mode_preview_enabled"), "OrientationSettings.edit_mode_preview_enabled must exist for the Scene-Mode Preview toggle");
 
             // v4 deletions: these fields must NOT exist (dead-code removal, not a rename miss).
             Assert.IsNull(ot.GetField("roll_snap_mode"), "roll_snap_mode was deliberately removed in v4");
@@ -126,6 +126,66 @@ namespace TileStories.Editor.Tests
                 "HierarchyLevelEntry.facing_mode_override must exist for the Hierarchy Levels table's Facing column");
             Assert.IsNull(typeof(HierarchyLevelEntry).GetField("orientation_mode_override"),
                 "orientation_mode_override was renamed to facing_mode_override in v4");
+        }
+
+        // The three Test guides are the developer's only test script, so they must not drift
+        // from the real fields: each one has to exist, be ASCII, have one block per Orientation
+        // sub-section, name every Facing option label the popups really offer (read from the same
+        // arrays the popups use), and start collapsed.
+        [Test]
+        public void TestGuides_ExistAsciiCoverEverySubSection_AndStartCollapsed()
+        {
+            var t = typeof(POIEditorToolWindow);
+            const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Static;
+
+            var facingTerms = new System.Collections.Generic.List<string> { "Hierarchy Levels" };
+            foreach (string arrayName in new[] { "FacingModeLabels", "FacingBasisLabels" })
+            {
+                var labels = (string[])t.GetField(arrayName, flags)?.GetValue(null);
+                Assert.IsNotNull(labels, arrayName + " must exist on the editor window");
+                facingTerms.AddRange(labels);
+            }
+            var verticalLabels = (string[])t.GetField("VerticalAlignmentModeLabels", flags)?.GetValue(null);
+            Assert.IsNotNull(verticalLabels, "VerticalAlignmentModeLabels must exist on the editor window");
+
+            foreach (string guideName in new[] { "OrientationSceneTestGuide", "OrientationPlaymodeTestGuide", "OrientationDeviceTestGuide" })
+            {
+                var guide = (string)t.GetField(guideName, flags)?.GetValue(null);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(guide), guideName + " must exist and not be empty");
+                foreach (char c in guide)
+                    Assert.IsTrue(c == '\n' || (c >= ' ' && c <= '~'), guideName + " must be ASCII only, found char code " + (int)c);
+
+                // One block per Orientation sub-section, not per field.
+                StringAssert.Contains("VERTICAL ALIGNMENT", guide, guideName);
+                StringAssert.Contains("FACING OPTIONS", guide, guideName);
+                StringAssert.Contains("UPDATE COST", guide, guideName);
+                foreach (string term in facingTerms)
+                    StringAssert.Contains(term, guide, guideName + " must mention '" + term + "'");
+
+                // Play and Device really test vertical alignment; Scene must say it cannot.
+                if (guideName == "OrientationSceneTestGuide")
+                {
+                    StringAssert.Contains("Not possible in Scene test", guide, guideName);
+                    StringAssert.Contains("Scene-Mode Preview", guide, guideName);
+                }
+                else
+                {
+                    foreach (string label in verticalLabels)
+                        StringAssert.Contains(label, guide, guideName + " must mention '" + label + "'");
+                }
+            }
+
+            var window = ScriptableObject.CreateInstance<POIEditorToolWindow>();
+            try
+            {
+                foreach (string foldoutField in new[] { "_showOrientationSceneTestGuide", "_showOrientationPlaymodeTestGuide", "_showOrientationDeviceTestGuide" })
+                {
+                    var f = t.GetField(foldoutField, BindingFlags.NonPublic | BindingFlags.Instance);
+                    Assert.IsNotNull(f, foldoutField + " must exist");
+                    Assert.IsFalse((bool)f.GetValue(window), foldoutField + " must default to collapsed");
+                }
+            }
+            finally { UnityEngine.Object.DestroyImmediate(window); }
         }
     }
 }

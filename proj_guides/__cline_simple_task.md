@@ -1,43 +1,19 @@
 
-# `Git`
-# `DELETE MODE && __CURR_PLAN_TRACKER!!!`
-# `Unity MCP Connected??`
+# 1. `Git`
+# 2. `DELETE MODE && __CURR_PLAN_TRACKER!!!`
+# 3. `Unity MCP Connected??`
+# 4. `npx adb-qr-connect`
 
 
 # TODO
 » fazer label board in ui toolit pra mostrar automatico primeira vez que corremo app e dp usar pode escolher fechar e escolher nao voltar a motrar... 
 
-# `Marker Deesign`
-I want to verify everything we have done in the domain of the marker design system.
 
-Start by reading these files fully and check the necessary and respective code files in the prooject to confirm how everything is implemented currently: 
-- C:\Users\franc\Desktop\TileStories\proj_guides\_2.2_Marker_Design.md 
-- C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
-
-then write in this file the normal user flow of actions in terms of this domain: 
-C:\Users\franc\Desktop\TileStories\proj_guides\__curr_plan_tracker.md
-
-example the user starts by creating a new POI, and what are the default fields that are created? just position or someething else? 
-and then what are the fields that should be edited and in some specifci order or not really?? and how to save things, or undo, or redo...?? 
-
-then tell me if there is any features in code that is not exposed in terms of the editor tab interface and maybe should be...?? so we have clear UI to tests "by hand" if everything works... and if you can actually call the unity mcp and confirm the feature is well exposed in terms of UI, ok, but if you can't confirm, and so for example we might have some edit button or some table colum but you can't really confirm 100% sure if that feature is well exposed, so tell me also all those features that are in doubt in terms of UI exposure. 
-
-then tell me if there is any feature in the guide files that is still missing to be implemented. 
-
-then add to the begining of the file a section "ORDERED TODO", basically a practical reasoning of your findings and your own analysis of what things should we do now? What is the order of things to do to finish this domain? should we implement some missing feature, should we correct or clean or refactor or run more tests to confirm some exiting feature, should we just start testing everything by hand basically following the normal "user flow of tasks"? you are the lead arhitect of this project, so what is the sequence of tasks that we should do now? Add that section to the begining of the file. 
-
-
-write all this with all important details BUT IN A CONCISE MANNER. I WANT TO BE ABLE TO READ IT FAST. SO ALL IMPORTANT DETAILS BUT AS CONCISE AS POSSIBLE IN A NATURAL LANGUAGE LIKE A CODER GUY TALKING TO ANOTHER CODER GUY. 
 
 
 # future task?? 
 A *stable `key` + `label`* split for categories (like `badge_categories` already has) is argitchitecturally "cleaner" but is a __schema + every-consumer change__ (schema, CategoryPalette, search/filter/minimap/results, editor dropdowns, tests, config backfill) — big and risky for one wall today. The propagated-string approach keeps the current schema, fixes your exact failure, matches the existing POI-rename pattern, and is genuinely small. If a second wall later needs real display-name independence, the `key`/`label` migration can happen then (badge is the template
 
-
-# `Change Task - No Backward compatibility - No dead code`
-So do a deep analyis of all these reorganization ideas i said now. Confirm if they are good ideas and more simple and clear and easy to use and understand... AND confirm if we can implement them in an easy way with simple clean and wwell organized code... AND so confirm if we do it in a clean way and changing everything necessary in the files etc... because this is the first vrsion of the project, so lets not have backward compatibility concerns, for example trying to keep the plan described in the guide proj_guides\_2.1_Marker_Orientation.md... lets just think the best way to implement things in a clean way, and if needed we implement everything new and we change things as we want to make them clear and well organized... and then also make sure we don't leave any deade code from the previous plan...
-
-so this is a big task... make a good plan before you act...
 
 
 
@@ -54,20 +30,25 @@ so this is a big task... make a good plan before you act...
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `and now:`
-in the orientation domain, lets now confirm that the global orintation setings about facing are well wired up with the spcific markers facing setings. 
-a) currently we have only a side bar for changing the y rotation. lets add also a side bar for the x and z rotation. AND lets syncroonize them with the normal unity rotation feature so they don't fight each other, and so we can also use the unity rotation feature normally and the sliders mve accordingly... and so we save these rotation degrees in memory... and when we click save we save them to the config json file... 
+## `And now: Lets confirm the whole "Effects" domain`
+I want to verify everything we have done in the domain of the marker design system.
 
-b) and about the "locking and usage of those rotations fields": currently we have the orientation to be freely changed even if the "verified" button is green/lcked. BUT we need to change that. Lets make the facing values and updates to also be allowed only if the verified button is not green. 
+a) Start by reading these files fully and check the necessary and respective code files in the prooject to confirm how everything is implemented currently: 
+- C:\Users\franc\Desktop\TileStories\proj_guides\_2.2_Marker_Design.md
+- C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
 
-c) and then lets add some notes in the info button explaining the whole facing  feature we have and logic and variablity according to the selected facing option in the global scene tab - orientation - facing field: if the option is camera facing - we doon't really care about these saved facing valuses; if the options is y only, so we care about the x,z rotation values because they will be used; if the option is wall glued so we care about all the 3 x,y,z values and so we must set them all well. BUT in terms of the sliders maybe we can make them all the same and don't really have "logic" ifs to impose these diffrent options "robusteness of facing values... lets just put the 3 sliders fr x,y,z facing values and the developer chooses as he wants. 
+b) then tell me the normal sequence of user flow of actions in this domain. Example: 
+b.1) The user starts by creating a new POI, and what are the default fields that are created and with which values? 
+b.2) And then what is a good sequence of "editing" of those fields, and where is the "lower level" we can test them? In the scene, in the playmode, in the device? 
+b.3) Is there some feature or functionality of this domain that we have in code and not exposed in a UI in the editor tab that maybe should be? Because the developer should be able to enable/disable or config, considering we are implementing a framework to allow the creation of apps for different scenarios? 
+b.4) Is there any feature or functionality in the guide files that is not implemented yet and should be? 
+b.5) the save, undo, redo things are all working corrected for all fiedls.. 
+b.6) Do we have already implemented an updated "Domain Manual Tests" sub component in the `effects domain component`? See in the ## 0. Guidelines of the proj_guides\_5.1_Editor_Tab.md how to do that. Is it all well implemented and tested and working well? 
+b.7) do we have good tests to confirm that each field configuration actually works well and has the expected outcomes? 
+b.8) in terms of code, any dead or duplucicated or bad organized code that we should improve according to the .clinerules? 
+b.9) any other detail to be aware of? 
 
-d) lets also use as default facing values, (0,0,0) if we are creating the first POI, and the rotation values of the POI we just "copied" when clicking the "+" icon. (similar to what we do already for the position values x,y,z)
-
-e) when we click in the scene in some concrete POI marker AND we start moving or rotating it (when we have these 2 conditions met), can we autmatic open the specific marker tab and we open that concrete POI sub component and we automatic scroll down there - so the developer sees right away the changes he is doing to the POI? is it simple to implement? (and then we already have some pop ups and warning messages in case the POI is "verified" to avoid accidental changes... and so those pop ups should also trigger now for the rotation editings... and so pay attention to it when you are doing tests - if a pop up appears confirm if you can click on it, and if not, so avoid tests that trigger those pop ups maybe??)
-
-
-
+c) If there is a lot of things to do, before you start implementing things, make a deep and complete and detailed plan to make sure things get clean and well organized and working well and well tested...
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
@@ -164,3 +145,9 @@ Act as a **Senior Staff Engineer** planning and implementing the whole plan, AND
 
 
 # ---
+
+# `Domain Tasks Change - No Backward compatibility - No dead code`
+So do a deep analyis of all these reorganization ideas i said now. Confirm if they are good ideas and more simple and clear and easy to use and understand... AND confirm if we can implement them in an easy way with simple clean and wwell organized code... AND so confirm if we do it in a clean way and changing everything necessary in the files etc... because this is the first vrsion of the project, so lets not have backward compatibility concerns, for example trying to keep the plan described in the guide proj_guides\_2.1_Marker_Orientation.md... lets just think the best way to implement things in a clean way, and if needed we implement everything new and we change things as we want to make them clear and well organized... and then also make sure we don't leave any deade code from the previous plan...
+
+so this is a big task... make a good plan before you act...
+

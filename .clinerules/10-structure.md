@@ -272,7 +272,7 @@ against disk on 2026-09-18.
         - MarkerSymbolTexturePostprocessor.cs  -- forces correct import settings on marker symbol textures
         - GlobalScene/  -- wall-wide settings sections
           - POIEditorToolWindow.GlobalScene.cs  -- section dispatch plus Marker, Badge, Outline, Effects and Hierarchy Levels (now also carries the per-level Facing override column, see _2.1 section 4.3)
-          - POIEditorToolWindow.Orientation.cs  -- Orientation section, 4 sub-foldouts: Vertical Alignment, Facing Options, Update Cost, Test (see _2.1 section 8)
+          - POIEditorToolWindow.Orientation.cs  -- Orientation section, 4 sub-foldouts: Vertical Alignment, Facing Options, Update Cost, Test (Scene-Mode Preview toggle + three collapsed guides: Scene, Playmode, Device; see _2.1 section 8)
           - POIEditorToolWindow.LodZoom.cs  -- LOD and Zoom sections, plus the four shared field-row helpers every section uses
           - POIEditorToolWindow.Displacement.cs  -- displacement algorithm, thresholds and leader-line settings
           - POIEditorToolWindow.SearchFilter.cs  -- search keyword fields and synonym groups
@@ -281,7 +281,7 @@ against disk on 2026-09-18.
           - POIEditorToolWindow.PositionTabs.cs  -- the Position foldout: three Facing X/Y/Z sliders (disabled while Verified), XYZ readout, Verified toggle
           - POIEditorToolWindow.MarkerSceneEdit.cs  -- selected-marker edit handling: facing sync from Scene view/Inspector, Verified lock on facing and position, auto-reveal of the POI's section
           - MarkerEditDetector.cs  -- pure tracker: did the selected marker's pose change since last seen, plus the gizmo-drag gesture check (drives the auto-reveal)
-          - FacingEditAdvice.cs  -- pure: which facing edits are invisible under Edit-Mode preview for the effective facing mode, and the Scene-view warning text for them
+          - FacingEditAdvice.cs  -- pure: which facing edits are invisible under Scene-Mode preview for the effective facing mode, and the Scene-view warning text for them
           - PoiFocusResolver.cs  -- pure math for framing a marker in the Scene view
           - PoiRenameKeys.cs  -- Enter/ESC commit handling for the rename field
           - PoiRotationResolver.cs  -- pure Facing X/Y/Z math: angles to quaternion, angle normalisation, IsSameOrientation (compare rotations as orientations, never euler triples)
@@ -339,8 +339,8 @@ against disk on 2026-09-18.
         - PoiFacingModesAndLifecycleTests.cs  -- per-mode/per-axis visibility on a real POI_Marker prefab under preview, preview warnings vs real pipeline, gizmo under preview, verify/unverify wiring, leaked scene-handler check, reveal incl. blocked edits
         - IdentityRenameResolverTests.cs, IdentityRenameCompositionTests.cs  -- rename rule and its composition across tables
         - HierarchyLevelKeyValidationTests.cs, HierarchyLevelSizeRangeTests.cs  -- config validation
-        - OrientationEditorRoundTripTests.cs  -- OrientationSettings JSON round-trip, no-block defaults, editor foldout field-existence, deleted-field absence checks (_2.1 section 7)
-        - OrientationEditModePreviewTests.cs  -- Edit-Mode orientation preview: non-destructive guarantee, on/off cycle byte-identical, CapturePositions guard, wall_fixed Edit/Play-Mode agreement (_2.1 section 9)
+        - OrientationEditorRoundTripTests.cs  -- OrientationSettings JSON round-trip, no-block defaults, editor foldout field-existence, deleted-field absence checks, test-guide contract (ASCII, every field and option named, collapsed by default) (_2.1 sections 7, 13)
+        - OrientationEditModePreviewTests.cs  -- Scene-Mode orientation preview: non-destructive guarantee, on/off cycle byte-identical, CapturePositions guard, wall_fixed Edit/Play-Mode agreement, Label/Badge tick and restore on a real POI_Marker (_2.1 section 9)
         - DefaultCategoryStylesTests.cs, DefaultBadgeCategoriesTests.cs, DefaultOutlineLevelsTests.cs  -- seeding defaults
         - POIEditorToolWriteBackTests.cs, POIEditorAddPoiTests.cs, POIEditorToolSearchRoundTripTests.cs  -- editor data flow; ReloadGuardChoiceTests.cs  -- pure dialog-result mappings (reload guards, rig safety) incl. Esc/X must cancel
         - POIEditorTableLayoutTests.cs, POIEditorAddButtonRowRenderTests.cs, POIEditorCoordinateRowRenderTests.cs, POIEditorColorGroupRenderTests.cs, POIEditorVisualHierarchyTests.cs, POIEditorWindowChromeTests.cs  -- real IMGUI geometry measurement

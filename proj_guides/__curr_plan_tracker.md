@@ -1,15 +1,14 @@
-# Facing sliders X/Y/Z + verified lock + auto-reveal (Orientation domain)
+# Current plan: Orientation > Test sub-section rework  (DONE 2026-09-21)
 
-Baseline (2026-09-18, before changes): EditMode 743 passed / 0 failed, PlayMode 80 passed / 0 failed.
-Final: EditMode 762 passed / 0 failed (+19 new), PlayMode 80 passed / 0 failed.
+Baseline (before changes): compile ok, EditMode 806/806, PlayMode 80/80.
+Final: zero error CS, Editor DLLs rebuilt, EditMode 808/808 (806 + 2 new), PlayMode 80/80.
 
-- [x] 1. PoiRotationResolver.IsSameOrientation; SyncPoiRotationFromScene compares orientation (not raw euler triples)
-- [x] 2. New partial POIEditorToolWindow.MarkerSceneEdit.cs: ShouldBlockVerifiedRotationChange, ProcessMarkerTransformEdit, RevealPoiInSpecificMarkerTab
-- [x] 3. New MarkerEditDetector.cs (pure "did this marker's pose change" tracker)
-- [x] 4. HandleSceneGui + OnInspectorUpdate rewired through the new methods (rotation lock, inspector sync, reveal)
-- [x] 5. DrawPositionTabs: three Facing sliders X/Y/Z, disabled when verified
-- [x] 6. TogglePoiVerification: capture rig rotation on verify; dialog text mentions facing; CapturePositions skips rotation for verified POIs
-- [x] 7. Help texts (EditRotationHelpBody, PositionSetupHelpBody) rewritten
-- [x] 8. Scroll-to-POI hook in DrawSpecificMarkerOptions
-- [x] 9. Tests (real rig, real window, real IMGUI) + AddPoi x/z copy tests
-- [x] 10. 10-structure.md + _2.1 / _5.1 docs; final EditMode + PlayMode run
+- [x] 1. Rename UI label "Edit-Mode Preview" -> "Scene-Mode Preview" (JSON key unchanged).
+- [x] 2. ApplyOrientationPreview ticks Label/Badge MarkerChildOrientation; RestoreRigRotationsFromConfig resets them.
+- [x] 3. Test: OrientationEditModePreviewTests.ApplyOrientationPreview_TicksLabelAndBadge_AndRestoreResetsThem (real POI_Marker prefab).
+- [x] 4. Three collapsed foldouts: How to Scene / Playmode / Device Test, ordered by config field.
+- [x] 5. Test: OrientationEditorRoundTripTests.TestGuides_ExistAsciiCoverEveryFieldAndOption_AndStartCollapsed.
+- [x] 6. Docs: _2.1 (sections 0, 8, 9, 13), _5.1, 10-structure.md.
+- [x] 7. Compile + EditMode + PlayMode zero failures.
+
+Open: eyeball the foldout indentation once in the real window (no screenshot pass done).

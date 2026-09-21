@@ -55,6 +55,14 @@ namespace TileStories.Editor
         // "Row Indentation & Spacing").
         private const float SubFieldIndentPixels = 8f;
 
+        // One real "child" step for the rows inside a plain sub-foldout (Orientation's
+        // Vertical Alignment / Facing Options / Update Cost / Test): they read as children of
+        // the foldout title, i.e. their label starts under the title TEXT, not under its arrow.
+        // Same raw-pixel mechanism as SubFieldIndentPixels (extraIndentPixels), just a full step
+        // (about one foldout arrow). A conditional row inside such a sub-foldout passes
+        // SectionChildIndentPixels + SubFieldIndentPixels.
+        private const float SectionChildIndentPixels = 16f;
+
         // Floor for non-table rows: even on a very narrow panel a button/row must
         // stay readable, so the width clamp is max(MinRowWidth, min(panel, MaxRowWidth)).
         private const float MinRowWidth = 180f;
@@ -186,23 +194,86 @@ namespace TileStories.Editor
         private static readonly string OrientationUpdateModeHelp = "Cost control for how often orientation is re-resolved. Every Frame (default, recommended): always up to date, avoids a subtle stale-rotation mismatch with the label/badge displacement system (see the Update Mode help below) - the CPU cost is negligible even at 150 markers. Interval: re-resolves at most every Update Interval seconds. On Camera Delta: re-resolves only once the camera has rotated past Camera Delta degrees since the last resolve. Both non-default modes can make label/badge offsets lag the marker's own rotation for a moment after a fast camera turn - use them only if a real profiling pass shows a need.";
         private static readonly string OrientationUpdateIntervalHelp = "Seconds between orientation re-resolves, used only when Update Mode is Interval.";
         private static readonly string OrientationCameraDeltaHelp = "Degrees the camera must rotate before orientation re-resolves, used only when Update Mode is On Camera Delta.";
-        private static readonly string EditModePreviewHelp = "Shows the resolved Vertical Alignment / Facing Options directly in the Scene view, without entering Play Mode. Nothing animates here (Edit Mode does not tick per-frame) - this checks the static result at the Scene camera's current angle only. See the Test section's own help for the full click-by-click workflow.";
+        private static readonly string EditModePreviewHelp = "Scene view ONLY. Shows the resolved Vertical Alignment / Facing Options directly on the Edit-Mode marker rig, without entering Play Mode. It has no effect in Play Mode or on a device, where the real MarkerBillboard always runs. Nothing animates here (Edit Mode does not tick per-frame) - this checks the static result at the Scene camera's current angle only. The Scene camera cannot roll, so roll-dependent behaviour is tested in Play Mode. See the three 'How to ... Test' guides below for the step-by-step tests.";
 
-        private static readonly string OrientationTestWorkflowHelp =
-            "HOW TO TEST YOUR ORIENTATION CHOICES\n\n" +
-            "IN SCENE MODE (no Play Mode, instant):\n" +
-            "1. Turn on 'Edit-Mode Preview' above.\n" +
-            "2. Click 'Load & Populate Rig' if the rig isn't already loaded.\n" +
-            "3. In the Scene view, hold the right mouse button and move the mouse (or use the view gizmo, top-right of the Scene view) to orbit and tilt the Scene camera around the markers.\n" +
-            "4. Watch the markers rotate live as you move the Scene camera - this uses the exact same math as the real app. Turn 'Edit-Mode Preview' off when done; it never touches your saved rotation values.\n\n" +
-            "IN PLAY MODE (the real running app, in the Editor Game view):\n" +
-            "1. Press the Play button at the top of the Unity Editor.\n" +
-            "2. The app uses a mock camera in the Editor (no real phone needed): click into the Game view, then:\n" +
-            "   - W/A/S/D moves the camera through the wall.\n" +
-            "   - Hold the right mouse button and move the mouse to look around (yaw/pitch) - this is what 'turning the phone left/right/up/down' means.\n" +
-            "   - Z and C keys roll the camera left/right - this simulates physically tilting the phone sideways (e.g. toward landscape), which is the single most important test for Vertical Alignment: with World Up selected, markers must stay upright as you roll; with Screen Up, they should tilt together with the roll.\n" +
-            "3. Watch the markers, labels and badges while you do this. World Up should keep them level with the real world; Screen Up should keep them level with the phone screen edges; Wall Fixed should never move at all; Y Rotation Only should turn to follow you left/right but never tip up/down.\n\n" +
-            "For a wider, side-by-side comparison across every combination at once, open Assets/Dev/OrientationGallery/OrientationGalleryScene.unity and press Play - the Camera Rig Sweep fields on the OrientationGalleryHarness component let you orbit/pitch/roll the gallery camera by hand and watch every row react together.";
+        // Three test guides, one per test area, each in its own collapsible foldout. One block per
+        // Orientation sub-section (Vertical Alignment, Facing Options, Update Cost), NOT per field:
+        // the fields under a sub-section are tested together. Terse slide-style bullets.
+        // ASCII only (20-code-quality.md 2.1); a test asserts that and that every sub-section is covered.
+        private static readonly string OrientationSceneTestGuide =
+            "SETUP\n" +
+            "- Scene-Mode Preview ON (above), then top bar 'Load & Populate Rig'.\n" +
+            "- Scene view: RMB + mouse = look, RMB + WASD = fly, Alt + LMB = orbit.\n" +
+            "- Changes show live. Nothing is saved until 'Save All to JSON'.\n\n" +
+            "VERTICAL ALIGNMENT\n" +
+            "- Not possible in Scene test: needs camera roll and the Scene camera cannot roll.\n" +
+            "- Test it in Play Mode.\n\n" +
+            "FACING OPTIONS\n" +
+            "- Wall Fixed: orbit the Scene camera, markers must NOT move.\n" +
+            "  - Specific Marker > 'lamp' > Facing X/Y/Z sliders rotate the marker live.\n" +
+            "  - Or Rotate tool (E) on the marker: the sliders follow. Verified POIs are locked.\n" +
+            "- Y Rotation Only: orbit left/right, markers turn to you. Orbit up/down, they do not tip.\n" +
+            "  - Facing X/Z sliders apply, Y does nothing (a notice explains it).\n" +
+            "- Always Facing Camera: markers face the Scene camera from any angle. Facing sliders do nothing (notice).\n" +
+            "  - Facing Basis: View Plane = all parallel to screen. Camera Position = slight skew at the screen edge.\n" +
+            "- Hierarchy Levels > Facing column: set level_1 = Wall Fixed. lamp/painting/camera stay still, the rest follow you. Reset to Inherit after.\n\n" +
+            "UPDATE COST\n" +
+            "- Not possible in Scene test: needs frames and time. Test it in Play Mode.\n\n" +
+            "WHEN DONE\n" +
+            "- Scene-Mode Preview OFF: rig returns to the saved angles, config untouched.";
+
+        private static readonly string OrientationPlaymodeTestGuide =
+            "SETUP\n" +
+            "- 'Save All to JSON' then 'Copy to StreamingAssets' (Play reads the copy).\n" +
+            "- Open Apps/LivingRoom/LivingRoomScene, press Play, click into the Game view.\n" +
+            "- Mock camera (the project's MockLocalizationProvider, Editor only, not Unity's):\n" +
+            "  - W/A/S/D = move. E = up, Q = down.\n" +
+            "  - RMB + mouse, Alt + LMB + mouse, or arrow keys = look.\n" +
+            "  - Z / C = tilt the phone left / right. What you SEE: the Game window never rotates, the world (wall, markers) rotates around you. (Under the hood the camera rolls.)\n\n" +
+            "VERTICAL ALIGNMENT\n" +
+            "- Hold Z or C and watch the wall rotate:\n" +
+            "  - World Up: markers rotate WITH the wall, they stay upright relative to the real world.\n" +
+            "  - Screen Up: markers do NOT rotate, they stay level with the window edges while the wall turns behind them.\n" +
+            "- Marker, Label and Badge are independent: e.g. Marker World Up + Label Screen Up = text stays screen-horizontal.\n" +
+            "- Clusters: view the lamp group from far away (dense), then roll with Z / C.\n" +
+            "- Up Reference: World Gravity = upright. Custom = leans by your vector. Spawn Root = leans with the wall's root.\n\n" +
+            "FACING OPTIONS\n" +
+            "- Wall Fixed: walk and look around, markers never move.\n" +
+            "- Y Rotation Only: circle a marker with A / D, it turns to you, never tips. Z / C has no effect.\n" +
+            "- Always Facing Camera: faces you everywhere, also above and below (E / Q). Never flips edge-on close up.\n" +
+            "  - Facing Basis: View Plane = parallel to screen. Camera Position = skew at the screen edge.\n" +
+            "- Hierarchy Levels > Facing column: level_1 = Wall Fixed, the others follow you.\n\n" +
+            "UPDATE COST\n" +
+            "- Every Frame: smooth. Interval (e.g. 1 s): markers update in steps.\n" +
+            "- On Camera Delta (e.g. 20 deg): markers re-aim only after the camera turns past it.\n\n" +
+            "SIDE-BY-SIDE\n" +
+            "- Assets/Dev/OrientationGallery/OrientationGalleryScene: Play, set Orbit Yaw/Pitch/Roll on OrientationGalleryHarness.\n" +
+            "- Automated: Test Runner, EditMode + PlayMode, zero failures.";
+
+        private static readonly string OrientationDeviceTestGuide =
+            "SETUP (Android)\n" +
+            "- USB: enable USB debugging, plug in, accept the prompt, 'adb devices' lists it.\n" +
+            "- Wi-Fi: Developer options > Wireless debugging > Pair with code.\n" +
+            "  - 'adb pair <ip>:<pair-port>' + code, then 'adb connect <ip>:<port>'.\n" +
+            "  - Or 'npx adb-qr-connect' and scan the QR code.\n" +
+            "- 'Save All to JSON' + 'Copy to StreamingAssets', then Build Settings > Android > Build And Run.\n" +
+            "- No mock camera on device: you move and tilt the phone.\n\n" +
+            "LOGS\n" +
+            "- 'adb logcat -c', then 'adb logcat -s Unity > __logcat.txt' and read the file.\n" +
+            "- Look for [Config], [POI], [Marker] lines and any Exception / Error.\n\n" +
+            "VERTICAL ALIGNMENT (main device test: real auto-rotation)\n" +
+            "- Point at the wall, rotate the phone to landscape, hold 5 s.\n" +
+            "- World Up: markers stay level with the world. Screen Up: they turn with the screen.\n" +
+            "- Check Marker, Label, Badge, Clusters: labels horizontal? symbols still circular? Did the app screen rotate?\n" +
+            "- Up Reference: only Spawn Root / Custom if the wall's map is tilted.\n\n" +
+            "FACING OPTIONS\n" +
+            "- Wall Fixed: walk left/right, markers stay glued to the wall.\n" +
+            "- Y Rotation Only: markers turn to you, keep the wall tilt.\n" +
+            "- Always Facing Camera: faces you, also crouching or very close. Facing Basis: View Plane vs Camera Position, check markers at the screen edge.\n" +
+            "- Hierarchy Levels > Facing column: one level Wall Fixed, the others follow you.\n\n" +
+            "UPDATE COST\n" +
+            "- Every Frame is the default: 5 min session on the densest wall, watch for lag or heat.\n" +
+            "- Interval / On Camera Delta only if too slow; check label offset lag after fast turns.";
 
         // --- Search & Filter editor constants (Block 5) ---
         // Search mode dropdown (inert values flagged by ValidateSearchEnumFields).
@@ -478,7 +549,7 @@ namespace TileStories.Editor
             "Sync: the sliders, Unity's Rotate tool and the Inspector Transform all stay in sync, " +
             "in both directions. Angles live in memory until you click Save, which writes them to " +
             "config.json.\n\n" +
-            "Preview warnings: with Edit-Mode Preview ON (Global Scene > Orientation) the Scene view " +
+            "Preview warnings: with Scene-Mode Preview ON (Global Scene > Orientation) the Scene view " +
             "shows what the runtime would show, so a notice appears over the Scene view when an axis " +
             "you change is overridden: every axis in Always Facing Camera, only Y in Y Rotation Only, " +
             "none in Wall Fixed. With the preview OFF you always see the raw authored angles. Tick the dialog's \"do not show again\" checkbox to hide it; TileStories > Reset Hidden Notices brings it back.\n\n" +
