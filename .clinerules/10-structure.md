@@ -278,10 +278,13 @@ against disk on 2026-09-18.
           - POIEditorToolWindow.SearchFilter.cs  -- search keyword fields and synonym groups
         - SpecificMarker/  -- per-POI editing
           - POIEditorToolWindow.SpecificMarker.cs  -- the POI list, header row (focus, rename, reorder, add, help, delete) and per-POI style sections
-          - POIEditorToolWindow.PositionTabs.cs  -- the Position foldout: XYZ readout, rotation slider, Verified toggle
+          - POIEditorToolWindow.PositionTabs.cs  -- the Position foldout: three Facing X/Y/Z sliders (disabled while Verified), XYZ readout, Verified toggle
+          - POIEditorToolWindow.MarkerSceneEdit.cs  -- selected-marker edit handling: facing sync from Scene view/Inspector, Verified lock on facing and position, auto-reveal of the POI's section
+          - MarkerEditDetector.cs  -- pure tracker: did the selected marker's pose change since last seen, plus the gizmo-drag gesture check (drives the auto-reveal)
+          - FacingEditAdvice.cs  -- pure: which facing edits are invisible under Edit-Mode preview for the effective facing mode, and the Scene-view warning text for them
           - PoiFocusResolver.cs  -- pure math for framing a marker in the Scene view
           - PoiRenameKeys.cs  -- Enter/ESC commit handling for the rename field
-          - PoiRotationResolver.cs  -- pure editor-preview rotation math (X/Y/Z to quaternion, angle normalisation)
+          - PoiRotationResolver.cs  -- pure Facing X/Y/Z math: angles to quaternion, angle normalisation, IsSameOrientation (compare rotations as orientations, never euler triples)
           - Icons/  -- add, delete, edit and focus button PNGs
         - RigLifecycle/
           - POIEditorToolWindow.RigLifecycle.cs  -- creates, refreshes, captures from and clears the Edit-Mode marker rig; calls the real Initialise methods; also owns the orientation preview (ApplyOrientationPreview, RestoreRigRotationsFromConfig, see _2.1 section 9)
@@ -299,7 +302,8 @@ against disk on 2026-09-18.
           - HelpInfoPopup.cs  -- read-only framework help popup plus HelpInfoButton.Draw
           - EntryDetailsPopup.cs  -- editable per-row notes persisted into config; NOT the same as help
           - ExistingSymbolPickerPopup.cs  -- curated sprite picker limited to wall and framework icons
-          - EditorAlertPopup.cs  -- non-blocking validation warning list
+          - EditorAlertItem.cs  -- one config-validation finding plus the plain-text report builder (first 6 findings + guidance)
+          - EditorNotice.cs  -- the one queue for short informational messages (locked edit, hidden facing change, nothing to clear, rejected rename, validation report); an editor-update pump shows each as a native OK dialog, debounced for drag gestures. Advisory notices carry Unity's native do-not-show-again checkbox (undone by TileStories > Reset Hidden Notices); refusal explanations never do. Yes/No decisions stay EditorUtility.DisplayDialog
           - IdentityRenameResolver.cs  -- the one rename rule for every identity key; rewrites all referencing POIs
           - IdentityRenameEditState.cs  -- commit-style edit session for identity cells; survives undo swaps
           - IdentityDeleteGuard.cs  -- confirm dialog before deleting a row POIs still reference
@@ -329,12 +333,16 @@ against disk on 2026-09-18.
         - POISearchIndexTests.cs, POISearchIndexMatchModeTests.cs, SearchTokenizerTests.cs, SearchSynonymGroupsTests.cs  -- search index behaviour
         - EditorCameraLookTests.cs  -- mock-camera look math including roll (_2.1 section 13.3)
         - PoiRotationResolverTests.cs, PoiFocusResolverTests.cs, PositionTabsTests.cs  -- per-POI editor math and Position foldout shape
+        - PoiFacingLockAndSyncTests.cs  -- Facing X/Y/Z: orientation-based scene sync, Verified lock on facing, marker-edit detector, auto-reveal state, real IMGUI slider rows, LivingRoom config round trip
+        - EditorNoticeTests.cs  -- notice queue timing (discrete vs drag), validation report text, hide/reset of notices, converted call sites (ClearRig, config validation, facing warnings)
+        - TestDialogGuard.cs  -- SetUpFixture: switches real notice dialogs off for the whole EditMode run so no test can hang on a modal
+        - PoiFacingModesAndLifecycleTests.cs  -- per-mode/per-axis visibility on a real POI_Marker prefab under preview, preview warnings vs real pipeline, gizmo under preview, verify/unverify wiring, leaked scene-handler check, reveal incl. blocked edits
         - IdentityRenameResolverTests.cs, IdentityRenameCompositionTests.cs  -- rename rule and its composition across tables
         - HierarchyLevelKeyValidationTests.cs, HierarchyLevelSizeRangeTests.cs  -- config validation
         - OrientationEditorRoundTripTests.cs  -- OrientationSettings JSON round-trip, no-block defaults, editor foldout field-existence, deleted-field absence checks (_2.1 section 7)
         - OrientationEditModePreviewTests.cs  -- Edit-Mode orientation preview: non-destructive guarantee, on/off cycle byte-identical, CapturePositions guard, wall_fixed Edit/Play-Mode agreement (_2.1 section 9)
         - DefaultCategoryStylesTests.cs, DefaultBadgeCategoriesTests.cs, DefaultOutlineLevelsTests.cs  -- seeding defaults
-        - POIEditorToolWriteBackTests.cs, POIEditorAddPoiTests.cs, POIEditorToolSearchRoundTripTests.cs, ReloadGuardChoiceTests.cs  -- editor data flow
+        - POIEditorToolWriteBackTests.cs, POIEditorAddPoiTests.cs, POIEditorToolSearchRoundTripTests.cs  -- editor data flow; ReloadGuardChoiceTests.cs  -- pure dialog-result mappings (reload guards, rig safety) incl. Esc/X must cancel
         - POIEditorTableLayoutTests.cs, POIEditorAddButtonRowRenderTests.cs, POIEditorCoordinateRowRenderTests.cs, POIEditorColorGroupRenderTests.cs, POIEditorVisualHierarchyTests.cs, POIEditorWindowChromeTests.cs  -- real IMGUI geometry measurement
         - MarkerSelectionEditModeTest.cs, MarkerSymbolTexturePostprocessorTests.cs, PanelSettingsTests.cs, SafeAreaHelperTests.cs, SearchFilterSelectToggleTests.cs, ZoomControlViewEditModeTests.cs  -- assorted contracts
         - UI/  -- UI Toolkit view tests, mirroring Runtime/UI's folder names

@@ -457,25 +457,37 @@ namespace TileStories.Editor
             "button) to lock it -- turns green. A verified position is protected: if the marker " +
             "gets bumped in the Scene view afterward, it snaps back automatically until you " +
             "unlock it again by clicking Verified a second time.\n\n" +
-            "Note on facing: the Facing slider below (and Unity's Rotate tool) is NOT covered " +
-            "by Verified and never needs to be locked. Whether these angles matter at runtime " +
-            "depends on the wall's global Facing Options mode (Global Scene > Orientation) -- see " +
-            "that row's own help button for which mode reads which axis.";
+            "Verified also locks facing: while green, the three Facing sliders are disabled and " +
+            "rotating the marker in the Scene view (or the Inspector) snaps it back with a notice. " +
+            "Click Verified again to unlock. Whether the angles matter at runtime depends on the " +
+            "wall's global Facing Options mode (Global Scene > Orientation) -- see the Facing " +
+            "row's own help button for which mode reads which axis.";
 
         // Facing Options row help ((i) button next to the slider itself).
         internal static readonly string EditRotationHelpBody =
-            "This slider controls yaw (rotation around Y); Unity's Rotate tool also lets you set " +
-            "pitch/roll (X/Z) directly in the Scene view. All three axes are captured live and saved " +
-            "to config JSON, then re-applied automatically next time the rig is populated.\n\n" +
-            "Whether these angles are used at runtime depends on the wall's Facing Options mode " +
+            "Three sliders set this marker's authored facing: X (pitch), Y (yaw) and Z (roll), in " +
+            "degrees. They are always identical -- you decide which ones matter for your wall.\n\n" +
+            "Which angles are used at runtime depends on the wall's Facing Options mode " +
             "(Global Scene > Orientation > Facing Options):\n" +
-            "- Wall Fixed: all three angles are used exactly as authored -- this marker never moves.\n" +
-            "- Y Rotation Only: the X/Z tilt is used as authored, but Y is replaced every frame by a " +
-            "live camera-facing yaw, so this slider only sets a STARTING yaw for preview purposes.\n" +
-            "- Always Facing Camera: none of these three angles are used at runtime at all -- the " +
-            "marker always fully faces the visitor, so this slider is an editor-preview aid only.\n\n" +
-            "Facing is always free to edit, even after this POI's position is Verified -- the " +
-            "Verified lock only ever applies to position.";
+            "- Always Facing Camera: none of the three are used -- the marker always fully faces " +
+            "the visitor. They only tilt the marker in the Scene view.\n" +
+            "- Y Rotation Only: X and Z (tilt) are used as authored; Y is replaced every frame by " +
+            "the live camera-facing yaw, so Y only sets a starting yaw for editor preview.\n" +
+            "- Wall Fixed: all three (X, Y, Z) are used exactly as authored -- this marker never " +
+            "turns toward the visitor, so set all three carefully (e.g. glued flat to a wall).\n\n" +
+            "Sync: the sliders, Unity's Rotate tool and the Inspector Transform all stay in sync, " +
+            "in both directions. Angles live in memory until you click Save, which writes them to " +
+            "config.json.\n\n" +
+            "Preview warnings: with Edit-Mode Preview ON (Global Scene > Orientation) the Scene view " +
+            "shows what the runtime would show, so a notice appears over the Scene view when an axis " +
+            "you change is overridden: every axis in Always Facing Camera, only Y in Y Rotation Only, " +
+            "none in Wall Fixed. With the preview OFF you always see the raw authored angles. Tick the dialog's \"do not show again\" checkbox to hide it; TileStories > Reset Hidden Notices brings it back.\n\n" +
+            "Lock: once this POI is Verified (green) the sliders are disabled and any rotation " +
+            "made in the Scene view snaps back with a notice. Click Verified to unlock.\n\n" +
+            "Defaults: the first POI starts at (0, 0, 0). A POI added with the + icon copies all " +
+            "three angles from the POI it was added from.\n\n" +
+            "Auto-open: moving or rotating a marker in the Scene view opens its section here " +
+            "and scrolls to it.";
 
         // Keyword Fields table (Global Scene > Search & Filter).
         private static readonly string SearchFieldKeyHelp = "Stable identifier for this search axis. Never change after editing begins -- existing per-POI keywords reference it by key.";

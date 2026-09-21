@@ -42,29 +42,30 @@ namespace TileStories.Editor
             // reads as "commit this position" next to the foldout title itself.
             // Shared row: label keeps a fixed width; slider takes rowWidth minus the
             // label + spacing, inside the capped row (level-2 indent measured at call time).
-            // Named "Facing Options" (not "Rotation") to match the global Orientation
-            // section's own Facing Options domain -- this Y slider (plus the Scene view's
-            // X/Z rotate gizmo) is exactly the per-POI angle data that domain's Wall Fixed
-            // and Y Rotation Only modes read at runtime (_2.1_Marker_Orientation.md v4).
-            DrawEditorRow(out float facingRow, out _);
-            {
-                EditorGUILayout.LabelField("Facing", EditorStyles.boldLabel, GUILayout.Width(92f));
-                DrawConfigMutationScope(
-                    () =>
+            // Named "Facing" (not "Rotation") to match the global Orientation section's own
+            // Facing Options domain -- these X/Y/Z sliders (kept in sync with the Scene
+            // view's rotate gizmo and the Inspector) are exactly the per-POI angle data that
+            // domain's Wall Fixed and Y Rotation Only modes read at runtime
+            // (_2.1_Marker_Orientation.md v4).
+            // Three plain sliders, one per axis, no per-mode logic: the developer decides
+            // which angles matter (the help button explains which mode reads which). All
+            // three lock together when the POI is Verified.
+            bool facingEditable = AreFacingSlidersEditable(poi);
+            DrawConfigMutationScope(
+                () =>
+                {
+                    float oldX = poi.editor_rotation_x_deg, oldY = poi.editor_rotation_deg, oldZ = poi.editor_rotation_z_deg;
+                    EditorGUI.BeginChangeCheck();
+                    poi.editor_rotation_x_deg = DrawFacingSliderRow("Facing X", poi.editor_rotation_x_deg, facingEditable, showHelp: true, out _);
+                    poi.editor_rotation_deg = DrawFacingSliderRow("Facing Y", poi.editor_rotation_deg, facingEditable, showHelp: false, out _);
+                    poi.editor_rotation_z_deg = DrawFacingSliderRow("Facing Z", poi.editor_rotation_z_deg, facingEditable, showHelp: false, out _);
+                    if (EditorGUI.EndChangeCheck())
                     {
-                        const float infoButtonWidth = 26f;
-                        const float infoButtonGap = 4f;
-                        float sliderW = Mathf.Max(120f, facingRow - 104f - infoButtonWidth - infoButtonGap);
-                        poi.editor_rotation_deg = EditorGUILayout.Slider(poi.editor_rotation_deg, 0f, 360f,
-                            GUILayout.Width(sliderW), GUILayout.ExpandWidth(false));
-                        if (GUI.changed)
-                            ApplyPoiEditorRotation(poi);
-                    },
-                    refreshRigOnChange: false);
-                GUILayout.Space(4f);
-                HelpInfoButton.Draw("Facing Options", EditRotationHelpBody);
-            }
-            EditorRowEnd();
+                        ApplyPoiEditorRotation(poi);
+                        WarnIfFacingEditInvisible(poi, oldX != poi.editor_rotation_x_deg, oldY != poi.editor_rotation_deg, oldZ != poi.editor_rotation_z_deg);
+                    }
+                },
+                refreshRigOnChange: false);
 
             EditorGUILayout.Space(2f);
 
@@ -84,6 +85,41 @@ namespace TileStories.Editor
             }
 
             }
+        }
+
+        // One Facing row: bold axis label + 0..360 slider (+ the help button on the first row
+        // only; other rows keep the same gap so all three sliders share one width). When not
+        // editable the slider is drawn disabled AND the incoming value is returned untouched.
+        // Rows are one shared shape so a render test can measure the real rects.
+        internal static float DrawFacingSliderRow(string label, float value, bool editable, bool showHelp, out Rect sliderRect)
+        {
+            const float labelWidth = 92f;
+            const float infoButtonWidth = 26f;
+            const float infoButtonGap = 4f;
+
+            float result = value;
+            sliderRect = default;
+
+            DrawEditorRow(out float facingRow, out _);
+            {
+                EditorGUILayout.LabelField(label, EditorStyles.boldLabel, GUILayout.Width(labelWidth));
+                float sliderW = Mathf.Max(120f, facingRow - 104f - infoButtonWidth - infoButtonGap);
+                using (new EditorGUI.DisabledScope(!editable))
+                {
+                    float edited = EditorGUILayout.Slider(value, 0f, 360f,
+                        GUILayout.Width(sliderW), GUILayout.ExpandWidth(false));
+                    if (editable)
+                        result = edited;
+                }
+                sliderRect = GUILayoutUtility.GetLastRect();
+
+                GUILayout.Space(infoButtonGap);
+                if (showHelp)
+                    HelpInfoButton.Draw("Facing Options", EditRotationHelpBody);
+            }
+            EditorRowEnd();
+
+            return result;
         }
 
         // Header-row trailing content for the Position foldout (drawn right-aligned,
@@ -109,7 +145,7 @@ namespace TileStories.Editor
         // WHY THE LETTERS LIVE OUTSIDE ANY DISABLED SCOPE: for a long time this was the
         // only row in the whole window that drew its label inside
         // EditorGUI.BeginDisabledGroup(true), and it was the only label that never showed
-        // up. Every other visible label here ("Edit Rotation", "Category", "Has status")
+        // up. Every other visible label here ("Category", "Has status")
         // is drawn un-disabled with the same EditorStyles.boldLabel and renders fine, so
         // the disabled scope was the one structural difference. The fix is therefore
         // structural too: only the VALUE FIELDS are read-only; the axis letters are
@@ -211,6 +247,12 @@ namespace TileStories.Editor
                 var child = rig != null ? rig.Find(poi.id) : null;
                 Vector3 verifiedPosition = child != null ? child.localPosition : (poi.position != null ? new Vector3(poi.position.x, poi.position.y, poi.position.z) : Vector3.zero);
 
+                // Same for facing: whatever the rig shows right now becomes the verified
+                // facing (covers an Inspector edit the ~10 Hz poll has not caught yet).
+                // Skipped during Edit-Mode preview, whose rotation is not authored.
+                if (child != null && _config?.orientation_settings?.edit_mode_preview_enabled != true)
+                    SyncPoiRotationFromScene(poi, child.localRotation.eulerAngles);
+
                 _lastVerifiedPositions[poi.id] = verifiedPosition;
                 if (poi.position == null)
                     poi.position = new PositionData();
@@ -230,7 +272,7 @@ namespace TileStories.Editor
                 {
                     int choice = EditorUtility.DisplayDialogComplex(
                         "Edit Verified Positions",
-                        $"The positions for '{poi.name}' are already verified.\n\nAre you sure you want to edit this POI's positions again?",
+                        $"The position and facing for '{poi.name}' are already verified.\n\nAre you sure you want to edit this POI's position and facing again?",
                         "Yes, Unlock",                // 0 = left button
                         "Cancel",                     // 1 = middle button
                         "Yes, and Don't Ask Again"); // 2 = right button

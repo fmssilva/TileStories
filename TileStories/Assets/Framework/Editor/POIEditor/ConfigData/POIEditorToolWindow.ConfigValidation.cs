@@ -110,7 +110,7 @@ namespace TileStories.Editor
             return issues;
         }
 
-        // Runs validation after config load and shows a non-blocking alert if
+        // Runs validation after config load and queues a notice dialog if
         // any hierarchy keys are unresolvable/unset or level sizes look out of range
         // or any search-mode string fields are unknown/inert
         // or any POI is missing keywords for a forced search field
@@ -126,9 +126,8 @@ namespace TileStories.Editor
             if (issues.Count == 0)
                 return;
 
-            string title = $"Config validation issues ({context})";
-            string guidance = "Some configuration needs attention. Fix or add the missing entries noted below; affected items fall back to framework defaults at runtime until fixed.";
-            PopupWindow.Show(new Rect(100, 100, 100, 100), new EditorAlertPopup(title, issues, guidance));
+            string guidance = "Some configuration needs attention. Fix or add the missing entries noted above; affected items fall back to framework defaults at runtime until fixed.";
+            EditorNotice.Queue($"Config validation issues ({context})", EditorAlertItem.FormatList(issues, guidance), 0f, NoticeKeys.ConfigValidation);
         }
 
         // (D4a) Validates that search-related string fields that map to enums

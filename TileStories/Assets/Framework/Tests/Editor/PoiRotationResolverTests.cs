@@ -4,24 +4,23 @@ using UnityEngine;
 
 namespace TileStories.Tests
 {
-    // Tier-0 tests for PoiRotationResolver: the pure yaw-normalise + quaternion
-    // math behind the per-POI "Edit Rotation" slider. Runtime MarkerBillboard
-    // always faces markers to the camera, so this yaw is editor-preview only --
-    // but the mapping config-angle -> scene rotation must be exact and stable,
-    // and the default (0) must be identity so a new/wall-config POI never
-    // visually changes a marker. Pure math, no SceneView needed.
+    // Tier-0 tests for PoiRotationResolver: the pure angle-normalise + quaternion
+    // math behind the per-POI Facing X/Y/Z sliders. The mapping config-angle ->
+    // scene rotation must be exact and stable, and zero on every axis must be
+    // identity so a new POI never visually changes a marker. Pure math, no
+    // SceneView needed.
     public class PoiRotationResolverTests
     {
         [Test]
         public void Zero_IsIdentityRotation()
         {
-            Assert.AreEqual(Quaternion.identity, PoiRotationResolver.ToYawQuaternion(0f));
+            Assert.AreEqual(Quaternion.identity, PoiRotationResolver.ToEulerQuaternion(0f, 0f, 0f));
         }
 
         [Test]
         public void NinetyDeg_IsQuarterTurnAroundY()
         {
-            Quaternion q = PoiRotationResolver.ToYawQuaternion(90f);
+            Quaternion q = PoiRotationResolver.ToEulerQuaternion(0f, 90f, 0f);
             // eulerAngles returns in [0,360); expect yaw 90, no pitch/roll.
             Assert.AreEqual(90f, q.eulerAngles.y, 1e-4f);
             Assert.AreEqual(0f, q.eulerAngles.x, 1e-4f);
@@ -31,22 +30,16 @@ namespace TileStories.Tests
         [Test]
         public void Normalize_KeepInRange_360WrapsToZero()
         {
-            Assert.AreEqual(0f, PoiRotationResolver.NormalizeYawDeg(360f), 1e-5f);
-            Assert.AreEqual(180f, PoiRotationResolver.NormalizeYawDeg(180f), 1e-5f);
-            Assert.AreEqual(720f % 360f, PoiRotationResolver.NormalizeYawDeg(720f), 1e-5f);
+            Assert.AreEqual(0f, PoiRotationResolver.NormalizeAngleDeg(360f), 1e-5f);
+            Assert.AreEqual(180f, PoiRotationResolver.NormalizeAngleDeg(180f), 1e-5f);
+            Assert.AreEqual(720f % 360f, PoiRotationResolver.NormalizeAngleDeg(720f), 1e-5f);
         }
 
         [Test]
         public void Normalize_Negative_FoldsPositive()
         {
-            Assert.AreEqual(270f, PoiRotationResolver.NormalizeYawDeg(-90f), 1e-5f);
-            Assert.AreEqual(350f, PoiRotationResolver.NormalizeYawDeg(-370f), 1e-5f);
-        }
-
-        [Test]
-        public void DefaultConstant_IsZero()
-        {
-            Assert.AreEqual(0, PoiRotationResolver.DefaultEditorRotationDeg);
+            Assert.AreEqual(270f, PoiRotationResolver.NormalizeAngleDeg(-90f), 1e-5f);
+            Assert.AreEqual(350f, PoiRotationResolver.NormalizeAngleDeg(-370f), 1e-5f);
         }
 
         [Test]

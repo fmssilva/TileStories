@@ -29,9 +29,6 @@ namespace TileStories.Editor
         private const string DefaultIconLibraryPath = "Assets/Framework/Runtime/UI/Markers/IconLibrary.asset";
         private const float SyncPositionTolerance = 0.001f;
 
-        // EditorPrefs key for the "Don't show again" toggle on safety prompts.
-        internal const string SkipPromptPrefKey = "TileStories.RigSafetySkipPrompt";
-
         // EditorPrefs key for the "Don't show again" toggle on un-verifying confirmed positions.
         internal const string SkipUnverifyPromptPrefKey = "TileStories.SkipUnverifyConfirmation";
         internal const string VerifiedPositionLockedMessage = "Those positions are already verified. If you want to change them, click the Verified button to enable editing.";
@@ -85,69 +82,39 @@ namespace TileStories.Editor
             return true;
         }
 
+        // Scene-view mouse gestures on the selected rig marker (drag = move/rotate, up =
+        // gesture end). Everything else in the scene GUI stream is ignored here.
         private void HandleSceneGui(SceneView sceneView)
         {
             if (_config == null || _config.pois == null || Event.current == null)
                 return;
 
-            if (Selection.activeGameObject == null)
-                return;
-
-            Transform target = Selection.activeGameObject.transform;
-            while (target != null && target.parent != null && target.parent.name != "POIEditorRig")
-                target = target.parent;
-
-            if (target == null || target.parent == null || target.parent.name != "POIEditorRig")
-                return;
-
-            var poi = _config.pois.FirstOrDefault(p => p.id == target.name);
-            if (poi == null)
-                return;
-
             if (Event.current.type != EventType.MouseDrag && Event.current.type != EventType.MouseUp)
                 return;
 
-            // Rotation is always freely editable with Unity's own Rotate tool, verified
-            // or not -- only position locks once a POI is Verified. Sync first, so the
-            // config (and the "Edit Rotation" Y slider) reflect the live rotation
-            // regardless of verified state. Runs in OnSceneGUI -- outside the window's
-            // DrawConfigMutationScope -- so it never feeds back through the scope's JSON
-            // diff (which would spam undo history and refresh the rig on every repaint).
-            // Skipped while Edit-Mode orientation preview is active (_2.1_Marker_Orientation.md
-            // section 14): the preview writes localRotation itself every repaint, and a
-            // Scene-view camera orbit drag is also a MouseDrag event, so without this guard
-            // the previewed (not authored) rotation would get silently captured as if the
-            // developer had rotated the marker by hand.
-            bool previewActive = _config.orientation_settings?.edit_mode_preview_enabled == true;
-            if (!previewActive && SyncPoiRotationFromScene(poi, target.localRotation.eulerAngles))
-            {
-                _hasUnsavedChanges = true;
-                Repaint();
-            }
+            // A drag while a Move/Rotate/Rect handle owns the mouse (not a camera-orbit or
+            // pan) is the developer acting on the marker, even when the transform itself
+            // is then overwritten (Edit-Mode preview) or reverted (Verified lock).
+            bool gizmoGesture = MarkerEditDetector.IsGizmoEditGesture(
+                Event.current.type == EventType.MouseDrag, GUIUtility.hotControl, Tools.viewToolActive, Tools.current);
 
-            if (!poi.position_verified)
+            HandleSelectedMarkerEdit(revealOnEdit: true, gizmoGesture);
+        }
+
+        // Runs ~10x/s while the window is open: keeps the sliders in sync with edits that
+        // never produce a Scene-view mouse event (the Inspector's Transform fields, undo).
+        // Never reveals -- only a real Scene-view gesture may move the window's scroll.
+        private void OnInspectorUpdate()
+        {
+            if (_config == null || _config.pois == null)
                 return;
 
-            Vector3 lastVerifiedPosition = GetLastVerifiedPositionForPoi(poi);
-            if (!ShouldBlockVerifiedPositionMove(poi, target.localPosition, lastVerifiedPosition, out var correctedPosition, out var message))
-                return;
-
-            Undo.RecordObject(target, "Revert verified POI position");
-            target.localPosition = correctedPosition;
-
-            // With Tool Handle Position set to Center, Unity's Rotate gizmo can nudge
-            // localPosition as a side effect of spinning around the visual bounds center
-            // rather than the transform's own origin -- that is incidental drift from
-            // rotating, not an intentional position edit, so correct it silently instead
-            // of surfacing the "already verified" notification (which should only ever
-            // fire for a genuine Move-tool drag).
-            if (sceneView != null && Tools.current != Tool.Rotate)
-                sceneView.ShowNotification(new GUIContent(message));
+            HandleSelectedMarkerEdit(revealOnEdit: false, gizmoGesture: false);
         }
 
         // Write a rig child's scene euler angles back into the POI's rotation fields,
         // returning true when anything actually changed. Y maps to editor_rotation_deg
-        // (the Edit Rotation slider), X/Z to the pitch/roll fields. Normalizes each axis
+        // (the Facing Y slider), X/Z to the pitch/roll fields. Normalizes each axis
         // into [0, 360) so dragging past a full turn or through negative wraps cleanly.
         // Pure (no SceneView), so it is Tier-0 testable.
         internal static bool SyncPoiRotationFromScene(POIData poi, Vector3 euler)
@@ -155,18 +122,15 @@ namespace TileStories.Editor
             if (poi == null)
                 return false;
 
-            float x = PoiRotationResolver.NormalizeAngleDeg(euler.x);
-            float y = PoiRotationResolver.NormalizeAngleDeg(euler.y);
-            float z = PoiRotationResolver.NormalizeAngleDeg(euler.z);
-
-            if (Mathf.Abs(x - poi.editor_rotation_x_deg) < 0.001f &&
-                Mathf.Abs(y - poi.editor_rotation_deg) < 0.001f &&
-                Mathf.Abs(z - poi.editor_rotation_z_deg) < 0.001f)
+            // Compare orientations, not raw triples: the scene reports a canonical euler
+            // triple that can differ from the stored one for the very same rotation.
+            Quaternion stored = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
+            if (PoiRotationResolver.IsSameOrientation(Quaternion.Euler(euler), stored))
                 return false;
 
-            poi.editor_rotation_x_deg = x;
-            poi.editor_rotation_deg = y;
-            poi.editor_rotation_z_deg = z;
+            poi.editor_rotation_x_deg = PoiRotationResolver.NormalizeAngleDeg(euler.x);
+            poi.editor_rotation_deg = PoiRotationResolver.NormalizeAngleDeg(euler.y);
+            poi.editor_rotation_z_deg = PoiRotationResolver.NormalizeAngleDeg(euler.z);
             return true;
         }
 
@@ -178,15 +142,14 @@ namespace TileStories.Editor
 
         // Shows the rig-safety dialog and returns true to proceed (Play or Build),
         // false to abort. When isBuild is true the "Continue Without Clearing"
-        // option is hidden because a build is visitor-facing.
+        // option is hidden because a build is visitor-facing. There is deliberately
+        // NO opt-out: the prompt only appears while the rig still holds editor
+        // stand-in markers, and an opt-out let a build ship them.
         internal static bool PromptBeforePlayOrBuild(bool isBuild)
         {
             int childCount = GetRigChildCountStatic();
             if (childCount == 0)
                 return true; // Nothing to warn about.
-
-            if (EditorPrefs.GetBool(SkipPromptPrefKey, false))
-                return true; // User opted out via "Don't show again".
 
             return ShowRigSafetyDialog(childCount, isBuild);
         }
@@ -200,43 +163,45 @@ namespace TileStories.Editor
                 ? $"POIEditorRig has {childCount} marker(s). These are Edit-Mode editor stand-ins and must not ship. Save positions to config.json and clear the rig before building."
                 : $"POIEditorRig has {childCount} marker(s) in the scene. If you have not captured positions to JSON, you will get duplicate markers at runtime. Save and clear now?";
 
-            // DisplayDialogComplex returns 0 = left button, 1 = middle, 2 = right.
-            // Layout (play):  [Save, Clear & Play]  [Continue Without Clearing]  [Cancel]
+            // DisplayDialogComplex returns 0 = ok slot, 1 = cancel slot, 2 = alt slot, and
+            // closing the dialog or pressing Esc ALWAYS returns 1. So slot 1 is the real Cancel.
+            // Layout (play):  [Save, Clear & Play]  [Cancel]  [Continue Without Clearing]
             // Layout (build): [Save, Clear & Build]  [Cancel]
+            int choice = EditorUtility.DisplayDialogComplex(
+                "POIEditorRig Safety Check",
+                message,
+                button1,
+                "Cancel",
+                isBuild ? "" : "Continue Without Clearing");
 
-            int choice;
-            if (isBuild)
+            switch (ResolveRigSafetyChoice(isBuild, choice))
             {
-                // Two-button dialog: button3 must be "" for the right button to
-                // be button2 (return 1), not button3 (return 2).
-                choice = EditorUtility.DisplayDialogComplex(
-                    "POIEditorRig Safety Check",
-                    message,
-                    button1,    // 0 = left (Save, Clear & Build)
-                    "Cancel",   // 1 = right (Cancel)
-                    "");        // no middle button
+                case RigSafetyAction.SaveClearAndContinue:
+                    SaveAndClearRig();
+                    return true;
+                case RigSafetyAction.ContinueWithoutClearing:
+                    return true;
+                default:
+                    return false;
             }
-            else
-            {
-                choice = EditorUtility.DisplayDialogComplex(
-                    "POIEditorRig Safety Check",
-                    message,
-                    button1,                              // 0 = left (Save, Clear & Play)
-                    "Continue Without Clearing",          // 1 = middle
-                    "Cancel");                            // 2 = right
-            }
+        }
 
-            if (choice == 0) // Save, Clear & Continue
-            {
-                SaveAndClearRig();
-                return true;
-            }
+        internal enum RigSafetyAction
+        {
+            SaveClearAndContinue,
+            ContinueWithoutClearing,
+            Cancel,
+        }
 
-            if (!isBuild && choice == 1) // Continue Without Clearing (play only)
-                return true;
-
-            // Cancel (any context) or -1 (closed via X)
-            return false;
+        // Pure dialog-result mapping for the rig safety prompt (slot 1 = Cancel, see above).
+        // Anything unexpected cancels: the safe default when the dialog is dismissed.
+        internal static RigSafetyAction ResolveRigSafetyChoice(bool isBuild, int dialogResult)
+        {
+            if (dialogResult == 0)
+                return RigSafetyAction.SaveClearAndContinue;
+            if (dialogResult == 2 && !isBuild)
+                return RigSafetyAction.ContinueWithoutClearing;
+            return RigSafetyAction.Cancel;
         }
 
         // Finds the open POIEditorToolWindow instance (if any) and calls
@@ -276,31 +241,6 @@ namespace TileStories.Editor
                 return 0;
 
             return rig.transform.childCount;
-        }
-
-        // ---- Menu item for "Don't show again" toggle ----
-
-        // Deliberately NOT under "TileStories/POI Editor": Unity gives a submenu
-        // precedence over a same-named command, so sharing that branch silently
-        // removed the POI Editor entry from the menu (only Shift+P still opened it).
-        [MenuItem("TileStories/Rig Safety Prompt on Play/Build")]
-        private static void ToggleRigSafetyPrompt()
-        {
-            bool currentlySkipping = EditorPrefs.GetBool(SkipPromptPrefKey, false);
-            EditorPrefs.SetBool(SkipPromptPrefKey, !currentlySkipping);
-        }
-
-        // Must return bool: a void validator leaves the item permanently greyed
-        // out. Menu.SetEnabled is gone in Unity 6, so the return value is the only
-        // way to report "this item is usable" -- and a validator that returns
-        // nothing is read as "disabled".
-        [MenuItem("TileStories/Rig Safety Prompt on Play/Build", true)]
-        private static bool ValidateToggleRigSafetyPrompt()
-        {
-            Menu.SetChecked(
-                "TileStories/Rig Safety Prompt on Play/Build",
-                !EditorPrefs.GetBool(SkipPromptPrefKey, false));
-            return true;
         }
 
         [SerializeField] private WallConfigData _config;
@@ -364,8 +304,13 @@ namespace TileStories.Editor
             EnsureDefaultIconLibraryLoaded();
         }
 
+        // Unsubscribe BOTH scene handlers. HandleSceneGui used to stay subscribed after the
+        // window closed, so a dead window kept reacting to Scene-view drags with its stale
+        // config snapshot (e.g. a POI still "verified" there) -- reverting rotations and
+        // showing the verified warning while the live window said unverified.
         private void OnDisable()
         {
+            SceneView.duringSceneGui -= HandleSceneGui;
             SceneView.duringSceneGui -= HandleOrientationPreviewSceneGui;
         }
 

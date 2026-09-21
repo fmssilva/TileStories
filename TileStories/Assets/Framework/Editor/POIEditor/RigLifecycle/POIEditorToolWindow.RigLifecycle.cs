@@ -136,10 +136,7 @@ namespace TileStories.Editor
 
             if (rig == null || rig.childCount == 0)
             {
-                EditorUtility.DisplayDialog(
-                    "Nothing to clear",
-                    "POIEditorRig has no children.",
-                    "OK");
+                EditorNotice.Queue("Nothing to clear", "POIEditorRig has no children.");
                 return;
             }
 
@@ -193,6 +190,10 @@ internal enum ReloadGuardChoice
             Cancel = 2,
         }
 
+        // Both guard dialogs use the slot layout [0 = Save/Capture & Reload] [1 = Cancel]
+        // [2 = Discard & Reload]. Unity returns 1 when the dialog is closed or Esc is pressed,
+        // so the destructive Discard must never sit in slot 1.
+        //
         // Pure decision helper for Guard 1 (uncaptured rig positions).
         // Returns null when no dialog is needed; otherwise the action the
         // caller must take for the given dialog result.
@@ -201,9 +202,7 @@ internal enum ReloadGuardChoice
         {
             if (!hasConfig || !hasRigChildren || rigInSync)
                 return null; // No dialog needed.
-            if (dialogResult == 0) return ReloadGuardChoice.ProceedWithSaveOrCapture;
-            if (dialogResult == 1) return ReloadGuardChoice.DiscardAndReload;
-            return ReloadGuardChoice.Cancel;
+            return MapReloadGuardResult(dialogResult);
         }
 
         // Pure decision helper for Guard 2 (unsaved in-memory config edits).
@@ -212,8 +211,15 @@ internal enum ReloadGuardChoice
         {
             if (!hasConfig || !hasUnsavedChanges)
                 return null; // No dialog needed.
+            return MapReloadGuardResult(dialogResult);
+        }
+
+        // One mapping for both guards: 0 = save/capture, 2 = discard, anything else
+        // (1 = Cancel button, Esc, X) = cancel and lose nothing.
+        private static ReloadGuardChoice MapReloadGuardResult(int dialogResult)
+        {
             if (dialogResult == 0) return ReloadGuardChoice.ProceedWithSaveOrCapture;
-            if (dialogResult == 1) return ReloadGuardChoice.DiscardAndReload;
+            if (dialogResult == 2) return ReloadGuardChoice.DiscardAndReload;
             return ReloadGuardChoice.Cancel;
         }
 
@@ -235,8 +241,8 @@ internal enum ReloadGuardChoice
                     "Uncaptured rig positions",
                     $"{outOfSyncCount} marker(s) in the rig were moved but never captured. Repopulating will destroy those moved Transforms.",
                     "Capture & Reload",
-                    "Discard & Reload",
-                    "Cancel");
+                    "Cancel",
+                    "Discard & Reload");
 
                 var rigChoice = ResolveUncapturedRigChoice(true, true, false, choice);
                 if (rigChoice == ReloadGuardChoice.ProceedWithSaveOrCapture)
@@ -254,8 +260,8 @@ internal enum ReloadGuardChoice
                     "Unsaved config changes",
                     "You have unsaved config edits. Reloading from config.json will discard them.",
                     "Save & Reload",
-                    "Discard & Reload",
-                    "Cancel");
+                    "Cancel",
+                    "Discard & Reload");
 
                 var configChoice = ResolveUnsavedConfigChoice(true, true, choice);
                 if (configChoice == ReloadGuardChoice.ProceedWithSaveOrCapture)
@@ -442,7 +448,9 @@ internal enum ReloadGuardChoice
                 // preview is active (_2.1_Marker_Orientation.md section 14) -- the rig's
                 // current localRotation is the PREVIEW, not an authored edit, and capturing
                 // it would silently corrupt the stored angles.
-                if (_config.orientation_settings?.edit_mode_preview_enabled != true)
+                // Also skipped for a Verified POI: its facing is locked, so the rig can only
+                // differ from the stored angles by an edit the lock is about to revert.
+                if (_config.orientation_settings?.edit_mode_preview_enabled != true && !poi.position_verified)
                 {
                     Vector3 euler = markerTransform.localRotation.eulerAngles;
                     poi.editor_rotation_x_deg = PoiRotationResolver.NormalizeAngleDeg(euler.x);

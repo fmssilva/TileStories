@@ -287,6 +287,47 @@ namespace TileStories.Tests
         }
 
         [Test]
+        public void AddFirstPoi_StartsWithZeroFacingOnAllThreeAxes()
+        {
+            var config = CreateMinimalConfig();
+            var window = CreateWindowWithConfig(config);
+
+            InvokeAddFirstPoi(window);
+
+            var poi = config.pois[0];
+            Assert.AreEqual(0f, poi.editor_rotation_x_deg, 0.0001f);
+            Assert.AreEqual(0f, poi.editor_rotation_deg, 0.0001f);
+            Assert.AreEqual(0f, poi.editor_rotation_z_deg, 0.0001f);
+        }
+
+        [Test]
+        public void AddNewPoiAfter_CopiesAllThreeFacingAnglesFromSource_AndPutsThemOnTheRigChild()
+        {
+            var config = new WallConfigData
+            {
+                wall_id = "test_wall",
+                wall_name = "Test Wall",
+                pois = new System.Collections.Generic.List<POIData>
+                {
+                    new POIData { id = "poi_1", name = "Lamp", category = "default", editor_rotation_x_deg = 15f, editor_rotation_deg = 120f, editor_rotation_z_deg = 45f }
+                }
+            };
+            var window = CreateWindowWithConfig(config);
+
+            InvokeAddNewPoiAfter(window, 0);
+
+            var added = config.pois[1];
+            Assert.AreEqual(15f, added.editor_rotation_x_deg, 0.0001f);
+            Assert.AreEqual(120f, added.editor_rotation_deg, 0.0001f);
+            Assert.AreEqual(45f, added.editor_rotation_z_deg, 0.0001f);
+
+            var rigChild = GameObject.Find("POIEditorRig")?.transform.Find(added.id);
+            Assert.IsNotNull(rigChild, "The new POI's rig child must exist.");
+            Assert.That(Quaternion.Angle(rigChild.localRotation, Quaternion.Euler(15f, 120f, 45f)), Is.LessThan(0.05f),
+                "The Scene-view marker must start with the copied facing, not identity.");
+        }
+
+        [Test]
         public void AddNewPoiAfter_GeneratesUniqueIds()
         {
             var config = new WallConfigData

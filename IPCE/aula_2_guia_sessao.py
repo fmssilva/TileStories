@@ -715,11 +715,11 @@ def triangle_kind(a: float, b: float, c: float) -> int:
     """
     if is_proper_triangle(a, b, c):
         if a == b == c:
-            return 1
+            return 1 # Equilateral triangle
         elif a == b or b == c or a == c:
-            return 2
+            return 2 # Isosceles triangle
         else:
-            return 3
+            return 3 # Scalene triangle
     else:
         return 0  # Invalid triangle
 

@@ -41,6 +41,16 @@ namespace TileStories.Editor
                 var headerLabelStyle = CreateHeaderLabelStyle(PoiHeaderColorFor(foldoutKey, i));
                 var headerRect = EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight);
 
+                // A reveal (see RevealPoiInSpecificMarkerTab) queued a scroll to this POI. The
+                // rect is only real during Repaint, and it is in the scroll view's content
+                // space, so it can be assigned straight to _scrollPos.y; the repaint picks it up.
+                if (Event.current.type == EventType.Repaint && poi.id == _pendingScrollPoiId)
+                {
+                    _pendingScrollPoiId = null;
+                    _scrollPos.y = Mathf.Max(0f, headerRect.y - 4f);
+                    Repaint();
+                }
+
                 // Row width follows the same shared convention as every other non-table
                 // row in this window (see DrawEditorRow / EditorRowWidthForIndent): capped
                 // to max(MinRowWidth, min(panel - margin - indent, MaxRowWidth)), so the
@@ -846,14 +856,13 @@ namespace TileStories.Editor
             sceneView.Frame(new Bounds(child.position, Vector3.one * width), false);
         }
 
-        private static POIData CreateDefaultPoi(float initialRotation, POIData sourcePoi = null)
+        private static POIData CreateDefaultPoi(POIData sourcePoi = null)
         {
             var poi = new POIData
             {
                 id = System.Guid.NewGuid().ToString("N"),
                 name = "New POI",
                 category = "default",
-                editor_rotation_deg = initialRotation,
                 position_verified = false,
                 status_pct = 0f,
                 has_status = false,
@@ -898,7 +907,7 @@ namespace TileStories.Editor
             if (_config == null) return;
             if (_config.pois == null) _config.pois = new List<POIData>();
 
-            var newPoi = CreateDefaultPoi(PoiRotationResolver.DefaultEditorRotationDeg);
+            var newPoi = CreateDefaultPoi();
             InsertPoiAt(0, newPoi);
             SpawnAndFocusNewPoi(newPoi);
             _poiFoldouts[newPoi.id] = true;
@@ -915,7 +924,7 @@ namespace TileStories.Editor
             if (index < 0 || index >= _config.pois.Count) return;
 
             var sourcePoi = _config.pois[index];
-            var newPoi = CreateDefaultPoi(sourcePoi.editor_rotation_deg, sourcePoi);
+            var newPoi = CreateDefaultPoi(sourcePoi);
             InsertPoiAt(index + 1, newPoi);
 
             SpawnAndFocusNewPoi(newPoi, sourcePoi);
@@ -930,7 +939,9 @@ namespace TileStories.Editor
             if (rig == null)
             {
                 // No rig available (e.g. no CorrectionAnchor in scene). Warn but keep POI in config.
-                EditorGUILayout.HelpBox("No POI Editor rig found. Add a PlacementCorrectionAnchor to the scene to see markers in the Scene view.", MessageType.Warning);
+                // (A HelpBox here was drawn mid-layout from an event handler and vanished
+                // next frame, so nobody saw it -- a queued notice dialog actually reaches the developer.)
+                EditorNotice.Queue("No POI Editor rig found", "Add a PlacementCorrectionAnchor to the scene to see markers in the Scene view. The POI was still added to the config.");
                 return;
             }
 

@@ -22,10 +22,9 @@ namespace TileStories.Editor
             // Save/Clear/Build or Cancel.
             if (!POIEditorToolWindow.PromptBeforePlayOrBuild(isBuild: true))
             {
-                // User cancelled the build, or opted out of prompts but the
-                // rig still has children (shouldn't happen — PromptBeforePlayOrBuild
-                // returns true when SkipPromptPrefKey is set. If it returns false,
-                // the user clicked Cancel).
+                // PromptBeforePlayOrBuild only returns false when the rig has children and
+                // the developer chose Cancel (or pressed Esc / closed the dialog). There is
+                // no opt-out: a build must never ship the editor rig's stand-in markers.
                 var rig = GameObject.Find("POIEditorRig");
                 int count = rig != null ? rig.transform.childCount : 0;
                 throw new BuildFailedException(

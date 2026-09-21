@@ -146,7 +146,7 @@ namespace TileStories.Editor
             else
             {
                 _rowSet(entry, oldName); // rejected: keep the original identity
-                EditorUtility.DisplayDialog("Identity not changed", rejection, "OK");
+                EditorNotice.Queue("Identity not changed", rejection);
             }
 
             Clear();

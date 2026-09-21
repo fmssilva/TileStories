@@ -37,7 +37,7 @@ namespace TileStories.Editor
                     if (!string.IsNullOrWhiteSpace(rel))
                         path = rel;
                     else
-                        EditorUtility.DisplayDialog("Invalid path", "Please choose a file inside this Unity project.", "OK");
+                        EditorNotice.Queue("Invalid path", "Please choose a file inside this Unity project.");
                 }
             }
             browseRect = GUILayoutUtility.GetLastRect();
