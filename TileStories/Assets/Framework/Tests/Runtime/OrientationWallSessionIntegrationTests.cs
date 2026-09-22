@@ -40,7 +40,7 @@ namespace TileStories.Tests
             yield return WallConfigLoader.LoadFromStreamingAssets("LivingRoom/config.json", c => config = c);
             Assert.IsNotNull(config, "StreamingAssets/LivingRoom/config.json must load for this integration test.");
             _config = config;
-            // The developer's own dev-tool switch ("Focus on Effects Grid") in the shipped config must never
+            // The developer's own dev-tool switch ("Add effects demo grid") in the shipped config must never
             // change what an orientation test spawns (it adds a second camera on this test's render texture).
             _config.effect_defaults.preview = new EffectDefaults.EffectPreviewSettings();
 
@@ -189,17 +189,28 @@ namespace TileStories.Tests
                 "A real WallSession-spawned marker's Symbol should be the topmost raycast target at its own centre.");
         }
 
+        // Topmost = the graphic with the highest draw depth that contains the point. This is what
+        // GraphicRaycaster does, minus its Display.RelativeMouseAt step: in the Editor that call
+        // returns (0,0,0) whenever the mouse is not over the Game view, so the raycaster reports
+        // zero hits regardless of the marker. The Symbol counts as hit when the topmost graphic is
+        // the Symbol itself or one of its own children (its icon), never a sibling or another marker.
         private static bool IsTopmostRaycastTarget(RectTransform target, Camera uiCamera)
         {
-            var raycaster = target.GetComponentInParent<GraphicRaycaster>();
-            if (raycaster == null || EventSystem.current == null) return false;
+            var canvas = target.GetComponentInParent<Canvas>();
+            if (canvas == null) return false;
 
             Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(uiCamera, target.position);
-            var pointerData = new PointerEventData(EventSystem.current) { position = screenPoint };
-            var results = new List<RaycastResult>();
-            raycaster.Raycast(pointerData, results);
+            Graphic top = null;
+            var graphics = GraphicRegistry.GetGraphicsForCanvas(canvas);
+            for (int i = 0; i < graphics.Count; i++)
+            {
+                var graphic = graphics[i];
+                if (!graphic.raycastTarget || graphic.depth == -1 || !graphic.gameObject.activeInHierarchy) continue;
+                if (!RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, screenPoint, uiCamera)) continue;
+                if (top == null || graphic.depth > top.depth) top = graphic;
+            }
 
-            return results.Count > 0 && results[0].gameObject.transform == target;
+            return top != null && (top.transform == target || top.transform.IsChildOf(target));
         }
 
         private static void SetField(object obj, string name, object value) =>

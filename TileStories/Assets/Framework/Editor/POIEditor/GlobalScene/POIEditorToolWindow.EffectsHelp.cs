@@ -89,7 +89,7 @@ namespace TileStories.Editor
 
         private static readonly string EffectsPlaymodeTestGuide =
             "SETUP\n" +
-            "- Fastest: tick 'Focus on Effects Grid' (Test, above), Save All to JSON, Copy to StreamingAssets, then Play. The screen shows a labelled grid of markers on a neutral background, each with its effect or level name; the wall cannot hide it. The real markers are hidden while it is on. Untick it when done.\n" +
+            "- Fastest: tick 'Add effects demo grid' (Test, above), Save All to JSON, Copy to StreamingAssets, then Play. The screen shows a labelled grid of markers on a neutral background, each with its effect or level name; the wall cannot hide it. The real markers are hidden while it is on. Untick it when done.\n" +
             "- LIVE: once Play is running, change any value on this Effects page (or a level's Ripple / Halo / Pulse column) and the running markers and the grid update at once. Nothing is saved by that: stop Play and your edits stay in this window; press Save All to JSON (then Copy to StreamingAssets) only when you want to keep them.\n" +
             "- Real markers instead: 'Save All to JSON' then 'Copy to StreamingAssets' (Play reads the copy), open Apps/LivingRoom/LivingRoomScene, press Play, click into the Game view.\n" +
             "- Mock camera (the project's MockLocalizationProvider, Editor only): W/A/S/D = move, E = up, Q = down, RMB + mouse or arrow keys = look.\n\n" +
@@ -120,7 +120,7 @@ namespace TileStories.Editor
             "- Wi-Fi: Developer options > Wireless debugging > Pair with code.\n" +
             "  - 'adb pair <ip>:<pair-port>' + code, then 'adb connect <ip>:<port>'.\n" +
             "  - Or 'npx adb-qr-connect' and scan the QR code.\n" +
-            "- Tick 'Focus on Effects Grid' to get the grid in a DEVELOPMENT build (Build Settings > Development Build). Release builds ignore it.\n" +
+            "- Tick 'Add effects demo grid' to get the grid in a DEVELOPMENT build (Build Settings > Development Build). Release builds ignore it.\n" +
             "- 'Save All to JSON' + 'Copy to StreamingAssets', then Build Settings > Android > Build And Run.\n\n" +
             "LOGS\n" +
             "- 'adb logcat -c', then 'adb logcat -s Unity > __logcat.txt' and read the file.\n" +

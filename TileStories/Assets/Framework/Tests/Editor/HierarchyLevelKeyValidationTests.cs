@@ -48,37 +48,52 @@ namespace TileStories.Tests
         }
 
         [Test]
-        public void NullKey_ProducesNeverAssignedIssue()
+        public void NullKey_ProducesNoHierarchyLevelAssignedIssue()
         {
             var config = ConfigWithLevels("level_1");
             AddPoi(config, "poi_a", null);
             var issues = InvokeValidator(CreateWindowWithConfig(config), "ValidateHierarchyLevelKeys");
 
             Assert.AreEqual(1, issues.Count);
-            StringAssert.Contains("never assigned", issues[0].problem);
+            StringAssert.Contains("No Hierarchy Level is assigned", issues[0].problem);
         }
 
         [Test]
-        public void EmptyKey_ProducesNeverAssignedIssue()
+        public void EmptyKey_ProducesNoHierarchyLevelAssignedIssue()
         {
             var config = ConfigWithLevels("level_1");
             AddPoi(config, "poi_a", "");
             var issues = InvokeValidator(CreateWindowWithConfig(config), "ValidateHierarchyLevelKeys");
 
             Assert.AreEqual(1, issues.Count);
-            StringAssert.Contains("never assigned", issues[0].problem);
+            StringAssert.Contains("No Hierarchy Level is assigned", issues[0].problem);
             StringAssert.AreEqualIgnoringCase("<empty>", issues[0].value);
         }
 
+        // Regression (P5, developer feedback on a confusing dialog): the problem/fix text must lead
+        // with the UI-facing name ("Hierarchy Level", the dropdown label) and say which tab it is
+        // in, not just the raw JSON field name -- a developer reading the popup should not need to
+        // already know the config schema to act on it.
         [Test]
-        public void StaleKey_ProducesExistingStaleReferenceText_Unchanged()
+        public void EmptyKey_FixHint_NamesTheRealTabAndDropdown()
+        {
+            var config = ConfigWithLevels("level_1");
+            AddPoi(config, "poi_a", "");
+            var issues = InvokeValidator(CreateWindowWithConfig(config), "ValidateHierarchyLevelKeys");
+
+            StringAssert.Contains("Specific Marker tab", issues[0].fixHint);
+            StringAssert.Contains("Hierarchy Level dropdown", issues[0].fixHint);
+        }
+
+        [Test]
+        public void StaleKey_ProducesStaleReferenceIssue()
         {
             var config = ConfigWithLevels("level_1");
             AddPoi(config, "poi_a", "deleted_level");
             var issues = InvokeValidator(CreateWindowWithConfig(config), "ValidateHierarchyLevelKeys");
 
             Assert.AreEqual(1, issues.Count);
-            StringAssert.Contains("does not match any entry", issues[0].problem);
+            StringAssert.Contains("no longer matches any row", issues[0].problem);
             StringAssert.AreNotEqualIgnoringCase("<empty>", issues[0].value);
         }
 
@@ -102,7 +117,8 @@ namespace TileStories.Tests
             var issues = InvokeValidator(CreateWindowWithConfig(config), "ValidateHierarchyLevelKeys");
 
             Assert.AreEqual(1, issues.Count);
-            StringAssert.Contains("Add at least one hierarchy level row", issues[0].fixHint);
+            StringAssert.Contains("Global Scene > Hierarchy Levels", issues[0].fixHint);
+            StringAssert.Contains("add at least one row", issues[0].fixHint);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -83,7 +84,7 @@ namespace TileStories.Tests
         public void Gap_Constants_RemovedFromSourceToo()
         {
             string shared = ReadSource(@"Framework\Editor\POIEditor\Shared\POIEditorToolWindow.SymbolTable.cs");
-            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.GlobalScene.cs");
+            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
             foreach (string src in new[] { shared, outline })
             {
                 Assert.IsFalse(src.Contains("TableGroupGap"), "Stale TableGroupGap reference in source");
@@ -130,13 +131,50 @@ namespace TileStories.Tests
                 "The pre-delete gap must be larger than the standard between-groups gap");
         }
 
-        // Same invariant for the outline table's own inline renderer.
+        // Same invariant for the outline table's own inline renderer, for the 3 boundaries that use
+        // the standard gap (key->style, keywords->trash, plus the right-edge clearance is separate).
+        // The Style->Color boundary is the shared table's own TableGapBeforeColor case, below.
         [Test]
         public void OutlineTable_GapBetweenGroups_AllBoundaries()
         {
-            string src = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.GlobalScene.cs");
-            Assert.That(CountOccurrences(src, "GUILayout.Space(TableGapBetweenGroups)"), Is.GreaterThanOrEqualTo(8),
-                "Outline renderer needs the between-groups gap at all 4 boundaries x (header + rows)");
+            string src = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
+            Assert.That(CountOccurrences(src, "GUILayout.Space(TableGapBetweenGroups)"), Is.GreaterThanOrEqualTo(6),
+                "Outline renderer needs the between-groups gap at 3 of its boundaries x (header + rows)");
+        }
+
+        // The Outline Style-to-Color boundary (header + row) reuses the shared table's larger,
+        // dedicated TableGapBeforeColor gap instead of the standard between-groups gap (developer
+        // feedback, 2026-09-22: the standard gap read as visually tight there).
+        [Test]
+        public void OutlineTable_GapBeforeColor_LargerThanBetweenGroups()
+        {
+            string src = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
+            Assert.That(CountOccurrences(src, "GUILayout.Space(TableGapBeforeColor)"), Is.GreaterThanOrEqualTo(2),
+                "Outline renderer needs the larger pre-color gap in both the header and the rows");
+            Assert.That(ReflectGapConstant("TableGapBeforeColor"), Is.GreaterThan(ReflectGapConstant("TableGapBetweenGroups")),
+                "The pre-color gap must be larger than the standard between-groups gap");
+        }
+
+        // The specific past bug: when "Per outline type" is off (Color column hidden),
+        // TableGapBeforeColor fired unconditionally before the (skipped) Color group and
+        // TableGapBetweenGroups fired again right after -- two gaps back to back with
+        // nothing drawn between them, in both the header and the row loop. The fix moved
+        // TableGapBeforeColor inside the same `if (showColorColumn)` block as the Color
+        // group itself, so it is only ever reserved once, alongside the group it precedes.
+        [Test]
+        public void OutlineTable_GapBeforeColor_OnlyReservedWhenColorColumnShown()
+        {
+            string src = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
+            // Whitespace-agnostic: the row-loop guard sits one indent level deeper than the header's,
+            // so this only requires "if (showColorColumn) { GUILayout.Space(TableGapBeforeColor);"
+            // with any amount of whitespace/newlines between the tokens, not an exact indent match.
+            var guardedPattern = new Regex(@"if\s*\(showColorColumn\)\s*\{\s*GUILayout\.Space\(TableGapBeforeColor\);");
+            int guardedCount = guardedPattern.Matches(src).Count;
+            Assert.That(guardedCount, Is.GreaterThanOrEqualTo(2),
+                "TableGapBeforeColor must sit inside the same showColorColumn guard as the Color group itself (header + rows), " +
+                "otherwise it still reserves space when the column is hidden and doubles up with the following TableGapBetweenGroups.");
+            Assert.That(CountOccurrences(src, "GUILayout.Space(TableGapBeforeColor)"), Is.EqualTo(guardedCount),
+                "Every TableGapBeforeColor call must be inside the showColorColumn guard -- none unconditional.");
         }
 
         // The specific past bug: no spacer between the Color group and the Search
@@ -146,7 +184,7 @@ namespace TileStories.Tests
         public void BothRenderers_GapAfterColorGroup_Present()
         {
             string shared = ReadSource(@"Framework\Editor\POIEditor\Shared\POIEditorToolWindow.SymbolTable.cs");
-            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.GlobalScene.cs");
+            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
 
             int srcPos = shared.IndexOf("// Group 4: Search keywords", StringComparison.Ordinal);
             Assert.That(srcPos, Is.GreaterThanOrEqualTo(0), "Marker/badge header must still show the Search Keywords title");
@@ -166,7 +204,7 @@ namespace TileStories.Tests
         public void BothRenderers_GapWithinGroup_Present()
         {
             string shared = ReadSource(@"Framework\Editor\POIEditor\Shared\POIEditorToolWindow.SymbolTable.cs");
-            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.GlobalScene.cs");
+            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
 
             Assert.That(CountOccurrences(shared, "GUILayout.Space(TableGapWithinGroup)"), Is.GreaterThanOrEqualTo(4),
                 "Marker/badge renderer needs within-group spacing for details, symbol trio and keywords pair");
@@ -218,7 +256,7 @@ namespace TileStories.Tests
         public void ColorGroup_HeaderLabelsUseDerivedWidth()
         {
             string shared = ReadSource(@"Framework\Editor\POIEditor\Shared\POIEditorToolWindow.SymbolTable.cs");
-            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.GlobalScene.cs");
+            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
 
             Assert.That(CountOccurrences(shared, "GUILayout.Width(ColorGroupWidth)"), Is.GreaterThanOrEqualTo(1),
                 "Marker/badge header Color label must use ColorGroupWidth");
@@ -340,7 +378,7 @@ namespace TileStories.Tests
         public void FieldRows_UseSharedRow()
         {
             string lod = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.LodZoom.cs");
-            string global = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.GlobalScene.cs");
+            string global = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
             string search = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.SearchFilter.cs");
             string specific = ReadSource(@"Framework\Editor\POIEditor\SpecificMarker\POIEditorToolWindow.SpecificMarker.cs");
             string position = ReadSource(@"Framework\Editor\POIEditor\SpecificMarker\POIEditorToolWindow.PositionTabs.cs");
@@ -355,7 +393,7 @@ namespace TileStories.Tests
             Assert.IsTrue(lod.Contains("DrawPopupField"), "DrawPopupField must exist");
 
             // Global scene direct field rows (badge/marker/outline toggles + popups).
-            AssertFieldRowsUseSharedRow(global, new string[] { "Enable badge", "Background shape", "Badge background shape", "Enable outline", "Outline Color" });
+            AssertFieldRowsUseSharedRow(global, new string[] { "Enable badge", "Background shape", "Badge back shape", "Enable outline", "Outline Color" });
 
             // Effects section: every parameter row goes through the shared field helpers (which open
             // the shared row themselves); a raw EditorGUILayout field call here would bypass the
@@ -396,14 +434,15 @@ namespace TileStories.Tests
         [Test]
         public void AddButtonRows_UseSharedRowWhereConverted()
         {
-            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.GlobalScene.cs");
+            string outline = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
+            string hierarchy = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.GlobalScene.cs");
             string lod = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.LodZoom.cs");
             string search = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.SearchFilter.cs");
             string specific = ReadSource(@"Framework\Editor\POIEditor\SpecificMarker\POIEditorToolWindow.SpecificMarker.cs");
             string position = ReadSource(@"Framework\Editor\POIEditor\SpecificMarker\POIEditorToolWindow.PositionTabs.cs");
 
             AssertSharedRow(outline, "+ Add outline level", "Outline");
-            AssertSharedRow(outline, "+ Add hierarchy level", "Hierarchy");
+            AssertSharedRow(hierarchy, "+ Add hierarchy level", "Hierarchy");
             AssertSharedRow(lod, "+ Add band", "LOD band");
             AssertSharedRow(lod, "Suggest Values", "LOD suggest");
             AssertSharedRow(search, "+ Add synonym group", "Synonym group");

@@ -3,7 +3,13 @@
 Read this file to get oriented on the project's structure. It is the map: what
 exists, where it lives, and what each piece does in one line. Tree verified
 against disk on 2026-09-18; the Effects, Orientation and Live Play Mode entries
-were re-verified on 2026-09-21.
+were re-verified on 2026-09-21; the Marker/Badge/Outline entries (MarkerVisualSettings,
+MarkerVisualResolver, MarkerDesign.cs, MarkerDesignHelp.cs, LivePlayModeMarkerApplier,
+the new test files, MarkerStyle.cs removal) were re-verified on 2026-09-22; the Outline
+follow-up (P5, same day: MarkerOutlineMode.Uniform/PerType rename+split, outline_uniform_color_hex,
+DevPreviewGridLayout.cs, OutlinePreviewSpawner.cs/OutlinePreviewFocus.cs, OutlinePreviewRenderTests.cs)
+was verified same day too, as was a further same-day fix to POIEditorToolWindow.MarkerDesign.cs's
+outline table (a double-gap regression when the Color column is hidden).
 
 ## 0. How to read and edit this file
 
@@ -137,13 +143,12 @@ were re-verified on 2026-09-21.
       - TileStories.asmdef  -- runtime assembly; refs Unity.InputSystem, Immersal.Core, Unity.TextMeshPro
       - AssemblyInfo.cs  -- InternalsVisibleTo so test assemblies can reach internals
       - Core/  -- config model, loading, and the session that boots a wall
-        - WallConfigData.cs  -- the whole config.json object model: WallConfigData, POIData, PositionData, taxonomy entries, LodSettings, DisplacementSettings, EffectDefaults
+        - WallConfigData.cs  -- the whole config.json object model: WallConfigData, POIData, PositionData, taxonomy entries, LodSettings, DisplacementSettings, EffectDefaults, OutlinePreviewSettings (P5, outline_preview)
         - WallConfigLoader.cs  -- reads config.json from StreamingAssets and deserializes it
         - WallSession.cs  -- boots one wall: load config, wait for tracking, spawn markers, expose settings to LOD/zoom. Delegates every decision; holds none. Also the live Play Mode seams ApplyEffectSettings / ApplyOrientationSettings
         - MarkerShape.cs  -- enum of symbol silhouettes (circle, rounded square, hexagon, diamond, star, none)
-        - MarkerOutlineMode.cs  -- enum for whether and how the status contour ring renders
-        - MarkerStyle.cs  -- LEGACY combined style enum, kept for old configs
-        - MarkerVisualsParser.cs  -- parses config strings into the enums above with safe fallbacks
+        - MarkerOutlineMode.cs  -- enum for whether and how the status contour ring renders (Uniform, SameHue, PerType, None; P5: Gold renamed to Uniform, PerType added)
+        - MarkerVisualsParser.cs  -- parses config strings into the enums above with safe fallbacks, plus TryParseBadgeCorner
       - Tracking/  -- localisation, the editor mock, and AR zoom
         - IWallTracker.cs  -- the tracking seam: OnWallLocalised(Pose)
         - ImmersalWallTracker.cs  -- real implementation wrapping the Immersal Localizer
@@ -157,8 +162,10 @@ were re-verified on 2026-09-21.
         - POIPositionResolver.cs  -- POI to local Vector3; a null position resolves to origin
         - CategoryPalette.cs  -- category string to color + icon key
         - BadgeCategoryPalette.cs  -- badge key to badge icon + tint
-        - StatusRamp.cs  -- status percentage to ring color and dash style
+        - StatusRamp.cs  -- status percentage to ring color and dash style; Configure(entries, mode, uniformColor) is mode-aware since P5 (Uniform shares one colour, Per outline type honours each row's own)
         - MarkerHierarchyResolver.cs  -- hierarchy level key to size, label visibility, effects, reveal timing
+        - MarkerVisualSettings.cs  -- the wall-level marker/badge/outline look, resolved ONCE from WallConfigData (Resolve) and applied to every static palette (ApplyPalettes); WallSession, the editor Scene rig and the live Play Mode applier all build it the same way (_2.2.1 section 3.1)
+        - MarkerVisualResolver.cs  -- pure: POIData + MarkerVisualSettings -> MarkerVisualState (background/fill/icon/ring/badge decisions as plain data); MarkerView only draws the result (_2.2.1 section 3.1)
         - MarkerOverlapResolver.cs  -- screen-space overlap detection and the three displacement algorithms
         - DisplacementTieBreakStrategy.cs  -- decides which marker of an overlapping pair moves
         - ClusterGrouping.cs  -- deterministic grouping of dense markers into cluster aggregates
@@ -258,8 +265,11 @@ were re-verified on 2026-09-21.
         - DisplacementGalleryHarness.cs  -- spawns displacement scenarios
         - OrientationGalleryDefinitions.cs  -- data list of the 11 orientation gallery entries (see _2.1 section 11)
         - OrientationGalleryHarness.cs  -- orbit/pitch/roll camera rig + SpawnEntry (shared by the visual harness and OrientationGalleryTests)
-        - EffectsPreviewSpawner.cs  -- dev-only "Focus on Effects Grid" (effect_defaults.preview): builds labelled real markers, one per effect and per hierarchy level, 5000 m above the scene; pure cell/fit/column maths; Editor and development builds only; called from WallSession
+        - EffectsPreviewSpawner.cs  -- dev-only "Add effects demo grid" (effect_defaults.preview): builds labelled real markers, one per effect and per hierarchy level, 5000 m above the scene; layout maths delegated to DevPreviewGridLayout.cs (P5); Editor and development builds only; called from WallSession
         - EffectsPreviewFocus.cs  -- lives on the grid root: owns the dedicated grid camera (main camera FOV/target, depth +100, neutral clear), copies the main camera rotation each frame and refits the grid when the aspect ratio or FOV changes
+        - DevPreviewGridLayout.cs  -- P5. Shared pure "two-block" grid layout maths (GridExtent/FitDistance/ChooseColumns/CellPositions) used by both EffectsPreviewSpawner (thin wrappers) and OutlinePreviewSpawner, so the camera-fit logic exists once
+        - OutlinePreviewSpawner.cs  -- P5. Dev-only "Add outline demo grid" (outline_preview): one no-outline control cell + one cell per outline level (real colour/dash/spin, the wall's own "unknown" row reused if present rather than duplicated), 6500 m above the scene (different height than the effects grid); Editor and development builds only; called from WallSession
+        - OutlinePreviewFocus.cs  -- P5. Same shape as EffectsPreviewFocus, for the outline grid's own camera
       - Blocks/  [EMPTY SCAFFOLD]  -- the per-POI content block system (text/image/audio/video/model/map)
       - Circuits/  [EMPTY SCAFFOLD]  -- circuit state machine and entry-point resolution
       - Telemetry/  [EMPTY SCAFFOLD]  -- analytics events and consent
@@ -276,7 +286,9 @@ were re-verified on 2026-09-21.
         - POIEditorToolWindow.Constants.cs  -- option and label arrays, section colors, layout constants, help strings
         - MarkerSymbolTexturePostprocessor.cs  -- forces correct import settings on marker symbol textures
         - GlobalScene/  -- wall-wide settings sections
-          - POIEditorToolWindow.GlobalScene.cs  -- section dispatch plus Marker, Badge, Outline, Effects and Hierarchy Levels (now also carries the per-level Facing override column, see _2.1 section 4.3)
+          - POIEditorToolWindow.GlobalScene.cs  -- section dispatch plus Hierarchy Levels table (now also carries the per-level Facing override column, see _2.1 section 4.3)
+          - POIEditorToolWindow.MarkerDesign.cs  -- Marker, Badge and Outline sections (_2.2.1/_2.2.2/_2.2.3), each on the shared field-drawer helpers and ending in a Test sub-foldout
+          - POIEditorToolWindow.MarkerDesignHelp.cs  -- Marker/Badge/Outline option arrays, (i) help texts, and the nine Scene/Playmode/Device test guides (three domains x three tiers)
           - POIEditorToolWindow.Orientation.cs  -- Orientation section, 4 sub-foldouts: Vertical Alignment, Facing Options, Update Cost, Test (Scene-Mode Preview toggle + three collapsed guides: Scene, Playmode, Device; see _2.1 section 8)
           - POIEditorToolWindow.Effects.cs  -- Effects section: master toggle (hides everything when off), one foldout per effect with its own enabled checkbox, used-by line, (i) buttons and parameter rows
           - POIEditorToolWindow.EffectsHelp.cs  -- every Effects constant: level-table option arrays, (i) help texts, the three Test guides
@@ -290,6 +302,7 @@ were re-verified on 2026-09-21.
           - LivePlayModeConfigDispatcher.cs  -- plain C#: remembers each domain's last fingerprint per running wall, applies only changed domains, hands each a private config copy
           - LivePlayModeEffectsApplier.cs  -- Effects domain applier: fingerprint = effect_defaults + hierarchy levels; Apply calls WallSession.ApplyEffectSettings
           - LivePlayModeOrientationApplier.cs  -- Orientation domain applier: fingerprint = orientation_settings + each level's facing override; Apply calls WallSession.ApplyOrientationSettings then LODController.ReapplyClusterOrientation (see _2.1 section 13.5)
+          - LivePlayModeMarkerApplier.cs  -- Marker/Badge/Outline domain applier: fingerprint = every wall-level marker field + the taxonomy tables + each POI's own marker/badge/status fields; Apply calls WallSession.ApplyMarkerSettings (see _2.2.1 section 3.3)
           - LivePlayModeConfigPush.cs  -- the one entry point the window calls after a change; registers every domain applier; does nothing outside Play Mode
         - SpecificMarker/  -- per-POI editing
           - POIEditorToolWindow.SpecificMarker.cs  -- the POI list, header row (focus, rename, reorder, add, help, delete) and per-POI style sections
@@ -357,8 +370,10 @@ were re-verified on 2026-09-21.
         - OrientationEditorRoundTripTests.cs  -- OrientationSettings JSON round-trip, no-block defaults, editor foldout field-existence, deleted-field absence checks, test-guide contract (ASCII, every field and option named, collapsed by default) (_2.1 sections 7, 13)
         - EffectsAuthoringTests.cs  -- Effects authoring: editor dropdown strings vs MarkerHierarchyResolver, JSON round trip and undo/redo of EVERY effect field (walked by reflection) through the real window history, shipped LivingRoom config, guide and help-text contract (_2.2.4)
         - EffectsUsageAndPreviewLayoutTests.cs  -- pure Effects logic: per-effect switches (FilterEnabled), usage and per-level lines, dropdown filtering, preview cell list and placement, release-build guard
+        - MarkerDesignAuthoringTests.cs  -- Marker/Badge/Outline authoring: every editor-offered option (Outline Color, Background shape) parses at runtime (the free_colors bug regression), Ring/Badge raycastTarget=false regression (_2.2.1)
+        - MarkerTaxonomyReferenceValidationTests.cs  -- ValidateMarkerTaxonomyReferences: stale category/badge/status-level/custom-symbol references, empty-taxonomy no-op case (_2.2.1)
         - DevFeatureBuildGuardTests.cs  -- the dev-only switch build guard: reported in development builds with the how-to text, ignored in release builds (matches EffectsPreviewSpawner.IsAllowed), nothing when OFF, registry entries complete
-        - LivePlayModeConfigTests.cs  -- live Play Mode config: dispatcher rules (first push, unchanged, one domain, new wall, private copy); the Effects applier and the Orientation applier driving a real WallSession and real markers (every orientation field walked by reflection for the fingerprint, level facing override, effects untouched)
+        - LivePlayModeConfigTests.cs  -- live Play Mode config: dispatcher rules (first push, unchanged, one domain, new wall, private copy); the Effects, Orientation and Marker appliers driving a real WallSession and real markers (every orientation field walked by reflection for the fingerprint, level facing override, effects untouched; marker fingerprint covers every wall+POI marker field, real markers recolour/hide live)
         - OrientationEditModePreviewTests.cs  -- Scene-Mode orientation preview: non-destructive guarantee, on/off cycle byte-identical, CapturePositions guard, wall_fixed Edit/Play-Mode agreement, Label/Badge tick and restore on a real POI_Marker (_2.1 section 9)
         - DefaultCategoryStylesTests.cs, DefaultBadgeCategoriesTests.cs, DefaultOutlineLevelsTests.cs  -- seeding defaults
         - POIEditorToolWriteBackTests.cs, POIEditorAddPoiTests.cs, POIEditorToolSearchRoundTripTests.cs  -- editor data flow; ReloadGuardChoiceTests.cs  -- pure dialog-result mappings (reload guards, rig safety) incl. Esc/X must cancel
@@ -378,6 +393,8 @@ were re-verified on 2026-09-21.
         - MarkerGalleryTests.cs, ClusterGalleryTests.cs, DisplacementGalleryTests.cs, OrientationGalleryTests.cs  -- Phase A gallery assertions, driven by the same definition lists as the harnesses
         - MarkerOverlapResolverTests.cs  -- the marker billboard rotation contract
         - MarkerViewRuntimeTests.cs, MarkerRevealEffectTests.cs, MarkerIconLibraryRuntimeTests.cs  -- marker visuals at runtime
+        - MarkerConfigDrivesMarkerTests.cs  -- real WallSession + real prefab + the real shipped LivingRoom config's 4 dev marker-design fixtures: no status (no ring/badge), no badge category (status-coloured fallback badge), no hierarchy level (framework fallback size), custom symbol (icon overridden, category fill untouched) (_2.2.1 section 6)
+        - OutlinePreviewRenderTests.cs  -- P5. Real WallSession + real prefab + real shipped config: the outline demo grid's cell count/naming (control + one per level, the wall's own "unknown" row not duplicated), per-mode ring colour (Uniform shared, Per outline type per-row), only level cells spin, live rebuild on ApplyMarkerSettings (_2.2.3 section 6)
         - MarkerEffectConfigTests.cs  -- every effect config value drives a real marker: each effect uses its OWN block (no leaking), parameters vs the spec formula each frame, all 24 ripple x halo x pulse combinations, LivingRoom levels, master and per-effect switches, period <= 0 safety, no base-scale drift, level reveal timing (_2.2.4)
         - EffectsPreviewSpawnerTests.cs  -- the effects preview grid through the real WallSession.SpawnPOIs: off = nothing, one cell per effect and level with the right effects/size/labels, all inside the camera view, plain grey circle vs a copied real POI, switches respected; plus WallSession.ApplyEffectSettings turning the grid on/off/rebuilding and re-applying effects on running markers
         - EffectsPreviewRenderTests.cs  -- render-level proof of the focus grid: real camera renders to a portrait texture with a wall 50 cm in front of the main camera; every cell drawn, main camera never draws the grid, every effect visible against an effects-off render and animated, effects keep their look on 7/20/30 cm markers, labels stay readable while the main camera rotates and rolls, refit on a resize; saves a PNG under Assets/Screenshots

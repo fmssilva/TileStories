@@ -28,7 +28,7 @@ namespace TileStories.Editor
 
             // Play-Mode preview grid (built by EffectsPreviewSpawner from WallSession): off by default.
             var preview = _config.effect_defaults.preview;
-            preview.enabled = DrawToggleField("Focus on Effects Grid", preview.enabled, EffectPreviewHelp, IndentLevel1);
+            preview.enabled = DrawToggleField("Add effects demo grid", preview.enabled, EffectPreviewHelp, IndentLevel1);
             if (preview.enabled)
             {
                 EffectUsageSummary.PreviewBaseOptions(_config, out string[] ids, out string[] labels);

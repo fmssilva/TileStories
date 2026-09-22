@@ -121,7 +121,7 @@ namespace TileStories.Tests
             var anchor = go.GetComponent<POIAnchor>() ?? go.AddComponent<POIAnchor>();
             anchor.Initialise(new POIData { id = "wallfixed", name = "wallfixed", category = "religious" });
             var view = go.GetComponentInChildren<MarkerView>();
-            view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+            view.Initialise(anchor, MarkerVisualSettings.Default());
             var billboard = go.GetComponent<MarkerBillboard>() ?? go.AddComponent<MarkerBillboard>();
             billboard.Configure(settings, "", null);
 

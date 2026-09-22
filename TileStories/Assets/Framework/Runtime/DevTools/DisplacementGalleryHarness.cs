@@ -77,7 +77,7 @@ namespace TileStories
 
                 var view = mgo.GetComponentInChildren<MarkerView>();
                 if (view == null) view = mgo.AddComponent<MarkerView>();
-                view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.None);
+                view.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None);
 
                 var reveal = mgo.GetComponent<MarkerRevealEffect>();
                 reveal?.SetFullAlphaAndScale();

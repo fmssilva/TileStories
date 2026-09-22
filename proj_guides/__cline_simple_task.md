@@ -30,7 +30,7 @@ A *stable `key` + `label`* split for categories (like `badge_categories` already
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: Lets confirm the whole "Marker_Design" domain`
+## `And now: Lets confirm the whole "Marker_Design" domain, which includes in the editor tab the marker, badge and outline components - and also the effects component but that is already revised i think`
 I want to verify everything we have done in the domain of the marker design system.
 
 a) Start by reading these files fully and check the necessary and respective code files in the prooject to confirm how everything is implemented currently: 

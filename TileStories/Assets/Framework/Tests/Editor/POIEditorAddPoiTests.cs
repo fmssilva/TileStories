@@ -250,7 +250,10 @@ namespace TileStories.Tests
             var newPoi = config.pois[0];
             Assert.IsFalse(string.IsNullOrEmpty(newPoi.id), "New POI should have a GUID id");
             Assert.AreEqual("New POI", newPoi.name);
-            Assert.AreEqual("default", newPoi.category);
+            // A config with no category_styles has nothing real to copy from -- empty, not a
+            // literal "default" that matches no dropdown option and silently falls through to
+            // CategoryPalette's hash fallback.
+            Assert.AreEqual(string.Empty, newPoi.category);
             Assert.AreEqual(0f, newPoi.editor_rotation_deg, 0.0001f);
             Assert.IsFalse(newPoi.position_verified);
             Assert.AreEqual(0f, newPoi.status_pct);
@@ -262,6 +265,51 @@ namespace TileStories.Tests
             Assert.IsNull(newPoi.badge_category);
             Assert.IsNotNull(newPoi.search_keywords);
             Assert.IsNotNull(newPoi.search_keyword_fields);
+        }
+
+        [Test]
+        public void AddFirstPoi_WithCategoryTaxonomy_UsesTheWallsFirstRealCategory()
+        {
+            var config = CreateMinimalConfig();
+            config.category_styles = new System.Collections.Generic.List<CategoryStyleEntry>
+            {
+                new CategoryStyleEntry { category = "religious", icon_key = "unknown" },
+                new CategoryStyleEntry { category = "military", icon_key = "unknown" },
+            };
+            var window = CreateWindowWithConfig(config);
+
+            InvokeAddFirstPoi(window);
+
+            Assert.AreEqual("religious", config.pois[0].category,
+                "A new POI's category should be a real, pickable dropdown value, not an invented literal.");
+        }
+
+        [Test]
+        public void AddNewPoiAfter_CopiesStatusLevelKey_AndDeepCopiesSearchKeywordFields()
+        {
+            var sourceKeywords = new System.Collections.Generic.List<POISearchKeywordField>
+            {
+                new POISearchKeywordField { field_key = "architect", keywords = new System.Collections.Generic.List<string> { "wren" } }
+            };
+            var config = new WallConfigData
+            {
+                wall_id = "test_wall",
+                wall_name = "Test Wall",
+                pois = new System.Collections.Generic.List<POIData>
+                {
+                    new POIData { id = "poi_1", name = "Lamp", category = "civic", has_status = true, status_level_key = "partial_damage", search_keyword_fields = sourceKeywords }
+                }
+            };
+            var window = CreateWindowWithConfig(config);
+
+            InvokeAddNewPoiAfter(window, 0);
+
+            var added = config.pois[1];
+            Assert.AreEqual("partial_damage", added.status_level_key, "status_level_key must be copied from the source POI.");
+
+            added.search_keyword_fields[0].keywords.Add("hooke");
+            Assert.AreEqual(1, config.pois[0].search_keyword_fields[0].keywords.Count,
+                "Editing the new POI's keywords must not mutate the source POI's own list.");
         }
 
         [Test]

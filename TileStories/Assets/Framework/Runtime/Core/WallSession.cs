@@ -24,15 +24,9 @@ namespace TileStories
         private bool _didSpawn;
         private bool _configLoaded;
 
-        // Resolved once from config, then passed to every marker on spawn
-        private MarkerShape _markerShape;
-        private MarkerShape _badgeShape = MarkerShape.Circle;
-        private MarkerOutlineMode _markerOutlineMode;
-        private bool _markerUseBadge;
-        private bool _hasShapeFromConfig;
-        private bool _hasCategoryDefinitions;
-        private bool _hasOutlineLevels;
-                private SpriteKeyLibrary _wallIconLibrary;
+        // Resolved from config (RefreshVisualSettings), then passed to every marker
+        private MarkerVisualSettings _visualSettings = MarkerVisualSettings.Default();
+        private SpriteKeyLibrary _wallIconLibrary;
                 private POISearchIndex _searchIndex;
 
                 // Exposed after SpawnPOIs completes so LODController and other systems
@@ -41,6 +35,9 @@ namespace TileStories
 
         // Root of the dev-only effects preview grid, or null when it was not spawned.
         public GameObject EffectsPreviewRoot { get; private set; }
+
+        // Root of the dev-only outline preview grid, or null when it was not spawned.
+        public GameObject OutlinePreviewRoot { get; private set; }
 
                 // Read-only access to the wall's LOD settings, used by LODController.
         // May be null until config finishes loading in LoadConfigCoroutine.
@@ -113,58 +110,7 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
 
             // Runtime reads only authored config and does no visual design fallbacks.
             // Missing/invalid optional fields degrade to no-op visual behavior.
-            _hasShapeFromConfig = MarkerVisualsParser.TryParseShape(_config.marker_shape, out _markerShape);
-            if (!_hasShapeFromConfig)
-                Debug.LogWarning("[WallSession] marker_shape missing/invalid - leaving prefab symbol shape unchanged.");
-
-            // badge_shape is independent of marker_shape (section 20.2). Missing/
-            // invalid falls back to Circle, matching the MarkerView default.
-            if (!MarkerVisualsParser.TryParseShape(_config.badge_shape, out _badgeShape))
-                _badgeShape = MarkerShape.Circle;
-
-            if (!string.IsNullOrWhiteSpace(_config.marker_outline_mode))
-            {
-                if (!MarkerVisualsParser.TryParseOutlineMode(_config.marker_outline_mode, out _markerOutlineMode))
-                {
-                    _markerOutlineMode = MarkerOutlineMode.None;
-                    Debug.LogWarning("[WallSession] marker_outline_mode missing/invalid - disabling outline at runtime.");
-                }
-
-                _markerUseBadge = _config.marker_use_badge;
-            }
-            else if (MarkerVisualsParser.TryParseStyle(_config.marker_style, out var legacyStyle))
-            {
-                // Legacy marker_style is still accepted as explicit authored config.
-                MarkerVisualsParser.DeriveOutlineAndBadgeFromLegacyStyle(
-                    legacyStyle == MarkerStyle.Badge ? "badge" :
-                    legacyStyle == MarkerStyle.OutlineSameHue ? "outline_same_hue" : "outline_gold",
-                    out _markerOutlineMode,
-                    out _markerUseBadge);
-            }
-            else
-            {
-                _markerOutlineMode = MarkerOutlineMode.None;
-                _markerUseBadge = false;
-            }
-
-            _hasCategoryDefinitions = _config.category_styles != null && _config.category_styles.Count > 0;
-            if (_hasCategoryDefinitions) CategoryPalette.Configure(_config.category_styles);
-            else CategoryPalette.ClearOverrides();
-
-            _wallIconLibrary = null;
-            if (!string.IsNullOrWhiteSpace(_config.marker_icon_library_resources_path))
-            {
-                _wallIconLibrary = Resources.Load<SpriteKeyLibrary>(_config.marker_icon_library_resources_path.Trim());
-                if (_wallIconLibrary == null)
-                    Debug.LogWarning($"[WallSession] marker_icon_library_resources_path '{_config.marker_icon_library_resources_path}' could not be loaded from Resources. Using prefab default icon library.");
-            }
-
-            BadgeCategoryPalette.Configure(_config.badge_categories);
-
-            _hasOutlineLevels = _config.outline_levels != null && _config.outline_levels.Count > 0;
-            if (_hasOutlineLevels) StatusRamp.Configure(_config.outline_levels);
-
-            MarkerHierarchyResolver.Configure(_config.hierarchy_levels);
+            RefreshVisualSettings();
 
             // Build the search index from config POIs (_2.6-al wiring).
             // Created once here, then exposed via SearchIndex for SearchOverlayView / ResultsListView / MinimapView.
@@ -208,9 +154,14 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
         private void SpawnEffectsPreview()
         {
             EffectsPreviewRoot = EffectsPreviewSpawner.TrySpawn(_config, poiAnchorPrefab, Camera.main,
-                (view, anchor, style) => view.Initialise(anchor, _markerOutlineMode, _markerUseBadge, _markerShape,
-                    MarkerEffectFlags.None, _hasCategoryDefinitions, _hasShapeFromConfig, _hasOutlineLevels,
-                    _wallIconLibrary, _badgeShape, _effectDefaults, style));
+                (view, anchor, style) => view.Initialise(anchor, _visualSettings, MarkerEffectFlags.None, _effectDefaults, style));
+        }
+
+        // Build the dev-only outline preview grid from the current config (null when off or not allowed)
+        private void SpawnOutlinePreview()
+        {
+            OutlinePreviewRoot = OutlinePreviewSpawner.TrySpawn(_config, poiAnchorPrefab, Camera.main,
+                (view, anchor, style) => view.Initialise(anchor, _visualSettings, MarkerEffectFlags.None, _effectDefaults, style));
         }
 
         // Keep the config and the static level resolver in step (live Play Mode edits)
@@ -219,6 +170,66 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
             if (hierarchyLevels == null) return;
             _config.hierarchy_levels = hierarchyLevels;
             MarkerHierarchyResolver.Configure(hierarchyLevels);
+        }
+
+        // Point the palettes at the config, reload the wall icon library, and resolve the wall-level
+        // marker look. Called at load, at spawn (so a config injected without loading still spawns
+        // exactly as configured) and on every live marker change.
+        private void RefreshVisualSettings()
+        {
+            _wallIconLibrary = null;
+            if (!string.IsNullOrWhiteSpace(_config.marker_icon_library_resources_path))
+            {
+                _wallIconLibrary = Resources.Load<SpriteKeyLibrary>(_config.marker_icon_library_resources_path.Trim());
+                if (_wallIconLibrary == null)
+                    Debug.LogWarning($"[WallSession] marker_icon_library_resources_path '{_config.marker_icon_library_resources_path}' could not be loaded from Resources. Using prefab default icon library.");
+            }
+
+            MarkerVisualSettings.ApplyPalettes(_config);
+            _visualSettings = MarkerVisualSettings.Resolve(_config, _wallIconLibrary);
+            if (!_visualSettings.HasShapeFromConfig)
+                Debug.LogWarning("[WallSession] marker_shape missing/invalid - leaving prefab symbol shape unchanged.");
+        }
+
+        // Swap in new marker/badge/outline settings on a running wall: every spawned marker re-applies
+        // its visuals (no reveal restart). `source` is the caller's own copy of the config, never the
+        // authoring object; its POIs replace each marker's data so per-POI edits show up too.
+        public void ApplyMarkerSettings(WallConfigData source)
+        {
+            if (_config == null || source == null) return;
+
+            _config.marker_shape = source.marker_shape;
+            _config.badge_shape = source.badge_shape;
+            _config.marker_outline_mode = source.marker_outline_mode;
+            _config.outline_uniform_color_hex = source.outline_uniform_color_hex;
+            _config.marker_use_badge = source.marker_use_badge;
+            _config.badge_corner = source.badge_corner;
+            _config.badge_size_ratio = source.badge_size_ratio;
+            _config.ring_size_ratio = source.ring_size_ratio;
+            _config.contour_spin_deg_per_s = source.contour_spin_deg_per_s;
+            _config.marker_icon_library_resources_path = source.marker_icon_library_resources_path;
+            _config.category_styles = source.category_styles;
+            _config.badge_categories = source.badge_categories;
+            _config.outline_levels = source.outline_levels;
+            _config.outline_preview = source.outline_preview;
+            ReplaceHierarchyLevels(source.hierarchy_levels);
+            RefreshVisualSettings();
+
+            foreach (var marker in SpawnedMarkers)
+            {
+                if (marker == null) continue;
+                var anchor = marker.GetComponentInParent<POIAnchor>();
+                if (anchor == null) continue;
+                var poi = source.pois?.Find(p => p.id == anchor.Data?.id);
+                if (poi != null) anchor.Initialise(poi);
+                marker.ReapplyVisuals(_visualSettings);
+            }
+
+            // The outline demo grid reflects the wall's current levels/colours/mode: rebuild it
+            // whenever any of that changes live, same pattern as the effects grid.
+            if (OutlinePreviewRoot != null) Destroy(OutlinePreviewRoot);
+            OutlinePreviewRoot = null;
+            SpawnOutlinePreview();
         }
 
         // Swap in new orientation settings on a running wall: every spawned marker is re-pointed at
@@ -262,6 +273,8 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
         private void SpawnPOIs()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            _effectDefaults = _config.effect_defaults;
+            RefreshVisualSettings();
 
             // Collect spawned MarkerViews for overlap detection
             var spawnedMarkerViews = new List<MarkerView>();
@@ -296,19 +309,7 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
                 var markerView = go.GetComponentInChildren<MarkerView>();
                 if (markerView != null)
                 {
-                    var effects = MarkerEffectFlags.None;
-                    markerView.Initialise(
-                        anchor,
-                        _markerOutlineMode,
-                        _markerUseBadge,
-                        _markerShape,
-                        effects,
-                        _hasCategoryDefinitions,
-                        _hasShapeFromConfig,
-                        _hasOutlineLevels,
-                        _wallIconLibrary,
-                        _badgeShape,
-                        _effectDefaults);
+                    markerView.Initialise(anchor, _visualSettings, MarkerEffectFlags.None, _effectDefaults);
                     spawnedMarkerViews.Add(markerView);
                 }
 
@@ -352,6 +353,9 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
             // Dev-only effects preview grid (effect_defaults.preview; Editor + development builds only).
             // The spawner decides everything; this only tells it how this wall initialises a MarkerView.
             SpawnEffectsPreview();
+
+            // Dev-only outline preview grid (outline_preview; Editor + development builds only), same rule.
+            SpawnOutlinePreview();
 
             // Block 2 selection infrastructure (spec _2.6 section 11). Markers exist
             // now (SpawnedMarkers populated above), so wire the bus-driven highlight

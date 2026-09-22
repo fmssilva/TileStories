@@ -5,7 +5,7 @@ namespace TileStories
 {
     // Renders one "coloured shape + centred icon" element. Reused at two
     // sizes/positions in a marker: the main Symbol (always present) and the
-    // optional Badge (MarkerStyle.Badge only). This view makes no decisions -- it
+    // optional Badge (marker_use_badge only). This view makes no decisions -- it
     // only paints what MarkerView tells it to.
     public class MarkerCircleGlyphView : MonoBehaviour
     {

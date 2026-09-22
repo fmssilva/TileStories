@@ -97,7 +97,7 @@ namespace TileStories
                     anchor.Initialise(poiData);
                     var view = mgo.GetComponentInChildren<MarkerView>();
                     if (view == null) view = mgo.AddComponent<MarkerView>();
-                    view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.None);
+                    view.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None);
                     members.Add(view);
                 }
             }

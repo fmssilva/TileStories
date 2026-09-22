@@ -303,7 +303,7 @@ namespace TileStories.Editor.Tests
         {
             var t = typeof(POIEditorToolWindow);
             var effectNames = EffectDefaults.SelectableEffects.Select(MarkerEffectNames.DisplayName).ToList();
-            var terms = new List<string> { "Enable effects", "Hierarchy Levels", "Reveal Delay", "Rotate", "Focus on Effects Grid" };
+            var terms = new List<string> { "Enable effects", "Hierarchy Levels", "Reveal Delay", "Rotate", "Add effects demo grid" };
             terms.AddRange(effectNames);
 
             foreach (string guideName in new[] { "EffectsSceneTestGuide", "EffectsPlaymodeTestGuide", "EffectsDeviceTestGuide" })

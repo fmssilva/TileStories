@@ -10,6 +10,7 @@ namespace TileStories.Editor
         {
             new LivePlayModeEffectsApplier(),
             new LivePlayModeOrientationApplier(),
+            new LivePlayModeMarkerApplier(),
         });
 
         // Push the config to the running WallSession, if there is one (does nothing in Edit Mode)

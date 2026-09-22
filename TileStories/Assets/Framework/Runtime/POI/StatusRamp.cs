@@ -8,22 +8,19 @@ namespace TileStories
         public readonly float Pct;
         public readonly Color RingColor;
         public readonly string RingSpriteKey; // solid/dash_long/dash_medium/dash_short/dotted
-        public readonly float RingWidth;
 
-        public StatusLevel(float pct, Color ringColor, string ringSpriteKey, float ringWidth)
+        public StatusLevel(float pct, Color ringColor, string ringSpriteKey)
         {
             Pct = pct;
             RingColor = ringColor;
             RingSpriteKey = ringSpriteKey;
-            RingWidth = ringWidth;
         }
     }
 
     // The single condition palette used everywhere a marker shows destruction
-    // status: OutlineGold's ring, OutlineSameHue's ring+fill, and Badge's badge
-    // fill all read from this same table -- the three styles never disagree about
-    // colour. Every level, including 100%, is fully opaque (see _2_2_Marker_Design.md
-    // §4 principle 3 for why).
+    // status: the gold ring, the same-hue ring + fill, and the badge fill all read from this
+    // same table -- the outline modes never disagree about colour. Every level, including 100%, is fully opaque (see _2.2.3_Outline_Design.md,
+    // principle "a ring that fades is a bug").
     public static class StatusRamp
     {
         private const string UnknownStatusLevelKey = "unknown";
@@ -36,16 +33,16 @@ namespace TileStories
         // Default representation for semantic unknown when no config-provided
         // outline level is available. Keeps unknown distinct from known destruction.
         public static readonly StatusLevel UnknownFallbackLevel =
-            new StatusLevel(100f, UnknownColor, "dotted", 1.8f);
+            new StatusLevel(100f, UnknownColor, "dotted");
 
         public static readonly StatusLevel[] Levels =
         {
-            new StatusLevel(0,   new Color(0.890f, 0.741f, 0.447f), "solid",       3.2f),
-            new StatusLevel(20,  new Color(0.812f, 0.624f, 0.369f), "dash_long",   2.8f),
-            new StatusLevel(40,  new Color(0.733f, 0.522f, 0.322f), "dash_medium", 2.4f),
-            new StatusLevel(60,  new Color(0.651f, 0.416f, 0.271f), "dash_short",  2.0f),
-            new StatusLevel(80,  new Color(0.549f, 0.302f, 0.235f), "dotted",      1.7f),
-            new StatusLevel(100, new Color(0.431f, 0.200f, 0.169f), "dotted",      1.8f),
+            new StatusLevel(0,   new Color(0.890f, 0.741f, 0.447f), "solid"),
+            new StatusLevel(20,  new Color(0.812f, 0.624f, 0.369f), "dash_long"),
+            new StatusLevel(40,  new Color(0.733f, 0.522f, 0.322f), "dash_medium"),
+            new StatusLevel(60,  new Color(0.651f, 0.416f, 0.271f), "dash_short"),
+            new StatusLevel(80,  new Color(0.549f, 0.302f, 0.235f), "dotted"),
+            new StatusLevel(100, new Color(0.431f, 0.200f, 0.169f), "dotted"),
         };
 
         private static StatusLevel[] _activeLevels = Levels;
@@ -53,7 +50,13 @@ namespace TileStories
 
         public static IReadOnlyList<StatusLevel> ActiveLevels => _activeLevels;
 
-        public static void Configure(IEnumerable<OutlineLevelEntry> entries)
+        // mode decides where each level's RING COLOUR comes from -- never the line style, which is
+        // always per-row: Uniform -> every level shares uniformColor (a row's own color_hex is
+        // ignored, so the table and the mode dropdown can never disagree about what "uniform" means);
+        // PerType -> each row's color_hex as authored, falling back to the stock ramp colour when a
+        // row leaves it empty; SameHue -> colour is irrelevant here (MarkerVisualResolver bypasses
+        // the ring's stored colour and shades the category hue instead), so it is treated like PerType.
+        public static void Configure(IEnumerable<OutlineLevelEntry> entries, MarkerOutlineMode mode, Color uniformColor)
         {
             if (entries == null)
             {
@@ -71,15 +74,22 @@ namespace TileStories
 
                 var fallback = Levels[Mathf.Clamp(index, 0, Levels.Length - 1)];
                 var lineStyle = MarkerVisualsParser.NormalizeLineStyle(entry.line_style);
-                var color = fallback.RingColor;
-                if (!string.IsNullOrWhiteSpace(entry.color_hex) &&
-                    ColorUtility.TryParseHtmlString(entry.color_hex, out var parsedColor))
+                Color color;
+                if (mode == MarkerOutlineMode.Uniform)
                 {
-                    color = parsedColor;
+                    color = uniformColor;
+                }
+                else
+                {
+                    color = fallback.RingColor;
+                    if (!string.IsNullOrWhiteSpace(entry.color_hex) &&
+                        ColorUtility.TryParseHtmlString(entry.color_hex, out var parsedColor))
+                    {
+                        color = parsedColor;
+                    }
                 }
 
-                float ringWidth = entry.ring_width > 0f ? entry.ring_width : fallback.RingWidth;
-                var level = new StatusLevel(entry.pct, color, lineStyle, ringWidth);
+                var level = new StatusLevel(entry.pct, color, lineStyle);
                 configured.Add(level);
 
                 if (!string.IsNullOrWhiteSpace(entry.key))
@@ -128,7 +138,7 @@ namespace TileStories
             return closest;
         }
 
-        // Used by MarkerStyle.OutlineSameHue: drains saturation/value toward a
+        // Used by the same_hue outline mode: drains saturation/value toward a
         // near-black neutral as status worsens, never reaching pure black.
         public static Color ShadeTowardBlack(Color baseColor, float pct)
         {

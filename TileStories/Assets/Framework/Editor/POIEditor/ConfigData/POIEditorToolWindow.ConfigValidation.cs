@@ -34,17 +34,20 @@ namespace TileStories.Editor
                 {
                     // Spec _2_3 section 11b: an UNSET key silently degrades to
                     // MarkerHierarchyResolver.Fallback -- surface it at editor time
-                    // time instead of letting the developer discover a generic-
-                    // looking marker at runtime. Distinguished from the stale-key
-                    // branch below so "never assigned" reads differently from
-                    // "references a deleted level".
+                    // instead of letting the developer discover a generic-looking
+                    // marker at runtime. Distinguished from the stale-key branch
+                    // below so "no level assigned" reads differently from
+                    // "references a deleted level" (2026-09-22: wording leads with
+                    // the UI-facing name now, not the raw hierarchy_level_key field,
+                    // after a real dialog read as too code-flavoured -- see
+                    // HierarchyLevelKeyValidationTests).
                     issues.Add(new EditorAlertItem(
                         poiId: poi.id ?? "<unnamed>",
                         value: "<empty>",
-                        problem: "hierarchy_level_key was never assigned -- this POI is rendering at MarkerHierarchyResolver.Fallback size/style, not an authored level.",
+                        problem: "No Hierarchy Level is assigned (config field: hierarchy_level_key). This POI renders at the framework's fallback size, with no label.",
                         fixHint: levelKeys.Count == 0
-                            ? "Add at least one hierarchy level row, then assign it to this POI."
-                            : $"Assign one of: {string.Join(", ", levelKeys)} via the Hierarchy Level dropdown."));
+                            ? "Global Scene > Hierarchy Levels: add at least one row, then assign it to this POI below."
+                            : $"Specific Marker tab > this POI > Hierarchy Level dropdown: pick one of {string.Join(", ", levelKeys)}."));
                     continue;
                 }
 
@@ -53,11 +56,59 @@ namespace TileStories.Editor
                     issues.Add(new EditorAlertItem(
                         poiId: poi.id ?? "<unnamed>",
                         value: key,
-                        problem: $"Hierarchy level key does not match any entry in the hierarchy_levels table.",
+                        problem: "This POI's Hierarchy Level no longer matches any row in the wall's Hierarchy Levels table (it was likely renamed or deleted after this POI was set up).",
                         fixHint: levelKeys.Count == 0
-                            ? "Add at least one hierarchy level row, or clear this POI's hierarchy_level_key."
-                            : $"Add a row with key '{key}' or change this POI's key to one of: {string.Join(", ", levelKeys)}."));
+                            ? "Global Scene > Hierarchy Levels: add at least one row, or clear this POI's Hierarchy Level dropdown."
+                            : $"Global Scene > Hierarchy Levels: add a row keyed '{key}' back, or Specific Marker tab > this POI > Hierarchy Level dropdown: pick one of {string.Join(", ", levelKeys)}."));
                 }
+            }
+
+            return issues;
+        }
+
+        // Validates that every POI's category, badge_category, status_level_key and
+        // custom_symbol_key actually resolve to a taxonomy row (_2.2.1/2/3). A stale reference
+        // (the row was renamed or deleted after this POI was authored) degrades silently at
+        // runtime -- CategoryPalette/BadgeCategoryPalette/StatusRamp all fall back quietly -- so
+        // this surfaces it at editor time instead. Non-blocking: never auto-fixes.
+        private List<EditorAlertItem> ValidateMarkerTaxonomyReferences()
+        {
+            var issues = new List<EditorAlertItem>();
+            if (_config == null || _config.pois == null)
+                return issues;
+
+            var categories = new HashSet<string>((_config.category_styles ?? new List<CategoryStyleEntry>())
+                .Where(e => e != null && !string.IsNullOrEmpty(e.category)).Select(e => e.category));
+            var badgeKeys = new HashSet<string>((_config.badge_categories ?? new List<BadgeCategoryEntry>())
+                .Where(e => e != null && !string.IsNullOrEmpty(e.key)).Select(e => e.key));
+            var statusLevelKeys = new HashSet<string>((_config.outline_levels ?? new List<OutlineLevelEntry>())
+                .Where(e => e != null && !string.IsNullOrEmpty(e.key)).Select(e => e.key));
+
+            foreach (var poi in _config.pois)
+            {
+                if (poi == null) continue;
+                string poiId = poi.id ?? "<unnamed>";
+
+                if (!string.IsNullOrEmpty(poi.category) && categories.Count > 0 && !categories.Contains(poi.category))
+                    issues.Add(new EditorAlertItem(poiId, poi.category,
+                        "Category does not match any row in the Marker > Category Symbols table.",
+                        "Falls through to CategoryPalette's hash-based colour -- pick a real category or add this one to the table."));
+
+                if (!string.IsNullOrEmpty(poi.badge_category) && badgeKeys.Count > 0 && !badgeKeys.Contains(poi.badge_category))
+                    issues.Add(new EditorAlertItem(poiId, poi.badge_category,
+                        "Badge category does not match any row in the Badge table.",
+                        "Pick a real badge key or add this one to the table."));
+
+                if (poi.has_status && !poi.status_unknown && !string.IsNullOrEmpty(poi.status_level_key) &&
+                    statusLevelKeys.Count > 0 && !statusLevelKeys.Contains(poi.status_level_key))
+                    issues.Add(new EditorAlertItem(poiId, poi.status_level_key,
+                        "Status level key does not match any row in the Outline table.",
+                        "Pick this POI's status level again from the Status level dropdown."));
+
+                if (poi.has_custom_symbol && string.IsNullOrWhiteSpace(poi.custom_symbol_key))
+                    issues.Add(new EditorAlertItem(poiId, "<empty>",
+                        "Use Custom Symbol is ticked but no symbol is assigned.",
+                        "Assign a sprite in Marker Style > Custom symbol, or untick Use Custom Symbol."));
             }
 
             return issues;
@@ -119,6 +170,7 @@ namespace TileStories.Editor
         {
             var issues = new List<EditorAlertItem>();
             issues.AddRange(ValidateHierarchyLevelKeys());
+            issues.AddRange(ValidateMarkerTaxonomyReferences());
             issues.AddRange(ValidateHierarchyLevelSizeRange(_config?.hierarchy_levels));
             issues.AddRange(ValidateSearchEnumFields());
             issues.AddRange(ValidateForcedSearchFields());

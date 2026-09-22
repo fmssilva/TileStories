@@ -26,13 +26,19 @@ namespace TileStories.Tests
 
             Assert.AreEqual(5, config.hierarchy_levels.Count(),
                 "LivingRoom config should declare 5 framework-default hierarchy levels.");
-            Assert.AreEqual(22, config.pois.Count(), "LivingRoom config should declare 22 POIs (18 real + 4 dev displacement fixtures).");
+            Assert.AreEqual(26, config.pois.Count(),
+                "LivingRoom config should declare 26 POIs (18 real + 4 dev displacement fixtures + 4 dev marker-design fixtures).");
 
             MarkerHierarchyResolver.Configure(config.hierarchy_levels);
             try
             {
                 foreach (var poi in config.pois)
                 {
+                    // An empty hierarchy_level_key is a legitimate authored state (dev_marker_nolevel:
+                    // the "no level assigned" case) -- it resolves to MarkerHierarchyResolver.Fallback,
+                    // not a resolver failure, so only a NON-empty, unresolvable key is a real bug here.
+                    if (string.IsNullOrWhiteSpace(poi.hierarchy_level_key))
+                        continue;
                     Assert.IsTrue(MarkerHierarchyResolver.TryResolveByKey(poi.hierarchy_level_key, out _),
                         $"POI '{poi.id}' has unresolvable hierarchy_level_key '{poi.hierarchy_level_key}'.");
                 }

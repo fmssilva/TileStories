@@ -546,8 +546,7 @@ namespace TileStories.Tests
 
                 var marker = root.GetComponent<MarkerView>();
                 Assert.IsNotNull(marker, "POI_Marker.prefab root must carry a MarkerView.");
-                marker.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle,
-                    MarkerEffectFlags.None);
+                marker.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None);
                 lampMarkers.Add(marker);
             }
             return lampMarkers;
@@ -687,8 +686,7 @@ namespace TileStories.Tests
 
                 var marker = root.GetComponent<MarkerView>();
                 Assert.IsNotNull(marker, "POI_Marker.prefab root must carry a MarkerView.");
-                marker.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle,
-                    MarkerEffectFlags.None);
+                marker.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None);
                 markers.Add(marker);
             }
             return markers;

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace TileStories
 {
-    // Renders the outline ring for MarkerStyle.OutlineGold/OutlineSameHue. Dash
+    // Renders the outline ring (marker_outline_mode gold or same_hue). Dash
     // patterns are pre-made sprites swapped by key -- uGUI cannot draw a dashed
     // circle procedurally without a custom shader; this is the same low-tech
     // sprite-swap pattern used elsewhere in the project.
@@ -67,7 +67,16 @@ namespace TileStories
 
         // Enable/disable the ring's continuous rotation. Only meaningful when
         // the ring is visible -- ApplyVisuals gates this on showRing.
-        public void SetRotating(bool rotating) => _rotating = rotating;
+        // Switching it off puts the ring back upright, so a live config change reverts cleanly.
+        public void SetRotating(bool rotating)
+        {
+            if (_rotating && !rotating && ringImage != null)
+                ringImage.rectTransform.localRotation = Quaternion.identity;
+            _rotating = rotating;
+        }
+
+        // Spin speed in degrees per second (wall config contour_spin_deg_per_s)
+        public void SetSpinSpeed(float degreesPerSecond) => rotationDegreesPerSecond = Mathf.Clamp(degreesPerSecond, 0f, 360f);
 
         private void Update()
         {

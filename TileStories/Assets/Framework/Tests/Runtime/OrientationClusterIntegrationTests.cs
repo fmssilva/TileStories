@@ -95,7 +95,7 @@ namespace TileStories.Tests
                 var anchor = root.GetComponent<POIAnchor>() ?? root.AddComponent<POIAnchor>();
                 anchor.Initialise(poi);
                 var marker = root.GetComponent<MarkerView>();
-                marker.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.None);
+                marker.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None);
                 _allMarkers.Add(marker);
             }
 

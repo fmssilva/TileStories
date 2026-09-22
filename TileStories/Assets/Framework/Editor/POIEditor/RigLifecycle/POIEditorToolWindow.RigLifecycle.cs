@@ -15,6 +15,7 @@ namespace TileStories.Editor
             Transform rig = GetExistingRig();
             if (rig == null) return;
 
+            var settings = PrepareRigVisuals();
             foreach (var poi in _config.pois)
             {
                 var child = rig.Find(poi.id);
@@ -26,71 +27,28 @@ namespace TileStories.Editor
                 child.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
 
                 // Reuse shared configuration logic.
-                ConfigureRigChild(poi, child);
+                ConfigureRigChild(poi, child, settings);
             }
         }
 
+        // Point the palettes at the window's config and resolve the wall-level marker look ONCE per
+        // refresh -- the same MarkerVisualSettings.Resolve the running wall uses (_2.2.1 section 5).
+        private MarkerVisualSettings PrepareRigVisuals()
+        {
+            MarkerVisualSettings.ApplyPalettes(_config);
+            return MarkerVisualSettings.Resolve(_config, _wallIconLibrary);
+        }
+
         // Configures a single rig child with all visual settings (MarkerView, POIAnchor, etc.).
-        // Shared between PopulateRig and the per-POI add-flow so both use identical setup.
-        internal void ConfigureRigChild(POIData poi, Transform child)
+        // Shared by PopulateRig, RefreshRigVisuals and the per-POI add-flow so all use identical setup.
+        internal void ConfigureRigChild(POIData poi, Transform child, MarkerVisualSettings settings)
         {
             if (_config == null || child == null) return;
-
-            bool hasCategoryDefinitions = _config.category_styles != null && _config.category_styles.Count > 0;
-            if (hasCategoryDefinitions) CategoryPalette.Configure(_config.category_styles);
-            else CategoryPalette.ClearOverrides();
-
-            BadgeCategoryPalette.Configure(_config.badge_categories);
-
-            bool hasOutlineLevels = _config.outline_levels != null && _config.outline_levels.Count > 0;
-            if (hasOutlineLevels) StatusRamp.Configure(_config.outline_levels);
-
-            MarkerHierarchyResolver.Configure(_config.hierarchy_levels);
-
-            bool hasShapeFromConfig = MarkerVisualsParser.TryParseShape(_config.marker_shape, out var shape);
-            MarkerVisualsParser.TryParseShape(_config.badge_shape, out var badgeShape);
-            if (badgeShape == default) badgeShape = MarkerShape.Circle;
-
-            MarkerOutlineMode outlineMode;
-            bool useBadge;
-            if (!string.IsNullOrWhiteSpace(_config.marker_outline_mode))
-            {
-                if (!MarkerVisualsParser.TryParseOutlineMode(_config.marker_outline_mode, out outlineMode))
-                    outlineMode = MarkerOutlineMode.None;
-                useBadge = _config.marker_use_badge;
-            }
-            else if (MarkerVisualsParser.TryParseStyle(_config.marker_style, out var legacyStyle))
-            {
-                MarkerVisualsParser.DeriveOutlineAndBadgeFromLegacyStyle(
-                    legacyStyle == MarkerStyle.Badge ? "badge" :
-                    legacyStyle == MarkerStyle.OutlineSameHue ? "outline_same_hue" : "outline_gold",
-                    out outlineMode,
-                    out useBadge);
-            }
-            else
-            {
-                outlineMode = MarkerOutlineMode.None;
-                useBadge = false;
-            }
-
-            var runtimeLibrary = _wallIconLibrary;
-
-            // Config is the source of truth for the edit-scene yaw; re-apply on
-            // every visual refresh so undo/redo/field edits don't drift the
-            // Scene-view preview away from the stored angle.
-            child.localRotation = PoiRotationResolver.ToEulerQuaternion(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
 
             var anchor = child.GetComponentInChildren<POIAnchor>() ?? child.gameObject.AddComponent<POIAnchor>();
             anchor.Initialise(poi);
 
-            var markerView = child.GetComponentInChildren<MarkerView>();
-            var effects = MarkerEffectFlags.None;
-            markerView?.Initialise(anchor, outlineMode, useBadge, shape, effects,
-                hasCategoryDefinitions,
-                hasShapeFromConfig,
-                hasOutlineLevels,
-                runtimeLibrary,
-                badgeShape);
+            child.GetComponentInChildren<MarkerView>()?.Initialise(anchor, settings);
         }
 
         internal bool IsRigInSyncWithConfig(out int outOfSyncCount)
@@ -325,42 +283,7 @@ internal enum ReloadGuardChoice
                     Undo.DestroyObjectImmediate(child);
             }
 
-                        bool hasCategoryDefinitions = _config.category_styles != null && _config.category_styles.Count > 0;
-            if (hasCategoryDefinitions) CategoryPalette.Configure(_config.category_styles);
-            else CategoryPalette.ClearOverrides();
-
-            BadgeCategoryPalette.Configure(_config.badge_categories);
-
-            bool hasOutlineLevels = _config.outline_levels != null && _config.outline_levels.Count > 0;
-            if (hasOutlineLevels) StatusRamp.Configure(_config.outline_levels);
-
-            MarkerHierarchyResolver.Configure(_config.hierarchy_levels);
-
-            bool hasShapeFromConfig = MarkerVisualsParser.TryParseShape(_config.marker_shape, out var shape);
-            MarkerVisualsParser.TryParseShape(_config.badge_shape, out var badgeShape);
-            if (badgeShape == default) badgeShape = MarkerShape.Circle;
-
-            MarkerOutlineMode outlineMode;
-            bool useBadge;
-            if (!string.IsNullOrWhiteSpace(_config.marker_outline_mode))
-            {
-                if (!MarkerVisualsParser.TryParseOutlineMode(_config.marker_outline_mode, out outlineMode))
-                    outlineMode = MarkerOutlineMode.None;
-                useBadge = _config.marker_use_badge;
-            }
-            else if (MarkerVisualsParser.TryParseStyle(_config.marker_style, out var legacyStyle))
-            {
-                MarkerVisualsParser.DeriveOutlineAndBadgeFromLegacyStyle(
-                    legacyStyle == MarkerStyle.Badge ? "badge" :
-                    legacyStyle == MarkerStyle.OutlineSameHue ? "outline_same_hue" : "outline_gold",
-                    out outlineMode,
-                    out useBadge);
-            }
-            else
-            {
-                outlineMode = MarkerOutlineMode.None;
-                useBadge = false;
-            }
+            var settings = PrepareRigVisuals();
 
             foreach (var poi in _config.pois)
             {
@@ -377,20 +300,7 @@ internal enum ReloadGuardChoice
 
                 Undo.RegisterCreatedObjectUndo(instance, $"Populate marker for {poi.id}");
 
-                var anchor = instance.GetComponentInChildren<POIAnchor>() ?? instance.AddComponent<POIAnchor>();
-                anchor.Initialise(poi);
-
-                var markerView = instance.GetComponentInChildren<MarkerView>();
-                if (markerView != null)
-                {
-                    var effects = MarkerEffectFlags.None;
-                    markerView.Initialise(anchor, outlineMode, useBadge, shape, effects,
-                        hasCategoryDefinitions,
-                        hasShapeFromConfig,
-                        hasOutlineLevels,
-                        _wallIconLibrary,
-                        badgeShape);
-                }
+                ConfigureRigChild(poi, instance.transform, settings);
             }
 
             SelectRigObjects();

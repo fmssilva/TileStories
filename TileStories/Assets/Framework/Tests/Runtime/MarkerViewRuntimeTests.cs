@@ -32,7 +32,7 @@ namespace TileStories.Tests
             SetPrivateField(markerView, "badge", badge);
             SetPrivateField(markerView, "ring", ring);
 
-            markerView.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+            markerView.Initialise(anchor, MarkerVisualSettings.Default());
             yield return null;
 
             Assert.IsNotNull(symbol.transform.Find("Icon"));
@@ -64,7 +64,7 @@ namespace TileStories.Tests
             });
 
             var heroView = heroGo.GetComponentInChildren<MarkerView>();
-            heroView.Initialise(heroAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.RippleRings);
+            heroView.Initialise(heroAnchor, MarkerVisualSettings.Default(), MarkerEffectFlags.RippleRings);
             yield return null;
 
             Assert.IsTrue(GetPrivateBool(heroGo.GetComponent<MarkerRippleEffect>(), "_active"),
@@ -99,7 +99,7 @@ namespace TileStories.Tests
             });
 
             var contourView = contourGo.GetComponentInChildren<MarkerView>();
-            contourView.Initialise(contourAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.RippleRings);
+            contourView.Initialise(contourAnchor, MarkerVisualSettings.Default(), MarkerEffectFlags.RippleRings);
             yield return null;
 
             var contourInner = contourGo.transform.Find("RippleInner")?.GetComponent<Image>();
@@ -122,7 +122,7 @@ namespace TileStories.Tests
             });
 
             var circlesView = circlesGo.GetComponentInChildren<MarkerView>();
-            circlesView.Initialise(circlesAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.RippleDiscs);
+            circlesView.Initialise(circlesAnchor, MarkerVisualSettings.Default(), MarkerEffectFlags.RippleDiscs);
             yield return null;
 
             var circlesInner = circlesGo.transform.Find("RippleInner")?.GetComponent<Image>();
@@ -228,7 +228,7 @@ namespace TileStories.Tests
                     SetPrivateField(view, "badge", badge);
                     SetPrivateField(view, "ring", ring);
 
-                    view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+                    view.Initialise(anchor, MarkerVisualSettings.Default());
                     yield return null; // ApplyVisuals + EnsureMarkerWiring settle
 
                     Assert.IsNotNull(symbol, "symbol glyph must be wired.");

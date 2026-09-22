@@ -167,7 +167,7 @@ namespace TileStories.Tests
             row.key = newKey;
             row.search_keywords = new List<string> { probe };
 
-            StatusRamp.Configure(config.outline_levels);
+            StatusRamp.Configure(config.outline_levels, MarkerOutlineMode.PerType, default);
             try
             {
                 // The renamed level is the live one, and the old name is gone: proves
@@ -181,7 +181,7 @@ namespace TileStories.Tests
                 {
                     Assert.IsTrue(StatusRamp.TryResolveByKey(poi.status_level_key, out var level),
                         $"POI '{poi.id}' must resolve its status ring after the rename.");
-                    Assert.Greater(level.RingWidth, 0f, "A resolved level must carry a usable ring width.");
+                    Assert.IsFalse(string.IsNullOrEmpty(level.RingSpriteKey), "A resolved level must carry a usable ring line style.");
                 }
             }
             finally

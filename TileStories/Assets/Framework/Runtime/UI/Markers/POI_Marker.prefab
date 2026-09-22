@@ -147,9 +147,8 @@ MonoBehaviour:
     badgeDirection: {x: 0.7, y: 0.7}
     labelGap: 0.015
   pulseEffect: {fileID: 0}
-  glowEffect: {fileID: 0}
-  sunEffect: {fileID: 0}
-  accentEffect: {fileID: 0}
+  rippleEffect: {fileID: 0}
+  haloEffect: {fileID: 0}
   effectFlags: 0
   shapeLibrary: {fileID: 11400000, guid: d9cb1f053d34d994fa13f11220869655, type: 2}
   iconLibrary: {fileID: 11400000, guid: 2dd4a8e58a73ec94bba20fc408366727, type: 2}
@@ -536,7 +535,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -725,7 +724,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:

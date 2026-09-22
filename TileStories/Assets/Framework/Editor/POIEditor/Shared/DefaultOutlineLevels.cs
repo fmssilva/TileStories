@@ -32,7 +32,6 @@ namespace TileStories.Editor
                     pct = 0f,
                     line_style = "solid",
                     color_hex = string.Empty,
-                    ring_width = 3.2f,
                     details = "No visible damage -- structure appears complete and maintained."
                 },
                 new OutlineLevelEntry
@@ -42,7 +41,6 @@ namespace TileStories.Editor
                     pct = 20f,
                     line_style = "dash_long",
                     color_hex = string.Empty,
-                    ring_width = 2.8f,
                     details = "Minor to moderate damage -- small cracks or chips."
                 },
                 new OutlineLevelEntry
@@ -52,7 +50,6 @@ namespace TileStories.Editor
                     pct = 100f,
                     line_style = "dash_short",
                     color_hex = string.Empty,
-                    ring_width = 2.0f,
                     details = "Severely damaged or collapsed -- little original structure remains."
                 },
                 new OutlineLevelEntry
@@ -62,7 +59,6 @@ namespace TileStories.Editor
                     pct = 100f,
                     line_style = "dotted",
                     color_hex = "#71717A",
-                    ring_width = 1.8f,
                     details = "Damage state not assessed or data unavailable."
                 },
             };

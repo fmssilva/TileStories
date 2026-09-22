@@ -12,7 +12,7 @@ using UnityEditor;
 
 namespace TileStories.Tests
 {
-    // "Can a human actually SEE it?" -- the render-level proof for "Focus on Effects Grid". The cameras are
+    // "Can a human actually SEE it?" -- the render-level proof for "Add effects demo grid". The cameras are
     // rendered to a texture (portrait aspect like a phone / narrow Game view), the pixels are read back,
     // and each cell is judged from real pixels. An opaque wall a few centimetres in front of the main
     // camera stands in for the room mesh: the grid must be visible anyway, because it lives far away and
@@ -219,8 +219,7 @@ namespace TileStories.Tests
             _config.effect_defaults.preview.base_poi_id = basePoiId;
             var defaults = _config.effect_defaults;
             var root = EffectsPreviewSpawner.TrySpawn(_config, _prefab, _cam,
-                (view, anchor, style) => view.Initialise(anchor, MarkerOutlineMode.Gold, false, MarkerShape.Circle,
-                    MarkerEffectFlags.None, true, true, true, null, MarkerShape.Circle, defaults, style));
+                (view, anchor, style) => view.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None, defaults, style));
             Assert.IsNotNull(root, "The grid must spawn.");
             _focus = root.GetComponent<EffectsPreviewFocus>();
             Assert.IsNotNull(_focus, "The grid root owns the focus component.");
@@ -465,8 +464,7 @@ namespace TileStories.Tests
                     var anchor = go.GetComponent<POIAnchor>() ?? go.AddComponent<POIAnchor>();
                     anchor.Initialise(new POIData { id = go.name, name = "x" });
                     var style = new HierarchyStyle(sizeCm, false, effect, false, 0f, 0f);
-                    go.GetComponentInChildren<MarkerView>().Initialise(anchor, MarkerOutlineMode.Gold, false, MarkerShape.Circle,
-                        MarkerEffectFlags.None, true, true, true, null, MarkerShape.Circle, defaults, style);
+                    go.GetComponentInChildren<MarkerView>().Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None, defaults, style);
                     go.GetComponentInChildren<MarkerBillboard>()?.Configure(new OrientationSettings(), "", null);
                     // Plain grey symbol so the symbol pixels are recognisable.
                     var symbolImage = go.transform.Find("Symbol").GetComponent<UnityEngine.UI.Image>();

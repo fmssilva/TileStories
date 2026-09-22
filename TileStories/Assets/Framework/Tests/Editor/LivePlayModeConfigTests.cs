@@ -334,5 +334,88 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(pulseA, a.GetComponent<MarkerPulseEffect>().IsActive, "effects untouched by an orientation push");
             Assert.AreNotSame(authoring.orientation_settings, billboardA.ConfiguredSettings, "the wall never shares the window's object");
         }
+
+        // ---------------- the Marker applier ----------------
+
+        [Test]
+        public void MarkerFingerprint_ChangesForWallAndPoiMarkerFields_NotForEffectsOrFacing()
+        {
+            var applier = new LivePlayModeMarkerApplier();
+            string baseline = applier.Fingerprint(LoadShippedConfig());
+
+            void AssertChanges(System.Action<WallConfigData> mutate, string label)
+            {
+                var config = LoadShippedConfig();
+                mutate(config);
+                Assert.AreNotEqual(baseline, applier.Fingerprint(config), label);
+            }
+
+            AssertChanges(c => c.marker_shape = "hexagon", "marker_shape");
+            AssertChanges(c => c.badge_shape = "hexagon", "badge_shape");
+            AssertChanges(c => c.marker_outline_mode = "same_hue", "marker_outline_mode");
+            AssertChanges(c => c.outline_uniform_color_hex = "#123456", "outline_uniform_color_hex");
+            AssertChanges(c => { c.outline_preview ??= new OutlinePreviewSettings(); c.outline_preview.enabled = !c.outline_preview.enabled; }, "outline_preview.enabled");
+            AssertChanges(c => c.marker_use_badge = !c.marker_use_badge, "marker_use_badge");
+            AssertChanges(c => c.badge_corner = "bottom_left", "badge_corner");
+            AssertChanges(c => c.badge_size_ratio += 0.05f, "badge_size_ratio");
+            AssertChanges(c => c.ring_size_ratio += 0.05f, "ring_size_ratio");
+            AssertChanges(c => c.contour_spin_deg_per_s += 10f, "contour_spin_deg_per_s");
+            AssertChanges(c => c.category_styles[0].color_hex = "#123456", "category_styles row");
+            AssertChanges(c => c.badge_categories[0].icon_key = "changed", "badge_categories row");
+            AssertChanges(c => c.outline_levels[0].line_style = "dotted", "outline_levels row");
+            AssertChanges(c => c.pois[0].category = "changed_category", "POI category");
+            AssertChanges(c => c.pois[0].badge_category = "changed_badge", "POI badge_category");
+            AssertChanges(c => c.pois[0].has_custom_symbol = !c.pois[0].has_custom_symbol, "POI has_custom_symbol");
+
+            var unrelated = LoadShippedConfig();
+            unrelated.pois[0].editor_rotation_deg += 10f;
+            unrelated.pois[0].hierarchy_level_key = "level_5";
+            unrelated.effect_defaults.pulse.enabled = !unrelated.effect_defaults.pulse.enabled;
+            unrelated.wall_name += "_x";
+            Assert.AreEqual(baseline, applier.Fingerprint(unrelated), "facing/hierarchy/effects/name edits must not trigger a marker push");
+        }
+
+        [Test]
+        public void MarkerApplier_DrivesRealMarkers_WallLevelAndPerPoiFields()
+        {
+            var authoring = LoadShippedConfig();
+            MarkerHierarchyResolver.Configure(authoring.hierarchy_levels);
+            var session = NewSessionOn(Copy(authoring));
+            var poi = authoring.pois[0];
+            var marker = session.SpawnedMarkers.First(m => m.name == poi.id);
+            var symbol = marker.transform.Find("Symbol").GetComponent<UnityEngine.UI.Image>();
+            var dispatcher = new LivePlayModeConfigDispatcher(new ILivePlayModeApplier[] { new LivePlayModeMarkerApplier() });
+            bool ringOnBefore = marker.transform.Find("Ring").GetComponent<UnityEngine.UI.Image>().enabled;
+            Assert.IsTrue(ringOnBefore, "Precondition: the shipped POI has an outline ring.");
+
+            // 1. wall-level: turning the outline off hides the ring on the running marker
+            authoring.marker_outline_mode = "none";
+            var applied = dispatcher.Push(session, authoring);
+            CollectionAssert.AreEqual(new[] { "marker" }, applied);
+            Assert.IsFalse(marker.transform.Find("Ring").GetComponent<UnityEngine.UI.Image>().enabled, "outline off must hide the ring live");
+
+            // 2. wall-level: category colour edit reaches the running symbol
+            authoring.marker_outline_mode = "uniform";
+            var categoryEntry = authoring.category_styles.First(e => e.category == poi.category);
+            categoryEntry.color_hex = "#00FF00";
+            dispatcher.Push(session, authoring);
+            Color expected; ColorUtility.TryParseHtmlString("#00FF00", out expected);
+            Assert.AreEqual(expected, symbol.color, "a live category colour edit must reach the running Symbol.");
+
+            // 3. per-POI: switching this POI to a different real category changes it live
+            string otherCategory = authoring.category_styles.First(e => e.category != poi.category).category;
+            poi.category = otherCategory;
+            dispatcher.Push(session, authoring);
+            Assert.AreNotEqual(expected, symbol.color, "the marker must recolour when its own POI.category changes live.");
+
+            // 4. an unrelated edit pushes nothing
+            authoring.wall_name += "_x";
+            Assert.IsEmpty(dispatcher.Push(session, authoring));
+
+            // 5. the wall never shares config objects with the window
+            var sessionConfigField = typeof(WallSession).GetField("_config", BindingFlags.NonPublic | BindingFlags.Instance);
+            var wallConfig = (WallConfigData)sessionConfigField.GetValue(session);
+            Assert.AreNotSame(authoring.category_styles, wallConfig.category_styles);
+        }
     }
 }

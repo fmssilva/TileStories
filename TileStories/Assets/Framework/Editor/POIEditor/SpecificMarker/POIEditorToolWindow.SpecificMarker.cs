@@ -866,17 +866,30 @@ namespace TileStories.Editor
             sceneView.Frame(new Bounds(child.position, Vector3.one * width), false);
         }
 
-        private static POIData CreateDefaultPoi(POIData sourcePoi = null)
+        // A first POI (no sourcePoi) has no colour taxonomy to copy from, so its category comes
+        // from the wall's own first category_styles row -- a real, pickable value in the dropdown,
+        // never a literal "default" that matches nothing and silently falls through to the hash.
+        private string FirstAvailableCategory()
+        {
+            if (_config?.category_styles != null)
+                foreach (var entry in _config.category_styles)
+                    if (entry != null && !string.IsNullOrWhiteSpace(entry.category))
+                        return entry.category;
+            return string.Empty;
+        }
+
+        private POIData CreateDefaultPoi(POIData sourcePoi = null)
         {
             var poi = new POIData
             {
                 id = System.Guid.NewGuid().ToString("N"),
                 name = "New POI",
-                category = "default",
+                category = FirstAvailableCategory(),
                 position_verified = false,
                 status_pct = 0f,
                 has_status = false,
                 status_unknown = false,
+                status_level_key = null,
                 hierarchy_level_key = null,
                 has_custom_symbol = false,
                 custom_symbol_key = null,
@@ -895,8 +908,18 @@ namespace TileStories.Editor
                 poi.has_status = sourcePoi.has_status;
                 poi.status_unknown = sourcePoi.status_unknown;
                 poi.status_pct = sourcePoi.status_pct;
+                poi.status_level_key = sourcePoi.status_level_key;
                 poi.search_keywords = sourcePoi.search_keywords != null ? new List<string>(sourcePoi.search_keywords) : new List<string>();
-                poi.search_keyword_fields = sourcePoi.search_keyword_fields != null ? new List<POISearchKeywordField>(sourcePoi.search_keyword_fields) : new List<POISearchKeywordField>();
+                // Deep copy: each field's own keyword list, not the source POI's list instances --
+                // otherwise editing the new POI's keywords silently rewrites the source POI's too.
+                poi.search_keyword_fields = new List<POISearchKeywordField>();
+                if (sourcePoi.search_keyword_fields != null)
+                    foreach (var field in sourcePoi.search_keyword_fields)
+                        poi.search_keyword_fields.Add(new POISearchKeywordField
+                        {
+                            field_key = field.field_key,
+                            keywords = field.keywords != null ? new List<string>(field.keywords) : new List<string>()
+                        });
                 poi.editor_rotation_deg = sourcePoi.editor_rotation_deg;
                 poi.editor_rotation_x_deg = sourcePoi.editor_rotation_x_deg;
                 poi.editor_rotation_z_deg = sourcePoi.editor_rotation_z_deg;
@@ -991,7 +1014,7 @@ namespace TileStories.Editor
             poi.position_verified = false;
 
             // Reuse the same visual configuration logic as PopulateRig.
-            ConfigureRigChild(poi, instance.transform);
+            ConfigureRigChild(poi, instance.transform, PrepareRigVisuals());
 
             // Select and frame the new marker.
             FocusPoiInScene(poi);

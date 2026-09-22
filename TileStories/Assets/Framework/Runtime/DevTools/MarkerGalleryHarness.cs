@@ -87,7 +87,7 @@ namespace TileStories
             anchor.Initialise(poiData);
 
             var markerView = go.GetComponentInChildren<MarkerView>();
-            markerView.Initialise(anchor, entry.Style, entry.Shape, entry.EffectFlags);
+            markerView.Initialise(anchor, entry.ToSettings(), entry.EffectFlags);
 
             LogResult(entry, go);
             if (ShouldRunDeepDiagnostics(entry))
@@ -163,8 +163,8 @@ namespace TileStories
             LogImageDiagnostics(entry, "RippleOuter", rippleOuter);
 
             bool isUnknown = entry.HasStatus && entry.StatusUnknown;
-            bool expectRing = entry.HasStatus && entry.Style != MarkerStyle.Badge;
-            bool expectBadge = entry.HasStatus && (isUnknown || entry.Style == MarkerStyle.Badge);
+            bool expectRing = entry.HasStatus && !entry.UseBadge;
+            bool expectBadge = entry.HasStatus && (isUnknown || entry.UseBadge);
 
             bool hasSymbolSprite = symbol != null && symbol.enabled && symbol.sprite != null;
             bool ringActive = ring != null && ring.enabled;
@@ -195,7 +195,7 @@ namespace TileStories
             }
 
             Debug.Log(
-                $"[MarkerGalleryDiag][SUMMARY] {entry.Group} | {entry.Label} | style={entry.Style} shape={entry.Shape} " +
+                $"[MarkerGalleryDiag][SUMMARY] {entry.Group} | {entry.Label} | outline={entry.OutlineMode} badge={entry.UseBadge} shape={entry.Shape} " +
                 $"hasStatus={entry.HasStatus} unknown={entry.StatusUnknown} hier={entry.HierarchyLevelKey ?? "(none)"} " +
                 $"symbolOk={hasSymbolSprite} ringOk={ringActive == expectRing} badgeOk={badgeActive == expectBadge}");
         }

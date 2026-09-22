@@ -20,10 +20,17 @@ namespace TileStories.Editor
         {
             new DevSwitch
             {
-                Name = "Focus on Effects Grid",
-                HowToDisable = "POI Editor > Global Scene > Effects > Test > untick 'Focus on Effects Grid', then Save All to JSON and Copy to StreamingAssets",
+                Name = "Add effects demo grid",
+                HowToDisable = "POI Editor > Global Scene > Effects > Test > untick 'Add effects demo grid', then Save All to JSON and Copy to StreamingAssets",
                 ActiveInReleaseBuild = false,
                 IsOn = c => c.effect_defaults != null && c.effect_defaults.preview != null && c.effect_defaults.preview.enabled,
+            },
+            new DevSwitch
+            {
+                Name = "Add outline demo grid",
+                HowToDisable = "POI Editor > Global Scene > Outline > Test > untick 'Add outline demo grid', then Save All to JSON and Copy to StreamingAssets",
+                ActiveInReleaseBuild = false,
+                IsOn = c => c.outline_preview != null && c.outline_preview.enabled,
             },
         };
 

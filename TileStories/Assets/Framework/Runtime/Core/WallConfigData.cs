@@ -11,14 +11,6 @@ namespace TileStories
         public string wall_name;
         public int immersal_map_id;
 
-        // LEGACY fallback only -- prefer marker_outline_mode + marker_use_badge
-        // below for new walls. Still read by
-        // MarkerVisualsParser.DeriveOutlineAndBadgeFromLegacyStyle when
-        // marker_outline_mode is absent, kept for walls authored before the split.
-        // "outline_gold" / "outline_same_hue" / "badge". Missing/unrecognised falls
-        // back to MarkerVisualsParser.DefaultStyle.
-        public string marker_style;
-
         // "circle" / "rounded_square" / "hexagon" / "diamond" / "star" / "none".
         public string marker_shape;
 
@@ -28,12 +20,34 @@ namespace TileStories
         // falls back to "circle", same as marker_shape's own default.
         public string badge_shape;
 
-        // Optional split-mode controls for marker visuals.
-        // marker_outline_mode: "gold" / "same_hue" / "none"
-        // marker_use_badge: true/false
-        // If these are absent, WallSession derives behavior from marker_style.
+        // Outline (status ring) mode: "uniform" (one shared, developer-adjustable colour, see
+        // outline_uniform_color_hex) / "same_hue" (category hue drained toward black) / "per_type"
+        // (each outline level below carries its own colour) / "none". Missing or unrecognised = no
+        // outline.
         public string marker_outline_mode;
+
+        // The single ring colour used when marker_outline_mode is "uniform". Defaults to the
+        // framework's original gold. Ignored in every other mode (same_hue derives its colour from
+        // the category, per_type from each outline level's own color_hex).
+        public string outline_uniform_color_hex = "#E3BD72";
+
+        // Show the badge (second meaning axis) on markers that name a badge_category.
         public bool marker_use_badge;
+
+        // Badge placement and size on the symbol (_2.2.2). Corner: "top_right" / "top_left" /
+        // "bottom_right" / "bottom_left". Size is a fraction of the symbol diameter.
+        public string badge_corner = "top_right";
+        public float badge_size_ratio = 0.36f;
+
+        // Outline ring size as a multiple of the symbol diameter (_2.2.3): larger = more gap.
+        public float ring_size_ratio = 1.18f;
+
+        // Dev-only "Add outline demo grid" (see OutlinePreviewSpawner): off by default, only honoured
+        // in the Editor and development builds, same rule as effect_defaults.preview.
+        public OutlinePreviewSettings outline_preview = new();
+
+        // Ring spin speed in degrees per second for hierarchy levels with rotate_contour on.
+        public float contour_spin_deg_per_s = 60f;
 
         // Optional wall-local icon library load path (Resources-relative, without
         // extension), e.g. "MarkerSymbols/LivingRoom_IconLibrary".
@@ -214,6 +228,16 @@ namespace TileStories
         public string voice_activity_indicator_style = "mic_text";
     }
 
+    // Dev-only "Add outline demo grid" (Editor Play Mode and development builds; release builds
+    // ignore it, same rule as EffectPreviewSettings). See OutlinePreviewSpawner.
+    [Serializable]
+    public class OutlinePreviewSettings
+    {
+        public bool enabled = false;
+        // POI id whose category the "Same hue" comparison cell borrows. Empty = plain grey circle.
+        public string base_poi_id = "";
+    }
+
     // Wall-level effect settings (_2.2.4): a master switch, one parameter block per
     // effect (each with its own "enabled" checkbox) and the dev-only preview grid settings.
     // Which effect a marker runs is chosen per hierarchy level (ripple_effect / halo_effect /
@@ -340,7 +364,7 @@ namespace TileStories
             public float inner_scale = 0.80f;
         }
 
-        // Dev-only "Focus on Effects Grid" (Editor Play Mode and development builds; release
+        // Dev-only "Add effects demo grid" (Editor Play Mode and development builds; release
         // builds ignore it). See EffectsPreviewSpawner.
         [Serializable]
         public class EffectPreviewSettings
@@ -416,9 +440,6 @@ namespace TileStories
 
         // Optional "#RRGGBB" tint override.
         public string color_hex;
-
-        // Optional width override in UI-space units.
-        public float ring_width;
 
         // Free-text note shown in the authoring tool's details popup. Not read by
         // runtime -- purely authoring metadata for this wall's taxonomy.
@@ -536,7 +557,7 @@ namespace TileStories
         // A genuinely separate third state: this wall DOES track status, and this
         // specific POI's fate is a real historical unknown (not merely undocumented in
         // this dataset). Only meaningful when has_status is true. Rendered identically
-        // across all three MarkerStyle values as a neutral-grey "?" badge, overriding
+        // in every outline mode as a neutral-grey "?" badge, overriding
         // the style-specific ring/fade/badge rendering for that one POI.
         public bool status_unknown;
 

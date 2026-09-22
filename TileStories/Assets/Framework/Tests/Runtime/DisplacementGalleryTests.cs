@@ -70,7 +70,7 @@ namespace TileStories.Tests
                     anchor.Initialise(new POIData { id = $"poi_{i}", name = $"Label {i}", category = "religious", has_status = false });
 
                     var view = go.GetComponentInChildren<MarkerView>();
-                    view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+                    view.Initialise(anchor, MarkerVisualSettings.Default());
 
                     var reveal = go.GetComponent<MarkerRevealEffect>();
                     if (reveal != null)
@@ -152,7 +152,7 @@ namespace TileStories.Tests
                 anchor.Initialise(new POIData { id = $"shallow_poi_{i}", name = $"Grazing {i}", category = "religious", has_status = false });
 
                 var view = go.GetComponentInChildren<MarkerView>();
-                view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+                view.Initialise(anchor, MarkerVisualSettings.Default());
 
                 var reveal = go.GetComponent<MarkerRevealEffect>();
                 if (reveal != null)
@@ -217,7 +217,7 @@ namespace TileStories.Tests
                 anchor.Initialise(new POIData { id = $"shallow_marker_{i}", name = $"Grazing Marker {i}", category = "religious", has_status = false });
 
                 var view = go.GetComponentInChildren<MarkerView>();
-                view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+                view.Initialise(anchor, MarkerVisualSettings.Default());
 
                 var reveal = go.GetComponent<MarkerRevealEffect>();
                 if (reveal != null)
@@ -293,7 +293,7 @@ namespace TileStories.Tests
                 has_status = false, hierarchy_level_key = "tiny",
             });
             var controlView = controlGo.GetComponentInChildren<MarkerView>();
-            controlView.Initialise(controlAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+            controlView.Initialise(controlAnchor, MarkerVisualSettings.Default());
             var controlReveal = controlGo.GetComponent<MarkerRevealEffect>();
             if (controlReveal != null) { controlReveal.StopAllCoroutines(); controlReveal.SetFullAlphaAndScale(); }
 
@@ -317,7 +317,7 @@ namespace TileStories.Tests
                 });
 
                 var view = go.GetComponentInChildren<MarkerView>();
-                view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+                view.Initialise(anchor, MarkerVisualSettings.Default());
 
                 var reveal = go.GetComponent<MarkerRevealEffect>();
                 if (reveal != null)

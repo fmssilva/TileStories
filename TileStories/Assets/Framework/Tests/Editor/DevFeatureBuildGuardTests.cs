@@ -27,7 +27,7 @@ namespace TileStories.Editor.Tests
             var messages = DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true);
 
             Assert.AreEqual(1, messages.Count);
-            StringAssert.Contains("Focus on Effects Grid", messages[0]);
+            StringAssert.Contains("Add effects demo grid", messages[0]);
             StringAssert.Contains("untick", messages[0]);
             StringAssert.Contains("Copy to StreamingAssets", messages[0]);
         }
@@ -63,10 +63,42 @@ namespace TileStories.Editor.Tests
         public void ReleaseFlag_MatchesWhatTheRuntimeReallyDoes()
         {
             // The guard's "ignored in release builds" claim is a claim about EffectsPreviewSpawner: assert it.
-            var effectsSwitch = DevFeatureBuildGuard.Registry.Single(r => r.Name == "Focus on Effects Grid");
+            var effectsSwitch = DevFeatureBuildGuard.Registry.Single(r => r.Name == "Add effects demo grid");
             Assert.IsFalse(effectsSwitch.ActiveInReleaseBuild);
             Assert.IsFalse(EffectsPreviewSpawner.IsAllowed(isEditor: false, isDebugBuild: false), "release must ignore the grid");
             Assert.IsTrue(EffectsPreviewSpawner.IsAllowed(isEditor: false, isDebugBuild: true), "development builds DO show it");
+        }
+
+        [Test]
+        public void OutlinePreviewOn_DevelopmentBuild_IsReported_WithTheHowToDisableText()
+        {
+            var config = ShippedConfig();
+            config.outline_preview.enabled = true;
+
+            var messages = DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true);
+
+            Assert.AreEqual(1, messages.Count);
+            StringAssert.Contains("Add outline demo grid", messages[0]);
+            StringAssert.Contains("untick", messages[0]);
+            StringAssert.Contains("Copy to StreamingAssets", messages[0]);
+        }
+
+        [Test]
+        public void OutlinePreviewOn_ReleaseBuild_IsNotReported_BecauseTheRuntimeIgnoresIt()
+        {
+            var config = ShippedConfig();
+            config.outline_preview.enabled = true;
+
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: false));
+        }
+
+        [Test]
+        public void OutlinePreviewReleaseFlag_MatchesWhatTheRuntimeReallyDoes()
+        {
+            var outlineSwitch = DevFeatureBuildGuard.Registry.Single(r => r.Name == "Add outline demo grid");
+            Assert.IsFalse(outlineSwitch.ActiveInReleaseBuild);
+            Assert.IsFalse(OutlinePreviewSpawner.IsAllowed(isEditor: false, isDebugBuild: false), "release must ignore the grid");
+            Assert.IsTrue(OutlinePreviewSpawner.IsAllowed(isEditor: false, isDebugBuild: true), "development builds DO show it");
         }
 
         [Test]

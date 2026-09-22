@@ -84,5 +84,47 @@ namespace TileStories.Tests
                     "'unknown' must never be mistakable for a known destruction reading.");
             }
         }
+
+        // Regression (P5): before this, StatusRamp.Configure read every row's color_hex regardless of
+        // mode, so a developer who once typed a per-row colour kept seeing it even after switching the
+        // Outline Color dropdown to Uniform -- the table and the dropdown disagreed about what
+        // "uniform" meant.
+        [Test]
+        public void Configure_UniformMode_EveryLevelSharesTheUniformColour_IgnoringPerRowColorHex()
+        {
+            var uniformColor = new Color(0.2f, 0.4f, 0.6f, 1f);
+            var entries = new System.Collections.Generic.List<OutlineLevelEntry>
+            {
+                new OutlineLevelEntry { key = "a", pct = 0f, line_style = "solid", color_hex = "#FF0000" },
+                new OutlineLevelEntry { key = "b", pct = 50f, line_style = "medium_dashed", color_hex = "" },
+                new OutlineLevelEntry { key = "c", pct = 100f, line_style = "dotted", color_hex = "#00FF00" },
+            };
+
+            StatusRamp.Configure(entries, MarkerOutlineMode.Uniform, uniformColor);
+
+            foreach (var level in StatusRamp.ActiveLevels)
+                Assert.AreEqual(uniformColor, level.RingColor, $"level at {level.Pct}% must use the uniform colour, not its own color_hex.");
+
+            // Line style stays per-row even in Uniform mode -- only colour is shared.
+            Assert.AreEqual("solid", StatusRamp.ActiveLevels[0].RingSpriteKey);
+            Assert.AreEqual("dash_medium", StatusRamp.ActiveLevels[1].RingSpriteKey);
+            Assert.AreEqual("dotted", StatusRamp.ActiveLevels[2].RingSpriteKey);
+        }
+
+        [Test]
+        public void Configure_PerTypeMode_HonoursEachRowsOwnColorHex()
+        {
+            var entries = new System.Collections.Generic.List<OutlineLevelEntry>
+            {
+                new OutlineLevelEntry { key = "a", pct = 0f, line_style = "solid", color_hex = "#FF0000" },
+                new OutlineLevelEntry { key = "b", pct = 100f, line_style = "dotted", color_hex = "" },
+            };
+
+            StatusRamp.Configure(entries, MarkerOutlineMode.PerType, Color.magenta);
+
+            ColorUtility.TryParseHtmlString("#FF0000", out var expectedRed);
+            Assert.AreEqual(expectedRed, StatusRamp.ActiveLevels[0].RingColor, "a row's own colour must be honoured in Per outline type mode.");
+            Assert.AreNotEqual(Color.magenta, StatusRamp.ActiveLevels[1].RingColor, "an empty row falls back to the stock ramp colour, not the (irrelevant here) uniform colour.");
+        }
     }
 }

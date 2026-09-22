@@ -53,7 +53,7 @@ namespace TileStories.Tests
             var anchor = go.AddComponent<POIAnchor>();
             anchor.Initialise(new POIData { id = id, name = id, category = "religious", has_status = false });
             var view = go.GetComponentInChildren<MarkerView>();
-            view.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+            view.Initialise(anchor, MarkerVisualSettings.Default());
 
             // In tests we disable the animated reveal coroutine and force full scale/alpha
             var reveal = go.GetComponent<MarkerRevealEffect>();

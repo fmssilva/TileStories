@@ -98,8 +98,8 @@ namespace TileStories.Editor
         private const float ColorHexFieldWidth = 90f;
         private const float ColorGroupWidth = ColorPickerWidth + ColorHexFieldWidth;
 
-        private static readonly string[] OutlineModeOptions = { "gold", "same_hue", "free_colors" };
-        private static readonly string[] OutlineModeLabels = { "Gold", "Same Hue", "Free Colors" };
+        private static readonly string[] OutlineModeOptions = { "uniform", "same_hue", "per_type" };
+        private static readonly string[] OutlineModeLabels = { "Uniform color", "Same hue as marker", "Per outline type" };
         private static readonly string[] LineStyleOptions = { "solid", "dash_long", "dash_medium", "dash_short", "dotted" };
         private static readonly string[] LineStyleLabels = { "Continuous", "Big Dashed", "Medium Dashed", "Small Dashed", "Dots" };
         private static readonly string[] ShapeOptions = { "circle", "rounded_square", "hexagon", "diamond", "star", "none" };

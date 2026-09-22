@@ -2,11 +2,19 @@
     "wall_id": "living_room",
     "wall_name": "Living Room (Dev Test)",
     "immersal_map_id": 146267,
-    "marker_style": "outline_gold",
     "marker_shape": "circle",
     "badge_shape": "circle",
-    "marker_outline_mode": "gold",
+    "marker_outline_mode": "uniform",
+    "outline_uniform_color_hex": "#E3BD72",
     "marker_use_badge": true,
+    "badge_corner": "top_right",
+    "badge_size_ratio": 0.36000001430511477,
+    "ring_size_ratio": 1.1799999475479127,
+    "outline_preview": {
+        "enabled": true,
+        "base_poi_id": ""
+    },
+    "contour_spin_deg_per_s": 60.0,
     "marker_icon_library_resources_path": "MarkerSymbols/living_room_IconLibrary",
     "category_styles": [
         {
@@ -93,7 +101,6 @@
             "pct": 0.0,
             "line_style": "solid",
             "color_hex": "",
-            "ring_width": 3.200000047683716,
             "details": "No visible damage -- structure appears complete and maintained.",
             "search_keywords": []
         },
@@ -103,7 +110,6 @@
             "pct": 20.0,
             "line_style": "dash_long",
             "color_hex": "",
-            "ring_width": 2.799999952316284,
             "details": "Minor to moderate damage -- small cracks or chips.",
             "search_keywords": []
         },
@@ -113,7 +119,6 @@
             "pct": 100.0,
             "line_style": "dash_short",
             "color_hex": "",
-            "ring_width": 2.0,
             "details": "Severely damaged or collapsed -- little original structure remains.",
             "search_keywords": []
         },
@@ -123,7 +128,6 @@
             "pct": 100.0,
             "line_style": "dotted",
             "color_hex": "#71717A",
-            "ring_width": 1.7999999523162842,
             "details": "Damage state not assessed or data unavailable.",
             "search_keywords": []
         }
@@ -760,6 +764,106 @@
             "hierarchy_level_key": "level_1",
             "has_custom_symbol": false,
             "custom_symbol_key": ""
+        },
+        {
+            "id": "dev_marker_nostatus",
+            "name": "Dev No Status",
+            "category": "infrastructure",
+            "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
+            "position": {
+                "x": 5.0,
+                "y": 1.0,
+                "z": -5.0
+            },
+            "position_verified": true,
+            "summary": "",
+            "search_keywords": [],
+            "search_keyword_fields": [],
+            "status_pct": 0.0,
+            "has_status": false,
+            "status_unknown": false,
+            "badge_category": "",
+            "status_level_key": "",
+            "hierarchy_level_key": "level_3",
+            "has_custom_symbol": false,
+            "custom_symbol_key": ""
+        },
+        {
+            "id": "dev_marker_nobadge",
+            "name": "Dev No Badge Category",
+            "category": "residential",
+            "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
+            "position": {
+                "x": 5.5,
+                "y": 1.0,
+                "z": -5.0
+            },
+            "position_verified": true,
+            "summary": "",
+            "search_keywords": [],
+            "search_keyword_fields": [],
+            "status_pct": 40.0,
+            "has_status": true,
+            "status_unknown": false,
+            "badge_category": "",
+            "status_level_key": "partial_damage",
+            "hierarchy_level_key": "level_3",
+            "has_custom_symbol": false,
+            "custom_symbol_key": ""
+        },
+        {
+            "id": "dev_marker_nolevel",
+            "name": "Dev No Hierarchy Level",
+            "category": "economic",
+            "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
+            "position": {
+                "x": 6.0,
+                "y": 1.0,
+                "z": -5.0
+            },
+            "position_verified": true,
+            "summary": "",
+            "search_keywords": [],
+            "search_keyword_fields": [],
+            "status_pct": 0.0,
+            "has_status": false,
+            "status_unknown": false,
+            "badge_category": "",
+            "status_level_key": "",
+            "hierarchy_level_key": "",
+            "has_custom_symbol": false,
+            "custom_symbol_key": ""
+        },
+        {
+            "id": "dev_marker_custom_symbol",
+            "name": "Dev Custom Symbol",
+            "category": "military",
+            "editor_rotation_deg": 0.0,
+            "editor_rotation_x_deg": 0.0,
+            "editor_rotation_z_deg": 0.0,
+            "position": {
+                "x": 6.5,
+                "y": 1.0,
+                "z": -5.0
+            },
+            "position_verified": true,
+            "summary": "",
+            "search_keywords": [],
+            "search_keyword_fields": [],
+            "status_pct": 0.0,
+            "has_status": false,
+            "status_unknown": false,
+            "badge_category": "",
+            "status_level_key": "",
+            "hierarchy_level_key": "level_3",
+            "has_custom_symbol": true,
+            "custom_symbol_key": "IconInfrastructures"
         }
     ],
     "wall_bounds": {

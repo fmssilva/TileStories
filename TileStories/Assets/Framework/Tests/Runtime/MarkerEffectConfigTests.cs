@@ -62,8 +62,7 @@ namespace TileStories.Tests
             });
             view = go.GetComponentInChildren<MarkerView>();
             Assert.IsNotNull(view, "POI_Marker prefab must carry a MarkerView.");
-            view.Initialise(anchor, MarkerOutlineMode.Gold, false, MarkerShape.Circle, MarkerEffectFlags.None,
-                true, true, true, null, MarkerShape.Circle, defaults);
+            view.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None, defaults);
             return go;
         }
 
@@ -464,11 +463,9 @@ namespace TileStories.Tests
                 yield return null;
             Assert.Greater(symbol.localScale.x, baseScale * 1.05f, "Precondition: pulse is mid-animation.");
             var anchor = go.GetComponent<POIAnchor>();
-            view.Initialise(anchor, MarkerOutlineMode.Gold, false, MarkerShape.Circle, MarkerEffectFlags.None,
-                true, true, true, null, MarkerShape.Circle, defaults);
+            view.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None, defaults);
             defaults.effects_enabled = false;
-            view.Initialise(anchor, MarkerOutlineMode.Gold, false, MarkerShape.Circle, MarkerEffectFlags.None,
-                true, true, true, null, MarkerShape.Circle, defaults);
+            view.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None, defaults);
             yield return null;
 
             Assert.AreEqual(baseScale, symbol.localScale.x, 0.0001f,

@@ -59,7 +59,7 @@ namespace TileStories.Tests
             var anchor = go.AddComponent<POIAnchor>();
             anchor.Initialise(poiData);
             var view = go.GetComponentInChildren<MarkerView>();
-            view.Initialise(anchor, entry.Style, entry.Shape, entry.EffectFlags);
+            view.Initialise(anchor, entry.ToSettings(), entry.EffectFlags);
             return (go, view);
         }
 
@@ -108,11 +108,11 @@ namespace TileStories.Tests
 
             StatusRamp.Configure(new List<OutlineLevelEntry>
             {
-                new OutlineLevelEntry { key = "intact", pct = 0f, line_style = "solid", color_hex = string.Empty, ring_width = 3.2f },
-                new OutlineLevelEntry { key = "partial_damage", pct = 20f, line_style = "dash_long", color_hex = string.Empty, ring_width = 2.8f },
-                new OutlineLevelEntry { key = "destroyed", pct = 100f, line_style = "dash_short", color_hex = string.Empty, ring_width = 2.0f },
-                new OutlineLevelEntry { key = "unknown", pct = 100f, line_style = "dotted", color_hex = "#71717A", ring_width = 1.8f },
-            });
+                new OutlineLevelEntry { key = "intact", pct = 0f, line_style = "solid", color_hex = string.Empty },
+                new OutlineLevelEntry { key = "partial_damage", pct = 20f, line_style = "dash_long", color_hex = string.Empty },
+                new OutlineLevelEntry { key = "destroyed", pct = 100f, line_style = "dash_short", color_hex = string.Empty },
+                new OutlineLevelEntry { key = "unknown", pct = 100f, line_style = "dotted", color_hex = "#71717A" },
+            }, MarkerOutlineMode.PerType, default);
         }
 
         [UnityTest]
@@ -160,12 +160,12 @@ namespace TileStories.Tests
                 var (go, _) = Spawn(prefab, entry);
                 yield return null;
                 var ringImage = go.transform.Find("Ring")?.GetComponent<Image>();
-                bool expectRing = entry.HasStatus && entry.Style != MarkerStyle.Badge;
+                bool expectRing = entry.HasStatus && !entry.UseBadge;
                 bool actualEnabled = ringImage != null && ringImage.enabled;
                 
                 if (actualEnabled != expectRing)
                 {
-                    failures += $"\n{entry.Label}: ring enabled={actualEnabled} but expected={expectRing} (style={entry.Style}, hasStatus={entry.HasStatus}, unknown={entry.StatusUnknown})";
+                    failures += $"\n{entry.Label}: ring enabled={actualEnabled} but expected={expectRing} (outline={entry.OutlineMode}, badge={entry.UseBadge}, hasStatus={entry.HasStatus}, unknown={entry.StatusUnknown})";
                     failedCount++;
                 }
                 
@@ -196,7 +196,7 @@ namespace TileStories.Tests
                 var (go, _) = Spawn(prefab, entry);
                 yield return null;
                 var badgeGo = go.transform.Find("Badge")?.gameObject;
-                bool expectBadge = entry.HasStatus && (entry.StatusUnknown || entry.Style == MarkerStyle.Badge);
+                bool expectBadge = entry.HasStatus && (entry.StatusUnknown || entry.UseBadge);
                 bool actualActive = badgeGo != null && badgeGo.activeSelf;
                 
                 if (actualActive != expectBadge)
@@ -255,7 +255,7 @@ namespace TileStories.Tests
                 Assert.AreEqual(expectedUnknownDamageIcon, badgeIcon.sprite,
                     $"{entry.Label}: unknown-status badge should resolve IconUnknownDamage by default taxonomy.");
 
-                if (entry.Style != MarkerStyle.Badge)
+                if (!entry.UseBadge)
                 {
                     var ringImage = go.transform.Find("Ring")?.GetComponent<Image>();
                     Assert.IsNotNull(ringImage, $"{entry.Label}: expected Ring image.");
@@ -289,7 +289,7 @@ namespace TileStories.Tests
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             var entry = new MarkerGalleryEntry("Adhoc", "same_hue_ring", "civic",
-                MarkerStyle.OutlineSameHue, MarkerShape.Circle, 80f, true, false);
+                MarkerOutlineMode.SameHue, false, MarkerShape.Circle, 80f, true, false);
 
             var (go, _) = Spawn(prefab, entry);
             yield return null;
@@ -310,7 +310,7 @@ namespace TileStories.Tests
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             var entry = new MarkerGalleryEntry("Adhoc", "badge_icon", "civic",
-                MarkerStyle.Badge, MarkerShape.Circle, 60f, true, false);
+                MarkerOutlineMode.None, true, MarkerShape.Circle, 60f, true, false);
 
             var (go, _) = Spawn(prefab, entry);
             yield return null;
@@ -342,7 +342,7 @@ namespace TileStories.Tests
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             var entry = new MarkerGalleryEntry("Adhoc", "contour_gap", "civic",
-                MarkerStyle.OutlineGold, MarkerShape.Circle, 40f, true, false);
+                MarkerOutlineMode.Uniform, false, MarkerShape.Circle, 40f, true, false);
 
             var (go, _) = Spawn(prefab, entry);
             yield return null;
@@ -414,7 +414,7 @@ namespace TileStories.Tests
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             var entry = new MarkerGalleryEntry("Adhoc", "ripple_falloff", "religious",
-                MarkerStyle.OutlineGold, MarkerShape.Circle, 0f, false, false,
+                MarkerOutlineMode.Uniform, false, MarkerShape.Circle, 0f, false, false,
                 effectFlags: MarkerEffectFlags.RippleRings);
 
             var (go, _) = Spawn(prefab, entry);
@@ -452,7 +452,7 @@ namespace TileStories.Tests
                 yield return null; // Wait for render
 
                 // Capture screenshot for this marker
-                string filename = SanitizeFileName($"{entry.Group}_{entry.Label}_{entry.Style}_{entry.Shape}.png");
+                string filename = SanitizeFileName($"{entry.Group}_{entry.Label}_{entry.OutlineMode}_{entry.Shape}.png");
                 string filepath = System.IO.Path.Combine(outputDir, filename);
                 ScreenCapture.CaptureScreenshot(filepath);
                 yield return new WaitForEndOfFrame();

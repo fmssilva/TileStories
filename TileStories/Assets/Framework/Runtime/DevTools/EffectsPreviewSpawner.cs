@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace TileStories
 {
-    // Dev-only "Focus on Effects Grid" (effect_defaults.preview): spawns a labelled grid of REAL markers
+    // Dev-only "Add effects demo grid" (effect_defaults.preview): spawns a labelled grid of REAL markers
     // so a developer sees every effect (and every hierarchy level's exact look) running, without hunting
     // for a marker in the wall. Block 1: a no-effect control plus one cell per effect. Block 2: one cell
     // per hierarchy level, using that level's real size, effects and reveal timing. Off by default; only
@@ -46,11 +46,6 @@ namespace TileStories
         public static readonly Color BackgroundColor = new Color(0.12f, 0.13f, 0.16f, 1f);
 
         private const float DefaultSizeCm = 20f;
-        private const float CellSpacing = 0.5f;
-        private const float RowSpacing = 0.65f;
-        private const float GridMargin = 0.6f;
-        private const float ViewFill = 0.92f;
-        private const float MinDistance = 0.5f;
         private const float QuickRevealSeconds = 0.35f;
         private static readonly Color PlainCircleColor = new Color(0.55f, 0.55f, 0.55f, 1f);
 
@@ -89,66 +84,22 @@ namespace TileStories
         }
 
         // ---------------- layout (pure) ----------------
+        // Thin wrappers: the real math is shared with OutlinePreviewSpawner in DevPreviewGridLayout,
+        // so the two grids' camera-fit logic cannot drift apart. Kept as public statics here too
+        // because existing tests (EffectsPreviewSpawnerTests, EffectsUsageAndPreviewLayoutTests) and
+        // EffectsPreviewFocus already call them by this name.
 
-        private static int RowsFor(int count, int columns) => count <= 0 ? 0 : (count + columns - 1) / columns;
+        public static Vector2 GridExtent(int effectCount, int levelCount, int columns) =>
+            DevPreviewGridLayout.GridExtent(effectCount, levelCount, columns);
 
-        // Size of the grid, in metres, when the two blocks are wrapped at `columns` per row.
-        public static Vector2 GridExtent(int effectCount, int levelCount, int columns)
-        {
-            int rows = RowsFor(effectCount, columns) + RowsFor(levelCount, columns);
-            int cols = Mathf.Min(columns, Mathf.Max(effectCount, levelCount));
-            return new Vector2((cols - 1) * CellSpacing + GridMargin, (rows - 1) * RowSpacing + GridMargin * 1.2f);
-        }
+        public static float FitDistance(Vector2 extent, float verticalFovDeg, float aspect) =>
+            DevPreviewGridLayout.FitDistance(extent, verticalFovDeg, aspect);
 
-        // Camera distance at which a grid of this extent fills (ViewFill of) the view.
-        public static float FitDistance(Vector2 extent, float verticalFovDeg, float aspect)
-        {
-            float tan = Mathf.Tan(verticalFovDeg * Mathf.Deg2Rad * 0.5f);
-            float byHeight = extent.y / (2f * tan);
-            float byWidth = extent.x / (2f * tan * Mathf.Max(0.1f, aspect));
-            return Mathf.Max(MinDistance, Mathf.Max(byWidth, byHeight) / ViewFill);
-        }
+        public static int ChooseColumns(int effectCount, int levelCount, float verticalFovDeg, float aspect) =>
+            DevPreviewGridLayout.ChooseColumns(effectCount, levelCount, verticalFovDeg, aspect);
 
-        // The column count that needs the least distance, i.e. gives the biggest cells on screen
-        // (a portrait view wants few columns, a wide one many).
-        public static int ChooseColumns(int effectCount, int levelCount, float verticalFovDeg, float aspect)
-        {
-            int best = 1;
-            float bestDistance = float.MaxValue;
-            int max = Mathf.Max(1, Mathf.Max(effectCount, levelCount));
-            for (int columns = 1; columns <= max; columns++)
-            {
-                float distance = FitDistance(GridExtent(effectCount, levelCount, columns), verticalFovDeg, aspect);
-                if (distance < bestDistance - 1e-4f)
-                {
-                    best = columns;
-                    bestDistance = distance;
-                }
-            }
-            return best;
-        }
-
-        // Local cell positions: the effect block first, then the level block, each wrapped at `columns`,
-        // every row centred, the whole grid centred on the origin.
-        public static List<Vector2> CellPositions(int effectCount, int levelCount, int columns)
-        {
-            var positions = new List<Vector2>();
-            int row = 0;
-            foreach (int count in new[] { effectCount, levelCount })
-            {
-                for (int start = 0; start < count; start += columns)
-                {
-                    int inRow = Mathf.Min(columns, count - start);
-                    for (int i = 0; i < inRow; i++)
-                        positions.Add(new Vector2((i - (inRow - 1) * 0.5f) * CellSpacing, -row * RowSpacing));
-                    row++;
-                }
-            }
-            float shift = (row - 1) * RowSpacing * 0.5f;
-            for (int i = 0; i < positions.Count; i++)
-                positions[i] += new Vector2(0f, shift);
-            return positions;
-        }
+        public static List<Vector2> CellPositions(int effectCount, int levelCount, int columns) =>
+            DevPreviewGridLayout.CellPositions(effectCount, levelCount, columns);
 
         // ---------------- spawning ----------------
 

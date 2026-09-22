@@ -2,41 +2,13 @@ using UnityEngine;
 
 namespace TileStories
 {
-    // Parses the wall config's freeform marker_style / marker_shape strings into
-    // their enums. Kept as strings in JSON (see design principle 2 in
-    // _2_2_Marker_Design.md §4). An unrecognised or missing value logs once and
+    // Parses the wall config's marker_shape / badge_shape / marker_outline_mode / badge_corner
+    // strings into their enums. Kept as strings in JSON (see _2.2.1_Marker_Design.md, design
+    // principle 2). An unrecognised or missing value logs once and
     // falls back to a sane default rather than silently defaulting to enum value 0.
     public static class MarkerVisualsParser
     {
-        public const MarkerStyle DefaultStyle = MarkerStyle.OutlineGold;
         public const MarkerShape DefaultShape = MarkerShape.Circle;
-
-        public static MarkerStyle ParseStyle(string raw)
-        {
-            switch (raw)
-            {
-                case "outline_gold": return MarkerStyle.OutlineGold;
-                case "outline_same_hue": return MarkerStyle.OutlineSameHue;
-                case "badge": return MarkerStyle.Badge;
-                default:
-                    if (!string.IsNullOrEmpty(raw))
-                        Debug.LogWarning($"[MarkerVisualsParser] Unknown marker_style '{raw}', falling back to {DefaultStyle}.");
-                    return DefaultStyle;
-            }
-        }
-
-        public static bool TryParseStyle(string raw, out MarkerStyle style)
-        {
-            switch (raw)
-            {
-                case "outline_gold": style = MarkerStyle.OutlineGold; return true;
-                case "outline_same_hue": style = MarkerStyle.OutlineSameHue; return true;
-                case "badge": style = MarkerStyle.Badge; return true;
-                default:
-                    style = default;
-                    return false;
-            }
-        }
 
         public static MarkerShape ParseShape(string raw)
         {
@@ -71,18 +43,17 @@ namespace TileStories
             }
         }
 
-        public const MarkerOutlineMode DefaultOutlineMode = MarkerOutlineMode.Gold;
+        public const MarkerOutlineMode DefaultOutlineMode = MarkerOutlineMode.Uniform;
         public const bool DefaultUseBadge = false;
 
-        // Parse split outline mode from wall config. Missing/unrecognized values
-        // fall back safely, and legacy marker_style still works through
-        // DeriveOutlineAndBadgeFromLegacyStyle when marker_outline_mode is empty.
+            // Parse the outline mode from wall config. Missing/unrecognized values fall back safely.
         public static MarkerOutlineMode ParseOutlineMode(string raw)
         {
             switch (raw)
             {
-                case "gold": return MarkerOutlineMode.Gold;
+                case "uniform": return MarkerOutlineMode.Uniform;
                 case "same_hue": return MarkerOutlineMode.SameHue;
+                case "per_type": return MarkerOutlineMode.PerType;
                 case "none": return MarkerOutlineMode.None;
                 default:
                     if (!string.IsNullOrEmpty(raw))
@@ -95,8 +66,9 @@ namespace TileStories
         {
             switch (raw)
             {
-                case "gold": outlineMode = MarkerOutlineMode.Gold; return true;
+                case "uniform": outlineMode = MarkerOutlineMode.Uniform; return true;
                 case "same_hue": outlineMode = MarkerOutlineMode.SameHue; return true;
+                case "per_type": outlineMode = MarkerOutlineMode.PerType; return true;
                 case "none": outlineMode = MarkerOutlineMode.None; return true;
                 default:
                     outlineMode = default;
@@ -104,24 +76,18 @@ namespace TileStories
             }
         }
 
-        // Derive split controls from legacy marker_style for backward-compatible
-        // behavior when marker_outline_mode is not authored.
-        public static void DeriveOutlineAndBadgeFromLegacyStyle(string rawStyle, out MarkerOutlineMode outlineMode, out bool useBadge)
+        // Badge corner key -> normalised direction from the symbol centre to the badge centre.
+        // (0.7, 0.7) = top right, the composition chosen in the interactive prototype.
+        public static bool TryParseBadgeCorner(string raw, out Vector2 direction)
         {
-            switch (ParseStyle(rawStyle))
+            const float d = 0.7f;
+            switch (raw)
             {
-                case MarkerStyle.OutlineSameHue:
-                    outlineMode = MarkerOutlineMode.SameHue;
-                    useBadge = false;
-                    return;
-                case MarkerStyle.Badge:
-                    outlineMode = MarkerOutlineMode.None;
-                    useBadge = true;
-                    return;
-                default:
-                    outlineMode = MarkerOutlineMode.Gold;
-                    useBadge = false;
-                    return;
+                case "top_right": direction = new Vector2(d, d); return true;
+                case "top_left": direction = new Vector2(-d, d); return true;
+                case "bottom_right": direction = new Vector2(d, -d); return true;
+                case "bottom_left": direction = new Vector2(-d, -d); return true;
+                default: direction = new Vector2(d, d); return false;
             }
         }
 

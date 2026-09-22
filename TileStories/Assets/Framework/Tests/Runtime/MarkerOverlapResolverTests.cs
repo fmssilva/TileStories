@@ -27,7 +27,7 @@ namespace TileStories.Tests
             anchor.Initialise(poiData);
 
             var markerView = go.AddComponent<MarkerView>();
-            markerView.Initialise(anchor, MarkerStyle.OutlineGold, MarkerShape.Circle);
+            markerView.Initialise(anchor, MarkerVisualSettings.Default());
 
             return markerView;
         }

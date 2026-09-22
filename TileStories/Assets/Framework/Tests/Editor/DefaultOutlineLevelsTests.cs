@@ -3,7 +3,7 @@
 // EditMode test for the outline-level defaults seeded by the POI Editor
 // when a wall has no outline_levels. Pure data -- no scene, no window, no
 // Unity dependencies. Verifies the four heritage levels, their line styles,
-// pct/ring_width values, and that "unknown" carries an explicit grey colour.
+// pct values, and that "unknown" carries an explicit grey colour.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +52,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("Intact", defaults[0].label);
             Assert.AreEqual(0f, defaults[0].pct);
             Assert.AreEqual("solid", defaults[0].line_style);
-            Assert.AreEqual(3.2f, defaults[0].ring_width, 0.001f);
             Assert.IsTrue(string.IsNullOrEmpty(defaults[0].color_hex),
                 "intact must have empty color_hex so runtime uses StatusRamp gold.");
 
@@ -61,7 +60,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("Partial Damage", defaults[1].label);
             Assert.AreEqual(20f, defaults[1].pct);
             Assert.AreEqual("dash_long", defaults[1].line_style);
-            Assert.AreEqual(2.8f, defaults[1].ring_width, 0.001f);
             Assert.IsTrue(string.IsNullOrEmpty(defaults[1].color_hex),
                 "partial_damage must have empty color_hex so runtime uses StatusRamp gold.");
 
@@ -70,7 +68,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("Destroyed", defaults[2].label);
             Assert.AreEqual(100f, defaults[2].pct);
             Assert.AreEqual("dash_short", defaults[2].line_style);
-            Assert.AreEqual(2.0f, defaults[2].ring_width, 0.001f);
             Assert.IsTrue(string.IsNullOrEmpty(defaults[2].color_hex),
                 "destroyed must have empty color_hex so runtime uses StatusRamp gold.");
 
@@ -79,7 +76,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("Unknown", defaults[3].label);
             Assert.AreEqual(100f, defaults[3].pct);
             Assert.AreEqual("dotted", defaults[3].line_style);
-            Assert.AreEqual(1.8f, defaults[3].ring_width, 0.001f);
             Assert.AreEqual("#71717A", defaults[3].color_hex,
                 "unknown must carry an explicit grey colour, not fall back to StatusRamp.");
         }
