@@ -410,24 +410,24 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator SunContours_UsesCenterToOuterLightFalloff()
+        public IEnumerator RippleRings_UsesCenterToOuterLightFalloff()
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
-            var entry = new MarkerGalleryEntry("Adhoc", "sun_falloff", "religious",
+            var entry = new MarkerGalleryEntry("Adhoc", "ripple_falloff", "religious",
                 MarkerStyle.OutlineGold, MarkerShape.Circle, 0f, false, false,
-                effectFlags: MarkerEffectFlags.SunContours);
+                effectFlags: MarkerEffectFlags.RippleRings);
 
             var (go, _) = Spawn(prefab, entry);
             yield return null;
 
-            var sunFx = go.GetComponent<MarkerSunEffect>();
-            Assert.IsNotNull(sunFx, "MarkerSunEffect missing.");
+            var rippleFx = go.GetComponent<MarkerRippleEffect>();
+            Assert.IsNotNull(rippleFx, "MarkerRippleEffect missing.");
 
-            float innerAlpha = GetPrivateFloat(sunFx, "innerAlpha");
-            float middleAlpha = GetPrivateFloat(sunFx, "middleAlpha");
-            float outerAlpha = GetPrivateFloat(sunFx, "outerAlpha");
-            Assert.Greater(innerAlpha, middleAlpha, "Inner sun layer should be stronger than middle layer.");
-            Assert.Greater(middleAlpha, outerAlpha, "Middle sun layer should be stronger than outer layer.");
+            float innerAlpha = GetPrivateFloat(rippleFx, "innerAlpha");
+            float middleAlpha = GetPrivateFloat(rippleFx, "middleAlpha");
+            float outerAlpha = GetPrivateFloat(rippleFx, "outerAlpha");
+            Assert.Greater(innerAlpha, middleAlpha, "Inner ripple layer should be stronger than middle layer.");
+            Assert.Greater(middleAlpha, outerAlpha, "Middle ripple layer should be stronger than outer layer.");
 
             Object.Destroy(go);
         }

@@ -137,8 +137,8 @@
             "search_keywords": [],
             "size_cm": 30.0,
             "show_label": true,
-            "sun_effect": "sun_circles",
-            "accent_effect": "ring_pulse",
+            "ripple_effect": "ripple_discs",
+            "halo_effect": "halo_ring",
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 0.0,
@@ -153,8 +153,8 @@
             "search_keywords": [],
             "size_cm": 20.0,
             "show_label": false,
-            "sun_effect": "sun_circles",
-            "accent_effect": "ring_pulse",
+            "ripple_effect": "ripple_discs",
+            "halo_effect": "halo_ring",
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 0.20000000298023225,
@@ -169,8 +169,8 @@
             "search_keywords": [],
             "size_cm": 15.0,
             "show_label": false,
-            "sun_effect": "sun_contours",
-            "accent_effect": "simple_sun",
+            "ripple_effect": "ripple_rings",
+            "halo_effect": "halo_disc",
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 0.5,
@@ -185,8 +185,8 @@
             "search_keywords": [],
             "size_cm": 10.0,
             "show_label": false,
-            "sun_effect": "none",
-            "accent_effect": "simple_sun",
+            "ripple_effect": "none",
+            "halo_effect": "halo_disc",
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 0.800000011920929,
@@ -201,8 +201,8 @@
             "search_keywords": [],
             "size_cm": 7.0,
             "show_label": false,
-            "sun_effect": "none",
-            "accent_effect": "beacon",
+            "ripple_effect": "none",
+            "halo_effect": "beacon",
             "pulse": true,
             "rotate_contour": true,
             "reveal_delay_s": 1.0,
@@ -775,29 +775,63 @@
         }
     },
     "effect_defaults": {
+        "effects_enabled": true,
         "pulse": {
+            "enabled": true,
             "amplitude": 0.18000000715255738,
             "period": 1.600000023841858
         },
-        "sun": {
+        "ripple_rings": {
+            "enabled": true,
             "period": 1.7999999523162842,
             "stagger": 0.11999999731779099,
-            "innerAlpha": 0.550000011920929,
-            "middleAlpha": 0.36000001430511477,
-            "outerAlpha": 0.20000000298023225,
+            "inner_alpha": 0.550000011920929,
+            "middle_alpha": 0.36000001430511477,
+            "outer_alpha": 0.20000000298023225,
             "tint_color_hex": "#F2CA71"
         },
-        "accent": {
-            "size": 0.23999999463558198,
-            "baseAlpha": 0.2800000011920929,
-            "contourOuterScale": 0.8999999761581421,
-            "contourInnerScale": 0.800000011920929,
-            "filledRadiusScale": 0.8500000238418579,
-            "breatheAmplitude": 0.15000000596046449,
-            "period": 2.0,
-            "beaconStartScale": 1.0,
-            "beaconEndScale": 1.7999999523162842,
+        "ripple_discs": {
+            "enabled": true,
+            "period": 1.7999999523162842,
+            "stagger": 0.11999999731779099,
+            "inner_alpha": 0.550000011920929,
+            "middle_alpha": 0.36000001430511477,
+            "outer_alpha": 0.20000000298023225,
             "tint_color_hex": "#F2CA71"
+        },
+        "halo_ring": {
+            "enabled": true,
+            "size": 1.2000000476837159,
+            "base_alpha": 0.2800000011920929,
+            "tint_color_hex": "#F2CA71",
+            "period": 2.0,
+            "breathe_amplitude": 0.15000000596046449,
+            "outer_scale": 0.8999999761581421,
+            "inner_scale": 0.800000011920929
+        },
+        "halo_disc": {
+            "enabled": true,
+            "size": 1.2000000476837159,
+            "base_alpha": 0.2800000011920929,
+            "tint_color_hex": "#F2CA71",
+            "period": 2.0,
+            "breathe_amplitude": 0.15000000596046449,
+            "radius_scale": 0.8500000238418579
+        },
+        "beacon": {
+            "enabled": true,
+            "size": 1.2000000476837159,
+            "base_alpha": 0.2800000011920929,
+            "tint_color_hex": "#F2CA71",
+            "period": 2.0,
+            "start_scale": 1.0,
+            "end_scale": 1.7999999523162842,
+            "outer_scale": 0.8999999761581421,
+            "inner_scale": 0.800000011920929
+        },
+        "preview": {
+            "enabled": false,
+            "base_poi_id": "lamp_military"
         }
     },
     "lod_settings": {

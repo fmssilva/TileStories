@@ -48,36 +48,44 @@ namespace TileStories
         private static Dictionary<string, int> _priorityByKey = new();
         private static Dictionary<string, string> _facingModeOverrideByKey = new();
 
-        // Parse an effect-mode string into MarkerEffectFlags. Local to this file
-        // -- this is the only consumer of sun_effect/accent_effect parsing.
-        private static MarkerEffectFlags ParseEffectString(string sunEffect, string accentEffect, bool pulse)
+        // The effects a level requests, parsed from its ripple_effect / halo_effect strings and
+        // pulse flag. The one parser of those strings (the editor reuses it for its usage lines);
+        // logWarnings=false keeps repaint-driven callers from spamming the console.
+        public static MarkerEffectFlags EffectFlagsOf(HierarchyLevelEntry entry, bool logWarnings = true)
+        {
+            return entry == null
+                ? MarkerEffectFlags.None
+                : ParseEffectString(entry.ripple_effect, entry.halo_effect, entry.pulse, logWarnings);
+        }
+
+        private static MarkerEffectFlags ParseEffectString(string rippleEffect, string haloEffect, bool pulse, bool logWarnings)
         {
             var flags = MarkerEffectFlags.None;
 
-            switch (sunEffect)
+            switch (rippleEffect)
             {
-                case "sun_contours": flags |= MarkerEffectFlags.SunContours; break;
-                case "sun_circles":  flags |= MarkerEffectFlags.SunCircles;  break;
+                case "ripple_rings": flags |= MarkerEffectFlags.RippleRings; break;
+                case "ripple_discs": flags |= MarkerEffectFlags.RippleDiscs; break;
                 case "none":
                 case null:
                 case "":
                     break;
                 default:
-                    Debug.LogWarning($"[MarkerHierarchyResolver] Unknown sun_effect '{sunEffect}', ignoring.");
+                    if (logWarnings) Debug.LogWarning($"[MarkerHierarchyResolver] Unknown ripple_effect '{rippleEffect}', ignoring.");
                     break;
             }
 
-            switch (accentEffect)
+            switch (haloEffect)
             {
-                case "ring_pulse":  flags |= MarkerEffectFlags.RingPulse;  break;
-                case "simple_sun":  flags |= MarkerEffectFlags.SimpleSun;  break;
-                case "beacon":      flags |= MarkerEffectFlags.Beacon;      break;
+                case "halo_ring": flags |= MarkerEffectFlags.HaloRing; break;
+                case "halo_disc": flags |= MarkerEffectFlags.HaloDisc; break;
+                case "beacon":    flags |= MarkerEffectFlags.Beacon;   break;
                 case "none":
                 case null:
                 case "":
                     break;
                 default:
-                    Debug.LogWarning($"[MarkerHierarchyResolver] Unknown accent_effect '{accentEffect}', ignoring.");
+                    if (logWarnings) Debug.LogWarning($"[MarkerHierarchyResolver] Unknown halo_effect '{haloEffect}', ignoring.");
                     break;
             }
 
@@ -107,7 +115,7 @@ namespace TileStories
                 var style = new HierarchyStyle(
                     entry.size_cm,
                     entry.show_label,
-                    ParseEffectString(entry.sun_effect, entry.accent_effect, entry.pulse),
+                    EffectFlagsOf(entry),
                     entry.rotate_contour,
                     entry.reveal_delay_s,
                     entry.reveal_duration_s);

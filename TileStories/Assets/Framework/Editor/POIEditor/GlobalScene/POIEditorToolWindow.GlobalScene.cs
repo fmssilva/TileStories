@@ -458,87 +458,19 @@ namespace TileStories.Editor
                 levels[i].pct = (100f / (levels.Count - 1)) * i;
         }
 
-        // Global effect defaults editor (section 19). Lets the wall developer tune
-        // the amplitude, period, and colour of each effect type from config.json
-        // rather than recompiling. Per-POI effect selection (which effects are
-        // active) is handled in the per-marker "Effects" foldout; this section
-        // only controls the shared parameters those active effects use.
-        private void DrawGlobalEffectsSection()
-        {
-            // Lazily ensure the nested EffectDefaults objects exist so the property
-            // drawers below never hit a null reference.
-            EnsureEffectDefaultsExist();
-
-            EditorGUILayout.HelpBox(
-                "These defaults control the look and timing of each effect type. " +
-                "Per-POI effect selection (which effects are active on a given marker) " +
-                "is set in each marker's 'Effects' foldout below. Changes here apply to " +
-                "all markers using the corresponding effect on this wall.",
-                MessageType.Info);
-
-            EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField("Available Effects", EditorStyles.boldLabel);
-
-            EditorGUILayout.LabelField("Pulse - Gentle scale breathing", EditorStyles.miniBoldLabel);
-            EditorGUILayout.LabelField("Sun Contours / Sun Circles - Three concentric waves, center-first flow", EditorStyles.miniLabel);
-            EditorGUILayout.LabelField("Ring Pulse - Thin contour, breathing", EditorStyles.miniLabel);
-            EditorGUILayout.LabelField("Simple Sun - Filled disc, breathing", EditorStyles.miniLabel);
-            EditorGUILayout.LabelField("Beacon - Thin contour, grow+fade sawtooth", EditorStyles.miniLabel);
-
-            EditorGUILayout.Space(8f);
-            EditorGUILayout.LabelField("Pulse Defaults", EditorStyles.boldLabel);
-            var pulse = _config.effect_defaults.pulse;
-            pulse.amplitude = DrawSliderField("Amplitude", pulse.amplitude, 0f, 0.45f);
-            pulse.period = DrawScalarField("Period (s)", pulse.period);
-
-            EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField("Sun Defaults", EditorStyles.boldLabel);
-            var sun = _config.effect_defaults.sun;
-            sun.period = DrawScalarField("Period (s)", sun.period);
-            sun.stagger = DrawSliderField("Stagger", sun.stagger, 0f, 0.25f);
-            sun.innerAlpha = DrawSliderField("Inner alpha", sun.innerAlpha, 0f, 1f);
-            sun.middleAlpha = DrawSliderField("Middle alpha", sun.middleAlpha, 0f, 1f);
-            sun.outerAlpha = DrawSliderField("Outer alpha", sun.outerAlpha, 0f, 1f);
-            string sunTint = sun.tint_color_hex;
-            DrawColorField("Tint Color", ref sunTint);
-            sun.tint_color_hex = sunTint;
-
-            EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField("Accent Defaults", EditorStyles.boldLabel);
-            var accent = _config.effect_defaults.accent;
-            accent.size = DrawSliderField("Size", accent.size, 0f, 1f);
-            accent.baseAlpha = DrawSliderField("Base alpha", accent.baseAlpha, 0f, 1f);
-            accent.contourOuterScale = DrawSliderField("Contour outer scale", accent.contourOuterScale, 0.72f, 0.98f);
-            accent.contourInnerScale = DrawSliderField("Contour inner scale", accent.contourInnerScale, 0.5f, 0.9f);
-            accent.filledRadiusScale = DrawSliderField("Filled radius scale", accent.filledRadiusScale, 0.85f, 1f);
-            accent.breatheAmplitude = DrawSliderField("Breathe amplitude", accent.breatheAmplitude, 0f, 0.4f);
-            accent.period = DrawScalarField("Period (s)", accent.period);
-            accent.beaconStartScale = DrawScalarField("Beacon start scale", accent.beaconStartScale);
-            accent.beaconEndScale = DrawScalarField("Beacon end scale", accent.beaconEndScale);
-            string accentTint = accent.tint_color_hex;
-            DrawColorField("Tint Color", ref accentTint);
-            accent.tint_color_hex = accentTint;
-
-            EditorGUILayout.Space(8f);
-            EditorGUILayout.HelpBox(
-                "To add a new marker effect: create a C# class inheriting MarkerEffect, " +
-                "add a flag to MarkerEffectFlags, update MarkerVisualsParser.ParseEffectFlags, " +
-                "wire it in MarkerView.ApplyHeroState, add a toggle in DrawPoiEffectsFields, " +
-                "and add a gallery entry in MarkerGalleryDefinitions.",
-                MessageType.Info);
-        }
-
         private void DrawGlobalHierarchySection()
         {
             if (_config.hierarchy_levels == null)
                 _config.hierarchy_levels = new List<HierarchyLevelEntry>();
+            EnsureEffectDefaultsExist();
 
             EditorGUILayout.LabelField("Hierarchy Levels", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
                 "Wall-configurable per-POI hierarchy levels. Each row drives one POI marker's " +
-                "size, label visibility, effect combination, outline rotation, reveal delay, " +
-                "and reveal duration. An empty table means all POIs fall through to the " +
-                "framework default (12cm, no label, no effects, 0.35s reveal).",
+                "size, label visibility, effects (Ripple / Halo / Pulse, defined in the Effects " +
+                "section), outline rotation, reveal delay, and reveal duration. An empty table " +
+                "means all POIs fall through to the framework default (12cm, no label, no " +
+                "effects, 0.35s reveal).",
                 MessageType.Info);
 
             int count = _config.hierarchy_levels.Count;
@@ -591,20 +523,21 @@ namespace TileStories.Editor
                     showLabelIdx = EditorGUILayout.Popup("Show Label", showLabelIdx, ShowLabelOptions, GUILayout.Width(130f));
                     entry.show_label = showLabelIdx == 0;
 
-                    // Column 6: Sun Effect (dropdown, mutually exclusive)
-                    int sunIdx = Array.IndexOf(SunEffectOptions, entry.sun_effect);
-                    if (sunIdx < 0) sunIdx = 0;
-                    sunIdx = EditorGUILayout.Popup("Sun", sunIdx, SunEffectLabels, GUILayout.Width(110f));
-                    entry.sun_effect = SunEffectOptions[sunIdx];
+                    // Column 6: Ripple effect (dropdown, mutually exclusive). Only effects ticked in
+                    // Global Scene > Effects are offered; a value that points at a disabled effect stays
+                    // visible as "(disabled)" so nothing is silently lost.
+                    entry.ripple_effect = DrawEffectOptionPopup("Ripple", entry.ripple_effect,
+                        RippleEffectOptions, RippleEffectLabels, 120f);
 
-                    // Column 7: Accent Effect (dropdown, mutually exclusive)
-                    int accentIdx = Array.IndexOf(AccentEffectOptions, entry.accent_effect);
-                    if (accentIdx < 0) accentIdx = 0;
-                    accentIdx = EditorGUILayout.Popup("Accent", accentIdx, AccentEffectLabels, GUILayout.Width(120f));
-                    entry.accent_effect = AccentEffectOptions[accentIdx];
+                    // Column 7: Halo effect (dropdown, mutually exclusive), filtered the same way.
+                    entry.halo_effect = DrawEffectOptionPopup("Halo", entry.halo_effect,
+                        HaloEffectOptions, HaloEffectLabels, 120f);
 
-                    // Column 8: Pulse (checkbox, standalone boolean)
-                    entry.pulse = EditorGUILayout.Toggle("Pulse", entry.pulse, GUILayout.Width(70f));
+                    // Column 8: Pulse (checkbox, standalone boolean). Greyed out when the Pulse effect
+                    // is switched off in the Effects section; the ticked value is kept.
+                    using (new EditorGUI.DisabledScope(!_config.effect_defaults.IsEffectEnabled(MarkerEffectFlags.Pulse)))
+                        entry.pulse = EditorGUILayout.Toggle("Pulse", entry.pulse, GUILayout.Width(70f));
+                    HelpInfoButton.Draw("Effect columns (Ripple / Halo / Pulse)", HierarchyEffectColumnsHelp);
 
                     // Column 9: Rotate Contour (checkbox, outline-gated)
                     bool outlineEnabled = !string.Equals(_config.marker_outline_mode, "none", StringComparison.OrdinalIgnoreCase);
@@ -671,8 +604,8 @@ namespace TileStories.Editor
                     priority = _config.hierarchy_levels.Count + 1,
                     size_cm = 12f,
                     show_label = false,
-                    sun_effect = "none",
-                    accent_effect = "none",
+                    ripple_effect = "none",
+                    halo_effect = "none",
                     pulse = false,
                     rotate_contour = false,
                     reveal_delay_s = 0f,
@@ -681,15 +614,6 @@ namespace TileStories.Editor
                 _hasUnsavedChanges = true;
             }
             EditorRowEnd();
-        }
-
-        private void EnsureEffectDefaultsExist()
-        {
-            if (_config.effect_defaults == null)
-            {
-                _config.effect_defaults = new EffectDefaults();
-                _hasUnsavedChanges = true;
-            }
         }
 
     }

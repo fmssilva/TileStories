@@ -214,67 +214,140 @@ namespace TileStories
         public string voice_activity_indicator_style = "mic_text";
     }
 
+    // Wall-level effect settings (_2.2.4): a master switch, one parameter block per
+    // effect (each with its own "enabled" checkbox) and the dev-only preview grid settings.
+    // Which effect a marker runs is chosen per hierarchy level (ripple_effect / halo_effect /
+    // pulse columns), not here: this class only defines how each effect looks.
     [Serializable]
     public class EffectDefaults
     {
-        // Gentle scale "breathing" -- cheapest "worth a look" cue.
+        // Wall-wide master switch: false silences every marker effect whatever the hierarchy
+        // levels say. Useful for weak devices and as a "reduce motion" accessibility option.
+        // Reveal timing is a separate per-level setting.
+        public bool effects_enabled = true;
+
         public PulseDefaults pulse = new();
+        public RippleDefaults ripple_rings = new();
+        public RippleDefaults ripple_discs = new();
+        public HaloRingDefaults halo_ring = new();
+        public HaloDiscDefaults halo_disc = new();
+        public BeaconDefaults beacon = new();
+        public EffectPreviewSettings preview = new();
 
-        // Three concentric waves with center-first flow.
-        public SunDefaults sun = new();
+        // Every selectable effect, in display order (editor foldouts, usage lines, tests).
+        public static readonly MarkerEffectFlags[] SelectableEffects =
+        {
+            MarkerEffectFlags.Pulse, MarkerEffectFlags.RippleRings, MarkerEffectFlags.RippleDiscs,
+            MarkerEffectFlags.HaloRing, MarkerEffectFlags.HaloDisc, MarkerEffectFlags.Beacon,
+        };
 
-        // Single reusable accent ring/disc (RingPulse / SimpleSun / Beacon).
-        public AccentDefaults accent = new();
+        // This one effect's own "enabled" checkbox (ignores the master switch).
+        public bool IsEffectEnabled(MarkerEffectFlags effect)
+        {
+            switch (effect)
+            {
+                case MarkerEffectFlags.Pulse: return pulse.enabled;
+                case MarkerEffectFlags.RippleRings: return ripple_rings.enabled;
+                case MarkerEffectFlags.RippleDiscs: return ripple_discs.enabled;
+                case MarkerEffectFlags.HaloRing: return halo_ring.enabled;
+                case MarkerEffectFlags.HaloDisc: return halo_disc.enabled;
+                case MarkerEffectFlags.Beacon: return beacon.enabled;
+                default: return true;
+            }
+        }
 
+        // Keep only the requested effects that are switched on: the master switch first,
+        // then each effect's own "enabled" checkbox. The one place both rules live, so the
+        // rendering path and the displacement radius can never disagree.
+        public MarkerEffectFlags FilterEnabled(MarkerEffectFlags requested)
+        {
+            if (!effects_enabled)
+                return MarkerEffectFlags.None;
+
+            var allowed = MarkerEffectFlags.None;
+            foreach (var effect in SelectableEffects)
+                if ((requested & effect) != 0 && IsEffectEnabled(effect))
+                    allowed |= effect;
+            return allowed;
+        }
+
+        // Whole-symbol scale breathing.
         [Serializable]
         public class PulseDefaults
         {
-            [Tooltip("How much the marker grows/shrinks per cycle (0=none, 0.45=45% swing).")]
+            public bool enabled = true;
+            // How much the symbol grows per cycle (0 = none, 0.45 = 45% swing).
             public float amplitude = 0.18f;
-            [Tooltip("Seconds per full pulse cycle.")]
+            // Seconds per full cycle.
             public float period = 1.6f;
         }
 
+        // Three staggered waves flowing outward; used twice (rings and discs), so a wall can
+        // give the filled discs lower alphas than the thin rings.
         [Serializable]
-        public class SunDefaults
+        public class RippleDefaults
         {
-            [Tooltip("Seconds per full sun animation cycle.")]
+            public bool enabled = true;
             public float period = 1.8f;
-            [Tooltip("Delay (in cycle units) between inner/middle/outer wave layers.")]
+            // Delay (in cycle units) between the inner, middle and outer wave.
             public float stagger = 0.12f;
-            [Tooltip("Starting alpha for the innermost ring/disc.")]
-            public float innerAlpha = 0.55f;
-            [Tooltip("Starting alpha for the middle ring/disc.")]
-            public float middleAlpha = 0.36f;
-            [Tooltip("Starting alpha for the outermost ring/disc.")]
-            public float outerAlpha = 0.2f;
-            [Tooltip("Tint colour for the sun effect rings/discs (hex string, e.g. '#F2CA71').")]
+            public float inner_alpha = 0.55f;
+            public float middle_alpha = 0.36f;
+            public float outer_alpha = 0.2f;
             public string tint_color_hex = "#F2CA71";
         }
 
+        // One breathing ring behind the symbol.
         [Serializable]
-        public class AccentDefaults
+        public class HaloRingDefaults
         {
-            [Tooltip("Diameter of the accent ring/disc as a fraction of the symbol size.")]
-            public float size = 0.24f;
-            [Tooltip("Starting alpha of the accent (always visible level).")]
-            public float baseAlpha = 0.28f;
-            [Tooltip("Outer radius scale for contour-style accents.")]
-            public float contourOuterScale = 0.90f;
-            [Tooltip("Inner radius scale for contour-style accents.")]
-            public float contourInnerScale = 0.80f;
-            [Tooltip("Radius scale for filled-circle-style accents.")]
-            public float filledRadiusScale = 0.84f;
-            [Tooltip("How much the accent grows per breathe cycle (0=none, 0.4=40% swing).")]
-            public float breatheAmplitude = 0.15f;
-            [Tooltip("Seconds per full breathe/beacon cycle.")]
-            public float period = 2.0f;
-            [Tooltip("Scale at cycle start for beacon motion.")]
-            public float beaconStartScale = 1.0f;
-            [Tooltip("Scale at cycle end for beacon motion.")]
-            public float beaconEndScale = 1.8f;
-            [Tooltip("Tint colour for the accent effect (hex string, e.g. '#F2CA71').")]
+            public bool enabled = true;
+            // Diameter as a MULTIPLE of the symbol diameter (1 = same size, 1.2 = 20 percent bigger).
+            public float size = 1.2f;
+            public float base_alpha = 0.28f;
             public string tint_color_hex = "#F2CA71";
+            public float period = 2.0f;
+            public float breathe_amplitude = 0.15f;
+            public float outer_scale = 0.90f;
+            public float inner_scale = 0.80f;
+        }
+
+        // One breathing filled disc behind the symbol.
+        [Serializable]
+        public class HaloDiscDefaults
+        {
+            public bool enabled = true;
+            public float size = 1.2f;
+            public float base_alpha = 0.28f;
+            public string tint_color_hex = "#F2CA71";
+            public float period = 2.0f;
+            public float breathe_amplitude = 0.15f;
+            public float radius_scale = 0.85f;
+        }
+
+        // One ring that grows and fades, then restarts (a single outward wave).
+        [Serializable]
+        public class BeaconDefaults
+        {
+            public bool enabled = true;
+            public float size = 1.2f;
+            public float base_alpha = 0.28f;
+            public string tint_color_hex = "#F2CA71";
+            public float period = 2.0f;
+            public float start_scale = 1.0f;
+            public float end_scale = 1.8f;
+            public float outer_scale = 0.90f;
+            public float inner_scale = 0.80f;
+        }
+
+        // Dev-only "Focus on Effects Grid" (Editor Play Mode and development builds; release
+        // builds ignore it). See EffectsPreviewSpawner.
+        [Serializable]
+        public class EffectPreviewSettings
+        {
+            public bool enabled = false;
+            // POI id whose category / status / badge the preview cells copy. Empty = plain grey circle.
+            public string base_poi_id = "";
         }
     }
 
@@ -388,13 +461,13 @@ namespace TileStories
         // Persistent label visible at this level? false = no label.
         public bool show_label;
 
-        // "none" | "sun_contours" | "sun_circles" -- parsed by MarkerHierarchyResolver.
-        public string sun_effect;
+        // "none" | "ripple_rings" | "ripple_discs" -- parsed by MarkerHierarchyResolver.
+        public string ripple_effect;
 
-        // "none" | "ring_pulse" | "simple_sun" | "beacon" -- parsed by MarkerHierarchyResolver.
-        public string accent_effect;
+        // "none" | "halo_ring" | "halo_disc" | "beacon" -- parsed by MarkerHierarchyResolver.
+        public string halo_effect;
 
-        // Independent of both effect families above -- standalone pulse component.
+        // Independent of both effect slots above -- standalone pulse component.
         public bool pulse;
 
         // Meaningful only when wall outline mode != none. Controls ring rotation.

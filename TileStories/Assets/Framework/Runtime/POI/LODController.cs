@@ -128,12 +128,17 @@ namespace TileStories
                 _displacementStability.Clear();
             }
 
-            // Resolve orientation settings alongside LOD/displacement (section 13).
-            // Effective cluster settings are computed once here, not per spawn: clusters
-            // are dynamic LOD aggregates with no authored per-POI rotation, so they always
-            // face the camera (facing_mode is forced, never inherited/configurable for
-            // clusters); only vertical alignment is developer-choosable, via
-            // cluster_vertical_alignment_mode ("inherit" = the wall's own vertical_alignment_mode).
+            ResolveClusterOrientation();
+        }
+
+        // Resolve orientation settings alongside LOD/displacement (section 13).
+        // Effective cluster settings are computed once here, not per spawn: clusters
+        // are dynamic LOD aggregates with no authored per-POI rotation, so they always
+        // face the camera (facing_mode is forced, never inherited/configurable for
+        // clusters); only vertical alignment is developer-choosable, via
+        // cluster_vertical_alignment_mode ("inherit" = the wall's own vertical_alignment_mode).
+        private void ResolveClusterOrientation()
+        {
             var orientationSettings = _wallSession?.OrientationSettings;
             if (orientationSettings != null && !ReferenceEquals(orientationSettings, _orientationSettings))
             {
@@ -146,6 +151,19 @@ namespace TileStories
                     vertical_alignment_mode = clusterVerticalMode,
                     facing_mode = "always_facing_camera"
                 };
+            }
+        }
+
+        // Live Play Mode edit of the orientation settings: recompute the effective cluster settings
+        // and hand them to every cluster already on screen (new clusters pick them up on spawn).
+        public void ReapplyClusterOrientation()
+        {
+            ResolveClusterOrientation();
+            if (_effectiveClusterOrientation == null) return;
+            foreach (var view in _activeClusterViews)
+            {
+                var billboard = view != null ? view.GetComponent<MarkerBillboard>() : null;
+                if (billboard != null) billboard.ReapplySettings(_effectiveClusterOrientation, "");
             }
         }
 

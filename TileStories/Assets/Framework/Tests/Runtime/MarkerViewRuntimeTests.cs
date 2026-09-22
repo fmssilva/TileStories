@@ -37,19 +37,17 @@ namespace TileStories.Tests
 
             Assert.IsNotNull(symbol.transform.Find("Icon"));
             Assert.IsNotNull(badge.transform.Find("Icon"));
-            Assert.IsNotNull(root.transform.Find("Halo"));
-            Assert.IsNotNull(root.transform.Find("SunInner"));
-            Assert.IsNotNull(root.transform.Find("SunMiddle"));
-            Assert.IsNotNull(root.transform.Find("SunOuter"));
+            Assert.IsNotNull(root.transform.Find("RippleInner"));
+            Assert.IsNotNull(root.transform.Find("RippleMiddle"));
+            Assert.IsNotNull(root.transform.Find("RippleOuter"));
             Assert.IsNotNull(root.GetComponent<MarkerPulseEffect>());
-            Assert.IsNotNull(root.GetComponent<MarkerGlowEffect>());
-            Assert.IsNotNull(root.GetComponentInChildren<MarkerSunEffect>(true));
+            Assert.IsNotNull(root.GetComponentInChildren<MarkerRippleEffect>(true));
 
             Object.Destroy(root);
         }
 
         [UnityTest]
-        public IEnumerator SunEffect_ActivatesThreeRingChildren()
+        public IEnumerator RippleEffect_ActivatesThreeRingChildren()
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
 
@@ -57,8 +55,8 @@ namespace TileStories.Tests
             var heroAnchor = heroGo.AddComponent<POIAnchor>();
             heroAnchor.Initialise(new POIData
             {
-                id = "sun",
-                name = "Sun Label",
+                id = "ripple",
+                name = "Ripple Label",
                 category = "religious",
                 has_status = false,
                 status_unknown = false,
@@ -66,25 +64,25 @@ namespace TileStories.Tests
             });
 
             var heroView = heroGo.GetComponentInChildren<MarkerView>();
-            heroView.Initialise(heroAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.SunContours);
+            heroView.Initialise(heroAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.RippleRings);
             yield return null;
 
-            Assert.IsTrue(GetPrivateBool(heroGo.GetComponent<MarkerSunEffect>(), "_active"),
-                "Sun effect should be active for hero markers using sun mode.");
+            Assert.IsTrue(GetPrivateBool(heroGo.GetComponent<MarkerRippleEffect>(), "_active"),
+                "Ripple effect should be active for ripple rings.");
             Assert.IsFalse(GetPrivateBool(heroGo.GetComponent<MarkerPulseEffect>(), "_active"),
-                "Pulse should be inactive when sun mode is selected.");
-            Assert.AreEqual(MarkerSunEffect.SunVisualStyle.Contours, heroGo.GetComponent<MarkerSunEffect>().CurrentStyle,
-                "MarkerEffectFlags.SunContours should map to the contour sun style.");
+                "Pulse should be inactive when only ripple rings are selected.");
+            Assert.AreEqual(MarkerRippleEffect.RippleStyle.Rings, heroGo.GetComponent<MarkerRippleEffect>().CurrentStyle,
+                "MarkerEffectFlags.RippleRings should map to the rings ripple style.");
 
-            Assert.IsNotNull(heroGo.transform.Find("SunInner")?.GetComponent<Image>());
-            Assert.IsNotNull(heroGo.transform.Find("SunMiddle")?.GetComponent<Image>());
-            Assert.IsNotNull(heroGo.transform.Find("SunOuter")?.GetComponent<Image>());
+            Assert.IsNotNull(heroGo.transform.Find("RippleInner")?.GetComponent<Image>());
+            Assert.IsNotNull(heroGo.transform.Find("RippleMiddle")?.GetComponent<Image>());
+            Assert.IsNotNull(heroGo.transform.Find("RippleOuter")?.GetComponent<Image>());
 
             Object.Destroy(heroGo);
         }
 
         [UnityTest]
-        public IEnumerator SunEffect_FilledAndContourVariants_HaveDistinctCenterAlphaProfiles()
+        public IEnumerator RippleEffect_DiscAndRingVariants_HaveDistinctCenterAlphaProfiles()
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
 
@@ -92,8 +90,8 @@ namespace TileStories.Tests
             var contourAnchor = contourGo.AddComponent<POIAnchor>();
             contourAnchor.Initialise(new POIData
             {
-                id = "sun_contours",
-                name = "Sun Contours",
+                id = "ripple_rings",
+                name = "Ripple Rings",
                 category = "religious",
                 has_status = false,
                 status_unknown = false,
@@ -101,12 +99,12 @@ namespace TileStories.Tests
             });
 
             var contourView = contourGo.GetComponentInChildren<MarkerView>();
-            contourView.Initialise(contourAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.SunContours);
+            contourView.Initialise(contourAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.RippleRings);
             yield return null;
 
-            var contourInner = contourGo.transform.Find("SunInner")?.GetComponent<Image>();
-            Assert.IsNotNull(contourInner, "SunInner missing for contour variant.");
-            Assert.IsNotNull(contourInner.sprite, "SunInner sprite missing for contour variant.");
+            var contourInner = contourGo.transform.Find("RippleInner")?.GetComponent<Image>();
+            Assert.IsNotNull(contourInner, "RippleInner missing for contour variant.");
+            Assert.IsNotNull(contourInner.sprite, "RippleInner sprite missing for contour variant.");
             float contourCenterAlpha = SampleCenterAlpha(contourInner.sprite);
             Assert.Less(contourCenterAlpha, 0.15f,
                 "Contour variant should keep center mostly transparent (ring behavior).");
@@ -115,8 +113,8 @@ namespace TileStories.Tests
             var circlesAnchor = circlesGo.AddComponent<POIAnchor>();
             circlesAnchor.Initialise(new POIData
             {
-                id = "sun_circles",
-                name = "Sun Circles",
+                id = "ripple_discs",
+                name = "Ripple Discs",
                 category = "religious",
                 has_status = false,
                 status_unknown = false,
@@ -124,12 +122,12 @@ namespace TileStories.Tests
             });
 
             var circlesView = circlesGo.GetComponentInChildren<MarkerView>();
-            circlesView.Initialise(circlesAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.SunCircles);
+            circlesView.Initialise(circlesAnchor, MarkerStyle.OutlineGold, MarkerShape.Circle, MarkerEffectFlags.RippleDiscs);
             yield return null;
 
-            var circlesInner = circlesGo.transform.Find("SunInner")?.GetComponent<Image>();
-            Assert.IsNotNull(circlesInner, "SunInner missing for filled-circles variant.");
-            Assert.IsNotNull(circlesInner.sprite, "SunInner sprite missing for filled-circles variant.");
+            var circlesInner = circlesGo.transform.Find("RippleInner")?.GetComponent<Image>();
+            Assert.IsNotNull(circlesInner, "RippleInner missing for filled-circles variant.");
+            Assert.IsNotNull(circlesInner.sprite, "RippleInner sprite missing for filled-circles variant.");
             float circlesCenterAlpha = SampleCenterAlpha(circlesInner.sprite);
             Assert.Greater(circlesCenterAlpha, 0.85f,
                 "Filled-circles variant should keep center mostly opaque.");

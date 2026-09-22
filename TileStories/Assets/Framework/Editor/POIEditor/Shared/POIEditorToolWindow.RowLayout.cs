@@ -70,7 +70,7 @@ namespace TileStories.Editor
         // its own label, see this file's row-layout Lesson 4). A raw pixel nudge
         // only moves the spacer/row start; it does not touch EditorGUI.indentLevel,
         // so the field's own internal indent stays identical to its sibling rows.
-        // See SubFieldIndentPixels (Constants.cs) for the one shared value.
+        // See ConditionalAdvance (Constants.cs) for the one shared value.
         internal static void DrawEditorRow(out float rowWidth, out Rect spacerRect, float extraIndentPixels = 0f)
         {
             EditorGUILayout.BeginHorizontal();
@@ -98,12 +98,24 @@ namespace TileStories.Editor
 
             // See the class comment: width from stable inputs only.
             rowWidth = EditorRowWidthForIndent(EditorGUIUtility.currentViewWidth, AddButtonRowRightMargin, indent);
+
+            // The spacer above has already paid the indent. Every EditorGUILayout control after it
+            // would pay it AGAIN on its own label/rect (the double-indent trap), so the row's
+            // controls run at indentLevel 0; EditorRowEnd restores it. Doing it here means no
+            // caller can forget it.
+            RowSavedIndentLevels.Push(EditorGUI.indentLevel);
+            EditorGUI.indentLevel = 0;
         }
 
-        // Closes a row opened with DrawEditorRow().
+        // Ambient indent levels saved by open rows (rows never interleave, a stack keeps it safe)
+        private static readonly System.Collections.Generic.Stack<int> RowSavedIndentLevels = new();
+
+        // Closes a row opened with DrawEditorRow() and restores the ambient indent level.
         internal static void EditorRowEnd()
         {
             EditorGUILayout.EndHorizontal();
+            if (RowSavedIndentLevels.Count > 0)
+                EditorGUI.indentLevel = RowSavedIndentLevels.Pop();
         }
 
         // Compensates a labelled field row's reserved label column by exactly the

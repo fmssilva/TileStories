@@ -26,6 +26,7 @@ namespace TileStories
         private Vector3 _lastCamForward;
         private bool _hasLastCamForward;
         private bool _hasResolvedOnce;
+        private bool _forceNextResolve;
 
         // Test-only visibility into the settings this marker was actually configured
         // with, so integration tests can assert the real WallSession -> Configure
@@ -48,6 +49,25 @@ namespace TileStories
             // whatever rotation this object happened to have from its previous use.
             _hasResolvedOnce = false;
 
+            ConfigureChildren();
+        }
+
+        // Swap in new settings on a marker that is already running (live Play Mode edits). Unlike
+        // Configure it keeps the authored rotation (wall_fixed depends on it: the current rotation
+        // is no longer the authored one), keeps the spawn root, and lets the rotation glide to the
+        // new result instead of snapping.
+        public void ReapplySettings(OrientationSettings settings, string facingModeOverride)
+        {
+            _settings = settings ?? new OrientationSettings();
+            _facingModeOverride = facingModeOverride ?? "";
+            ConfigureChildren();
+            // interval / on_camera_delta would otherwise wait for the next tick or camera move
+            _forceNextResolve = true;
+        }
+
+        // Hand the Label and Badge children their own vertical-alignment mode
+        private void ConfigureChildren()
+        {
             _children = GetComponentsInChildren<MarkerChildOrientation>(true);
             foreach (var child in _children)
             {
@@ -88,8 +108,9 @@ namespace TileStories
 
             float cameraAngleDeltaDeg = _hasLastCamForward ? Vector3.Angle(_lastCamForward, _camera.transform.forward) : 0f;
             float secondsSinceLastUpdate = Time.time - _lastUpdateTime;
-            if (!MarkerOrientationResolver.ShouldUpdate(_settings, secondsSinceLastUpdate, cameraAngleDeltaDeg))
+            if (!_forceNextResolve && !MarkerOrientationResolver.ShouldUpdate(_settings, secondsSinceLastUpdate, cameraAngleDeltaDeg))
                 return; // nothing moved enough to justify re-resolving; children are not ticked either
+            _forceNextResolve = false;
 
             _lastUpdateTime = Time.time;
             _lastCamForward = _camera.transform.forward;

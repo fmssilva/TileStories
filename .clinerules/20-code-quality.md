@@ -59,6 +59,13 @@
 - **No speculative code.** Implement only what the current task actually needs. Do not
   add a parameter, a flag, an interface method, or a config field because it "might be
   useful for a future wall" unless a concrete, currently-known requirement needs it.
+- **Developer-only features never reach the real app.** A preview, gallery toggle, debug view or
+  test switch must be OFF by default, gated in the runtime by one small testable allow rule
+  (Editor-only where a device has no use for it, development builds at most, never release
+  builds), and registered in `DevFeatureBuildGuard` (`Editor/DevFeatureBuildGuard.cs`) so a build
+  warns and asks for confirmation when its config switch is ON. Its label or help says it is
+  developer-only and how to turn it off. Full recipe: `proj_guides/_5.1_Editor_Tab.md`, subject
+  "Dev-only features and build safety".
 - **Self-documenting names.** Name every class, method, field, and folder so a reader
   understands its purpose from the name alone, without needing to open the file.
 - **Standard C# naming:** `PascalCase` for classes, methods, and public properties;

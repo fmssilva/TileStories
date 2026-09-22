@@ -4,7 +4,7 @@ using UnityEngine;
 namespace TileStories
 {
     // Single shared source of runtime-generated circle/ring sprites for every
-    // marker accent effect (MarkerSunEffect, MarkerAccentEffect). Centralising
+    // marker layer effect (MarkerRippleEffect, MarkerHaloEffect). Centralising
     // this means the domain-reload-safety fix from section 18.12 only has to
     // exist in one place -- do not reimplement sprite generation or its caching
     // in any individual effect file; call in here instead.

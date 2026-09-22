@@ -26,6 +26,8 @@ namespace TileStories.Editor
 
             if (refreshRigOnChange)
                 RefreshRigVisuals();
+
+            LivePlayModeConfigPush.PushToRunningWall(_config);
         }
 
         private void RecordConfigChange(string before, string after)
@@ -79,6 +81,7 @@ namespace TileStories.Editor
             ApplyConfigSnapshot(_configHistory[_configHistoryIndex]);
             _hasUnsavedChanges = true;
             RefreshRigVisuals();
+            LivePlayModeConfigPush.PushToRunningWall(_config);
         }
 
         private void RedoConfigChange()
@@ -90,6 +93,7 @@ namespace TileStories.Editor
             ApplyConfigSnapshot(_configHistory[_configHistoryIndex]);
             _hasUnsavedChanges = true;
             RefreshRigVisuals();
+            LivePlayModeConfigPush.PushToRunningWall(_config);
         }
 
         private void ApplyConfigSnapshot(string snapshot)

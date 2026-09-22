@@ -41,7 +41,7 @@ namespace TileStories.Editor
 
             // Conditional: relaxation steps only apply to the force_directed algorithm.
             if (disp.displacement_algorithm == "force_directed")
-                disp.force_directed_iterations = DrawIntField("Relaxation Steps", disp.force_directed_iterations, ForceDirectedIterationsHelp, SubFieldIndentPixels);
+                disp.force_directed_iterations = DrawIntField("Relaxation Steps", disp.force_directed_iterations, ForceDirectedIterationsHelp, ConditionalAdvance);
 
             disp.max_displacement_px = DrawScalarField("Max Displacement (px)", disp.max_displacement_px, DisplacementMaxHelp);
 

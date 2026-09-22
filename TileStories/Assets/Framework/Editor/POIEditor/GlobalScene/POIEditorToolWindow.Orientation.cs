@@ -57,25 +57,25 @@ namespace TileStories.Editor
             _showOrientationVerticalAlignment = EditorGUILayout.Foldout(_showOrientationVerticalAlignment, "Vertical Alignment", true, EditorStyles.foldoutHeader);
             if (!_showOrientationVerticalAlignment) return;
 
-            // Rows inside a sub-foldout are its CHILDREN: SectionChildIndentPixels puts their label
+            // Rows inside a sub-foldout are its CHILDREN: IndentLevel1 puts their label
             // under the foldout title text (a raw pixel step through DrawEditorRow, not an
             // IndentLevelScope, so the row's own control never double-indents; the value column
             // stays aligned through FieldLabelWidthCompensationScope). _5.1_Editor_Tab.md
             // "Row Indentation & Spacing".
             o.vertical_alignment_mode = DrawPopupField("Marker", o.vertical_alignment_mode,
-                VerticalAlignmentModeOptions, VerticalAlignmentModeLabels, VerticalAlignmentModeHelp, SectionChildIndentPixels);
+                VerticalAlignmentModeOptions, VerticalAlignmentModeLabels, VerticalAlignmentModeHelp, IndentLevel1);
 
             o.label_vertical_alignment_mode = DrawPopupField("Label", o.label_vertical_alignment_mode,
-                ChildVerticalAlignmentModeOptions, ChildVerticalAlignmentModeLabels, ChildVerticalAlignmentHelp, SectionChildIndentPixels);
+                ChildVerticalAlignmentModeOptions, ChildVerticalAlignmentModeLabels, ChildVerticalAlignmentHelp, IndentLevel1);
 
             if (_config.marker_use_badge)
             {
                 o.badge_vertical_alignment_mode = DrawPopupField("Badge", o.badge_vertical_alignment_mode,
-                    ChildVerticalAlignmentModeOptions, ChildVerticalAlignmentModeLabels, ChildVerticalAlignmentHelp, SectionChildIndentPixels);
+                    ChildVerticalAlignmentModeOptions, ChildVerticalAlignmentModeLabels, ChildVerticalAlignmentHelp, IndentLevel1);
             }
 
             o.cluster_vertical_alignment_mode = DrawPopupField("Clusters", o.cluster_vertical_alignment_mode,
-                ChildVerticalAlignmentModeOptions, ChildVerticalAlignmentModeLabels, ChildVerticalAlignmentHelp, SectionChildIndentPixels);
+                ChildVerticalAlignmentModeOptions, ChildVerticalAlignmentModeLabels, ChildVerticalAlignmentHelp, IndentLevel1);
 
             // up_reference only matters wherever something is actually set to World Up.
             bool anyUsesWorldUp = o.vertical_alignment_mode == "world_up"
@@ -84,12 +84,12 @@ namespace TileStories.Editor
                 || o.cluster_vertical_alignment_mode == "world_up";
             if (anyUsesWorldUp)
             {
-                o.up_reference = DrawPopupField("Up Reference", o.up_reference, UpReferenceOptions, UpReferenceLabels, UpReferenceHelp, SectionChildIndentPixels + SubFieldIndentPixels);
+                o.up_reference = DrawPopupField("Up Reference", o.up_reference, UpReferenceOptions, UpReferenceLabels, UpReferenceHelp, IndentLevel1 + ConditionalAdvance);
                 if (o.up_reference == "custom")
                 {
-                    o.custom_up_x = DrawScalarField("Custom Up X", o.custom_up_x, CustomUpHelp, SectionChildIndentPixels + SubFieldIndentPixels * 2);
-                    o.custom_up_y = DrawScalarField("Custom Up Y", o.custom_up_y, CustomUpHelp, SectionChildIndentPixels + SubFieldIndentPixels * 2);
-                    o.custom_up_z = DrawScalarField("Custom Up Z", o.custom_up_z, CustomUpHelp, SectionChildIndentPixels + SubFieldIndentPixels * 2);
+                    o.custom_up_x = DrawScalarField("Custom Up X", o.custom_up_x, CustomUpHelp, IndentLevel1 + ConditionalAdvance * 2);
+                    o.custom_up_y = DrawScalarField("Custom Up Y", o.custom_up_y, CustomUpHelp, IndentLevel1 + ConditionalAdvance * 2);
+                    o.custom_up_z = DrawScalarField("Custom Up Z", o.custom_up_z, CustomUpHelp, IndentLevel1 + ConditionalAdvance * 2);
                 }
             }
         }
@@ -99,10 +99,10 @@ namespace TileStories.Editor
             _showOrientationFacingOptions = EditorGUILayout.Foldout(_showOrientationFacingOptions, "Facing Options", true, EditorStyles.foldoutHeader);
             if (!_showOrientationFacingOptions) return;
 
-            o.facing_mode = DrawPopupField("Facing", o.facing_mode, FacingModeOptions, FacingModeLabels, FacingModeHelp, SectionChildIndentPixels);
+            o.facing_mode = DrawPopupField("Facing", o.facing_mode, FacingModeOptions, FacingModeLabels, FacingModeHelp, IndentLevel1);
 
             if (o.facing_mode == "always_facing_camera")
-                o.facing_basis = DrawPopupField("Facing Basis", o.facing_basis, FacingBasisOptions, FacingBasisLabels, FacingBasisHelp, SectionChildIndentPixels + SubFieldIndentPixels);
+                o.facing_basis = DrawPopupField("Facing Basis", o.facing_basis, FacingBasisOptions, FacingBasisLabels, FacingBasisHelp, IndentLevel1 + ConditionalAdvance);
 
             if (o.facing_mode == "wall_fixed" || o.facing_mode == "yaw_only")
             {
@@ -117,11 +117,11 @@ namespace TileStories.Editor
             _showOrientationUpdateCost = EditorGUILayout.Foldout(_showOrientationUpdateCost, "Update Cost", true, EditorStyles.foldoutHeader);
             if (!_showOrientationUpdateCost) return;
 
-            o.update_mode = DrawPopupField("Update Mode", o.update_mode, OrientationUpdateModeOptions, OrientationUpdateModeLabels, OrientationUpdateModeHelp, SectionChildIndentPixels);
+            o.update_mode = DrawPopupField("Update Mode", o.update_mode, OrientationUpdateModeOptions, OrientationUpdateModeLabels, OrientationUpdateModeHelp, IndentLevel1);
             if (o.update_mode == "interval")
-                o.update_interval_s = DrawScalarField("Update Interval (s)", o.update_interval_s, OrientationUpdateIntervalHelp, SectionChildIndentPixels + SubFieldIndentPixels);
+                o.update_interval_s = DrawScalarField("Update Interval (s)", o.update_interval_s, OrientationUpdateIntervalHelp, IndentLevel1 + ConditionalAdvance);
             if (o.update_mode == "on_camera_delta")
-                o.camera_delta_deg = DrawScalarField("Camera Delta (deg)", o.camera_delta_deg, OrientationCameraDeltaHelp, SectionChildIndentPixels + SubFieldIndentPixels);
+                o.camera_delta_deg = DrawScalarField("Camera Delta (deg)", o.camera_delta_deg, OrientationCameraDeltaHelp, IndentLevel1 + ConditionalAdvance);
         }
 
         private void DrawOrientationTestSubSection(OrientationSettings o)
@@ -129,7 +129,7 @@ namespace TileStories.Editor
             _showOrientationTest = EditorGUILayout.Foldout(_showOrientationTest, "Test", true, EditorStyles.foldoutHeader);
             if (!_showOrientationTest) return;
 
-            o.edit_mode_preview_enabled = DrawToggleField("Scene-Mode Preview", o.edit_mode_preview_enabled, EditModePreviewHelp, SectionChildIndentPixels);
+            o.edit_mode_preview_enabled = DrawToggleField("Scene-Mode Preview", o.edit_mode_preview_enabled, EditModePreviewHelp, IndentLevel1);
 
             EditorGUILayout.Space(4f);
 
@@ -150,14 +150,14 @@ namespace TileStories.Editor
         private bool DrawTestGuideFoldout(bool isOpen, string title, string guideText)
         {
             int savedIndent = EditorGUI.indentLevel;
-            DrawEditorRow(out _, out _, SectionChildIndentPixels);
+            DrawEditorRow(out _, out _, IndentLevel1);
             EditorGUI.indentLevel = 0;
             isOpen = EditorGUILayout.Foldout(isOpen, title, true, EditorStyles.foldout);
             EditorGUI.indentLevel = savedIndent;
             EditorRowEnd();
             if (!isOpen) return false;
 
-            DrawEditorRow(out float rowWidth, out _, SectionChildIndentPixels * 2f);
+            DrawEditorRow(out float rowWidth, out _, IndentLevel2);
             EditorGUI.indentLevel = 0;
             var guideStyle = EditorStyles.textArea;
             float guideHeight = guideStyle.CalcHeight(new GUIContent(guideText), rowWidth);

@@ -31,8 +31,8 @@ namespace TileStories.Tests
             {
                 DidDraw = true;
                 // Mirror DrawPositionTabs' net indent: POI foldout (+1) + framed-foldout
-                // content (+1) + the method's own IndentLevelScope(-1) == +1.
-                EditorGUI.indentLevel += 1;
+                // content (+1) == +2 (the row itself runs its controls at indent 0).
+                EditorGUI.indentLevel += 2;
                 try
                 {
                     ViewWidthAtDraw = EditorGUIUtility.currentViewWidth;

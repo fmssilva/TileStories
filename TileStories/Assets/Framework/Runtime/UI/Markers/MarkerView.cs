@@ -14,9 +14,8 @@ namespace TileStories
     //   - Badge (Image)                          -> MarkerCircleGlyphView
     //   - Label (TextMeshPro - World Space)
     //   - PulseEffect (optional)                 -> MarkerPulseEffect
-    //   - GlowEffect (optional)                  -> MarkerGlowEffect
-    //   - SunEffect (optional)                   -> MarkerSunEffect
-    //   - AccentEffect (optional)                -> MarkerAccentEffect
+    //   - RippleEffect (optional)                -> MarkerRippleEffect
+    //   - HaloEffect (optional)                  -> MarkerHaloEffect
     //
     // All effect components are optional -- a prefab without them simply never
     // animates. This keeps the base marker cheap.
@@ -27,7 +26,6 @@ namespace TileStories
         private const string FallbackUnknownStatusLevelKey = "unknown";
 
         private static readonly Color IconTint = new Color(0.949f, 0.925f, 0.827f);
-        private static readonly Color HaloTint = new Color(0.949f, 0.925f, 0.827f, 0.2f);
 
         [Header("References")]
         [SerializeField] private MarkerCircleGlyphView symbol;
@@ -40,9 +38,8 @@ namespace TileStories
 
         [Header("Effects (optional)")]
         [SerializeField] private MarkerPulseEffect pulseEffect;
-        [SerializeField] private MarkerGlowEffect glowEffect;
-        [SerializeField] private MarkerSunEffect sunEffect;
-        [SerializeField] private MarkerAccentEffect accentEffect;
+        [SerializeField] private MarkerRippleEffect rippleEffect;
+        [SerializeField] private MarkerHaloEffect haloEffect;
         [SerializeField] private MarkerEffectFlags effectFlags = MarkerEffectFlags.None;
 
                 [Header("External assets")]
@@ -83,12 +80,22 @@ namespace TileStories
         private bool _hasBaseLabelSize;
         private HierarchyStyle _hierarchyStyle;
         private bool _hasHierarchy;
+        private HierarchyStyle? _styleOverride;
 
         // Single source of truth for the effect-flag fallback rule (spec _2_3 section 9):
-        // hierarchy level's flags when resolved, otherwise the serialized inspector flags.
-        // Consumed by both ApplyVisuals (rendering) and GetVisualRadiusWorld (displacement
-        // bounds, Domain 2.5) -- keep them in lockstep by construction.
-        private MarkerEffectFlags ActiveEffectFlags => _hasHierarchy ? _hierarchyStyle.EffectFlags : effectFlags;
+        // hierarchy level's flags when resolved, otherwise the serialized inspector flags,
+        // then filtered by the wall's switches (master + each effect's own "enabled";
+        // no effect_defaults = everything on). Consumed by both ApplyEffects (rendering) and
+        // GetVisualRadiusWorld (displacement bounds, Domain 2.5) -- keep them in lockstep
+        // by construction.
+        private MarkerEffectFlags ActiveEffectFlags
+        {
+            get
+            {
+                var requested = _hasHierarchy ? _hierarchyStyle.EffectFlags : effectFlags;
+                return _effectDefaults == null ? requested : _effectDefaults.FilterEnabled(requested);
+            }
+        }
 
         private bool _baseLabelWordWrapping;
         private TextOverflowModes _baseLabelOverflowMode;
@@ -181,16 +188,18 @@ namespace TileStories
             bool enableStatusVisuals,
             SpriteKeyLibrary iconLibraryOverride,
             MarkerShape badgeShape = MarkerShape.Circle,
-            EffectDefaults effectDefaults = null)
+            EffectDefaults effectDefaults = null,
+            HierarchyStyle? styleOverride = null)
         {
             EnsureMarkerWiring(allowCreate: true);
             _anchor = anchor;
+            _effectDefaults = effectDefaults;
+            _styleOverride = styleOverride;
             _outlineMode = outlineMode;
             _useBadge = useBadge;
             _shape = shape;
             _badgeShape = badgeShape;
             _runtimeIconLibraryOverride = iconLibraryOverride;
-            _effectDefaults = effectDefaults;
             _applyCategoryVisuals = applyCategoryVisuals;
             _applyShapeVisuals = applyShapeVisuals;
             _enableStatusVisuals = enableStatusVisuals;
@@ -204,6 +213,30 @@ namespace TileStories
                         reveal?.Play(_hierarchyStyle.RevealDelaySeconds, _hierarchyStyle.RevealDurationSeconds);
         }
 
+        // Look up this marker's hierarchy style (a style override replaces the lookup entirely)
+        private void ResolveHierarchyStyle(POIData poi)
+        {
+            if (_styleOverride.HasValue)
+            {
+                _hierarchyStyle = _styleOverride.Value;
+                _hasHierarchy = true;
+                return;
+            }
+
+            _hasHierarchy = MarkerHierarchyResolver.TryResolveByKey(poi.hierarchy_level_key, out _hierarchyStyle);
+            if (!_hasHierarchy) _hierarchyStyle = MarkerHierarchyResolver.Fallback;
+        }
+
+        // Swap in new effect settings and re-apply ONLY the effects (no visual rebuild, no reveal
+        // restart). Used when the effects config changes while the wall is running.
+        public void ReapplyEffects(EffectDefaults effectDefaults)
+        {
+            if (_anchor?.Data == null) return;
+            _effectDefaults = effectDefaults;
+            ResolveHierarchyStyle(_anchor.Data);
+            ApplyEffects();
+        }
+
         private void ApplyVisuals()
         {
             if (_anchor?.Data == null) return;
@@ -214,8 +247,8 @@ namespace TileStories
             // Falls back to MarkerHierarchyResolver.Fallback when no hierarchy_level_key
             // is set or the resolver has not been configured -- matches the empty-state
             // behavior of CategoryPalette/StatusRamp.
-            _hasHierarchy = MarkerHierarchyResolver.TryResolveByKey(poi.hierarchy_level_key, out _hierarchyStyle);
-            if (!_hasHierarchy) _hierarchyStyle = MarkerHierarchyResolver.Fallback;
+            // A style override (the effects preview grid) replaces the lookup entirely.
+            ResolveHierarchyStyle(poi);
 
             // Apply hierarchy-driven size (cm -> metres conversion at this one call site).
             // Cannot assign through ?. operator to RectTransform -- check null first.
@@ -470,50 +503,64 @@ namespace TileStories
                 }
             }
 
-            // Effects are now driven by the hierarchy level when one is resolved.
-            // When no hierarchy level is set (hasHierarchy == false, e.g. the gallery
-            // testing arbitrary flag combinations), fall back to the effectFlags
-            // parameter as before. This is the one subtle fallback part of the refactor.
-            MarkerEffectFlags activeFlags = ActiveEffectFlags;
+            ApplyEffects();
+        }
 
-            bool pulseActive = HasEffect(activeFlags, MarkerEffectFlags.Pulse);
-            bool sunContoursActive = HasEffect(activeFlags, MarkerEffectFlags.SunContours);
-            bool sunCirclesActive = HasEffect(activeFlags, MarkerEffectFlags.SunCircles);
-            bool sunActive = sunContoursActive || sunCirclesActive;
+        // Switch each effect on or off for this marker and hand it ITS OWN parameter block from
+        // the wall's effect_defaults. Which effects are requested comes from the hierarchy level
+        // (or the effectFlags parameter when no level resolved, e.g. the galleries), already
+        // filtered by the wall's switches in ActiveEffectFlags.
+        private void ApplyEffects()
+        {
+            MarkerEffectFlags flags = ActiveEffectFlags;
 
-            if (sunActive)
+            pulseEffect?.ApplyDefaults(_effectDefaults?.pulse);
+            pulseEffect?.SetActive(HasEffect(flags, MarkerEffectFlags.Pulse));
+
+            // Ripple rings and discs are alternatives (one MarkerRippleEffect per marker); rings
+            // win if both are somehow requested. Defaults go in before SetActive so the first
+            // Update tick already animates with them.
+            bool rings = HasEffect(flags, MarkerEffectFlags.RippleRings);
+            bool discs = HasEffect(flags, MarkerEffectFlags.RippleDiscs);
+            if (rippleEffect != null)
             {
-                var sunStyle = sunContoursActive
-                    ? MarkerSunEffect.SunVisualStyle.Contours
-                    : MarkerSunEffect.SunVisualStyle.FilledCircles;
-                sunEffect?.SetVisualStyle(sunStyle);
+                if (rings)
+                {
+                    rippleEffect.SetStyle(MarkerRippleEffect.RippleStyle.Rings);
+                    rippleEffect.ApplyDefaults(_effectDefaults?.ripple_rings);
+                }
+                else if (discs)
+                {
+                    rippleEffect.SetStyle(MarkerRippleEffect.RippleStyle.Discs);
+                    rippleEffect.ApplyDefaults(_effectDefaults?.ripple_discs);
+                }
+                rippleEffect.SetActive(rings || discs);
             }
 
-            pulseEffect?.SetActive(pulseActive);
-            glowEffect?.SetActive(false);
-            sunEffect?.SetActive(sunActive);
-
-            // The three single-accent styles are mutually exclusive in this
-            // implementation (one MarkerAccentEffect instance, reconfigured per
-            // marker) -- priority order below (RingPulse > SimpleSun > Beacon) is
-            // arbitrary but deterministic. Stack freely with Pulse and Sun*; don't
-            // expect two of these three at once on the same marker (section 19.2).
-            bool ringPulseActive = HasEffect(activeFlags, MarkerEffectFlags.RingPulse);
-            bool simpleSunActive = HasEffect(activeFlags, MarkerEffectFlags.SimpleSun);
-            bool beaconActive = HasEffect(activeFlags, MarkerEffectFlags.Beacon);
-
-            if (ringPulseActive)
-                accentEffect?.Configure(symbol.RectTransform, MarkerAccentEffect.AccentShape.Contour, MarkerAccentEffect.AccentMotion.Breathe);
-            else if (simpleSunActive)
-                accentEffect?.Configure(symbol.RectTransform, MarkerAccentEffect.AccentShape.FilledCircle, MarkerAccentEffect.AccentMotion.Breathe);
-            else if (beaconActive)
-                accentEffect?.Configure(symbol.RectTransform, MarkerAccentEffect.AccentShape.Contour, MarkerAccentEffect.AccentMotion.Beacon);
-
-            // Apply defaults after Configure so the configured shape/motion is set,
-            // but defaults are applied before the first Update tick animates.
-            accentEffect?.ApplyDefaults(_effectDefaults?.accent);
-
-            accentEffect?.SetActive(ringPulseActive || simpleSunActive || beaconActive);
+            // The three halo variants are alternatives too (one MarkerHaloEffect per marker),
+            // priority HaloRing > HaloDisc > Beacon. They stack freely with Pulse and Ripple.
+            bool haloRing = HasEffect(flags, MarkerEffectFlags.HaloRing);
+            bool haloDisc = HasEffect(flags, MarkerEffectFlags.HaloDisc);
+            bool beacon = HasEffect(flags, MarkerEffectFlags.Beacon);
+            if (haloEffect != null)
+            {
+                if (haloRing)
+                {
+                    haloEffect.Configure(symbol.RectTransform, MarkerHaloEffect.HaloVariant.Ring);
+                    haloEffect.ApplyDefaults(_effectDefaults?.halo_ring);
+                }
+                else if (haloDisc)
+                {
+                    haloEffect.Configure(symbol.RectTransform, MarkerHaloEffect.HaloVariant.Disc);
+                    haloEffect.ApplyDefaults(_effectDefaults?.halo_disc);
+                }
+                else if (beacon)
+                {
+                    haloEffect.Configure(symbol.RectTransform, MarkerHaloEffect.HaloVariant.Beacon);
+                    haloEffect.ApplyDefaults(_effectDefaults?.beacon);
+                }
+                haloEffect.SetActive(haloRing || haloDisc || beacon);
+            }
         }
 
         private static bool HasEffect(MarkerEffectFlags mask, MarkerEffectFlags effect)
@@ -727,9 +774,8 @@ namespace TileStories
                 if (badgeDist > maxRadius) maxRadius = badgeDist;
             }
 
-            // If pulse or sun effects are active, account for their maximum expansion envelope
-            MarkerEffectFlags activeFlags = ActiveEffectFlags;
-            if ((activeFlags & (MarkerEffectFlags.Pulse | MarkerEffectFlags.SunContours | MarkerEffectFlags.SunCircles | MarkerEffectFlags.Beacon | MarkerEffectFlags.SimpleSun | MarkerEffectFlags.RingPulse)) != 0)
+            // Every effect animates outward, so any active one needs the maximum expansion envelope
+            if (ActiveEffectFlags != MarkerEffectFlags.None)
             {
                 maxRadius *= 1.35f; // Max envelope expansion during animated peak
             }
@@ -757,57 +803,14 @@ namespace TileStories
 
             if (pulseEffect == null && allowCreate)
                 pulseEffect = GetComponent<MarkerPulseEffect>() ?? gameObject.AddComponent<MarkerPulseEffect>();
-            pulseEffect?.ApplyDefaults(_effectDefaults?.pulse);
             pulseEffect?.Configure(symbol.RectTransform);
 
-            var haloImage = EnsureHaloImage(allowCreate);
-            if (glowEffect == null && allowCreate)
-                glowEffect = GetComponent<MarkerGlowEffect>() ?? gameObject.AddComponent<MarkerGlowEffect>();
-            if (haloImage != null)
-                glowEffect?.Configure(haloImage);
+            if (rippleEffect == null && allowCreate)
+                rippleEffect = GetComponent<MarkerRippleEffect>() ?? gameObject.AddComponent<MarkerRippleEffect>();
+            rippleEffect?.Configure(symbol.RectTransform);
 
-            if (sunEffect == null && allowCreate)
-                sunEffect = GetComponent<MarkerSunEffect>() ?? gameObject.AddComponent<MarkerSunEffect>();
-            sunEffect?.ApplyDefaults(_effectDefaults?.sun);
-            sunEffect?.Configure(symbol.RectTransform);
-
-            if (accentEffect == null && allowCreate)
-                accentEffect = GetComponent<MarkerAccentEffect>() ?? gameObject.AddComponent<MarkerAccentEffect>();
-            accentEffect?.ApplyDefaults(_effectDefaults?.accent);
-        }
-
-        private Image EnsureHaloImage(bool allowCreate)
-        {
-            var existing = transform.Find("Halo");
-            Image haloImage;
-            if (existing != null)
-            {
-                haloImage = existing.GetComponent<Image>() ?? existing.gameObject.AddComponent<Image>();
-            }
-            else if (!allowCreate)
-            {
-                return null;
-            }
-            else
-            {
-                var haloObject = new GameObject("Halo", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-                var haloTransform = (RectTransform)haloObject.transform;
-                haloTransform.SetParent(transform, false);
-                haloTransform.SetSiblingIndex(0);
-                haloTransform.anchorMin = new Vector2(0.5f, 0.5f);
-                haloTransform.anchorMax = new Vector2(0.5f, 0.5f);
-                haloTransform.sizeDelta = new Vector2(0.16f, 0.16f);
-                haloImage = haloObject.GetComponent<Image>();
-            }
-
-            var symbolBackground = symbol.GetComponent<Image>();
-            if (symbolBackground != null && haloImage.sprite == null)
-                haloImage.sprite = symbolBackground.sprite;
-
-                        haloImage.color = HaloTint;
-            haloImage.raycastTarget = false;
-            haloImage.enabled = false;
-            return haloImage;
+            if (haloEffect == null && allowCreate)
+                haloEffect = GetComponent<MarkerHaloEffect>() ?? gameObject.AddComponent<MarkerHaloEffect>();
         }
 
         private const float ALPHA_FULL = 1f;

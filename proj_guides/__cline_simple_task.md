@@ -15,7 +15,7 @@
 A *stable `key` + `label`* split for categories (like `badge_categories` already has) is argitchitecturally "cleaner" but is a __schema + every-consumer change__ (schema, CategoryPalette, search/filter/minimap/results, editor dropdowns, tests, config backfill) — big and risky for one wall today. The propagated-string approach keeps the current schema, fixes your exact failure, matches the existing POI-rename pattern, and is genuinely small. If a second wall later needs real display-name independence, the `key`/`label` migration can happen then (badge is the template
 
 
-
+# TODO - limpar o 5_Editor 
 
 # `claude agent`
 - **GATE TASK:** start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
@@ -30,25 +30,45 @@ A *stable `key` + `label`* split for categories (like `badge_categories` already
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: Lets confirm the whole "Effects" domain`
+## `And now: Lets confirm the whole "Marker_Design" domain`
 I want to verify everything we have done in the domain of the marker design system.
 
 a) Start by reading these files fully and check the necessary and respective code files in the prooject to confirm how everything is implemented currently: 
+- C:\Users\franc\Desktop\TileStories\proj_guides\_2.2_Marker_Design_Archive.md
 - C:\Users\franc\Desktop\TileStories\proj_guides\_2.2_Marker_Design.md
+- C:\Users\franc\Desktop\TileStories\proj_guides\_2.2_notes.md
 - C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
 
 b) then tell me the normal sequence of user flow of actions in this domain. Example: 
-b.1) The user starts by creating a new POI, and what are the default fields that are created and with which values? 
-b.2) And then what is a good sequence of "editing" of those fields, and where is the "lower level" we can test them? In the scene, in the playmode, in the device? 
-b.3) Is there some feature or functionality of this domain that we have in code and not exposed in a UI in the editor tab that maybe should be? Because the developer should be able to enable/disable or config, considering we are implementing a framework to allow the creation of apps for different scenarios? 
-b.4) Is there any feature or functionality in the guide files that is not implemented yet and should be? 
-b.5) the save, undo, redo things are all working corrected for all fiedls.. 
-b.6) Do we have already implemented an updated "Domain Manual Tests" sub component in the `effects domain component`? See in the ## 0. Guidelines of the proj_guides\_5.1_Editor_Tab.md how to do that. Is it all well implemented and tested and working well? 
-b.7) do we have good tests to confirm that each field configuration actually works well and has the expected outcomes? 
-b.8) in terms of code, any dead or duplucicated or bad organized code that we should improve according to the .clinerules? 
-b.9) any other detail to be aware of? 
+b.1) The user starts by creating a new POI, and what are the default fields that are created and with which values? maybe we can "copy the values of the "original POI that we copied", similar to how we do with the position and orientation values?
 
-c) If there is a lot of things to do, before you start implementing things, make a deep and complete and detailed plan to make sure things get clean and well organized and working well and well tested...
+b.2) Is there some feature or functionality of this domain that we have in code and not exposed in a UI in the editor tab that maybe should have, because the developer should be able to enable/disable or config, considering we are implementing a framework to allow the creation of apps for different scenarios? 
+b.3) Is there any feature or functionality in the guide files that is not implemented yet and should be? 
+
+b.4) Take the proj_guides\_5.1_Editor_Tab.md file. Read the section ## HOW TO USE THIS FILE (read this first), and then use the section ## 0. Guidelines as a checklist to evaluate the whole quality of these domains, are all the rows well formated, with the good width, indentation, elements and components, helpers, etc... the save, undo, redo things are all working corrected for all fields... we have the correct warnings and pop ups if needed... what is a good sequence of "editing" and config of all those fields, do we have a good "UI Ontology and hierarchy in the editor tab to be evrything easy and well organized and intuitive to use by the developer? What are the lowest level we can test each config? (Scene, PlayMode, Device)... Do we have already implemented an updated "Domain Manual Tests" sub component to guide the developer on how to config and test things? Do we have already "live sync between the editor tab values of the fields and the scene mode preview? For the PlayMode tests do we have the "playmode live sync between the editor tab and the playmode view also? Make a deep analysis of evrything we have and how and where we have it. is it all good or can we make it better, implement what is missing, improve some feature, make the code simpler or better organized... ?? 
+ 
+b.5) In terms of code, any dead or duplicated or bad organized code that we should improve according to the .clinerules? 
+
+b.6) Do we have good set of tests to confirm that each field configuration actually works well and has the expected results in the markers, in the scene and playmode? Lets confirm we have good REAL tests, and also take some screen shots to confirm visually if things are working well. 
+
+b.7) any other detail we should be aware of for this domain or think about? 
+
+c) If there is a lot of things to do, before you start implementing things, make a deep and complete and detailed plan to make sure things get clean and well organized and working well and well tested... keep in mind that this is the first version of project so lets just make things better and organized and clean - no backward compatibility concerns and weird code just to avoid some bigger change... let just change what is necessary to make it all better and simple and clean and well organized, so it gets easier to understand and to maintain in the future with less "coupling" and weird dependencies as possible... lets keep things well organized and easy to change and improve... 
+
+d) after we do and implement and clean and test everything, lets update, if necessary the files: proj_guides\_5.1_Editor_Tab.md and .clinerules\10-structure.md, and also lets write a clean set of guide files: 
+C:\Users\franc\Desktop\TileStories\proj_guides\_2.2.1_Marker_Design.md
+C:\Users\franc\Desktop\TileStories\proj_guides\_2.2.2_Badge_Design.md
+C:\Users\franc\Desktop\TileStories\proj_guides\_2.2.3_Outline_Design.md
+»» so lets confirm we have well implemented all the good features described in the files:
+proj_guides\_2.2_Marker_Design_Archive.md
+proj_guides\_2.2_Marker_Design.md
+proj_guides\_2.2_notes.md
+and so then we can consolidate these files into the well orgaized files
+proj_guides\_2.2.1_Marker_Design.md
+proj_guides\_2.2.2_Badge_Design.md
+proj_guides\_2.2.3_Outline_Design.md
+proj_guides\_2.2.4_Markers_Effects.md
+keeping there all important details, including some bibliographic references we might havee used or other impoortant details that might be usefull for when i write my master thesis report about this project. 
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

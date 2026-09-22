@@ -72,17 +72,17 @@ namespace TileStories.Editor
             _config.minimap_enabled = DrawToggleField("Enable minimap", _config.minimap_enabled, MinimapHelp);
             if (_config.minimap_enabled)
             {
-                // Conditional rows nest via the raw-pixel SubFieldIndentPixels nudge
+                // Conditional rows nest via the raw-pixel ConditionalAdvance nudge
                 // (_5.1_Editor_Tab.md "Row Indentation & Spacing"), never a whole
                 // EditorGUI.IndentLevelScope -- a full level shifts the VALUE box too
                 // (compensated automatically by each field-drawer's
                 // FieldLabelWidthCompensationScope, which only fires for extraIndentPixels).
                 _config.minimap_visibility = DrawPopupField("Visibility", _config.minimap_visibility,
-                    MinimapVisibilityOptions, MinimapVisibilityLabels, MinimapVisibilityHelp, SubFieldIndentPixels);
+                    MinimapVisibilityOptions, MinimapVisibilityLabels, MinimapVisibilityHelp, ConditionalAdvance);
                 _config.minimap_icon_style = DrawPopupField("Icon style", _config.minimap_icon_style,
-                    MinimapIconOptions, MinimapIconLabels, MinimapIconHelp, SubFieldIndentPixels);
-                _config.minimap_dot_size_px = DrawScalarField("Dot size (px)", _config.minimap_dot_size_px, MinimapDotSizeHelp, SubFieldIndentPixels);
-                _config.minimap_dot_tap_target_px = DrawScalarField("Dot tap target (px)", _config.minimap_dot_tap_target_px, MinimapTapTargetHelp, SubFieldIndentPixels);
+                    MinimapIconOptions, MinimapIconLabels, MinimapIconHelp, ConditionalAdvance);
+                _config.minimap_dot_size_px = DrawScalarField("Dot size (px)", _config.minimap_dot_size_px, MinimapDotSizeHelp, ConditionalAdvance);
+                _config.minimap_dot_tap_target_px = DrawScalarField("Dot tap target (px)", _config.minimap_dot_tap_target_px, MinimapTapTargetHelp, ConditionalAdvance);
             }
 
             EditorGUILayout.Space(6f);
@@ -99,9 +99,9 @@ namespace TileStories.Editor
             {
                 // Raw-pixel nudge, not IndentLevelScope -- see Minimap above.
                 _config.voice_search_match_mode = DrawPopupField("Match mode", _config.voice_search_match_mode,
-                    VoiceMatchModeOptions, VoiceMatchModeLabels, VoiceMatchModeHelp, SubFieldIndentPixels);
+                    VoiceMatchModeOptions, VoiceMatchModeLabels, VoiceMatchModeHelp, ConditionalAdvance);
                 _config.voice_activity_indicator_style = DrawPopupField("Indicator style", _config.voice_activity_indicator_style,
-                    VoiceIndicatorOptions, VoiceIndicatorLabels, VoiceIndicatorHelp, SubFieldIndentPixels);
+                    VoiceIndicatorOptions, VoiceIndicatorLabels, VoiceIndicatorHelp, ConditionalAdvance);
             }
 
             EditorGUILayout.Space(6f);
@@ -111,16 +111,16 @@ namespace TileStories.Editor
             if (_config.zoom_on_select_enabled)
             {
                 // Raw-pixel nudge, not IndentLevelScope -- see Minimap above.
-                DrawEditorRow(out float triggerRow, out _, SubFieldIndentPixels);
+                DrawEditorRow(out float triggerRow, out _, ConditionalAdvance);
                 int savedTriggerIndent = EditorGUI.indentLevel;
                 EditorGUI.indentLevel = 0;
-                using (new FieldLabelWidthCompensationScope(SubFieldIndentPixels))
+                using (new FieldLabelWidthCompensationScope(ConditionalAdvance))
                     _config.zoom_on_select_trigger = (WallConfigData.ZoomOnSelectTrigger)EditorGUILayout.EnumPopup("Trigger target", _config.zoom_on_select_trigger,
                         GUILayout.Width(triggerRow), GUILayout.ExpandWidth(false));
                 EditorGUI.indentLevel = savedTriggerIndent;
                 EditorRowEnd();
-                _config.zoom_on_select_density_threshold = DrawIntField("Density threshold", _config.zoom_on_select_density_threshold, ZoomOnSelectDensityHelp, SubFieldIndentPixels);
-                _config.zoom_on_select_factor = DrawScalarField("Zoom factor", _config.zoom_on_select_factor, ZoomOnSelectFactorHelp, SubFieldIndentPixels);
+                _config.zoom_on_select_density_threshold = DrawIntField("Density threshold", _config.zoom_on_select_density_threshold, ZoomOnSelectDensityHelp, ConditionalAdvance);
+                _config.zoom_on_select_factor = DrawScalarField("Zoom factor", _config.zoom_on_select_factor, ZoomOnSelectFactorHelp, ConditionalAdvance);
             }
 
             // --- Synonym groups (_2.6-al) ---

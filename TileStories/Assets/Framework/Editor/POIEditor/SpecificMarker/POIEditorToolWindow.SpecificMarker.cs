@@ -337,7 +337,7 @@ namespace TileStories.Editor
 
         private void DrawPoiMarkerStyleFields(POIData poi)
         {
-            using (new EditorGUI.IndentLevelScope(-1))
+            // IndentLevel0: rows sit at the section content's own indent (no collapsing scope)
             {
             // Note: the POI name is renamed from the header row pencil, not here --
             // a second name field would fight the header draft (two writers, one field).
@@ -347,6 +347,12 @@ namespace TileStories.Editor
             // from the wall's hierarchy_levels table (section 2.3). Populated from
             // _config.hierarchy_levels; writes poi.hierarchy_level_key.
             poi.hierarchy_level_key = DrawHierarchyLevelDropdown("Hierarchy Level", poi.hierarchy_level_key);
+
+            // Read-only: what this POI actually gets from its level (effects + reveal), so it can be
+            // seen here without opening Hierarchy Levels. Effects are per level, never per POI.
+            DrawEffectNote(EffectUsageSummary.DescribeLevelEffects(
+                _config.hierarchy_levels?.Find(l => l != null && l.key == poi.hierarchy_level_key),
+                _config.effect_defaults), 0f);
 
             // Custom symbol override (section 13.6/21) -- replaces the old "is_hero"
             // concept. When checked, shows a Sprite field + preview. Uses the same
@@ -389,7 +395,7 @@ namespace TileStories.Editor
 
         private void DrawPoiBadgeStyleFields(POIData poi)
         {
-            using (new EditorGUI.IndentLevelScope(-1))
+            // IndentLevel0: rows sit at the section content's own indent (no collapsing scope)
             {
             poi.badge_category = DrawBadgeCategoryDropdown("Badge category", poi.badge_category);
             }
@@ -397,7 +403,7 @@ namespace TileStories.Editor
 
         private void DrawPoiOutlineFields(POIData poi)
         {
-            using (new EditorGUI.IndentLevelScope(-1))
+            // IndentLevel0: rows sit at the section content's own indent (no collapsing scope)
             {
             bool hasStatus = poi.has_status;
             // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
@@ -637,7 +643,7 @@ namespace TileStories.Editor
         // Edits POIData.search_keywords via a multi-line TextField popup.
         private void DrawPoiSearchKeywordsField(POIData poi)
         {
-            using (new EditorGUI.IndentLevelScope(-1))
+            // IndentLevel0: rows sit at the section content's own indent (no collapsing scope)
             {
             if (poi == null)
                 return;
@@ -726,8 +732,12 @@ namespace TileStories.Editor
 
             // --- Others row (freeform flat keywords) ---
             EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField("Others (freeform)", EditorStyles.miniLabel);
+            // Label and its help button share ONE row (a help button drawn outside a row lands at the far left)
+            DrawEditorRow(out float othersLabelRow, out _);
+            EditorGUILayout.LabelField("Others (freeform)", EditorStyles.miniLabel,
+                GUILayout.Width(Mathf.Max(120f, othersLabelRow - 40f)), GUILayout.ExpandWidth(false));
             HelpInfoButton.Draw("Others (Freeform Keywords)", SearchKeywordsOthersHelp);
+            EditorRowEnd();
             string othersJoined = string.Join(", ", poi.search_keywords);
             // Shared row: transparent indent spacer + TextField capped to rowWidth.
             DrawEditorRow(out float othersRow, out _);

@@ -39,6 +39,9 @@ namespace TileStories
         // can enumerate spawned markers without reaching into WallSession internals.
         public IReadOnlyList<MarkerView> SpawnedMarkers { get; private set; } = System.Array.Empty<MarkerView>();
 
+        // Root of the dev-only effects preview grid, or null when it was not spawned.
+        public GameObject EffectsPreviewRoot { get; private set; }
+
                 // Read-only access to the wall's LOD settings, used by LODController.
         // May be null until config finishes loading in LoadConfigCoroutine.
         public LodSettings LodSettings => _config?.lod_settings;
@@ -201,6 +204,61 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
             _didSpawn = true;
         }
 
+        // Build the dev-only effects preview grid from the current config (null when off or not allowed)
+        private void SpawnEffectsPreview()
+        {
+            EffectsPreviewRoot = EffectsPreviewSpawner.TrySpawn(_config, poiAnchorPrefab, Camera.main,
+                (view, anchor, style) => view.Initialise(anchor, _markerOutlineMode, _markerUseBadge, _markerShape,
+                    MarkerEffectFlags.None, _hasCategoryDefinitions, _hasShapeFromConfig, _hasOutlineLevels,
+                    _wallIconLibrary, _badgeShape, _effectDefaults, style));
+        }
+
+        // Keep the config and the static level resolver in step (live Play Mode edits)
+        private void ReplaceHierarchyLevels(List<HierarchyLevelEntry> hierarchyLevels)
+        {
+            if (hierarchyLevels == null) return;
+            _config.hierarchy_levels = hierarchyLevels;
+            MarkerHierarchyResolver.Configure(hierarchyLevels);
+        }
+
+        // Swap in new orientation settings on a running wall: every spawned marker is re-pointed at
+        // them, with its own level's facing override. Clusters are LODController's job (its
+        // ReapplyClusterOrientation). The caller passes its own copy, never the authoring object.
+        public void ApplyOrientationSettings(OrientationSettings settings, List<HierarchyLevelEntry> hierarchyLevels)
+        {
+            if (_config == null || settings == null) return;
+
+            _config.orientation_settings = settings;
+            ReplaceHierarchyLevels(hierarchyLevels);
+
+            foreach (var marker in SpawnedMarkers)
+            {
+                if (marker == null) continue;
+                var billboard = marker.GetComponentInChildren<MarkerBillboard>();
+                var anchor = marker.GetComponentInParent<POIAnchor>();
+                if (billboard == null || anchor?.Data == null) continue;
+                billboard.ReapplySettings(settings, MarkerHierarchyResolver.ResolveFacingModeOverride(anchor.Data.hierarchy_level_key));
+            }
+        }
+
+        // Swap in new effect settings on a running wall: every spawned marker re-applies its effects
+        // and the preview grid is rebuilt. The caller passes its own copy, never the authoring object.
+        public void ApplyEffectSettings(EffectDefaults defaults, List<HierarchyLevelEntry> hierarchyLevels)
+        {
+            if (_config == null || defaults == null) return;
+
+            _config.effect_defaults = defaults;
+            _effectDefaults = defaults;
+            ReplaceHierarchyLevels(hierarchyLevels);
+
+            foreach (var marker in SpawnedMarkers)
+                if (marker != null) marker.ReapplyEffects(defaults);
+
+            if (EffectsPreviewRoot != null) Destroy(EffectsPreviewRoot);
+            EffectsPreviewRoot = null;
+            SpawnEffectsPreview();
+        }
+
         private void SpawnPOIs()
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -290,6 +348,10 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
 
             stopwatch.Stop();
             Debug.Log($"[WallSession] Ready {_spawnedPOIs.Count}/{_config.pois.Count} POIs in {stopwatch.ElapsedMilliseconds}ms.");
+
+            // Dev-only effects preview grid (effect_defaults.preview; Editor + development builds only).
+            // The spawner decides everything; this only tells it how this wall initialises a MarkerView.
+            SpawnEffectsPreview();
 
             // Block 2 selection infrastructure (spec _2.6 section 11). Markers exist
             // now (SpawnedMarkers populated above), so wire the bus-driven highlight

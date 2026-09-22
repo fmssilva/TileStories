@@ -3,23 +3,24 @@ using UnityEngine.UI;
 
 namespace TileStories
 {
-    // Hero accent: three concentric waves with center-first flow.
-    // Supports both contour-ring and filled-circle rendering so we can compare variants.
-    public class MarkerSunEffect : MarkerEffect
+    // Three staggered waves flowing outward from the symbol, centre first. Two looks
+    // (RippleStyle): thin rings or filled discs; each has its own parameter block in
+    // EffectDefaults. A single-wave version of the same motion is MarkerHaloEffect's Beacon.
+    public class MarkerRippleEffect : MarkerEffect
     {
-        public enum SunVisualStyle
+        public enum RippleStyle
         {
-            Contours,
-            FilledCircles,
+            Rings,
+            Discs,
         }
 
         [SerializeField] private RectTransform target;
         [SerializeField] private Image innerImage;
         [SerializeField] private Image middleImage;
         [SerializeField] private Image outerImage;
-        [SerializeField] private SunVisualStyle renderStyle = SunVisualStyle.Contours;
+        [SerializeField] private RippleStyle style = RippleStyle.Rings;
         [SerializeField] private Color baseTint = new Color(0.949f, 0.792f, 0.443f, 1f);
-        [SerializeField, Range(0.05f, 0.5f)] private float period = 1.8f;
+        [SerializeField, Min(0.1f)] private float period = 1.8f;
         [SerializeField, Range(0.0f, 0.25f)] private float stagger = 0.12f;
         [SerializeField, Range(0f, 1f)] private float innerAlpha = 0.55f;
         [SerializeField, Range(0f, 1f)] private float middleAlpha = 0.36f;
@@ -27,16 +28,18 @@ namespace TileStories
 
         private bool _active;
         private Vector3 _baseScale = Vector3.one;
+        private bool _baseCaptured;
 
         public bool IsActive => _active;
-        public SunVisualStyle CurrentStyle => renderStyle;
+        protected override RectTransform SizeReference => target;
+        public RippleStyle CurrentStyle => style;
 
-        public void SetVisualStyle(SunVisualStyle style)
+        public void SetStyle(RippleStyle newStyle)
         {
-            if (renderStyle == style)
+            if (style == newStyle)
                 return;
 
-            renderStyle = style;
+            style = newStyle;
             EnsureCircles();
         }
 
@@ -46,21 +49,27 @@ namespace TileStories
             if (target == null)
                 return;
 
-            _baseScale = target.localScale;
+            // Authored scale is read once: Configure runs on every Initialise, when the
+            // target may already be mid-pulse (see MarkerPulseEffect.CaptureBaseScale).
+            if (!_baseCaptured)
+            {
+                _baseScale = target.localScale;
+                _baseCaptured = true;
+            }
             EnsureCircles();
         }
 
-        // Apply per-wall effect defaults from EffectDefaults.
-        // Called by MarkerView when effect_defaults is present in the wall config;
-        // safe no-op when null (compiled-in [SerializeField] defaults are used instead).
-        public void ApplyDefaults(EffectDefaults.SunDefaults defaults)
+        // Apply this style's parameter block from EffectDefaults. Safe no-op when null
+        // (the compiled-in [SerializeField] values are used instead). Values are clamped to
+        // the same limits as the Inspector attributes above.
+        public void ApplyDefaults(EffectDefaults.RippleDefaults defaults)
         {
             if (defaults == null) return;
-            period = defaults.period;
-            stagger = defaults.stagger;
-            innerAlpha = defaults.innerAlpha;
-            middleAlpha = defaults.middleAlpha;
-            outerAlpha = defaults.outerAlpha;
+            period = Mathf.Max(MinPeriodSeconds, defaults.period);
+            stagger = Mathf.Clamp(defaults.stagger, 0f, 0.25f);
+            innerAlpha = Mathf.Clamp01(defaults.inner_alpha);
+            middleAlpha = Mathf.Clamp01(defaults.middle_alpha);
+            outerAlpha = Mathf.Clamp01(defaults.outer_alpha);
             if (!string.IsNullOrEmpty(defaults.tint_color_hex))
                 ColorUtility.TryParseHtmlString(defaults.tint_color_hex, out baseTint);
         }
@@ -90,7 +99,7 @@ namespace TileStories
             if (!_active || target == null)
                 return;
 
-            // Center-first flow: inner starts first, then middle, then outer.
+            // Centre-first flow: inner starts first, then middle, then outer.
             AnimateCircle(innerImage, 0f, innerAlpha, 1.03f, 1.16f);
             AnimateCircle(middleImage, stagger, middleAlpha, 1.10f, 1.36f);
             AnimateCircle(outerImage, stagger * 2f, outerAlpha, 1.20f, 1.62f);
@@ -101,12 +110,12 @@ namespace TileStories
             if (target == null)
                 return;
 
-            innerImage = EnsureCircle("SunInner", 0.16f, SpriteKind.Inner);
-            middleImage = EnsureCircle("SunMiddle", 0.20f, SpriteKind.Middle);
-            outerImage = EnsureCircle("SunOuter", 0.24f, SpriteKind.Outer);
+            innerImage = EnsureCircle("RippleInner", 0.8f, SpriteKind.Inner);
+            middleImage = EnsureCircle("RippleMiddle", 1.0f, SpriteKind.Middle);
+            outerImage = EnsureCircle("RippleOuter", 1.2f, SpriteKind.Outer);
         }
 
-        private Image EnsureCircle(string name, float size, SpriteKind kind)
+        private Image EnsureCircle(string name, float sizeInSymbols, SpriteKind kind)
         {
             var existing = transform.Find(name);
             Image image;
@@ -122,11 +131,11 @@ namespace TileStories
                 rect.SetSiblingIndex(0);
                 rect.anchorMin = new Vector2(0.5f, 0.5f);
                 rect.anchorMax = new Vector2(0.5f, 0.5f);
-                rect.sizeDelta = new Vector2(size, size);
+                rect.sizeDelta = Vector2.one * sizeInSymbols * SymbolDiameter;
                 image = go.GetComponent<Image>();
             }
 
-            image.rectTransform.sizeDelta = new Vector2(size, size);
+            image.rectTransform.sizeDelta = Vector2.one * sizeInSymbols * SymbolDiameter;
             image.raycastTarget = false;
             image.preserveAspect = true;
             image.type = Image.Type.Simple;
@@ -137,12 +146,11 @@ namespace TileStories
         }
 
         // Sprite generation and its domain-reload-safe caching live in the shared
-        // MarkerCircleSpriteFactory (section 19.3) -- this class never builds a
-        // Texture2D itself, so the section 18.12 stale-static-cache fix only has
-        // to exist in one place.
+        // MarkerCircleSpriteFactory -- this class never builds a Texture2D itself, so the
+        // stale-static-cache fix (archive section 18.12) only has to exist in one place.
         private Sprite ResolveSprite(SpriteKind kind)
         {
-            if (renderStyle == SunVisualStyle.FilledCircles)
+            if (style == RippleStyle.Discs)
                 return MarkerCircleSpriteFactory.GetFilled(0.84f);
 
             return kind switch

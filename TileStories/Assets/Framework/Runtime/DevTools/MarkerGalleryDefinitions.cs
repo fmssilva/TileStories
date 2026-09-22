@@ -51,35 +51,35 @@ namespace TileStories
                 new HierarchyLevelEntry
                 {
                                         key = "level_1", label = "1", size_cm = 20f, show_label = true,
-                    sun_effect = "sun_circles", accent_effect = "ring_pulse",
+                    ripple_effect = "ripple_discs", halo_effect = "halo_ring",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0f,
                     reveal_duration_s = 0.5f
                 },
                 new HierarchyLevelEntry
                 {
                                         key = "level_2", label = "2", size_cm = 15f, show_label = false,
-                    sun_effect = "sun_contours", accent_effect = "none",
+                    ripple_effect = "ripple_rings", halo_effect = "none",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.15f,
                     reveal_duration_s = 0.4f
                 },
                 new HierarchyLevelEntry
                 {
                                         key = "level_3", label = "3", size_cm = 10f, show_label = false,
-                    sun_effect = "none", accent_effect = "simple_sun",
+                    ripple_effect = "none", halo_effect = "halo_disc",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.3f,
                     reveal_duration_s = 0.35f
                 },
                 new HierarchyLevelEntry
                 {
                                         key = "level_4", label = "4", size_cm = 5f, show_label = false,
-                    sun_effect = "none", accent_effect = "beacon",
+                    ripple_effect = "none", halo_effect = "beacon",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.45f,
                     reveal_duration_s = 0.3f
                 },
                 new HierarchyLevelEntry
                 {
                                         key = "level_5", label = "5", size_cm = 2f, show_label = false,
-                    sun_effect = "none", accent_effect = "none",
+                    ripple_effect = "none", halo_effect = "none",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.6f,
                     reveal_duration_s = 0.25f
                 },
@@ -180,14 +180,14 @@ namespace TileStories
             // entries with "level_5" get rotate_contour=true from the configured level.
             AddRotateContourRows(list);
 
-            // Step 9: Ring Pulse (thin contour, breathing).
-            AddAccentEffectRows(list, "Accent - Ring Pulse", MarkerEffectFlags.RingPulse);
+            // Step 9: Halo Ring (thin ring, breathing).
+            AddHaloEffectRows(list, "Halo - Ring", MarkerEffectFlags.HaloRing);
 
-            // Step 10: Simple Sun (filled disc, breathing).
-            AddAccentEffectRows(list, "Accent - Simple Sun", MarkerEffectFlags.SimpleSun);
+            // Step 10: Halo Disc (filled disc, breathing).
+            AddHaloEffectRows(list, "Halo - Disc", MarkerEffectFlags.HaloDisc);
 
             // Step 11: Beacon (thin contour, grow+fade sawtooth).
-            AddAccentEffectRows(list, "Accent - Beacon", MarkerEffectFlags.Beacon);
+            AddHaloEffectRows(list, "Beacon", MarkerEffectFlags.Beacon);
 
             // Step 12: Background shape None (section 20.1) -- icon-only marker,
             // no backdrop behind the symbol. Category icon must still be visible.
@@ -209,10 +209,10 @@ namespace TileStories
         {
             const string category = "religious";
             list.Add(new MarkerGalleryEntry(group, "Pulse", category, style, shape, statusPct, hasStatus, false, effectFlags: MarkerEffectFlags.Pulse));
-            list.Add(new MarkerGalleryEntry(group, "Sun Circles", category, style, shape, statusPct, hasStatus, false, effectFlags: MarkerEffectFlags.SunCircles));
-            list.Add(new MarkerGalleryEntry(group, "Sun Contours", category, style, shape, statusPct, hasStatus, false, effectFlags: MarkerEffectFlags.SunContours));
-            list.Add(new MarkerGalleryEntry(group, "Pulse + Sun Circles", category, style, shape, statusPct, hasStatus, false, effectFlags: MarkerEffectFlags.PulseSunCircles));
-            list.Add(new MarkerGalleryEntry(group, "Pulse + Sun Contours", category, style, shape, statusPct, hasStatus, false, effectFlags: MarkerEffectFlags.PulseSunContours));
+            list.Add(new MarkerGalleryEntry(group, "Ripple Discs", category, style, shape, statusPct, hasStatus, false, effectFlags: MarkerEffectFlags.RippleDiscs));
+            list.Add(new MarkerGalleryEntry(group, "Ripple Rings", category, style, shape, statusPct, hasStatus, false, effectFlags: MarkerEffectFlags.RippleRings));
+            list.Add(new MarkerGalleryEntry(group, "Pulse + Ripple Discs", category, style, shape, statusPct, hasStatus, false, effectFlags: MarkerEffectFlags.Pulse | MarkerEffectFlags.RippleDiscs));
+            list.Add(new MarkerGalleryEntry(group, "Pulse + Ripple Rings", category, style, shape, statusPct, hasStatus, false, effectFlags: MarkerEffectFlags.Pulse | MarkerEffectFlags.RippleRings));
         }
 
         // Contourse rotation -- hierarchy driven. Entries with a level key get
@@ -227,11 +227,11 @@ namespace TileStories
             list.Add(new MarkerGalleryEntry(group, "OutlineSameHue, rotating", "civic", MarkerStyle.OutlineSameHue, MarkerShape.Circle, 40, true, false, hierarchyLevelKey: "level_5", effectFlags: MarkerEffectFlags.None));
         }
 
-        // Steps 9-11: the three single-accent effects, each proven on BOTH a
+        // Steps 9-11: the three halo effects, each proven on BOTH a
         // non-hierarchy and a hierarchy-keyed marker -- this is the direct,
         // visual test that they are no longer hierarchy-gated (the effect flags
         // fallback rule in MarkerView applies when no hierarchy key is set).
-        private static void AddAccentEffectRows(List<MarkerGalleryEntry> list, string group, MarkerEffectFlags effect)
+        private static void AddHaloEffectRows(List<MarkerGalleryEntry> list, string group, MarkerEffectFlags effect)
         {
             list.Add(new MarkerGalleryEntry(group, "No hierarchy", "civic", MarkerStyle.OutlineGold, MarkerShape.Circle, 0, false, false, effectFlags: effect));
             list.Add(new MarkerGalleryEntry(group, "With hierarchy level_1", "religious", MarkerStyle.OutlineGold, MarkerShape.Circle, 0, false, false, hierarchyLevelKey: "level_1", effectFlags: effect));

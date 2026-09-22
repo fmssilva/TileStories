@@ -230,13 +230,13 @@ namespace TileStories.Editor
             {
                 lod.cluster_icon_mode = DrawPopupField("Cluster Icon", lod.cluster_icon_mode, ClusterIconOptions, ClusterIconLabels, "");
                 lod.cluster_band_source = DrawPopupField("Band Source", lod.cluster_band_source, ClusterBandSourceOptions, ClusterBandSourceLabels, LodClusterBandSourceHelp);
-                lod.cluster_band_hysteresis_enabled = DrawToggleField("Band Hysteresis", lod.cluster_band_hysteresis_enabled, LodClusterBandHysteresisHelp, SubFieldIndentPixels);
-                lod.cluster_dissolve_grace_cycles = DrawIntField("Dissolve Grace (cycles)", lod.cluster_dissolve_grace_cycles, LodClusterDissolveGraceHelp, SubFieldIndentPixels);
+                lod.cluster_band_hysteresis_enabled = DrawToggleField("Band Hysteresis", lod.cluster_band_hysteresis_enabled, LodClusterBandHysteresisHelp, ConditionalAdvance);
+                lod.cluster_dissolve_grace_cycles = DrawIntField("Dissolve Grace (cycles)", lod.cluster_dissolve_grace_cycles, LodClusterDissolveGraceHelp, ConditionalAdvance);
             }
 
             lod.density_safety_escalation_enabled = DrawToggleField("Safety Escalation", lod.density_safety_escalation_enabled, LodSafetyEscalationHelp);
             if (lod.density_safety_escalation_enabled)
-                lod.density_safety_escalation_multiplier = DrawScalarField("Multiplier", lod.density_safety_escalation_multiplier, LodSafetyEscalationHelp, SubFieldIndentPixels);
+                lod.density_safety_escalation_multiplier = DrawScalarField("Multiplier", lod.density_safety_escalation_multiplier, LodSafetyEscalationHelp, ConditionalAdvance);
 
             EditorGUILayout.Space(6f);
             EditorGUILayout.LabelField("Transitions", EditorStyles.boldLabel);
@@ -247,7 +247,7 @@ namespace TileStories.Editor
             EditorGUILayout.LabelField("Performance", EditorStyles.boldLabel);
             lod.frustum_culling_enabled = DrawToggleField("Frustum Culling", lod.frustum_culling_enabled, LodFrustumHelp);
             if (lod.frustum_culling_enabled)
-                lod.fov_culling_margin_deg = DrawScalarField("FOV Margin (deg)", lod.fov_culling_margin_deg, LodFovMarginHelp, SubFieldIndentPixels);
+                lod.fov_culling_margin_deg = DrawScalarField("FOV Margin (deg)", lod.fov_culling_margin_deg, LodFovMarginHelp, ConditionalAdvance);
         }
         // ---- Zoom section ----
         private void DrawGlobalZoomSection()

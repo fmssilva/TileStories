@@ -3,8 +3,8 @@ using UnityEngine;
 namespace TileStories
 {
     // Gentle scale "breathing" -- cheapest, most universally-readable "worth a
-    // look" cue. Hero-tier only (see MarkerView.ApplyHeroState) -- pulsing every
-    // marker at once reads as noise, not emphasis.
+    // look" cue. Enabled per hierarchy level (pulse column) -- pulsing every
+    // marker at once reads as noise, not emphasis, so authors pick which levels pulse.
     public class MarkerPulseEffect : MarkerEffect
     {
         [SerializeField] private RectTransform target;
@@ -12,28 +12,39 @@ namespace TileStories
         [SerializeField, Min(0.1f)] private float period = 1.6f;
 
         private Vector3 _baseScale = Vector3.one;
+        private bool _baseCaptured;
         private bool _active;
 
         private void Awake()
         {
-            if (target != null) _baseScale = target.localScale;
+            CaptureBaseScale();
         }
 
         public void Configure(RectTransform configuredTarget)
         {
             target = configuredTarget;
-            if (target != null)
-                _baseScale = target.localScale;
+            CaptureBaseScale();
+        }
+
+        // Read the target's authored scale exactly once. Configure runs on every Initialise, by
+        // which time this effect may already be animating the same transform -- reading it again
+        // would bake the animated scale in as the new "base" and the marker would never shrink back.
+        private void CaptureBaseScale()
+        {
+            if (_baseCaptured || target == null) return;
+            _baseScale = target.localScale;
+            _baseCaptured = true;
         }
 
         // Apply per-wall effect defaults from EffectDefaults.
         // Called by MarkerView when effect_defaults is present in the wall config;
         // safe no-op when null (compiled-in [SerializeField] defaults are used instead).
+        // Values are clamped to the same limits as the Inspector attributes above.
         public void ApplyDefaults(EffectDefaults.PulseDefaults defaults)
         {
             if (defaults == null) return;
-            amplitude = defaults.amplitude;
-            period = defaults.period;
+            amplitude = Mathf.Clamp(defaults.amplitude, 0f, 0.45f);
+            period = Mathf.Max(MinPeriodSeconds, defaults.period);
         }
 
         public override void SetActive(bool active)

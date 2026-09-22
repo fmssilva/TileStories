@@ -19,35 +19,35 @@ namespace TileStories.Tests
                 new HierarchyLevelEntry
                 {
                                         key = "level_1", label = "1", size_cm = 20f, show_label = true,
-                    sun_effect = "sun_circles", accent_effect = "ring_pulse",
+                    ripple_effect = "ripple_discs", halo_effect = "halo_ring",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0f,
                     reveal_duration_s = 0.5f
                 },
                 new HierarchyLevelEntry
                 {
                                         key = "level_2", label = "2", size_cm = 15f, show_label = false,
-                    sun_effect = "sun_contours", accent_effect = "none",
+                    ripple_effect = "ripple_rings", halo_effect = "none",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.15f,
                     reveal_duration_s = 0.4f
                 },
                 new HierarchyLevelEntry
                 {
                                         key = "level_3", label = "3", size_cm = 10f, show_label = false,
-                    sun_effect = "none", accent_effect = "simple_sun",
+                    ripple_effect = "none", halo_effect = "halo_disc",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.3f,
                     reveal_duration_s = 0.35f
                 },
                 new HierarchyLevelEntry
                 {
                                         key = "level_4", label = "4", size_cm = 5f, show_label = false,
-                    sun_effect = "none", accent_effect = "beacon",
+                    ripple_effect = "none", halo_effect = "beacon",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.45f,
                     reveal_duration_s = 0.3f
                 },
                 new HierarchyLevelEntry
                 {
                                         key = "level_5", label = "5", size_cm = 2f, show_label = false,
-                    sun_effect = "none", accent_effect = "none",
+                    ripple_effect = "none", halo_effect = "none",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.6f,
                     reveal_duration_s = 0.25f
                 },
@@ -70,7 +70,7 @@ namespace TileStories.Tests
             Assert.IsTrue(MarkerHierarchyResolver.TryResolveByKey("level_1", out var s1), "level_1 should resolve");
             Assert.AreEqual(20f, s1.SizeCm, "level_1 size");
             Assert.IsTrue(s1.ShowLabel, "level_1 show_label");
-            Assert.AreEqual(MarkerEffectFlags.SunCircles | MarkerEffectFlags.RingPulse | MarkerEffectFlags.Pulse,
+            Assert.AreEqual(MarkerEffectFlags.RippleDiscs | MarkerEffectFlags.HaloRing | MarkerEffectFlags.Pulse,
                 s1.EffectFlags, "level_1 effects");
             Assert.IsTrue(s1.RotateContour, "level_1 rotate");
                         Assert.AreEqual(0f, s1.RevealDelaySeconds, "level_1 delay");
@@ -79,7 +79,7 @@ namespace TileStories.Tests
             Assert.IsTrue(MarkerHierarchyResolver.TryResolveByKey("level_2", out var s2), "level_2 should resolve");
             Assert.AreEqual(15f, s2.SizeCm, "level_2 size");
             Assert.IsFalse(s2.ShowLabel, "level_2 show_label");
-            Assert.AreEqual(MarkerEffectFlags.SunContours | MarkerEffectFlags.Pulse,
+            Assert.AreEqual(MarkerEffectFlags.RippleRings | MarkerEffectFlags.Pulse,
                 s2.EffectFlags, "level_2 effects");
             Assert.IsTrue(s2.RotateContour, "level_2 rotate");
                         Assert.AreEqual(0.15f, s2.RevealDelaySeconds, "level_2 delay");
@@ -87,7 +87,7 @@ namespace TileStories.Tests
 
             Assert.IsTrue(MarkerHierarchyResolver.TryResolveByKey("level_3", out var s3), "level_3 should resolve");
             Assert.AreEqual(10f, s3.SizeCm, "level_3 size");
-            Assert.AreEqual(MarkerEffectFlags.SimpleSun | MarkerEffectFlags.Pulse,
+            Assert.AreEqual(MarkerEffectFlags.HaloDisc | MarkerEffectFlags.Pulse,
                 s3.EffectFlags, "level_3 effects");
                         Assert.AreEqual(0.3f, s3.RevealDelaySeconds, "level_3 delay");
             Assert.AreEqual(0.35f, s3.RevealDurationSeconds, "level_3 duration");

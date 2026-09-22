@@ -146,24 +146,21 @@ namespace TileStories
             var ring = go.transform.Find("Ring")?.GetComponent<Image>();
             var badge = go.transform.Find("Badge")?.GetComponent<Image>();
             var badgeIcon = go.transform.Find("Badge/Icon")?.GetComponent<Image>();
-            var halo = go.transform.Find("Halo")?.GetComponent<Image>();
-            var sunInner = go.transform.Find("SunInner")?.GetComponent<Image>();
-            var sunMiddle = go.transform.Find("SunMiddle")?.GetComponent<Image>();
-            var sunOuter = go.transform.Find("SunOuter")?.GetComponent<Image>();
+            var rippleInner = go.transform.Find("RippleInner")?.GetComponent<Image>();
+            var rippleMiddle = go.transform.Find("RippleMiddle")?.GetComponent<Image>();
+            var rippleOuter = go.transform.Find("RippleOuter")?.GetComponent<Image>();
 
             var pulseFx = go.GetComponent<MarkerPulseEffect>();
-            var glowFx = go.GetComponent<MarkerGlowEffect>();
-            var sunFx = go.GetComponent<MarkerSunEffect>();
+            var rippleFx = go.GetComponent<MarkerRippleEffect>();
 
             LogImageDiagnostics(entry, "Symbol", symbol);
             LogImageDiagnostics(entry, "Symbol/Icon", symbolIcon);
             LogImageDiagnostics(entry, "Ring", ring);
             LogImageDiagnostics(entry, "Badge", badge);
             LogImageDiagnostics(entry, "Badge/Icon", badgeIcon);
-            LogImageDiagnostics(entry, "Halo", halo);
-            LogImageDiagnostics(entry, "SunInner", sunInner);
-            LogImageDiagnostics(entry, "SunMiddle", sunMiddle);
-            LogImageDiagnostics(entry, "SunOuter", sunOuter);
+            LogImageDiagnostics(entry, "RippleInner", rippleInner);
+            LogImageDiagnostics(entry, "RippleMiddle", rippleMiddle);
+            LogImageDiagnostics(entry, "RippleOuter", rippleOuter);
 
             bool isUnknown = entry.HasStatus && entry.StatusUnknown;
             bool expectRing = entry.HasStatus && entry.Style != MarkerStyle.Badge;
@@ -173,8 +170,8 @@ namespace TileStories
             bool ringActive = ring != null && ring.enabled;
             bool badgeActive = badge != null && badge.gameObject.activeSelf;
             bool heroPulseExpected = HasEffect(entry.EffectFlags, MarkerEffectFlags.Pulse);
-            bool heroSunExpected = HasEffect(entry.EffectFlags, MarkerEffectFlags.SunContours) || HasEffect(entry.EffectFlags, MarkerEffectFlags.SunCircles);
-            bool sunVisible = sunFx != null && sunFx.IsActive;
+            bool rippleExpected = HasEffect(entry.EffectFlags, MarkerEffectFlags.RippleRings) || HasEffect(entry.EffectFlags, MarkerEffectFlags.RippleDiscs);
+            bool rippleVisible = rippleFx != null && rippleFx.IsActive;
 
             Debug.Assert(hasSymbolSprite,
                 $"[MarkerGalleryDiag][FAIL] {entry.Label}: Symbol should have a non-null sprite.");
@@ -185,16 +182,16 @@ namespace TileStories
 
             Debug.Log(
                 $"[MarkerGalleryDiag][FX] {entry.Label} | pulse={(pulseFx != null ? pulseFx.IsActive : false)} " +
-                $"glow={(glowFx != null ? glowFx.IsActive : false)} sun={(sunFx != null ? sunFx.IsActive : false)} " +
-                $"sunStyle={(sunFx != null ? sunFx.CurrentStyle.ToString() : "n/a")} " +
-                $"sunExpected={heroSunExpected} pulseExpected={heroPulseExpected} " +
-                $"sunInner={(sunInner != null && sunInner.enabled)} sunMiddle={(sunMiddle != null && sunMiddle.enabled)} sunOuter={(sunOuter != null && sunOuter.enabled)}");
+                $"ripple={(rippleFx != null ? rippleFx.IsActive : false)} " +
+                $"rippleStyle={(rippleFx != null ? rippleFx.CurrentStyle.ToString() : "n/a")} " +
+                $"rippleExpected={rippleExpected} pulseExpected={heroPulseExpected} " +
+                $"rippleInner={(rippleInner != null && rippleInner.enabled)} rippleMiddle={(rippleMiddle != null && rippleMiddle.enabled)} rippleOuter={(rippleOuter != null && rippleOuter.enabled)}");
 
-            if (heroSunExpected)
+            if (rippleExpected)
             {
-                AssertSunLayerLooksCircular(entry, "SunInner", sunInner);
-                AssertSunLayerLooksCircular(entry, "SunMiddle", sunMiddle);
-                AssertSunLayerLooksCircular(entry, "SunOuter", sunOuter);
+                AssertRippleLayerLooksCircular(entry, "RippleInner", rippleInner);
+                AssertRippleLayerLooksCircular(entry, "RippleMiddle", rippleMiddle);
+                AssertRippleLayerLooksCircular(entry, "RippleOuter", rippleOuter);
             }
 
             Debug.Log(
@@ -284,10 +281,10 @@ namespace TileStories
             return (mask & effect) != 0;
         }
 
-        private static void AssertSunLayerLooksCircular(MarkerGalleryEntry entry, string key, Image image)
+        private static void AssertRippleLayerLooksCircular(MarkerGalleryEntry entry, string key, Image image)
         {
             Debug.Assert(image != null,
-                $"[MarkerGalleryDiag][FAIL] {entry.Label}: {key} image missing for expected sun effect.");
+                $"[MarkerGalleryDiag][FAIL] {entry.Label}: {key} image missing for expected ripple effect.");
             if (image == null)
                 return;
 

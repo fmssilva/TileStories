@@ -36,32 +36,29 @@ namespace TileStories.Editor
         private const float SectionRowIndent = 15f;
         private const float MaxRowWidth = 480f;
 
-        // The ONE way a conditional/dependent field row (e.g. "Up Reference" showing
-        // only when something is set to World Up, "Relaxation Steps" only for the
-        // force_directed algorithm) sits visually a bit deeper than its section's own
-        // base fields: pass this as the `extraIndentPixels` argument to
-        // DrawScalarField/DrawIntField/DrawToggleField/DrawPopupField (or DrawEditorRow
-        // directly). This is a RAW pixel nudge, not a whole EditorGUI.IndentLevelScope
-        // step -- a full indent level (~15px) also makes the row's own EditorGUILayout
-        // control re-apply the ambient indentLevel a second time on its label (this
-        // file's row-layout Lesson 4), and reads as noticeably too far forward for a
-        // merely-conditional row (confirmed directly, developer feedback 2026-09-18).
-        // Roughly half of one indent level. A doubly-conditional field (e.g. "Custom Up
-        // X/Y/Z", which only shows when Up Reference is ALSO Custom) uses
-        // `SubFieldIndentPixels * 2`, not a second nested level.
-        // Never fake this with leading spaces inside a label string -- that only shifts
-        // the label's glyphs inside its own fixed-width column, not the row itself, and
-        // renders inconsistently across labels/fonts (_5.1_Editor_Tab.md
-        // "Row Indentation & Spacing").
-        private const float SubFieldIndentPixels = 8f;
+        // INDENT LEVELS: the one vocabulary for how far a row sits to the right (_5.1_Editor_Tab.md,
+        // subject "Indentation"). Pass one of these as the `extraIndentPixels` argument of the shared
+        // field drawers (DrawScalarField/DrawIntField/DrawToggleField/DrawPopupField/DrawSliderField/
+        // DrawColorField) or of DrawEditorRow. The level of a row is decided by WHERE IT IS IN THE
+        // TREE, not by taste: a child sits one level right of its parent container.
+        //   IndentLevel0: direct child of a section (DrawFramedFoldout content) -- the ambient indent
+        //   IndentLevel1: child of a sub-foldout inside a section (Orientation's Vertical Alignment...)
+        //   IndentLevel2: child of a sub-foldout of a sub-foldout, or the text block of an open guide
+        //   IndentLevel3: one level deeper still
+        // Raw pixels, never EditorGUI.IndentLevelScope: a whole scope step also makes the row's own
+        // labelled control re-apply the ambient indent a second time (double-indent trap).
+        private const float IndentStepPixels = 16f;
+        private const float IndentLevel0 = 0f;
+        private const float IndentLevel1 = IndentStepPixels;
+        private const float IndentLevel2 = IndentStepPixels * 2f;
+        private const float IndentLevel3 = IndentStepPixels * 3f;
 
-        // One real "child" step for the rows inside a plain sub-foldout (Orientation's
-        // Vertical Alignment / Facing Options / Update Cost / Test): they read as children of
-        // the foldout title, i.e. their label starts under the title TEXT, not under its arrow.
-        // Same raw-pixel mechanism as SubFieldIndentPixels (extraIndentPixels), just a full step
-        // (about one foldout arrow). A conditional row inside such a sub-foldout passes
-        // SectionChildIndentPixels + SubFieldIndentPixels.
-        private const float SectionChildIndentPixels = 16f;
+        // CONDITIONAL ADVANCE: a row shown only when another field has a value (e.g. "Up Reference"
+        // only when something is World Up) sits this much right of the level of its parent field. Add
+        // it to the level (IndentLevel1 + ConditionalAdvance); a doubly conditional row adds it twice.
+        // Half a level, a raw nudge (a full step reads as too far forward). Never fake indentation with
+        // leading spaces in a label: that shifts only the glyphs, not the row.
+        private const float ConditionalAdvance = 8f;
 
         // Floor for non-table rows: even on a very narrow panel a button/row must
         // stay readable, so the width clamp is max(MinRowWidth, min(panel, MaxRowWidth)).
@@ -107,14 +104,6 @@ namespace TileStories.Editor
         private static readonly string[] LineStyleLabels = { "Continuous", "Big Dashed", "Medium Dashed", "Small Dashed", "Dots" };
         private static readonly string[] ShapeOptions = { "circle", "rounded_square", "hexagon", "diamond", "star", "none" };
         private static readonly string[] ShapeLabels = { "Circle", "Rounded Square", "Hexagon", "Diamond", "Star", "None" };
-
-        // Sun effect options for hierarchy level table (maps to HierarchyLevelEntry.sun_effect).
-        private static readonly string[] SunEffectOptions = { "none", "sun_contours", "sun_circles" };
-        private static readonly string[] SunEffectLabels = { "None", "Contours", "Circles" };
-
-        // Accent effect options for hierarchy level table (maps to HierarchyLevelEntry.accent_effect).
-        private static readonly string[] AccentEffectOptions = { "none", "ring_pulse", "simple_sun", "beacon" };
-        private static readonly string[] AccentEffectLabels = { "None", "Ring Pulse", "Simple Sun", "Beacon" };
 
         // LOD density-response mode options (maps to LodSettings.density_response_mode).
         private static readonly string[] DensityModeOptions = { "none", "select_hide", "cluster", "shrink_and_fade", "hybrid" };
@@ -225,6 +214,7 @@ namespace TileStories.Editor
         private static readonly string OrientationPlaymodeTestGuide =
             "SETUP\n" +
             "- 'Save All to JSON' then 'Copy to StreamingAssets' (Play reads the copy).\n" +
+            "- LIVE: once Play is running, change any Orientation value here (or a level's Facing override) and the running markers and clusters follow at once, no restart. Nothing is saved by that: stop Play and your edits stay in this window; Save All to JSON (then Copy to StreamingAssets) only to keep them.\n" +
             "- Open Apps/LivingRoom/LivingRoomScene, press Play, click into the Game view.\n" +
             "- Mock camera (the project's MockLocalizationProvider, Editor only, not Unity's):\n" +
             "  - W/A/S/D = move. E = up, Q = down.\n" +

@@ -157,38 +157,5 @@ namespace TileStories
                     return trimmed;
             }
         }
-
-        // Default when effect_mode is absent/empty in config.json -- a safe,
-        // unsurprising default (no effects) since effects are opt-in per POI
-        // and is_hero only controls the label, not which effects run.
-        public const MarkerEffectFlags DefaultEffects = MarkerEffectFlags.None;
-
-        // effect_mode is a comma-separated list, e.g. "pulse,sun_contours" or
-        // just "beacon". Empty/missing -> None. Unknown tokens warn and skip
-        // rather than silently dropping the entire value.
-        public static MarkerEffectFlags ParseEffectFlags(string raw)
-        {
-            if (string.IsNullOrWhiteSpace(raw))
-                return DefaultEffects;
-
-            var result = MarkerEffectFlags.None;
-            foreach (var token in raw.Split(','))
-            {
-                switch (token.Trim())
-                {
-                    case "pulse": result |= MarkerEffectFlags.Pulse; break;
-                    case "sun_contours": result |= MarkerEffectFlags.SunContours; break;
-                    case "sun_circles": result |= MarkerEffectFlags.SunCircles; break;
-                    case "ring_pulse": result |= MarkerEffectFlags.RingPulse; break;
-                    case "simple_sun": result |= MarkerEffectFlags.SimpleSun; break;
-                    case "beacon": result |= MarkerEffectFlags.Beacon; break;
-                    case "": break; // tolerate trailing commas
-                    default:
-                        Debug.LogWarning($"[MarkerVisualsParser] Unknown effect_mode token '{token}', ignoring.");
-                        break;
-                }
-            }
-            return result;
-        }
     }
 }

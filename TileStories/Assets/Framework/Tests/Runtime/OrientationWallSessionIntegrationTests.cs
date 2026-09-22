@@ -40,6 +40,9 @@ namespace TileStories.Tests
             yield return WallConfigLoader.LoadFromStreamingAssets("LivingRoom/config.json", c => config = c);
             Assert.IsNotNull(config, "StreamingAssets/LivingRoom/config.json must load for this integration test.");
             _config = config;
+            // The developer's own dev-tool switch ("Focus on Effects Grid") in the shipped config must never
+            // change what an orientation test spawns (it adds a second camera on this test's render texture).
+            _config.effect_defaults.preview = new EffectDefaults.EffectPreviewSettings();
 
             CategoryPalette.Configure(_config.category_styles);
             MarkerHierarchyResolver.Configure(_config.hierarchy_levels);

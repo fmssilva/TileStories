@@ -22,7 +22,7 @@ namespace TileStories.Editor
         {
             if (poi == null) return;
 
-            using (new EditorGUI.IndentLevelScope(-1))
+            // IndentLevel0: rows sit at the section content's own indent (no collapsing scope)
             {
 
             bool hasPosition = poi.position != null;
@@ -73,16 +73,9 @@ namespace TileStories.Editor
             // drawn OUTSIDE any disabled scope (see DrawCoordinateRow) -- this row is the
             // only one in the window whose label sat inside BeginDisabledGroup(true), and
             // it is the only label that never showed up.
-            // Extra +2 indent so this row's left edge matches "Rotation" above it.
-            // Verified via direct pixel measurement of a real screenshot (GUILayoutUtility
-            // rects logged via Debug.Log were NOT reliable evidence here -- they reported
-            // both rows starting at the same x while the actual rendered pixels showed
-            // the Rotation row's glyph starting at x=68 and this row's at x=40, a real 28px
-            // gap close to two indent levels).
-            using (new EditorGUI.IndentLevelScope(2))
-            {
-                DrawCoordinateRow(position.x, position.y, position.z, out _, out _, out _);
-            }
+            // Same level as the Facing rows above: DrawCoordinateRow opens its own shared row, whose
+            // spacer already pays the section's indent (no extra IndentLevelScope).
+            DrawCoordinateRow(position.x, position.y, position.z, out _, out _, out _);
 
             }
         }

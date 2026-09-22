@@ -354,8 +354,21 @@ namespace TileStories.Tests
                 "DrawToggleField must use ExpandWidth(false)");
             Assert.IsTrue(lod.Contains("DrawPopupField"), "DrawPopupField must exist");
 
-            // Global scene direct field rows (badge/marker/outline toggles + popups, Effects sliders).
-            AssertFieldRowsUseSharedRow(global, new string[] { "Enable badge", "Background shape", "Badge background shape", "Enable outline", "Outline Color", "Amplitude", "Inner alpha" });
+            // Global scene direct field rows (badge/marker/outline toggles + popups).
+            AssertFieldRowsUseSharedRow(global, new string[] { "Enable badge", "Background shape", "Badge background shape", "Enable outline", "Outline Color" });
+
+            // Effects section: every parameter row goes through the shared field helpers (which open
+            // the shared row themselves); a raw EditorGUILayout field call here would bypass the
+            // indent, width cap and right margin. The only hand-built rows are the foldout header
+            // and the note, which open DrawEditorRow explicitly.
+            string effects = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.Effects.cs");
+            foreach (string label in new[] { "Amplitude", "Inner alpha", "Base alpha", "Tint Color", "Enable effects" })
+                Assert.IsTrue(effects.Contains("\"" + label + "\""), "Effects row must still be present: " + label);
+            Assert.IsTrue(effects.Contains("DrawSliderField(") && effects.Contains("DrawScalarField(") && effects.Contains("DrawColorField(") && effects.Contains("DrawToggleField("),
+                "Effects rows must use the shared field helpers");
+            foreach (string raw in new[] { "EditorGUILayout.Slider(", "EditorGUILayout.FloatField(", "EditorGUILayout.TextField(" })
+                Assert.IsFalse(effects.Contains(raw), "Effects must not draw a raw " + raw + " outside the shared helpers");
+            Assert.IsTrue(effects.Contains("DrawEditorRow(") && effects.Contains("EditorRowEnd()"), "Header and note rows open and close the shared row");
             // Search & Filter direct rows (No-results text, Trigger target enum).
             AssertFieldRowsUseSharedRow(search, new string[] { "No-results message", "Trigger target" });
             // SpecificMarker level-2 field rows (status toggles/slider, custom symbol, keyword fields).

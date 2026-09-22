@@ -1,8 +1,9 @@
 # Project Structure and Organizing Principles
 
 Read this file to get oriented on the project's structure. It is the map: what
-exists, where it lives, and what each piece does in one line. Full tree verified
-against disk on 2026-09-18.
+exists, where it lives, and what each piece does in one line. Tree verified
+against disk on 2026-09-18; the Effects, Orientation and Live Play Mode entries
+were re-verified on 2026-09-21.
 
 ## 0. How to read and edit this file
 
@@ -92,6 +93,8 @@ against disk on 2026-09-18.
   the Phase A isolated gallery scenes (`40-testing.md` section 4.4).
 - Assemblies: `TileStories` (runtime), `TileStories.Editor`,
   `TileStories.Tests.Runtime` (PlayMode), `TileStories.Editor.Tests` (EditMode).
+- `TileStories/MarkerGalleryScreenshots/` (next to `Assets/`, not inside it) is written by
+  `MarkerGalleryTests` on every PlayMode run: generated evidence PNGs, not authored content.
 - The five `Assets/InitTestScene<guid>.unity` files at the project root are Unity
   Test Framework leftovers, not authored content. Safe to delete; do not build on them.
 
@@ -136,7 +139,7 @@ against disk on 2026-09-18.
       - Core/  -- config model, loading, and the session that boots a wall
         - WallConfigData.cs  -- the whole config.json object model: WallConfigData, POIData, PositionData, taxonomy entries, LodSettings, DisplacementSettings, EffectDefaults
         - WallConfigLoader.cs  -- reads config.json from StreamingAssets and deserializes it
-        - WallSession.cs  -- boots one wall: load config, wait for tracking, spawn markers, expose settings to LOD/zoom. Delegates every decision; holds none
+        - WallSession.cs  -- boots one wall: load config, wait for tracking, spawn markers, expose settings to LOD/zoom. Delegates every decision; holds none. Also the live Play Mode seams ApplyEffectSettings / ApplyOrientationSettings
         - MarkerShape.cs  -- enum of symbol silhouettes (circle, rounded square, hexagon, diamond, star, none)
         - MarkerOutlineMode.cs  -- enum for whether and how the status contour ring renders
         - MarkerStyle.cs  -- LEGACY combined style enum, kept for old configs
@@ -159,7 +162,7 @@ against disk on 2026-09-18.
         - MarkerOverlapResolver.cs  -- screen-space overlap detection and the three displacement algorithms
         - DisplacementTieBreakStrategy.cs  -- decides which marker of an overlapping pair moves
         - ClusterGrouping.cs  -- deterministic grouping of dense markers into cluster aggregates
-        - LODController.cs  -- the per-cycle pipeline: distance banding, culling, density response, clustering, displacement
+        - LODController.cs  -- the per-cycle pipeline: distance banding, culling, density response, clustering, displacement; ReapplyClusterOrientation re-points on-screen clusters when orientation changes live
         - POISearchIndex.cs  -- builds and queries the POI keyword index
         - SearchTokenizer.cs  -- shared tokenisation for index build and query time
         - SynonymGroup.cs  -- synonym expansion, stored as plain config data
@@ -168,8 +171,8 @@ against disk on 2026-09-18.
           - POI_Marker.prefab  -- the marker outer container. Root holds Canvas + POIAnchor + MarkerView + MarkerBillboard + MarkerRevealEffect + MarkerSelectable + MarkerLeaderLine; children are Label, Symbol, Ring, Badge. Label and Badge each also carry MarkerChildOrientation (see _2.1)
           - POI_Cluster.prefab  -- LOD aggregate marker; children PieContainer, CountLabel, BackgroundImage, DominantIcon. Root also carries MarkerBillboard (see _2.1 section 6.4)
           - POIAnchor.cs  -- holds this marker's POIData so other components can read it
-          - MarkerView.cs  -- applies all visual state to the prefab's children; owns label and marker displacement write-back
-          - MarkerBillboard.cs  -- orientation of the marker root, Vertical Alignment + Facing Options (see _2.1). Referenced from POI_Marker.prefab by script GUID -- do NOT rename
+          - MarkerView.cs  -- applies all visual state to the prefab's children; owns label and marker displacement write-back; ReapplyEffects re-applies only the effects
+          - MarkerBillboard.cs  -- orientation of the marker root, Vertical Alignment + Facing Options (see _2.1); ReapplySettings swaps settings on a running marker without losing the authored rotation. Referenced from POI_Marker.prefab by script GUID -- do NOT rename
           - MarkerOrientationResolver.cs  -- pure, stateless orientation math (see _2.1): ScreenUpWorld, ResolveVerticalUp, ResolveRootRotation, ResolveChildLocalRotation, RootRollDeg, Rotate2D, ClampPitch, ShouldUpdate, ResolveUpReference
           - MarkerChildOrientation.cs  -- per-child (Label/Badge) independent vertical-alignment counter-rotation (see _2.1); baked onto POI_Marker.prefab's Label and Badge children
           - MarkerLayout.cs  -- symbol/label/badge sizing ratios and ScreenPixelsToWorld conversion
@@ -183,12 +186,10 @@ against disk on 2026-09-18.
           - SelectionHighlightController.cs  -- single writer of marker highlight alpha, so nothing fights over CanvasGroup
           - ZoomOnSelectController.cs  -- zooms the camera toward a newly selected marker
           - MarkerEffect.cs  -- base class for optional per-marker animated effects
-          - MarkerEffectFlags.cs  -- bitflags naming which effects a hierarchy level enables
+          - MarkerEffectFlags.cs  -- the six selectable effects as bitflags, plus MarkerEffectNames (display names shared by the editor and the preview grid)
           - MarkerPulseEffect.cs  -- gentle scale pulse
-          - MarkerGlowEffect.cs  -- soft glow behind the symbol; hero tier only
-          - MarkerSunEffect.cs  -- radiating sun burst, ring or filled variants
-          - MarkerAccentEffect.cs  -- accent halo with breathe and beacon modes
-          - MarkerParticleEffect.cs  -- particle emission around a marker
+          - MarkerRippleEffect.cs  -- three staggered waves flowing outward, rings or discs, each style with its own parameter block
+          - MarkerHaloEffect.cs  -- one extra layer behind the symbol: halo ring or halo disc (breathing) or beacon (grow and fade), each variant with its own parameter block
           - MarkerRevealEffect.cs  -- delayed fade and scale-in on spawn; snaps to full in Edit Mode
           - SpriteKeyLibrary.cs  -- the sprite-key lookup contract shared by icon and shape libraries
           - IconLibrary.asset  -- framework default category and badge icons
@@ -257,6 +258,8 @@ against disk on 2026-09-18.
         - DisplacementGalleryHarness.cs  -- spawns displacement scenarios
         - OrientationGalleryDefinitions.cs  -- data list of the 11 orientation gallery entries (see _2.1 section 11)
         - OrientationGalleryHarness.cs  -- orbit/pitch/roll camera rig + SpawnEntry (shared by the visual harness and OrientationGalleryTests)
+        - EffectsPreviewSpawner.cs  -- dev-only "Focus on Effects Grid" (effect_defaults.preview): builds labelled real markers, one per effect and per hierarchy level, 5000 m above the scene; pure cell/fit/column maths; Editor and development builds only; called from WallSession
+        - EffectsPreviewFocus.cs  -- lives on the grid root: owns the dedicated grid camera (main camera FOV/target, depth +100, neutral clear), copies the main camera rotation each frame and refits the grid when the aspect ratio or FOV changes
       - Blocks/  [EMPTY SCAFFOLD]  -- the per-POI content block system (text/image/audio/video/model/map)
       - Circuits/  [EMPTY SCAFFOLD]  -- circuit state machine and entry-point resolution
       - Telemetry/  [EMPTY SCAFFOLD]  -- analytics events and consent
@@ -266,6 +269,8 @@ against disk on 2026-09-18.
       - AssemblyInfo.cs  -- InternalsVisibleTo for the editor test assembly
       - POIEditorRigSafetyCheck.cs  -- warns on scene save or Play Mode if the editor rig still has markers in it
       - POIEditorRigBuildCheck.cs  -- hard-blocks a build while the rig has children, since a build is visitor-facing
+      - DevFeatureBuildGuard.cs  -- pure: registry of developer-only config switches (name, how to turn off, works in release?) and which are ON and would take effect in a given kind of build
+      - DevFeatureBuildCheck.cs  -- IPreprocessBuildWithReport: reads every StreamingAssets config before a build and asks Build anyway / Cancel when a registered dev-only switch is ON (batch mode only warns)
       - POIEditor/  -- the POI Editor window; one partial class across many files (see _5.1_Editor_Tab.md)
         - POIEditorToolWindow.cs  -- shell: fields, menu item, OnGUI orchestration, DrawFramedFoldout, action bar
         - POIEditorToolWindow.Constants.cs  -- option and label arrays, section colors, layout constants, help strings
@@ -273,9 +278,19 @@ against disk on 2026-09-18.
         - GlobalScene/  -- wall-wide settings sections
           - POIEditorToolWindow.GlobalScene.cs  -- section dispatch plus Marker, Badge, Outline, Effects and Hierarchy Levels (now also carries the per-level Facing override column, see _2.1 section 4.3)
           - POIEditorToolWindow.Orientation.cs  -- Orientation section, 4 sub-foldouts: Vertical Alignment, Facing Options, Update Cost, Test (Scene-Mode Preview toggle + three collapsed guides: Scene, Playmode, Device; see _2.1 section 8)
+          - POIEditorToolWindow.Effects.cs  -- Effects section: master toggle (hides everything when off), one foldout per effect with its own enabled checkbox, used-by line, (i) buttons and parameter rows
+          - POIEditorToolWindow.EffectsHelp.cs  -- every Effects constant: level-table option arrays, (i) help texts, the three Test guides
+          - EffectUsageSummary.cs  -- pure text/list logic of the Effects page: used-by and per-level effects lines, level-table dropdown filtering, preview base-marker options
+          - POIEditorToolWindow.EffectsTest.cs  -- Test sub-foldout of the Effects section: Play-Mode preview grid switch and base-marker dropdown, plus three collapsed guides (Scene, Playmode, Device; see _2.2.4)
           - POIEditorToolWindow.LodZoom.cs  -- LOD and Zoom sections, plus the four shared field-row helpers every section uses
           - POIEditorToolWindow.Displacement.cs  -- displacement algorithm, thresholds and leader-line settings
           - POIEditorToolWindow.SearchFilter.cs  -- search keyword fields and synonym groups
+        - LivePlayModeConfig/  -- Editor-assembly only, never ships: pushes window edits to the running wall while Play Mode runs (see _2.2.4 section 3.7)
+          - ILivePlayModeApplier.cs  -- one domain's live re-apply contract: Name, Fingerprint(config), Apply(session, configCopy)
+          - LivePlayModeConfigDispatcher.cs  -- plain C#: remembers each domain's last fingerprint per running wall, applies only changed domains, hands each a private config copy
+          - LivePlayModeEffectsApplier.cs  -- Effects domain applier: fingerprint = effect_defaults + hierarchy levels; Apply calls WallSession.ApplyEffectSettings
+          - LivePlayModeOrientationApplier.cs  -- Orientation domain applier: fingerprint = orientation_settings + each level's facing override; Apply calls WallSession.ApplyOrientationSettings then LODController.ReapplyClusterOrientation (see _2.1 section 13.5)
+          - LivePlayModeConfigPush.cs  -- the one entry point the window calls after a change; registers every domain applier; does nothing outside Play Mode
         - SpecificMarker/  -- per-POI editing
           - POIEditorToolWindow.SpecificMarker.cs  -- the POI list, header row (focus, rename, reorder, add, help, delete) and per-POI style sections
           - POIEditorToolWindow.PositionTabs.cs  -- the Position foldout: three Facing X/Y/Z sliders (disabled while Verified), XYZ readout, Verified toggle
@@ -340,6 +355,10 @@ against disk on 2026-09-18.
         - IdentityRenameResolverTests.cs, IdentityRenameCompositionTests.cs  -- rename rule and its composition across tables
         - HierarchyLevelKeyValidationTests.cs, HierarchyLevelSizeRangeTests.cs  -- config validation
         - OrientationEditorRoundTripTests.cs  -- OrientationSettings JSON round-trip, no-block defaults, editor foldout field-existence, deleted-field absence checks, test-guide contract (ASCII, every field and option named, collapsed by default) (_2.1 sections 7, 13)
+        - EffectsAuthoringTests.cs  -- Effects authoring: editor dropdown strings vs MarkerHierarchyResolver, JSON round trip and undo/redo of EVERY effect field (walked by reflection) through the real window history, shipped LivingRoom config, guide and help-text contract (_2.2.4)
+        - EffectsUsageAndPreviewLayoutTests.cs  -- pure Effects logic: per-effect switches (FilterEnabled), usage and per-level lines, dropdown filtering, preview cell list and placement, release-build guard
+        - DevFeatureBuildGuardTests.cs  -- the dev-only switch build guard: reported in development builds with the how-to text, ignored in release builds (matches EffectsPreviewSpawner.IsAllowed), nothing when OFF, registry entries complete
+        - LivePlayModeConfigTests.cs  -- live Play Mode config: dispatcher rules (first push, unchanged, one domain, new wall, private copy); the Effects applier and the Orientation applier driving a real WallSession and real markers (every orientation field walked by reflection for the fingerprint, level facing override, effects untouched)
         - OrientationEditModePreviewTests.cs  -- Scene-Mode orientation preview: non-destructive guarantee, on/off cycle byte-identical, CapturePositions guard, wall_fixed Edit/Play-Mode agreement, Label/Badge tick and restore on a real POI_Marker (_2.1 section 9)
         - DefaultCategoryStylesTests.cs, DefaultBadgeCategoriesTests.cs, DefaultOutlineLevelsTests.cs  -- seeding defaults
         - POIEditorToolWriteBackTests.cs, POIEditorAddPoiTests.cs, POIEditorToolSearchRoundTripTests.cs  -- editor data flow; ReloadGuardChoiceTests.cs  -- pure dialog-result mappings (reload guards, rig safety) incl. Esc/X must cancel
@@ -359,12 +378,16 @@ against disk on 2026-09-18.
         - MarkerGalleryTests.cs, ClusterGalleryTests.cs, DisplacementGalleryTests.cs, OrientationGalleryTests.cs  -- Phase A gallery assertions, driven by the same definition lists as the harnesses
         - MarkerOverlapResolverTests.cs  -- the marker billboard rotation contract
         - MarkerViewRuntimeTests.cs, MarkerRevealEffectTests.cs, MarkerIconLibraryRuntimeTests.cs  -- marker visuals at runtime
+        - MarkerEffectConfigTests.cs  -- every effect config value drives a real marker: each effect uses its OWN block (no leaking), parameters vs the spec formula each frame, all 24 ripple x halo x pulse combinations, LivingRoom levels, master and per-effect switches, period <= 0 safety, no base-scale drift, level reveal timing (_2.2.4)
+        - EffectsPreviewSpawnerTests.cs  -- the effects preview grid through the real WallSession.SpawnPOIs: off = nothing, one cell per effect and level with the right effects/size/labels, all inside the camera view, plain grey circle vs a copied real POI, switches respected; plus WallSession.ApplyEffectSettings turning the grid on/off/rebuilding and re-applying effects on running markers
+        - EffectsPreviewRenderTests.cs  -- render-level proof of the focus grid: real camera renders to a portrait texture with a wall 50 cm in front of the main camera; every cell drawn, main camera never draws the grid, every effect visible against an effects-off render and animated, effects keep their look on 7/20/30 cm markers, labels stay readable while the main camera rotates and rolls, refit on a resize; saves a PNG under Assets/Screenshots
         - LODControllerEvaluateTests.cs, ClusterPipelineIntegrationTests.cs, ClusterReconcilePlayModeTests.cs  -- the real LOD pipeline end to end
         - DisplacementLabelTests.cs  -- label displacement against real transforms
         - FilterCompositionPlayModeTests.cs  -- filter fades, which need coroutines
         - ARZoomRoutingTests.cs, ARZoomRoutingTests_additions.cs, ARZoomCameraFovTests.cs  -- zoom routing and real FOV change
         - LivingRoomConfigIntegrationTests.cs  -- editor to StreamingAssets to runtime config contract
         - OrientationWallSessionIntegrationTests.cs  -- real WallSession.SpawnPOIs orientation wiring + hierarchy override + real-marker occlusion check (_2.1 section 6)
+        - OrientationLiveUpdateTests.cs  -- live orientation changes on a RUNNING wall: real rotations of real markers and a real cluster after real frames (world_up/screen_up, Label alone, wall_fixed round trip keeps the authored rotation, level override, on_camera_delta change not delayed) (_2.1 section 13.5)
         - OrientationClusterIntegrationTests.cs  -- real LODController cluster spawn path gets MarkerBillboard.Configure; cluster rotation changes when camera rotates (_2.1 section 6.4)
         - Search/SearchOverlayRuntimeTests.cs  -- search overlay with a real UIDocument
       - EditMode/  [EMPTY SCAFFOLD]  -- legacy folder, superseded by Tests/Editor
@@ -383,7 +406,7 @@ against disk on 2026-09-18.
   - Resources/  [EMPTY SCAFFOLD]  -- project-wide runtime-loadable assets
   - DefaultVolumeProfile.asset  -- URP post-processing defaults
   - InitTestScene<guid>.unity (x5)  -- Unity Test Framework leftovers; not authored content
-- proj_guides/  -- domain design docs (_0_work_plan.md, _2.1 through _2.6, _5.1)
+- proj_guides/  -- domain design docs (_0_work_plan.md, _2.1 through _2.6, _2.2.4 effects, _5.1)
 - .clinerules/  -- the guideline files (00 process, 10 structure, 20 code quality, 30 UI, 40 testing, 50 tools, 60 finishing)
 - report/  -- thesis report sources
 

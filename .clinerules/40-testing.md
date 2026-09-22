@@ -163,6 +163,14 @@ comment to say which conditions it actually holds under. Grepping for the
 guarantee's phrasing across the repo is a cheap way to find every place that
 silently depends on it before you change the component that provides it.
 
+### 4.2.2 Modal dialogs stall the Editor and every test run
+
+A modal dialog (`EditorUtility.DisplayDialog`, `DisplayDialogComplex`, a native notice, a build guard) freezes Unity's main thread until someone clicks it. While it is open, MCP calls (`refresh_unity`, `run_tests`, `get_test_job`, `execute_code`) stall or time out without a useful error and a test run never advances.
+
+- Never write or run a test that can open a modal dialog. Test the decision logic instead (a pure mapping, a queue, a guard's message list) and let `TestDialogGuard` keep real notice dialogs off.
+- If a run or tool call stalls, assume a dialog is open before retrying: tell the developer "a dialog may be open in Unity, please click it" (a screen capture can confirm), then continue. Do not queue new runs on a blocked Editor.
+- If a task truly needs a dialog (a real build with a guard), announce it first and say which button to click.
+
 ### 4.3 Asset Database Refresh Discipline
 
 Any edit to a `.meta`, `.prefab`, `.asset`, or raw asset file (texture, audio, model)
@@ -365,6 +373,8 @@ require a per-item answer citing what is actually observed:
 
 A holistic summary answer to a checklist prompt is itself a sign the check wasn't
 done properly — reject it and re-ask item by item if that's what comes back.
+
+**Visual evidence needs the Editor on screen.** A screen capture reads whatever is on the desktop; if another application covers Unity it captures that application instead (private content). Always open a capture and confirm it shows the Editor window, and delete any that does not. When Unity is covered: do not stop the whole task. Finish everything that needs no pixels, then, before the final report, ask the developer ONCE to leave Unity in front and retry (ask early when the whole task is visual). If it still cannot be captured, do not claim visual verification: record the unverified items in the domain's pending-verification list (for the POI Editor window: `proj_guides/_5.1_Editor_Tab.md`, "Verifying and debugging layout") and say so in the report.
 
 **Tier 2 — human (rarest, most expensive).** Real device, final subjective/
 aesthetic judgment, real-world legibility. Reserved for what Tiers 0/0.5/1
