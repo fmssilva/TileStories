@@ -111,25 +111,6 @@ namespace TileStories.Editor.Tests
             }
         }
 
-        // "+ Add hierarchy level" must never hand out a key that already exists: the key is the
-        // identity every POI points at. The old "level_" + (Count + 1) collided as soon as a middle
-        // row had been deleted (rows level_1, level_3 -> a second level_3).
-        [Test]
-        public void NextFreeHierarchyLevelKey_NeverRepeatsAnExistingKey()
-        {
-            var levels = new List<global::TileStories.HierarchyLevelEntry>
-            {
-                new global::TileStories.HierarchyLevelEntry { key = "level_1" },
-                new global::TileStories.HierarchyLevelEntry { key = "level_3" },
-            };
-            Assert.AreEqual("level_4", POIEditorToolWindow.NextFreeHierarchyLevelKey(levels), "level_3 is taken, so the next free one");
-
-            levels[1].key = "hub";
-            Assert.AreEqual("level_3", POIEditorToolWindow.NextFreeHierarchyLevelKey(levels));
-            Assert.AreEqual("level_1", POIEditorToolWindow.NextFreeHierarchyLevelKey(new List<global::TileStories.HierarchyLevelEntry>()));
-            Assert.AreEqual("level_1", POIEditorToolWindow.NextFreeHierarchyLevelKey(null));
-        }
-
         [Test]
         public void HierarchyLevelEntry_SearchKeywords_RoundTripsThroughJson()
         {

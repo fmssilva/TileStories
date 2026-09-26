@@ -81,7 +81,7 @@ namespace TileStories.Editor
             "- Ctrl+Z / Ctrl+Y undo and redo each change.\n\n" +
             "CATEGORY SYMBOLS TABLE\n" +
             "- Change one category's Color or Symbol (drag a sprite, or click the thumbnail to pick one): every POI using that category changes, no other POI does.\n" +
-            "- Rename a category: the POIs that used it follow. Delete a category still in use: a confirmation says how many POIs are affected.\n\n" +
+            "- Rename a Category label: the POIs keep their category (they point at the row, not at its label) and each POI's Category list shows the new label. Delete a category still in use: a confirmation says how many POIs are affected.\n\n" +
             "PER-POI (Specific Marker > POI > Marker Style)\n" +
             "- Category recolours that one marker. Use Custom Symbol: its own icon shows, category colour unchanged.\n" +
             "- A POI with Hierarchy Level '(none)' renders at the 12 cm framework fallback, with no label.\n" +
@@ -130,8 +130,8 @@ namespace TileStories.Editor
             "- Corner: the badge jumps to the chosen corner of the symbol.\n" +
             "- Size: drag 0.20 to 0.50; the badge grows against a fixed symbol.\n\n" +
             "BADGE TABLE\n" +
-            "- Change the Color or Symbol of one badge key: every POI using that badge key changes together.\n" +
-            "- Rename a key: the POIs follow. Delete a key in use: a confirmation with the POI count.\n\n" +
+            "- Change the Color or Symbol of one badge row: every POI using that badge changes together.\n" +
+            "- Rename a Badge label: the POIs keep their badge (they point at the row, not at its label) and each POI's Badge category list shows the new label. Delete a row in use: a confirmation with the POI count.\n\n" +
             "PER-POI (Specific Marker > POI > Badge Style)\n" +
             "- Badge category '(none)' on a POI with a known status: the badge stays, coloured by the status (its outline type's colour).\n" +
             "- Has status off (Outline foldout): no badge at all.\n" +

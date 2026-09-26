@@ -91,7 +91,7 @@ namespace TileStories.Editor.Tests
                 marker_use_badge = true,
                 marker_outline_mode = "uniform",
                 effect_defaults = new EffectDefaults(),
-                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { category = "real_category", icon_key = "unknown" } },
+                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { key = "real_category", icon_key = "unknown" } },
                 badge_categories = new List<BadgeCategoryEntry> { new BadgeCategoryEntry { key = "real_badge", icon_key = "unknown" } },
                 outline_levels = new List<OutlineLevelEntry> { new OutlineLevelEntry { key = "real_status", label = "Real", pct = 0f, line_style = "solid" } },
                 hierarchy_levels = new List<HierarchyLevelEntry> { new HierarchyLevelEntry { key = "real_level", level_name = "Real", size_cm = 20f } },

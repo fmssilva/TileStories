@@ -9,7 +9,7 @@ namespace TileStories.Tests
     // Tier-0 structural + reflection guards for the POI editor tool's
     // visual hierarchy: only the 2 top-level tab containers keep colored
     // boxes; per-POI header foldouts are bold + colored (PoiHeaderColor),
-    // while the five Specific-Marker inner sub-sections render bold but
+    // while the six Specific-Marker inner sub-sections render bold but
     // uncolored (editor-default foldout text via FoldoutDefaultColor). The
     // per-POI colored container is removed. These assertions prove the
     // intended wiring is on disk rather than absent due to a stale recompile.
@@ -183,7 +183,7 @@ namespace TileStories.Tests
         }
 
         // Structural guard: per-POI colored container wrapper is gone and the
-        // 5 inner foldouts render directly under the POI header.
+        // 6 inner foldouts render directly under the POI header.
         [Test]
         public void Source_SpecificMarker_PerPoiContainerWrapperRemoved()
         {
@@ -191,8 +191,8 @@ namespace TileStories.Tests
             Assert.IsFalse(src.Contains("DrawTabContentContainer"),
                 "SpecificMarker must no longer wrap per-POI content in DrawTabContentContainer");
             int foldouts = CountOccurrences(src, "DrawFramedFoldout(");
-            Assert.AreEqual(5, foldouts,
-                "SpecificMarker should still define 5 inner foldouts (Position, Marker Style, Badge Style, Outline, Search Keywords)");
+            Assert.AreEqual(6, foldouts,
+                "SpecificMarker should define 6 inner foldouts (Position, Marker Style, Badge Style, Outline, Summary & Keywords, Card Content)");
         }
 
         // Structural guard: left-border accent removed from DrawFramedFoldout,
@@ -206,11 +206,11 @@ namespace TileStories.Tests
             Assert.IsFalse(src.Contains("borderRect"),
                 "borderRect computation must be removed from DrawFramedFoldout");
             Assert.IsTrue(src.Contains("DrawTabContentContainer"),
-                "The 2 outer tab containers (Global Scene + Specific Marker) must remain");
+                "The outer tab containers (Global Scene, Specific Marker, Detail Card) must remain");
         }
 
         // Structural guard: the per-POI IndentLevelScope wrapper that nests
-        // the five inner foldouts under each POI header is present in source.
+        // the six inner foldouts under each POI header is present in source.
         [Test]
         public void Source_SpecificMarker_PerPoiContainerWrapperPresent()
         {
@@ -237,7 +237,7 @@ namespace TileStories.Tests
 
         // Structural guard: POI header foldouts are bold + colored via the shared
         // CreateFoldoutStyle helper + PoiHeaderColorFor (stable per-POI palette
-        // color), while the five inner sub-section foldouts pass the uncolored
+        // color), while the six inner sub-section foldouts pass the uncolored
         // FoldoutDefaultColor token.
         [Test]
         public void Source_SpecificMarker_PoiHeaderViaPalette_InnerSectionsUncolored()
@@ -249,8 +249,8 @@ namespace TileStories.Tests
                 "POI header foldout must be rendered bold+colored via CreateFoldoutStyle(PoiHeaderColorFor(...))");
             Assert.IsFalse(src.Contains("CreateFoldoutStyle(PoiHeaderColor)"),
                 "old CreateFoldoutStyle(PoiHeaderColor) call must be gone, replaced by CreateFoldoutStyle(PoiHeaderColorFor(...))");
-            Assert.AreEqual(5, CountOccurrences(src, "FoldoutDefaultColor"),
-                "Each of the 5 inner sub-sections must use the uncolored FoldoutDefaultColor token");
+            Assert.AreEqual(6, CountOccurrences(src, "FoldoutDefaultColor"),
+                "Each of the 6 inner sub-sections must use the uncolored FoldoutDefaultColor token");
             Assert.IsFalse(src.Contains("PositionSectionColor"),
                 "PositionSectionColor must be gone from SpecificMarker source");
             Assert.IsFalse(src.Contains("MarkerStyleSectionColor"),

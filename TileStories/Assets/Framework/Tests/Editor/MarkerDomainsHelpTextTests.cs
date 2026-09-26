@@ -84,7 +84,7 @@ namespace TileStories.Editor.Tests
         {
             var config = new WallConfigData
             {
-                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { category = "real" } },
+                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { key = "real" } },
                 badge_categories = new List<BadgeCategoryEntry> { new BadgeCategoryEntry { key = "real" } },
                 outline_levels = new List<OutlineLevelEntry> { new OutlineLevelEntry { key = "real" } },
                 pois = new List<POIData>

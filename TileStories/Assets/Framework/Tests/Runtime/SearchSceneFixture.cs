@@ -26,6 +26,8 @@ namespace TileStories.Tests
 
         protected WallSession Session;
         protected SearchUIHost Host;
+        // The POI Detail Card of the same scene (PoiCard object, _3.1)
+        protected PoiCardHost Card;
         protected Camera Cam;
         private readonly List<string> _unexpectedErrors = new();
         private string _savedRecent;
@@ -52,6 +54,11 @@ namespace TileStories.Tests
 #else
             Assert.Ignore("Needs the Editor to load the wall scene by path.");
 #endif
+            // - the visitor's app never holds the POI Editor's stand-in markers (a build with them is refused), but a
+            //   scene saved while the rig was populated does -- the Test Runner saves the open scene before a run.
+            //   They sit exactly on the real markers (a tap hit a stand-in with no POI id), so drop them here.
+            var editorRig = GameObject.Find("POIEditorRig");
+            if (editorRig != null) Object.Destroy(editorRig);
             foreach (var mb in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
                 if (mb != null && mb.GetType().FullName == "Immersal.XR.ImmersalSession") mb.enabled = false;
             ARZoomState.SetZoom(1f, 1f, 4f);
@@ -59,12 +66,15 @@ namespace TileStories.Tests
             {
                 Session = Object.FindFirstObjectByType<WallSession>();
                 Host = Object.FindFirstObjectByType<SearchUIHost>();
+                Card = Object.FindFirstObjectByType<PoiCardHost>();
                 if (Session != null && Session.SpawnedMarkers.Count > 0 && Host != null && Host.Root != null) break;
                 yield return null;
             }
             Assert.IsNotNull(Session, "the wall scene has a WallSession");
             Assert.IsNotNull(Host, "the wall scene has the search UI (SearchUI object with a SearchUIHost)");
             Assert.IsNotNull(Host.Root, "precondition: the search UI was built when the wall spawned");
+            Assert.IsNotNull(Card, "the wall scene has the POI Detail Card (PoiCard object with a PoiCardHost)");
+            Assert.IsNotNull(Card.Sheet, "precondition: the card was built when it bound to the wall");
             Cam = Camera.main;
             // - LOD off: every POI stays visible, so what a test sees is the search's doing alone
             Session.ApplyLodSettings(new LodSettings { enabled = false });

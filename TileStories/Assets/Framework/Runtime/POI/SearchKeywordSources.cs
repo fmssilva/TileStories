@@ -58,7 +58,7 @@ namespace TileStories
                 {
                     if (field?.keywords == null) continue;
                     var def = config?.search_fields?.Find(f => f != null && f.key == field.field_key);
-                    string origin = !string.IsNullOrWhiteSpace(def?.label) ? def.label : field.field_key;
+                    string origin = TaxonomyNames.NameOr(def?.label, field.field_key);
                     foreach (var k in field.keywords)
                         Add(words, k, POISearchIndex.MatchSource.Keyword, POISearchIndex.RankKeyword, origin);
                 }
@@ -73,22 +73,22 @@ namespace TileStories
         {
             if (!string.IsNullOrEmpty(poi.category))
             {
-                AddRow(words, poi.category, OriginCategory);
-                var row = config.category_styles?.Find(e => e != null && e.category == poi.category);
+                var row = config.category_styles?.Find(e => e != null && e.key == poi.category);
+                AddRow(words, TaxonomyNames.NameOr(row?.label, poi.category), OriginCategory);
                 AddRowKeywords(words, row?.search_keywords, OriginCategory);
             }
 
             if (!string.IsNullOrEmpty(poi.badge_category))
             {
                 var row = config.badge_categories?.Find(e => e != null && e.key == poi.badge_category);
-                AddRow(words, string.IsNullOrEmpty(row?.label) ? poi.badge_category : row.label, OriginBadge);
+                AddRow(words, TaxonomyNames.NameOr(row?.label, poi.badge_category), OriginBadge);
                 AddRowKeywords(words, row?.search_keywords, OriginBadge);
             }
 
             if (poi.has_status && !string.IsNullOrEmpty(poi.status_level_key))
             {
                 var row = config.outline_levels?.Find(e => e != null && e.key == poi.status_level_key);
-                AddRow(words, string.IsNullOrEmpty(row?.label) ? poi.status_level_key : row.label, OriginStatus);
+                AddRow(words, TaxonomyNames.NameOr(row?.label, poi.status_level_key), OriginStatus);
                 AddRowKeywords(words, row?.search_keywords, OriginStatus);
             }
 
@@ -139,12 +139,12 @@ namespace TileStories
             }
         }
 
-        // A group's words, tokenised the way the search reads them (key + synonyms, no repeats)
+        // A group's words, tokenised the way the search reads them (word + synonyms, no repeats)
         public static List<string> Members(SynonymGroup group)
         {
             var members = new List<string>();
             if (group == null) return members;
-            members.AddRange(SearchTokenizer.Tokenize(group.key));
+            members.AddRange(SearchTokenizer.Tokenize(group.word));
             if (group.synonyms != null)
                 foreach (var synonym in group.synonyms)
                     foreach (var token in SearchTokenizer.Tokenize(synonym))

@@ -303,7 +303,7 @@ namespace TileStories.Editor
                 foreach (var level in _config.hierarchy_levels)
                 {
                     if (level == null) continue;
-                    string label = string.IsNullOrWhiteSpace(level.level_name) ? level.key : level.level_name;
+                    string label = EditorNames.Level(level);
                     int count = DemoFieldLayout.CountFor(field, level.key);
                     int edited = DrawIntSliderField(label, count, 0, DemoFieldSettings.MaxCountPerLevel, "", inner + ConditionalAdvance);
                     if (edited != count) SetDemoFieldCount(field, level.key, edited);

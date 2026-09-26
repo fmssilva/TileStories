@@ -41,7 +41,7 @@ namespace TileStories.Editor
                 key => ApplyPopupEdit(() => assignKey(key)), IsStillEditing(_config));
         }
 
-        // Same rule for a free-text note popup (one undo step per keystroke, like an inline field)
+        // Same rule for a free-text note popup (one undo step per keystroke: its field lives in another window, see ActiveEditGesture)
         private EntryDetailsPopup CreateDetailsPopup(string title, Func<string> get, Action<string> set)
         {
             return new EntryDetailsPopup(title, get, value => ApplyPopupEdit(() => set(value)), IsStillEditing(_config));
@@ -59,14 +59,59 @@ namespace TileStories.Editor
         // Run a popup's edit inside a mutation scope, then repaint so the window shows the new value
         private void ApplyPopupEdit(Action edit)
         {
-            DrawConfigMutationScope(edit, refreshRigOnChange: true);
+            _recordingPopupEdit = true;
+            try { DrawConfigMutationScope(edit, refreshRigOnChange: true); }
+            finally { _recordingPopupEdit = false; }
             Repaint();
+        }
+
+        // ---- Grouped undo: one history step per gesture, not per keystroke / drag frame ----
+        // The gesture the last recorded change came from; null = that change was a one-shot edit.
+        private string _historyGesture;
+        private bool _recordingPopupEdit;
+
+        // Which control the current edit comes from: the text field being typed in, or the control the mouse
+        // holds (a slider drag). Null for a one-shot edit (a toggle click, a popup pick, a button) and for a
+        // popup's edit -- a popup's controls live in ANOTHER window, so this window cannot see its focus.
+        private string ActiveEditGesture()
+        {
+            if (_recordingPopupEdit) return null;
+            if (EditorGUIUtility.editingTextField && GUIUtility.keyboardControl != 0) return "text:" + GUIUtility.keyboardControl;
+            if (GUIUtility.hotControl != 0) return "drag:" + GUIUtility.hotControl;
+            return null;
+        }
+
+        // A gesture ends as soon as focus / the mouse leaves its control, even for one event: typing into the
+        // same cell again later is a NEW undo step (IMGUI control ids are stable, so the id alone can't tell)
+        private void EndEditGestureIfFocusMoved()
+        {
+            if (_historyGesture != null && ActiveEditGesture() != _historyGesture)
+                _historyGesture = null;
         }
 
         private void RecordConfigChange(string before, string after)
         {
             if (_isApplyingHistory)
                 return;
+
+            // Still the same gesture and nothing else happened since: widen the last step instead of adding one
+            // (typing "Cracked" = one Ctrl+Z). A gesture that ends where it started removes its step.
+            string gesture = ActiveEditGesture();
+            if (gesture != null && gesture == _historyGesture && _configHistoryIndex > 0
+                && _configHistoryIndex == _configHistory.Count - 1
+                && string.Equals(_configHistory[_configHistoryIndex], before, StringComparison.Ordinal))
+            {
+                if (string.Equals(_configHistory[_configHistoryIndex - 1], after, StringComparison.Ordinal))
+                {
+                    _configHistory.RemoveAt(_configHistoryIndex);
+                    _configHistoryIndex--;
+                    _historyGesture = null;
+                }
+                else
+                    _configHistory[_configHistoryIndex] = after;
+                return;
+            }
+            _historyGesture = gesture;
 
             if (_configHistory.Count == 0)
             {
@@ -94,6 +139,7 @@ namespace TileStories.Editor
         {
             _configHistory.Clear();
             _configHistoryIndex = -1;
+            _historyGesture = null;
 
             if (_config == null)
                 return;
@@ -111,6 +157,7 @@ namespace TileStories.Editor
                 return;
 
             _configHistoryIndex--;
+            _historyGesture = null;
             ApplyConfigSnapshot(_configHistory[_configHistoryIndex]);
             _hasUnsavedChanges = true;
             RefreshRigVisuals();
@@ -123,6 +170,7 @@ namespace TileStories.Editor
                 return;
 
             _configHistoryIndex++;
+            _historyGesture = null;
             ApplyConfigSnapshot(_configHistory[_configHistoryIndex]);
             _hasUnsavedChanges = true;
             RefreshRigVisuals();

@@ -29,7 +29,7 @@ namespace TileStories.Editor.Tests
                 pois = new List<POIData>(),
                 category_styles = new List<CategoryStyleEntry>
                 {
-                    new CategoryStyleEntry { category = "cat_a", icon_key = "old_icon", details = "old note" }
+                    new CategoryStyleEntry { key = "cat_a", icon_key = "old_icon", details = "old note" }
                 }
             };
             _window = ScriptableObject.CreateInstance<POIEditorToolWindow>();

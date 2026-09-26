@@ -79,8 +79,8 @@ namespace TileStories
             return suggestions;
         }
 
-        // Return category names ordered by descending POI count, then name
-        // ascending (stable for deterministic tests).
+        // Return category NAMES (what a visitor would type) ordered by descending POI count, then name
+        // ascending (stable for deterministic tests). POIs store the category key; the name comes from its row.
         private IEnumerable<string> CategoryDistribution(WallConfigData config)
         {
             if (config?.pois == null)
@@ -89,7 +89,7 @@ namespace TileStories
             var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             foreach (var poi in config.pois)
             {
-                string category = poi.category;
+                string category = string.IsNullOrEmpty(poi.category) ? null : TaxonomyNames.Category(config, poi.category);
                 if (string.IsNullOrEmpty(category))
                     continue;
 

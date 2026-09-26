@@ -30,7 +30,7 @@ namespace TileStories.Tests
         {
             return new WallConfigData
             {
-                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { category = "religious" } },
+                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { key = "religious" } },
                 badge_categories = new List<BadgeCategoryEntry> { new BadgeCategoryEntry { key = "intact" } },
                 outline_levels = new List<OutlineLevelEntry> { new OutlineLevelEntry { key = "partial_damage" } },
                 pois = new List<POIData>(),

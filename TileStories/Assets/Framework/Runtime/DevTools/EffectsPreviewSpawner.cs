@@ -128,7 +128,7 @@ namespace TileStories
                     // never the level name. The style comes from the same StyleOf real markers use,
                     // so Show Marker Label?, the Marker Label Style override and every other column
                     // reach the grid exactly as they reach the wall.
-                    string levelName = string.IsNullOrWhiteSpace(level.level_name) ? level.key : level.level_name;
+                    string levelName = TaxonomyNames.NameOr(level.level_name, level.key);
                     levelRow.Add(new Cell("Level: " + levelName,
                         MarkerHierarchyResolver.StyleOf(level, logWarnings: false), labelText: baseMarkerName));
                 }

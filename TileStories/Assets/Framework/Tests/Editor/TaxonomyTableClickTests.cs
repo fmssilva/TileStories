@@ -48,7 +48,7 @@ namespace TileStories.Editor.Tests
                 marker_outline_mode = "uniform",
                 effect_defaults = new EffectDefaults(),
                 hierarchy_levels = new List<HierarchyLevelEntry>(),
-                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { category = "cat_a", icon_key = "unknown", color_hex = "#336699", search_keywords = new List<string>() } },
+                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { key = "cat_a", icon_key = "unknown", color_hex = "#336699", search_keywords = new List<string>() } },
                 badge_categories = new List<BadgeCategoryEntry> { new BadgeCategoryEntry { key = "badge_a", icon_key = "unknown", color_hex = "#999999", search_keywords = new List<string>() } },
                 outline_levels = new List<OutlineLevelEntry> { new OutlineLevelEntry { key = "level_1", label = "Intact", pct = 0f, line_style = "solid", search_keywords = new List<string>() } }
             };
@@ -104,21 +104,21 @@ namespace TileStories.Editor.Tests
         }
 
         [UnityTest]
-        public IEnumerator CategoryCell_TakesAClickAtItsLeftEdge()
+        public IEnumerator CategoryLabelCell_TakesAClickAtItsLeftEdge()
         {
             Open("_showGlobalMarker");
             yield return WaitForRepaint();
-            ClickLeftEdge("Category");
-            Assert.IsTrue(EditorGUIUtility.editingTextField, "clicking the left edge of the Category cell must start editing it");
+            ClickLeftEdge("Category label");
+            Assert.IsTrue(EditorGUIUtility.editingTextField, "clicking the left edge of the Category label cell must start editing it");
         }
 
         [UnityTest]
-        public IEnumerator BadgeKeyCell_TakesAClickAtItsLeftEdge()
+        public IEnumerator BadgeLabelCell_TakesAClickAtItsLeftEdge()
         {
             Open("_showGlobalBadge");
             yield return WaitForRepaint();
-            ClickLeftEdge("Badge Key");
-            Assert.IsTrue(EditorGUIUtility.editingTextField, "clicking the left edge of the Badge Key cell must start editing it");
+            ClickLeftEdge("Badge label");
+            Assert.IsTrue(EditorGUIUtility.editingTextField, "clicking the left edge of the Badge label cell must start editing it");
         }
 
         [UnityTest]

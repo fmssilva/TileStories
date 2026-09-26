@@ -110,10 +110,13 @@ namespace TileStories.Editor
         // sees the cell (same idea as HierarchyCheckboxRectProbe).
         internal static Action<string, int, Rect> TableCellRectProbe;
 
-        private static void ReportTableCellRect(string table, int row)
+        private static void ReportTableCellRect(string table, int row) =>
+            ReportTableCellRect(table, row, GUILayoutUtility.GetLastRect());
+
+        private static void ReportTableCellRect(string table, int row, Rect rect)
         {
             if (TableCellRectProbe != null && Event.current.type == EventType.Repaint)
-                TableCellRectProbe(table, row, GUILayoutUtility.GetLastRect());
+                TableCellRectProbe(table, row, rect);
         }
 
         // Shared symbol-table renderer for both category and badge sections (section 13.2).
@@ -318,7 +321,8 @@ namespace TileStories.Editor
             //      indentLevel * theme indent width, currently 30px at level 2).
             //      Guessed constants are gone; the spacer always matches the rows.
             //   2) the real "+ Add ..." button, sized min(available, MaxRowWidth).
-            DrawAddButtonRow(addButtonLabel, () => entries.Add(createNew()), out _, out _);
+            DrawAddButtonRow(addButtonLabel, () => entries.Add(createNew()), out _, out Rect addRect);
+            ReportTableCellRect(addButtonLabel, 0, addRect);
         }
 
         // Draws the +Add button as a one-row pair: transparent spacer then real

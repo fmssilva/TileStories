@@ -60,14 +60,49 @@ namespace TileStories.Tests
             Assert.AreEqual(1, POIEditorToolWindow.NextLowestPriority(null));
         }
 
+        // A file without Priority loads 0 = unset. Load stores the order the runtime ALREADY gave each level, so
+        // the value is explicit from then on and nothing changes meaning (drawing used to write 1 = top priority).
         [Test]
-        public void PriorityValidation_FlagsBelowOne_AndAcceptsAnyPositiveRange()
+        public void FillUnsetPriorities_StoresExactlyTheRuntimeOrder_AndLeavesSetOnesAlone()
         {
-            Assert.IsEmpty(POIEditorToolWindow.ValidateHierarchyLevelPriorities(
-                new List<HierarchyLevelEntry> { L("a", 1), L("b", 10), L("c", 100), L("d", 5000) }));
-            Assert.AreEqual(2, POIEditorToolWindow.ValidateHierarchyLevelPriorities(
-                new List<HierarchyLevelEntry> { L("a", 0), L("b", -3), L("c", 2) }).Count);
-            Assert.IsEmpty(POIEditorToolWindow.ValidateHierarchyLevelPriorities(null));
+            var levels = new List<HierarchyLevelEntry> { L("a", 5), L("", 0), null, L("b", 0), L("c", -3), L("d", 100) };
+            var runtimeBefore = new Dictionary<string, int>();
+            MarkerHierarchyResolver.Configure(levels);
+            try
+            {
+                foreach (var k in new[] { "a", "b", "c", "d" })
+                {
+                    Assert.IsTrue(MarkerHierarchyResolver.TryResolvePriority(k, out int p));
+                    runtimeBefore[k] = p;
+                }
+            }
+            finally { MarkerHierarchyResolver.ResetToDefaults(); }
+
+            Assert.AreEqual(2, POIEditorToolWindow.FillUnsetLevelPriorities(levels), "b and c were unset; the blank-key row is not a level");
+            Assert.AreEqual(5, levels[0].priority, "a set priority is never touched");
+            Assert.AreEqual(100, levels[5].priority);
+            foreach (var k in new[] { "a", "b", "c", "d" })
+                Assert.AreEqual(runtimeBefore[k], levels.Find(l => l != null && l.key == k).priority,
+                    k + ": the stored value is the one the runtime was already using (rows counted like the runtime: keyed rows only)");
+            Assert.AreEqual(0, POIEditorToolWindow.FillUnsetLevelPriorities(levels), "nothing left to fill");
+            Assert.AreEqual(0, POIEditorToolWindow.FillUnsetLevelPriorities(null));
+        }
+
+        // A blank-key row is not a level: the new-POI default counts rows exactly like the runtime does
+        [Test]
+        public void HighestPriorityLevel_ABlankKeyRowAbove_DoesNotShiftTheRowOrder()
+        {
+            var levels = new List<HierarchyLevelEntry> { L("", 0), L("b", 0), L("a", 1) };
+            // runtime: b = the FIRST keyed row -> 1, a = 1; the tie goes to the earlier row, b.
+            // Counting every row (the old copy of the rule) made b = 2 and picked a.
+            Assert.AreEqual("b", POIEditorToolWindow.HighestPriorityLevelKey(levels));
+            MarkerHierarchyResolver.Configure(levels);
+            try
+            {
+                Assert.IsTrue(MarkerHierarchyResolver.TryResolvePriority("b", out int b));
+                Assert.AreEqual(1, b, "the runtime agrees");
+            }
+            finally { MarkerHierarchyResolver.ResetToDefaults(); }
         }
 
         [Test]

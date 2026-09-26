@@ -34,7 +34,7 @@ namespace TileStories
             var categories = new List<string>();
             if (config.category_styles != null)
                 foreach (var c in config.category_styles)
-                    if (c != null && !string.IsNullOrEmpty(c.category)) categories.Add(c.category);
+                    if (c != null && !string.IsNullOrEmpty(c.key)) categories.Add(c.key);
 
             var root = new GameObject("Displacement Demo");
             root.transform.SetParent(parent, false);

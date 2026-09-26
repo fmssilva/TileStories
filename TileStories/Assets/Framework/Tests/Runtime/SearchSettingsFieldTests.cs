@@ -325,7 +325,7 @@ namespace TileStories.Tests
             var cfg = ConfigCopy();
             Press(Host.Root.Q<Button>("search-filters"));
             // - a category AND a level none of that category's demo POIs has: two filters with no POI in common
-            string catA = cfg.category_styles[0].category;
+            string catA = cfg.category_styles[0].key;
             var emptyPair = Session.SearchPois.Where(p => p.category == catA).Select(p => p.hierarchy_level_key).Distinct().ToList();
             string levelNone = cfg.hierarchy_levels.Select(l => l.key).First(k => !emptyPair.Contains(k));
             Press(Host.Tray.Root.Q<Toggle>("facet-Category-" + catA));
@@ -346,7 +346,7 @@ namespace TileStories.Tests
             yield return Demo();
             yield return ApplySearch(s => s.search.no_results_filters_message = "No point fits these filters");
             var cfg = ConfigCopy();
-            string catA = cfg.category_styles[0].category;
+            string catA = cfg.category_styles[0].key;
             var levelsOfA = Session.SearchPois.Where(p => p.category == catA).Select(p => p.hierarchy_level_key).Distinct().ToList();
             string levelNone = cfg.hierarchy_levels.Select(l => l.key).First(k => !levelsOfA.Contains(k));
             Host.Tray.SetFacet(FacetGroup.Category, catA, true);
@@ -412,7 +412,7 @@ namespace TileStories.Tests
 
             yield return ApplySearch(s => { s.results.recent_count = 3; s.results.suggestion_source = "category_distribution"; });
             Assert.AreNotEqual("lantern", Host.SearchBar.SuggestionTerms[0], "Categories: the wall's categories lead");
-            var categories = ConfigCopy().category_styles.Select(c => c.category).ToList();
+            var categories = ConfigCopy().category_styles.Select(c => c.label).ToList();   // a suggestion is a category NAME
             Assert.IsTrue(categories.Contains(Host.SearchBar.SuggestionTerms[0]));
         }
 

@@ -3,22 +3,23 @@ using System.Text;
 
 namespace TileStories.Editor
 {
-    // One config-validation finding (which POI/setting, its value, what is wrong, how to fix
-    // it). Produced by the Validate* methods; shown to the developer as one EditorNotice.
+    // One config-validation finding (what it is about, its value, what is wrong, how to fix it). Produced by the
+    // Validate* methods; shown to the developer as one EditorNotice. `subject` names the thing the way the window
+    // shows it (a POI's "3. North tower", a level's name, a section) -- never a POI id or a generated key.
     internal struct EditorAlertItem
     {
         // A dialog is not a scrolling list, so a long report shows the first few findings
         // and says how many more there are.
         private const int MaxItemsShown = 6;
 
-        public readonly string poiId;
+        public readonly string subject;
         public readonly string value;
         public readonly string problem;
         public readonly string fixHint;
 
-        public EditorAlertItem(string poiId, string value, string problem, string fixHint = null)
+        public EditorAlertItem(string subject, string value, string problem, string fixHint = null)
         {
-            this.poiId = poiId;
+            this.subject = subject;
             this.value = value;
             this.problem = problem;
             this.fixHint = fixHint;
@@ -32,7 +33,7 @@ namespace TileStories.Editor
             for (int i = 0; i < shown; i++)
             {
                 var item = items[i];
-                text.Append("- ").Append(item.poiId);
+                text.Append("- ").Append(item.subject);
                 if (!string.IsNullOrEmpty(item.value))
                     text.Append(" (").Append(item.value).Append(')');
                 text.Append(": ").Append(item.problem);

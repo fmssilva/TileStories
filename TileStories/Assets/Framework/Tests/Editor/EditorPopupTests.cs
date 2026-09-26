@@ -165,7 +165,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TypingInADetailsNote_EditsTheConfig_Undoably_AndAnUndoClosesTheNote()
         {
-            var entry = new CategoryStyleEntry { category = "cat_a", details = "" };
+            var entry = new CategoryStyleEntry { key = "cat_a", details = "" };
             Owner(new WallConfigData { pois = new List<POIData>(), category_styles = new List<CategoryStyleEntry> { entry } });
 
             var note = Call<EntryDetailsPopup>("CreateDetailsPopup", "cat_a",
@@ -219,7 +219,7 @@ namespace TileStories.Tests
 
             try
             {
-                var entry = new CategoryStyleEntry { category = "cat_a", icon_key = "old_icon" };
+                var entry = new CategoryStyleEntry { key = "cat_a", icon_key = "old_icon" };
                 Owner(new WallConfigData { pois = new List<POIData>(), category_styles = new List<CategoryStyleEntry> { entry } });
                 typeof(POIEditorToolWindow).GetField("_wallIconLibrary", Instance).SetValue(_owner, library);
 

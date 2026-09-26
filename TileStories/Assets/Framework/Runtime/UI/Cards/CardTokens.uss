@@ -1,0 +1,79 @@
+/* The POI Detail Card's design tokens (_3.3 section 2): the ONE place a card colour, size, radius or duration is
+   written. PoiCard.uss and every block style read them as var(--ts-*); the C# views only add classes.
+   ".ts-card" carries the token set on the sheet itself (so its own custom style holds them, and every block
+   inherits them). This is the minimal default preset (Stone & Gold, dark); _3.3 adds the other presets, light
+   mode and the sunlight expansion as more classes over the same names.
+   Font tokens (--ts-font-display / -body / -mono) arrive with _3.3 step 2 (fonts as UI Toolkit font assets). */
+
+.ts-card.ts-theme-default {
+    /* Surfaces */
+    --ts-bg: rgb(26, 21, 16);
+    --ts-surface: rgb(35, 28, 21);
+    --ts-surface-2: rgb(48, 39, 30);
+    --ts-scrim: rgba(0, 0, 0, 0.5);
+    --ts-hero-fade: rgba(26, 21, 16, 0.9);
+
+    /* Text */
+    --ts-ink: rgb(247, 239, 220);
+    --ts-ink-2: rgba(247, 239, 220, 0.8);
+    --ts-ink-3: rgba(247, 239, 220, 0.6);
+    --ts-on-accent: rgb(26, 21, 16);
+
+    /* Accent */
+    --ts-accent: rgb(245, 158, 11);
+    --ts-accent-text: rgb(245, 158, 11);
+    --ts-accent-2: rgb(180, 120, 40);
+
+    /* Lines */
+    --ts-line: rgba(247, 239, 220, 0.16);
+    --ts-line-width: 1px;
+    --ts-focus: rgb(245, 158, 11);
+
+    /* Status ramp (the markers' outline levels, intact -> destroyed) */
+    --ts-status-0: rgb(111, 191, 115);
+    --ts-status-1: rgb(201, 180, 88);
+    --ts-status-2: rgb(224, 145, 58);
+    --ts-status-3: rgb(210, 85, 63);
+    --ts-status-4: rgb(142, 142, 142);
+
+    /* Family colours (_3.2 navigation) */
+    --ts-family-about: rgb(245, 158, 11);
+    --ts-family-media: rgb(127, 179, 213);
+    --ts-family-guides: rgb(163, 197, 133);
+    --ts-family-stories: rgb(215, 166, 200);
+    --ts-family-ar: rgb(127, 209, 201);
+    --ts-family-play: rgb(242, 197, 124);
+    --ts-family-visit: rgb(176, 168, 224);
+    --ts-family-community: rgb(232, 168, 124);
+
+    /* Type */
+    --ts-size-body: 16px;
+    --ts-size-title: 24px;
+    --ts-size-caption: 14px;
+    --ts-weight-body: normal;
+
+    /* Shape */
+    --ts-radius-s: 6px;
+    --ts-radius-m: 12px;
+    --ts-radius-l: 20px;
+    --ts-space-1: 4px;
+    --ts-space-2: 8px;
+    --ts-space-3: 12px;
+    --ts-space-4: 16px;
+    --ts-space-5: 24px;
+    --ts-space-6: 32px;
+
+    /* Effects */
+    --ts-glass-opacity: 0.88;
+
+    /* Motion */
+    --ts-duration: 0.22s;
+    --ts-ease: ease-out-cubic;
+
+    /* Sheet layout: the smallest tap target (WCAG 2.5.5 asks 44), the grabber bar, and the gap the full stop
+       leaves above the sheet. --ts-sheet-top-gap is read by PoiCardSheetView as a plain number (panel units). */
+    --ts-touch-target: 48px;
+    --ts-grabber-width: 40px;
+    --ts-grabber-height: 4px;
+    --ts-sheet-top-gap: 48;
+}

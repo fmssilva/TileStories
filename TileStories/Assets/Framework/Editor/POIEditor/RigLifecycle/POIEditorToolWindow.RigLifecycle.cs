@@ -225,7 +225,7 @@ namespace TileStories.Editor
             {
                 if (!POIPositionResolver.TryResolvePosition(poi, out Vector3 localPos))
                 {
-                    Debug.LogWarning($"[POIEditor] Skipping POI '{poi.id}' - position could not be resolved.");
+                    Debug.LogWarning($"[POIEditor] Skipping POI '{EditorNames.Poi(_config.pois, poi)}' (rig object '{poi.id}') - position could not be resolved.");
                     continue;
                 }
 

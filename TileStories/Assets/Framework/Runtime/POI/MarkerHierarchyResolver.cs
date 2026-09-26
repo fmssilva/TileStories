@@ -220,9 +220,13 @@ namespace TileStories
             // in the table, treat as lowest priority rather than an arbitrary value.
             priority = authored >= 1
                 ? authored
-                : (_levelIndexByKey.TryGetValue(key.Trim(), out var idx) ? idx + 1 : int.MaxValue);
+                : (_levelIndexByKey.TryGetValue(key.Trim(), out var idx) ? EffectivePriority(authored, idx) : int.MaxValue);
             return true;
         }
+
+        // The ONE priority rule: an authored priority >= 1 as-is, an unset one (<= 0) the level's 1-based position
+        // among the keyed rows. Shared with the POI Editor, which fills unset priorities with it on load.
+        public static int EffectivePriority(int authored, int keyedRowIndex) => authored >= 1 ? authored : keyedRowIndex + 1;
 
         // Convenience wrapper: ordering priority for a key, unknown keys ranking last.
         public static int GetLevelPriority(string key)

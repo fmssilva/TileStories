@@ -273,8 +273,8 @@ namespace TileStories.Tests
             var config = CreateMinimalConfig();
             config.category_styles = new System.Collections.Generic.List<CategoryStyleEntry>
             {
-                new CategoryStyleEntry { category = "religious", icon_key = "unknown" },
-                new CategoryStyleEntry { category = "military", icon_key = "unknown" },
+                new CategoryStyleEntry { key = "religious", icon_key = "unknown" },
+                new CategoryStyleEntry { key = "military", icon_key = "unknown" },
             };
             var window = CreateWindowWithConfig(config);
 

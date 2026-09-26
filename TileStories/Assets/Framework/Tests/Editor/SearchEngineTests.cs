@@ -23,8 +23,8 @@ namespace TileStories.Editor.Tests
             {
                 category_styles = new List<CategoryStyleEntry>
                 {
-                    new() { category = "religious", search_keywords = new List<string> { "worship" } },
-                    new() { category = "military" },
+                    new() { key = "religious", search_keywords = new List<string> { "worship" } },
+                    new() { key = "military" },
                 },
                 badge_categories = new List<BadgeCategoryEntry>
                 {
@@ -205,13 +205,13 @@ namespace TileStories.Editor.Tests
         public void SynonymGroups_WorkBothWays_AndNeverOutrankTheirSource()
         {
             var config = Wall();
-            config.synonym_groups = new List<SynonymGroup> { new() { key = "chapel", synonyms = new List<string> { "church", "temple" } } };
+            config.synonym_groups = new List<SynonymGroup> { new() { word = "chapel", synonyms = new List<string> { "church", "temple" } } };
             var index = Index(config);
             var exact = Opt(prefix: SearchPrefixScope.Off, typos: 0);
 
             // "church" is a NAME word of a (1.0): its synonyms reach a, capped at RankSynonym
             Assert.AreEqual(POISearchIndex.RankSynonym, Scores(index, "temple", exact)["a"], 1e-5, "church -> temple");
-            Assert.AreEqual(POISearchIndex.RankSynonym, Scores(index, "chapel", exact)["a"], 1e-5, "church -> the group's key");
+            Assert.AreEqual(POISearchIndex.RankSynonym, Scores(index, "chapel", exact)["a"], 1e-5, "church -> the group's word");
 
             config.pois[1].search_keywords = new List<string> { "chapel" };
             index = Index(config);
@@ -222,6 +222,22 @@ namespace TileStories.Editor.Tests
             index = Index(config);
             Assert.AreEqual(POISearchIndex.RankTaxonomy, Scores(index, "chapel", exact)["b"], 1e-5,
                 "a synonym of a taxonomy word stays at the taxonomy rank (never above its source)");
+        }
+
+        // A synonym group is saved as {"word", "synonyms"} -- a word, not a "key": nothing points at a group, so it
+        // has no identity key like the taxonomy rows. The config text drives the search through that field.
+        [Test]
+        public void SynonymGroup_SavedAsWordAndSynonyms_DrivesTheSearchFromTheConfigText()
+        {
+            string json = JsonUtility.ToJson(new SynonymGroup { word = "chapel", synonyms = new List<string> { "church" } });
+            StringAssert.Contains("\"word\":\"chapel\"", json);
+            StringAssert.DoesNotContain("\"key\"", json);
+
+            var config = Wall();
+            var loaded = JsonUtility.FromJson<WallConfigData>("{\"synonym_groups\":[{\"word\":\"chapel\",\"synonyms\":[\"church\"]}]}");
+            config.synonym_groups = loaded.synonym_groups;
+            Assert.AreEqual(POISearchIndex.RankSynonym, Scores(Index(config), "chapel", Opt(prefix: SearchPrefixScope.Off, typos: 0))["a"], 1e-5,
+                "the word read from the config text is a searchable member: 'chapel' finds the POI named with 'church'");
         }
 
         [Test]
@@ -294,7 +310,7 @@ namespace TileStories.Editor.Tests
         private static WallConfigData WallWithSynonyms()
         {
             var config = Wall();
-            config.synonym_groups = new List<SynonymGroup> { new() { key = "church", synonyms = new List<string> { "chapel" } } };
+            config.synonym_groups = new List<SynonymGroup> { new() { word = "church", synonyms = new List<string> { "chapel" } } };
             config.search_fields = new List<SearchFieldDefinition> { new() { key = "material", label = "Material" } };
             return config;
         }

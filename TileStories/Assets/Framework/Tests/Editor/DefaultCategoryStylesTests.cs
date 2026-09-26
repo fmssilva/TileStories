@@ -28,8 +28,10 @@ namespace TileStories.Editor.Tests
 
             foreach (var entry in defaults)
             {
-                Assert.IsFalse(string.IsNullOrWhiteSpace(entry.category),
-                    "Every default entry must have a category.");
+                Assert.IsFalse(string.IsNullOrWhiteSpace(entry.key),
+                    "Every default entry must have a key.");
+                Assert.IsFalse(string.IsNullOrWhiteSpace(entry.label),
+                    "Every default entry must have a label (what a visitor reads).");
                 Assert.IsFalse(string.IsNullOrWhiteSpace(entry.icon_key),
                     "Every default entry must have an icon_key.");
                 Assert.IsFalse(string.IsNullOrWhiteSpace(entry.color_hex),
@@ -43,7 +45,7 @@ namespace TileStories.Editor.Tests
             List<CategoryStyleEntry> defaults = DefaultCategoryStyles.Create();
 
             // Spot-check each of the six heritage categories against the spec.
-            var byCategory = defaults.ToDictionary(e => e.category);
+            var byCategory = defaults.ToDictionary(e => e.key);
 
             Assert.IsTrue(byCategory.ContainsKey("royal_government"));
             Assert.AreEqual("IconRoyal&Government", byCategory["royal_government"].icon_key);

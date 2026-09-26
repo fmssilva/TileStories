@@ -134,7 +134,7 @@ namespace TileStories.Editor.Tests
         public void SearchPanelsRule_Table()
         {
             var idle = SearchPanelsRule.Resolve(false, ViewMode.List, false, true, false, false);
-            Assert.IsFalse(idle.List || idle.ViewModes || idle.Minimap || idle.Card, "idle: the camera view stays clear");
+            Assert.IsFalse(idle.List || idle.ViewModes || idle.Minimap, "idle: the camera view stays clear");
             Assert.IsTrue(idle.MinimapButton, "the Map button shows with Visibility = Button");
 
             var list = SearchPanelsRule.Resolve(true, ViewMode.List, false, true, false, false);
@@ -147,7 +147,7 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(highlight.List || highlight.Minimap, "Highlight: no panel");
 
             var selected = SearchPanelsRule.Resolve(true, ViewMode.List, true, true, false, false);
-            Assert.IsTrue(selected.Card && !selected.List, "a selection: the card instead of the list");
+            Assert.IsTrue(!selected.List && selected.ViewModes, "a selection hides the list (the POI Detail Card shows the POI)");
 
             var always = SearchPanelsRule.Resolve(false, ViewMode.List, false, true, true, false);
             Assert.IsTrue(always.Minimap && !always.MinimapButton, "Visibility = Always: always on, no button");
@@ -198,7 +198,7 @@ namespace TileStories.Editor.Tests
 
         private static WallConfigData FacetWall() => new()
         {
-            category_styles = new List<CategoryStyleEntry> { new() { category = "religious" }, new() { category = "military" } },
+            category_styles = new List<CategoryStyleEntry> { new() { key = "religious" }, new() { key = "military" } },
             badge_categories = new List<BadgeCategoryEntry> { new() { key = "intact", label = "Intact" }, new() { key = "ruin", label = "Ruined" } },
             outline_levels = new List<OutlineLevelEntry> { new() { key = "low", label = "Low" } },
             hierarchy_levels = new List<HierarchyLevelEntry> { new() { key = "level_1", level_name = "Hub", priority = 1 } },
@@ -397,21 +397,17 @@ namespace TileStories.Editor.Tests
             finally { list.Dispose(); }
         }
 
+        // The results rows and the card header's chip share one subtitle rule (the card itself: PoiCardSceneTests)
         [Test]
-        public void DetailCard_ShowsTheSelectedPoi_AndItsXClears()
+        public void PoiSubtitle_IsCategoryNameThenLevelName_EitherPartOptional()
         {
             var c = FacetWall();
-            var card = new DetailCardView(new VisualElement());
-            try
-            {
-                card.Configure(id => c.pois.Find(p => p.id == id), c);
-                SelectionEventBus.Select("a");
-                Assert.AreEqual("Chapel One", card.NameText);
-                Assert.AreEqual("religious - Hub", card.SubtitleText);
-                SelectionEventBus.Clear();
-                Assert.IsNull(SelectionEventBus.CurrentPoiId);
-            }
-            finally { card.Dispose(); }
+            var chapel = c.pois.Find(p => p.id == "a");
+            Assert.AreEqual("Chapel One", chapel.name);
+            Assert.AreEqual("religious - Hub", PoiSubtitle.Of(chapel, c));
+            Assert.AreEqual("Hub", PoiSubtitle.Of(new POIData { hierarchy_level_key = chapel.hierarchy_level_key }, c), "no category");
+            Assert.AreEqual("religious", PoiSubtitle.Of(new POIData { category = chapel.category }, c), "no level");
+            Assert.AreEqual("", PoiSubtitle.Of(null, c));
         }
 
         [Test]
@@ -570,7 +566,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(categories * 2 + SearchDemoLayout.TestPoiCount + SearchDemoLayout.ClumpCount, entries.Count);
 
             var pois = searchConfig.pois;
-            foreach (var c in searchConfig.category_styles) Assert.IsTrue(pois.Any(p => p.category == c.category), "category " + c.category);
+            foreach (var c in searchConfig.category_styles) Assert.IsTrue(pois.Any(p => p.category == c.key), "category " + c.key);
             foreach (var l in searchConfig.hierarchy_levels) Assert.IsTrue(pois.Any(p => p.hierarchy_level_key == l.key), "level " + l.key);
             foreach (var b in searchConfig.badge_categories) Assert.IsTrue(pois.Any(p => p.badge_category == b.key), "badge " + b.key);
             foreach (var o in searchConfig.outline_levels) Assert.IsTrue(pois.Any(p => p.status_level_key == o.key), "outline " + o.key);
@@ -613,7 +609,7 @@ namespace TileStories.Editor.Tests
         [Test]
         public void SearchDemoLayout_EachControlChangesThePlacement()
         {
-            var wall = new WallConfigData { category_styles = new List<CategoryStyleEntry> { new() { category = "a" }, new() { category = "b" } } };
+            var wall = new WallConfigData { category_styles = new List<CategoryStyleEntry> { new() { key = "a" }, new() { key = "b" } } };
             var near = SearchDemoLayout.Build(new SearchDemoSettings { distance_m = 1f, test_cases = false }, wall);
             var far = SearchDemoLayout.Build(new SearchDemoSettings { distance_m = 4f, test_cases = false }, wall);
             Assert.AreEqual(1f, near[0].LocalPosition.z, 1e-5, "Distance");

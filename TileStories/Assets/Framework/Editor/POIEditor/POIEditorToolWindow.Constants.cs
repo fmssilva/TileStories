@@ -237,6 +237,9 @@ namespace TileStories.Editor
         // Tab button and container colors for the enhanced visual hierarchy.
         private static readonly Color GlobalSceneTabColor = new Color(0.15f, 0.50f, 0.95f); // vivid blue
         private static readonly Color SpecificMarkerTabColor = new Color(0.00f, 0.78f, 0.38f); // vivid green
+        private static readonly Color DetailCardTabColor = new Color(0.90f, 0.55f, 0.10f); // amber (the card's accent)
+        private static readonly Color CardContainerSectionColor = new Color(0.95f, 0.65f, 0.20f);
+        private static readonly Color BlockLibrarySectionColor = new Color(0.80f, 0.45f, 0.15f);
         private static readonly Color TabTextColor = Color.white;
         private static readonly Color SceneConfigSectionColor = new Color(0.45f, 0.55f, 0.85f);
         private static readonly Color LabelsAndFontsSectionColor = new Color(0.90f, 0.45f, 0.55f);

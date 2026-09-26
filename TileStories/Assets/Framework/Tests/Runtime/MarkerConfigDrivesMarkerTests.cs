@@ -128,7 +128,7 @@ namespace TileStories.Tests
 
             // dev_marker_custom_symbol is authored with category "military" -- a real LivingRoom
             // category with its own configured colour, unrelated to the custom icon override.
-            var militaryEntry = _config.category_styles.First(e => e.category == "military");
+            var militaryEntry = _config.category_styles.First(e => e.key == "military");
             Color expectedFill;
             ColorUtility.TryParseHtmlString(militaryEntry.color_hex, out expectedFill);
             Assert.AreEqual(expectedFill, symbolBackground.color,

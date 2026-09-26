@@ -111,7 +111,7 @@ namespace TileStories
             filter ??= new FilterSettings();
 
             if (filter.category_facet)
-                AddGroup(groups, FacetGroup.Category, "Category", config.category_styles, e => e.category, e => e.category);
+                AddGroup(groups, FacetGroup.Category, "Category", config.category_styles, e => e.key, e => e.label);
             if (filter.badge_facet)
                 AddGroup(groups, FacetGroup.Badge, "Badge", config.badge_categories, e => e.key, e => e.label);
             if (filter.status_facet)
@@ -146,7 +146,7 @@ namespace TileStories
             var options = new FacetGroupOptions
             {
                 Group = FacetGroup.Field(field.key),
-                Title = string.IsNullOrWhiteSpace(field.label) ? field.key : field.label,
+                Title = TaxonomyNames.NameOr(field.label, field.key),
             };
             foreach (var kvp in labels) options.Choices.Add((kvp.Key, kvp.Value));
             groups.Add(options);
@@ -160,8 +160,7 @@ namespace TileStories
             foreach (var row in rows)
             {
                 if (row == null || string.IsNullOrEmpty(key(row))) continue;
-                string l = label(row);
-                options.Choices.Add((key(row), string.IsNullOrWhiteSpace(l) ? key(row) : l));
+                options.Choices.Add((key(row), TaxonomyNames.NameOr(label(row), key(row))));
             }
             if (options.Choices.Count > 0) groups.Add(options);
         }

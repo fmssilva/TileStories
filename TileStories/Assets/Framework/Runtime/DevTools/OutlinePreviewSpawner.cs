@@ -72,7 +72,7 @@ namespace TileStories
                 foreach (var level in config.outline_levels)
                 {
                     if (level == null) continue;
-                    string label = string.IsNullOrWhiteSpace(level.label) ? level.key : level.label;
+                    string label = TaxonomyNames.NameOr(level.label, level.key);
                     bool isUnknownRow = string.Equals(level.key?.Trim(), "unknown", System.StringComparison.OrdinalIgnoreCase);
                     hasOwnUnknownLevel |= isUnknownRow;
                     // A wall's own "unknown" row is a real, developer-authored level like any other

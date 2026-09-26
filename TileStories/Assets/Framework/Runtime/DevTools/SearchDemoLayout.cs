@@ -53,7 +53,7 @@ namespace TileStories
 
         // The demo's synonym group: "church" finds the POI tagged "chapel" and the reverse
         public static SynonymGroup DemoSynonymGroup() =>
-            new SynonymGroup { key = "church", synonyms = new List<string> { "chapel", "temple" } };
+            new SynonymGroup { word = "church", synonyms = new List<string> { "chapel", "temple" } };
 
         // The demo's Keyword Field definition (filterable)
         public static SearchFieldDefinition DemoMaterialField() =>
@@ -108,7 +108,7 @@ namespace TileStories
             var categories = new List<string>();
             if (config?.category_styles != null)
                 foreach (var c in config.category_styles)
-                    if (c != null && !string.IsNullOrEmpty(c.category)) categories.Add(c.category);
+                    if (c != null && !string.IsNullOrEmpty(c.key)) categories.Add(c.key);
             if (categories.Count == 0)
                 categories.Add("demo");
 
@@ -134,7 +134,7 @@ namespace TileStories
             {
                 for (int row = 0; row < perCategory; row++, n++)
                 {
-                    var poi = NewPoi($"{IdPrefix}{n}", $"{Pretty(categories[col])} {row + 1}", categories[col],
+                    var poi = NewPoi($"{IdPrefix}{n}", $"{TaxonomyNames.Category(config, categories[col])} {row + 1}", categories[col],
                         Pick(levels, n), Pick(badges, n), Pick(outlines, n));
                     SetMaterial(poi, Materials[n % Materials.Length]);
                     entries.Add(new Entry { Poi = poi, LocalPosition = CellPosition(col, row) });
@@ -223,9 +223,5 @@ namespace TileStories
         }
 
         private static string Pick(List<string> keys, int i) => keys.Count == 0 ? "" : keys[i % keys.Count];
-
-        // "infrastructure" -> "Infrastructure" (the category key reads as a name)
-        private static string Pretty(string category) =>
-            string.IsNullOrEmpty(category) ? category : char.ToUpperInvariant(category[0]) + category.Substring(1);
     }
 }

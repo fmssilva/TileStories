@@ -10,10 +10,11 @@ namespace TileStories.Tests
         // Builds a HierarchyLevelEntry by key + size. priority is left unset so
         // these tests never exercise positional priority fallback (that belongs
         // to MarkerHierarchyResolverTests).
-        private static global::TileStories.HierarchyLevelEntry Make(string key, float size)
+        private static global::TileStories.HierarchyLevelEntry Make(string key, float size, string name = null)
             => new global::TileStories.HierarchyLevelEntry
             {
                 key = key,
+                level_name = name,
                 size_cm = size
             };
 
@@ -36,15 +37,16 @@ namespace TileStories.Tests
         {
             var levels = new List<global::TileStories.HierarchyLevelEntry>
             {
-                Make("bad_small", 0.02f), // m/cm typo
-                Make("ok", 5f),
-                Make("bad_large", 200f)   // m/cm typo
+                Make("level_1", 0.02f, "Tiny"), // m/cm typo
+                Make("level_2", 5f, "Ok"),
+                Make("level_3", 200f, "Huge")   // m/cm typo
             };
             var issues = global::TileStories.Editor.POIEditorToolWindow.ValidateHierarchyLevelSizeRange(levels);
             Assert.AreEqual(2, issues.Count);
+            // - named the way the Hierarchy Levels table shows the row, never by its generated key
             CollectionAssert.AreEquivalent(
-                new[] { "bad_small", "bad_large" },
-                new[] { issues[0].poiId, issues[1].poiId });
+                new[] { "Hierarchy level 'Tiny'", "Hierarchy level 'Huge'" },
+                new[] { issues[0].subject, issues[1].subject });
         }
 
         [Test]
@@ -65,12 +67,12 @@ namespace TileStories.Tests
             var levels = new List<global::TileStories.HierarchyLevelEntry>
             {
                 null,
-                Make("bad", 250f),
+                Make("bad", 250f, ""),
                 null
             };
             var issues = global::TileStories.Editor.POIEditorToolWindow.ValidateHierarchyLevelSizeRange(levels);
             Assert.AreEqual(1, issues.Count);
-            Assert.AreEqual("bad", issues[0].poiId);
+            Assert.AreEqual("Hierarchy level 'bad'", issues[0].subject, "a level with no name falls back to its key");
         }
     }
 }

@@ -11,8 +11,9 @@ namespace TileStories
         public string wall_name;
         public int immersal_map_id;
 
-        // "circle" / "rounded_square" / "hexagon" / "diamond" / "star" / "none".
-        public string marker_shape;
+        // "circle" / "rounded_square" / "hexagon" / "diamond" / "star" / "none". A file without it loads the
+        // framework default (MarkerVisualsParser.DefaultShape), the same in the Editor and at runtime.
+        public string marker_shape = "circle";
 
         // "circle" / "rounded_square" / "hexagon" / "diamond" / "star" / "none".
         // Independent of marker_shape -- a wall can have a hexagon symbol with a
@@ -22,9 +23,9 @@ namespace TileStories
 
         // Outline (status ring) mode: "uniform" (one shared, developer-adjustable colour, see
         // outline_uniform_color_hex) / "same_hue" (category hue drained toward black) / "per_type"
-        // (each outline level below carries its own colour) / "none". Missing or unrecognised = no
-        // outline.
-        public string marker_outline_mode;
+        // (each outline level below carries its own colour) / "none". A file without it loads "none" (no
+        // outline), so the Editor shows exactly what runs; an unrecognised value is also no outline.
+        public string marker_outline_mode = "none";
 
         // The single ring colour used when marker_outline_mode is "uniform". Defaults to the
         // framework's original gold. Ignored in every other mode (same_hue derives its colour from
@@ -139,6 +140,10 @@ namespace TileStories
         //   also matches every other member (POISearchIndex.Build).
         public List<SearchFieldDefinition> search_fields = new();
         public List<SynonymGroup> synonym_groups = new();
+
+        // The POI Detail Card domain (_3.1): the card container and the Block Library (CardConfigData.cs).
+        // Each POI's own blocks live on POIData.card.
+        public CardSettings card_settings = new();
 
         // Dev-only "Add search & filter demo" (Editor Play Mode and development builds only):
         // generated POIs on their own stage built to exercise every search / filter / selection
@@ -375,7 +380,12 @@ namespace TileStories
     [Serializable]
     public class CategoryStyleEntry
     {
-        public string category;   // must match POIData.category exactly
+        // Generated stable key (category_N, never shown), stored in POIData.category.
+        public string key;
+
+        // The category's name: typed in the editor's Category table, read by visitors (detail card, results,
+        // filter chips, search, suggestions). Blank -> the key is shown.
+        public string label;
 
         // "#RRGGBB". Empty/omitted -> this category keeps the hash-generated colour.
         public string color_hex;
@@ -493,11 +503,11 @@ namespace TileStories
         public float label_font_size_ratio;
         public string label_font_key = "";
 
-        // "none" | "ripple_rings" | "ripple_discs" -- parsed by MarkerHierarchyResolver.
-        public string ripple_effect;
+        // "none" | "ripple_rings" | "ripple_discs" -- parsed by MarkerHierarchyResolver. A level without it is "none".
+        public string ripple_effect = "none";
 
-        // "none" | "halo_ring" | "halo_disc" | "beacon" -- parsed by MarkerHierarchyResolver.
-        public string halo_effect;
+        // "none" | "halo_ring" | "halo_disc" | "beacon" -- parsed by MarkerHierarchyResolver. A level without it is "none".
+        public string halo_effect = "none";
 
         // Independent of both effect slots above -- standalone pulse component.
         public bool pulse;
@@ -593,6 +603,10 @@ namespace TileStories
         // Icon key from IconLibrary.asset used when has_custom_symbol is true.
         public string custom_symbol_key;
 
+        // This POI's Detail Card blocks (_3.1 section 5.2). Card text is NOT searched: name and summary
+        // stay the searchable fields.
+        public POICardData card = new();
+
         public void OnBeforeSerialize()
         {
         }
@@ -617,6 +631,8 @@ namespace TileStories
                 search_keywords = new();
             if (search_keyword_fields == null)
                 search_keyword_fields = new();
+            card ??= new POICardData();
+            card.blocks ??= new List<BlockInstanceData>();
         }
     }
 

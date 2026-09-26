@@ -16,11 +16,10 @@ namespace TileStories.Editor
     public partial class POIEditorToolWindow
     {
         // Keyword tables' own columns (this section's two tables only)
-        private const float KeywordKeyColumnWidth = 110f;
         private const float KeywordLabelColumnWidth = 130f;
         private const float KeywordRequiredColumnWidth = 64f;
         private const float KeywordFilterColumnWidth = 44f;
-        private const float SynonymKeyColumnWidth = 110f;
+        private const float SynonymWordColumnWidth = 110f;
         private const float SynonymWordsColumnWidth = 230f;
 
         private bool _showSearchSelection = true;
@@ -218,37 +217,22 @@ namespace TileStories.Editor
             return value;
         }
 
-        // Commit-style rename for the keyword field keys: a SearchFieldDefinition.key is the identity each
-        // POI's search_keyword_fields[].field_key points at, so a rename moves every POI's list along
-        // (SearchFieldReferenceResolver) instead of stranding it under the old key.
-        private IdentityRenameEditState<SearchFieldDefinition> _searchFieldRenameEdit;
-
-        private IdentityRenameEditState<SearchFieldDefinition> SearchFieldRenameEdit =>
-            _searchFieldRenameEdit ??= new IdentityRenameEditState<SearchFieldDefinition>(
-                "TileStories.SearchFieldEdit",
-                () => _config?.search_fields,
-                e => e.key,
-                (e, v) => e.key = v,
-                () => _config?.pois,
-                SearchFieldReferenceResolver.RenameFieldKey);
-
-        // Custom keyword fields: Key, Label, Required, Filter, Details, delete
+        // Custom keyword fields: Label, Required, Filter, Details, delete. Like every taxonomy table the row's
+        // key (what each POI's keyword list is stored under) is generated once and never shown, so renaming a
+        // field's label never moves a POI's keywords.
         private void DrawKeywordFieldsTable()
         {
             _config.search_fields ??= new List<SearchFieldDefinition>();
-            SearchFieldRenameEdit.HandleEditEvents();
 
             using (new TableRowScope())
             {
                 GUILayout.Space(IndentLevel1);
-                GUILayout.Label("Key", EditorStyles.miniBoldLabel, GUILayout.Width(KeywordKeyColumnWidth));
-                GUILayout.Space(TableGapWithinGroup);
                 GUILayout.Label("Label", EditorStyles.miniBoldLabel, GUILayout.Width(KeywordLabelColumnWidth));
                 GUILayout.Space(TableGapBetweenGroups);
                 GUILayout.Label("Required", EditorStyles.miniBoldLabel, GUILayout.Width(KeywordRequiredColumnWidth));
                 GUILayout.Label("Filter", EditorStyles.miniBoldLabel, GUILayout.Width(KeywordFilterColumnWidth));
-                // - one (i) for the four columns, above the Details column (the tables' convention)
-                HelpInfoButton.Draw("Keyword Fields", "Key: " + KeywordFieldKeyHelp + "\n\nLabel: " + KeywordFieldLabelHelp +
+                // - one (i) for the three columns, above the Details column (the tables' convention)
+                HelpInfoButton.Draw("Keyword Fields", "Label: " + KeywordFieldLabelHelp +
                     "\n\nRequired: " + KeywordFieldRequiredHelp + "\n\nFilter: " + KeywordFieldFilterHelp, 26f);
                 GUILayout.FlexibleSpace();
                 GUILayout.Space(AddButtonRowRightMargin);
@@ -261,19 +245,17 @@ namespace TileStories.Editor
                 using (new TableRowScope())
                 {
                     GUILayout.Space(IndentLevel1);
-                    SearchFieldRenameEdit.SetLabel(field,
-                        EditorGUILayout.TextField(SearchFieldRenameEdit.GetLabel(field), GUILayout.Width(KeywordKeyColumnWidth)));
-                    GUILayout.Space(TableGapWithinGroup);
                     field.label = EditorGUILayout.TextField(field.label ?? "", GUILayout.Width(KeywordLabelColumnWidth));
+                    ReportTableCellRect("Keyword Field label", i);
                     GUILayout.Space(TableGapBetweenGroups);
                     field.forced = EditorGUILayout.Toggle(field.forced, GUILayout.Width(KeywordRequiredColumnWidth));
                     field.filterable = EditorGUILayout.Toggle(field.filterable, GUILayout.Width(KeywordFilterColumnWidth));
                     if (GUILayout.Button(DetailsIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
                         EditorPopup.ShowAt(CreateDetailsPopup(
-                            field.label ?? field.key ?? "Field", () => field.details, v => field.details = v), GUILayoutUtility.GetLastRect());
+                            TaxonomyNames.NameOr(field.label, field.key), () => field.details, v => field.details = v), GUILayoutUtility.GetLastRect());
                     GUILayout.FlexibleSpace();
                     GUILayout.Space(TableGapBeforeDelete);
-                    if (DeleteButton.DrawLayout($"Delete keyword field: {field.key}")) deleteIndex = i;
+                    if (DeleteButton.DrawLayout($"Delete keyword field: {TaxonomyNames.NameOr(field.label, field.key)}")) deleteIndex = i;
                     GUILayout.Space(AddButtonRowRightMargin);
                 }
             }
@@ -282,8 +264,8 @@ namespace TileStories.Editor
             if (deleteIndex >= 0)
             {
                 var field = _config.search_fields[deleteIndex];
-                if (IdentityDeleteGuard.Confirm("Keyword field", field.key,
-                        SearchFieldReferenceResolver.CountPoisUsingField(_config.pois, field.key)))
+                if (IdentityDeleteGuard.Confirm("Keyword field", TaxonomyNames.NameOr(field.label, field.key),
+                        TaxonomyRowKeys.CountReferences(_config.pois, TaxonomyRowKeys.PoiUsesKeywordField, field.key)))
                     _config.search_fields.RemoveAt(deleteIndex);
             }
 
@@ -291,24 +273,14 @@ namespace TileStories.Editor
             if (GUILayout.Button("+ Add keyword field", GUILayout.Width(rowWidth), GUILayout.ExpandWidth(false)))
                 _config.search_fields.Add(new SearchFieldDefinition
                 {
-                    key = NextFreeSearchFieldKey(_config.search_fields),
+                    key = TaxonomyRowKeys.NextFree(_config.search_fields, f => f.key, TaxonomyRowKeys.FieldPrefix),
                     label = "New Field",
                     details = "",
                 });
             EditorRowEnd();
         }
 
-        // "field_1", "field_2", ...: the first key no row uses
-        internal static string NextFreeSearchFieldKey(List<SearchFieldDefinition> fields)
-        {
-            for (int n = 1; ; n++)
-            {
-                string key = "field_" + n;
-                if (fields == null || !fields.Exists(f => f != null && f.key == key)) return key;
-            }
-        }
-
-        // Synonym groups: Key, the other words, delete
+        // Synonym groups: Word, the other words, delete
         private void DrawSynonymGroupsTable()
         {
             _config.synonym_groups ??= new List<SynonymGroup>();
@@ -316,7 +288,7 @@ namespace TileStories.Editor
             using (new TableRowScope())
             {
                 GUILayout.Space(IndentLevel1);
-                GUILayout.Label("Word", EditorStyles.miniBoldLabel, GUILayout.Width(SynonymKeyColumnWidth));
+                GUILayout.Label("Word", EditorStyles.miniBoldLabel, GUILayout.Width(SynonymWordColumnWidth));
                 GUILayout.Space(TableGapWithinGroup);
                 GUILayout.Label("Same meaning (comma-separated)", EditorStyles.miniBoldLabel, GUILayout.Width(SynonymWordsColumnWidth));
                 GUILayout.FlexibleSpace();
@@ -330,12 +302,12 @@ namespace TileStories.Editor
                 using (new TableRowScope())
                 {
                     GUILayout.Space(IndentLevel1);
-                    group.key = EditorGUILayout.TextField(group.key ?? "", GUILayout.Width(SynonymKeyColumnWidth));
+                    group.word = EditorGUILayout.TextField(group.word ?? "", GUILayout.Width(SynonymWordColumnWidth));
                     GUILayout.Space(TableGapWithinGroup);
                     group.synonyms = DrawKeywordListField(group.synonyms, GUILayout.Width(SynonymWordsColumnWidth));
                     GUILayout.FlexibleSpace();
                     GUILayout.Space(TableGapBeforeDelete);
-                    if (DeleteButton.DrawLayout($"Delete synonym group: {group.key}")) deleteIndex = i;
+                    if (DeleteButton.DrawLayout($"Delete synonym group: {group.word}")) deleteIndex = i;
                     GUILayout.Space(AddButtonRowRightMargin);
                 }
             }
@@ -343,7 +315,7 @@ namespace TileStories.Editor
 
             DrawEditorRow(out float rowWidth, out _, IndentLevel1);
             if (GUILayout.Button("+ Add synonym group", GUILayout.Width(rowWidth), GUILayout.ExpandWidth(false)))
-                _config.synonym_groups.Add(new SynonymGroup { key = "", synonyms = new List<string>() });
+                _config.synonym_groups.Add(new SynonymGroup { word = "", synonyms = new List<string>() });
             EditorRowEnd();
         }
 

@@ -78,11 +78,22 @@ namespace TileStories.Editor
             if (_config.outline_levels.Count == 0)
                 _config.outline_levels.AddRange(DefaultOutlineLevels.Create());
 
+            // - a hand-edited file can leave a row without a key, or two rows sharing one: fix it here, once,
+            //   before the undo baseline, so drawing never has to write the config
+            int repairedKeys = TaxonomyRowKeys.RepairKeys(_config);
+            if (repairedKeys > 0)
+                Debug.Log($"[POIEditor] gave {repairedKeys} taxonomy row(s) a missing or repeated key; Save to keep it");
+            // - a file without Priority (older, or written by a script) loads 0 = "unset"; store the order the runtime
+            //   already gives it, so the Priority cell never rewrites it while drawing (it used to write 1 = top)
+            int filledPriorities = FillUnsetLevelPriorities(_config.hierarchy_levels);
+            if (filledPriorities > 0)
+                Debug.Log($"[POIEditor] set {filledPriorities} hierarchy level Priority value(s) to their row order; Save to keep it");
+
             EnsureDefaultIconLibraryLoaded();
             TryResolveWallIconLibraryFromConfig();
             TryResolveWallFontLibraryFromConfig();
             InitializeConfigHistory();
-            _hasUnsavedChanges = false;
+            _hasUnsavedChanges = repairedKeys + filledPriorities > 0;
 
             // Non-blocking validation: warn after load if any POI's
             // hierarchy_level_key does not resolve to a hierarchy_levels entry.
@@ -90,6 +101,27 @@ namespace TileStories.Editor
 
             Debug.Log($"[POIEditor] Loaded {_config.pois.Count} POIs from {_configPath}");
             Repaint();
+        }
+
+        // Give every hierarchy level with an unset Priority (<= 0) the value the runtime already uses for it
+        // (MarkerHierarchyResolver.EffectivePriority: its position among the keyed rows), so nothing changes meaning.
+        // Returns how many levels were set.
+        internal static int FillUnsetLevelPriorities(List<HierarchyLevelEntry> levels)
+        {
+            if (levels == null) return 0;
+            int keyedRow = 0, filled = 0;
+            foreach (var level in levels)
+            {
+                // - count rows exactly as MarkerHierarchyResolver.Configure does: keyed rows only
+                if (level == null || string.IsNullOrWhiteSpace(level.key)) continue;
+                if (level.priority < 1)
+                {
+                    level.priority = MarkerHierarchyResolver.EffectivePriority(level.priority, keyedRow);
+                    filled++;
+                }
+                keyedRow++;
+            }
+            return filled;
         }
 
         private void CopyToStreamingAssets()

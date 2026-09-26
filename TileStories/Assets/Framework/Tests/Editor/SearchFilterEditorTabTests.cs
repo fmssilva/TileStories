@@ -44,7 +44,7 @@ namespace TileStories.Editor.Tests
             "NoResultsHelp", "FacetGroupsHelp", "MismatchHelp", "DimFilteredHelp", "RelaxHelp", "DefaultViewHelp", "RememberViewHelp",
             "RecentSearchesHelp", "SuggestionsHelp", "MinimapEnabledHelp", "MinimapVisibilityHelp", "MinimapIconHelp",
             "MinimapDotSizeHelp", "MinimapTapTargetHelp", "MinimapProjectionHelp", "MinimapBoundsHelp", "VoiceEnabledHelp",
-            "VoiceIndicatorHelp", "KeywordFieldsHelp", "KeywordFieldKeyHelp", "KeywordFieldLabelHelp", "KeywordFieldRequiredHelp",
+            "VoiceIndicatorHelp", "KeywordFieldsHelp", "KeywordFieldLabelHelp", "KeywordFieldRequiredHelp",
             "SynonymGroupsHelp", "SearchDemoHelp", "SearchDemoPerCategoryHelp", "SearchDemoTestCasesHelp", "SearchDemoLabelsHelp",
             "SearchDemoDistanceHelp", "SearchDemoSpacingHelp", "SearchDemoRunLodHelp", "TryQueryHelp", "SearchReadoutHelp",
             "NoResultsFiltersHelp", "PoiSummaryHelp", "PoiKeywordFieldHelp", "PoiOthersKeywordsHelp", "PoiFoundByHelp", "KeywordFieldFilterHelp", "DemoQueryHelp",
@@ -282,7 +282,7 @@ namespace TileStories.Editor.Tests
             var vocabulary = new (string what, Action<WallConfigData> edit)[]
             {
                 ("a keyword field", c => c.search_fields.Add(new SearchFieldDefinition { key = "era" })),
-                ("a synonym group", c => c.synonym_groups.Add(new SynonymGroup { key = "church" })),
+                ("a synonym group", c => c.synonym_groups.Add(new SynonymGroup { word = "church" })),
                 ("a POI's Others keywords", c => c.pois[0].search_keywords.Add("stone")),
                 ("a POI's keyword field", c => c.pois[0].search_keyword_fields.Add(new POISearchKeywordField { field_key = "era" })),
                 ("a POI's summary", c => c.pois[0].summary = "new text"),
@@ -364,15 +364,6 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(sw.IsOn(on));
             Assert.IsFalse(sw.IsOn(new WallConfigData()));
             StringAssert.Contains("Select, Filter & Search > Test", sw.HowToDisable);
-        }
-
-        [Test]
-        public void NextFreeSearchFieldKey_NeverRepeatsAKey()
-        {
-            var fields = new List<SearchFieldDefinition> { new() { key = "field_1" }, new() { key = "field_3" } };
-            Assert.AreEqual("field_2", POIEditorToolWindow.NextFreeSearchFieldKey(fields));
-            fields.Add(new SearchFieldDefinition { key = "field_2" });
-            Assert.AreEqual("field_4", POIEditorToolWindow.NextFreeSearchFieldKey(fields));
         }
 
         [Test]
@@ -472,7 +463,7 @@ namespace TileStories.Editor.Tests
                 s.minimap.bounds_mode = conditionalRowsOn ? "manual" : "auto";
                 s.voice.enabled = conditionalRowsOn;
                 c.search_fields.Add(new SearchFieldDefinition { key = "era", label = "Era" });
-                c.synonym_groups.Add(new SynonymGroup { key = "church", synonyms = new List<string> { "chapel" } });
+                c.synonym_groups.Add(new SynonymGroup { word = "church", synonyms = new List<string> { "chapel" } });
                 c.search_demo.enabled = demo;
             });
         }

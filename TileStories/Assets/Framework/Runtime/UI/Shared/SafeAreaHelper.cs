@@ -56,6 +56,30 @@ namespace TileStories
             return ComputePadding(Screen.safeArea, new Vector2(Screen.width, Screen.height));
         }
 
+        // Keep an absolutely positioned UI root inside the device's safe area (notch, home indicator): the
+        // root's own left/top/right/bottom offsets take the insets, converted from screen pixels to panel units
+        // (the panel scales to its reference size). Parent padding would not move absolutely positioned
+        // children. Call it from the root's GeometryChangedEvent; it writes only a changed value.
+        public static void ApplyAsOffsets(VisualElement root)
+        {
+            if (root?.panel == null) return;
+            var insets = GetCurrent();
+            float scale = RuntimePanelUtils.ScreenToPanel(root.panel, new Vector2(1000f, 0f)).x
+                        - RuntimePanelUtils.ScreenToPanel(root.panel, Vector2.zero).x;
+            scale = scale > 0f ? scale / 1000f : 1f;
+            SetOffset(root.style.left, insets.left * scale, v => root.style.left = v);
+            SetOffset(root.style.top, insets.top * scale, v => root.style.top = v);
+            SetOffset(root.style.right, insets.right * scale, v => root.style.right = v);
+            SetOffset(root.style.bottom, insets.bottom * scale, v => root.style.bottom = v);
+        }
+
+        // - write only a changed value: a style write inside GeometryChanged would otherwise loop
+        private static void SetOffset(StyleLength current, float value, Action<StyleLength> set)
+        {
+            if (current.keyword == StyleKeyword.Undefined && Mathf.Approximately(current.value.value, value)) return;
+            set(value);
+        }
+
         // Pad the root element of a UIDocument panel once at init; idempotent re-apply is fine.
         public static void ApplyToRoot(VisualElement root)
         {

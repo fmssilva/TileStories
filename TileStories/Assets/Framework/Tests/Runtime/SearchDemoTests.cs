@@ -149,7 +149,7 @@ namespace TileStories.Tests
         {
             yield return TurnOn(Demo());
             var cfg = ConfigCopy();
-            string category = cfg.category_styles[0].category;
+            string category = cfg.category_styles[0].key;
             Press(Host.Root.Q<Button>("search-filters"));
             Press(Host.Tray.Root.Q<Toggle>("facet-Category-" + category));
             yield return null;

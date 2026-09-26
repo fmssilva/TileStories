@@ -58,19 +58,19 @@ namespace TileStories
 
             foreach (var entry in overrides)
             {
-                if (entry == null || string.IsNullOrEmpty(entry.category)) continue;
+                if (entry == null || string.IsNullOrEmpty(entry.key)) continue;
 
-                _declaredCategories.Add(entry.category);
+                _declaredCategories.Add(entry.key);
 
                 if (!string.IsNullOrEmpty(entry.color_hex) &&
                     ColorUtility.TryParseHtmlString(entry.color_hex, out var parsedColor))
                 {
-                    _colorOverrides[entry.category] = parsedColor;
+                    _colorOverrides[entry.key] = parsedColor;
                 }
 
                 if (!string.IsNullOrEmpty(entry.icon_key))
                 {
-                    _iconOverrides[entry.category] = entry.icon_key;
+                    _iconOverrides[entry.key] = entry.icon_key;
                 }
             }
         }

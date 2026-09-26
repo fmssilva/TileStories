@@ -87,7 +87,7 @@ namespace TileStories.Tests
                 .Distinct()
                 .Select(c => new CategoryStyleEntry
                 {
-                    category = c,
+                    key = c,
                     color_hex = string.Empty,
                     icon_key = CategoryPalette.ResolveIconKey(c)
                 })

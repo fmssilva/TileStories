@@ -38,9 +38,9 @@ namespace TileStories
     {
         public static readonly List<CategoryStyleEntry> Overrides = new()
         {
-            new CategoryStyleEntry { category = "religious", color_hex = "#6B4226", icon_key = "temple" },
-            new CategoryStyleEntry { category = "civic",     color_hex = "#8A5A2B" },
-            new CategoryStyleEntry { category = "palace",    color_hex = "#5A6E8C" },
+            new CategoryStyleEntry { key = "religious", color_hex = "#6B4226", icon_key = "temple" },
+            new CategoryStyleEntry { key = "civic",     color_hex = "#8A5A2B" },
+            new CategoryStyleEntry { key = "palace",    color_hex = "#5A6E8C" },
         };
 
         public static readonly List<ClusterGalleryEntry> Entries = new()

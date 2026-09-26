@@ -41,7 +41,7 @@ namespace TileStories
         // override is checked against a realistic case, not an invented one.
         public static readonly List<CategoryStyleEntry> Overrides = new()
         {
-            new CategoryStyleEntry { category = "furniture", color_hex = "#8033CC" },
+            new CategoryStyleEntry { key = "furniture", color_hex = "#8033CC" },
         };
 
         // Five fabricated hierarchy levels mirroring section 13 of

@@ -322,7 +322,7 @@ namespace TileStories.Editor
                     GUILayout.Space(TableGapBeforeDelete);
 
                     // Remove (trash button)
-                    string entryDisplayName = string.IsNullOrWhiteSpace(entry.level_name) ? entry.key : entry.level_name;
+                    string entryDisplayName = EditorNames.Level(entry);
                     bool deleteHierarchyClicked = DeleteButton.DrawLayout($"Delete hierarchy level: {entryDisplayName}");
                     ReportCheckboxRect("delete", i, GUILayoutUtility.GetLastRect());
 
@@ -345,8 +345,6 @@ namespace TileStories.Editor
                     }
                 }
 
-                if (string.IsNullOrWhiteSpace(entry.key))
-                    entry.key = NextFreeHierarchyLevelKey(_config.hierarchy_levels);
                 _config.hierarchy_levels[i] = entry;
             }
 
@@ -359,7 +357,7 @@ namespace TileStories.Editor
             {
                 _config.hierarchy_levels.Add(new HierarchyLevelEntry
                 {
-                    key = NextFreeHierarchyLevelKey(_config.hierarchy_levels),
+                    key = TaxonomyRowKeys.NextFree(_config.hierarchy_levels, e => e.key, TaxonomyRowKeys.LevelPrefix),
                     level_name = (_config.hierarchy_levels.Count + 1).ToString(),
                     priority = NextLowestPriority(_config.hierarchy_levels),
                     size_cm = 12f,
@@ -375,21 +373,6 @@ namespace TileStories.Editor
             EditorRowEnd();
 
             DrawDomainTestSubSection(_hierarchyTest, HierarchySceneTestGuide, HierarchyPlaymodeTestGuide, HierarchyDeviceTestGuide, DrawHierarchyPreviewSwitch);
-        }
-
-        // A level key nobody uses yet: "level_N" with the smallest N >= Count + 1 that is free. The
-        // key is the identity POIs point at, so it must never repeat -- "level_" + (Count + 1) alone
-        // collided as soon as a middle row had been deleted (level_1, level_3 -> a second level_3).
-        internal static string NextFreeHierarchyLevelKey(List<HierarchyLevelEntry> levels)
-        {
-            var used = new HashSet<string>();
-            if (levels != null)
-                foreach (var level in levels)
-                    if (level != null && !string.IsNullOrWhiteSpace(level.key)) used.Add(level.key.Trim());
-
-            int n = (levels?.Count ?? 0) + 1;
-            while (used.Contains("level_" + n)) n++;
-            return "level_" + n;
         }
 
         // "Add Hierarchy demo grid": the SAME Play-Mode preview switch Effects > Test calls "Add

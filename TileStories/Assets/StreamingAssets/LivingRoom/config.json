@@ -66,42 +66,48 @@
     "marker_icon_library_resources_path": "MarkerSymbols/living_room_IconLibrary",
     "category_styles": [
         {
-            "category": "Royal Government",
+            "key": "royal_government",
+            "label": "Royal Government",
             "color_hex": "#FFC786",
             "icon_key": "IconRoyal&Government",
             "details": "Royal & Government buildings",
             "search_keywords": []
         },
         {
-            "category": "religious",
+            "key": "religious",
+            "label": "Religious",
             "color_hex": "#CB80FF",
             "icon_key": "IconReligious",
             "details": "Sacred Architecture (includes christian, jew, muslim and pagan)",
             "search_keywords": []
         },
         {
-            "category": "military",
+            "key": "military",
+            "label": "Military",
             "color_hex": "#B44848",
             "icon_key": "IconMilitary",
             "details": "Defense & Fortifications",
             "search_keywords": []
         },
         {
-            "category": "residential",
+            "key": "residential",
+            "label": "Residential",
             "color_hex": "#FF9FFC",
             "icon_key": "IconNobel&PrivateResidence",
             "details": "Noble & Private Housing",
             "search_keywords": []
         },
         {
-            "category": "economic",
+            "key": "economic",
+            "label": "Economic",
             "color_hex": "#8F5E48",
             "icon_key": "IconIndustry&Trade",
             "details": "Trade, Industry & Harbor",
             "search_keywords": []
         },
         {
-            "category": "infrastructure",
+            "key": "infrastructure",
+            "label": "Infrastructure",
             "color_hex": "#9DDEFF",
             "icon_key": "IconInfrastructures",
             "details": "Public Utilities & Works",
@@ -286,7 +292,7 @@
         {
             "id": "lamp",
             "name": "The Lamp",
-            "category": "Royal Government",
+            "category": "royal_government",
             "editor_rotation_deg": 151.98159790039063,
             "editor_rotation_x_deg": 342.31494140625,
             "editor_rotation_z_deg": 8.911750793457032,
@@ -306,7 +312,55 @@
             "status_level_key": "intact",
             "hierarchy_level_key": "level_1",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": [
+                    {
+                        "key": "block_1",
+                        "kind": "header",
+                        "variant": "text_only",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "St George's Castle"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Castelo de Sao Jorge"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "subtitle",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Military - c. 1700 on the panel"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Militar - c. 1700 no painel"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    }
+                ]
+            }
         },
         {
             "id": "lamp_religious",
@@ -356,7 +410,37 @@
             "status_level_key": "partial_damage",
             "hierarchy_level_key": "level_3",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": [
+                    {
+                        "key": "block_1",
+                        "kind": "header",
+                        "variant": "compact",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Castle Keep"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Torre de Menagem"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    }
+                ]
+            }
         },
         {
             "id": "lamp_residential",
@@ -436,7 +520,7 @@
         {
             "id": "painting",
             "name": "The Painting",
-            "category": "Royal Government",
+            "category": "royal_government",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
             "editor_rotation_z_deg": 0.0,
@@ -586,7 +670,7 @@
         {
             "id": "camera",
             "name": "The Camera",
-            "category": "Royal Government",
+            "category": "royal_government",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
             "editor_rotation_z_deg": 0.0,
@@ -736,7 +820,7 @@
         {
             "id": "dev_disp_eq_royal",
             "name": "Dev Disp Eq Royal",
-            "category": "Royal Government",
+            "category": "royal_government",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
             "editor_rotation_z_deg": 0.0,
@@ -1089,7 +1173,8 @@
             "match_mode": "all",
             "prefix_matching": "all_fields",
             "typo_tolerance": 1,
-            "no_results_message": "No matches for \"{query}\" - try removing a filter."
+            "no_results_message": "No matches for \"{query}\" - try removing a filter.",
+            "no_results_filters_message": "Nothing matches these filters - try removing one."
         },
         "filter": {
             "category_facet": true,
@@ -1133,6 +1218,21 @@
     },
     "search_fields": [],
     "synonym_groups": [],
+    "card_settings": {
+        "enabled": true,
+        "languages": [
+            "en",
+            "pt"
+        ],
+        "media_resources_path": "LivingRoom/CardMedia",
+        "container": {
+            "open_stop": "peek",
+            "half_max_ratio": 0.4000000059604645,
+            "dismiss_on_tap_outside": true,
+            "keep_audio_on_close": true
+        },
+        "kinds": []
+    },
     "search_demo": {
         "enabled": false,
         "markers_per_category": 3,

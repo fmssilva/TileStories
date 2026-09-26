@@ -62,5 +62,34 @@ namespace TileStories.Tests
                 if (openedHere) EditorSceneManager.CloseScene(scene, true);
             }
         }
+
+        // The POI Detail Card (_3.1): its own PoiCard object with its own UIDocument drawn above the search UI,
+        // bound to the wall and to both card stylesheets (tokens + layout)
+        [Test]
+        public void LivingRoomScene_HasThePoiCard_AboveTheSearchUi_WiredToTheWall()
+        {
+            var scene = SceneManager.GetSceneByPath(ScenePath);
+            bool openedHere = !scene.isLoaded;
+            if (openedHere) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+            try
+            {
+                var wall = Only<WallSession>(scene);
+                var card = Only<PoiCardHost>(scene);
+                Assert.AreEqual("PoiCard", card.gameObject.name);
+                Assert.AreSame(wall, Ref(card, "wallSession"), "the card shows this wall's POIs");
+                Assert.AreEqual("Assets/Framework/Runtime/UI/Cards/CardTokens.uss", AssetDatabase.GetAssetPath(Ref(card, "tokens")));
+                Assert.AreEqual("Assets/Framework/Runtime/UI/Cards/PoiCard.uss", AssetDatabase.GetAssetPath(Ref(card, "cardStyle")));
+
+                var cardDocument = card.GetComponent<UIDocument>();
+                var searchDocument = Only<SearchUIHost>(scene).GetComponent<UIDocument>();
+                Assert.AreSame(searchDocument.panelSettings, cardDocument.panelSettings, "one shared runtime panel");
+                Assert.AreEqual(2, cardDocument.sortingOrder, "sort order 2");
+                Assert.Greater(cardDocument.sortingOrder, searchDocument.sortingOrder, "the card draws above the search UI");
+            }
+            finally
+            {
+                if (openedHere) EditorSceneManager.CloseScene(scene, true);
+            }
+        }
     }
 }

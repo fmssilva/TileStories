@@ -48,7 +48,7 @@ namespace TileStories.Tests
         {
             var overrides = new[]
             {
-                new CategoryStyleEntry { category = "furniture", color_hex = "#FF0000" }
+                new CategoryStyleEntry { key = "furniture", color_hex = "#FF0000" }
             };
             CategoryPalette.Configure(overrides);
 
@@ -75,7 +75,7 @@ namespace TileStories.Tests
         {
             var overrides = new[]
             {
-                new CategoryStyleEntry { category = "furniture", icon_key = "chair" }
+                new CategoryStyleEntry { key = "furniture", icon_key = "chair" }
             };
             CategoryPalette.Configure(overrides);
 
@@ -117,7 +117,7 @@ namespace TileStories.Tests
         {
             var overrides = new[]
             {
-                new CategoryStyleEntry { category = "furniture", color_hex = "#00FF00" }
+                new CategoryStyleEntry { key = "furniture", color_hex = "#00FF00" }
             };
             CategoryPalette.Configure(overrides);
 
@@ -130,7 +130,7 @@ namespace TileStories.Tests
         {
             var overrides = new[]
             {
-                new CategoryStyleEntry { category = "furniture", icon_key = "custom_icon" }
+                new CategoryStyleEntry { key = "furniture", icon_key = "custom_icon" }
             };
             CategoryPalette.Configure(overrides);
 

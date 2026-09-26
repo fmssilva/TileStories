@@ -1,0 +1,110 @@
+/* The POI Detail Card's layout (PoiCardSheetView, BlockStackView, the block views). Written ONLY with the
+   --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3, _3.3).
+   UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
+
+/* The full area the sheet rests at the bottom of; lets taps through to the camera view */
+.poi-card-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+/* The sheet: its height is its stop (set by the view), animated between stops */
+.poi-card {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    background-color: var(--ts-surface);
+    border-top-left-radius: var(--ts-radius-l);
+    border-top-right-radius: var(--ts-radius-l);
+    border-top-width: var(--ts-line-width);
+    border-top-color: var(--ts-line);
+    transition-property: height;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: var(--ts-ease);
+}
+
+/* While a finger drags the sheet it follows the finger, no animation */
+.poi-card--dragging {
+    transition-duration: 0s;
+}
+
+/* The grab zone at the top: a full-width, finger-sized drag target with a small bar in its middle */
+.poi-card__handle {
+    flex-shrink: 0;
+    height: var(--ts-space-5);
+    align-items: center;
+    justify-content: center;
+}
+
+.poi-card__grabber {
+    width: var(--ts-grabber-width);
+    height: var(--ts-grabber-height);
+    border-radius: var(--ts-grabber-height);
+    background-color: var(--ts-ink-3);
+}
+
+.poi-card__close {
+    position: absolute;
+    top: var(--ts-space-2);
+    right: var(--ts-space-2);
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-line);
+    border-width: var(--ts-line-width);
+    border-radius: var(--ts-touch-target);
+}
+
+/* The pinned header slot (never scrolls) and the scrolling rest of the stack */
+.poi-card__header {
+    flex-shrink: 0;
+    padding-left: var(--ts-space-4);
+    padding-right: var(--ts-space-6);
+}
+
+.poi-card__stack {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+/* ---- header block ---- */
+
+.card-header__top {
+    margin-bottom: var(--ts-space-3);
+    padding-right: var(--ts-space-6);
+}
+
+.card-header__title {
+    font-size: var(--ts-size-title);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-chip {
+    align-self: flex-start;
+    margin-top: var(--ts-space-2);
+    padding: var(--ts-space-1) var(--ts-space-3);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-on-accent);
+    background-color: var(--ts-accent);
+    border-radius: var(--ts-radius-m);
+}
+
+.card-header__subtitle {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-4) 0;
+    padding: 0;
+}

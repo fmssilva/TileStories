@@ -57,6 +57,12 @@ namespace TileStories.Editor
                 float needed = EditorStyles.label.CalcSize(new GUIContent(label)).x + 6f;
                 if (EditorGUIUtility.labelWidth < needed) EditorGUIUtility.labelWidth = needed;
                 value = EditorGUILayout.Toggle(label, value, GUILayout.Width(FieldWidth(rowWidth, helpText)), GUILayout.ExpandWidth(false));
+                // - the checkbox itself (right of the label column): clicking a toggle's label does not toggle it
+                if (FieldRowRectProbe != null && Event.current.type == EventType.Repaint)
+                {
+                    Rect r = GUILayoutUtility.GetLastRect();
+                    FieldRowRectProbe(label, new Rect(r.x + EditorGUIUtility.labelWidth, r.y, EditorGUIUtility.singleLineHeight, r.height));
+                }
             }
             DrawRowHelp(label, helpText);
             EditorRowEnd();
@@ -94,11 +100,17 @@ namespace TileStories.Editor
         }
 
         // A min/max-clamped slider instead of a free-typed float
+        // Test seam: reports a slider or toggle row's rect (label, rect) on Repaint, so a test can drag / click the real control.
+        // Null in production, so zero cost (same idea as TableCellRectProbe).
+        internal static Action<string, Rect> FieldRowRectProbe;
+
         internal static float DrawSliderField(string label, float value, float min, float max, string helpText = "", float extraIndentPixels = 0f)
         {
             DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
             using (new FieldLabelWidthCompensationScope(extraIndentPixels))
                 value = EditorGUILayout.Slider(label, value, min, max, GUILayout.Width(FieldWidth(rowWidth, helpText)), GUILayout.ExpandWidth(false));
+            if (FieldRowRectProbe != null && Event.current.type == EventType.Repaint)
+                FieldRowRectProbe(label, GUILayoutUtility.GetLastRect());
             DrawRowHelp(label, helpText);
             EditorRowEnd();
             return value;

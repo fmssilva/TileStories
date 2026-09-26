@@ -53,7 +53,7 @@ namespace TileStories.Tests
                     {
                         var entry = new CategoryStyleEntry
                         {
-                            category = "test_category",
+                            key = "test_category",
                             color_hex = "#FFC786",
                             icon_key = string.Empty,
                             details = string.Empty,
@@ -67,8 +67,8 @@ namespace TileStories.Tests
                         MethodInfo closed = generic.MakeGenericMethod(typeof(CategoryStyleEntry));
 
                         System.Func<CategoryStyleEntry> createNew = () => new CategoryStyleEntry();
-                        System.Func<CategoryStyleEntry, string> getPrimary = e => e.category;
-                        System.Action<CategoryStyleEntry, string> setPrimary = (e, v) => e.category = v;
+                        System.Func<CategoryStyleEntry, string> getPrimary = e => e.label;
+                        System.Action<CategoryStyleEntry, string> setPrimary = (e, v) => e.label = v;
                         System.Func<CategoryStyleEntry, string> getIcon = e => e.icon_key;
                         System.Action<CategoryStyleEntry, string> setIcon = (e, v) => e.icon_key = v;
                         System.Func<CategoryStyleEntry, string> getColor = e => e.color_hex;

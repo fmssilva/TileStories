@@ -21,7 +21,7 @@ namespace TileStories.Editor.Tests
                 marker_shape = "circle",
                 marker_outline_mode = "per_type",
                 marker_use_badge = true,
-                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { category = "cat", icon_key = "unknown", color_hex = "#3366CC" } },
+                category_styles = new List<CategoryStyleEntry> { new CategoryStyleEntry { key = "cat", icon_key = "unknown", color_hex = "#3366CC" } },
                 badge_categories = new List<BadgeCategoryEntry>(),
                 outline_levels = new List<OutlineLevelEntry>
                 {

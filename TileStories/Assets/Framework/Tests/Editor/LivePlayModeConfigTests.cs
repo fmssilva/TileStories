@@ -405,14 +405,14 @@ namespace TileStories.Editor.Tests
 
             // 2. wall-level: category colour edit reaches the running symbol
             authoring.marker_outline_mode = "uniform";
-            var categoryEntry = authoring.category_styles.First(e => e.category == poi.category);
+            var categoryEntry = authoring.category_styles.First(e => e.key == poi.category);
             categoryEntry.color_hex = "#00FF00";
             dispatcher.Push(session, authoring);
             Color expected; ColorUtility.TryParseHtmlString("#00FF00", out expected);
             Assert.AreEqual(expected, symbol.color, "a live category colour edit must reach the running Symbol.");
 
             // 3. per-POI: switching this POI to a different real category changes it live
-            string otherCategory = authoring.category_styles.First(e => e.category != poi.category).category;
+            string otherCategory = authoring.category_styles.First(e => e.key != poi.category).key;
             poi.category = otherCategory;
             dispatcher.Push(session, authoring);
             Assert.AreNotEqual(expected, symbol.color, "the marker must recolour when its own POI.category changes live.");

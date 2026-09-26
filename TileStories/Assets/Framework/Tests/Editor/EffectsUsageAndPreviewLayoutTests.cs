@@ -112,7 +112,7 @@ namespace TileStories.Editor.Tests
 
             EffectUsageSummary.PreviewBaseOptions(Wall(), out ids, out labels);
             CollectionAssert.AreEqual(new[] { "", "a", "b", "c" }, ids);
-            Assert.AreEqual("Alpha (a)", labels[1]);
+            Assert.AreEqual("1. Alpha", labels[1], "the POI list title, never the id");
             EffectUsageSummary.PreviewBaseOptions(null, out ids, out _);
             Assert.AreEqual(1, ids.Length, "a null config still offers the plain circle");
         }

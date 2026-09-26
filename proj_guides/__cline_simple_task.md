@@ -11,8 +11,6 @@
 
 
 # future task?? 
-A *stable `key` + `label`* split for categories (like `badge_categories` already has) is argitchitecturally "cleaner" but is a __schema + every-consumer change__ (schema, CategoryPalette, search/filter/minimap/results, editor dropdowns, tests, config backfill) — big and risky for one wall today. The propagated-string approach keeps the current schema, fixes your exact failure, matches the existing POI-rename pattern, and is genuinely small. If a second wall later needs real display-name independence, the `key`/`label` migration can happen then (badge is the template
-
 
 lets create a size and resize domain?? where we set the size of markers and lables of each hierarhcy level and we adjuts the distance scaling? ?? should we have this domain on its own or better to just keep things more closed to the current domains like marker, label, hierarchy, LOD? 
 
@@ -79,7 +77,30 @@ d) after we do and implement and clean and test everything, lets update, if nece
 So start by reading them all. 
 
 
-## `and now l`
+## `and now implement the POI Detail Card foundation: _3.1 steps 0-5`
+
+Domain spec (read ALL lines before planning): 
+  C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md
+Also read for context only (do NOT implement yet): _3.2_POI_Card_Navigation.md, _3.3_POI_Card_Styles.md
+Also read: _5.1_Editor_Tab.md (the general Editor rules the new tab must follow) and
+_2.6_Select_Filter_Search.md section 14 (the minimal DetailCardView we are replacing).
+
+Scope of THIS session: _3.1 section 10, steps 0 to 5 only:
+0. Baseline: compile clean + all EditMode/PlayMode tests green BEFORE any change; record totals in _3.1's status table.
+1. Config model (card_settings, POIData.card, BlockInstanceData, BlockFieldValue, BlockItemData, LocalizedEntry) -- JsonUtility compatible (option C, _3.1 section 3.1).
+2. Block contract + BlockRegistry + BuiltInBlocks + BlockStackBuilder + BlockFieldReader + SheetStopRule (pure, EditMode tests).
+3. Card container: PoiCardHost on a new "PoiCard" scene object (own UIDocument, sort order 2), sheet stops peek/half(<=40%)/full, 3 dismiss paths, the `header` kind only (compact, text_only). Remove DetailCardView from SearchUIHost, move Subtitle to a pure PoiSubtitle, migrate the 4 tests that use the old card and prove each still passes. Phase A gallery (Assets/Dev/CardGallery) + Phase B real-scene tests.
+4. Editor: third tab "Detail Card" (Card Container + Block Library sections) and Specific Marker > "Card Content" section with the generic BlockFieldDrawer.
+5. Media seam (IMediaSource + ResourcesMediaSource), lazy load on bind / release on unbind.
+
+Hard rules for this domain:
+- Fixture: "The Lamp" (id lamp) gets the card content; "Lamp - Military" (id lamp_military) the short card. NEVER change any POI's id, name, category, summary or keywords -- SearchSceneTests depend on them. Card text is NOT indexed by search.
+- No literal colours/sizes in C# or UXML: PoiCard.uss + CardTokens.uss with var(--ts-*) tokens (token names in _3.3 section 2).
+- Stop after step 5 green. Blocks tiers (step 6+) are the next session.
+- Before finishing: update _3.1's Implementation status table with real proof, 10-structure.md for every new file, and _5.1 for the new tab (it describes current truth only).
+
+If any step's design in _3.1 turns out wrong against the real code, STOP and report it instead of patching around it.
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

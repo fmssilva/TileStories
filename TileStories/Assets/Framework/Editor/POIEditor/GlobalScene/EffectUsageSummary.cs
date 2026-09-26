@@ -61,11 +61,12 @@ namespace TileStories.Editor
             var l = new List<string> { EffectsPreviewSpawner.PlainCircleName };
             if (config?.pois != null)
             {
-                foreach (var poi in config.pois)
+                for (int n = 0; n < config.pois.Count; n++)
                 {
+                    var poi = config.pois[n];
                     if (poi == null || string.IsNullOrWhiteSpace(poi.id)) continue;
                     i.Add(poi.id);
-                    l.Add(string.IsNullOrWhiteSpace(poi.name) ? poi.id : $"{poi.name} ({poi.id})");
+                    l.Add(EditorNames.Poi(n, poi));   // "3. North tower", like the POI list -- the id is never shown
                 }
             }
             ids = i.ToArray();

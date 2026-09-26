@@ -129,7 +129,7 @@ namespace TileStories.Editor
             var level = FindHierarchyLevel(levelKey);
             if (level == null) return false;
 
-            string levelName = string.IsNullOrWhiteSpace(level.level_name) ? level.key : level.level_name;
+            string levelName = EditorNames.Level(level);
             EditorGUILayout.LabelField("Hierarchy level: " + levelName, EditorStyles.miniLabel);
             EditorGUILayout.Space(2f);
 

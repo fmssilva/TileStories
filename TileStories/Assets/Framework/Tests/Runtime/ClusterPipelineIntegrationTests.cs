@@ -38,7 +38,7 @@ namespace TileStories.Tests
         // real aggregate of 6 members with 6 pie slices.
         private static readonly (string id, string category)[] LampFamily =
         {
-            ("lamp",                 "Royal Government"), // must match StreamingAssets config (POI + style row)
+            ("lamp",                 "royal_government"), // must match StreamingAssets config (POI category key = style row key)
             ("lamp_religious",       "religious"),
             ("lamp_military",        "military"),
             ("lamp_residential",     "residential"),

@@ -5,7 +5,7 @@ namespace TileStories
     //   - results are "active" while there is query text or at least one filter
     //   - the view switch (List / Minimap / Highlight) shows only while results are active
     //   - the list shows in List view while results are active and nothing is selected
-    //   - a selection shows the detail card instead of the list
+    //   - a selection hides the list (the POI Detail Card, PoiCardHost, shows the selected POI)
     //   - the minimap shows while it is enabled and either set to "always", opened with its button, or
     //     the Minimap view is showing active results
     // "Highlight" view shows no panel at all: the markers themselves show the result set.
@@ -14,15 +14,13 @@ namespace TileStories
         public readonly bool ViewModes;
         public readonly bool List;
         public readonly bool Minimap;
-        public readonly bool Card;
         public readonly bool MinimapButton;
 
-        public SearchPanels(bool viewModes, bool list, bool minimap, bool card, bool minimapButton)
+        public SearchPanels(bool viewModes, bool list, bool minimap, bool minimapButton)
         {
             ViewModes = viewModes;
             List = list;
             Minimap = minimap;
-            Card = card;
             MinimapButton = minimapButton;
         }
     }
@@ -36,7 +34,7 @@ namespace TileStories
             bool minimap = minimapEnabled
                 && (minimapAlways || minimapToggledOpen || (resultsActive && view == ViewMode.Minimap));
             bool button = minimapEnabled && !minimapAlways;
-            return new SearchPanels(resultsActive, list, minimap, selectionActive, button);
+            return new SearchPanels(resultsActive, list, minimap, button);
         }
     }
 

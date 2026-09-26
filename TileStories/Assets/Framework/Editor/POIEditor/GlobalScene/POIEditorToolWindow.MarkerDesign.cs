@@ -65,16 +65,17 @@ namespace TileStories.Editor
             if (_config.category_styles.Count == 0)
                 _config.category_styles.AddRange(DefaultCategoryStyles.Create());
 
-            // Resolve Enter/ESC for an in-progress rename BEFORE the shared TextField draws
-            // (Unity's TextField consumes the first Return when it sees it -- the same "press
-            // Enter twice" trap PoiRenameKeys was built to avoid). Click-outside also commits.
-            CategoryRenameEdit.HandleEditEvents();
-
+            // The cell edits the category's label (what a visitor reads); the key POIs store is generated
+            // once and never shown, like every taxonomy table. So a rename never touches a POI.
             DrawSymbolTable(
                 _config.category_styles,
-                () => new CategoryStyleEntry { category = "new_category", icon_key = "unknown", color_hex = string.Empty },
-                CategoryRenameEdit.GetLabel,
-                CategoryRenameEdit.SetLabel,
+                () => new CategoryStyleEntry
+                {
+                    key = TaxonomyRowKeys.NextFree(_config.category_styles, e => e.key, TaxonomyRowKeys.CategoryPrefix),
+                    label = "New Category", icon_key = "unknown", color_hex = string.Empty
+                },
+                e => e.label,
+                (e, v) => e.label = v,
                 e => e.icon_key,
                 (e, v) => e.icon_key = v,
                 e => e.color_hex,
@@ -83,58 +84,17 @@ namespace TileStories.Editor
                 (e, v) => e.details = v,
                 e => _config.marker_shape != "none",
                 "+ Add category",
-                "Category",
+                "Category label",
                 "Write more information about this category here: what it represents, when to use it, example POIs. Stored per row in config.json.",
                 SymbolColumnHelp,
                 true,
                 e => e.search_keywords,
                 (e, v) => e.search_keywords = v,
-                // Deleting a category POIs still reference cannot propagate anywhere,
-                // so ask first and say how many POIs would be orphaned.
-                entry => IdentityRenameResolver.CountReferences(
-                    _config.pois, IdentityRenameResolver.PoiUsesCategory, entry.category));
+                // Deleting a category POIs still reference orphans them, so ask first with the count
+                entry => TaxonomyRowKeys.CountReferences(_config.pois, TaxonomyRowKeys.PoiUsesCategory, entry.key));
 
             DrawDomainTestSubSection(_markerTest, MarkerSceneTestGuide, MarkerPlaymodeTestGuide, MarkerDeviceTestGuide);
         }
-
-        // ---- Commit-style identity renames (category + badge key) ----
-        // In both tables the primary cell IS the identity their POIs reference, so
-        // renaming a row must propagate to every POI holding the old string.
-        // Editing is buffered in SessionState: keystrokes only update the draft,
-        // the row's identity stays pristine until Commit writes it once and
-        // IdentityRenameResolver rewrites the POIs. ESC discards the draft (no
-        // change); Enter or a click outside the field commits the final word,
-        // mirroring the PoiRenameKeys pattern the POI header rename uses.
-        //
-        // Each state object is built once and reused. It reads rows/POIs through
-        // providers, so it keeps pointing at the live _config even after undo
-        // replaces it wholesale (ApplyConfigSnapshot) or a reload swaps in a fresh
-        // WallConfigData -- a captured list reference would silently detach.
-        private IdentityRenameEditState<CategoryStyleEntry> _categoryRenameEdit;
-        private IdentityRenameEditState<BadgeCategoryEntry> _badgeRenameEdit;
-
-        private IdentityRenameEditState<CategoryStyleEntry> CategoryRenameEdit =>
-            _categoryRenameEdit ??= new IdentityRenameEditState<CategoryStyleEntry>(
-                "TileStories.CategoryEdit",
-                () => _config?.category_styles,
-                e => e.category,
-                (e, v) => e.category = v,
-                () => _config?.pois,
-                IdentityRenameResolver.CategoryRewrite);
-
-        private IdentityRenameEditState<BadgeCategoryEntry> BadgeRenameEdit =>
-            _badgeRenameEdit ??= new IdentityRenameEditState<BadgeCategoryEntry>(
-                "TileStories.BadgeEdit",
-                () => _config?.badge_categories,
-                e => e.key,
-                (e, v) => e.key = v,
-                () => _config?.pois,
-                IdentityRenameResolver.BadgeKeyRewrite);
-
-        // The get/set pair for the primary cell now lives on IdentityRenameEditState:
-        // it owns the "is this keystroke a draft or the committed word?" decision, so
-        // both tables call CategoryRenameEdit.GetLabel / .SetLabel directly instead of
-        // each partial re-implementing the SessionState dance.
 
         // ---------------- Badge ----------------
 
@@ -165,16 +125,18 @@ namespace TileStories.Editor
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Badge Categories", EditorStyles.boldLabel);
 
-            // Same commit-style rename protection the category table has: the badge key IS the
-            // identity POIData.badge_category references, so a raw keystroke straight into it would
-            // orphan every POI that uses this badge. Resolve Enter/ESC before the shared TextField draws.
-            BadgeRenameEdit.HandleEditEvents();
-
+            // The cell edits the badge's label (what a visitor reads on its filter chip); the key POIs
+            // store is generated once and never shown, like the Outline Types table. So a rename never
+            // touches a POI, and a row the framework looks up by key (the unknown badge) keeps working.
             DrawSymbolTable(
                 _config.badge_categories,
-                () => new BadgeCategoryEntry { key = "new_badge", label = "New Badge", icon_key = "unknown", color_hex = "#B3B3B3" },
-                BadgeRenameEdit.GetLabel,
-                BadgeRenameEdit.SetLabel,
+                () => new BadgeCategoryEntry
+                {
+                    key = TaxonomyRowKeys.NextFree(_config.badge_categories, e => e.key, TaxonomyRowKeys.BadgePrefix),
+                    label = "New Badge", icon_key = "unknown", color_hex = "#B3B3B3"
+                },
+                e => e.label,
+                (e, v) => e.label = v,
                 e => e.icon_key,
                 (e, v) => e.icon_key = v,
                 e => e.color_hex,
@@ -183,29 +145,28 @@ namespace TileStories.Editor
                 (e, v) => e.details = v,
                 e => _config.badge_shape != "none",
                 "+ Add badge category",
-                "Badge Key",
+                "Badge label",
                 "Write more information about this badge here: what it represents, when to use it, example POIs. Stored per row in config.json.",
                 SymbolColumnHelp,
                 true,
                 e => e.search_keywords,
                 (e, v) => e.search_keywords = v,
-                entry => IdentityRenameResolver.CountReferences(
-                    _config.pois, IdentityRenameResolver.PoiUsesBadgeKey, entry.key));
+                entry => TaxonomyRowKeys.CountReferences(_config.pois, TaxonomyRowKeys.PoiUsesBadge, entry.key));
 
             DrawDomainTestSubSection(_badgeTest, BadgeSceneTestGuide, BadgePlaymodeTestGuide, BadgeDeviceTestGuide);
         }
 
         // How many POIs still name this outline level. Outline level keys are
         // identity (POIData.status_level_key stores them) but they are generated
-        // (level_N), never typed, so they cannot be renamed out from under a POI --
+        // (outline_N), never typed, so they cannot be renamed out from under a POI --
         // deleting the row is the only way to orphan one, hence the guard below.
         private int CountPoisUsingStatusLevel(string key) =>
-            IdentityRenameResolver.CountReferences(_config.pois, IdentityRenameResolver.PoiUsesStatusLevelKey, key);
+            TaxonomyRowKeys.CountReferences(_config.pois, TaxonomyRowKeys.PoiUsesStatusLevel, key);
 
         // Same for hierarchy levels: POIData.hierarchy_level_key stores the row key,
         // so removing a level in use drops those markers to the framework fallback.
         private int CountPoisUsingHierarchyLevel(string key) =>
-            IdentityRenameResolver.CountReferences(_config.pois, IdentityRenameResolver.PoiUsesHierarchyLevelKey, key);
+            TaxonomyRowKeys.CountReferences(_config.pois, TaxonomyRowKeys.PoiUsesHierarchyLevel, key);
 
         // ---------------- Outline ----------------
 
@@ -270,8 +231,8 @@ namespace TileStories.Editor
             {
                 // Group 1: key + notes info
                 // The cell below edits entry.label, while entry.key (the identity
-                // POIData.status_level_key references, e.g. "level_2") is generated
-                // after the row loop. Header must say which one it is or developers
+                // POIData.status_level_key references, e.g. "outline_2") is generated
+                // once ("+ Add", or the load repair). Header must say which one it is or developers
                 // assume they are renaming the key.
                 EditorGUILayout.LabelField("Outline label", EditorStyles.miniBoldLabel, GUILayout.Width(110f));
                 GUILayout.Space(TableGapWithinGroup);
@@ -372,7 +333,10 @@ namespace TileStories.Editor
 
                     // Group 5: Remove (trash) -- last column, same between-groups gap.
                     GUILayout.Space(TableGapBetweenGroups);
-                    bool deleteOutlineClicked = DeleteButton.DrawLayout($"Delete outline level: {entry.key}");
+                    // The developer only ever sees the label, so every message names the label (the key is internal)
+                    string outlineDisplayName = TaxonomyNames.NameOr(entry.label, entry.key);
+                    bool deleteOutlineClicked = DeleteButton.DrawLayout($"Delete outline level: {outlineDisplayName}");
+                    ReportTableCellRect("Outline delete", i);
 
                     // Same right-edge scrollbar clearance as the header row above.
                     GUILayout.Space(AddButtonRowRightMargin);
@@ -381,7 +345,7 @@ namespace TileStories.Editor
                     {
                         // Deleting a level cannot propagate to the POIs that name it,
                         // so confirm with a count when any still do (see IdentityDeleteGuard).
-                        if (IdentityDeleteGuard.Confirm("Outline level", entry.key, CountPoisUsingStatusLevel(entry.key)))
+                        if (IdentityDeleteGuard.Confirm("Outline level", outlineDisplayName, CountPoisUsingStatusLevel(entry.key)))
                         {
                             _config.outline_levels.RemoveAt(i);
                             RecomputeLevelPercentSpacing(_config.outline_levels);
@@ -391,7 +355,6 @@ namespace TileStories.Editor
                     }
                 }
 
-                entry.key = string.IsNullOrWhiteSpace(entry.key) ? $"level_{i + 1}" : entry.key;
                 _config.outline_levels[i] = entry;
             }
 
@@ -399,11 +362,13 @@ namespace TileStories.Editor
             // Rendered as a shared editor row: transparent indent spacer + width
             // capped to max(MinRowWidth, min(visible panel, MaxRowWidth)).
             DrawEditorRow(out float rowWidth, out _);
-            if (GUILayout.Button("+ Add outline level", GUILayout.Width(rowWidth), GUILayout.ExpandWidth(false)))
+            bool addOutlineClicked = GUILayout.Button("+ Add outline level", GUILayout.Width(rowWidth), GUILayout.ExpandWidth(false));
+            ReportTableCellRect("+ Add outline level", 0);
+            if (addOutlineClicked)
             {
                 _config.outline_levels.Add(new OutlineLevelEntry
                 {
-                    key = "level_" + (_config.outline_levels.Count + 1),
+                    key = TaxonomyRowKeys.NextFree(_config.outline_levels, e => e.key, TaxonomyRowKeys.OutlinePrefix),
                     label = "Level " + (_config.outline_levels.Count + 1),
                     line_style = "solid",
                     color_hex = string.Empty

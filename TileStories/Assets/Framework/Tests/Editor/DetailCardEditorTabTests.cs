@@ -1,0 +1,327 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
+
+namespace TileStories.Editor.Tests
+{
+    // The POI Editor's third tab, "Detail Card", and Specific Marker > "Card Content" (_3.1 section 8), on the REAL
+    // window (PoiEditorWindowHost): real clicks, real typing, real Ctrl+Z / Ctrl+Y through the window's own config
+    // history. Every card_settings field is walked by reflection; the texts and the field drawers are guarded so a
+    // new kind or a new field cannot slip in without help or without an Editor row.
+    public class DetailCardEditorTabTests
+    {
+        private const BindingFlags Instance = BindingFlags.NonPublic | BindingFlags.Instance;
+        private const BindingFlags Static = BindingFlags.NonPublic | BindingFlags.Static;
+        private PoiEditorWindowHost _window;
+
+        [TearDown]
+        public void TearDown() => _window?.Close();
+
+        private static WallConfigData ShippedConfig() =>
+            JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+
+        private static WallConfigData TwoPoiConfig()
+        {
+            var config = new WallConfigData { wall_id = "t" };
+            config.pois.Add(new POIData { id = "poi_1", name = "North Tower", summary = "Built in 1640." });
+            config.pois.Add(new POIData { id = "poi_2", name = "South Gate" });
+            return config;
+        }
+
+        private void OpenTab(string tab)
+        {
+            var tabField = typeof(POIEditorToolWindow).GetField("_selectedTab", Instance);
+            _window.SetWindowField("_selectedTab", Enum.Parse(tabField.FieldType, tab));
+        }
+
+        private void OpenPoiCardContent(string poiId)
+        {
+            OpenTab("SpecificMarker");
+            _window.SetWindowField("_showPoiCardContent", true);
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_poiFoldouts", Instance).GetValue(_window.Editor);
+            foldouts[poiId] = true;
+        }
+
+        // ---------------- the tab ----------------
+
+        [UnityTest]
+        public IEnumerator TheDetailCardTab_DrawsCardContainerAndBlockLibrary_OnTheShippedWall()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            _window.SetWindowField("_showCardBlockLibrary", true);
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Card languages#0");
+            _window.RectOf("Tap Outside Closes");
+            _window.RectOf("Half Height Max");
+            _window.RectOf("Block Library enabled#0");
+            Assert.IsFalse(_window.Unsaved, "drawing the tab changes nothing");
+        }
+
+        [UnityTest]
+        public IEnumerator RealClicks_TapOutsideCloses_AndHalfHeightMax_EditUndoAndRedo()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+
+            _window.Click("Tap Outside Closes");
+            yield return _window.WaitForRepaint();
+            Assert.IsFalse(_window.Config.card_settings.container.dismiss_on_tap_outside, "a real click unticks it");
+            Assert.IsTrue(_window.Unsaved);
+            yield return _window.PressUndo();
+            Assert.IsTrue(_window.Config.card_settings.container.dismiss_on_tap_outside, "Ctrl+Z");
+            yield return _window.PressRedo();
+            Assert.IsFalse(_window.Config.card_settings.container.dismiss_on_tap_outside, "Ctrl+Y");
+
+            // a real drag along the slider track, from near its right end far to the left
+            Rect row = _window.RectOf("Half Height Max");
+            float y = row.center.y, startX = row.xMax - 70f;
+            int steps = _window.UndoStepsLeft;
+            _window.Send(new Event { type = EventType.MouseDown, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX, y)) });
+            yield return _window.WaitForRepaint();
+            for (int i = 1; i <= 8; i++)
+            {
+                _window.Send(new Event { type = EventType.MouseDrag, button = 0, mousePosition = _window.Local(new Vector2(startX - 40f * i, y)), delta = new Vector2(-40f, 0f) });
+                yield return _window.WaitForRepaint();
+            }
+            _window.Send(new Event { type = EventType.MouseUp, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX - 320f, y)) });
+            yield return _window.WaitForRepaint();
+            float half = _window.Config.card_settings.container.half_max_ratio;
+            Assert.Less(half, CardContainerSettings.HalfMaxRatioMax - 0.01f, "the drag moved the slider down");
+            Assert.GreaterOrEqual(half, CardContainerSettings.HalfMaxRatioMin, "never below the allowed minimum");
+            Assert.AreEqual(steps + 1, _window.UndoStepsLeft, "the whole drag is one history step");
+            yield return _window.PressUndo();
+            Assert.AreEqual(0.40f, _window.Config.card_settings.container.half_max_ratio, 1e-5f, "one Ctrl+Z puts it back");
+        }
+
+        [Test]
+        public void EveryCardSettingsField_ThroughTheWindowHistory_UndoesRedoesAndRoundTrips()
+        {
+            var t = typeof(POIEditorToolWindow);
+            var mutate = t.GetMethod("DrawConfigMutationScope", Instance);
+            var undo = t.GetMethod("UndoConfigChange", Instance);
+            var redo = t.GetMethod("RedoConfigChange", Instance);
+            var edits = new List<(string Name, Action<CardSettings> Change)>();
+            foreach (var f in typeof(CardSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (f.FieldType == typeof(bool)) edits.Add((f.Name, s => f.SetValue(s, !(bool)f.GetValue(s))));
+                else if (f.FieldType == typeof(string)) edits.Add((f.Name, s => f.SetValue(s, "Wall/CardMedia")));
+                else if (f.FieldType == typeof(List<string>)) edits.Add((f.Name, s => f.SetValue(s, new List<string> { "pt", "en", "es" })));
+                else if (f.FieldType == typeof(List<BlockKindSetting>)) edits.Add((f.Name, s => s.kinds.Add(new BlockKindSetting { kind = "header", default_variant = "compact" })));
+                else if (f.FieldType == typeof(CardContainerSettings))
+                    foreach (var c in typeof(CardContainerSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        if (c.FieldType == typeof(bool)) edits.Add((c.Name, s => c.SetValue(s.container, !(bool)c.GetValue(s.container))));
+                        else if (c.FieldType == typeof(float)) edits.Add((c.Name, s => c.SetValue(s.container, 0.3f)));
+                        else if (c.FieldType == typeof(string)) edits.Add((c.Name, s => c.SetValue(s.container, CardOptions.StopHalf)));
+                        else Assert.Fail("no edit for container field " + c.Name);
+                    }
+                else Assert.Fail("no edit for card_settings field " + f.Name);
+            }
+            Assert.AreEqual(4 + 4, edits.Count, "every card_settings field (walked by reflection) has an edit: 4 wall-level + 4 container");
+
+            foreach (var (name, change) in edits)
+            {
+                var window = ScriptableObject.CreateInstance<POIEditorToolWindow>();
+                try
+                {
+                    var config = ShippedConfig();
+                    t.GetField("_config", Instance).SetValue(window, config);
+                    t.GetMethod("InitializeConfigHistory", Instance).Invoke(window, null);
+                    string before = JsonUtility.ToJson(config.card_settings);
+
+                    mutate.Invoke(window, new object[] { (Action)(() => change(((WallConfigData)t.GetField("_config", Instance).GetValue(window)).card_settings)), false });
+                    string after = JsonUtility.ToJson(((WallConfigData)t.GetField("_config", Instance).GetValue(window)).card_settings);
+                    Assert.AreNotEqual(before, after, name + ": the edit changed the config");
+                    Assert.IsTrue((bool)t.GetField("_hasUnsavedChanges", Instance).GetValue(window), name + ": Save lights up");
+
+                    undo.Invoke(window, null);
+                    Assert.AreEqual(before, JsonUtility.ToJson(((WallConfigData)t.GetField("_config", Instance).GetValue(window)).card_settings), name + ": undo");
+                    redo.Invoke(window, null);
+                    var redone = ((WallConfigData)t.GetField("_config", Instance).GetValue(window)).card_settings;
+                    Assert.AreEqual(after, JsonUtility.ToJson(redone), name + ": redo");
+                    Assert.AreEqual(after, JsonUtility.ToJson(JsonUtility.FromJson<WallConfigData>(JsonUtility.ToJson(new WallConfigData { card_settings = redone })).card_settings),
+                        name + ": survives Save / load");
+                }
+                finally { UnityEngine.Object.DestroyImmediate(window); }
+            }
+        }
+
+        // ---------------- Block Library ----------------
+
+        [UnityTest]
+        public IEnumerator TheBlockLibrary_NeverWritesByDrawing_TheHeaderIsLocked_AndAnEditMakesItsRow()
+        {
+            var config = ShippedConfig();
+            _window = new PoiEditorWindowHost(config, "_showCardBlockLibrary");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.kinds, "drawing the table creates no row");
+
+            _window.Click("Block Library enabled#0");
+            yield return _window.WaitForRepaint();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.kinds, "the Header's Enabled is locked: a real click changes nothing");
+            Assert.IsFalse(_window.Unsaved);
+
+            // the Default Variant popup's write path, inside the window's own mutation scope
+            typeof(POIEditorToolWindow).GetMethod("DrawConfigMutationScope", Instance).Invoke(_window.Editor, new object[]
+                { (Action)(() => _window.Editor.SetBlockLibraryVariant(BuiltInBlocks.HeaderKind, BuiltInBlocks.HeaderCompact)), false });
+            Assert.AreEqual(1, _window.Config.card_settings.kinds.Count, "the first edit makes the row");
+            var painting = _window.Config.pois.Single(p => p.id == "painting");
+            Assert.AreEqual(BuiltInBlocks.HeaderCompact, BlockStackBuilder.Build(painting, _window.Config.card_settings, BlockRegistry.Shared).Entries[0].Variant,
+                "a POI without a card now gets the compact header");
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.kinds, "Ctrl+Z removes the row again");
+        }
+
+        // ---------------- Card Content ----------------
+
+        [UnityTest]
+        public IEnumerator CardContent_RealClicksAndTyping_AddWriteReorderDelete_EachUndoable()
+        {
+            _window = new PoiEditorWindowHost(TwoPoiConfig(), "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            yield return _window.WaitForRepaint();
+            var poi = _window.Config.pois[0];
+            CollectionAssert.IsEmpty(poi.card.blocks, "precondition: no blocks");
+
+            _window.Click("Card add block#0");
+            yield return _window.WaitForRepaint();
+            poi = _window.Config.pois[0];
+            Assert.AreEqual(1, poi.card.blocks.Count, "a real click on + Add block");
+            Assert.AreEqual("block_1", poi.card.blocks[0].key);
+            Assert.AreEqual(BuiltInBlocks.HeaderKind, poi.card.blocks[0].kind);
+            Assert.IsTrue(BlockStackBuilder.Build(poi, _window.Config.card_settings, BlockRegistry.Shared).Entries[0].Synthesized,
+                "an empty header is not shown yet: the card still uses the name");
+
+            yield return _window.ReplaceText("Block field title en#0", "Keep");
+            yield return _window.ClickAway();
+            poi = _window.Config.pois[0];
+            Assert.AreEqual("Keep", POIEditorToolWindow.LocalizedValue(poi.card.blocks[0], "title", "en"));
+            Assert.AreEqual("", POIEditorToolWindow.LocalizedValue(poi.card.blocks[0], "title", "pt"), "the other language stays unwritten");
+            var entry = BlockStackBuilder.Build(poi, _window.Config.card_settings, BlockRegistry.Shared).Entries[0];
+            Assert.IsFalse(entry.Synthesized, "the typed title makes the authored header count");
+            Assert.AreEqual("Keep", new BlockFieldReader(entry.Instance, "pt", "en").Text("title"), "a visitor in pt reads the fallback");
+
+            yield return _window.PressUndo();
+            Assert.AreEqual("", POIEditorToolWindow.LocalizedValue(_window.Config.pois[0].card.blocks[0], "title", "en"), "one Ctrl+Z takes the typed word back");
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(_window.Config.pois[0].card.blocks, "a second Ctrl+Z removes the block");
+            yield return _window.PressRedo();
+            yield return _window.PressRedo();
+            Assert.AreEqual("Keep", POIEditorToolWindow.LocalizedValue(_window.Config.pois[0].card.blocks[0], "title", "en"), "Ctrl+Y twice");
+
+            // a second header: kept in Card Content, flagged as not shown -- first for its empty title, then as a second header
+            _window.Click("Card add block#0");
+            yield return _window.WaitForRepaint();
+            poi = _window.Config.pois[0];
+            Assert.AreEqual("block_2", poi.card.blocks[1].key, "a fresh key");
+            var skipped = BlockStackBuilder.Build(poi, _window.Config.card_settings, BlockRegistry.Shared).Skipped.Single();
+            Assert.AreEqual("block_2", skipped.Instance.key);
+            Assert.AreEqual(BlockStackBuilder.SkipReason.MissingRequired, skipped.Reason, "an empty required field is reported first");
+            Assert.AreEqual("Not shown: Title is empty in every language.",
+                POIEditorToolWindow.CardBlockSkipText(skipped.Reason, BuiltInBlocks.Header.Field(skipped.FieldKey).Label), "the row names the field by its label");
+            yield return _window.ReplaceText("Block field title en#1", "Gate");
+            yield return _window.ClickAway();
+            skipped = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared).Skipped.Single();
+            Assert.AreEqual(BlockStackBuilder.SkipReason.ExtraHeader, skipped.Reason);
+            StringAssert.Contains("one Header", POIEditorToolWindow.CardBlockSkipText(skipped.Reason, null), "the row says why");
+
+            _window.Click("Card block down#0");
+            yield return _window.WaitForRepaint();
+            CollectionAssert.AreEqual(new[] { "block_2", "block_1" }, _window.Config.pois[0].card.blocks.Select(b => b.key), "a real click moves it down");
+
+            _window.Click("Card block delete#0");
+            yield return _window.WaitForRepaint();
+            CollectionAssert.AreEqual(new[] { "block_1" }, _window.Config.pois[0].card.blocks.Select(b => b.key), "a real click deletes it (no question: Ctrl+Z restores it)");
+            yield return _window.PressUndo();
+            CollectionAssert.AreEqual(new[] { "block_2", "block_1" }, _window.Config.pois[0].card.blocks.Select(b => b.key));
+            CollectionAssert.IsEmpty(_window.Config.pois[1].card.blocks, "the other POI is untouched");
+        }
+
+        [UnityTest]
+        public IEnumerator EveryLanguage_GetsItsOwnRow()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en", "pt", "es" };
+            config.pois[0].card.blocks.Add(new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.HeaderKind });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            foreach (string lang in new[] { "en", "pt", "es" })
+            {
+                _window.RectOf("Block field title " + lang + "#0");
+                _window.RectOf("Block field subtitle " + lang + "#0");
+            }
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            yield return _window.ReplaceText("Block field subtitle es#0", "Puerta");
+            yield return _window.ClickAway();
+            Assert.AreEqual("Puerta", POIEditorToolWindow.LocalizedValue(_window.Config.pois[0].card.blocks[0], "subtitle", "es"));
+        }
+
+        // ---------------- guards ----------------
+
+        [Test]
+        public void EveryRegisteredKind_IsFullyEditableHere_WithHelpOnEveryRow()
+        {
+            Assert.Greater(BlockRegistry.Shared.All.Count, 0);
+            foreach (var kind in BlockRegistry.Shared.All)
+            {
+                Assert.IsNull(BlockRegistry.Validate(kind), kind.Key);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(kind.DisplayName), kind.Key + " has a name");
+                Assert.IsFalse(string.IsNullOrWhiteSpace(kind.Help), kind.Key + " has a (i) text");
+                foreach (var field in kind.Fields)
+                {
+                    Assert.IsTrue(POIEditorToolWindow.HasBlockFieldDrawer(field.Type), kind.Key + "." + field.Key + ": no Editor drawer for " + field.Type);
+                    Assert.IsFalse(string.IsNullOrWhiteSpace(field.Label), kind.Key + "." + field.Key + " has a label");
+                    Assert.IsFalse(string.IsNullOrWhiteSpace(field.Help), kind.Key + "." + field.Key + " has a (i) text");
+                    Assert.IsTrue((field.Label + field.Help + kind.Help).All(c => c < 128), kind.Key + "." + field.Key + ": ASCII only");
+                }
+            }
+        }
+
+        private static readonly string[] ForbiddenTerms =
+        {
+            ".md", ".cs", "_3.", "_5.1", "LivingRoom", "lamp", "Lamp", "painting", "PoiCardHost", "BlockStackBuilder",
+            "card_settings", "CardOptions", "Assets/", "Gallery",
+        };
+
+        [Test]
+        public void HelpAndGuideTexts_AreAsciiAppAgnostic_AndNameTheEditorTabControls()
+        {
+            var texts = typeof(POIEditorToolWindow).GetFields(Static)
+                .Where(f => f.FieldType == typeof(string) && (f.Name.StartsWith("Card") || f.Name.StartsWith("BlockLibrary"))
+                            && (f.Name.EndsWith("Help") || f.Name.EndsWith("Guide") || f.Name.EndsWith("Note")))
+                .ToDictionary(f => f.Name, f => (string)f.GetValue(null));
+            foreach (string required in new[] { "CardEnabledHelp", "CardLanguagesHelp", "CardOpenAtHelp", "CardContentHelp", "BlockLibraryHelp",
+                         "CardSceneTestGuide", "CardPlaymodeTestGuide", "CardDeviceTestGuide", "BlockLibraryPlaymodeTestGuide" })
+                Assert.IsTrue(texts.ContainsKey(required), required + " is scanned");
+            foreach (var reason in (BlockStackBuilder.SkipReason[])Enum.GetValues(typeof(BlockStackBuilder.SkipReason)))
+                texts["skip " + reason] = POIEditorToolWindow.CardBlockSkipText(reason, "Title");
+
+            foreach (var pair in texts)
+            {
+                Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Value), pair.Key);
+                Assert.IsTrue(pair.Value.All(c => c < 128), pair.Key + " must be ASCII only");
+                foreach (string term in ForbiddenTerms)
+                    StringAssert.DoesNotContain(term, pair.Value, pair.Key + " must not contain '" + term + "'");
+            }
+            StringAssert.Contains("Not possible in Scene test", texts["CardSceneTestGuide"]);
+            StringAssert.Contains("Not possible in Scene test", texts["BlockLibrarySceneTestGuide"]);
+            foreach (string control in new[] { "Enable Detail Card", "Languages", "Open At", "Half Height Max", "Tap Outside Closes" })
+                StringAssert.Contains(control, texts["CardPlaymodeTestGuide"], "the Playmode guide names " + control);
+            StringAssert.Contains("not live yet", texts["CardPlaymodeTestGuide"], "the guide says edits need Save + Copy + Play");
+            var openLabels = (string[])typeof(POIEditorToolWindow).GetField("CardOpenStopLabels", Static).GetValue(null);
+            Assert.AreEqual(CardOptions.OpenStops.Length, openLabels.Length, "one label per Open At option");
+        }
+    }
+}

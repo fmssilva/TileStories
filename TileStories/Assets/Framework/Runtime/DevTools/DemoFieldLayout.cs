@@ -70,7 +70,7 @@ namespace TileStories
                 {
                     if (level == null) continue;
                     int count = CountFor(settings, level.key);
-                    string label = string.IsNullOrWhiteSpace(level.level_name) ? level.key : level.level_name;
+                    string label = TaxonomyNames.NameOr(level.level_name, level.key);
                     for (int i = 0; i < count; i++)
                     {
                         var pos = new Vector3(Range(-width * 0.5f, width * 0.5f), Range(-height * 0.5f, height * 0.5f), near + Range(0f, depth));

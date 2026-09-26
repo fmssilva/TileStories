@@ -18,7 +18,8 @@ namespace TileStories.Editor
         private enum TabSelection
         {
             GlobalScene,
-            SpecificMarker
+            SpecificMarker,
+            DetailCard
         }
 
         private TabSelection _selectedTab = TabSelection.GlobalScene;
@@ -293,6 +294,11 @@ namespace TileStories.Editor
         [SerializeField] private bool _showPoiBadgeStyle = false;
         [SerializeField] private bool _showPoiOutline = false;
         [SerializeField] private bool _showPoiSearchKeywords = false;
+        [SerializeField] private bool _showPoiCardContent = false;
+
+        // Detail Card tab sections (_3.1), collapsed like every section
+        [SerializeField] private bool _showCardContainer = false;
+        [SerializeField] private bool _showCardBlockLibrary = false;
 
         [SerializeField] private SpriteKeyLibrary _defaultIconLibrary;
         [SerializeField] private SpriteKeyLibrary _wallIconLibrary;
@@ -333,6 +339,7 @@ namespace TileStories.Editor
 
         private void OnGUI()
         {
+            EndEditGestureIfFocusMoved();
             HandleUndoShortcuts();
 
             DrawTopConfigAndActions();
@@ -343,7 +350,7 @@ namespace TileStories.Editor
                 return;
             }
 
-            // Tab buttons with constant base colors (Global Scene = blue, Specific Marker = green)
+            // Tab buttons with constant base colors (Global Scene = blue, Specific Marker = green, Detail Card = amber)
             var originalBgColor = GUI.backgroundColor;
 
             using (new EditorGUILayout.HorizontalScope())
@@ -365,6 +372,15 @@ namespace TileStories.Editor
                 GUI.backgroundColor = SpecificMarkerTabColor;
                 if (GUILayout.Button("Specific Marker", specificTabStyle, GUILayout.Height(26f), GUILayout.ExpandWidth(false)))
                     _selectedTab = TabSelection.SpecificMarker;
+
+                // Detail Card tab button (always amber): the card domains (_3.1 / _3.2 / _3.3)
+                var cardTabStyle = new GUIStyle(GUI.skin.button);
+                cardTabStyle.fontStyle = FontStyle.Bold;
+                cardTabStyle.normal.textColor = TabTextColor;
+                cardTabStyle.onNormal.textColor = TabTextColor;
+                GUI.backgroundColor = DetailCardTabColor;
+                if (GUILayout.Button("Detail Card", cardTabStyle, GUILayout.Height(26f), GUILayout.ExpandWidth(false)))
+                    _selectedTab = TabSelection.DetailCard;
             }
 
             GUI.backgroundColor = originalBgColor;
@@ -380,6 +396,10 @@ namespace TileStories.Editor
                     break;
                 case TabSelection.SpecificMarker:
                     DrawConfigMutationScope(() => DrawTabContentContainer(DrawSpecificMarkerOptions, SpecificMarkerTabColor), refreshRigOnChange: true);
+                    break;
+                case TabSelection.DetailCard:
+                    // - no rig refresh: nothing on this tab changes a marker
+                    DrawConfigMutationScope(() => DrawTabContentContainer(DrawDetailCardOptions, DetailCardTabColor), refreshRigOnChange: false);
                     break;
             }
 

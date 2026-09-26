@@ -163,11 +163,9 @@ namespace TileStories.Editor
             "Ranking: a point's name first, then its own keywords, synonyms, its summary, then words it inherits from its " +
             "table rows.";
 
-        private static readonly string KeywordFieldKeyHelp =
-            "Stable id of the field; each point's keyword list for this field is stored under it. Renaming it here moves " +
-            "every point's list along.";
-
-        private static readonly string KeywordFieldLabelHelp = "The name shown above this field in each point's Search Keywords.";
+        private static readonly string KeywordFieldLabelHelp =
+            "The field's name: shown above this field in each point's Summary & Keywords and, with Filter on, as the " +
+            "visitor's filter group title. Renaming it never moves or loses any point's keywords.";
 
         private static readonly string KeywordFieldRequiredHelp =
             "Required: a point with no keyword for this field gets a warning when the configuration is checked (on load and " +

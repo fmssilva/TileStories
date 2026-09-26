@@ -5,10 +5,10 @@ using UnityEngine.UIElements;
 namespace TileStories
 {
     // The visitor's search, filter and select UI in a wall scene (spec _2.6): the ONE place its views are
-    // composed. It builds the search bar, the filter tray, the view switch, the results list, the minimap
-    // and the detail card into its own UIDocument, rebuilds them whenever the wall's searchable data
-    // changes (WallSession.SearchDataChanged) and pushes the one result set to all of them and to the
-    // markers (SelectionHighlightController). Every decision is a pure rule (ResultSetCoordinator,
+    // composed. It builds the search bar, the filter tray, the view switch, the results list and the minimap
+    // into its own UIDocument (the POI Detail Card is its own scene object, PoiCardHost), rebuilds them
+    // whenever the wall's searchable data changes (WallSession.SearchDataChanged) and pushes the one result
+    // set to all of them and to the markers (SelectionHighlightController). Every decision is a pure rule (ResultSetCoordinator,
     // SearchPanelsRule, FilterTrayView.BuildOptions); this class only wires and applies them.
     [RequireComponent(typeof(UIDocument))]
     public sealed class SearchUIHost : MonoBehaviour
@@ -28,7 +28,6 @@ namespace TileStories
         public ViewModeControl ViewModes { get; private set; }
         public ResultsListView List { get; private set; }
         public MinimapView Minimap { get; private set; }
-        public DetailCardView Card { get; private set; }
 
         // The last computed result set (what every surface shows)
         public ResultSetState State { get; private set; } = new();
@@ -72,7 +71,6 @@ namespace TileStories
             SelectionEventBus.OnSelectionCleared -= OnSelectionCleared;
             List?.Dispose();
             Minimap?.Dispose();
-            Card?.Dispose();
             Voice?.Dispose();
             _root?.RemoveFromHierarchy();
             _root = null;
@@ -99,7 +97,6 @@ namespace TileStories
             Tray.Rebuild(FilterTrayView.BuildOptions(config, settings.filter));
             Minimap.Rebuild(MarkerPoints(), settings.minimap, wallSession.WallIconLibrary);
             ViewModes.Configure(settings.results, settings.minimap.enabled);
-            Card.Configure(FindPoi, config);
 
             Voice?.Dispose();
             Voice = settings.voice.enabled
@@ -133,7 +130,7 @@ namespace TileStories
             var bottom = new VisualElement { name = "search-bottom", pickingMode = PickingMode.Ignore };
             bottom.AddToClassList("search-bottom");
 
-            // - draw order = child order: the map under the bottom panels (the card's X stays tappable),
+            // - draw order = child order: the map under the bottom panels,
             //   the top bar (and its filter tray) over everything
             Minimap = new MinimapView(_root);
             _root.Add(bottom);
@@ -143,7 +140,6 @@ namespace TileStories
             ViewModes = new ViewModeControl(top);
             Tray = new FilterTrayView(top);
             List = new ResultsListView(bottom);
-            Card = new DetailCardView(bottom);
 
             SearchBar.QueryChanged += q => { Query = q; Refresh(); };
             SearchBar.Submitted += q => _recent?.Add(q);
@@ -154,30 +150,7 @@ namespace TileStories
             ViewModes.Changed += _ => ApplyPanels();
 
             _document.rootVisualElement.Add(_root);
-            _root.RegisterCallback<GeometryChangedEvent>(_ => ApplySafeArea());
-        }
-
-        // Keep the whole search UI inside the device's safe area (notch, home indicator). The panels are
-        // absolutely positioned, which parent padding does not move, so the root's own offsets take the
-        // insets -- converted from screen pixels to panel units (the panel scales to its reference size).
-        private void ApplySafeArea()
-        {
-            if (_root?.panel == null) return;
-            var insets = SafeAreaHelper.GetCurrent();
-            float scale = RuntimePanelUtils.ScreenToPanel(_root.panel, new Vector2(1000f, 0f)).x
-                        - RuntimePanelUtils.ScreenToPanel(_root.panel, Vector2.zero).x;
-            scale = scale > 0f ? scale / 1000f : 1f;
-            SetOffset(_root.style.left, insets.left * scale, v => _root.style.left = v);
-            SetOffset(_root.style.top, insets.top * scale, v => _root.style.top = v);
-            SetOffset(_root.style.right, insets.right * scale, v => _root.style.right = v);
-            SetOffset(_root.style.bottom, insets.bottom * scale, v => _root.style.bottom = v);
-        }
-
-        // - write only a changed value: a style write inside GeometryChanged would otherwise loop
-        private static void SetOffset(StyleLength current, float value, System.Action<StyleLength> set)
-        {
-            if (current.keyword == StyleKeyword.Undefined && Mathf.Approximately(current.value.value, value)) return;
-            set(value);
+            _root.RegisterCallback<GeometryChangedEvent>(_ => SafeAreaHelper.ApplyAsOffsets(_root));
         }
 
         // Recompute the one result set and push it to every surface
@@ -193,7 +166,7 @@ namespace TileStories
 
             var rows = new List<ResultsListView.Row>();
             foreach (var r in State.Results)
-                rows.Add(new ResultsListView.Row { PoiId = r.PoiId, Name = r.Poi.name, Subtitle = DetailCardView.Subtitle(r.Poi, wallSession.SearchConfig) });
+                rows.Add(new ResultsListView.Row { PoiId = r.PoiId, Name = r.Poi.name, Subtitle = PoiSubtitle.Of(r.Poi, wallSession.SearchConfig) });
             string relaxText = null;
             System.Action relaxAction = null;
             if (State.Relax.HasValue)
@@ -215,7 +188,6 @@ namespace TileStories
             ViewModes.SetShown(Panels.ViewModes);
             List.SetShown(Panels.List);
             Minimap.SetShown(Panels.Minimap);
-            Card.Root.style.display = Panels.Card ? DisplayStyle.Flex : DisplayStyle.None;
             SearchBar.SetMapButton(Panels.MinimapButton, Panels.Minimap);
         }
 
@@ -239,14 +211,6 @@ namespace TileStories
                 if (poi != null) points.Add((poi, marker.UndisplacedWorldPosition));
             }
             return points;
-        }
-
-        private POIData FindPoi(string id)
-        {
-            var pois = wallSession.SearchPois;
-            for (int i = 0; i < pois.Count; i++)
-                if (pois[i].id == id) return pois[i];
-            return null;
         }
     }
 }

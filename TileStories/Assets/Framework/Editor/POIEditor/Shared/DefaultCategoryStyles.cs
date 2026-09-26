@@ -17,7 +17,7 @@ namespace TileStories.Editor
 {
     public static class DefaultCategoryStyles
     {
-        // The six heritage building categories with their icon keys and colours.
+        // The six heritage building categories: key (what POIs store), label (what visitors read), icon key, colour.
         // icon_key values match entries registered in IconLibrary.asset so the
         // editor table previews resolve to real sprites.
         public static List<CategoryStyleEntry> Create()
@@ -26,42 +26,48 @@ namespace TileStories.Editor
             {
                 new CategoryStyleEntry
                 {
-                    category = "royal_government",
+                    key = "royal_government",
+                    label = "Royal Government",
                     icon_key = "IconRoyal&Government",
                     color_hex = "#D97706",
                     details = "Royal & Government"
                 },
                 new CategoryStyleEntry
                 {
-                    category = "religious",
+                    key = "religious",
+                    label = "Religious",
                     icon_key = "IconReligious",
                     color_hex = "#7C3AED",
                     details = "Sacred Architecture"
                 },
                 new CategoryStyleEntry
                 {
-                    category = "military",
+                    key = "military",
+                    label = "Military",
                     icon_key = "IconMilitary",
                     color_hex = "#DC2626",
                     details = "Defense & Fortifications"
                 },
                 new CategoryStyleEntry
                 {
-                    category = "residential",
+                    key = "residential",
+                    label = "Residential",
                     icon_key = "IconNobel&PrivateResidence",
                     color_hex = "#DB2777",
                     details = "Noble & Private Housing"
                 },
                 new CategoryStyleEntry
                 {
-                    category = "economic",
+                    key = "economic",
+                    label = "Economic",
                     icon_key = "IconIndustry&Trade",
                     color_hex = "#059669",
                     details = "Trade, Industry & Harbor"
                 },
                 new CategoryStyleEntry
                 {
-                    category = "infrastructure",
+                    key = "infrastructure",
+                    label = "Infrastructure",
                     icon_key = "IconInfrastructures",
                     color_hex = "#0284C7",
                     details = "Public Utilities & Works"

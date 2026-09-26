@@ -85,7 +85,7 @@ namespace TileStories.Editor
                 var pencilRect = new Rect(upRect.x - iconGapX - pencilWidth, headerRect.y, pencilWidth, headerRect.height);
                 var focusRect = new Rect(pencilRect.x - iconGapX - pencilWidth, headerRect.y, pencilWidth, headerRect.height);
 
-                string displayName = $"{i + 1}. {poi.name}";
+                string displayName = EditorNames.Poi(i, poi);
                 // CalcSize slightly under-measures this bold label's real rendered width
                 // (confirmed by screenshot: even a 10f pad still clipped the last glyph on
                 // longer names) -- pad generously; this only matters when
@@ -268,6 +268,9 @@ namespace TileStories.Editor
                     // driven entirely by the hierarchy level (see DrawPoiMarkerStyleFields).
                     // Global effect *defaults* remain in the Global Scene Effects section.
                     _showPoiSearchKeywords = DrawFramedFoldout(ref _showPoiSearchKeywords, () => DrawPoiSearchKeywordsField(poi), PoiSearchSectionTitle, FoldoutDefaultColor);
+
+                    // This POI's Detail Card blocks (_3.1); the wall-wide card settings are the Detail Card tab
+                    _showPoiCardContent = DrawFramedFoldout(ref _showPoiCardContent, () => DrawPoiCardContent(poi), "Card Content", FoldoutDefaultColor);
                 }
 
                 EditorGUILayout.Space(6f);
@@ -340,7 +343,7 @@ namespace TileStories.Editor
         // popup keeps a stale key visible as "(missing)" instead of silently rewriting it.
         private void DrawPoiMarkerStyleFields(POIData poi)
         {
-            ReferenceRows(_config.category_styles, e => e.category, e => e.category, out var categoryKeys, out var categoryLabels);
+            ReferenceRows(_config.category_styles, e => e.key, e => TaxonomyNames.NameOr(e.label, e.key), out var categoryKeys, out var categoryLabels);
             poi.category = DrawReferencePopupField("Category", poi.category, categoryKeys, categoryLabels,
                 allowNone: false, PoiCategoryHelp);
 
@@ -388,7 +391,8 @@ namespace TileStories.Editor
         // Specific Marker > POI > Badge Style (only while Global Scene > Badge is enabled)
         private void DrawPoiBadgeStyleFields(POIData poi)
         {
-            ReferenceRows(_config.badge_categories, e => e.key, e => e.key, out var badgeKeys, out var badgeLabels);
+            ReferenceRows(_config.badge_categories, e => e.key,
+                e => TaxonomyNames.NameOr(e.label, e.key), out var badgeKeys, out var badgeLabels);
             poi.badge_category = DrawReferencePopupField("Badge category", poi.badge_category, badgeKeys, badgeLabels,
                 allowNone: true, PoiBadgeCategoryHelp);
         }
@@ -423,7 +427,7 @@ namespace TileStories.Editor
             if (hasLevels)
             {
                 ReferenceRows(_config.outline_levels, e => e.key,
-                    e => (string.IsNullOrWhiteSpace(e.label) ? e.key : e.label) + " (" + e.pct.ToString("0") + "%)",
+                    e => TaxonomyNames.NameOr(e.label, e.key) + " (" + e.pct.ToString("0") + "%)",
                     out var levelKeys, out var levelLabels);
                 string picked = DrawReferencePopupField("Status level", poi.status_level_key, levelKeys, levelLabels,
                     allowNone: false, PoiStatusLevelHelp);
@@ -539,7 +543,7 @@ namespace TileStories.Editor
                         continue;
 
                     var entry = poi.search_keyword_fields?.Find(e => e != null && e.field_key == fieldDef.key);
-                    string displayLabel = string.IsNullOrWhiteSpace(fieldDef.label) ? fieldDef.key : fieldDef.label;
+                    string displayLabel = TaxonomyNames.NameOr(fieldDef.label, fieldDef.key);
                     bool isEmpty = entry?.keywords == null || entry.keywords.Count == 0;
 
                     EditorGUILayout.Space(4f);
@@ -699,8 +703,8 @@ namespace TileStories.Editor
         {
             if (_config?.category_styles != null)
                 foreach (var entry in _config.category_styles)
-                    if (entry != null && !string.IsNullOrWhiteSpace(entry.category))
-                        return entry.category;
+                    if (entry != null && !string.IsNullOrWhiteSpace(entry.key))
+                        return entry.key;
             return string.Empty;
         }
 
@@ -726,11 +730,11 @@ namespace TileStories.Editor
             string bestKey = null;
             int bestPriority = int.MaxValue;
             if (levels == null) return null;
-            for (int i = 0; i < levels.Count; i++)
+            int keyedRow = 0;
+            foreach (var level in levels)
             {
-                var level = levels[i];
                 if (level == null || string.IsNullOrWhiteSpace(level.key)) continue;
-                int effective = level.priority >= 1 ? level.priority : i + 1;
+                int effective = MarkerHierarchyResolver.EffectivePriority(level.priority, keyedRow++);
                 if (bestKey == null || effective < bestPriority)
                 {
                     bestKey = level.key;

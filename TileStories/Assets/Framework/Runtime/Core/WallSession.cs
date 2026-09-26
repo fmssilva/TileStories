@@ -89,6 +89,9 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
         // The Select, Filter & Search settings (_2.6), read by the selection responders and the search UI
         public SelectFilterSearchSettings SelectFilterSearch => _config?.select_filter_search;
 
+        // The POI Detail Card's wall settings (_3.1); PoiCardHost reads them on every selection
+        public CardSettings CardSettings => _config?.card_settings;
+
         // The searchable set: exactly the POIs whose markers run (the wall's own, or a demo's while one
         // is on), so every search result has a marker to show. Rebuilt with the index.
         public IReadOnlyList<POIData> SearchPois => _searchPois;

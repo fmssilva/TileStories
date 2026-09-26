@@ -54,6 +54,11 @@ namespace TileStories.Tests
 #else
             Assert.Ignore("Needs the Editor to load the wall scene by path.");
 #endif
+            // - the visitor's app never holds the POI Editor's stand-in markers (a build with them is refused), but a
+            //   scene saved while the rig was populated does -- the Test Runner saves the open scene before a run.
+            //   They sit exactly on the real markers (a tap hit a stand-in with no POI id), so drop them here.
+            var editorRig = GameObject.Find("POIEditorRig");
+            if (editorRig != null) Object.Destroy(editorRig);
             // the real tracking SDK polls a device camera every frame and logs an error when there is none;
             // in the Editor the mock tracker drives the camera instead, so its session is paused
             foreach (var mb in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))

@@ -32,7 +32,7 @@ namespace TileStories.Tests
 
             // idle: the camera view stays clear
             Assert.IsFalse(Host.State.Active);
-            Assert.IsFalse(Host.List.IsShown || Host.ViewModes.IsShown || Host.Minimap.IsShown || Shown(Host.Card.Root));
+            Assert.IsFalse(Host.List.IsShown || Host.ViewModes.IsShown || Host.Minimap.IsShown || Card.Sheet.IsOpen, "no list, map or card");
             Assert.AreEqual(Session.SpawnedMarkers.Count, MarkersAt(1f).Count, "no marker dimmed");
             yield return Capture("Idle");
         }
@@ -78,7 +78,7 @@ namespace TileStories.Tests
             Assert.IsTrue(Host.List.EmptyShown);
             // - filters alone, no text: the filters message, never the query one with an empty ""
             Assert.AreEqual(ConfigCopy().select_filter_search.search.no_results_filters_message, Host.List.EmptyMessage);
-            StringAssert.StartsWith("Remove filter: military", Host.List.RelaxText, "dropping the category gives the most results");
+            StringAssert.StartsWith("Remove filter: Military", Host.List.RelaxText, "dropping the category gives the most results -- named by its label, never its key");
             yield return Capture("NoResults_Relax");
 
             Press(Host.List.Root.Q<Button>("results-relax"));
@@ -132,15 +132,15 @@ namespace TileStories.Tests
             string selected = SelectionEventBus.CurrentPoiId;
             Assert.AreEqual(1f, Marker(selected).SelectionAlpha, 1e-3, "the selected marker stays full");
             Assert.AreEqual(Session.SpawnedMarkers.Count - 1, MarkersAt(0.3f).Count, "Highlight Selection: every other marker at Dim Others To");
-            Assert.IsTrue(Shown(Host.Card.Root), "the card opens");
-            Assert.AreEqual(Session.SearchPois.First(p => p.id == selected).name, Host.Card.NameText);
+            Assert.IsTrue(Card.Sheet.IsOpen, "the card opens");
+            Assert.AreEqual(selected, Card.ShownPoiId, "for the tapped marker's POI");
             yield return Capture("Selected_Card");
 
             TapScreen(ScreenPointOf(Marker(selected)).Value);
             yield return Wait(0.6f);
             Assert.IsNull(SelectionEventBus.CurrentPoiId, "tapping it again clears the selection");
             Assert.AreEqual(Session.SpawnedMarkers.Count, MarkersAt(1f).Count, "every marker back to full");
-            Assert.IsFalse(Shown(Host.Card.Root), "the card closes");
+            Assert.IsFalse(Card.Sheet.IsOpen, "the card closes");
         }
 
         [UnityTest]
@@ -158,7 +158,7 @@ namespace TileStories.Tests
             Assert.AreEqual(1f, Marker("lamp_military").SelectionAlpha, 1e-3);
             CollectionAssert.AreEquivalent(Military.Where(id => id != "lamp_military"), MarkersAt(0.3f), "the other results dim");
 
-            Press(Host.Card.Root.Q<Button>("detail-card-close"));
+            Press(Card.Sheet.CloseButton);
             yield return null;
             Assert.IsNull(SelectionEventBus.CurrentPoiId, "the card's X clears the selection");
             CollectionAssert.AreEquivalent(hidden, MarkersAt(0f), "clearing the selection keeps the filter (it used to reset every marker)");
@@ -292,7 +292,7 @@ namespace TileStories.Tests
             }
             SelectionEventBus.Select("lamp");
             yield return Wait(0.2f);
-            var close = Host.Card.Root.Q<Button>("detail-card-close");
+            var close = Card.Sheet.CloseButton;
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(close.worldBound.width, close.worldBound.height), "the card's X");
         }
     }
