@@ -47,7 +47,7 @@ namespace TileStories.Tests
         {
             var index = new POISearchIndex();
             index.Build(config);
-            return index.Search(query).Select(r => r.POIId).OrderBy(id => id).ToList();
+            return index.Search(query, SearchOptions.Default).Select(r => r.PoiId).OrderBy(id => id).ToList();
         }
 
         [Test]
@@ -92,7 +92,7 @@ namespace TileStories.Tests
             }
 
             // RUNTIME 2: the row's keywords still reach the POIs that name it
-            // (POISearchIndex.IndexTaxonomyKeywords matches by the identity string).
+            // (POISearchIndex.Build matches each POI to its taxonomy row by the identity string).
             var found = SearchIds(config, ProbeKeyword);
             CollectionAssert.AreEqual(
                 referencing.Select(p => p.id).OrderBy(id => id).ToList(), found,
@@ -225,7 +225,7 @@ namespace TileStories.Tests
             var row = config.hierarchy_levels.First(r => r.key == oldKey);
             float authoredSize = row.size_cm;
             row.key = newKey;
-            row.label = probeKeyword; // label is display-only, so probing it is safe
+            row.level_name = probeKeyword; // level_name is display-only, so probing it is safe
 
             MarkerHierarchyResolver.Configure(config.hierarchy_levels);
             try

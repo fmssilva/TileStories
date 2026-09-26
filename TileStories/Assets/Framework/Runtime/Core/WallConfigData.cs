@@ -42,9 +42,39 @@ namespace TileStories
         // Outline ring size as a multiple of the symbol diameter (_2.2.3): larger = more gap.
         public float ring_size_ratio = 1.18f;
 
+        // The icon drawn on the symbol and on the badge (_2.2.1): its colour (every marker) and the
+        // symbol icon's diameter as a fraction of the symbol. Defaults = the framework's original look.
+        public string icon_color_hex = "#F2ECD3";
+        public float icon_size_ratio = 0.56f;
+
+        // Text label gap and font size, both as a multiple of the symbol diameter (_2.2.1), same
+        // proportional-sizing convention as ring_size_ratio/badge_size_ratio above: a ratio (not an
+        // absolute distance/point size) means every hierarchy level's label sits and reads correctly
+        // relative to THAT level's own marker size automatically, with no per-level override needed.
+        public float label_gap_ratio = 0.075f;
+        public float label_font_size_ratio = 0.25f;
+
+        // Wall-default label font, a key into FontKeyLibrary (_2.0_Labels_And_Fonts_Design.md).
+        // "liberation_sans" ships in the framework default library and always resolves.
+        public string label_font_key = "liberation_sans";
+
+        // Optional wall-local font library load path (Resources-relative, without extension),
+        // same recipe as marker_icon_library_resources_path: when set, WallSession loads this
+        // FontKeyLibrary and label_font_key (and any per-level override) is looked up there
+        // instead of the framework default library.
+        public string label_font_library_resources_path;
+
         // Dev-only "Add outline demo grid" (see OutlinePreviewSpawner): off by default, only honoured
         // in the Editor and development builds, same rule as effect_defaults.preview.
         public OutlinePreviewSettings outline_preview = new();
+        // Dev-only "Add LOD demo field" (Editor Play Mode and development builds only): extra, generated
+        // markers in front of the camera so every LOD / crowding / cluster / displacement setting can be
+        // seen working. See DemoFieldSpawner. Never saved into pois, never searchable.
+        public DemoFieldSettings demo_field = new();
+        // Dev-only "Add displacement demo" (Editor Play Mode and development builds only): crowded groups of
+        // generated markers on an empty stage, each beside a faded copy at its true place, so every
+        // Displacement setting can be seen working. See DisplacementDemoSpawner. Never saved into pois.
+        public DisplacementDemoSettings displacement_demo = new();
 
         // Ring spin speed in degrees per second for hierarchy levels with rotate_contour on.
         public float contour_spin_deg_per_s = 60f;
@@ -75,11 +105,6 @@ namespace TileStories
 
         public List<POIData> pois = new();
 
-        // Optional wall bounds for minimap coordinate conversion (used to convert
-        // position world coordinates to normalized minimap coordinates).
-        // If not set, minimap will fall back to a default 4x3m wall centered at origin.
-        public WallBounds wall_bounds;
-
         // Optional wall-level effect parameter defaults. When present, these values
         // are passed to each marker's effect components at spawn time, overriding
         // the components' compiled-in [SerializeField] defaults. When absent/null,
@@ -90,6 +115,7 @@ namespace TileStories
         // Optional LOD settings. When absent, LODController uses defaults:
         // 3-tier bands (2m/7m/9999m, counts -1/15/5), hybrid density, frustum cull on.
                 public LodSettings lod_settings = new();
+        public ZoomSettings zoom_settings = new();
 
         // Optional marker/label displacement settings (spec _2.5 section 10). When
         // absent, MarkerOverlapResolver.ApplyDisplacement uses these compiled-in
@@ -101,131 +127,23 @@ namespace TileStories
         // always_facing_camera facing, every_frame updates.
         public OrientationSettings orientation_settings = new();
 
-        // --- Custom keyword field definitions (spec _2.6 section 3 / 15) ---
-        // Developer-defined search axes (e.g. "architect", "period", "material").
-        // Each definition appears as an editable row in every specific POI section
-        // and in the Global Scene Keyword Fields table. System axes (category/hierarchy/
-        // badge/outline) are NOT listed here -- their keywords come from the taxonomy
-        // tables and are indexed automatically at Build time.
+        // The Select, Filter & Search domain (_2.6): selection, search, filter, results, minimap
+        // and voice settings, one sub-block each (SelectFilterSearchSettings.cs).
+        public SelectFilterSearchSettings select_filter_search = new();
+
+        // Keyword vocabulary of the search domain, next to the taxonomy tables whose rows carry
+        // their own search_keywords:
+        // - search_fields: developer-defined search axes ("architect", "period"); every POI gets
+        //   one keyword list per axis (POIData.search_keyword_fields).
+        // - synonym_groups: words that mean the same thing; a POI matching one member of a group
+        //   also matches every other member (POISearchIndex.Build).
         public List<SearchFieldDefinition> search_fields = new();
-
-        // --- Selection & zoom-on-select infrastructure (spec _2.6 section 11) ---
-        // Closed behaviour choice for which tap target triggers an auto-zoom.
-        // Framework-controlled (not wall-authored taxonomy), so it is an enum rather
-        // than a free-form string like marker_style / marker_shape.
-        public enum ZoomOnSelectTrigger { None, Marker, Cluster, Both }
-
-        // When true, tapping a marker dims all other markers to partial alpha so the
-        // selected one is the clear focal point; re-tapping it clears the highlight.
-        // Defaults true (the section 11 behaviour).
-        [Tooltip("Dim non-selected markers to partial alpha when a marker is selected.")]
-        public bool selection_highlight_enabled = true;
-
-        // Auto-zoom only when the selected marker has at least this many
-        // screen-space neighbours (LODController's last density evaluation). Stops
-        // us zooming in on isolated markers with nothing to disambiguate.
-        public int zoom_on_select_density_threshold = 2;
-
-        // Multiplier applied to the current ARZoomState.ZoomFactor when zoom-on-
-        // select fires (e.g. 2.0 doubles the zoom-in), clamped to [zoom_min,
-        // zoom_max] by ARZoomController.SetZoomAnimated.
-        public float zoom_on_select_factor = 2.0f;
-
-        // Master toggle for zoom-on-select: when true, selecting a dense marker
-        // auto-zooms per zoom_on_select_factor. When false, selection only
-        // highlights (if selection_highlight_enabled).
-        public bool zoom_on_select_enabled = true;
-
-        // Which tap target auto-zooms: Marker active in Block 2; Cluster/Both
-        // reserved for Block 3 cluster-tap wiring (spec _2.6 section 11).
-        public ZoomOnSelectTrigger zoom_on_select_trigger = ZoomOnSelectTrigger.Marker;
-
-        // --- Select, filter & search UI settings (spec _2.6 section 3) ---
-        // Author-selectable search interaction model.
-        // Convention values: "explicit" | "dynamic" | "scoped" | "faceted" | "auto_complete".
-                // Free-form string so future walls can use values not foreseen here.
-        // Absent/null defaults to "explicit" (plain keyword search bar).
-        public string search_mode;
-
-        // No-results message shown when a search or filter returns zero POIs.
-        // Supports {query} placeholder for the user's search term.
-        public string no_results_message = "No matches for \"{query}\" - try removing a filter.";
-
-        // How many recent search queries to remember locally (PlayerPrefs).
-        public int recent_search_count = 5;
-
-        // Whether to show suggested categories based on the wall's actual POI
-        // distribution. Computed live, not manually curated.
-        public bool show_suggested_categories = true;
-
-        // Where suggestion terms come from (spec _2.6 section 13).
-        // "category_distribution" (default): top-N categories by live POI count.
-        // "recent_first": visitor's recent queries first, then category back-fill.
-        public string suggested_source = "category_distribution";
-
-        // --- Select/Filter/Search domain master switch (_2_6 section 3 via _2.7 entry 2.6-d) ---
-        // One switch to disable the whole domain, mirroring LodSettings.enabled /
-        // DisplacementSettings.enabled. When false: no search/filter/minimap/results UI
-        // activates and marker-selection responders are never wired.
-        public bool search_filter_select_enabled = true;
-
-        // --- Synonym groups for search expansion (_2.6-al via _2.7 entry 2.6-al) ---
-        // Each group defines a key term + synonyms that should also match POIs containing the key.
-        // Expanded at index-build time (zero runtime search cost) by POISearchIndex.ConfigureWithSynonyms.
-        // Matches the pattern of every other taxonomy list (category_styles, badge_categories, etc.).
         public List<SynonymGroup> synonym_groups = new();
 
-        // What happens to markers NOT in the active filter/search result set
-        // (_2.6-i): "hide" fully fades them out (spec section 7 default);
-        // "dim" keeps them faintly visible for positional context in dense walls.
-        // Both ride the LOD-coexistent SetVisible(alpha, fade) seam.
-        public string filter_mismatch_behaviour = "hide";
-
-        // --- Minimap settings (spec _2.6 section 8) ---
-        // Whether the minimap feature is enabled for this wall.
-        public bool minimap_enabled = true;
-
-        // "always" shows the minimap permanently; "toggle" shows a button to
-        // expand/collapse it.
-        public string minimap_visibility = "toggle";
-
-        // "dots_only" (plain colored dots), "category_colored_dots" (dots
-        // colored by category), "mini_icons" (scaled-down marker icons).
-        public string minimap_icon_style = "category_colored_dots";
-
-        // Visual dot diameter, px. Kept small so dense walls stay readable --
-        // tap comfort is handled separately by minimap_dot_tap_target_px.
-        public float minimap_dot_size_px = 20f;
-
-        // Invisible hit-zone diameter per dot, px; the actual tap receiver.
-        // Defaults to the 44x44 WCAG 2.5.5 floor. Overlapping zones at high
-        // density are expected and resolved by nearest-dot-center at runtime.
-        public float minimap_dot_tap_target_px = 44f;
-
-        // --- View mode settings (spec _2.6 section 10) ---
-        // The result view shown by default when the wall loads.
-        // "list" | "minimap" | "camera_highlight"
-        public string default_result_view = "list";
-
-        // --- Voice search settings (spec _2.6 section 12) ---
-        // Off by default -- real permission and reliability caveats (iOS requires
-        // two separate permission prompts, on-device model needs initial download).
-        public bool voice_search_enabled = false;
-
-        // "all" requires every remaining token to match; "any" matches if any
-        // token matches. Default "all" for precision over recall.
-        public string voice_search_match_mode = "all";
-
-        // --- Voice search indicator (spec _2.6 section 12) ---
-        // How the "listening/processing" voice state is surfaced to the visitor.
-        // "mic_text" (default): the mic button text flips to "..." while listening/processing.
-        //   Behavior-identical to the legacy inline implementation, so existing walls are
-        //   unaffected unless they explicitly opt in.
-        // "listen_bar": also renders a dedicated, explicitly-labelled listen/progress bar.
-        // Free-form string so future walls can introduce styles without a Framework code
-        // change; unknown values fall back to "mic_text" (logged once) in
-        // VoiceActivityIndicatorView.ParseStyle.
-        public string voice_activity_indicator_style = "mic_text";
+        // Dev-only "Add search & filter demo" (Editor Play Mode and development builds only):
+        // generated POIs on their own stage built to exercise every search / filter / selection
+        // setting. See SearchDemoSpawner. Never saved into pois.
+        public SearchDemoSettings search_demo = new();
     }
 
     // Dev-only "Add outline demo grid" (Editor Play Mode and development builds; release builds
@@ -236,6 +154,85 @@ namespace TileStories
         public bool enabled = false;
         // POI id whose category the "Same hue" comparison cell borrows. Empty = plain grey circle.
         public string base_poi_id = "";
+    }
+
+    // Dev-only LOD demo field (spec _2.4 section 7.2): a box of generated markers on an empty stage (the
+    // Editor moves the camera there; a device uses its start pose), with a chosen number of markers per
+    // hierarchy level plus one dense clump, so distance bands, crowding, clusters and displacement are
+    // all reachable in Play Mode. Placement is deterministic for a given seed (DemoFieldLayout). Off by
+    // default; release builds ignore it.
+    [Serializable]
+    public class DemoFieldSettings
+    {
+        public bool enabled = false;                // on: only the demo markers run (the wall's own POIs are paused)
+        public bool show_labels = true;             // off = no text labels on demo markers, whatever the level says
+        public int seed = 1;                        // same seed = same placement; "Reshuffle" picks a new one
+        public float distance_m = 1.5f;             // from the stage start (the camera) to the near face of the field
+        public float width_m = 6f;                  // left-right spread
+        public float height_m = 2.5f;               // up-down spread
+        public float depth_m = 8f;                  // how far the field reaches away (spans several distance bands)
+        public int dense_clump_count = 8;           // extra markers packed together (crowding / cluster test)
+        public float dense_clump_radius_m = 0.08f;
+        public List<DemoFieldLevelCount> level_counts = new(); // markers per hierarchy level (missing = 0)
+
+        // Limits shared by the Editor sliders and the layout clamp
+        public const int MaxCountPerLevel = 60;
+        public const int MaxClumpCount = 30;
+    }
+
+    // Dev-only displacement demo (spec _2.5 section 12): four crowded scenarios on a flat demo wall facing
+    // the camera -- same level, mixed levels, one big marker among small ones, a lone control marker --
+    // each optionally beside a faded, never-displaced reference copy at the true positions. Placement is
+    // pure (DisplacementDemoLayout). Off by default; release builds ignore it.
+    [Serializable]
+    public class DisplacementDemoSettings
+    {
+        public bool enabled = false;                          // on: only the demo markers run (the wall's own POIs are paused)
+        public int markers_per_group = 4;                     // members of each crowded group
+        public float spread_cm = 4f;                          // how far apart a group's true positions are (0 = stacked)
+        public float distance_m = 3f;                         // camera to the demo wall (farther = smaller = more crowded)
+        public bool show_labels = true;                       // every demo marker shows its text label (off: none do)
+        public string reference_copies = "side_by_side";      // "side_by_side" | "overlay" | "off"
+        public bool run_lod = false;                          // off: LOD leaves the demo alone so only displacement acts
+
+        // Limits shared by the Editor sliders and the layout clamp
+        public const int MinMarkersPerGroup = 2;
+        public const int MaxMarkersPerGroup = 8;
+        public const float MaxSpreadCm = 30f;
+        public const float MinDistanceM = 0.3f;
+        public const float MaxDistanceM = 6f;
+    }
+
+    // Dev-only search & filter demo (spec _2.6 section 17): a flat wall of generated POIs on its own stage
+    // facing the camera, one column block per wall category, cycling through every hierarchy level, badge
+    // and outline type so every facet has something to filter, plus named test cases (an accented name,
+    // a typo twin, a synonym, a custom-field keyword, a dense clump). While it is on the wall searches,
+    // filters and selects the demo's POIs instead of its own. Placement is pure (SearchDemoLayout). Off
+    // by default; release builds ignore it.
+    [Serializable]
+    public class SearchDemoSettings
+    {
+        public bool enabled = false;          // on: only the demo POIs run (the wall's own are paused)
+        public int markers_per_category = 3;  // generated POIs per wall category
+        public bool test_cases = true;        // add the named test-case POIs and the demo synonym group
+        public bool show_labels = true;       // every demo marker shows its text label (off: none do)
+        public float distance_m = 3.5f;       // camera to the demo wall
+        public float spacing_cm = 40f;        // between neighbouring markers (the clump ignores it)
+        public bool run_lod = false;          // off: every demo marker stays visible; on: LOD / clusters act
+
+        // Limits shared by the Editor sliders and the layout clamp
+        public const int MaxMarkersPerCategory = 6;
+        public const float MinDistanceM = 0.5f;
+        public const float MaxDistanceM = 8f;
+        public const float MinSpacingCm = 5f;
+        public const float MaxSpacingCm = 80f;
+    }
+
+    [Serializable]
+    public class DemoFieldLevelCount
+    {
+        public string level_key = "";
+        public int count;
     }
 
     // Wall-level effect settings (_2.2.4): a master switch, one parameter block per
@@ -457,8 +454,10 @@ namespace TileStories
         // Stable key, e.g. "level_1" -- written to POIData.hierarchy_level_key.
         public string key;
 
-        // Developer-facing label, e.g. "1" or "Landmark".
-        public string label;
+        // Developer-facing name for THIS LEVEL (e.g. "Hub", "Landmark") -- shown in the per-POI
+        // "which hierarchy level" dropdown. Never a marker's on-wall text: under a marker (real or
+        // demo grid) the label is always the POI's own name.
+        public string level_name;
 
         // Authorable priority for this hierarchy level (lower = higher priority).
         // Convention: a value >= 1 is an explicit developer-assigned priority; a value
@@ -481,6 +480,18 @@ namespace TileStories
 
         // Persistent label visible at this level? false = no label.
         public bool show_label;
+
+        // Marker Label Style (the table's "Aa" window, _2.0_Labels_And_Fonts_Design.md section 4).
+        // override_label_style = false: this level's label follows the wall default (Labels, Text &
+        // Fonts) and the three values below are ignored. true: the level uses its own values. One
+        // explicit switch instead of three "<= 0 means inherit" sentinels, so the UI is one checkbox
+        // and the runtime rule is one if. Ticking it seeds the values from the current wall default.
+        // Exists for cases the wall ratio can't cover -- e.g. keeping one level's text large for
+        // accessibility even though its marker is small.
+        public bool override_label_style;
+        public float label_gap_ratio;
+        public float label_font_size_ratio;
+        public string label_font_key = "";
 
         // "none" | "ripple_rings" | "ripple_discs" -- parsed by MarkerHierarchyResolver.
         public string ripple_effect;
@@ -625,7 +636,17 @@ namespace TileStories
     public class LodSettings
     {
         public bool enabled = true;
-        public List<LodBandEntry> bands = new(); // see defaults below
+        // Distance tiers, sorted ascending by max_distance_m; the last row's large value is a real
+        // catch-all. A new wall starts with the framework's three explicit tiers (DefaultBands).
+        public List<LodBandEntry> bands = DefaultBands();
+
+        // The framework default tiers (spec 3): under 2 m all markers, under 7 m 15, beyond that 5.
+        public static List<LodBandEntry> DefaultBands() => new()
+        {
+            new LodBandEntry { max_distance_m = 2f, max_visible_count = -1 },
+            new LodBandEntry { max_distance_m = 7f, max_visible_count = 15 },
+            new LodBandEntry { max_distance_m = 9999f, max_visible_count = 5 },
+        };
         public float hysteresis_margin_m = 0.5f;
         public float transition_fade_duration_s = 0.3f;
         public float evaluation_interval_s = 0.2f;
@@ -634,6 +655,8 @@ namespace TileStories
         public float density_radius_px = 40f;            // matches MarkerOverlapResolver's threshold
         public int shrink_start_neighbor_count = 2;       // hybrid/shrink_and_fade: density response begins here
         public int cluster_min_count = 5;                 // select_hide/cluster/hybrid: escalate to hide-or-cluster here
+        public float shrink_min_factor = 0.4f;            // size AND opacity of a marker at the end of the shrink ramp (never vanishes)
+        public float cluster_size_ratio = 1.2f;           // cluster diameter as a multiple of its largest member's symbol
         public bool density_safety_escalation_enabled = true; // see §6.2
         public float density_safety_escalation_multiplier = 2f; // see §6.2
         public string cluster_icon_mode = "pie_and_count"; // pie_and_count|dominant_category|count_only
@@ -644,21 +667,25 @@ namespace TileStories
 
         public bool frustum_culling_enabled = true;
         public float fov_culling_margin_deg = 10f;
+    }
 
-        public bool zoom_enabled = true;
-        public float zoom_min = 1f;
-        public float zoom_max = 4f;          // hard clamp, see §9
-        public float zoom_tap_step = 1.5f;
-        public int zoom_tap_levels = 2;      // 3rd tap/click returns to 1x
-        public float zoom_transition_speed_s = 0.25f; // animation duration for tap/double-tap/button zoom changes
-        public bool zoom_show_ui_buttons = true;
+    // AR camera zoom (spec _2.4 section 3.9): its own block, separate from LOD. LOD only READS the
+    // resulting zoom factor (effective distance = real distance / zoom).
+    [Serializable]
+    public class ZoomSettings
+    {
+        public bool enabled = true;
+        public float min_factor = 1f;            // 1 = native camera field of view
+        public float max_factor = 4f;            // hard clamp (ARZoomState.SetZoom)
+        public float tap_step = 1.5f;            // zoom multiplier per double-tap step
+        public int tap_levels = 2;               // steps before the next double-tap returns to 1x
+        public float transition_duration_s = 0.25f; // animation length of double-tap and button zoom changes
+        public bool show_ui_buttons = true;      // on-screen zoom in / out / reset buttons
 
-        // Double-tap gesture tunables (spec section 9 "three mechanisms"; read by
-        // ARZoomGestureInput). Seconds between the two taps, and how far the second
-        // tap may land from the first and still count as a double-tap rather than
-        // a drag. Developer-exposed, never hardcoded in the gesture script.
-        public float zoom_double_tap_window_s = 0.3f;
-        public float zoom_double_tap_move_tolerance_px = 50f;
+        // Double-tap gesture tunables (read by ARZoomGestureInput): seconds between the two taps, and
+        // how far the second tap may land from the first and still count as a double-tap.
+        public float double_tap_window_s = 0.3f;
+        public float double_tap_move_tolerance_px = 50f;
     }
 
     [Serializable]
@@ -687,7 +714,6 @@ namespace TileStories
         public float overlap_threshold_px = 40f;                  // was a hardcoded const in MarkerOverlapResolver; now configurable
         public string displace_target = "label_only";             // "label_only" | "marker" | "both"
         public string displacement_algorithm = "force_directed";  // "fixed_axis" | "candidate_position" | "force_directed"
-        public int force_directed_iterations = 4;                 // relaxation steps/cycle, force_directed only
         public float max_displacement_px = 120f;                  // cap; beyond it, hide the label
         public bool leader_lines_enabled = true;
         public string leader_line_style = "straight";             // "straight" | "dashed" | "elbow"
@@ -695,6 +721,14 @@ namespace TileStories
         public float leader_line_width = 0.01f;                // world-space width of the line (spec Section 6)
         public float leader_line_opacity = 1.0f;               // 0-1 alpha multiplier on the category color
         public string displacement_tiebreak = "symmetric";        // "symmetric" | "lower_priority_only"
+
+        // Slider ranges of the POI Editor's Displacement rows (the one place they are defined)
+        public const float MinOverlapPx = 5f;
+        public const float MaxOverlapPx = 200f;
+        public const float MaxMovePxLimit = 400f;
+        public const float MaxLeaderMinLengthPx = 200f;
+        public const float MinLeaderWidthM = 0.001f;
+        public const float MaxLeaderWidthM = 0.05f;
 
         // Parameterless constructor (required because the copy constructor below
         // would otherwise suppress the compiler-generated default).
@@ -708,7 +742,6 @@ namespace TileStories
             overlap_threshold_px = other.overlap_threshold_px;
             displace_target = other.displace_target;
             displacement_algorithm = other.displacement_algorithm;
-            force_directed_iterations = other.force_directed_iterations;
             max_displacement_px = other.max_displacement_px;
             leader_lines_enabled = other.leader_lines_enabled;
             leader_line_style = other.leader_line_style;
@@ -799,6 +832,10 @@ namespace TileStories
         // required status; most will be optional.
         public bool forced;
 
+        // When true, the visitor's Filters panel gets a group for this field: one chip per keyword the POIs
+        // hold in it (for example a "Period" field -> chips "Baroque", "Gothic"), filtered like a category.
+        public bool filterable;
+
         // Free-text guidance note surfaced via the Details popup (same pattern
         // as CategoryStyleEntry.details and other taxonomy entries).
         public string details;
@@ -817,29 +854,5 @@ namespace TileStories
 
         // The actual keyword strings for this field on this POI.
         public List<string> keywords = new();
-    }
-}
-
-// Wall bounds for minimap coordinate conversion.
-// Represents the world-space bounding box of the wall area.
-// min/max are in world space (same coordinate system as position).
-[Serializable]
-public class WallBounds
-{
-    public Vector3 min;
-    public Vector3 max;
-
-    // Returns true if bounds are valid (min <= max on all axes)
-    public bool IsValid() => min.x <= max.x && min.y <= max.y && min.z <= max.z;
-
-    // Convert a world position to normalized [0,1] coordinates within these bounds.
-    // Returns (0.5, 0.5) if bounds are invalid.
-    public Vector2 WorldToNormalized(Vector3 worldPos)
-    {
-        if (!IsValid())
-            return new Vector2(0.5f, 0.5f);
-        float x = Mathf.InverseLerp(min.x, max.x, worldPos.x);
-        float y = Mathf.InverseLerp(min.y, max.y, worldPos.y);
-        return new Vector2(Mathf.Clamp01(x), Mathf.Clamp01(y));
     }
 }

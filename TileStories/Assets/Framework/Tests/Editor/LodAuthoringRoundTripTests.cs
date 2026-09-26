@@ -18,9 +18,9 @@ namespace TileStories.Editor.Tests
             config.lod_settings = LodAutoSuggest.Suggest(18);
             config.lod_settings.density_response_mode = "cluster";
             config.lod_settings.density_safety_escalation_multiplier = 3f;
-            config.lod_settings.zoom_max = 5f;
-            config.lod_settings.zoom_double_tap_window_s = 0.3f;
-            config.lod_settings.zoom_double_tap_move_tolerance_px = 50f;
+            config.zoom_settings.max_factor = 5f;
+            config.zoom_settings.double_tap_window_s = 0.3f;
+            config.zoom_settings.double_tap_move_tolerance_px = 50f;
 
             // 3-7a: set the three new LodSettings fields that the LOD editor
             // foldout binds to, so the round-trip asserts below cover them.
@@ -39,9 +39,9 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(15, loaded.lod_settings.bands[1].max_visible_count);
             Assert.AreEqual("cluster", loaded.lod_settings.density_response_mode);
             Assert.AreEqual(3f, loaded.lod_settings.density_safety_escalation_multiplier);
-            Assert.AreEqual(5f, loaded.lod_settings.zoom_max);
-            Assert.AreEqual(0.3f, loaded.lod_settings.zoom_double_tap_window_s, "zoom double-tap window survives round-trip");
-            Assert.AreEqual(50f, loaded.lod_settings.zoom_double_tap_move_tolerance_px, "zoom double-tap move tolerance survives round-trip");
+            Assert.AreEqual(5f, loaded.zoom_settings.max_factor);
+            Assert.AreEqual(0.3f, loaded.zoom_settings.double_tap_window_s, "zoom double-tap window survives round-trip");
+            Assert.AreEqual(50f, loaded.zoom_settings.double_tap_move_tolerance_px, "zoom double-tap move tolerance survives round-trip");
             Assert.AreEqual("far sentinel", loaded.lod_settings.bands[2].details, "additive band details survives");
 
             // 3-7b: Asserts the three new LodSettings fields survive the
@@ -75,8 +75,8 @@ namespace TileStories.Editor.Tests
             Assert.IsNotNull(typeof(LodSettings).GetField("cluster_band_source"), "LodSettings.cluster_band_source must exist for the Band Source foldout field");
             Assert.IsNotNull(typeof(LodSettings).GetField("cluster_band_hysteresis_enabled"), "LodSettings.cluster_band_hysteresis_enabled must exist for the Band Hysteresis toggle");
             Assert.IsNotNull(typeof(LodSettings).GetField("cluster_dissolve_grace_cycles"), "LodSettings.cluster_dissolve_grace_cycles must exist for the Dissolve Grace field");
-Assert.IsNotNull(typeof(LodSettings).GetField("zoom_double_tap_window_s"), "LodSettings.zoom_double_tap_window_s must exist for the Double-Tap Window field");
-            Assert.IsNotNull(typeof(LodSettings).GetField("zoom_double_tap_move_tolerance_px"), "LodSettings.zoom_double_tap_move_tolerance_px must exist for the Double-Tap Move Tolerance field");
+Assert.IsNotNull(typeof(ZoomSettings).GetField("double_tap_window_s"), "ZoomSettings.double_tap_window_s must exist for the Double-Tap Window field");
+            Assert.IsNotNull(typeof(ZoomSettings).GetField("double_tap_move_tolerance_px"), "ZoomSettings.double_tap_move_tolerance_px must exist for the Double-Tap Move Tolerance field");
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine; // PlayerPrefs cleanup for order-independent tests
 namespace TileStories.Tests
 {
     // Tier-0 tests for SuggestedSearchesManager: live category distribution,
-    // recent-first surfacing, synonym-key injection and the top-N cap
+    // recent-first surfacing and the top-N cap
     // (spec _2.6 section 13).
     public class SuggestedSearchesManagerTests
     {
@@ -91,24 +91,6 @@ namespace TileStories.Tests
             Assert.That(result, Has.Count.EqualTo(2));
             Assert.AreEqual("religious", result[0]);
             Assert.AreEqual("civic", result[1]);
-        }
-
-        [Test]
-        public void SynonymGroups_KeysSurfacedAsSuggestions()
-        {
-            var groups = new List<SynonymGroup>
-            {
-                new SynonymGroup { key = "santuário" },
-                new SynonymGroup { key = "azulejo" },
-            };
-
-            var mgr = new SuggestedSearchesManager(topN: 5);
-            var result = mgr.BuildSuggestions(_config, null, groups);
-
-            // Synonyms first (2), then category back-fill (2) = 4, within topN.
-            Assert.That(result, Has.Count.EqualTo(4));
-            Assert.AreEqual("santuário", result[0]);
-            Assert.AreEqual("azulejo", result[1]);
         }
 
         [Test]

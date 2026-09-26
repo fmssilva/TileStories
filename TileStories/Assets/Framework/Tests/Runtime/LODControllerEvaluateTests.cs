@@ -242,13 +242,6 @@ namespace TileStories.Tests
                 "real config displacement_algorithm must default \"force_directed\".");
             Assert.AreEqual("label_only", real.displace_target,
                 "real config displace_target must default \"label_only\".");
-            Assert.AreEqual(4, real.force_directed_iterations,
-                "real config force_directed_iterations must default 4.");
-            // (T5) The override this run actually uses: MakeRealDispSettings bumps 4->50
-            // for separation headroom (matches DisplacementGalleryTests). Assert both so
-            // a change to either breaks the right thing.
-            Assert.AreEqual(50, MakeRealDispSettings(config).force_directed_iterations,
-                "MakeRealDispSettings must override iterations 4->50 for separation headroom.");
 
             // --- LOD OFF -> lamp family stays as visible labels (not absorbed into a
             //     cluster aggregate); displacement ON with the real-config defaults ---
@@ -501,22 +494,13 @@ namespace TileStories.Tests
             return prefab;
         }
 
-        // Clone the real config's displacement_settings defaults and bump only
-        // force_directed_iterations (4 -> 50). The default of 4 is asserted in-test;
-        // 50 mirrors the Phase-A gallery contract (DisplacementGalleryTests) that yields
-        // >=35px screen-pixel gaps. ApplyDisplacement is capped in screen pixels
-        // (max_displacement_px), so separation is identical at 20m as at 5m -- 50
-        // iterations is sufficient and stable. Other fields stay the genuine config
-        // defaults (force_directed / label_only / symmetric).
+        // A copy of the real config's displacement_settings (force_directed / label_only / symmetric),
+        // so a test can change a field without touching the loaded config.
         private DisplacementSettings MakeRealDispSettings(WallConfigData config)
         {
             Assert.IsNotNull(config.displacement_settings,
                 "config.displacement_settings must be non-null (field default initializer).");
-            var d = new DisplacementSettings(config.displacement_settings)
-            {
-                force_directed_iterations = 50,
-            };
-            return d;
+            return new DisplacementSettings(config.displacement_settings);
         }
 
         // Spawn the 6 real lamp_* markers from the prefab at their real resolved

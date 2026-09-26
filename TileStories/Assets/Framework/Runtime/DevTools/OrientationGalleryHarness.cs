@@ -100,7 +100,7 @@ namespace TileStories
                 // deterministic - matches the same fix DisplacementGalleryTests.cs already
                 // applies for exactly this reason.
                 reveal.StopAllCoroutines();
-                reveal.SetFullAlphaAndScale();
+                reveal.SkipToEnd();
             }
 
             // MarkerChildOrientation is baked into POI_Marker.prefab's Label/Badge as of

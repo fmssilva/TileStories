@@ -4,17 +4,20 @@ using UnityEngine;
 
 namespace TileStories
 {
-    // Screen-space marker/label overlap resolver (spec _2.5 Sections 1/4/11a).
-    // Replaces the legacy spawn-time resolver: union-find grouping over a fixed
-    // screen-space snapshot, offsets written via MarkerView.ApplyLabelOffset /
-    // ClearLabelOffset (label_only), re-evaluated every LODController cycle (step 8).
-    // Block 2 = fixed_axis + label_only only; other algorithms/targets/tiebreaks
-    // warn once and fall back (spec _2.5 Section 11a step 2).
+    // Screen-space marker/label overlap resolver (spec _2.5). Runs as step 8 of every LODController
+    // cycle: markers whose screen positions are closer than overlap_threshold_px form a group
+    // (union-find), one of three algorithms spreads each group (ComputeOffsets, pure), and the result
+    // moves the label, the marker or both (MarkerView), with a 2-cycle hysteresis gate so a marker at
+    // the threshold edge does not flicker. Only visible individual markers take part (SelectCandidates).
     public static class MarkerOverlapResolver
     {
-        private const string AlgorithmNotImplementedFmt = "[Displacement] displacement_algorithm '{0}' is not yet implemented; using fixed_axis.";
+        // Force Directed: push-apart steps per evaluation. The loop stops as soon as nothing overlaps
+        // (usually after one or two steps), so this is only a ceiling; measured on 4-12 member groups,
+        // anything from 1 to 50 steps changed a result by a few pixels at most, which is why it is not
+        // a developer setting (_2.5 Design history).
+        public const int ForceDirectedMaxSteps = 50;
 
-        private const string TargetNotImplementedFmt = "[Displacement] displace_target '{0}' is not yet implemented; using label_only.";
+        private const string AlgorithmNotImplementedFmt = "[Displacement] displacement_algorithm '{0}' is not a known algorithm; using fixed_axis.";
 
         private static readonly HashSet<string> _warnedOnce = new HashSet<string>();
         internal static void ResetWarnings() => _warnedOnce.Clear();
@@ -69,33 +72,7 @@ namespace TileStories
             float threshold = Mathf.Max(0.0001f, settings.overlap_threshold_px);
             float maxDisp = Mathf.Max(0f, settings.max_displacement_px);
 
-            int[] parent = new int[n];
-            for (int i = 0; i < n; i++) parent[i] = i;
-            int Find(int x)
-            {
-                while (parent[x] != x) { parent[x] = parent[parent[x]]; x = parent[x]; }
-                return x;
-            }
-            void Union(int a, int b)
-            {
-                int ra = Find(a), rb = Find(b);
-                if (ra != rb) parent[ra] = rb;
-            }
-            for (int i = 0; i < n; i++)
-                for (int j = i + 1; j < n; j++)
-                    if (Vector2.Distance(screenPositions[i], screenPositions[j]) < threshold)
-                        Union(i, j);
-
-            var groups = new Dictionary<int, List<int>>();
-            for (int i = 0; i < n; i++)
-            {
-                int root = Find(i);
-                if (!groups.TryGetValue(root, out var members))
-                    groups[root] = members = new List<int>();
-                members.Add(i);
-            }
-
-            foreach (var members in groups.Values)
+            foreach (var members in BuildOverlapGroups(screenPositions, threshold).Values)
             {
                 if (members.Count < 2) continue;
 
@@ -183,7 +160,7 @@ namespace TileStories
             float maxDisp = Mathf.Max(0f, settings.max_displacement_px);
 
             // Build overlap groups (reuse existing union-find helper)
-            var groups = BuildOverlapGroups(screenPositions, threshold, ids);
+            var groups = BuildOverlapGroups(screenPositions, threshold);
 
             // Process each group independently
             foreach (var kvp in groups)
@@ -400,7 +377,9 @@ namespace TileStories
             }
         }
 
-        private static Dictionary<int, List<int>> BuildOverlapGroups(IReadOnlyList<Vector2> positions, float threshold, IReadOnlyList<string> ids)
+        // Union-find: every marker closer than threshold to another joins its group (chains too: A-B
+        // and B-C put A, B and C together). Keyed by group root; singletons are groups of one.
+        internal static Dictionary<int, List<int>> BuildOverlapGroups(IReadOnlyList<Vector2> positions, float threshold)
         {
             int n = positions.Count;
             var groups = new Dictionary<int, List<int>>();
@@ -449,7 +428,7 @@ namespace TileStories
             float maxDisp = Mathf.Max(0f, settings.max_displacement_px);
 
             // Build overlap groups using union-find
-            var groups = BuildOverlapGroups(screenPositions, threshold, ids);
+            var groups = BuildOverlapGroups(screenPositions, threshold);
 
             foreach (var kvp in groups)
             {
@@ -481,7 +460,7 @@ namespace TileStories
                     settings.displacement_tiebreak, groupPriorities, out int leaderLocal);
 
                 // Iterative force-directed repulsion
-                int maxIterations = Mathf.Max(1, settings.force_directed_iterations);
+                int maxIterations = ForceDirectedMaxSteps;
                 float damping = 0.5f;
 
                 for (int iter = 0; iter < maxIterations; iter++)
@@ -671,75 +650,87 @@ namespace TileStories
             return h.committed;
         }
 
-        public static void ApplyDisplacement(IReadOnlyList<VisualUnit> visibleUnits, Camera cam, DisplacementSettings settings, Dictionary<string, DisplacementStabilityState> stability)
-        {
-            if (cam == null || visibleUnits == null || settings == null) return;
+        // Pure: the units displacement works on -- visible individual markers. A hidden marker (culled,
+        // capped, faded out by crowding) must not push its visible neighbours' labels around, and a
+        // cluster aggregate is LOD's own answer to crowding (it has no MarkerView to move).
+        public static bool TakesPart(VisualUnit unit) =>
+            unit != null && unit.marker != null && unit.isVisible && unit.clusterMembers == null;
 
+        // Put every given marker back exactly where it belongs: no label/marker offset, label shown,
+        // no leader line. Used when displacement is switched off or its settings are replaced.
+        public static void ClearAll(IEnumerable<MarkerView> markers)
+        {
+            if (markers == null) return;
+            foreach (var marker in markers)
+            {
+                if (marker == null) continue;
+                marker.SetLabelVisible(true);
+                marker.ClearLabelOffset();
+                marker.ClearMarkerOffset();
+                marker.RefreshLeaderLine(null, null);
+            }
+        }
+
+        // One displacement cycle over the pipeline's units (step 8 of LODController.Evaluate). Units that
+        // do not take part are reset; the rest are grouped, spread and moved. Returns what it decided.
+        public static DisplacementStats ApplyDisplacement(IReadOnlyList<VisualUnit> units, Camera cam, DisplacementSettings settings, Dictionary<string, DisplacementStabilityState> stability)
+        {
+            var stats = new DisplacementStats();
+            if (cam == null || units == null || settings == null) return stats;
+
+            var candidates = new List<VisualUnit>(units.Count);
+            var resting = new List<MarkerView>();
+            foreach (var u in units)
+            {
+                if (TakesPart(u)) candidates.Add(u);
+                else if (u?.marker != null) resting.Add(u.marker);
+            }
+            ClearAll(resting);
             if (!settings.enabled)
             {
-                for (int i = 0; i < visibleUnits.Count; i++)
-                {
-                    visibleUnits[i]?.marker?.ClearLabelOffset();
-                    visibleUnits[i]?.marker?.ClearMarkerOffset();
-                    visibleUnits[i]?.marker?.UpdateLeaderLine(cam, settings);
-                }
-                return;
+                ClearAll(candidates.Select(c => c.marker));
+                stability.Clear();
+                return stats;
             }
 
             if (settings.displacement_algorithm != "fixed_axis" &&
                 settings.displacement_algorithm != "candidate_position" &&
                 settings.displacement_algorithm != "force_directed")
                 WarnOnce("algorithm", string.Format(AlgorithmNotImplementedFmt, settings.displacement_algorithm));
-            // 2.5-g: lower_priority_only is fully implemented across all three algorithm
-            // branches via DisplacementTieBreakStrategy.TryGetPrimaryAnchorLocalIndex; no
-            // fallback warning is emitted.
 
-
-            int n = visibleUnits.Count;
-            if (n < 2)
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    visibleUnits[i]?.marker?.ClearLabelOffset();
-                    visibleUnits[i]?.marker?.ClearMarkerOffset();
-                    visibleUnits[i]?.marker?.UpdateLeaderLine(cam, settings);
-                }
-                return;
-            }
-
+            int n = candidates.Count;
+            stats.Candidates = n;
             var screenPositions = new Vector2[n];
             var ids = new string[n];
             for (int i = 0; i < n; i++)
             {
-                var u = visibleUnits[i];
-                if (u == null || u.marker == null) { screenPositions[i] = Vector2.zero; ids[i] = string.Empty; continue; }
-                Vector3 sp = cam.WorldToScreenPoint(u.worldPosition);
+                Vector3 sp = cam.WorldToScreenPoint(candidates[i].worldPosition);
                 screenPositions[i] = new Vector2(sp.x, sp.y);
-                ids[i] = u.poiId ?? string.Empty;
+                ids[i] = candidates[i].poiId ?? string.Empty;
             }
 
-
-
-            Vector2[] offsets = ComputeOffsets(screenPositions, ids, settings, visibleUnits);
+            Vector2[] offsets = ComputeOffsets(screenPositions, ids, settings, candidates);
 
             // 2.5-h: decide up front (once per cycle) which lower-priority labels get
             // hidden because displacement hit the max clamp and they still crowd a
             // neighbour. Pure computation; consumed by the apply loop below.
-            var hiddenLabels = ResolveLabelsToHide(screenPositions, offsets, visibleUnits, settings);
+            var hiddenLabels = ResolveLabelsToHide(screenPositions, offsets, candidates, settings);
 
-            float membershipThreshold = Mathf.Max(0.0001f, settings.overlap_threshold_px);
+            // - a marker "has a neighbour" exactly when its union-find group has another member
+            float threshold = Mathf.Max(0.0001f, settings.overlap_threshold_px);
+            var inGroup = new bool[n];
+            foreach (var group in BuildOverlapGroups(screenPositions, threshold).Values)
+            {
+                if (group.Count < 2) continue;
+                stats.Groups++;
+                foreach (int i in group) inGroup[i] = true;
+            }
+
             for (int i = 0; i < n; i++)
             {
-                var u = visibleUnits[i];
-                var marker = u?.marker;
-                if (marker == null) continue;
-                bool hasNeighbour = false;
-                for (int j = 0; j < n && !hasNeighbour; j++)
-                {
-                    if (j == i) continue;
-                    if (Vector2.Distance(screenPositions[i], screenPositions[j]) < membershipThreshold)
-                        hasNeighbour = true;
-                }
+                var u = candidates[i];
+                var marker = u.marker;
+                bool hasNeighbour = inGroup[i];
                 // Section 9 hysteresis: group membership must commit through two
                 // consecutive cycles before a marker displaces, so a marker at the
                 // threshold boundary does not flap on every visitor micro-move.
@@ -767,22 +758,35 @@ namespace TileStories
                     // 2.5-h: hide the lower-priority member's label only when the clamp cap
                     // still leaves it crowding a neighbour. Restricted to label_only (hiding
                     // a whole marker is out-of-scope); marker/both always apply their offsets.
-                    bool hideLabel = settings.displace_target == "label_only"
-                        && hiddenLabels.Contains(i);
+                    bool hideLabel = settings.displace_target == "label_only" && hiddenLabels.Contains(i);
                     if (hideLabel)
                     {
                         marker.SetLabelVisible(false);
                         marker.ClearLabelOffset();
+                        marker.ClearMarkerOffset();
+                        stats.LabelsHidden++;
                     }
                     else
                     {
                         marker.SetLabelVisible(true);
+                        // - each target clears the channel it does not use, so switching What Moves on a
+                        //   running wall never leaves the previous target's offset behind
                         switch (settings.displace_target)
                         {
-                            case "marker":   marker.ApplyMarkerOffset(cam, applyOffset); break;
-                            case "both":     marker.ApplyLabelOffset(cam, applyOffset);
-                                             marker.ApplyMarkerOffset(cam, applyOffset); break;
-                            default:         marker.ApplyLabelOffset(cam, applyOffset); break;
+                            case "marker": marker.ClearLabelOffset(); marker.ApplyMarkerOffset(cam, applyOffset); break;
+                            case "both":   marker.ApplyLabelOffset(cam, applyOffset); marker.ApplyMarkerOffset(cam, applyOffset); break;
+                            default:       marker.ClearMarkerOffset(); marker.ApplyLabelOffset(cam, applyOffset); break;
+                        }
+                        // - Label only on a marker whose level shows no label moves nothing anyone can see:
+                        //   the offset is kept (the label appears in the right place if switched on live)
+                        //   but it is not counted as a move
+                        float movePx = settings.displace_target == "label_only" && !marker.ShowsLabel ? 0f : applyOffset.magnitude;
+                        if (movePx > 0.5f)
+                        {
+                            stats.Moved++;
+                            if (movePx > stats.LargestMovePx) stats.LargestMovePx = movePx;
+                            if (settings.leader_lines_enabled && movePx >= settings.leader_line_min_distance_px)
+                                stats.LeaderLines++;
                         }
                     }
                 }
@@ -792,22 +796,22 @@ namespace TileStories
                     marker.ClearLabelOffset();
                     marker.ClearMarkerOffset();
                 }
-                marker.UpdateLeaderLine(cam, settings);
+                marker.RefreshLeaderLine(cam, settings);
             }
 
             // Prune stability entries for markers no longer in the visible set;
             // a despawned or frustum-culled marker must not retain a stale committed
             // displacement it will never get to clear in a later cycle.
-            var currentIds = new HashSet<string>();
-            for (int i = 0; i < n; i++)
-                currentIds.Add(visibleUnits[i]?.poiId ?? string.Empty);
+            var currentIds = new HashSet<string>(ids);
             var staleKeys = new List<string>();
             foreach (var kvp in stability)
                 if (!currentIds.Contains(kvp.Key))
                     staleKeys.Add(kvp.Key);
             for (int i = 0; i < staleKeys.Count; i++)
                 stability.Remove(staleKeys[i]);
+            return stats;
         }
+
         // 2.5-h: decide which labels to hide when displacement hits the max clamp and
         // members still crowd each other. Tier-0 testable (no Camera/MonoBehaviour dep).
         // Returns indices whose LABEL text should be hidden; restricted to label_only

@@ -221,7 +221,7 @@ namespace TileStories.Editor
                     // one place, since none of the icon-only buttons carry a visible label.
                     // A smaller inset than its siblings so the glyph itself reads clearly.
                     if (DrawIconButton(infoRect, (Texture2D)InfoIcon.image, "Row icons help", iconInset: 2f))
-                        PopupWindow.Show(infoRect, new HelpInfoPopup("POI Row Icons", PoiHeaderIconsHelpBody));
+                        EditorPopup.ShowAt(new HelpInfoPopup("POI Row Icons", PoiHeaderIconsHelpBody), infoRect);
 
                     // Same width/height as its sibling icon buttons. Goes through the
                     // shared DeleteButton (Marker Table's trash glyph) like every other
@@ -267,7 +267,7 @@ namespace TileStories.Editor
                     // Effects foldout removed: per-POI effect selection is now
                     // driven entirely by the hierarchy level (see DrawPoiMarkerStyleFields).
                     // Global effect *defaults* remain in the Global Scene Effects section.
-                    _showPoiSearchKeywords = DrawFramedFoldout(ref _showPoiSearchKeywords, () => DrawPoiSearchKeywordsField(poi), "Search Keywords", FoldoutDefaultColor);
+                    _showPoiSearchKeywords = DrawFramedFoldout(ref _showPoiSearchKeywords, () => DrawPoiSearchKeywordsField(poi), PoiSearchSectionTitle, FoldoutDefaultColor);
                 }
 
                 EditorGUILayout.Space(6f);
@@ -311,11 +311,10 @@ namespace TileStories.Editor
                 return;
 
             string poiName = string.IsNullOrWhiteSpace(poi.name) ? "this POI" : poi.name;
-            bool confirm = EditorUtility.DisplayDialog(
+            bool confirm = EditorDecision.Ask(
                 "Delete POI?",
                 $"Are you sure you want to delete \"{poiName}\"?\n\nThis removes the POI from the config and from the Scene rig.",
-                "Delete",
-                "Cancel");
+                "Delete") == DecisionAnswer.Confirm;
 
             if (!confirm)
                 return;
@@ -335,18 +334,26 @@ namespace TileStories.Editor
             }, true);
         }
 
+        // Specific Marker > POI > Marker Style: the category and hierarchy level this POI uses, plus
+        // an optional custom icon. The POI name is renamed from the header row pencil, not here (a
+        // second name field would fight the header draft: two writers, one field). Every reference
+        // popup keeps a stale key visible as "(missing)" instead of silently rewriting it.
         private void DrawPoiMarkerStyleFields(POIData poi)
         {
-            // IndentLevel0: rows sit at the section content's own indent (no collapsing scope)
-            {
-            // Note: the POI name is renamed from the header row pencil, not here --
-            // a second name field would fight the header draft (two writers, one field).
-            poi.category = DrawCategoryDropdown("Category", poi.category);
+            ReferenceRows(_config.category_styles, e => e.category, e => e.category, out var categoryKeys, out var categoryLabels);
+            poi.category = DrawReferencePopupField("Category", poi.category, categoryKeys, categoryLabels,
+                allowNone: false, PoiCategoryHelp);
 
-            // Hierarchy Level: selects this POI's size/label/effects/reveal-delay
-            // from the wall's hierarchy_levels table (section 2.3). Populated from
-            // _config.hierarchy_levels; writes poi.hierarchy_level_key.
-            poi.hierarchy_level_key = DrawHierarchyLevelDropdown("Hierarchy Level", poi.hierarchy_level_key);
+            if (_config.hierarchy_levels == null || _config.hierarchy_levels.Count == 0)
+            {
+                EditorGUILayout.HelpBox("No hierarchy levels yet: add one in Global Scene > Hierarchy Levels.", MessageType.Info);
+            }
+            else
+            {
+                ReferenceRows(_config.hierarchy_levels, e => e.key, e => e.level_name, out var levelKeys, out var levelLabels);
+                poi.hierarchy_level_key = DrawReferencePopupField("Hierarchy Level", poi.hierarchy_level_key, levelKeys, levelLabels,
+                    allowNone: true, PoiHierarchyLevelHelp);
+            }
 
             // Read-only: what this POI actually gets from its level (effects + reveal), so it can be
             // seen here without opening Hierarchy Levels. Effects are per level, never per POI.
@@ -354,70 +361,55 @@ namespace TileStories.Editor
                 _config.hierarchy_levels?.Find(l => l != null && l.key == poi.hierarchy_level_key),
                 _config.effect_defaults), 0f);
 
-            // Custom symbol override (section 13.6/21) -- replaces the old "is_hero"
-            // concept. When checked, shows a Sprite field + preview. Uses the same
-            // assign-to-wall-library-and-get-key flow as the category table.
-            // Setting it changes just this POI's icon; category color, ring, and
-            // badge are unaffected.
-            // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
-            DrawEditorRow(out float customToggleRow, out _);
-            poi.has_custom_symbol = EditorGUILayout.Toggle("Use Custom Symbol", poi.has_custom_symbol,
-                GUILayout.Width(customToggleRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-
+            poi.has_custom_symbol = DrawToggleField("Use Custom Symbol", poi.has_custom_symbol, PoiCustomSymbolHelp);
             if (poi.has_custom_symbol)
-            {
-                // Multi-element shared row: label + preview keep fixed widths; the
-                // ObjectField takes the remaining rowWidth, all inside the same capped row.
-                DrawEditorRow(out float symbolRow, out _);
-                {
-                    EditorGUILayout.LabelField("Custom symbol (optional)", GUILayout.Width(150f));
-                    Sprite current = ResolveSpriteForKey(poi.custom_symbol_key);
-                    // Clicking the preview opens the curated wall + framework picker
-                    // and assigns the chosen key to this POI's custom_symbol_key.
-                    EnsureDefaultIconLibraryLoaded();
-                    var targetPoi = poi;
-                    DrawSpritePreview(current,
-                        () => PopupWindow.Show(GUILayoutUtility.GetLastRect(),
-                            new ExistingSymbolPickerPopup(_wallIconLibrary, _defaultIconLibrary,
-                                key => targetPoi.custom_symbol_key = key)));
-                    float symbolFieldW = Mathf.Max(90f, symbolRow - 150f - 36f - 12f);
-                    Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false,
-                        GUILayout.Width(symbolFieldW), GUILayout.ExpandWidth(false));
-                    if (chosen != current)
-                        poi.custom_symbol_key = chosen != null ? AssignSpriteToLibraryAndGetKey(chosen, poi.id + "_symbol") : null;
-                }
-                EditorRowEnd();
-                EditorGUILayout.LabelField("Overrides just this POI's icon (e.g. a small castle glyph). Category color, ring, and badge stay unchanged.", EditorStyles.wordWrappedMiniLabel);
-            }
-            }
+                DrawPoiCustomSymbolRow(poi);
         }
 
+        // Custom symbol row (shown under "Use Custom Symbol"): label, the clickable thumbnail (the
+        // curated wall + framework picker) and the project-wide Sprite field, in one capped row.
+        private void DrawPoiCustomSymbolRow(POIData poi)
+        {
+            const float labelWidth = 110f;
+            DrawEditorRow(out float rowWidth, out _, ConditionalAdvance);
+            EditorGUILayout.LabelField("Custom symbol", GUILayout.Width(labelWidth));
+            Sprite current = ResolveSpriteForKey(poi.custom_symbol_key);
+            var targetPoi = poi;
+            DrawSpritePreview(current,
+                () => EditorPopup.ShowAt(CreateSymbolPickerPopup(key => targetPoi.custom_symbol_key = key), GUILayoutUtility.GetLastRect()));
+            float fieldWidth = Mathf.Max(90f, rowWidth - labelWidth - 36f - 12f);
+            Sprite chosen = (Sprite)EditorGUILayout.ObjectField(current, typeof(Sprite), false,
+                GUILayout.Width(fieldWidth), GUILayout.ExpandWidth(false));
+            if (chosen != current)
+                poi.custom_symbol_key = chosen != null ? AssignSpriteToLibraryAndGetKey(chosen, poi.id + "_symbol") : null;
+            EditorRowEnd();
+        }
+
+        // Specific Marker > POI > Badge Style (only while Global Scene > Badge is enabled)
         private void DrawPoiBadgeStyleFields(POIData poi)
         {
-            // IndentLevel0: rows sit at the section content's own indent (no collapsing scope)
-            {
-            poi.badge_category = DrawBadgeCategoryDropdown("Badge category", poi.badge_category);
-            }
+            ReferenceRows(_config.badge_categories, e => e.key, e => e.key, out var badgeKeys, out var badgeLabels);
+            poi.badge_category = DrawReferencePopupField("Badge category", poi.badge_category, badgeKeys, badgeLabels,
+                allowNone: true, PoiBadgeCategoryHelp);
         }
 
+        // Specific Marker > POI > Outline (only while Global Scene > Outline is enabled). The ring
+        // follows the chosen Outline Types row (status_level_key); status_pct is kept in step with it
+        // and is what the ring uses only while the wall has no Outline Types rows yet (Status %).
         private void DrawPoiOutlineFields(POIData poi)
         {
-            // IndentLevel0: rows sit at the section content's own indent (no collapsing scope)
-            {
-            bool hasStatus = poi.has_status;
-            // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
-            DrawEditorRow(out float hasStatusRow, out _);
-            bool wantsStatus = EditorGUILayout.Toggle("Has status", hasStatus,
-                GUILayout.Width(hasStatusRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
+            bool hasLevels = _config.outline_levels != null && _config.outline_levels.Count > 0;
 
-            if (wantsStatus && !hasStatus)
+            bool wantsStatus = DrawToggleField("Has status", poi.has_status, PoiHasStatusHelp);
+            if (wantsStatus && !poi.has_status)
             {
+                // Start on the first Outline Types row, a real pickable value (never a blank key)
                 poi.has_status = true;
-                poi.status_pct = 0f;
+                var first = hasLevels ? _config.outline_levels.Find(l => l != null && !string.IsNullOrWhiteSpace(l.key)) : null;
+                poi.status_level_key = first?.key;
+                poi.status_pct = first?.pct ?? 0f;
             }
-            else if (!wantsStatus && hasStatus)
+            else if (!wantsStatus && poi.has_status)
             {
                 poi.has_status = false;
                 poi.status_pct = 0f;
@@ -425,34 +417,36 @@ namespace TileStories.Editor
                 poi.status_level_key = null;
             }
 
-            if (poi.has_status)
+            if (!poi.has_status)
+                return;
+
+            if (hasLevels)
             {
-                if (_config.outline_levels != null && _config.outline_levels.Count > 0)
-                    DrawStatusLevelDropdown(poi);
-                else
+                ReferenceRows(_config.outline_levels, e => e.key,
+                    e => (string.IsNullOrWhiteSpace(e.label) ? e.key : e.label) + " (" + e.pct.ToString("0") + "%)",
+                    out var levelKeys, out var levelLabels);
+                string picked = DrawReferencePopupField("Status level", poi.status_level_key, levelKeys, levelLabels,
+                    allowNone: false, PoiStatusLevelHelp);
+                if (picked != poi.status_level_key)
                 {
-                    // Shared row: transparent indent spacer + labelled Slider capped to rowWidth.
-                    DrawEditorRow(out float statusPctRow, out _);
-                    poi.status_pct = EditorGUILayout.Slider("Status %", poi.status_pct, 0f, 100f,
-                        GUILayout.Width(statusPctRow), GUILayout.ExpandWidth(false));
-                    EditorRowEnd();
+                    poi.status_level_key = picked;
+                    var level = _config.outline_levels.Find(l => l != null && l.key == picked);
+                    if (level != null) poi.status_pct = level.pct;
                 }
-
-                bool wasUnknown = poi.status_unknown;
-                // Shared row: transparent indent spacer + labelled Toggle capped to rowWidth.
-                DrawEditorRow(out float statusUnknownRow, out _);
-                poi.status_unknown = EditorGUILayout.Toggle("Status unknown", poi.status_unknown,
-                    GUILayout.Width(statusUnknownRow), GUILayout.ExpandWidth(false));
-                EditorRowEnd();
-                if (!wasUnknown && poi.status_unknown)
-                    ApplyUnknownStatusDefaults(poi);
+            }
+            else
+            {
+                poi.status_pct = DrawSliderField("Status %", poi.status_pct, 0f, 100f, PoiStatusPctHelp);
             }
 
-            // rotate_contour is now a hierarchy-level property, not a per-POI field.
-            // Configured in the Global Scene Hierarchy table (see DrawGlobalHierarchySection).
-            }
+            bool wasUnknown = poi.status_unknown;
+            poi.status_unknown = DrawToggleField("Status unknown", poi.status_unknown, PoiStatusUnknownHelp);
+            if (!wasUnknown && poi.status_unknown)
+                ApplyUnknownStatusDefaults(poi);
         }
 
+        // Ticking "Status unknown": point the POI at the wall's "unknown" outline type and
+        // "unknown_damage" badge (the framework's seeded default keys) when those rows exist
         private void ApplyUnknownStatusDefaults(POIData poi)
         {
             if (poi == null)
@@ -475,7 +469,9 @@ namespace TileStories.Editor
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(poi.badge_category) && _config?.badge_categories != null)
+            // The unknown badge follows the POI's own badge category at runtime, so a known one (e.g.
+            // "intact") left in place would contradict the grey unknown ring: switch it too.
+            if (_config?.badge_categories != null)
             {
                 for (int i = 0; i < _config.badge_categories.Count; i++)
                 {
@@ -492,134 +488,19 @@ namespace TileStories.Editor
             }
         }
 
-        // Hierarchy Level dropdown: maps level labels back to their stable keys.
-        // Follows the same pattern as DrawStatusLevelDropdown -- select by current
-        // key, display by label, write back the key. "(none)" option clears the
-        // key so the marker falls through to MarkerHierarchyResolver.Fallback.
-        private string DrawHierarchyLevelDropdown(string label, string currentKey)
+        // Keys and display labels of one taxonomy table, for a reference popup (null rows skipped)
+        private static void ReferenceRows<T>(List<T> rows, Func<T, string> key, Func<T, string> label,
+            out List<string> keys, out List<string> labels) where T : class
         {
-            if (_config?.hierarchy_levels == null || _config.hierarchy_levels.Count == 0)
+            keys = new List<string>();
+            labels = new List<string>();
+            if (rows == null) return;
+            foreach (var row in rows)
             {
-                EditorGUILayout.LabelField(label, "No hierarchy levels defined (see Global Scene).", EditorStyles.miniLabel);
-                return currentKey;
+                if (row == null) continue;
+                keys.Add(key(row));
+                labels.Add(label(row));
             }
-
-            var entries = _config.hierarchy_levels;
-            var labels = new string[entries.Count + 1];
-            labels[0] = "(none)";
-
-            int selectedIndex = 0;
-            for (int i = 0; i < entries.Count; i++)
-            {
-                var entry = entries[i];
-                if (entry == null || string.IsNullOrWhiteSpace(entry.key))
-                    continue;
-
-                string display = string.IsNullOrWhiteSpace(entry.label) ? entry.key : entry.label;
-                labels[i + 1] = display;
-
-                if (entry.key == currentKey)
-                    selectedIndex = i + 1;
-            }
-
-            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
-            DrawEditorRow(out float hierarchyRow, out _);
-            int next = EditorGUILayout.Popup(label, selectedIndex, labels,
-                GUILayout.Width(hierarchyRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            return next == 0 ? null : entries[next - 1].key;
-        }
-
-        private string DrawCategoryDropdown(string label, string current)
-        {
-            var options = CollectCategoryOptions();
-            int idx = Mathf.Max(0, options.IndexOf(current));
-            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
-            DrawEditorRow(out float categoryRow, out _);
-            int next = EditorGUILayout.Popup(label, idx, options.ToArray(),
-                GUILayout.Width(categoryRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            return options[next];
-        }
-
-        private string DrawBadgeCategoryDropdown(string label, string current)
-        {
-            var options = new List<string> { "" };
-            if (_config?.badge_categories != null)
-            {
-                foreach (var entry in _config.badge_categories)
-                {
-                    if (entry == null || string.IsNullOrWhiteSpace(entry.key))
-                        continue;
-                    if (!options.Contains(entry.key))
-                        options.Add(entry.key);
-                }
-            }
-
-            int idx = Mathf.Max(0, options.IndexOf(current));
-            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth.
-            DrawEditorRow(out float badgeRow, out _);
-            int next = EditorGUILayout.Popup(label, idx, options.ToArray(),
-                GUILayout.Width(badgeRow), GUILayout.ExpandWidth(false));
-            EditorRowEnd();
-            return options[next];
-        }
-
-        private void DrawStatusLevelDropdown(POIData poi)
-        {
-            var levels = _config.outline_levels;
-            if (levels == null || levels.Count == 0)
-            {
-                // Shared row: transparent indent spacer + labelled Slider capped to rowWidth.
-                DrawEditorRow(out float statusPctFallbackRow, out _);
-                poi.status_pct = EditorGUILayout.Slider("Status %", poi.status_pct, 0f, 100f,
-                    GUILayout.Width(statusPctFallbackRow), GUILayout.ExpandWidth(false));
-                EditorRowEnd();
-                return;
-            }
-
-            var labels = new string[levels.Count];
-            int selectedIndex = 0;
-            for (int i = 0; i < levels.Count; i++)
-            {
-                var level = levels[i];
-                string levelLabel = !string.IsNullOrWhiteSpace(level.label) ? level.label : (level.key ?? $"Level {i + 1}");
-                labels[i] = levelLabel + " (" + level.pct.ToString("0") + "%)";
-
-                if (!string.IsNullOrWhiteSpace(poi.status_level_key) && poi.status_level_key == level.key)
-                    selectedIndex = i;
-            }
-
-            // Shared row: transparent indent spacer + labelled Popup capped to rowWidth
-            // (no trailing resolved-status label).
-            DrawEditorRow(out float statusRow, out _);
-            int next = EditorGUILayout.Popup("Status level", selectedIndex, labels,
-                GUILayout.Width(statusRow), GUILayout.ExpandWidth(false));
-            next = Mathf.Clamp(next, 0, levels.Count - 1);
-            poi.status_level_key = levels[next].key;
-            poi.status_pct = levels[next].pct;
-            EditorRowEnd();
-        }
-
-        private List<string> CollectCategoryOptions()
-        {
-            var options = new List<string>();
-
-            if (_config?.category_styles != null)
-            {
-                foreach (var entry in _config.category_styles)
-                {
-                    if (entry == null || string.IsNullOrWhiteSpace(entry.category))
-                        continue;
-                    if (!options.Contains(entry.category))
-                        options.Add(entry.category);
-                }
-            }
-
-            if (options.Count == 0)
-                options.Add("unknown");
-
-            return options;
         }
 
         private bool GetPoiFoldout(string key)
@@ -639,191 +520,136 @@ namespace TileStories.Editor
             return expanded;
         }
 
-        // Per-POI search keywords editor (Block 5, Phase 5.1, task 4).
-        // Edits POIData.search_keywords via a multi-line TextField popup.
+        // Per-POI "Summary & Keywords": the POI's summary, its keyword list per Keyword Field, its Others, and
+        // read-only "Found by" -- every word the search finds this POI by (SearchKeywordSources, the same list
+        // the index is built from). Drawing never writes: a keyword-field list is created only when typed into.
         private void DrawPoiSearchKeywordsField(POIData poi)
         {
-            // IndentLevel0: rows sit at the section content's own indent (no collapsing scope)
-            {
             if (poi == null)
                 return;
 
-            if (poi.search_keywords == null)
-                poi.search_keywords = new List<string>();
-            if (poi.search_keyword_fields == null)
-                poi.search_keyword_fields = new List<POISearchKeywordField>();
+            DrawPoiSummaryRows(poi);
 
-            // --- Derived keywords (read-only: auto-applied from taxonomy assignments) ---
-            var derived = CollectDerivedKeywords(poi);
-            if (derived.Count > 0)
+            // --- one keyword list per Keyword Field ---
+            if (_config?.search_fields != null)
             {
-                // Shared row: transparent indent spacer + read-only label capped to rowWidth,
-                // with the trailing help button in the same capped row.
-                DrawEditorRow(out float derivedRow, out _);
-                {
-                    float derivedLabelW = Mathf.Max(140f, derivedRow - 40f);
-                    EditorGUILayout.LabelField("Auto-included from taxonomy (read-only)", EditorStyles.miniLabel,
-                        GUILayout.Width(derivedLabelW), GUILayout.ExpandWidth(false));
-                    HelpInfoButton.Draw("Auto-Included Keywords", SearchKeywordsDerivedHelp);
-                }
-                EditorRowEnd();
-                EditorGUILayout.HelpBox(string.Join(", ", derived), MessageType.None);
-            }
-            else
-            {
-                EditorGUILayout.LabelField("No taxonomy keywords yet (assign category/badge/outline/hierarchy in the tables above).", EditorStyles.wordWrappedMiniLabel);
-            }
-
-            // --- Custom fields (one editable keyword row per SearchFieldDefinition) ---
-            if (_config?.search_fields != null && _config.search_fields.Count > 0)
-            {
-                EditorGUILayout.Space(4f);
-                EditorGUILayout.LabelField("Custom keyword fields", EditorStyles.boldLabel);
-
                 foreach (var fieldDef in _config.search_fields)
                 {
                     if (fieldDef == null || string.IsNullOrWhiteSpace(fieldDef.key))
                         continue;
 
-                    // Find or create the matching entry on this POI.
-                    var entry = poi.search_keyword_fields.Find(e => e.field_key == fieldDef.key);
-                    if (entry == null)
-                    {
-                        entry = new POISearchKeywordField { field_key = fieldDef.key, keywords = new List<string>() };
-                        poi.search_keyword_fields.Add(entry);
-                    }
-
+                    var entry = poi.search_keyword_fields?.Find(e => e != null && e.field_key == fieldDef.key);
                     string displayLabel = string.IsNullOrWhiteSpace(fieldDef.label) ? fieldDef.key : fieldDef.label;
-                    bool isEmpty = entry.keywords == null || entry.keywords.Count == 0;
+                    bool isEmpty = entry?.keywords == null || entry.keywords.Count == 0;
 
-                    // Show a warning icon next to the label when the field is forced and empty.
+                    EditorGUILayout.Space(4f);
+                    DrawEditorRow(out float labelRow, out _);
                     if (fieldDef.forced && isEmpty)
                     {
-                        // Shared row: transparent indent spacer + warning icon + required label.
-                        DrawEditorRow(out float requiredRow, out _);
-                        {
-                            EditorGUILayout.LabelField(
-                                EditorGUIUtility.IconContent("console.warnicon.sml"),
-                                GUILayout.Width(18f), GUILayout.Height(18f));
-                            float requiredLabelW = Mathf.Max(120f, requiredRow - 30f);
-                            EditorGUILayout.LabelField($"{displayLabel} (required)", EditorStyles.boldLabel,
-                                GUILayout.Width(requiredLabelW), GUILayout.ExpandWidth(false));
-                        }
-                        EditorRowEnd();
+                        // - a Required field left empty: warning icon + "(required)", never blocking
+                        GUILayout.Label(EditorGUIUtility.IconContent("console.warnicon.sml"), GUILayout.Width(18f), GUILayout.Height(18f));
+                        GUILayout.Label($"{displayLabel} (required)", EditorStyles.boldLabel,
+                            GUILayout.Width(Mathf.Max(40f, labelRow - 22f - 36f)), GUILayout.ExpandWidth(false));
                     }
                     else
                     {
-                        EditorGUILayout.LabelField(displayLabel, EditorStyles.miniLabel);
+                        GUILayout.Label(displayLabel, EditorStyles.miniBoldLabel,
+                            GUILayout.Width(Mathf.Max(40f, labelRow - 36f)), GUILayout.ExpandWidth(false));
                     }
-
-                    string joined = entry.keywords != null ? string.Join(", ", entry.keywords) : string.Empty;
-                    // Shared row: transparent indent spacer + TextField capped to rowWidth.
-                    DrawEditorRow(out float keywordRow, out _);
-                    string edited = EditorGUILayout.TextField(joined,
-                        GUILayout.Width(keywordRow), GUILayout.ExpandWidth(false));
+                    HelpInfoButton.Draw(displayLabel, PoiKeywordFieldHelp);
                     EditorRowEnd();
-                    if (edited != joined)
+
+                    var current = entry?.keywords ?? new List<string>();
+                    DrawEditorRow(out float keywordRow, out _);
+                    var edited = DrawKeywordListField(current, GUILayout.Width(keywordRow), GUILayout.ExpandWidth(false));
+                    EditorRowEnd();
+                    if (!ReferenceEquals(edited, current))
                     {
-                        entry.keywords = ParseKeywordListStatic(edited);
-                        _hasUnsavedChanges = true;
+                        poi.search_keyword_fields ??= new List<POISearchKeywordField>();
+                        if (entry == null)
+                            poi.search_keyword_fields.Add(entry = new POISearchKeywordField { field_key = fieldDef.key });
+                        entry.keywords = edited;
                     }
                 }
             }
 
-            // --- Others row (freeform flat keywords) ---
+            // --- Others: freeform keywords outside every Keyword Field ---
             EditorGUILayout.Space(4f);
-            // Label and its help button share ONE row (a help button drawn outside a row lands at the far left)
             DrawEditorRow(out float othersLabelRow, out _);
-            EditorGUILayout.LabelField("Others (freeform)", EditorStyles.miniLabel,
-                GUILayout.Width(Mathf.Max(120f, othersLabelRow - 40f)), GUILayout.ExpandWidth(false));
-            HelpInfoButton.Draw("Others (Freeform Keywords)", SearchKeywordsOthersHelp);
+            GUILayout.Label("Others", EditorStyles.miniBoldLabel,
+                GUILayout.Width(Mathf.Max(40f, othersLabelRow - 36f)), GUILayout.ExpandWidth(false));
+            HelpInfoButton.Draw("Others", PoiOthersKeywordsHelp);
             EditorRowEnd();
-            string othersJoined = string.Join(", ", poi.search_keywords);
-            // Shared row: transparent indent spacer + TextField capped to rowWidth.
+            var others = poi.search_keywords ?? new List<string>();
             DrawEditorRow(out float othersRow, out _);
-            string othersEdited = EditorGUILayout.TextField(othersJoined,
-                GUILayout.Width(othersRow), GUILayout.ExpandWidth(false));
+            var othersEdited = DrawKeywordListField(others, GUILayout.Width(othersRow), GUILayout.ExpandWidth(false));
             EditorRowEnd();
-            if (othersEdited != othersJoined)
-            {
-                poi.search_keywords = ParseKeywordListStatic(othersEdited);
-                _hasUnsavedChanges = true;
-            }
-            }
+            if (!ReferenceEquals(othersEdited, others))
+                poi.search_keywords = othersEdited;
+
+            // --- Found by: the result of everything above plus the tables and synonym groups ---
+            EditorGUILayout.Space(4f);
+            DrawEditorRow(out float foundRow, out _);
+            GUILayout.Label("Found by (read-only)", EditorStyles.miniBoldLabel,
+                GUILayout.Width(Mathf.Max(40f, foundRow - 36f)), GUILayout.ExpandWidth(false));
+            HelpInfoButton.Draw("Found by", PoiFoundByHelp);
+            EditorRowEnd();
+            DrawEditorRow(out float foundTextRow, out _);
+            GUILayout.Label(FoundByText(SearchKeywordSources.Collect(_config, poi)), EditorStyles.helpBox,
+                GUILayout.Width(foundTextRow), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
         }
 
-        // Collect the keywords that will be auto-included at index-build time from
-        // this POI's taxonomy assignments. Read-only in the UI -- just for developer
-        // visibility of what the index will pick up without manual entry.
-        private List<string> CollectDerivedKeywords(POIData poi)
+        // The POI's Summary: a short description shown on its card and searched (below its own keywords)
+        private void DrawPoiSummaryRows(POIData poi)
         {
-            var keywords = new List<string>();
-            if (_config == null)
-                return keywords;
+            DrawEditorRow(out float labelRow, out _);
+            GUILayout.Label("Summary", EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, labelRow - 36f)), GUILayout.ExpandWidth(false));
+            HelpInfoButton.Draw("Summary", PoiSummaryHelp);
+            EditorRowEnd();
 
-            // Category keywords.
-            if (!string.IsNullOrEmpty(poi.category) && _config.category_styles != null)
-            {
-                foreach (var entry in _config.category_styles)
-                {
-                    if (entry?.category == poi.category && entry.search_keywords != null)
-                        keywords.AddRange(entry.search_keywords);
-                }
-            }
-
-            // Badge keywords.
-            if (!string.IsNullOrEmpty(poi.badge_category) && _config.badge_categories != null)
-            {
-                foreach (var entry in _config.badge_categories)
-                {
-                    if (entry?.key == poi.badge_category && entry.search_keywords != null)
-                        keywords.AddRange(entry.search_keywords);
-                }
-            }
-
-            // Outline / status keywords.
-            if (!string.IsNullOrEmpty(poi.status_level_key) && _config.outline_levels != null)
-            {
-                foreach (var entry in _config.outline_levels)
-                {
-                    if (entry?.key == poi.status_level_key && entry.search_keywords != null)
-                        keywords.AddRange(entry.search_keywords);
-                }
-            }
-
-            // Hierarchy keywords.
-            if (!string.IsNullOrEmpty(poi.hierarchy_level_key) && _config.hierarchy_levels != null)
-            {
-                foreach (var entry in _config.hierarchy_levels)
-                {
-                    if (entry?.key == poi.hierarchy_level_key && entry.search_keywords != null)
-                        keywords.AddRange(entry.search_keywords);
-                }
-            }
-
-            return keywords;
+            DrawEditorRow(out float textRow, out _);
+            var style = new GUIStyle(EditorStyles.textArea) { wordWrap = true };
+            string summary = EditorGUILayout.TextArea(poi.summary ?? "", style, GUILayout.Width(textRow),
+                GUILayout.MinHeight(EditorGUIUtility.singleLineHeight * 2.5f), GUILayout.ExpandWidth(false));
+            EditorRowEnd();
+            // - write only a real change: drawing a POI without a summary must not turn null into ""
+            if (summary != (poi.summary ?? ""))
+                poi.summary = summary;
         }
+
+        // "Found by" text: one line per origin, in the order the search ranks them ("Name: The Lamp",
+        // "Category: religious, church", "Synonyms: chapel"); a long text is cut, the rest counted
+        internal static string FoundByText(List<SearchKeywordSources.Word> words)
+        {
+            if (words == null || words.Count == 0)
+                return "Nothing yet: give this point a name, keywords or a category.";
+
+            var order = new List<string>();
+            var byOrigin = new Dictionary<string, List<string>>();
+            foreach (var w in words)
+            {
+                if (!byOrigin.TryGetValue(w.Origin, out var list))
+                {
+                    byOrigin[w.Origin] = list = new List<string>();
+                    order.Add(w.Origin);
+                }
+                string text = w.Text.Length > FoundByMaxTextLength ? w.Text.Substring(0, FoundByMaxTextLength) + "..." : w.Text;
+                if (!list.Contains(text)) list.Add(text);
+            }
+
+            var lines = new List<string>();
+            foreach (var origin in order)
+                lines.Add(origin + ": " + string.Join(", ", byOrigin[origin]));
+            return string.Join("\n", lines);
+        }
+
+        private const int FoundByMaxTextLength = 60;
+
+        private const string PoiSearchSectionTitle = "Summary & Keywords";
 
         // DrawIconButton lives in Shared/POIEditorToolWindow.IconButton.cs now (it's the
         // shared look for every icon-only button in this window, not just this row's).
-
-        // Parse a comma-separated keyword string into a list, trimming empties.
-        // Duplicated from SymbolTable.cs to avoid assembly-boundary issues
-        // (this partial is in the same assembly, but keeps the method self-contained).
-        private static List<string> ParseKeywordListStatic(string text)
-        {
-            var result = new List<string>();
-            if (string.IsNullOrWhiteSpace(text))
-                return result;
-
-            foreach (string part in text.Split(','))
-            {
-                string trimmed = part.Trim();
-                if (!string.IsNullOrEmpty(trimmed))
-                    result.Add(trimmed);
-            }
-            return result;
-        }
 
         // Whether the Focus button is clickable: rig must contain a child
         // named after this POI's id (rig child name == poi.id binding key).
@@ -878,6 +704,42 @@ namespace TileStories.Editor
             return string.Empty;
         }
 
+        // Same rule for the level: the wall's first Hierarchy Levels row, so a first POI gets a real
+        // size and label (and passes the save-time check) instead of the 12 cm "no level" fallback.
+        private string FirstAvailableHierarchyLevelKey() => HighestPriorityLevelKey(_config?.hierarchy_levels);
+
+        // A new level goes last: one more than the largest priority in use (and than the row count).
+        internal static int NextLowestPriority(IList<HierarchyLevelEntry> levels)
+        {
+            int max = levels?.Count ?? 0;
+            if (levels != null)
+                foreach (var l in levels)
+                    if (l != null && l.priority > max) max = l.priority;
+            return max + 1;
+        }
+
+        // The level with the highest priority (smallest number), whatever numbers the developer chose
+        // (10..100 works the same as 1..5). Uses the runtime's own rule: priority >= 1 is explicit,
+        // otherwise the 1-based table position. A tie goes to the earlier row. Null when there is none.
+        internal static string HighestPriorityLevelKey(IList<HierarchyLevelEntry> levels)
+        {
+            string bestKey = null;
+            int bestPriority = int.MaxValue;
+            if (levels == null) return null;
+            for (int i = 0; i < levels.Count; i++)
+            {
+                var level = levels[i];
+                if (level == null || string.IsNullOrWhiteSpace(level.key)) continue;
+                int effective = level.priority >= 1 ? level.priority : i + 1;
+                if (bestKey == null || effective < bestPriority)
+                {
+                    bestKey = level.key;
+                    bestPriority = effective;
+                }
+            }
+            return bestKey;
+        }
+
         private POIData CreateDefaultPoi(POIData sourcePoi = null)
         {
             var poi = new POIData
@@ -890,7 +752,7 @@ namespace TileStories.Editor
                 has_status = false,
                 status_unknown = false,
                 status_level_key = null,
-                hierarchy_level_key = null,
+                hierarchy_level_key = FirstAvailableHierarchyLevelKey(),
                 has_custom_symbol = false,
                 custom_symbol_key = null,
                 badge_category = null,

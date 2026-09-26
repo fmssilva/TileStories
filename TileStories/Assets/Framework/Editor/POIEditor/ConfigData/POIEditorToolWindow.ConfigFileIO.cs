@@ -80,6 +80,7 @@ namespace TileStories.Editor
 
             EnsureDefaultIconLibraryLoaded();
             TryResolveWallIconLibraryFromConfig();
+            TryResolveWallFontLibraryFromConfig();
             InitializeConfigHistory();
             _hasUnsavedChanges = false;
 

@@ -1,281 +1,172 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // Top-of-screen search overlay: a typed TextField, a voice mic button
-    // (shown only when voice search is enabled), and recent/suggested rows.
-    // Delegates result rendering to ResultsListView, suggestion generation to the
-    // recent/suggested managers, and voice capture to VoiceSearchController --
-    // this class owns only the input policy + presentation (spec _2.6 section 9).
-    public class SearchOverlayView : MonoBehaviour
+    // The search bar (spec _2.6 sections 5, 12, 13): the query field, a mic button (voice only), a
+    // Filters button with the number of active filters, a Map button (minimap "toggle" only), and the
+    // suggestions shown under an empty focused field. It reports what the visitor does and decides
+    // nothing about results. "dynamic" search reports the query after a short pause in typing,
+    // "explicit" only on Enter. Plain C#: built into the parent the search UI hands it.
+    public sealed class SearchOverlayView
     {
-        private WallConfigData _config;
-        private ResultsListView _resultsListView;
-        private RecentSearchesManager _recent;
-        private SuggestedSearchesManager _suggested;
-        /// <summary>Exposed for test wiring of the voice search controller.</summary>
-    public VoiceSearchController VoiceController => _voice;
-    /// <summary>Exposed for test wiring of the voice transcriber preset.</summary>
-    public ITranscriber Transcriber => _transcriber;
-    /// <summary>Sets the preset transcript emitted by DebugTranscriber on StartListening.</summary>
-    public void SetPresetTranscript(string transcript)
-    {
-        // PresetTranscript is a DebugTranscriber-specific property; in a build the factory
-        // may return a different ITranscriber implementation without this field.
-        if (_transcriber is DebugTranscriber dbg)
-            dbg.PresetTranscript = transcript;
-    }
-        private ITranscriber _transcriber;
-        private VoiceSearchController _voice;
-        private VoiceActivityIndicatorView _voiceIndicator;
-        private UIDocument _uiDocument;
-        private VisualElement _root;
-        private VisualElement _voiceActivityBar;
-        private TextField _searchField;
-        private Button _micButton;
-        private VisualElement _suggestionsContainer;
-        private Coroutine _debounceRoutine;
-        private float _lastChangeTime;
-        private List<string> _displayedSuggestions = new List<string>();
+        // Pause after the last keystroke before a dynamic search runs
+        public const long DebounceMs = 150;
 
-        // Shared search submit used for typed and voice input: record the query as
-        // recent, then feed the result list. Called from VoiceSearchController too.
-        public void SubmitSearch(string query, SearchMatchMode matchMode)
+        public VisualElement Root { get; }
+        public VisualElement Suggestions { get; }
+
+        // The query to search now ("" = no search)
+        public event Action<string> QueryChanged;
+        // The visitor pressed Enter on this query (it is worth remembering as a recent search)
+        public event Action<string> Submitted;
+        public event Action FiltersPressed;
+        public event Action MapPressed;
+        public event Action MicPressed;
+
+        private readonly TextField _field;
+        private readonly Button _mic;
+        private readonly Button _filters;
+        private readonly Button _map;
+        private readonly VisualElement _listenBar;
+        private IVisualElementScheduledItem _pending;
+        private bool _dynamic = true;
+
+        public SearchOverlayView(VisualElement parent)
         {
-            if (string.IsNullOrWhiteSpace(query))
-                return;
+            Root = new VisualElement { name = "search-bar" };
+            Root.AddToClassList("search-bar");
 
-            _recent?.Add(query);
-            if (_coordinator != null)
-                _coordinator.RefreshSearch(query, matchMode);
+            _field = new TextField { name = "search-field", tooltip = "Search by name, category or keyword" };
+            _field.textEdition.placeholder = "Search";
+            _field.AddToClassList("search-field");
+            _field.RegisterValueChangedCallback(evt => OnTyped(evt.newValue));
+            _field.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode != KeyCode.Return && evt.keyCode != KeyCode.KeypadEnter) return;
+                // - text, not value: a delayed (explicit) field has not committed its value yet
+                string typed = _field.text ?? "";
+                RunNow(typed);
+                if (!string.IsNullOrWhiteSpace(typed)) Submitted?.Invoke(typed.Trim());
+            }, TrickleDown.TrickleDown);
+            _field.RegisterCallback<FocusInEvent>(_ => ShowSuggestionsIfEmpty());
+            _field.RegisterCallback<FocusOutEvent>(_ => Suggestions.schedule.Execute(() => Suggestions.style.display = DisplayStyle.None).ExecuteLater(200));
+
+            _mic = MakeButton("search-mic", "Mic", "Voice search", () => MicPressed?.Invoke());
+            _filters = MakeButton("search-filters", "Filters", "Show filters", () => FiltersPressed?.Invoke());
+            _map = MakeButton("search-map", "Map", "Show map", () => MapPressed?.Invoke());
+
+            Root.Add(_field);
+            Root.Add(_mic);
+            Root.Add(_filters);
+            Root.Add(_map);
+            parent.Add(Root);
+
+            _listenBar = new VisualElement { name = "search-listen-bar", tooltip = VoiceActivityIndicatorView.ListenBarLabel };
+            _listenBar.AddToClassList("listen-bar");
+            _listenBar.style.display = DisplayStyle.None;
+            parent.Add(_listenBar);
+
+            Suggestions = new VisualElement { name = "search-suggestions" };
+            Suggestions.AddToClassList("search-panel");
+            Suggestions.AddToClassList("search-suggestions");
+            Suggestions.style.display = DisplayStyle.None;
+            parent.Add(Suggestions);
+        }
+
+        public string Query => _field.value ?? "";
+        public bool MicShown => _mic.style.display != DisplayStyle.None;
+        public bool MapButtonShown => _map.style.display != DisplayStyle.None;
+        public string FiltersText => _filters.text;
+        public bool IsDelayed => _field.isDelayed;
+
+        private List<string> _suggestions = new();
+        public IReadOnlyList<string> SuggestionTerms => _suggestions;
+
+        // Apply the wall's search settings; the mic shows only when voice can really run
+        public void Configure(SearchSettings search, bool voiceAvailable)
+        {
+            _dynamic = (search?.mode ?? SelectFilterSearchOptions.ModeDynamic) != SelectFilterSearchOptions.ModeExplicit;
+            // - explicit: the field reports its value only on Enter / focus loss
+            _field.isDelayed = !_dynamic;
+            _mic.style.display = voiceAvailable ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        // Put a query in the field and search it at once (a suggestion, a voice transcript, the Editor)
+        public void SetQuery(string query)
+        {
+            _field.SetValueWithoutNotify(query ?? "");
+            RunNow(_field.value);
+        }
+
+        public void SetFilterCount(int count) => _filters.text = count > 0 ? $"Filters ({count})" : "Filters";
+
+        public void SetMapButton(bool shown, bool open)
+        {
+            _map.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+            _map.EnableInClassList("search-button--on", open);
+        }
+
+        // Show a voice state: the mic label (mic_text style) or the listen bar (listen_bar style)
+        public void ShowVoiceState(VoiceActivityIndicatorView indicator, VoiceSearchState state)
+        {
+            if (indicator.Style == VoiceActivityIndicatorView.IndicatorStyle.MicText)
+                _mic.text = indicator.MicLabelForState(state);
             else
-                _resultsListView?.RefreshResults(query, matchMode);
+                _listenBar.style.display = indicator.IsBarVisible(state) ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        // Result-set composition seam (_2.6-i). Optional: when the filter tray /
-        // minimap / spawned markers exist, search + facets produce ONE result set
-        // pushed to every surface. Without them the overlay keeps its legacy
-        // results-list-only behaviour. Gated by the 2.6-d domain master toggle.
-        public void AttachResultCoordinator(FilterTrayView tray, MinimapView minimap,
-            Func<IReadOnlyList<MarkerView>> getSpawned,
-            SelectionHighlightController highlight = null)
+        public string MicText => _mic.text;
+        public bool ListenBarShown => _listenBar.style.display != DisplayStyle.None;
+
+        // The terms offered under an empty field
+        public void SetSuggestions(List<string> terms)
         {
-            if (_config != null && !_config.search_filter_select_enabled)
-                return; // whole domain disabled for this wall
-
-            _coordinator?.Dispose();
-            _coordinator = new ResultSetCoordinator(_searchIndexForCoordinator, _config,
-                tray, _resultsListView, minimap, getSpawned, highlight);
-        }
-
-        private POISearchIndex _searchIndexForCoordinator;
-        private ResultSetCoordinator _coordinator;
-
-        // Wires config + dependencies. `uiDocument` may be injected (tests) or
-        // located via FindFirstObjectByType at runtime. CreateUI is null-guarded
-        // so IsMicVisible/GetDisplayedSuggestions stay testable in EditMode.
-        public void Initialize(WallConfigData config, POISearchIndex searchIndex,
-                               ResultsListView resultsListView,
-                               RecentSearchesManager recent, SuggestedSearchesManager suggested,
-                               UIDocument uiDocument = null)
-        {
-            _config = config;
-            _resultsListView = resultsListView;
-            _searchIndexForCoordinator = searchIndex;
-            _recent = recent;
-            _suggested = suggested;
-
-            // (D3) Apply the config's suggested_source to the manager.
-            SuggestedSourceApplier.Apply(_config, _suggested);
-
-            _transcriber = new TranscriberFactory().Create(_config?.voice_search_enabled ?? false);
-            _voice = new VoiceSearchController(_config, _transcriber, SubmitSearch);
-            _voice.StateChanged += OnVoiceStateChanged;
-            _voiceIndicator = new VoiceActivityIndicatorView(_config?.voice_activity_indicator_style);
-
-            _uiDocument = uiDocument != null ? uiDocument : FindFirstObjectByType<UIDocument>();
-            if (_uiDocument != null && _root == null)
-                CreateUI(_uiDocument.rootVisualElement);
-
-            RefreshSuggestions();
-        }
-
-        public void SetVisible(bool visible)
-        {
-            if (_root != null)
-                _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-
-        public bool IsMicVisible() =>
-            SearchInputGuard.IsMicVisible(_config?.voice_search_enabled ?? false,
-                                          _transcriber?.IsSupported ?? false);
-
-        public IReadOnlyList<string> GetDisplayedSuggestions() => _displayedSuggestions;
-
-        private void CreateUI(VisualElement root)
-        {
-            _root = root;
-
-            var container = new VisualElement { name = "search-overlay" };
-            container.style.position = Position.Absolute;
-            container.style.top = 12;
-            container.style.left = 12;
-            container.style.right = 12;
-            container.style.height = 44;
-            container.style.flexDirection = FlexDirection.Row;
-            container.style.alignItems = Align.Center;
-            root.Add(container);
-
-            _searchField = new TextField { name = "search-field" };
-            _searchField.tooltip = "Search POIs by name, category, or keyword";
-            _searchField.style.flexGrow = 1;
-            _searchField.style.height = 32;
-            _searchField.style.fontSize = 14;
-            // explicit fires OnValueChanged on Enter (isDelayed); dynamic fires
-            // per keystroke and is debounced in OnSearchFieldChanged.
-            _searchField.isDelayed = _config?.search_mode == "explicit";
-            _searchField.RegisterValueChangedCallback<string>(OnSearchFieldChanged);
-            container.Add(_searchField);
-
-            _micButton = new Button(OnMicClicked) { name = "voice-mic-btn", text = "Mic" };
-            _micButton.tooltip = "Activate voice search";
-            _micButton.style.width = 44;
-            _micButton.style.height = 44;
-            _micButton.style.marginLeft = 8;
-            _micButton.style.display = IsMicVisible() ? DisplayStyle.Flex : DisplayStyle.None;
-            container.Add(_micButton);
-
-            _voiceActivityBar = new VisualElement { name = "voice-activity-bar" };
-            _voiceActivityBar.tooltip = VoiceActivityIndicatorView.ListenBarLabel;
-            _voiceActivityBar.style.position = Position.Absolute;
-            _voiceActivityBar.style.top = 56;
-            _voiceActivityBar.style.left = 12;
-            _voiceActivityBar.style.right = 12;
-            _voiceActivityBar.style.height = 4;
-            _voiceActivityBar.style.backgroundColor = new StyleColor(new Color(0.7f, 0.9f, 1.0f, 0.8f));
-            _voiceActivityBar.style.display = DisplayStyle.None;
-            _voiceActivityBar.AddToClassList("voice-activity-indicator");
-            root.Add(_voiceActivityBar);
-
-            _suggestionsContainer = new VisualElement { name = "search-suggestions" };
-            _suggestionsContainer.style.position = Position.Absolute;
-            _suggestionsContainer.style.top = 56;
-            _suggestionsContainer.style.left = 12;
-            _suggestionsContainer.style.right = 12;
-            _suggestionsContainer.style.flexDirection = FlexDirection.Column;
-            root.Add(_suggestionsContainer);
-        }
-
-        private void OnSearchFieldChanged(ChangeEvent<string> evt)
-        {
-            _lastChangeTime = Time.realtimeSinceStartup;
-            string mode = _config?.search_mode ?? "dynamic";
-
-            if (SearchInputGuard.ShouldSubmit(evt.newValue, mode, 0f))
+            _suggestions = terms ?? new List<string>();
+            Suggestions.Clear();
+            foreach (var term in _suggestions)
             {
-                SubmitSearch(evt.newValue, SearchMatchMode.Any);
-                return;
-            }
-
-            // dynamic: debounce, restarting the wait on every keystroke.
-            if (_debounceRoutine != null)
-                StopCoroutine(_debounceRoutine);
-            _debounceRoutine = StartCoroutine(DelayedSearch(evt.newValue, mode));
-        }
-
-        private IEnumerator DelayedSearch(string query, string mode)
-        {
-            float elapsed = Time.realtimeSinceStartup - _lastChangeTime;
-            yield return new WaitForSeconds(
-                Mathf.Max(0f, SearchInputGuard.DefaultDebounceSeconds - elapsed));
-
-            if (_searchField != null && _searchField.value == query &&
-                SearchInputGuard.ShouldSubmit(query, mode, SearchInputGuard.DefaultDebounceSeconds))
-                SubmitSearch(query, SearchMatchMode.Any);
-
-            _debounceRoutine = null;
-        }
-
-        private void OnMicClicked() => _voice?.StartVoiceSearch();
-
-        // Delegate voice-state policy to VoiceActivityIndicatorView (spec _2.6 section 12):
-        // mic_text mode flips the mic button label, listen_bar mode shows a dedicated bar.
-        private void OnVoiceStateChanged(VoiceSearchState state)
-        {
-            if (_voiceIndicator == null)
-                return;
-
-            if (_voiceIndicator.Style == VoiceActivityIndicatorView.IndicatorStyle.MicText)
-            {
-                if (_micButton != null)
-                    _micButton.text = _voiceIndicator.MicLabelForState(state);
-            }
-            else
-            {
-                if (_voiceActivityBar != null)
-                    _voiceActivityBar.style.display = _voiceIndicator.IsBarVisible(state)
-                        ? DisplayStyle.Flex : DisplayStyle.None;
+                var t = term;
+                var b = new Button(() =>
+                {
+                    SetQuery(t);
+                    Submitted?.Invoke(t);
+                }) { name = "suggestion-" + t, text = t, tooltip = $"Search for {t}" };
+                b.AddToClassList("suggestion");
+                Suggestions.Add(b);
             }
         }
 
-        public void RefreshSuggestions()
+        private void OnTyped(string text)
         {
-            _displayedSuggestions =
-                _suggested?.BuildSuggestions(_config, _recent) ?? new List<string>();
-
-            if (_suggestionsContainer == null)
-                return;
-
-            _suggestionsContainer.Clear();
-            foreach (string term in _displayedSuggestions)
-                _suggestionsContainer.Add(CreateSuggestionRow(term));
-        }
-
-        private Button CreateSuggestionRow(string term)
-        {
-            var button = new Button(() => SubmitSuggestion(term))
+            Suggestions.style.display = DisplayStyle.None;
+            if (!_dynamic)
             {
-                name = "suggestion-" + term,
-                text = term,
-                tooltip = $"Search for \"{term}\""
-            };
-            button.style.unityTextAlign = TextAnchor.MiddleLeft;
-            button.style.fontSize = 13;
-            button.style.height = 32;
-            return button;
-        }
-
-        private void SubmitSuggestion(string term)
-        {
-            SubmitSearch(term, SearchMatchMode.Any);
-            if (_searchField != null)
-                _searchField.SetValueWithoutNotify(term);
-        }
-
-        private void OnDisable()
-        {
-            if (_voice != null)
-                _voice.StateChanged -= OnVoiceStateChanged;
-            _coordinator?.Dispose();
-            _coordinator = null;
-        }
-    }
-
-    // (D3) Apply the config's suggested_source to a SuggestedSearchesManager.
-    // Pure static helper so the wiring is testable without a MonoBehaviour.
-    // config string -> enum -> manager.Source.
-    public static class SuggestedSourceApplier
-    {
-        public static void Apply(WallConfigData config, SuggestedSearchesManager manager)
-        {
-            if (config == null || manager == null)
+                RunNow(text);
                 return;
+            }
+            _pending?.Pause();
+            _pending = _field.schedule.Execute(() => RunNow(_field.value));
+            _pending.ExecuteLater(DebounceMs);
+            if (string.IsNullOrEmpty(text)) RunNow(text);
+        }
 
-            manager.Source = SuggestedSearchesManager.ParseSource(config.suggested_source);
+        private void RunNow(string text)
+        {
+            _pending?.Pause();
+            QueryChanged?.Invoke((text ?? "").Trim());
+        }
+
+        private void ShowSuggestionsIfEmpty() =>
+            Suggestions.style.display = string.IsNullOrEmpty(_field.value) && _suggestions.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+
+        private static Button MakeButton(string name, string text, string tooltip, Action onClick)
+        {
+            var b = new Button(onClick) { name = name, text = text, tooltip = tooltip };
+            b.AddToClassList("search-button");
+            return b;
         }
     }
 }

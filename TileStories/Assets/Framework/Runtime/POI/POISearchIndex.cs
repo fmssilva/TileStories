@@ -1,543 +1,279 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace TileStories
 {
-    // Inverted index for POI name / summary / keyword / category / hierarchy search.
-    // Plain C# class -- no MonoBehaviour. Instantiated per wall session with
-    // `new POISearchIndex()`.
-    // Per-query token coverage for search (spec _2.6 section 5 / §12 match-mode).
-    // `Any`: a POI qualifies if ANY query token matches (existing default behavior).
-    // `All`: a POI qualifies only if EVERY query token matches (conjunction).
-    // Honored by POISearchIndex.Search and threaded through ResultsListView so that
-    // voice search can use a stricter mode than typed search without changing the
-    // index internals -- one seam for the match policy, none duplicated elsewhere.
+    // Token coverage of a multi-word query: All = every word must match the POI (precise), Any = one is
+    // enough (broad). Typed and voice queries share it (select_filter_search.search.match_mode).
     public enum SearchMatchMode
     {
         Any = 0,
         All = 1,
     }
 
+    // Which indexed words a partial query word may complete: none, only POI names, or every source.
+    public enum SearchPrefixScope
+    {
+        Off,
+        NameOnly,
+        AllFields,
+    }
+
+    // How one query runs (built from SearchSettings by SelectFilterSearchOptions.ToSearchOptions)
+    public readonly struct SearchOptions
+    {
+        public readonly SearchMatchMode MatchMode;
+        public readonly SearchPrefixScope Prefix;
+        public readonly int MaxTypoEdits;
+
+        public SearchOptions(SearchMatchMode matchMode, SearchPrefixScope prefix, int maxTypoEdits)
+        {
+            MatchMode = matchMode;
+            Prefix = prefix;
+            MaxTypoEdits = Math.Max(0, maxTypoEdits);
+        }
+
+        // The framework defaults: every word must match, partial words complete, one typo forgiven
+        public static SearchOptions Default => new SearchOptions(SearchMatchMode.All, SearchPrefixScope.AllFields, 1);
+    }
+
+    // Inverted index over every searchable word of a wall's POIs (spec _2.6 section 5). Plain C#,
+    // built once per config (Build replaces, never accumulates). Authoring keeps keywords as a tree --
+    // taxonomy rows, custom search axes, freeform per-POI keywords, wall synonym groups -- and Build
+    // flattens it into token -> (POI, rank, source), so a query is one dictionary lookup per word.
     public class POISearchIndex
     {
-        // One entry in the inverted index: which POI owns a token and at what rank.
+        // Where an indexed word came from (the readout says it, the rank follows from it)
+        public enum MatchSource { Name, Keyword, Synonym, Summary, Taxonomy }
+
+        // How a query word met the indexed word
+        public enum MatchKind { Exact, Prefix, Typo }
+
+        // Rank of a word by its source: the POI's own name beats its own keywords beats its summary
+        // beats what it inherits from the taxonomy rows it belongs to.
+        public const float RankName = 1.0f;
+        public const float RankKeyword = 0.7f;
+        public const float RankSynonym = 0.6f;
+        public const float RankSummary = 0.4f;
+        public const float RankTaxonomy = 0.3f;
+
+        // A partial word or a misspelt one is a weaker match than the whole word
+        public const float PrefixFactor = 0.9f;
+        public const float OneTypoFactor = 0.8f;
+        public const float TwoTypoFactor = 0.6f;
+
+        // Shortest query word that may complete a longer one ("c" completing everything is noise)
+        public const int MinPrefixLength = 2;
+        // Shortest query word forgiven one typo, and two typos (short words have too many neighbours)
+        public const int MinLengthForOneTypo = 4;
+        public const int MinLengthForTwoTypos = 8;
+
         private struct TokenEntry
         {
             public int PoiIndex;
             public float Rank;
-
-            public TokenEntry(int poiIndex, float rank)
-            {
-                PoiIndex = poiIndex;
-                Rank = rank;
-            }
+            public MatchSource Source;
         }
 
-        // Token -> list of (POI index, rank) pairs. A single POI appears once
-        // per token, keeping the highest rank if the token appears in multiple fields.
-        private readonly Dictionary<string, List<TokenEntry>> _invertedIndex = new();
+        private readonly Dictionary<string, List<TokenEntry>> _index = new();
+        private readonly List<POIData> _pois = new();
+        private readonly Dictionary<string, int> _indexById = new();
 
-        // Token -> list of POI indices that have this token in their name.
-        // Used for prefix matching at search time (e.g. "lis" -> "Lisbon").
-        private readonly Dictionary<string, List<int>> _nameTokenToPoiIndices = new();
+        // Number of POIs indexed (POIs without an id and repeated ids are skipped)
+        public int PoiCount => _pois.Count;
 
-        // Stored POI data references, indexed by position in _poiDatas.
-        private readonly List<POIData> _poiDatas = new();
+        // Number of distinct indexed words
+        public int TokenCount => _index.Count;
 
-        // All unique indexed tokens, for GetMatchingKeywords prefix lookups.
-        private readonly HashSet<string> _allIndexedTokens = new();
-
-        // Duplicate-ID detection during Build.
-        private readonly HashSet<string> _poiIds = new();
-
-        // Rank constants: exact name is highest, name prefix just below,
-        // keyword mid-tier, summary and taxonomy lower.
-        private const float RANK_NAME = 1.0f;
-        private const float RANK_NAME_PREFIX = 0.9f;
-        private const float RANK_KEYWORD = 0.7f;
-        private const float RANK_SUMMARY = 0.4f;
-        private const float RANK_TAXONOMY = 0.3f;
-
-
-        // Build the inverted index from a fully-deserialized WallConfigData.
-        // Clears existing state first -- calling Build twice replaces, never
-        // accumulates.
+        // Index every word each POI of the config is found by (SearchKeywordSources: name, own keywords,
+        // summary, taxonomy rows, synonyms). Calling it again replaces the previous index.
         public void Build(WallConfigData config)
         {
             Clear();
-
-            if (config == null || config.pois == null)
+            if (config?.pois == null)
                 return;
 
-            // --- First pass: index each POI's direct fields ---
             foreach (var poi in config.pois)
             {
-                if (string.IsNullOrEmpty(poi.id))
+                // - first occurrence of an id wins, same as spawning
+                if (poi == null || string.IsNullOrEmpty(poi.id) || _indexById.ContainsKey(poi.id))
                     continue;
+                int i = _pois.Count;
+                _pois.Add(poi);
+                _indexById[poi.id] = i;
 
-                // Skip duplicate IDs -- first occurrence wins, matching POI
-                // spawn behavior which also uses the first occurrence.
-                if (!_poiIds.Add(poi.id))
-                    continue;
-
-                int index = _poiDatas.Count;
-                _poiDatas.Add(poi);
-
-                // POI name (rank 1.0)
-                foreach (var token in SearchTokenizer.Tokenize(poi.name))
-                {
-                    AddToIndex(token, index, RANK_NAME);
-                    AddToNameIndices(token, index);
-                }
-
-                // POI search_keywords -- the "Others" freeform bucket (rank 0.7)
-                if (poi.search_keywords != null)
-                {
-                    foreach (var keyword in poi.search_keywords)
-                    {
-                        foreach (var token in SearchTokenizer.Tokenize(keyword))
-                            AddToIndex(token, index, RANK_KEYWORD);
-                    }
-                }
-
-                // Per-field custom keywords (rank 0.7) -- field_key is authoring-only;
-                // the runtime index treats all keyword matches at the same quality tier.
-                if (poi.search_keyword_fields != null)
-                {
-                    foreach (var fieldEntry in poi.search_keyword_fields)
-                    {
-                        if (fieldEntry?.keywords == null)
-                            continue;
-                        foreach (var keyword in fieldEntry.keywords)
-                        {
-                            foreach (var token in SearchTokenizer.Tokenize(keyword))
-                                AddToIndex(token, index, RANK_KEYWORD);
-                        }
-                    }
-                }
-
-                // POI summary (rank 0.4)
-                foreach (var token in SearchTokenizer.Tokenize(poi.summary))
-                {
-                    AddToIndex(token, index, RANK_SUMMARY);
-                }
-
-                // POI category (rank 0.3)
-                foreach (var token in SearchTokenizer.Tokenize(poi.category))
-                {
-                    AddToIndex(token, index, RANK_TAXONOMY);
-                }
-
-                // Hierarchy level label (rank 0.3) -- resolved from the wall's
-                // hierarchy_levels table, not stored on the POI itself.
-                if (!string.IsNullOrEmpty(poi.hierarchy_level_key) && config.hierarchy_levels != null)
-                {
-                    HierarchyLevelEntry level = null;
-                    foreach (var entry in config.hierarchy_levels)
-                    {
-                        if (entry.key == poi.hierarchy_level_key)
-                        {
-                            level = entry;
-                            break;
-                        }
-                    }
-                    if (level != null && !string.IsNullOrEmpty(level.label))
-                    {
-                        foreach (var token in SearchTokenizer.Tokenize(level.label))
-                        {
-                            AddToIndex(token, index, RANK_TAXONOMY);
-                        }
-                    }
-                }
-            }
-
-            // --- Second pass: index taxonomy-level search_keywords ---
-            IndexTaxonomyKeywords(config);
-        }
-
-        // Index search_keywords from category_styles, badge_categories, and
-        // outline_levels. Each taxonomy entry's keywords are applied to all
-        // POIs whose corresponding field matches the entry's key.
-        private void IndexTaxonomyKeywords(WallConfigData config)
-        {
-            // Category styles -> POIs with matching category
-            if (config.category_styles != null)
-            {
-                foreach (var entry in config.category_styles)
-                {
-                    if (entry.search_keywords == null || string.IsNullOrEmpty(entry.category))
-                        continue;
-
-                    var matchingPois = FindPoisByCategory(entry.category);
-                    foreach (var keyword in entry.search_keywords)
-                    {
-                        foreach (var token in SearchTokenizer.Tokenize(keyword))
-                        {
-                            foreach (int idx in matchingPois)
-                                AddToIndex(token, idx, RANK_TAXONOMY);
-                        }
-                    }
-                }
-            }
-
-            // Badge categories -> POIs with matching badge_category
-            if (config.badge_categories != null)
-            {
-                foreach (var entry in config.badge_categories)
-                {
-                    if (entry.search_keywords == null || string.IsNullOrEmpty(entry.key))
-                        continue;
-
-                    var matchingPois = FindPoisByBadgeCategory(entry.key);
-                    foreach (var keyword in entry.search_keywords)
-                    {
-                        foreach (var token in SearchTokenizer.Tokenize(keyword))
-                        {
-                            foreach (int idx in matchingPois)
-                                AddToIndex(token, idx, RANK_TAXONOMY);
-                        }
-                    }
-                }
-            }
-
-            // Outline levels -> POIs with matching status_level_key
-            if (config.outline_levels != null)
-            {
-                foreach (var entry in config.outline_levels)
-                {
-                    if (entry.search_keywords == null || string.IsNullOrEmpty(entry.key))
-                        continue;
-
-                    var matchingPois = FindPoisByStatusLevel(entry.key);
-                    foreach (var keyword in entry.search_keywords)
-                    {
-                        foreach (var token in SearchTokenizer.Tokenize(keyword))
-                        {
-                            foreach (int idx in matchingPois)
-                                AddToIndex(token, idx, RANK_TAXONOMY);
-                        }
-                    }
-                }
+                foreach (var word in SearchKeywordSources.Collect(config, poi))
+                    AddText(word.Text, i, word.Rank, word.Source);
             }
         }
 
-        // Find all POI indices whose category matches the given key.
-        private List<int> FindPoisByCategory(string category)
+        private void AddText(string text, int poiIndex, float rank, MatchSource source)
         {
-            var result = new List<int>();
-            for (int i = 0; i < _poiDatas.Count; i++)
-            {
-                if (_poiDatas[i].category == category)
-                    result.Add(i);
-            }
-            return result;
+            foreach (var token in SearchTokenizer.Tokenize(text))
+                Add(token, poiIndex, rank, source);
         }
 
-        // Find all POI indices whose badge_category matches the given key.
-        private List<int> FindPoisByBadgeCategory(string key)
+        // One (word, POI) pair is stored once, at its best rank
+        private void Add(string token, int poiIndex, float rank, MatchSource source)
         {
-            var result = new List<int>();
-            for (int i = 0; i < _poiDatas.Count; i++)
-            {
-                if (_poiDatas[i].badge_category == key)
-                    result.Add(i);
-            }
-            return result;
-        }
-
-        // Find all POI indices whose status_level_key matches the given key.
-        private List<int> FindPoisByStatusLevel(string key)
-        {
-            var result = new List<int>();
-            for (int i = 0; i < _poiDatas.Count; i++)
-            {
-                if (_poiDatas[i].status_level_key == key)
-                    result.Add(i);
-            }
-            return result;
-        }
-
-        // Add a (token, POI, rank) entry to the inverted index. If the POI
-        // already owns this token, keep the higher rank.
-        private void AddToIndex(string token, int poiIndex, float rank)
-        {
-            if (string.IsNullOrEmpty(token))
-                return;
-
-            _allIndexedTokens.Add(token);
-
-            if (!_invertedIndex.TryGetValue(token, out var entries))
+            if (!_index.TryGetValue(token, out var entries))
             {
                 entries = new List<TokenEntry>();
-                _invertedIndex[token] = entries;
+                _index[token] = entries;
             }
-
-            for (int i = 0; i < entries.Count; i++)
+            for (int k = 0; k < entries.Count; k++)
             {
-                if (entries[i].PoiIndex == poiIndex)
-                {
-                    if (rank > entries[i].Rank)
-                        entries[i] = new TokenEntry(poiIndex, rank);
-                    return;
-                }
+                if (entries[k].PoiIndex != poiIndex)
+                    continue;
+                if (rank > entries[k].Rank)
+                    entries[k] = new TokenEntry { PoiIndex = poiIndex, Rank = rank, Source = source };
+                return;
             }
-
-            entries.Add(new TokenEntry(poiIndex, rank));
+            entries.Add(new TokenEntry { PoiIndex = poiIndex, Rank = rank, Source = source });
         }
 
-        // Record that a POI has a given name token (for prefix matching).
-        private void AddToNameIndices(string token, int poiIndex)
-        {
-            if (!_nameTokenToPoiIndices.TryGetValue(token, out var indices))
-            {
-                indices = new List<int>();
-                _nameTokenToPoiIndices[token] = indices;
-            }
-            indices.Add(poiIndex);
-        }
-
-        // Search the index for matches against a user query string.
-        // Each query token is looked up exactly first (1.0 / 0.7 / 0.4 / 0.3).
-        // If no exact name match is found, name-prefix matching kicks in (0.9).
-        // Per-POI score is the MAX rank across all query tokens, not the sum.
-        // Results are sorted by score desc, then POI index asc (stable).
-        // Search the index for matches against a user query string.
-        // Each query token is looked up exactly first (1.0 / 0.7 / 0.4 / 0.3);
-        // name-prefix matching (0.9) is a fallback. Per-POI score is the MAX rank
-        // across the query tokens, not the sum. matchMode controls token coverage:
-        // `Any` returns any POI hit by >=1 token (existing behavior); `All` requires
-        // every query token to match the POI (conjunction). Results are sorted by
-        // score desc, then POI index asc (stable).
-        public List<SearchResult> Search(string query, SearchMatchMode matchMode = SearchMatchMode.Any,
-            ICollection<string> candidatePoiIds = null)
+        // Rank every POI against a query. candidatePoiIds narrows the search to a filtered set: null =
+        // every POI, an empty set = nothing (a filter that matches nothing leaves nothing to search).
+        // An empty query returns the candidates themselves in config order (a filter with no text shows
+        // its set), or nothing when there are no candidates. Results: best score first, then config order.
+        public List<SearchResult> Search(string query, SearchOptions options, ICollection<string> candidatePoiIds = null)
         {
             var results = new List<SearchResult>();
-
-            // Candidate narrowing (_2.6-i): when supplied, restrict every phase of this
-            // search to POIs in the set. null/empty = unrestricted (backward compatible).
-            HashSet<int> candidateIndices = null;
-            if (candidatePoiIds != null && candidatePoiIds.Count > 0)
-            {
-                candidateIndices = new HashSet<int>();
-                for (int i = 0; i < _poiDatas.Count; i++)
-                {
-                    if (!string.IsNullOrEmpty(_poiDatas[i].id) && candidatePoiIds.Contains(_poiDatas[i].id))
-                        candidateIndices.Add(i);
-                }
-            }
-
-            // Empty query + active filter = "show the filtered set" (_2_6 section 7):
-            // facet toggles alone must update the visible result set without any typed text,
-            // so return every candidate unscored in wall-config order (deterministic).
-            if (string.IsNullOrEmpty(query) || _poiDatas.Count == 0)
-            {
-                if (query != null && query.Length == 0 && candidateIndices != null && _poiDatas.Count > 0)
-                {
-                    foreach (int poiIndex in candidateIndices)
-                        results.Add(new SearchResult(poiIndex, 0f, _poiDatas[poiIndex].id));
-                }
+            if (_pois.Count == 0)
                 return results;
-            }
 
             var queryTokens = SearchTokenizer.Tokenize(query);
             if (queryTokens.Count == 0)
+            {
+                if (candidatePoiIds != null)
+                    for (int i = 0; i < _pois.Count; i++)
+                        if (candidatePoiIds.Contains(_pois[i].id))
+                            results.Add(new SearchResult(_pois[i], 0f, ""));
                 return results;
-
-            // Track best score per POI across all query tokens, plus which distinct
-            // query-token indices each POI matched (so `All` mode can enforce coverage).
-            var bestScores = new Dictionary<int, float>();
-            var matchedTokenSets = new Dictionary<int, HashSet<int>>();
-
-            int tokenCount = queryTokens.Count;
-            int ti = 0;
-            foreach (string queryToken in queryTokens)
-            {
-                // Exact token match in the inverted index
-                if (_invertedIndex.TryGetValue(queryToken, out var entries))
-                {
-                    foreach (var entry in entries)
-                    {
-                        if (candidateIndices != null && !candidateIndices.Contains(entry.PoiIndex))
-                            continue; // filtered out: never scored, never returned (_2.6-i)
-                        if (!bestScores.TryGetValue(entry.PoiIndex, out float current) || entry.Rank > current)
-                            bestScores[entry.PoiIndex] = entry.Rank;
-                        RecordMatch(matchedTokenSets, entry.PoiIndex, ti);
-                    }
-                }
-
-                // Name prefix match: queryToken is a proper prefix of a name token,
-                // or a name token is a proper prefix of queryToken. Only applies to
-                // name tokens (rank 0.9), never to keywords/summary/taxonomy.
-                foreach (string nameToken in _nameTokenToPoiIndices.Keys)
-                {
-                    bool isPrefix = false;
-
-                    // queryToken is a proper prefix of nameToken ('lis' -> 'lisbon')
-                    if (nameToken.Length > queryToken.Length && nameToken.StartsWith(queryToken))
-                        isPrefix = true;
-
-                    // nameToken is a proper prefix of queryToken ('li' -> 'lisbon')
-                    else if (queryToken.Length > nameToken.Length && queryToken.StartsWith(nameToken))
-                        isPrefix = true;
-
-                    if (isPrefix)
-                    {
-                        foreach (int poiIndex in _nameTokenToPoiIndices[nameToken])
-                        {
-                            if (candidateIndices != null && !candidateIndices.Contains(poiIndex))
-                                continue; // filtered out: never scored, never returned
-                            if (!bestScores.TryGetValue(poiIndex, out float current) || RANK_NAME_PREFIX > current)
-                                bestScores[poiIndex] = RANK_NAME_PREFIX;
-                            RecordMatch(matchedTokenSets, poiIndex, ti);
-                        }
-                    }
-                }
-
-                ti++;
             }
 
-            // Convert to SearchResult list, applying match-mode coverage filtering.
-            foreach (var kvp in bestScores)
-            {
-                int poiIndex = kvp.Key;
-                float score = kvp.Value;
+            // per POI: its best score over the query words, why, and how many words it matched
+            var best = new Dictionary<int, (float score, string reason)>();
+            var matchedWords = new Dictionary<int, int>();
 
-                // `All` mode: the POI must have matched every query token.
-                if (matchMode == SearchMatchMode.All)
+            foreach (string word in queryTokens)
+            {
+                var wordBest = new Dictionary<int, (float score, string reason)>();
+                foreach (var kvp in _index)
                 {
-                    int matched = matchedTokenSets.TryGetValue(poiIndex, out var set) ? set.Count : 0;
-                    if (matched != tokenCount)
+                    float factor = MatchFactor(word, kvp.Key, kvp.Value, options, out MatchKind kind);
+                    if (factor <= 0f)
                         continue;
+                    foreach (var e in kvp.Value)
+                    {
+                        if (kind == MatchKind.Prefix && options.Prefix == SearchPrefixScope.NameOnly && e.Source != MatchSource.Name)
+                            continue;
+                        if (candidatePoiIds != null && !candidatePoiIds.Contains(_pois[e.PoiIndex].id))
+                            continue;
+                        float score = e.Rank * factor;
+                        if (!wordBest.TryGetValue(e.PoiIndex, out var cur) || score > cur.score)
+                            wordBest[e.PoiIndex] = (score, Describe(e.Source, kind));
+                    }
                 }
 
-                string poiId = poiIndex < _poiDatas.Count ? _poiDatas[poiIndex].id : "";
-                results.Add(new SearchResult(poiIndex, score, poiId));
+                foreach (var kvp in wordBest)
+                {
+                    matchedWords[kvp.Key] = matchedWords.TryGetValue(kvp.Key, out int n) ? n + 1 : 1;
+                    if (!best.TryGetValue(kvp.Key, out var cur) || kvp.Value.score > cur.score)
+                        best[kvp.Key] = kvp.Value;
+                }
             }
 
-            // Stable sort: score descending, then POIIndex ascending
+            foreach (var kvp in best)
+            {
+                if (options.MatchMode == SearchMatchMode.All && matchedWords[kvp.Key] < queryTokens.Count)
+                    continue;
+                results.Add(new SearchResult(_pois[kvp.Key], kvp.Value.score, kvp.Value.reason));
+            }
+
             results.Sort((a, b) =>
             {
-                int scoreCmp = b.Score.CompareTo(a.Score);
-                if (scoreCmp != 0)
-                    return scoreCmp;
-                return a.POIIndex.CompareTo(b.POIIndex);
+                int byScore = b.Score.CompareTo(a.Score);
+                return byScore != 0 ? byScore : _indexById[a.PoiId].CompareTo(_indexById[b.PoiId]);
             });
-
             return results;
         }
 
-        // Record that POI `poiIndex` matched query-token index `tokenIndex`.
-        // Helper for Search() so match-mode coverage (All) can be enforced without
-        // changing the scoring loop above it.
-        private static void RecordMatch(Dictionary<int, HashSet<int>> sets, int poiIndex, int tokenIndex)
+        // How well a query word meets one indexed word: 1 exact, PrefixFactor when the query word starts
+        // it, a typo factor within the allowed edits, 0 otherwise.
+        private static float MatchFactor(string word, string token, List<TokenEntry> entries, SearchOptions options, out MatchKind kind)
         {
-            if (!sets.TryGetValue(poiIndex, out var set))
+            kind = MatchKind.Exact;
+            if (token == word)
+                return 1f;
+
+            if (options.Prefix != SearchPrefixScope.Off && word.Length >= MinPrefixLength
+                && token.Length > word.Length && token.StartsWith(word, StringComparison.Ordinal))
             {
-                set = new HashSet<int>();
-                sets[poiIndex] = set;
-            }
-            set.Add(tokenIndex);
-        }
-
-        // Return all indexed tokens that start with the given prefix.
-        // Sorted alphabetically. Empty prefix returns an empty list
-        // (we never return the full vocabulary as auto-complete options).
-        public List<string> GetMatchingKeywords(string prefix)
-        {
-            var results = new List<string>();
-
-            if (string.IsNullOrEmpty(prefix))
-                return results;
-
-            foreach (string token in _allIndexedTokens)
-            {
-                if (token.StartsWith(prefix))
-                    results.Add(token);
+                kind = MatchKind.Prefix;
+                return PrefixFactor;
             }
 
-            results.Sort();
-            return results;
+            int allowed = AllowedTypos(word, options.MaxTypoEdits);
+            if (allowed > 0 && Math.Abs(token.Length - word.Length) <= allowed)
+            {
+                int edits = SearchTextDistance.Bounded(word, token, allowed);
+                if (edits > 0 && edits <= allowed)
+                {
+                    kind = MatchKind.Typo;
+                    return edits == 1 ? OneTypoFactor : TwoTypoFactor;
+                }
+            }
+            return 0f;
         }
 
-        // Drop all internal state. Replaces, does not accumulate.
+        // Typos forgiven for a query word of this length, never more than the setting allows
+        public static int AllowedTypos(string word, int maxTypoEdits)
+        {
+            int byLength = word.Length >= MinLengthForTwoTypos ? 2 : word.Length >= MinLengthForOneTypo ? 1 : 0;
+            return Math.Min(byLength, maxTypoEdits);
+        }
+
+        private static string Describe(MatchSource source, MatchKind kind)
+        {
+            string s = source switch
+            {
+                MatchSource.Name => "name",
+                MatchSource.Keyword => "keyword",
+                MatchSource.Synonym => "synonym",
+                MatchSource.Summary => "summary",
+                _ => "taxonomy",
+            };
+            return kind switch
+            {
+                MatchKind.Prefix => s + ", partial word",
+                MatchKind.Typo => s + ", typo",
+                _ => s,
+            };
+        }
+
+        // Drop the whole index
         public void Clear()
         {
-            _invertedIndex.Clear();
-            _nameTokenToPoiIndices.Clear();
-            _poiDatas.Clear();
-            _allIndexedTokens.Clear();
-            _poiIds.Clear();
+            _index.Clear();
+            _pois.Clear();
+            _indexById.Clear();
         }
 
-        // Apply synonym groups: for each group, if any POI contains the key POI contains the key
-        // token, also index the synonyms at keyword rank (0.7). This is a
-        // build-time expansion so Search has zero runtime cost for synonyms.
-        // Accepts a list of SynonymGroup (Runtime data type) rather than the
-        // SearchSynonymGroups ScriptableObject (Editor-only) to avoid a
-        // Runtime->Editor assembly dependency. The Editor wiring layer
-        // extracts groups from the asset and passes them here.
-        public void ConfigureWithSynonyms(IList<SynonymGroup> groups)
-        {
-            if (groups == null || groups.Count == 0)
-                return;
-
-            // Build a quick lookup: token -> POI indices that contain that token
-            var tokenToPois = new Dictionary<string, List<int>>();
-            foreach (var kvp in _invertedIndex)
-            {
-                var pois = new List<int>();
-                foreach (var entry in kvp.Value)
-                    pois.Add(entry.PoiIndex);
-                tokenToPois[kvp.Key] = pois;
-            }
-
-            foreach (var group in groups)
-            {
-                if (string.IsNullOrEmpty(group.key))
-                    continue;
-
-                // Tokenize the key and each synonym
-                var keyTokens = SearchTokenizer.Tokenize(group.key);
-                var synonymTokens = new List<string>();
-                if (group.synonyms != null)
-                {
-                    foreach (var syn in group.synonyms)
-                    {
-                        synonymTokens.AddRange(SearchTokenizer.Tokenize(syn));
-                    }
-                }
-
-                // For each key token, find POIs that contain it, then index
-                // the synonyms for those same POIs at keyword rank.
-                foreach (string keyToken in keyTokens)
-                {
-                    if (tokenToPois.TryGetValue(keyToken, out var matchingPois))
-                    {
-                        foreach (int poiIndex in matchingPois)
-                        {
-                            foreach (string synToken in synonymTokens)
-                            {
-                                AddToIndex(synToken, poiIndex, RANK_KEYWORD);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // A single search result: the POI index, its best match score, and its ID.
+        // One ranked match: the POI, its score (0..1) and a short reason ("keyword, typo")
         public readonly struct SearchResult
         {
-            public readonly int POIIndex;
+            public readonly POIData Poi;
             public readonly float Score;
-            public readonly string POIId;
+            public readonly string Reason;
 
-            public SearchResult(int poiIndex, float score, string poiId)
+            public string PoiId => Poi?.id;
+
+            public SearchResult(POIData poi, float score, string reason)
             {
-                POIIndex = poiIndex;
+                Poi = poi;
                 Score = score;
-                POIId = poiId;
+                Reason = reason;
             }
         }
     }

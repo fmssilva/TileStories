@@ -105,6 +105,17 @@ namespace TileStories.Editor
             return _defaultIconLibrary;
         }
 
+        // Test seam: reports a table text cell's RESERVED rect (table name, row index) on Repaint.
+        // Null in production, so zero cost. Lets TaxonomyTableClickTests click where the developer
+        // sees the cell (same idea as HierarchyCheckboxRectProbe).
+        internal static Action<string, int, Rect> TableCellRectProbe;
+
+        private static void ReportTableCellRect(string table, int row)
+        {
+            if (TableCellRectProbe != null && Event.current.type == EventType.Repaint)
+                TableCellRectProbe(table, row, GUILayoutUtility.GetLastRect());
+        }
+
         // Shared symbol-table renderer for both category and badge sections (section 13.2).
         // Driven by delegates rather than an interface hierarchy â€” simpler for editor-only GUI code,
         // no serialization constraints to satisfy.
@@ -137,7 +148,7 @@ namespace TileStories.Editor
         {
             // Column order (5 groups, header mirrors rows exactly):
             // [key+details] | [Symbol + interactive Preview] | [Color] | [SearchKeywords] | [trash]
-            using (new EditorGUILayout.HorizontalScope())
+            using (new TableRowScope())
             {
                 // Group 1: primary key + notes info
                 EditorGUILayout.LabelField(primaryLabelHeader, EditorStyles.miniBoldLabel, GUILayout.Width(130f));
@@ -190,15 +201,16 @@ namespace TileStories.Editor
             for (int i = 0; i < entries.Count; i++)
             {
                 var entry = entries[i];
-                using (new EditorGUILayout.HorizontalScope())
+                using (new TableRowScope())
                 {
                     // Group 1: key + details
                     setPrimaryLabel(entry, EditorGUILayout.TextField(getPrimaryLabel(entry), GUILayout.Width(130f)));
+                    ReportTableCellRect(primaryLabelHeader, i);
 
-                    // Details button -- opens a popup with a text area and a Close button.
+                    // Details button -- opens the row's note popup (a text area; X / Esc closes it).
                     GUILayout.Space(TableGapWithinGroup);
                     if (GUILayout.Button(DetailsIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
-                        PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(getPrimaryLabel(entry), () => getDetails(entry), v => setDetails(entry, v)));
+                        EditorPopup.ShowAt(CreateDetailsPopup(getPrimaryLabel(entry), () => getDetails(entry), v => setDetails(entry, v)), GUILayoutUtility.GetLastRect());
 
                     GUILayout.Space(TableGapBetweenGroups);
 
@@ -211,15 +223,12 @@ namespace TileStories.Editor
 
                     GUILayout.Space(TableGapWithinGroup);
 
-                    // Clicking the preview opens the curated wall + framework picker
-                    // (section 14.7). Capture per-iteration: PopupWindow.Show is async,
-                    // so a lambda must not close over the loop variable directly.
-                    EnsureDefaultIconLibraryLoaded();
+                    // Clicking the preview opens the curated wall + framework picker.
+                    // Capture per-iteration: the popup calls back later, so a lambda must
+                    // not close over the loop variable directly.
                     var previewEntry = entry;
                     DrawSpritePreview(chosen != null ? chosen : current,
-                        () => PopupWindow.Show(GUILayoutUtility.GetLastRect(),
-                            new ExistingSymbolPickerPopup(_wallIconLibrary, _defaultIconLibrary,
-                                key => setIconKey(previewEntry, key))));
+                        () => EditorPopup.ShowAt(CreateSymbolPickerPopup(key => setIconKey(previewEntry, key)), GUILayoutUtility.GetLastRect()));
                     Rect previewRect = GUILayoutUtility.GetLastRect();
 
                     // Extra gap (not the standard between-groups gap) before Color --
@@ -256,23 +265,19 @@ namespace TileStories.Editor
                     {
                         var targetEntry = entry;
                         var keywords = getSearchKeywords(targetEntry) ?? new List<string>();
-                        string joined = string.Join(", ", keywords);
-
-                        string edited = EditorGUILayout.TextField(joined, GUILayout.ExpandWidth(true));
-                        if (edited != joined)
-                            setSearchKeywords(targetEntry, ParseKeywordList(edited));
+                        var edited = DrawKeywordListField(keywords, GUILayout.ExpandWidth(true));
+                        if (!ReferenceEquals(edited, keywords))
+                            setSearchKeywords(targetEntry, edited);
 
                         GUILayout.Space(TableGapWithinGroup);
-                        string buttonLabel = string.IsNullOrEmpty(joined) ? "Suggest" : "Edit";
-                        if (GUILayout.Button(buttonLabel, GUILayout.Width(60f)))
+                        if (GUILayout.Button("Edit", GUILayout.Width(60f)))
                         {
                             // The popup reads the field live rather than the string captured
                             // at click time, so an inline edit made a moment earlier is what
                             // the popup opens with.
-                            PopupWindow.Show(GUILayoutUtility.GetLastRect(),
-                                new EntryDetailsPopup("Search Keywords",
-                                    () => string.Join(", ", getSearchKeywords(targetEntry) ?? new List<string>()),
-                                    v => setSearchKeywords(targetEntry, ParseKeywordList(v))));
+                            EditorPopup.ShowAt(CreateDetailsPopup("Search Keywords",
+                                    () => KeywordListText.Join(getSearchKeywords(targetEntry)),
+                                    v => setSearchKeywords(targetEntry, KeywordListText.Parse(v))), GUILayoutUtility.GetLastRect());
                         }
                         keywordsTailRect = GUILayoutUtility.GetLastRect();
                     }
@@ -424,37 +429,14 @@ namespace TileStories.Editor
             return $"#{c32.r:X2}{c32.g:X2}{c32.b:X2}";
         }
 
-        // Draw a keyword list inline in a table row, returning the edited list.
-        // Shows a TextField (comma-separated) with an Edit popup for richer
-        // editing. Used by the search_keywords column in taxonomy tables.
-        private static List<string> DrawKeywordListField(List<string> keywords)
+        // A comma-separated keyword list cell (every Search Keywords column, the synonym rows): returns
+        // the SAME list object while nothing was typed, a new parsed list after an edit
+        private static List<string> DrawKeywordListField(List<string> keywords, params GUILayoutOption[] options)
         {
-            if (keywords == null)
-                keywords = new List<string>();
-
-            string joined = string.Join(", ", keywords);
-            string edited = EditorGUILayout.TextField(joined, GUILayout.ExpandWidth(true));
-            if (edited != joined)
-                keywords = ParseKeywordList(edited);
-
-            return keywords;
-        }
-
-        // Parse a comma-separated keyword string into a list, trimming and
-        // dropping empties. Used by the search_keywords column's Edit popup.
-        private static List<string> ParseKeywordList(string text)
-        {
-            var result = new List<string>();
-            if (string.IsNullOrWhiteSpace(text))
-                return result;
-
-            foreach (string part in text.Split(','))
-            {
-                string trimmed = part.Trim();
-                if (!string.IsNullOrEmpty(trimmed))
-                    result.Add(trimmed);
-            }
-            return result;
+            keywords ??= new List<string>();
+            string joined = KeywordListText.Join(keywords);
+            string edited = EditorGUILayout.TextField(joined, options);
+            return edited == joined ? keywords : KeywordListText.Parse(edited);
         }
     }
 }

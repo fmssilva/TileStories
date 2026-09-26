@@ -37,6 +37,7 @@ namespace TileStories.Editor
             if (!d.effects_enabled)
             {
                 DrawEffectNote("Effects are off. Your effect settings are kept and still saved.", IndentLevel1);
+                DrawEffectsTestSubSection();
                 return;
             }
 
@@ -48,7 +49,6 @@ namespace TileStories.Editor
             DrawHaloDiscEffect(d.halo_disc);
             DrawBeaconEffect(d.beacon);
 
-            EditorGUILayout.Space(4f);
             DrawEffectsTestSubSection();
         }
 
@@ -139,14 +139,29 @@ namespace TileStories.Editor
 
         // ---------------- shared pieces ----------------
 
-        // One labelled popup for a level-table effect column, offering only enabled effects.
-        private string DrawEffectOptionPopup(string label, string current, string[] options, string[] labels, float width)
+        // One popup for a level-table effect column, offering only enabled effects. Takes a
+        // GUIContent (pass GUIContent.none from a table row whose column is already named by the
+        // table's own header, so no prefix-label width is reserved and the control fills `width`).
+        private string DrawEffectOptionPopup(GUIContent label, string current, string[] options, string[] labels, float width)
         {
             EffectUsageSummary.FilterEnabledOptions(options, labels, _config.effect_defaults, current,
                 out string[] shownOptions, out string[] shownLabels);
             int index = System.Array.IndexOf(shownOptions, current);
             if (index < 0) index = 0;
             index = EditorGUILayout.Popup(label, index, shownLabels, GUILayout.Width(width));
+            return shownOptions[index];
+        }
+
+        // Rect overload -- used where two effect popups must sit pixel-adjacent (e.g. Ripple +
+        // Halo with the between-them group gap removed), since a GUILayout.Width call always
+        // carries the Popup style's own left/right margin and would reintroduce a small gap here.
+        private string DrawEffectOptionPopup(Rect rect, string current, string[] options, string[] labels)
+        {
+            EffectUsageSummary.FilterEnabledOptions(options, labels, _config.effect_defaults, current,
+                out string[] shownOptions, out string[] shownLabels);
+            int index = System.Array.IndexOf(shownOptions, current);
+            if (index < 0) index = 0;
+            index = EditorGUI.Popup(rect, index, shownLabels);
             return shownOptions[index];
         }
 

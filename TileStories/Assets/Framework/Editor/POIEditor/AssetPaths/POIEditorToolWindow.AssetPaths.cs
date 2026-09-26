@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 
@@ -136,6 +138,96 @@ namespace TileStories.Editor
                     break;
                 }
             }
+        }
+
+        // Same recipe as the icon library above (_2.0_Labels_And_Fonts_Design.md section 2.3),
+        // resolved by scanning for a FontKeyLibrary whose own Resources-relative path matches
+        // the config's label_font_library_resources_path.
+        private void TryResolveWallFontLibraryFromConfig()
+        {
+            _wallFontLibrary = null;
+            if (_config == null || string.IsNullOrWhiteSpace(_config.label_font_library_resources_path))
+                return;
+
+            string target = _config.label_font_library_resources_path.Trim();
+            string[] guids = AssetDatabase.FindAssets("t:FontKeyLibrary");
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (string.Equals(AssetPathToResourcesPath(path), target, StringComparison.Ordinal))
+                {
+                    _wallFontLibrary = AssetDatabase.LoadAssetAtPath<FontKeyLibrary>(path);
+                    break;
+                }
+            }
+        }
+
+        // The wall's own FontKeyLibrary: the one already assigned, else locate-or-create it next to
+        // the wall's icon library (seeded with the framework's 3 fonts -- a wall library REPLACES the
+        // framework one at runtime, so it must start with everything the wall keeps,
+        // _2.0_Labels_And_Fonts_Design.md section 2.3), and point the config at it. Called only when
+        // the developer adds a font, so a wall that never adds one never gets a library asset.
+        private FontKeyLibrary EnsureWallFontLibrary()
+        {
+            if (_wallFontLibrary != null) return _wallFontLibrary;
+
+            string directory = GetWallLibraryDirectory();
+            string wallName = _config != null && !string.IsNullOrWhiteSpace(_config.wall_id) ? _config.wall_id : "Wall";
+            string assetPath = directory + "/" + SanitizeFileName(wallName) + "_FontLibrary.asset";
+            EnsureAssetDirectory(directory);
+
+            _wallFontLibrary = AssetDatabase.LoadAssetAtPath<FontKeyLibrary>(assetPath);
+            if (_wallFontLibrary == null)
+            {
+                _wallFontLibrary = CreateInstance<FontKeyLibrary>();
+                var defaultLibrary = AssetDatabase.LoadAssetAtPath<FontKeyLibrary>(DefaultFontLibraryPath);
+                if (defaultLibrary != null)
+                    _wallFontLibrary.CopyFrom(defaultLibrary);
+                AssetDatabase.CreateAsset(_wallFontLibrary, assetPath);
+                AssetDatabase.SaveAssets();
+            }
+
+            string resourcesPath = AssetPathToResourcesPath(assetPath);
+            if (_config != null && !string.IsNullOrWhiteSpace(resourcesPath))
+                _config.label_font_library_resources_path = resourcesPath;
+            return _wallFontLibrary;
+        }
+
+        // Register a TMP Font Asset in the wall's font library (creating the library on first use)
+        // and return its key -- the font equivalent of AssignSpriteToLibraryAndGetKey. The same call
+        // backs "Add font" in both Labels, Text & Fonts and the hierarchy Marker Label Style window.
+        private string AddFontToWallLibraryAndGetKey(TMP_FontAsset font)
+        {
+            if (font == null) return null;
+            var library = EnsureWallFontLibrary();
+            Undo.RecordObject(library, "Add Label Font");
+            string key = library.EnsureKeyForFont(font);
+            EditorUtility.SetDirty(library);
+            AssetDatabase.SaveAssets();
+            return key;
+        }
+
+        // The Font popup's option list: the 3 framework keys plus any extra keys the wall's own
+        // FontKeyLibrary defines, so a font added to the wall is selectable everywhere a Font popup
+        // exists. Rebuilt on every call (a handful of entries) rather than cached, so a freshly added
+        // font shows up on the next repaint with no invalidation to wire.
+        private void GetAvailableFontKeyOptions(out string[] keys, out string[] labels)
+        {
+            var keyList = new List<string>(LabelFontKeyOptions);
+            var labelList = new List<string>(LabelFontKeyLabels);
+
+            if (_wallFontLibrary != null)
+            {
+                foreach (string wallKey in _wallFontLibrary.Keys())
+                {
+                    if (keyList.Contains(wallKey)) continue;
+                    keyList.Add(wallKey);
+                    labelList.Add(wallKey + " (wall)");
+                }
+            }
+
+            keys = keyList.ToArray();
+            labels = labelList.ToArray();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace TileStories
     // distribution, so they can never go stale as POIs are added or removed.
     public sealed class SuggestedSearchesManager
     {
-                // Where suggestion terms come from (spec _2.6 section 13 / config suggested_source).
+        // Where suggestion terms come from (spec _2.6 section 13 / results.suggestion_source).
         public enum SuggestedSource
         {
             // Top-N categories by live POI count (developer-maintained-free default).
@@ -19,7 +19,7 @@ namespace TileStories
             RecentFirst
         }
 
-        // Parse the config string `suggested_source` into the enum. Case-insensitive;
+        // Parse the config string `results.suggestion_source` into the enum. Case-insensitive;
         // unknown/empty/null falls back to CategoryDistribution (the default).
         public static SuggestedSource ParseSource(string value)
         {
@@ -44,13 +44,9 @@ namespace TileStories
 
         public SuggestedSource Source { get; set; } = SuggestedSource.CategoryDistribution;
 
-        // Build the suggestion list for the current frame. Optional `recent` and
-        // `synonymGroups` are only consumed when the caller can supply them --
-        // this class never reaches into the Editor-only SearchSynonymGroups asset
-        // itself, so it stays in the Runtime assembly with zero Editor deps.
-        public List<string> BuildSuggestions(WallConfigData config,
-                                             RecentSearchesManager recent = null,
-                                             IList<SynonymGroup> synonymGroups = null)
+        // Build the suggestion list: the visitor's recent queries first (recent_first only), then the
+        // wall's categories by how many POIs they hold, deduplicated, at most topN terms.
+        public List<string> BuildSuggestions(WallConfigData config, RecentSearchesManager recent = null)
         {
             var suggestions = new List<string>();
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -63,14 +59,6 @@ namespace TileStories
                 if (!seen.Add(term))
                     return;
                 suggestions.Add(term);
-            }
-
-            // Synonym group keys surface as suggestions ONLY when the Editor
-            // wiring passes groups in (i.e. a SearchSynonymGroups asset exists).
-            if (synonymGroups != null)
-            {
-                foreach (var group in synonymGroups)
-                    Add(group?.key);
             }
 
             // recent_first: surface the visitor's own history before categories.

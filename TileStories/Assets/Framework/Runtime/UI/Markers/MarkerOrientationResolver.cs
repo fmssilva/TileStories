@@ -70,14 +70,21 @@ namespace TileStories
             {
                 // Wall tilt (X/Z) stays exactly as authored; only yaw tracks the camera,
                 // computed the same way the editor's Y slider already means "yaw" (Unity's
-                // Quaternion.Euler applies Y as the outermost/world-space rotation).
-                Vector3 camFwdFlat = Vector3.ProjectOnPlane(camPos - markerWorldPos, up);
+                // Quaternion.Euler applies Y as the outermost/world-space rotation). The yaw points
+                // the marker's forward AWAY from the camera, like always_facing_camera: a world-space
+                // canvas is read from that side (camera-to-marker, never marker-to-camera, which
+                // showed every yaw_only marker from behind with mirrored text).
+                // - measured in the PARENT's frame: the yaw goes into a local Euler below, so a world
+                //   yaw would add the parent's own yaw a second time under a rotated anchor
+                Quaternion toParent = Quaternion.Inverse(parentRotation);
+                Vector3 localUp = toParent * up;
+                Vector3 camFwdFlat = Vector3.ProjectOnPlane(toParent * (markerWorldPos - camPos), localUp);
                 if (camFwdFlat.sqrMagnitude < 1e-12f)
                 {
                     return new OrientationResult { Rotation = parentRotation * authoredLocalRotation, Resolved = false };
                 }
 
-                float liveYawDeg = Quaternion.LookRotation(camFwdFlat, up).eulerAngles.y;
+                float liveYawDeg = Quaternion.LookRotation(camFwdFlat, localUp).eulerAngles.y;
                 Vector3 authoredEuler = authoredLocalRotation.eulerAngles;
                 Quaternion yawOnly = parentRotation * Quaternion.Euler(authoredEuler.x, liveYawDeg, authoredEuler.z);
                 return new OrientationResult { Rotation = yawOnly, Resolved = true };

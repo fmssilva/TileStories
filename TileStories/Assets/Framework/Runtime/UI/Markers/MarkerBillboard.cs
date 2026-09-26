@@ -65,6 +65,18 @@ namespace TileStories
             _forceNextResolve = true;
         }
 
+        // The authored rotation wall_fixed uses fully and yaw_only partially (X/Z)
+        public Quaternion AuthoredLocalRotation => _authoredLocalRotation;
+
+        // Swap in a new authored rotation on a running marker (a POI's Facing X/Y/Z edited live in
+        // Play Mode). Configure cannot be reused for it: it would snapshot the CURRENT, already
+        // camera-resolved rotation instead of the authored one. Glides in like ReapplySettings.
+        public void SetAuthoredLocalRotation(Quaternion authoredLocalRotation)
+        {
+            _authoredLocalRotation = authoredLocalRotation;
+            _forceNextResolve = true;
+        }
+
         // Hand the Label and Badge children their own vertical-alignment mode
         private void ConfigureChildren()
         {

@@ -118,6 +118,32 @@ namespace TileStories.Editor
                 EditorGUI.indentLevel = RowSavedIndentLevels.Pop();
         }
 
+        // One row (header or data) of a table whose cells sit at rects the table computes itself.
+        // EditorGUI's Rect controls (Toggle, TextField, IntField, FloatField, Popup) run their rect
+        // through EditorGUI.IndentedRect, which inside a DrawFramedFoldout section moves EVERY cell
+        // indentLevel * 15 px right and shrinks it as much: a checkbox's hit box slid off its glyph
+        // (clicks missed) and two adjacent fields showed a gap. This pays the section's indent ONCE,
+        // as a leading space, then zeroes indentLevel for the cells. (Setting labelWidth to 0 does
+        // not help: Unity reads 0 as "use the default width".)
+        internal sealed class TableRowScope : IDisposable
+        {
+            private readonly int _savedIndent;
+
+            public TableRowScope()
+            {
+                EditorGUILayout.BeginHorizontal();
+                _savedIndent = EditorGUI.indentLevel;
+                GUILayout.Space(EditorGUI.IndentedRect(new Rect(0f, 0f, 0f, 0f)).x);
+                EditorGUI.indentLevel = 0;
+            }
+
+            public void Dispose()
+            {
+                EditorGUI.indentLevel = _savedIndent;
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+
         // Compensates a labelled field row's reserved label column by exactly the
         // same extraIndentPixels its own DrawEditorRow spacer was widened by, so a
         // nested/conditional row's VALUE box lands at the same x as its shallower

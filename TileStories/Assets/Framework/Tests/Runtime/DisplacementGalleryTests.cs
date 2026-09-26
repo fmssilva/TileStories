@@ -76,7 +76,7 @@ namespace TileStories.Tests
                     if (reveal != null)
                     {
                         reveal.StopAllCoroutines();
-                        reveal.SetFullAlphaAndScale();
+                        reveal.SkipToEnd();
                     }
 
                     groupUnits.Add(new VisualUnit { marker = view, poiId = $"poi_{i}", worldPosition = origin });
@@ -96,9 +96,6 @@ namespace TileStories.Tests
                     leader_line_style = entry.LeaderLineStyle,
                     displacement_tiebreak = "symmetric"
                 };
-                // Override iterations for force_directed algorithm
-                if (entry.Algorithm == "force_directed")
-                    settings.force_directed_iterations = 50;
 
                 var stab = new Dictionary<string, DisplacementStabilityState>();
                 MarkerOverlapResolver.ApplyDisplacement(groupUnits, _cam, settings, stab); // section-9 cycle 1: provisional
@@ -158,7 +155,7 @@ namespace TileStories.Tests
                 if (reveal != null)
                 {
                     reveal.StopAllCoroutines();
-                    reveal.SetFullAlphaAndScale();
+                    reveal.SkipToEnd();
                 }
 
                 groupUnits.Add(new VisualUnit { marker = view, poiId = $"shallow_poi_{i}", worldPosition = wallPoint });
@@ -223,7 +220,7 @@ namespace TileStories.Tests
                 if (reveal != null)
                 {
                     reveal.StopAllCoroutines();
-                    reveal.SetFullAlphaAndScale();
+                    reveal.SkipToEnd();
                 }
 
                 groupUnits.Add(new VisualUnit { marker = view, poiId = $"shallow_marker_{i}", worldPosition = wallPoint });
@@ -295,7 +292,7 @@ namespace TileStories.Tests
             var controlView = controlGo.GetComponentInChildren<MarkerView>();
             controlView.Initialise(controlAnchor, MarkerVisualSettings.Default());
             var controlReveal = controlGo.GetComponent<MarkerRevealEffect>();
-            if (controlReveal != null) { controlReveal.StopAllCoroutines(); controlReveal.SetFullAlphaAndScale(); }
+            if (controlReveal != null) { controlReveal.SkipToEnd(); }
 
             var groupUnits = new List<VisualUnit>();
             var groupMarkers = new List<MarkerView>();
@@ -323,7 +320,7 @@ namespace TileStories.Tests
                 if (reveal != null)
                 {
                     reveal.StopAllCoroutines();
-                    reveal.SetFullAlphaAndScale();
+                    reveal.SkipToEnd();
                 }
 
                 groupUnits.Add(new VisualUnit { marker = view, poiId = $"tiny_disp_{i}", worldPosition = Vector3.zero });

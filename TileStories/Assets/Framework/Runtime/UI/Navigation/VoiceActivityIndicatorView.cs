@@ -4,13 +4,13 @@ namespace TileStories
 {
     // Policy + presentation-decisions for the voice-search "listening/processing" indicator
     // (spec _2.6 section 12). Decouples the indicator STYLE (config-driven via
-    // WallConfigData.voice_activity_indicator_style) from SearchOverlayView: the view owns the
+    // select_filter_search.voice.indicator_style) from the search bar: the view owns the
     // actual UI elements (mic button, listen bar) and forwards each VoiceSearchState here;
     // this plain C# class owns ONLY the "what should show" decisions (which mic label, which
     // bar visibility), so the policy is EditMode-testable with no UI Toolkit / scene
     // (20-code-quality.md: logic in plain classes, not the MonoBehaviour).
     //
-    // Styles (WallConfigData.voice_activity_indicator_style):
+    // Styles (select_filter_search.voice.indicator_style):
     //   "mic_text"  (default) mic button text flips to "..." while listening/processing.
     //     Behavior-identical to the legacy inline implementation, so existing walls see no
     //     change unless they opt in.
@@ -19,9 +19,8 @@ namespace TileStories
     {
         public enum IndicatorStyle { MicText, ListenBar }
 
-        public const string MicTextStyleName = "mic_text";
-        public const string ListenBarStyleName = "listen_bar";
-        public static readonly string[] StyleNames = { MicTextStyleName, ListenBarStyleName };
+        public const string MicTextStyleName = SelectFilterSearchOptions.IndicatorMicText;
+        public const string ListenBarStyleName = SelectFilterSearchOptions.IndicatorListenBar;
 
         // Accessible label for the dedicated listen bar (listen_bar mode).
         public const string ListenBarLabel = "Voice search in progress";
@@ -43,7 +42,7 @@ namespace TileStories
             if (!s_unknownStyleLogged)
             {
                 s_unknownStyleLogged = true;
-                Debug.LogWarning($"[VoiceIndicator] unknown voice_activity_indicator_style \"{raw}\"; defaulting to {MicTextStyleName}.");
+                Debug.LogWarning($"[VoiceIndicator] unknown voice indicator_style \"{raw}\"; defaulting to {MicTextStyleName}.");
             }
             return IndicatorStyle.MicText;
         }

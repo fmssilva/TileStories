@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
@@ -377,20 +378,25 @@ namespace TileStories.Tests
         [Test]
         public void FieldRows_UseSharedRow()
         {
-            string lod = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.LodZoom.cs");
+            string rows = ReadSource(@"Framework\Editor\POIEditor\Shared\POIEditorToolWindow.FieldRows.cs");
             string global = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.MarkerDesign.cs");
             string search = ReadSource(@"Framework\Editor\POIEditor\GlobalScene\POIEditorToolWindow.SearchFilter.cs");
             string specific = ReadSource(@"Framework\Editor\POIEditor\SpecificMarker\POIEditorToolWindow.SpecificMarker.cs");
             string position = ReadSource(@"Framework\Editor\POIEditor\SpecificMarker\POIEditorToolWindow.PositionTabs.cs");
 
-            // The four shared field helpers in LodZoom are themselves shared rows.
-            Assert.IsTrue(lod.Contains("DrawScalarField") && lod.Contains("DrawEditorRow(out float rowWidth"),
-                "DrawScalarField must open the shared row");
-            Assert.IsTrue(lod.Contains("DrawIntField") && lod.Contains("EditorRowEnd()"),
-                "DrawIntField must close with EditorRowEnd");
-            Assert.IsTrue(lod.Contains("DrawToggleField") && lod.Contains("GUILayout.ExpandWidth(false)"),
-                "DrawToggleField must use ExpandWidth(false)");
-            Assert.IsTrue(lod.Contains("DrawPopupField"), "DrawPopupField must exist");
+            // Every shared field drawer is itself one shared row: it opens DrawEditorRow, closes with
+            // EditorRowEnd, and leaves indentLevel to the row (DrawEditorRow already zeroes it).
+            string[] drawers = { "DrawScalarField", "DrawIntField", "DrawToggleField", "DrawPopupField", "DrawReferencePopupField",
+                "DrawSliderField", "DrawIntSliderField", "DrawColorField" };
+            var bodies = rows.Split(new[] { "internal static " }, System.StringSplitOptions.None);
+            foreach (string drawer in drawers)
+            {
+                string body = bodies.FirstOrDefault(b => b.Contains(" " + drawer + "("));
+                Assert.IsNotNull(body, drawer + " must live in Shared/POIEditorToolWindow.FieldRows.cs");
+                Assert.IsTrue(body.Contains("DrawEditorRow(") && body.Contains("EditorRowEnd()"), drawer + " must be one shared row");
+                Assert.IsFalse(body.Contains("EditorGUI.indentLevel"), drawer + " must not touch indentLevel: the row already runs its controls at 0");
+            }
+            Assert.IsTrue(rows.Contains("GUILayout.ExpandWidth(false)"), "drawer controls use ExpandWidth(false)");
 
             // Global scene direct field rows (badge/marker/outline toggles + popups).
             AssertFieldRowsUseSharedRow(global, new string[] { "Enable badge", "Background shape", "Badge back shape", "Enable outline", "Outline Color" });
@@ -407,10 +413,25 @@ namespace TileStories.Tests
             foreach (string raw in new[] { "EditorGUILayout.Slider(", "EditorGUILayout.FloatField(", "EditorGUILayout.TextField(" })
                 Assert.IsFalse(effects.Contains(raw), "Effects must not draw a raw " + raw + " outside the shared helpers");
             Assert.IsTrue(effects.Contains("DrawEditorRow(") && effects.Contains("EditorRowEnd()"), "Header and note rows open and close the shared row");
-            // Search & Filter direct rows (No-results text, Trigger target enum).
-            AssertFieldRowsUseSharedRow(search, new string[] { "No-results message", "Trigger target" });
-            // SpecificMarker level-2 field rows (status toggles/slider, custom symbol, keyword fields).
-            AssertFieldRowsUseSharedRow(specific, new string[] { "Use Custom Symbol", "Has status", "Status unknown", "Status %", "Custom symbol (optional)" });
+            // Select, Filter & Search hand-built rows (the text, Vector3 and Try a Query rows): each control
+            // sits inside its own DrawEditorRow ... EditorRowEnd, every other row is a shared drawer
+            AssertInsideSharedRow(search, "EditorGUILayout.TextField(label, value", "No-Results Message text row");
+            AssertInsideSharedRow(search, "EditorGUILayout.Vector3Field(label, value", "Bounds Vector3 row");
+            AssertInsideSharedRow(search, "EditorGUILayout.TextField(\"Try a Query\"", "Try a Query row");
+            foreach (string raw in new[] { "EditorGUILayout.EnumPopup(", "EditorGUILayout.Popup(", "EditorGUILayout.Slider(", "EditorGUILayout.FloatField(" })
+                Assert.IsFalse(search.Contains(raw), "Select, Filter & Search must not draw a raw " + raw + " (use the shared drawers)");
+            // SpecificMarker per-POI rows: every labelled field goes through a shared drawer (which
+            // opens the shared row and carries the (i) help), the reference popups through
+            // DrawReferencePopupField so a stale key is never rewritten; only the custom symbol row
+            // (label + thumbnail + Sprite field) is hand-built on DrawEditorRow.
+            AssertFieldRowsUseSharedRow(specific, new string[] { "Custom symbol" });
+            foreach (string call in new[] { "DrawToggleField(\"Use Custom Symbol\"", "DrawToggleField(\"Has status\"",
+                         "DrawToggleField(\"Status unknown\"", "DrawSliderField(\"Status %\"", "DrawReferencePopupField(\"Category\"",
+                         "DrawReferencePopupField(\"Hierarchy Level\"", "DrawReferencePopupField(\"Badge category\"",
+                         "DrawReferencePopupField(\"Status level\"" })
+                Assert.IsTrue(specific.Contains(call), "per-POI row must use the shared drawer: " + call);
+            foreach (string raw in new[] { "EditorGUILayout.Popup(", "EditorGUILayout.Toggle(", "EditorGUILayout.Slider(" })
+                Assert.IsFalse(specific.Contains(raw), "per-POI rows must not draw a raw " + raw);
             // Position rotation slider + XYZ row.
             AssertFieldRowsUseSharedRow(position, new string[] { "Rotation", "X" });
         }
@@ -443,10 +464,10 @@ namespace TileStories.Tests
 
             AssertSharedRow(outline, "+ Add outline level", "Outline");
             AssertSharedRow(hierarchy, "+ Add hierarchy level", "Hierarchy");
-            AssertSharedRow(lod, "+ Add band", "LOD band");
-            AssertSharedRow(lod, "Suggest Values", "LOD suggest");
-            AssertSharedRow(search, "+ Add synonym group", "Synonym group");
-            AssertSharedRow(search, "+ Add keyword field", "Keyword field");
+            AssertInsideSharedRow(lod, "\"+ Add band\"", "LOD band");
+            AssertInsideSharedRow(lod, "\"Suggest Values\"", "LOD suggest");
+            AssertInsideSharedRow(search, "\"+ Add synonym group\"", "Synonym group");
+            AssertInsideSharedRow(search, "\"+ Add keyword field\"", "Keyword field");
             AssertSharedRow(specific, "+ Add first", "SpecificMarker first");
             // "Verified" is intentionally NOT a shared row anymore: it moved from a
             // standalone full-width row inside the Position foldout's content to a
@@ -460,6 +481,18 @@ namespace TileStories.Tests
         // The "+ Add POI before/after/near" separators are row-pairs; each is a
         // shared row with two half-width buttons (sepHalf), still capped by the
         // route through DrawEditorRow.
+        // Precise form: the control sits between a DrawEditorRow( and the EditorRowEnd() that closes it
+        private static void AssertInsideSharedRow(string src, string control, string what)
+        {
+            int at = src.IndexOf(control, System.StringComparison.Ordinal);
+            Assert.GreaterOrEqual(at, 0, what + ": control " + control + " must exist");
+            int open = src.LastIndexOf("DrawEditorRow(", at, System.StringComparison.Ordinal);
+            int closeBefore = src.LastIndexOf("EditorRowEnd()", at, System.StringComparison.Ordinal);
+            int close = src.IndexOf("EditorRowEnd()", at, System.StringComparison.Ordinal);
+            Assert.IsTrue(open >= 0 && open > closeBefore && close > at, what + " row must be drawn inside the shared DrawEditorRow ... EditorRowEnd");
+            StringAssert.Contains("GUILayout.ExpandWidth(false)", src.Substring(open, close - open), what + " row controls must use ExpandWidth(false)");
+        }
+
         private static void AssertSharedRow(string src, string label, string what)
         {
             Assert.IsTrue(src.Contains("DrawEditorRow(out float rowWidth, out _)") ||

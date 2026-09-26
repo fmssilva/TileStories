@@ -41,75 +41,47 @@ namespace TileStories
         }
 
 #if UNITY_EDITOR
+        // Reads WASD/look/roll input through the shared DevCameraInput (Runtime/DevTools) --
+        // the same reader the demo grid cameras use (EffectsPreviewFocus/OutlinePreviewFocus) --
+        // so this project has exactly one place that knows which keys/mouse buttons mean what,
+        // gated on the mouse actually being over the Game view.
         private void Update()
         {
-            var cam = Camera.main.transform;
-            if (cam == null) return;
+            // - check the camera BEFORE touching .transform: with no main camera (a scene unloading,
+            //   a test that owns its own camera) the old order threw every frame
+            var main = Camera.main;
+            if (main == null) return;
+            var cam = main.transform;
 
-            var mouse = UnityEngine.InputSystem.Mouse.current;
-            var kb = UnityEngine.InputSystem.Keyboard.current;
+            var input = DevCameraInput.ReadThisFrame();
 
-            bool lookActive = false;
+            // lookSensitivity now scales every look source uniformly (mouse-drag and arrow keys
+            // alike) -- previously mouse-drag silently ignored this field entirely, which is why
+            // "Mouse-look sensitivity" not doing anything to the mouse was a latent bug, not
+            // intentional behaviour, fixed here as part of unifying onto DevCameraInput.
+            if (input.LookDelta != Vector2.zero)
+                ApplyLookDelta(input.LookDelta * lookSensitivity);
 
-            // --- LOOK INPUTS (all additive, non-exclusive) ---
-
-            // 1. Right mouse button + mouse (existing)
-            if (mouse != null && mouse.rightButton.isPressed)
+            if (input.RollDelta != 0f)
             {
-                ApplyLookDelta(mouse.delta.ReadValue());
-                lookActive = true;
+                _rollDeg += input.RollDelta * rollSpeed * Time.deltaTime;
+                ApplyLookDelta(Vector2.zero);
             }
 
-            // 2. Alt + left mouse button (new)
-            if (!lookActive && mouse != null && mouse.leftButton.isPressed &&
-                kb != null && (kb.leftAltKey.isPressed || kb.rightAltKey.isPressed))
+            if (input.MoveDelta != Vector3.zero)
             {
-                ApplyLookDelta(mouse.delta.ReadValue());
+                Vector3 move = input.MoveDelta.z * cam.forward + input.MoveDelta.x * cam.right + input.MoveDelta.y * Vector3.up;
+                cam.position += move * (moveSpeed * Time.deltaTime);
             }
-
-            // 3. Arrow keys for look (new)
-            if (kb != null)
-            {
-                float arrowYaw = 0f, arrowPitch = 0f;
-                if (kb.leftArrowKey.isPressed)  arrowYaw -= 1f;
-                if (kb.rightArrowKey.isPressed) arrowYaw += 1f;
-                if (kb.upArrowKey.isPressed)    arrowPitch -= 1f;
-                if (kb.downArrowKey.isPressed)  arrowPitch += 1f;
-
-                if (arrowYaw != 0f || arrowPitch != 0f)
-                {
-                    float step = lookSensitivity * Time.deltaTime * 100f;
-                    ApplyLookDelta(new Vector2(arrowYaw * step, -arrowPitch * step));
-                }
-            }
-
-            // --- ROLL (Z/C) so roll-dependent orientation behaviour is reachable in
-            // the Editor - see _2.1_Marker_Orientation.md S8. ---
-            if (kb != null)
-            {
-                if (kb.zKey.isPressed) _rollDeg -= rollSpeed * Time.deltaTime;
-                if (kb.cKey.isPressed) _rollDeg += rollSpeed * Time.deltaTime;
-                if (kb.zKey.isPressed || kb.cKey.isPressed)
-                    ApplyLookDelta(Vector2.zero);
-            }
-
-            // --- MOVEMENT (unchanged) ---
-            if (kb == null) return;
-            var move = Vector3.zero;
-            if (kb.wKey.isPressed) move += cam.forward;
-            if (kb.sKey.isPressed) move -= cam.forward;
-            if (kb.aKey.isPressed) move -= cam.right;
-            if (kb.dKey.isPressed) move += cam.right;
-            if (kb.eKey.isPressed) move += Vector3.up;      // E = ascend
-            if (kb.qKey.isPressed) move -= Vector3.up;      // Q = descend
-            cam.position += move * (moveSpeed * Time.deltaTime);
         }
 
         // Delegate to EditorCameraLook for the pure rotation math; this keeps
         // the MonoBehaviour thin and the math independently unit-testable.
         private void ApplyLookDelta(Vector2 delta)
         {
-            var cam = Camera.main.transform;
+            var main = Camera.main;
+            if (main == null) return;
+            var cam = main.transform;
             cam.localRotation = EditorCameraLook.ApplyDelta(cam.localRotation, delta, Time.deltaTime, _rollDeg);
         }
 #endif

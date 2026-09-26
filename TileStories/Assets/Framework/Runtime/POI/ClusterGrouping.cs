@@ -119,48 +119,42 @@ namespace TileStories
             return ids;
         }
 
-        // Pick WHICH representative distance feeds the band lookup, per the wall's
-        // band_source. "centroid" uses the centroid effective distance passed by the
-        // caller; nearest/farthest use the min/max of each member's zoom-adjusted
-        // effectiveDistance. Returns a full LodBand (index + thresholds).
-        public static LodBand ResolveBand(List<VisualUnit> group, string bandSource, float centroidEffectiveDistance, List<LodBandEntry> entries)
+        // The distance that decides a cluster's LOD band, per the wall's Band Source: "centroid" (the
+        // default) is the centroid's effective distance passed in by the caller; "nearest_member" /
+        // "farthest_member" are the min / max of the members' zoom-adjusted effectiveDistance. An
+        // unknown value falls back to centroid. The caller runs the band lookup (with its hysteresis).
+        public static float RepresentativeDistance(List<VisualUnit> group, string bandSource, float centroidEffectiveDistance)
         {
-            if (entries == null || entries.Count == 0) entries = LODController.DefaultBands();
-            string mode = string.IsNullOrEmpty(bandSource) ? "centroid" : bandSource;
-            if (mode != "centroid" && mode != "nearest_member" && mode != "farthest_member")
-            {
-                Debug.LogWarning($"[LOD] cluster band_source '{bandSource}' unrecognised; falling back to 'centroid'");
-                mode = "centroid";
-            }
-
-            float dist;
-            switch (mode)
+            if (group == null || group.Count == 0) return centroidEffectiveDistance;
+            switch (bandSource)
             {
                 case "nearest_member":
-                    dist = float.PositiveInfinity;
+                {
+                    float dist = float.PositiveInfinity;
                     foreach (var m in group) if (m != null && m.effectiveDistance < dist) dist = m.effectiveDistance;
-                    break;
+                    return float.IsPositiveInfinity(dist) ? centroidEffectiveDistance : dist;
+                }
                 case "farthest_member":
-                    dist = float.NegativeInfinity;
+                {
+                    float dist = float.NegativeInfinity;
                     foreach (var m in group) if (m != null && m.effectiveDistance > dist) dist = m.effectiveDistance;
-                    break;
+                    return float.IsNegativeInfinity(dist) ? centroidEffectiveDistance : dist;
+                }
                 default:
-                    dist = centroidEffectiveDistance;
-                    break;
+                    return centroidEffectiveDistance;
             }
-            return LODController.FindBand(dist, entries);
         }
 
         // Build the aggregate VisualUnit that replaces a group of absorbed members.
-        // Sets worldPosition/poiId/priority/members/densityState; leaves clusterView
-        // and band for the caller (the only two fields the caller owns, per §6.1).
-        public static VisualUnit BuildAggregate(List<VisualUnit> group, int bestMemberPriority, string bandSource, Vector3 centroid, float centroidEffectiveDistance)
+        // Sets worldPosition/poiId/priority/members/densityState and the band-deciding distance;
+        // leaves clusterView and band for the caller (the only two fields the caller owns, per §6.1).
+        public static VisualUnit BuildAggregate(List<VisualUnit> group, int bestMemberPriority, Vector3 centroid, float bandDistance)
         {
             return new VisualUnit
             {
                 poiId = Signature(MemberIds(group)),
                 worldPosition = centroid,
-                effectiveDistance = centroidEffectiveDistance,
+                effectiveDistance = bandDistance,
                 hierarchyLevelIndex = bestMemberPriority,
                 densityState = DensityState.Clustered,
                 clusterMembers = group != null ? new List<VisualUnit>(group) : null,

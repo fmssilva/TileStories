@@ -26,20 +26,26 @@ namespace TileStories.Editor
                 foreach (var message in DevFeatureBuildGuard.ActiveMessages(config, development))
                     findings.Add(Path.GetFileName(Path.GetDirectoryName(configPath)) + ": " + message);
             }
-            if (findings.Count == 0) return;
+            ConfirmOrStopBuild(findings, Application.isBatchMode);
+        }
+
+        // "Build anyway" lets the build go on; Cancel (or Esc / closing the dialog) stops it with a
+        // BuildFailedException. Batch mode cannot ask: it only warns. No findings = nothing asked.
+        internal static void ConfirmOrStopBuild(IReadOnlyList<string> findings, bool batchMode)
+        {
+            if (findings == null || findings.Count == 0) return;
 
             string text = string.Join("\n\n", findings);
-            if (Application.isBatchMode)
+            if (batchMode)
             {
                 Debug.LogWarning("[DevFeatureBuildCheck] " + text.Replace("\n\n", " | "));
                 return;
             }
 
-            // DisplayDialog: ok = first button; Esc / closing the dialog = false = cancel
-            bool buildAnyway = EditorUtility.DisplayDialog(
+            bool buildAnyway = EditorDecision.Ask(
                 "Developer-only switch is ON",
-                text + "\n\nBuild anyway?",
-                "Build anyway", "Cancel build");
+                text + "\n\nBuild anyway, or Cancel and switch it off first?",
+                "Build anyway") == DecisionAnswer.Confirm;
             if (!buildAnyway)
                 throw new BuildFailedException("[DevFeatureBuildCheck] Build cancelled: a developer-only switch is ON in the config. " + text.Replace("\n\n", " | "));
         }

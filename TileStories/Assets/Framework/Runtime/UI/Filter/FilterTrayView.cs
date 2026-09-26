@@ -1,229 +1,169 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // Facet filter tray: collapsible sections for category, badge category,
-    // outline/status level, and hierarchy level. Toggling a facet immediately
-    // updates the visible result set (NN/G's "faceted-search-with-a-tray" pattern).
-    // When zero results remain, computes which single facet removal would yield
-    // the most results and offers it as a one-tap "relax filters" action.
-    // (spec _2.6 section 7)
-    public class FilterTrayView : MonoBehaviour
+    // One facet group of the tray and its choices (taxonomy key + the label the visitor reads)
+    public sealed class FacetGroupOptions
     {
-        private WallConfigData _config;
-        private UIDocument _uiDocument;
-        private VisualElement _root;
-        private VisualElement _trayContainer;
-        private Label _emptyStateLabel;
+        public FacetGroup Group;
+        public string Title;
+        public List<(string key, string label)> Choices = new();
+    }
 
-        // Currently active filter values per facet type
-        private readonly HashSet<string> _activeCategories = new();
-        private readonly HashSet<string> _activeBadgeCategories = new();
-        private readonly HashSet<string> _activeOutlineLevels = new();
-        private readonly HashSet<string> _activeHierarchyLevels = new();
+    // The facet filter tray (spec _2.6 section 7, NN/G's "faceted search with a tray"): one chip per
+    // taxonomy row of each enabled facet group, toggling a chip updates the results at once (no Apply).
+    // Plain C#: built into the parent element the search UI hands it; styled by SearchUI.uss.
+    public sealed class FilterTrayView
+    {
+        public VisualElement Root { get; }
+        public FacetSelection Selection { get; } = new();
 
-        // Event raised when filters change so ResultsListView can refresh
-        public event Action OnFiltersChanged;
+        // Raised after the visitor changed any filter
+        public event Action Changed;
 
-        // Initialise with wall config
-        public void Initialize(WallConfigData config)
+        private readonly ScrollView _groups;
+
+        public FilterTrayView(VisualElement parent)
         {
-            _config = config;
+            Root = new VisualElement { name = "filter-tray" };
+            Root.AddToClassList("search-panel");
+            Root.AddToClassList("filter-tray");
 
-            if (_uiDocument == null)
+            // - a scroll view: a wall with many rows gets a scrolling tray, never overlapping groups
+            _groups = new ScrollView(ScrollViewMode.Vertical) { name = "filter-groups" };
+            _groups.AddToClassList("filter-groups");
+            Root.Add(_groups);
+
+            var clear = new Button(ClearAll) { name = "filter-clear-all", text = "Clear filters", tooltip = "Clear every filter" };
+            clear.AddToClassList("search-button");
+            Root.Add(clear);
+
+            parent.Add(Root);
+            SetOpen(false);
+        }
+
+        public bool IsOpen => Root.style.display != DisplayStyle.None;
+
+        public void SetOpen(bool open) => Root.style.display = open ? DisplayStyle.Flex : DisplayStyle.None;
+
+        // Rebuild the chips for this taxonomy; active filters whose row still exists stay on
+        public void Rebuild(IReadOnlyList<FacetGroupOptions> groups)
+        {
+            _groups.Clear();
+            var stillThere = new FacetSelection();
+            foreach (var g in groups)
             {
-                _uiDocument = FindFirstObjectByType<UIDocument>();
-                if (_uiDocument != null)
+                var section = new VisualElement { name = "facet-group-" + g.Group };
+                section.AddToClassList("facet-group");
+                var title = new Label(g.Title);
+                title.AddToClassList("facet-title");
+                section.Add(title);
+
+                var chips = new VisualElement();
+                chips.AddToClassList("facet-chips");
+                foreach (var (key, label) in g.Choices)
                 {
-                    _root = _uiDocument.rootVisualElement;
-                    CreateUI(_root);
+                    bool on = Selection.IsActive(g.Group, key);
+                    if (on) stillThere.Set(g.Group, key, true);
+                    var chip = new Toggle(label) { name = $"facet-{g.Group}-{key}", value = on, tooltip = $"Filter by {label}" };
+                    chip.AddToClassList("facet-chip");
+                    var group = g.Group;
+                    chip.RegisterValueChangedCallback(evt =>
+                    {
+                        if (Selection.Set(group, key, evt.newValue)) Changed?.Invoke();
+                    });
+                    chips.Add(chip);
                 }
+                section.Add(chips);
+                _groups.Add(section);
             }
 
-            if (_trayContainer != null)
-                RefreshAllFacets();
+            Selection.Clear();
+            foreach (var group in stillThere.ActiveGroups)
+                foreach (var key in stillThere.Active(group))
+                    Selection.Set(group, key, true);
         }
 
-        // Build the filter tray UI with collapsible sections.
-        // Internal (not private) so the EditMode accessibility suite can build the
-        // real UI and assert authored styles (Runtime grants InternalsVisibleTo the
-        // editor test assembly -- same seam as DetailCardView).
-        internal void CreateUI(VisualElement root)
+        // Turn one filter value on or off (the relax button, tests): the same result as tapping its chip
+        public void SetFacet(FacetGroup group, string key, bool on)
         {
-            _trayContainer = new VisualElement()
-            {
-                name = "filter-tray-container",
-            };
-            _trayContainer.style.position = Position.Absolute;
-            _trayContainer.style.top = 80;
-            _trayContainer.style.left = 12;
-            _trayContainer.style.right = 12;
-            _trayContainer.style.bottom = 12;
-            // Authored surface (2.6-af design-token decision): gives the tray a
-            // deterministic background so text contrast is assertable (same
-            // overlay language as DetailCardView / results list).
-            _trayContainer.style.backgroundColor = new StyleColor(UIPalette.SurfaceDark);
-
-            _emptyStateLabel = new Label();
-            _emptyStateLabel.name = "filter-empty-state";
-            _emptyStateLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _emptyStateLabel.style.flexGrow = 1;
-            _emptyStateLabel.style.fontSize = 14;
-            _emptyStateLabel.style.color = new StyleColor(UIPalette.TextSecondary);
-            _emptyStateLabel.style.display = DisplayStyle.None;
-            _trayContainer.Add(_emptyStateLabel);
-
-            root.Add(_trayContainer);
+            Root.Q<Toggle>($"facet-{group}-{key}")?.SetValueWithoutNotify(on);
+            if (Selection.Set(group, key, on)) Changed?.Invoke();
         }
 
-        // Rebuild all facet sections from the wall config taxonomy
-        private void RefreshAllFacets()
+        public void ClearAll()
         {
-            if (_trayContainer == null || _config == null)
-                return;
-
-            // Clear existing facet sections (keep the empty state label)
-            var toRemove = new List<VisualElement>();
-            foreach (var child in _trayContainer.Children())
-            {
-                if (child is VisualElement ve && ve.name != "filter-empty-state")
-                    toRemove.Add(ve);
-            }
-            foreach (var child in toRemove)
-                child.RemoveFromHierarchy();
-
-            // Category facet (CategoryStyleEntry uses .category field)
-            AddFacetSection<CategoryStyleEntry>("Categories", _config.category_styles,
-                entry => entry.category, "category", _activeCategories);
-
-            // Badge category facet (BadgeCategoryEntry uses .key field)
-            AddFacetSection<BadgeCategoryEntry>("Badges", _config.badge_categories,
-                entry => entry.key, "badge", _activeBadgeCategories);
-
-            // Outline/status level facet (OutlineLevelEntry uses .key field)
-            AddFacetSection<OutlineLevelEntry>("Status Levels", _config.outline_levels,
-                entry => entry.key, "status", _activeOutlineLevels);
-
-            // Hierarchy level facet (HierarchyLevelEntry uses .key field)
-            AddFacetSection<HierarchyLevelEntry>("Hierarchy Levels", _config.hierarchy_levels,
-                entry => entry.key, "hierarchy", _activeHierarchyLevels);
+            if (!Selection.Any) return;
+            Selection.Clear();
+            _groups.Query<Toggle>().ForEach(t => t.SetValueWithoutNotify(false));
+            Changed?.Invoke();
         }
 
-        // Generic facet section builder for any taxonomy table
-        private void AddFacetSection<T>(string title, List<T> entries, Func<T, string> keySelector,
-            string facetType, HashSet<string> activeSet)
+        // The tray's groups for a wall: only enabled facet groups whose table has rows; each chip reads
+        // the row's label (a level's name, a badge's label), the key only when the row has no label. Then one
+        // group per Keyword Field marked Filter, whose chips are the keywords the POIs hold in it (A-Z).
+        public static List<FacetGroupOptions> BuildOptions(WallConfigData config, FilterSettings filter)
         {
-            if (entries == null || entries.Count == 0)
-                return;
+            var groups = new List<FacetGroupOptions>();
+            if (config == null) return groups;
+            filter ??= new FilterSettings();
 
-            var section = new VisualElement()
-            {
-                name = $"facet-section-{facetType}",
-            };
-            section.style.marginBottom = 8;
+            if (filter.category_facet)
+                AddGroup(groups, FacetGroup.Category, "Category", config.category_styles, e => e.category, e => e.category);
+            if (filter.badge_facet)
+                AddGroup(groups, FacetGroup.Badge, "Badge", config.badge_categories, e => e.key, e => e.label);
+            if (filter.status_facet)
+                AddGroup(groups, FacetGroup.Status, "Status", config.outline_levels, e => e.key, e => e.label);
+            if (filter.hierarchy_facet)
+                AddGroup(groups, FacetGroup.Hierarchy, "Level", config.hierarchy_levels, e => e.key, e => e.level_name);
 
-            var header = new Label(title);
-            header.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.style.fontSize = 13;
-            header.style.paddingLeft = 4;
-            header.style.paddingBottom = 4;
-            header.style.color = new StyleColor(UIPalette.TextPrimary);
-            section.Add(header);
+            if (config.search_fields != null)
+                foreach (var field in config.search_fields)
+                    if (field != null && field.filterable && !string.IsNullOrWhiteSpace(field.key))
+                        AddFieldGroup(groups, field, config.pois);
+            return groups;
+        }
 
-            foreach (var entry in entries)
-            {
-                string key = keySelector(entry);
-                if (string.IsNullOrEmpty(key))
-                    continue;
-
-                var toggle = new Toggle(key);
-                toggle.name = "facet-toggle-" + key;
-                toggle.tooltip = $"Toggle {key} {facetType} filter";
-                toggle.style.minHeight = 44; // WCAG 2.5.5: >=44px tap target
-                toggle.value = activeSet.Contains(key);
-                toggle.RegisterValueChangedCallback(evt =>
+        // One chip per distinct keyword (case and spaces ignored, first spelling kept) the POIs hold in this field
+        private static void AddFieldGroup(List<FacetGroupOptions> groups, SearchFieldDefinition field, List<POIData> pois)
+        {
+            var labels = new SortedDictionary<string, string>(StringComparer.Ordinal);
+            if (pois != null)
+                foreach (var poi in pois)
                 {
-                    if (evt.newValue)
-                        activeSet.Add(key);
-                    else
-                        activeSet.Remove(key);
+                    var own = poi?.search_keyword_fields?.Find(f => f != null && f.field_key == field.key);
+                    if (own?.keywords == null) continue;
+                    foreach (var keyword in own.keywords)
+                    {
+                        string key = FilterFacetEvaluator.FieldValueKey(keyword);
+                        if (key.Length > 0 && !labels.ContainsKey(key)) labels[key] = keyword.Trim();
+                    }
+                }
+            if (labels.Count == 0) return;
 
-                    OnFacetToggled();
-                });
+            var options = new FacetGroupOptions
+            {
+                Group = FacetGroup.Field(field.key),
+                Title = string.IsNullOrWhiteSpace(field.label) ? field.key : field.label,
+            };
+            foreach (var kvp in labels) options.Choices.Add((kvp.Key, kvp.Value));
+            groups.Add(options);
+        }
 
-                section.Add(toggle);
+        private static void AddGroup<T>(List<FacetGroupOptions> groups, FacetGroup group, string title, List<T> rows,
+            Func<T, string> key, Func<T, string> label) where T : class
+        {
+            if (rows == null) return;
+            var options = new FacetGroupOptions { Group = group, Title = title };
+            foreach (var row in rows)
+            {
+                if (row == null || string.IsNullOrEmpty(key(row))) continue;
+                string l = label(row);
+                options.Choices.Add((key(row), string.IsNullOrWhiteSpace(l) ? key(row) : l));
             }
-
-            _trayContainer.Add(section);
-        }
-
-        // Called when any facet toggle changes
-        private void OnFacetToggled()
-        {
-            OnFiltersChanged?.Invoke();
-        }
-
-        // Get all active category filters
-        public List<string> GetActiveCategories() => new List<string>(_activeCategories);
-
-        // Get all active badge category filters
-        public List<string> GetActiveBadgeCategories() => new List<string>(_activeBadgeCategories);
-
-        // Get all active outline level filters
-        public List<string> GetActiveOutlineLevels() => new List<string>(_activeOutlineLevels);
-
-        // Get all active hierarchy level filters
-        public List<string> GetActiveHierarchyLevels() => new List<string>(_activeHierarchyLevels);
-
-        // Compute the "relax filters" suggestion when zero results.
-        // Delegates to FilterFacetEvaluator for the pure-logic computation.
-        public string ComputeRelaxSuggestion()
-        {
-            if (_config?.pois == null) return null;
-            return FilterFacetEvaluator.ComputeRelaxSuggestion(
-                _config.pois, _activeCategories, _activeBadgeCategories,
-                _activeOutlineLevels, _activeHierarchyLevels);
-        }
-
-        // Check if any filters are currently active
-        public bool HasActiveFilters()
-        {
-            return _activeCategories.Count > 0 || _activeBadgeCategories.Count > 0 ||
-                   _activeOutlineLevels.Count > 0 || _activeHierarchyLevels.Count > 0;
-        }
-
-        // Clear all active filters
-        public void ClearAllFilters()
-        {
-            _activeCategories.Clear();
-            _activeBadgeCategories.Clear();
-            _activeOutlineLevels.Clear();
-            _activeHierarchyLevels.Clear();
-            RefreshAllFacets();
-            OnFiltersChanged?.Invoke();
-        }
-
-        // Show/hide the filter tray
-        public void SetVisible(bool visible)
-        {
-            if (_trayContainer != null)
-                _trayContainer.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-
-        // Update when wall config changes
-        public void Refresh(WallConfigData newConfig)
-        {
-            _config = newConfig;
-            RefreshAllFacets();
-        }
-
-        private void OnDestroy()
-        {
-            OnFiltersChanged = null;
+            if (options.Choices.Count > 0) groups.Add(options);
         }
     }
 }

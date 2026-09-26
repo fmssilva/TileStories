@@ -28,17 +28,17 @@ namespace TileStories.Tests
             var ws = wsGO.AddComponent<WallSession>();
 
             var cfg = new WallConfigData();
-            cfg.lod_settings = new LodSettings
+            cfg.zoom_settings = new ZoomSettings
             {
-                zoom_enabled = true,
-                zoom_min = 1f,
-                zoom_max = 4f,
-                zoom_tap_step = 1.5f,
-                zoom_tap_levels = 2,
-                zoom_show_ui_buttons = true,
-                zoom_transition_speed_s = 0.1f
+                enabled = true,
+                min_factor = 1f,
+                max_factor = 4f,
+                tap_step = 1.5f,
+                tap_levels = 2,
+                show_ui_buttons = true,
+                transition_duration_s = 0.1f
             };
-            SetField(ws, "_config", cfg);        // ws.LodSettings now reads our settings
+            SetField(ws, "_config", cfg);        // ws.ZoomSettings now reads our settings
             SetField(zoom, "_wallSession", ws); // ARZoomController.Settings now resolves
 
             // Settings must resolve now that _wallSession is injected (the original failure).
@@ -47,7 +47,7 @@ namespace TileStories.Tests
             var resolved = settingsProp.GetValue(zoom);
             Assert.IsNotNull(resolved,
                 "ARZoomController.Settings must resolve after ws/_config injection");
-            Assert.IsTrue(((LodSettings)resolved).zoom_enabled);
+            Assert.IsTrue(((ZoomSettings)resolved).enabled);
 
             // View bound to the real controller (no UXML/UIDocument needed for pure routing).
             var zcvGO = new GameObject("ZoomControl");

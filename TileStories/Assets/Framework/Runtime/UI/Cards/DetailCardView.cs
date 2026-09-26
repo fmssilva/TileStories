@@ -1,142 +1,77 @@
-using System.Linq;
-using UnityEngine;
+using System;
+using System.Collections.Generic;
 using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // Minimal proof-of-life detail card (spec _2.6 section 14): a small centered
-    // panel showing the selected POI's name plus a close (X) button. Shows on
-    // selection (marker / minimap / list taps all raise the same SelectionEventBus
-    // event) and hides on close or clear. Deliberately scoped: no blocks, scroll
-    // view, spring-up animation or safe-area handling -- that is future-domain
-    // work in the Blocks/Cards system. This card only proves selection -> detail.
-    public class DetailCardView : MonoBehaviour
+    // Minimal detail card (spec _2.6 section 14): proves selection -> detail end to end, nothing more.
+    // Shows the selected POI's name, "category - level" and summary; the X clears the selection through
+    // SelectionEventBus, so markers, list and minimap all return to normal together. The future content
+    // card (blocks, scroll, animation) is another domain's work.
+    // Plain C#: built into the parent the search UI hands it; styled by SearchUI.uss.
+    public sealed class DetailCardView : IDisposable
     {
-        private WallConfigData _config;
-        private UIDocument _uiDocument;
-        private VisualElement _panel;
-        private Label _nameLabel;
-        private Button _closeButton;
+        public VisualElement Root { get; }
+        private readonly Label _name;
+        private readonly Label _subtitle;
+        private readonly Label _summary;
+        private Func<string, POIData> _findPoi;
+        private WallConfigData _taxonomy;
 
-        // Selection state, kept separate from the UI label so the behaviour is
-        // testable in EditMode without a UIDocument/scene.
-        private bool _visible;
-        private string _selectedName = string.Empty;
-
-        // The panel root is shared with other UI Toolkit views (they each add
-        // children to the UIDocument root). Exposed for tests.
-        public bool IsVisibleState() => _visible;
-        public string GetLabelText() => _selectedName;
-
-        public void Initialize(WallConfigData config, UIDocument uiDocument = null)
+        public DetailCardView(VisualElement parent)
         {
-            _config = config;
+            Root = new VisualElement { name = "detail-card" };
+            Root.AddToClassList("search-panel");
+            Root.AddToClassList("detail-card");
 
-            // One selection system, two surfaces: react to the same bus the
-            // markers / minimap / list publish to.
-            SelectionEventBus.OnMarkerSelected += OnMarkerSelected;
-            SelectionEventBus.OnSelectionCleared += OnSelectionCleared;
+            var close = new Button(() => SelectionEventBus.Clear()) { name = "detail-card-close", text = "X", tooltip = "Close" };
+            close.AddToClassList("detail-card-close");
+            _name = new Label { name = "detail-card-name" };
+            _name.AddToClassList("detail-card-name");
+            _subtitle = new Label { name = "detail-card-subtitle" };
+            _subtitle.AddToClassList("detail-card-subtitle");
+            _summary = new Label { name = "detail-card-summary" };
+            _summary.AddToClassList("detail-card-summary");
+            Root.Add(close);
+            Root.Add(_name);
+            Root.Add(_subtitle);
+            Root.Add(_summary);
+            parent.Add(Root);
 
-            _uiDocument = uiDocument != null ? uiDocument : FindFirstObjectByType<UIDocument>();
-            if (_uiDocument != null && _panel == null)
-                CreateUI(_uiDocument.rootVisualElement);
-
-            // Start hidden; shown when a POI is selected.
-            SetVisible(false);
+            SelectionEventBus.OnMarkerSelected += Show;
         }
 
-        // Internal (not private) so the EditMode accessibility suite can build the
-        // real UI and assert on it (Runtime assembly grants InternalsVisibleTo the
-        // editor test assembly). No other callers.
-        internal void CreateUI(VisualElement root)
+        public string NameText => _name.text;
+        public string SubtitleText => _subtitle.text;
+
+        // Where the card finds a POI by id and the taxonomy it reads labels from
+        public void Configure(Func<string, POIData> findPoi, WallConfigData taxonomy)
         {
-            _panel = new VisualElement
-            {
-                name = "detail-card-panel"
-            };
-            _panel.style.position = Position.Absolute;
-            _panel.style.left = 24;
-            _panel.style.right = 24;
-            _panel.style.bottom = 24;
-            _panel.style.height = 160; // <=40% screen height cap (spec §14)
-            _panel.style.backgroundColor = new StyleColor(new Color(0f, 0f, 0f, 0.85f));
-            _panel.style.borderTopLeftRadius = 12;
-            _panel.style.borderTopRightRadius = 12;
-            _panel.style.borderBottomLeftRadius = 12;
-            _panel.style.borderBottomRightRadius = 12;
-            _panel.style.paddingLeft = 16;
-            _panel.style.paddingRight = 16;
-            _panel.style.paddingTop = 12;
-            _panel.style.paddingBottom = 12;
-            root.Add(_panel);
-
-            _nameLabel = new Label
-            {
-                name = "detail-card-label",
-                text = string.Empty
-            };
-            _nameLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _nameLabel.style.color = new StyleColor(Color.white);
-            _nameLabel.style.fontSize = 16;
-            _panel.Add(_nameLabel);
-
-            _closeButton = new Button(OnCloseClicked)
-            {
-                name = "detail-card-close",
-                text = "X"
-            };
-            _closeButton.style.position = Position.Absolute;
-            _closeButton.style.top = 6;
-            _closeButton.style.right = 6;
-            _closeButton.style.width = 44; // WCAG 2.5.5 minimum tap target (spec _2.7 #2.6-y)
-            _closeButton.style.height = 44;
-            _panel.Add(_closeButton);
+            _findPoi = findPoi;
+            _taxonomy = taxonomy;
+            if (SelectionEventBus.CurrentPoiId != null) Show(SelectionEventBus.CurrentPoiId);
         }
 
-        // Raised by marker / minimap / list taps. Resolve the name via config so
-        // the card is the only consumer that needs the POI roster.
-        private void OnMarkerSelected(string poiId)
+        private void Show(string poiId)
         {
-            POIData poi = FindPoi(poiId);
-            if (poi == null)
-                return;
-
-            _selectedName = poi.name;
-            if (_nameLabel != null)
-                _nameLabel.text = _selectedName;
-
-            SetVisible(true);
+            var poi = _findPoi?.Invoke(poiId);
+            if (poi == null) return;
+            _name.text = poi.name;
+            _subtitle.text = Subtitle(poi, _taxonomy);
+            _summary.text = poi.summary ?? "";
+            _summary.style.display = string.IsNullOrEmpty(poi.summary) ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
-        private POIData FindPoi(string poiId) =>
-            _config?.pois?.FirstOrDefault(p => p.id == poiId);
-
-        // X button -> clear selection (the shared path restores full marker opacity
-        // + minimap/list highlights via their own SelectionEventBus handlers).
-        private void OnCloseClicked()
+        // "category - level name" (either part left out when the POI has none)
+        public static string Subtitle(POIData poi, WallConfigData taxonomy)
         {
-            SelectionEventBus.RaiseSelectionCleared();
+            var parts = new List<string>();
+            if (!string.IsNullOrEmpty(poi.category)) parts.Add(poi.category);
+            var level = taxonomy?.hierarchy_levels?.Find(l => l != null && l.key == poi.hierarchy_level_key);
+            if (level != null && !string.IsNullOrWhiteSpace(level.level_name)) parts.Add(level.level_name);
+            return string.Join(" - ", parts);
         }
 
-        // Public so tests can drive the close path directly.
-        public void Close() => OnCloseClicked();
-
-        private void OnSelectionCleared()
-        {
-            SetVisible(false);
-        }
-
-        public void SetVisible(bool visible)
-        {
-            _visible = visible;
-            if (_panel != null)
-                _panel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-
-        private void OnDestroy()
-        {
-            SelectionEventBus.OnMarkerSelected -= OnMarkerSelected;
-            SelectionEventBus.OnSelectionCleared -= OnSelectionCleared;
-        }
+        public void Dispose() => SelectionEventBus.OnMarkerSelected -= Show;
     }
 }

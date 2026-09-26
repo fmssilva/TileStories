@@ -22,7 +22,6 @@ namespace TileStories.Tests
                 max_displacement_px = 120f,
                 displace_target = "label_only",
                 displacement_algorithm = "fixed_axis",
-                force_directed_iterations = 4,
                 displacement_tiebreak = "symmetric"
             };
         }
@@ -81,7 +80,6 @@ namespace TileStories.Tests
                 max_displacement_px = 120f,
                 displace_target = "label_only",
                 displacement_algorithm = "candidate_position",
-                force_directed_iterations = 4,
                 displacement_tiebreak = "symmetric"
             };
 
@@ -114,7 +112,6 @@ namespace TileStories.Tests
                 max_displacement_px = 120f,
                 displace_target = "label_only",
                 displacement_algorithm = "force_directed",
-                force_directed_iterations = 4,
                 displacement_tiebreak = "symmetric"
             };
 

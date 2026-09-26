@@ -44,14 +44,18 @@ namespace TileStories
             bool isUnknown = poi.has_status && poi.status_unknown;
             bool knownStatus = poi.has_status && !isUnknown;
             bool sameHueFill = settings.OutlineMode == MarkerOutlineMode.SameHue && knownStatus;
+            StatusLevel knownLevel = default;
+            float statusPct = poi.status_pct;
+            if (knownStatus)
+                statusPct = ResolveKnownLevel(poi, out knownLevel);
 
             // Symbol: coloured by category; a custom symbol replaces just the icon
             state.HasConfiguredCategory = hasCategory;
             state.IconKey = poi.has_custom_symbol && !string.IsNullOrWhiteSpace(poi.custom_symbol_key)
                 ? poi.custom_symbol_key
                 : categoryIconKey;
-            state.SymbolFill = sameHueFill ? StatusRamp.ShadeTowardBlack(categoryColor, poi.status_pct) : categoryColor;
-            state.IconOpacity = sameHueFill ? Mathf.Lerp(1f, 0.28f, Mathf.Clamp01(poi.status_pct / 100f)) : 1f;
+            state.SymbolFill = sameHueFill ? StatusRamp.ShadeTowardBlack(categoryColor, statusPct) : categoryColor;
+            state.IconOpacity = sameHueFill ? Mathf.Lerp(1f, 0.28f, Mathf.Clamp01(statusPct / 100f)) : 1f;
 
             bool paintCategory = settings.HasCategoryDefinitions && hasCategory;
             state.ShowIcon = paintCategory;
@@ -71,14 +75,19 @@ namespace TileStories
             state.ShowRing = canRing && (knownStatus || hasUnknownLevel);
             if (state.ShowRing)
             {
-                state.RingLevel = knownStatus ? StatusRamp.Resolve(poi.status_pct) : unknownLevel;
+                state.RingLevel = knownStatus ? knownLevel : unknownLevel;
                 state.RingUsesCategoryHue = sameHueFill;
-                if (sameHueFill) state.RingHueColor = ShadeRingTowardBlack(categoryColor, poi.status_pct);
+                if (sameHueFill) state.RingHueColor = ShadeRingTowardBlack(categoryColor, statusPct);
             }
 
-            // Badge: the "?" for an unknown status always wins; then the POI's badge category;
-            // then, with badges on and a known status, the status colour with the symbol icon
-            if (settings.HasOutlineLevels && isUnknown)
+            // Badge: hidden without a status axis (_2.2.2 rule 1 -- a badge category left over after
+            // "Has status" was switched off must not keep showing); the "?" for an unknown status
+            // always wins; then the POI's badge category; then the status colour with the symbol icon
+            if (!poi.has_status)
+            {
+                state.Badge = BadgeSource.Hidden;
+            }
+            else if (settings.HasOutlineLevels && isUnknown)
             {
                 var def = ResolveUnknownBadge(poi);
                 state.Badge = BadgeSource.UnknownStatus;
@@ -95,9 +104,22 @@ namespace TileStories
             else if (settings.HasOutlineLevels && settings.UseBadge && knownStatus)
             {
                 state.Badge = BadgeSource.StatusFallback;
-                state.BadgeColor = StatusRamp.Resolve(poi.status_pct).RingColor;
+                state.BadgeColor = knownLevel.RingColor;
             }
             return state;
+        }
+
+        // A known status is the Outline Types row the developer picked (status_level_key): two rows
+        // can share a percentage (e.g. a "destroyed" and an "unknown" row both at 100), so snapping the
+        // percentage alone drew the wrong row. Only a POI with no (or a stale) key falls back to the
+        // nearest percentage (the "Status %" slider of a wall with no Outline Types rows yet).
+        // Returns the percentage that goes with the resolved level (for the same-hue shading).
+        private static float ResolveKnownLevel(POIData poi, out StatusLevel level)
+        {
+            if (!string.IsNullOrWhiteSpace(poi.status_level_key) && StatusRamp.TryResolveByKey(poi.status_level_key, out level))
+                return level.Pct;
+            level = StatusRamp.Resolve(poi.status_pct);
+            return poi.status_pct;
         }
 
         // Same-hue ring stays in the category hue family while darkening with severity

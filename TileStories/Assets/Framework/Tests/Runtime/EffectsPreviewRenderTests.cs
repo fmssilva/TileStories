@@ -269,17 +269,19 @@ namespace TileStories.Tests
 
             var symbolBaseline = Uniform(EffectsPreviewSpawner.BackgroundColor);
             var cells = CellsOf(root);
-            Assert.AreEqual(12, cells.Count, "Precondition: 7 effect cells + 5 level cells.");
+            // Quick row (3) + combo row (6, one a blank spacer with no marker at all) + 5 level cells.
+            Assert.AreEqual(EffectsPreviewSpawner.LevelRowStart + 5, cells.Count, "Precondition: 9 quick/combo cells + 5 level cells.");
             var report = new List<string>();
             var failures = new List<string>();
             for (int i = 0; i < cells.Count; i++)
             {
+                if (i == EffectsPreviewSpawner.IndexComboSpacer) continue;   // no marker spawned there, nothing to read
                 var reading = Read(cells[i], frames, _focus.ViewCamera, symbolBaseline, symbolBaseline);
                 report.Add(Describe(reading));
                 if (reading.SymbolCoverage < 0.85f)
                     failures.Add($"{cells[i].name} is NOT visible (symbol coverage {reading.SymbolCoverage:0.00})");
-                // The 20 cm effect cells must be big enough on this portrait view to judge an effect by eye.
-                if (i < 7 && reading.SymbolRadiusPx < 18f)
+                // The quick/combo-row cells must be big enough on this portrait view to judge an effect by eye.
+                if (i < EffectsPreviewSpawner.LevelRowStart && reading.SymbolRadiusPx < 18f)
                     failures.Add($"{cells[i].name} is drawn too small to judge (symbol radius {reading.SymbolRadiusPx:0} px, needs >= 18)");
             }
             Debug.Log("[PreviewRender] cells:\n" + string.Join("\n", report));
@@ -317,27 +319,33 @@ namespace TileStories.Tests
             yield return SampleFrames_(frames);
 
             var symbolBaseline = Uniform(EffectsPreviewSpawner.BackgroundColor);
-            var readings = new List<CellReading>();
             var cells = CellsOf(root);
-            for (int i = 0; i < 7; i++)
-                readings.Add(Read(cells[i], frames, _focus.ViewCamera, haloBaseline, symbolBaseline));
-            var report = readings.Select(Describe).ToList();
-            Debug.Log("[PreviewRender] effect row:\n" + string.Join("\n", report));
 
-            var control = readings[0];
-            Assert.Less(control.BestHalo, 0.01f, "'No effect' must show nothing around the symbol.\n" + string.Join("\n", report));
-            Assert.Greater(control.SymbolCoverage, 0.85f, "Precondition: the control marker itself is drawn.\n" + string.Join("\n", report));
+            var control = Read(cells[EffectsPreviewSpawner.IndexNoEffect], frames, _focus.ViewCamera, haloBaseline, symbolBaseline);
+            Assert.Less(control.BestHalo, 0.01f, "'No effect' must show nothing around the symbol.");
+            Assert.Greater(control.SymbolCoverage, 0.85f, "Precondition: the control marker itself is drawn.");
 
-            string[] names = { "Pulse", "Ripple Rings", "Ripple Discs", "Halo Ring", "Halo Disc", "Beacon" };
-            var failures = new List<string>();
-            for (int i = 1; i <= 6; i++)
+            var effectCells = new (string name, int index)[]
             {
-                var r = readings[i];
+                ("Pulse", EffectsPreviewSpawner.IndexPulse),
+                ("Ripple Rings", EffectsPreviewSpawner.IndexRippleRings),
+                ("Ripple Discs", EffectsPreviewSpawner.IndexRippleDiscs),
+                ("Halo Ring", EffectsPreviewSpawner.IndexHaloRing),
+                ("Halo Disc", EffectsPreviewSpawner.IndexHaloDisc),
+                ("Beacon", EffectsPreviewSpawner.IndexBeacon),
+            };
+            var report = new List<string> { Describe(control) };
+            var failures = new List<string>();
+            foreach (var e in effectCells)
+            {
+                var r = Read(cells[e.index], frames, _focus.ViewCamera, haloBaseline, symbolBaseline);
+                report.Add(Describe(r));
                 if (r.BestHalo < 0.03f)
-                    failures.Add($"{names[i - 1]} is NOT visibly different from 'No effect' (best halo coverage {r.BestHalo:0.000}, needs >= 0.03)");
+                    failures.Add($"{e.name} is NOT visibly different from 'No effect' (best halo coverage {r.BestHalo:0.000}, needs >= 0.03)");
                 if (r.MaxExtentRatio < 1.06f)
-                    failures.Add($"{names[i - 1]} never reaches outside the symbol (extent {r.MaxExtentRatio:0.00}r)");
+                    failures.Add($"{e.name} never reaches outside the symbol (extent {r.MaxExtentRatio:0.00}r)");
             }
+            Debug.Log("[PreviewRender] effect cells:\n" + string.Join("\n", report));
             CollectionAssert.IsEmpty(failures, string.Join("\n", failures) + "\n--- readings ---\n" + string.Join("\n", report));
         }
 
@@ -356,15 +364,23 @@ namespace TileStories.Tests
             // change between frames (a static image would score the same on every frame).
             var symbolBaseline = Uniform(EffectsPreviewSpawner.BackgroundColor);
             var cells = CellsOf(root);
-            string[] names = { "Pulse", "Ripple Rings", "Ripple Discs", "Halo Ring", "Halo Disc", "Beacon" };
-            var failures = new List<string>();
-            for (int i = 1; i <= 6; i++)
+            var effectCells = new (string name, int index)[]
             {
-                var one = Read(cells[i], frames, _focus.ViewCamera, haloBaseline, symbolBaseline);
+                ("Pulse", EffectsPreviewSpawner.IndexPulse),
+                ("Ripple Rings", EffectsPreviewSpawner.IndexRippleRings),
+                ("Ripple Discs", EffectsPreviewSpawner.IndexRippleDiscs),
+                ("Halo Ring", EffectsPreviewSpawner.IndexHaloRing),
+                ("Halo Disc", EffectsPreviewSpawner.IndexHaloDisc),
+                ("Beacon", EffectsPreviewSpawner.IndexBeacon),
+            };
+            var failures = new List<string>();
+            foreach (var e in effectCells)
+            {
+                var one = Read(cells[e.index], frames, _focus.ViewCamera, haloBaseline, symbolBaseline);
                 if (one.BestHalo - one.WorstHalo < 0.005f)
-                    failures.Add($"{names[i - 1]} does not animate (halo coverage best {one.BestHalo:0.000} vs worst {one.WorstHalo:0.000})");
+                    failures.Add($"{e.name} does not animate (halo coverage best {one.BestHalo:0.000} vs worst {one.WorstHalo:0.000})");
             }
-            var control = Read(cells[0], frames, _focus.ViewCamera, haloBaseline, symbolBaseline);
+            var control = Read(cells[EffectsPreviewSpawner.IndexNoEffect], frames, _focus.ViewCamera, haloBaseline, symbolBaseline);
             Assert.Less(control.BestHalo - control.WorstHalo, 0.005f, "The control cell must stay still.");
             CollectionAssert.IsEmpty(failures, string.Join("\n", failures));
         }
@@ -388,7 +404,9 @@ namespace TileStories.Tests
                 var failures = new List<string>();
                 foreach (var cell in cells)
                 {
-                    var label = cell.GetComponentInChildren<MarkerView>().LabelRect;
+                    var markerView = cell.GetComponentInChildren<MarkerView>();
+                    if (markerView == null) continue;   // the spacer cell has no marker at all
+                    var label = markerView.LabelRect;
                     float facing = Vector3.Dot(label.forward, view.transform.forward);
                     float upright = Vector3.Dot(label.up, view.transform.up);
                     Vector3 vp = view.WorldToViewportPoint(cell.transform.position);

@@ -11,10 +11,9 @@ namespace TileStories
     // +/-/fit button clicks to the already-built ARZoomController entry points
     // (ZoomIn / ZoomOut / ResetToBase, spec section 9).
     //
-    // Visibility is NOT decided here -- ARZoomController.Settings is private, so the
-    // caller (WallSession, which owns the public LodSettings accessor) decides
-    // whether to mount/toggle this overlay based on LodSettings.zoom_show_ui_buttons
-    // and invokes SetButtonsVisible accordingly. All visual constants (colors,
+    // Mounts itself into its UIDocument on Start and, every frame, shows the overlay only while
+    // the wall's zoom is enabled AND Show UI Buttons is on (ShouldShowButtons), so a live Play
+    // Mode edit of either switch takes effect at once. All visual constants (colors,
     // radii, button size, the 44px WCAG floor) live in ZoomControlView.uss, never in
     // code or UXML (30-ui-content rule 2).
     [DisallowMultipleComponent]
@@ -27,6 +26,22 @@ namespace TileStories
         [Header("UI Toolkit")]
         [Tooltip("Shared UXML template cloned into the UI document root.")]
         [SerializeField] private VisualTreeAsset _template;
+        [Tooltip("UIDocument the overlay mounts into on Start (the Shared PanelSettings).")]
+        [SerializeField] private UIDocument _document;
+
+        // Mount into the scene's own UIDocument (tests call Mount directly instead)
+        private void Start()
+        {
+            if (_root == null && _document != null && _template != null && _zoom != null)
+                Mount(_document);
+        }
+
+        // Follow the wall's zoom switches every frame (cheap: two bool reads)
+        private void Update()
+        {
+            if (_root != null && _zoom != null)
+                SetButtonsVisible(ShouldShowButtons(_zoom.Settings));
+        }
 
         private VisualElement _root;
         public VisualElement Root => _root;
@@ -41,6 +56,11 @@ namespace TileStories
             if (_zoom == null) throw new InvalidOperationException("ZoomControlView._zoom is unassigned");
 
             _root = _template.CloneTree();
+            // - the clone's container must fill the panel: the strip docks to ITS bottom-right corner,
+            //   and an empty container is 0 px tall (the strip once sat above the top of the screen)
+            // - and let taps through everywhere except on the buttons themselves
+            _root.style.flexGrow = 1f;
+            _root.pickingMode = PickingMode.Ignore;
             SafeAreaHelper.ApplyToRoot(_root);
             document.rootVisualElement.Add(_root);
             BindButtons();
@@ -70,9 +90,8 @@ namespace TileStories
         private void ZoomOutClicked() => _zoom.ZoomOut();
         private void ZoomResetClicked() => _zoom.ResetToBase();
 
-        // Read-only visibility gate mirroring WallSession.LodSettings.zoom_show_ui_buttons.
-        // Kept as a pure helper so the gating rule is unit-assertable without a scene.
-        public static bool ShouldShowButtons(LodSettings settings) =>
-            settings != null && settings.zoom_show_ui_buttons;
+        // The visibility rule, pure: buttons only while zoom itself is enabled and wanted on screen
+        public static bool ShouldShowButtons(ZoomSettings settings) =>
+            settings != null && settings.enabled && settings.show_ui_buttons;
     }
 }

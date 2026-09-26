@@ -27,15 +27,15 @@ namespace TileStories.Tests
         {
             return new WallConfigData
             {
-                lod_settings = new LodSettings
+                zoom_settings = new ZoomSettings
                 {
-                    zoom_enabled = enabled,
-                    zoom_min = min,
-                    zoom_max = max,
-                    zoom_tap_step = 1.5f,
-                    zoom_tap_levels = 2,
-                    zoom_transition_speed_s = transition,
-                    zoom_show_ui_buttons = true
+                    enabled = enabled,
+                    min_factor = min,
+                    max_factor = max,
+                    tap_step = 1.5f,
+                    tap_levels = 2,
+                    transition_duration_s = transition,
+                    show_ui_buttons = true
                 }
             };
         }
@@ -63,7 +63,7 @@ namespace TileStories.Tests
             _wsGO.SetActive(false);
             _ws = _wsGO.AddComponent<WallSession>();
 
-            SetField(_ws, "_config", cfg);            // ws.LodSettings now resolves
+            SetField(_ws, "_config", cfg);            // ws.ZoomSettings now resolves
             SetField(_zoom, "_wallSession", _ws);     // ARZoomController.Settings resolves
             SetField(_zoom, "_camera", _camera);      // bypass Camera.main lookup
         }
@@ -114,7 +114,7 @@ namespace TileStories.Tests
 
             // Let the animation run; it must move the FOV down toward base/4 over frames,
             // and must never overshoot below it. Exact convergence arithmetic is
-            // already covered by SetZoomImmediate (above) and by StepTowardTarget's
+            // already covered by SetZoomImmediate (above) and by AnimatedZoom's
             // own unit tests -- here we only need "animated = gradual, bounded".
             for (int i = 0; i < 40; i++) yield return null;
             float settledFov = _camera.fieldOfView;
@@ -143,7 +143,7 @@ namespace TileStories.Tests
         public IEnumerator NearZeroFactor_DoesNotProduceNaNorInfinity()
         {
             // Regression for the Mathf.Max(zoom, 0.0001f) guard: a caller that
-            // forces the factor toward 0 must never divide by zero. zoom_min=0 is
+            // forces the factor toward 0 must never divide by zero. min_factor=0 is
             // the only way to let zero reach the LateUpdate path.
             BuildHarness(BuildConfig(min: 0f));
             float baseFov = _camera.fieldOfView;

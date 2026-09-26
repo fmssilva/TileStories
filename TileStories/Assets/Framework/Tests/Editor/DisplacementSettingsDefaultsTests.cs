@@ -24,7 +24,6 @@ namespace TileStories.Tests
             Assert.AreEqual(40f, _settings.overlap_threshold_px);
             Assert.AreEqual("label_only", _settings.displace_target);
             Assert.AreEqual("force_directed", _settings.displacement_algorithm);
-            Assert.AreEqual(4, _settings.force_directed_iterations);
             Assert.AreEqual(120f, _settings.max_displacement_px);
             Assert.IsTrue(_settings.leader_lines_enabled);
             Assert.AreEqual("straight", _settings.leader_line_style);

@@ -165,9 +165,9 @@ silently depends on it before you change the component that provides it.
 
 ### 4.2.2 Modal dialogs stall the Editor and every test run
 
-A modal dialog (`EditorUtility.DisplayDialog`, `DisplayDialogComplex`, a native notice, a build guard) freezes Unity's main thread until someone clicks it. While it is open, MCP calls (`refresh_unity`, `run_tests`, `get_test_job`, `execute_code`) stall or time out without a useful error and a test run never advances.
+A modal dialog (a native `EditorUtility.DisplayDialog*`, a Play / Build gate) freezes Unity's main thread until someone clicks it. While it is open, MCP calls (`refresh_unity`, `run_tests`, `get_test_job`, `execute_code`) stall or time out without a useful error and a test run never advances. In the POI Editor the only modal kind left is `EditorDecision` (a question the code must wait for); every other popup -- notices included -- is a non-blocking `EditorPopup` (`_5.1_Editor_Tab.md`, "Popups: the two kinds and when to use which").
 
-- Never write or run a test that can open a modal dialog. Test the decision logic instead (a pure mapping, a queue, a guard's message list) and let `TestDialogGuard` keep real notice dialogs off.
+- Never write or run a test that can open a modal dialog. Drive the real flow with `EditorDecision.Responder` instead (it receives the exact question and "clicks" a button; `TestDialogGuard` answers Cancel for the whole EditMode run), and open non-blocking popups for real (`EditorPopupTests`).
 - If a run or tool call stalls, assume a dialog is open before retrying: tell the developer "a dialog may be open in Unity, please click it" (a screen capture can confirm), then continue. Do not queue new runs on a blocked Editor.
 - If a task truly needs a dialog (a real build with a guard), announce it first and say which button to click.
 

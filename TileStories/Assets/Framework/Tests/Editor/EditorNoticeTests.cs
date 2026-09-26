@@ -7,8 +7,8 @@ using TileStories.Editor;
 
 namespace TileStories.Tests
 {
-    // Tests for the one shared "tell the developer" queue. The final native dialog cannot be
-    // clicked by a test, so it is switched off for the whole run (TestDialogGuard); everything
+    // Tests for the one shared "tell the developer" queue. The notice popup itself is covered
+    // by EditorPopupTests; here it is switched off (TestDialogGuard) and everything
     // that decides WHAT is shown and WHEN is real code exercised here.
     public class EditorNoticeTests
     {
@@ -94,16 +94,16 @@ namespace TileStories.Tests
         }
 
         [Test]
-        public void TheTestRun_HasDialogsSwitchedOff_SoAQueuedNoticeCanNeverOpenAModal()
+        public void TheTestRun_HasNoticePopupsSwitchedOff_SoQueuedNoticesStayObservable()
         {
-            Assert.IsFalse(EditorNotice.ShowDialogs, "TestDialogGuard must have disabled real dialogs for this run.");
+            Assert.IsFalse(EditorNotice.ShowPopups, "TestDialogGuard must have switched notice popups off for this run.");
 
             // Give the real editor-update pump a chance to run: the notice must still be there.
             EditorNotice.Queue("Would be modal", "msg");
             var pump = typeof(EditorNotice).GetMethod("Pump", BindingFlags.NonPublic | BindingFlags.Static);
             Assert.IsNotNull(pump);
             pump.Invoke(null, null);
-            Assert.IsTrue(EditorNotice.HasPending, "With dialogs off the pump must leave the queue untouched.");
+            Assert.IsTrue(EditorNotice.HasPending, "With popups off the pump must leave the queue untouched.");
         }
 
         // ---------- opt-out checkbox ("do not show again") ----------
@@ -138,14 +138,14 @@ namespace TileStories.Tests
         }
 
         [Test]
-        public void ResetHiddenNotices_CoversEveryHideableNotice()
+        public void ResetHiddenMessages_CoversEveryHideableNoticeAndQuestion()
         {
             CollectionAssert.AreEquivalent(
-                new[] { NoticeKeys.FacingPreviewWarning, NoticeKeys.ConfigValidation }, NoticeKeys.All,
+                new[] { NoticeKeys.FacingPreviewWarning, NoticeKeys.ConfigValidation, NoticeKeys.UnverifyPosition }, NoticeKeys.All,
                 "Every notice that offers the opt-out checkbox must be in All, or the reset menu cannot bring it back.");
 
             foreach (string key in NoticeKeys.All) EditorUtility.SetDialogOptOutDecision(DialogOptOutDecisionType.ForThisMachine, key, true);
-            var reset = typeof(EditorNotice).GetMethod("ResetHiddenNotices", BindingFlags.NonPublic | BindingFlags.Static);
+            var reset = typeof(EditorNotice).GetMethod("ResetHiddenMessages", BindingFlags.NonPublic | BindingFlags.Static);
             Assert.IsNotNull(reset);
             reset.Invoke(null, null);
             foreach (string key in NoticeKeys.All)
@@ -279,8 +279,8 @@ namespace TileStories.Tests
 
                 Assert.AreEqual("Config validation issues (after load)", EditorNotice.PendingTitle);
                 Assert.AreEqual(NoticeKeys.ConfigValidation, EditorNotice.PendingDontShowAgainKey, "Repeating advisory: offers the opt-out checkbox.");
-                StringAssert.Contains("<LOD settings>", EditorNotice.PendingMessage);
-                StringAssert.Contains("Shrink Start must be strictly less than Cluster Min", EditorNotice.PendingMessage);
+                StringAssert.Contains("LOD > Crowding", EditorNotice.PendingMessage);
+                StringAssert.Contains("Shrink Starts At must be strictly less than Crowded At", EditorNotice.PendingMessage);
             }
             finally { Object.DestroyImmediate(window); }
         }

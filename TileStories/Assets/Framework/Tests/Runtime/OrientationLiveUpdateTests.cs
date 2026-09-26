@@ -84,7 +84,7 @@ namespace TileStories.Tests
             foreach (var m in ws.SpawnedMarkers)
             {
                 var reveal = m.GetComponent<MarkerRevealEffect>();
-                if (reveal != null) { reveal.StopAllCoroutines(); reveal.SetFullAlphaAndScale(); }
+                if (reveal != null) { reveal.SkipToEnd(); }
             }
             _ws = ws;
             return ws;
@@ -182,6 +182,45 @@ namespace TileStories.Tests
                 "Back to wall_fixed the marker must return to its AUTHORED rotation (Configure would have lost it).");
         }
 
+        // A POI's own Facing X/Y/Z (Specific Marker > Position) edited while the wall runs: a wall_fixed
+        // marker turns to the new authored angle, and a yaw_only one takes its X/Z tilt (Y stays live).
+        [UnityTest]
+        public IEnumerator PoiFacing_LiveEdit_TurnsTheRunningMarkerToTheNewAuthoredAngle()
+        {
+            var poi = _config.pois[0];
+            poi.editor_rotation_x_deg = 0f; poi.editor_rotation_deg = 0f; poi.editor_rotation_z_deg = 0f;
+            _config.orientation_settings.facing_mode = "wall_fixed";
+            PoseCamera(0f, 0f);
+            var ws = SpawnWall();
+            var marker = ws.SpawnedMarkers.First(m => m.name == poi.id);
+            yield return new WaitForSeconds(Settle);
+            Assert.Less(Quaternion.Angle(marker.transform.rotation, Quaternion.identity), AngleTolerance,
+                "Precondition: wall_fixed shows the authored (identity) rotation.");
+
+            // The window's private copy of the POI list, with this POI's facing edited
+            var edited = JsonUtility.FromJson<PoisHolder>(JsonUtility.ToJson(new PoisHolder { pois = _config.pois })).pois;
+            var editedPoi = edited.First(p => p.id == poi.id);
+            editedPoi.editor_rotation_x_deg = 20f; editedPoi.editor_rotation_deg = 35f; editedPoi.editor_rotation_z_deg = 10f;
+            ws.ApplyPoiFacing(edited);
+            yield return new WaitForSeconds(Settle);
+
+            var expected = Quaternion.Euler(20f, 35f, 10f);
+            Assert.Less(Quaternion.Angle(marker.transform.rotation, expected), AngleTolerance,
+                "wall_fixed: the running marker must turn to the newly authored Facing X/Y/Z, without a restart.");
+
+            // yaw_only keeps the authored X/Z tilt but replaces Y with the live camera yaw
+            var yawOnly = CopyOf(_config.orientation_settings);
+            yawOnly.facing_mode = "yaw_only";
+            ws.ApplyOrientationSettings(yawOnly, LevelsCopy(_config));
+            yield return new WaitForSeconds(Settle);
+            Vector3 euler = marker.transform.rotation.eulerAngles;
+            Assert.AreEqual(20f, Mathf.DeltaAngle(0f, euler.x), AngleTolerance, "yaw_only keeps the new X tilt");
+            Assert.AreEqual(10f, Mathf.DeltaAngle(0f, euler.z), AngleTolerance, "yaw_only keeps the new Z tilt");
+        }
+
+        [System.Serializable]
+        private class PoisHolder { public List<POIData> pois; }
+
         [UnityTest]
         public IEnumerator Facing_LevelOverride_AppliesOnlyToThatLevelsMarkersLive()
         {
@@ -272,13 +311,15 @@ namespace TileStories.Tests
             ARZoomState.SetZoom(1f, 1f, 100f);
             var rig = new GameObject("LODControllerRig"); _tracked.Add(rig);
             var lod = rig.AddComponent<LODController>();
-            SetPrivate(lod, "_settings", new LodSettings
+            // the wall's own settings object: LODController follows WallSession.LodSettings every frame
+            _config.lod_settings = new LodSettings
             {
                 enabled = true, density_response_mode = "cluster", density_radius_px = 80f, cluster_min_count = 2,
                 shrink_start_neighbor_count = 2, density_safety_escalation_enabled = false, cluster_icon_mode = "pie_and_count",
                 cluster_band_source = "centroid", cluster_band_hysteresis_enabled = true, cluster_dissolve_grace_cycles = 3,
                 hysteresis_margin_m = 0.5f, transition_fade_duration_s = 0.3f,
-            });
+            };
+            SetPrivate(lod, "_settings", _config.lod_settings);
             SetPrivate(lod, "_clusterPrefab", AssetDatabase.LoadAssetAtPath<GameObject>(ClusterPrefabPath));
             SetPrivate(lod, "_camera", _cam);
             SetPrivate(lod, "_wallSession", ws);

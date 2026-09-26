@@ -12,6 +12,18 @@ namespace TileStories.Editor
         private const float TableGapBetweenGroups = 6f;
         private const float TableGapWithinGroup = 4f;
 
+        // A centered variant of miniBoldLabel, for header titles sitting over a column of
+        // dropdown/popup controls (those read center-ish, not left-aligned like a text field).
+        // Lazily built once, not per-frame -- EditorStyles.miniBoldLabel isn't safely readable
+        // before the editor GUI system is initialized, so this can't be a plain static readonly.
+        private static GUIStyle _centeredMiniBoldLabel;
+        private static GUIStyle CenteredMiniBoldLabel => _centeredMiniBoldLabel ?? (_centeredMiniBoldLabel = new GUIStyle(EditorStyles.miniBoldLabel) { alignment = TextAnchor.MiddleCenter });
+
+        // The Hierarchy table's "Aa" button when its level overrides the wall label style (created
+        // lazily: GUI.skin only exists inside OnGUI).
+        private static GUIStyle _boldTableButton;
+        private static GUIStyle BoldTableButton => _boldTableButton ?? (_boldTableButton = new GUIStyle(GUI.skin.button) { fontStyle = FontStyle.Bold });
+
         // Extra breathing room before the Color group (Marker/Badge tables only) --
         // developer screenshot feedback (2026-09-18) confirmed the standard
         // between-groups gap read as visually too tight once the Symbol group's preview
@@ -105,52 +117,8 @@ namespace TileStories.Editor
         private static readonly string[] ShapeOptions = { "circle", "rounded_square", "hexagon", "diamond", "star", "none" };
         private static readonly string[] ShapeLabels = { "Circle", "Rounded Square", "Hexagon", "Diamond", "Star", "None" };
 
-        // LOD density-response mode options (maps to LodSettings.density_response_mode).
-        private static readonly string[] DensityModeOptions = { "none", "select_hide", "cluster", "shrink_and_fade", "hybrid" };
-        private static readonly string[] DensityModeLabels = { "None (off)", "Select & Hide", "Cluster", "Shrink & Fade", "Hybrid" };
-
-        // Cluster icon modes (maps to LodSettings.cluster_icon_mode); only
-        // applicable when density_response_mode is cluster or hybrid.
-        private static readonly string[] ClusterIconOptions = { "pie_and_count", "dominant_category", "count_only" };
-        private static readonly string[] ClusterIconLabels = { "Pie & Count", "Dominant Category", "Count Only" };
-
-        // Cluster band-source selection (maps to LodSettings.cluster_band_source);
-        // only applicable when density_response_mode is cluster or hybrid.
-        private static readonly string[] ClusterBandSourceOptions = { "centroid", "nearest_member", "farthest_member" };
-        private static readonly string[] ClusterBandSourceLabels = { "Centroid", "Nearest Member", "Farthest Member" };
-        // Editor help text for the three new cluster params (3-7 of _2.4_Marker_LOD.md).
-        // Read-only explanations surfaced via HelpInfoButton.Draw -> HelpInfoPopup (Block 2).
-        private static readonly string LodClusterBandSourceHelp = "Which cluster member's effective distance decides the cluster's visible LOD band when the group is treated as one unit. Centroid (default; the group moves as one, smoothest), Nearest Member (the first member to cross a threshold band-promotes the whole group), or Farthest Member (the whole group must clear the far edge before promoting).";
-        private static readonly string LodClusterBandHysteresisHelp = "Reuses the same hysteresis_margin_m as individual markers: a cluster stays in its current band until its active member's effective distance retreats past the margin before re-evaluating, so clustered groups chatter at band boundaries no differently than individual markers do.";
-        private static readonly string LodClusterDissolveGraceHelp = "How many consecutive Evaluate() cycles a group must stay 'ungrouped' (below cluster_min_count neighbors) before its cluster view begins fading out. 0 disables the grace (groups pop in/out immediately). Default 3 smooths the membership flicker when visitors edge in and out of a density region.";
-
-        // Editor help text for the LOD + Zoom foldouts (Block 2 of
-        // _2.4_Marker_LOD.md, rows 5b / 12 / 13). Read-only explanations, not
-        // persisted data -- HelpInfoButton.Draw opens a fixed HelpInfoPopup.
-        private static readonly string LodEnabledHelp = "Master switch for the LOD/density/cluster/frustum pipeline. Disabling skips every step of LODController.Evaluate() -- markers render at full detail regardless of distance or screen-space density.";
-        private static readonly string LodDensityResponseHelp = "How to thin markers in a dense screen region: None (off); Select & Hide (drop lowest-hierarchy-priority units); Cluster (merge into MarkerClusterView aggregates, section 6.1); Shrink & Fade (scale down + fade proportionally, never vanish); Hybrid (apply the shrink/fade ramp, then escalate to Cluster once neighbor count reaches cluster_min_count).";
-        private static readonly string LodBandsHelp = "Distance tiers. A marker's effective distance (real distance divided by the zoom factor) is matched against the first row whose max_distance_m it falls under; rows must be sorted ascending. The last row's large value is a real sentinel, not a special case. max_visible_count = -1 means show every marker in that band.";
-        private static readonly string LodDensityRadiusHelp = "Screen-space pixel radius treated as 'this marker is crowded'. Reuses MarkerOverlapResolver's 40f constant so this domain and the Displacement domain agree on what 'touching' means (section 6.2).";
-        private static readonly string LodShrinkStartHelp = "Neighbor count (within density_radius_px) at which Shrink & Fade / Hybrid begins shrinking a marker. Must be < cluster_min_count -- validated at config-load time.";
-        private static readonly string LodClusterMinHelp = "Neighbor count at which density response escalates to clustering (select_hide / cluster / hybrid). Deliberately higher than Displacement's implicit 2-marker nudging threshold so the two systems don't compete over the same small groups (section 6.2).";
-        private static readonly string LodSafetyEscalationHelp = "If a region's neighbor count exceeds cluster_min_count x multiplier while density_response_mode is anything other than Hybrid, LODController overrides to Cluster for that region only this cycle -- a deterministic correctness safety net, not a competing 'smart' system (section 6.2).";
-        private static readonly string LodHysteresisHelp = "Meters a distance-band transition must be crossed back before promoting again; the demotion fires immediately at the threshold. Stops flicker from a visitor's body sway at a band boundary (section 7).";
-        private static readonly string LodTransitionsHelp = "Seconds visibility/size/alpha changes fade over instead of cutting. Reuses the same CanvasGroup mechanism MarkerRevealEffect introduced (section 7) -- do not build a second fade system.";
-        private static readonly string LodEvalIntervalHelp = "Seconds between LODController.Evaluate() cycles. Density/LOD state doesn't need 60Hz; lower-end devices or very dense walls can use a coarser interval (section 4).";
-        private static readonly string LodFrustumHelp = "Skips markers outside the camera's FOV (plus margin) before distance/density evaluation. Turn off for unusual wall geometry or to debug visibility (section 8).";
-        private static readonly string LodFovMarginHelp = "Degrees added to the FOV used for the frustum-cull test only (not the render camera). A wider margin means markers just outside the edge are 'known' and already mid-transition by the time they scroll on screen.";
-        private static readonly string ZoomEnabledHelp = "Master switch for global FOV-based AR camera zoom (section 9).";
-        private static readonly string ZoomMinHelp = "Minimum zoom factor. SetZoom clamps to this. 1 = unzoomed (native device FOV).";
-        private static readonly string ZoomMaxHelp = "Maximum zoom factor. Hard-clamped in ARZoomState.SetZoom -- an unclamped zoom drives effective distance toward zero and breaks every downstream size/LOD formula, plus pushes FOV to a degenerate near-zero. Practical editor ceiling is ~5x; beyond that AR passthrough upscaling degrades the image and is rarely usable on real hardware.";
-        private static readonly string ZoomTapStepHelp = "Zoom-factor step applied per double-tap. Distinct from Zoom Transition Speed, which is the animation duration of each step, not the size.";
-        private static readonly string ZoomTapLevelsHelp = "Number of double-tap steps before cycling back to 1x. 2 means: step once, step twice, third tap returns to 1x.";
-        private static readonly string ZoomTransitionHelp = "Seconds the FOV animates over for double-tap steps and on-screen button taps. Pinch (continuous) does not animate -- it follows the finger directly (section 9).";
-        private static readonly string ZoomUiButtonsHelp = "Shows on-screen zoom in / zoom out / fit-to-1x buttons (UI Toolkit, screen-space). Independently toggleable so devs who prefer gestures can hide the chrome.";
-   private static readonly string ZoomDoubleTapWindowHelp = "Seconds between the two taps for a double-tap gesture. Second tap must arrive within this window after the first.";
-   private static readonly string ZoomDoubleTapMoveToleranceHelp = "Maximum pixel movement allowed between the two taps for a double-tap gesture. Exceeding this distance counts as a drag, not a double-tap.";
 
                 // Show-label options (explicit wording per Â§6 of 2.3 doc, clearer than bare checkbox).
-        private static readonly string[] ShowLabelOptions = { "Show Label", "NOT show Label" };
 
         // --- Orientation editor constants (_2.1_Marker_Orientation.md v4) ---
         // Vertical Alignment domain.
@@ -178,12 +146,12 @@ namespace TileStories.Editor
         private static readonly string ChildVerticalAlignmentHelp = "Inherit (default): follows the marker's own Vertical Alignment above, rigidly. World Up / Screen Up: overrides just this element's vertical alignment independently of the marker root - this is how 'marker stays upright in the world, but the label always reads screen-horizontal' (or the reverse) is achieved without moving the root.";
         private static readonly string UpReferenceHelp = "The real-world 'up' direction used wherever Vertical Alignment is World Up. World Gravity (default): true real-world up - no gyroscope needed, since AR world space is already gravity-aligned. Spawn Root: the wall's own placement anchor up instead - use only if this wall's map was scanned at a tilt and isn't gravity-aligned. Custom: an authored vector below.";
         private static readonly string CustomUpHelp = "The custom up-reference vector, used only when Up Reference is set to Custom.";
-        private static readonly string FacingModeHelp = "What the marker points at. Wall Fixed: painted flat onto the wall using this POI's authored Facing Options angles (Specific Marker tab) - never moves at runtime. Y Rotation Only: keeps the authored X/Z wall tilt fixed, but continuously turns left/right (yaw) to face the visitor. Always Facing Camera (default): ignores the authored angles entirely and always looks straight at the visitor, like a classic billboard.";
+        private static readonly string FacingModeHelp = "What the marker points at. Wall Fixed: painted flat onto the wall using this POI's own Facing X / Y / Z (Specific Marker > POI > Position) - never moves at runtime. Y Rotation Only: keeps the authored X/Z wall tilt fixed, but continuously turns left/right (yaw) to face the visitor. Always Facing Camera (default): ignores the authored angles entirely and always looks straight at the visitor, like a classic billboard.";
         private static readonly string FacingBasisHelp = "How the marker's forward direction is chosen (Always Facing Camera only). View Plane (default): every marker parallel to the camera's near plane, no perspective skew anywhere on screen. Camera Position: each marker's forward points away from the camera individually, which reads as more physical for large markers but introduces slight skew off-centre.";
         private static readonly string OrientationUpdateModeHelp = "Cost control for how often orientation is re-resolved. Every Frame (default, recommended): always up to date, avoids a subtle stale-rotation mismatch with the label/badge displacement system (see the Update Mode help below) - the CPU cost is negligible even at 150 markers. Interval: re-resolves at most every Update Interval seconds. On Camera Delta: re-resolves only once the camera has rotated past Camera Delta degrees since the last resolve. Both non-default modes can make label/badge offsets lag the marker's own rotation for a moment after a fast camera turn - use them only if a real profiling pass shows a need.";
         private static readonly string OrientationUpdateIntervalHelp = "Seconds between orientation re-resolves, used only when Update Mode is Interval.";
         private static readonly string OrientationCameraDeltaHelp = "Degrees the camera must rotate before orientation re-resolves, used only when Update Mode is On Camera Delta.";
-        private static readonly string EditModePreviewHelp = "Scene view ONLY. Shows the resolved Vertical Alignment / Facing Options directly on the Edit-Mode marker rig, without entering Play Mode. It has no effect in Play Mode or on a device, where the real MarkerBillboard always runs. Nothing animates here (Edit Mode does not tick per-frame) - this checks the static result at the Scene camera's current angle only. The Scene camera cannot roll, so roll-dependent behaviour is tested in Play Mode. See the three 'How to ... Test' guides below for the step-by-step tests.";
+        private static readonly string EditModePreviewHelp = "Scene view ONLY. Shows the resolved Vertical Alignment / Facing Options directly on the Edit-Mode marker rig, without entering Play Mode. It has no effect in Play Mode or on a device, where the real orientation always runs. Nothing animates here (Edit Mode does not tick per-frame) - this checks the static result at the Scene camera's current angle only. The Scene camera cannot roll, so roll-dependent behaviour is tested in Play Mode. See the three 'How to ... Test' guides below for the step-by-step tests.";
 
         // Three test guides, one per test area, each in its own collapsible foldout. One block per
         // Orientation sub-section (Vertical Alignment, Facing Options, Update Cost), NOT per field:
@@ -199,13 +167,13 @@ namespace TileStories.Editor
             "- Test it in Play Mode.\n\n" +
             "FACING OPTIONS\n" +
             "- Wall Fixed: orbit the Scene camera, markers must NOT move.\n" +
-            "  - Specific Marker > 'lamp' > Facing X/Y/Z sliders rotate the marker live.\n" +
+            "  - Specific Marker > pick any one POI > its own Facing X/Y/Z sliders rotate the marker live.\n" +
             "  - Or Rotate tool (E) on the marker: the sliders follow. Verified POIs are locked.\n" +
             "- Y Rotation Only: orbit left/right, markers turn to you. Orbit up/down, they do not tip.\n" +
             "  - Facing X/Z sliders apply, Y does nothing (a notice explains it).\n" +
             "- Always Facing Camera: markers face the Scene camera from any angle. Facing sliders do nothing (notice).\n" +
             "  - Facing Basis: View Plane = all parallel to screen. Camera Position = slight skew at the screen edge.\n" +
-            "- Hierarchy Levels > Facing column: set level_1 = Wall Fixed. lamp/painting/camera stay still, the rest follow you. Reset to Inherit after.\n\n" +
+            "- Hierarchy Levels > Facing Override: set one level to Wall Fixed. POIs at that level stay still, the rest follow you. Reset to Inherit after.\n\n" +
             "UPDATE COST\n" +
             "- Not possible in Scene test: needs frames and time. Test it in Play Mode.\n\n" +
             "WHEN DONE\n" +
@@ -214,9 +182,9 @@ namespace TileStories.Editor
         private static readonly string OrientationPlaymodeTestGuide =
             "SETUP\n" +
             "- 'Save All to JSON' then 'Copy to StreamingAssets' (Play reads the copy).\n" +
-            "- LIVE: once Play is running, change any Orientation value here (or a level's Facing override) and the running markers and clusters follow at once, no restart. Nothing is saved by that: stop Play and your edits stay in this window; Save All to JSON (then Copy to StreamingAssets) only to keep them.\n" +
-            "- Open Apps/LivingRoom/LivingRoomScene, press Play, click into the Game view.\n" +
-            "- Mock camera (the project's MockLocalizationProvider, Editor only, not Unity's):\n" +
+            "- LIVE: once Play is running, change any Orientation value here (a level's Facing Override, or a POI's own Facing X / Y / Z) and the running markers and clusters follow at once, no restart. Nothing is saved by that: stop Play and your edits stay in this window; Save All to JSON (then Copy to StreamingAssets) only to keep them.\n" +
+            "- Open your wall's scene, press Play, click into the Game view.\n" +
+            "- Editor mock camera (Editor only, not Unity's):\n" +
             "  - W/A/S/D = move. E = up, Q = down.\n" +
             "  - RMB + mouse, Alt + LMB + mouse, or arrow keys = look.\n" +
             "  - Z / C = tilt the phone left / right. What you SEE: the Game window never rotates, the world (wall, markers) rotates around you. (Under the hood the camera rolls.)\n\n" +
@@ -225,19 +193,18 @@ namespace TileStories.Editor
             "  - World Up: markers rotate WITH the wall, they stay upright relative to the real world.\n" +
             "  - Screen Up: markers do NOT rotate, they stay level with the window edges while the wall turns behind them.\n" +
             "- Marker, Label and Badge are independent: e.g. Marker World Up + Label Screen Up = text stays screen-horizontal.\n" +
-            "- Clusters: view the lamp group from far away (dense), then roll with Z / C.\n" +
+            "- Clusters: view a dense group of POIs from far away, then roll with Z / C.\n" +
             "- Up Reference: World Gravity = upright. Custom = leans by your vector. Spawn Root = leans with the wall's root.\n\n" +
             "FACING OPTIONS\n" +
             "- Wall Fixed: walk and look around, markers never move.\n" +
             "- Y Rotation Only: circle a marker with A / D, it turns to you, never tips. Z / C has no effect.\n" +
             "- Always Facing Camera: faces you everywhere, also above and below (E / Q). Never flips edge-on close up.\n" +
             "  - Facing Basis: View Plane = parallel to screen. Camera Position = skew at the screen edge.\n" +
-            "- Hierarchy Levels > Facing column: level_1 = Wall Fixed, the others follow you.\n\n" +
+            "- Hierarchy Levels > Facing Override: set one level to Wall Fixed, the others follow you.\n\n" +
             "UPDATE COST\n" +
             "- Every Frame: smooth. Interval (e.g. 1 s): markers update in steps.\n" +
             "- On Camera Delta (e.g. 20 deg): markers re-aim only after the camera turns past it.\n\n" +
-            "SIDE-BY-SIDE\n" +
-            "- Assets/Dev/OrientationGallery/OrientationGalleryScene: Play, set Orbit Yaw/Pitch/Roll on OrientationGalleryHarness.\n" +
+            "AUTOMATED\n" +
             "- Automated: Test Runner, EditMode + PlayMode, zero failures.";
 
         private static readonly string OrientationDeviceTestGuide =
@@ -260,60 +227,11 @@ namespace TileStories.Editor
             "- Wall Fixed: walk left/right, markers stay glued to the wall.\n" +
             "- Y Rotation Only: markers turn to you, keep the wall tilt.\n" +
             "- Always Facing Camera: faces you, also crouching or very close. Facing Basis: View Plane vs Camera Position, check markers at the screen edge.\n" +
-            "- Hierarchy Levels > Facing column: one level Wall Fixed, the others follow you.\n\n" +
+            "- Hierarchy Levels > Facing Override: one level Wall Fixed, the others follow you.\n\n" +
             "UPDATE COST\n" +
             "- Every Frame is the default: 5 min session on the densest wall, watch for lag or heat.\n" +
             "- Interval / On Camera Delta only if too slow; check label offset lag after fast turns.";
 
-        // --- Search & Filter editor constants (Block 5) ---
-        // Search mode dropdown (inert values flagged by ValidateSearchEnumFields).
-        private static readonly string[] SearchModeOptions = { "dynamic", "explicit", "scoped", "faceted", "auto_complete" };
-        private static readonly string[] SearchModeLabels = { "Dynamic", "Explicit", "Scoped (inert)", "Faceted (inert)", "Auto-Complete (inert)" };
-        private static readonly string SearchModeHelp = "dynamic: debounced live filtering as the visitor types. explicit: results only on submit. scoped/faceted/auto_complete are recognized but currently inert (fall back to dynamic).";
-
-        // Result view dropdown.
-        private static readonly string[] ResultViewOptions = { "list", "minimap", "camera_highlight" };
-        private static readonly string[] ResultViewLabels = { "List", "Minimap", "Camera Highlight" };
-        private static readonly string ResultViewHelp = "The default result view shown when search returns results.";
-
-        // Minimap dropdowns.
-        private static readonly string[] MinimapVisibilityOptions = { "always", "toggle" };
-        private static readonly string[] MinimapVisibilityLabels = { "Always", "Toggle" };
-        private static readonly string[] MinimapIconOptions = { "dots_only", "category_colored_dots", "mini_icons" };
-        private static readonly string[] MinimapIconLabels = { "Dots Only", "Category Colored", "Mini Icons" };
-        private static readonly string MinimapHelp = "Show a 2D minimap overlay for POI navigation.";
-        private static readonly string MasterToggleHelp = "Master switch for the whole Select / Filter / Search domain (search overlay, facet filters, minimap, results list, marker selection + zoom-on-select). Off = none of it activates for this wall, mirroring the LOD and Displacement master toggles.";
-
-        // Filter mismatch behaviour (maps to WallConfigData.filter_mismatch_behaviour).
-        private static readonly string[] FilterMismatchOptions = { "hide", "dim" };
-        private static readonly string[] FilterMismatchLabels = { "Hide", "Dim" };
-        private static readonly string FilterMismatchHelp = "What happens to markers outside the active filter/search result set. Hide: fully faded out (spec section 7 default). Dim: kept faintly visible so dense walls keep their positional context.";
-        private static readonly string MinimapVisibilityHelp = "always: visible permanently. toggle: shows a button to expand/collapse.";
-        private static readonly string MinimapIconHelp = "dots_only: plain colored dots. category_colored_dots: dots colored by category. mini_icons: scaled-down marker icons.";
-        private static readonly string MinimapDotSizeHelp = "Visual dot diameter in px. Keep small so dense walls stay readable -- tap comfort is the separate 'Dot tap target' value below.";
-        private static readonly string MinimapTapTargetHelp = "Invisible hit-zone diameter per dot (the actual tap receiver). Defaults to the 44x44 WCAG floor; overlapping zones at high density resolve by nearest dot center.";
-
-        // Recent & suggested dropdown.
-        private static readonly string[] SuggestedSourceOptions = { "category_distribution", "recent_first" };
-        private static readonly string[] SuggestedSourceLabels = { "Category Distribution", "Recent First" };
-        private static readonly string RecentCountHelp = "Number of recent search queries to remember locally (PlayerPrefs).";
-        private static readonly string SuggestedHelp = "Show suggested search terms based on the wall's live POI distribution.";
-        private static readonly string SuggestedSourceHelp = "category_distribution: top-N categories by POI count. recent_first: visitor's recent queries first, then category back-fill.";
-
-        // Voice dropdowns.
-        private static readonly string[] VoiceMatchModeOptions = { "all", "any" };
-        private static readonly string[] VoiceMatchModeLabels = { "All", "Any" };
-        private static readonly string[] VoiceIndicatorOptions = { "mic_text", "listen_bar" };
-        private static readonly string[] VoiceIndicatorLabels = { "Mic Text", "Listen Bar" };
-        private static readonly string VoiceEnabledHelp = "Enable voice search (requires microphone permission). Off by default due to iOS permission/privacy caveats.";
-        private static readonly string VoiceMatchModeHelp = "all: results must match every token. any: results matching any token.";
-        private static readonly string VoiceIndicatorHelp = "mic_text: mic button text flips to '...' while listening. listen_bar: also renders a dedicated progress bar.";
-
-        // Selection & Zoom.
-        private static readonly string SelectionHighlightHelp = "Dim non-selected markers when a marker is selected.";
-        private static readonly string ZoomOnSelectHelp = "Auto-zoom when selecting a marker in dense regions.";
-        private static readonly string ZoomOnSelectDensityHelp = "Minimum screen-space neighbours for zoom-on-select to fire.";
-        private static readonly string ZoomOnSelectFactorHelp = "Zoom multiplier applied when zoom-on-select fires (e.g. 2.0 doubles the zoom). Clamped to the wall's zoom_min..zoom_max range.";
         private static readonly Color GlobalSectionColor = new Color(0.35f, 0.55f, 0.95f);
 
         // Tab button and container colors for the enhanced visual hierarchy.
@@ -321,6 +239,7 @@ namespace TileStories.Editor
         private static readonly Color SpecificMarkerTabColor = new Color(0.00f, 0.78f, 0.38f); // vivid green
         private static readonly Color TabTextColor = Color.white;
         private static readonly Color SceneConfigSectionColor = new Color(0.45f, 0.55f, 0.85f);
+        private static readonly Color LabelsAndFontsSectionColor = new Color(0.90f, 0.45f, 0.55f);
         private static readonly Color MarkerSectionColor = new Color(0.30f, 0.80f, 0.40f);
         private static readonly Color OrientationSectionColor = new Color(0.50f, 0.50f, 0.95f);
         private static readonly Color BadgeSectionColor = new Color(0.95f, 0.60f, 0.20f);
@@ -330,34 +249,8 @@ namespace TileStories.Editor
         private static readonly Color LodSectionColor = new Color(0.00f, 0.70f, 0.70f);
                 private static readonly Color ZoomSectionColor = new Color(0.80f, 0.20f, 0.70f);
 
-        // ---- Displacement section (Block 8 of _2.5_Marker_Displacement.md) ----
-        // Section color + option arrays + help text for the Global Scene ->
-        // Displacement Settings foldout. The draw method lives in
-        // POIEditorToolWindow.Displacement.cs; this file only owns the data,
-        // mirroring how the LOD/Zoom options/colors live here while their draw
-        // method lives in LodZoom.cs.
+        // Displacement: its option arrays and texts live in GlobalScene/POIEditorToolWindow.DisplacementHelp.cs
         private static readonly Color DisplacementSectionColor = new Color(0.85f, 0.30f, 0.95f);
-        private static readonly string[] DisplaceTargetOptions = { "label_only", "marker", "both" };
-        private static readonly string[] DisplaceTargetLabels = { "Label Only", "Marker", "Both" };
-        private static readonly string[] DisplacementAlgorithmOptions = { "fixed_axis", "candidate_position", "force_directed" };
-        private static readonly string[] DisplacementAlgorithmLabels = { "Fixed Axis", "Candidate Position", "Force Directed" };
-        private static readonly string[] LeaderLineStyleOptions = { "straight", "dashed", "elbow" };
-        private static readonly string[] LeaderLineStyleLabels = { "Straight", "Dashed", "Elbow" };
-        private static readonly string[] DisplacementTiebreakOptions = { "symmetric", "lower_priority_only" };
-        private static readonly string[] DisplacementTiebreakLabels = { "Symmetric", "Lower Priority Only" };
-
-        private static readonly string DisplacementEnabledHelp = "Master switch for displacement (LODController.Evaluate step 8). When off, every visible marker renders at its base position and no offsets are computed; stability snapshots are left untouched so re-enabling settles immediately without popping.";
-        private static readonly string DisplacementOverlapThresholdHelp = "Screen-space pixel radius treated as 'these markers touch' when deciding a group needs to separate. Shared with LODController's density radius so the two systems agree on what 'touching' means.";
-        private static readonly string DisplacementTargetHelp = "Which part moves to resolve overlap: Label Only (shifts only the readable text -- the safest default; never moves the 3D anchor and reads correctly at a shallow viewing angle), Marker (shifts the 3D anchor itself), or Both.";
-        private static readonly string DisplacementAlgorithmHelp = "fixed_axis: deterministic symmetric fan-out (cheapest). candidate_position: nearest open slot per ring (Christensen et al. 1995, good for dense walls). force_directed: organic iterative repulsion with priority anchoring -- the default; cost scales with Relaxation Steps.";
-        private static readonly string ForceDirectedIterationsHelp = "Relaxation steps per Evaluate() cycle for the force_directed algorithm only. More steps separate further but cost more.";
-        private static readonly string DisplacementMaxHelp = "Cap on how far (screen px) a marker/label may travel to escape overlap; beyond it the displaced element hides instead of pushing further, keeping dense groups legible.";
-        private static readonly string LeaderLinesEnabledHelp = "Draw a line from the displaced marker back to its true baseline position so the visitor can still read which POI the shifted label belongs to.";
-        private static readonly string LeaderLineStyleHelp = "straight (single segment), dashed (clears over other markers), or elbow (two-segment poly-line to dodge overlapping content).";
-        private static readonly string LeaderLineMinDistanceHelp = "Shortest screen-px displacement before a leader line is drawn; tiny nudges get no line to avoid clutter.";
-        private static readonly string LeaderLineWidthHelp = "World-space (metre) thickness -- not pixels -- so it scales with viewing distance. Tuned per wall.";
-        private static readonly string LeaderLineOpacityHelp = "0-1 alpha multiplier over the marker's resolved category color. 1.0 = full color.";
-        private static readonly string DisplacementTiebreakHelp = "Tiebreak for two equal-priority markers that overlap: Symmetric (default) shifts both. lower_priority_only shifts only the lower-priority one -- currently deferred (falls back to Symmetric), but still schema-valid to author now.";
         private static readonly Color SearchFilterSectionColor = new Color(0.60f, 0.40f, 0.20f);
         // Specific Marker tab: per-POI header foldouts pick a stable color from
         // PoiHeaderPalette (deterministic FNV-1a hash of the POI id), so concrete
@@ -549,19 +442,5 @@ namespace TileStories.Editor
             "three angles from the POI it was added from.\n\n" +
             "Auto-open: moving or rotating a marker in the Scene view opens its section here " +
             "and scrolls to it.";
-
-        // Keyword Fields table (Global Scene > Search & Filter).
-        private static readonly string SearchFieldKeyHelp = "Stable identifier for this search axis. Never change after editing begins -- existing per-POI keywords reference it by key.";
-        private static readonly string SearchFieldLabelHelp = "Human-readable name shown in each POI's keyword editor.";
-        private static readonly string SearchFieldForcedHelp = "When enabled, a warning appears on any POI that leaves this field's keyword list empty. Non-blocking -- does not prevent saving.";
-        private static readonly string SearchFieldDetailsHelp = "Usage note for the editor team: what vocabulary is useful here, any naming conventions, examples.";
-        private static readonly string SearchFieldsTableHelp =
-            "Define custom search axes (e.g. 'architect', 'period', 'material'). Each row appears as an editable keyword list in every specific POI.\n" +
-            "System axes (category / hierarchy / badge / outline) are handled automatically from their respective tables above.\n" +
-            "Synonym suggestion (WordNet EN / AI) is a planned feature -- manual keyword entry is fully functional now.";
-
-        // Per-POI keyword section labels.
-        private static readonly string SearchKeywordsDerivedHelp = "These keywords are derived automatically from the taxonomy selections above and indexed at runtime. No action needed.";
-        private static readonly string SearchKeywordsOthersHelp = "Freeform keywords that do not belong to any defined search axis (comma-separated). Indexed alongside all other keyword sources.";
     }
 }

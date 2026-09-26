@@ -17,7 +17,7 @@ namespace TileStories.Tests
         public void SetUp()
         {
             MarkerHierarchyResolver.ResetToDefaults();
-            _defaultBands = LODController.DefaultBands();
+            _defaultBands = LodSettings.DefaultBands();
         }
 
         [TearDown]
@@ -320,12 +320,52 @@ private static LodSettings MakeSettings(
         }
 
         [Test]
-        public void Target_SelectHide_OverThresholdIsClustered()
+        public void Target_SelectHide_HidesExactlyWhatTheSelectionDropped()
         {
             var s = MakeSettings("select_hide");
-            Assert.AreEqual(DensityState.Normal, LODController.ComputeTargetDensityState(4, s, 2, 5));
-            Assert.AreEqual(DensityState.Clustered, LODController.ComputeTargetDensityState(5, s, 2, 5));
-            Assert.AreEqual(DensityState.Clustered, LODController.ComputeTargetDensityState(9, s, 2, 5));
+            // crowding alone never hides under Select & Hide: the priority selection decides
+            Assert.AreEqual(DensityState.Normal, LODController.ComputeTargetDensityState(9, s, 2, 5, selectedToHide: false));
+            Assert.AreEqual(DensityState.Clustered, LODController.ComputeTargetDensityState(5, s, 2, 5, selectedToHide: true));
+        }
+
+        // A crowd at one screen spot, one unit per hierarchy level (0 = most important)
+        private static List<VisualUnit> Crowd(int count, Vector2 at, string prefix)
+        {
+            var list = new List<VisualUnit>();
+            for (int i = 0; i < count; i++)
+            {
+                var u = MakeUnit(prefix + i, count - 1, hierarchyLevel: i);
+                u.screenPosition = at + new Vector2(i, 0f);
+                list.Add(u);
+            }
+            return list;
+        }
+
+        [Test]
+        public void SelectAndHide_KeepsTheMostImportantMarkersOfACrowd_AndLeavesADistantCrowdAlone()
+        {
+            var crowd = Crowd(8, new Vector2(100f, 100f), "a");
+            var other = Crowd(3, new Vector2(900f, 900f), "b");
+            var all = crowd.Concat(other).ToList();
+            all.Sort(LODController.ComparePriority);
+
+            var hidden = LODController.SelectAndHide(all, radiusPx: 40f, crowdedAt: 5);
+
+            // the 5 most important of the crowd stay (each then has 4 kept neighbours: not crowded)
+            for (int i = 0; i < 5; i++) Assert.IsFalse(hidden.Contains(crowd[i]), "level " + i + " is among the 5 most important: kept");
+            for (int i = 5; i < 8; i++) Assert.IsTrue(hidden.Contains(crowd[i]), "level " + i + " is less important: hidden");
+            Assert.IsTrue(other.All(u => !hidden.Contains(u)), "a small crowd elsewhere on screen is untouched");
+        }
+
+        [Test]
+        public void SelectAndHide_ReversedInput_StillKeepsByPriority_OnceSorted()
+        {
+            var crowd = Crowd(7, Vector2.zero, "c");
+            var shuffled = new List<VisualUnit>(crowd);
+            shuffled.Reverse();
+            shuffled.Sort(LODController.ComparePriority);
+            var hidden = LODController.SelectAndHide(shuffled, 40f, 3);
+            CollectionAssert.AreEquivalent(crowd.Skip(3), hidden, "only the 3 most important survive a Crowded At of 3");
         }
 
         [Test]
@@ -439,16 +479,25 @@ private static LodSettings MakeSettings(
         }
 
         [Test]
-        public void Strategy_SelectHide_HidesAtOrAboveClusterMin()
+        public void Strategy_SelectHide_HidesTheLeastImportantOfACrowd_AfterTwoAgreeingCycles()
         {
             var s = MakeSettings("select_hide");
+            s.density_radius_px = 40f;
             var hys = new Dictionary<string, DensityHysteresisState>();
-            var u = MakeUnit("p1", 5); // >= cluster_min
-            LODController.ApplyDensityStrategy(new List<VisualUnit> { u }, s, hys);
-            Assert.IsTrue(u.isVisible, "provisional: not yet hidden");
-            LODController.ApplyDensityStrategy(new List<VisualUnit> { u }, s, hys);
-            Assert.IsFalse(u.isVisible, "select_hide hides once committed clustered");
-            Assert.AreEqual(1f, u.shrinkScale, 0.001f);
+
+            List<VisualUnit> Cycle()
+            {
+                // units are rebuilt every Evaluate(), exactly like the real pipeline
+                var crowd = Crowd(7, new Vector2(300f, 300f), "p");
+                LODController.ApplyDensityStrategy(crowd, s, hys);
+                return crowd;
+            }
+
+            Assert.IsTrue(Cycle().All(u => u.isVisible), "provisional: nothing hidden on the first cycle");
+            var committed = Cycle();
+            for (int i = 0; i < 5; i++) Assert.IsTrue(committed[i].isVisible, "level " + i + " stays");
+            for (int i = 5; i < 7; i++) Assert.IsFalse(committed[i].isVisible, "level " + i + " hidden once committed");
+            Assert.IsTrue(committed.All(u => Mathf.Approximately(u.shrinkScale, 1f)), "Select & Hide never shrinks");
         }
 
         [Test]
@@ -609,7 +658,7 @@ private static LodSettings MakeSettings(
             var rig = new GameObject("PipelineControllerRig");
             tracked.Add(rig);
             var controller = rig.AddComponent<LODController>();
-            var settings = new LodSettings { enabled = true }; // empty bands -> AssignBands falls back to DefaultBands()
+            var settings = new LodSettings { enabled = true }; // the framework default bands (LodSettings.DefaultBands)
             typeof(LODController)
                 .GetField("_settings", InstanceFlags)?
                 .SetValue(controller, settings);

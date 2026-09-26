@@ -4,185 +4,82 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // Segmented control for switching between result views:
-    // - List: shows ResultsListView as a scrollable list of search results
-    // - Minimap: shows MinimapView overlay with POI dots
-    // - Highlight: dims non-selected markers, keeps AR view prominent
-    // Persists user's preferred view mode to PlayerPrefs.
-    // (spec _2.6 section 10)
-    public class ViewModeControl : MonoBehaviour
+    // The result view switch (spec _2.6 section 10): List | Map | Highlight. "Map" is offered only while
+    // the minimap is enabled. The starting view is the wall's default_result_view, or -- when
+    // remember_last_view is on -- the view this device chose last time (PlayerPrefs).
+    // Plain C#: built into the parent the search UI hands it; styled by SearchUI.uss.
+    public sealed class ViewModeControl
     {
-        private const string PREF_KEY = "TileStories.default_result_view";
+        public const string LastViewPrefsKey = "TileStories.last_result_view";
 
-        private WallConfigData _config;
-        private UIDocument _uiDocument;
-        private VisualElement _root;
-        private VisualElement _segmentedControl;
-        private MinimapView _minimapView;
-        private ResultsListView _resultsListView;
-        private FilterTrayView _filterTrayView;
+        public VisualElement Root { get; }
+        public ViewMode Mode { get; private set; } = ViewMode.List;
 
-        // Current active view mode
-        private ViewMode _currentMode = ViewMode.List;
+        // Raised after the visitor chose another view
+        public event Action<ViewMode> Changed;
 
-        public enum ViewMode
+        private readonly Button _list;
+        private readonly Button _map;
+        private readonly Button _highlight;
+        private ResultsSettings _results;
+
+        public ViewModeControl(VisualElement parent)
         {
-            List,
-            Minimap,
-            CameraHighlight
+            Root = new VisualElement { name = "view-modes" };
+            Root.AddToClassList("view-modes");
+            _list = AddSegment("List", ViewMode.List);
+            _map = AddSegment("Map", ViewMode.Minimap);
+            _highlight = AddSegment("Highlight", ViewMode.CameraHighlight);
+            parent.Add(Root);
         }
 
-        // Event raised when the view mode changes
-        public event Action<ViewMode> OnViewModeChanged;
+        public bool IsShown => Root.style.display != DisplayStyle.None;
+        public void SetShown(bool shown) => Root.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+        public bool MapOffered => _map.style.display != DisplayStyle.None;
 
-        // Initialise with wall config and references to the view components
-        public void Initialize(WallConfigData config, UIDocument uiDocument,
-            MinimapView minimapView, ResultsListView resultsListView,
-            FilterTrayView filterTrayView)
+        // Apply the wall's settings and pick the starting view
+        public void Configure(ResultsSettings results, bool minimapEnabled)
         {
-            _config = config;
-            _uiDocument = uiDocument;
-            _minimapView = minimapView;
-            _resultsListView = resultsListView;
-            _filterTrayView = filterTrayView;
+            _results = results ?? new ResultsSettings();
+            _map.style.display = minimapEnabled ? DisplayStyle.Flex : DisplayStyle.None;
+            string start = _results.remember_last_view
+                ? PlayerPrefs.GetString(LastViewPrefsKey, _results.default_view)
+                : _results.default_view;
+            Mode = StartingView(ViewModeParser.Parse(start), minimapEnabled);
+            RefreshSegments();
+        }
 
-            if (_uiDocument != null)
+        // The view to start in: the chosen one, or List when that is the map and the map is off
+        public static ViewMode StartingView(ViewMode chosen, bool minimapEnabled) =>
+            chosen == ViewMode.Minimap && !minimapEnabled ? ViewMode.List : chosen;
+
+        // Switch view as if the visitor tapped its segment
+        public void Choose(ViewMode mode)
+        {
+            if (mode == Mode) return;
+            Mode = mode;
+            if (_results != null && _results.remember_last_view)
             {
-                _root = _uiDocument.rootVisualElement;
-                CreateUI(_root);
+                PlayerPrefs.SetString(LastViewPrefsKey, ViewModeParser.ToString(mode));
+                PlayerPrefs.Save();
             }
-
-            // Load or default the view mode
-            string defaultMode = config?.default_result_view ?? "list";
-            string savedMode = PlayerPrefs.GetString(PREF_KEY, defaultMode);
-            ApplyViewMode(ViewModeParser.Parse(savedMode), instant: true);
+            RefreshSegments();
+            Changed?.Invoke(mode);
         }
 
-        // Build the segmented control UI
-        private void CreateUI(VisualElement root)
+        private Button AddSegment(string label, ViewMode mode)
         {
-            _segmentedControl = new VisualElement()
-            {
-                name = "view-mode-control",
-            };
-            _segmentedControl.style.position = Position.Absolute;
-            _segmentedControl.style.top = 12;
-            _segmentedControl.style.left = 12;
-            _segmentedControl.style.right = 12;
-            _segmentedControl.style.height = 36;
-            _segmentedControl.style.flexDirection = FlexDirection.Row;
-            _segmentedControl.style.justifyContent = Justify.Center;
-            _segmentedControl.style.borderLeftWidth = 1;
-            _segmentedControl.style.borderRightWidth = 1;
-            _segmentedControl.style.borderTopWidth = 1;
-            _segmentedControl.style.borderBottomWidth = 1;
-            _segmentedControl.style.borderLeftColor = new StyleColor(new Color(1f, 1f, 1f, 0.2f));
-            _segmentedControl.style.borderRightColor = new StyleColor(new Color(1f, 1f, 1f, 0.2f));
-            _segmentedControl.style.borderTopColor = new StyleColor(new Color(1f, 1f, 1f, 0.2f));
-            _segmentedControl.style.borderBottomColor = new StyleColor(new Color(1f, 1f, 1f, 0.2f));
-
-            AddSegmentButton("List", ViewMode.List);
-            AddSegmentButton("Minimap", ViewMode.Minimap);
-            AddSegmentButton("Highlight", ViewMode.CameraHighlight);
-
-            root.Add(_segmentedControl);
+            var b = new Button(() => Choose(mode)) { name = "view-mode-" + mode, text = label, tooltip = label + " view" };
+            b.AddToClassList("view-mode");
+            Root.Add(b);
+            return b;
         }
 
-        // Add a single button to the segmented control
-        private void AddSegmentButton(string label, ViewMode mode)
+        private void RefreshSegments()
         {
-            var button = new Button(() => OnSegmentClicked(mode))
-            {
-                text = label,
-                name = $"view-mode-{mode}",
-            };
-            UIAccessibility.SetRoleAndLabel(button, "button", label + " view");
-            button.style.minWidth = 100;
-            button.style.minHeight = 34;
-            button.style.unityTextAlign = TextAnchor.MiddleCenter;
-            button.style.fontSize = 13;
-            button.style.unityFontStyleAndWeight = FontStyle.Bold;
-            button.userData = mode;
-            UpdateSegmentButtonVisual(button, mode == _currentMode);
-
-            _segmentedControl.Add(button);
-        }
-
-        // Handle a segment button click
-        private void OnSegmentClicked(ViewMode mode)
-        {
-            ApplyViewMode(mode);
-        }
-
-        // Apply the selected view mode, updating all view components
-        private void ApplyViewMode(ViewMode mode, bool instant = false)
-        {
-            if (_currentMode == mode && !instant)
-                return;
-
-            _currentMode = mode;
-
-            // Update segment button visuals
-            if (_segmentedControl != null)
-            {
-                foreach (var child in _segmentedControl.Children())
-                {
-                    if (child is Button button)
-                    {
-                        ViewMode buttonMode = (ViewMode)button.userData;
-                        UpdateSegmentButtonVisual(button, buttonMode == mode);
-                    }
-                }
-            }
-
-            // Show/hide the appropriate view components
-            if (_minimapView != null)
-                _minimapView.SetVisible(mode == ViewMode.Minimap);
-
-            if (_resultsListView != null)
-                _resultsListView.SetVisible(mode == ViewMode.List);
-
-            if (_filterTrayView != null)
-                _filterTrayView.SetVisible(true); // tray available in every mode -- filtering while highlighting is the point of CameraHighlight (2.6-i decision)
-
-            // CameraHighlight mode: ResultSetCoordinator drives the result-set dim through
-            // SelectionHighlightController.SetTargetCandidates (2.6-i) -- NOT the old
-            // single-tap-selection highlight, which only ever dimmed around one marker.
-
-            // Persist preference
-            PlayerPrefs.SetString(PREF_KEY, ViewModeParser.ToString(mode));
-            PlayerPrefs.Save();
-
-            OnViewModeChanged?.Invoke(mode);
-        }
-
-        // Update a segment button's appearance based on selected state
-        private void UpdateSegmentButtonVisual(Button button, bool selected)
-        {
-            if (selected)
-            {
-                button.style.backgroundColor = new StyleColor(new Color(0.3f, 0.5f, 0.8f, 0.8f));
-                button.style.color = new StyleColor(Color.white);
-            }
-            else
-            {
-                button.style.backgroundColor = new StyleColor(Color.clear);
-                button.style.color = new StyleColor(new Color(0.8f, 0.8f, 0.8f));
-            }
-        }
-
-        // Get the current view mode
-        public ViewMode GetCurrentMode() => _currentMode;
-
-        // Update when wall config changes
-        public void Refresh(WallConfigData newConfig)
-        {
-            _config = newConfig;
-        }
-
-        private void OnDestroy()
-        {
-            OnViewModeChanged = null;
+            _list.EnableInClassList("view-mode--on", Mode == ViewMode.List);
+            _map.EnableInClassList("view-mode--on", Mode == ViewMode.Minimap);
+            _highlight.EnableInClassList("view-mode--on", Mode == ViewMode.CameraHighlight);
         }
     }
 }

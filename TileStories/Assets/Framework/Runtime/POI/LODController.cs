@@ -5,7 +5,7 @@ namespace TileStories
 {
     // Core invariant (spec §2): every distance value in this domain is the real
     // 3D Euclidean distance from the camera to that specific marker's world
-    // position (Vector3.Distance(camera.position, marker.transform.position)),
+    // undisplaced position (Vector3.Distance(camera.position, marker.UndisplacedWorldPosition)),
     // never a shared "distance to wall plane" reused across markers. This makes
     // the "standing close, looking sideways at a wide wall" scenario resolve
     // correctly — a marker 15m to the side has a genuinely large distance and
@@ -65,12 +65,25 @@ namespace TileStories
         private DisplacementSettings _dispSettings;
         private readonly Dictionary<string, DisplacementStabilityState> _displacementStability = new();
 
+        // True once step 8 has moved anything, so switching Displacement off puts every marker back once.
+        private bool _displacementApplied;
+
+        // What the last displacement cycle decided (the POI Editor's live readout); null while it is off.
+        public DisplacementStats LastDisplacementStats { get; private set; }
+
         // Orientation settings (_2.1_Marker_Orientation.md section 13), resolved lazily
         // alongside LOD/displacement. _effectiveClusterOrientation is computed once when
         // the wall settings reference changes, not per spawn -- cluster views are pooled
         // and re-used, so recomputing per-spawn would be wasted work on every reuse.
         private OrientationSettings _orientationSettings;
         private OrientationSettings _effectiveClusterOrientation;
+
+        // True once Evaluate() has hidden/shrunk/clustered anything, so switching LOD off restores once.
+        private bool _lodStateApplied;
+
+        // What the last evaluation decided (the POI Editor's live LOD readout); null while LOD is off
+        // or nothing was evaluated since the markers were restored.
+        public LodStats LastStats { get; private set; }
 
         private void Awake()
         {
@@ -82,17 +95,23 @@ namespace TileStories
 
         private void Update()
         {
-            if (_settings == null)
-            {
-                EnsureSettings();
-                if (_settings == null) return;
-            }
+            // Cheap reference check every frame: a live Play Mode edit swaps the wall's settings
+            // object, and the new one must take effect (and reset LOD state) right away.
+            EnsureSettings();
+            if (_settings == null) return;
 
-            // Displacement runs independently of LOD — only skip if both are disabled
-            // (spec _2.5 section 8: enabled-flag fix). Before Block 6, early-return
-            // fired whenever _settings.enabled was false, which also killed displacement.
-            bool lodEnabled = _settings.enabled;
+            // LOD switched off while markers were thinned/clustered: put every marker back once.
+            if (!_settings.enabled && _lodStateApplied)
+                RestoreAllMarkers();
+
+            // Displacement switched off while markers were moved: put every marker back once.
             bool dispEnabled = _dispSettings?.enabled ?? false;
+            if (!dispEnabled && _displacementApplied)
+                ClearDisplacement();
+
+            // Displacement runs independently of LOD -- only skip if both are disabled
+            // (spec _2.5 section 8).
+            bool lodEnabled = _settings.enabled;
             if (!lodEnabled && !dispEnabled) return;
 
             var markers = _wallSession?.SpawnedMarkers;
@@ -111,11 +130,14 @@ namespace TileStories
             var lodSettings = _wallSession?.LodSettings;
             if (lodSettings != null && !ReferenceEquals(lodSettings, _settings))
             {
+                // - new settings = new rules: drop every remembered band/density/cluster decision
+                //   and show the wall untouched until the next Evaluate() decides again
+                if (_settings != null) RestoreAllMarkers();
                 _settings = lodSettings;
-                                _bandCache.Clear();
+                _bandCache.Clear();
                 _prevEffectiveDistance.Clear();
                 _densityHysteresis.Clear();
-                                _clusterBandCache.Clear();
+                _clusterBandCache.Clear();
                 _clusterDissolveMisses.Clear();
             }
 
@@ -124,6 +146,8 @@ namespace TileStories
             var dispSettings = _wallSession?.DisplacementSettings;
             if (dispSettings != null && !ReferenceEquals(dispSettings, _dispSettings))
             {
+                // - new settings = new rules: every marker starts again from where it really is
+                if (_dispSettings != null) ClearDisplacement();
                 _dispSettings = dispSettings;
                 _displacementStability.Clear();
             }
@@ -152,6 +176,37 @@ namespace TileStories
                     facing_mode = "always_facing_camera"
                 };
             }
+        }
+
+        // Undo every LOD decision on the markers: all visible at full size and opacity, every
+        // cluster aggregate removed. Used when LOD is switched off or its settings are replaced.
+        public void RestoreAllMarkers()
+        {
+            foreach (var marker in GetMarkers())
+            {
+                marker.SetDensityFactor(1f, 0f);
+                marker.SetVisible(true, 0f);
+            }
+            foreach (var view in _activeClusterViews)
+            {
+                if (view == null) continue;
+                if (Application.isPlaying) Destroy(view.gameObject);
+                else DestroyImmediate(view.gameObject);
+            }
+            _activeClusterViews.Clear();
+            _clusterDissolveMisses.Clear();
+            _clusterBandCache.Clear();
+            _lodStateApplied = false;
+            LastStats = null;
+        }
+
+        // Undo every displacement decision: labels and markers back in place, labels shown, no leader lines.
+        public void ClearDisplacement()
+        {
+            MarkerOverlapResolver.ClearAll(GetMarkers());
+            _displacementStability.Clear();
+            _displacementApplied = false;
+            LastDisplacementStats = null;
         }
 
         // Live Play Mode edit of the orientation settings: recompute the effective cluster settings
@@ -212,9 +267,12 @@ namespace TileStories
 
                 // Step 7: Apply visibility with soft transition (§4 step 6, §7)
                 ApplyVisibility(visualUnits);
+                LastStats = LodStats.From(visualUnits, _settings.bands != null && _settings.bands.Count > 0
+                    ? _settings.bands : LodSettings.DefaultBands(), ARZoomState.ZoomFactor);
             }
             else
             {
+                LastStats = null;
                 // LOD disabled — passthrough: every spawned marker is a visible
                 // unit. Displacement still runs (e.g. small wall with dense POIs
                 // where distance-based thinning isn't useful but overlap still occurs).
@@ -224,10 +282,12 @@ namespace TileStories
 
             // Step 8: Apply displacement offsets (spec _2.5 section 8) on whatever
             // VisualUnits survived step 7 (or the passthrough if LOD is disabled).
+            // Hidden units and cluster aggregates are reset there, never moved (MarkerOverlapResolver.TakesPart).
             if (dispEnabled && _camera != null)
             {
-                MarkerOverlapResolver.ApplyDisplacement(
+                LastDisplacementStats = MarkerOverlapResolver.ApplyDisplacement(
                     visualUnits, _camera, _dispSettings, _displacementStability);
+                _displacementApplied = true;
             }
         }
 
@@ -244,7 +304,7 @@ namespace TileStories
                 {
                     marker = marker,
                     poiId = marker.PoiId,
-                    worldPosition = marker.transform.position,
+                    worldPosition = marker.UndisplacedWorldPosition,
                     isVisible = true,
                     hierarchyLevelIndex = MarkerHierarchyResolver.GetLevelPriority(marker.HierarchyLevelKey)
                 };
@@ -282,7 +342,7 @@ namespace TileStories
             foreach (var marker in markers)
             {
                 if (marker == null) continue;
-                var viewportPos = cam.WorldToViewportPoint(marker.transform.position);
+                var viewportPos = cam.WorldToViewportPoint(marker.UndisplacedWorldPosition);
                 if (viewportPos.z < 0) continue; // behind camera
                 if (viewportPos.x < -viewportMargin || viewportPos.x > 1f + viewportMargin) continue;
                 if (viewportPos.y < -viewportMargin || viewportPos.y > 1f + viewportMargin) continue;
@@ -308,7 +368,7 @@ namespace TileStories
             foreach (var marker in markers)
             {
                 if (marker == null) continue;
-                float realDistance = Vector3.Distance(cam.transform.position, marker.transform.position);
+                float realDistance = Vector3.Distance(cam.transform.position, marker.UndisplacedWorldPosition);
                 result[marker.PoiId] = realDistance / zoomFactor;
             }
 
@@ -322,7 +382,7 @@ namespace TileStories
             var result = new Dictionary<string, LodBand>(distances.Count);
             var bands = _settings.bands != null && _settings.bands.Count > 0
                 ? _settings.bands
-                : DefaultBands();
+                : LodSettings.DefaultBands();
 
             foreach (var kvp in distances)
             {
@@ -369,7 +429,7 @@ namespace TileStories
             var valid = new bool[markers.Count];
             for (int i = 0; i < markers.Count; i++)
             {
-                var screenPos = cam.WorldToScreenPoint(markers[i].transform.position);
+                var screenPos = cam.WorldToScreenPoint(markers[i].UndisplacedWorldPosition);
                 valid[i] = screenPos.z > 0; // in front of camera
                 screenPositions[i] = new Vector2(screenPos.x, screenPos.y);
             }
@@ -409,12 +469,14 @@ namespace TileStories
             {
                 if (marker == null) continue;
 
-                                                var unit = new VisualUnit { marker = marker, poiId = marker.PoiId, worldPosition = marker.transform.position };
+                var unit = new VisualUnit { marker = marker, poiId = marker.PoiId, worldPosition = marker.UndisplacedWorldPosition };
 
                 if (visibleSet.Contains(marker))
                 {
                     // Frustum-visible: populate full data
                     unit.isVisible = true;
+                    unit.inView = true;
+                    if (_camera != null) unit.screenPosition = _camera.WorldToScreenPoint(unit.worldPosition);
                     unit.effectiveDistance = distances.TryGetValue(marker.PoiId, out var d) ? d : 0f;
                     if (bands.TryGetValue(marker.PoiId, out var band))
                         unit.band = band;
@@ -497,11 +559,14 @@ namespace TileStories
         public void ApplyVisibility(List<VisualUnit> visualUnits)
         {
             float fadeDuration = _settings.transition_fade_duration_s;
+            _lodStateApplied = true;
 
-                        foreach (var unit in visualUnits)
+            foreach (var unit in visualUnits)
             {
                 if (unit.marker != null)
                 {
+                    // - crowding factor first (size + opacity), then the show/hide channel
+                    unit.marker.SetDensityFactor(unit.shrinkScale, fadeDuration);
                     unit.marker.SetVisible(unit.isVisible, fadeDuration);
                 }
                 else if (unit.clusterView != null)
@@ -551,7 +616,7 @@ namespace TileStories
                 return;
             }
 
-            var bandEntries = _settings.bands != null && _settings.bands.Count > 0 ? _settings.bands : DefaultBands();
+            var bandEntries = _settings.bands != null && _settings.bands.Count > 0 ? _settings.bands : LodSettings.DefaultBands();
             var spawnRoot = _wallSession != null ? _wallSession.MarkerSpawnRoot : transform;
             var iconLibrary = _wallSession != null ? _wallSession.WallIconLibrary : null;
             float fade = _settings.transition_fade_duration_s;
@@ -597,12 +662,14 @@ namespace TileStories
                 else view.Refresh(memberViews, iconLibrary, _settings);
                 view.PositionAt(centroid, spawnRoot);
 
-                // 5. Band with per-signature hysteresis (spec §7).
+                // 5. Band from the developer's Band Source (centroid / nearest / farthest member),
+                //    with per-signature hysteresis (spec §7).
+                float bandDistance = ClusterGrouping.RepresentativeDistance(group, _settings.cluster_band_source, centroidEff);
                 LodBand committedBand;
                 if (_settings.cluster_band_hysteresis_enabled && _clusterBandCache.TryGetValue(signature, out var prevBand))
-                    committedBand = FindBandWithHysteresis(centroidEff, bandEntries, prevBand, _settings.hysteresis_margin_m);
+                    committedBand = FindBandWithHysteresis(bandDistance, bandEntries, prevBand, _settings.hysteresis_margin_m);
                 else
-                    committedBand = FindBand(centroidEff, bandEntries);
+                    committedBand = FindBand(bandDistance, bandEntries);
                 _clusterBandCache[signature] = committedBand;
 
                 // 6. Aggregate unit: BuildAggregate owns worldPosition/poiId/priority/members;
@@ -610,7 +677,7 @@ namespace TileStories
                 int bestPriority = group[0].hierarchyLevelIndex;
                 for (int i = 1; i < group.Count; i++)
                     if (group[i].hierarchyLevelIndex < bestPriority) bestPriority = group[i].hierarchyLevelIndex;
-                var agg = ClusterGrouping.BuildAggregate(group, bestPriority, _settings.cluster_band_source, centroid, centroidEff);
+                var agg = ClusterGrouping.BuildAggregate(group, bestPriority, centroid, bandDistance);
                 agg.clusterView = view;
                 agg.band = committedBand;
                 aggregates.Add(agg);
@@ -698,25 +765,13 @@ namespace TileStories
         // Static methods — Tier 0 testable without a scene
         // ------------------------------------------------------------------
 
-        // Default bands per spec §3 (2m/7m/9999m, counts -1/15/5).
-        // All three tiers are explicit rows — no implicit "beyond last row".
-                public static List<LodBandEntry> DefaultBands()
-        {
-            return new List<LodBandEntry>
-            {
-                new LodBandEntry { max_distance_m = 2f,   max_visible_count = -1 }, // all
-                new LodBandEntry { max_distance_m = 7f,   max_visible_count = 15 },
-                new LodBandEntry { max_distance_m = 9999f, max_visible_count = 5 },
-            };
-        }
-
         // Band lookup: ordered scan, first row whose max_distance_m the
         // distance is under, wins. Last row is catch-all for any distance
         // beyond its threshold (but since last row = 9999m, this rarely triggers).
                 public static LodBand FindBand(float effectiveDistance, List<LodBandEntry> bands)
         {
             if (bands == null || bands.Count == 0)
-                bands = DefaultBands();
+                bands = LodSettings.DefaultBands();
 
             for (int i = 0; i < bands.Count; i++)
             {
@@ -773,13 +828,18 @@ namespace TileStories
 
         // Density factor for shrink_and_fade (§6). Linear ramp from
         // shrink_start_neighbor_count (factor=1.0, unaffected) to
-        // cluster_min_count (factor=0.4, floor — never fully invisible).
-                public static float DensityFactor(float neighborCount, int shrinkStart, int clusterMin)
+        // cluster_min_count (factor=floor, never fully invisible). One factor drives both
+        // size and opacity (MarkerView.SetDensityFactor).
+        public static float DensityFactor(float neighborCount, int shrinkStart, int clusterMin, float floor = DefaultShrinkFloor)
         {
             if (clusterMin <= shrinkStart) return 1f; // misconfigured, no shrink
             float t = Mathf.InverseLerp(shrinkStart, clusterMin, neighborCount);
-            return Mathf.Lerp(1f, 0.4f, t);
+            return Mathf.Lerp(1f, Mathf.Clamp(floor, MinShrinkFloor, 1f), t);
         }
+
+        // Framework default and lower limit of shrink_min_factor (the Editor slider uses the same limits)
+        public const float DefaultShrinkFloor = 0.4f;
+        public const float MinShrinkFloor = 0.1f;
 
         // --- Density response strategies (§6) + 2-cycle hysteresis (§7) ---
 
@@ -806,23 +866,49 @@ namespace TileStories
 
             int shrinkStart = settings.shrink_start_neighbor_count;
             int clusterMin = settings.cluster_min_count;
+            var hiddenBySelection = settings.density_response_mode == "select_hide"
+                ? SelectAndHide(visible, settings.density_radius_px, clusterMin)
+                : null;
 
             foreach (var u in visible)
             {
-                var target = ComputeTargetDensityState(u.neighborCount, settings, shrinkStart, clusterMin);
-                                var committed = CommitDensityState(u.poiId, target, hysteresis);
+                bool selectedToHide = hiddenBySelection != null && hiddenBySelection.Contains(u);
+                var target = ComputeTargetDensityState(u.neighborCount, settings, shrinkStart, clusterMin, selectedToHide);
+                var committed = CommitDensityState(u.poiId, target, hysteresis);
                 u.densityState = committed;
-                ApplyCommittedDensityState(u, committed, shrinkStart, clusterMin);
+                ApplyCommittedDensityState(u, committed, shrinkStart, clusterMin, settings.shrink_min_factor);
             }
+        }
+
+        // Select & Hide (Selection, spec 6): walk the units from most to least important and keep each
+        // one while fewer than `crowdedAt` already-kept units sit within `radiusPx` of it on screen;
+        // the rest are hidden. A crowd therefore keeps its most important markers (none of them left
+        // crowded) instead of vanishing whole. `prioritySorted` must be in ComparePriority order.
+        public static HashSet<VisualUnit> SelectAndHide(IReadOnlyList<VisualUnit> prioritySorted, float radiusPx, int crowdedAt)
+        {
+            var hidden = new HashSet<VisualUnit>();
+            var kept = new List<VisualUnit>();
+            float radiusSq = radiusPx * radiusPx;
+            foreach (var u in prioritySorted)
+            {
+                int keptNeighbours = 0;
+                foreach (var k in kept)
+                    if ((k.screenPosition - u.screenPosition).sqrMagnitude < radiusSq) keptNeighbours++;
+                if (keptNeighbours >= crowdedAt) hidden.Add(u);
+                else kept.Add(u);
+            }
+            return hidden;
         }
 
         // Resolve which density state a marker TARGETS this cycle (pre-hysteresis).
         // Pure on its inputs; the 2-cycle commit gate lives in CommitDensityState.
+        // `selectedToHide` is SelectAndHide's answer for this marker (read by Select & Hide only).
         public static DensityState ComputeTargetDensityState(
             int neighborCount,
             LodSettings s,
             int shrinkStart,
-            int clusterMin)
+            int clusterMin,
+            bool selectedToHide = false)
         {
             // Safety-net escalation (§6.2): in any NON-hybrid mode, if a region is
             // unexpectedly far denser than cluster_min (x the multiplier), force
@@ -839,9 +925,8 @@ namespace TileStories
                     // Density is still evaluated (cheap) but nothing acts on it.
                     return DensityState.Normal;
                 case "select_hide":
-                    // Over cluster_min -> hidden outright; lowest-priority first
-                    // is enforced by the caller's priority ordering.
-                    return neighborCount >= clusterMin ? DensityState.Clustered : DensityState.Normal;
+                    // hidden outright only when SelectAndHide dropped it (least important first)
+                    return selectedToHide ? DensityState.Clustered : DensityState.Normal;
                 case "cluster":
                     return neighborCount >= clusterMin ? DensityState.Clustered : DensityState.Normal;
                 case "shrink_and_fade":
@@ -907,7 +992,8 @@ namespace TileStories
             VisualUnit unit,
             DensityState committed,
             int shrinkStart,
-            int clusterMin)
+            int clusterMin,
+            float shrinkFloor)
         {
             switch (committed)
             {
@@ -919,7 +1005,7 @@ namespace TileStories
                     // Reuse the shared DensityFactor ramp: 1.0 at shrink_start,
                     // 0.4 floor at cluster_min. Above cluster_min it clamps to 0.4
                     // (never fully vanishes) -- the correct floor for shrink_and_fade.
-                    unit.shrinkScale = DensityFactor(unit.neighborCount, shrinkStart, clusterMin);
+                    unit.shrinkScale = DensityFactor(unit.neighborCount, shrinkStart, clusterMin, shrinkFloor);
                     unit.isVisible = true;
                     break;
                 case DensityState.Clustered:
@@ -1014,6 +1100,8 @@ namespace TileStories
         public MarkerView marker;
         public string poiId;
         public Vector3 worldPosition; // L272 sets this; Phase 2 (clustering) reads it for centroid
+        public Vector2 screenPosition; // where the camera draws it this cycle (Select & Hide's neighbour test)
+        public bool inView;            // survived Frustum Culling this cycle (LodStats tells culled from capped)
         public bool isVisible = true;
         public float effectiveDistance;
         public LodBand band;

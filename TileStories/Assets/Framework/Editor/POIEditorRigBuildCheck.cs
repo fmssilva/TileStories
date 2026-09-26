@@ -18,7 +18,7 @@ namespace TileStories.Editor
         public void OnPreprocessBuild(BuildReport report)
         {
             // Delegate to the tool window's dialog. For builds there is no
-            // "Continue Without Clearing" option — the dialog only offers
+            // "Play With Duplicates" option — the dialog only offers
             // Save/Clear/Build or Cancel.
             if (!POIEditorToolWindow.PromptBeforePlayOrBuild(isBuild: true))
             {

@@ -303,7 +303,7 @@ namespace TileStories.Editor.Tests
         {
             var t = typeof(POIEditorToolWindow);
             var effectNames = EffectDefaults.SelectableEffects.Select(MarkerEffectNames.DisplayName).ToList();
-            var terms = new List<string> { "Enable effects", "Hierarchy Levels", "Reveal Delay", "Rotate", "Add effects demo grid" };
+            var terms = new List<string> { "Enable effects", "Hierarchy Levels", "Reveal Delay", "Spin Ring", "Add effects demo grid" };
             terms.AddRange(effectNames);
 
             foreach (string guideName in new[] { "EffectsSceneTestGuide", "EffectsPlaymodeTestGuide", "EffectsDeviceTestGuide" })
@@ -312,7 +312,7 @@ namespace TileStories.Editor.Tests
                 Assert.IsFalse(string.IsNullOrWhiteSpace(guide), guideName + " must exist and not be empty");
                 AssertAscii(guide, guideName);
 
-                foreach (string block in new[] { "MASTER SWITCH", "PULSE", "RIPPLE", "HALO", "REVEAL AND ROTATE" })
+                foreach (string block in new[] { "MASTER SWITCH", "PULSE", "RIPPLE", "HALO", "REVEAL AND SPIN RING" })
                     StringAssert.Contains(block, guide, guideName + " must have a '" + block + "' block");
 
                 if (guideName == "EffectsSceneTestGuide")
@@ -324,7 +324,9 @@ namespace TileStories.Editor.Tests
                 {
                     foreach (string term in terms)
                         StringAssert.Contains(term, guide, guideName + " must mention '" + term + "'");
-                    StringAssert.Contains("MarkerGalleryScene", guide, guideName);
+                    // The demo grid is the framework's side-by-side view; this repo's dev gallery scenes are
+                    // not something a wall developer has (MarkerDomainsHelpTextTests forbids naming them)
+                    StringAssert.Contains("Add effects demo grid", guide, guideName);
                 }
                 else
                 {
@@ -336,14 +338,13 @@ namespace TileStories.Editor.Tests
             var window = ScriptableObject.CreateInstance<POIEditorToolWindow>();
             try
             {
-                foreach (string foldoutField in new[] { "_showEffectsSceneTestGuide", "_showEffectsPlaymodeTestGuide", "_showEffectsDeviceTestGuide",
-                    "_showEffectPulse", "_showEffectRippleRings", "_showEffectRippleDiscs", "_showEffectHaloRing", "_showEffectHaloDisc", "_showEffectBeacon" })
+                // The Test foldout's own open/collapsed defaults: DomainTestFoldoutTests (every domain)
+                foreach (string foldoutField in new[] { "_showEffectPulse", "_showEffectRippleRings", "_showEffectRippleDiscs", "_showEffectHaloRing", "_showEffectHaloDisc", "_showEffectBeacon" })
                 {
                     var f = t.GetField(foldoutField, Instance);
                     Assert.IsNotNull(f, foldoutField + " must exist");
                     Assert.IsFalse((bool)f.GetValue(window), foldoutField + " must default to collapsed");
                 }
-                Assert.IsTrue((bool)t.GetField("_showEffectsTest", Instance).GetValue(window), "The Test foldout itself defaults to open");
             }
             finally { UnityEngine.Object.DestroyImmediate(window); }
         }
@@ -372,6 +373,26 @@ namespace TileStories.Editor.Tests
         {
             foreach (char c in text)
                 Assert.IsTrue(c == '\n' || (c >= ' ' && c <= '~'), what + " must be ASCII only, found char code " + (int)c);
+        }
+
+        [Test]
+        public void EffectsTestGuides_DoNotHardcodeAWallsRealPoiIdsOrLevelKeys()
+        {
+            // Guide text must describe framework behaviour, not one specific wall's taxonomy
+            // (_5.1_Editor_Tab.md, "Domain Manual Tests" > "Guide content must stay app-agnostic").
+            // "LivingRoom" itself is NOT forbidden: the real scene-path reference
+            // (Apps/LivingRoom/LivingRoomScene) is legitimate and kept.
+            var t = typeof(POIEditorToolWindow);
+            var forbidden = new[] { "'lamp'", "lamp_military", "lamp_economic", "level_1", "level_2", "level_3", "level_4", "level_5" };
+
+            foreach (string guideName in new[] { "EffectsSceneTestGuide", "EffectsPlaymodeTestGuide", "EffectsDeviceTestGuide" })
+            {
+                var field = t.GetField(guideName, Static);
+                Assert.IsNotNull(field, guideName + " must exist");
+                var guide = (string)field.GetValue(null);
+                foreach (string term in forbidden)
+                    StringAssert.DoesNotContain(term, guide, guideName + " must not hardcode the real wall-specific id/level key '" + term + "'");
+            }
         }
     }
 }

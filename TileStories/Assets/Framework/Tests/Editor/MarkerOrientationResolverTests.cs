@@ -85,6 +85,64 @@ namespace TileStories.Tests
             Object.DestroyImmediate(go);
         }
 
+        // The side a visitor READS: a world-space uGUI canvas shows its front when its forward points
+        // AWAY from the viewer (a billboard copies the camera's rotation). Every camera-facing mode
+        // must turn that side to the camera, from any direction -- yaw_only once pointed its forward
+        // at the camera, so every yaw_only label read mirrored while every other test stayed green.
+        [TestCase("yaw_only", "view_plane")]
+        [TestCase("always_facing_camera", "view_plane")]
+        [TestCase("always_facing_camera", "camera_position")]
+        public void ResolveRootRotation_CameraFacingModes_ShowTheReadableSideToTheCamera(string facingMode, string basis)
+        {
+            var settings = new OrientationSettings { vertical_alignment_mode = "world_up", facing_mode = facingMode, facing_basis = basis };
+            Vector3 markerPos = new Vector3(1f, 0.5f, 2f);
+            for (int i = 0; i < 8; i++)
+            {
+                float yaw = i * 45f;
+                Vector3 camPos = markerPos + Quaternion.Euler(0f, yaw, 0f) * new Vector3(0f, (i % 3 - 1) * 0.8f, -3f);
+                Vector3 camForward = (markerPos - camPos).normalized;   // the camera looks at the marker
+
+                var result = MarkerOrientationResolver.ResolveRootRotation(
+                    settings, "", markerPos, camPos, camForward,
+                    Vector3.up, Vector3.up, Quaternion.identity, Quaternion.identity);
+
+                Assert.IsTrue(result.Resolved, facingMode + " camera at " + yaw + " deg");
+                Vector3 markerForward = result.Rotation * Vector3.forward;
+                Vector3 awayFromCamera = Vector3.ProjectOnPlane(markerPos - camPos, Vector3.up).normalized;
+                Assert.Greater(Vector3.Dot(Vector3.ProjectOnPlane(markerForward, Vector3.up).normalized, awayFromCamera), 0.9f,
+                    facingMode + "/" + basis + ": camera at " + yaw + " deg sees the BACK of the marker (mirrored text)");
+            }
+        }
+
+        // A real wall's markers hang under a ROTATED parent (the localised anchor turned to the wall's
+        // heading; the LOD demo field's root turned to the camera). yaw_only once measured the camera's
+        // yaw in world space and then applied it on top of the parent's own yaw, so every marker turned
+        // by the parent's yaw a second time -- invisible under the Editor's identity anchor.
+        [TestCase(0f)]
+        [TestCase(37f)]
+        [TestCase(90f)]
+        [TestCase(-120f)]
+        [TestCase(283.3f)]
+        public void ResolveRootRotation_YawOnly_UnderARotatedParent_StillShowsTheReadableSideToTheCamera(float parentYawDeg)
+        {
+            var settings = new OrientationSettings { vertical_alignment_mode = "world_up", facing_mode = "yaw_only" };
+            var parent = Quaternion.Euler(0f, parentYawDeg, 0f);
+            Vector3 markerPos = new Vector3(1f, 0.5f, 2f);
+            for (int i = 0; i < 8; i++)
+            {
+                Vector3 camPos = markerPos + Quaternion.Euler(0f, i * 45f, 0f) * new Vector3(0f, 0.3f, -3f);
+                var result = MarkerOrientationResolver.ResolveRootRotation(
+                    settings, "", markerPos, camPos, (markerPos - camPos).normalized,
+                    Vector3.up, Vector3.up, parent, Quaternion.identity);
+
+                Assert.IsTrue(result.Resolved);
+                Vector3 markerForward = Vector3.ProjectOnPlane(result.Rotation * Vector3.forward, Vector3.up).normalized;
+                Vector3 awayFromCamera = Vector3.ProjectOnPlane(markerPos - camPos, Vector3.up).normalized;
+                Assert.Greater(Vector3.Dot(markerForward, awayFromCamera), 0.999f,
+                    "parent yaw " + parentYawDeg + ", camera at " + (i * 45) + " deg: the marker must face the camera, not turn by the parent's yaw again");
+            }
+        }
+
         [Test]
         public void ResolveRootRotation_YawOnly_HasNoPitchComponent()
         {

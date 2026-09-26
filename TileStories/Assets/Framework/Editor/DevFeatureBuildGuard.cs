@@ -32,6 +32,27 @@ namespace TileStories.Editor
                 ActiveInReleaseBuild = false,
                 IsOn = c => c.outline_preview != null && c.outline_preview.enabled,
             },
+            new DevSwitch
+            {
+                Name = "Add LOD demo field",
+                HowToDisable = "POI Editor > Global Scene > LOD > Test > untick 'Add LOD demo field', then Save All to JSON and Copy to StreamingAssets",
+                ActiveInReleaseBuild = false,
+                IsOn = c => c.demo_field != null && c.demo_field.enabled,
+            },
+            new DevSwitch
+            {
+                Name = "Add displacement demo",
+                HowToDisable = "POI Editor > Global Scene > Displacement > Test > untick 'Add displacement demo', then Save All to JSON and Copy to StreamingAssets",
+                ActiveInReleaseBuild = false,
+                IsOn = c => c.displacement_demo != null && c.displacement_demo.enabled,
+            },
+            new DevSwitch
+            {
+                Name = "Add search demo",
+                HowToDisable = "POI Editor > Global Scene > Select, Filter & Search > Test > untick 'Add search demo', then Save All to JSON and Copy to StreamingAssets",
+                ActiveInReleaseBuild = false,
+                IsOn = c => c.search_demo != null && c.search_demo.enabled,
+            },
         };
 
         // Messages for every switch that is ON and would take effect in this kind of build

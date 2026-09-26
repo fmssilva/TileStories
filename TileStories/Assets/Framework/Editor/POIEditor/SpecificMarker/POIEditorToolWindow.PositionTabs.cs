@@ -259,32 +259,16 @@ namespace TileStories.Editor
             {
                 _lastVerifiedPositions.Remove(poi.id);
 
-                // Verified -> Unverified: confirm if the user really wants to unlock editing
-                bool skipPrompt = EditorPrefs.GetBool(SkipUnverifyPromptPrefKey, false);
-                if (!skipPrompt)
-                {
-                    int choice = EditorUtility.DisplayDialogComplex(
-                        "Edit Verified Positions",
-                        $"The position and facing for '{poi.name}' are already verified.\n\nAre you sure you want to edit this POI's position and facing again?",
-                        "Yes, Unlock",                // 0 = left button
-                        "Cancel",                     // 1 = middle button
-                        "Yes, and Don't Ask Again"); // 2 = right button
+                // Verified -> Unverified: confirm the developer really wants to unlock editing
+                // (Unity's own "do not show again" box; a hidden question answers Confirm)
+                var answer = EditorDecision.Ask(
+                    "Edit Verified Positions",
+                    $"The position and facing for '{poi.name}' are already verified.\n\nAre you sure you want to edit this POI's position and facing again?",
+                    "Yes, Unlock",
+                    dontAskAgainKey: NoticeKeys.UnverifyPosition);
 
-                    if (choice == 0) // Yes, Unlock
-                    {
-                        DrawConfigMutationScope(() => { poi.position_verified = false; }, true);
-                    }
-                    else if (choice == 2) // Yes, and Don't Ask Again
-                    {
-                        EditorPrefs.SetBool(SkipUnverifyPromptPrefKey, true);
-                        DrawConfigMutationScope(() => { poi.position_verified = false; }, true);
-                    }
-                    // choice == 1 or closed via X: Cancel (do nothing)
-                }
-                else
-                {
+                if (answer == DecisionAnswer.Confirm)
                     DrawConfigMutationScope(() => { poi.position_verified = false; }, true);
-                }
             }
         }
 

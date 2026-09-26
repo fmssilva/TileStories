@@ -146,9 +146,9 @@ namespace TileStories.Tests
         [Test]
         public void StyleNames_ContainsBothStyleStrings()
         {
-            Assert.AreEqual(2, VoiceActivityIndicatorView.StyleNames.Length);
-            Assert.Contains(VoiceActivityIndicatorView.MicTextStyleName, VoiceActivityIndicatorView.StyleNames);
-            Assert.Contains(VoiceActivityIndicatorView.ListenBarStyleName, VoiceActivityIndicatorView.StyleNames);
+            Assert.AreEqual(2, SelectFilterSearchOptions.IndicatorStyles.Length);
+            Assert.Contains(VoiceActivityIndicatorView.MicTextStyleName, SelectFilterSearchOptions.IndicatorStyles);
+            Assert.Contains(VoiceActivityIndicatorView.ListenBarStyleName, SelectFilterSearchOptions.IndicatorStyles);
         }
 
         [Test]

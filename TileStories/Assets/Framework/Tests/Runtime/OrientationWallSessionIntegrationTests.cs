@@ -175,7 +175,7 @@ namespace TileStories.Tests
             // Skip past the reveal fade/scale-in so tappability doesn't depend on frame
             // timing (same fix as OrientationGalleryHarness.SpawnEntry / DisplacementGalleryTests).
             var reveal = marker.GetComponent<MarkerRevealEffect>();
-            if (reveal != null) { reveal.StopAllCoroutines(); reveal.SetFullAlphaAndScale(); }
+            if (reveal != null) { reveal.SkipToEnd(); }
 
             var cam = _camGO.GetComponent<Camera>();
             marker.transform.position = new Vector3(0f, 0f, 0f);

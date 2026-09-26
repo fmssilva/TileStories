@@ -102,6 +102,48 @@ namespace TileStories.Editor.Tests
         }
 
         [Test]
+        public void LodDemoField_On_IsReportedForADevelopmentBuild_AndIgnoredForRelease()
+        {
+            var config = new WallConfigData();
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true), "off by default: nothing to report");
+            config.demo_field.enabled = true;
+            var messages = DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true);
+            Assert.AreEqual(1, messages.Count);
+            StringAssert.Contains("Add LOD demo field", messages[0]);
+            StringAssert.Contains("Global Scene > LOD > Test", messages[0]);
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: false), "release builds ignore the field");
+        }
+
+        [Test]
+        public void LodDemoFieldReleaseFlag_MatchesWhatTheRuntimeReallyDoes()
+        {
+            var fieldSwitch = DevFeatureBuildGuard.Registry.Single(r => r.Name == "Add LOD demo field");
+            Assert.IsFalse(fieldSwitch.ActiveInReleaseBuild);
+            Assert.IsFalse(DemoFieldSpawner.IsAllowed(isEditor: false, isDebugBuild: false), "release must ignore the field");
+            Assert.IsTrue(DemoFieldSpawner.IsAllowed(isEditor: false, isDebugBuild: true), "development builds DO show it");
+            Assert.IsFalse(new DemoFieldSettings().enabled, "the switch is OFF by default");
+        }
+
+        [Test]
+        public void DisplacementDemo_On_IsReportedForADevelopmentBuild_AndIgnoredForRelease()
+        {
+            var config = new WallConfigData();
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true), "off by default: nothing to report");
+            config.displacement_demo.enabled = true;
+            var messages = DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true);
+            Assert.AreEqual(1, messages.Count);
+            StringAssert.Contains("Add displacement demo", messages[0]);
+            StringAssert.Contains("Global Scene > Displacement > Test", messages[0]);
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: false), "release builds ignore the demo");
+
+            var sw = DevFeatureBuildGuard.Registry.Single(r => r.Name == "Add displacement demo");
+            Assert.IsFalse(sw.ActiveInReleaseBuild);
+            Assert.IsFalse(DisplacementDemoSpawner.IsAllowed(isEditor: false, isDebugBuild: false), "release must ignore the demo");
+            Assert.IsTrue(DisplacementDemoSpawner.IsAllowed(isEditor: false, isDebugBuild: true), "development builds DO show it");
+            Assert.IsFalse(new DisplacementDemoSettings().enabled, "the switch is OFF by default");
+        }
+
+        [Test]
         public void EveryRegisteredSwitch_HasNameHowToAndPredicate_InAscii()
         {
             foreach (var sw in DevFeatureBuildGuard.Registry)

@@ -146,40 +146,51 @@ namespace TileStories.Tests
             var cells = Cells(root);
             int levels = _config.hierarchy_levels.Count;
             Assert.Greater(levels, 0, "Precondition: the wall authors levels.");
-            Assert.AreEqual(7 + levels, cells.Count, "No effect + 6 effects + one cell per level");
+            // Quick row (3: No effect, Pulse, Spin Ring) + combo row (6: 2 ripples, 1 spacer, 3 halos) + one cell per level.
+            Assert.AreEqual(9 + levels, cells.Count, "quick row + combo row (incl. spacer) + one cell per level");
             Assert.AreEqual(_config.pois.Count, ws.SpawnedMarkers.Count, "Preview cells are not counted as wall POIs.");
 
-            // Effect row.
+            // Quick row: No effect, Pulse, Spin Ring.
             Assert.AreEqual("No effect", LabelTextOf(cells[0]));
             AssertCellRunsExactly(cells[0], "none", "none", false, "No effect");
-            var expectedEffects = new (string label, string ripple, string halo, bool pulse)[]
-            {
-                ("Pulse", "none", "none", true),
-                ("Ripple Rings", "ripple_rings", "none", false),
-                ("Ripple Discs", "ripple_discs", "none", false),
-                ("Halo Ring", "none", "halo_ring", false),
-                ("Halo Disc", "none", "halo_disc", false),
-                ("Beacon", "none", "beacon", false),
-            };
-            for (int i = 0; i < expectedEffects.Length; i++)
-            {
-                var e = expectedEffects[i];
-                Assert.AreEqual(e.label, LabelTextOf(cells[i + 1]), "cell label");
-                AssertCellRunsExactly(cells[i + 1], e.ripple, e.halo, e.pulse, e.label);
-            }
+            Assert.AreEqual("Pulse", LabelTextOf(cells[1]));
+            AssertCellRunsExactly(cells[1], "none", "none", true, "Pulse");
+            Assert.AreEqual("Spin Ring", LabelTextOf(cells[2]));
+            AssertCellRunsExactly(cells[2], "none", "none", false, "Spin Ring");
 
-            // Level row: real effects and real size of each level.
+            // Combo row: Ripple Rings, Ripple Discs, spacer (index 5, skipped), Halo Ring, Halo Disc, Beacon.
+            var expectedCombo = new (int index, string label, string ripple, string halo)[]
+            {
+                (3, "Ripple Rings", "ripple_rings", "none"),
+                (4, "Ripple Discs", "ripple_discs", "none"),
+                (6, "Halo Ring", "none", "halo_ring"),
+                (7, "Halo Disc", "none", "halo_disc"),
+                (8, "Beacon", "none", "beacon"),
+            };
+            foreach (var e in expectedCombo)
+            {
+                Assert.AreEqual(e.label, LabelTextOf(cells[e.index]), "cell label");
+                AssertCellRunsExactly(cells[e.index], e.ripple, e.halo, false, e.label);
+            }
+            Assert.AreEqual("Preview_(spacer)", cells[5].name, "the gap between Ripple and Halo is a real, positioned, invisible cell");
+            Assert.IsNull(cells[5].GetComponent<POIAnchor>(), "the spacer spawns no marker");
+
+            // Level row: the base marker's name (plain grey circle here, never the level name), real
+            // effects and real size of each level.
             for (int i = 0; i < levels; i++)
             {
                 var level = _config.hierarchy_levels[i];
-                var cell = cells[7 + i];
-                Assert.AreEqual(level.key, LabelTextOf(cell), "level cell label");
+                var cell = cells[9 + i];
+                Assert.AreEqual(EffectsPreviewSpawner.PlainCircleName, LabelTextOf(cell), "level cell label is the marker's name");
+                if (!string.IsNullOrWhiteSpace(level.level_name))
+                    Assert.AreNotEqual(level.level_name, LabelTextOf(cell), "a hierarchy level name must never be shown under a marker");
                 AssertCellRunsExactly(cell, level.ripple_effect, level.halo_effect, level.pulse, "level " + level.key);
                 var symbol = (RectTransform)cell.transform.Find("Symbol");
                 Assert.AreEqual(level.size_cm / 100f, symbol.sizeDelta.x, 1e-4f, level.key + " uses its real size");
             }
 
-            // Everything is in front of the GRID camera and inside its view, cells do not overlap.
+            // Everything is in front of the GRID camera and inside its view, cells do not overlap
+            // (the spacer has a real position too, but no visible content).
             var viewCam = root.GetComponent<EffectsPreviewFocus>().ViewCamera;
             Assert.IsNotNull(viewCam, "The grid owns its own camera.");
             var seen = new HashSet<Vector3>();
@@ -220,7 +231,8 @@ namespace TileStories.Tests
 
             var level = _config.hierarchy_levels.First(l => l.key == basePoi.hierarchy_level_key);
             var cells = Cells(ws.EffectsPreviewRoot);
-            foreach (var cell in cells.Take(7))
+            // Quick row (3) + combo row (6, one of them a spacer with no POIAnchor).
+            foreach (var cell in cells.Take(9).Where(c => c.GetComponent<POIAnchor>() != null))
             {
                 var data = cell.GetComponent<POIAnchor>().Data;
                 Assert.AreEqual(basePoi.category, data.category, cell.name + ": category copied");
@@ -261,9 +273,17 @@ namespace TileStories.Tests
             var ws = Spawn();
             yield return null;
 
-            foreach (var cell in Cells(ws.EffectsPreviewRoot))
+            // The spacer cell (combo row) has no marker components at all -- skip it here.
+            foreach (var cell in Cells(ws.EffectsPreviewRoot).Where(c => c.GetComponent<POIAnchor>() != null))
                 AssertCellRunsExactly(cell, "none", "none", false, cell.name);
-            Assert.IsTrue(Cells(ws.EffectsPreviewRoot).Skip(1).Take(6).All(c => c.name.EndsWith("(off)")), "effect cells are labelled (off)");
+
+            // Pulse (quick row) plus every combo-row effect are labelled "(off)"; Spin Ring is not an
+            // effect switch and the No effect / level cells are not gated by effects_enabled by name.
+            var gatedEffectCells = Cells(ws.EffectsPreviewRoot)
+                .Where(c => c.name.Contains("Pulse") || c.name.Contains("Ripple") || c.name.Contains("Halo") || c.name.Contains("Beacon"))
+                .ToList();
+            Assert.AreEqual(6, gatedEffectCells.Count, "Pulse + 2 Ripple + 2 Halo + Beacon");
+            Assert.IsTrue(gatedEffectCells.All(c => c.name.EndsWith("(off)")), "every effect-gated cell is labelled (off)");
         }
 
         // ---------------- live update of a running wall (Live Play Mode Config) ----------------
@@ -284,7 +304,7 @@ namespace TileStories.Tests
             yield return null;
             var firstRoot = ws.EffectsPreviewRoot;
             Assert.IsNotNull(firstRoot, "Turning the switch on must build the grid without a restart.");
-            Assert.AreEqual(7 + _config.hierarchy_levels.Count, Cells(firstRoot).Count);
+            Assert.AreEqual(9 + _config.hierarchy_levels.Count, Cells(firstRoot).Count);
 
             // A second apply rebuilds: the old grid (and its camera) is gone, exactly one grid exists.
             ws.ApplyEffectSettings(CopyOf(on), _config.hierarchy_levels);
@@ -300,6 +320,182 @@ namespace TileStories.Tests
             yield return null;
             Assert.IsNull(ws.EffectsPreviewRoot);
             Assert.AreEqual(0, Object.FindObjectsByType<EffectsPreviewFocus>(FindObjectsSortMode.None).Length);
+        }
+
+        // A developer reported not seeing Hierarchy Levels table edits reflected in this grid while
+        // Play Mode ran. Size/Show Label/Rotate/Reveal belong to LivePlayModeMarkerApplier, not the
+        // effects applier -- ApplyMarkerSettings must rebuild THIS grid too (WallSession.cs), or a
+        // live Size edit reaches every real marker (proven separately in
+        // LivePlayModeConfigTests.MarkerApplier_DrivesRealMarkers_HierarchyLevelFields) but leaves
+        // this preview grid showing the stale size, exactly the gap being fixed here.
+        [UnityTest]
+        public IEnumerator ApplyMarkerSettings_RebuildsThePreviewGridLive_WhenALevelsSizeChanges()
+        {
+            _config.effect_defaults.preview.enabled = true;
+            var ws = Spawn();
+            yield return null;
+            var firstRoot = ws.EffectsPreviewRoot;
+            Assert.IsNotNull(firstRoot, "Precondition: the grid is on.");
+            int levelIndex = 0;
+            float originalSizeCm = _config.hierarchy_levels[levelIndex].size_cm;
+
+            var edited = JsonUtility.FromJson<WallConfigData>(JsonUtility.ToJson(_config));
+            edited.hierarchy_levels[levelIndex].size_cm = originalSizeCm + 25f;
+            ws.ApplyMarkerSettings(edited);
+            yield return null;
+
+            Assert.IsTrue(firstRoot == null, "The old grid must be destroyed, not left stale.");
+            var symbol = (RectTransform)Cells(ws.EffectsPreviewRoot)[9 + levelIndex].transform.Find("Symbol");
+            Assert.AreEqual((originalSizeCm + 25f) / 100f, symbol.sizeDelta.x, 1e-4f,
+                "The rebuilt grid's level cell must show the new Size (cm), not the stale one.");
+        }
+
+        // With a real POI chosen as the Base marker, every level cell is labelled with THAT POI's own
+        // name (e.g. "The Lamp"), exactly like a real POI at that level -- never the level name.
+        [UnityTest]
+        public IEnumerator LevelCells_AreLabelledWithTheBasePoisOwnName()
+        {
+            var basePoi = _config.pois.First(p => !string.IsNullOrWhiteSpace(p.name));
+            _config.effect_defaults.preview.enabled = true;
+            _config.effect_defaults.preview.base_poi_id = basePoi.id;
+            var ws = Spawn();
+            yield return null;
+
+            var levelCells = Cells(ws.EffectsPreviewRoot).Skip(9).ToList();
+            Assert.AreEqual(_config.hierarchy_levels.Count, levelCells.Count, "Precondition: one cell per level.");
+            foreach (var cell in levelCells)
+                Assert.AreEqual(basePoi.name, LabelTextOf(cell), cell.name + " must show the base marker's name");
+            for (int i = 0; i < levelCells.Count; i++)
+            {
+                var level = _config.hierarchy_levels[i];
+                string levelName = string.IsNullOrWhiteSpace(level.level_name) ? level.key : level.level_name;
+                Assert.AreEqual("Preview_Level: " + levelName, levelCells[i].name, "the cell stays findable by its level");
+            }
+        }
+
+        // A level's Marker Label Style reaches its grid cell's REAL label live: ApplyMarkerSettings (the
+        // marker applier's runtime seam) rebuilds the grid and the cell's TMP font size and Label
+        // offset follow the level's own ratios -- the "Aa sliders do nothing on the grid" bug.
+        [UnityTest]
+        public IEnumerator ApplyMarkerSettings_ALevelsMarkerLabelStyleReachesItsGridCellLive()
+        {
+            _config.effect_defaults.preview.enabled = true;
+            int levelIndex = _config.hierarchy_levels.FindIndex(l => l.show_label);
+            Assert.GreaterOrEqual(levelIndex, 0, "Precondition: the shipped config has a level that shows its label.");
+            var ws = Spawn();
+            yield return null;
+
+            var edited = JsonUtility.FromJson<WallConfigData>(JsonUtility.ToJson(_config));
+            var level = edited.hierarchy_levels[levelIndex];
+            level.override_label_style = true;
+            level.label_gap_ratio = 0.4f;
+            level.label_font_size_ratio = 0.9f;
+            level.label_font_key = "liberation_sans";
+            ws.ApplyMarkerSettings(edited);
+            yield return null;
+
+            var cell = Cells(ws.EffectsPreviewRoot)[9 + levelIndex];
+            var labelRect = cell.GetComponentInChildren<MarkerView>().LabelRect;
+            var tmp = labelRect.GetComponent("TextMeshProUGUI");
+            float fontSize = (float)tmp.GetType().GetProperty("fontSize").GetValue(tmp);
+            float diameter = level.size_cm / 100f;
+            Assert.AreEqual(0.9f * diameter, fontSize, 1e-4f, "the level's own font size ratio reaches the grid cell");
+            Assert.AreEqual(-diameter * 0.5f - 0.4f * diameter, labelRect.anchoredPosition.y, 1e-4f, "the level's own gap reaches the grid cell");
+
+            level.override_label_style = false;
+            ws.ApplyMarkerSettings(JsonUtility.FromJson<WallConfigData>(JsonUtility.ToJson(edited)));
+            yield return null;
+            cell = Cells(ws.EffectsPreviewRoot)[9 + levelIndex];
+            tmp = cell.GetComponentInChildren<MarkerView>().LabelRect.GetComponent("TextMeshProUGUI");
+            fontSize = (float)tmp.GetType().GetProperty("fontSize").GetValue(tmp);
+            Assert.AreEqual(MarkerVisualSettings.ClampLabelFontSizeRatio(edited.label_font_size_ratio) * diameter, fontSize, 1e-4f,
+                "override off: the grid cell goes back to the wall default");
+        }
+
+        // "Move closer to a marker": the demo grid's own scroll-wheel zoom (DevPreviewCameraDolly),
+        // driving the real EffectsPreviewFocus component on a real spawned grid.
+        [UnityTest]
+        public IEnumerator ScrollingIn_MovesTheGridCameraCloser_AndARebuiltGridKeepsTheSameZoom()
+        {
+            _config.effect_defaults.preview.enabled = true;
+            var ws = Spawn();
+            yield return null;
+            var focus = ws.EffectsPreviewRoot.GetComponent<EffectsPreviewFocus>();
+            float distanceBefore = -focus.ViewCamera.transform.localPosition.z;
+
+            focus.Dolly.ApplyScroll(3f);
+            yield return null;
+
+            float distanceAfter = -focus.ViewCamera.transform.localPosition.z;
+            Assert.Less(distanceAfter, distanceBefore, "scrolling in must move the grid camera closer");
+
+            // A developer reported the camera snapping back to the auto-fit framing on every editor
+            // edit made while Play Mode ran, since a rebuild used to hand the new grid's Focus a
+            // fresh zero-offset dolly. WallSession now carries the offset across the rebuild
+            // (RebuildEffectsPreview, 2026-09-22) -- a live config push must NOT reset the view.
+            float zoomBefore = focus.Dolly.ZoomOffsetMetres;
+            var edited = JsonUtility.FromJson<WallConfigData>(JsonUtility.ToJson(_config));
+            edited.hierarchy_levels[0].size_cm += 5f;
+            ws.ApplyMarkerSettings(edited);
+            yield return null;
+
+            var newFocus = ws.EffectsPreviewRoot.GetComponent<EffectsPreviewFocus>();
+            Assert.AreNotSame(focus, newFocus, "Precondition: the grid (and its Focus) was rebuilt.");
+            Assert.AreEqual(zoomBefore, newFocus.Dolly.ZoomOffsetMetres, 1e-4f,
+                "a rebuilt grid must carry the developer's zoom across the rebuild, not reset it");
+        }
+
+        // Same guarantee as the zoom test above, for pan -- both offsets must survive a rebuild.
+        [UnityTest]
+        public IEnumerator PanningTheDolly_ThenRebuilding_KeepsTheSamePan()
+        {
+            _config.effect_defaults.preview.enabled = true;
+            var ws = Spawn();
+            yield return null;
+            var focus = ws.EffectsPreviewRoot.GetComponent<EffectsPreviewFocus>();
+            focus.Dolly.ApplyPan(new Vector2(0.1f, 0.05f));
+            yield return null;
+            Vector2 panBefore = focus.Dolly.PanOffsetMetres;
+
+            var edited = JsonUtility.FromJson<WallConfigData>(JsonUtility.ToJson(_config));
+            edited.hierarchy_levels[0].size_cm += 5f;
+            ws.ApplyMarkerSettings(edited);
+            yield return null;
+
+            var newFocus = ws.EffectsPreviewRoot.GetComponent<EffectsPreviewFocus>();
+            Assert.AreNotSame(focus, newFocus, "Precondition: the grid (and its Focus) was rebuilt.");
+            Assert.AreEqual(panBefore.x, newFocus.Dolly.PanOffsetMetres.x, 1e-4f, "pan.x must survive a rebuild");
+            Assert.AreEqual(panBefore.y, newFocus.Dolly.PanOffsetMetres.y, 1e-4f, "pan.y must survive a rebuild");
+        }
+
+        // "Move around": WASD/mouse-drag pan (DevPreviewCameraDolly.ApplyPan), driving the real
+        // EffectsPreviewFocus. DevCameraInput itself needs a real mouse-over-Game-view + Input
+        // System state this test cannot simulate headlessly, so this drives the dolly directly --
+        // exactly the seam DevCameraInput hands off to (proven wired at the call site by reading
+        // EffectsPreviewFocus.cs itself, per 40-testing.md 4.2.1's "confirm the call site is
+        // reached" rule, not just that a method with this name exists somewhere).
+        [UnityTest]
+        public IEnumerator PanningTheDolly_MovesTheGridCameraSideways_ClampedToTheGridsOwnExtent()
+        {
+            _config.effect_defaults.preview.enabled = true;
+            var ws = Spawn();
+            yield return null;
+            var focus = ws.EffectsPreviewRoot.GetComponent<EffectsPreviewFocus>();
+            Vector3 posBefore = focus.ViewCamera.transform.localPosition;
+
+            focus.Dolly.ApplyPan(new Vector2(0.2f, 0.1f));
+            yield return null;
+
+            Vector3 posAfter = focus.ViewCamera.transform.localPosition;
+            Assert.AreNotEqual(posBefore.x, posAfter.x, "panning must move the grid camera sideways");
+            Assert.AreNotEqual(posBefore.y, posAfter.y, "panning must move the grid camera vertically");
+            Assert.AreEqual(posBefore.z, posAfter.z, 1e-4f, "panning must not change the zoom distance");
+
+            // An enormous pan is clamped to the grid's own extent, never loses the grid entirely.
+            focus.Dolly.ApplyPan(new Vector2(10000f, 10000f));
+            yield return null;
+            Vector3 posClamped = focus.ViewCamera.transform.localPosition;
+            Assert.Less(Mathf.Abs(posClamped.x), 50f, "an extreme pan must still be clamped to a sane range");
         }
 
         [UnityTest]

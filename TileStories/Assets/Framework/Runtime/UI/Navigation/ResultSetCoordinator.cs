@@ -1,128 +1,73 @@
-using System;
 using System.Collections.Generic;
 
 namespace TileStories
 {
-    // Single composition seam for Select/Filter/Search (_2_6 sections 5+7 via _2.7 2.6-i):
-    // a facet toggle or a search submit produces ONE result set, pushed to every surface --
-    // results list, scene markers, minimap dots, and the camera_highlight dimmer -- so they
-    // can never show different answers to the same query+filter state.
-    //
-    // Plain C# (no MonoBehaviour): Tier-0 testable with fabricated config + real views,
-    // per the "logic in plain classes" rule. Created/owned by SearchOverlayView once the
-    // search/filter UI exists; never wired by the marker prefab or LOD.
-    public sealed class ResultSetCoordinator : IDisposable
+    // What the search UI should show for the current query and filters (spec _2.6 sections 5 and 7)
+    public sealed class ResultSetState
     {
-        private const float ALPHA_FULL = 1f;
-        private const float MISMATCH_DIM_ALPHA = 0.3f;
-        private const float DEFAULT_FADE = 0.15f;
+        // Results are active while there is query text or at least one filter
+        public bool Active;
+        // The ranked results (best first) and their ids -- the ONE set every surface shows
+        public List<POISearchIndex.SearchResult> Results = new();
+        public HashSet<string> Ids = new();
+        // With no results: the wall's message, and the filter worth removing (if any)
+        public string EmptyMessage = "";
+        public RelaxSuggestion? Relax;
+    }
 
-        private readonly POISearchIndex _index;
-        private readonly WallConfigData _config;
-        private readonly FilterTrayView _tray;
-        private readonly ResultsListView _results;
-        private readonly MinimapView _minimap;
-        private readonly Func<IReadOnlyList<MarkerView>> _getSpawned;
-        private readonly SelectionHighlightController _highlight;
-        private bool _disposed;
-
-        // Last submitted query/mode, replayed whenever facets change so a facet toggle
-        // re-runs the SAME search against the narrowed candidate set.
-        public string CurrentQuery { get; private set; } = "";
-        public SearchMatchMode CurrentMatchMode { get; private set; } = SearchMatchMode.Any;
-
-        public ResultSetCoordinator(POISearchIndex index, WallConfigData config,
-            FilterTrayView tray, ResultsListView results, MinimapView minimap,
-            Func<IReadOnlyList<MarkerView>> getSpawned,
-            SelectionHighlightController highlight = null)
+    // Joins search and filters into one result set (spec _2.6 sections 5 and 7): filters narrow first
+    // (OR within a group, AND across groups), the query ranks within what is left, and the list, the
+    // minimap and the markers all show that same set. Pure given the index: no UI, no scene.
+    public static class ResultSetCoordinator
+    {
+        public static ResultSetState Compute(POISearchIndex index, IReadOnlyList<POIData> pois, string query,
+            FacetSelection facets, SelectFilterSearchSettings settings)
         {
-            _index = index ?? throw new ArgumentNullException(nameof(index));
-            _config = config;
-            _tray = tray;
-            _results = results;
-            _minimap = minimap;
-            _getSpawned = getSpawned;
-            _highlight = highlight;
+            var state = new ResultSetState();
+            query = (query ?? "").Trim();
+            bool filtering = facets != null && facets.Any;
+            state.Active = query.Length > 0 || filtering;
+            if (!state.Active || index == null)
+                return state;
 
-            if (_tray != null)
-                _tray.OnFiltersChanged += OnFiltersChanged;
-        }
+            var options = SelectFilterSearchOptions.ToSearchOptions(settings?.search);
+            state.Results = Run(index, pois, query, facets, options);
+            foreach (var r in state.Results)
+                state.Ids.Add(r.PoiId);
 
-        // Called by SearchOverlayView.SubmitSearch (typed + voice input).
-        public void RefreshSearch(string query, SearchMatchMode matchMode)
-        {
-            CurrentQuery = query ?? "";
-            CurrentMatchMode = matchMode;
-            Refresh();
-        }
-
-        // Facet toggle / clear-all path: same query, newly narrowed candidates.
-        internal void OnFiltersChanged() => Refresh();
-
-        // Recompute the one result set and push it to every surface.
-        public void Refresh()
-        {
-            if (_disposed || _index == null || _config?.pois == null)
-                return;
-
-            bool anyFilterActive = _tray != null && _tray.HasActiveFilters();
-            HashSet<string> candidateIds = FilterFacetEvaluator.GetFilterCandidateIds(
-                _config.pois,
-                ToSet(_tray?.GetActiveCategories()),
-                ToSet(_tray?.GetActiveBadgeCategories()),
-                ToSet(_tray?.GetActiveOutlineLevels()),
-                ToSet(_tray?.GetActiveHierarchyLevels()));
-
-            // No active facet = unrestricted: pass null so Search keeps its original
-            // empty-query-means-empty-list semantics (backward compatible).
-            ICollection<string> narrow = anyFilterActive ? (ICollection<string>)candidateIds : null;
-
-            // 1. Results list (one result set, not a side channel).
-            _results?.RefreshResults(CurrentQuery, CurrentMatchMode, narrow);
-
-            // 2. Minimap dots: matching stay, non-matching hidden.
-            _minimap?.SetFilterCandidateIds(narrow);
-
-            // 3. Scene markers + camera_highlight dim. Only act while a filter is active;
-            //    with no filter, markers stay fully under LODController's authority.
-            if (!anyFilterActive)
+            if (state.Results.Count == 0)
             {
-                _highlight?.SetTargetCandidates(null);
-                return;
+                // - filters alone: their own message ("No matches for """ is what the query one read as)
+                state.EmptyMessage = query.Length > 0
+                    ? (settings?.search?.no_results_message ?? "").Replace("{query}", query)
+                    : settings?.search?.no_results_filters_message ?? "";
+                if (filtering && (settings?.filter?.relax_suggestion ?? true))
+                    state.Relax = FilterFacetEvaluator.ComputeRelaxSuggestion(facets,
+                        fewer => Run(index, pois, query, fewer, options).Count);
             }
-
-            float fade = DEFAULT_FADE;
-            bool hide = _config.filter_mismatch_behaviour != "dim";
-            float mismatchAlpha = hide ? 0f : MISMATCH_DIM_ALPHA;
-            var markers = _getSpawned?.Invoke();
-            if (markers != null)
-            {
-                for (int i = 0; i < markers.Count; i++)
-                {
-                    var m = markers[i];
-                    if (m == null) continue;
-                    bool inSet = candidateIds.Contains(m.PoiId);
-                    // Alpha seam (not SetVisible(bool)): composes with LODController's
-                    // per-tick visibility writes instead of fighting over CanvasGroup.
-                    m.SetVisible(inSet ? ALPHA_FULL : mismatchAlpha, fade);
-                }
-            }
-
-            // 4. camera_highlight: same dim treatment through the selection controller.
-            _highlight?.SetTargetCandidates((ICollection<string>)candidateIds);
+            return state;
         }
 
-        private static HashSet<string> ToSet(List<string> list)
+        // The search within the filtered candidates (every POI when no filter is on)
+        private static List<POISearchIndex.SearchResult> Run(POISearchIndex index, IReadOnlyList<POIData> pois,
+            string query, FacetSelection facets, SearchOptions options)
         {
-            return list == null ? new HashSet<string>() : new HashSet<string>(list);
+            ICollection<string> candidates = facets != null && facets.Any
+                ? FilterFacetEvaluator.CandidateIds(pois, facets)
+                : null;
+            return index.Search(query, options, candidates);
         }
 
-        public void Dispose()
+        // The relax button's text for a suggestion: "Remove filter: <label> (N results)"
+        public static string RelaxText(RelaxSuggestion s, IReadOnlyList<FacetGroupOptions> groups)
         {
-            if (_disposed) return;
-            _disposed = true;
-            if (_tray != null)
-                _tray.OnFiltersChanged -= OnFiltersChanged;
+            string label = s.Key;
+            if (groups != null)
+                foreach (var g in groups)
+                    if (g.Group == s.Group)
+                        foreach (var (key, l) in g.Choices)
+                            if (key == s.Key) label = l;
+            return $"Remove filter: {label} ({s.ResultCount} results)";
         }
     }
 }

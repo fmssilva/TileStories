@@ -120,29 +120,86 @@ namespace TileStories.Editor.Tests
         // ---------------- preview grid: cells and placement ----------------
 
         [Test]
-        public void PreviewRows_HaveAControlPlusOneCellPerEffect_AndOneCellPerRealLevel()
+        public void PreviewRows_HaveTheQuickAndComboGroupsPlusOneCellPerRealLevel()
         {
             var w = Wall();
-            var (effectRow, levelRow) = EffectsPreviewSpawner.BuildRows(w, 25f);
+            var (quickRow, comboRow, levelRow) = EffectsPreviewSpawner.BuildRows(w, 25f);
 
-            Assert.AreEqual(7, effectRow.Count, "No effect + 6 effects");
-            Assert.AreEqual("No effect", effectRow[0].Name);
-            Assert.AreEqual(MarkerEffectFlags.None, effectRow[0].Style.EffectFlags);
-            for (int i = 0; i < EffectDefaults.SelectableEffects.Length; i++)
+            // QUICK ROW: No effect, Pulse, Spin Ring.
+            Assert.AreEqual(3, quickRow.Count, "No effect + Pulse + Spin Ring");
+            Assert.AreEqual("No effect", quickRow[0].Name);
+            Assert.AreEqual(MarkerEffectFlags.None, quickRow[0].Style.EffectFlags);
+            Assert.AreEqual("Pulse", quickRow[1].Name);
+            Assert.AreEqual(MarkerEffectFlags.Pulse, quickRow[1].Style.EffectFlags);
+            Assert.AreEqual("Spin Ring", quickRow[2].Name);
+            Assert.AreEqual(MarkerEffectFlags.None, quickRow[2].Style.EffectFlags);
+            Assert.IsTrue(quickRow[2].Style.RotateContour, "the Spin Ring cell must actually rotate");
+            foreach (var cell in quickRow)
             {
-                var effect = EffectDefaults.SelectableEffects[i];
-                Assert.AreEqual(MarkerEffectNames.DisplayName(effect), effectRow[i + 1].Name);
-                Assert.AreEqual(effect, effectRow[i + 1].Style.EffectFlags, "each effect cell shows exactly that effect");
-                Assert.AreEqual(25f, effectRow[i + 1].Style.SizeCm, 1e-4f, "effect cells share the base size");
-                Assert.IsTrue(effectRow[i + 1].Style.ShowLabel, "cells are labelled");
+                Assert.AreEqual(25f, cell.Style.SizeCm, 1e-4f, "quick-row cells share the base size");
+                Assert.IsTrue(cell.Style.ShowLabel, "quick-row cells are labelled");
+                Assert.IsFalse(cell.IsSpacer);
             }
 
+            // COMBO ROW: Ripple Rings, Ripple Discs, spacer, Halo Ring, Halo Disc, Beacon.
+            Assert.AreEqual(6, comboRow.Count, "2 ripple variants + spacer + 3 halo variants");
+            Assert.AreEqual(MarkerEffectFlags.RippleRings, comboRow[0].Style.EffectFlags);
+            Assert.AreEqual(MarkerEffectFlags.RippleDiscs, comboRow[1].Style.EffectFlags);
+            Assert.IsTrue(comboRow[2].IsSpacer, "a blank gap separates the Ripple group from the Halo group");
+            Assert.AreEqual(MarkerEffectFlags.HaloRing, comboRow[3].Style.EffectFlags);
+            Assert.AreEqual(MarkerEffectFlags.HaloDisc, comboRow[4].Style.EffectFlags);
+            Assert.AreEqual(MarkerEffectFlags.Beacon, comboRow[5].Style.EffectFlags);
+
             Assert.AreEqual(3, levelRow.Count, "one cell per hierarchy level");
-            Assert.AreEqual("l1", levelRow[0].Name);
+            Assert.AreEqual("Level: l1", levelRow[0].Name, "a level cell is NAMED after its level (blank level_name -> key)");
             Assert.AreEqual(MarkerEffectFlags.RippleDiscs | MarkerEffectFlags.HaloRing | MarkerEffectFlags.Pulse, levelRow[0].Style.EffectFlags);
             Assert.AreEqual(30f, levelRow[0].Style.SizeCm, 1e-4f, "level cells use the level's real size");
             Assert.AreEqual(0.2f, levelRow[1].Style.RevealDelaySeconds, 1e-4f, "and its real reveal timing");
             Assert.AreEqual(0.3f, levelRow[2].Style.RevealDurationSeconds, 1e-4f);
+        }
+
+        // A hierarchy level name is an authoring id, never marker text: a level cell's LABEL is the
+        // base marker's own name (what a real POI at that level shows), while its NAME (GameObject)
+        // still identifies the level for the Hierarchy window. Show Marker Label? is honoured.
+        [Test]
+        public void PreviewRows_LevelCellsShowTheBaseMarkerName_NeverTheLevelName_AndHonourShowLabel()
+        {
+            var w = Wall();
+            w.hierarchy_levels[0].level_name = "Hub";
+            w.hierarchy_levels[0].show_label = false;
+            w.hierarchy_levels[1].level_name = "";   // blank level_name -> the key identifies the cell
+
+            var (_, _, levelRow) = EffectsPreviewSpawner.BuildRows(w, 20f, "The Lamp");
+            Assert.AreEqual("The Lamp", levelRow[0].LabelText, "the label shows the base marker's name");
+            Assert.AreEqual("Level: Hub", levelRow[0].Name, "the cell is still identifiable by its level");
+            Assert.IsFalse(levelRow[0].Style.ShowLabel, "Show Marker Label? off must hide the preview cell's label too");
+            Assert.AreEqual("Level: l2", levelRow[1].Name);
+            Assert.IsTrue(levelRow.All(c => c.LabelText == "The Lamp"), "no level cell ever shows a level name");
+
+            var (_, _, plainRow) = EffectsPreviewSpawner.BuildRows(w, 20f);
+            Assert.IsTrue(plainRow.All(c => c.LabelText == EffectsPreviewSpawner.PlainCircleName),
+                "with no base POI the label is 'Plain grey circle', the name the Base marker dropdown uses");
+        }
+
+        // The grid's level cells get the level's WHOLE style (StyleOf), Marker Label Style included --
+        // the grid once dropped every label override because it built its own 6-field style.
+        [Test]
+        public void PreviewRows_LevelCellsCarryTheLevelsMarkerLabelStyle()
+        {
+            var w = Wall();
+            w.hierarchy_levels[0].override_label_style = true;
+            w.hierarchy_levels[0].label_gap_ratio = 0.3f;
+            w.hierarchy_levels[0].label_font_size_ratio = 0.7f;
+            w.hierarchy_levels[0].label_font_key = "oswald_bold";
+
+            var (_, _, levelRow) = EffectsPreviewSpawner.BuildRows(w, 20f);
+
+            var style = levelRow[0].Style;
+            Assert.IsTrue(style.OverridesLabelStyle);
+            Assert.AreEqual(0.3f, style.LabelGapRatio, 1e-5f);
+            Assert.AreEqual(0.7f, style.LabelFontSizeRatio, 1e-5f);
+            Assert.AreEqual("oswald_bold", style.LabelFontKey);
+            Assert.IsFalse(levelRow[1].Style.OverridesLabelStyle, "a level without the override follows the wall default");
         }
 
         [Test]
@@ -150,20 +207,24 @@ namespace TileStories.Editor.Tests
         {
             var w = Wall();
             w.effect_defaults.beacon.enabled = false;
-            var (effectRow, _) = EffectsPreviewSpawner.BuildRows(w, 20f);
-            Assert.AreEqual("Beacon (off)", effectRow.Last().Name);
-            Assert.AreEqual("Pulse", effectRow[1].Name);
+            var (_, comboRow, _) = EffectsPreviewSpawner.BuildRows(w, 20f);
+            Assert.AreEqual("Beacon (off)", comboRow.Last().Name);
+
+            var (quickRow, _, _) = EffectsPreviewSpawner.BuildRows(w, 20f);
+            Assert.AreEqual("Pulse", quickRow[1].Name);
 
             w.effect_defaults.effects_enabled = false;
-            (effectRow, _) = EffectsPreviewSpawner.BuildRows(w, 20f);
-            Assert.IsTrue(effectRow.Skip(1).All(c => c.Name.EndsWith("(off)")), "master off marks every effect");
+            (quickRow, comboRow, _) = EffectsPreviewSpawner.BuildRows(w, 20f);
+            Assert.AreEqual("Pulse (off)", quickRow[1].Name, "master off marks Pulse too");
+            Assert.IsTrue(comboRow.Where(c => !c.IsSpacer).All(c => c.Name.EndsWith("(off)")), "master off marks every combo-row effect");
         }
 
         [Test]
-        public void PreviewRows_WithNoHierarchyLevels_HaveOnlyTheEffectRow()
+        public void PreviewRows_WithNoHierarchyLevels_HaveOnlyTheQuickAndComboRows()
         {
-            var (effectRow, levelRow) = EffectsPreviewSpawner.BuildRows(new WallConfigData { effect_defaults = new EffectDefaults() }, 20f);
-            Assert.AreEqual(7, effectRow.Count);
+            var (quickRow, comboRow, levelRow) = EffectsPreviewSpawner.BuildRows(new WallConfigData { effect_defaults = new EffectDefaults() }, 20f);
+            Assert.AreEqual(3, quickRow.Count);
+            Assert.AreEqual(6, comboRow.Count);
             Assert.AreEqual(0, levelRow.Count);
         }
 
@@ -174,14 +235,14 @@ namespace TileStories.Editor.Tests
             foreach (float aspect in new[] { 0.5f, 0.89f, 1.78f, 2.4f })
                 foreach (int levels in new[] { 0, 3, 5, 12 })
                 {
-                    const int effects = 7;
-                    int columns = EffectsPreviewSpawner.ChooseColumns(effects, levels, fov, aspect);
-                    var extent = EffectsPreviewSpawner.GridExtent(effects, levels, columns);
+                    var blocks = new[] { 3, 6, levels };
+                    int columns = EffectsPreviewSpawner.ChooseColumns(blocks, fov, aspect);
+                    var extent = EffectsPreviewSpawner.GridExtent(blocks, columns);
                     float distance = EffectsPreviewSpawner.FitDistance(extent, fov, aspect);
-                    var positions = EffectsPreviewSpawner.CellPositions(effects, levels, columns);
+                    var positions = EffectsPreviewSpawner.CellPositions(blocks, columns);
                     string ctx = $"aspect {aspect}, {levels} levels";
 
-                    Assert.AreEqual(effects + levels, positions.Count, ctx + ": one position per cell");
+                    Assert.AreEqual(9 + levels, positions.Count, ctx + ": one position per cell");
                     Assert.GreaterOrEqual(distance, 0.5f, ctx + ": never closer than the minimum");
 
                     // No two cells share a spot and neighbours keep at least one cell spacing apart.
@@ -199,24 +260,26 @@ namespace TileStories.Editor.Tests
 
                     // The chosen column count really is the best: no other count needs less distance.
                     for (int other = 1; other <= 12; other++)
-                        Assert.LessOrEqual(distance, EffectsPreviewSpawner.FitDistance(EffectsPreviewSpawner.GridExtent(effects, levels, other), fov, aspect) + 1e-3f,
+                        Assert.LessOrEqual(distance, EffectsPreviewSpawner.FitDistance(EffectsPreviewSpawner.GridExtent(blocks, other), fov, aspect) + 1e-3f,
                             $"{ctx}: {other} columns would need less distance than the chosen {columns}");
                 }
 
             // A portrait view wraps into fewer columns than a landscape one; a wider view never needs more distance.
-            int portrait = EffectsPreviewSpawner.ChooseColumns(7, 5, 60f, 0.5f);
-            int landscape = EffectsPreviewSpawner.ChooseColumns(7, 5, 60f, 2.4f);
+            var demoBlocks = new[] { 3, 6, 5 };
+            int portrait = EffectsPreviewSpawner.ChooseColumns(demoBlocks, 60f, 0.5f);
+            int landscape = EffectsPreviewSpawner.ChooseColumns(demoBlocks, 60f, 2.4f);
             Assert.Less(portrait, landscape, "portrait wraps into fewer columns");
             Assert.LessOrEqual(
-                EffectsPreviewSpawner.FitDistance(EffectsPreviewSpawner.GridExtent(7, 5, landscape), 60f, 2.4f),
-                EffectsPreviewSpawner.FitDistance(EffectsPreviewSpawner.GridExtent(7, 5, portrait), 60f, 0.5f) + 1e-4f,
+                EffectsPreviewSpawner.FitDistance(EffectsPreviewSpawner.GridExtent(demoBlocks, landscape), 60f, 2.4f),
+                EffectsPreviewSpawner.FitDistance(EffectsPreviewSpawner.GridExtent(demoBlocks, portrait), 60f, 0.5f) + 1e-4f,
                 "a wider view never needs more distance");
 
-            // The effect block comes first (top), the level block below it, rows centred.
-            var pos = EffectsPreviewSpawner.CellPositions(7, 5, 4);
-            Assert.Greater(pos[0].y, pos[7].y, "effect block is above the level block");
-            Assert.AreEqual(-pos[3].x, pos[0].x, 1e-4f, "a full row is centred");
-            Assert.AreEqual(0f, pos[4].x + pos[6].x, 1e-4f, "a short last row (3 cells) is centred too");
+            // Each block comes before the next, top to bottom, rows centred.
+            var pos = EffectsPreviewSpawner.CellPositions(new[] { 3, 6, 5 }, 6);
+            Assert.Greater(pos[0].y, pos[3].y, "the quick row is above the combo row");
+            Assert.Greater(pos[3].y, pos[9].y, "the combo row is above the level row");
+            Assert.AreEqual(-pos[3].x, pos[8].x, 1e-4f, "a full row (6 cells) is centred");
+            Assert.AreEqual(0f, pos[9].x + pos[13].x, 1e-4f, "a short last row (5 cells over 6 columns) is centred too");
         }
 
         [Test]

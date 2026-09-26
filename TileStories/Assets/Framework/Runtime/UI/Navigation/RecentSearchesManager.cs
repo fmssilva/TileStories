@@ -12,7 +12,7 @@ namespace TileStories
         // PlayerPrefs key for the persisted recent-searches blob.
         public const string PREFS_KEY = "TileStories.recent_searches";
 
-        // Cap on stored queries; defaults to WallConfigData.recent_search_count (5).
+        // Cap on stored queries (select_filter_search.results.recent_count); 0 = remember nothing
         private readonly int _maxCount;
 
         // Recency-ordered: index 0 is the most recent query.
@@ -20,7 +20,7 @@ namespace TileStories
 
         public RecentSearchesManager(int maxCount = 5)
         {
-            _maxCount = Math.Max(1, maxCount);
+            _maxCount = Math.Max(0, maxCount);
             Load();
         }
 
@@ -30,7 +30,7 @@ namespace TileStories
         // trimming to _maxCount. No-ops on null/empty/whitespace queries.
         public void Add(string query)
         {
-            if (string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrWhiteSpace(query) || _maxCount == 0)
                 return;
 
             _entries.RemoveAll(q => q == query);

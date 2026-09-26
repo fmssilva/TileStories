@@ -294,6 +294,14 @@ namespace TileStories.Editor.Tests
             levelEdit.hierarchy_levels[0].facing_mode_override = "wall_fixed";
             Assert.AreNotEqual(baseline, applier.Fingerprint(levelEdit), "level facing override");
 
+            foreach (System.Action<POIData> edit in new System.Action<POIData>[]
+                     { p => p.editor_rotation_x_deg += 5f, p => p.editor_rotation_deg += 5f, p => p.editor_rotation_z_deg += 5f })
+            {
+                var poiFacing = LoadShippedConfig();
+                edit(poiFacing.pois[0]);
+                Assert.AreNotEqual(baseline, applier.Fingerprint(poiFacing), "a POI's own Facing X/Y/Z must trigger an orientation push");
+            }
+
             var unrelated = LoadShippedConfig();
             unrelated.effect_defaults.pulse.enabled = !unrelated.effect_defaults.pulse.enabled;
             unrelated.hierarchy_levels[0].pulse = !unrelated.hierarchy_levels[0].pulse;
@@ -366,6 +374,7 @@ namespace TileStories.Editor.Tests
             AssertChanges(c => c.pois[0].category = "changed_category", "POI category");
             AssertChanges(c => c.pois[0].badge_category = "changed_badge", "POI badge_category");
             AssertChanges(c => c.pois[0].has_custom_symbol = !c.pois[0].has_custom_symbol, "POI has_custom_symbol");
+            AssertChanges(c => c.pois[0].name += "_renamed", "POI name (the marker's label text)");
 
             var unrelated = LoadShippedConfig();
             unrelated.pois[0].editor_rotation_deg += 10f;
@@ -416,6 +425,254 @@ namespace TileStories.Editor.Tests
             var sessionConfigField = typeof(WallSession).GetField("_config", BindingFlags.NonPublic | BindingFlags.Instance);
             var wallConfig = (WallConfigData)sessionConfigField.GetValue(session);
             Assert.AreNotSame(authoring.category_styles, wallConfig.category_styles);
+        }
+
+        // icon_color_hex / icon_size_ratio (_2.2.1): the Marker section's Icon color / Icon size reach
+        // a real running marker's Symbol icon (colour + anchors) and its Badge icon colour, live.
+        [Test]
+        public void MarkerApplier_DrivesRealMarkers_IconColorAndSize()
+        {
+            var authoring = LoadShippedConfig();
+            MarkerHierarchyResolver.Configure(authoring.hierarchy_levels);
+            var session = NewSessionOn(Copy(authoring));
+            var poi = authoring.pois.First(p => p.has_status && !p.status_unknown && !string.IsNullOrEmpty(p.badge_category));
+            var marker = session.SpawnedMarkers.First(m => m.name == poi.id);
+            var icon = marker.transform.Find("Symbol/Icon");
+            var badgeIcon = marker.transform.Find("Badge/Icon");
+            Assert.IsNotNull(icon, "POI_Marker has Symbol/Icon");
+            Assert.IsNotNull(badgeIcon, "POI_Marker has Badge/Icon");
+            var dispatcher = new LivePlayModeConfigDispatcher(new ILivePlayModeApplier[] { new LivePlayModeMarkerApplier() });
+            dispatcher.Push(session, authoring);
+            float widthBefore = ((RectTransform)icon).anchorMax.x - ((RectTransform)icon).anchorMin.x;
+
+            authoring.icon_color_hex = "#FF00FF";
+            authoring.icon_size_ratio = 0.85f;
+            CollectionAssert.AreEqual(new[] { "marker" }, dispatcher.Push(session, authoring));
+
+            ColorUtility.TryParseHtmlString("#FF00FF", out var magenta);
+            var iconColor = icon.GetComponent<UnityEngine.UI.Image>().color;
+            Assert.AreEqual(magenta.r, iconColor.r, 1e-3f); Assert.AreEqual(magenta.g, iconColor.g, 1e-3f); Assert.AreEqual(magenta.b, iconColor.b, 1e-3f);
+            var badgeColor = badgeIcon.GetComponent<UnityEngine.UI.Image>().color;
+            Assert.AreEqual(magenta.r, badgeColor.r, 1e-3f, "the badge icon uses the same Icon color");
+            float widthAfter = ((RectTransform)icon).anchorMax.x - ((RectTransform)icon).anchorMin.x;
+            Assert.AreEqual(0.85f, widthAfter, 1e-3f, "the icon spans Icon size of the symbol");
+            Assert.Greater(widthAfter, widthBefore, "a live Icon size edit must grow the running icon");
+        }
+
+        // label_gap_ratio / label_font_size_ratio (_2.2.1): wall-level ratios of the symbol
+        // diameter, resolved through MarkerVisualSettings the same way ring_size_ratio/
+        // badge_size_ratio already are. Proves the config actually reaches a real marker's real
+        // Label RectTransform/TextMeshProUGUI component, live, on a wall that shows its label
+        // (level_1 in the shipped config has show_label true).
+        [Test]
+        public void MarkerApplier_DrivesRealMarkers_LabelGapAndFontSizeRatios()
+        {
+            var authoring = LoadShippedConfig();
+            var level = authoring.hierarchy_levels.First(l => l.show_label);
+            MarkerHierarchyResolver.Configure(authoring.hierarchy_levels);
+            var session = NewSessionOn(Copy(authoring));
+            var poi = authoring.pois.First(p => p.hierarchy_level_key == level.key);
+            var marker = session.SpawnedMarkers.First(m => m.name == poi.id);
+            var labelRect = (RectTransform)marker.transform.Find("Label");
+            var labelText = labelRect.GetComponent("TextMeshProUGUI");
+            var fontSizeProp = labelText.GetType().GetProperty("fontSize");
+            float symbolDiameter = level.size_cm / 100f;
+            var dispatcher = new LivePlayModeConfigDispatcher(new ILivePlayModeApplier[] { new LivePlayModeMarkerApplier() });
+
+            authoring.label_gap_ratio = 0.2f;
+            authoring.label_font_size_ratio = 0.4f;
+            var applied = dispatcher.Push(session, authoring);
+            CollectionAssert.AreEqual(new[] { "marker" }, applied);
+
+            Assert.AreEqual(0.4f * symbolDiameter, (float)fontSizeProp.GetValue(labelText), 1e-4f,
+                "label_font_size_ratio must reach the real marker's TMP font size live");
+            float symbolRadius = symbolDiameter * 0.5f;
+            Assert.AreEqual(-symbolRadius - 0.2f * symbolDiameter, labelRect.anchoredPosition.y, 1e-4f,
+                "label_gap_ratio must reach the real marker's Label offset live");
+        }
+
+        // Font system (_2.0_Labels_And_Fonts_Design.md): the wall's label_font_key reaches the real
+        // marker's TMP font asset live, through the same prefab-attached FontKeyLibrary MarkerView
+        // resolves at draw time.
+        [Test]
+        public void MarkerApplier_DrivesRealMarkers_LabelFontKey()
+        {
+            var authoring = LoadShippedConfig();
+            var level = authoring.hierarchy_levels.First(l => l.show_label);
+            MarkerHierarchyResolver.Configure(authoring.hierarchy_levels);
+            var session = NewSessionOn(Copy(authoring));
+            var poi = authoring.pois.First(p => p.hierarchy_level_key == level.key);
+            var marker = session.SpawnedMarkers.First(m => m.name == poi.id);
+            var labelRect = (RectTransform)marker.transform.Find("Label");
+            var labelText = labelRect.GetComponent("TextMeshProUGUI");
+            var fontProp = labelText.GetType().GetProperty("font");
+            var fontLib = AssetDatabase.LoadAssetAtPath<FontKeyLibrary>("Assets/Framework/Runtime/UI/Markers/FontLibrary.asset");
+            var dispatcher = new LivePlayModeConfigDispatcher(new ILivePlayModeApplier[] { new LivePlayModeMarkerApplier() });
+
+            authoring.label_font_key = "roboto_bold";
+            dispatcher.Push(session, authoring);
+
+            Assert.AreSame(fontLib.Get("roboto_bold"), fontProp.GetValue(labelText),
+                "label_font_key must reach the real marker's TMP font asset live");
+        }
+
+        // Marker Label Style (_2.0_Labels_And_Fonts_Design.md section 4), the whole contract on a real
+        // marker through the real applier: override ON = the level's own values win; while ON a wall
+        // default edit does NOT reach that level; switched OFF live = the level follows the wall
+        // default again (its stored values are ignored, not deleted).
+        [Test]
+        public void MarkerApplier_DrivesRealMarkers_LevelLabelStyleOverride_OnOffAndWallEdits()
+        {
+            var authoring = LoadShippedConfig();
+            authoring.label_gap_ratio = 0.075f;
+            authoring.label_font_size_ratio = 0.25f;
+            authoring.label_font_key = "liberation_sans";
+            var level = authoring.hierarchy_levels.First(l => l.show_label);
+            level.override_label_style = true;
+            level.label_gap_ratio = 0.2f;
+            level.label_font_size_ratio = 0.5f;
+            level.label_font_key = "oswald_bold";
+            MarkerHierarchyResolver.Configure(authoring.hierarchy_levels);
+            var session = NewSessionOn(Copy(authoring));
+            var poi = authoring.pois.First(p => p.hierarchy_level_key == level.key);
+            var marker = session.SpawnedMarkers.First(m => m.name == poi.id);
+            var labelRect = (RectTransform)marker.transform.Find("Label");
+            var labelText = labelRect.GetComponent("TextMeshProUGUI");
+            var fontSizeProp = labelText.GetType().GetProperty("fontSize");
+            var fontProp = labelText.GetType().GetProperty("font");
+            var fontLib = AssetDatabase.LoadAssetAtPath<FontKeyLibrary>("Assets/Framework/Runtime/UI/Markers/FontLibrary.asset");
+            float symbolDiameter = level.size_cm / 100f;
+            float symbolRadius = symbolDiameter * 0.5f;
+            float FontSize() => (float)fontSizeProp.GetValue(labelText);
+            var dispatcher = new LivePlayModeConfigDispatcher(new ILivePlayModeApplier[] { new LivePlayModeMarkerApplier() });
+            dispatcher.Push(session, authoring);
+
+            Assert.AreEqual(0.5f * symbolDiameter, FontSize(), 1e-4f, "override ON: the level's own font size wins");
+            Assert.AreEqual(-symbolRadius - 0.2f * symbolDiameter, labelRect.anchoredPosition.y, 1e-4f, "override ON: the level's own gap wins");
+            Assert.AreSame(fontLib.Get("oswald_bold"), fontProp.GetValue(labelText), "override ON: the level's own font wins");
+
+            authoring.label_font_size_ratio = 0.9f;
+            dispatcher.Push(session, authoring);
+            Assert.AreEqual(0.5f * symbolDiameter, FontSize(), 1e-4f, "override ON: a wall default edit must not reach this level");
+
+            level.override_label_style = false;
+            CollectionAssert.AreEqual(new[] { "marker" }, dispatcher.Push(session, authoring), "the override switch is a marker-applier field");
+            Assert.AreEqual(0.9f * symbolDiameter, FontSize(), 1e-4f, "override OFF: the level follows the current wall default");
+            Assert.AreEqual(-symbolRadius - 0.075f * symbolDiameter, labelRect.anchoredPosition.y, 1e-4f, "override OFF: wall gap");
+            Assert.AreSame(fontLib.Get("liberation_sans"), fontProp.GetValue(labelText), "override OFF: wall font");
+            Assert.AreEqual(0.5f, level.label_font_size_ratio, "switching OFF keeps the level's stored values (just ignored)");
+        }
+
+        // Confirms the exact gap a developer reported: editing the Hierarchy Levels table while
+        // Play Mode runs must show up on the real markers right away, for every column the marker
+        // applier owns (Size, Text Label, Spin Ring, Search Keywords -- Ripple/Halo/Pulse are
+        // covered by EffectsApplier_DrivesRealMarkers_ThroughEverySwitchAndLevelChoice above,
+        // Facing Override by OrientationApplier_RepointsRealMarkers... above). Reveal Delay/
+        // Duration are NOT asserted here: MarkerRevealEffect.Play only runs once, from
+        // MarkerView.Initialise, at spawn time (_2.3_Marker_Hierarchy.md section 5's "settled
+        // baseline" contract) -- a live edit to those two fields has nothing left to animate on an
+        // already-revealed marker, by design, not by a live-sync bug.
+        [Test]
+        public void MarkerApplier_DrivesRealMarkers_HierarchyLevelFields()
+        {
+            var authoring = LoadShippedConfig();
+            var level = authoring.hierarchy_levels[0];
+            MarkerHierarchyResolver.Configure(authoring.hierarchy_levels);
+            var session = NewSessionOn(Copy(authoring));
+            var poi = authoring.pois.First(p => p.hierarchy_level_key == level.key);
+            var marker = session.SpawnedMarkers.First(m => m.name == poi.id);
+            var symbol = marker.transform.Find("Symbol").GetComponent<RectTransform>();
+            var label = marker.transform.Find("Label").gameObject;
+            var ring = marker.transform.Find("Ring").GetComponent<MarkerRingView>();
+            var rotatingField = typeof(MarkerRingView).GetField("_rotating", BindingFlags.NonPublic | BindingFlags.Instance);
+            var dispatcher = new LivePlayModeConfigDispatcher(new ILivePlayModeApplier[] { new LivePlayModeMarkerApplier() });
+
+            // 1. Size (cm): the real Symbol RectTransform must resize live, no restart.
+            // `level` aliases authoring.hierarchy_levels[0], so the original value is captured
+            // BEFORE mutating -- reading level.size_cm afterwards would double-count the edit.
+            float originalSizeCm = level.size_cm;
+            authoring.hierarchy_levels[0].size_cm = originalSizeCm + 25f;
+            var applied = dispatcher.Push(session, authoring);
+            CollectionAssert.AreEqual(new[] { "marker" }, applied);
+            Assert.AreEqual((originalSizeCm + 25f) / 100f, symbol.sizeDelta.x, 0.001f, "Size (cm) must resize the running marker live");
+
+            // 2. Text Label (Show/Don't Show): the real Label GameObject must toggle live.
+            bool showBefore = label.activeSelf;
+            authoring.hierarchy_levels[0].show_label = !showBefore;
+            dispatcher.Push(session, authoring);
+            Assert.AreEqual(!showBefore, label.activeSelf, "Text Label must show/hide the running marker's label live");
+
+            // 3. Spin Ring (rotate_contour): the real ring's rotation state must toggle live.
+            authoring.hierarchy_levels[0].rotate_contour = true;
+            dispatcher.Push(session, authoring);
+            Assert.IsTrue((bool)rotatingField.GetValue(ring), "Spin Ring ON must start the running marker's ring rotating live");
+            authoring.hierarchy_levels[0].rotate_contour = false;
+            dispatcher.Push(session, authoring);
+            Assert.IsFalse((bool)rotatingField.GetValue(ring), "Spin Ring OFF must stop the running marker's ring rotating live");
+
+            // 4. Search Keywords: not marker-visual, but must still round-trip live into the running
+            // wall's own config copy (POISearchIndex reads WallSession's config, not the window's).
+            authoring.hierarchy_levels[0].search_keywords = new List<string> { "edited_live" };
+            dispatcher.Push(session, authoring);
+            var wallConfigField = typeof(WallSession).GetField("_config", BindingFlags.NonPublic | BindingFlags.Instance);
+            var wallConfig = (WallConfigData)wallConfigField.GetValue(session);
+            CollectionAssert.AreEqual(new[] { "edited_live" }, wallConfig.hierarchy_levels[0].search_keywords,
+                "Search Keywords must reach the running wall's own hierarchy_levels copy live");
+
+            // 5. an unrelated edit pushes nothing (same discipline as every other applier test)
+            authoring.wall_name += "_x";
+            Assert.IsEmpty(dispatcher.Push(session, authoring));
+        }
+
+        // A POI's own Hierarchy Level assignment (Specific Marker > Marker Style > Hierarchy Level) is
+        // live: moving a real POI to another level resizes it, shows/hides its label, swaps its effects
+        // and its facing override at once -- and ONLY the poi-level applier reacts (the levels' own
+        // columns are untouched, so no other domain re-applies). All four real appliers, real order.
+        [Test]
+        public void PoiLevelApplier_MovingARealPoiToAnotherLevel_ChangesItsSizeLabelEffectsAndFacingLive()
+        {
+            var authoring = LoadShippedConfig();
+            var from = authoring.hierarchy_levels.First(l => l.show_label);
+            var to = authoring.hierarchy_levels.First(l => !l.show_label && Mathf.Abs(l.size_cm - from.size_cm) > 1f);
+            to.facing_mode_override = "wall_fixed";
+            from.facing_mode_override = "";
+            from.pulse = true;
+            to.pulse = false;
+            MarkerHierarchyResolver.Configure(authoring.hierarchy_levels);
+            var session = NewSessionOn(Copy(authoring));
+            var poi = authoring.pois.First(p => p.hierarchy_level_key == from.key);
+            var marker = session.SpawnedMarkers.First(m => m.name == poi.id);
+            var symbol = marker.transform.Find("Symbol").GetComponent<RectTransform>();
+            var label = marker.transform.Find("Label").gameObject;
+            var billboard = marker.GetComponentInChildren<MarkerBillboard>();
+            var pulse = marker.GetComponent<MarkerPulseEffect>();
+            var dispatcher = new LivePlayModeConfigDispatcher(new ILivePlayModeApplier[]
+            {
+                new LivePlayModeEffectsApplier(), new LivePlayModeOrientationApplier(),
+                new LivePlayModeMarkerApplier(), new LivePlayModePoiLevelApplier(),
+            });
+            dispatcher.Push(session, authoring);   // first push to a new wall applies every domain once
+
+            Assert.AreEqual(from.size_cm / 100f, symbol.sizeDelta.x, 0.001f, "precondition: the POI starts at its own level's size");
+            Assert.IsTrue(label.activeSelf, "precondition: its level shows the label");
+            Assert.IsTrue(pulse.IsActive, "precondition: its level pulses");
+
+            poi.hierarchy_level_key = to.key;
+            CollectionAssert.AreEqual(new[] { "poi-level" }, dispatcher.Push(session, authoring),
+                "a POI level change is the poi-level applier's alone");
+
+            Assert.AreEqual(to.size_cm / 100f, symbol.sizeDelta.x, 0.001f, "the POI takes its new level's size live");
+            Assert.IsFalse(label.activeSelf, "the POI takes its new level's label visibility live");
+            Assert.IsFalse(pulse.IsActive, "the POI takes its new level's effects live");
+            Assert.AreEqual("wall_fixed", billboard.ConfiguredModeOverride, "the POI takes its new level's facing override live");
+
+            poi.hierarchy_level_key = "";
+            dispatcher.Push(session, authoring);
+            Assert.AreEqual(MarkerHierarchyResolver.Fallback.SizeCm / 100f, symbol.sizeDelta.x, 0.001f,
+                "'(none)' drops the POI to the framework Fallback live");
+
+            from.size_cm += 5f;
+            Assert.IsFalse(dispatcher.Push(session, authoring).Contains("poi-level"), "a level column edit is not a POI assignment change");
         }
     }
 }

@@ -133,41 +133,37 @@ namespace TileStories.Tests
         }
 
         [Test]
-        public void StepTowardTarget_ReachesTargetWhenDeltaEqualsSpeed()
+        public void AnimatedZoom_LastsExactlyTheTransition_ThenSitsOnTheTarget()
         {
-            // deltaTime == transitionSpeed -> t=1 -> exactly target.
-            Assert.That(ARZoomMath.StepTowardTarget(1.0f, 2.0f, 0.25f, 0.25f), Is.EqualTo(2.0f).Within(1e-5f));
+            // Transition (s) = 0.4: start at 0, halfway at 0.2 (eased, symmetric), target exactly at 0.4 and after
+            Assert.That(ARZoomMath.AnimatedZoom(1f, 2f, 0f, 0.4f), Is.EqualTo(1f).Within(1e-5f));
+            Assert.That(ARZoomMath.AnimatedZoom(1f, 2f, 0.2f, 0.4f), Is.EqualTo(1.5f).Within(1e-5f));
+            Assert.That(ARZoomMath.AnimatedZoom(1f, 2f, 0.4f, 0.4f), Is.EqualTo(2f).Within(1e-5f));
+            Assert.That(ARZoomMath.AnimatedZoom(1f, 2f, 9f, 0.4f), Is.EqualTo(2f).Within(1e-5f), "never overshoots");
         }
 
         [Test]
-        public void StepTowardTarget_ApproachesMonotonicallyWithoutOvershoot()
+        public void AnimatedZoom_IsTheSameAtAnyFrameRate_AndMovesOneWay()
         {
-            // mid-step: t=0.5 -> 1.5 (between start and target, no overshoot).
-            float mid = ARZoomMath.StepTowardTarget(1.0f, 2.0f, 0.25f, 0.125f);
-            Assert.That(mid, Is.EqualTo(1.5f).Within(1e-5f));
-
-            // large delta is clamped to t=1 -> target, still no overshoot past it.
-            float big = ARZoomMath.StepTowardTarget(1.0f, 2.0f, 0.25f, 5.0f);
-            Assert.That(big, Is.LessThanOrEqualTo(2.0f + 1e-5f));
-            Assert.That(big, Is.EqualTo(2.0f).Within(1e-4f));
-
-            // descending direction stays monotonic and bounded.
-            float down = ARZoomMath.StepTowardTarget(3.0f, 1.0f, 0.25f, 0.1f);
-            Assert.That(down, Is.LessThan(3.0f));
-            Assert.That(down, Is.GreaterThan(1.0f));
+            // the value depends on elapsed time only, so 30 and 120 fps agree at the same moment
+            float at30 = 0f, at120 = 0f;
+            for (int i = 0; i < 3; i++) at30 += 1f / 30f;
+            for (int i = 0; i < 12; i++) at120 += 1f / 120f;
+            Assert.That(ARZoomMath.AnimatedZoom(3f, 1f, at30, 0.25f), Is.EqualTo(ARZoomMath.AnimatedZoom(3f, 1f, at120, 0.25f)).Within(1e-4f));
+            float previous = 3f;
+            for (float t = 0f; t <= 0.25f; t += 0.01f)
+            {
+                float z = ARZoomMath.AnimatedZoom(3f, 1f, t, 0.25f);
+                Assert.That(z, Is.LessThanOrEqualTo(previous + 1e-6f), "zooming out never turns back");
+                previous = z;
+            }
         }
 
         [Test]
-        public void StepTowardTarget_InstantWhenZeroOrNegativeSpeed()
+        public void AnimatedZoom_InstantWhenTheTransitionIsZeroOrLess()
         {
-            Assert.That(ARZoomMath.StepTowardTarget(1.0f, 2.0f, 0f, 0.01f), Is.EqualTo(2.0f).Within(1e-5f));
-            Assert.That(ARZoomMath.StepTowardTarget(1.0f, 2.0f, -1f, 0.01f), Is.EqualTo(2.0f).Within(1e-5f));
-        }
-
-        [Test]
-        public void StepTowardTarget_AlreadyAtTarget()
-        {
-            Assert.That(ARZoomMath.StepTowardTarget(2.0f, 2.0f, 0.25f, 0.01f), Is.EqualTo(2.0f).Within(1e-5f));
+            Assert.That(ARZoomMath.AnimatedZoom(1f, 2f, 0f, 0f), Is.EqualTo(2f).Within(1e-5f));
+            Assert.That(ARZoomMath.AnimatedZoom(1f, 2f, 0f, -1f), Is.EqualTo(2f).Within(1e-5f));
         }
 
         // --- Task 5.2 (2.4-m): gesture pure-math helpers, Tier-0 ---

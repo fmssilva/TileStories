@@ -12,9 +12,19 @@ namespace TileStories
         public bool IsSupported => true;
         public bool IsBusy { get; private set; }
 
+        // What the Editor mic "hears" when nothing set PresetTranscript: the POI Editor's "Try a Query" text
+        // (Select, Filter & Search > Test), so the developer picks the phrase a voice search should find
+        public static string EditorPhrase = "cathedral";
+
         // The transcript emitted synchronously on StartListening. Set before the
         // controller starts listening so tests can drive a known utterance.
-        public string PresetTranscript { get; set; } = "cathedral";
+        public string PresetTranscript
+        {
+            get => _presetTranscript ?? EditorPhrase;
+            set => _presetTranscript = value;
+        }
+
+        private string _presetTranscript;
 
         // Simulated voice-level amplitude (0..1) emitted at listen start.
         public float SimulatedVoiceLevel { get; set; } = 0.5f;

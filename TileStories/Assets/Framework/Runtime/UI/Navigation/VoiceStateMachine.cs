@@ -30,21 +30,6 @@ namespace TileStories
         // The last error message received (set on OnTranscriberError/OnSearchFailed).
         public string LastError { get; private set; } = string.Empty;
 
-        // Decide whether a transcript should trigger a search and, if so, which
-        // match mode to use. Returns null for empty/whitespace transcripts (no
-        // search). Defaults to Any on an unrecognised config value so a typo'd
-        // voice_search_match_mode can never silently break searching.
-        public static SearchMatchMode? ResolveSearchMode(string transcript, string matchModeConfig)
-        {
-            if (string.IsNullOrWhiteSpace(transcript))
-                return null;
-
-            return ParseMatchMode(matchModeConfig);
-        }
-
-        public static SearchMatchMode ParseMatchMode(string value) =>
-            value == "all" ? SearchMatchMode.All : SearchMatchMode.Any;
-
         // idle/result/error -> listening. No-op while already listening or
         // processing, so a double mic tap cannot race the pipeline.
         public void BeginListening()

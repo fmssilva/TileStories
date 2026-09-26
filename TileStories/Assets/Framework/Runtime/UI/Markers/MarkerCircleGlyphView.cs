@@ -53,6 +53,15 @@ namespace TileStories
 
         public void SetVisible(bool visible) => gameObject.SetActive(visible);
 
+        // The icon's diameter as a fraction of this glyph (the wall's icon_size_ratio for the Symbol)
+        public void SetIconSizeRatio(float ratio)
+        {
+            iconSizeRatio = Mathf.Clamp(ratio, 0.35f, 0.9f);
+            ConfigureIconRect();
+        }
+
+        public float IconSizeRatio => iconSizeRatio;
+
         public Image EnsureIconReference()
         {
             if (icon != null)

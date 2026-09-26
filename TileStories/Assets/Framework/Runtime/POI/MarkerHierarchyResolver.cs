@@ -15,9 +15,19 @@ namespace TileStories
         public readonly float RevealDelaySeconds;
         public readonly float RevealDurationSeconds;
 
+        // Marker Label Style (_2.0_Labels_And_Fonts_Design.md section 4). OverridesLabelStyle false
+        // = the label follows the wall default and the three values are ignored; MarkerView, not
+        // this struct, picks between the two. Values are already clamped by StyleOf.
+        public readonly bool OverridesLabelStyle;
+        public readonly float LabelGapRatio;
+        public readonly float LabelFontSizeRatio;
+        public readonly string LabelFontKey;
+
         public HierarchyStyle(float sizeCm, bool showLabel,
             MarkerEffectFlags effectFlags, bool rotateContour,
-            float revealDelaySeconds, float revealDurationSeconds)
+            float revealDelaySeconds, float revealDurationSeconds,
+            bool overridesLabelStyle = false, float labelGapRatio = 0f,
+            float labelFontSizeRatio = 0f, string labelFontKey = "")
         {
             SizeCm = sizeCm;
             ShowLabel = showLabel;
@@ -25,6 +35,10 @@ namespace TileStories
             RotateContour = rotateContour;
             RevealDelaySeconds = revealDelaySeconds;
             RevealDurationSeconds = revealDurationSeconds;
+            OverridesLabelStyle = overridesLabelStyle;
+            LabelGapRatio = labelGapRatio;
+            LabelFontSizeRatio = labelFontSizeRatio;
+            LabelFontKey = labelFontKey ?? "";
         }
     }
 
@@ -93,6 +107,25 @@ namespace TileStories
             return flags;
         }
 
+        // The ONE conversion from a table row to its resolved style. Configure uses it for real
+        // markers and the demo grid uses it for its level cells, so a column can never reach one
+        // and silently miss the other (the demo grid once dropped every label override this way).
+        public static HierarchyStyle StyleOf(HierarchyLevelEntry entry, bool logWarnings = true)
+        {
+            if (entry == null) return Fallback;
+            return new HierarchyStyle(
+                entry.size_cm,
+                entry.show_label,
+                EffectFlagsOf(entry, logWarnings),
+                entry.rotate_contour,
+                entry.reveal_delay_s,
+                entry.reveal_duration_s,
+                entry.override_label_style,
+                MarkerVisualSettings.ClampLabelGapRatio(entry.label_gap_ratio),
+                MarkerVisualSettings.ClampLabelFontSizeRatio(entry.label_font_size_ratio),
+                MarkerVisualSettings.ResolveLabelFontKey(entry.label_font_key));
+        }
+
         public static void Configure(IEnumerable<HierarchyLevelEntry> entries)
         {
             _stylesByKey.Clear();
@@ -112,15 +145,7 @@ namespace TileStories
                 if (entry == null || string.IsNullOrWhiteSpace(entry.key))
                     continue;
 
-                var style = new HierarchyStyle(
-                    entry.size_cm,
-                    entry.show_label,
-                    EffectFlagsOf(entry),
-                    entry.rotate_contour,
-                    entry.reveal_delay_s,
-                    entry.reveal_duration_s);
-
-                _stylesByKey[entry.key.Trim()] = style;
+                _stylesByKey[entry.key.Trim()] = StyleOf(entry);
                 _levelIndexByKey[entry.key.Trim()] = count;
                 _priorityByKey[entry.key.Trim()] = entry.priority;
                 _facingModeOverrideByKey[entry.key.Trim()] = entry.facing_mode_override ?? "";

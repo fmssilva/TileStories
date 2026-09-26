@@ -59,15 +59,15 @@ namespace TileStories.Tests
         }
 
         [Test]
-        public void Apply_Label_SitsBelowSymbolByRadiusPlusGap()
+        public void Apply_Label_SitsBelowSymbolByRadiusPlusGapRatioOfDiameter()
         {
             var symbol = MakeRect("Symbol", new Vector2(0.12f, 0.12f));
             var label = MakeRect("Label", Vector2.zero);
-            var proportions = new MarkerLayoutProportions { labelGap = 0.02f };
+            var proportions = new MarkerLayoutProportions { labelGapRatio = 0.1f }; // 0.1 * 0.12 = 0.012 gap
 
             MarkerLayout.Apply(symbol, null, null, label, proportions);
 
-            Assert.AreEqual(-0.08f, label.anchoredPosition.y, 0.0001f);
+            Assert.AreEqual(-0.06f - 0.012f, label.anchoredPosition.y, 0.0001f);
         }
 
                 [Test]
@@ -134,13 +134,12 @@ namespace TileStories.Tests
 
                         Assert.AreEqual(smallRing.sizeDelta.x * 2f, bigRing.sizeDelta.x, 0.0001f, "ring must scale with symbol");
             Assert.AreEqual(smallBadge.sizeDelta.x * 2f, bigBadge.sizeDelta.x, 0.0001f, "badge must scale with symbol");
-            // Label offset = -symbolRadius - labelGap. The symbol-derived part doubles,
-            // but labelGap is fixed -- so the total does not double exactly.
-            float smallSymbolRadius = 0.10f * 0.5f;
-            float bigSymbolRadius = 0.20f * 0.5f;
-            Assert.AreEqual(-smallSymbolRadius - proportions.labelGap, smallLabel.anchoredPosition.y, 0.0001f, "small label offset");
-            Assert.AreEqual(-bigSymbolRadius - proportions.labelGap, bigLabel.anchoredPosition.y, 0.0001f, "big label offset");
-            Assert.AreEqual(smallSymbolRadius * 2f, bigSymbolRadius, 0.0001f, "symbol-derived label part must double");
+            // Label offset = -symbolRadius - labelGapRatio * symbolDiameter. Both terms scale with
+            // the symbol, so (unlike the old fixed-world-units labelGap) the WHOLE offset doubles
+            // exactly too -- this is exactly the proportional-scaling fix _2.3_Marker_Hierarchy.md
+            // documents: a level's label sits and reads correctly relative to ITS OWN size with no
+            // per-level override needed.
+            Assert.AreEqual(smallLabel.anchoredPosition.y * 2f, bigLabel.anchoredPosition.y, 0.0001f, "label offset must double along with the symbol");
         }
     }
 }

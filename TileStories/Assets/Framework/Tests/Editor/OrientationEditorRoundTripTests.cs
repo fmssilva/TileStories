@@ -99,8 +99,8 @@ namespace TileStories.Editor.Tests
                 t.GetMethod("DrawOrientationUpdateCostSubSection", BindingFlags.NonPublic | BindingFlags.Instance),
                 "Update Cost sub-section must be wired");
             Assert.IsNotNull(
-                t.GetMethod("DrawOrientationTestSubSection", BindingFlags.NonPublic | BindingFlags.Instance),
-                "Test sub-section must be wired");
+                t.GetField("_orientationTest", BindingFlags.NonPublic | BindingFlags.Instance),
+                "Test sub-section (the shared DrawDomainTestSubSection) must have its Orientation state");
 
             var ot = typeof(OrientationSettings);
             Assert.IsNotNull(ot.GetField("vertical_alignment_mode"), "OrientationSettings.vertical_alignment_mode must exist for the Marker vertical-alignment popup");
@@ -175,17 +175,27 @@ namespace TileStories.Editor.Tests
                 }
             }
 
-            var window = ScriptableObject.CreateInstance<POIEditorToolWindow>();
-            try
+            // The guides' collapsed-by-default state: DomainTestFoldoutTests (every domain)
+        }
+
+        [Test]
+        public void TestGuides_DoNotHardcodeAWallsRealPoiIdsOrLevelKeys()
+        {
+            // Guide text must describe framework behaviour, not one specific wall's taxonomy
+            // (_5.1_Editor_Tab.md, "Domain Manual Tests" > "Guide content must stay app-agnostic").
+            // "LivingRoom" itself is NOT forbidden: the real scene-path reference
+            // (Apps/LivingRoom/LivingRoomScene) is legitimate and kept.
+            var t = typeof(POIEditorToolWindow);
+            const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Static;
+            var forbidden = new[] { "'lamp'", "painting", "camera'", "level_1", "level_2", "level_3", "level_4", "level_5" };
+
+            foreach (string guideName in new[] { "OrientationSceneTestGuide", "OrientationPlaymodeTestGuide", "OrientationDeviceTestGuide" })
             {
-                foreach (string foldoutField in new[] { "_showOrientationSceneTestGuide", "_showOrientationPlaymodeTestGuide", "_showOrientationDeviceTestGuide" })
-                {
-                    var f = t.GetField(foldoutField, BindingFlags.NonPublic | BindingFlags.Instance);
-                    Assert.IsNotNull(f, foldoutField + " must exist");
-                    Assert.IsFalse((bool)f.GetValue(window), foldoutField + " must default to collapsed");
-                }
+                var guide = (string)t.GetField(guideName, flags)?.GetValue(null);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(guide), guideName + " must exist");
+                foreach (string term in forbidden)
+                    StringAssert.DoesNotContain(term, guide, guideName + " must not hardcode the real wall-specific id/level key '" + term + "'");
             }
-            finally { UnityEngine.Object.DestroyImmediate(window); }
         }
     }
 }

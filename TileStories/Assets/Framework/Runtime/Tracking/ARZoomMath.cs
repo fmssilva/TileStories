@@ -88,17 +88,14 @@ namespace TileStories
             return Mathf.Clamp(currentZoom * scaleFactor, min, max);
         }
 
-        // Frame-step toward a target. Reaches the target in roughly
-        // transitionSpeedSeconds at low framerate; higher framerate approaches
-        // asymptotically with no overshoot. Clamped to the target to stop jitter.
-        public static float StepTowardTarget(float from, float to, float transitionSpeedSeconds, float deltaTime)
+        // The zoom `elapsed` seconds into an animation from `from` to `to` that lasts exactly
+        // `durationSeconds` (the Editor's Transition (s)), eased in and out, the same at any frame rate.
+        // Reaches `to` exactly at the end; a duration of 0 or less is instant.
+        public static float AnimatedZoom(float from, float to, float elapsed, float durationSeconds)
         {
-            if (Mathf.Approximately(from, to)) return to;
-            if (transitionSpeedSeconds <= 0f) return to; // instant
-            float t = Mathf.Clamp01(deltaTime / transitionSpeedSeconds);
-            float next = Mathf.Lerp(from, to, t);
-            if (Mathf.Abs(next - to) < 1e-4f) return to;
-            return next;
+            if (durationSeconds <= 0f) return to;
+            float t = Mathf.Clamp01(elapsed / durationSeconds);
+            return Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t));
         }
 
         // A quick helper pair for the gesture driver (ARZoomGestureInput) --

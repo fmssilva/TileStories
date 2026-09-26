@@ -76,7 +76,7 @@ namespace TileStories.Tests
         public void ResetToBase_RespectsMinAboveOne()
         {
             // ResetToBase writes 1.0f through SetZoom, which clamps to [min, max].
-            // If a wall's zoom_min floors above 1.0, the reset target is clamped to
+            // If a wall's zoom_settings.min_factor floors above 1.0, the reset target is clamped to
             // that min (never below the floor) -- 1.0 is unreachable but never broken.
             ARZoomState.SetZoom(9f, 2f, 8f);
             ARZoomState.ResetToBase(2f, 8f);

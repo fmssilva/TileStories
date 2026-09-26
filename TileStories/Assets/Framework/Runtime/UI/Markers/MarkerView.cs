@@ -21,8 +21,6 @@ namespace TileStories
     // animates. This keeps the base marker cheap.
     public class MarkerView : MonoBehaviour
     {
-        private static readonly Color IconTint = new Color(0.949f, 0.925f, 0.827f);
-
         [Header("References")]
         [SerializeField] private MarkerCircleGlyphView symbol;
         [SerializeField] private MarkerRingView ring;
@@ -41,6 +39,7 @@ namespace TileStories
                 [Header("External assets")]
         [SerializeField] private SpriteKeyLibrary shapeLibrary;
         [SerializeField] private SpriteKeyLibrary iconLibrary;
+        [SerializeField] private FontKeyLibrary fontLibrary;
 
         // Shared with MarkerRevealEffect -- auto-resolved in EnsureMarkerWiring.
         // SetVisible toggles this same CanvasGroup so LOD and reveal cannot fight
@@ -113,6 +112,10 @@ namespace TileStories
         }
 
 
+        // Does this marker show a text label at all (its level's Show Marker Label?)? Independent of
+        // SetLabelVisible, which only the displacement fallback uses.
+        public bool ShowsLabel => labelText != null && labelText.gameObject.activeSelf;
+
         // Expose the POI id for deterministic sorting in overlap resolution
         public string PoiId { get; private set; }
 
@@ -171,6 +174,7 @@ namespace TileStories
             layout.badgeSizeRatio = _settings.BadgeSizeRatio;
             layout.badgeDirection = _settings.BadgeDirection;
             ring?.SetSpinSpeed(_settings.ContourSpinDegPerSecond);
+            symbol?.SetIconSizeRatio(_settings.IconSizeRatio);
         }
 
         // Look up this marker's hierarchy style (a style override replaces the lookup entirely)
@@ -209,6 +213,21 @@ namespace TileStories
             ResolveHierarchyStyle(poi);
             if (symbol != null)
                 symbol.RectTransform.sizeDelta = Vector2.one * (_hierarchyStyle.SizeCm / 100f);
+            // Label gap/font-size/font: the level's own Marker Label Style when it overrides, else
+            // the wall default (_2.0_Labels_And_Fonts_Design.md section 4). Resolved here, not in
+            // UseSettings, because it needs _hierarchyStyle, which only exists after the line above.
+            bool levelStyle = _hierarchyStyle.OverridesLabelStyle;
+            layout.labelGapRatio = levelStyle ? _hierarchyStyle.LabelGapRatio : _settings.LabelGapRatio;
+            float labelFontSizeRatio = levelStyle ? _hierarchyStyle.LabelFontSizeRatio : _settings.LabelFontSizeRatio;
+            string labelFontKey = levelStyle ? _hierarchyStyle.LabelFontKey : _settings.LabelFontKey;
+            if (labelText != null)
+            {
+                labelText.fontSize = (_hierarchyStyle.SizeCm / 100f) * labelFontSizeRatio;
+                var activeFontLibrary = _settings.FontLibrary != null ? _settings.FontLibrary : fontLibrary;
+                var resolvedFont = activeFontLibrary != null ? activeFontLibrary.Get(labelFontKey) : null;
+                if (resolvedFont != null)
+                    labelText.font = resolvedFont;
+            }
 
             MarkerVisualState state = MarkerVisualResolver.Resolve(poi, _settings);
             CategoryPalette.TryResolveConfigured(poi.category, out var categoryColor, out _);
@@ -227,7 +246,7 @@ namespace TileStories
                     symbol?.SetBackground(shapeSprite, state.SymbolFill);
             }
             if (state.ShowIcon)
-                symbol?.SetIcon(iconSprite, IconTint, state.IconOpacity);
+                symbol?.SetIcon(iconSprite, _settings.IconColor, state.IconOpacity);
 
             // Ring (status outline) and its optional spin
             if (state.ShowRing)
@@ -252,7 +271,7 @@ namespace TileStories
                     : iconSprite;
                 badge?.SetBackgroundVisible(badgeHasBackground);
                 badge?.SetBackground(badgeShapeSprite, state.BadgeColor);
-                badge?.SetIcon(badgeIcon, IconTint, 1f);
+                badge?.SetIcon(badgeIcon, _settings.IconColor, 1f);
                 badge?.SetVisible(true);
             }
 
@@ -545,6 +564,11 @@ namespace TileStories
             _hasMarkerOffset = true;
         }
 
+        // Where the marker really is, ignoring any displacement nudge: every LOD / crowding /
+        // displacement decision measures from here, so a displaced marker never feeds its own
+        // offset back into the next cycle (the drift the displacement flicker test caught).
+        public Vector3 UndisplacedWorldPosition => _hasMarkerOffset ? _baseWorldPosition : transform.position;
+
         // Restore the marker root to its baseline world position.
         public void ClearMarkerOffset()
         {
@@ -572,17 +596,66 @@ namespace TileStories
         // MarkerLeaderLine can pick up the correct tint without re-resolving.
         internal Color LeaderLineColor => _resolvedCategoryColor;
 
-        // Delegate to the MarkerLeaderLine component on this prefab, if present.
-        // Called from ApplyDisplacement every LOD cycle; the component then
-        // self-updates in LateUpdate for per-frame visibility (camera distance).
-        public void UpdateLeaderLine(Camera cam, DisplacementSettings settings)
+        // Hand the latest displacement cycle's camera + settings to this marker's leader line (null hides
+        // it). The line itself re-reads TryGetLeaderLineEnds every frame.
+        public void RefreshLeaderLine(Camera cam, DisplacementSettings settings)
         {
-            if (!TryGetComponent<MarkerLeaderLine>(out var leaderLine)) return;
-            if (_hasWorldBasePosition)
+            if (TryGetComponent<MarkerLeaderLine>(out var leaderLine))
+                leaderLine.Refresh(cam, settings);
+        }
+
+        // Where this marker's leader line runs right now (world space), and how far the moved element
+        // travelled on screen. Marker moved (marker/both): from its true place to the rim of the symbol
+        // where it is drawn now. Only the label moved (label_only): from the rim of the symbol to the edge
+        // of the label's text. False when nothing moved, or the marker/label is not shown.
+        internal bool TryGetLeaderLineEnds(Camera cam, out Vector3 start, out Vector3 end, out float movedPx)
+        {
+            start = end = default;
+            movedPx = 0f;
+            if (cam == null || !_visible || symbol == null) return false;
+
+            Vector3 symbolCentre = symbol.RectTransform.position;
+            float symbolRadius = symbol.RectTransform.TransformVector(new Vector3(symbol.RectTransform.rect.width, 0f, 0f)).magnitude * 0.5f;
+
+            if (_hasMarkerOffset)
             {
-                leaderLine.Configure(_baseWorldPosition, _resolvedCategoryColor);
+                movedPx = ScreenDistance(cam, _baseWorldPosition, transform.position);
+                Vector3 toShown = symbolCentre - _baseWorldPosition;
+                if (toShown.sqrMagnitude < 1e-10f) return false;
+                start = _baseWorldPosition;
+                end = symbolCentre - toShown.normalized * symbolRadius;
+                return true;
             }
-            leaderLine.UpdateVisibility(cam, settings);
+
+            if (!_hasLabelOffset || labelText == null || !labelText.enabled || !labelText.gameObject.activeInHierarchy)
+                return false;
+
+            var rt = (RectTransform)labelText.transform;
+            Bounds text = labelText.textBounds;
+            bool hasText = text.size.x > 0f && text.size.y > 0f;
+            Vector3 localCentre = hasText ? text.center : (Vector3)rt.rect.center;
+            Vector2 localHalf = hasText ? (Vector2)text.extents : rt.rect.size * 0.5f;
+            Vector3 labelCentre = rt.TransformPoint(localCentre);
+            Vector3 labelBase = labelCentre - transform.TransformVector(rt.anchoredPosition - _baseLabelAnchoredPosition);
+            movedPx = ScreenDistance(cam, labelBase, labelCentre);
+
+            Vector3 toLabel = labelCentre - symbolCentre;
+            if (toLabel.sqrMagnitude < 1e-10f) return false;
+            Vector3 dir = toLabel.normalized;
+            Vector3 right = rt.TransformVector(Vector3.right * localHalf.x);
+            Vector3 up = rt.TransformVector(Vector3.up * localHalf.y);
+            float edge = MarkerLeaderLine.EdgeDistance(-dir, right.normalized, up.normalized, right.magnitude, up.magnitude);
+            start = symbolCentre + dir * symbolRadius;
+            end = labelCentre - dir * edge;
+            // - the label still touches its symbol: the gap between them is too small to draw into
+            return Vector3.Dot(end - start, dir) > 0f;
+        }
+
+        private static float ScreenDistance(Camera cam, Vector3 a, Vector3 b)
+        {
+            Vector3 sa = cam.WorldToScreenPoint(a);
+            Vector3 sb = cam.WorldToScreenPoint(b);
+            return Vector2.Distance(sa, sb);
         }
 
         // Test seam (InternalsVisibleTo -> TileStories.Tests.Runtime). Exposes the live label
@@ -590,6 +663,12 @@ namespace TileStories
         internal RectTransform LabelRect => labelText != null ? (RectTransform)labelText.transform : null;
 
         internal bool HasLabelOffset => _hasLabelOffset;
+
+        // Test seam: false while displacement's Max Move fallback hides this label (SetLabelVisible)
+        internal bool LabelTextEnabled => labelText != null && labelText.enabled;
+
+        // Symbol diameter in metres (its hierarchy level size); clusters size themselves from it
+        public float SymbolDiameterMetres => symbol != null ? symbol.RectTransform.sizeDelta.x : _hierarchyStyle.SizeCm / 100f;
 
         // Visual extent in world-space metres (radius from centre to outermost visual element).
         // Combines hierarchy size (symbol + ring + badge + label) and animated effect expansions
@@ -648,18 +727,24 @@ namespace TileStories
         }
 
         private const float ALPHA_FULL = 1f;
-        private const float ALPHA_HIDDEN = 0f;
         // Alpha at/below which a marker is treated as hidden (raycasts off).
         private const float DIM_THRESHOLD = 0.001f;
 
-        // Selection-dim level (spec section 11) that persists across LOD ticks.
-        // When non-1, LODController's per-tick SetVisible(true, ...) targets this
-        // dimmed alpha instead of full, so selection-highlight and LOD layer their
-        // alpha writes through one seam instead of fighting over CanvasGroup.alpha
-        // (the "single source of truth" the MarkerView header documents). Default
-        // 1.0 => existing callers (LOD, reveal) see identical behaviour until a
-        // highlight is active, so there is no regression when the feature is off.
-        private float _highlightAlpha = ALPHA_FULL;
+        // Three INDEPENDENT channels, multiplied into the one CanvasGroup alpha (ComposeAlpha):
+        // - visible: LOD / cluster membership (LODController). Hiding never touches the others,
+        //   so a marker hidden by LOD comes back at exactly its selection/density look.
+        // - selection: the highlight / filter-mismatch dim (SelectionHighlightController,
+        //   ResultSetCoordinator).
+        // - density: the Shrink & Fade crowding factor (LODController), which also scales the root.
+        // The reveal-on-spawn animation heads for the composed look instead of "full" (SetRest).
+        private bool _visible = true;
+        private float _selectionAlpha = ALPHA_FULL;
+        private float _densityFactor = 1f;
+
+        // Current values of the three channels (read by tests and by LODController's restore path)
+        public bool IsVisible => _visible;
+        public float SelectionAlpha => _selectionAlpha;
+        public float DensityFactor => _densityFactor;
 
         // Read-only access to this marker's hierarchy reveal duration, so
         // SelectionHighlightController can time its highlight fade to the same
@@ -668,13 +753,55 @@ namespace TileStories
             ? _hierarchyStyle.RevealDurationSeconds
             : MarkerHierarchyResolver.Fallback.RevealDurationSeconds;
 
-        // Instantly toggle marker visibility via the shared CanvasGroup.
-        // In Edit Mode, sets alpha immediately (coroutines do not tick there).
-        public void SetVisible(bool visible)
+        // The one alpha formula: hidden wins, otherwise selection dim x crowding fade
+        public static float ComposeAlpha(bool visible, float selectionAlpha, float densityFactor) =>
+            visible ? Mathf.Clamp01(selectionAlpha) * Mathf.Clamp01(densityFactor) : 0f;
+
+        // Show/hide instantly (LOD / cluster membership channel)
+        public void SetVisible(bool visible) => SetVisible(visible, 0f);
+
+        // Show/hide with a fade (LOD / cluster membership channel)
+        public void SetVisible(bool visible, float fadeDuration)
+        {
+            _visible = visible;
+            MoveToLook(fadeDuration);
+        }
+
+        // Selection dim channel: 1 = full, lower = subdued; independent of LOD visibility
+        public void SetSelectionAlpha(float alpha, float fadeDuration)
+        {
+            _selectionAlpha = Mathf.Clamp01(alpha);
+            MoveToLook(fadeDuration);
+        }
+
+        // Crowding channel (Shrink & Fade): one factor drives both size and opacity, 1 = untouched
+        public void SetDensityFactor(float factor, float fadeDuration)
+        {
+            _densityFactor = Mathf.Clamp01(factor);
+            MoveToLook(fadeDuration);
+        }
+
+        // Head for the composed look: through the reveal while it plays, else own fade (or snap)
+        private void MoveToLook(float fadeDuration)
         {
             if (_canvasGroup == null)
                 _canvasGroup = GetComponent<CanvasGroup>();
-            if (_canvasGroup == null) return;
+
+            float targetAlpha = ComposeAlpha(_visible, _selectionAlpha, _densityFactor);
+            float targetScale = _densityFactor;
+            bool interactive = targetAlpha > DIM_THRESHOLD;
+
+            var reveal = GetComponent<MarkerRevealEffect>();
+            if (reveal != null)
+            {
+                // - the reveal (if playing) animates toward these; otherwise this just records them
+                reveal.SetRest(targetAlpha, targetScale);
+                if (reveal.IsPlaying)
+                {
+                    SetInteractive(interactive);
+                    return;
+                }
+            }
 
             if (_fadeCoroutine != null)
             {
@@ -682,96 +809,48 @@ namespace TileStories
                 _fadeCoroutine = null;
             }
 
-            float targetAlpha = visible ? _highlightAlpha : ALPHA_HIDDEN;
-            _canvasGroup.alpha = targetAlpha;
-            bool interactive = targetAlpha > DIM_THRESHOLD;
+            if (!Application.isPlaying || fadeDuration <= 0f || !isActiveAndEnabled)
+            {
+                if (_canvasGroup != null) _canvasGroup.alpha = targetAlpha;
+                transform.localScale = Vector3.one * targetScale;
+                SetInteractive(interactive);
+                return;
+            }
+
+            _fadeCoroutine = StartCoroutine(FadeCoroutine(targetAlpha, targetScale, fadeDuration));
+        }
+
+        private void SetInteractive(bool interactive)
+        {
+            if (_canvasGroup == null) return;
             _canvasGroup.interactable = interactive;
             _canvasGroup.blocksRaycasts = interactive;
         }
 
-        // Fade marker visibility over fadeDuration, using the shared CanvasGroup.
-        // In Edit Mode, falls back to instant (coroutines do not tick there).
-                public void SetVisible(bool visible, float fadeDuration)
+        // Crossfade alpha and root scale from current to target (smoothstep). Raycasts take their final
+        // state at the START of either fade: a marker on its way out (hidden by LOD, merged into a cluster,
+        // filtered out) stops taking taps at once -- a tap during its fade used to select a marker that was
+        // already disappearing, and a cluster tap landed on its fading members instead of the cluster.
+        private IEnumerator FadeCoroutine(float targetAlpha, float targetScale, float duration)
         {
-            // Route the bool API through the float overload, mapping visible to this
-            // marker's current highlight level. This is what lets LODController's
-            // visible-call retarget to a dimmed alpha (spec section 11) instead of
-            // snapping back to full -- LOD and selection-highlight share one seam.
-            SetVisible(visible ? _highlightAlpha : ALPHA_HIDDEN, fadeDuration);
-        }
+            float startAlpha = _canvasGroup != null ? _canvasGroup.alpha : targetAlpha;
+            float startScale = transform.localScale.x;
+            SetInteractive(targetAlpha > DIM_THRESHOLD);
 
-        // Fade (or instantly set, at fadeDuration <= 0) to an explicit target alpha.
-        // Partial alpha implements the selection dim (spec section 11): non-selected
-        // markers sit at a dim level while remaining tappable; the selected marker
-        // targets full. Reuses the same CanvasGroup + coroutine as the bool overload
-        // so LOD and selection-highlight compose through one alpha seam.
-        public void SetVisible(float targetAlpha, float fadeDuration)
-        {
-            if (!Application.isPlaying || fadeDuration <= 0f)
-            {
-                if (_canvasGroup == null)
-                    _canvasGroup = GetComponent<CanvasGroup>();
-                if (_canvasGroup == null) return;
-
-                if (_fadeCoroutine != null)
-                {
-                    StopCoroutine(_fadeCoroutine);
-                    _fadeCoroutine = null;
-                }
-
-                _highlightAlpha = targetAlpha > DIM_THRESHOLD ? Mathf.Clamp01(targetAlpha) : ALPHA_HIDDEN;
-                _canvasGroup.alpha = targetAlpha;
-                bool interactive = targetAlpha > DIM_THRESHOLD;
-                _canvasGroup.interactable = interactive;
-                _canvasGroup.blocksRaycasts = interactive;
-                return;
-            }
-
-            if (_canvasGroup == null)
-                _canvasGroup = GetComponent<CanvasGroup>();
-            if (_canvasGroup == null) return;
-
-            if (_fadeCoroutine != null)
-                StopCoroutine(_fadeCoroutine);
-            _fadeCoroutine = StartCoroutine(FadeCoroutine(targetAlpha, fadeDuration));
-        }
-
-        // Crossfade CanvasGroup alpha from current to target; flip interaction
-        // flags at the endpoints so raycasts resume only above the hidden threshold.
-        // Stamps _highlightAlpha so a concurrent LOD tick (which calls
-        // SetVisible(true, ...) -> SetVisible(_highlightAlpha, ...)) targets the same
-        // dimmed level instead of snapping back to full -- the seam that lets
-        // selection-dimming and LOD coexist on one shared CanvasGroup.
-        private IEnumerator FadeCoroutine(float targetAlpha, float duration)
-        {
-            float startAlpha = _canvasGroup.alpha;
             float elapsed = 0f;
-
-            _highlightAlpha = targetAlpha > DIM_THRESHOLD ? Mathf.Clamp01(targetAlpha) : ALPHA_HIDDEN;
-            bool willBeInteractive = targetAlpha > DIM_THRESHOLD;
-            if (willBeInteractive)
-            {
-                _canvasGroup.interactable = true;
-                _canvasGroup.blocksRaycasts = true;
-            }
-
             while (elapsed < duration)
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
                 float smooth = t * t * (3f - 2f * t); // smoothstep
-                _canvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, smooth);
+                if (_canvasGroup != null) _canvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, smooth);
+                transform.localScale = Vector3.one * Mathf.Lerp(startScale, targetScale, smooth);
                 yield return null;
             }
 
-            _canvasGroup.alpha = targetAlpha;
+            if (_canvasGroup != null) _canvasGroup.alpha = targetAlpha;
+            transform.localScale = Vector3.one * targetScale;
             _fadeCoroutine = null;
-
-            if (!willBeInteractive)
-            {
-                _canvasGroup.interactable = false;
-                _canvasGroup.blocksRaycasts = false;
-            }
         }
     }
 }

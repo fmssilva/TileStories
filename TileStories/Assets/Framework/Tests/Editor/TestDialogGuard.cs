@@ -1,28 +1,35 @@
 using NUnit.Framework;
 using TileStories.Editor;
 
-namespace TileStories.Tests
+// Runs once around EVERY test of this EditMode assembly. It sits outside any namespace on
+// purpose: an NUnit [SetUpFixture] only covers fixtures in its own namespace and below, and
+// this assembly has two (TileStories.Tests and TileStories.Editor.Tests) -- inside one of them
+// it silently left the other unguarded.
+//  - A test cannot click a modal dialog (it hangs the run): every EditorDecision question asked
+//    by code under test gets a Cancel from here instead of a real dialog. A test that needs a
+//    different answer sets EditorDecision.Responder itself and restores the guard's afterwards.
+//  - Notices queued by code under test stay in the queue (observable) instead of opening popups.
+[SetUpFixture]
+public class TestDialogGuard
 {
-    // Runs once around every test in this assembly's TileStories.Tests namespace. A test
-    // cannot click a modal dialog, so a notice the code under test queues must never open a
-    // real one (it would hang the whole run). The queue itself stays fully observable.
-    [SetUpFixture]
-    public class TestDialogGuard
+    // Every question asked without a test's own responder is answered Cancel: the safe default
+    internal static DecisionAnswer CancelEverything(DecisionRequest request) => DecisionAnswer.Cancel;
+
+    private bool _previousShowPopups;
+
+    [OneTimeSetUp]
+    public void DisableBlockingAndStrayPopups()
     {
-        private bool _previous;
+        _previousShowPopups = EditorNotice.ShowPopups;
+        EditorNotice.ShowPopups = false;
+        EditorDecision.Responder = CancelEverything;
+    }
 
-        [OneTimeSetUp]
-        public void DisableNoticeDialogs()
-        {
-            _previous = EditorNotice.ShowDialogs;
-            EditorNotice.ShowDialogs = false;
-        }
-
-        [OneTimeTearDown]
-        public void RestoreNoticeDialogs()
-        {
-            EditorNotice.Clear();
-            EditorNotice.ShowDialogs = _previous;
-        }
+    [OneTimeTearDown]
+    public void Restore()
+    {
+        EditorNotice.Clear();
+        EditorNotice.ShowPopups = _previousShowPopups;
+        EditorDecision.Responder = null;
     }
 }

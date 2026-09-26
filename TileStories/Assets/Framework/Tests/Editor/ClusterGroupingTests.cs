@@ -19,7 +19,7 @@ namespace TileStories.Tests
             // Pin ARZoomState.ZoomFactor to 1f so CentroidEffectiveDistance == raw
             // Vector3.Distance. SetZoom is the public write path (ZoomFactor is get-only).
             ARZoomState.SetZoom(1f, 1f, 100f);
-            _defaultBands = LODController.DefaultBands();
+            _defaultBands = LodSettings.DefaultBands();
         }
 
         // --- Group ---
@@ -253,36 +253,27 @@ namespace TileStories.Tests
             Assert.IsFalse(ClusterGrouping.Overlaps(null, new List<string> { "a" }));
         }
 
-        // --- ResolveBand ---
+        // --- RepresentativeDistance (the Band Source rule) ---
 
         [Test]
-        public void ResolveBand_CentroidMode_UsesPassedCentroidDistance()
+        public void RepresentativeDistance_Centroid_UsesPassedCentroidDistance()
         {
-            // 10m centroid distance -> band 2 (7m..9999m), regardless of members.
+            // 10m centroid distance wins regardless of the members' own distances.
             var group = new List<VisualUnit> { new VisualUnit { poiId = "p1", effectiveDistance = 0f } };
-            var band = ClusterGrouping.ResolveBand(group, "centroid", 10f, _defaultBands);
-            Assert.AreEqual(2, band.Index);
-            Assert.AreEqual(9999f, band.MaxDistanceM);
+            Assert.AreEqual(10f, ClusterGrouping.RepresentativeDistance(group, "centroid", 10f));
+            Assert.AreEqual(2, LODController.FindBand(10f, _defaultBands).Index);
         }
 
         [Test]
-        public void ResolveBand_NullBandSource_DefaultsToCentroid()
+        public void RepresentativeDistance_NullOrUnknownSource_FallsBackToCentroid()
         {
-            var group = new List<VisualUnit> { new VisualUnit { poiId = "p1", effectiveDistance = 0f } };
-            var band = ClusterGrouping.ResolveBand(group, null, 0f, _defaultBands);
-            Assert.AreEqual(0, band.Index);
+            var group = new List<VisualUnit> { new VisualUnit { poiId = "p1", effectiveDistance = 8f } };
+            Assert.AreEqual(1.5f, ClusterGrouping.RepresentativeDistance(group, null, 1.5f));
+            Assert.AreEqual(1.5f, ClusterGrouping.RepresentativeDistance(group, "bogus_mode", 1.5f));
         }
 
         [Test]
-        public void ResolveBand_UnknownMode_FallsBackToCentroid()
-        {
-            var group = new List<VisualUnit> { new VisualUnit { poiId = "p1", effectiveDistance = 0f } };
-            var band = ClusterGrouping.ResolveBand(group, "bogus_mode", 0f, _defaultBands);
-            Assert.AreEqual(0, band.Index);
-        }
-
-        [Test]
-        public void ResolveBand_NearestMember_UsesMinMemberDistance()
+        public void RepresentativeDistance_NearestMember_UsesMinMemberDistance()
         {
             var group = new List<VisualUnit>
             {
@@ -290,12 +281,13 @@ namespace TileStories.Tests
                 new VisualUnit { poiId = "b", effectiveDistance = 3f },
             };
             // min member eff distance = 3f -> band 1 (2m..7m)
-            var band = ClusterGrouping.ResolveBand(group, "nearest_member", 999f, _defaultBands);
-            Assert.AreEqual(1, band.Index);
+            float d = ClusterGrouping.RepresentativeDistance(group, "nearest_member", 999f);
+            Assert.AreEqual(3f, d);
+            Assert.AreEqual(1, LODController.FindBand(d, _defaultBands).Index);
         }
 
         [Test]
-        public void ResolveBand_FarthestMember_UsesMaxMemberDistance()
+        public void RepresentativeDistance_FarthestMember_UsesMaxMemberDistance()
         {
             var group = new List<VisualUnit>
             {
@@ -303,8 +295,9 @@ namespace TileStories.Tests
                 new VisualUnit { poiId = "b", effectiveDistance = 20f },
             };
             // max member eff distance = 20f -> band 2
-            var band = ClusterGrouping.ResolveBand(group, "farthest_member", 0f, _defaultBands);
-            Assert.AreEqual(2, band.Index);
+            float d = ClusterGrouping.RepresentativeDistance(group, "farthest_member", 0f);
+            Assert.AreEqual(20f, d);
+            Assert.AreEqual(2, LODController.FindBand(d, _defaultBands).Index);
         }
 
         // --- BuildAggregate ---
@@ -318,7 +311,7 @@ namespace TileStories.Tests
                 new VisualUnit { poiId = "p1", worldPosition = new Vector3(0, 0, 0), hierarchyLevelIndex = 0 },
             };
             var centroid = new Vector3(1, 0, 0);
-            var agg = ClusterGrouping.BuildAggregate(group, 0, "centroid", centroid, 5f);
+            var agg = ClusterGrouping.BuildAggregate(group, 0, centroid, 5f);
 
             Assert.AreEqual(ClusterGrouping.Signature(ClusterGrouping.MemberIds(group)), agg.poiId);
             Assert.AreEqual(centroid, agg.worldPosition);

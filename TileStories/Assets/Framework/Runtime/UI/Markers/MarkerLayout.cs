@@ -18,7 +18,10 @@ namespace TileStories
         // four in the interactive prototype (see the HTML file's badge section).
         public Vector2 badgeDirection = new Vector2(0.7f, 0.7f);
 
-        public float labelGap = 0.015f; // world units, symbol bottom edge -> label top
+        // Symbol bottom edge -> label top, as a multiple of the symbol diameter (_2.2.1
+        // label_gap_ratio): scales with each hierarchy level's own size automatically, same
+        // convention as ringSizeRatio/badgeSizeRatio above.
+        public float labelGapRatio = 0.075f;
     }
 
     // Pure function of (symbol size, proportions) -> (ring/badge/label rects). No
@@ -56,7 +59,7 @@ namespace TileStories
             {
                 Vector2 pos = label.anchoredPosition;
                 pos.x = symbol.anchoredPosition.x;
-                pos.y = symbol.anchoredPosition.y - symbolRadius - proportions.labelGap;
+                pos.y = symbol.anchoredPosition.y - symbolRadius - proportions.labelGapRatio * symbolSize.x;
                                 label.anchoredPosition = pos;
             }
         }

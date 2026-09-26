@@ -1,154 +1,173 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 
 namespace TileStories
 {
-    // Pure logic for evaluating which POIs pass the active facet filters and
-    // computing the "relax filters" suggestion when zero results remain.
-    // Extracted from FilterTrayView so it can be Tier-0 tested without a scene
-    // or UI Toolkit instance. Stateless per-call (spec _2.6 section 7).
-    public static class FilterFacetEvaluator
+    // One facet group a visitor can filter by (spec _2.6 section 7): the four taxonomy tables, plus one group
+    // per Keyword Field the developer ticked "Filter" on (its values = the keywords the POIs hold in it).
+    // A small value type compared by Id; Id is also the chip's element-name part ("facet-Category-religious").
+    public readonly struct FacetGroup : IEquatable<FacetGroup>
     {
-        // Check whether a single POI passes all active facet filters.
-        public static bool PoiPassesFilters(POIData poi,
-            HashSet<string> activeCategories,
-            HashSet<string> activeBadgeCategories,
-            HashSet<string> activeOutlineLevels,
-            HashSet<string> activeHierarchyLevels)
+        public readonly string Id;
+        // The Keyword Field's key for a field group, null for a taxonomy group
+        public readonly string FieldKey;
+
+        private FacetGroup(string id, string fieldKey)
         {
-            if (poi == null) return false;
-
-            // No filter is always a pass; an empty active set means "show all"
-            bool passesCategory = activeCategories.Count == 0 ||
-                (!string.IsNullOrEmpty(poi.category) && activeCategories.Contains(poi.category));
-
-            bool passesBadge = activeBadgeCategories.Count == 0 ||
-                (!string.IsNullOrEmpty(poi.badge_category) && activeBadgeCategories.Contains(poi.badge_category));
-
-            bool passesOutline = activeOutlineLevels.Count == 0 ||
-                (!string.IsNullOrEmpty(poi.status_level_key) && activeOutlineLevels.Contains(poi.status_level_key));
-
-            bool passesHierarchy = activeHierarchyLevels.Count == 0 ||
-                (!string.IsNullOrEmpty(poi.hierarchy_level_key) && activeHierarchyLevels.Contains(poi.hierarchy_level_key));
-
-            return passesCategory && passesBadge && passesOutline && passesHierarchy;
+            Id = id;
+            FieldKey = fieldKey;
         }
 
-        // Build the full candidate id set for the active facets (_2.6-i): every POI
-        // that passes PoiPassesFilters. Empty/absent active sets -> ALL ids (no filter).
-        // Single new access point so ResultsListView/minimap/markers share ONE set.
-        public static HashSet<string> GetFilterCandidateIds(List<POIData> pois,
-            HashSet<string> activeCategories,
-            HashSet<string> activeBadgeCategories,
-            HashSet<string> activeOutlineLevels,
-            HashSet<string> activeHierarchyLevels)
+        public static readonly FacetGroup Category = new("Category", null);
+        public static readonly FacetGroup Badge = new("Badge", null);
+        public static readonly FacetGroup Status = new("Status", null);
+        public static readonly FacetGroup Hierarchy = new("Hierarchy", null);
+
+        // The group of one filterable Keyword Field
+        public static FacetGroup Field(string fieldKey) => new("Field_" + fieldKey, fieldKey);
+
+        public bool IsField => FieldKey != null;
+
+        public bool Equals(FacetGroup other) => Id == other.Id;
+        public override bool Equals(object obj) => obj is FacetGroup g && Equals(g);
+        public override int GetHashCode() => Id?.GetHashCode() ?? 0;
+        public static bool operator ==(FacetGroup a, FacetGroup b) => a.Equals(b);
+        public static bool operator !=(FacetGroup a, FacetGroup b) => !a.Equals(b);
+        public override string ToString() => Id;
+    }
+
+    // The visitor's active filter values, one set of keys per facet group
+    public sealed class FacetSelection
+    {
+        private static readonly HashSet<string> None = new();
+        private readonly Dictionary<FacetGroup, HashSet<string>> _active = new();
+
+        public IReadOnlyCollection<string> Active(FacetGroup group) => _active.TryGetValue(group, out var set) ? set : None;
+        public bool IsActive(FacetGroup group, string key) => _active.TryGetValue(group, out var set) && set.Contains(key);
+
+        // Every group with at least one active value, in the order they were first switched on
+        public IEnumerable<FacetGroup> ActiveGroups
+        {
+            get
+            {
+                foreach (var kvp in _active)
+                    if (kvp.Value.Count > 0) yield return kvp.Key;
+            }
+        }
+
+        // Turn one filter value on or off; true when that changed anything
+        public bool Set(FacetGroup group, string key, bool on)
+        {
+            if (!_active.TryGetValue(group, out var set))
+            {
+                if (!on) return false;
+                _active[group] = set = new HashSet<string>();
+            }
+            return on ? set.Add(key) : set.Remove(key);
+        }
+
+        public void Clear() => _active.Clear();
+
+        public int Count
+        {
+            get
+            {
+                int n = 0;
+                foreach (var set in _active.Values) n += set.Count;
+                return n;
+            }
+        }
+
+        public bool Any => Count > 0;
+
+        // A copy with one value removed (for the relax suggestion)
+        public FacetSelection Without(FacetGroup group, string key)
+        {
+            var copy = new FacetSelection();
+            foreach (var kvp in _active)
+                foreach (var k in kvp.Value)
+                    if (kvp.Key != group || k != key) copy.Set(kvp.Key, k, true);
+            return copy;
+        }
+    }
+
+    // One filter the visitor could drop to get results back, and how many POIs that would give
+    public readonly struct RelaxSuggestion
+    {
+        public readonly FacetGroup Group;
+        public readonly string Key;
+        public readonly int ResultCount;
+
+        public RelaxSuggestion(FacetGroup group, string key, int resultCount)
+        {
+            Group = group;
+            Key = key;
+            ResultCount = resultCount;
+        }
+    }
+
+    // Pure facet filtering (spec _2.6 section 7): OR within a group (Religious OR Military), AND across
+    // groups (Religious AND Destroyed), an empty group filters nothing.
+    public static class FilterFacetEvaluator
+    {
+        public static bool PoiPasses(POIData poi, FacetSelection facets)
+        {
+            if (poi == null) return false;
+            foreach (var group in facets.ActiveGroups)
+                if (!Passes(poi, facets, group)) return false;
+            return true;
+        }
+
+        private static bool Passes(POIData poi, FacetSelection facets, FacetGroup group)
+        {
+            if (group.IsField)
+            {
+                // - a keyword field: the POI passes with ANY of its keywords in that field ticked
+                var field = poi.search_keyword_fields?.Find(f => f != null && f.field_key == group.FieldKey);
+                if (field?.keywords != null)
+                    foreach (var keyword in field.keywords)
+                        if (facets.IsActive(group, FieldValueKey(keyword))) return true;
+                return false;
+            }
+            string value = group == FacetGroup.Category ? poi.category
+                : group == FacetGroup.Badge ? poi.badge_category
+                : group == FacetGroup.Status ? (poi.has_status ? poi.status_level_key : null)
+                : group == FacetGroup.Hierarchy ? poi.hierarchy_level_key
+                : null;
+            return !string.IsNullOrEmpty(value) && facets.IsActive(group, value);
+        }
+
+        // A keyword field's filter value key: 'Granite ' and 'granite' are one chip
+        public static string FieldValueKey(string keyword) => (keyword ?? "").Trim().ToLowerInvariant();
+
+        // The ids of every POI that passes the active filters
+        public static HashSet<string> CandidateIds(IReadOnlyList<POIData> pois, FacetSelection facets)
         {
             var ids = new HashSet<string>();
             if (pois == null) return ids;
             foreach (var poi in pois)
-            {
-                if (PoiPassesFilters(poi, activeCategories, activeBadgeCategories, activeOutlineLevels, activeHierarchyLevels))
-                    ids.Add(poi.id);
-            }
+                if (PoiPasses(poi, facets)) ids.Add(poi.id);
             return ids;
         }
 
-        // Count how many POIs pass all filters when one specific facet value
-        // is removed from the active set. Used by ComputeRelaxSuggestion.
-        public static int CountPoisWithFacetRemoved(List<POIData> pois,
-            string removedKey, HashSet<string> activeSet,
-            string facetType,
-            HashSet<string> activeCategories,
-            HashSet<string> activeBadgeCategories,
-            HashSet<string> activeOutlineLevels,
-            HashSet<string> activeHierarchyLevels)
+        // With two or more filters active, the single filter whose removal gives the most results
+        // (`countResults` counts the results of a filter set: the caller applies the query too).
+        // Null when fewer than two are active or no removal gives any result.
+        public static RelaxSuggestion? ComputeRelaxSuggestion(FacetSelection facets,
+            Func<FacetSelection, int> countResults)
         {
-            // Build temporary active sets with the removed key excluded
-            var tempCategories = activeCategories.Count > 0 ? new HashSet<string>(activeCategories) : activeCategories;
-            var tempBadges = activeBadgeCategories.Count > 0 ? new HashSet<string>(activeBadgeCategories) : activeBadgeCategories;
-            var tempOutlines = activeOutlineLevels.Count > 0 ? new HashSet<string>(activeOutlineLevels) : activeOutlineLevels;
-            var tempHierarchy = activeHierarchyLevels.Count > 0 ? new HashSet<string>(activeHierarchyLevels) : activeHierarchyLevels;
-
-            switch (facetType)
+            if (facets.Count < 2) return null;
+            RelaxSuggestion? best = null;
+            foreach (var group in new List<FacetGroup>(facets.ActiveGroups))
             {
-                case "category": tempCategories.Remove(removedKey); break;
-                case "badge": tempBadges.Remove(removedKey); break;
-                case "status": tempOutlines.Remove(removedKey); break;
-                case "hierarchy": tempHierarchy.Remove(removedKey); break;
-            }
-
-            int count = 0;
-            foreach (var poi in pois)
-            {
-                if (PoiPassesFilters(poi, tempCategories, tempBadges, tempOutlines, tempHierarchy))
-                    count++;
-            }
-            return count;
-        }
-
-        // Compute which single facet removal would yield the most results.
-        // Returns a description string, or null if fewer than 2 facets are active.
-        public static string ComputeRelaxSuggestion(List<POIData> pois,
-            HashSet<string> activeCategories,
-            HashSet<string> activeBadgeCategories,
-            HashSet<string> activeOutlineLevels,
-            HashSet<string> activeHierarchyLevels)
-        {
-            int activeTotal = activeCategories.Count + activeBadgeCategories.Count +
-                              activeOutlineLevels.Count + activeHierarchyLevels.Count;
-
-            if (activeTotal < 2 || pois == null)
-                return null;
-
-            int bestCount = 0;
-            string bestSuggestion = null;
-
-            foreach (string cat in activeCategories)
-            {
-                int count = CountPoisWithFacetRemoved(pois, cat, activeCategories, "category",
-                    activeCategories, activeBadgeCategories, activeOutlineLevels, activeHierarchyLevels);
-                if (count > bestCount)
+                foreach (var key in new List<string>(facets.Active(group)))
                 {
-                    bestCount = count;
-                    bestSuggestion = $"Remove category \"{cat}\" filter";
+                    int n = countResults(facets.Without(group, key));
+                    if (n > 0 && (best == null || n > best.Value.ResultCount))
+                        best = new RelaxSuggestion(group, key, n);
                 }
             }
-
-            foreach (string badge in activeBadgeCategories)
-            {
-                int count = CountPoisWithFacetRemoved(pois, badge, activeBadgeCategories, "badge",
-                    activeCategories, activeBadgeCategories, activeOutlineLevels, activeHierarchyLevels);
-                if (count > bestCount)
-                {
-                    bestCount = count;
-                    bestSuggestion = $"Remove badge \"{badge}\" filter";
-                }
-            }
-
-            foreach (string level in activeOutlineLevels)
-            {
-                int count = CountPoisWithFacetRemoved(pois, level, activeOutlineLevels, "status",
-                    activeCategories, activeBadgeCategories, activeOutlineLevels, activeHierarchyLevels);
-                if (count > bestCount)
-                {
-                    bestCount = count;
-                    bestSuggestion = $"Remove status level \"{level}\" filter";
-                }
-            }
-
-            foreach (string level in activeHierarchyLevels)
-            {
-                int count = CountPoisWithFacetRemoved(pois, level, activeHierarchyLevels, "hierarchy",
-                    activeCategories, activeBadgeCategories, activeOutlineLevels, activeHierarchyLevels);
-                if (count > bestCount)
-                {
-                    bestCount = count;
-                    bestSuggestion = $"Remove hierarchy level \"{level}\" filter";
-                }
-            }
-
-            return bestSuggestion;
+            return best;
         }
     }
 }

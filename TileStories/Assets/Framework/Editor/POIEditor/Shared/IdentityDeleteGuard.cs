@@ -9,10 +9,8 @@
 // 12cm marker) with no error anywhere.
 //
 // The counting rule itself is pure and lives in
-// IdentityRenameResolver.CountReferences; this file owns only the dialog, so
+// IdentityRenameResolver.CountReferences; this file owns only the question, so
 // the rule stays Tier-0 testable with `new` and no EditorWindow running.
-using UnityEditor;
-
 namespace TileStories.Editor
 {
     internal static class IdentityDeleteGuard
@@ -26,14 +24,13 @@ namespace TileStories.Editor
             if (referenceCount <= 0)
                 return true;
 
-            return EditorUtility.DisplayDialog(
+            return EditorDecision.Ask(
                 $"{rowKind} still in use",
                 $"{referenceCount} POI(s) still reference '{identity}'.\n\n" +
                 "Deleting this row leaves them naming a value that no longer exists, so " +
                 "their marker silently falls back to the framework default. Reassign those " +
                 "POIs first, or confirm to delete anyway.",
-                "Delete anyway",
-                "Cancel");
+                "Delete anyway") == DecisionAnswer.Confirm;
         }
     }
 }

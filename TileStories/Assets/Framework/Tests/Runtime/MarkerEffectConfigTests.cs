@@ -43,7 +43,7 @@ namespace TileStories.Tests
         private static HierarchyLevelEntry Level(string key, string ripple, string halo, bool pulse,
             float revealDelay = 0f, float revealDuration = 0f) => new HierarchyLevelEntry
             {
-                key = key, label = key, priority = 1, size_cm = 20f,
+                key = key, level_name = key, priority = 1, size_cm = 20f,
                 ripple_effect = ripple, halo_effect = halo, pulse = pulse,
                 reveal_delay_s = revealDelay, reveal_duration_s = revealDuration,
             };

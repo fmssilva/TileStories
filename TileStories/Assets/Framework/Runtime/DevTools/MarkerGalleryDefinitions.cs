@@ -53,35 +53,35 @@ namespace TileStories
             {
                 new HierarchyLevelEntry
                 {
-                                        key = "level_1", label = "1", size_cm = 20f, show_label = true,
+                                        key = "level_1", level_name = "1", size_cm = 20f, show_label = true,
                     ripple_effect = "ripple_discs", halo_effect = "halo_ring",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0f,
                     reveal_duration_s = 0.5f
                 },
                 new HierarchyLevelEntry
                 {
-                                        key = "level_2", label = "2", size_cm = 15f, show_label = false,
+                                        key = "level_2", level_name = "2", size_cm = 15f, show_label = false,
                     ripple_effect = "ripple_rings", halo_effect = "none",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.15f,
                     reveal_duration_s = 0.4f
                 },
                 new HierarchyLevelEntry
                 {
-                                        key = "level_3", label = "3", size_cm = 10f, show_label = false,
+                                        key = "level_3", level_name = "3", size_cm = 10f, show_label = false,
                     ripple_effect = "none", halo_effect = "halo_disc",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.3f,
                     reveal_duration_s = 0.35f
                 },
                 new HierarchyLevelEntry
                 {
-                                        key = "level_4", label = "4", size_cm = 5f, show_label = false,
+                                        key = "level_4", level_name = "4", size_cm = 5f, show_label = false,
                     ripple_effect = "none", halo_effect = "beacon",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.45f,
                     reveal_duration_s = 0.3f
                 },
                 new HierarchyLevelEntry
                 {
-                                        key = "level_5", label = "5", size_cm = 2f, show_label = false,
+                                        key = "level_5", level_name = "5", size_cm = 2f, show_label = false,
                     ripple_effect = "none", halo_effect = "none",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.6f,
                     reveal_duration_s = 0.25f

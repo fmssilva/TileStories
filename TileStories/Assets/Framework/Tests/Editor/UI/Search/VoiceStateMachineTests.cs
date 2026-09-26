@@ -114,29 +114,5 @@ namespace TileStories.Tests
                 new[] { VoiceSearchState.Listening, VoiceSearchState.Processing, VoiceSearchState.Result },
                 seen);
         }
-
-        [Test]
-        public void ResolveSearchMode_NonEmpty_ReturnsParsedMode()
-        {
-            Assert.AreEqual(SearchMatchMode.Any, VoiceSearchStateMachine.ResolveSearchMode("cathedral", "any"));
-            Assert.AreEqual(SearchMatchMode.All, VoiceSearchStateMachine.ResolveSearchMode("cathedral", "all"));
-        }
-
-        [Test]
-        public void ResolveSearchMode_EmptyOrWhitespace_ReturnsNull()
-        {
-            Assert.IsNull(VoiceSearchStateMachine.ResolveSearchMode("", "all"));
-            Assert.IsNull(VoiceSearchStateMachine.ResolveSearchMode("   ", "any"));
-            Assert.IsNull(VoiceSearchStateMachine.ResolveSearchMode(null, "all"));
-        }
-
-        [Test]
-        public void ParseMatchMode_UnknownDefaultsToAny()
-        {
-            Assert.AreEqual(SearchMatchMode.Any, VoiceSearchStateMachine.ParseMatchMode("weird"));
-            Assert.AreEqual(SearchMatchMode.Any, VoiceSearchStateMachine.ParseMatchMode(""));
-            Assert.AreEqual(SearchMatchMode.All, VoiceSearchStateMachine.ParseMatchMode("all"));
-            Assert.AreEqual(SearchMatchMode.Any, VoiceSearchStateMachine.ParseMatchMode(null));
-        }
     }
 }

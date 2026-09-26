@@ -108,36 +108,39 @@ A isso chama-se fazer um CAST (conversão). Fazemos isso "envolvendo"
 o valor com o nome do tipo que queremos: int(...), float(...), str(...).
 """
 
+
 # int para string: 
 a = 1                   # int 
-print(a, type(a))
 b = str(a)              # "1"  (agora é str)
-print(b, type(b))       
-print()
+print("int -> str")
+print(a, type(a))
+print(b, type(b), "\n")       
 
 # string para int: 
-texto_numero = "25"     # string
-print(texto_numero, type(texto_numero))
-c = int(texto_numero)   # 25   (agora é int, já dá para somar/multiplicar)
-print(c, type(c))       
-print()
-
+a = "25"     # string
+b = int(a)   # 25   (agora é int, já dá para somar/multiplicar)
+print("str -> int")
+print(a, type(a))
+print(b, type(b), "\n")
+       
 # string para float 
-texto_decimal = "3.5"
-print(texto_decimal, type(texto_decimal))
-d = float(texto_decimal)
-print(d, type(d))       
-print()
+a = "3.5"
+b = float(a)
+print("str -> float")
+print(a, type(a))
+print(b, type(b), "\n")       
 
 # float para int (repara que a parte decimal é truncada - não arredonda)
-num_float = 3.9
-print(num_float, type(num_float))
-e = int(num_float)
-print(e, type(e))
+a = 3.9
+b = int(a)
+print("float -> int")
+print(a, type(a))
+print(b, type(b))
 
 # Algumas conversão não são exequíveis e dão erro
 # exemplo isto vai dar erro (remove o comentário e corre para veres): 
-# int("vinte")
+
+# a = int("vinte")
 
 
 # %% 

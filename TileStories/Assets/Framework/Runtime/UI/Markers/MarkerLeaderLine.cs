@@ -2,152 +2,129 @@ using UnityEngine;
 
 namespace TileStories
 {
-    // Leader line component for displaced markers (spec _2.5 Section 6).
-    // Draws a line from the marker's current (displaced) position back to
-    // its true baseline position, using the marker's resolved category color.
-    // Positioned as a sibling of MarkerView on the POI_Marker root so it
-    // shares the billboarded rotation from MarkerBillboard.
+    // Leader line of a displaced marker (spec _2.5 section 6): a thin world-space line from where the moved
+    // element really belongs to where it is drawn now, in the marker's own category colour, so a visitor can
+    // still tell which POI a shifted label belongs to. What moved and where comes from MarkerView
+    // (TryGetLeaderLineEnds) every LateUpdate, because the billboard turns the marker every frame; the
+    // displacement cycle only hands over the camera and settings (Refresh).
     [RequireComponent(typeof(LineRenderer))]
     public class MarkerLeaderLine : MonoBehaviour
     {
-        [Header("Rendering")]
-        [Tooltip("Width of the leader line in world units.")]
-        [SerializeField] private float _lineWidthWorld = 0.01f;
+        // One dash + one gap per this many line widths ("dashed" style)
+        public const float DashPeriodInWidths = 4f;
 
-        // Runtime state set by MarkerView.Configure()
-        private Vector3 _baselinePosition;
-        private Color _categoryColor = Color.gray;
-        private bool _isConfigured;
+        private static Texture2D _dashTexture;
+        private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
 
-        // Per-cycle state set by MarkerView.UpdateLeaderLine()
+        private LineRenderer _lr;
+        private MarkerView _view;
+        private MaterialPropertyBlock _block;
         private Camera _cam;
         private DisplacementSettings _settings;
 
-        private LineRenderer _lr;
+        // True while the line is drawn (tests read it; the renderer's own flag says the same)
+        public bool IsShown => _lr != null && _lr.enabled;
 
         private void Awake()
         {
             _lr = GetComponent<LineRenderer>();
-            if (_lr != null)
-            {
-                _lr.positionCount = 0;
-                _lr.enabled = false; // hidden until Evaluate() decides to show
-                _lr.startWidth = _lineWidthWorld;
-                _lr.endWidth = _lineWidthWorld;
-                _lr.useWorldSpace = true;
-            }
+            _view = GetComponent<MarkerView>();
+            _lr.enabled = false; // hidden until a displacement cycle hands over its settings
+            _lr.positionCount = 0;
+            _lr.useWorldSpace = true;
+            _lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            _lr.receiveShadows = false;
         }
 
-        // Store the baseline (true) position and resolved category color.
-        // Called by MarkerView.UpdateLeaderLine whenever displacement settings
-        // or the marker's visual state changes.
-        public void Configure(Vector3 baseline, Color color)
-        {
-            _baselinePosition = baseline;
-            _categoryColor = color;
-            _isConfigured = true;
-        }
-
-        // Provide the camera and current displacement settings for per-frame
-        // visibility evaluation. Called on every ApplyDisplacement cycle.
-        public void UpdateVisibility(Camera cam, DisplacementSettings settings)
+        // Hand over the camera and settings of the latest displacement cycle; null settings hide the line
+        public void Refresh(Camera cam, DisplacementSettings settings)
         {
             _cam = cam;
             _settings = settings;
+            if (settings == null) Hide();
         }
 
         private void LateUpdate()
         {
-            Evaluate();
+            if (_settings == null || !_settings.leader_lines_enabled || _cam == null || _view == null
+                || !_view.TryGetLeaderLineEnds(_cam, out Vector3 start, out Vector3 end, out float movedPx)
+                || movedPx < _settings.leader_line_min_distance_px)
+            {
+                Hide();
+                return;
+            }
+            Draw(start, end);
         }
 
-        // Extracted from LateUpdate so Tier-0 EditMode tests can invoke it
-        // directly without a running scene/cycle.
-        public void Evaluate()
+        private void Hide()
         {
-            if (_lr == null) _lr = GetComponent<LineRenderer>();
-            if (!_isConfigured || _lr == null || _cam == null || _settings == null)
+            if (_lr != null) _lr.enabled = false;
+        }
+
+        private void Draw(Vector3 start, Vector3 end)
+        {
+            float width = Mathf.Max(0.0005f, _settings.leader_line_width);
+            Color color = _view.LeaderLineColor;
+            color.a *= Mathf.Clamp01(_settings.leader_line_opacity);
+            _lr.startColor = _lr.endColor = color;
+            _lr.startWidth = _lr.endWidth = width;
+
+            bool dashed = _settings.leader_line_style == "dashed";
+            _block ??= new MaterialPropertyBlock();
+            _lr.GetPropertyBlock(_block);
+            _block.SetTexture(MainTexId, dashed ? DashTexture() : Texture2D.whiteTexture);
+            _lr.SetPropertyBlock(_block);
+            _lr.textureMode = dashed ? LineTextureMode.Tile : LineTextureMode.Stretch;
+            // - Tile repeats the texture once per world unit; scale it so one dash+gap spans a few widths
+            _lr.textureScale = dashed ? new Vector2(1f / (width * DashPeriodInWidths), 1f) : Vector2.one;
+
+            if (_settings.leader_line_style == "elbow")
             {
-                if (_lr != null) _lr.enabled = false;
-                return;
+                _lr.positionCount = 3;
+                _lr.SetPosition(0, start);
+                _lr.SetPosition(1, ElbowPoint(start, end, _cam.transform.up));
+                _lr.SetPosition(2, end);
             }
-
-            if (!_settings.leader_lines_enabled)
+            else
             {
-                _lr.enabled = false;
-                return;
+                _lr.positionCount = 2;
+                _lr.SetPosition(0, start);
+                _lr.SetPosition(1, end);
             }
-
-            Vector3 displaced = transform.position;
-
-            // Compute screen-space distance using viewport coordinates (normalized 0-1),
-            // which work in EditMode where pixelWidth/pixelHeight may be 0.
-            Vector3 vpDisplaced = _cam.WorldToViewportPoint(displaced);
-            Vector3 vpBaseline = _cam.WorldToViewportPoint(_baselinePosition);
-            float viewportDist = Vector2.Distance(
-                new Vector2(vpDisplaced.x, vpDisplaced.y),
-                new Vector2(vpBaseline.x, vpBaseline.y));
-            float pixelHeight = _cam.pixelHeight > 0 ? _cam.pixelHeight : 1080f;
-            float screenDist = viewportDist * pixelHeight;
-
-            // Only draw when displacement exceeds the configured pixel threshold.
-            if (screenDist < _settings.leader_line_min_distance_px)
-            {
-                _lr.enabled = false;
-                return;
-            }
-
             _lr.enabled = true;
-            float lineWidth = _settings.leader_line_width > 0f ? _settings.leader_line_width : _lineWidthWorld;
-            Color lineColor = _categoryColor;
-            lineColor.a *= Mathf.Clamp01(_settings.leader_line_opacity);
-            _lr.startColor = lineColor;
-            _lr.endColor = lineColor;
-            _lr.startWidth = lineWidth;
-            _lr.endWidth = lineWidth;
-
-            ApplyLinePositions(displaced);
         }
 
-        // Set LineRenderer vertex count and positions based on the configured style.
-        // straight/dashed: 2 vertices. elbow: 3 vertices with a right-angle bend.
-        private void ApplyLinePositions(Vector3 displaced)
+        // Pure: the corner of an elbow line -- go straight up or down on screen first, then across, so the
+        // bend is a right angle on screen whatever way the camera is turned
+        public static Vector3 ElbowPoint(Vector3 start, Vector3 end, Vector3 cameraUp) =>
+            start + cameraUp * Vector3.Dot(end - start, cameraUp);
+
+        // Pure: how far from a rectangle's centre its edge is along a unit direction lying in its plane
+        // (used to stop the line at the label's text edge instead of running through the text)
+        public static float EdgeDistance(Vector3 direction, Vector3 rightUnit, Vector3 upUnit, float halfWidth, float halfHeight)
         {
-            switch (_settings.leader_line_style)
-            {
-                case "dashed":
-                    // Same geometry as straight; dash appearance is a material/texture property
-                    // (set on the LineRenderer's material, not the positions).
-                    _lr.textureMode = LineTextureMode.Tile;
-                    _lr.positionCount = 2;
-                    _lr.SetPosition(0, displaced);
-                    _lr.SetPosition(1, _baselinePosition);
-                    break;
-
-                case "elbow":
-                    // Right-angle L-shape: horizontal offset first (along world X/Z),
-                    // then vertical drop to the baseline.
-                    Vector3 bend = new Vector3(_baselinePosition.x, displaced.y, _baselinePosition.z);
-                    _lr.positionCount = 3;
-                    _lr.SetPosition(0, displaced);
-                    _lr.SetPosition(1, bend);
-                    _lr.SetPosition(2, _baselinePosition);
-                    break;
-
-                case "straight":
-                default:
-                    _lr.textureMode = LineTextureMode.Stretch;
-                    _lr.positionCount = 2;
-                    _lr.SetPosition(0, displaced);
-                    _lr.SetPosition(1, _baselinePosition);
-                    break;
-            }
+            float alongRight = Mathf.Abs(Vector3.Dot(direction, rightUnit));
+            float alongUp = Mathf.Abs(Vector3.Dot(direction, upUnit));
+            float toSide = alongRight > 1e-5f ? halfWidth / alongRight : float.MaxValue;
+            float toTop = alongUp > 1e-5f ? halfHeight / alongUp : float.MaxValue;
+            float d = Mathf.Min(toSide, toTop);
+            return d == float.MaxValue ? 0f : d;
         }
 
-        // Test seams (InternalsVisibleTo -> TileStories.Tests.Runtime)
-        internal bool IsLineEnabled => _lr != null ? _lr.enabled : false;
-        internal int CurrentPositionCount => _lr != null ? _lr.positionCount : 0;
-        internal Vector3 BaselinePos => _baselinePosition;
-        internal bool IsConfigured => _isConfigured;
+        // One opaque texel and one clear one, repeated along the line (created once, shared by every marker)
+        private static Texture2D DashTexture()
+        {
+            if (_dashTexture != null) return _dashTexture;
+            _dashTexture = new Texture2D(2, 1, TextureFormat.RGBA32, false)
+            {
+                name = "LeaderLineDash",
+                wrapMode = TextureWrapMode.Repeat,
+                filterMode = FilterMode.Point,
+                hideFlags = HideFlags.DontSave,
+            };
+            _dashTexture.SetPixels(new[] { Color.white, Color.clear });
+            _dashTexture.Apply();
+            return _dashTexture;
+        }
     }
 }

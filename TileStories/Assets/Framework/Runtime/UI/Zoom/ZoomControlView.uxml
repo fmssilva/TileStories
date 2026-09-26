@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UXML xmlns:ui="UnityEngine.UIElements">
   <ui:VisualElement name="zoom-control-root" class="ts-zoom-control">
+    <ui:Style src="ZoomControlView.uss" />
     <ui:VisualElement name="zoom-button-strip" class="ts-zoom-control__strip">
       <ui:Button name="zoom-out-button" text="Zoom out" class="ts-zoom-control__button" tooltip="Zoom out" />
       <ui:Button name="zoom-reset-button" text="Fit" class="ts-zoom-control__button" tooltip="Fit to 1x" />

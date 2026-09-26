@@ -29,7 +29,7 @@ namespace TileStories
         [Tooltip("Controller whose OnPinch / OnDoubleTap the gestures invoke.")]
         [SerializeField] private ARZoomController _zoom;
 
-        [Tooltip("WallSession whose LodSettings supplies the double-tap window/tolerance.")]
+        [Tooltip("WallSession whose ZoomSettings supplies the double-tap window/tolerance.")]
         [SerializeField] private WallSession _wallSession;
 
         // Pinch state: last two-finger distance (negative = no pinch in flight).
@@ -39,7 +39,7 @@ namespace TileStories
         private float _lastTapTime = -1f;
         private Vector2 _lastTapPos;
 
-        private LodSettings Settings => _wallSession != null ? _wallSession.LodSettings : null;
+        private ZoomSettings Settings => _wallSession != null ? _wallSession.ZoomSettings : null;
 
         private void OnEnable() => EnhancedTouch.EnhancedTouchSupport.Enable();
         private void OnDisable() => EnhancedTouch.EnhancedTouchSupport.Disable();
@@ -47,7 +47,7 @@ namespace TileStories
         private void Update()
         {
             var settings = Settings;
-            if (settings == null || !settings.zoom_enabled || _zoom == null)
+            if (settings == null || !settings.enabled || _zoom == null)
                 return;
 
             HandlePinch();
@@ -84,10 +84,10 @@ namespace TileStories
         // Detect a double tap (two quick, close taps) and route it as a zoom step.
         // A single tap routes nothing -- select-type interactions are owned by
         // MarkerSelectable (Domain 2.6), not here.
-        private void HandleDoubleTap(LodSettings settings)
+        private void HandleDoubleTap(ZoomSettings settings)
         {
-            float window = settings.zoom_double_tap_window_s;
-            float tolerance = settings.zoom_double_tap_move_tolerance_px;
+            float window = settings.double_tap_window_s;
+            float tolerance = settings.double_tap_move_tolerance_px;
 
             foreach (var t in EnhancedTouch.Touch.activeTouches)
             {

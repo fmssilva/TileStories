@@ -1,322 +1,128 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // Scrollable list of search/filter results rendered via UI Toolkit.
-    // Binds to POISearchIndex.Search() results, displays each match's name,
-    // category, and relevance score, and raises SelectionEventBus events on tap
-    // so the same selection pipeline serves list, minimap, and marker inputs.
-    // (spec _2.6 section 9)
-    public class ResultsListView : MonoBehaviour
+    // The results list (spec _2.6 section 9): UI Toolkit's virtualised ListView (only visible rows are
+    // built), one row per result -- the POI's name and "category - level" -- in ranked order. Tapping a
+    // row selects that POI through SelectionEventBus, like tapping its marker. With no results it shows
+    // the wall's no-results message and, when there is one, a one-tap "remove this filter" button.
+    // Plain C#: built into the parent the search UI hands it; styled by SearchUI.uss.
+    public sealed class ResultsListView : IDisposable
     {
-        private WallConfigData _config;
-        private POISearchIndex _searchIndex;
-        private UIDocument _uiDocument;
-        private VisualElement _root;
-        private ListView _listView;
-        private Label _emptyStateLabel;
-        private string _selectedPoiId = null;
-        private bool _isEnabled = true;
-        // Active facet candidate set pushed by ResultSetCoordinator (_2.6-i); null/empty
-        // means unrestricted, so plain search callers keep their old behavior.
-        private ICollection<string> _filterCandidateIds;
-
-        // One row in the results list.
-        public class ResultRow
+        public sealed class Row
         {
-            public string poiId;
-            public string displayName;
-            public string categoryLabel;
-            public string summary;
-            public float score;
+            public string PoiId;
+            public string Name;
+            public string Subtitle;
         }
 
-        // Initialise with wall config and search index.
-        public void Initialize(WallConfigData config, POISearchIndex searchIndex)
+        public VisualElement Root { get; }
+        private readonly ListView _list;
+        private readonly VisualElement _empty;
+        private readonly Label _emptyMessage;
+        private readonly Button _relax;
+        private readonly List<Row> _rows = new();
+        private Action _relaxAction;
+
+        public ResultsListView(VisualElement parent)
         {
-            _config = config;
-            _searchIndex = searchIndex;
+            Root = new VisualElement { name = "results-panel" };
+            Root.AddToClassList("search-panel");
+            Root.AddToClassList("results-panel");
 
-            if (_uiDocument == null)
+            _list = new ListView
             {
-                _uiDocument = FindFirstObjectByType<UIDocument>();
-                if (_uiDocument != null)
-                {
-                    _root = _uiDocument.rootVisualElement;
-                    CreateUI(_root);
-                }
-            }
+                name = "results-list",
+                itemsSource = _rows,
+                selectionType = SelectionType.None,
+                virtualizationMethod = CollectionVirtualizationMethod.FixedHeight,
+                fixedItemHeight = 56,   // = .result-row height in SearchUI.uss
+                makeItem = MakeRow,
+                bindItem = BindRow,
+            };
+            _list.AddToClassList("results-list");
+            Root.Add(_list);
 
-            if (_listView != null)
-                RefreshResults("");
+            _empty = new VisualElement { name = "results-empty" };
+            _empty.AddToClassList("results-empty");
+            _emptyMessage = new Label { name = "results-empty-message" };
+            _emptyMessage.AddToClassList("results-empty-message");
+            _relax = new Button(() => _relaxAction?.Invoke()) { name = "results-relax" };
+            _relax.AddToClassList("search-button");
+            _empty.Add(_emptyMessage);
+            _empty.Add(_relax);
+            Root.Add(_empty);
+
+            parent.Add(Root);
+            SelectionEventBus.OnMarkerSelected += OnSelectionChanged;
+            SelectionEventBus.OnSelectionCleared += OnSelectionCleared;
+            ShowRows(new List<Row>(), "", null, null);
         }
 
-        // Build the UI Toolkit list view and attach it to the root visual tree.
-        // Internal (not private) so the EditMode accessibility suite can build the
-        // real UI and assert authored styles (Runtime grants InternalsVisibleTo the
-        // editor test assembly -- same seam as DetailCardView).
-        internal void CreateUI(VisualElement root)
+        public IReadOnlyList<Row> Rows => _rows;
+        public string EmptyMessage => _emptyMessage.text;
+        public bool EmptyShown => _empty.style.display != DisplayStyle.None;
+        public string RelaxText => _relax.style.display == DisplayStyle.None ? null : _relax.text;
+
+        public void SetShown(bool shown) => Root.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+        public bool IsShown => Root.style.display != DisplayStyle.None;
+
+        // Show these rows; with none, `emptyMessage` and (when relaxText is set) a button running relaxAction
+        public void ShowRows(IReadOnlyList<Row> rows, string emptyMessage, string relaxText, Action relaxAction)
         {
-            _listView = new ListView()
-            {
-                name = "results-list-view",
-                showAlternatingRowBackgrounds = AlternatingRowBackground.All,
-                showBorder = false,
-                reorderable = false,
-            };
+            _rows.Clear();
+            _rows.AddRange(rows);
+            _list.RefreshItems();
 
-            _listView.style.flexGrow = 1;
-            _listView.style.position = Position.Absolute;
-            _listView.style.left = 12;
-            _listView.style.right = 12;
-            _listView.style.top = 80;
-            _listView.style.bottom = 80;
-            // Authored surface (2.6-af design-token decision): without this the
-            // effective background was theme-resolved and no deterministic WCAG
-            // contrast pair existed to assert against.
-            _listView.style.backgroundColor = new StyleColor(UIPalette.SurfaceDark);
-
-            // Define the row template
-            _listView.makeItem += MakeResultItem;
-            _listView.bindItem += BindResultItem;
-            _listView.selectionChanged += OnSelectionChanged;
-
-            root.Add(_listView);
-
-            // Empty state label
-            _emptyStateLabel = new Label();
-            _emptyStateLabel.name = "results-empty-state";
-            _emptyStateLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _emptyStateLabel.style.flexGrow = 1;
-            _emptyStateLabel.style.fontSize = 14;
-            _emptyStateLabel.style.color = new StyleColor(UIPalette.TextSecondary);
-            _emptyStateLabel.style.display = DisplayStyle.None;
-            root.Add(_emptyStateLabel);
-
-            // Subscribe to selection events
-            SelectionEventBus.OnMarkerSelected += OnExternalSelection;
-            SelectionEventBus.OnSelectionCleared += OnExternalClear;
+            bool empty = _rows.Count == 0;
+            _list.style.display = empty ? DisplayStyle.None : DisplayStyle.Flex;
+            _empty.style.display = empty ? DisplayStyle.Flex : DisplayStyle.None;
+            _emptyMessage.text = emptyMessage ?? "";
+            _relaxAction = relaxAction;
+            _relax.text = relaxText ?? "";
+            _relax.style.display = empty && relaxText != null ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        // Factory for each result row VisualElement.
-        private VisualElement MakeResultItem()
+        // Tap a row by POI id, exactly as a visitor's tap would
+        public void TapRow(string poiId) => SelectionEventBus.Select(poiId);
+
+        private VisualElement MakeRow()
         {
-            var row = new VisualElement()
+            var row = new VisualElement();
+            row.AddToClassList("result-row");
+            var name = new Label { name = "result-name" };
+            name.AddToClassList("result-name");
+            var subtitle = new Label { name = "result-subtitle" };
+            subtitle.AddToClassList("result-subtitle");
+            row.Add(name);
+            row.Add(subtitle);
+            row.RegisterCallback<ClickEvent>(_ =>
             {
-                name = "result-row",
-                tooltip = "Search result -- click to select",
-            };
-            row.style.flexDirection = FlexDirection.Row;
-            row.style.alignItems = Align.Center;
-            row.style.paddingLeft = 8;
-            row.style.paddingRight = 8;
-            row.style.paddingTop = 6;
-            row.style.paddingBottom = 6;
-            // Authored default surface (2.6-af design-token decision); the bind
-            // step overrides it with the selection tint when the row is selected.
-            row.style.backgroundColor = new StyleColor(UIPalette.SurfaceDark);
-
-            var nameLabel = new Label()
-            {
-                name = "result-name",
-                pickingMode = PickingMode.Ignore,
-            };
-            nameLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
-            nameLabel.style.flexGrow = 1;
-            nameLabel.style.fontSize = 14;
-            nameLabel.style.color = new StyleColor(UIPalette.TextPrimary);
-            row.Add(nameLabel);
-
-            var categoryLabel = new Label()
-            {
-                name = "result-category",
-                pickingMode = PickingMode.Ignore,
-            };
-            categoryLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
-            categoryLabel.style.fontSize = 12;
-            categoryLabel.style.color = new StyleColor(UIPalette.TextSecondary);
-            categoryLabel.style.marginLeft = 8;
-            row.Add(categoryLabel);
-
+                if (row.userData is string id) TapRow(id);
+            });
             return row;
         }
 
-        // Bind data to a result row VisualElement.
-        private void BindResultItem(VisualElement element, int index)
+        private void BindRow(VisualElement element, int index)
         {
-            if (index < 0 || _listView.itemsSource == null || index >= _listView.itemsSource.Count)
-                return;
-
-            var item = _listView.itemsSource[index] as ResultRow;
-            if (item == null) return;
-
-            element.tooltip = $"{item.displayName} ({item.categoryLabel})";
-
-            var nameLabel = element.Q<Label>("result-name");
-            var categoryLabel = element.Q<Label>("result-category");
-
-            if (nameLabel != null)
-                nameLabel.text = item.displayName;
-
-            if (categoryLabel != null)
-                categoryLabel.text = item.categoryLabel;
-
-            // Highlight if this is the currently selected item
-            bool isSelected = _selectedPoiId == item.poiId;
-            element.style.backgroundColor = isSelected
-                ? new StyleColor(new Color(0.3f, 0.5f, 0.8f, 0.2f))
-                : new StyleColor(UIPalette.SurfaceDark);
+            var row = _rows[index];
+            element.userData = row.PoiId;
+            element.name = "result-row-" + row.PoiId;
+            element.tooltip = row.Name;
+            element.Q<Label>("result-name").text = row.Name;
+            element.Q<Label>("result-subtitle").text = row.Subtitle;
+            element.EnableInClassList("result-row--selected", row.PoiId == SelectionEventBus.CurrentPoiId);
         }
 
-        // Search query changed -- rebuild the results list.
-        // matchMode (default Any) is forwarded to POISearchIndex.Search so voice
-        // search can enforce a stricter token-coverage policy than typed input
-        // without the index needing to know who called it.
-        public void RefreshResults(string query, SearchMatchMode matchMode = SearchMatchMode.Any)
+        private void OnSelectionChanged(string _) => _list.RefreshItems();
+        private void OnSelectionCleared() => _list.RefreshItems();
+
+        public void Dispose()
         {
-            RefreshResults(query, matchMode, null);
-        }
-
-        // Candidate-narrowing overload (2.6-i): the coordinator passes the active facet's
-        // passing-id set; Search restricts to it. Empty query + candidates shows the
-        // whole filtered set (facet-only usage pattern).
-        public void RefreshResults(string query, SearchMatchMode matchMode,
-            ICollection<string> candidatePoiIds)
-        {
-            if (_searchIndex == null || _listView == null)
-                return;
-
-            _filterCandidateIds = candidatePoiIds;
-            var results = _searchIndex.Search(query, matchMode, candidatePoiIds);
-            var rows = new List<ResultRow>();
-
-            foreach (var result in results)
-            {
-                POIData poi = null;
-                if (_config != null && result.POIIndex >= 0 && result.POIIndex < _config.pois.Count)
-                    poi = _config.pois[result.POIIndex];
-
-                string poiId = poi?.id ?? result.POIId;
-                if (string.IsNullOrEmpty(poiId))
-                    poiId = FindIdBySearchResult(result);
-
-                rows.Add(new ResultRow
-                {
-                    poiId = poiId,
-                    displayName = poi?.name ?? $"POI_{result.POIIndex}",
-                    categoryLabel = string.IsNullOrEmpty(poi?.category) ? "" : poi.category,
-                    summary = poi?.summary ?? "",
-                    score = result.Score,
-                });
-            }
-
-            _listView.itemsSource = rows;
-            _listView.Rebuild();
-
-            // Show/hide empty state
-            if (rows.Count == 0)
-            {
-                ShowEmptyState(query);
-            }
-            else
-            {
-                HideEmptyState();
-            }
-        }
-
-        // Look up POI id by matching SearchResult index to config.pois.
-        private string FindIdBySearchResult(POISearchIndex.SearchResult result)
-        {
-            if (_config == null || _config.pois == null) return "";
-            if (result.POIIndex >= 0 && result.POIIndex < _config.pois.Count)
-                return _config.pois[result.POIIndex].id;
-            return "";
-        }
-
-        private void ShowEmptyState(string query)
-        {
-            if (_emptyStateLabel == null) return;
-
-            if (_config?.no_results_message != null)
-            {
-                string message = _config.no_results_message.Replace("{query}", query);
-                _emptyStateLabel.text = message;
-            }
-            else
-            {
-                _emptyStateLabel.text = query.Length > 0
-                    ? $"No matches for \"{query}\""
-                    : "No search results";
-            }
-
-            _emptyStateLabel.style.display = DisplayStyle.Flex;
-            _listView.style.display = DisplayStyle.None;
-        }
-
-        private void HideEmptyState()
-        {
-            if (_emptyStateLabel != null)
-                _emptyStateLabel.style.display = DisplayStyle.None;
-            if (_listView != null)
-                _listView.style.display = DisplayStyle.Flex;
-        }
-
-        // Called when a row is selected in the list view.
-        private void OnSelectionChanged(IEnumerable<object> selectedItems)
-        {
-            if (!_isEnabled || _searchIndex == null) return;
-
-            foreach (var item in selectedItems)
-            {
-                if (item is ResultRow row)
-                {
-                    SelectionEventBus.RaiseMarkerSelected(row.poiId);
-                    break;
-                }
-            }
-        }
-
-        // Called when a selection happens externally (marker tap or minimap tap).
-        private void OnExternalSelection(string poiId)
-        {
-            _selectedPoiId = poiId;
-            RefreshSelectionHighlight();
-        }
-
-        private void OnExternalClear()
-        {
-            _selectedPoiId = null;
-            RefreshSelectionHighlight();
-        }
-
-        private void RefreshSelectionHighlight()
-        {
-            if (_listView?.itemsSource == null) return;
-            _listView.Rebuild();
-        }
-
-        // Update the results list visibility.
-        public void SetVisible(bool visible)
-        {
-            _isEnabled = visible;
-            if (_root != null)
-                _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-
-        // Update when wall config changes.
-        public void Refresh(WallConfigData newConfig)
-        {
-            _config = newConfig;
-            RefreshResults("");
-        }
-
-        private void OnDestroy()
-        {
-            SelectionEventBus.OnMarkerSelected -= OnExternalSelection;
-            SelectionEventBus.OnSelectionCleared -= OnExternalClear;
+            SelectionEventBus.OnMarkerSelected -= OnSelectionChanged;
+            SelectionEventBus.OnSelectionCleared -= OnSelectionCleared;
         }
     }
 }

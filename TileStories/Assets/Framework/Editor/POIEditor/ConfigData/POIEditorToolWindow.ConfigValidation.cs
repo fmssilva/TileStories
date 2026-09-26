@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -92,23 +92,23 @@ namespace TileStories.Editor
                 if (!string.IsNullOrEmpty(poi.category) && categories.Count > 0 && !categories.Contains(poi.category))
                     issues.Add(new EditorAlertItem(poiId, poi.category,
                         "Category does not match any row in the Marker > Category Symbols table.",
-                        "Falls through to CategoryPalette's hash-based colour -- pick a real category or add this one to the table."));
+                        "The marker gets an automatic colour until fixed: Specific Marker > this POI > Marker Style > Category, pick a real category (shown as '(missing)' now), or add this one to Global Scene > Marker > Category Symbols."));
 
                 if (!string.IsNullOrEmpty(poi.badge_category) && badgeKeys.Count > 0 && !badgeKeys.Contains(poi.badge_category))
                     issues.Add(new EditorAlertItem(poiId, poi.badge_category,
                         "Badge category does not match any row in the Badge table.",
-                        "Pick a real badge key or add this one to the table."));
+                        "Specific Marker > this POI > Badge Style > Badge category: pick a real badge key, or add this one to Global Scene > Badge."));
 
                 if (poi.has_status && !poi.status_unknown && !string.IsNullOrEmpty(poi.status_level_key) &&
                     statusLevelKeys.Count > 0 && !statusLevelKeys.Contains(poi.status_level_key))
                     issues.Add(new EditorAlertItem(poiId, poi.status_level_key,
-                        "Status level key does not match any row in the Outline table.",
-                        "Pick this POI's status level again from the Status level dropdown."));
+                        "Status level does not match any row in the Outline Types table.",
+                        "Specific Marker > this POI > Outline > Status level: pick a real outline type (shown as '(missing)' now)."));
 
                 if (poi.has_custom_symbol && string.IsNullOrWhiteSpace(poi.custom_symbol_key))
                     issues.Add(new EditorAlertItem(poiId, "<empty>",
                         "Use Custom Symbol is ticked but no symbol is assigned.",
-                        "Assign a sprite in Marker Style > Custom symbol, or untick Use Custom Symbol."));
+                        "Specific Marker > this POI > Marker Style: assign a symbol under Custom symbol, or untick Use Custom Symbol."));
             }
 
             return issues;
@@ -140,24 +140,57 @@ namespace TileStories.Editor
             return issues;
         }
 
-        // Spec _2_4 section 6: shrink_start_neighbor_count must be strictly less
-        // than cluster_min_count. LODController.IsDensityConfigValid already
-        // detects violations (and DensityFactor already no-ops safely) -- this
-        // just surfaces the detector's answer at editor time so a backwards
-        // pair cannot be saved silently.
+        // Priority is a whole number >= 1 (the Priority field enforces it while editing); a value below 1
+        // can only come from a hand-edited file, where it silently falls back to the row position.
+        internal static List<EditorAlertItem> ValidateHierarchyLevelPriorities(
+            IEnumerable<global::TileStories.HierarchyLevelEntry> levels)
+        {
+            var issues = new List<EditorAlertItem>();
+            if (levels == null)
+                return issues;
+            foreach (var entry in levels)
+            {
+                if (entry == null || entry.priority >= 1)
+                    continue;
+                issues.Add(new EditorAlertItem(
+                    poiId: entry.key ?? "<unnamed>",
+                    value: entry.priority.ToString(),
+                    problem: "Priority is below 1, so the level falls back to its row position.",
+                    fixHint: "Global Scene > Hierarchy Levels > Priority: enter a whole number of 1 or more (lower = higher priority)."));
+            }
+            return issues;
+        }
+
+        // Spec _2_4 section 6: in a mode that shrinks, Shrink Starts At must be smaller than Crowded At,
+        // or markers never shrink (LODController.IsDensityConfigValid is the runtime's own detector).
         private List<EditorAlertItem> ValidateDensityThresholds()
         {
             var issues = new List<EditorAlertItem>();
             var lod = _config?.lod_settings;
-            if (lod == null) return issues;
+            if (lod == null || !LodEditorRules.UsesShrink(lod.density_response_mode)) return issues;
             if (!LODController.IsDensityConfigValid(lod))
             {
                 issues.Add(new EditorAlertItem(
-                    poiId: "<LOD settings>",
-                    value: $"shrink_start_neighbor_count={lod.shrink_start_neighbor_count}, cluster_min_count={lod.cluster_min_count}",
-                    problem: "Shrink Start must be strictly less than Cluster Min, or the shrink/fade ramp never activates (DensityFactor always returns 1.0 -- a silent no-op, not a runtime error).",
-                    fixHint: "Lower Shrink Start below Cluster Min, or raise Cluster Min above Shrink Start, or use \"Suggest Values\" to regenerate both together."));
+                    poiId: "LOD > Crowding",
+                    value: $"Shrink Starts At = {lod.shrink_start_neighbor_count}, Crowded At = {lod.cluster_min_count}",
+                    problem: "Shrink Starts At must be strictly less than Crowded At, or crowded markers never shrink or fade.",
+                    fixHint: "Lower Shrink Starts At or raise Crowded At, or click Suggest Values under Distance Bands to set both."));
             }
+            return issues;
+        }
+
+        // Spec _2_4 section 3: the Distance Bands table must go from near to far with sensible values
+        private List<EditorAlertItem> ValidateLodBands()
+        {
+            var issues = new List<EditorAlertItem>();
+            var lod = _config?.lod_settings;
+            if (lod == null || !lod.enabled) return issues;
+            foreach (string problem in LodEditorRules.BandProblems(lod.bands))
+                issues.Add(new EditorAlertItem(
+                    poiId: "LOD > Distance Bands",
+                    value: (lod.bands?.Count ?? 0) + " band(s)",
+                    problem: problem,
+                    fixHint: "Edit the Distance Bands table, or click Suggest Values."));
             return issues;
         }
 
@@ -172,9 +205,11 @@ namespace TileStories.Editor
             issues.AddRange(ValidateHierarchyLevelKeys());
             issues.AddRange(ValidateMarkerTaxonomyReferences());
             issues.AddRange(ValidateHierarchyLevelSizeRange(_config?.hierarchy_levels));
+            issues.AddRange(ValidateHierarchyLevelPriorities(_config?.hierarchy_levels));
             issues.AddRange(ValidateSearchEnumFields());
             issues.AddRange(ValidateForcedSearchFields());
             issues.AddRange(ValidateDensityThresholds());
+            issues.AddRange(ValidateLodBands());
             if (issues.Count == 0)
                 return;
 
@@ -182,72 +217,39 @@ namespace TileStories.Editor
             EditorNotice.Queue($"Config validation issues ({context})", EditorAlertItem.FormatList(issues, guidance), 0f, NoticeKeys.ConfigValidation);
         }
 
-        // (D4a) Validates that search-related string fields that map to enums
-        // have known values. Non-blocking warnings -- surfaces inert strategy
-        // values (scoped/faceted/auto_complete) and unknown values for
-        // search_mode, voice_search_match_mode, voice_activity_indicator_style,
-        // and suggested_source.
+        // Every Select, Filter & Search option string must be one the runtime understands (the value
+        // arrays of SelectFilterSearchOptions, which the Editor dropdowns offer). A hand-edited or old
+        // config with anything else is reported; the runtime would fall back to a default.
         private List<EditorAlertItem> ValidateSearchEnumFields()
         {
             var issues = new List<EditorAlertItem>();
-            if (_config == null)
+            var s = _config?.select_filter_search;
+            if (s == null)
                 return issues;
 
             string wallId = _config.wall_id ?? "<unnamed>";
-
-            // search_mode: dynamic and explicit are operative; scoped/faceted/auto_complete
-            // are recognized but inert (fall back to dynamic).
-            string[] searchModeActive = { "dynamic", "explicit" };
-            if (!string.IsNullOrEmpty(_config.search_mode) &&
-                !System.Array.Exists(searchModeActive, m => m.Equals(_config.search_mode, StringComparison.OrdinalIgnoreCase)))
+            void Check(string field, string value, string[] known)
             {
-                string[] inertModes = { "scoped", "faceted", "auto_complete" };
-                string detail = System.Array.Exists(inertModes, m => m.Equals(_config.search_mode, StringComparison.OrdinalIgnoreCase))
-                    ? "inert -- falls back to dynamic at runtime"
-                    : "unrecognized value";
+                if (!string.IsNullOrEmpty(value) && System.Array.IndexOf(known, value) >= 0) return;
                 issues.Add(new EditorAlertItem(
                     poiId: wallId,
-                    value: _config.search_mode,
-                    problem: $"search_mode is {detail}.",
-                    fixHint: $"Use 'dynamic' or 'explicit'. 'scoped', 'faceted', 'auto_complete' are recognized but not yet implemented."));
+                    value: value ?? "(empty)",
+                    problem: $"Select, Filter & Search > {field} has a value the app does not know.",
+                    fixHint: $"Pick one of the options in Global Scene > Select, Filter & Search > {field}."));
             }
 
-            // voice_search_match_mode
-            string[] validMatchModes = { "all", "any" };
-            if (!string.IsNullOrEmpty(_config.voice_search_match_mode) &&
-                !System.Array.Exists(validMatchModes, m => m.Equals(_config.voice_search_match_mode, StringComparison.OrdinalIgnoreCase)))
-            {
-                issues.Add(new EditorAlertItem(
-                    poiId: wallId,
-                    value: _config.voice_search_match_mode,
-                    problem: "voice_search_match_mode has an unrecognized value.",
-                    fixHint: "Use 'all' (conjunction) or 'any' (disjunction)."));
-            }
-
-            // voice_activity_indicator_style
-            string[] validIndicatorStyles = { "mic_text", "listen_bar" };
-            if (!string.IsNullOrEmpty(_config.voice_activity_indicator_style) &&
-                !System.Array.Exists(validIndicatorStyles, s => s.Equals(_config.voice_activity_indicator_style, StringComparison.OrdinalIgnoreCase)))
-            {
-                issues.Add(new EditorAlertItem(
-                    poiId: wallId,
-                    value: _config.voice_activity_indicator_style,
-                    problem: "voice_activity_indicator_style has an unrecognized value.",
-                    fixHint: "Use 'mic_text' or 'listen_bar'."));
-            }
-
-            // suggested_source
-            string[] validSources = { "category_distribution", "recent_first" };
-            if (!string.IsNullOrEmpty(_config.suggested_source) &&
-                !System.Array.Exists(validSources, s => s.Equals(_config.suggested_source, StringComparison.OrdinalIgnoreCase)))
-            {
-                issues.Add(new EditorAlertItem(
-                    poiId: wallId,
-                    value: _config.suggested_source,
-                    problem: "suggested_source has an unrecognized value.",
-                    fixHint: "Use 'category_distribution' or 'recent_first'."));
-            }
-
+            Check("Zoom Trigger", s.selection?.zoom?.trigger, SelectFilterSearchOptions.Triggers);
+            Check("Search Mode", s.search?.mode, SelectFilterSearchOptions.Modes);
+            Check("Match Words", s.search?.match_mode, SelectFilterSearchOptions.MatchModes);
+            Check("Partial Words", s.search?.prefix_matching, SelectFilterSearchOptions.PrefixModes);
+            Check("Filtered-Out Markers", s.filter?.mismatch, SelectFilterSearchOptions.Mismatches);
+            Check("Default View", s.results?.default_view, SelectFilterSearchOptions.Views);
+            Check("Suggestion Source", s.results?.suggestion_source, SelectFilterSearchOptions.SuggestionSources);
+            Check("Visibility", s.minimap?.visibility, SelectFilterSearchOptions.Visibilities);
+            Check("Dot Style", s.minimap?.icon_style, SelectFilterSearchOptions.IconStyles);
+            Check("Projection", s.minimap?.projection, SelectFilterSearchOptions.Projections);
+            Check("Bounds", s.minimap?.bounds_mode, SelectFilterSearchOptions.BoundsModes);
+            Check("Voice Indicator", s.voice?.indicator_style, SelectFilterSearchOptions.IndicatorStyles);
             return issues;
         }
 
@@ -279,8 +281,8 @@ namespace TileStories.Editor
                         issues.Add(new EditorAlertItem(
                             poiId: poi.id ?? "<unnamed>",
                             value: field.key,
-                            problem: $"POI is missing keywords for the required search field '{displayLabel}'.",
-                            fixHint: $"Open the Specific Marker tab, expand this POI, and fill in the '{displayLabel}' keyword field."));
+                            problem: $"POI is missing keywords for the required keyword field '{displayLabel}'.",
+                            fixHint: $"Open Specific Marker > this POI > Summary & Keywords and fill in '{displayLabel}'."));
                     }
                 }
             }

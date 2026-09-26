@@ -18,7 +18,7 @@ namespace TileStories.Editor
         // ---------------- (i) help texts ----------------
 
         private const string EffectsFlowNote =
-            "Flow: 1) tick and tune the effects on this page. 2) Pick which effect each hierarchy level uses in the Hierarchy Levels table (Ripple / Halo / Pulse columns); only ticked effects are offered there. 3) Every POI takes the effects of its hierarchy level. Reveal delay / duration and Rotate are also set per level in that table.";
+            "Flow: 1) tick and tune the effects on this page. 2) Pick which effect each hierarchy level uses in the Hierarchy Levels table (Ripple / Halo / Pulse columns); only ticked effects are offered there. 3) Every POI takes the effects of its hierarchy level. Reveal delay / duration and Spin Ring are also set per level in that table.";
 
         private static readonly string EffectsEnabledHelp =
             "Master switch for every marker effect on this wall. Off = no pulse, ripple, halo or beacon anywhere, and everything below is hidden (your settings are kept and still saved, so switching it off by mistake loses nothing). Also removes the animation margin from the displacement radius. Use it for weak devices or as a reduce-motion option. The reveal fade-in is separate.\n\n" + EffectsFlowNote;
@@ -52,14 +52,11 @@ namespace TileStories.Editor
         private const string EffectStartScaleHelp = "Size of the wave when it starts, relative to the symbol (1 = same size).";
         private const string EffectEndScaleHelp = "Size of the wave when it has faded out, relative to the symbol. Bigger = the wave travels further.";
 
-        private const string HierarchyEffectColumnsHelp =
-            "Ripple, Halo and Pulse choose which effects the POIs of this level run. How each effect looks is defined in Global Scene > Effects; only effects ticked there are offered here (a value pointing at a disabled effect shows '(disabled)' and does nothing until it is ticked again).\n\nRipple = three waves flowing outward (Rings or Discs). Halo = one layer behind the symbol (Ring, Disc or Beacon). Pulse = the symbol breathes. They stack: one Ripple + one Halo + Pulse can all run on the same marker.\n\nRotate (ring spin) and the reveal delay / duration are also set per level, in this table.";
-
         private const string DisabledEffectNote =
             "Switched off: not offered in the Hierarchy Levels table. Its settings are kept and still saved.";
 
         private const string EffectPreviewHelp =
-            "Play Mode and development builds only (release builds ignore it). When ticked, pressing Play FOCUSES the screen on a labelled grid of real markers: one per effect, plus one per hierarchy level with its real size, effects and reveal timing. The grid lives far away from the wall and is drawn by its own camera on a neutral background, so no wall or scenery can hide it, and your real camera, tracking and markers are untouched. Untick it to see the wall again.\n\nPlay reads the SAVED config: after ticking, press Save All to JSON and Copy to StreamingAssets, then Play. Off by default.";
+            "Play Mode and development builds only (release builds ignore it). When ticked, pressing Play FOCUSES the screen on a labelled grid of real markers: one per effect, plus one per hierarchy level with its real size, effects and reveal timing. The grid lives far away from the wall and is drawn by its own camera on a neutral background, so no wall or scenery can hide it, and your real camera, tracking and markers are untouched. Untick it to see the wall again.\n\nOnly ONE demo grid can be on screen at a time: ticking this automatically unticks Outline > Test > 'Add outline demo grid' if it was on (the two grid cameras would otherwise draw on top of each other).\n\nPlay reads the SAVED config: after ticking, press Save All to JSON and Copy to StreamingAssets, then Play. Off by default.";
         private const string EffectPreviewBaseHelp =
             "Which marker the preview cells copy: a plain grey circle, or any POI of this wall (its category colour, icon, status and badge). Use a real POI to check that effect tints stay visible against its colour.";
 
@@ -80,19 +77,19 @@ namespace TileStories.Editor
             "- Not possible in Scene test: the waves are animated. Use Play Mode.\n\n" +
             "HALO (Halo Ring, Halo Disc, Beacon)\n" +
             "- Not possible in Scene test: the halo is animated. Use Play Mode.\n\n" +
-            "REVEAL AND ROTATE\n" +
+            "REVEAL AND SPIN RING\n" +
             "- Not possible in Scene test: markers appear at full size at once and the ring does not spin.\n\n" +
             "WHAT YOU CAN CHECK HERE\n" +
-            "- Hierarchy Levels > Size (cm): 'lamp' (level_1, 30 cm) is clearly bigger than 'lamp_economic' (level_5, 7 cm).\n" +
+            "- Hierarchy Levels > Marker Size (cm): compare your largest-size level against your smallest-size level -- the difference should be immediately visible.\n" +
             "- Effect columns persist: set a level's Ripple to Discs, 'Save All to JSON', 'Load & Populate Rig', the dropdown keeps it. Ctrl+Z / Ctrl+Y undo and redo it.\n" +
             "- Untick an effect above: it disappears from the Ripple / Halo dropdowns (a level still using it shows '(disabled)').";
 
         private static readonly string EffectsPlaymodeTestGuide =
             "SETUP\n" +
-            "- Fastest: tick 'Add effects demo grid' (Test, above), Save All to JSON, Copy to StreamingAssets, then Play. The screen shows a labelled grid of markers on a neutral background, each with its effect or level name; the wall cannot hide it. The real markers are hidden while it is on. Untick it when done.\n" +
+            "- Fastest: tick 'Add effects demo grid' (Test, above), Save All to JSON, Copy to StreamingAssets, then Play. The screen shows a labelled grid of markers on a neutral background, effect cells labelled with their effect name, level cells with the Base marker's own name; the wall cannot hide it. The real markers are hidden while it is on. Untick it when done.\n" +
             "- LIVE: once Play is running, change any value on this Effects page (or a level's Ripple / Halo / Pulse column) and the running markers and the grid update at once. Nothing is saved by that: stop Play and your edits stay in this window; press Save All to JSON (then Copy to StreamingAssets) only when you want to keep them.\n" +
-            "- Real markers instead: 'Save All to JSON' then 'Copy to StreamingAssets' (Play reads the copy), open Apps/LivingRoom/LivingRoomScene, press Play, click into the Game view.\n" +
-            "- Mock camera (the project's MockLocalizationProvider, Editor only): W/A/S/D = move, E = up, Q = down, RMB + mouse or arrow keys = look.\n\n" +
+            "- Real markers instead: 'Save All to JSON' then 'Copy to StreamingAssets' (Play reads the copy), open your wall's scene, press Play, click into the Game view.\n" +
+            "- Editor mock camera (Editor only): W/A/S/D = move, E = up, Q = down, RMB + mouse or arrow keys = look.\n\n" +
             "MASTER SWITCH\n" +
             "- 'Enable effects' ON: the preview cells pulse, ripple and glow.\n" +
             "- OFF: every cell goes static at once (live in Play Mode). The reveal fade-in still plays.\n\n" +
@@ -106,12 +103,11 @@ namespace TileStories.Editor
             "- Halo Ring: thin ring that breathes. Halo Disc: filled glow that breathes. Beacon: one ring that grows and fades, then restarts.\n" +
             "- Size, Base alpha, scales, Breathe amplitude, Start / End scale and Tint Color: change one at a time and compare. Each effect has its own values.\n" +
             "- One halo per marker. Ripple and Pulse stack with it.\n\n" +
-            "REVEAL AND ROTATE\n" +
-            "- Reveal Delay / Duration in Hierarchy Levels: the level row of the preview appears in order (level_1 first, then 0.2 s, 0.5 s, 0.8 s, 1.0 s in LivingRoom), each fading and scaling in.\n" +
-            "- Rotate ticked: the status ring spins. Unticked: static ring.\n\n" +
+            "REVEAL AND SPIN RING\n" +
+            "- Reveal Delay / Duration in Hierarchy Levels: the level rows of the preview appear in the order of their Reveal Delay, each fading and scaling in.\n" +
+            "- Spin Ring ticked: the status ring spins (speed: Outline > Contour spin). Unticked: static ring.\n\n" +
             "REAL MARKERS\n" +
-            "- 'lamp' (level_1) shows Ripple Discs + Halo Ring + Pulse; 'lamp_military' (level_3) Ripple Rings + Halo Disc; 'lamp_economic' (level_5) Beacon.\n" +
-            "- Assets/Dev/MarkerGallery/MarkerGalleryScene: Play, every effect variant in one grid.\n" +
+            "- Pick two or three real POIs at different hierarchy levels and compare their configured Ripple/Halo/Pulse combinations running live.\n" +
             "- Automated: Test Runner, EditMode + PlayMode, zero failures.";
 
         private static readonly string EffectsDeviceTestGuide =
@@ -133,8 +129,8 @@ namespace TileStories.Editor
             "- Outdoors in bright light: is the Tint Color still visible against the wall? Discs are stronger than Rings.\n\n" +
             "HALO (Halo Ring, Halo Disc, Beacon)\n" +
             "- Check Beacon on the smallest level at arm's length: is the ring readable, not a blur?\n\n" +
-            "REVEAL AND ROTATE\n" +
+            "REVEAL AND SPIN RING\n" +
             "- Point at the wall from a real distance: does the staggered fade-in feel calm or slow? Adjust Reveal Delay / Duration.\n" +
-            "- Rotate: a spinning ring on many markers costs battery, tick it only where it matters.";
+            "- Spin Ring: a spinning ring on many markers costs battery, tick it only where it matters.";
     }
 }

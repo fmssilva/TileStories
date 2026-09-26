@@ -50,7 +50,7 @@ namespace TileStories.Tests
 
             // Wait for the duration plus a buffer
             yield return new WaitForSeconds(0.3f + 0.1f);
-            yield return null; // ensure RevealCoroutine's final SetFullAlphaAndScale has run
+            yield return null; // ensure RevealCoroutine's final SnapToRest has run
 
             Assert.AreEqual(1f, _canvasGroup.alpha, 0.001f, "alpha should be 1 after reveal completes");
             Assert.AreEqual(1f, _rect.localScale.x, 0.001f, "scale.x should be 1 after reveal completes");
@@ -76,7 +76,7 @@ namespace TileStories.Tests
 
             // Wait for delay + duration + buffer
             yield return new WaitForSeconds(0.2f + 0.3f + 0.15f);
-            yield return null; // ensure RevealCoroutine's final SetFullAlphaAndScale has run
+            yield return null; // ensure RevealCoroutine's final SnapToRest has run
 
             Assert.AreEqual(1f, _canvasGroup.alpha, 0.001f, "alpha should be 1 after delay+duration");
             Assert.AreEqual(Vector3.one, _rect.localScale, "scale should be 1 after delay+duration");
@@ -106,7 +106,7 @@ namespace TileStories.Tests
 
             // After 0.15s: short should be done, long should still be animating
             yield return new WaitForSeconds(0.15f);
-            yield return null; // ensure short coroutine's SetFullAlphaAndScale has run
+            yield return null; // ensure short coroutine's SnapToRest has run
 
             Assert.AreEqual(1f, cgShort.alpha, 0.001f, "short-reveal marker should be fully visible");
             Assert.AreEqual(1f, rectShort.localScale.x, 0.001f, "short-reveal scale should be 1");
@@ -129,7 +129,7 @@ namespace TileStories.Tests
                         Assert.That(_canvasGroup.alpha, Is.LessThan(0.5f), "alpha should be < 0.5 before delay expires");
 
             yield return new WaitForSeconds(0.15f);
-            yield return null; // ensure coroutine's post-delay step (SetFullAlphaAndScale) has run
+            yield return null; // ensure coroutine's post-delay step (SnapToRest) has run
 
             Assert.AreEqual(1f, _canvasGroup.alpha, 0.001f, "alpha should be 1 after 0-duration reveal");
             Assert.AreEqual(Vector3.one, _rect.localScale, "scale should be 1 after 0-duration reveal");
@@ -147,7 +147,7 @@ namespace TileStories.Tests
 
             // Wait for completion plus a small buffer.
             yield return new WaitForSeconds(0.25f);
-            yield return null; // ensure final SetFullAlphaAndScale has executed
+            yield return null; // ensure final SnapToRest has executed
 
             Assert.AreEqual(1f, _canvasGroup.alpha, 0.001f, "alpha must be 1 after settle");
             Assert.AreEqual(Vector3.one, _rect.localScale, "scale must be Vector3.one after settle");

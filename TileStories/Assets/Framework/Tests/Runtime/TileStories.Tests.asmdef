@@ -6,7 +6,8 @@
     ],
     "references": [
         "TileStories",
-        "nunit"
+        "nunit",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

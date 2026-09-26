@@ -284,6 +284,53 @@ namespace TileStories.Tests
                 "A new POI's category should be a real, pickable dropdown value, not an invented literal.");
         }
 
+        // Ticking Status unknown on a POI that already shows a known badge (e.g. intact) must switch
+        // the badge to the unknown row too: the runtime unknown badge follows the POI's own badge key
+        [Test]
+        public void TickingStatusUnknown_SelectsTheUnknownOutlineType_AndTheUnknownBadge_EvenOverAKnownBadge()
+        {
+            var config = CreateMinimalConfig();
+            config.outline_levels = new System.Collections.Generic.List<OutlineLevelEntry>
+            {
+                new OutlineLevelEntry { key = "intact", pct = 0f }, new OutlineLevelEntry { key = "unknown", pct = 100f }
+            };
+            config.badge_categories = new System.Collections.Generic.List<BadgeCategoryEntry>
+            {
+                new BadgeCategoryEntry { key = "intact" }, new BadgeCategoryEntry { key = "unknown_damage" }
+            };
+            var poi = new POIData { id = "p", has_status = true, status_level_key = "intact", badge_category = "intact" };
+            config.pois.Add(poi);
+            var window = CreateWindowWithConfig(config);
+
+            typeof(POIEditorToolWindow).GetMethod("ApplyUnknownStatusDefaults", BindingFlags.NonPublic | BindingFlags.Instance)
+                .Invoke(window, new object[] { poi });
+
+            Assert.AreEqual("unknown", poi.status_level_key);
+            Assert.AreEqual(100f, poi.status_pct);
+            Assert.AreEqual("unknown_damage", poi.badge_category, "a known badge would contradict the unknown ring");
+        }
+
+        [Test]
+        public void AddFirstPoi_WithHierarchyLevels_UsesTheHighestPriorityLevel_SoItPassesTheSaveCheck()
+        {
+            var config = CreateMinimalConfig();
+            config.hierarchy_levels = new System.Collections.Generic.List<HierarchyLevelEntry>
+            {
+                new HierarchyLevelEntry { key = "big", level_name = "Big", size_cm = 8f, priority = 100 },
+                new HierarchyLevelEntry { key = "top", level_name = "Top", size_cm = 20f, priority = 10 },
+            };
+            var window = CreateWindowWithConfig(config);
+
+            InvokeAddFirstPoi(window);
+
+            Assert.AreEqual("top", config.pois[0].hierarchy_level_key,
+                "A first POI should get a real level (size + label), not the 12 cm 'no level' fallback.");
+            var issues = (System.Collections.IList)typeof(POIEditorToolWindow)
+                .GetMethod("ValidateHierarchyLevelKeys", BindingFlags.NonPublic | BindingFlags.Instance)
+                .Invoke(window, null);
+            Assert.AreEqual(0, issues.Count, "the new POI must not trigger the empty-level validation notice");
+        }
+
         [Test]
         public void AddNewPoiAfter_CopiesStatusLevelKey_AndDeepCopiesSearchKeywordFields()
         {

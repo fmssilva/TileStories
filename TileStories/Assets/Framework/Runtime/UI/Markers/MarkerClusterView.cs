@@ -22,13 +22,25 @@ namespace TileStories
     // coroutine) so clusters and individual markers fade in/out with identical timing.
     public class MarkerClusterView : MonoBehaviour
     {
-        private const float MinSizePx = 48f;   // >= 44px WCAG 2.5.5 tap target, headroom for the label
-        private const float MaxSizePx = 112f;  // cap so very large clusters do not fill the screen
-        private const float SizePerMember = 9f;
+        // A cluster lives on a WORLD-space canvas, like every marker: sizes are metres, not pixels.
+        // Its diameter follows its largest member's symbol (x cluster_size_ratio), growing a little
+        // with member count (GrowthPerMember, at most MaxGrowth) so "+12" reads bigger than "+2".
+        private const float GrowthPerMember = 0.05f;
+        private const float MaxGrowth = 0.5f;
+        private const float MinDiameterMetres = 0.02f;   // never collapse to nothing (e.g. members without a symbol)
+        private const float CountLabelFontRatio = 0.32f; // "+N" text height as a share of the diameter
+        public const float MinSizeRatio = 1f;             // the Editor's Cluster size slider uses these limits
+        public const float MaxSizeRatio = 4f;
         private const string DefaultClusterMode = "pie_and_count";
 
         // CVD-safe neutral accent fallback (single hue, no red<->green encoding).
         private static readonly Color FallbackAccent = new Color(0.46f, 0.43f, 0.40f);
+
+        // The dark disc behind "+N": a donut hole over the pie, or the whole cluster in the other modes,
+        // so the white count reads on any category colour.
+        private static readonly Color DiscColor = new Color(0.12f, 0.12f, 0.14f, 0.92f);
+        private const float PieHoleRatio = 0.58f;        // hole diameter as a share of the cluster
+        private const float DominantIconRatio = 0.5f;    // dominant category icon, above the count
 
         [Header("References")]
         [SerializeField] private RectTransform pieContainer;
@@ -69,6 +81,25 @@ namespace TileStories
             // World-Space Canvas needs an explicit event camera to raycast against.
             if (_canvas != null && _canvas.renderMode == RenderMode.WorldSpace && _canvas.worldCamera == null)
                 _canvas.worldCamera = Camera.main;
+
+            // Draw order (later siblings on top): pie, dark disc, dominant icon, then "+N" last --
+            // whatever order the prefab lists them in (it once drew an untextured white background
+            // over the pie and the count).
+            if (pieContainer != null) pieContainer.SetAsLastSibling();
+            if (backgroundImage != null)
+            {
+                backgroundImage.transform.SetAsLastSibling();
+                backgroundImage.sprite = MarkerCircleSpriteFactory.GetFilled(1f);
+                backgroundImage.color = DiscColor;
+                backgroundImage.raycastTarget = false;
+            }
+            if (dominantIcon != null) dominantIcon.transform.SetAsLastSibling();
+            if (countLabel != null)
+            {
+                countLabel.transform.SetAsLastSibling();
+                countLabel.color = Color.white;
+                countLabel.raycastTarget = false;
+            }
         }
 
         // Build the cluster visual from a group of member markers. Called on first
@@ -81,7 +112,7 @@ namespace TileStories
             BuildPie(iconLibrary, settings);
             BuildDominantIcon(iconLibrary, settings);
             UpdateCountLabel();
-            ScaleByMemberCount();
+            ApplySize(settings);
         }
 
         // Refresh members + visuals when reusing a pooled view (member set drifted).
@@ -93,7 +124,18 @@ namespace TileStories
             BuildPie(iconLibrary, settings);
             BuildDominantIcon(iconLibrary, settings);
             UpdateCountLabel();
-            ScaleByMemberCount();
+            ApplySize(settings);
+        }
+
+        // Current diameter in metres (world units of the cluster's canvas)
+        public float DiameterMetres { get; private set; }
+
+        // The cluster diameter rule, pure: largest member symbol x size ratio x a small count growth
+        public static float ComputeDiameterMetres(float largestMemberDiameter, float sizeRatio, int memberCount)
+        {
+            float ratio = Mathf.Clamp(sizeRatio, MinSizeRatio, MaxSizeRatio);
+            float growth = 1f + Mathf.Min(MaxGrowth, GrowthPerMember * Mathf.Max(0, memberCount - 2));
+            return Mathf.Max(MinDiameterMetres, largestMemberDiameter * ratio * growth);
         }
 
         // Reposition the aggregate in AR space. centroid = world-space mean of members
@@ -189,7 +231,9 @@ namespace TileStories
                 slice.fillOrigin = 0; // Bottom (3 o'clock); RectTransform rotation advances subsequent slices
                 slice.fillClockwise = true;
                 slice.fillAmount = (float)entries[i].Value / total;
-                slice.rectTransform.localRotation = Quaternion.Euler(0f, 0f, cumulative * 360f);
+                // - the slice fills CLOCKWISE, so the next one starts rotated clockwise (negative z in
+                //   Unity) by everything before it; a positive angle left a wedge-shaped gap
+                slice.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -cumulative * 360f);
                 float t = entries.Count > 1 ? (float)i / (entries.Count - 1) : 1f;
                 slice.color = Color.HSVToRGB(hue, sat, Mathf.Lerp(0.45f, 1f, t));
                 cumulative += slice.fillAmount;
@@ -202,6 +246,12 @@ namespace TileStories
             // safety already solved there); Image.Filled carves the radial slice out of it.
             var go = new GameObject("cluster_slice", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             go.transform.SetParent(pieContainer, false);
+            // - stretch over the pie container (a new RectTransform defaults to 100x100 units = 100 m here)
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
             var img = go.GetComponent<Image>();
             img.sprite = MarkerCircleSpriteFactory.GetFilled(1f);
             _slices.Add(go);
@@ -222,15 +272,41 @@ namespace TileStories
             countLabel.text = "+" + total;
         }
 
-        private void ScaleByMemberCount()
+        // Size every part of the aggregate from the largest member's symbol (ComputeDiameterMetres)
+        private void ApplySize(LodSettings settings)
         {
-            int total = _members?.Count ?? 0;
-            float size = Mathf.Clamp(MinSizePx + total * SizePerMember, MinSizePx, MaxSizePx);
+            float largest = 0f;
+            if (_members != null)
+                foreach (var m in _members)
+                    if (m != null && m.SymbolDiameterMetres > largest) largest = m.SymbolDiameterMetres;
+
+            float ratio = settings != null ? settings.cluster_size_ratio : new LodSettings().cluster_size_ratio;
+            float size = ComputeDiameterMetres(largest, ratio, _members?.Count ?? 0);
+            DiameterMetres = size;
+
+            string mode = settings?.cluster_icon_mode ?? DefaultClusterMode;
+            bool pie = mode != "count_only" && mode != "dominant_category";
+            bool dominant = mode == "dominant_category";
+
             var rt = transform as RectTransform;
             if (rt != null) rt.sizeDelta = Vector2.one * size;
             if (pieContainer != null) pieContainer.sizeDelta = Vector2.one * size;
-            if (countLabel != null) countLabel.fontSize = Mathf.Lerp(14f, 32f, (size - MinSizePx) / (MaxSizePx - MinSizePx));
-            if (backgroundImage != null) backgroundImage.rectTransform.sizeDelta = Vector2.one * size;
+            // - pie: the dark disc is the donut hole; otherwise it IS the cluster
+            if (backgroundImage != null) backgroundImage.rectTransform.sizeDelta = Vector2.one * (pie ? size * PieHoleRatio : size);
+            if (dominantIcon != null)
+            {
+                dominantIcon.rectTransform.sizeDelta = Vector2.one * (size * DominantIconRatio);
+                dominantIcon.rectTransform.anchoredPosition = new Vector2(0f, size * 0.14f);
+            }
+            if (countLabel != null)
+            {
+                var labelRect = countLabel.rectTransform;
+                labelRect.sizeDelta = new Vector2(size, dominant ? size * 0.36f : size);
+                labelRect.anchoredPosition = new Vector2(0f, dominant ? -size * 0.24f : 0f);
+                countLabel.alignment = TextAlignmentOptions.Center;
+                countLabel.enableWordWrapping = false;
+                countLabel.fontSize = size * (dominant ? CountLabelFontRatio * 0.7f : CountLabelFontRatio);
+            }
         }
 
         private Color ResolveAccentColor()

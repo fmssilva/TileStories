@@ -58,7 +58,7 @@ namespace TileStories.Editor
         public static void PreviewBaseOptions(WallConfigData config, out string[] ids, out string[] labels)
         {
             var i = new List<string> { "" };
-            var l = new List<string> { "Plain grey circle" };
+            var l = new List<string> { EffectsPreviewSpawner.PlainCircleName };
             if (config?.pois != null)
             {
                 foreach (var poi in config.pois)

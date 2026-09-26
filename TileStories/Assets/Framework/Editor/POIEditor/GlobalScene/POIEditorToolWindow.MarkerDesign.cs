@@ -14,35 +14,9 @@ namespace TileStories.Editor
 {
     public partial class POIEditorToolWindow
     {
-        // Open/closed state of one domain's Test sub-foldout and its three guides. The Test foldout
-        // starts open, the guides start collapsed (_5.1_Editor_Tab.md, "Domain Manual Tests").
-        private sealed class TestGuideState
-        {
-            public bool Open = true;
-            public bool Scene;
-            public bool Playmode;
-            public bool Device;
-        }
-
         private readonly TestGuideState _markerTest = new TestGuideState();
         private readonly TestGuideState _badgeTest = new TestGuideState();
         private readonly TestGuideState _outlineTest = new TestGuideState();
-
-        // One Test sub-foldout: an optional Play-Mode preview switch (Outline's demo grid; null for
-        // Marker/Badge, which have none), then three collapsed guides, one per test tier.
-        private void DrawDomainTestSubSection(TestGuideState state, string sceneGuide, string playmodeGuide,
-            string deviceGuide, Action drawBeforeGuides = null)
-        {
-            EditorGUILayout.Space(4f);
-            state.Open = EditorGUILayout.Foldout(state.Open, "Test", true, EditorStyles.foldoutHeader);
-            if (!state.Open) return;
-
-            drawBeforeGuides?.Invoke();
-
-            state.Scene = DrawTestGuideFoldout(state.Scene, "How to Scene Test", sceneGuide);
-            state.Playmode = DrawTestGuideFoldout(state.Playmode, "How to Playmode Test", playmodeGuide);
-            state.Device = DrawTestGuideFoldout(state.Device, "How to Device Test", deviceGuide);
-        }
 
         // Outline's "Add outline demo grid" switch (mirrors EffectsTest.cs's "Add effects demo grid"):
         // off by default, Editor + development builds only (OutlinePreviewSpawner.IsAllowed).
@@ -50,7 +24,9 @@ namespace TileStories.Editor
         {
             if (_config.outline_preview == null) _config.outline_preview = new OutlinePreviewSettings();
             var preview = _config.outline_preview;
+            bool wasOn = preview.enabled;
             preview.enabled = DrawToggleField("Add outline demo grid", preview.enabled, OutlinePreviewHelp, IndentLevel1);
+            MakeThisTheOnlyActiveDemoView(DemoView.OutlineGrid, justTurnedOn: preview.enabled && !wasOn);
             if (preview.enabled)
             {
                 EffectUsageSummary.PreviewBaseOptions(_config, out string[] ids, out string[] labels);
@@ -64,6 +40,18 @@ namespace TileStories.Editor
         private void DrawMarkerGlobalSection()
         {
             _config.marker_shape = DrawPopupField("Background shape", _config.marker_shape, ShapeOptions, ShapeLabels, MarkerShapeHelp);
+
+            // The icon on every symbol (and badge): its colour and its size inside the symbol
+            if (string.IsNullOrWhiteSpace(_config.icon_color_hex))
+                _config.icon_color_hex = MarkerVisualSettings.DefaultIconColorHex;
+            string iconColor = _config.icon_color_hex;
+            DrawColorField("Icon color", ref iconColor, IconColorHelp);
+            _config.icon_color_hex = iconColor;
+            _config.icon_size_ratio = DrawSliderField("Icon size", _config.icon_size_ratio,
+                MarkerVisualSettings.IconSizeRatioMin, MarkerVisualSettings.IconSizeRatioMax, IconSizeHelp);
+
+            // Label typography (gap/font-size/font) lives in its own "Labels, Text & Fonts" section
+            // (POIEditorToolWindow.LabelsAndFonts.cs).
 
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Category Symbols", EditorStyles.boldLabel);
@@ -173,6 +161,10 @@ namespace TileStories.Editor
             if (_config.badge_categories.Count == 0)
                 _config.badge_categories.AddRange(DefaultBadgeCategories.Create());
 
+            // Table title, same as Marker's "Category Symbols"
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.LabelField("Badge Categories", EditorStyles.boldLabel);
+
             // Same commit-style rename protection the category table has: the badge key IS the
             // identity POIData.badge_category references, so a raw keystroke straight into it would
             // orphan every POI that uses this badge. Resolve Enter/ESC before the shared TextField draws.
@@ -260,13 +252,12 @@ namespace TileStories.Editor
 
             EditorGUILayout.Space(4f);
 
-            // Column headers for the outline table (section 13.4).
-            EditorGUILayout.LabelField("Outline Types", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox(
-                "Each row is one discrete outline type a POI can be set to (e.g. \"Intact\", \"25% damaged\"). " +
-                "To add a custom line (e.g. a wavy or double line): import a transparent PNG ring/dash pattern " +
-                "as a Sprite, then use the Outline Style column the same way as a marker/badge symbol.",
-                MessageType.Info);
+            // Table title + its (i): what a row is and how to add your own line style
+            DrawEditorRow(out float titleRowWidth, out _);
+            EditorGUILayout.LabelField("Outline Types", EditorStyles.boldLabel,
+                GUILayout.Width(Mathf.Max(40f, titleRowWidth - 36f)), GUILayout.ExpandWidth(false));
+            HelpInfoButton.Draw("Outline Types", OutlineTypesHelp);
+            EditorRowEnd();
 
             // Seed defaults only if genuinely empty (section 13.2) -- a brand-new wall,
             // not one that already has entries the developer chose.
@@ -275,7 +266,7 @@ namespace TileStories.Editor
 
             // Column headers (5 groups, header mirrors rows exactly):
             // [key+details] | [Style + interactive Preview] | [Color] | [SearchKeywords] | [trash]
-            using (new EditorGUILayout.HorizontalScope())
+            using (new TableRowScope())
             {
                 // Group 1: key + notes info
                 // The cell below edits entry.label, while entry.key (the identity
@@ -334,15 +325,16 @@ namespace TileStories.Editor
             for (int i = 0; i < _config.outline_levels.Count; i++)
             {
                 var entry = _config.outline_levels[i] ?? new OutlineLevelEntry();
-                using (new EditorGUILayout.HorizontalScope())
+                using (new TableRowScope())
                 {
                     // Group 1: key + details
                     entry.label = EditorGUILayout.TextField(entry.label, GUILayout.Width(110f));
+                    ReportTableCellRect("Outline label", i);
 
                     // Details: popup for free-text notes (same pattern as DrawSymbolTable).
                     GUILayout.Space(TableGapWithinGroup);
                     if (GUILayout.Button(DetailsIcon, GUILayout.Width(26f), GUILayout.Height(20f)))
-                        PopupWindow.Show(GUILayoutUtility.GetLastRect(), new EntryDetailsPopup(entry.label ?? "Outline level", () => entry.details, v => entry.details = v));
+                        EditorPopup.ShowAt(CreateDetailsPopup(entry.label ?? "Outline level", () => entry.details, v => entry.details = v), GUILayoutUtility.GetLastRect());
 
                     GUILayout.Space(TableGapBetweenGroups);
 
@@ -355,14 +347,11 @@ namespace TileStories.Editor
 
                     GUILayout.Space(TableGapWithinGroup);
 
-                    // Clicking the preview opens the curated wall + framework picker
-                    // (section 14.7). Capture per-iteration: PopupWindow.Show is async.
-                    EnsureDefaultIconLibraryLoaded();
+                    // Clicking the preview opens the curated wall + framework picker.
+                    // Capture per-iteration: the popup calls back later, so no loop-variable closure.
                     var targetEntry = entry;
                     DrawSpritePreview(chosen != null ? chosen : current,
-                        () => PopupWindow.Show(GUILayoutUtility.GetLastRect(),
-                            new ExistingSymbolPickerPopup(_wallIconLibrary, _defaultIconLibrary,
-                                key => targetEntry.line_style = key)));
+                        () => EditorPopup.ShowAt(CreateSymbolPickerPopup(key => targetEntry.line_style = key), GUILayoutUtility.GetLastRect()));
 
                     // Group 3: per-row colour override -- only in "Per outline type" mode (see the
                     // header comment above). The real picker is the first cell of this group; the
@@ -379,7 +368,7 @@ namespace TileStories.Editor
 
                     // Group 4: Search keywords
                     GUILayout.Space(TableGapBetweenGroups);
-                    entry.search_keywords = DrawKeywordListField(entry.search_keywords);
+                    entry.search_keywords = DrawKeywordListField(entry.search_keywords, GUILayout.ExpandWidth(true));
 
                     // Group 5: Remove (trash) -- last column, same between-groups gap.
                     GUILayout.Space(TableGapBetweenGroups);

@@ -4,7 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "TileStories.Editor",
-        "TileStories"
+        "TileStories",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

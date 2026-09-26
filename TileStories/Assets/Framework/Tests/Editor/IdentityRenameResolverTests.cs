@@ -216,8 +216,8 @@ namespace TileStories.Tests
         {
             var rows = new List<HierarchyLevelEntry>
             {
-                new HierarchyLevelEntry { key = "level_3", label = "3" },
-                new HierarchyLevelEntry { key = "level_1", label = "Hub" },
+                new HierarchyLevelEntry { key = "level_3", level_name = "3" },
+                new HierarchyLevelEntry { key = "level_1", level_name = "Hub" },
             };
             var pois = new List<POIData>
             {

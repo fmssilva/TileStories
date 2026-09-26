@@ -7,13 +7,13 @@ namespace TileStories
     // (LODController via ARZoomState.ZoomFactor -> effective distance, section 10).
     // Keeping the math static and device-free makes it assertable without a scene.
     //
-    // Assumption (documented): the tap cycle is MULTIPLICATIVE per zoom_tap_step.
-    // Levels = [1.0, step, step^2, ...] clamped to [zoom_min, zoom_max], base first.
+    // Assumption (documented): the tap cycle is MULTIPLICATIVE per tap_step.
+    // Levels = [1.0, step, step^2, ...] clamped to [min_factor, max_factor], base first.
     // The tap past the last level wraps back to 1.0 (base) -- exactly the
-    // "3rd tap/click returns to 1x" contract baked into WallConfigData zoom_tap_levels.
+    // "3rd tap/click returns to 1x" contract baked into WallConfigData tap_levels.
 
     // Input writer for ARZoomState (spec section 9). Reads zoom_* config from
-    // WallSession.LodSettings and drives ARZoomState via ARZoomState.SetZoom,
+    // WallSession.ZoomSettings and drives ARZoomState via ARZoomState.SetZoom,
     // the only place the global zoom factor is mutated.
     //
     // Gesture DETECTION (pinch/double-tap input parsing) is intentionally NOT
@@ -38,11 +38,14 @@ namespace TileStories
         private bool _fovCaptured;    // false until Start captures a camera
 
         private float _targetZoom;      // where the animation is heading
+        private float _animFrom;        // where it started
+        private float _animElapsed;     // seconds since it started
         private bool _animating;
 
-        private LodSettings Settings => _wallSession != null ? _wallSession.LodSettings : null;
-        private LodSettings _lastSettings;
-        private float _lastTransitionSpeed;
+        // The wall's zoom settings (read live: a Play Mode edit swaps the object). Internal so the
+        // on-screen buttons (ZoomControlView) can follow Enable Zoom / Show UI Buttons.
+        internal ZoomSettings Settings => _wallSession != null ? _wallSession.ZoomSettings : null;
+        private ZoomSettings _lastSettings;
 
         private void Awake()
         {
@@ -68,7 +71,7 @@ namespace TileStories
         // LateUpdate runs AFTER Update() each frame, where ARZoomState.ZoomFactor is
         // finalized, so the factor is final before we read it. This is the actual
         // visual zoom (spec section 9: global, FOV-based). The Max guard is a regression
-        // backstop: ARZoomState clamps to >= zoom_min (>=1) in normal flow, but a direct
+        // backstop: ARZoomState clamps to >= min_factor (>=1) in normal flow, but a direct
         // SetZoom(0) caller elsewhere must never produce a NaN/Inf FOV.
         private void LateUpdate()
         {
@@ -81,16 +84,20 @@ namespace TileStories
         private void Update()
         {
             var settings = Settings;
-            if (settings == null || !settings.zoom_enabled)
+            if (settings == null || !settings.enabled)
             {
                 _animating = false;
+                // - zoom switched off: the camera goes back to its own field of view
+                if (settings != null && !Mathf.Approximately(ARZoomState.ZoomFactor, 1f))
+                    ARZoomState.SetZoom(1f, 1f, 1f);
                 return;
             }
 
             if (settings != _lastSettings)
             {
                 _lastSettings = settings;
-                _lastTransitionSpeed = settings.zoom_transition_speed_s;
+                // - new limits (e.g. a lower Max Zoom edited live) apply to the current zoom too
+                ARZoomState.SetZoom(ARZoomState.ZoomFactor, settings.min_factor, settings.max_factor);
             }
 
             // Drive the smooth transition toward the pending target each frame.
@@ -98,10 +105,10 @@ namespace TileStories
             // LODController divides into effective distance.
             if (_animating)
             {
-                float from = ARZoomState.ZoomFactor;
-                float next = ARZoomMath.StepTowardTarget(from, _targetZoom, _lastTransitionSpeed, Time.unscaledDeltaTime);
-                ARZoomState.SetZoom(next, settings.zoom_min, settings.zoom_max);
-                _animating = Mathf.Abs(next - _targetZoom) > 1e-4f;
+                _animElapsed += Time.unscaledDeltaTime;
+                float next = ARZoomMath.AnimatedZoom(_animFrom, _targetZoom, _animElapsed, settings.transition_duration_s);
+                ARZoomState.SetZoom(next, settings.min_factor, settings.max_factor);
+                _animating = _animElapsed < settings.transition_duration_s;
             }
         }
 
@@ -109,9 +116,9 @@ namespace TileStories
         public void SetZoomImmediate(float targetZoomFactor)
         {
             var settings = Settings;
-            if (settings == null || !settings.zoom_enabled) return;
-            _targetZoom = Mathf.Clamp(targetZoomFactor, settings.zoom_min, settings.zoom_max);
-            ARZoomState.SetZoom(_targetZoom, settings.zoom_min, settings.zoom_max);
+            if (settings == null || !settings.enabled) return;
+            _targetZoom = Mathf.Clamp(targetZoomFactor, settings.min_factor, settings.max_factor);
+            ARZoomState.SetZoom(_targetZoom, settings.min_factor, settings.max_factor);
             _animating = false;
             if (_debug) Debug.Log($"[ARZoom] immediate -> {_targetZoom:F2}");
         }
@@ -119,8 +126,10 @@ namespace TileStories
         public void SetZoomAnimated(float targetZoomFactor)
         {
             var settings = Settings;
-            if (settings == null || !settings.zoom_enabled) return;
-            _targetZoom = Mathf.Clamp(targetZoomFactor, settings.zoom_min, settings.zoom_max);
+            if (settings == null || !settings.enabled) return;
+            _targetZoom = Mathf.Clamp(targetZoomFactor, settings.min_factor, settings.max_factor);
+            _animFrom = ARZoomState.ZoomFactor;   // - a new click restarts from where the view is now
+            _animElapsed = 0f;
             _animating = true;
             if (_debug) Debug.Log($"[ARZoom] animated -> {_targetZoom:F2}");
         }
@@ -130,31 +139,35 @@ namespace TileStories
         public void ZoomIn()  => StepLevel(true);
         public void ZoomOut() => StepLevel(false);
 
+        // Where the next step starts: the level an animation is heading for, else the current zoom.
+        // A second click while the first still animates must go one level FURTHER, not repeat it.
+        private float StepOrigin() => _animating ? _targetZoom : ARZoomState.ZoomFactor;
+
         private void StepLevel(bool up)
         {
             var settings = Settings;
-            if (settings == null || !settings.zoom_enabled) return;
-            float current = ARZoomState.ZoomFactor;
+            if (settings == null || !settings.enabled) return;
+            float current = StepOrigin();
             // + button caps at max (no wrap); - button retreats one level, floor at base.
             float target = up
-                ? ARZoomMath.NextTapLevel(current, settings.zoom_tap_step, settings.zoom_tap_levels, settings.zoom_min, settings.zoom_max, wrap: false)
-                : ARZoomMath.PreviousTapLevel(current, settings.zoom_tap_step, settings.zoom_tap_levels, settings.zoom_min, settings.zoom_max);
+                ? ARZoomMath.NextTapLevel(current, settings.tap_step, settings.tap_levels, settings.min_factor, settings.max_factor, wrap: false)
+                : ARZoomMath.PreviousTapLevel(current, settings.tap_step, settings.tap_levels, settings.min_factor, settings.max_factor);
             SetZoomAnimated(target);
         }
 
         public void OnTap()
         {
             var settings = Settings;
-            if (settings == null || !settings.zoom_enabled) return;
-            float target = ARZoomMath.NextTapLevel(ARZoomState.ZoomFactor, settings.zoom_tap_step, settings.zoom_tap_levels, settings.zoom_min, settings.zoom_max);
+            if (settings == null || !settings.enabled) return;
+            float target = ARZoomMath.NextTapLevel(StepOrigin(), settings.tap_step, settings.tap_levels, settings.min_factor, settings.max_factor);
             SetZoomAnimated(target);
         }
 
         public void OnDoubleTap()
         {
             var settings = Settings;
-            if (settings == null || !settings.zoom_enabled) return;
-            float target = ARZoomMath.NextDoubleTapTarget(ARZoomState.ZoomFactor, settings.zoom_min, settings.zoom_max);
+            if (settings == null || !settings.enabled) return;
+            float target = ARZoomMath.NextDoubleTapTarget(StepOrigin(), settings.min_factor, settings.max_factor);
             SetZoomAnimated(target);
         }
 
@@ -162,9 +175,9 @@ namespace TileStories
         public void OnPinch(float scaleFactor)
         {
             var settings = Settings;
-            if (settings == null || !settings.zoom_enabled) return;
+            if (settings == null || !settings.enabled) return;
             float current = ARZoomState.ZoomFactor;
-            float target = ARZoomMath.ApplyPinchScale(current, scaleFactor, settings.zoom_min, settings.zoom_max);
+            float target = ARZoomMath.ApplyPinchScale(current, scaleFactor, settings.min_factor, settings.max_factor);
             SetZoomImmediate(target);
         }
 
@@ -172,8 +185,8 @@ namespace TileStories
         public void ResetToBase()
         {
             var settings = Settings;
-            if (settings == null || !settings.zoom_enabled) return;
-            ARZoomState.ResetToBase(settings.zoom_min, settings.zoom_max);
+            if (settings == null || !settings.enabled) return;
+            ARZoomState.ResetToBase(settings.min_factor, settings.max_factor);
             _targetZoom = ARZoomState.ZoomFactor;
             _animating = false;
             if (_debug) Debug.Log("[ARZoom] reset to base");

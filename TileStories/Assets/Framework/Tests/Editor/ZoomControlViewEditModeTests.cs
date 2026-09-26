@@ -28,8 +28,10 @@ namespace TileStories.Tests
         public void ShouldShowButtons_gates_on_zoom_show_ui_buttons()
         {
             Assert.IsFalse(ZoomControlView.ShouldShowButtons(null));
-            Assert.IsFalse(ZoomControlView.ShouldShowButtons(new LodSettings { zoom_show_ui_buttons = false }));
-            Assert.IsTrue(ZoomControlView.ShouldShowButtons(new LodSettings { zoom_show_ui_buttons = true }));
+            Assert.IsFalse(ZoomControlView.ShouldShowButtons(new ZoomSettings { show_ui_buttons = false }));
+            Assert.IsTrue(ZoomControlView.ShouldShowButtons(new ZoomSettings { show_ui_buttons = true }));
+            Assert.IsFalse(ZoomControlView.ShouldShowButtons(new ZoomSettings { enabled = false, show_ui_buttons = true }),
+                "no zoom buttons while Enable Zoom is off");
         }
 
         // --- 1d UXML declares the three buttons by the exact names BindButtons queries ---

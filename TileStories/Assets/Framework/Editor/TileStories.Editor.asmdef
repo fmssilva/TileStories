@@ -2,7 +2,8 @@
     "name": "TileStories.Editor",
     "rootNamespace": "TileStories.Editor",
     "references": [
-        "GUID:9684a9acb0ad15443a3df046d245f1cb"
+        "GUID:9684a9acb0ad15443a3df046d245f1cb",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

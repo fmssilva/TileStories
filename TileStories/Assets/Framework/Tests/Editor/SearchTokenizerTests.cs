@@ -105,29 +105,5 @@ namespace TileStories.Tests
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("x", result[0]);
         }
-
-        [Test]
-        public void IsTokenValid_Null_ReturnsFalse()
-        {
-            Assert.IsFalse(SearchTokenizer.IsTokenValid(null));
-        }
-
-        [Test]
-        public void IsTokenValid_Empty_ReturnsFalse()
-        {
-            Assert.IsFalse(SearchTokenizer.IsTokenValid(""));
-        }
-
-        [Test]
-        public void IsTokenValid_WhitespaceOnly_ReturnsFalse()
-        {
-            Assert.IsFalse(SearchTokenizer.IsTokenValid("   "));
-        }
-
-        [Test]
-        public void IsTokenValid_ValidToken_ReturnsTrue()
-        {
-            Assert.IsTrue(SearchTokenizer.IsTokenValid("hello"));
-        }
     }
 }

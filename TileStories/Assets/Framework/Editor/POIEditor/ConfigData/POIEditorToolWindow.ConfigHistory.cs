@@ -30,6 +30,39 @@ namespace TileStories.Editor
             LivePlayModeConfigPush.PushToRunningWall(_config);
         }
 
+        // A popup (the curated symbol picker, a Details note) writes back from its OWN OnGUI, after
+        // this window's DrawConfigMutationScope has already closed -- so the write skipped undo, the
+        // unsaved flag, the rig refresh and the live Play Mode push. Every popup is built by one of
+        // these two factories, which give its write-back a mutation scope of its own.
+        private ExistingSymbolPickerPopup CreateSymbolPickerPopup(Action<string> assignKey)
+        {
+            EnsureDefaultIconLibraryLoaded();
+            return new ExistingSymbolPickerPopup(_wallIconLibrary, _defaultIconLibrary,
+                key => ApplyPopupEdit(() => assignKey(key)), IsStillEditing(_config));
+        }
+
+        // Same rule for a free-text note popup (one undo step per keystroke, like an inline field)
+        private EntryDetailsPopup CreateDetailsPopup(string title, Func<string> get, Action<string> set)
+        {
+            return new EntryDetailsPopup(title, get, value => ApplyPopupEdit(() => set(value)), IsStillEditing(_config));
+        }
+
+        // A popup stays open next to the window, but its get/set close over a row of the config it was
+        // opened on. Undo/redo and a reload REPLACE _config, so after one that row is a dead copy: the
+        // popup must close instead of writing into it. True while this window is alive and still holds
+        // that same config object.
+        private Func<bool> IsStillEditing(WallConfigData openedOn)
+        {
+            return () => this != null && openedOn != null && ReferenceEquals(_config, openedOn);
+        }
+
+        // Run a popup's edit inside a mutation scope, then repaint so the window shows the new value
+        private void ApplyPopupEdit(Action edit)
+        {
+            DrawConfigMutationScope(edit, refreshRigOnChange: true);
+            Repaint();
+        }
+
         private void RecordConfigChange(string before, string after)
         {
             if (_isApplyingHistory)
@@ -104,6 +137,7 @@ namespace TileStories.Editor
             _isApplyingHistory = true;
             _config = JsonUtility.FromJson<WallConfigData>(snapshot);
             TryResolveWallIconLibraryFromConfig();
+            TryResolveWallFontLibraryFromConfig();
             _isApplyingHistory = false;
             Repaint();
         }

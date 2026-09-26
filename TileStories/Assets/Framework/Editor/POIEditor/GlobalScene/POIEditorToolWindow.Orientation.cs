@@ -23,11 +23,7 @@ namespace TileStories.Editor
         private bool _showOrientationVerticalAlignment = true;
         private bool _showOrientationFacingOptions = true;
         private bool _showOrientationUpdateCost = true;
-        private bool _showOrientationTest = true;
-        // The three test guides start collapsed: the developer opens only the one they need.
-        private bool _showOrientationSceneTestGuide;
-        private bool _showOrientationPlaymodeTestGuide;
-        private bool _showOrientationDeviceTestGuide;
+        private readonly TestGuideState _orientationTest = new TestGuideState();
 
         // Global Scene -> Orientation Settings foldout. Edits
         // _config.orientation_settings (the OrientationSettings schema defined in
@@ -48,8 +44,10 @@ namespace TileStories.Editor
             DrawOrientationFacingOptionsSubSection(o);
             EditorGUILayout.Space(4f);
             DrawOrientationUpdateCostSubSection(o);
-            EditorGUILayout.Space(4f);
-            DrawOrientationTestSubSection(o);
+            // Test: the Scene-Mode Preview switch, then the three guides (Shared/DomainTest.cs)
+            DrawDomainTestSubSection(_orientationTest, OrientationSceneTestGuide, OrientationPlaymodeTestGuide,
+                OrientationDeviceTestGuide, () => o.edit_mode_preview_enabled =
+                    DrawToggleField("Scene-Mode Preview", o.edit_mode_preview_enabled, EditModePreviewHelp, IndentLevel1));
         }
 
         private void DrawOrientationVerticalAlignmentSubSection(OrientationSettings o)
@@ -107,7 +105,7 @@ namespace TileStories.Editor
             if (o.facing_mode == "wall_fixed" || o.facing_mode == "yaw_only")
             {
                 EditorGUILayout.HelpBox(
-                    "This mode uses the per-POI angles authored in the Specific Marker tab's own Facing Options row (Position foldout). Wall Fixed uses all three angles; Y Rotation Only uses only the X/Z tilt and replaces Y with a live camera-facing yaw.",
+                    "This mode uses each POI's own angles: Specific Marker > POI > Position > Facing X / Y / Z. Wall Fixed uses all three; Y Rotation Only keeps the X/Z tilt and replaces Y with a live camera-facing yaw.",
                     MessageType.Info);
             }
         }
@@ -122,50 +120,6 @@ namespace TileStories.Editor
                 o.update_interval_s = DrawScalarField("Update Interval (s)", o.update_interval_s, OrientationUpdateIntervalHelp, IndentLevel1 + ConditionalAdvance);
             if (o.update_mode == "on_camera_delta")
                 o.camera_delta_deg = DrawScalarField("Camera Delta (deg)", o.camera_delta_deg, OrientationCameraDeltaHelp, IndentLevel1 + ConditionalAdvance);
-        }
-
-        private void DrawOrientationTestSubSection(OrientationSettings o)
-        {
-            _showOrientationTest = EditorGUILayout.Foldout(_showOrientationTest, "Test", true, EditorStyles.foldoutHeader);
-            if (!_showOrientationTest) return;
-
-            o.edit_mode_preview_enabled = DrawToggleField("Scene-Mode Preview", o.edit_mode_preview_enabled, EditModePreviewHelp, IndentLevel1);
-
-            EditorGUILayout.Space(4f);
-
-            // Three separate guides, one per test area, each collapsed by default so the
-            // developer opens only the kind of test being run. Each stays an always-visible
-            // text block (not a popup): the steps are followed while looking at the Scene/Game
-            // view, and a popup would close the moment focus moves there.
-            _showOrientationSceneTestGuide = DrawTestGuideFoldout(_showOrientationSceneTestGuide, "How to Scene Test", OrientationSceneTestGuide);
-            _showOrientationPlaymodeTestGuide = DrawTestGuideFoldout(_showOrientationPlaymodeTestGuide, "How to Playmode Test", OrientationPlaymodeTestGuide);
-            _showOrientationDeviceTestGuide = DrawTestGuideFoldout(_showOrientationDeviceTestGuide, "How to Device Test", OrientationDeviceTestGuide);
-        }
-
-        // One collapsible guide: a foldout title (a child of "Test", same level as the Scene-Mode
-        // Preview row) and, when open, the read-only text block one step deeper. Both go through
-        // DrawEditorRow so the spacer supplies the indent; indentLevel is zeroed around the two
-        // controls because Foldout and SelectableLabel would otherwise re-apply the ambient indent
-        // on top of the spacer (they landed twice as far right before).
-        private bool DrawTestGuideFoldout(bool isOpen, string title, string guideText)
-        {
-            int savedIndent = EditorGUI.indentLevel;
-            DrawEditorRow(out _, out _, IndentLevel1);
-            EditorGUI.indentLevel = 0;
-            isOpen = EditorGUILayout.Foldout(isOpen, title, true, EditorStyles.foldout);
-            EditorGUI.indentLevel = savedIndent;
-            EditorRowEnd();
-            if (!isOpen) return false;
-
-            DrawEditorRow(out float rowWidth, out _, IndentLevel2);
-            EditorGUI.indentLevel = 0;
-            var guideStyle = EditorStyles.textArea;
-            float guideHeight = guideStyle.CalcHeight(new GUIContent(guideText), rowWidth);
-            EditorGUILayout.SelectableLabel(guideText, guideStyle,
-                GUILayout.Width(rowWidth), GUILayout.Height(guideHeight), GUILayout.ExpandWidth(false));
-            EditorGUI.indentLevel = savedIndent;
-            EditorRowEnd();
-            return true;
         }
     }
 }

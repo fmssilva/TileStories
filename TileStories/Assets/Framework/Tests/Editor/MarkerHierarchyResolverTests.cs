@@ -18,35 +18,35 @@ namespace TileStories.Tests
             {
                 new HierarchyLevelEntry
                 {
-                                        key = "level_1", label = "1", size_cm = 20f, show_label = true,
+                                        key = "level_1", level_name = "1", size_cm = 20f, show_label = true,
                     ripple_effect = "ripple_discs", halo_effect = "halo_ring",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0f,
                     reveal_duration_s = 0.5f
                 },
                 new HierarchyLevelEntry
                 {
-                                        key = "level_2", label = "2", size_cm = 15f, show_label = false,
+                                        key = "level_2", level_name = "2", size_cm = 15f, show_label = false,
                     ripple_effect = "ripple_rings", halo_effect = "none",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.15f,
                     reveal_duration_s = 0.4f
                 },
                 new HierarchyLevelEntry
                 {
-                                        key = "level_3", label = "3", size_cm = 10f, show_label = false,
+                                        key = "level_3", level_name = "3", size_cm = 10f, show_label = false,
                     ripple_effect = "none", halo_effect = "halo_disc",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.3f,
                     reveal_duration_s = 0.35f
                 },
                 new HierarchyLevelEntry
                 {
-                                        key = "level_4", label = "4", size_cm = 5f, show_label = false,
+                                        key = "level_4", level_name = "4", size_cm = 5f, show_label = false,
                     ripple_effect = "none", halo_effect = "beacon",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.45f,
                     reveal_duration_s = 0.3f
                 },
                 new HierarchyLevelEntry
                 {
-                                        key = "level_5", label = "5", size_cm = 2f, show_label = false,
+                                        key = "level_5", level_name = "5", size_cm = 2f, show_label = false,
                     ripple_effect = "none", halo_effect = "none",
                     pulse = true, rotate_contour = true, reveal_delay_s = 0.6f,
                     reveal_duration_s = 0.25f
@@ -246,6 +246,60 @@ namespace TileStories.Tests
             MarkerHierarchyResolver.Configure(null);
             Assert.AreEqual(int.MaxValue, MarkerHierarchyResolver.GetLevelPriority("level_1"));
             Assert.IsFalse(MarkerHierarchyResolver.TryResolvePriority("level_1", out _));
+        }
+
+        // Marker Label Style (_2.0_Labels_And_Fonts_Design.md section 4): an overriding level's
+        // values pass through exactly.
+        [Test]
+        public void Configure_WithLabelStyleOverride_ResolvesItsOwnValuesExactly()
+        {
+            var entries = new List<HierarchyLevelEntry>
+            {
+                new HierarchyLevelEntry
+                {
+                    key = "level_1",
+                    override_label_style = true,
+                    label_gap_ratio = 0.2f,
+                    label_font_size_ratio = 0.4f,
+                    label_font_key = "roboto_bold",
+                },
+            };
+            MarkerHierarchyResolver.Configure(entries);
+
+            Assert.IsTrue(MarkerHierarchyResolver.TryResolveByKey("level_1", out var style));
+            Assert.IsTrue(style.OverridesLabelStyle);
+            Assert.AreEqual(0.2f, style.LabelGapRatio, "gap");
+            Assert.AreEqual(0.4f, style.LabelFontSizeRatio, "font size");
+            Assert.AreEqual("roboto_bold", style.LabelFontKey, "font key");
+        }
+
+        // A level that does not override resolves OverridesLabelStyle = false (MarkerView then uses
+        // the wall default), and the Fallback never overrides either.
+        [Test]
+        public void Configure_WithoutLabelStyleOverride_DoesNotOverride()
+        {
+            var entries = new List<HierarchyLevelEntry> { new HierarchyLevelEntry { key = "level_1" } };
+            MarkerHierarchyResolver.Configure(entries);
+
+            Assert.IsTrue(MarkerHierarchyResolver.TryResolveByKey("level_1", out var style));
+            Assert.IsFalse(style.OverridesLabelStyle);
+            Assert.IsFalse(MarkerHierarchyResolver.Fallback.OverridesLabelStyle);
+        }
+
+        // Out-of-range level values (a hand-edited config) are clamped to the SAME limits the wall
+        // default uses, and a blank font key resolves to the framework default font.
+        [Test]
+        public void StyleOf_ClampsLevelLabelValues_ToTheSharedLimits()
+        {
+            var style = MarkerHierarchyResolver.StyleOf(new HierarchyLevelEntry
+            {
+                key = "x", override_label_style = true,
+                label_gap_ratio = 5f, label_font_size_ratio = 0f, label_font_key = "  "
+            });
+
+            Assert.AreEqual(MarkerVisualSettings.LabelGapRatioMax, style.LabelGapRatio);
+            Assert.AreEqual(MarkerVisualSettings.LabelFontSizeRatioMin, style.LabelFontSizeRatio);
+            Assert.AreEqual(MarkerVisualSettings.DefaultLabelFontKey, style.LabelFontKey);
         }
     }
 }

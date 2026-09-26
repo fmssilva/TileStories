@@ -60,5 +60,68 @@ namespace TileStories.Editor.Tests
             foreach (string option in options)
                 Assert.IsTrue(MarkerVisualsParser.TryParseShape(option, out _), $"Shape option '{option}' must parse.");
         }
+
+        [Test]
+        public void MarkerBadgeOutlineTestGuides_DoNotHardcodeAWallsRealPoiIdsOrCategories()
+        {
+            // Guide text must describe framework behaviour, not one specific wall's taxonomy
+            // (_5.1_Editor_Tab.md, "Domain Manual Tests" > "Guide content must stay app-agnostic").
+            // These are real LivingRoom POI ids/categories/badge keys that must never be assumed
+            // to exist as framework fixtures. "LivingRoom" itself is NOT forbidden: the real
+            // scene-path references (Apps/LivingRoom/LivingRoomScene) are legitimate and kept.
+            var t = typeof(POIEditorToolWindow);
+            var forbidden = new[]
+            {
+                "lamp_military", "lamp_economic", "lamp_religious", "lamp_infrastructure", "lamp_residential",
+                "painting_religious", "camera_religious", "painting_military", "camera_military",
+                "painting_economic", "camera_economic",
+                "dev_marker_custom_symbol", "dev_marker_nolevel", "dev_marker_nobadge", "dev_marker_nostatus",
+                "'lamp'", "'religious'", "'military'", "partial_damage",
+            };
+
+            foreach (string guideName in new[]
+            {
+                "MarkerSceneTestGuide", "MarkerPlaymodeTestGuide", "MarkerDeviceTestGuide",
+                "BadgeSceneTestGuide", "BadgePlaymodeTestGuide", "BadgeDeviceTestGuide",
+                "OutlineSceneTestGuide", "OutlinePlaymodeTestGuide", "OutlineDeviceTestGuide",
+            })
+            {
+                var field = t.GetField(guideName, Static);
+                Assert.IsNotNull(field, guideName + " must exist");
+                var guide = (string)field.GetValue(null);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(guide), guideName + " must exist and not be empty");
+                foreach (string term in forbidden)
+                    StringAssert.DoesNotContain(term, guide, guideName + " must not hardcode the real wall-specific id/category/key '" + term + "'");
+            }
+        }
+
+        // Labels, Text & Fonts domain (_2.0_Labels_And_Fonts_Design.md, 2026-09-22): same
+        // guide-contract shape as the test above, kept separate since it is a distinct domain.
+        [Test]
+        public void LabelsAndFontsTestGuides_ExistAndDoNotHardcodeAWallsRealPoiIdsOrCategories()
+        {
+            var t = typeof(POIEditorToolWindow);
+            var forbidden = new[]
+            {
+                "lamp_military", "lamp_economic", "lamp_religious", "lamp_infrastructure", "lamp_residential",
+                "painting_religious", "camera_religious", "painting_military", "camera_military",
+                "painting_economic", "camera_economic",
+                "dev_marker_custom_symbol", "dev_marker_nolevel", "dev_marker_nobadge", "dev_marker_nostatus",
+                "'lamp'", "'religious'", "'military'", "partial_damage",
+            };
+
+            foreach (string guideName in new[]
+            {
+                "LabelsAndFontsSceneTestGuide", "LabelsAndFontsPlaymodeTestGuide", "LabelsAndFontsDeviceTestGuide",
+            })
+            {
+                var field = t.GetField(guideName, Static);
+                Assert.IsNotNull(field, guideName + " must exist");
+                var guide = (string)field.GetValue(null);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(guide), guideName + " must exist and not be empty");
+                foreach (string term in forbidden)
+                    StringAssert.DoesNotContain(term, guide, guideName + " must not hardcode the real wall-specific id/category/key '" + term + "'");
+            }
+        }
     }
 }

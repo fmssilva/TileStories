@@ -31,6 +31,20 @@ namespace TileStories.Tests
 #endif
         }
 
+        public const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+
+        public static GameObject LoadMarkerPrefab()
+        {
+#if UNITY_EDITOR
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(MarkerPrefabPath);
+            Assert.IsNotNull(prefab, "POI_Marker.prefab missing at " + MarkerPrefabPath);
+            return prefab;
+#else
+            Assert.Fail("ClusterGalleryTests requires the Unity Editor (AssetDatabase).");
+            return null;
+#endif
+        }
+
         public static SpriteKeyLibrary LoadIconLibrary()
         {
 #if UNITY_EDITOR
@@ -46,11 +60,6 @@ namespace TileStories.Tests
 
     public class ClusterGalleryTests
     {
-        // Contract values mirrored from MarkerClusterView (MinSizePx/SizePerMember/MaxSizePx).
-        private const float MinSizePx = 48f;
-        private const float SizePerMember = 9f;
-        private const float MaxSizePx = 112f;
-
         private readonly List<GameObject> _tracked = new();
 
         [SetUp]
@@ -75,22 +84,25 @@ namespace TileStories.Tests
             return (T)f.GetValue(target);
         }
 
-        // Lightweight member fabrication: a MarkerView + POIAnchor carries the category
-        // that MarkerClusterView.BuildCategoryCounts reads via GetComponentInParent.
-        // Mirrors ClusterGalleryHarness.FabricateMembers but self-contained (no scene GO).
+        // Member fabrication with REAL markers: the real POI_Marker prefab, initialised like any POI,
+        // so the cluster reads a real symbol size and the category BuildCategoryCounts looks up.
+        // Same recipe as ClusterGalleryHarness.FabricateMembers.
         private List<MarkerView> FabricateMembers(ClusterGalleryEntry entry, Transform parent)
         {
+            var markerPrefab = ClusterGalleryTestFixture.LoadMarkerPrefab();
             var members = new List<MarkerView>();
             int idx = 0;
             foreach (var cc in entry.CategoryPlan)
             {
                 for (int c = 0; c < cc.Count; c++, idx++)
                 {
-                    var mgo = new GameObject("member_" + idx, typeof(MarkerView), typeof(CanvasGroup));
-                    mgo.transform.SetParent(parent, false);
-                    var anchor = mgo.AddComponent<POIAnchor>();
-                    anchor.Initialise(new POIData { id = entry.Label + "_m" + idx, category = cc.Category });
-                    members.Add(mgo.GetComponent<MarkerView>());
+                    var mgo = Object.Instantiate(markerPrefab, parent);
+                    mgo.name = "member_" + idx;
+                    var anchor = mgo.GetComponent<POIAnchor>() ?? mgo.AddComponent<POIAnchor>();
+                    anchor.Initialise(new POIData { id = entry.Label + "_m" + idx, name = cc.Category, category = cc.Category });
+                    var view = mgo.GetComponentInChildren<MarkerView>();
+                    view.Initialise(anchor, MarkerVisualSettings.Default(), MarkerEffectFlags.None);
+                    members.Add(view);
                 }
             }
             return members;
@@ -130,7 +142,10 @@ namespace TileStories.Tests
                 yield return null; // let layout/scale settle
 
                 int n = entry.MemberCount;
-                float expectedSize = Mathf.Clamp(MinSizePx + n * SizePerMember, MinSizePx, MaxSizePx);
+                float largestMember = 0f;
+                foreach (var m in members) largestMember = Mathf.Max(largestMember, m.SymbolDiameterMetres);
+                Assert.Greater(largestMember, 0f, entry.Label + ": precondition, members have a real symbol size");
+                float expectedSize = MarkerClusterView.ComputeDiameterMetres(largestMember, settings.cluster_size_ratio, n);
 
                 // 6.5: "+N" count label matches member count.
                 // Read via reflection (test asmdef does not reference TMPro) -- same
@@ -141,14 +156,18 @@ namespace TileStories.Tests
                 Assert.AreEqual("+" + n, countTextProp.GetValue(countLabel),
                     entry.Label + ": count label should be +N");
 
-                // 6.5: tap target >= 44px; 6.2: rect spans 48..112px scaled by member count.
+                // 6.2: a WORLD-space size (metres), from the largest member x cluster_size_ratio,
+                // never smaller than that member and never the old 48..112 "px" (= metres) giant.
                 var pieRt = GetPrivate<RectTransform>(mcv, "pieContainer");
-                Assert.IsTrue(pieRt.sizeDelta.x >= MinSizePx,
-                    entry.Label + ": cluster rect must be >= MinSizePx (" + MinSizePx + "px)");
-                Assert.IsTrue(pieRt.sizeDelta.x <= MaxSizePx,
-                    entry.Label + ": cluster rect must be <= MaxSizePx (" + MaxSizePx + "px)");
-                Assert.AreEqual(expectedSize, pieRt.sizeDelta.x, 0.5f,
-                    entry.Label + ": cluster rect size matches member-count scaling");
+                Assert.AreEqual(expectedSize, pieRt.sizeDelta.x, 1e-4f,
+                    entry.Label + ": cluster size follows the largest member's symbol");
+                Assert.GreaterOrEqual(pieRt.sizeDelta.x, largestMember,
+                    entry.Label + ": a cluster is never smaller than its largest member");
+                Assert.Less(pieRt.sizeDelta.x, 2f,
+                    entry.Label + ": a cluster is a marker-sized disc, not tens of metres wide");
+                foreach (RectTransform slice in pieRt)
+                    Assert.AreEqual(pieRt.rect.width, slice.rect.width, 1e-4f,
+                        entry.Label + ": every pie slice fills the pie container exactly");
 
                 // 6.3: DominantIcon active iff dominant_category mode; hidden otherwise.
                 Assert.AreEqual(entry.IconMode == "dominant_category",

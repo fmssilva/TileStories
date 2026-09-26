@@ -33,10 +33,13 @@ namespace TileStories.Editor
 
         // Point the palettes at the window's config and resolve the wall-level marker look ONCE per
         // refresh -- the same MarkerVisualSettings.Resolve the running wall uses (_2.2.1 section 5).
+        // Passes _wallFontLibrary too (2026-09-24 fix): without it, a wall's own font override
+        // rendered correctly in Play Mode (WallSession resolves it) but never in the Scene-view
+        // rig, since Resolve silently treats a missing font library as "use the framework default".
         private MarkerVisualSettings PrepareRigVisuals()
         {
             MarkerVisualSettings.ApplyPalettes(_config);
-            return MarkerVisualSettings.Resolve(_config, _wallIconLibrary);
+            return MarkerVisualSettings.Resolve(_config, _wallIconLibrary, _wallFontLibrary);
         }
 
         // Configures a single rig child with all visual settings (MarkerView, POIAnchor, etc.).
@@ -99,11 +102,10 @@ namespace TileStories.Editor
             }
 
             bool inSync = IsRigInSyncWithConfig(out int outOfSyncCount);
-            bool proceed = inSync || EditorUtility.DisplayDialog(
+            bool proceed = inSync || EditorDecision.Ask(
                 "Uncaptured or unsynced positions",
                 $"{outOfSyncCount} marker(s) in the rig don't match config.json (never captured, or moved since the last capture). Clearing now will lose that placement work. Clear anyway?",
-                "Clear anyway",
-                "Cancel");
+                "Clear anyway") == DecisionAnswer.Confirm;
 
             if (!proceed)
                 return;
@@ -141,94 +143,44 @@ namespace TileStories.Editor
             return rig != null ? rig.childCount : 0;
         }
 
-internal enum ReloadGuardChoice
-        {
-            ProceedWithSaveOrCapture = 0,
-            DiscardAndReload = 1,
-            Cancel = 2,
-        }
-
-        // Both guard dialogs use the slot layout [0 = Save/Capture & Reload] [1 = Cancel]
-        // [2 = Discard & Reload]. Unity returns 1 when the dialog is closed or Esc is pressed,
-        // so the destructive Discard must never sit in slot 1.
-        //
-        // Pure decision helper for Guard 1 (uncaptured rig positions).
-        // Returns null when no dialog is needed; otherwise the action the
-        // caller must take for the given dialog result.
-        internal static ReloadGuardChoice? ResolveUncapturedRigChoice(
-            bool hasConfig, bool hasRigChildren, bool rigInSync, int dialogResult)
-        {
-            if (!hasConfig || !hasRigChildren || rigInSync)
-                return null; // No dialog needed.
-            return MapReloadGuardResult(dialogResult);
-        }
-
-        // Pure decision helper for Guard 2 (unsaved in-memory config edits).
-        internal static ReloadGuardChoice? ResolveUnsavedConfigChoice(
-            bool hasConfig, bool hasUnsavedChanges, int dialogResult)
-        {
-            if (!hasConfig || !hasUnsavedChanges)
-                return null; // No dialog needed.
-            return MapReloadGuardResult(dialogResult);
-        }
-
-        // One mapping for both guards: 0 = save/capture, 2 = discard, anything else
-        // (1 = Cancel button, Esc, X) = cancel and lose nothing.
-        private static ReloadGuardChoice MapReloadGuardResult(int dialogResult)
-        {
-            if (dialogResult == 0) return ReloadGuardChoice.ProceedWithSaveOrCapture;
-            if (dialogResult == 2) return ReloadGuardChoice.DiscardAndReload;
-            return ReloadGuardChoice.Cancel;
-        }
-
+        // "Load & Populate Rig": reload config.json and rebuild the rig from it. The reload replaces
+        // the in-memory config AND every rig marker, so when that would lose work (markers moved
+        // since the last save, unsaved config edits) ONE question lists what, and every button does
+        // exactly what it says: Save & Reload keeps the work (saved first), Discard & Reload drops
+        // it, Cancel changes nothing. Nothing to lose = no question.
         private void LoadAndPopulateRig()
         {
-            // Guard 1: rig markers were moved in the scene but never captured
-            // to config. PopulateRig would destroy those Transforms, so offer
-            // to capture them into the in-memory config first (CapturePositions
-            // flips _hasUnsavedChanges, so Guard 2 below then offers to save).
-            Transform existingRig = GetExistingRig();
-            int outOfSyncCount = 0;
-            bool rigNeedsDialog = _config != null
-                && existingRig != null && existingRig.childCount > 0
-                && !IsRigInSyncWithConfig(out outOfSyncCount)
-                && outOfSyncCount > 0;
-            if (rigNeedsDialog)
+            int movedCount = 0;
+            if (_config != null)
+                IsRigInSyncWithConfig(out movedCount);
+            bool hasUnsavedEdits = _config != null && _hasUnsavedChanges;
+
+            if (movedCount > 0 || hasUnsavedEdits)
             {
-                int choice = EditorUtility.DisplayDialogComplex(
-                    "Uncaptured rig positions",
-                    $"{outOfSyncCount} marker(s) in the rig were moved but never captured. Repopulating will destroy those moved Transforms.",
-                    "Capture & Reload",
-                    "Cancel",
-                    "Discard & Reload");
-
-                var rigChoice = ResolveUncapturedRigChoice(true, true, false, choice);
-                if (rigChoice == ReloadGuardChoice.ProceedWithSaveOrCapture)
-                    CapturePositions();
-                else if (rigChoice != ReloadGuardChoice.DiscardAndReload)
-                    return; // Cancel (or closed via X) -> stay, lose nothing.
-            }
-
-            // Guard 2: unsaved in-memory config edits would be overwritten by
-            // the reload inside PopulateRig. Ask first, same blocking pattern
-            // as ClearRig's unsynced-positions check.
-            if (_config != null && _hasUnsavedChanges)
-            {
-                int choice = EditorUtility.DisplayDialogComplex(
-                    "Unsaved config changes",
-                    "You have unsaved config edits. Reloading from config.json will discard them.",
-                    "Save & Reload",
-                    "Cancel",
-                    "Discard & Reload");
-
-                var configChoice = ResolveUnsavedConfigChoice(true, true, choice);
-                if (configChoice == ReloadGuardChoice.ProceedWithSaveOrCapture)
-                    SaveAllToJson(); // CapturePositions + SaveConfig
-                else if (configChoice != ReloadGuardChoice.DiscardAndReload)
-                    return; // Cancel (or closed via X) -> stay, lose nothing.
+                var answer = EditorDecision.Ask(BuildReloadQuestion(movedCount, hasUnsavedEdits));
+                if (answer == DecisionAnswer.Confirm)
+                    SaveAllToJson(); // CapturePositions + SaveConfig: the reload then reads the work back
+                else if (answer != DecisionAnswer.Alternative)
+                    return; // Cancel (or Esc / X) -> stay, lose nothing.
             }
 
             PopulateRig();
+        }
+
+        // Pure: the Load & Populate question, listing exactly what a reload would drop
+        internal static DecisionRequest BuildReloadQuestion(int movedCount, bool hasUnsavedEdits)
+        {
+            var lines = new List<string> { "Reloading replaces the config and every rig marker with what config.json holds. It would drop:" };
+            if (movedCount > 0) lines.Add($"- {movedCount} rig marker(s) moved since the last save");
+            if (hasUnsavedEdits) lines.Add("- unsaved config edits");
+            lines.Add("Save & Reload saves them first, so the reload keeps them. Discard & Reload drops them.");
+            return new DecisionRequest
+            {
+                Title = "Reload config.json?",
+                Message = string.Join("\n", lines),
+                ConfirmLabel = "Save & Reload",
+                AlternativeLabel = "Discard & Reload",
+            };
         }
 
         private void PopulateRig()
@@ -261,27 +213,11 @@ internal enum ReloadGuardChoice
                 return;
             }
 
-            if (rig.childCount > 0)
-            {
-                bool clear = EditorUtility.DisplayDialog(
-                    "POI Editor Rig",
-                    $"POIEditorRig already has {rig.childCount} object(s). Clear existing rig first?",
-                    "Clear and repopulate",
-                    "Cancel");
-
-                if (!clear)
-                {
-                    Debug.Log("[POIEditor] Populate cancelled by user.");
-                    return;
-                }
-
-                var children = new List<GameObject>();
-                for (int i = 0; i < rig.childCount; i++)
-                    children.Add(rig.GetChild(i).gameObject);
-
-                foreach (var child in children)
-                    Undo.DestroyObjectImmediate(child);
-            }
+            // Rebuilding the rig IS what Load & Populate means, and LoadAndPopulateRig already asked
+            // about anything that would be lost, so the old markers go without a further question
+            // (undoable with Edit > Undo, like Clear Rig).
+            for (int i = rig.childCount - 1; i >= 0; i--)
+                Undo.DestroyObjectImmediate(rig.GetChild(i).gameObject);
 
             var settings = PrepareRigVisuals();
 

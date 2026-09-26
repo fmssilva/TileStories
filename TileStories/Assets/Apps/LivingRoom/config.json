@@ -10,9 +10,57 @@
     "badge_corner": "top_right",
     "badge_size_ratio": 0.36000001430511477,
     "ring_size_ratio": 1.1799999475479127,
+    "icon_color_hex": "#F2ECD3",
+    "icon_size_ratio": 0.5600000023841858,
+    "label_gap_ratio": 0.2720000147819519,
+    "label_font_size_ratio": 0.3109999895095825,
+    "label_font_key": "oswald_bold",
+    "label_font_library_resources_path": "",
     "outline_preview": {
-        "enabled": true,
+        "enabled": false,
         "base_poi_id": ""
+    },
+    "demo_field": {
+        "enabled": false,
+        "show_labels": true,
+        "seed": 1,
+        "distance_m": 1.5,
+        "width_m": 6.0,
+        "height_m": 2.5,
+        "depth_m": 8.0,
+        "dense_clump_count": 8,
+        "dense_clump_radius_m": 0.07999999821186066,
+        "level_counts": [
+            {
+                "level_key": "level_1",
+                "count": 4
+            },
+            {
+                "level_key": "level_2",
+                "count": 4
+            },
+            {
+                "level_key": "level_3",
+                "count": 4
+            },
+            {
+                "level_key": "level_4",
+                "count": 4
+            },
+            {
+                "level_key": "level_5",
+                "count": 4
+            }
+        ]
+    },
+    "displacement_demo": {
+        "enabled": false,
+        "markers_per_group": 4,
+        "spread_cm": 4.0,
+        "distance_m": 3.0,
+        "show_labels": true,
+        "reference_copies": "side_by_side",
+        "run_lod": false
     },
     "contour_spin_deg_per_s": 60.0,
     "marker_icon_library_resources_path": "MarkerSymbols/living_room_IconLibrary",
@@ -135,12 +183,16 @@
     "hierarchy_levels": [
         {
             "key": "level_1",
-            "label": "Hub",
+            "level_name": "Hub",
             "priority": 1,
             "details": "",
             "search_keywords": [],
             "size_cm": 30.0,
             "show_label": true,
+            "override_label_style": false,
+            "label_gap_ratio": 0.0,
+            "label_font_size_ratio": 0.0,
+            "label_font_key": "",
             "ripple_effect": "ripple_discs",
             "halo_effect": "halo_ring",
             "pulse": true,
@@ -151,12 +203,16 @@
         },
         {
             "key": "level_2",
-            "label": "2",
+            "level_name": "2",
             "priority": 2,
             "details": "",
             "search_keywords": [],
             "size_cm": 20.0,
             "show_label": false,
+            "override_label_style": false,
+            "label_gap_ratio": 0.0,
+            "label_font_size_ratio": 0.0,
+            "label_font_key": "",
             "ripple_effect": "ripple_discs",
             "halo_effect": "halo_ring",
             "pulse": true,
@@ -167,12 +223,16 @@
         },
         {
             "key": "level_3",
-            "label": "3",
+            "level_name": "3",
             "priority": 3,
             "details": "",
             "search_keywords": [],
             "size_cm": 15.0,
             "show_label": false,
+            "override_label_style": false,
+            "label_gap_ratio": 0.0,
+            "label_font_size_ratio": 0.0,
+            "label_font_key": "",
             "ripple_effect": "ripple_rings",
             "halo_effect": "halo_disc",
             "pulse": true,
@@ -183,12 +243,16 @@
         },
         {
             "key": "level_4",
-            "label": "4",
+            "level_name": "4",
             "priority": 4,
             "details": "",
             "search_keywords": [],
             "size_cm": 10.0,
             "show_label": false,
+            "override_label_style": false,
+            "label_gap_ratio": 0.0,
+            "label_font_size_ratio": 0.0,
+            "label_font_key": "",
             "ripple_effect": "none",
             "halo_effect": "halo_disc",
             "pulse": true,
@@ -199,12 +263,16 @@
         },
         {
             "key": "level_5",
-            "label": "5",
+            "level_name": "5",
             "priority": 5,
             "details": "",
             "search_keywords": [],
             "size_cm": 7.0,
             "show_label": false,
+            "override_label_style": false,
+            "label_gap_ratio": 0.0,
+            "label_font_size_ratio": 0.0,
+            "label_font_key": "",
             "ripple_effect": "none",
             "halo_effect": "beacon",
             "pulse": true,
@@ -866,18 +934,6 @@
             "custom_symbol_key": "IconInfrastructures"
         }
     ],
-    "wall_bounds": {
-        "min": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-        },
-        "max": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-        }
-    },
     "effect_defaults": {
         "effects_enabled": true,
         "pulse": {
@@ -940,7 +996,23 @@
     },
     "lod_settings": {
         "enabled": true,
-        "bands": [],
+        "bands": [
+            {
+                "max_distance_m": 2.0,
+                "max_visible_count": -1,
+                "details": ""
+            },
+            {
+                "max_distance_m": 7.0,
+                "max_visible_count": 15,
+                "details": ""
+            },
+            {
+                "max_distance_m": 9999.0,
+                "max_visible_count": 5,
+                "details": ""
+            }
+        ],
         "hysteresis_margin_m": 0.5,
         "transition_fade_duration_s": 0.30000001192092898,
         "evaluation_interval_s": 0.20000000298023225,
@@ -948,6 +1020,8 @@
         "density_radius_px": 40.0,
         "shrink_start_neighbor_count": 2,
         "cluster_min_count": 5,
+        "shrink_min_factor": 0.4000000059604645,
+        "cluster_size_ratio": 1.2000000476837159,
         "density_safety_escalation_enabled": true,
         "density_safety_escalation_multiplier": 2.0,
         "cluster_icon_mode": "pie_and_count",
@@ -955,23 +1029,24 @@
         "cluster_band_hysteresis_enabled": true,
         "cluster_dissolve_grace_cycles": 3,
         "frustum_culling_enabled": true,
-        "fov_culling_margin_deg": 10.0,
-        "zoom_enabled": true,
-        "zoom_min": 1.0,
-        "zoom_max": 4.0,
-        "zoom_tap_step": 1.5,
-        "zoom_tap_levels": 2,
-        "zoom_transition_speed_s": 0.25,
-        "zoom_show_ui_buttons": true,
-        "zoom_double_tap_window_s": 0.30000001192092898,
-        "zoom_double_tap_move_tolerance_px": 50.0
+        "fov_culling_margin_deg": 10.0
+    },
+    "zoom_settings": {
+        "enabled": true,
+        "min_factor": 1.0,
+        "max_factor": 4.0,
+        "tap_step": 1.5,
+        "tap_levels": 2,
+        "transition_duration_s": 0.25,
+        "show_ui_buttons": true,
+        "double_tap_window_s": 0.30000001192092898,
+        "double_tap_move_tolerance_px": 50.0
     },
     "displacement_settings": {
         "enabled": true,
         "overlap_threshold_px": 40.0,
         "displace_target": "label_only",
         "displacement_algorithm": "force_directed",
-        "force_directed_iterations": 4,
         "max_displacement_px": 120.0,
         "leader_lines_enabled": true,
         "leader_line_style": "straight",
@@ -989,34 +1064,82 @@
         "custom_up_x": 0.0,
         "custom_up_y": 1.0,
         "custom_up_z": 0.0,
-        "facing_mode": "yaw_only",
+        "facing_mode": "always_facing_camera",
         "facing_basis": "view_plane",
         "update_mode": "every_frame",
         "update_interval_s": 0.05000000074505806,
         "camera_delta_deg": 0.5,
         "edit_mode_preview_enabled": true
     },
+    "select_filter_search": {
+        "enabled": true,
+        "selection": {
+            "highlight_enabled": true,
+            "dim_alpha": 0.30000001192092898,
+            "zoom": {
+                "enabled": true,
+                "trigger": "marker",
+                "neighbour_radius_px": 60.0,
+                "min_neighbours": 2,
+                "factor": 2.0
+            }
+        },
+        "search": {
+            "mode": "dynamic",
+            "match_mode": "all",
+            "prefix_matching": "all_fields",
+            "typo_tolerance": 1,
+            "no_results_message": "No matches for \"{query}\" - try removing a filter."
+        },
+        "filter": {
+            "category_facet": true,
+            "badge_facet": true,
+            "status_facet": true,
+            "hierarchy_facet": true,
+            "mismatch": "hide",
+            "dim_alpha": 0.30000001192092898,
+            "relax_suggestion": true
+        },
+        "results": {
+            "default_view": "list",
+            "remember_last_view": false,
+            "recent_count": 5,
+            "suggestions_enabled": true,
+            "suggestion_source": "category_distribution"
+        },
+        "minimap": {
+            "enabled": true,
+            "visibility": "toggle",
+            "icon_style": "category_colored_dots",
+            "dot_size_px": 20.0,
+            "tap_target_px": 44.0,
+            "projection": "auto",
+            "bounds_mode": "auto",
+            "bounds_min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "bounds_max": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        "voice": {
+            "enabled": false,
+            "indicator_style": "mic_text"
+        }
+    },
     "search_fields": [],
-    "selection_highlight_enabled": true,
-    "zoom_on_select_density_threshold": 2,
-    "zoom_on_select_factor": 2.0,
-    "zoom_on_select_enabled": true,
-    "zoom_on_select_trigger": 1,
-    "search_mode": "dynamic",
-    "no_results_message": "No matches for \"{query}\" - try removing a filter.",
-    "recent_search_count": 5,
-    "show_suggested_categories": true,
-    "suggested_source": "category_distribution",
-    "search_filter_select_enabled": true,
     "synonym_groups": [],
-    "filter_mismatch_behaviour": "hide",
-    "minimap_enabled": true,
-    "minimap_visibility": "toggle",
-    "minimap_icon_style": "category_colored_dots",
-    "minimap_dot_size_px": 20.0,
-    "minimap_dot_tap_target_px": 44.0,
-    "default_result_view": "list",
-    "voice_search_enabled": false,
-    "voice_search_match_mode": "all",
-    "voice_activity_indicator_style": "mic_text"
+    "search_demo": {
+        "enabled": false,
+        "markers_per_category": 3,
+        "test_cases": true,
+        "show_labels": true,
+        "distance_m": 3.5,
+        "spacing_cm": 40.0,
+        "run_lod": false
+    }
 }

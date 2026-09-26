@@ -60,7 +60,7 @@ namespace TileStories.Tests
             if (reveal != null)
             {
                 reveal.StopAllCoroutines();
-                reveal.SetFullAlphaAndScale();
+                reveal.SkipToEnd();
             }
 
             return view;
@@ -192,7 +192,6 @@ namespace TileStories.Tests
         public IEnumerator ForceDirected_ActiveAndSeparatesLabels()
         {
             _settings.displacement_algorithm = "force_directed";
-            _settings.force_directed_iterations = 15;
             Vector2 s = new Vector2(400, 400);
             var m0 = SpawnMarker(s, "m0"); yield return null;
             var m1 = SpawnMarker(s, "m1"); yield return null;

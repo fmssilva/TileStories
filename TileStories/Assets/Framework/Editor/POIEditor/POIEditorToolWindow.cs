@@ -27,10 +27,10 @@ namespace TileStories.Editor
         private const string DefaultStreamingConfigPath = "Assets/StreamingAssets/LivingRoom/config.json";
         private const string DefaultPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
         private const string DefaultIconLibraryPath = "Assets/Framework/Runtime/UI/Markers/IconLibrary.asset";
+        private const string DefaultFontLibraryPath = "Assets/Framework/Runtime/UI/Markers/FontLibrary.asset";
         private const float SyncPositionTolerance = 0.001f;
 
         // EditorPrefs key for the "Don't show again" toggle on un-verifying confirmed positions.
-        internal const string SkipUnverifyPromptPrefKey = "TileStories.SkipUnverifyConfirmation";
         internal const string VerifiedPositionLockedMessage = "Those positions are already verified. If you want to change them, click the Verified button to enable editing.";
 
         private readonly Dictionary<string, Vector3> _lastVerifiedPositions = new();
@@ -106,6 +106,7 @@ namespace TileStories.Editor
         // Never reveals -- only a real Scene-view gesture may move the window's scroll.
         private void OnInspectorUpdate()
         {
+            RepaintLiveReadoutsWhilePlaying();
             if (_config == null || _config.pois == null)
                 return;
 
@@ -140,93 +141,105 @@ namespace TileStories.Editor
         // play-mode hook live in the dedicated safety-check class instead, keeping
         // this window class focused on editor logic.
 
-        // Shows the rig-safety dialog and returns true to proceed (Play or Build),
-        // false to abort. When isBuild is true the "Continue Without Clearing"
-        // option is hidden because a build is visitor-facing. There is deliberately
-        // NO opt-out: the prompt only appears while the rig still holds editor
-        // stand-in markers, and an opt-out let a build ship them.
-        internal static bool PromptBeforePlayOrBuild(bool isBuild)
+        // The gate before Play or a build while the POI Editor rig still holds its stand-in markers.
+        // True = go on, false = stop. Uses the open POI Editor (the one holding a config) to save.
+        // There is deliberately NO opt-out: an opt-out once let a build ship the stand-ins.
+        internal static bool PromptBeforePlayOrBuild(bool isBuild) =>
+            PromptBeforePlayOrBuild(isBuild, FindOpenEditorWithConfig());
+
+        // Same, with the window that saves passed in (null = no POI Editor open: nothing can be saved)
+        internal static bool PromptBeforePlayOrBuild(bool isBuild, POIEditorToolWindow tool)
         {
-            int childCount = GetRigChildCountStatic();
-            if (childCount == 0)
+            int markerCount = GetRigChildCountStatic();
+            if (markerCount == 0)
                 return true; // Nothing to warn about.
 
-            return ShowRigSafetyDialog(childCount, isBuild);
-        }
+            bool canSave = tool != null && tool._config != null;
+            int movedCount = 0;
+            if (canSave)
+                tool.IsRigInSyncWithConfig(out movedCount);
+            bool hasUnsavedEdits = canSave && tool._hasUnsavedChanges;
 
-        // Pure dialog logic. Returns true to proceed, false to abort.
-        private static bool ShowRigSafetyDialog(int childCount, bool isBuild)
-        {
-            string button1 = isBuild ? "Save, Clear & Build" : "Save, Clear & Play";
-
-            string message = isBuild
-                ? $"POIEditorRig has {childCount} marker(s). These are Edit-Mode editor stand-ins and must not ship. Save positions to config.json and clear the rig before building."
-                : $"POIEditorRig has {childCount} marker(s) in the scene. If you have not captured positions to JSON, you will get duplicate markers at runtime. Save and clear now?";
-
-            // DisplayDialogComplex returns 0 = ok slot, 1 = cancel slot, 2 = alt slot, and
-            // closing the dialog or pressing Esc ALWAYS returns 1. So slot 1 is the real Cancel.
-            // Layout (play):  [Save, Clear & Play]  [Cancel]  [Continue Without Clearing]
-            // Layout (build): [Save, Clear & Build]  [Cancel]
-            int choice = EditorUtility.DisplayDialogComplex(
-                "POIEditorRig Safety Check",
-                message,
-                button1,
-                "Cancel",
-                isBuild ? "" : "Continue Without Clearing");
-
-            switch (ResolveRigSafetyChoice(isBuild, choice))
+            var answer = EditorDecision.Ask(BuildRigSafetyQuestion(markerCount, isBuild, canSave, movedCount, hasUnsavedEdits));
+            if (answer == DecisionAnswer.Confirm)
             {
-                case RigSafetyAction.SaveClearAndContinue:
-                    SaveAndClearRig();
-                    return true;
-                case RigSafetyAction.ContinueWithoutClearing:
-                    return true;
-                default:
-                    return false;
+                ClearRigBeforePlayOrBuild(canSave && (movedCount > 0 || hasUnsavedEdits) ? tool : null);
+                return true;
             }
+            return answer == DecisionAnswer.Alternative; // Play With Duplicates (never offered for a build)
         }
 
-        internal enum RigSafetyAction
+        // Pure: the gate's question from the real state, so every label says exactly what its button does.
+        //  - something to save and a POI Editor to save it: "Save, Clear & Play/Build"
+        //  - nothing to save, or no POI Editor open (then the message says moves are lost): "Clear & Play/Build"
+        //  - Play only: "Play With Duplicates" leaves the stand-ins in (each marker then shows twice)
+        internal static DecisionRequest BuildRigSafetyQuestion(int markerCount, bool isBuild, bool canSave,
+            int movedCount, bool hasUnsavedEdits)
         {
-            SaveClearAndContinue,
-            ContinueWithoutClearing,
-            Cancel,
-        }
+            string run = isBuild ? "Build" : "Play";
+            bool save = canSave && (movedCount > 0 || hasUnsavedEdits);
 
-        // Pure dialog-result mapping for the rig safety prompt (slot 1 = Cancel, see above).
-        // Anything unexpected cancels: the safe default when the dialog is dismissed.
-        internal static RigSafetyAction ResolveRigSafetyChoice(bool isBuild, int dialogResult)
-        {
-            if (dialogResult == 0)
-                return RigSafetyAction.SaveClearAndContinue;
-            if (dialogResult == 2 && !isBuild)
-                return RigSafetyAction.ContinueWithoutClearing;
-            return RigSafetyAction.Cancel;
-        }
-
-        // Finds the open POIEditorToolWindow instance (if any) and calls
-        // its SaveAllToJson + ClearRig. If the window is not open we still
-        // clear the rig to prevent duplicates, but warn that config was not saved.
-        private static void SaveAndClearRig()
-        {
-            var windows = Resources.FindObjectsOfTypeAll<POIEditorToolWindow>();
-            if (windows.Length > 0)
+            var lines = new List<string>
             {
-                var tool = windows[0];
-                tool.SaveAllToJson();  // CapturePositions + SaveConfig
-                tool.ClearRig();
+                isBuild
+                    ? $"The scene still holds {markerCount} POI Editor stand-in marker(s). They exist only for editing and must not ship in a build."
+                    : $"The scene still holds {markerCount} POI Editor stand-in marker(s). Play spawns its own markers from the config, so each of these would show twice."
+            };
+            if (save)
+            {
+                if (movedCount > 0) lines.Add($"- {movedCount} of them were moved since the last save.");
+                if (hasUnsavedEdits) lines.Add("- The config has unsaved edits.");
+                lines.Add($"Save, Clear & {run} saves everything to config.json AND its StreamingAssets copy (the copy {run} reads), then removes the stand-ins.");
+            }
+            else if (canSave)
+            {
+                lines.Add($"Everything is already saved. Clear & {run} removes the stand-ins.");
             }
             else
             {
-                // Window is closed -- just clear the rig to prevent duplicates.
-                var rig = GameObject.Find("POIEditorRig");
-                if (rig != null)
-                {
-                    for (int i = rig.transform.childCount - 1; i >= 0; i--)
-                        Undo.DestroyObjectImmediate(rig.transform.GetChild(i).gameObject);
-                }
-                Debug.LogWarning("[POIEditorRigSafety] Tool window was not open. Rig was cleared but config.json was NOT saved. Open the POI Editor and click 'Save All to JSON' to persist your work.");
+                lines.Add($"The POI Editor window is closed, so nothing can be saved from here: Clear & {run} removes the stand-ins, and a marker moved since the last save loses its new place. To keep it, press Cancel, open the POI Editor and press Save All to JSON.");
             }
+            if (!isBuild)
+                lines.Add("Play With Duplicates leaves the stand-ins in the scene, e.g. to compare them with the real markers.");
+
+            return new DecisionRequest
+            {
+                Title = "POI Editor stand-in markers in the scene",
+                Message = string.Join("\n\n", lines),
+                ConfirmLabel = (save ? "Save, Clear & " : "Clear & ") + run,
+                AlternativeLabel = isBuild ? null : "Play With Duplicates",
+            };
+        }
+
+        // What the confirm button does: save + copy to StreamingAssets (only when there is something
+        // to save and a window to save it), then remove every stand-in. The developer already
+        // answered, so the rig is cleared directly -- Clear Rig's own question is not asked again.
+        private static void ClearRigBeforePlayOrBuild(POIEditorToolWindow saveWith)
+        {
+            if (saveWith != null)
+            {
+                saveWith.SaveAllToJson();          // CapturePositions + SaveConfig
+                saveWith.CopyToStreamingAssets();  // Play and builds read this copy
+            }
+
+            var rig = GameObject.Find("POIEditorRig");
+            if (rig != null)
+            {
+                for (int i = rig.transform.childCount - 1; i >= 0; i--)
+                    Undo.DestroyObjectImmediate(rig.transform.GetChild(i).gameObject);
+            }
+            Debug.Log(saveWith != null
+                ? "[POIEditorRigSafety] Saved, copied to StreamingAssets and cleared the rig."
+                : "[POIEditorRigSafety] Cleared the rig (nothing saved).");
+        }
+
+        // The POI Editor window that holds a config, if one is open (it is the one that can save)
+        private static POIEditorToolWindow FindOpenEditorWithConfig()
+        {
+            foreach (var window in Resources.FindObjectsOfTypeAll<POIEditorToolWindow>())
+                if (window != null && window._config != null)
+                    return window;
+            return null;
         }
 
         // Safe static accessor -- does NOT require a window instance.
@@ -255,6 +268,9 @@ namespace TileStories.Editor
         // Default collapsed: matches the Specific Marker tab's default-collapsed POI
         // sections, so a wall with many sections opens as a scannable list of closed
         // foldouts instead of dumping every Global Scene section open at once.
+        // Labels, Text & Fonts (_2.0_Labels_And_Fonts_Design.md, 2026-09-22): wall-default label
+        // typography, placed first since it will also host future UI Toolkit text/font config.
+        [SerializeField] private bool _showGlobalLabelsAndFonts = false;
         [SerializeField] private bool _showGlobalMarker = false;
         // Block 6 (_2.1_Marker_Orientation.md): Orientation editor foldout, between Marker and Badge.
         [SerializeField] private bool _showGlobalOrientation = false;
@@ -267,7 +283,7 @@ namespace TileStories.Editor
         [SerializeField] private bool _showGlobalZoom = false;
         // Block 8 (_2.5 section 11): Displacement editor foldout.
         [SerializeField] private bool _showGlobalDisplacement = false;
-        // Block 5 (_2.6 section 3): Search & Filter editor foldout.
+        // Global Scene > Select, Filter & Search (_2.6)
         [SerializeField] private bool _showGlobalSearchFilter = false;
 
         // Default collapsed: a POI's inner sections open one at a time, on request,
@@ -280,6 +296,7 @@ namespace TileStories.Editor
 
         [SerializeField] private SpriteKeyLibrary _defaultIconLibrary;
         [SerializeField] private SpriteKeyLibrary _wallIconLibrary;
+        [SerializeField] private FontKeyLibrary _wallFontLibrary;
         [SerializeField] private bool _hasUnsavedChanges;
 
         private readonly Dictionary<string, bool> _poiFoldouts = new();
