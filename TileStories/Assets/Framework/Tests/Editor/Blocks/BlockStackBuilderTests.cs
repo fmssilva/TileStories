@@ -18,7 +18,7 @@ namespace TileStories.Editor.Tests
             public void Unbind() { }
         }
 
-        private static BlockKindDefinition Kind(string key, string family = "about", bool requiredBody = false) => new()
+        private static BlockKindDefinition Kind(string key, string family = "about", bool requiredBody = false, BlockFieldDefinition[] fields = null) => new()
         {
             Key = key,
             Family = family,
@@ -26,7 +26,7 @@ namespace TileStories.Editor.Tests
             Variants = new[] { "plain", "fancy" },
             DefaultVariant = "plain",
             DisplayModes = new[] { CardOptions.DisplayInline },
-            Fields = new[]
+            Fields = fields ?? new[]
             {
                 new BlockFieldDefinition { Key = "title", Type = BlockFieldType.LocalizedText, Required = key == BuiltInBlocks.HeaderKind },
                 new BlockFieldDefinition { Key = "body", Type = BlockFieldType.LocalizedLongText, Required = requiredBody },
@@ -156,13 +156,15 @@ namespace TileStories.Editor.Tests
 
             var noDefault = Kind("a"); noDefault.DefaultVariant = "gone";
             StringAssert.Contains("default variant", BlockRegistry.Validate(noDefault));
-            var dupField = Kind("b"); dupField.Fields = new[] { new BlockFieldDefinition { Key = "x" }, new BlockFieldDefinition { Key = "x" } };
+            var dupField = Kind("b", fields: new[] { new BlockFieldDefinition { Key = "x" }, new BlockFieldDefinition { Key = "x" } });
             StringAssert.Contains("two fields", BlockRegistry.Validate(dupField));
-            var choice = Kind("c"); choice.Fields = new[] { new BlockFieldDefinition { Key = "x", Type = BlockFieldType.Choice } };
+            // - the common heading is every kind's: a kind declaring its own "heading" clashes with it (6C)
+            var ownHeading = Kind("h", fields: new[] { new BlockFieldDefinition { Key = BlockKindDefinition.HeadingField } });
+            StringAssert.Contains("two fields are keyed 'heading'", BlockRegistry.Validate(ownHeading));
+            var choice = Kind("c", fields: new[] { new BlockFieldDefinition { Key = "x", Type = BlockFieldType.Choice } });
             StringAssert.Contains("no options", BlockRegistry.Validate(choice));
-            var nested = Kind("d");
-            nested.Fields = new[] { new BlockFieldDefinition { Key = "rows", Type = BlockFieldType.Items, ItemFields = new[] {
-                new BlockFieldDefinition { Key = "inner", Type = BlockFieldType.Items, ItemFields = new[] { new BlockFieldDefinition { Key = "t" } } } } } };
+            var nested = Kind("d", fields: new[] { new BlockFieldDefinition { Key = "rows", Type = BlockFieldType.Items, ItemFields = new[] {
+                new BlockFieldDefinition { Key = "inner", Type = BlockFieldType.Items, ItemFields = new[] { new BlockFieldDefinition { Key = "t" } } } } } });
             StringAssert.Contains("cannot nest", BlockRegistry.Validate(nested));
             Assert.IsNull(BlockRegistry.Validate(Kind("e")));
 
@@ -176,7 +178,7 @@ namespace TileStories.Editor.Tests
         {
             var r = Registry();
             var status = Kind("status");
-            status.ShowsFor = p => p.has_status;
+            status.ShowsFor = (p, _, _) => p.has_status;
             status.NotShownForPoiNote = "this point has no status.";
             r.Register(status, () => new PlainView());
             var poi = Poi(Block("block_2", "status"));
@@ -194,9 +196,139 @@ namespace TileStories.Editor.Tests
         [Test]
         public void TheBuiltInStatusKind_ShowsOnlyForAPoiWithAStatus()
         {
-            Assert.IsFalse(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = false }));
-            Assert.IsTrue(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = true, status_unknown = true }), "unknown is still a status: the question mark");
+            Assert.IsFalse(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = false }, null, null));
+            Assert.IsTrue(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = true, status_unknown = true }, null, null), "unknown is still a status: the question mark");
             Assert.IsFalse(string.IsNullOrWhiteSpace(BuiltInBlocks.Status.NotShownForPoiNote));
+        }
+
+        // ---------------- compare_points: a kind that points at another POI ----------------
+
+        [Test]
+        public void ACompareBlock_ShowsOnlyWhenBothPointsHaveAStatus_AndTheOtherIsOnTheWall()
+        {
+            var here = new POIData { id = "north", name = "North Tower", has_status = true };
+            var other = new POIData { id = "gate", name = "South Gate", has_status = true };
+            var block = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.ComparePointsKind };
+            block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.ComparePointsOtherField, value = "gate" });
+            here.card.blocks.Add(block);
+            var wall = new List<POIData> { here, other };
+            BlockStackBuilder.Result Build(IReadOnlyList<POIData> pois) => BlockStackBuilder.Build(here, new CardSettings(), BlockRegistry.Shared, pois);
+
+            Assert.AreEqual(BuiltInBlocks.ComparePointsKind, Build(wall).Entries.Last().Definition.Key, "both have a status: shown");
+            Assert.AreSame(other, BuiltInBlocks.OtherPoi(block, wall));
+
+            other.has_status = false;
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NotForThisPoint, Build(wall).Skipped.Single().Reason, "the other point has no status: no half pair");
+            other.has_status = true;
+            here.has_status = false;
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NotForThisPoint, Build(wall).Skipped.Single().Reason, "this point has no status");
+            here.has_status = true;
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NotForThisPoint, Build(new List<POIData> { here }).Skipped.Single().Reason, "the other point was deleted");
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NotForThisPoint, Build(null).Skipped.Single().Reason, "no wall at hand: nothing resolves");
+
+            block.fields.Clear();
+            var none = Build(wall).Skipped.Single();
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NotForThisPoint, none.Reason, "nothing picked: no other point either (ShowsFor runs first)");
+            Assert.IsNull(BuiltInBlocks.OtherPoi(block, wall));
+        }
+
+        [Test]
+        public void CardTitleOf_IsTheFirstAuthoredHeaderTitle_InTheLanguage_ElseTheName()
+        {
+            var poi = new POIData { id = "p", name = "Lamp - Military" };
+            Assert.AreEqual("Lamp - Military", BlockStackBuilder.CardTitleOf(poi, "en", "en"), "no header: the name");
+            var header = Block("block_1", BuiltInBlocks.HeaderKind, title: "Castle Keep");
+            header.fields[0].text.Add(new LocalizedEntry { lang = "pt", value = "Torre de Menagem" });
+            poi.card.blocks.Add(header);
+            Assert.AreEqual("Torre de Menagem", BlockStackBuilder.CardTitleOf(poi, "pt", "en"));
+            Assert.AreEqual("Castle Keep", BlockStackBuilder.CardTitleOf(poi, "es", "en"), "a missing language falls back");
+            Assert.AreEqual("", BlockStackBuilder.CardTitleOf(null, "en", "en"));
+        }
+
+        // ---------------- item rows: required sub-fields ----------------
+
+        private static BlockKindDefinition StepsKind() => new()
+        {
+            Key = "steps",
+            Family = "about",
+            DisplayName = "Steps",
+            Variants = new[] { "plain" },
+            DefaultVariant = "plain",
+            DisplayModes = new[] { CardOptions.DisplayInline },
+            Fields = new[]
+            {
+                new BlockFieldDefinition
+                {
+                    Key = "rows", Type = BlockFieldType.Items, Required = true, ItemFields = new[]
+                    {
+                        new BlockFieldDefinition { Key = "title", Type = BlockFieldType.LocalizedText, Required = true },
+                        new BlockFieldDefinition { Key = "colour", Type = BlockFieldType.Color },
+                        new BlockFieldDefinition { Key = "note", Type = BlockFieldType.LocalizedText },
+                    },
+                },
+            },
+        };
+
+        private static BlockItemData Row(string title, string colour = null, string note = null)
+        {
+            var item = new BlockItemData();
+            if (title != null) item.fields.Add(new BlockItemFieldValue { key = "title", text = new List<LocalizedEntry> { new() { lang = "pt", value = title } } });
+            if (colour != null) item.fields.Add(new BlockItemFieldValue { key = "colour", value = colour });
+            if (note != null) item.fields.Add(new BlockItemFieldValue { key = "note", text = new List<LocalizedEntry> { new() { lang = "en", value = note } } });
+            return item;
+        }
+
+        private static BlockStackBuilder.Result BuildSteps(BlockKindDefinition kind, params BlockItemData[] rows)
+        {
+            var r = Registry();
+            r.Register(kind, () => new PlainView());
+            var block = new BlockInstanceData { key = "block_2", kind = kind.Key };
+            if (rows != null) block.fields.Add(new BlockFieldValue { key = "rows", items = new List<BlockItemData>(rows) });
+            return BlockStackBuilder.Build(Poi(block), new CardSettings(), r);
+        }
+
+        [Test]
+        public void ARequiredItemsField_WithNoRows_IsMissing_WithRowsButNoneComplete_HasNoCompleteRow_AndOneCompleteRowShowsIt()
+        {
+            var noField = BuildSteps(StepsKind(), null).Skipped.Single();
+            Assert.AreEqual(BlockStackBuilder.SkipReason.MissingRequired, noField.Reason, "no rows at all");
+            Assert.AreEqual(BlockStackBuilder.SkipReason.MissingRequired, BuildSteps(StepsKind()).Skipped.Single().Reason, "an empty list too");
+
+            var incomplete = BuildSteps(StepsKind(), Row(null, note: "only a note"), Row("  ")).Skipped.Single();
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NoCompleteRow, incomplete.Reason, "rows, but every one lacks its required title");
+            Assert.AreEqual("rows", incomplete.FieldKey);
+
+            var shown = BuildSteps(StepsKind(), Row(null), Row("Dig the clay"));
+            CollectionAssert.IsEmpty(shown.Skipped, "one complete row is enough: the view leaves out the other");
+            Assert.AreEqual("steps", shown.Entries.Last().Definition.Key);
+
+            Assert.IsFalse(BlockFieldReader.ItemIsComplete(Row(null, note: "x"), StepsKind().Field("rows").ItemFields), "the title is required");
+            Assert.IsTrue(BlockFieldReader.ItemIsComplete(Row("Fire it"), StepsKind().Field("rows").ItemFields), "an empty optional colour and note are fine");
+            Assert.IsTrue(BlockFieldReader.ItemIsComplete(new BlockItemData(), null), "a field with no sub-field definitions: every row counts");
+        }
+
+        [Test]
+        public void ARequiredColour_ThatIsNotAColour_MakesItsRowIncomplete()
+        {
+            var kind = StepsKind();
+            kind.Field("rows").ItemFields[1].Required = true;
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NoCompleteRow, BuildSteps(kind, Row("Cobalt", "#12"), Row("Tin", "white")).Skipped.Single().Reason,
+                "'#12' and 'white' are not colours: no complete row");
+            CollectionAssert.IsEmpty(BuildSteps(kind, Row("Cobalt", "#12"), Row("Tin", "#F2EEE3")).Skipped, "one real colour");
+        }
+
+        [Test]
+        public void TryParseColor_AcceptsOnlyTheHexFormsTheEditorWrites()
+        {
+            Assert.IsTrue(BlockFieldReader.TryParseColor("#1F3F8F", out var c));
+            Assert.AreEqual(0x1F / 255f, c.r, 1e-4f);
+            Assert.AreEqual(0x3F / 255f, c.g, 1e-4f);
+            Assert.AreEqual(0x8F / 255f, c.b, 1e-4f);
+            Assert.AreEqual(1f, c.a, "opaque");
+            Assert.IsTrue(BlockFieldReader.TryParseColor(" #abc ", out c), "short form, lower case, spaces around");
+            Assert.AreEqual(0xAA / 255f, c.r, 1e-4f);
+            foreach (string bad in new[] { null, "", "  ", "1F3F8F", "#1F3F8", "#1F3F8FF0", "#GG0000", "red", "#12" })
+                Assert.IsFalse(BlockFieldReader.TryParseColor(bad, out _), "'" + bad + "' is not a colour here");
         }
     }
 }

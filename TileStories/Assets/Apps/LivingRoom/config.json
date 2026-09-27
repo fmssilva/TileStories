@@ -318,7 +318,7 @@
                     {
                         "key": "block_1",
                         "kind": "header",
-                        "variant": "text_only",
+                        "variant": "image_parallax",
                         "display": "inline",
                         "fields": [
                             {
@@ -356,6 +356,15 @@
                                 "value": "",
                                 "asset": "",
                                 "items": []
+                            },
+                            {
+                                "key": "image",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "castle_hero.png",
+                                "items": []
                             }
                         ]
                     },
@@ -364,14 +373,52 @@
                         "kind": "status",
                         "variant": "ring",
                         "display": "inline",
-                        "fields": []
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "How it stands today"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Como esta hoje"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
                     },
                     {
                         "key": "block_14",
                         "kind": "status",
                         "variant": "scale",
                         "display": "inline",
-                        "fields": []
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Damage scale"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Escala de danos"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
                     },
                     {
                         "key": "block_6",
@@ -379,6 +426,24 @@
                         "variant": "chips",
                         "display": "inline",
                         "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "At a glance"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Num relance"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
                             {
                                 "key": "facts",
                                 "text": [],
@@ -511,6 +576,24 @@
                         "variant": "grid_hairline",
                         "display": "inline",
                         "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Key dates"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Datas-chave"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
                             {
                                 "key": "facts",
                                 "text": [],
@@ -682,6 +765,24 @@
                         "display": "inline",
                         "fields": [
                             {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "In numbers"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Em numeros"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
                                 "key": "facts",
                                 "text": [],
                                 "number": 0.0,
@@ -776,6 +877,24 @@
                         "display": "inline",
                         "fields": [
                             {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The story"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "A historia"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
                                 "key": "body",
                                 "text": [
                                     {
@@ -801,6 +920,24 @@
                         "variant": "drop_cap",
                         "display": "inline",
                         "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "On the panel"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "No painel"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
                             {
                                 "key": "body",
                                 "text": [
@@ -828,6 +965,24 @@
                         "display": "inline",
                         "fields": [
                             {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Why it matters"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Porque importa"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
                                 "key": "body",
                                 "text": [
                                     {
@@ -853,6 +1008,24 @@
                         "variant": "sections",
                         "display": "inline",
                         "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Through the centuries"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Ao longo dos seculos"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
                             {
                                 "key": "body",
                                 "text": [
@@ -1103,6 +1276,24 @@
                         "display": "inline",
                         "fields": [
                             {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "In their words"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Nas palavras deles"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
                                 "key": "quote",
                                 "text": [
                                     {
@@ -1192,6 +1383,2338 @@
                                     {
                                         "lang": "pt",
                                         "value": "Um viajante"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_20",
+                        "kind": "process_steps",
+                        "variant": "numbered",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "How the tiles were made"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Como se faziam os azulejos"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "steps",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Shape the clay"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Moldar o barro"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Clay from the river banks was pressed into square wooden frames and dried in the shade."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O barro das margens do rio era prensado em formas quadradas de madeira e seco a sombra."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "First firing"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Primeira cozedura"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A day and a night in the kiln turned the clay into hard biscuit."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Um dia e uma noite no forno tornavam o barro em chacota dura."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Glaze and paint"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Vidrar e pintar"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A coat of white tin glaze, then the drawing in cobalt blue with a fine brush."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Uma camada de vidrado branco de estanho e depois o desenho a azul de cobalto, com um pincel fino."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Second firing"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Segunda cozedura"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The glaze melted into glass and the blue sank into it for good."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O vidrado fundia-se em vidro e o azul ficava nele para sempre."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_21",
+                        "kind": "swatches",
+                        "variant": "grid",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The palette"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "A paleta"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "swatches",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "name",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Cobalt blue"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Azul cobalto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "colour",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "#1F3F8F",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "note",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The drawing and its shadows"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O desenho e as sombras"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "name",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Tin white"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Branco estanho"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "colour",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "#F2EEE3",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "note",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The glaze under the drawing"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O vidrado debaixo do desenho"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "name",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Antimony yellow"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Amarelo antimonio"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "colour",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "#D9A93A",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "note",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The border and the flags"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A cercadura e as bandeiras"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "name",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Manganese purple"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Roxo manganes"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "colour",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "#4A2F45",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "note",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Outlines on the oldest panels"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Contornos nos paineis mais antigos"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_22",
+                        "kind": "timeline",
+                        "variant": "vertical",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Timeline"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Cronologia"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "events",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1147"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1147"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The siege"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O cerco"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "After four months the town on the hill was taken."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Ao fim de quatro meses a cidade da colina foi tomada."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "c. 1300"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "c. 1300"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A royal palace"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Um palacio real"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The kings made the castle their home."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Os reis fizeram do castelo a sua casa."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1755"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1755"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The earthquake"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O terramoto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Most of the palace fell; the walls stood."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Quase todo o palacio caiu; as muralhas ficaram de pe."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1940"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1940"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Rebuilt"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Reconstruido"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The walls were rebuilt from old panels and drawings."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As muralhas foram reconstruidas a partir de paineis e desenhos antigos."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "key": "highlight_now",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": true,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_23",
+                        "kind": "timeline",
+                        "variant": "horizontal",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Timeline at a glance"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Cronologia num relance"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "events",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1147"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1147"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The siege"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O cerco"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1511"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1511"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The court moves to the river"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A corte muda-se para o rio"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1755"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1755"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The earthquake"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O terramoto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1940"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1940"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Rebuilt"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Reconstruido"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_24",
+                        "kind": "person",
+                        "variant": "row",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Who built it"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Quem o construiu"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "name",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Afonso Henriques"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Afonso Henriques"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "role",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "First king of Portugal"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Primeiro rei de Portugal"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "text",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "He took the town and its castle in 1147, with the help of crusaders."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Tomou a cidade e o seu castelo em 1147, com a ajuda dos cruzados."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_25",
+                        "kind": "person",
+                        "variant": "card",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The painter"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O pintor"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "name",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "King Manuel I"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "D. Manuel I"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "role",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Moved the court to the river, 1511"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Mudou a corte para o rio, 1511"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "text",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "He left the castle to the garrison and built his palace where the ships came in."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Deixou o castelo a guarnicao e construiu o seu palacio onde chegavam os navios."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_26",
+                        "kind": "story_chapters",
+                        "variant": "segmented",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The siege, in chapters"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O cerco, em capitulos"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "chapters",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The siege"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O cerco"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Ships of crusaders stopped in the river and joined the king's army outside the walls."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Navios de cruzados pararam no rio e juntaram-se ao exercito do rei junto as muralhas."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O palacio"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "For two centuries the kings lived here and filled the rooms with painted tiles."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Durante dois seculos os reis viveram aqui e encheram as salas de azulejos pintados."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The earthquake"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O terramoto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "On 1 November 1755 the ground shook and the palace fell."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A 1 de novembro de 1755 a terra tremeu e o palacio caiu."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_27",
+                        "kind": "compare_points",
+                        "variant": "rings",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "other",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "lamp_military",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "axis",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "status",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_28",
+                        "kind": "practical_info",
+                        "variant": "rows",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Plan your visit"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Planeie a visita"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "rows",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "time",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Open"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Aberto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Every day, 9:00 to 21:00"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Todos os dias, 9:00 as 21:00"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "ticket",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Tickets"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Bilhetes"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "15 EUR"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "15 EUR"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "access",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Getting in"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Acesso"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Steep streets; tram 28 stops at the gate"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Ruas ingremes; o eletrico 28 para a porta"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "location",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Where"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Onde"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Upper old town"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Alta da cidade velha"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "light",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Best light"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Melhor luz"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Late afternoon"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Fim da tarde"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "icon",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "info",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Good to know"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Bom saber"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Bring a jacket: the walls are windy"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Traga um casaco: as muralhas tem vento"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_29",
+                        "kind": "gallery",
+                        "variant": "carousel",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "In pictures"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Em imagens"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "pictures",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_1.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The gate from the square"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A porta vista da praca"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_2.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The river front"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A frente ribeirinha"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_3.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The chapel tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre da capela"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_4.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The walls at dusk"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As muralhas ao entardecer"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_30",
+                        "kind": "gallery",
+                        "variant": "grid",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "pictures",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_1.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The gate from the square"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A porta vista da praca"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_2.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The river front"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A frente ribeirinha"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_3.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The chapel tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre da capela"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_4.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The walls at dusk"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As muralhas ao entardecer"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_31",
+                        "kind": "gallery",
+                        "variant": "filmstrip",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "pictures",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_1.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The gate from the square"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A porta vista da praca"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_2.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The river front"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A frente ribeirinha"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_3.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The chapel tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre da capela"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_4.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The walls at dusk"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As muralhas ao entardecer"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_32",
+                        "kind": "gallery",
+                        "variant": "stack",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "pictures",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_1.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The gate from the square"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A porta vista da praca"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_2.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The river front"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A frente ribeirinha"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_3.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The chapel tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre da capela"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_4.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The walls at dusk"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As muralhas ao entardecer"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_33",
+                        "kind": "before_after",
+                        "variant": "slider",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "What the earthquake took"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O que o terramoto levou"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "before",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "damage_before.png",
+                                "items": []
+                            },
+                            {
+                                "key": "after",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "damage_after.png",
+                                "items": []
+                            },
+                            {
+                                "key": "before_label",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Before 1755"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Antes de 1755"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "after_label",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "After the earthquake"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Depois do terramoto"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_34",
+                        "kind": "zoom_image",
+                        "variant": "pinch",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Look closer"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Veja de perto"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "image",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "tile_detail.png",
+                                "items": []
+                            },
+                            {
+                                "key": "caption",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Every tile of the panel, up close"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Cada azulejo do painel, de perto"
                                     }
                                 ],
                                 "number": 0.0,
@@ -1798,6 +4321,192 @@
                                                     {
                                                         "lang": "pt",
                                                         "value": "3 m de espessura"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_4",
+                        "kind": "gallery",
+                        "variant": "carousel",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "In pictures"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Em imagens"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "pictures",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_1.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The gate from the square"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A porta vista da praca"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_2.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The river front"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A frente ribeirinha"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_3.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The chapel tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre da capela"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_4.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The walls at dusk"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As muralhas ao entardecer"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "credit",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Placeholder picture"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Imagem provisoria"
                                                     }
                                                 ],
                                                 "number": 0.0,

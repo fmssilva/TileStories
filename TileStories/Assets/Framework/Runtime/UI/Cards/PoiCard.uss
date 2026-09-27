@@ -1,6 +1,8 @@
-/* The POI Detail Card's layout (PoiCardSheetView, BlockStackView, the block views). Written ONLY with the
-   --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3, _3.3).
-   UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
+/* The POI Detail Card's CONTAINER (PoiCardSheetView, BlockStackView): the layer, the sheet, its grabber and X, the
+   pinned header slot, the scrolling stack, the footer and the rule every block shares. The blocks' own looks are in
+   CardParts.uss (parts several families use) and Blocks/<Family>/<Family>.uss; the host adds them after this file.
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
+   _3.3). UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
 
 /* The full area the sheet rests at the bottom of; lets taps through to the camera view */
 .poi-card-layer {
@@ -96,533 +98,51 @@
     min-height: 0;
 }
 
-/* ---- header block ---- */
-
-.card-header__top {
-    margin-bottom: var(--ts-space-3);
-    padding-right: var(--ts-space-6);
-}
-
-.card-header__title {
-    font-size: var(--ts-size-title);
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-    white-space: normal;
-    margin: 0;
-    padding: 0;
-}
-
-.card-chip {
-    align-self: flex-start;
-    margin-top: var(--ts-space-2);
-    padding: var(--ts-space-1) var(--ts-space-3);
-    font-size: var(--ts-size-caption);
-    color: var(--ts-on-accent);
-    background-color: var(--ts-accent);
-    border-radius: var(--ts-radius-m);
-}
-
-.card-header__subtitle {
-    font-size: var(--ts-size-body);
-    color: var(--ts-ink-2);
-    white-space: normal;
-    margin: 0 0 var(--ts-space-4) 0;
-    padding: 0;
-}
-
 /* ---- every content block ---- */
 
 .card-block {
-    margin: 0 var(--ts-space-4) var(--ts-space-5) var(--ts-space-4);
+    margin: 0 var(--ts-space-4);
 }
 
-/* ---- long text (CardTextView): paragraphs, glossary definition, lede, drop cap ---- */
-
-.card-text__paragraph {
-    font-size: var(--ts-size-body);
-    color: var(--ts-ink);
-    white-space: normal;
-    margin: 0 0 var(--ts-space-3) 0;
-    padding: 0;
+/* One block's place in the stack (BlockStackView): its heading, the block, and under it the ONE gap between blocks.
+   Blocks have no bottom margin of their own, so every gap is this token. */
+.card-block-slot {
+    margin-bottom: var(--ts-block-gap);
 }
 
-.card-text__lede {
-    font-size: var(--ts-size-lede);
-}
-
-.card-text__cap-row {
-    flex-direction: row;
-    align-items: flex-start;
-}
-
-.card-text__dropcap {
-    font-size: var(--ts-size-dropcap);
-    -unity-font-style: bold;
-    color: var(--ts-accent-text);
-    margin: 0 var(--ts-space-2) 0 0;
-    padding: 0;
-}
-
-.card-text__beside-cap {
-    flex-grow: 1;
-    flex-shrink: 1;
-}
-
-.card-text__definition {
-    background-color: var(--ts-surface-2);
-    border-radius: var(--ts-radius-m);
-    border-left-width: var(--ts-space-1);
-    border-left-color: var(--ts-accent);
-    padding: var(--ts-space-3);
-    margin: 0 0 var(--ts-space-3) 0;
-}
-
-.card-text__definition-title {
-    font-size: var(--ts-size-caption);
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-    white-space: normal;
-    margin: 0 0 var(--ts-space-1) 0;
-    padding: 0;
-}
-
-.card-text__definition-text {
-    font-size: var(--ts-size-body);
-    color: var(--ts-ink);
-    white-space: normal;
-    margin: 0;
-    padding: 0;
-}
-
-/* ---- rich_text ---- */
-
-.card-rich__heading {
+/* The common heading every kind may have (BlockKindDefinition.HeadingField): one look for every block */
+.card-block-heading {
     font-size: var(--ts-size-heading);
     -unity-font-style: bold;
     color: var(--ts-ink);
     white-space: normal;
-    margin: var(--ts-space-3) 0 var(--ts-space-2) 0;
+    margin: 0 var(--ts-space-4) var(--ts-space-2) var(--ts-space-4);
     padding: 0;
 }
 
-/* ---- quick_facts: chips, grid_hairline, big_numbers ---- */
-
-.card-facts {
-    flex-direction: row;
-    flex-wrap: wrap;
+.card-block-heading--empty {
+    display: none;
 }
 
-.card-facts__label {
+/* In the pinned header the heading is a small kicker above the title (the slot already pads the sides), and the
+   collapsed header gives it up with the subtitle; the header and the footer keep their own spacing */
+.poi-card__header .card-block-heading {
     font-size: var(--ts-size-caption);
-    color: var(--ts-ink-2);
-    white-space: normal;
-    margin: 0;
-    padding: 0;
-}
-
-.card-facts__value {
-    font-size: var(--ts-size-body);
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-    white-space: normal;
-    margin: 0;
-    padding: 0;
-}
-
-.card-facts--chips .card-facts__cell {
-    flex-direction: row;
-    align-items: center;
-    background-color: var(--ts-surface-2);
-    border-radius: var(--ts-radius-l);
-    padding: var(--ts-space-1) var(--ts-space-3);
-    margin: 0 var(--ts-space-2) var(--ts-space-2) 0;
-    /* a chip never grows past the card: a long value wraps inside it */
-    max-width: 100%;
-    flex-shrink: 1;
-}
-
-.card-facts--chips .card-facts__label {
-    margin-right: var(--ts-space-2);
-    flex-shrink: 0;
-}
-
-.card-facts--chips .card-facts__value {
-    flex-shrink: 1;
-}
-
-.card-facts--grid_hairline .card-facts__cell {
-    width: 50%;
-    padding: var(--ts-space-3) var(--ts-space-3) var(--ts-space-3) 0;
-    border-top-width: var(--ts-line-width);
-    border-top-color: var(--ts-line);
-}
-
-.card-facts--big_numbers .card-facts__cell {
-    width: 50%;
-    flex-direction: column-reverse;
-    /* column-reverse starts at the bottom: flex-end keeps each value at the top of its row */
-    justify-content: flex-end;
-    padding: var(--ts-space-2) var(--ts-space-3) var(--ts-space-3) 0;
-}
-
-.card-facts--big_numbers .card-facts__value {
-    font-size: var(--ts-size-title);
-    color: var(--ts-accent-text);
-}
-
-/* ---- fun_fact: flip, postcard ---- */
-
-.card-fun__box {
-    background-color: var(--ts-surface-2);
-    border-radius: var(--ts-radius-m);
-    padding: var(--ts-space-3) var(--ts-space-4);
-    margin: 0 0 var(--ts-space-3) 0;
-    min-height: var(--ts-touch-target);
-}
-
-.card-fun__heading {
-    font-size: var(--ts-size-caption);
-    -unity-font-style: bold;
     color: var(--ts-accent-text);
     margin: 0 0 var(--ts-space-1) 0;
-    padding: 0;
 }
 
-.card-fun__hint {
-    font-size: var(--ts-size-body);
-    color: var(--ts-ink-2);
-    margin: 0;
-    padding: 0;
+.poi-card__header--collapsed .card-block-heading {
+    display: none;
 }
 
-.card-fun__paragraph {
-    margin-bottom: var(--ts-space-1);
-}
-
-.card-fun--postcard .card-fun__box {
-    border-width: var(--ts-line-width);
-    border-color: var(--ts-line);
-    border-left-width: var(--ts-space-1);
-    border-left-color: var(--ts-accent);
-    rotate: var(--ts-postcard-tilt);
-}
-
-/* ---- pull_quote: serif, minimal ---- */
-
-.card-quote__paragraph {
-    -unity-font-style: italic;
-}
-
-.card-quote--serif {
-    border-left-width: var(--ts-space-1);
-    border-left-color: var(--ts-accent);
-    padding-left: var(--ts-space-4);
-}
-
-.card-quote--serif .card-quote__paragraph {
-    font-size: var(--ts-size-quote);
-}
-
-.card-quote__author {
-    font-size: var(--ts-size-caption);
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-    white-space: normal;
-    margin: 0;
-    padding: 0;
-}
-
-.card-quote__source {
-    font-size: var(--ts-size-caption);
-    color: var(--ts-ink-2);
-    white-space: normal;
-    margin: 0;
-    padding: 0;
-}
-
-.card-quote--minimal .card-quote__attribution {
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.card-quote--minimal .card-quote__author {
-    margin-right: var(--ts-space-2);
-}
-
-/* ---- status: ring, scale. The ring picture is the MARKERS' own (Rings/), tinted by the view with the wall's colour;
-   the tone classes are the fallback when the wall draws no ring ---- */
-
-.card-status__main {
-    flex-direction: row;
-    align-items: center;
-}
-
-.card-status__ring {
-    width: var(--ts-status-ring-size);
-    height: var(--ts-status-ring-size);
-    flex-shrink: 0;
-    margin-right: var(--ts-space-3);
-    align-items: center;
-    justify-content: center;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.card-status__ring--small {
-    width: var(--ts-status-step-ring);
-    height: var(--ts-status-step-ring);
-    margin: 0 0 var(--ts-space-1) 0;
-}
-
-.card-status__ring--solid { background-image: url("../Markers/Rings/RingSolid.png"); }
-.card-status__ring--dash_long { background-image: url("../Markers/Rings/RingDashLong.png"); }
-.card-status__ring--dash_medium { background-image: url("../Markers/Rings/RingDashMedium.png"); }
-.card-status__ring--dash_short { background-image: url("../Markers/Rings/RingDashShort.png"); }
-.card-status__ring--dotted { background-image: url("../Markers/Rings/RingDotted.png"); }
-
-.card-status__ring--tone-0 { -unity-background-image-tint-color: var(--ts-status-0); }
-.card-status__ring--tone-1 { -unity-background-image-tint-color: var(--ts-status-1); }
-.card-status__ring--tone-2 { -unity-background-image-tint-color: var(--ts-status-2); }
-.card-status__ring--tone-3 { -unity-background-image-tint-color: var(--ts-status-3); }
-.card-status__ring--tone-4 { -unity-background-image-tint-color: var(--ts-status-4); }
-
-.card-status__unknown-mark {
-    font-size: var(--ts-size-heading);
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-    margin: 0;
-    padding: 0;
-}
-
-.card-status__heading {
-    font-size: var(--ts-size-caption);
-    color: var(--ts-ink-2);
-    margin: 0;
-    padding: 0;
-}
-
-.card-status__level {
-    font-size: var(--ts-size-heading);
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-    white-space: normal;
-    margin: 0;
-    padding: 0;
-}
-
-.card-status__words {
-    flex-shrink: 1;
-}
-
-.card-status__scale {
-    flex-direction: row;
-    margin-top: var(--ts-space-3);
-}
-
-.card-status__step {
-    flex-grow: 1;
-    flex-basis: 0;
-    align-items: center;
-    padding-bottom: var(--ts-space-1);
-    border-bottom-width: 0;
-}
-
-.card-status__step--current {
-    border-bottom-width: var(--ts-space-1);
-    border-bottom-color: var(--ts-accent);
-}
-
-.card-status__step-name {
-    font-size: var(--ts-size-caption);
-    color: var(--ts-ink-2);
-    white-space: normal;
-    -unity-text-align: upper-center;
-    margin: 0;
-    padding: 0;
-}
-
-.card-status__step--current .card-status__step-name {
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-}
-
-/* ---- sources: list, with_confidence ---- */
-
-.card-sources__top {
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: var(--ts-space-2);
-}
-
-.card-sources__heading {
-    font-size: var(--ts-size-heading);
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-    margin: 0 var(--ts-space-3) 0 0;
-    padding: 0;
-}
-
-.card-sources__chip {
-    font-size: var(--ts-size-caption);
-    padding: var(--ts-space-1) var(--ts-space-3);
-    border-radius: var(--ts-radius-m);
-    border-width: var(--ts-line-width);
-    margin: 0;
-}
-
-.card-sources__chip--verified {
-    color: var(--ts-on-accent);
-    background-color: var(--ts-accent);
-    border-color: var(--ts-accent);
-}
-
-.card-sources__chip--draft {
-    color: var(--ts-ink);
-    background-color: var(--ts-surface-2);
-    border-color: var(--ts-line);
-}
-
-.card-sources__row {
-    padding: var(--ts-space-2) 0;
-    border-top-width: var(--ts-line-width);
-    border-top-color: var(--ts-line);
-}
-
-.card-sources__title {
-    font-size: var(--ts-size-body);
-    -unity-font-style: bold;
-    color: var(--ts-ink);
-    white-space: normal;
-    margin: 0;
-    padding: 0;
-}
-
-.card-sources__meta {
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.card-sources__author,
-.card-sources__licence {
-    font-size: var(--ts-size-caption);
-    color: var(--ts-ink-2);
-    white-space: normal;
-    margin: 0 var(--ts-space-3) 0 0;
-    padding: 0;
+.poi-card__header .card-block-slot,
+.poi-card__footer .card-block-slot {
+    margin-bottom: 0;
 }
 
 /* ---- the footer: pinned under the scrolling blocks (sticky actions) ---- */
 
 .poi-card__footer {
     flex-shrink: 0;
-}
-
-/* ---- actions: circles, pill_row, sticky_cta. Icons are drawn here (no picture, no glyph) ---- */
-
-.card-actions {
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.card-action {
-    margin: 0 var(--ts-space-2) var(--ts-space-2) 0;
-    padding: 0;
-    border-width: 0;
-    background-color: var(--ts-surface-2);
-    color: var(--ts-ink);
-    min-height: var(--ts-touch-target);
-    min-width: var(--ts-touch-target);
-    align-items: center;
-    justify-content: center;
-}
-
-.card-action__label {
-    flex-shrink: 1;
-    font-size: var(--ts-size-caption);
-    color: var(--ts-ink);
-    white-space: normal;
-    -unity-text-align: middle-center;
-    margin: 0;
-    padding: 0;
-}
-
-/* show_on_wall: a target -- a ring with a dot in its centre */
-.card-action__icon {
-    width: var(--ts-icon-size);
-    height: var(--ts-icon-size);
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    border-width: var(--ts-icon-stroke);
-    border-color: var(--ts-accent);
-    border-radius: var(--ts-icon-size);
-}
-
-.card-action__icon-dot {
-    width: var(--ts-icon-dot);
-    height: var(--ts-icon-dot);
-    border-radius: var(--ts-icon-dot);
-    background-color: var(--ts-accent);
-}
-
-.card-actions--circles .card-action {
-    flex-direction: column;
-    /* icons share one top line; a long label grows downwards */
-    justify-content: flex-start;
-    background-color: var(--ts-surface);
-    width: 25%;
-    padding: var(--ts-space-2) var(--ts-space-1);
-    border-radius: var(--ts-radius-m);
-}
-
-.card-actions--circles .card-action__icon {
-    width: var(--ts-touch-target);
-    height: var(--ts-touch-target);
-    border-radius: var(--ts-touch-target);
-    background-color: var(--ts-surface-2);
-    margin-bottom: var(--ts-space-1);
-}
-
-.card-actions--pill_row .card-action {
-    flex-direction: row;
-    border-radius: var(--ts-touch-target);
-    padding: 0 var(--ts-space-4) 0 var(--ts-space-3);
-}
-
-.card-actions--pill_row .card-action__icon {
-    margin-right: var(--ts-space-2);
-}
-
-.card-actions--sticky_cta {
-    flex-direction: column;
-    /* a wrapping column would size each button to its one-line words: no wrap, stretch to the card's width */
-    flex-wrap: nowrap;
-    align-items: stretch;
-    margin: 0;
-    padding: var(--ts-space-3) var(--ts-space-4);
-    border-top-width: var(--ts-line-width);
-    border-top-color: var(--ts-line);
-    background-color: var(--ts-surface);
-}
-
-.card-actions--sticky_cta .card-action {
-    flex-direction: row;
-    margin: 0 0 var(--ts-space-2) 0;
-    background-color: var(--ts-accent);
-    border-radius: var(--ts-radius-m);
-}
-
-.card-actions--sticky_cta .card-action__label {
-    font-size: var(--ts-size-body);
-    -unity-font-style: bold;
-    color: var(--ts-on-accent);
-}
-
-.card-actions--sticky_cta .card-action__icon {
-    border-color: var(--ts-on-accent);
-    margin-right: var(--ts-space-2);
-}
-
-.card-actions--sticky_cta .card-action__icon-dot {
-    background-color: var(--ts-on-accent);
 }

@@ -1,0 +1,265 @@
+/* The parts several block families share: the long text (CardTextView) and the icon set (CardIcons).
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
+   _3.3). UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
+
+/* ---- long text (CardTextView): paragraphs, glossary definition, lede, drop cap ---- */
+
+.card-text__paragraph {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-3) 0;
+    padding: 0;
+}
+
+.card-text__lede {
+    font-size: var(--ts-size-lede);
+}
+
+.card-text__cap-row {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.card-text__dropcap {
+    font-size: var(--ts-size-dropcap);
+    -unity-font-style: bold;
+    color: var(--ts-accent-text);
+    margin: 0 var(--ts-space-2) 0 0;
+    padding: 0;
+}
+
+.card-text__beside-cap {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.card-text__definition {
+    background-color: var(--ts-surface-2);
+    border-radius: var(--ts-radius-m);
+    border-left-width: var(--ts-space-1);
+    border-left-color: var(--ts-accent);
+    padding: var(--ts-space-3);
+    margin: 0 0 var(--ts-space-3) 0;
+}
+
+.card-text__definition-title {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+.card-text__definition-text {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- the card's icon set (CardIcons): a glyph box of --ts-icon-size holding four parts -- frame, bar a, bar b, dot --
+   hidden until a key's class shows and places them. Strokes and colours are tokens; a look may resize the icon's root,
+   the glyph stays centred at its own size ---- */
+
+.card-icon {
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-icon__glyph {
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+}
+
+.card-icon__frame,
+.card-icon__bar,
+.card-icon__dot {
+    position: absolute;
+    display: none;
+}
+
+.card-icon__frame {
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-width: var(--ts-icon-stroke);
+    border-color: var(--ts-accent);
+    border-radius: var(--ts-icon-size);
+}
+
+.card-icon__bar {
+    background-color: var(--ts-accent);
+}
+
+.card-icon__dot {
+    left: 50%;
+    top: 50%;
+    width: var(--ts-icon-dot);
+    height: var(--ts-icon-dot);
+    translate: -50% -50%;
+    border-radius: var(--ts-icon-dot);
+    background-color: var(--ts-accent);
+}
+
+/* show_on_wall: a target -- a ring with a dot in its centre */
+.card-icon--show_on_wall .card-icon__frame,
+.card-icon--show_on_wall .card-icon__dot {
+    display: flex;
+}
+
+/* time: a clock -- a ring, a long hand up and a short hand right */
+.card-icon--time .card-icon__frame,
+.card-icon--time .card-icon__bar {
+    display: flex;
+}
+
+.card-icon--time .card-icon__bar--a {
+    left: 50%;
+    top: 22%;
+    width: var(--ts-icon-stroke);
+    height: 30%;
+    translate: -50% 0;
+}
+
+.card-icon--time .card-icon__bar--b {
+    left: 50%;
+    top: 50%;
+    width: 26%;
+    height: var(--ts-icon-stroke);
+    translate: 0 -50%;
+}
+
+/* location: a pin -- a ring pulled to a point at the bottom, a dot inside */
+.card-icon--location .card-icon__frame,
+.card-icon--location .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--location .card-icon__frame {
+    left: 12%;
+    top: 4%;
+    right: 12%;
+    bottom: 20%;
+    border-bottom-right-radius: 0;
+    rotate: 45deg;
+}
+
+.card-icon--location .card-icon__dot {
+    top: 42%;
+}
+
+/* info: an "i" in a ring -- a dot over a short bar */
+.card-icon--info .card-icon__frame,
+.card-icon--info .card-icon__bar--a,
+.card-icon--info .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--info .card-icon__bar--a {
+    left: 50%;
+    top: 44%;
+    width: var(--ts-icon-stroke);
+    height: 32%;
+    translate: -50% 0;
+}
+
+.card-icon--info .card-icon__dot {
+    top: 28%;
+    width: var(--ts-icon-stroke);
+    height: var(--ts-icon-stroke);
+}
+
+/* ticket: a wide box with a tear-off line */
+.card-icon--ticket .card-icon__frame,
+.card-icon--ticket .card-icon__bar--a {
+    display: flex;
+}
+
+.card-icon--ticket .card-icon__frame {
+    top: 20%;
+    bottom: 20%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--ticket .card-icon__bar--a {
+    left: 64%;
+    top: 20%;
+    bottom: 20%;
+    width: var(--ts-icon-stroke);
+}
+
+/* access: a doorway on its floor line, a knob on the door */
+.card-icon--access .card-icon__frame,
+.card-icon--access .card-icon__bar--b,
+.card-icon--access .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--access .card-icon__frame {
+    left: 20%;
+    right: 20%;
+    bottom: 0;
+    border-bottom-width: 0;
+    border-radius: var(--ts-icon-stroke) var(--ts-icon-stroke) 0 0;
+}
+
+.card-icon--access .card-icon__bar--b {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--ts-icon-stroke);
+}
+
+.card-icon--access .card-icon__dot {
+    left: 64%;
+    top: 58%;
+    width: var(--ts-icon-stroke);
+    height: var(--ts-icon-stroke);
+}
+
+/* light: a bright point -- a dot with rays across it */
+.card-icon--light .card-icon__bar,
+.card-icon--light .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--light .card-icon__bar--a {
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: var(--ts-icon-stroke);
+    translate: -50% 0;
+}
+
+.card-icon--light .card-icon__bar--b {
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: var(--ts-icon-stroke);
+    translate: 0 -50%;
+}
+
+/* a sun: a large disc over the crossing, so only the bars' ends show, as rays */
+.card-icon--light .card-icon__dot {
+    width: 56%;
+    height: 56%;
+    border-radius: var(--ts-icon-size);
+}
+
+/* ---- the pill button: ONE shape for every block that has one (actions' pill_row, story_chapters' Previous / Next).
+   The radius is half the touch-target height (--ts-pill-radius), so short words give a stadium, not an egg ---- */
+
+.card-pill {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--ts-touch-target);
+    min-width: var(--ts-pill-min-width);
+    padding: 0 var(--ts-space-4);
+    border-radius: var(--ts-pill-radius);
+}

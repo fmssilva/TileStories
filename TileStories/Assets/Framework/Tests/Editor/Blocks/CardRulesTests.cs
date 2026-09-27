@@ -134,5 +134,21 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(CardTapRule.ShouldDismiss(true, true, isTap: false, false), "a drag across the wall");
             Assert.IsFalse(CardTapRule.ShouldDismiss(cardOpen: false, true, true, false), "no card open");
         }
+
+        // _3.1 step 6C: the pinned header collapses once the stack scrolls, opens only back at the top, and never collapses
+        // a stack that could not scroll any more afterwards (that would snap to the top, open, scroll... a loop)
+        [Test]
+        public void HeaderCollapseRule_CollapsesOnScroll_OpensOnlyAtTheTop_AndNeverLoops()
+        {
+            const float range = 600f, freed = 120f;
+            Assert.IsFalse(HeaderCollapseRule.Next(false, 0f, range, freed), "at the top: open");
+            Assert.IsFalse(HeaderCollapseRule.Next(false, HeaderCollapseRule.CollapseAfter, range, freed), "a finger's wobble at the top: still open");
+            Assert.IsTrue(HeaderCollapseRule.Next(false, 40f, range, freed), "scrolled down: collapsed");
+            Assert.IsTrue(HeaderCollapseRule.Next(true, 4f, range, freed), "collapsed, scrolled almost back: stays collapsed (hysteresis)");
+            Assert.IsFalse(HeaderCollapseRule.Next(true, 0f, range, freed), "back at the very top: open");
+            Assert.IsFalse(HeaderCollapseRule.Next(false, 40f, freed + 5f, freed),
+                "collapsing would leave less than CollapseAfter to scroll: stays open (no snap-open loop)");
+            Assert.IsTrue(HeaderCollapseRule.Next(false, 40f, freed + HeaderCollapseRule.CollapseAfter + 1f, freed), "just enough left to scroll: collapses");
+        }
     }
 }

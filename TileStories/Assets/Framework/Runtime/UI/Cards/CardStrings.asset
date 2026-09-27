@@ -90,3 +90,101 @@ MonoBehaviour:
       value: Draft
     - lang: pt
       value: Rascunho
+  - key: timeline_now
+    where: The end point a Timeline block adds after its last event while Highlight Now is on.
+    text:
+    - lang: en
+      value: Now
+    - lang: pt
+      value: Hoje
+  - key: story_chapter_of
+    where: The line above a Story Chapters chapter, where {0} is the chapter shown and {1} how many there are.
+    text:
+    - lang: en
+      value: Chapter {0} of {1}
+    - lang: pt
+      value: Capitulo {0} de {1}
+  - key: story_previous
+    where: The button of a Story Chapters block that goes back one chapter.
+    text:
+    - lang: en
+      value: Previous
+    - lang: pt
+      value: Anterior
+  - key: story_next
+    where: The button of a Story Chapters block that goes on to the next chapter.
+    text:
+    - lang: en
+      value: Next
+    - lang: pt
+      value: Seguinte
+  - key: compare_heading
+    where: The small heading of a Compare Points block, above the two points' conditions side by side.
+    text:
+    - lang: en
+      value: Side by side
+    - lang: pt
+      value: Lado a lado
+  - key: media_unavailable
+    where: The frame of a picture whose file cannot be shown (missing, or not a picture the card may use).
+    text:
+    - lang: en
+      value: Picture unavailable
+    - lang: pt
+      value: Imagem indisponivel
+  - key: header_then
+    where: The label on the left half of a Then and Now header picture.
+    text:
+    - lang: en
+      value: Then
+    - lang: pt
+      value: Antes
+  - key: header_now
+    where: The label on the right half of a Then and Now header picture.
+    text:
+    - lang: en
+      value: Now
+    - lang: pt
+      value: Hoje
+  - key: before_label
+    where: The label of the left side of a Before and After slider when the block names none.
+    text:
+    - lang: en
+      value: Before
+    - lang: pt
+      value: Antes
+  - key: after_label
+    where: The label of the right side of a Before and After slider when the block names none.
+    text:
+    - lang: en
+      value: After
+    - lang: pt
+      value: Depois
+  - key: gallery_name
+    where: A gallery's name in the breadcrumb of the full-screen picture view (card title > this).
+    text:
+    - lang: en
+      value: Gallery
+    - lang: pt
+      value: Galeria
+  - key: gallery_count
+    where: 'Under a stacked gallery: how many pictures it holds ({0} = the number).'
+    text:
+    - lang: en
+      value: '{0} pictures'
+    - lang: pt
+      value: '{0} imagens'
+  - key: takeover_back
+    where: The button of the full-screen view that goes back to the card.
+    text:
+    - lang: en
+      value: Back
+    - lang: pt
+      value: Voltar
+  - key: zoom_hint
+    where: The hint under a Zoom Image picture.
+    text:
+    - lang: en
+      value: Pinch to zoom in
+    - lang: pt
+      value: Afaste os dedos para ampliar

@@ -3,7 +3,8 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // The sources block (_3.1 Tier 1, family meta): where the card's content comes from, under a heading (CardStrings).
+    // The sources block (_3.1 Tier 1, family meta): where the card's content comes from, under the stack's heading
+    // (default: CardStrings sources_heading).
     // Each source is its title, then its author and licence on one wrapping line (an empty one takes no space). Two
     // looks -- list: the sources; with_confidence: the same, plus a chip saying whether the content was checked
     // (Verified) or is a draft (Content Status; no chip while none is set). Only classes here.
@@ -18,7 +19,6 @@ namespace TileStories
         }
 
         public VisualElement Root { get; }
-        public Label Heading { get; }
         public Label Confidence { get; }
         public IReadOnlyList<Row> Rows => _shown;
 
@@ -31,15 +31,9 @@ namespace TileStories
             Root = new VisualElement { name = "card-sources" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-sources");
-            var top = new VisualElement();
-            top.AddToClassList("card-sources__top");
-            Heading = new Label();
-            Heading.AddToClassList("card-sources__heading");
             Confidence = new Label { name = "card-sources-confidence" };
             Confidence.AddToClassList("card-sources__chip");
-            top.Add(Heading);
-            top.Add(Confidence);
-            Root.Add(top);
+            Root.Add(Confidence);
             _list = new VisualElement();
             Root.Add(_list);
         }
@@ -48,7 +42,6 @@ namespace TileStories
         {
             Unbind();
             var read = new BlockFieldReader(instance, context.Language, context.FallbackLanguage);
-            Heading.text = context.Strings?.Get(CardStrings.Keys.SourcesHeading) ?? "";
 
             string status = read.Value(BuiltInBlocks.SourcesStatusField);
             bool verified = status == BuiltInBlocks.ContentVerified, draft = status == BuiltInBlocks.ContentDraft;

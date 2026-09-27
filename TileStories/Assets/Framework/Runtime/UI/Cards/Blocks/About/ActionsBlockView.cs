@@ -8,7 +8,8 @@ namespace TileStories
     // a round icon with its label under it; pill_row: icon + label pills in a wrapping row; sticky_cta: ONE call to action
     // (the first button) full width, pinned to the card's footer (BlockKindDefinition.FooterVariants) -- one button is what
     // fits under the header at every stop; a stack of them would not be sticky at all. An action with no label, or one
-    // this framework does not know (a later tier's), is left out: never a button that does nothing. Icons are drawn by USS.
+    // this framework does not know (a later tier's), is left out: never a button that does nothing. Icons are the card's
+    // one USS-drawn set (CardIcons), keyed by the action.
     public sealed class ActionsBlockView : IBlockView
     {
         public sealed class Action
@@ -51,8 +52,9 @@ namespace TileStories
                 var action = Take(_shown.Count);
                 action.Kind = kind;
                 action.Label.text = label;
-                foreach (string known in BuiltInBlocks.ActionOptions)
-                    action.Icon.EnableInClassList("card-action__icon--" + known, known == kind);
+                CardIcons.SetKey(action.Icon, kind);
+                // - the pill row wears the card's one pill shape (CardParts.uss), shared with story_chapters' buttons
+                action.Button.EnableInClassList("card-pill", context.Variant == BuiltInBlocks.ActionsPillRow);
                 Root.Add(action.Button);
                 _shown.Add(action);
             }
@@ -84,14 +86,11 @@ namespace TileStories
         {
             while (_pool.Count <= index)
             {
-                var action = new Action { Icon = new VisualElement { pickingMode = PickingMode.Ignore }, Label = new Label { pickingMode = PickingMode.Ignore } };
+                var action = new Action { Icon = CardIcons.Create(), Label = new Label { pickingMode = PickingMode.Ignore } };
                 action.Button = new Button(() => Run(action));
                 action.Button.AddToClassList("card-action");
                 action.Button.AddToClassList("card-tap");
                 action.Icon.AddToClassList("card-action__icon");
-                var dot = new VisualElement { pickingMode = PickingMode.Ignore };
-                dot.AddToClassList("card-action__icon-dot");
-                action.Icon.Add(dot);
                 action.Label.AddToClassList("card-action__label");
                 action.Button.Add(action.Icon);
                 action.Button.Add(action.Label);

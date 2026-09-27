@@ -1,0 +1,55 @@
+/* The meta family's blocks: sources.
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
+   _3.3). UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
+
+/* ---- sources: list, with_confidence ---- */
+
+.card-sources__chip {
+    align-self: flex-start;
+    font-size: var(--ts-size-caption);
+    padding: var(--ts-space-1) var(--ts-space-3);
+    border-radius: var(--ts-radius-m);
+    border-width: var(--ts-line-width);
+    margin: 0 0 var(--ts-space-2) 0;
+}
+
+.card-sources__chip--verified {
+    color: var(--ts-on-accent);
+    background-color: var(--ts-accent);
+    border-color: var(--ts-accent);
+}
+
+.card-sources__chip--draft {
+    color: var(--ts-ink);
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-line);
+}
+
+.card-sources__row {
+    padding: var(--ts-space-2) 0;
+    border-top-width: var(--ts-line-width);
+    border-top-color: var(--ts-line);
+}
+
+.card-sources__title {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-sources__meta {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.card-sources__author,
+.card-sources__licence {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0 var(--ts-space-3) 0 0;
+    padding: 0;
+}

@@ -7,7 +7,7 @@ namespace TileStories
     // A card long text (_3.1 section 6): one Label per paragraph (GlossaryMarkup.Paragraphs), glossary words as
     // underlined links, and ONE definition panel that opens under the paragraph whose word was tapped (tap the word
     // again, or the panel, to close it). The first paragraph can be a lede or start with a raised initial (drop cap).
-    // Shared by every block that shows long text; plain C#, labels reused across binds. Styled by PoiCard.uss.
+    // Shared by every block that shows long text; plain C#, labels reused across binds. Styled by CardParts.uss.
     public sealed class CardTextView
     {
         public enum FirstParagraph { Normal, Lede, DropCap }

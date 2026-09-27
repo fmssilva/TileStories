@@ -63,7 +63,7 @@ d) after we do and implement and clean and test everything, lets update, if nece
 
 
 
-## `And now: review and complete the <DOMAIN> domain`
+creview and complete the <DOMAIN> domain`
 Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, and _5.1_Editor_Tab.md
 (HOW TO USE + section 0). Check the real code; don't trust the docs.
 1. Developer flow: the normal sequence of actions in the Editor and Play Mode; the defaults a new POI /
@@ -82,7 +82,7 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
    doc, _5.1 and 10-structure.md. End with a plain summary of what the domain does and how to test each option.
 
 
-   
+
 # `claude agent`
 - **GATE TASK:** start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
 
@@ -96,34 +96,50 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-
-## `and now continue the POI Detail Card: _3.1 step 5b + Tier 1 group A`
+## `And now: POI Detail Card -- _3.1 Tier 2 group B (step 7B) + the [7B] TODOs`
 
 Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md
-Context only: _3.2 (families/ontology), _3.3 (tokens), _5.1 (Editor rules), _2.2.x marker docs (outline colours).
-Steps 0-5 are DONE and verified (see _3.1 status table) -- re-verify the baseline (compile + all tests green) before changing anything.
+-- start with "## TODOs" (the [7B] items) and the status table (steps 0-7A DONE and verified).
+Context only: _3.2 (families), _3.3 (tokens), _5.1 (Editor rules + "Verifying and debugging layout"),
+_2.6 (selection bus, zoom on select) for wall_locator / related.
+Re-verify the baseline first (compile clean, EditMode + PlayMode all green; the tree was committed).
 
-Scope of THIS session:
-1. Step 5b (review fixes), exactly as written in _3.1 section 10:
-   - card UI strings table (framework defaults en/pt, wall override in card_settings), migrate the "X";
-   - tap-outside vs double-tap zoom: one rule, proven with two real taps in the real scene;
-   - status colours resolved through the markers' own outline rule, tokens only as fallback.
-2. Tier 1 group A, one kind at a time through the section 7 micro-cycle (definition -> round trip ->
-   view -> Phase A gallery entries + tests -> Editor rows appear by themselves -> fixture on "The Lamp"
-   -> Phase B real-scene test -> docs):
-   rich_text (plain, drop_cap, lede, sections + the [[term]] glossary renderer), quick_facts (chips,
-   grid_hairline, big_numbers), fun_fact (flip, postcard), pull_quote (serif, minimal),
-   status (ring, scale, unknown; has_status=false never renders), sources (list, with_confidence),
-   actions (circles, pill_row, sticky_cta).
-   Add each new BlockFieldType drawer only when a kind first needs it (the guard test enforces it).
+PART 1 -- the four [7B] TODOs:
+1. One screen-UI raycast: move PoiCardHost.AnythingUnder into ScreenUIHit, one hit list, host calls it.
+   Behaviour unchanged; the existing tap-outside and pinch tests must stay green.
+2. Collapsed header = one line (smaller title, chip hidden); its max height is a token; a real-scroll test
+   asserts collapsed height <= token and full header back at scroll top. Capture both.
+3. Lightbox: swipe left/right between pictures + pinch-zoom inside (reuse ZoomPanRule). Real drag/pinch tests.
+4. Make PoiCardTapZoomTests deterministic: inject a time source into the host's tap path (or queue the taps
+   with explicit timestamps) so no real-time wait decides the result. Run the suite 5 times: 5/5 green.
+   Then delete the [watch] flake line.
 
-Rules: never change any POI's id/name/category/summary/keywords; card text is not searchable;
-no literal colours/sizes in C#/UXML; no visitor strings in code (use the new strings table).
-"Lamp - Military" stays the short card (header, rich_text, quick_facts only for now).
-Stop after group A is green. Group B (process_steps, swatches, timeline, person, story_chapters,
-compare_points, practical_info) is the next session.
-Update _3.1 status (split step 6 into 6A/6B rows), 10-structure.md, _5.1 if the Editor changed.
-If _3.1 is wrong against the real code, STOP and report instead of patching around it.
+PART 2 -- Tier 2 group B, one kind at a time through the section 7 micro-cycle (definition -> round trip
+-> view -> Phase A gallery + tests -> Editor rows -> fixture on "The Lamp" -> Phase B real-scene test
+-> capture + checklist -> docs):
+- hotspot_image (numbered, loupes): image*, spots* items: x, y (0-1 sliders), title*, text. Tap a spot ->
+  its text opens under the picture; loupes = magnified circle crops. The Editor needs a way to place x/y:
+  sliders are enough now; note a click-to-place picker as a TODO, do not build it.
+- wall_locator (strip, neighbours): no authored fields; reads this wall's POI positions (captured
+  positions -> a horizontal strip, this POI highlighted, the camera's position as "you" in Play Mode).
+  neighbours = the nearest POI left and right along the strip, tap selects it through SelectionEventBus
+  (the card rebinds, zoom-on-select as for a marker tap). Define "along the wall" in ONE pure rule
+  (project on the wall's main axis, same idea as the minimap's MinimapLayout -- reuse it if it fits).
+- today_map (static, bridge): map image*, lat, lng (Number), maps_url; "Directions" opens the URL
+  (Application.OpenURL behind an interface so tests can check the call without leaving Unity).
+- related (carousel, next_along_wall): source Choice (manual / same_category / nearest), items: PoiRef;
+  tap selects that POI through the bus. next_along_wall reuses wall_locator's rule.
+Fixture: The Lamp gets every group B kind x variant; Lamp - Military keeps its short card + gallery.
+Never change any POI's id/name/category/summary/keywords (git diff = card data + media only).
+
+Rules as before: no literal colours/sizes in card C#/UXML, no visitor strings in code (CardStrings),
+capture and check every new Editor row and render yourself (40-testing 4.5).
+Stop when both parts are green. Update _3.1 (row 7B with proof, delete done TODO lines, design history
+for any deviation), 10-structure.md, _5.1. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+If _3.1 is wrong against the real code, STOP and report.
+
+and then also i am trying to commit to git but something is giving errors... you try to commit: 
+"POI card: Tier 1 group B, 6C review fixes (family split, search hides at full, header collapse, block headings) and Tier 2 group A (picture fields, header pictures, gallery + lightbox, before/after, zoom image)"
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

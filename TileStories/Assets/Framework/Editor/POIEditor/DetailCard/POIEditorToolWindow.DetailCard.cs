@@ -19,6 +19,11 @@ namespace TileStories.Editor
         private const float BlockLibraryEnabledColumnWidth = 60f;
         private const float BlockLibraryVariantColumnWidth = 130f;
 
+        private static GUIStyle _blockLibraryFamilyStyle;
+        // The family word: mini type, vertically centred so it shares the kind name's line
+        private static GUIStyle BlockLibraryFamilyStyle =>
+            _blockLibraryFamilyStyle ??= new GUIStyle(EditorStyles.miniLabel) { alignment = TextAnchor.MiddleLeft, fixedHeight = 0f };
+
         private readonly TestGuideState _cardContainerTest = new TestGuideState();
         private readonly TestGuideState _blockLibraryTest = new TestGuideState();
         private readonly TestGuideState _cardTextsTest = new TestGuideState();
@@ -225,7 +230,8 @@ namespace TileStories.Editor
                 using (new TableRowScope())
                 {
                     GUILayout.Label(kind.DisplayName, GUILayout.Width(BlockLibraryKindColumnWidth));
-                    GUILayout.Label(kind.Family, EditorStyles.miniLabel, GUILayout.Width(BlockLibraryFamilyColumnWidth));
+                    // - the mini style is shorter than the row and top-aligned: centred at the row's height it sits on the kind's line
+                    GUILayout.Label(kind.Family, BlockLibraryFamilyStyle, GUILayout.Width(BlockLibraryFamilyColumnWidth), GUILayout.Height(EditorGUIUtility.singleLineHeight));
                     GUILayout.Space(TableGapBetweenGroups);
 
                     bool enabled = BlockLibraryRule.IsEnabled(s, kind.Key);

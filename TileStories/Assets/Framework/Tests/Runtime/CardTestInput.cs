@@ -27,6 +27,31 @@ namespace TileStories.Tests
             yield return null;
         }
 
+        // Drag from panel position `start` by `delta` (panel units, any direction), over `frames` frames
+        public static IEnumerator DragFrom(IPanel panel, Vector2 start, Vector2 delta, int frames = 12)
+        {
+            Send(panel, EventType.MouseDown, start);
+            yield return null;
+            for (int i = 1; i <= frames; i++)
+            {
+                Send(panel, EventType.MouseDrag, start + delta * i / frames);
+                yield return null;
+            }
+            Send(panel, EventType.MouseUp, start + delta);
+            yield return null;
+        }
+
+        // Ctrl + mouse wheel at a panel position (the desktop's pinch: a trackpad pinch arrives as exactly this); + = out
+        public static IEnumerator CtrlWheel(IPanel panel, Vector2 at, float notches, int frames = 1)
+        {
+            for (int i = 0; i < frames; i++)
+            {
+                var e = new Event { type = EventType.ScrollWheel, mousePosition = at, delta = new Vector2(0f, notches / frames), modifiers = EventModifiers.Control };
+                using (var evt = WheelEvent.GetPooled(e)) panel.visualTree.SendEvent(evt);
+                yield return null;
+            }
+        }
+
         // A tap (press + release, no move) at a panel position: the panel picks the element under it
         public static IEnumerator Tap(IPanel panel, Vector2 position)
         {
@@ -34,6 +59,20 @@ namespace TileStories.Tests
             yield return null;
             Send(panel, EventType.MouseUp, position);
             yield return null;
+        }
+
+        // Scroll the mouse wheel over the centre of `over` (panel units per notch as the ScrollView defines them; + = down),
+        // one notch per frame: the panel picks the element under the point, exactly as a real wheel's events are routed
+        public static IEnumerator Wheel(VisualElement over, float notches, int frames = 1)
+        {
+            Assert.IsNotNull(over?.panel, "the wheel turns over an element of a live panel");
+            Vector2 at = over.worldBound.center;
+            for (int i = 0; i < frames; i++)
+            {
+                var e = new Event { type = EventType.ScrollWheel, mousePosition = at, delta = new Vector2(0f, notches / frames) };
+                using (var evt = WheelEvent.GetPooled(e)) over.panel.visualTree.SendEvent(evt);
+                yield return null;
+            }
         }
 
         // The colour actually behind an element: its own and its ancestors' backgrounds composited, from the nearest

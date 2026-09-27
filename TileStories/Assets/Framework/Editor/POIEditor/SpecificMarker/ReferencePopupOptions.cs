@@ -24,8 +24,9 @@ namespace TileStories.Editor
             SelectedIndex = selectedIndex;
         }
 
-        // keys/labels: the real rows (same length). allowNone: offer "(none)" as a real choice.
-        public static ReferencePopupOptions Build(IList<string> keys, IList<string> labels, string current, bool allowNone)
+        // keys/labels: the real rows (same length). allowNone: offer "(none)" as a real choice. missingLabel: how a stale
+        // value is shown instead of "<key> (missing)" -- for a reference whose key the window never shows (a POI id)
+        public static ReferencePopupOptions Build(IList<string> keys, IList<string> labels, string current, bool allowNone, string missingLabel = null)
         {
             var outKeys = new List<string>();
             var outLabels = new List<string>();
@@ -51,7 +52,7 @@ namespace TileStories.Editor
             {
                 selected = outKeys.Count;
                 outKeys.Add(current);
-                outLabels.Add(current + MissingSuffix);
+                outLabels.Add(missingLabel ?? current + MissingSuffix);
             }
 
             return new ReferencePopupOptions(outKeys.ToArray(), outLabels.ToArray(), selected);

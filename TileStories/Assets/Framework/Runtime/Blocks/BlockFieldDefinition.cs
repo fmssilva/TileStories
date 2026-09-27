@@ -13,6 +13,7 @@ namespace TileStories
         Asset,              // asset: a path under card_settings.media_resources_path
         Items,              // items: a repeater whose rows hold ItemFields
         PoiRef,             // value: a POI id of this wall
+        Color,              // value: a colour written "#RRGGBB" or "#RGB" (content, e.g. a swatch; BlockFieldReader.TryParseColor)
     }
 
     // One field of a block kind: the schema the view, the Editor drawer and the validator all read
@@ -22,7 +23,8 @@ namespace TileStories
         public BlockFieldType Type;
         // The Editor row label ("Title")
         public string Label;
-        // A block whose required field is empty is not shown (BlockStackBuilder)
+        // A block whose required field is empty is not shown (BlockStackBuilder); an Items row whose required sub-field
+        // is empty is not shown either (BlockFieldReader.ItemIsComplete)
         public bool Required;
         // The Editor (i) text: framework-authored, app-agnostic
         public string Help;
@@ -31,5 +33,11 @@ namespace TileStories
         public IReadOnlyList<string> OptionLabels;
         // Items only: the sub-fields of one row (never Items themselves)
         public IReadOnlyList<BlockFieldDefinition> ItemFields;
+        // Asset only: what the file must be (MediaPathRule checks the stored path against it)
+        public MediaKind Media;
+        // Number only: the value range (the Editor's slider) and the value read while nothing is stored
+        public float NumberMin;
+        public float NumberMax = 1f;
+        public float NumberDefault;
     }
 }

@@ -1,0 +1,502 @@
+/* The about family's blocks: header, status, quick_facts, rich_text, fun_fact, pull_quote, process_steps,
+   swatches, actions.
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
+   _3.3). UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
+
+/* ---- header block ---- */
+
+/* the compact variant, an empty subtitle, and the pinned header collapsed by a scrolled stack (BlockStackView) all keep
+   only the top part: title + chip */
+.card-header--compact .card-header__subtitle,
+.card-header__subtitle--empty,
+.poi-card__header--collapsed .card-header__subtitle {
+    display: none;
+}
+
+.card-header__top {
+    margin-bottom: var(--ts-space-3);
+    padding-right: var(--ts-space-6);
+}
+
+.card-header__title {
+    font-size: var(--ts-size-title);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-chip {
+    align-self: flex-start;
+    margin-top: var(--ts-space-2);
+    padding: var(--ts-space-1) var(--ts-space-3);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-on-accent);
+    background-color: var(--ts-accent);
+    border-radius: var(--ts-radius-m);
+}
+
+.card-header__subtitle {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-4) 0;
+    padding: 0;
+}
+
+/* ---- rich_text ---- */
+
+.card-rich__heading {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: var(--ts-space-3) 0 var(--ts-space-2) 0;
+    padding: 0;
+}
+
+/* ---- quick_facts: chips, grid_hairline, big_numbers ---- */
+
+.card-facts {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.card-facts__label {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-facts__value {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-facts--chips .card-facts__cell {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--ts-surface-2);
+    border-radius: var(--ts-radius-l);
+    padding: var(--ts-space-1) var(--ts-space-3);
+    margin: 0 var(--ts-space-2) var(--ts-space-2) 0;
+    /* a chip never grows past the card: a long value wraps inside it */
+    max-width: 100%;
+    flex-shrink: 1;
+}
+
+.card-facts--chips .card-facts__label {
+    margin-right: var(--ts-space-2);
+    flex-shrink: 0;
+}
+
+.card-facts--chips .card-facts__value {
+    flex-shrink: 1;
+}
+
+.card-facts--grid_hairline .card-facts__cell {
+    width: 50%;
+    padding: var(--ts-space-3) var(--ts-space-3) var(--ts-space-3) 0;
+    border-top-width: var(--ts-line-width);
+    border-top-color: var(--ts-line);
+}
+
+.card-facts--big_numbers .card-facts__cell {
+    width: 50%;
+    flex-direction: column-reverse;
+    /* column-reverse starts at the bottom: flex-end keeps each value at the top of its row */
+    justify-content: flex-end;
+    padding: var(--ts-space-2) var(--ts-space-3) var(--ts-space-3) 0;
+}
+
+.card-facts--big_numbers .card-facts__value {
+    font-size: var(--ts-size-title);
+    color: var(--ts-accent-text);
+}
+
+/* ---- fun_fact: flip, postcard ---- */
+
+.card-fun__box {
+    background-color: var(--ts-surface-2);
+    border-radius: var(--ts-radius-m);
+    padding: var(--ts-space-3) var(--ts-space-4);
+    margin: 0 0 var(--ts-space-3) 0;
+    min-height: var(--ts-touch-target);
+}
+
+.card-fun__heading {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-accent-text);
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+.card-fun__hint {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+    margin: 0;
+    padding: 0;
+}
+
+.card-fun__paragraph {
+    margin-bottom: var(--ts-space-1);
+}
+
+.card-fun--postcard .card-fun__box {
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-left-width: var(--ts-space-1);
+    border-left-color: var(--ts-accent);
+    rotate: var(--ts-postcard-tilt);
+}
+
+/* ---- pull_quote: serif, minimal ---- */
+
+.card-quote__paragraph {
+    -unity-font-style: italic;
+}
+
+.card-quote--serif {
+    border-left-width: var(--ts-space-1);
+    border-left-color: var(--ts-accent);
+    padding-left: var(--ts-space-4);
+}
+
+.card-quote--serif .card-quote__paragraph {
+    font-size: var(--ts-size-quote);
+}
+
+.card-quote__author {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-quote__source {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-quote--minimal .card-quote__attribution {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.card-quote--minimal .card-quote__author {
+    margin-right: var(--ts-space-2);
+}
+
+/* ---- process_steps: numbered. The number in a circle, a rail down to the next step, then title + text ---- */
+
+.card-steps__step {
+    flex-direction: row;
+}
+
+.card-steps__marker {
+    width: var(--ts-step-number);
+    flex-shrink: 0;
+    align-items: center;
+    margin-right: var(--ts-space-3);
+}
+
+.card-steps__number {
+    width: var(--ts-step-number);
+    height: var(--ts-step-number);
+    flex-shrink: 0;
+    border-radius: var(--ts-step-number);
+    background-color: var(--ts-accent);
+    color: var(--ts-on-accent);
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
+}
+
+.card-steps__rail {
+    flex-grow: 1;
+    width: var(--ts-rail-width);
+    min-height: var(--ts-space-3);
+    margin: var(--ts-space-1) 0;
+    background-color: var(--ts-line);
+}
+
+.card-steps__body {
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding-bottom: var(--ts-space-4);
+}
+
+/* at least the number's height, centred: a one-line title sits level with its number */
+.card-steps__title {
+    min-height: var(--ts-step-number);
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-steps__paragraph {
+    margin-bottom: var(--ts-space-1);
+}
+
+/* ---- swatches: grid. The sample's colour is content (set by the view); its border keeps a colour close to the card's
+   own visible as a sample ---- */
+
+.card-swatches {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.card-swatches--grid .card-swatches__cell {
+    width: 50%;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0 var(--ts-space-3) var(--ts-space-4) 0;
+}
+
+.card-swatches__sample {
+    width: var(--ts-swatch-size);
+    height: var(--ts-swatch-size);
+    flex-shrink: 0;
+    margin-right: var(--ts-space-3);
+    border-radius: var(--ts-radius-s);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+}
+
+.card-swatches__words {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.card-swatches__name {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-swatches__code,
+.card-swatches__note {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- status: ring, scale. The ring picture is the MARKERS' own (Rings/), tinted by the view with the wall's colour;
+   the tone classes are the fallback when the wall draws no ring ---- */
+
+.card-status__main {
+    flex-direction: row;
+    align-items: center;
+}
+
+.card-status__ring {
+    width: var(--ts-status-ring-size);
+    height: var(--ts-status-ring-size);
+    flex-shrink: 0;
+    margin-right: var(--ts-space-3);
+    align-items: center;
+    justify-content: center;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.card-status__ring--small {
+    width: var(--ts-status-step-ring);
+    height: var(--ts-status-step-ring);
+    margin: 0 0 var(--ts-space-1) 0;
+}
+
+.card-status__ring--solid { background-image: url("../../../Markers/Rings/RingSolid.png"); }
+.card-status__ring--dash_long { background-image: url("../../../Markers/Rings/RingDashLong.png"); }
+.card-status__ring--dash_medium { background-image: url("../../../Markers/Rings/RingDashMedium.png"); }
+.card-status__ring--dash_short { background-image: url("../../../Markers/Rings/RingDashShort.png"); }
+.card-status__ring--dotted { background-image: url("../../../Markers/Rings/RingDotted.png"); }
+
+.card-status__ring--tone-0 { -unity-background-image-tint-color: var(--ts-status-0); }
+.card-status__ring--tone-1 { -unity-background-image-tint-color: var(--ts-status-1); }
+.card-status__ring--tone-2 { -unity-background-image-tint-color: var(--ts-status-2); }
+.card-status__ring--tone-3 { -unity-background-image-tint-color: var(--ts-status-3); }
+.card-status__ring--tone-4 { -unity-background-image-tint-color: var(--ts-status-4); }
+
+.card-status__unknown-mark {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    margin: 0;
+    padding: 0;
+}
+
+.card-status__heading {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    margin: 0;
+    padding: 0;
+}
+
+.card-status__level {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-status__words {
+    flex-shrink: 1;
+}
+
+.card-status__scale {
+    flex-direction: row;
+    margin-top: var(--ts-space-3);
+}
+
+.card-status__step {
+    flex-grow: 1;
+    flex-basis: 0;
+    align-items: center;
+    padding-bottom: var(--ts-space-1);
+    border-bottom-width: 0;
+}
+
+.card-status__step--current {
+    border-bottom-width: var(--ts-space-1);
+    border-bottom-color: var(--ts-accent);
+}
+
+.card-status__step-name {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    -unity-text-align: upper-center;
+    margin: 0;
+    padding: 0;
+}
+
+.card-status__step--current .card-status__step-name {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
+
+/* ---- actions: circles, pill_row, sticky_cta. The icon is the set's (CardIcons); these rules size its root ---- */
+
+.card-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.card-action {
+    margin: 0 var(--ts-space-2) var(--ts-space-2) 0;
+    padding: 0;
+    border-width: 0;
+    background-color: var(--ts-surface-2);
+    color: var(--ts-ink);
+    min-height: var(--ts-touch-target);
+    min-width: var(--ts-touch-target);
+    align-items: center;
+    justify-content: center;
+}
+
+.card-action__label {
+    flex-shrink: 1;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
+}
+
+.card-action__icon {
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+}
+
+.card-actions--circles .card-action {
+    flex-direction: column;
+    /* icons share one top line; a long label grows downwards */
+    justify-content: flex-start;
+    background-color: var(--ts-surface);
+    width: 25%;
+    padding: var(--ts-space-2) var(--ts-space-1);
+    border-radius: var(--ts-radius-m);
+}
+
+.card-actions--circles .card-action__icon {
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    border-radius: var(--ts-touch-target);
+    background-color: var(--ts-surface-2);
+    margin-bottom: var(--ts-space-1);
+}
+
+/* the shape is the shared .card-pill (CardParts.uss), added to the buttons by the view in this look */
+.card-actions--pill_row .card-action {
+    padding-left: var(--ts-space-3);
+}
+
+.card-actions--pill_row .card-action__icon {
+    margin-right: var(--ts-space-2);
+}
+
+.card-actions--sticky_cta {
+    flex-direction: column;
+    /* a wrapping column would size each button to its one-line words: no wrap, stretch to the card's width */
+    flex-wrap: nowrap;
+    align-items: stretch;
+    margin: 0;
+    padding: var(--ts-space-3) var(--ts-space-4);
+    border-top-width: var(--ts-line-width);
+    border-top-color: var(--ts-line);
+    background-color: var(--ts-surface);
+}
+
+.card-actions--sticky_cta .card-action {
+    flex-direction: row;
+    margin: 0 0 var(--ts-space-2) 0;
+    background-color: var(--ts-accent);
+    border-radius: var(--ts-radius-m);
+}
+
+.card-actions--sticky_cta .card-action__label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-on-accent);
+}
+
+.card-actions--sticky_cta .card-action__icon {
+    margin-right: var(--ts-space-2);
+}
+
+/* on the accent button the icon is drawn in the button's text colour */
+.card-actions--sticky_cta .card-icon__frame {
+    border-color: var(--ts-on-accent);
+}
+
+.card-actions--sticky_cta .card-icon__bar,
+.card-actions--sticky_cta .card-icon__dot {
+    background-color: var(--ts-on-accent);
+}

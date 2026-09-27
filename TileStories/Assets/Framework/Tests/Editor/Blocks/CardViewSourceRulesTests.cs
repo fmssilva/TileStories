@@ -7,7 +7,7 @@ namespace TileStories.Editor.Tests
 {
     // The card's two hard rules (_3.1 section 3, 30-ui-content.md), enforced on the source of every card view
     // (Runtime/UI/Cards/**/*.cs) so a later edit cannot slip past them:
-    //   - no literal colour or size: views add CLASSES, PoiCard.uss + CardTokens.uss hold every value (_3.3 section 1)
+    //   - no literal colour or size: views add CLASSES, the card stylesheets + CardTokens.uss hold every value (_3.3 section 1)
     //   - no visitor string in code: a text a visitor reads comes from the config or the card strings table
     public class CardViewSourceRulesTests
     {
@@ -36,7 +36,7 @@ namespace TileStories.Editor.Tests
                 @"style\.(width|height|min\w*|max\w*|fontSize|margin\w*|padding\w*|border\w*Width|border\w*Radius|left|right|top|bottom)\s*=\s*-?\d");
             foreach (string file in Files())
                 foreach (Match m in literal.Matches(Code(file)))
-                    Assert.Fail(Path.GetFileName(file) + " writes a literal look in C#: '" + m.Value + "' (put it in PoiCard.uss / CardTokens.uss)");
+                    Assert.Fail(Path.GetFileName(file) + " writes a literal look in C#: '" + m.Value + "' (put it in the card stylesheets / CardTokens.uss)");
         }
 
         [Test]

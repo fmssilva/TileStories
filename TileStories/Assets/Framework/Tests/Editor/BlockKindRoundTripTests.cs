@@ -20,6 +20,9 @@ namespace TileStories.Editor.Tests
 
         private static string TextOf(string key, string lang) => key + " in " + lang;
 
+        // A row's colour: both written forms the Editor accepts
+        private static string ColourOf(int row) => row == 0 ? "#1F3F8F" : "#abc";
+
         // One value of every field type, from the definition
         private static BlockFieldValue Filled(BlockFieldDefinition f)
         {
@@ -35,6 +38,7 @@ namespace TileStories.Editor.Tests
                 case BlockFieldType.Choice: v.value = f.Options[f.Options.Count - 1]; break;
                 case BlockFieldType.Asset: v.asset = "folder/" + f.Key + ".png"; break;
                 case BlockFieldType.PoiRef: v.value = "poi_2"; break;
+                case BlockFieldType.Color: v.value = "#1F3F8F"; break;
                 case BlockFieldType.Items:
                     for (int row = 0; row < 2; row++)
                     {
@@ -44,6 +48,9 @@ namespace TileStories.Editor.Tests
                             var s = new BlockItemFieldValue { key = sub.Key };
                             if (sub.Type == BlockFieldType.Choice) s.value = sub.Options[row % sub.Options.Count];
                             else if (sub.Type == BlockFieldType.Number) s.number = row + 1;
+                            else if (sub.Type == BlockFieldType.Color) s.value = ColourOf(row);
+                            else if (sub.Type == BlockFieldType.Toggle) s.flag = row == 0;
+                            else if (sub.Type == BlockFieldType.Asset) s.asset = "folder/" + sub.Key + row + ".png";
                             else s.text = Languages.Select(l => new LocalizedEntry { lang = l, value = TextOf(sub.Key + row, l) }).ToList();
                             item.fields.Add(s);
                         }
@@ -68,7 +75,8 @@ namespace TileStories.Editor.Tests
                 var config = new WallConfigData { wall_id = "rt" };
                 config.card_settings.languages = new List<string>(Languages);
                 config.pois.Add(new POIData { id = "poi_1", name = "North Tower", has_status = true, status_pct = 20f });
-                config.pois.Add(new POIData { id = "poi_2", name = "South Gate" });
+                // - a status on both: kinds that compare the POI with another (poi_2) have something to show
+                config.pois.Add(new POIData { id = "poi_2", name = "South Gate", has_status = true, status_pct = 60f });
                 t.GetField("_config", Instance).SetValue(window, config);
                 t.GetMethod("InitializeConfigHistory", Instance).Invoke(window, null);
                 WallConfigData Live() => (WallConfigData)t.GetField("_config", Instance).GetValue(window);
@@ -86,7 +94,7 @@ namespace TileStories.Editor.Tests
                     foreach (string lang in Languages)
                         AssertReadsBack(new BlockFieldReader(back, lang, "en"), f, lang, kindKey);
 
-                var built = BlockStackBuilder.Build(loaded.pois[0], loaded.card_settings, BlockRegistry.Shared);
+                var built = BlockStackBuilder.Build(loaded.pois[0], loaded.card_settings, BlockRegistry.Shared, loaded.pois);
                 CollectionAssert.IsEmpty(built.Skipped, kindKey + ": a block with every field filled is shown");
                 if (kind.Key != BuiltInBlocks.HeaderKind) Assert.AreEqual(kind.Key, built.Entries.Last().Definition.Key);
 
@@ -110,6 +118,7 @@ namespace TileStories.Editor.Tests
                 case BlockFieldType.Choice: Assert.AreEqual(f.Options[f.Options.Count - 1], read.Value(f.Key), where); break;
                 case BlockFieldType.Asset: Assert.AreEqual("folder/" + f.Key + ".png", read.Asset(f.Key), where); break;
                 case BlockFieldType.PoiRef: Assert.AreEqual("poi_2", read.Value(f.Key), where); break;
+                case BlockFieldType.Color: Assert.AreEqual("#1F3F8F", read.Value(f.Key), where); break;
                 case BlockFieldType.Items:
                     var items = read.Items(f.Key);
                     Assert.AreEqual(2, items.Count, where + ": both rows");
@@ -120,6 +129,15 @@ namespace TileStories.Editor.Tests
                                 Assert.AreEqual(sub.Options[row % sub.Options.Count], items[row].fields.Single(x => x.key == sub.Key).value, where + " row " + row);
                             else if (sub.Type == BlockFieldType.Number)
                                 Assert.AreEqual(row + 1, items[row].fields.Single(x => x.key == sub.Key).number, where + " row " + row);
+                            else if (sub.Type == BlockFieldType.Color)
+                            {
+                                Assert.AreEqual(ColourOf(row), read.ItemValue(items[row], sub.Key), where + " row " + row);
+                                Assert.IsTrue(read.ItemColor(items[row], sub.Key, out _), where + " row " + row + ": a colour the card accepts");
+                            }
+                            else if (sub.Type == BlockFieldType.Toggle)
+                                Assert.AreEqual(row == 0, read.ItemFlag(items[row], sub.Key), where + " row " + row);
+                            else if (sub.Type == BlockFieldType.Asset)
+                                Assert.AreEqual("folder/" + sub.Key + row + ".png", read.ItemValidAsset(items[row], sub.Key, sub.Media), where + " row " + row + ": a path the rule accepts");
                             else
                                 Assert.AreEqual(TextOf(sub.Key + row, lang), read.ItemText(items[row], sub.Key), where + " row " + row + "." + sub.Key);
                         }

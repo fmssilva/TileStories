@@ -20,8 +20,14 @@ namespace TileStories
         [Tooltip("CardTokens.uss: the --ts-* design tokens")]
         [SerializeField] private StyleSheet tokens;
 
-        [Tooltip("PoiCard.uss: the card's layout, written only with the tokens")]
+        [Tooltip("PoiCard.uss: the card's container, written only with the tokens")]
         [SerializeField] private StyleSheet cardStyle;
+
+        [Tooltip("The blocks' looks, added after the container: CardParts.uss, then one Blocks/<Family>/<Family>.uss per family")]
+        [SerializeField] private StyleSheet[] blockStyles;
+
+        [Tooltip("The search UI of this scene: its top (bar, filter tray, view switch) steps aside while the card is at full")]
+        [SerializeField] private SearchUIHost searchUI;
 
         [Tooltip("CardStrings.asset: the framework's default wording of the card's UI texts")]
         [SerializeField] private CardStringTable strings;
@@ -79,10 +85,25 @@ namespace TileStories
         {
             if (Sheet != null) return;
             var root = GetComponent<UIDocument>().rootVisualElement;
-            Sheet = new PoiCardSheetView(root, BlockRegistry.Shared, new[] { tokens, cardStyle });
+            Sheet = new PoiCardSheetView(root, BlockRegistry.Shared, CardStyleSheets(tokens, cardStyle, blockStyles));
             Sheet.CloseRequested += SelectionEventBus.Clear;
+            // - the full card would cover the search bar half-way (neither readable nor tappable): the bar steps aside
+            Sheet.StopChanged += stop => { if (searchUI != null) searchUI.SetTopCoveredByCard(SheetStopRule.CoversScreenTop(stop)); };
             Sheet.Layer.RegisterCallback<GeometryChangedEvent>(_ => SafeAreaHelper.ApplyAsOffsets(Sheet.Layer));
         }
+
+        // Every stylesheet of the card, in the order they apply: tokens, container, then the blocks' (shared by the
+        // Phase A harness, so the gallery card and the wall's card are styled by exactly the same list)
+        public static IEnumerable<StyleSheet> CardStyleSheets(StyleSheet tokens, StyleSheet container, IEnumerable<StyleSheet> blockStyles)
+        {
+            yield return tokens;
+            yield return container;
+            if (blockStyles == null) yield break;
+            foreach (var sheet in blockStyles) yield return sheet;
+        }
+
+        // The block stylesheets this host adds (LivingRoomSceneWiringTests checks the list is complete)
+        public IReadOnlyList<StyleSheet> BlockStyles => blockStyles ?? System.Array.Empty<StyleSheet>();
 
         // Open (or rebind) the card for this POI
         private void Show(string poiId)
@@ -96,7 +117,7 @@ namespace TileStories
             }
 
             _tapOutside.Cancel();
-            var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared);
+            var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wallSession.SearchPois);
             if (Application.isEditor || Debug.isDebugBuild)
                 foreach (var skipped in stack.Skipped)
                     Debug.LogWarning("[Card] " + poiId + ": block '" + skipped.Instance.key + "' (" + skipped.Instance.kind + ") not shown: " + skipped.Reason

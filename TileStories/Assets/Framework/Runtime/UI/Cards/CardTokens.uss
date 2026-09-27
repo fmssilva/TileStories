@@ -66,6 +66,12 @@
     --ts-space-4: 16px;
     --ts-space-5: 24px;
     --ts-space-6: 32px;
+    /* The pill button (CardParts.uss .card-pill): its corner radius is HALF the touch target, so a one-word pill stays a
+       stadium, never an egg (a radius larger than half the height is shrunk unevenly), and it never gets narrower than this */
+    --ts-pill-radius: 24px;
+    --ts-pill-min-width: 96px;
+    /* The one gap between two blocks of the stack (BlockStackView's slots, _3.1 step 6C) */
+    --ts-block-gap: 24px;
 
     /* Effects */
     --ts-glass-opacity: 0.88;
@@ -92,4 +98,39 @@
 
     /* The fun_fact postcard's tilt */
     --ts-postcard-tilt: -1.5deg;
+
+    /* Numbered markers (process_steps) and the line that joins steps / timeline events */
+    --ts-step-number: 32px;
+    --ts-rail-width: 2px;
+
+    /* A colour sample (swatches) */
+    --ts-swatch-size: 44px;
+
+    /* Timeline: an event's dot, the Now point's larger ring, one event's width in the horizontal look */
+    --ts-timeline-dot: 12px;
+    --ts-timeline-now: 16px;
+    --ts-timeline-cell: 160px;
+
+    /* A person's monogram (the photo's place until Tier 2 images) */
+    --ts-monogram-size: 48px;
+
+    /* The chapter bar of story_chapters: one segment per chapter */
+    --ts-segment-height: 4px;
+
+    /* Tier 2 pictures (Media.uss): the header's hero, a block picture's frame, the gallery's small pictures and prints,
+       the spotlight ring, the before / after handle, the full-screen view's picture area */
+    --ts-hero-height: 200px;
+    --ts-media-height: 220px;
+    --ts-thumb-size: 64px;
+    --ts-grid-cell-height: 120px;
+    --ts-print-offset: 10px;
+    --ts-print-tilt: 3deg;
+    --ts-spotlight-ring: 56px;
+    --ts-spotlight-ring-width: 3px;
+    --ts-spotlight-ring-radius: 28px;
+    --ts-slider-line: 3px;
+    --ts-dot-size: 8px;
+    --ts-carousel-page: 300px;
+    /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
+    --ts-clear: rgba(0, 0, 0, 0);
 }

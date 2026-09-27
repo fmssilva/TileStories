@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -256,7 +257,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("block_2", skipped.Instance.key);
             Assert.AreEqual(BlockStackBuilder.SkipReason.MissingRequired, skipped.Reason, "an empty required field is reported first");
             Assert.AreEqual("Not shown: Title is empty in every language.",
-                POIEditorToolWindow.CardBlockSkipText(skipped.Reason, BuiltInBlocks.Header.Field(skipped.FieldKey).Label), "the row names the field by its label");
+                POIEditorToolWindow.CardBlockSkipText(skipped.Reason, BuiltInBlocks.Header.Field(skipped.FieldKey)), "the row names the field by its label");
             yield return _window.ReplaceText("Block field title en#1", "Gate");
             yield return _window.ClickAway();
             skipped = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared).Skipped.Single();
@@ -388,6 +389,127 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("checked", POIEditorToolWindow.ChoiceValue(_window.Config.pois[0].card.blocks[0], BuiltInBlocks.SourcesStatusField), "Ctrl+Z");
         }
 
+        // ---------------- Color fields ----------------
+
+        [UnityTest]
+        public IEnumerator AColourField_RealTypingOfAHexCode_TheCardShowsIt_AnInvalidOneIsKeptWithAWarning_AndCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var block = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.SwatchesKind };
+            config.pois[0].card.blocks.Add(block);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            _window.Click("Block item swatches add#0");
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Block item swatches 0 colour#0");
+            Assert.AreEqual(1, Swatches().Count, "a real click added the row");
+            Assert.IsNull(Swatches()[0].fields.Find(f => f.key == BuiltInBlocks.SwatchesColourField), "drawing the colour row writes nothing");
+
+            yield return _window.ReplaceText("Block item swatches 0 name en#0", "Cobalt blue");
+            yield return _window.ClickAway();
+            yield return _window.ReplaceText("Block item swatches 0 colour#0", "#1F3F8F");
+            yield return _window.ClickAway();
+            Assert.AreEqual("#1F3F8F", POIEditorToolWindow.ItemChoiceValue(Swatches()[0], BuiltInBlocks.SwatchesColourField), "real typing stores the hex text");
+            var shown = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared);
+            CollectionAssert.IsEmpty(shown.Skipped, "a named row with a real colour: the card shows the block");
+            var reader = new BlockFieldReader(shown.Entries[1].Instance, "en", "en");
+            Assert.IsTrue(reader.ItemColor(reader.Items(BuiltInBlocks.SwatchesItemsField)[0], BuiltInBlocks.SwatchesColourField, out var colour));
+            Assert.AreEqual(0x3F / 255f, colour.g, 1e-4f, "the card reads the typed colour");
+
+            yield return _window.ReplaceText("Block item swatches 0 colour#0", "#12");
+            yield return _window.ClickAway();
+            Assert.AreEqual("#12", POIEditorToolWindow.ItemChoiceValue(Swatches()[0], BuiltInBlocks.SwatchesColourField), "an invalid text is kept as typed, never rewritten");
+            var skipped = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared).Skipped.Single();
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NoCompleteRow, skipped.Reason, "its only row is no longer complete");
+            Assert.AreEqual("Not shown: no row of Swatches is complete: each needs Name and Colour (a colour written as #RRGGBB).",
+                POIEditorToolWindow.CardBlockSkipText(skipped.Reason, BuiltInBlocks.Swatches.Field(skipped.FieldKey)), "the block's reason names the colour rule");
+            Assert.AreEqual("Colour '#12' is not a colour: write it as #RRGGBB (for example #1F3F8F), or pick it. Until then the card leaves this row out.",
+                POIEditorToolWindow.CardColorInvalidText("Colour", "#12"), "the warning under the field");
+
+            yield return _window.PressUndo();
+            Assert.AreEqual("#1F3F8F", POIEditorToolWindow.ItemChoiceValue(Swatches()[0], BuiltInBlocks.SwatchesColourField), "one Ctrl+Z brings the good colour back");
+        }
+
+        [UnityTest]
+        public IEnumerator AToggleField_ARealClickTurnsItOn_TheCardReadsIt_DrawingNeverWrites_AndCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            config.pois[0].card.blocks.Add(new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.TimelineKind });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Block field highlight_now#0");
+            Assert.IsEmpty(_window.Config.pois[0].card.blocks[0].fields, "drawing an unticked toggle writes nothing");
+            Assert.IsFalse(_window.Unsaved);
+
+            _window.Click("Block field highlight_now#0");
+            yield return _window.WaitForRepaint();
+            var block = _window.Config.pois[0].card.blocks[0];
+            Assert.IsTrue(POIEditorToolWindow.FlagValue(block, BuiltInBlocks.TimelineHighlightNowField), "a real click ticks it");
+            Assert.IsTrue(new BlockFieldReader(block, "en", "en").Flag(BuiltInBlocks.TimelineHighlightNowField), "the card reads it");
+            yield return _window.PressUndo();
+            Assert.IsFalse(POIEditorToolWindow.FlagValue(_window.Config.pois[0].card.blocks[0], BuiltInBlocks.TimelineHighlightNowField), "Ctrl+Z unticks it");
+        }
+
+        // ---------------- PoiRef fields ----------------
+
+        [UnityTest]
+        public IEnumerator APoiRefField_ListsThePointsByTheirListTitles_AStaleIdShowsAsMissing_APickIsUndoable_AndItselfWarns()
+        {
+            var config = TwoPoiConfig();
+            config.pois[0].has_status = true;
+            config.pois[1].has_status = true;
+            config.card_settings.languages = new List<string> { "en" };
+            var block = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.ComparePointsKind };
+            POIEditorToolWindow.SetChoiceValue(block, BuiltInBlocks.ComparePointsOtherField, "poi_9");
+            config.pois[0].card.blocks.Add(block);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Block field other#0");
+            _window.RectOf("Block field axis#0");
+            Assert.IsFalse(_window.Unsaved, "drawing the popups writes nothing");
+            Assert.AreEqual("poi_9", POIEditorToolWindow.ChoiceValue(_window.Config.pois[0].card.blocks[0], BuiltInBlocks.ComparePointsOtherField),
+                "a deleted point's id is kept, never rewritten by drawing");
+
+            var stale = POIEditorToolWindow.PoiRefOptions(_window.Config.pois, "poi_9", allowNone: false);
+            CollectionAssert.AreEqual(new[] { "1. North Tower", "2. South Gate", "(missing)" }, stale.Labels, "list titles, and the stale id never shown");
+            Assert.AreEqual(2, stale.SelectedIndex, "the stale value stays selected");
+            Assert.IsFalse(stale.Labels.Any(l => l.Contains("poi_")), "no POI id in the popup");
+            var blank = POIEditorToolWindow.PoiRefOptions(_window.Config.pois, "", allowNone: false);
+            CollectionAssert.AreEqual(new[] { "(none)", "1. North Tower", "2. South Gate" }, blank.Labels, "nothing picked yet");
+            Assert.AreEqual("poi_2", blank.KeyAt(2), "a label stands for its POI's id");
+            var skipped = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois).Skipped.Single();
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NotForThisPoint, skipped.Reason, "a deleted point: not shown, with the kind's reason");
+
+            // - the popup's write path, inside the window's own mutation scope (a real pick goes through the same setter)
+            typeof(POIEditorToolWindow).GetMethod("DrawConfigMutationScope", Instance).Invoke(_window.Editor, new object[]
+                { (Action)(() => POIEditorToolWindow.SetChoiceValue(_window.Config.pois[0].card.blocks[0], BuiltInBlocks.ComparePointsOtherField, blank.KeyAt(2))), false });
+            var poi = _window.Config.pois[0];
+            CollectionAssert.IsEmpty(BlockStackBuilder.Build(poi, _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois).Skipped, "South Gate picked: shown");
+            CollectionAssert.IsEmpty(POIEditorToolWindow.CardBlockWarnings(poi.card.blocks[0], BuiltInBlocks.ComparePoints, _window.Config.card_settings, poi));
+
+            POIEditorToolWindow.SetChoiceValue(poi.card.blocks[0], BuiltInBlocks.ComparePointsOtherField, "poi_1");
+            Assert.AreEqual(POIEditorToolWindow.CardCompareWithItselfNote,
+                POIEditorToolWindow.CardBlockWarnings(poi.card.blocks[0], BuiltInBlocks.ComparePoints, _window.Config.card_settings, poi).Single(), "itself: warned");
+            POIEditorToolWindow.SetChoiceValue(poi.card.blocks[0], BuiltInBlocks.ComparePointsOtherField, "poi_2");
+
+            yield return _window.PressUndo();
+            Assert.AreEqual("poi_9", POIEditorToolWindow.ChoiceValue(_window.Config.pois[0].card.blocks[0], BuiltInBlocks.ComparePointsOtherField), "Ctrl+Z");
+        }
+
+        private List<BlockItemData> Swatches() =>
+            _window.Config.pois[0].card.blocks[0].fields.Single(f => f.key == BuiltInBlocks.SwatchesItemsField).items;
+
         // ---------------- Glossary ----------------
 
         [UnityTest]
@@ -421,6 +543,138 @@ namespace TileStories.Editor.Tests
             yield return _window.PressUndo();
             yield return _window.PressUndo();
             CollectionAssert.IsEmpty(_window.Config.card_settings.glossary, "three Ctrl+Z: definition, term, row");
+        }
+
+        // ---------------- warnings on blocks that show ----------------
+
+        private static BlockInstanceData ActionsWithRows(string variant, int rows)
+        {
+            var block = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.ActionsKind, variant = variant };
+            var field = new BlockFieldValue { key = BuiltInBlocks.ActionsItemsField };
+            for (int i = 0; i < rows; i++)
+                field.items.Add(new BlockItemData { fields = new List<BlockItemFieldValue>
+                {
+                    new() { key = BuiltInBlocks.ActionsLabelField, text = new List<LocalizedEntry> { new() { lang = "en", value = "Button " + i } } },
+                    new() { key = BuiltInBlocks.ActionsActionField, value = BuiltInBlocks.ActionShowOnWall },
+                } });
+            block.fields.Add(field);
+            return block;
+        }
+
+        // A real drag-and-drop of a project file onto a probed control: DragUpdated then DragPerform at its centre, with the
+        // file in DragAndDrop, exactly the events a person dragging from the Project window sends
+        private IEnumerator DropOnto(string probeKey, UnityEngine.Object file)
+        {
+            var at = _window.Local(_window.RectOf(probeKey).center);
+            DragAndDrop.PrepareStartDrag();
+            DragAndDrop.objectReferences = new[] { file };
+            DragAndDrop.paths = new[] { AssetDatabase.GetAssetPath(file) };
+            _window.Send(new Event { type = EventType.DragUpdated, mousePosition = at });
+            _window.Send(new Event { type = EventType.DragPerform, mousePosition = at });
+            DragAndDrop.PrepareStartDrag();
+            yield return _window.WaitForRepaint();
+        }
+
+        private const string MediaFolder = "LivingRoom/CardMedia";
+
+        [UnityTest]
+        public IEnumerator AnAssetField_ARealDropOfAPictureInTheMediaFolder_StoresItsPathThere_OutsideTheFolderIsKeptWithAReason_AndCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            config.card_settings.media_resources_path = MediaFolder;
+            var block = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.ZoomImageKind };
+            config.pois[0].card.blocks.Add(block);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Block field image#0");
+            BlockInstanceData Zoom() => _window.Config.pois[0].card.blocks[0];
+            Assert.IsNull(Zoom().fields.Find(f => f.key == BuiltInBlocks.ZoomImageImageField), "drawing the picture row writes nothing");
+
+            var inside = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/tile_detail.png");
+            Assert.IsNotNull(inside, "precondition: the fixture picture exists");
+            yield return DropOnto("Block field image#0", inside);
+            Assert.AreEqual("tile_detail.png", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField),
+                "a real drop stores the path inside the Media Folder, not the project path");
+            Assert.IsTrue(_window.Unsaved);
+            Assert.AreSame(inside, POIEditorToolWindow.MediaAssetFor("tile_detail.png", MediaFolder), "the row shows the picture the app will load (through Resources)");
+            var shown = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared);
+            CollectionAssert.IsEmpty(shown.Skipped, "the card shows the block");
+
+            yield return _window.PressUndo();
+            Assert.AreEqual("", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField), "one Ctrl+Z takes the drop back");
+            yield return _window.PressRedo();
+            Assert.AreEqual("tile_detail.png", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField), "Ctrl+Y");
+
+            const string outsidePath = "Assets/Framework/Runtime/UI/Markers/SymbolCircle.png";
+            var outside = AssetDatabase.LoadAssetAtPath<Texture2D>(outsidePath);
+            Assert.IsNotNull(outside, "precondition: a picture outside the Media Folder");
+            yield return DropOnto("Block field image#0", outside);
+            Assert.AreEqual(outsidePath, POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField), "a picture from outside is kept as picked, never silently refused");
+            var skipped = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared).Skipped.Single();
+            Assert.AreEqual(BlockStackBuilder.SkipReason.InvalidMedia, skipped.Reason, "the card leaves it out...");
+            var imageField = BuiltInBlocks.ZoomImage.Field(BuiltInBlocks.ZoomImageImageField);
+            StringAssert.StartsWith("Not shown: Picture must be a PNG / JPG / JPEG picture inside the wall's Media Folder",
+                POIEditorToolWindow.CardBlockSkipText(skipped.Reason, imageField), "...and Card Content says why, naming the field");
+            StringAssert.Contains("outside the wall's Media Folder",
+                POIEditorToolWindow.CardMediaProblemText(imageField.Label, imageField.Media, MediaPathRule.Check(outsidePath, imageField.Media)), "the warning under the row");
+            yield return _window.WaitForRepaint();
+            Assert.AreSame(outside, POIEditorToolWindow.MediaAssetFor(outsidePath, MediaFolder), "the row still shows what was picked");
+            Assert.IsNull(POIEditorToolWindow.MediaAssetFor("ghost.png", MediaFolder), "a path with no file: the row can tell (the missing-file warning)");
+        }
+
+        [UnityTest]
+        public IEnumerator ANumberField_ShowsItsDefaultWithoutWriting_ARealSliderClickStoresAValue_AndCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var block = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.BeforeAfterKind };
+            config.pois[0].card.blocks.Add(block);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            BlockInstanceData Slider() => _window.Config.pois[0].card.blocks[0];
+            var start = BuiltInBlocks.BeforeAfter.Field(BuiltInBlocks.BeforeAfterStartField);
+            Assert.IsNull(Slider().fields.Find(f => f.key == start.Key), "drawing writes nothing");
+            Assert.AreEqual(0.5f, POIEditorToolWindow.NumberValue(Slider(), start), "the row shows the default");
+
+            // - a real click near the left of the slider's track: the value jumps there
+            Rect row = _window.RectOf("Block field start#0");
+            _window.ClickAt(new Vector2(row.x + 6f, row.center.y));
+            yield return _window.WaitForRepaint();
+            var stored = Slider().fields.Find(f => f.key == start.Key);
+            Assert.IsNotNull(stored, "a real click wrote the value");
+            Assert.Less(stored.number, 0.2f, "near the track's left end: near 0 (all After)");
+            Assert.GreaterOrEqual(stored.number, start.NumberMin, "inside the range");
+            yield return _window.PressUndo();
+            Assert.IsNull(Slider().fields.Find(f => f.key == start.Key), "one Ctrl+Z: back to the default, nothing stored");
+        }
+
+        [Test]
+        public void AStickyActionsBlockWithSeveralButtons_WarnsThatOnlyTheFirstShows_WhateverSetsTheLook()
+        {
+            var settings = new CardSettings();
+            var warning = POIEditorToolWindow.CardBlockWarnings(ActionsWithRows(BuiltInBlocks.ActionsStickyCta, 3), BuiltInBlocks.Actions, settings, null).Single();
+            Assert.AreEqual("Sticky shows only the first button: the other 2 rows are not shown. Pick Circles or Pill Row to show every button.", warning);
+            StringAssert.Contains("other 1 row is", POIEditorToolWindow.CardBlockWarnings(ActionsWithRows(BuiltInBlocks.ActionsStickyCta, 2), BuiltInBlocks.Actions, settings, null).Single());
+
+            CollectionAssert.IsEmpty(POIEditorToolWindow.CardBlockWarnings(ActionsWithRows(BuiltInBlocks.ActionsStickyCta, 1), BuiltInBlocks.Actions, settings, null), "one button: nothing hidden");
+            CollectionAssert.IsEmpty(POIEditorToolWindow.CardBlockWarnings(ActionsWithRows(BuiltInBlocks.ActionsPillRow, 3), BuiltInBlocks.Actions, settings, null), "pill row shows them all");
+
+            // - no look picked on the block: the Block Library's default decides, exactly as the card does
+            var libraryBlock = ActionsWithRows("", 3);
+            CollectionAssert.IsEmpty(POIEditorToolWindow.CardBlockWarnings(libraryBlock, BuiltInBlocks.Actions, settings, null), "stock default is pill_row");
+            settings.kinds.Add(new BlockKindSetting { kind = BuiltInBlocks.ActionsKind, default_variant = BuiltInBlocks.ActionsStickyCta });
+            Assert.AreEqual(BuiltInBlocks.ActionsStickyCta, BlockStackBuilder.Build(new POIData { id = "p", card = new POICardData { blocks = { libraryBlock } } }, settings, BlockRegistry.Shared).Entries[1].Variant,
+                "precondition: the card really draws it sticky");
+            Assert.AreEqual(1, POIEditorToolWindow.CardBlockWarnings(libraryBlock, BuiltInBlocks.Actions, settings, null).Count, "a sticky Block Library default warns too");
+            Assert.IsTrue(warning.All(c => c < 128), "ASCII only");
+            foreach (string term in ForbiddenTerms) StringAssert.DoesNotContain(term, warning);
         }
 
         // ---------------- guards ----------------
@@ -468,7 +722,9 @@ namespace TileStories.Editor.Tests
                          "CardSceneTestGuide", "CardPlaymodeTestGuide", "CardDeviceTestGuide", "BlockLibraryPlaymodeTestGuide" })
                 Assert.IsTrue(texts.ContainsKey(required), required + " is scanned");
             foreach (var reason in (BlockStackBuilder.SkipReason[])Enum.GetValues(typeof(BlockStackBuilder.SkipReason)))
-                texts["skip " + reason] = POIEditorToolWindow.CardBlockSkipText(reason, "Title");
+                foreach (var kind in BlockRegistry.Shared.All)
+                    foreach (var field in kind.Fields)
+                        texts["skip " + reason + " " + kind.Key + "." + field.Key] = POIEditorToolWindow.CardBlockSkipText(reason, field, kind.NotShownForPoiNote);
 
             foreach (var pair in texts)
             {

@@ -1,0 +1,286 @@
+/* The stories family's blocks: timeline, person, story_chapters, compare_points.
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
+   _3.3). UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
+
+/* ---- timeline: vertical, horizontal. One event = a marker (dot + rail to the next dot) and a body (date, title, text);
+   horizontal turns the marker into a row and lays the events side by side in a swipe track ---- */
+
+.card-timeline__event {
+    flex-direction: row;
+}
+
+.card-timeline__marker {
+    width: var(--ts-timeline-now);
+    flex-shrink: 0;
+    align-items: center;
+    padding-top: var(--ts-space-1);
+    margin-right: var(--ts-space-3);
+}
+
+.card-timeline__dot {
+    width: var(--ts-timeline-dot);
+    height: var(--ts-timeline-dot);
+    flex-shrink: 0;
+    border-radius: var(--ts-timeline-dot);
+    background-color: var(--ts-accent);
+}
+
+.card-timeline__rail {
+    flex-grow: 1;
+    width: var(--ts-rail-width);
+    min-height: var(--ts-space-3);
+    margin-top: var(--ts-space-1);
+    background-color: var(--ts-line);
+}
+
+.card-timeline__body {
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding-bottom: var(--ts-space-4);
+}
+
+.card-timeline__date {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-accent-text);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-timeline__title {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+.card-timeline__paragraph {
+    margin-bottom: var(--ts-space-1);
+}
+
+/* the Now point: a larger hollow ring and its word as the headline of that point */
+.card-timeline__event--now .card-timeline__dot {
+    width: var(--ts-timeline-now);
+    height: var(--ts-timeline-now);
+    border-radius: var(--ts-timeline-now);
+    border-width: var(--ts-rail-width);
+    border-color: var(--ts-accent);
+    background-color: var(--ts-surface);
+}
+
+.card-timeline__event--now .card-timeline__date {
+    font-size: var(--ts-size-heading);
+}
+
+.card-timeline__track-content {
+    flex-direction: row;
+}
+
+.card-timeline--horizontal .card-timeline__event {
+    flex-direction: column;
+    width: var(--ts-timeline-cell);
+    flex-shrink: 0;
+}
+
+/* the Now ring's height, children centred: every dot (the larger Now ring too) on one line */
+.card-timeline--horizontal .card-timeline__marker {
+    flex-direction: row;
+    width: auto;
+    height: var(--ts-timeline-now);
+    align-items: center;
+    padding-top: 0;
+    margin: 0 0 var(--ts-space-2) 0;
+}
+
+.card-timeline--horizontal .card-timeline__rail {
+    width: auto;
+    height: var(--ts-rail-width);
+    min-height: 0;
+    margin: 0 0 0 var(--ts-space-1);
+}
+
+.card-timeline--horizontal .card-timeline__body {
+    padding-right: var(--ts-space-3);
+}
+
+/* ---- person: row, card. A round monogram beside the name and role, the text under them ---- */
+
+/* top-aligned: the initial starts level with the name, however many lines the name wraps to */
+.card-person__top {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: var(--ts-space-2);
+}
+
+.card-person__monogram {
+    width: var(--ts-monogram-size);
+    height: var(--ts-monogram-size);
+    flex-shrink: 0;
+    border-radius: var(--ts-monogram-size);
+    border-width: var(--ts-rail-width);
+    border-color: var(--ts-accent);
+    background-color: var(--ts-surface-2);
+    color: var(--ts-accent-text);
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin: 0 var(--ts-space-3) 0 0;
+    padding: 0;
+}
+
+.card-person__words {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.card-person__name {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-person__role {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-person__paragraph {
+    margin-bottom: var(--ts-space-2);
+}
+
+.card-person--card {
+    background-color: var(--ts-surface-2);
+    border-radius: var(--ts-radius-m);
+    border-top-width: var(--ts-space-1);
+    border-top-color: var(--ts-accent);
+    padding: var(--ts-space-4);
+}
+
+.card-person--card .card-person__monogram {
+    background-color: var(--ts-surface);
+}
+
+.card-person--card .card-person__name {
+    font-size: var(--ts-size-title);
+}
+
+/* ---- story_chapters: segmented. The chapter bar, "Chapter n of m", title, text, Previous / Next ---- */
+
+.card-story__progress {
+    flex-direction: row;
+    margin-bottom: var(--ts-space-2);
+}
+
+.card-story__segment {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: var(--ts-segment-height);
+    border-radius: var(--ts-segment-height);
+    margin-right: var(--ts-space-1);
+    background-color: var(--ts-line);
+}
+
+.card-story__segment--read {
+    background-color: var(--ts-accent-2);
+}
+
+.card-story__segment--current {
+    background-color: var(--ts-accent);
+}
+
+.card-story__counter {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    margin: 0;
+    padding: 0;
+}
+
+.card-story__title {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-2) 0;
+    padding: 0;
+}
+
+.card-story__paragraph {
+    margin-bottom: var(--ts-space-2);
+}
+
+.card-story__nav {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+/* the shape is the shared .card-pill (CardParts.uss); here only the colours */
+.card-story__button {
+    margin: 0;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface-2);
+}
+
+.card-story__next {
+    background-color: var(--ts-accent);
+    border-color: var(--ts-accent);
+}
+
+.card-story__button-label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    margin: 0;
+    padding: 0;
+}
+
+.card-story__next .card-story__button-label {
+    color: var(--ts-on-accent);
+}
+
+/* ---- compare_points: rings. Two columns, each a status ring (the status block's own classes), the point's title and
+   its condition ---- */
+
+.card-compare__row {
+    flex-direction: row;
+}
+
+.card-compare__side {
+    flex-grow: 1;
+    flex-basis: 0;
+    align-items: center;
+    padding: 0 var(--ts-space-2);
+}
+
+/* two classes: beats .card-status__ring's side margin (declared later in this file), so the ring stays centred */
+.card-compare__side .card-compare__ring {
+    margin: 0 0 var(--ts-space-2) 0;
+}
+
+.card-compare__title {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: upper-center;
+    margin: 0;
+    padding: 0;
+}
+
+.card-compare__level {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    -unity-text-align: upper-center;
+    margin: 0;
+    padding: 0;
+}

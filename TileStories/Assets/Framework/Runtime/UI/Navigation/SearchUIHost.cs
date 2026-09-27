@@ -21,6 +21,8 @@ namespace TileStories
 
         private UIDocument _document;
         private VisualElement _root;
+        private VisualElement _top;
+        private bool _topCovered;
         private bool _subscribed;
 
         public SearchOverlayView SearchBar { get; private set; }
@@ -74,6 +76,7 @@ namespace TileStories
             Voice?.Dispose();
             _root?.RemoveFromHierarchy();
             _root = null;
+            _top = null;
             SearchBar = null;
         }
 
@@ -125,7 +128,7 @@ namespace TileStories
             _root.AddToClassList("search-ui");
             if (styleSheet != null) _root.styleSheets.Add(styleSheet);
 
-            var top = new VisualElement { name = "search-top", pickingMode = PickingMode.Ignore };
+            var top = _top = new VisualElement { name = "search-top", pickingMode = PickingMode.Ignore };
             top.AddToClassList("search-top");
             var bottom = new VisualElement { name = "search-bottom", pickingMode = PickingMode.Ignore };
             bottom.AddToClassList("search-bottom");
@@ -179,12 +182,25 @@ namespace TileStories
             ApplyPanels();
         }
 
+        // Something covers the top of the screen (the POI Detail Card at its full stop): the bar, the filter tray and the
+        // view switch step aside until it moves away. The search keeps its query and filters meanwhile.
+        public void SetTopCoveredByCard(bool covered)
+        {
+            if (_topCovered == covered) return;
+            _topCovered = covered;
+            ApplyPanels();
+        }
+
+        // Whether the top (bar, tray, view switch) is on screen now
+        public bool TopShown => _top != null && _top.resolvedStyle.display != DisplayStyle.None;
+
         private void ApplyPanels()
         {
             if (_root == null) return;
             var minimap = wallSession.SelectFilterSearch?.minimap ?? new MinimapSettings();
             Panels = SearchPanelsRule.Resolve(State.Active, ViewModes.Mode, SelectionEventBus.CurrentPoiId != null,
-                minimap.enabled, minimap.visibility == SelectFilterSearchOptions.VisibilityAlways, MinimapToggledOpen);
+                minimap.enabled, minimap.visibility == SelectFilterSearchOptions.VisibilityAlways, MinimapToggledOpen, _topCovered);
+            _top.style.display = Panels.Top ? DisplayStyle.Flex : DisplayStyle.None;
             ViewModes.SetShown(Panels.ViewModes);
             List.SetShown(Panels.List);
             Minimap.SetShown(Panels.Minimap);

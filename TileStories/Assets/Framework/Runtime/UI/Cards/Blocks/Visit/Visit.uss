@@ -1,0 +1,43 @@
+/* The visit family's blocks: practical_info.
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
+   _3.3). UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
+
+/* ---- practical_info: rows. The set's icon (in a round badge), then label over value, a hairline between rows ---- */
+
+.card-practical__row {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: var(--ts-space-3) 0;
+    border-top-width: var(--ts-line-width);
+    border-top-color: var(--ts-line);
+}
+
+.card-practical__icon {
+    width: var(--ts-step-number);
+    height: var(--ts-step-number);
+    border-radius: var(--ts-step-number);
+    background-color: var(--ts-surface-2);
+    margin-right: var(--ts-space-3);
+}
+
+.card-practical__words {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.card-practical__label {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-practical__value {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}

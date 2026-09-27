@@ -8,13 +8,16 @@ namespace TileStories
     //   - a kind switched off in the Block Library    -> skipped (KindDisabled)
     //   - a kind with nothing to show for this POI    -> skipped (NotForThisPoint, BlockKindDefinition.ShowsFor)
     //   - a required field with nothing in it         -> skipped (MissingRequired)
+    //   - a required Items field with no complete row -> skipped (NoCompleteRow, BlockFieldReader.ItemIsComplete)
+    //   - a required Asset whose path MediaPathRule refuses (outside the media folder, wrong file type)
+    //                                                 -> skipped (InvalidMedia)
     //   - a second header                             -> skipped (ExtraHeader)
     //   - a variant the kind does not have (or none)  -> kept, with the Block Library's default variant
     // The stack always starts with ONE header: the first authored header (moved to the top), else one made from
     // the POI's name and summary -- so a POI with no card still gets a card, with zero authoring.
     public static class BlockStackBuilder
     {
-        public enum SkipReason { UnknownKind, KindDisabled, NotForThisPoint, MissingRequired, ExtraHeader }
+        public enum SkipReason { UnknownKind, KindDisabled, NotForThisPoint, MissingRequired, NoCompleteRow, InvalidMedia, ExtraHeader }
 
         public readonly struct Entry
         {
@@ -37,7 +40,7 @@ namespace TileStories
         {
             public readonly BlockInstanceData Instance;
             public readonly SkipReason Reason;
-            // MissingRequired: the empty field's key
+            // MissingRequired / NoCompleteRow / InvalidMedia: the field's key
             public readonly string FieldKey;
 
             public Skipped(BlockInstanceData instance, SkipReason reason, string fieldKey = null)
@@ -58,7 +61,8 @@ namespace TileStories
         public const string HeaderTitleField = "title";
         public const string HeaderSubtitleField = "subtitle";
 
-        public static Result Build(POIData poi, CardSettings settings, BlockRegistry registry)
+        // `wallPois`: the wall's POIs, for kinds that point at another POI (compare_points); null = no other POI resolves
+        public static Result Build(POIData poi, CardSettings settings, BlockRegistry registry, IReadOnlyList<POIData> wallPois = null)
         {
             var result = new Result();
             Entry? header = null;
@@ -80,15 +84,15 @@ namespace TileStories
                         result.Skipped.Add(new Skipped(instance, SkipReason.KindDisabled));
                         continue;
                     }
-                    if (definition.ShowsFor != null && !definition.ShowsFor(poi))
+                    if (definition.ShowsFor != null && !definition.ShowsFor(poi, instance, wallPois))
                     {
                         result.Skipped.Add(new Skipped(instance, SkipReason.NotForThisPoint));
                         continue;
                     }
-                    string empty = FirstEmptyRequiredField(instance, definition);
-                    if (empty != null)
+                    var (emptyField, emptyReason) = FirstEmptyRequiredField(instance, definition);
+                    if (emptyField != null)
                     {
-                        result.Skipped.Add(new Skipped(instance, SkipReason.MissingRequired, empty));
+                        result.Skipped.Add(new Skipped(instance, emptyReason, emptyField));
                         continue;
                     }
 
@@ -124,16 +128,36 @@ namespace TileStories
             };
         }
 
-        private static string FirstEmptyRequiredField(BlockInstanceData instance, BlockKindDefinition definition)
+        // The first required field that leaves the block with nothing to show, and why (empty / no complete row)
+        private static (string Field, SkipReason Reason) FirstEmptyRequiredField(BlockInstanceData instance, BlockKindDefinition definition)
         {
-            if (definition.Fields == null) return null;
+            if (definition.Fields == null) return (null, default);
             foreach (var field in definition.Fields)
             {
                 if (!field.Required) continue;
                 var value = instance.fields?.Find(v => v != null && v.key == field.Key);
-                if (!BlockFieldReader.HasContent(value, field.Type)) return field.Key;
+                if (!BlockFieldReader.HasContent(value, field.Type)) return (field.Key, SkipReason.MissingRequired);
+                if (field.Type == BlockFieldType.Asset && !MediaPathRule.IsValid(value.asset, field.Media)) return (field.Key, SkipReason.InvalidMedia);
+                if (field.Type == BlockFieldType.Items && !value.items.Exists(item => BlockFieldReader.ItemIsComplete(item, field.ItemFields)))
+                    return (field.Key, SkipReason.NoCompleteRow);
             }
-            return null;
+            return (null, default);
+        }
+
+        // The title a visitor reads at the top of a POI's card: its first authored header's title in `language` (the
+        // fallback language's when missing), else its name. How another block names this POI (compare_points).
+        public static string CardTitleOf(POIData poi, string language, string fallbackLanguage)
+        {
+            if (poi == null) return "";
+            var blocks = poi.card?.blocks;
+            if (blocks != null)
+                foreach (var block in blocks)
+                {
+                    if (block == null || block.kind != BuiltInBlocks.HeaderKind) continue;
+                    string title = new BlockFieldReader(block, language, fallbackLanguage).Text(HeaderTitleField);
+                    if (title.Length > 0) return title;
+                }
+            return poi.name ?? "";
         }
     }
 }

@@ -234,6 +234,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: TileStories::TileStories.CardGalleryHarness
   tokens: {fileID: 7433441132597879392, guid: 50288e2b963dbad449e920230ffaf85d, type: 3}
   cardStyle: {fileID: 7433441132597879392, guid: 1ff0daa54f77bb54f9aad0352a25800f, type: 3}
+  blockStyles:
+  - {fileID: 7433441132597879392, guid: 7f97275d695abf247a4e3742838bcd67, type: 3}
+  - {fileID: 7433441132597879392, guid: 812eee262cb31d2418306cf9823b9667, type: 3}
+  - {fileID: 7433441132597879392, guid: 2e20a83bbaf2c20408c475f977621dce, type: 3}
+  - {fileID: 7433441132597879392, guid: 10fbd69229615dd45bc8672a989f05a6, type: 3}
+  - {fileID: 7433441132597879392, guid: d2a6b9b7189b9f748ac50b977823a301, type: 3}
+  - {fileID: 7433441132597879392, guid: a28e2002014314d479a102339113d5c0, type: 3}
   strings: {fileID: 11400000, guid: d7a0473454ee7e24588c88b2d1b18b1f, type: 2}
 --- !u!114 &1479729995
 MonoBehaviour:

@@ -23,11 +23,15 @@ namespace TileStories
         public IBlockHost Host;
     }
 
-    // What a block may ask of its card (_3.1 section 3). Today: lower the card so the selected POI's marker shows on the
-    // wall. Tier 2-4 add their requests here (open a takeover, play audio) with their first block.
+    // What a block may ask of its card (_3.1 section 3): lower the card so the selected POI's marker shows on the wall;
+    // open the full-screen view over the card (Tier 2: the gallery's lightbox). Tier 4 adds audio with its first block.
     public interface IBlockHost
     {
         void ShowOnWall();
+
+        // Open the full-screen view: `name` ends the breadcrumb after the card's title, `pageCount` sibling pages starting
+        // at `startPage`, each drawn by `drawPage` through the view's own media scope
+        void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage);
     }
 
     // One block kind's view (_3.1 section 3): built once, then bound and unbound as the visitor switches POIs

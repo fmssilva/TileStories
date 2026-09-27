@@ -50,6 +50,10 @@ namespace TileStories
             return new Stops(peek, half, full);
         }
 
+        // Whether the sheet resting at `stop` covers the top of the screen, where the search bar sits (_3.1 step 6C): only
+        // full does -- half is capped at 40% of the height. What sits there steps aside (SearchPanelsRule's topCovered).
+        public static bool CoversScreenTop(Stop stop) => stop == Stop.Full;
+
         // Where the card opens for a new selection: "half" opens at half, anything else at peek (never full)
         public static Stop OpenStop(string openStop) => openStop == CardOptions.StopHalf ? Stop.Half : Stop.Peek;
 

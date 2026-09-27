@@ -84,6 +84,7 @@ namespace TileStories.Tests
 
                 var cardDocument = card.GetComponent<UIDocument>();
                 var searchDocument = Only<SearchUIHost>(scene).GetComponent<UIDocument>();
+                Assert.AreSame(Only<SearchUIHost>(scene), Ref(card, "searchUI"), "the card tells this scene's search UI when it covers the top (6C)");
                 Assert.AreSame(searchDocument.panelSettings, cardDocument.panelSettings, "one shared runtime panel");
                 Assert.AreEqual(2, cardDocument.sortingOrder, "sort order 2");
                 Assert.Greater(cardDocument.sortingOrder, searchDocument.sortingOrder, "the card draws above the search UI");
@@ -91,6 +92,39 @@ namespace TileStories.Tests
             finally
             {
                 if (openedHere) EditorSceneManager.CloseScene(scene, true);
+            }
+        }
+
+        // Every block stylesheet on disk (CardParts.uss + one per family, _3.1 step 6C) is added by BOTH card hosts -- the
+        // wall's PoiCardHost and the Phase A CardGalleryHarness -- in the same order, CardParts first. A family .uss added
+        // without wiring would leave its blocks unstyled in one scene while the other looked right.
+        [Test]
+        public void BothCardHosts_AddEveryBlockStylesheet_InTheSameOrder()
+        {
+            const string cards = "Assets/Framework/Runtime/UI/Cards";
+            var onDisk = System.IO.Directory.GetFiles(cards, "*.uss", System.IO.SearchOption.AllDirectories)
+                .Select(p => p.Replace('\\', '/'))
+                .Where(p => p != cards + "/CardTokens.uss" && p != cards + "/PoiCard.uss")
+                .OrderBy(p => p).ToList();
+            Assert.GreaterOrEqual(onDisk.Count, 5, "not vacuous: CardParts + the About, Stories, Visit and Meta families");
+
+            foreach (var (path, type) in new[] { (ScenePath, typeof(PoiCardHost)), ("Assets/Dev/CardGallery/CardGalleryScene.unity", typeof(CardGalleryHarness)) })
+            {
+                var scene = SceneManager.GetSceneByPath(path);
+                bool openedHere = !scene.isLoaded;
+                if (openedHere) scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+                try
+                {
+                    var host = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren(type, true)).Single();
+                    var list = new SerializedObject(host).FindProperty("blockStyles");
+                    var wired = Enumerable.Range(0, list.arraySize).Select(i => AssetDatabase.GetAssetPath(list.GetArrayElementAtIndex(i).objectReferenceValue)).ToList();
+                    CollectionAssert.AreEquivalent(onDisk, wired, path + ": every block stylesheet, nothing missing or extra");
+                    Assert.AreEqual(cards + "/CardParts.uss", wired[0], path + ": the shared parts first, the families after");
+                }
+                finally
+                {
+                    if (openedHere) EditorSceneManager.CloseScene(scene, true);
+                }
             }
         }
     }

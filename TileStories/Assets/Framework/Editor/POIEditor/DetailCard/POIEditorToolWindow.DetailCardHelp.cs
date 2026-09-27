@@ -160,19 +160,88 @@ namespace TileStories.Editor
             "GLOSSARY\n" +
             "- Tap a linked word with a real finger: the definition opens; a slow drag across the text scrolls the card instead.";
 
+        // A Color field holds text that is not a colour the card accepts
+        internal static string CardColorInvalidText(string fieldLabel, string typed) =>
+            fieldLabel + " '" + typed.Trim() + "' is not a colour: write it as #RRGGBB (for example #1F3F8F), or pick it. " +
+            "Until then the card leaves this row out.";
+
+        // A Compare Points block names its own point in Compare With
+        internal const string CardCompareWithItselfNote =
+            "Compare With is this point itself: the card shows the same condition twice. Pick another point.";
+
+        // An Actions block in the Sticky look holds more buttons than the one it shows
+        internal static string CardStickyExtraButtonsText(int hidden) =>
+            "Sticky shows only the first button: the other " + hidden + (hidden == 1 ? " row is" : " rows are") +
+            " not shown. Pick Circles or Pill Row to show every button.";
+
         // A block text links a word the Glossary does not have
         internal static string CardGlossaryMissingText(IReadOnlyList<string> terms) =>
             "Not in the Glossary (Detail Card > Glossary), shown as plain text: " + string.Join(", ", terms) + ".";
 
-        // Why a block of Card Content would not show (BlockStackBuilder's reason), in the Editor's words
-        internal static string CardBlockSkipText(BlockStackBuilder.SkipReason reason, string fieldLabel, string notForThisPointNote = null) => reason switch
+        // Why a block of Card Content would not show (BlockStackBuilder's reason), in the Editor's words. `field` is the
+        // field the reason names (MissingRequired, NoCompleteRow): the words follow its type.
+        internal static string CardBlockSkipText(BlockStackBuilder.SkipReason reason, BlockFieldDefinition field, string notForThisPointNote = null) => reason switch
         {
             BlockStackBuilder.SkipReason.NotForThisPoint => "Not shown: " + (notForThisPointNote ?? "this kind has nothing to show for this point."),
             BlockStackBuilder.SkipReason.UnknownKind => "Not shown: no block kind of this name is registered.",
             BlockStackBuilder.SkipReason.KindDisabled => "Not shown: this kind is switched off in Detail Card > Block Library.",
-            BlockStackBuilder.SkipReason.MissingRequired => "Not shown: " + fieldLabel + " is empty in every language.",
+            BlockStackBuilder.SkipReason.MissingRequired => "Not shown: " + CardEmptyFieldText(field) + ".",
+            BlockStackBuilder.SkipReason.NoCompleteRow => "Not shown: " + CardNoCompleteRowText(field) + ".",
+            BlockStackBuilder.SkipReason.InvalidMedia => "Not shown: " + CardMediaProblemText(field?.Label ?? "the picture", field?.Media ?? MediaKind.Image, MediaPathProblem.None) + ".",
             BlockStackBuilder.SkipReason.ExtraHeader => "Not shown: a card has one Header; the first one is used.",
             _ => "Not shown.",
         };
+
+        private static string CardEmptyFieldText(BlockFieldDefinition field)
+        {
+            string label = field?.Label ?? "a required field";
+            return field?.Type switch
+            {
+                BlockFieldType.LocalizedText or BlockFieldType.LocalizedLongText => label + " is empty in every language",
+                BlockFieldType.Items => label + " has no rows",
+                BlockFieldType.Choice or BlockFieldType.PoiRef => label + " is not picked",
+                BlockFieldType.Color => label + " is not a colour written as #RRGGBB",
+                _ => label + " is empty",
+            };
+        }
+
+        // "no row of Swatches is complete: each needs Name and Colour (a colour written as #RRGGBB)"
+        private static string CardNoCompleteRowText(BlockFieldDefinition field)
+        {
+            var needed = new List<string>();
+            bool colour = false, picture = false;
+            foreach (var sub in field?.ItemFields ?? System.Array.Empty<BlockFieldDefinition>())
+            {
+                if (!sub.Required) continue;
+                needed.Add(sub.Label);
+                colour |= sub.Type == BlockFieldType.Color;
+                picture |= sub.Type == BlockFieldType.Asset;
+            }
+            return "no row of " + (field?.Label ?? "the list") + " is complete: each needs " + string.Join(" and ", needed)
+                   + (colour ? " (a colour written as #RRGGBB)" : "") + (picture ? " (a picture from the Media Folder)" : "");
+        }
+
+        // What is wrong with a picture field, for the warning under it and the "Not shown" line. `problem` None = say
+        // what the field takes (the builder's reason carries no detail).
+        internal static string CardMediaProblemText(string label, MediaKind kind, MediaPathProblem problem)
+        {
+            string types = string.Join(" / ", MediaPathRule.ImageExtensions).Replace(".", "").ToUpperInvariant();
+            return problem switch
+            {
+                MediaPathProblem.OutsideFolder => label + " is outside the wall's Media Folder (Detail Card > Card Container): the app cannot load it. Move the file into that folder and pick it again",
+                MediaPathProblem.WrongType => label + " is not a picture the card can show (" + types + ")",
+                MediaPathProblem.Empty => label + " is empty",
+                _ => label + " must be a " + types + " picture inside the wall's Media Folder (Detail Card > Card Container)",
+            };
+        }
+
+        // A header picture look that lacks what it needs (Picture; Split Then Now: both pictures)
+        internal static string CardHeaderNeedsPictureText(string variant) =>
+            "The " + variant + " look needs " + (variant == BuiltInBlocks.HeaderSplitThenNow ? "Picture and Second Picture" : "Picture") +
+            " (pictures inside the Media Folder): until then the card shows the text-only look.";
+
+        // A picture path that is fine by the rule but has no file behind it (deleted or renamed after it was picked)
+        internal static string CardMediaMissingText(string label, string path) =>
+            label + ": no picture \"" + path + "\" in the Media Folder any more. The card shows its \"picture unavailable\" frame until another is picked.";
     }
 }

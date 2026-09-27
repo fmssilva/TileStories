@@ -133,30 +133,39 @@ namespace TileStories.Editor.Tests
         [Test]
         public void SearchPanelsRule_Table()
         {
-            var idle = SearchPanelsRule.Resolve(false, ViewMode.List, false, true, false, false);
+            var idle = SearchPanelsRule.Resolve(false, ViewMode.List, false, true, false, false, false);
             Assert.IsFalse(idle.List || idle.ViewModes || idle.Minimap, "idle: the camera view stays clear");
             Assert.IsTrue(idle.MinimapButton, "the Map button shows with Visibility = Button");
 
-            var list = SearchPanelsRule.Resolve(true, ViewMode.List, false, true, false, false);
+            var list = SearchPanelsRule.Resolve(true, ViewMode.List, false, true, false, false, false);
             Assert.IsTrue(list.List && list.ViewModes && !list.Minimap);
 
-            var map = SearchPanelsRule.Resolve(true, ViewMode.Minimap, false, true, false, false);
+            var map = SearchPanelsRule.Resolve(true, ViewMode.Minimap, false, true, false, false, false);
             Assert.IsTrue(map.Minimap && !map.List, "Map view opens the minimap");
 
-            var highlight = SearchPanelsRule.Resolve(true, ViewMode.CameraHighlight, false, true, false, false);
+            var highlight = SearchPanelsRule.Resolve(true, ViewMode.CameraHighlight, false, true, false, false, false);
             Assert.IsFalse(highlight.List || highlight.Minimap, "Highlight: no panel");
 
-            var selected = SearchPanelsRule.Resolve(true, ViewMode.List, true, true, false, false);
+            var selected = SearchPanelsRule.Resolve(true, ViewMode.List, true, true, false, false, false);
             Assert.IsTrue(!selected.List && selected.ViewModes, "a selection hides the list (the POI Detail Card shows the POI)");
 
-            var always = SearchPanelsRule.Resolve(false, ViewMode.List, false, true, true, false);
+            var always = SearchPanelsRule.Resolve(false, ViewMode.List, false, true, true, false, false);
             Assert.IsTrue(always.Minimap && !always.MinimapButton, "Visibility = Always: always on, no button");
 
-            var toggled = SearchPanelsRule.Resolve(false, ViewMode.List, false, true, false, true);
+            var toggled = SearchPanelsRule.Resolve(false, ViewMode.List, false, true, false, true, false);
             Assert.IsTrue(toggled.Minimap, "opened with its button");
 
-            var off = SearchPanelsRule.Resolve(true, ViewMode.Minimap, false, false, true, true);
+            var off = SearchPanelsRule.Resolve(true, ViewMode.Minimap, false, false, true, true, false);
             Assert.IsFalse(off.Minimap || off.MinimapButton, "Enable Minimap off: never");
+
+            // - the card at its full stop covers the top of the screen: the bar, the tray and the view switch step aside
+            Assert.IsTrue(list.Top && idle.Top, "nothing covers the top: the search bar shows");
+            var covered = SearchPanelsRule.Resolve(true, ViewMode.List, true, true, true, false, true);
+            Assert.IsFalse(covered.Top || covered.ViewModes, "covered: no bar, no view switch");
+            Assert.IsTrue(covered.Minimap, "...the rest of the rule is unchanged (an always-on minimap stays)");
+            Assert.IsTrue(SheetStopRule.CoversScreenTop(SheetStopRule.Stop.Full), "the full stop covers the top");
+            foreach (var stop in new[] { SheetStopRule.Stop.Dismissed, SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half })
+                Assert.IsFalse(SheetStopRule.CoversScreenTop(stop), stop + " leaves the top free (half is at most 40%)");
         }
 
         // ---- view switch ----
@@ -407,6 +416,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("religious - Hub", PoiSubtitle.Of(chapel, c));
             Assert.AreEqual("Hub", PoiSubtitle.Of(new POIData { hierarchy_level_key = chapel.hierarchy_level_key }, c), "no category");
             Assert.AreEqual("religious", PoiSubtitle.Of(new POIData { category = chapel.category }, c), "no level");
+            Assert.AreEqual("religious", PoiSubtitle.Of(chapel, c, withLevel: false), "the card header without Show Level: the category alone");
             Assert.AreEqual("", PoiSubtitle.Of(null, c));
         }
 

@@ -37,7 +37,7 @@ namespace TileStories.Editor
             EditorRowEnd();
 
             var blocks = poi.card?.blocks ?? new List<BlockInstanceData>();
-            var built = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared);
+            var built = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, _config.pois);
             int deleteIndex = -1, moveIndex = -1, moveBy = 0;
 
             for (int i = 0; i < blocks.Count; i++)
@@ -88,12 +88,14 @@ namespace TileStories.Editor
 
                 foreach (var skipped in built.Skipped)
                     if (ReferenceEquals(skipped.Instance, block))
-                        EditorGUILayout.HelpBox(CardBlockSkipText(skipped.Reason, definition?.Field(skipped.FieldKey)?.Label ?? skipped.FieldKey, definition?.NotShownForPoiNote), MessageType.Warning);
+                        EditorGUILayout.HelpBox(CardBlockSkipText(skipped.Reason, definition?.Field(skipped.FieldKey), definition?.NotShownForPoiNote), MessageType.Warning);
 
                 if (definition != null)
                 {
                     var missing = MissingGlossaryTerms(block, definition, settings.glossary);
                     if (missing.Count > 0) EditorGUILayout.HelpBox(CardGlossaryMissingText(missing), MessageType.Warning);
+                    foreach (string warning in CardBlockWarnings(block, definition, settings, poi))
+                        EditorGUILayout.HelpBox(warning, MessageType.Warning);
                 }
 
                 if (open && definition != null)
@@ -155,6 +157,28 @@ namespace TileStories.Editor
                 foreach (string term in GlossaryMarkup.Terms(text))
                     if (CardGlossary.Find(glossary, term) == null && !missing.Exists(m => CardGlossary.SameTerm(m, term))) missing.Add(term);
             return missing;
+        }
+
+        // What a block that DOES show hides or gets wrong, in the Editor's words (the "Not shown" reasons are
+        // BlockStackBuilder's): a sticky call to action with more than one button shows only the first; a compare block
+        // pointed at its own point compares it with itself; a header picture look without its picture(s) shows text only
+        internal static List<string> CardBlockWarnings(BlockInstanceData block, BlockKindDefinition definition, CardSettings settings, POIData poi)
+        {
+            var warnings = new List<string>();
+            string variant = definition.HasVariant(block.variant) ? block.variant : BlockLibraryRule.DefaultVariant(settings, definition);
+            if (definition.Key == BuiltInBlocks.ActionsKind && variant == BuiltInBlocks.ActionsStickyCta)
+            {
+                int rows = block.fields?.Find(f => f != null && f.key == BuiltInBlocks.ActionsItemsField)?.items?.Count ?? 0;
+                if (rows > 1) warnings.Add(CardStickyExtraButtonsText(rows - 1));
+            }
+            if (definition.Key == BuiltInBlocks.ComparePointsKind && poi != null
+                && new BlockFieldReader(block, null, null).Value(BuiltInBlocks.ComparePointsOtherField) == poi.id)
+                warnings.Add(CardCompareWithItselfNote);
+            // - a header picture look without its picture(s) quietly falls back to text only: say so
+            if (definition.Key == BuiltInBlocks.HeaderKind && System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, variant) >= 0
+                && !BuiltInBlocks.HeaderShowsPicture(variant, block))
+                warnings.Add(CardHeaderNeedsPictureText(variant));
+            return warnings;
         }
 
         internal void AddCardBlock(POIData poi, BlockKindDefinition kind)

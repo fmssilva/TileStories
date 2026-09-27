@@ -1,0 +1,408 @@
+/* The media family's looks (_3.1 Tier 2) and the card's picture parts: CardImage, the header's hero, the gallery, the
+   full-screen view (TakeoverView), before / after and zoom. Written only with var(--ts-*) tokens (CardTokens.uss).
+   Added to the card by its host after CardParts.uss (PoiCardHost / CardGalleryHarness blockStyles). */
+
+/* ---- CardImage: one picture in a clipped frame; the "unavailable" words instead of a picture that cannot be shown ---- */
+
+.card-image {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--ts-surface-2);
+    border-radius: var(--ts-radius-m);
+}
+
+.card-image__picture {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.card-image__unavailable {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    padding: var(--ts-space-2);
+}
+
+.card-image--unavailable > .card-image__unavailable {
+    display: flex;
+}
+
+/* ---- the header's hero: a picture under the pinned header, first in what scrolls ---- */
+
+.card-hero {
+    height: var(--ts-hero-height);
+    margin: 0 var(--ts-space-4) var(--ts-block-gap) var(--ts-space-4);
+    overflow: hidden;
+    border-radius: var(--ts-radius-m);
+    flex-direction: row;
+    background-color: var(--ts-surface-2);
+}
+
+/* the picture fills the frame; parallax slides it down inside (translate, from C#) while the frame scrolls away */
+.card-hero .card-hero__picture {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+}
+
+/* then | now: two equal halves side by side, the frame's colour showing as a thin line between them */
+.card-hero--split_then_now .card-hero__picture {
+    position: relative;
+    width: auto;
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+/* (USS has no sibling selector: the right half carries its own class) -- a margin, not a border, so both halves keep
+   the same width */
+.card-hero--split_then_now .card-hero__picture--now {
+    margin-left: var(--ts-slider-line);
+}
+
+.card-hero__label {
+    position: absolute;
+    left: var(--ts-space-2);
+    bottom: var(--ts-space-2);
+    padding: var(--ts-space-1) var(--ts-space-2);
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-surface);
+    color: var(--ts-ink);
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+}
+
+/* spotlight: the picture's size and place come from SpotlightCropRule; the ring sits centred on the focus point */
+.card-hero--spotlight_crop .card-hero__picture {
+    width: auto;
+    height: auto;
+}
+
+.card-hero__ring {
+    position: absolute;
+    width: var(--ts-spotlight-ring);
+    height: var(--ts-spotlight-ring);
+    translate: -50% -50%;
+    border-radius: var(--ts-spotlight-ring-radius);
+    border-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-accent);
+}
+
+/* ---- gallery: carousel, grid, filmstrip, stack ---- */
+
+.card-gallery__track-content {
+    flex-direction: row;
+}
+
+.card-gallery__caption {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin-top: var(--ts-space-1);
+}
+
+/* carousel: pages on a swipe track, the next one peeking in at the edge */
+.card-gallery--carousel .card-gallery__shot {
+    width: var(--ts-carousel-page);
+    flex-shrink: 0;
+    margin-right: var(--ts-space-3);
+}
+
+.card-gallery--carousel .card-gallery__picture {
+    height: var(--ts-media-height);
+}
+
+.card-gallery__dots {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: var(--ts-space-2);
+}
+
+.card-gallery__dot {
+    width: var(--ts-dot-size);
+    height: var(--ts-dot-size);
+    border-radius: var(--ts-radius-s);
+    margin: 0 var(--ts-space-1);
+    background-color: var(--ts-ink-3);
+}
+
+.card-gallery__dot--current {
+    background-color: var(--ts-accent);
+}
+
+/* grid: two per row */
+.card-gallery__grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.card-gallery--grid .card-gallery__shot {
+    width: 50%;
+    padding: var(--ts-space-1);
+}
+
+.card-gallery--grid .card-gallery__picture {
+    height: var(--ts-grid-cell-height);
+}
+
+/* filmstrip: one large picture, the small ones in a strip under it (the large one's small one marked) */
+.card-gallery__main {
+    height: var(--ts-media-height);
+}
+
+.card-gallery--filmstrip .card-gallery__caption {
+    margin-bottom: var(--ts-space-2);
+}
+
+.card-gallery__thumb {
+    width: var(--ts-thumb-size);
+    height: var(--ts-thumb-size);
+    flex-shrink: 0;
+    margin-right: var(--ts-space-2);
+    border-width: var(--ts-slider-line);
+    border-color: var(--ts-clear);
+    border-radius: var(--ts-radius-m);
+}
+
+.card-gallery__thumb .card-gallery__picture {
+    height: 100%;
+}
+
+.card-gallery__thumb--current {
+    border-color: var(--ts-accent);
+}
+
+/* stack: up to three prints fanned, the first on top */
+.card-gallery--stack .card-gallery__grid {
+    height: var(--ts-media-height);
+    margin: 0 var(--ts-print-offset) var(--ts-print-offset) 0;
+}
+
+.card-gallery--stack .card-gallery__shot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.card-gallery--stack .card-gallery__picture {
+    height: 100%;
+    border-width: var(--ts-slider-line);
+    border-color: var(--ts-surface);
+}
+
+.card-gallery__print--1 {
+    rotate: var(--ts-print-tilt);
+    translate: var(--ts-print-offset) 0;
+}
+
+.card-gallery__print--2 {
+    rotate: var(--ts-postcard-tilt);
+    translate: 0 var(--ts-print-offset);
+}
+
+.card-gallery__count {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    margin-top: var(--ts-space-3);
+}
+
+/* ---- the full-screen view over the card (TakeoverView); the gallery's lightbox page ---- */
+
+.card-takeover {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: var(--ts-space-4);
+    background-color: var(--ts-bg);
+}
+
+.card-takeover__bar {
+    flex-direction: row;
+    align-items: center;
+}
+
+.card-takeover__back {
+    background-color: var(--ts-surface-2);
+    color: var(--ts-ink);
+    border-width: 0;
+    font-size: var(--ts-size-body);
+    margin: 0;
+}
+
+.card-takeover__crumb {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: var(--ts-space-3);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+}
+
+.card-takeover__page {
+    flex-grow: 1;
+    margin: var(--ts-space-4) 0;
+}
+
+.card-takeover__chips {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card-takeover__chip {
+    min-width: var(--ts-touch-target);
+    min-height: var(--ts-touch-target);
+    border-radius: var(--ts-pill-radius);
+    border-width: 0;
+    margin: var(--ts-space-1);
+    background-color: var(--ts-surface-2);
+    color: var(--ts-ink);
+    font-size: var(--ts-size-body);
+}
+
+.card-takeover__chip--current {
+    background-color: var(--ts-accent);
+    color: var(--ts-on-accent);
+}
+
+.card-gallery__full {
+    flex-grow: 1;
+    background-color: var(--ts-bg);
+}
+
+.card-gallery__full .card-image__picture {
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.card-gallery__full-caption {
+    margin-top: var(--ts-space-3);
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+}
+
+.card-gallery__full-credit {
+    margin-top: var(--ts-space-1);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+}
+
+/* ---- before_after: After fills the frame, Before over it cut at the handle ---- */
+
+.card-before-after__frame {
+    height: var(--ts-media-height);
+    overflow: hidden;
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+.card-before-after__after,
+.card-before-after__before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 0;
+}
+
+.card-before-after__after {
+    right: 0;
+}
+
+.card-before-after__clip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.card-before-after__handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--ts-slider-line);
+    translate: -50% 0;
+    background-color: var(--ts-ink);
+    align-items: center;
+    justify-content: center;
+}
+
+.card-before-after__knob {
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    flex-shrink: 0;
+    border-radius: var(--ts-pill-radius);
+    border-width: var(--ts-slider-line);
+    border-color: var(--ts-ink);
+    background-color: var(--ts-surface);
+}
+
+.card-before-after__label {
+    position: absolute;
+    top: var(--ts-space-2);
+    padding: var(--ts-space-1) var(--ts-space-2);
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-surface);
+    color: var(--ts-ink);
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+}
+
+.card-before-after__label--before {
+    left: var(--ts-space-2);
+}
+
+.card-before-after__label--after {
+    right: var(--ts-space-2);
+}
+
+/* ---- zoom_image: the picture's size and place come from ZoomPanRule ---- */
+
+.card-zoom__frame {
+    height: var(--ts-media-height);
+    overflow: hidden;
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+.card-zoom__image {
+    position: absolute;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.card-zoom__image .card-image__picture {
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.card-zoom__caption {
+    margin-top: var(--ts-space-2);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+}
+
+.card-zoom__hint {
+    margin-top: var(--ts-space-1);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+}

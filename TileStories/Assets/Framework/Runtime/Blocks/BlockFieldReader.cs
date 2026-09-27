@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace TileStories
 {
@@ -20,9 +21,17 @@ namespace TileStories
 
         public string Text(string key) => Pick(Find(key)?.text, _language, _fallback);
         public float Number(string key) => Find(key)?.number ?? 0f;
+        // A Number field, or its definition's default while none is stored, kept inside the definition's range
+        public float Number(BlockFieldDefinition field)
+        {
+            var value = Find(field.Key);
+            return value == null ? field.NumberDefault : Mathf.Clamp(value.number, field.NumberMin, field.NumberMax);
+        }
         public bool Flag(string key) => Find(key)?.flag ?? false;
         public string Value(string key) => Find(key)?.value ?? "";
         public string Asset(string key) => Find(key)?.asset ?? "";
+        // An image field's path when MediaPathRule accepts it, else "" (the view shows its "unavailable" state)
+        public string ValidAsset(string key, MediaKind kind) => MediaPathRule.IsValid(Asset(key), kind) ? Asset(key).Trim() : "";
         public IReadOnlyList<BlockItemData> Items(string key) => (IReadOnlyList<BlockItemData>)Find(key)?.items ?? System.Array.Empty<BlockItemData>();
 
         // A localized sub-field of one Items row
@@ -30,6 +39,19 @@ namespace TileStories
 
         // The Choice value of one Items row's sub-field ("" when there is none)
         public string ItemValue(BlockItemData item, string key) => FindItemField(item, key)?.value ?? "";
+
+        // The Asset of one Items row's sub-field when MediaPathRule accepts it, else ""
+        public string ItemValidAsset(BlockItemData item, string key, MediaKind kind)
+        {
+            string path = FindItemField(item, key)?.asset ?? "";
+            return MediaPathRule.IsValid(path, kind) ? path.Trim() : "";
+        }
+
+        // The Toggle of one Items row's sub-field
+        public bool ItemFlag(BlockItemData item, string key) => FindItemField(item, key)?.flag ?? false;
+
+        // The colour of one Items row's Color sub-field; false when it is empty or not a colour (TryParseColor)
+        public bool ItemColor(BlockItemData item, string key, out Color color) => TryParseColor(FindItemField(item, key)?.value, out color);
 
         // Whether the field holds anything a visitor would see (a required field that fails this hides the block)
         public static bool HasContent(BlockFieldValue value, BlockFieldType type)
@@ -43,6 +65,8 @@ namespace TileStories
                 case BlockFieldType.Choice:
                 case BlockFieldType.PoiRef:
                     return !string.IsNullOrWhiteSpace(value.value);
+                case BlockFieldType.Color:
+                    return TryParseColor(value.value, out _);
                 case BlockFieldType.Asset:
                     return !string.IsNullOrWhiteSpace(value.asset);
                 case BlockFieldType.Items:
@@ -50,6 +74,53 @@ namespace TileStories
                 default:
                     return true; // a number or a toggle always has a value
             }
+        }
+
+        // Whether one Items row is complete: every sub-field its definition marks Required holds something a visitor
+        // would see (a Color: a real colour; an Asset: a path MediaPathRule accepts). An incomplete row is not shown; a required Items field with no complete
+        // row hides the block (BlockStackBuilder, NoCompleteRow). A row of a field with no required sub-field is complete.
+        public static bool ItemIsComplete(BlockItemData item, IReadOnlyList<BlockFieldDefinition> itemFields)
+        {
+            if (item == null) return false;
+            if (itemFields == null) return true;
+            foreach (var sub in itemFields)
+                if (sub.Required && !HasItemContent(FindItemField(item, sub.Key), sub)) return false;
+            return true;
+        }
+
+        // Same as HasContent, for one sub-field of an Items row
+        public static bool HasItemContent(BlockItemFieldValue value, BlockFieldDefinition sub)
+        {
+            if (value == null) return false;
+            switch (sub.Type)
+            {
+                case BlockFieldType.LocalizedText:
+                case BlockFieldType.LocalizedLongText:
+                    return Pick(value.text, null, null).Length > 0;
+                case BlockFieldType.Choice:
+                case BlockFieldType.PoiRef:
+                    return !string.IsNullOrWhiteSpace(value.value);
+                case BlockFieldType.Color:
+                    return TryParseColor(value.value, out _);
+                case BlockFieldType.Asset:
+                    return MediaPathRule.IsValid(value.asset, sub.Media);
+                default:
+                    return true;
+            }
+        }
+
+        // A content colour as the config stores it: "#RRGGBB" or "#RGB" (hex digits, either case, surrounding spaces
+        // ignored). Stricter than ColorUtility on purpose: no colour names, no alpha -- one written form the Editor can
+        // show and the card can trust.
+        public static bool TryParseColor(string hex, out Color color)
+        {
+            color = default;
+            if (string.IsNullOrWhiteSpace(hex)) return false;
+            string h = hex.Trim();
+            if ((h.Length != 4 && h.Length != 7) || h[0] != '#') return false;
+            for (int i = 1; i < h.Length; i++)
+                if (!System.Uri.IsHexDigit(h[i])) return false;
+            return ColorUtility.TryParseHtmlString(h, out color);
         }
 
         // language -> fallback -> the first non-blank entry -> ""

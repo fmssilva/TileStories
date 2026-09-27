@@ -39,6 +39,10 @@ namespace TileStories
         private float _lastTapTime = -1f;
         private Vector2 _lastTapPos;
 
+        // Touches that started on the screen UI (ScreenUIHit), by touch id: they belong to the UI (a card picture's pinch,
+        // a double tap on a card image), never to the camera zoom. Judged once, from where the touch started.
+        private readonly System.Collections.Generic.Dictionary<int, bool> _startedOnUI = new();
+
         private ZoomSettings Settings => _wallSession != null ? _wallSession.ZoomSettings : null;
 
         private void OnEnable() => EnhancedTouch.EnhancedTouchSupport.Enable();
@@ -52,6 +56,21 @@ namespace TileStories
 
             HandlePinch();
             HandleDoubleTap(settings);
+            ForgetEndedTouches();
+        }
+
+        // Whether this touch began on the screen UI (remembered per touch until it ends)
+        private bool StartedOnUI(EnhancedTouch.Touch t)
+        {
+            if (!_startedOnUI.TryGetValue(t.touchId, out bool onUI))
+                _startedOnUI[t.touchId] = onUI = ScreenUIHit.IsOverScreenUI(t.startScreenPosition);
+            return onUI;
+        }
+
+        private void ForgetEndedTouches()
+        {
+            foreach (var t in EnhancedTouch.Touch.activeTouches)
+                if (t.phase == InputTouchPhase.Ended || t.phase == InputTouchPhase.Canceled) _startedOnUI.Remove(t.touchId);
         }
 
         // Continuous two-finger pinch. Uses the two most distant active touch points
@@ -62,6 +81,8 @@ namespace TileStories
             foreach (var t in EnhancedTouch.Touch.activeTouches)
             {
                 if (t.phase == InputTouchPhase.Canceled || t.phase == InputTouchPhase.Ended) continue;
+                // - a finger on the card (or any screen UI) is the UI's gesture, not the camera's
+                if (StartedOnUI(t)) continue;
                 if (!a.HasValue) a = t.screenPosition;
                 else if (!b.HasValue && Vector2.Distance(a.Value, t.screenPosition) > 1f) b = t.screenPosition;
                 if (a.HasValue && b.HasValue) break;
@@ -91,7 +112,7 @@ namespace TileStories
 
             foreach (var t in EnhancedTouch.Touch.activeTouches)
             {
-                if (t.phase != InputTouchPhase.Ended) continue;
+                if (t.phase != InputTouchPhase.Ended || StartedOnUI(t)) continue;
 
                 // A tap requires the touch to be short-lived and confined to a small
                 // area -- a long hold or a swipe is a drag, not a tap. Touch carries

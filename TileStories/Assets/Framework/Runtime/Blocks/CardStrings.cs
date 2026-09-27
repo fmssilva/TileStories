@@ -29,15 +29,44 @@ namespace TileStories
             // "{0}% damaged": a known condition the wall's Outline Types do not name ({0} = the percentage)
             public const string StatusPercent = "status_percent";
 
-            // The sources block's heading, and its confidence chip for verified / draft content
+            // The sources block's default heading (BlockKindDefinition.DefaultHeadingKey), and its confidence chip for verified / draft content
             public const string SourcesHeading = "sources_heading";
             public const string SourcesVerified = "sources_verified";
             public const string SourcesDraft = "sources_draft";
 
+            // The end point a timeline adds after its last event when Highlight Now is on
+            public const string TimelineNow = "timeline_now";
+
+            // "Chapter {0} of {1}" above a story chapter ({0} = this chapter, {1} = how many), and the two buttons under it
+            public const string StoryChapterOf = "story_chapter_of";
+            public const string StoryPrevious = "story_previous";
+            public const string StoryNext = "story_next";
+
+            // The default heading of a compare_points block (the two conditions side by side; DefaultHeadingKey)
+            public const string CompareHeading = "compare_heading";
+
+            // What a picture's frame says when its file cannot be loaded (missing, or a path the card may not use)
+            public const string MediaUnavailable = "media_unavailable";
+            // The two halves of a split_then_now header picture
+            public const string HeaderThen = "header_then";
+            public const string HeaderNow = "header_now";
+            // The two sides of a before_after slider when the block names none
+            public const string BeforeLabel = "before_label";
+            public const string AfterLabel = "after_label";
+            // A gallery's name in the full-screen view's breadcrumb ("St George's Castle > Gallery")
+            public const string GalleryName = "gallery_name";
+            // "{0} pictures" under a stacked gallery ({0} = how many)
+            public const string GalleryCount = "gallery_count";
+            // The full-screen view's way back to the card
+            public const string TakeoverBack = "takeover_back";
+            // The hint under a zoom_image picture
+            public const string ZoomHint = "zoom_hint";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Close, FunFactLabel, FunFactHint, StatusHeading, StatusUnknownMark, StatusUnknown, StatusPercent,
-                SourcesHeading, SourcesVerified, SourcesDraft,
+                SourcesHeading, SourcesVerified, SourcesDraft, TimelineNow, StoryChapterOf, StoryPrevious, StoryNext, CompareHeading,
+                MediaUnavailable, HeaderThen, HeaderNow, BeforeLabel, AfterLabel, GalleryName, GalleryCount, TakeoverBack, ZoomHint,
             };
         }
 

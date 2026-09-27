@@ -103,8 +103,9 @@ namespace TileStories
             _variantClass = null;
         }
 
-        // The ring picture of the line style, tinted with the wall's colour -- or with the card's status token
-        private static void Paint(VisualElement ring, CardStatusRule.Status status)
+        // The ring picture of the line style, tinted with the wall's colour -- or with the card's status token. Shared with
+        // compare_points, whose two rings must look exactly like this block's (and so like the markers')
+        internal static void Paint(VisualElement ring, CardStatusRule.Status status)
         {
             foreach (string style in LineStyles) ring.EnableInClassList("card-status__ring--" + style, style == status.LineStyle);
             for (int i = 0; i <= CardStatusRule.UnknownTokenStep; i++)
@@ -115,7 +116,7 @@ namespace TileStories
         }
 
         // The condition's name: its Outline Types row, else "Not assessed" / "20% damaged" from the card's strings
-        private static string NameOf(CardStatusRule.Status status, CardStrings strings)
+        internal static string NameOf(CardStatusRule.Status status, CardStrings strings)
         {
             if (status.LevelName.Length > 0) return status.LevelName;
             if (strings == null) return "";

@@ -13,9 +13,18 @@ namespace TileStories
     {
         [SerializeField] private StyleSheet tokens;
         [SerializeField] private StyleSheet cardStyle;
+        [SerializeField] private StyleSheet[] blockStyles;
         [SerializeField] private CardStringTable strings;
 
+        // The framework string table the gallery card reads (tests resolve default texts through it)
+        public CardStringTable StringTable => strings;
+
+        // The block stylesheets this harness adds (the same list as the wall scene's PoiCardHost; a test checks both)
+        public System.Collections.Generic.IReadOnlyList<StyleSheet> BlockStyles => blockStyles ?? System.Array.Empty<StyleSheet>();
+
         public PoiCardSheetView Sheet { get; private set; }
+        // The gallery's pictures, made in memory (no wall folder in Phase A); counted, so tests see what a card holds
+        public CardGalleryMedia Media { get; } = new();
         public VisualElement Frame { get; private set; }
         public int Index { get; private set; }
 
@@ -36,7 +45,10 @@ namespace TileStories
             Frame.style.left = new Length(50, LengthUnit.Percent);
             Frame.style.translate = new Translate(new Length(-50, LengthUnit.Percent), 0);
             root.Add(Frame);
-            Sheet = new PoiCardSheetView(Frame, BlockRegistry.Shared, new[] { tokens, cardStyle });
+            Sheet = new PoiCardSheetView(Frame, BlockRegistry.Shared, PoiCardHost.CardStyleSheets(tokens, cardStyle, blockStyles));
+            // - Phase A checks LAYOUT: the sheet jumps to its stop (no height animation for a measurement to race after a
+            //   slow first frame); the motion itself is the real scene's to test (PoiCardSceneTests)
+            Sheet.Root.style.transitionDuration = new StyleList<TimeValue>(new System.Collections.Generic.List<TimeValue> { new TimeValue(0f) });
             Sheet.CloseRequested += Sheet.Hide;
             Show(0);
         }
@@ -54,13 +66,14 @@ namespace TileStories
             // - the marker palettes the status block reads, configured exactly as a wall configures them
             MarkerVisualSettings.ApplyPalettes(wall);
             var poi = CardGalleryDefinitions.Poi(entry);
-            var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared);
+            var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wall.pois);
             var context = new BlockBindContext
             {
                 Poi = poi, Taxonomy = wall, Language = "en", FallbackLanguage = "en",
                 Strings = new CardStrings(strings != null ? strings.Entries() : null, settings.strings, "en", "en"),
                 Glossary = new CardGlossary(settings.glossary, "en", "en"),
                 MarkerLook = MarkerVisualSettings.Resolve(wall, null),
+                Media = Media,
             };
             Sheet.Hide();
             Sheet.Show(stack.Entries, context, SheetStopRule.Stop.Peek, settings.container.half_max_ratio);

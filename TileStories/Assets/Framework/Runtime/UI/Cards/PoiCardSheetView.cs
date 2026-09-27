@@ -18,9 +18,14 @@ namespace TileStories
         public VisualElement Handle { get; }
         public Button CloseButton { get; }
         public BlockStackView Stack { get; }
+        // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
+        public TakeoverView Takeover { get; }
 
         // Raised when the visitor closes the card (the X, or a drag / swipe below peek)
         public event Action CloseRequested;
+
+        // Raised when the sheet comes to rest at another stop (Dismissed when it closes)
+        public event Action<SheetStopRule.Stop> StopChanged;
 
         public SheetStopRule.Stop Stop { get; private set; } = SheetStopRule.Stop.Dismissed;
         public SheetStopRule.Stops Stops { get; private set; }
@@ -38,6 +43,8 @@ namespace TileStories
         private float _lastSampleHeight;
         private float _lastSampleTime;
         private float _velocity;
+        // The shown card's media source and texts: what the full-screen view loads through and words its way back with
+        private BlockBindContext _context;
 
         public PoiCardSheetView(VisualElement parent, BlockRegistry registry, IEnumerable<StyleSheet> styleSheets)
         {
@@ -74,6 +81,7 @@ namespace TileStories
             Root.Add(CloseButton);
 
             Layer.Add(Root);
+            Takeover = new TakeoverView(Layer);
             parent.Add(Layer);
 
             foreach (var dragArea in new[] { Handle, Stack.HeaderSlot })
@@ -95,6 +103,9 @@ namespace TileStories
             _halfMaxRatio = halfMaxRatio;
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
             context.Host ??= this;
+            // - another card replaces the full-screen view of the old one
+            Takeover.Close();
+            _context = context;
             Stack.Bind(entries, context);
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
@@ -103,8 +114,10 @@ namespace TileStories
         // Close: unbind every block (views go back to their pool) and collapse
         public void Hide()
         {
+            Takeover?.Close();
+            _context = null;
             Stack.UnbindAll();
-            Stop = SheetStopRule.Stop.Dismissed;
+            SetStopState(SheetStopRule.Stop.Dismissed);
             IsDragging = false;
             ApplyHeight(0f);
             Root.style.display = DisplayStyle.None;
@@ -116,12 +129,28 @@ namespace TileStories
             if (IsOpen) SetStop(SheetStopRule.Stop.Peek);
         }
 
+        // A block asked for the full-screen view: the breadcrumb starts with this card's title
+        public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage)
+        {
+            if (!IsOpen || _context == null) return;
+            string title = Stack.BoundViews.Count > 0 && Stack.BoundViews[0] is HeaderBlockView header ? header.TitleText : "";
+            string crumb = title.Length > 0 && !string.IsNullOrEmpty(name) ? title + " > " + name : title + name;
+            Takeover.Open(crumb, pageCount, startPage, _context.Media, drawPage, _context.Strings);
+        }
+
         // Rest at `stop` (Dismissed hides)
         public void SetStop(SheetStopRule.Stop stop)
         {
             if (stop == SheetStopRule.Stop.Dismissed) { Hide(); return; }
-            Stop = stop;
+            SetStopState(stop);
             RecomputeStops();
+        }
+
+        private void SetStopState(SheetStopRule.Stop stop)
+        {
+            if (stop == Stop) return;
+            Stop = stop;
+            StopChanged?.Invoke(stop);
         }
 
         // The stops for the layer's current height and the header's current size; re-applies the rest height
