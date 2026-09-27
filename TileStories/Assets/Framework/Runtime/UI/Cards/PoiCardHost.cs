@@ -23,12 +23,20 @@ namespace TileStories
         [Tooltip("PoiCard.uss: the card's layout, written only with the tokens")]
         [SerializeField] private StyleSheet cardStyle;
 
+        [Tooltip("CardStrings.asset: the framework's default wording of the card's UI texts")]
+        [SerializeField] private CardStringTable strings;
+
         public PoiCardSheetView Sheet { get; private set; }
+        public CardStringTable StringTable => strings;
         // Where the card's blocks load media from (card_settings.media_resources_path), rebuilt when that changes
         public ResourcesMediaSource Media { get; private set; }
         // The POI the card shows (null while closed)
         public string ShownPoiId { get; private set; }
 
+        // A tap on empty space waits out the zoom's double-tap window before it closes (TapOutsideDismissal)
+        public bool ClosePending => _tapOutside.IsPending;
+
+        private readonly TapOutsideDismissal _tapOutside = new();
         private bool _subscribed;
         private Vector2 _pressPosition;
         private float _pressTime;
@@ -87,6 +95,7 @@ namespace TileStories
                 return;
             }
 
+            _tapOutside.Cancel();
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared);
             if (Application.isEditor || Debug.isDebugBuild)
                 foreach (var skipped in stack.Skipped)
@@ -96,13 +105,20 @@ namespace TileStories
             string language = settings.languages != null && settings.languages.Count > 0 ? settings.languages[0] : "";
             if (Media == null || Media.Root != (settings.media_resources_path ?? "").Trim().Trim('/'))
                 Media = new ResourcesMediaSource(settings.media_resources_path);
-            var context = new BlockBindContext { Poi = poi, Taxonomy = wallSession.SearchConfig, Language = language, FallbackLanguage = language, Media = Media };
+            var context = new BlockBindContext
+            {
+                Poi = poi, Taxonomy = wallSession.SearchConfig, Language = language, FallbackLanguage = language, Media = Media,
+                Strings = new CardStrings(strings != null ? strings.Entries() : null, settings.strings, language, language),
+                MarkerLook = wallSession.MarkerLook,
+                Glossary = new CardGlossary(settings.glossary, language, language),
+            };
             Sheet.Show(stack.Entries, context, SheetStopRule.OpenStop(settings.container.open_stop), settings.container.half_max_ratio);
             ShownPoiId = poiId;
         }
 
         private void Close()
         {
+            _tapOutside.Cancel();
             Sheet?.Hide();
             ShownPoiId = null;
         }
@@ -116,8 +132,11 @@ namespace TileStories
         // - a tap is judged on release: pressed and released in about the same place, quickly
         private void Update()
         {
+            if (Sheet == null) return;
+            if (_tapOutside.TakeDue(Time.unscaledTime, TapOutsideDismissal.DelayFor(wallSession != null ? wallSession.ZoomSettings : null)))
+                SelectionEventBus.Clear();
             var pointer = Pointer.current;
-            if (pointer == null || Sheet == null) return;
+            if (pointer == null) return;
             if (pointer.press.wasPressedThisFrame)
             {
                 _pressed = true;
@@ -131,16 +150,23 @@ namespace TileStories
             }
         }
 
-        // A press at `down` released at `up` (screen pixels): close the card when it was a tap on empty camera
-        // space. Returns true when it closed. The input poll above calls it; so can a test, with real positions.
+        // A press at `down` released at `up` (screen pixels, times on the Time.unscaledTime clock). A tap on empty
+        // camera space closes the card -- at once while zoom is off, else once the zoom's double-tap window passes
+        // with no second tap (ClosePending meanwhile). Returns true when it closed NOW. The input poll above calls
+        // it; so can a test, with real positions and times.
         public bool HandleScreenTap(Vector2 down, Vector2 up, float downTime, float upTime)
         {
             var settings = wallSession != null ? wallSession.CardSettings : null;
+            var zoom = wallSession != null ? wallSession.ZoomSettings : null;
             bool isTap = CardTapRule.IsTap(down, up, downTime, upTime, Screen.height);
-            bool dismiss = CardTapRule.ShouldDismiss(Sheet != null && Sheet.IsOpen, settings?.container.dismiss_on_tap_outside ?? true,
+            bool closes = CardTapRule.ShouldDismiss(Sheet != null && Sheet.IsOpen, settings?.container.dismiss_on_tap_outside ?? true,
                 isTap, isTap && AnythingUnder(up));
-            if (dismiss) SelectionEventBus.Clear();
-            return dismiss;
+            float window = TapOutsideDismissal.DelayFor(zoom);
+            _tapOutside.OnTap(upTime, up, closes, window, zoom?.double_tap_move_tolerance_px ?? 0f);
+            // - zoom off: no second tap can make it a double tap, so there is nothing to wait for
+            if (!_tapOutside.TakeDue(upTime, window)) return false;
+            SelectionEventBus.Clear();
+            return true;
         }
 
         // Whether anything the EventSystem raycasts (a marker, the card, the search UI) is under this screen point

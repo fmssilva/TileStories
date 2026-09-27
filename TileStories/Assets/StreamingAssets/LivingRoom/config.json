@@ -358,6 +358,1255 @@
                                 "items": []
                             }
                         ]
+                    },
+                    {
+                        "key": "block_13",
+                        "kind": "status",
+                        "variant": "ring",
+                        "display": "inline",
+                        "fields": []
+                    },
+                    {
+                        "key": "block_14",
+                        "kind": "status",
+                        "variant": "scale",
+                        "display": "inline",
+                        "fields": []
+                    },
+                    {
+                        "key": "block_6",
+                        "kind": "quick_facts",
+                        "variant": "chips",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Style"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Estilo"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Military gothic"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Gotico militar"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Material"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Material"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Limestone"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Calcario"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Access"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Acesso"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "On foot"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A pe"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_7",
+                        "kind": "quick_facts",
+                        "variant": "grid_hairline",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Taken"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Tomado"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1147"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1147"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Towers"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Torres"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "11"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "11"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Palace until"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Paco ate"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1511"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1511"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "On the panel"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "No painel"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "c. 1700"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "c. 1700"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_8",
+                        "kind": "quick_facts",
+                        "variant": "big_numbers",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "towers"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "torres"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "11"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "11"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "years a palace"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "anos de paco"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "364"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "364"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_2",
+                        "kind": "rich_text",
+                        "variant": "plain",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "body",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "[[Keep|keep]] and walls crown the highest hill of the city, above the river. The painter shows them whole, with every merlon in place.\n\nThe [[curtain wall]] closes the old town and meets the river at the gate."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "[[Torre de menagem|keep]] e muralhas coroam a colina mais alta da cidade, sobre o rio. O pintor mostra-as inteiras, com todas as ameias no lugar.\n\nA [[muralha|curtain wall]] fecha a cidade velha e chega ao rio junto a porta."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_3",
+                        "kind": "rich_text",
+                        "variant": "drop_cap",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "body",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Built by the Moors and taken in 1147, the castle became a royal palace for three centuries."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Construido pelos mouros e tomado em 1147, o castelo foi paco real durante tres seculos."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_4",
+                        "kind": "rich_text",
+                        "variant": "lede",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "body",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "A castle that was a palace, a barracks and a prison, and is now a garden above the city.\n\nOn the panel it still flies the royal colours; the barracks came later."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Um castelo que foi paco, quartel e prisao, e hoje e um jardim sobre a cidade.\n\nNo painel ainda ostenta as cores reais; o quartel veio depois."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_5",
+                        "kind": "rich_text",
+                        "variant": "sections",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "body",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Three moments of the castle, as the panel and the chronicles tell them."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Tres momentos do castelo, contados pelo painel e pelas cronicas."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "sections",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The siege of 1147"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O cerco de 1147"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The crusaders camped below the walls for four months."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Os cruzados acamparam sob as muralhas durante quatro meses."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The royal palace"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O paco real"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Kings lived here until the new palace was built by the river; the [[barbican]] guarded their gate."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Os reis viveram aqui ate ao novo paco junto ao rio; a [[barbaca|barbican]] guardava a sua porta."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "After the earthquake"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Depois do terramoto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "body",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The 1755 earthquake left the keep standing and the palace in ruins."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O terramoto de 1755 deixou a torre de menagem de pe e o paco em ruinas."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_9",
+                        "kind": "fun_fact",
+                        "variant": "flip",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The [[keep]] has no door at ground level: its only way in was a wooden stair the garrison could pull up."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A [[torre de menagem|keep]] nao tem porta ao nivel do chao: so se entrava por uma escada de madeira que a guarnicao podia recolher."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Peacocks have lived in the castle gardens for longer than anyone remembers."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Ha pavoes nos jardins do castelo desde que ha memoria."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_10",
+                        "kind": "fun_fact",
+                        "variant": "postcard",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The painter left out a whole tower, probably to make room for the ships."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O pintor deixou de fora uma torre inteira, talvez para dar lugar aos navios."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_11",
+                        "kind": "pull_quote",
+                        "variant": "serif",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "quote",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "We saw the [[keep]] from the river long before the town, white in the morning."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Vimos a [[torre de menagem|keep]] do rio muito antes da cidade, branca de manha."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "author",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Osbern, a crusader priest"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Osberno, padre cruzado"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "source",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Letter on the conquest, 1147"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Carta sobre a conquista, 1147"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_12",
+                        "kind": "pull_quote",
+                        "variant": "minimal",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "quote",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The most noble castle that I have seen in all these lands."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O mais nobre castelo que vi em todas estas terras."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "author",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "A traveller"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Um viajante"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_15",
+                        "kind": "sources",
+                        "variant": "list",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "sources",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Letter on the conquest of Lisbon"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Carta sobre a conquista de Lisboa"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "author",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Osbern"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Osberno"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "licence",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Public domain"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Dominio publico"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Tile panel of the city, inventory sheet 14"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Painel de azulejo da cidade, ficha 14"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "author",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "National Tile Museum"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Museu Nacional do Azulejo"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "licence",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "With permission"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Com autorizacao"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_16",
+                        "kind": "sources",
+                        "variant": "with_confidence",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "sources",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Letter on the conquest of Lisbon"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Carta sobre a conquista de Lisboa"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "author",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Osbern"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Osberno"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "licence",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Public domain"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Dominio publico"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Tile panel of the city, inventory sheet 14"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Painel de azulejo da cidade, ficha 14"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "author",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "National Tile Museum"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Museu Nacional do Azulejo"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "licence",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "With permission"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Com autorizacao"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "key": "content_status",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "verified",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_17",
+                        "kind": "actions",
+                        "variant": "circles",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "actions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "On the wall"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Na parede"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "action",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "show_on_wall",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_18",
+                        "kind": "actions",
+                        "variant": "pill_row",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "actions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "See it on the wall"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Ver na parede"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "action",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "show_on_wall",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_19",
+                        "kind": "actions",
+                        "variant": "sticky_cta",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "actions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Show me where it is"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Mostrar onde fica"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "action",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "show_on_wall",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             }
@@ -385,7 +1634,10 @@
             "status_level_key": "unknown",
             "hierarchy_level_key": "level_2",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "lamp_military",
@@ -438,6 +1690,126 @@
                                 "items": []
                             }
                         ]
+                    },
+                    {
+                        "key": "block_2",
+                        "kind": "rich_text",
+                        "variant": "plain",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "body",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The [[keep]] was the last refuge of the garrison, built to hold even if the town fell.\n\nIts walls are thicker at the base than the height of a man."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "A [[torre de menagem|keep]] era o ultimo refugio da guarnicao, feita para resistir mesmo que a cidade caisse.\n\nAs suas paredes sao mais grossas na base do que a altura de um homem."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_3",
+                        "kind": "quick_facts",
+                        "variant": "grid_hairline",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Role"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Funcao"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Last refuge"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Ultimo refugio"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Walls"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Paredes"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "3 m thick"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "3 m de espessura"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             }
@@ -465,7 +1837,10 @@
             "status_level_key": "partial_damage",
             "hierarchy_level_key": "level_4",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "lamp_economic",
@@ -490,7 +1865,10 @@
             "status_level_key": "destroyed",
             "hierarchy_level_key": "level_5",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "lamp_infrastructure",
@@ -515,7 +1893,10 @@
             "status_level_key": "unknown",
             "hierarchy_level_key": "level_5",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "painting",
@@ -540,7 +1921,10 @@
             "status_level_key": "intact",
             "hierarchy_level_key": "level_1",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "painting_religious",
@@ -565,7 +1949,10 @@
             "status_level_key": "intact",
             "hierarchy_level_key": "level_2",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "painting_military",
@@ -590,7 +1977,10 @@
             "status_level_key": "partial_damage",
             "hierarchy_level_key": "level_3",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "painting_residential",
@@ -615,7 +2005,10 @@
             "status_level_key": "partial_damage",
             "hierarchy_level_key": "level_4",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "painting_economic",
@@ -640,7 +2033,10 @@
             "status_level_key": "destroyed",
             "hierarchy_level_key": "level_5",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "painting_infrastructure",
@@ -665,7 +2061,10 @@
             "status_level_key": "unknown",
             "hierarchy_level_key": "level_5",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "camera",
@@ -690,7 +2089,10 @@
             "status_level_key": "intact",
             "hierarchy_level_key": "level_1",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "camera_religious",
@@ -715,7 +2117,10 @@
             "status_level_key": "intact",
             "hierarchy_level_key": "level_2",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "camera_military",
@@ -740,7 +2145,10 @@
             "status_level_key": "partial_damage",
             "hierarchy_level_key": "level_3",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "camera_residential",
@@ -765,7 +2173,10 @@
             "status_level_key": "partial_damage",
             "hierarchy_level_key": "level_4",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "camera_economic",
@@ -790,7 +2201,10 @@
             "status_level_key": "destroyed",
             "hierarchy_level_key": "level_5",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "camera_infrastructure",
@@ -815,7 +2229,10 @@
             "status_level_key": "unknown",
             "hierarchy_level_key": "level_5",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "dev_disp_eq_royal",
@@ -840,7 +2257,10 @@
             "status_level_key": "partial_damage",
             "hierarchy_level_key": "level_3",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "dev_disp_eq_mil",
@@ -865,7 +2285,10 @@
             "status_level_key": "partial_damage",
             "hierarchy_level_key": "level_3",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "dev_disp_eq_eco",
@@ -890,7 +2313,10 @@
             "status_level_key": "destroyed",
             "hierarchy_level_key": "level_3",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "dev_disp_singleton",
@@ -915,7 +2341,10 @@
             "status_level_key": "intact",
             "hierarchy_level_key": "level_1",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "dev_marker_nostatus",
@@ -940,7 +2369,10 @@
             "status_level_key": "",
             "hierarchy_level_key": "level_3",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "dev_marker_nobadge",
@@ -965,7 +2397,10 @@
             "status_level_key": "partial_damage",
             "hierarchy_level_key": "level_3",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "dev_marker_nolevel",
@@ -990,7 +2425,10 @@
             "status_level_key": "",
             "hierarchy_level_key": "",
             "has_custom_symbol": false,
-            "custom_symbol_key": ""
+            "custom_symbol_key": "",
+            "card": {
+                "blocks": []
+            }
         },
         {
             "id": "dev_marker_custom_symbol",
@@ -1015,7 +2453,10 @@
             "status_level_key": "",
             "hierarchy_level_key": "level_3",
             "has_custom_symbol": true,
-            "custom_symbol_key": "IconInfrastructures"
+            "custom_symbol_key": "IconInfrastructures",
+            "card": {
+                "blocks": []
+            }
         }
     ],
     "effect_defaults": {
@@ -1231,7 +2672,49 @@
             "dismiss_on_tap_outside": true,
             "keep_audio_on_close": true
         },
-        "kinds": []
+        "kinds": [],
+        "strings": [],
+        "glossary": [
+            {
+                "term": "keep",
+                "definition": [
+                    {
+                        "lang": "en",
+                        "value": "The strongest tower of a castle, its last refuge."
+                    },
+                    {
+                        "lang": "pt",
+                        "value": "A torre mais forte de um castelo, o seu ultimo refugio."
+                    }
+                ]
+            },
+            {
+                "term": "curtain wall",
+                "definition": [
+                    {
+                        "lang": "en",
+                        "value": "The wall that joins the towers of a castle."
+                    },
+                    {
+                        "lang": "pt",
+                        "value": "A muralha que liga as torres de um castelo."
+                    }
+                ]
+            },
+            {
+                "term": "barbican",
+                "definition": [
+                    {
+                        "lang": "en",
+                        "value": "A fortified outwork that guards a gate."
+                    },
+                    {
+                        "lang": "pt",
+                        "value": "Uma defesa avancada que protege uma porta."
+                    }
+                ]
+            }
+        ]
     },
     "search_demo": {
         "enabled": false,

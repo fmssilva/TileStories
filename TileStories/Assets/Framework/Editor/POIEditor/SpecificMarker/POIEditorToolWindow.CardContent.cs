@@ -78,17 +78,23 @@ namespace TileStories.Editor
                         if (pickedMode >= 0 && pickedMode != modeIndex) block.display = modes[pickedMode];
                     }
 
-                    GUILayout.FlexibleSpace();
+                    // - the delete right after the row's cells, never at the far edge of a wide window
                     GUILayout.Space(TableGapBeforeDelete);
                     if (DeleteButton.DrawLayout("Delete block: " + kindName)) deleteIndex = i;
                     ReportTableCellRect("Card block delete", i);
-                    GUILayout.Space(AddButtonRowRightMargin);
+                    GUILayout.FlexibleSpace();
                 }
                 _cardBlockFoldouts[foldoutKey] = open;
 
                 foreach (var skipped in built.Skipped)
                     if (ReferenceEquals(skipped.Instance, block))
-                        EditorGUILayout.HelpBox(CardBlockSkipText(skipped.Reason, definition?.Field(skipped.FieldKey)?.Label ?? skipped.FieldKey), MessageType.Warning);
+                        EditorGUILayout.HelpBox(CardBlockSkipText(skipped.Reason, definition?.Field(skipped.FieldKey)?.Label ?? skipped.FieldKey, definition?.NotShownForPoiNote), MessageType.Warning);
+
+                if (definition != null)
+                {
+                    var missing = MissingGlossaryTerms(block, definition, settings.glossary);
+                    if (missing.Count > 0) EditorGUILayout.HelpBox(CardGlossaryMissingText(missing), MessageType.Warning);
+                }
 
                 if (open && definition != null)
                     DrawBlockFields(block, definition, i);
@@ -121,6 +127,34 @@ namespace TileStories.Editor
                 AddCardBlock(poi, kinds[_newCardBlockKindIndex]);
             ReportTableCellRect("Card add block", 0);
             EditorRowEnd();
+        }
+
+        // The [[terms]] of a block's long texts (every language, item rows included) that the wall's Glossary lacks
+        internal static List<string> MissingGlossaryTerms(BlockInstanceData block, BlockKindDefinition definition, List<GlossaryEntry> glossary)
+        {
+            var texts = new List<string>();
+            foreach (var field in definition.Fields)
+            {
+                var value = block.fields?.Find(f => f != null && f.key == field.Key);
+                if (value == null) continue;
+                if (field.Type == BlockFieldType.LocalizedLongText && value.text != null)
+                    foreach (var t in value.text) if (t != null) texts.Add(t.value);
+                if (field.Type != BlockFieldType.Items || value.items == null) continue;
+                foreach (var sub in field.ItemFields)
+                {
+                    if (sub.Type != BlockFieldType.LocalizedLongText) continue;
+                    foreach (var item in value.items)
+                    {
+                        var subValue = item?.fields?.Find(f => f != null && f.key == sub.Key);
+                        if (subValue?.text != null) foreach (var t in subValue.text) if (t != null) texts.Add(t.value);
+                    }
+                }
+            }
+            var missing = new List<string>();
+            foreach (string text in texts)
+                foreach (string term in GlossaryMarkup.Terms(text))
+                    if (CardGlossary.Find(glossary, term) == null && !missing.Exists(m => CardGlossary.SameTerm(m, term))) missing.Add(term);
+            return missing;
         }
 
         internal void AddCardBlock(POIData poi, BlockKindDefinition kind)

@@ -4,6 +4,8 @@
 // texts and the Scene / Playmode / Device Test guides. Framework-authored and app-agnostic: they name Editor Tab
 // controls, never a project doc, a code file or one wall's own content (_5.1_Editor_Tab.md, "Domain Manual Tests").
 
+using System.Collections.Generic;
+
 namespace TileStories.Editor
 {
     public partial class POIEditorToolWindow
@@ -105,9 +107,67 @@ namespace TileStories.Editor
         private const string BlockLibraryDeviceTestGuide =
             "Nothing device-specific: the library only decides which blocks draw. Check it on a device with the Card Container guide.";
 
+        private const string CardTextsHelp =
+            "The card's own words that no block holds: button names, small headings, hints. Each row is one text, named by " +
+            "its framework wording; under it, one field per language of Card Container > Languages. Type your wall's wording " +
+            "to replace the framework's; leave a field empty to keep the framework's. The (i) of a row says where the card " +
+            "shows it.";
+
+        private const string CardTextsMissingNote =
+            "The framework's card texts were not found in the project. Reimport the framework (the card still works, but its " +
+            "buttons and small headings would have no words).";
+
+        private const string CardTextsSceneTestGuide =
+            "Not possible in Scene test: the card is screen-space UI and only draws in Play Mode. Use How to Playmode Test.";
+
+        private const string CardTextsPlaymodeTestGuide =
+            "SETUP\n" +
+            "- Save All to JSON, then Copy to StreamingAssets; open the wall scene, press Play. Card edits are not live yet: " +
+            "stop, save, copy and Play again after a change.\n\n" +
+            "CARD TEXTS\n" +
+            "- Type your own wording for Close in the first language; tap a marker; point at the round close button: its " +
+            "name is your wording.\n" +
+            "- Empty the field again: the framework's wording is back.\n" +
+            "- Put another language first in Card Container > Languages: every card text is in that language.";
+
+        private const string CardTextsDeviceTestGuide =
+            "Nothing device-specific: the texts are the same on every device. Check them on a device with the Card Container guide.";
+
+        private const string CardGlossaryHelp =
+            "Words a visitor can tap in a card text to read what they mean. A card text links a word by writing it between " +
+            "double brackets, [[keep]]; to show other words for the same entry write [[shown words|keep]]. Term: the word " +
+            "written between the brackets (capital letters do not matter). Definition: one text per language of Card Container " +
+            "> Languages. A linked word with no row here shows as plain text, and Card Content warns under its block.";
+
+        private const string CardGlossaryDefinitionHelp =
+            "What the visitor reads when they tap the word: one or two short sentences.";
+
+        private const string CardGlossarySceneTestGuide =
+            "Not possible in Scene test: the card is screen-space UI and only draws in Play Mode. Use How to Playmode Test.";
+
+        private const string CardGlossaryPlaymodeTestGuide =
+            "SETUP\n" +
+            "- Add a term here, write [[the term]] in a Rich Text block of a point (Specific Marker > Card Content).\n" +
+            "- Save All to JSON, then Copy to StreamingAssets; open the wall scene, press Play.\n\n" +
+            "GLOSSARY\n" +
+            "- Tap the point's marker, drag the card up to full: the word is underlined.\n" +
+            "- Tap the word: its definition opens under the paragraph. Tap the word again (or the definition): it closes.\n" +
+            "- Delete the term here, save, copy, Play again: the word is plain text and cannot be tapped.";
+
+        private const string CardGlossaryDeviceTestGuide =
+            "SETUP\n" +
+            "- Save All to JSON, Copy to StreamingAssets, Build And Run.\n\n" +
+            "GLOSSARY\n" +
+            "- Tap a linked word with a real finger: the definition opens; a slow drag across the text scrolls the card instead.";
+
+        // A block text links a word the Glossary does not have
+        internal static string CardGlossaryMissingText(IReadOnlyList<string> terms) =>
+            "Not in the Glossary (Detail Card > Glossary), shown as plain text: " + string.Join(", ", terms) + ".";
+
         // Why a block of Card Content would not show (BlockStackBuilder's reason), in the Editor's words
-        internal static string CardBlockSkipText(BlockStackBuilder.SkipReason reason, string fieldLabel) => reason switch
+        internal static string CardBlockSkipText(BlockStackBuilder.SkipReason reason, string fieldLabel, string notForThisPointNote = null) => reason switch
         {
+            BlockStackBuilder.SkipReason.NotForThisPoint => "Not shown: " + (notForThisPointNote ?? "this kind has nothing to show for this point."),
             BlockStackBuilder.SkipReason.UnknownKind => "Not shown: no block kind of this name is registered.",
             BlockStackBuilder.SkipReason.KindDisabled => "Not shown: this kind is switched off in Detail Card > Block Library.",
             BlockStackBuilder.SkipReason.MissingRequired => "Not shown: " + fieldLabel + " is empty in every language.",

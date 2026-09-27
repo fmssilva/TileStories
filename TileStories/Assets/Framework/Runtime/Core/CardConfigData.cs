@@ -26,6 +26,29 @@ namespace TileStories
         // The Block Library: one row per kind the developer changed. A kind with no row is enabled with
         // its own default variant (BlockLibraryRule), so a new built-in kind needs no config edit.
         public List<BlockKindSetting> kinds = new();
+        // Card Texts: this wall's own wording of the card's UI texts ("Did you know?", the close label...). A key
+        // with no row here, or a language with no text, uses the framework's default (CardStrings).
+        public List<CardStringEntry> strings = new();
+        // The wall's glossary: a card text marks a word as [[term]] (or [[shown words|term]]) and the visitor taps it
+        // for this definition (GlossaryMarkup, CardGlossary)
+        public List<GlossaryEntry> glossary = new();
+    }
+
+    // One glossary word and its definition in every language it is written in
+    [Serializable]
+    public class GlossaryEntry
+    {
+        // What a card text writes between [[ ]] (matched ignoring case and surrounding spaces)
+        public string term;
+        public List<LocalizedEntry> definition = new();
+    }
+
+    // One card UI text in every language it is written in, by its framework key (CardStrings.Keys)
+    [Serializable]
+    public class CardStringEntry
+    {
+        public string key;
+        public List<LocalizedEntry> text = new();
     }
 
     [Serializable]

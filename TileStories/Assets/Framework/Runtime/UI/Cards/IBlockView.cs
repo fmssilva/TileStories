@@ -13,6 +13,21 @@ namespace TileStories
         public string Language;
         public string FallbackLanguage;
         public IMediaSource Media;
+        // The card's UI texts in this card's language (framework defaults + the wall's own wording)
+        public CardStrings Strings;
+        // The wall's marker look: blocks that show marker facts (status) resolve them through the markers' own rules
+        public MarkerVisualSettings MarkerLook;
+        // The wall's glossary in this card's language: the definitions of [[terms]] in long texts
+        public CardGlossary Glossary;
+        // What a block may ask of the card it sits on (the sheet)
+        public IBlockHost Host;
+    }
+
+    // What a block may ask of its card (_3.1 section 3). Today: lower the card so the selected POI's marker shows on the
+    // wall. Tier 2-4 add their requests here (open a takeover, play audio) with their first block.
+    public interface IBlockHost
+    {
+        void ShowOnWall();
     }
 
     // One block kind's view (_3.1 section 3): built once, then bound and unbound as the visitor switches POIs

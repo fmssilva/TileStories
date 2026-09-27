@@ -170,5 +170,33 @@ namespace TileStories.Editor.Tests
             Assert.IsNull(r.CreateView("hologram"));
             CollectionAssert.AreEqual(new[] { "fun_fact" }, r.All.Select(k => k.Key));
         }
+
+        [Test]
+        public void AKindWithNothingToShowForThisPoi_IsSkipped_WithItsOwnReason_AndKeptOnceItHasSomething()
+        {
+            var r = Registry();
+            var status = Kind("status");
+            status.ShowsFor = p => p.has_status;
+            status.NotShownForPoiNote = "this point has no status.";
+            r.Register(status, () => new PlainView());
+            var poi = Poi(Block("block_2", "status"));
+            poi.has_status = false;
+
+            var skipped = BlockStackBuilder.Build(poi, new CardSettings(), r).Skipped.Single();
+            Assert.AreEqual(BlockStackBuilder.SkipReason.NotForThisPoint, skipped.Reason, "no empty ring for a POI without a status");
+            Assert.AreEqual("Not shown: this point has no status.",
+                POIEditorToolWindow.CardBlockSkipText(skipped.Reason, null, status.NotShownForPoiNote), "the Editor row says why, in the kind's words");
+
+            poi.has_status = true;
+            CollectionAssert.AreEqual(new[] { "", "block_2" }, Keys(BlockStackBuilder.Build(poi, new CardSettings(), r)), "with a status it is shown");
+        }
+
+        [Test]
+        public void TheBuiltInStatusKind_ShowsOnlyForAPoiWithAStatus()
+        {
+            Assert.IsFalse(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = false }));
+            Assert.IsTrue(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = true, status_unknown = true }), "unknown is still a status: the question mark");
+            Assert.IsFalse(string.IsNullOrWhiteSpace(BuiltInBlocks.Status.NotShownForPoiNote));
+        }
     }
 }

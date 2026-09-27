@@ -374,6 +374,15 @@ require a per-item answer citing what is actually observed:
 A holistic summary answer to a checklist prompt is itself a sign the check wasn't
 done properly — reject it and re-ask item by item if that's what comes back.
 
+**Visual verification is the agent's job, not the developer's.** The agent is vision-capable and the
+developer keeps the Unity Editor open and unobstructed during agent sessions. So every change with a visible
+result -- a POI Editor row, table or popup, a Game-view render, a demo grid, a card, a marker -- is captured
+and checked BY THE AGENT before it is reported done: take the capture (Unity MCP screenshot tool, or the
+`ReadScreenPixel` procedure in `proj_guides/_5.1_Editor_Tab.md`, "Verifying and debugging layout"), write a
+numbered checklist of falsifiable claims (Tier 1 above), answer each item from what the capture actually
+shows, fix what it shows wrong and capture again. "Tested with real clicks but not looked at, please check"
+is not an acceptable finish while a capture is possible. The developer's own look is the fallback below.
+
 **Visual evidence needs the Editor on screen.** A screen capture reads whatever is on the desktop; if another application covers Unity it captures that application instead (private content). Always open a capture and confirm it shows the Editor window, and delete any that does not. When Unity is covered: do not stop the whole task. Finish everything that needs no pixels, then, before the final report, ask the developer ONCE to leave Unity in front and retry (ask early when the whole task is visual). If it still cannot be captured, do not claim visual verification: record the unverified items in the domain's pending-verification list (for the POI Editor window: `proj_guides/_5.1_Editor_Tab.md`, "Verifying and debugging layout") and say so in the report.
 
 **Tier 2 — human (rarest, most expensive).** Real device, final subjective/

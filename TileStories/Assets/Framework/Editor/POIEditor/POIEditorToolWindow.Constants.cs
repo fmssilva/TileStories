@@ -240,6 +240,8 @@ namespace TileStories.Editor
         private static readonly Color DetailCardTabColor = new Color(0.90f, 0.55f, 0.10f); // amber (the card's accent)
         private static readonly Color CardContainerSectionColor = new Color(0.95f, 0.65f, 0.20f);
         private static readonly Color BlockLibrarySectionColor = new Color(0.80f, 0.45f, 0.15f);
+        private static readonly Color CardTextsSectionColor = new Color(0.70f, 0.55f, 0.20f);
+        private static readonly Color CardGlossarySectionColor = new Color(0.60f, 0.50f, 0.25f);
         private static readonly Color TabTextColor = Color.white;
         private static readonly Color SceneConfigSectionColor = new Color(0.45f, 0.55f, 0.85f);
         private static readonly Color LabelsAndFontsSectionColor = new Color(0.90f, 0.45f, 0.55f);

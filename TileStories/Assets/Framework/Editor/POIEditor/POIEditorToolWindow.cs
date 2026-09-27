@@ -299,6 +299,8 @@ namespace TileStories.Editor
         // Detail Card tab sections (_3.1), collapsed like every section
         [SerializeField] private bool _showCardContainer = false;
         [SerializeField] private bool _showCardBlockLibrary = false;
+        [SerializeField] private bool _showCardTexts = false;
+        [SerializeField] private bool _showCardGlossary = false;
 
         [SerializeField] private SpriteKeyLibrary _defaultIconLibrary;
         [SerializeField] private SpriteKeyLibrary _wallIconLibrary;

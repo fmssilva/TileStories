@@ -26,8 +26,9 @@ namespace TileStories
         public bool Required;
         // The Editor (i) text: framework-authored, app-agnostic
         public string Help;
-        // Choice only: the option values
+        // Choice only: the option values (stored in config) and, in the same order, the names the Editor shows
         public IReadOnlyList<string> Options;
+        public IReadOnlyList<string> OptionLabels;
         // Items only: the sub-fields of one row (never Items themselves)
         public IReadOnlyList<BlockFieldDefinition> ItemFields;
     }

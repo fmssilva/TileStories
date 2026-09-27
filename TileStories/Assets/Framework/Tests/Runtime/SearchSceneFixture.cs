@@ -169,6 +169,23 @@ namespace TileStories.Tests
             return new Vector2(sp.x, sp.y);
         }
 
+        // A screen point (pixels) with nothing the EventSystem can hit under it, above the open card -- and at least
+        // `minDistance` pixels from `awayFrom` when one is given
+        protected Vector2 EmptyScreenPoint(Vector2? awayFrom = null, float minDistance = 0f)
+        {
+            var sheet = Card.Sheet;
+            float cardTop = Screen.height - sheet.TargetHeight * Screen.height / sheet.Layer.layout.height;
+            for (float y = Screen.height * 0.35f; y < cardTop - 10f && y < Screen.height * 0.8f; y += 17f)
+                for (float x = Screen.width * 0.1f; x < Screen.width * 0.9f; x += 23f)
+                {
+                    var p = new Vector2(x, Screen.height - y);
+                    if (awayFrom.HasValue && Vector2.Distance(p, awayFrom.Value) < minDistance) continue;
+                    if (!PoiCardHost.AnythingUnder(p)) return p;
+                }
+            Assert.Fail("precondition: the camera view has an empty spot");
+            return default;
+        }
+
         // Save what the Game view shows (3D and UI) under Assets/Screenshots
         protected static IEnumerator Capture(string name)
         {

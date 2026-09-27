@@ -13,6 +13,7 @@ namespace TileStories
     {
         [SerializeField] private StyleSheet tokens;
         [SerializeField] private StyleSheet cardStyle;
+        [SerializeField] private CardStringTable strings;
 
         public PoiCardSheetView Sheet { get; private set; }
         public VisualElement Frame { get; private set; }
@@ -47,10 +48,20 @@ namespace TileStories
             var entries = CardGalleryDefinitions.All;
             Index = (index % entries.Count + entries.Count) % entries.Count;
             var entry = entries[Index];
-            var settings = new CardSettings();
+            var wall = CardGalleryDefinitions.Taxonomy();
+            entry.WallSetup?.Invoke(wall);
+            var settings = wall.card_settings;
+            // - the marker palettes the status block reads, configured exactly as a wall configures them
+            MarkerVisualSettings.ApplyPalettes(wall);
             var poi = CardGalleryDefinitions.Poi(entry);
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared);
-            var context = new BlockBindContext { Poi = poi, Taxonomy = CardGalleryDefinitions.Taxonomy(), Language = "en", FallbackLanguage = "en" };
+            var context = new BlockBindContext
+            {
+                Poi = poi, Taxonomy = wall, Language = "en", FallbackLanguage = "en",
+                Strings = new CardStrings(strings != null ? strings.Entries() : null, settings.strings, "en", "en"),
+                Glossary = new CardGlossary(settings.glossary, "en", "en"),
+                MarkerLook = MarkerVisualSettings.Resolve(wall, null),
+            };
             Sheet.Hide();
             Sheet.Show(stack.Entries, context, SheetStopRule.Stop.Peek, settings.container.half_max_ratio);
             Sheet.SetStop(entry.Stop);

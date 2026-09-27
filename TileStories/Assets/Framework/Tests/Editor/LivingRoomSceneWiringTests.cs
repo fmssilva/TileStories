@@ -79,6 +79,8 @@ namespace TileStories.Tests
                 Assert.AreSame(wall, Ref(card, "wallSession"), "the card shows this wall's POIs");
                 Assert.AreEqual("Assets/Framework/Runtime/UI/Cards/CardTokens.uss", AssetDatabase.GetAssetPath(Ref(card, "tokens")));
                 Assert.AreEqual("Assets/Framework/Runtime/UI/Cards/PoiCard.uss", AssetDatabase.GetAssetPath(Ref(card, "cardStyle")));
+                Assert.AreEqual("Assets/Framework/Runtime/UI/Cards/CardStrings.asset", AssetDatabase.GetAssetPath(Ref(card, "strings")),
+                    "the card's UI texts come from the framework string table (+ the wall's Card Texts)");
 
                 var cardDocument = card.GetComponent<UIDocument>();
                 var searchDocument = Only<SearchUIHost>(scene).GetComponent<UIDocument>();

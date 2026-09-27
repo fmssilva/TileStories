@@ -50,6 +50,10 @@
     --ts-size-body: 16px;
     --ts-size-title: 24px;
     --ts-size-caption: 14px;
+    --ts-size-lede: 19px;
+    --ts-size-heading: 18px;
+    --ts-size-dropcap: 48px;
+    --ts-size-quote: 22px;
     --ts-weight-body: normal;
 
     /* Shape */
@@ -76,4 +80,16 @@
     --ts-grabber-width: 40px;
     --ts-grabber-height: 4px;
     --ts-sheet-top-gap: 48;
+
+    /* Line icons drawn in USS (the close X): their length and stroke */
+    --ts-icon-size: 18px;
+    --ts-icon-stroke: 2px;
+    --ts-icon-dot: 6px;
+
+    /* The status block's rings: the main one and each step of the scale */
+    --ts-status-ring-size: 56px;
+    --ts-status-step-ring: 28px;
+
+    /* The fun_fact postcard's tilt */
+    --ts-postcard-tilt: -1.5deg;
 }

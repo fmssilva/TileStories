@@ -63,6 +63,26 @@ d) after we do and implement and clean and test everything, lets update, if nece
 
 
 
+## `And now: review and complete the <DOMAIN> domain`
+Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, and _5.1_Editor_Tab.md
+(HOW TO USE + section 0). Check the real code; don't trust the docs.
+1. Developer flow: the normal sequence of actions in the Editor and Play Mode; the defaults a new POI /
+   row gets (copied from the reference POI where that makes sense).
+2. Gaps: features in the doc not built; features worth adding for a flexible framework; features in code
+   but not exposed in the Editor Tab that a developer should be able to switch or tune.
+3. Config ontology: clear groups with one responsibility each, clear names, UI order = ontology.
+4. Editor quality: use _5.1 section 0 as a checklist (rows, width, indentation, tables, (i) help, popups,
+   undo/redo/save for EVERY field, warnings, Test sub-foldout with Scene/Playmode/Device guides that are
+   app-agnostic and name Editor controls, not code files, live sync in Scene and in Play Mode).
+5. Code: dead, duplicated, unused, or needlessly complex code per 20-code-quality.md.
+6. Demo + tests: a demo that shows every setting; every demo control and every domain setting proven
+   one by one on the real scene with a coverage guard (_5.1 "A demo is not done until...").
+7. Visual: capture the Editor section and the demo's key states; answer an item-by-item checklist.
+8. Then plan (no backward-compatibility shims; this is v1), implement, test, look, and update the domain
+   doc, _5.1 and 10-structure.md. End with a plain summary of what the domain does and how to test each option.
+
+
+   
 # `claude agent`
 - **GATE TASK:** start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
 
@@ -77,30 +97,33 @@ d) after we do and implement and clean and test everything, lets update, if nece
 So start by reading them all. 
 
 
-## `and now implement the POI Detail Card foundation: _3.1 steps 0-5`
+## `and now continue the POI Detail Card: _3.1 step 5b + Tier 1 group A`
 
-Domain spec (read ALL lines before planning): 
-  C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md
-Also read for context only (do NOT implement yet): _3.2_POI_Card_Navigation.md, _3.3_POI_Card_Styles.md
-Also read: _5.1_Editor_Tab.md (the general Editor rules the new tab must follow) and
-_2.6_Select_Filter_Search.md section 14 (the minimal DetailCardView we are replacing).
+Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md
+Context only: _3.2 (families/ontology), _3.3 (tokens), _5.1 (Editor rules), _2.2.x marker docs (outline colours).
+Steps 0-5 are DONE and verified (see _3.1 status table) -- re-verify the baseline (compile + all tests green) before changing anything.
 
-Scope of THIS session: _3.1 section 10, steps 0 to 5 only:
-0. Baseline: compile clean + all EditMode/PlayMode tests green BEFORE any change; record totals in _3.1's status table.
-1. Config model (card_settings, POIData.card, BlockInstanceData, BlockFieldValue, BlockItemData, LocalizedEntry) -- JsonUtility compatible (option C, _3.1 section 3.1).
-2. Block contract + BlockRegistry + BuiltInBlocks + BlockStackBuilder + BlockFieldReader + SheetStopRule (pure, EditMode tests).
-3. Card container: PoiCardHost on a new "PoiCard" scene object (own UIDocument, sort order 2), sheet stops peek/half(<=40%)/full, 3 dismiss paths, the `header` kind only (compact, text_only). Remove DetailCardView from SearchUIHost, move Subtitle to a pure PoiSubtitle, migrate the 4 tests that use the old card and prove each still passes. Phase A gallery (Assets/Dev/CardGallery) + Phase B real-scene tests.
-4. Editor: third tab "Detail Card" (Card Container + Block Library sections) and Specific Marker > "Card Content" section with the generic BlockFieldDrawer.
-5. Media seam (IMediaSource + ResourcesMediaSource), lazy load on bind / release on unbind.
+Scope of THIS session:
+1. Step 5b (review fixes), exactly as written in _3.1 section 10:
+   - card UI strings table (framework defaults en/pt, wall override in card_settings), migrate the "X";
+   - tap-outside vs double-tap zoom: one rule, proven with two real taps in the real scene;
+   - status colours resolved through the markers' own outline rule, tokens only as fallback.
+2. Tier 1 group A, one kind at a time through the section 7 micro-cycle (definition -> round trip ->
+   view -> Phase A gallery entries + tests -> Editor rows appear by themselves -> fixture on "The Lamp"
+   -> Phase B real-scene test -> docs):
+   rich_text (plain, drop_cap, lede, sections + the [[term]] glossary renderer), quick_facts (chips,
+   grid_hairline, big_numbers), fun_fact (flip, postcard), pull_quote (serif, minimal),
+   status (ring, scale, unknown; has_status=false never renders), sources (list, with_confidence),
+   actions (circles, pill_row, sticky_cta).
+   Add each new BlockFieldType drawer only when a kind first needs it (the guard test enforces it).
 
-Hard rules for this domain:
-- Fixture: "The Lamp" (id lamp) gets the card content; "Lamp - Military" (id lamp_military) the short card. NEVER change any POI's id, name, category, summary or keywords -- SearchSceneTests depend on them. Card text is NOT indexed by search.
-- No literal colours/sizes in C# or UXML: PoiCard.uss + CardTokens.uss with var(--ts-*) tokens (token names in _3.3 section 2).
-- Stop after step 5 green. Blocks tiers (step 6+) are the next session.
-- Before finishing: update _3.1's Implementation status table with real proof, 10-structure.md for every new file, and _5.1 for the new tab (it describes current truth only).
-
-If any step's design in _3.1 turns out wrong against the real code, STOP and report it instead of patching around it.
-
+Rules: never change any POI's id/name/category/summary/keywords; card text is not searchable;
+no literal colours/sizes in C#/UXML; no visitor strings in code (use the new strings table).
+"Lamp - Military" stays the short card (header, rich_text, quick_facts only for now).
+Stop after group A is green. Group B (process_steps, swatches, timeline, person, story_chapters,
+compare_points, practical_info) is the next session.
+Update _3.1 status (split step 6 into 6A/6B rows), 10-structure.md, _5.1 if the Editor changed.
+If _3.1 is wrong against the real code, STOP and report instead of patching around it.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
@@ -177,6 +200,7 @@ For every step/group of sub-tasks execute the following cycle:
 3. **Implement Tests:** per .clinerules/40-testing.md, see which layers of tests you should implement and what each one specifically needs to check for this task — don't plan a boilerplate list of tests. Only the ones real needed for fast and robust developement. 
 4. **Verify Code** Compile code and execute Edit/Playmode tests to confirm everything is ok. 
 5. **Run Tests** Run the necessary tests you implemented - TESTS THAT ACTUALLY CONFIRM IF THINGS WORK OK FOR REAL, LIKE IF THE USER WAS CLICKING AND DOING THEM - NO MOCK TESTS. 
+- 5b. **Look at it:** for anything with a visible result (POI Editor rows/tables/popups, Game-view renders, demo grids, the card), capture it and check it yourself with an item-by-item checklist (.clinerules/40-testing.md 4.5, "Visual verification is the agent's job"). Unity is open and unobstructed for this. Fix what the capture shows and capture again. Never report "not looked at".
 6. **Learning Summary** present a "Learning Summary" for these steps we just did in chat, for me to keep track of what is beeing done, with all important details BUT in a concise manner, like i explained above. 
 
 Repeat steps 1–6 until every step/group of sub-tasks in the plan is done. 

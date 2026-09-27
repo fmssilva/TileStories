@@ -74,6 +74,8 @@ namespace TileStories
                 if (f == null || string.IsNullOrWhiteSpace(f.Key)) return "a field has no key";
                 if (!keys.Add(f.Key)) return "two fields are keyed '" + f.Key + "'";
                 if (f.Type == BlockFieldType.Choice && (f.Options == null || f.Options.Count == 0)) return "Choice field '" + f.Key + "' has no options";
+                if (f.Type == BlockFieldType.Choice && f.OptionLabels != null && f.OptionLabels.Count != f.Options.Count)
+                    return "Choice field '" + f.Key + "' has " + f.OptionLabels.Count + " labels for " + f.Options.Count + " options";
                 if (f.Type == BlockFieldType.Items)
                 {
                     if (!allowItems) return "Items field '" + f.Key + "' inside an item (items cannot nest)";

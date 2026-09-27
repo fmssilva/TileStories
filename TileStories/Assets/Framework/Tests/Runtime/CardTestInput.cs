@@ -27,6 +27,50 @@ namespace TileStories.Tests
             yield return null;
         }
 
+        // A tap (press + release, no move) at a panel position: the panel picks the element under it
+        public static IEnumerator Tap(IPanel panel, Vector2 position)
+        {
+            Send(panel, EventType.MouseDown, position);
+            yield return null;
+            Send(panel, EventType.MouseUp, position);
+            yield return null;
+        }
+
+        // The colour actually behind an element: its own and its ancestors' backgrounds composited, from the nearest
+        // opaque one inwards (a translucent chip over the card is judged against what it really covers)
+        public static Color EffectiveBackground(VisualElement element)
+        {
+            var chain = new System.Collections.Generic.List<Color>();
+            for (var e = element; e != null; e = e.parent)
+            {
+                var c = e.resolvedStyle.backgroundColor;
+                chain.Add(c);
+                if (c.a >= 0.999f) break;
+            }
+            Color result = Color.black;
+            for (int i = chain.Count - 1; i >= 0; i--)
+                result = Color.Lerp(result, new Color(chain[i].r, chain[i].g, chain[i].b, 1f), chain[i].a);
+            return result;
+        }
+
+        // The name of the picture an element's background draws (a sprite or a texture), or null
+        public static string BackgroundPictureName(VisualElement element)
+        {
+            var bg = element.resolvedStyle.backgroundImage;
+            return bg.sprite != null ? bg.sprite.name : bg.texture != null ? bg.texture.name : null;
+        }
+
+        // Whether an element is laid out as shown (it and every ancestor up to `root` displayed)
+        public static bool IsShown(VisualElement element, VisualElement root)
+        {
+            for (var e = element; e != null; e = e.parent)
+            {
+                if (e.resolvedStyle.display == DisplayStyle.None) return false;
+                if (e == root) return true;
+            }
+            return false;
+        }
+
         private static void Send(IPanel panel, EventType type, Vector2 position)
         {
             var e = new Event { type = type, mousePosition = position, button = 0, clickCount = 1 };

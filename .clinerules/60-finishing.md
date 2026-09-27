@@ -15,6 +15,10 @@ or a log line saying success. Before saying something is done:
 - If the change touched an asset file rather than only going through
   Unity's own Editor UI: confirm the AssetDatabase refresh actually
   happened (`40-testing.md` §4.3), not just that the file on disk changed.
+- Visible changes (Editor window layout, Game-view renders, demo grids, cards, markers): captured and checked
+  by the agent with an answered item-by-item checklist (`40-testing.md` 4.5, "Visual verification is the
+  agent's job"). Name the captures in the report. Only when no capture is possible: the pending-verification
+  list in `_5.1` + say so.
 - Re-run the actual EditMode/PlayMode tests relevant to the change via Unity MCP
   `run_tests` + `get_test_job` (preferred) or batch-mode XML. Acceptance gate:
   **zero failed tests** — never a fixed count. If the task added or changed a test,

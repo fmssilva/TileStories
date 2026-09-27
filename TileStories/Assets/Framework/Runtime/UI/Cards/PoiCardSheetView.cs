@@ -10,7 +10,7 @@ namespace TileStories
     // grabber or the header, and on release snaps -- or asks to close (CloseRequested) when pulled away. The X
     // asks the same. The sheet's HEIGHT is its state (the ScrollView's viewport is exactly what is visible),
     // animated by a USS transition. Plain C#: built into the parent it is handed; PoiCard.uss styles it.
-    public sealed class PoiCardSheetView
+    public sealed class PoiCardSheetView : IBlockHost
     {
         // Full-area layer the sheet sits at the bottom of (its height is what the stops divide)
         public VisualElement Layer { get; }
@@ -61,8 +61,16 @@ namespace TileStories
 
             Stack = new BlockStackView(Root, Root, registry);
 
-            CloseButton = new Button(() => CloseRequested?.Invoke()) { name = "poi-card-close", text = "X", tooltip = "Close" };
+            // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings
+            CloseButton = new Button(() => CloseRequested?.Invoke()) { name = "poi-card-close" };
             CloseButton.AddToClassList("poi-card__close");
+            foreach (string bar in new[] { "poi-card__close-bar--a", "poi-card__close-bar--b" })
+            {
+                var stroke = new VisualElement { pickingMode = PickingMode.Ignore };
+                stroke.AddToClassList("poi-card__close-bar");
+                stroke.AddToClassList(bar);
+                CloseButton.Add(stroke);
+            }
             Root.Add(CloseButton);
 
             Layer.Add(Root);
@@ -85,6 +93,8 @@ namespace TileStories
         public void Show(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockBindContext context, SheetStopRule.Stop openStop, float halfMaxRatio)
         {
             _halfMaxRatio = halfMaxRatio;
+            CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
+            context.Host ??= this;
             Stack.Bind(entries, context);
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
@@ -98,6 +108,12 @@ namespace TileStories
             IsDragging = false;
             ApplyHeight(0f);
             Root.style.display = DisplayStyle.None;
+        }
+
+        // A block asked to see the POI on the wall: lower the card to peek (the selection and its marker stay)
+        public void ShowOnWall()
+        {
+            if (IsOpen) SetStop(SheetStopRule.Stop.Peek);
         }
 
         // Rest at `stop` (Dismissed hides)

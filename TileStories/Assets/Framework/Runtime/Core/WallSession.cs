@@ -92,6 +92,10 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
         // The POI Detail Card's wall settings (_3.1); PoiCardHost reads them on every selection
         public CardSettings CardSettings => _config?.card_settings;
 
+        // The wall's resolved marker look (outline mode, outline levels...): the card's status block draws its
+        // colour through the SAME rule as the markers (CardStatusRule -> MarkerVisualResolver)
+        public MarkerVisualSettings MarkerLook => _visualSettings;
+
         // The searchable set: exactly the POIs whose markers run (the wall's own, or a demo's while one
         // is on), so every search result has a marker to show. Rebuilt with the index.
         public IReadOnlyList<POIData> SearchPois => _searchPois;

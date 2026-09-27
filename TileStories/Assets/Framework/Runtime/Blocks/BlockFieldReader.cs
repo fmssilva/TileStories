@@ -28,6 +28,9 @@ namespace TileStories
         // A localized sub-field of one Items row
         public string ItemText(BlockItemData item, string key) => Pick(FindItemField(item, key)?.text, _language, _fallback);
 
+        // The Choice value of one Items row's sub-field ("" when there is none)
+        public string ItemValue(BlockItemData item, string key) => FindItemField(item, key)?.value ?? "";
+
         // Whether the field holds anything a visitor would see (a required field that fails this hides the block)
         public static bool HasContent(BlockFieldValue value, BlockFieldType type)
         {

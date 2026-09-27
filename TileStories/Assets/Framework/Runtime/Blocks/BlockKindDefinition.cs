@@ -20,6 +20,15 @@ namespace TileStories
         public string DefaultVariant;
         public IReadOnlyList<BlockFieldDefinition> Fields;
         public IReadOnlyList<string> DisplayModes;
+        // Which POIs the kind has something to show for (null = every POI). A block on any other POI is skipped
+        // (BlockStackBuilder, NotForThisPoint) -- e.g. a status block on a POI without a status never draws an empty ring.
+        public System.Func<POIData, bool> ShowsFor;
+        // The Editor's words for that skip, under the block's row in Card Content ("this point has no status...")
+        public string NotShownForPoiNote;
+        // Variants drawn in the card's footer, pinned under the scrolling blocks (a sticky call to action)
+        public IReadOnlyList<string> FooterVariants;
+
+        public bool IsFooter(string variant) => FooterVariants != null && variant != null && ContainsString(FooterVariants, variant);
 
         public bool HasVariant(string variant) => Variants != null && variant != null && ContainsString(Variants, variant);
 

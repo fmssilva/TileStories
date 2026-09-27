@@ -6,6 +6,7 @@ namespace TileStories
     // not a debug session. In authored order, each instance is kept or skipped with its reason:
     //   - an unknown kind (not registered)            -> skipped (UnknownKind)
     //   - a kind switched off in the Block Library    -> skipped (KindDisabled)
+    //   - a kind with nothing to show for this POI    -> skipped (NotForThisPoint, BlockKindDefinition.ShowsFor)
     //   - a required field with nothing in it         -> skipped (MissingRequired)
     //   - a second header                             -> skipped (ExtraHeader)
     //   - a variant the kind does not have (or none)  -> kept, with the Block Library's default variant
@@ -13,7 +14,7 @@ namespace TileStories
     // the POI's name and summary -- so a POI with no card still gets a card, with zero authoring.
     public static class BlockStackBuilder
     {
-        public enum SkipReason { UnknownKind, KindDisabled, MissingRequired, ExtraHeader }
+        public enum SkipReason { UnknownKind, KindDisabled, NotForThisPoint, MissingRequired, ExtraHeader }
 
         public readonly struct Entry
         {
@@ -77,6 +78,11 @@ namespace TileStories
                     if (!BlockLibraryRule.IsEnabled(settings, definition.Key))
                     {
                         result.Skipped.Add(new Skipped(instance, SkipReason.KindDisabled));
+                        continue;
+                    }
+                    if (definition.ShowsFor != null && !definition.ShowsFor(poi))
+                    {
+                        result.Skipped.Add(new Skipped(instance, SkipReason.NotForThisPoint));
                         continue;
                     }
                     string empty = FirstEmptyRequiredField(instance, definition);

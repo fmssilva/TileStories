@@ -12,6 +12,8 @@ namespace TileStories
     {
         public VisualElement HeaderSlot { get; }
         public ScrollView Scroll { get; }
+        // Pinned under the scroll: the blocks whose variant is a footer (BlockKindDefinition.FooterVariants)
+        public VisualElement Footer { get; }
 
         private readonly BlockRegistry _registry;
         private readonly Dictionary<string, Stack<IBlockView>> _pool = new();
@@ -47,9 +49,18 @@ namespace TileStories
             HeaderSlot = new VisualElement { name = "poi-card-header" };
             HeaderSlot.AddToClassList("poi-card__header");
             headerParent.Add(HeaderSlot);
-            Scroll = new ScrollView(ScrollViewMode.Vertical) { name = "poi-card-stack" };
+            // - a phone card scrolls by dragging its content: no desktop scroll bar (it took width and ignored the tokens)
+            Scroll = new ScrollView(ScrollViewMode.Vertical)
+            {
+                name = "poi-card-stack",
+                verticalScrollerVisibility = ScrollerVisibility.Hidden,
+                horizontalScrollerVisibility = ScrollerVisibility.Hidden,
+            };
             Scroll.AddToClassList("poi-card__stack");
             scrollParent.Add(Scroll);
+            Footer = new VisualElement { name = "poi-card-footer" };
+            Footer.AddToClassList("poi-card__footer");
+            scrollParent.Add(Footer);
         }
 
         // Show these entries (BlockStackBuilder's output), each bound with `context` and its own variant
@@ -69,9 +80,14 @@ namespace TileStories
                     Language = context.Language,
                     FallbackLanguage = context.FallbackLanguage,
                     Media = media,
+                    Strings = context.Strings,
+                    MarkerLook = context.MarkerLook,
+                    Glossary = context.Glossary,
+                    Host = context.Host,
                 });
                 bool header = _bound.Count == 0 && entry.Definition.Key == BuiltInBlocks.HeaderKind;
-                (header ? HeaderSlot : Scroll.contentContainer).Add(view.Root);
+                var slot = header ? HeaderSlot : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;
+                slot.Add(view.Root);
                 _bound.Add((entry.Definition.Key, view, media));
             }
             Scroll.scrollOffset = UnityEngine.Vector2.zero;
