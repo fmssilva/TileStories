@@ -193,6 +193,7 @@ namespace TileStories
                     Host = context.Host,
                     State = context.State,
                     Events = context.Events,
+                    PollResults = context.PollResults,
                 });
                 bool header = _bound.Count == 0 && entry.Definition.Key == BuiltInBlocks.HeaderKind;
                 var parent = header ? HeaderSlot : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;

@@ -372,3 +372,87 @@ MonoBehaviour:
       value: Thank you for your feedback
     - lang: pt
       value: Obrigado pelo seu comentario
+  - key: poll_your_choice
+    where: The caption on the option the visitor picked in a Poll block.
+    text:
+    - lang: en
+      value: Your choice
+    - lang: pt
+      value: A sua escolha
+  - key: poll_thanks
+    where: The thank-you a Poll block shows once the visitor has voted.
+    text:
+    - lang: en
+      value: Thank you for voting
+    - lang: pt
+      value: Obrigado pelo seu voto
+  - key: poll_percent
+    where: 'The share of the votes an option got, when results exist ({0} = the percentage): a Poll block only shows it when the app has results to show.'
+    text:
+    - lang: en
+      value: '{0}%'
+    - lang: pt
+      value: '{0}%'
+  - key: collect_heading
+    where: The default heading of a Collect block, when the block names none.
+    text:
+    - lang: en
+      value: Your story
+    - lang: pt
+      value: A sua historia
+  - key: collect_add
+    where: The button of a Collect block that adds this point's item to the visitor's story.
+    text:
+    - lang: en
+      value: Add to my story
+    - lang: pt
+      value: Adicionar a minha historia
+  - key: collect_collected
+    where: The words of a Collect block's button once the item is in the visitor's story.
+    text:
+    - lang: en
+      value: In your story
+    - lang: pt
+      value: Na sua historia
+  - key: collect_progress
+    where: 'How many of this wall''s collectable items the visitor has ({0} = theirs, {1} = all of the wall''s).'
+    text:
+    - lang: en
+      value: '{0} of {1} collected'
+    - lang: pt
+      value: '{0} de {1} recolhidos'
+  - key: dialogue_continue
+    where: The button of a Dialogue block that shows the next line.
+    text:
+    - lang: en
+      value: Continue
+    - lang: pt
+      value: Continuar
+  - key: dialogue_again
+    where: The button of a Dialogue block that starts the conversation over once it has ended.
+    text:
+    - lang: en
+      value: Start again
+    - lang: pt
+      value: Recomecar
+  - key: dialogue_you
+    where: The name shown on the visitor's own reply in a Dialogue block.
+    text:
+    - lang: en
+      value: You
+    - lang: pt
+      value: Voce
+  - key: show_on_wall_button
+    where: 'The button of a Show On Wall block, which lowers the card so the point''s marker shows on the wall.'
+    text:
+    - lang: en
+      value: Show me where it is
+    - lang: pt
+      value: Mostra-me onde fica
+  - key: show_on_wall_nearby
+    where: The caption over the neighbouring points of a Show On Wall block in the With Neighbours look.
+    text:
+    - lang: en
+      value: Also nearby
+    - lang: pt
+      value: Tambem perto

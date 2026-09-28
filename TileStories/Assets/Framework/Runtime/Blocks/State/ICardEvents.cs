@@ -17,7 +17,7 @@ namespace TileStories
         public readonly string PoiId;
         public readonly string BlockKey;
         public readonly string Variant;
-        // What the visitor chose, as words: "up" / "down" for thumbs, "1".."5" for stars
+        // What the visitor chose, as words: "up" / "down" for thumbs, "1".."5" for stars, the option number of a poll
         public readonly string Value;
 
         public CardEvent(string kind, string wallId, string poiId, string blockKey, string variant, string value)
@@ -36,5 +36,11 @@ namespace TileStories
     {
         // A visitor gave feedback (thumbs / stars) on a block: raised once per block
         public const string Feedback = "feedback";
+
+        // A visitor voted in a poll block: raised once per block (Value: the option's authored row number, from 1)
+        public const string Poll = "poll";
+
+        // A visitor added this point's item to their story (a collect block): raised once per block (Value: "collected")
+        public const string Collect = "collect";
     }
 }

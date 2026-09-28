@@ -530,7 +530,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator TheLamp_IsTheFullCard_EveryTier1AndTier2GroupAKindAndVariant_InCatalogOrder()
+        public IEnumerator TheLamp_IsTheFullCard_EveryKindAndVariantOfTiers1To3_InCatalogOrder()
         {
             yield return OpenFull("lamp");
             CollectionAssert.AreEqual(new[]
@@ -540,9 +540,9 @@ namespace TileStories.Tests
                 "process_steps", "swatches", "timeline", "timeline", "person", "person", "story_chapters", "compare_points", "practical_info",
                 "gallery", "gallery", "gallery", "gallery", "before_after", "zoom_image",
                 "hotspot_image", "hotspot_image", "wall_locator", "wall_locator", "today_map", "today_map", "related", "related",
-                "knowledge_check", "knowledge_check", "knowledge_check", "feedback", "feedback",
+                "knowledge_check", "knowledge_check", "knowledge_check", "poll", "collect", "feedback", "feedback", "dialogue", "show_on_wall", "show_on_wall",
                 "sources", "sources", "actions", "actions", "actions",
-            }, ShownKinds(), "one block per kind and variant (Tier 1, Tier 2), nothing skipped");
+            }, ShownKinds(), "one block per kind and variant (Tiers 1 to 3), nothing skipped");
             var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
             CollectionAssert.IsEmpty(BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Skipped, "no authored block skipped");
             var variants = Sheet.Stack.BoundViews.Select(v => v.Root.GetClasses().FirstOrDefault(c => c.Contains("--"))).Where(c => c != null).ToList();
@@ -1398,6 +1398,217 @@ namespace TileStories.Tests
                 if (indexBefore == null) PlayerPrefs.DeleteKey(indexKey); else PlayerPrefs.SetString(indexKey, indexBefore);
                 PlayerPrefs.Save();
             }
+        }
+
+        // ---------------- Tier 3 group B on the real wall (_3.1 step 8B) ----------------
+
+        private T Only<T>() where T : class, IBlockView => Sheet.Stack.BoundViews.OfType<T>().Single();
+
+        private string StoredKey(string poiId, string block, string slot) => "ts.card." + Session.SearchConfig.wall_id + "." + poiId + "." + block + "." + slot;
+
+        // _3.1 step 8B: The Lamp's poll on the real card: a real tap votes, the card shows the visitor's own choice and a thank-you and
+        // NEVER a percentage (there is no backend), one event goes through the events seam, the vote is kept under wall + POI + block,
+        // and a Portuguese card asks and thanks in Portuguese
+        [UnityTest]
+        public IEnumerator TheLamp_Poll_ARealTapVotes_NoPercentagesWithoutABackend_OneEvent_Kept_AndInPortugueseTheWordsFollow()
+        {
+            yield return OpenFull("lamp");
+            var poll = Only<PollBlockView>();
+            Assert.AreEqual("Which part of the castle would you visit first?", poll.Question.text);
+            CollectionAssert.AreEqual(new[] { "The keep", "The curtain wall", "The gatehouse" }, poll.Options.Select(o => o.Text.text).ToList());
+            Assert.IsFalse(poll.ResultsShown);
+            yield return ScrollAndTap(poll.Options[1].Button);
+            Assert.AreEqual(1, poll.Voted);
+            Assert.AreEqual("Your choice", poll.Options[1].Caption.text);
+            Assert.IsTrue(CardTestInput.IsShown(poll.Options[1].Mark, poll.Options[1].Button) && poll.Options[1].Mark.worldBound.width > 4f, "the tick element on the picked option");
+            Assert.AreEqual("Thank you for voting", poll.Thanks.text);
+            Assert.IsFalse(poll.ResultsShown, "the card's own poll results seam has nothing (no backend)");
+            Assert.IsInstanceOf<NoPollResults>(Card.PollResults, "the app's seam today");
+            Assert.IsFalse(poll.Root.Query<Label>().ToList().Any(l => CardTestInput.IsShown(l, poll.Root) && l.text.Contains("%")), "no percentage anywhere in the block");
+            Assert.AreEqual(1, _cardEvents.Raised.Count(e => e.Kind == CardEventKinds.Poll), "one poll event");
+            var raised = _cardEvents.Raised.Single(e => e.Kind == CardEventKinds.Poll);
+            Assert.AreEqual(Session.SearchConfig.wall_id, raised.WallId);
+            Assert.AreEqual("lamp", raised.PoiId);
+            Assert.AreEqual("block_48", raised.BlockKey);
+            Assert.AreEqual("bars", raised.Variant);
+            Assert.AreEqual("2", raised.Value);
+            Assert.AreEqual(1, Card.State.PollVote("lamp", "block_48"));
+            Assert.IsTrue(_cardStore.TryGet(StoredKey("lamp", "block_48", "poll"), out string stored), "the scoped key");
+            Assert.AreEqual("1", stored);
+            yield return ScrollTo(poll);
+            yield return Capture("Card_Lamp_Poll");
+
+            // - closed and opened again: the vote shown as given, nothing reported again
+            SelectionEventBus.Clear();
+            yield return OpenFull("lamp");
+            poll = Only<PollBlockView>();
+            Assert.AreEqual(1, poll.Voted);
+            Assert.AreEqual(1, _cardEvents.Raised.Count(e => e.Kind == CardEventKinds.Poll));
+
+            // - Portuguese, on a fresh device
+            _cardStore.Keys.ToList().ForEach(k => _cardStore.Remove(k));
+            SelectionEventBus.Clear();
+            LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
+            yield return OpenFull("lamp");
+            poll = Only<PollBlockView>();
+            Assert.AreEqual("Que parte do castelo visitaria primeiro?", poll.Question.text);
+            yield return ScrollAndTap(poll.Options[2].Button);
+            Assert.AreEqual("A sua escolha", poll.Options[2].Caption.text);
+            Assert.AreEqual("Obrigado pelo seu voto", poll.Thanks.text);
+            Assert.AreEqual("A porta principal", poll.Options[2].Text.text);
+        }
+
+        // _3.1 step 8B: The Lamp's collect block: a real tap adds its item and it persists; the count is worked out from the wall's
+        // CONFIG -- give another point of the wall a collect block and the total grows -- and its words are Portuguese in a
+        // Portuguese card
+        [UnityTest]
+        public IEnumerator TheLamp_Collect_ARealTapAddsTheItem_ItPersists_TheCountComesFromTheWallsConfig_AndInPortugueseTheWordsFollow()
+        {
+            yield return OpenFull("lamp");
+            var collect = Only<CollectBlockView>();
+            Assert.AreEqual("Your story", Sheet.Stack.HeadingOf(collect).text, "no heading written: the card's default");
+            Assert.AreEqual("Castles and towers", collect.Series.text);
+            Assert.AreEqual("Stamp of the castle", collect.ItemName.text);
+            Assert.AreEqual(1, collect.Total, "the wall's config has ONE collect block");
+            Assert.AreEqual("0 of 1 collected", collect.Progress.text);
+
+            // - another point of the running wall gets a collect block (in memory: the wall's own points have none): the total is 2
+            var other = Session.SearchPois.First(p => p.id == "lamp_military");
+            other.card.blocks.Add(new BlockInstanceData { key = "block_99", kind = BuiltInBlocks.CollectKind, variant = BuiltInBlocks.CollectAddToStory });
+            try
+            {
+                SelectionEventBus.Clear();
+                yield return OpenFull("lamp");
+                collect = Only<CollectBlockView>();
+                Assert.AreEqual(2, collect.Total, "counted from the config, not a constant");
+                Assert.AreEqual("0 of 2 collected", collect.Progress.text);
+                yield return ScrollAndTap(collect.Add);
+                Assert.IsTrue(collect.IsCollected);
+                Assert.AreEqual("In your story", collect.AddLabel.text);
+                Assert.AreEqual("1 of 2 collected", collect.Progress.text);
+                Assert.IsTrue(collect.StampStar.Filled);
+                Assert.AreEqual(1, _cardEvents.Raised.Count(e => e.Kind == CardEventKinds.Collect));
+                Assert.IsTrue(Card.State.Collected("lamp", "block_49"));
+                Assert.IsTrue(_cardStore.TryGet(StoredKey("lamp", "block_49", "collected"), out _), "the scoped key");
+                yield return ScrollTo(collect);
+                yield return Capture("Card_Lamp_Collect");
+
+                // - closed and opened again: still in the story
+                SelectionEventBus.Clear();
+                yield return OpenFull("lamp");
+                collect = Only<CollectBlockView>();
+                Assert.IsTrue(collect.IsCollected);
+                Assert.AreEqual("1 of 2 collected", collect.Progress.text);
+
+                // - the other point's own card counts the same wall: 1 of 2, its own item not yet collected
+                SelectionEventBus.Clear();
+                yield return OpenFull("lamp_military");
+                var military = Only<CollectBlockView>();
+                Assert.AreEqual("1 of 2 collected", military.Progress.text, "the count is the wall's, whichever card shows it");
+                Assert.IsFalse(military.IsCollected);
+
+                // - Portuguese
+                _cardStore.Keys.ToList().ForEach(k => _cardStore.Remove(k));
+                SelectionEventBus.Clear();
+                LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
+                yield return OpenFull("lamp");
+                collect = Only<CollectBlockView>();
+                Assert.AreEqual("A sua historia", Sheet.Stack.HeadingOf(collect).text);
+                Assert.AreEqual("Selo do castelo", collect.ItemName.text);
+                Assert.AreEqual("Castelos e torres", collect.Series.text);
+                Assert.AreEqual("Adicionar a minha historia", collect.AddLabel.text);
+                Assert.AreEqual("0 de 2 recolhidos", collect.Progress.text);
+            }
+            finally
+            {
+                other.card.blocks.RemoveAll(b => b.key == "block_99");
+            }
+        }
+
+        // _3.1 step 8B: The Lamp's dialogue: real taps reveal one line at a time, the reply the visitor picks joins the thread, and
+        // where they got to is never stored; a Portuguese card says the lines in Portuguese
+        [UnityTest]
+        public IEnumerator TheLamp_Dialogue_ARealTapRevealsOneLineAtATime_ARepliesJoinTheThread_NothingIsStored_AndInPortugueseTheWordsFollow()
+        {
+            yield return OpenFull("lamp");
+            var dialogue = Only<DialogueBlockView>();
+            Assert.AreEqual(3, dialogue.Count);
+            Assert.AreEqual(1, dialogue.Bubbles.Count);
+            Assert.AreEqual("The stonemason", dialogue.Bubbles[0].Speaker.text);
+            Assert.AreEqual("Welcome to the castle. Do you know why its walls are so thick?", dialogue.Bubbles[0].Text.text);
+            Assert.IsTrue(dialogue.AwaitsChoice, "the first line offers two replies");
+            yield return ScrollAndTap(dialogue.Choices[0].Button);
+            Assert.AreEqual(3, dialogue.Bubbles.Count, "the line, the visitor's reply and the stonemason's answer");
+            Assert.AreEqual("You", dialogue.Bubbles[1].Speaker.text);
+            Assert.AreEqual("No, tell me", dialogue.Bubbles[1].Text.text);
+            Assert.AreEqual("Because it had to hold out against a siege for weeks.", dialogue.Bubbles[2].Text.text);
+            yield return ScrollAndTap(dialogue.Continue);
+            yield return ScrollAndTap(dialogue.Continue);
+            Assert.AreEqual(5, dialogue.Bubbles.Count);
+            Assert.AreEqual(3, dialogue.Reached);
+            Assert.IsTrue(CardTestInput.IsShown(dialogue.Again, dialogue.Root));
+            yield return ScrollTo(dialogue);
+            yield return Capture("Card_Lamp_Dialogue");
+            Assert.IsFalse(_cardStore.Keys.Any(k => k.Contains(".block_50.")), "the reached line and the picked reply are view state: nothing stored");
+            Assert.AreEqual(0, _cardEvents.Raised.Count, "and nothing reported");
+
+            SelectionEventBus.Clear();
+            yield return OpenFull("lamp");
+            Assert.AreEqual(1, Only<DialogueBlockView>().Bubbles.Count, "a new bind starts at the first line");
+
+            SelectionEventBus.Clear();
+            LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
+            yield return OpenFull("lamp");
+            dialogue = Only<DialogueBlockView>();
+            Assert.AreEqual("O pedreiro", dialogue.Bubbles[0].Speaker.text);
+            Assert.AreEqual("Nao, conte-me", dialogue.Choices[0].Label.text);
+            yield return ScrollAndTap(dialogue.Choices[1].Button);
+            Assert.AreEqual("Voce", dialogue.Bubbles[1].Speaker.text, "the visitor's own name in Portuguese");
+            Assert.AreEqual("Entao tem bom olho.", dialogue.Bubbles[2].Text.text);
+            Assert.AreEqual("Continuar", dialogue.Continue.Q<Label>().text);
+        }
+
+        // _3.1 step 8B: The Lamp's show_on_wall blocks on the RUNNING wall: a real tap on the button lowers the card to its peek and the
+        // point's marker is the lit one (the selection stays: the others dim); the neighbour look names the three nearest points of the
+        // wall and a real tap on one selects it
+        [UnityTest]
+        public IEnumerator TheLamp_ShowOnWall_ARealTapDropsTheCardToPeek_TheRightMarkerStaysLit_AndNeighboursAreTheNearestPoints()
+        {
+            yield return OpenFull("lamp");
+            var views = Sheet.Stack.BoundViews.OfType<ShowOnWallBlockView>().ToList();
+            Assert.AreEqual(2, views.Count, "the button and the neighbour look");
+            Assert.AreEqual(0, views[0].Neighbours.Count);
+            Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop);
+
+            yield return ScrollAndTap(views[0].Button);
+            yield return CardTestInput.Settle();
+            Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop, "the card dropped to its peek");
+            Assert.IsTrue(Sheet.IsOpen);
+            Assert.AreEqual("lamp", SelectionEventBus.CurrentPoiId, "the point stays selected");
+            Assert.AreEqual(1f, Marker("lamp").SelectionAlpha, 1e-3, "THE RIGHT marker is the lit one on the running wall");
+            Assert.AreEqual(Session.SpawnedMarkers.Count - 1, MarkersAt(0.3f).Count, "every other marker dimmed");
+            yield return Capture("Card_Lamp_ShowOnWall_Peek");
+
+            // - the neighbours: the three nearest other points by straight-line distance (worked out here, from the positions alone)
+            SelectionEventBus.Clear();
+            yield return OpenFull("lamp");
+            var neighbours = Sheet.Stack.BoundViews.OfType<ShowOnWallBlockView>().Last();
+            var lampPoi = Session.SearchPois.First(p => p.id == "lamp");
+            POIPositionResolver.TryResolvePosition(lampPoi, out var here, logErrors: false);
+            var expected = Session.SearchPois.Where(p => p.id != "lamp")
+                .Select(p => (p, ok: POIPositionResolver.TryResolvePosition(p, out var at, logErrors: false), at))
+                .Where(x => x.ok)
+                .OrderBy(x => Vector3.Distance(here, x.at)).ThenBy(x => x.p.id, System.StringComparer.Ordinal)
+                .Take(3).Select(x => x.p.id).ToList();
+            CollectionAssert.AreEqual(expected, neighbours.Neighbours.Select(n => n.PoiId).ToList(), "the nearest three, nearest first");
+            for (int i = 0; i < 3; i++)
+                Assert.AreEqual(BlockStackBuilder.CardTitleOf(Session.SearchPois.First(p => p.id == expected[i]), "en", "en"), neighbours.Neighbours[i].Title.text, "named by card title");
+            yield return ScrollTo(neighbours);
+            yield return Capture("Card_Lamp_ShowOnWall_Neighbours");
+            yield return ScrollAndTap(neighbours.Neighbours[0].Button);
+            yield return CardTestInput.Settle();
+            Assert.AreEqual(expected[0], SelectionEventBus.CurrentPoiId, "a real tap on a neighbour selected it");
+            Assert.AreEqual(expected[0], Card.ShownPoiId, "the card is now its card");
         }
     }
 }

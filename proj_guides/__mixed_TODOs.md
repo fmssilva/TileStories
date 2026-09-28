@@ -68,8 +68,19 @@ check thee FOV splike thing???
   idea above (`Editor/Dev/`) should read the real scale from a known-good probe (capture a known corner, compare) instead
   of assuming one.
 - `LogCardEvents` (one log line) is the placeholder behind `ICardEvents`: the work plan's Stage 3 telemetry (Type A / B
-  events, consent) replaces it. The card only raises `feedback` today (`CardEventKinds`); poll votes and collect events
-  join the same seam in 8B, and answering a knowledge question is a natural third event once the consent story exists.
+  events, consent) replaces it. The card raises `feedback`, `poll` and `collect` events today (`CardEventKinds`, 8A / 8B);
+  answering a knowledge question is a natural next event once the consent story exists.
 - `PlayerPrefs` keeps the visitor's answers and votes on the device only (`CardLocalState`); there is no export, no
   cross-device sync and no per-visitor profile. If the evaluation protocol (`_7.1`) wants per-visitor answer data, that is a
   telemetry decision, not a card one.
+- `LivingRoomScene.unity` was found saved at 3.9 MB (spawned marker rig objects, e.g. `RippleMiddle`) against 58 KB in git in the middle of
+  the 8A-fix / 8B session, with the scene open and clean in the Editor and nothing in the session saving it on purpose. It was restored from
+  HEAD (plus the one stylesheet line) and stayed small through every later test run. Suspect: Unity's scene auto-save catching a rig
+  populated in the open scene by an EditMode test or the POI Editor's Load & Populate Rig. Worth finding before it lands in a commit: check
+  `git diff --stat` on the scene each time, and see whether an EditMode fixture should close or reload the scene it populates.
+- `EditorNotice` does not block the Editor with a native dialog (it queues an in-window popup) and its test switch is
+  `EditorNotice.ShowPopups`; a UnityMCP capture script that loads the wall config should set it false around `LoadConfig`, as the 8B
+  captures did, so nothing floats over the window being captured.
+- Real touches drive UI Toolkit's `ScrollView` even while a child holds the pointer capture; a child that wants to keep vertical
+  scrolling alive should still not capture at touch-down (the card then swallows the finger for its own gestures elsewhere, e.g. inside a
+  horizontal ScrollView). `SwipeGrabRule` is the pattern for the next swipeable block.

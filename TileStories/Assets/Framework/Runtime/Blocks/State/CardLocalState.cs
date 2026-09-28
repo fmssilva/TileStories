@@ -49,6 +49,18 @@ namespace TileStories
         // Remember the vote (0 and up; anything else is ignored)
         public void SetVote(string poiId, string blockKey, int value) => WriteInt(KeyOf(poiId, blockKey, "vote"), value);
 
+        // The option the visitor voted for in a poll block, as the AUTHORED ROW of that option (0-based); -1 = no vote yet
+        public int PollVote(string poiId, string blockKey) => ReadInt(KeyOf(poiId, blockKey, "poll"));
+
+        // Remember the poll vote (0 and up; anything else is ignored)
+        public void SetPollVote(string poiId, string blockKey, int row) => WriteInt(KeyOf(poiId, blockKey, "poll"), row);
+
+        // Whether the visitor added the item of a collect block to their story
+        public bool Collected(string poiId, string blockKey) => ReadInt(KeyOf(poiId, blockKey, "collected")) == 1;
+
+        // Remember that the item was collected
+        public void SetCollected(string poiId, string blockKey) => WriteInt(KeyOf(poiId, blockKey, "collected"), 1);
+
         // Whether the block was already revealed to this visitor (a block that waits until the card was read: show_after_viewed)
         public bool Seen(string poiId, string blockKey) => ReadInt(KeyOf(poiId, blockKey, "seen")) == 1;
 

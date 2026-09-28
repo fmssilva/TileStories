@@ -178,6 +178,30 @@ namespace TileStories.Editor
             if (definition.Key == BuiltInBlocks.HeaderKind && System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, variant) >= 0
                 && !BuiltInBlocks.HeaderShowsPicture(variant, block))
                 warnings.Add(CardHeaderNeedsPictureText(variant));
+            // - a block that waits for the reading, in the middle of the card, is revealed above the visitor
+            if (definition.ShowAfterViewedField != null && new BlockFieldReader(block, null, null).Flag(definition.ShowAfterViewedField))
+            {
+                var blocks = poi?.card?.blocks;
+                int at = blocks?.IndexOf(block) ?? -1;
+                if (at >= 0 && !ContentSeenRule.RevealsInView(FamiliesAfter(blocks, at)))
+                    warnings.Add(CardShowAfterReadingMidCardNote);
+            }
+            // - a poll with more options than it shows
+            if (definition.Key == BuiltInBlocks.PollKind)
+            {
+                var read = new BlockFieldReader(block, null, null);
+                int withWords = 0;
+                foreach (var row in read.Items(BuiltInBlocks.PollOptionsField))
+                    if (read.ItemText(row, BuiltInBlocks.PollOptionTextField).Length > 0) withWords++;
+                if (withWords > PollRule.MaxOptions) warnings.Add(CardPollExtraOptionsText(withWords - PollRule.MaxOptions));
+            }
+            // - a dialogue's rows that will not show, and replies nobody can pick
+            if (definition.Key == BuiltInBlocks.DialogueKind)
+            {
+                DialogueRule.Problems(new BlockFieldReader(block, null, null), out var noWords, out var orphans);
+                if (noWords.Count > 0) warnings.Add(CardDialogueEmptyRowsText(noWords));
+                if (orphans.Count > 0) warnings.Add(CardDialogueOrphanReplyText(orphans));
+            }
             // - a question row the look would leave out (the block still shows its other rows): name the row and the reason
             if (definition.Key == BuiltInBlocks.KnowledgeCheckKind)
             {
@@ -190,6 +214,13 @@ namespace TileStories.Editor
                 }
             }
             return warnings;
+        }
+
+        // The family of every block written after `blocks[index]` (a kind that is not registered counts as content)
+        private static IEnumerable<string> FamiliesAfter(List<BlockInstanceData> blocks, int index)
+        {
+            for (int i = index + 1; i < blocks.Count; i++)
+                yield return BlockRegistry.Shared.TryGet(blocks[i]?.kind, out var later) ? later.Family : "";
         }
 
         internal void AddCardBlock(POIData poi, BlockKindDefinition kind)

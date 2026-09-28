@@ -284,3 +284,100 @@
     margin: 0;
     padding: 0;
 }
+
+/* ---- dialogue: a chat thread, one bubble per line said; the visitor's own replies sit on the other side ---- */
+
+.card-dialogue__thread {
+    flex-direction: column;
+}
+
+.card-dialogue__bubble {
+    align-self: flex-start;
+    max-width: var(--ts-bubble-max-width);
+    margin: 0 0 var(--ts-space-2) 0;
+    padding: var(--ts-space-3);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+/* the visitor's own reply: the other side, the accent border, so it is told apart by place and outline and not by colour alone */
+.card-dialogue__bubble--visitor {
+    align-self: flex-end;
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-accent);
+    background-color: var(--ts-surface);
+}
+
+.card-dialogue__speaker {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-accent-text);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+.card-dialogue__text {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-dialogue__actions {
+    flex-direction: column;
+    align-items: flex-start;
+    margin: var(--ts-space-1) 0 0 0;
+}
+
+.card-dialogue__choices {
+    align-self: stretch;
+    flex-direction: column;
+}
+
+.card-dialogue__choice {
+    flex-direction: row;
+    align-items: center;
+    min-height: var(--ts-touch-target);
+    margin: 0 0 var(--ts-space-2) 0;
+    padding: var(--ts-space-3);
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-accent);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface);
+}
+
+.card-dialogue__choice-label {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: middle-left;
+    margin: 0;
+    padding: 0;
+}
+
+/* the shape is the shared .card-pill (CardParts.uss); here only the colours */
+.card-dialogue__button {
+    margin: 0;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface-2);
+}
+
+.card-dialogue__continue {
+    border-color: var(--ts-accent);
+    background-color: var(--ts-accent);
+}
+
+.card-dialogue__button-label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    margin: 0;
+    padding: 0;
+}
+
+.card-dialogue__continue .card-dialogue__button-label {
+    color: var(--ts-on-accent);
+}

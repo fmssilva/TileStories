@@ -50,6 +50,9 @@ namespace TileStories
         // Where the cards report what the visitor did (feedback): a log line until the telemetry work replaces it
         internal ICardEvents Events { get; set; } = new LogCardEvents();
 
+        // Where a poll block would get other visitors' votes: no backend yet, so none (8B: the poll then shows no results)
+        internal IPollResults PollResults { get; set; } = new NoPollResults();
+
         // The tap path's clock (press and release times, a pending close falling due): Time.unscaledTime in the app. A test
         // sets its own, so its taps' times are what it says -- no slow frame can decide whether two taps fell in one window
         internal System.Func<float> Clock { get; set; } = () => Time.unscaledTime;
@@ -153,6 +156,7 @@ namespace TileStories
                 Glossary = new CardGlossary(settings.glossary, language, language),
                 State = StateOfThisWall(),
                 Events = Events,
+                PollResults = PollResults,
             };
             Sheet.Show(stack.Entries, context, SheetStopRule.OpenStop(settings.container.open_stop), settings.container.half_max_ratio);
             ShownPoiId = poiId;

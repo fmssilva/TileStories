@@ -33,6 +33,7 @@ namespace TileStories
         public CardLocalState State { get; }
         // Where the gallery card reports what the visitor did (a test hands its own to see the events)
         public ICardEvents Events { get; set; } = new LogCardEvents();
+        public IPollResults PollResults { get; set; } = new NoPollResults();
 
         public CardGalleryHarness() => State = new CardLocalState(StateStore, "gallery");
 
@@ -93,6 +94,7 @@ namespace TileStories
                 Media = Media,
                 State = State,
                 Events = Events,
+                PollResults = PollResults,
             };
             Sheet.Hide();
             Sheet.Show(stack.Entries, context, SheetStopRule.Stop.Peek, settings.container.half_max_ratio);

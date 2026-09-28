@@ -21,6 +21,8 @@ namespace TileStories
             public Button Button;
             public Label Text;
             public CardImage Image;
+            // The tick (the right choice) or cross (the wrong one picked) drawn on the choice once answered: the colour is never the only signal
+            public CardIcons.VectorGlyph Mark;
             public int Index;
         }
 
@@ -32,6 +34,9 @@ namespace TileStories
         public Label SwipeHint { get; }
         public VisualElement ChoicesRow { get; }
         public VisualElement Result { get; }
+        public VisualElement VerdictRow { get; }
+        // Before the verdict's words: a tick for a right answer, a cross for a wrong one
+        public CardIcons.VectorGlyph VerdictMark { get; }
         public Label Verdict { get; }
         public Label Explanation { get; }
         public VisualElement Nav { get; }
@@ -61,6 +66,9 @@ namespace TileStories
         private string _variant = "";
         private string _variantClass;
         private bool _swipes;
+        // The finger that went down on the statement card (-1 = none) and where: it is only judged, not captured, until SwipeGrabRule
+        // says the drag is clearly sideways
+        private int _pressedPointer = -1;
         private Vector2 _swipeStart;
 
         public KnowledgeCheckBlockView()
@@ -82,11 +90,17 @@ namespace TileStories
             ChoicesRow.AddToClassList("card-quiz__choices");
             Result = new VisualElement();
             Result.AddToClassList("card-quiz__result");
+            VerdictRow = new VisualElement();
+            VerdictRow.AddToClassList("card-quiz__verdict-row");
+            VerdictMark = CardIcons.CreateVector(CardIcons.Shape.Tick);
+            VerdictMark.AddToClassList("card-quiz__mark");
             Verdict = new Label();
             Verdict.AddToClassList("card-quiz__verdict");
             Explanation = new Label();
             Explanation.AddToClassList("card-quiz__explanation");
-            Result.Add(Verdict);
+            VerdictRow.Add(VerdictMark);
+            VerdictRow.Add(Verdict);
+            Result.Add(VerdictRow);
             Result.Add(Explanation);
             Nav = new VisualElement();
             Nav.AddToClassList("card-quiz__nav");
@@ -104,6 +118,8 @@ namespace TileStories
             Stage.RegisterCallback<PointerMoveEvent>(OnPointerMove);
             Stage.RegisterCallback<PointerUpEvent>(OnPointerUp);
             Stage.RegisterCallback<PointerCancelEvent>(_ => EndSwipe());
+            // - the ScrollView taking the finger (a vertical drag) ends any swipe in progress
+            Stage.RegisterCallback<PointerCaptureOutEvent>(_ => EndSwipe());
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -198,14 +214,27 @@ namespace TileStories
             Stage.EnableInClassList("card-quiz__stage--wrong", answered && !right);
             foreach (var choice in _shown)
             {
-                choice.Button.EnableInClassList("card-quiz__choice--correct", answered && choice.Index == question.Correct);
-                choice.Button.EnableInClassList("card-quiz__choice--wrong", answered && choice.Index == chosen && !right);
+                bool isRight = answered && choice.Index == question.Correct;
+                bool isWrong = answered && choice.Index == chosen && !right;
+                choice.Button.EnableInClassList("card-quiz__choice--correct", isRight);
+                choice.Button.EnableInClassList("card-quiz__choice--wrong", isWrong);
+                SetMark(choice.Mark, isRight, isWrong);
             }
+            SetMark(VerdictMark, answered && right, answered && !right);
             Result.style.display = answered ? DisplayStyle.Flex : DisplayStyle.None;
             Result.EnableInClassList("card-quiz__result--correct", answered && right);
             Result.EnableInClassList("card-quiz__result--wrong", answered && !right);
             Verdict.text = _strings?.Get(right ? CardStrings.Keys.KnowledgeCorrect : CardStrings.Keys.KnowledgeWrong) ?? "";
             Explanation.text = answered ? question.Explanation : "";
+        }
+
+        // Show `mark` as a tick, as a cross, or not at all (its colour follows its class; the shape carries the meaning too)
+        private static void SetMark(CardIcons.VectorGlyph mark, bool tick, bool cross)
+        {
+            mark.style.display = tick || cross ? DisplayStyle.Flex : DisplayStyle.None;
+            mark.Kind = tick ? CardIcons.Shape.Tick : CardIcons.Shape.Cross;
+            mark.EnableInClassList("card-quiz__mark--tick", tick);
+            mark.EnableInClassList("card-quiz__mark--cross", cross);
         }
 
         // Fill a choice for this look: True / False words, a caption, or a picture with its caption
@@ -231,8 +260,12 @@ namespace TileStories
                 choice.Button.AddToClassList("card-tap");
                 choice.Text.AddToClassList("card-quiz__choice-text");
                 choice.Image.Root.pickingMode = PickingMode.Ignore;
+                choice.Mark = CardIcons.CreateVector(CardIcons.Shape.Tick);
+                choice.Mark.AddToClassList("card-quiz__mark");
+                choice.Mark.AddToClassList("card-quiz__choice-mark");
                 choice.Button.Add(choice.Image.Root);
                 choice.Button.Add(choice.Text);
+                choice.Button.Add(choice.Mark);
                 var captured = choice;
                 choice.Button.clicked += () => Answer(captured.Index);
                 _pool.Add(choice);
@@ -254,29 +287,42 @@ namespace TileStories
             return (button, label);
         }
 
-        // ---- the true / false swipe: a pointer-captured drag on the statement card (so the stack does not scroll meanwhile) ----
+        // ---- the true / false swipe: the statement card follows a finger that is clearly moving sideways ----
+        // A finger that goes down on the card is NOT captured: until its drag is clearly sideways (SwipeGrabRule) the events stay
+        // with the stack's ScrollView, so a finger that lands on this big card and moves up or down scrolls the stack. Once it is
+        // sideways the card takes the pointer and follows it.
 
         private void OnPointerDown(PointerDownEvent evt)
         {
             if (!_swipes || Answered || _questions.Count == 0) return;
             if (evt.button != 0 && evt.pointerType == UnityEngine.UIElements.PointerType.mouse) return;
-            Stage.CapturePointer(evt.pointerId);
-            IsSwiping = true;
-            _swipeStart = evt.position;
-            evt.StopPropagation();
-        }
+            _pressedPointer = evt.pointerId;
+            _swipeStart = evt.position;        }
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
-            if (!IsSwiping || !Stage.HasPointerCapture(evt.pointerId)) return;
+            if (_pressedPointer != evt.pointerId || evt.pressedButtons == 0) return;
+            Vector2 travel = (Vector2)evt.position - _swipeStart;
+            if (!IsSwiping)
+            {
+                if (!SwipeGrabRule.ClaimsPointer(travel)) return;
+                IsSwiping = true;
+                Stage.CapturePointer(evt.pointerId);
+            }
+            if (!Stage.HasPointerCapture(evt.pointerId)) return;
             // - the card follows the finger sideways (panel coordinates: the card itself moves, so its local position would not change)
-            Stage.style.translate = new Translate(((Vector2)evt.position).x - _swipeStart.x, 0f);
+            Stage.style.translate = new Translate(travel.x, 0f);
             evt.StopPropagation();
         }
 
         private void OnPointerUp(PointerUpEvent evt)
         {
-            if (!IsSwiping || !Stage.HasPointerCapture(evt.pointerId)) return;
+            if (_pressedPointer != evt.pointerId) return;
+            if (!IsSwiping || !Stage.HasPointerCapture(evt.pointerId))
+            {
+                _pressedPointer = -1;
+                return;
+            }
             Stage.ReleasePointer(evt.pointerId);
             Vector2 travel = (Vector2)evt.position - _swipeStart;
             EndSwipe();
@@ -289,6 +335,7 @@ namespace TileStories
         private void EndSwipe()
         {
             IsSwiping = false;
+            _pressedPointer = -1;
             Stage.style.translate = StyleKeyword.Null;
         }
     }

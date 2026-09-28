@@ -94,7 +94,11 @@ namespace TileStories
             AddTodayMaps(list);
             AddRelated(list);
             AddKnowledgeChecks(list);
+            AddPolls(list);
+            AddCollects(list);
             AddFeedback(list);
+            AddDialogues(list);
+            AddShowOnWall(list);
             AddHeadings(list);
             return list;
         }
@@ -637,6 +641,179 @@ namespace TileStories
             if (question != null) block.fields.Add(Text(BuiltInBlocks.FeedbackQuestionField, question));
             return block;
         }
+
+        // ---------------- poll, collect, dialogue, show_on_wall (Tier 3 group B) ----------------
+
+        public const string PollQuestion = "Which side of the wall would you visit first?";
+        public const string PollLongQuestion = "You have seen how the panel was made and what the earthquake left standing; which part of the whole story would you most like the museum to tell in more detail next season?";
+        public static string[] PollShortOptions => new[] { "The arcade", "The river gate", "The bell tower" };
+        public static string[] PollLongOptions => new[]
+        {
+            "The long arcade with its many arches and the market that once stood under it",
+            "The river gate", "The bell tower", "The cloister", "The old cemetery beside the chapel of Saint George", "The kitchen garden",
+        };
+
+        private static void AddPolls(List<Entry> list)
+        {
+            foreach (var variant in BuiltInBlocks.Poll.Variants)
+            {
+                list.Add(new Entry(BuiltInBlocks.PollKind, variant, "short", PollBlock(variant, PollQuestion, PollShortOptions)));
+                list.Add(new Entry(BuiltInBlocks.PollKind, variant, "long", PollBlock(variant, PollLongQuestion, PollLongOptions)));
+                // - "partial": blank rows are left out; the two with words are still a poll
+                list.Add(new Entry(BuiltInBlocks.PollKind, variant, "partial", PollBlock(variant, PollQuestion, "The arcade", "", "The river gate", "  ")));
+            }
+        }
+
+        private static BlockInstanceData PollBlock(string variant, string question, params string[] options)
+        {
+            var block = new BlockInstanceData { key = QuizBlockKey, kind = BuiltInBlocks.PollKind, variant = variant };
+            block.fields.Add(Text(BuiltInBlocks.PollQuestionField, question));
+            var rows = new List<BlockItemData>();
+            foreach (string option in options) rows.Add(Item(ItemText(BuiltInBlocks.PollOptionTextField, option)));
+            block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.PollOptionsField, items = rows });
+            return block;
+        }
+
+        public const string CollectItem = "Stamp of the old gate";
+        public const string CollectSeries = "Gates and towers";
+
+        // Three more collectable points on the fabricated wall: the wall's total is then 4 (the shown point + these)
+        private static void ThreeMoreCollectables(WallConfigData wall)
+        {
+            for (int i = 1; i <= 3; i++)
+            {
+                var poi = WallPoi("collect_" + i, "Collectable " + i, new Vector3(i, 0f, 0f), null);
+                poi.card.blocks.Add(new BlockInstanceData { key = "block_9", kind = BuiltInBlocks.CollectKind, variant = BuiltInBlocks.CollectAddToStory });
+                wall.pois.Add(poi);
+            }
+        }
+
+        private static void AddCollects(List<Entry> list)
+        {
+            foreach (var variant in BuiltInBlocks.Collect.Variants)
+            {
+                list.Add(new Entry(BuiltInBlocks.CollectKind, variant, "short", CollectBlock(variant, CollectItem, CollectSeries), null, ThreeMoreCollectables));
+                // - nothing written: the point's card title and its category name
+                list.Add(new Entry(BuiltInBlocks.CollectKind, variant, "defaults", CollectBlock(variant, null, null), null, ThreeMoreCollectables));
+                list.Add(new Entry(BuiltInBlocks.CollectKind, variant, "long",
+                    CollectBlock(variant, "Stamp of the great river gate of the Royal Palace of the Kings of Portugal and of the Algarves",
+                        "The gates, towers, arcades and cloisters of the palace by the river"), null, ThreeMoreCollectables));
+                // - the only collectable on its wall: 0 of 1
+                list.Add(new Entry(BuiltInBlocks.CollectKind, variant, "alone", CollectBlock(variant, CollectItem, CollectSeries)));
+            }
+        }
+
+        private static BlockInstanceData CollectBlock(string variant, string itemName, string series)
+        {
+            var block = new BlockInstanceData { key = QuizBlockKey, kind = BuiltInBlocks.CollectKind, variant = variant };
+            if (itemName != null) block.fields.Add(Text(BuiltInBlocks.CollectItemNameField, itemName));
+            if (series != null) block.fields.Add(Text(BuiltInBlocks.CollectSeriesField, series));
+            return block;
+        }
+
+        // One authored dialogue row: the speaker, the line, and up to three (choice, reply) pairs
+        public readonly struct DialogueRow
+        {
+            public readonly string Speaker;
+            public readonly string Line;
+            public readonly (string Choice, string Reply)[] Replies;
+
+            public DialogueRow(string speaker, string line, params (string Choice, string Reply)[] replies)
+            {
+                Speaker = speaker;
+                Line = line;
+                Replies = replies;
+            }
+        }
+
+        public static DialogueRow[] DialoguePlain => new DialogueRow[]
+        {
+            new("The mason", "Welcome. Mind the dust: we are mending the arch."),
+            new("The mason", "The stone comes from the quarry across the river."),
+            new("The mason", "Come back next spring and it will look as it did in 1640."),
+        };
+
+        public static DialogueRow[] DialogueWithChoices => new DialogueRow[]
+        {
+            new("The mason", "Welcome. Do you know why this arch was rebuilt?", ("No, tell me", "The earthquake brought it down in 1755."), ("Yes, the earthquake", "Then you know more than most visitors.")),
+            new("The mason", "It took eleven winters to finish."),
+            new("The mason", "Would you like to hold a chisel?", ("Yes please", "Careful: it is sharper than it looks."), ("Not today", ""), ("Maybe later", "I am here until dusk.")),
+            new("The mason", "Thank you for listening."),
+        };
+
+        public static DialogueRow[] DialogueLong => new DialogueRow[]
+        {
+            new("The royal chronicler of the household of the Kings of Portugal and of the Algarves",
+                "The palace stood by the river for more than two hundred years and its halls, its gardens and its long arcades were known across the whole of Europe for their tiles and for their paintings, and every visitor to the court was taken through them in the same order."),
+            new("The royal chronicler of the household of the Kings of Portugal and of the Algarves",
+                "Then, on the morning of the first of November, everything moved.", ("What happened next?", "The river rose, the fires started, and by evening the palace was gone; only the foundations and the memory were left."), ("How do you know?", "It was written down by people who were there, and I have read every page of it.")),
+        };
+
+        private static void AddDialogues(List<Entry> list)
+        {
+            foreach (var variant in BuiltInBlocks.Dialogue.Variants)
+            {
+                list.Add(new Entry(BuiltInBlocks.DialogueKind, variant, "short", DialogueBlock(variant, DialoguePlain)));
+                list.Add(new Entry(BuiltInBlocks.DialogueKind, variant, "choices", DialogueBlock(variant, DialogueWithChoices)));
+                list.Add(new Entry(BuiltInBlocks.DialogueKind, variant, "long", DialogueBlock(variant, DialogueLong)));
+                // - "partial": a row with no words is left out, a reply with no choice label is never offered, a line may have no speaker
+                list.Add(new Entry(BuiltInBlocks.DialogueKind, variant, "partial", DialogueBlock(variant,
+                    new DialogueRow("The mason", "The first line."),
+                    new DialogueRow("The mason", ""),
+                    new DialogueRow("", "A line with no speaker.", ("", "A reply nobody can pick."), ("Go on", "Very well.")))));
+                // - one line only: nothing to continue, nothing to start again
+                list.Add(new Entry(BuiltInBlocks.DialogueKind, variant, "oneline", DialogueBlock(variant, new DialogueRow("The mason", "Just one thing to say."))));
+            }
+        }
+
+        private static BlockInstanceData DialogueBlock(string variant, params DialogueRow[] rows)
+        {
+            var block = new BlockInstanceData { key = QuizBlockKey, kind = BuiltInBlocks.DialogueKind, variant = variant };
+            var items = new List<BlockItemData>();
+            foreach (var row in rows)
+            {
+                var fields = new List<BlockItemFieldValue>();
+                if (row.Speaker.Length > 0) fields.Add(ItemText(BuiltInBlocks.DialogueSpeakerField, row.Speaker));
+                fields.Add(ItemText(BuiltInBlocks.DialogueTextField, row.Line));
+                for (int i = 0; row.Replies != null && i < row.Replies.Length; i++)
+                {
+                    fields.Add(ItemText(DialogueRule.ChoiceField(i + 1), row.Replies[i].Choice));
+                    fields.Add(ItemText(DialogueRule.ReplyField(i + 1), row.Replies[i].Reply));
+                }
+                items.Add(Item(fields.ToArray()));
+            }
+            block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.DialogueLinesField, items = items });
+            return block;
+        }
+
+        private static void AddShowOnWall(List<Entry> list)
+        {
+            System.Action<WallConfigData> neighbours = wall =>
+            {
+                wall.pois.Add(WallPoi("near_a", "North Tower", new Vector3(-1f, 0f, 0f), null));
+                wall.pois.Add(WallPoi("near_b", "South Tower", new Vector3(2f, 0f, 0f), null));
+                wall.pois.Add(WallPoi("near_c", "The chapel of Saint George with its bell tower and the old cemetery", new Vector3(3f, 0f, 0f), null));
+                wall.pois.Add(WallPoi("near_d", "Too Far To Be Named", new Vector3(30f, 0f, 0f), null));
+            };
+            // - three neighbours whose card titles are all long: the chips wrap
+            System.Action<WallConfigData> longNeighbours = wall =>
+            {
+                wall.pois.Add(WallPoi("near_l1", "The Royal Palace of the Kings of Portugal and of the Algarves, before the earthquake", new Vector3(-1f, 0f, 0f), null));
+                wall.pois.Add(WallPoi("near_l2", "The chapel of Saint George with its bell tower and the old cemetery", new Vector3(2f, 0f, 0f), null));
+                wall.pois.Add(WallPoi("near_l3", "The long arcade with its many arches and the market that once stood under it", new Vector3(3f, 0f, 0f), null));
+            };
+            foreach (var variant in BuiltInBlocks.ShowOnWall.Variants)
+            {
+                // - with_neighbours: only the nearest few are named (the fourth point is far away and is not); button: no neighbours drawn
+                list.Add(new Entry(BuiltInBlocks.ShowOnWallKind, variant, "short", ShowOnWallBlock(variant), null, neighbours));
+                if (variant == BuiltInBlocks.ShowOnWallWithNeighbours)
+                    list.Add(new Entry(BuiltInBlocks.ShowOnWallKind, variant, "long", ShowOnWallBlock(variant), null, longNeighbours));
+            }
+        }
+
+        private static BlockInstanceData ShowOnWallBlock(string variant) =>
+            new() { key = QuizBlockKey, kind = BuiltInBlocks.ShowOnWallKind, variant = variant };
+
 
         // ---------------- status ----------------
 

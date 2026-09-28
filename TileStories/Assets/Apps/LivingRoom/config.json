@@ -4888,6 +4888,149 @@
                         ]
                     },
                     {
+                        "key": "block_48",
+                        "kind": "poll",
+                        "variant": "bars",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "question",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Which part of the castle would you visit first?"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Que parte do castelo visitaria primeiro?"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "options",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The keep"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre de menagem"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The curtain wall"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A muralha"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The gatehouse"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A porta principal"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_49",
+                        "kind": "collect",
+                        "variant": "add_to_story",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "item_name",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Stamp of the castle"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Selo do castelo"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "series",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Castles and towers"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Castelos e torres"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
                         "key": "block_46",
                         "kind": "feedback",
                         "variant": "thumbs",
@@ -4917,6 +5060,220 @@
                         "key": "block_47",
                         "kind": "feedback",
                         "variant": "stars",
+                        "display": "inline",
+                        "fields": []
+                    },
+                    {
+                        "key": "block_50",
+                        "kind": "dialogue",
+                        "variant": "choices",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "lines",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "speaker",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The stonemason"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O pedreiro"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "line",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Welcome to the castle. Do you know why its walls are so thick?"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Bem-vindo ao castelo. Sabe porque as suas muralhas sao tao grossas?"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "choice_1",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "No, tell me"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Nao, conte-me"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "reply_1",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Because it had to hold out against a siege for weeks."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Porque tinha de resistir a um cerco durante semanas."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "choice_2",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Yes, for defence"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Sim, para defesa"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "reply_2",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Then you have a good eye."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Entao tem bom olho."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "speaker",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The stonemason"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O pedreiro"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "line",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The keep is the last refuge: the tallest tower, with the thickest walls."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre de menagem e o ultimo refugio: a torre mais alta, com as paredes mais grossas."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "speaker",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The stonemason"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O pedreiro"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "line",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Come back at sunset: the stones turn gold."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Volte ao entardecer: as pedras ficam douradas."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_51",
+                        "kind": "show_on_wall",
+                        "variant": "button",
+                        "display": "inline",
+                        "fields": []
+                    },
+                    {
+                        "key": "block_52",
+                        "kind": "show_on_wall",
+                        "variant": "with_neighbours",
                         "display": "inline",
                         "fields": []
                     },

@@ -1,0 +1,70 @@
+/* The ar family's looks (_3.1 Tier 3): what ties the card to the wall in front of the visitor -- show_on_wall.
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
+   _3.3). UI Toolkit USS only: no sibling selectors (an import ERROR that drops the whole sheet), no % radius, no web-CSS
+   gap / cursor / calc. */
+
+/* ---- show_on_wall: one accent pill with the show-on-wall icon; with_neighbours adds the nearest points under it ---- */
+
+.card-show-on-wall__button {
+    align-self: flex-start;
+    margin: 0;
+    border-width: 0;
+    background-color: var(--ts-accent);
+}
+
+.card-show-on-wall__icon {
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    margin-right: var(--ts-space-2);
+}
+
+/* on the accent pill the icon is drawn in the button's text colour (as the sticky actions button) */
+.card-show-on-wall__button .card-icon__frame {
+    border-color: var(--ts-on-accent);
+}
+
+.card-show-on-wall__button .card-icon__bar,
+.card-show-on-wall__button .card-icon__dot {
+    background-color: var(--ts-on-accent);
+}
+
+.card-show-on-wall__label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-on-accent);
+    margin: 0;
+    padding: 0;
+}
+
+.card-show-on-wall__caption {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: var(--ts-space-3) 0 var(--ts-space-2) 0;
+    padding: 0;
+}
+
+.card-show-on-wall__neighbours {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.card-show-on-wall__neighbour {
+    flex-direction: row;
+    align-items: center;
+    min-height: var(--ts-touch-target);
+    margin: 0 var(--ts-space-2) var(--ts-space-2) 0;
+    padding: 0 var(--ts-space-3);
+    border-width: 0;
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface-2);
+}
+
+.card-show-on-wall__neighbour-title {
+    -unity-text-align: middle-left;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}

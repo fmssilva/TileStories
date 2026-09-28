@@ -1663,6 +1663,32 @@ namespace TileStories.Tests
         // The border colour a real render draws around an element (the verdict's colour, from the tokens)
         private static Color BorderOf(VisualElement e) => e.resolvedStyle.borderTopColor;
 
+        // The mark a choice shows (a tick or a cross), or null when it shows none: the element must really be laid out, not only classed
+        private static CardIcons.Shape? MarkOf(KnowledgeCheckBlockView.Choice choice) =>
+            CardTestInput.IsShown(choice.Mark, choice.Button) && choice.Mark.worldBound.width > 4f ? choice.Mark.Kind : (CardIcons.Shape?)null;
+
+        // 8A-fix: right / wrong is never the colour alone -- the right choice carries a tick, the wrong one picked a cross, the others
+        // nothing, and the verdict's words start with the same shape. `wrongChoice` -1 = nothing wrong to show.
+        private static void AssertMarks(KnowledgeCheckBlockView quiz, int wrongChoice, int rightChoice)
+        {
+            for (int i = 0; i < quiz.Choices.Count; i++)
+            {
+                CardIcons.Shape? expected = i == rightChoice ? CardIcons.Shape.Tick : i == wrongChoice ? CardIcons.Shape.Cross : (CardIcons.Shape?)null;
+                Assert.AreEqual(expected, MarkOf(quiz.Choices[i]), "choice " + i + " carries its own mark, as an element and not only a class");
+            }
+            Assert.IsTrue(CardTestInput.IsShown(quiz.VerdictMark, quiz.Result), "the verdict has its icon");
+            Assert.AreEqual(wrongChoice >= 0 ? CardIcons.Shape.Cross : CardIcons.Shape.Tick, quiz.VerdictMark.Kind, "a tick before a right verdict, a cross before a wrong one");
+            Assert.Less(quiz.VerdictMark.worldBound.xMax, quiz.Verdict.worldBound.xMin + 1f, "the icon comes before the words");
+        }
+
+        // 8A-fix: the question of the two option looks is plain prompt text: no box, no border, and it never takes the verdict's colour
+        private static void AssertPlainPrompt(KnowledgeCheckBlockView quiz)
+        {
+            Assert.AreEqual(0f, quiz.Stage.resolvedStyle.borderTopWidth, "no border round the question");
+            Assert.AreEqual(0f, quiz.Stage.resolvedStyle.backgroundColor.a, 0.001f, "no box behind the question");
+            Assert.AreEqual(0f, quiz.Stage.resolvedStyle.paddingLeft, "no card padding");
+        }
+
         [UnityTest]
         public IEnumerator KnowledgeCheck_MultipleChoice_AWrongTapSaysActually_ExplainsMarksTheRightOne_IsRemembered_AndNeverRetried()
         {
@@ -1689,7 +1715,8 @@ namespace TileStories.Tests
             Assert.IsTrue(quiz.Choices[1].Button.ClassListContains("card-quiz__choice--correct"), "the right one is shown");
             Assert.IsFalse(quiz.Choices[2].Button.ClassListContains("card-quiz__choice--wrong") || quiz.Choices[2].Button.ClassListContains("card-quiz__choice--correct"));
             Assert.AreNotEqual(BorderOf(quiz.Choices[0].Button), BorderOf(quiz.Choices[1].Button), "wrong and right are told apart by more than a class name");
-            Assert.AreEqual(BorderOf(quiz.Choices[0].Button), BorderOf(quiz.Stage), "the question's card wears the verdict's colour");
+            AssertMarks(quiz, wrongChoice: 0, rightChoice: 1);
+            AssertPlainPrompt(quiz);
             Assert.GreaterOrEqual(CardTestInput.Contrast(quiz.Explanation.resolvedStyle.color, CardTestInput.EffectiveBackground(quiz.Explanation)),
                 UIAccessibility.MinRatioNormalText, "the explanation reads");
             Assert.AreEqual(0, _harness.State.Answer(entry, CardGalleryDefinitions.QuizBlockKey, 0), "remembered under the POI, the block and the question's row");
@@ -1730,7 +1757,8 @@ namespace TileStories.Tests
             StringAssert.StartsWith("The keep is the strongest tower of a castle.", quiz.Explanation.text);
             Assert.IsTrue(quiz.Choices[1].Button.ClassListContains("card-quiz__choice--correct"));
             Assert.IsFalse(quiz.Choices.Any(c => c.Button.ClassListContains("card-quiz__choice--wrong")), "nothing wrong to show");
-            Assert.AreEqual(BorderOf(quiz.Choices[1].Button), BorderOf(quiz.Stage), "the card wears the right answer's colour");
+            AssertMarks(quiz, wrongChoice: -1, rightChoice: 1);
+            AssertPlainPrompt(quiz);
             yield return Render("Card_knowledge_check_multiple_choice_correct");
 
             // - Next: the second question (four options), answered wrong on a real tap; the first one keeps its answer
@@ -1783,6 +1811,7 @@ namespace TileStories.Tests
             yield return null;
             Assert.AreEqual(KnowledgeCheckRule.ChoiceTrue, quiz.Chosen, "a real swipe right answered True");
             Assert.AreEqual("Correct!", quiz.Verdict.text);
+            AssertMarks(quiz, wrongChoice: -1, rightChoice: KnowledgeCheckRule.ChoiceTrue);
             Assert.AreEqual(CardGalleryDefinitions.CurtainExplanation, quiz.Explanation.text);
             Assert.AreEqual(0f, quiz.Stage.resolvedStyle.translate.x, 0.01f, "the card came back after the swipe");
             Assert.IsFalse(CardTestInput.IsShown(quiz.SwipeHint, quiz.Root), "no hint once answered");
@@ -1808,6 +1837,10 @@ namespace TileStories.Tests
             Assert.AreEqual(KnowledgeCheckRule.ChoiceFalse, quiz.Chosen);
             Assert.AreEqual("Actually...", quiz.Verdict.text);
             Assert.IsTrue(quiz.Choices[KnowledgeCheckRule.ChoiceTrue].Button.ClassListContains("card-quiz__choice--correct"), "True is shown as the right one");
+            AssertMarks(quiz, wrongChoice: KnowledgeCheckRule.ChoiceFalse, rightChoice: KnowledgeCheckRule.ChoiceTrue);
+            // - the swipe look keeps its bordered statement card (what a swipe moves), and it wears the verdict's colour
+            Assert.Greater(quiz.Stage.resolvedStyle.borderTopWidth, 0f, "the swipe card is a box");
+            Assert.AreEqual(BorderOf(quiz.Choices[KnowledgeCheckRule.ChoiceFalse].Button), BorderOf(quiz.Stage), "the card wears the wrong verdict's colour");
             yield return Render("Card_knowledge_check_true_false_swipe_wrong");
         }
 
@@ -1832,6 +1865,8 @@ namespace TileStories.Tests
             Assert.AreEqual(CardGalleryDefinitions.PanelExplanation, quiz.Explanation.text);
             Assert.IsTrue(quiz.Choices[0].Button.ClassListContains("card-quiz__choice--correct"), "the right picture is framed");
             Assert.IsTrue(quiz.Choices[1].Button.ClassListContains("card-quiz__choice--wrong"));
+            AssertMarks(quiz, wrongChoice: 1, rightChoice: 0);
+            AssertPlainPrompt(quiz);
             yield return Render("Card_knowledge_check_image_choice_wrong");
 
             _harness.Sheet.Hide();
@@ -1947,6 +1982,8 @@ namespace TileStories.Tests
             Assert.AreEqual(FeedbackRule.ThumbUp, _harness.State.Vote(entry, CardGalleryDefinitions.QuizBlockKey), "remembered");
             Assert.IsTrue(feedback.Votes[0].Button.ClassListContains("card-feedback__vote--on"));
             Assert.IsFalse(feedback.Votes[1].Button.ClassListContains("card-feedback__vote--on"));
+            Assert.IsTrue(feedback.Votes[0].Glyph.Filled, "the thumb given is filled");
+            Assert.IsFalse(feedback.Votes[1].Glyph.Filled, "the other stays an outline");
             Assert.IsTrue(CardTestInput.IsShown(feedback.Thanks, feedback.Root));
             Assert.AreEqual("Thank you for your feedback", feedback.Thanks.text);
             yield return Render("Card_feedback_thumbs_voted");
@@ -1989,6 +2026,14 @@ namespace TileStories.Tests
             Assert.AreEqual(4, feedback.Voted);
             CollectionAssert.AreEqual(new[] { true, true, true, true, false }, feedback.Votes.Select(v => v.Button.ClassListContains("card-feedback__vote--on")).ToList(),
                 "the stars up to the vote are filled");
+            CollectionAssert.AreEqual(new[] { true, true, true, true, false }, feedback.Votes.Select(v => v.Glyph.Filled).ToList(),
+                "filled is a property of the drawn star, not only of the button's class");
+            // - a real render: the inside of a filled star is the star's colour, the inside of an outlined one is the card behind it
+            var on = feedback.Votes[0].Glyph;
+            var off = feedback.Votes[4].Glyph;
+            Color onColour = on.resolvedStyle.color;
+            yield return PixelAt(on, on.worldBound.center, c => AssertColour(onColour, c, "a filled star is solid"));
+            yield return PixelAt(off, off.worldBound.center, c => Assert.Less(c.grayscale, onColour.grayscale - 0.05f, "an outlined star's inside is hollow"));
             Assert.AreEqual(1, events.Raised.Count);
             Assert.AreEqual("4", events.Raised[0].Value);
             Assert.AreEqual("stars", events.Raised[0].Variant);
@@ -2007,6 +2052,300 @@ namespace TileStories.Tests
             Assert.AreEqual(-1, feedback.Voted, "a 4 does not exist on the thumbs");
             Assert.IsFalse(CardTestInput.IsShown(feedback.Thanks, feedback.Root));
             Assert.AreEqual(1, events.Raised.Count);
+        }
+
+        // ---------------- Tier 3 group B (step 8B): poll, collect, dialogue, show_on_wall ----------------
+
+        // An IPollResults with numbers (a stand-in for a backend, which does not exist): the seam must draw results from it and only from it
+        private sealed class FakePollResults : IPollResults
+        {
+            public System.Collections.Generic.IReadOnlyList<int> Counts;
+            public bool TryGet(string wallId, string poiId, string blockKey, out System.Collections.Generic.IReadOnlyList<int> votesPerRow)
+            {
+                votesPerRow = Counts;
+                return Counts != null;
+            }
+        }
+
+        private static string PollKeyOf(string entry) => "ts.card.gallery." + entry + "." + CardGalleryDefinitions.QuizBlockKey + ".poll";
+
+        // The percent signs a block SHOWS (a label that is not displayed does not count)
+        private static System.Collections.Generic.List<string> ShownPercents(VisualElement root) =>
+            root.Query<Label>().ToList().Where(l => CardTestInput.IsShown(l, root) && l.text.Contains("%")).Select(l => l.text).ToList();
+
+        [UnityTest]
+        public IEnumerator Poll_ARealTapVotes_ShowsYourChoiceAndAThankYou_NeverAPercentage_OneEvent_Remembered_AndFinal()
+        {
+            var events = new RecordingEvents();
+            _harness.Events = events;
+            const string entry = "poll_bars_short";
+            PollBlockView poll = null;
+            yield return ShowBlock(entry, v => poll = (PollBlockView)v);
+            Assert.AreEqual(CardGalleryDefinitions.PollQuestion, poll.Question.text);
+            CollectionAssert.AreEqual(CardGalleryDefinitions.PollShortOptions, poll.Options.Select(o => o.Text.text).ToList());
+            Assert.AreEqual(-1, poll.Voted, "a fresh visitor: no vote");
+            Assert.IsFalse(CardTestInput.IsShown(poll.Thanks, poll.Root), "no thank-you before a vote");
+            foreach (var option in poll.Options)
+            {
+                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(option.Button.worldBound.width, option.Button.worldBound.height), "an option is a tap target >= 44 px");
+                Assert.IsFalse(CardTestInput.IsShown(option.Mark, option.Button), "no tick before a vote");
+            }
+            yield return Render("Card_poll_bars_open");
+
+            // - a real tap on the second option
+            yield return ScrollAndTap(poll.Options[1].Button);
+            Assert.AreEqual(1, poll.Voted);
+            Assert.IsTrue(CardTestInput.IsShown(poll.Options[1].Mark, poll.Options[1].Button) && poll.Options[1].Mark.worldBound.width > 4f, "the picked option carries a tick ELEMENT");
+            Assert.AreEqual(CardIcons.Shape.Tick, poll.Options[1].Mark.Kind);
+            Assert.IsTrue(CardTestInput.IsShown(poll.Options[1].Caption, poll.Options[1].Button));
+            Assert.AreEqual("Your choice", poll.Options[1].Caption.text, "the caption, from the card strings");
+            Assert.IsFalse(CardTestInput.IsShown(poll.Options[0].Caption, poll.Options[0].Button) || CardTestInput.IsShown(poll.Options[2].Mark, poll.Options[2].Button), "only the picked option is marked");
+            Assert.IsTrue(CardTestInput.IsShown(poll.Thanks, poll.Root));
+            Assert.AreEqual("Thank you for voting", poll.Thanks.text);
+            // - there is no backend: not one percentage, not one results bar, however the block is looked at
+            Assert.IsFalse(poll.ResultsShown, "no results without an IPollResults that has some");
+            CollectionAssert.IsEmpty(ShownPercents(poll.Root), "no invented percentages");
+            Assert.IsFalse(poll.Options.Any(o => CardTestInput.IsShown(o.Fill, o.Button)), "no results bar");
+            Assert.GreaterOrEqual(CardTestInput.Contrast(poll.Options[1].Caption.resolvedStyle.color, CardTestInput.EffectiveBackground(poll.Options[1].Caption)),
+                UIAccessibility.MinRatioNormalText, "Your choice reads");
+            // - one event, in the events seam's words: which option, in which block, of which look
+            Assert.AreEqual(1, events.Raised.Count);
+            var raised = events.Raised[0];
+            Assert.AreEqual(CardEventKinds.Poll, raised.Kind);
+            Assert.AreEqual("gallery", raised.WallId);
+            Assert.AreEqual(entry, raised.PoiId);
+            Assert.AreEqual(CardGalleryDefinitions.QuizBlockKey, raised.BlockKey);
+            Assert.AreEqual("bars", raised.Variant);
+            Assert.AreEqual("2", raised.Value, "the option's row number counted from 1");
+            Assert.AreEqual(1, _harness.State.PollVote(entry, CardGalleryDefinitions.QuizBlockKey), "remembered under the POI, the block and the authored row");
+            Assert.IsTrue(_harness.StateStore.TryGet(PollKeyOf(entry), out string stored));
+            Assert.AreEqual("1", stored);
+            yield return Render("Card_poll_bars_voted");
+
+            // - final: a tap on another option changes nothing and raises nothing
+            yield return ScrollAndTap(poll.Options[0].Button);
+            Assert.AreEqual(1, poll.Voted);
+            Assert.AreEqual(1, events.Raised.Count, "no second event");
+
+            // - the card opened again: the vote shown as given, nothing reported
+            yield return ShowBlock(entry, v => poll = (PollBlockView)v);
+            Assert.AreEqual(1, poll.Voted, "remembered across a rebind");
+            Assert.IsTrue(CardTestInput.IsShown(poll.Options[1].Mark, poll.Options[1].Button));
+            Assert.IsTrue(CardTestInput.IsShown(poll.Thanks, poll.Root));
+            Assert.AreEqual(1, events.Raised.Count, "showing a remembered vote reports nothing");
+
+            // - blank rows are left out, and the vote is kept under the AUTHORED row: the partial poll shows rows 0 and 2
+            yield return ShowBlock("poll_bars_partial", v => poll = (PollBlockView)v);
+            CollectionAssert.AreEqual(new[] { "The arcade", "The river gate" }, poll.Options.Select(o => o.Text.text).ToList());
+            yield return ScrollAndTap(poll.Options[1].Button);
+            Assert.AreEqual(2, _harness.State.PollVote("poll_bars_partial", CardGalleryDefinitions.QuizBlockKey), "the second SHOWN option is authored row 2");
+            Assert.AreEqual("3", events.Raised[1].Value);
+            // - a vote stored for a row that is not shown is no vote
+            _harness.State.SetPollVote("poll_bars_short", CardGalleryDefinitions.QuizBlockKey, 5);
+            yield return ShowBlock("poll_bars_short", v => poll = (PollBlockView)v);
+            Assert.AreEqual(-1, poll.Voted, "there is no option 6 in a poll of three");
+        }
+
+        [UnityTest]
+        public IEnumerator Poll_TheResultsSeam_DrawsBarsAndSharesOnlyFromWhatAnIPollResultsGives_AfterTheVote()
+        {
+            var results = new FakePollResults { Counts = new[] { 1, 3, 0 } };
+            _harness.PollResults = results;
+            PollBlockView poll = null;
+            yield return ShowBlock("poll_bars_short", v => poll = (PollBlockView)v);
+            Assert.IsFalse(poll.ResultsShown, "results wait for the visitor's own vote");
+            yield return ScrollAndTap(poll.Options[0].Button);
+            Assert.IsTrue(poll.ResultsShown, "the seam had numbers: the bars show");
+            CollectionAssert.AreEqual(new[] { "25%", "75%", "0%" }, poll.Options.Select(o => o.Percent.text).ToList(),
+                "1, 3 and 0 votes of 4 are 25, 75 and 0 percent (counts are per authored row)");
+            float first = poll.Options[0].Fill.resolvedStyle.width;
+            float second = poll.Options[1].Fill.resolvedStyle.width;
+            Assert.Greater(first, 4f, "a bar with a real width");
+            Assert.AreEqual(3f, second / first, 0.05f, "the bars are drawn in proportion: 75 to 25");
+            Assert.AreEqual(0f, poll.Options[2].Fill.resolvedStyle.width, 0.5f, "no votes: no bar");
+            yield return Render("Card_poll_bars_with_results");
+
+            // - the seam answering nothing again (NoPollResults, today): the bars are hidden and the block shows no percentage
+            _harness.PollResults = new NoPollResults();
+            yield return ShowBlock("poll_bars_short", v => poll = (PollBlockView)v);
+            Assert.IsFalse(poll.ResultsShown);
+            CollectionAssert.IsEmpty(ShownPercents(poll.Root), "no data: no percentage");
+        }
+
+        [UnityTest]
+        public IEnumerator Collect_ARealTapAddsTheItem_TheCountIsReadFromTheWallsConfig_ItPersists_AndReportsOneEvent()
+        {
+            var events = new RecordingEvents();
+            _harness.Events = events;
+            const string entry = "collect_add_to_story_short";
+            CollectBlockView collect = null;
+            // - another point of the wall already has its item in the visitor's story: the count reads across points
+            _harness.State.SetCollected("collect_1", "block_9");
+            yield return ShowBlock(entry, v => collect = (CollectBlockView)v);
+            Assert.AreEqual(CardGalleryDefinitions.CollectSeries, collect.Series.text);
+            Assert.AreEqual(CardGalleryDefinitions.CollectItem, collect.ItemName.text);
+            Assert.AreEqual(4, collect.Total, "the shown point + the three more collectables the fabricated wall holds: counted from the config");
+            Assert.AreEqual(1, collect.Have);
+            Assert.AreEqual("1 of 4 collected", collect.Progress.text, "the card strings' words");
+            Assert.IsFalse(collect.IsCollected);
+            Assert.AreEqual("Add to my story", collect.AddLabel.text);
+            Assert.IsFalse(collect.StampStar.Filled, "the stamp's star is an outline until collected");
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(collect.Add.worldBound.width, collect.Add.worldBound.height), "the button is a tap target >= 44 px");
+            Assert.GreaterOrEqual(CardTestInput.Contrast(collect.AddLabel.resolvedStyle.color, collect.Add.resolvedStyle.backgroundColor), UIAccessibility.MinRatioNormalText, "the button reads");
+            yield return Render("Card_collect_open");
+
+            yield return ScrollAndTap(collect.Add);
+            Assert.IsTrue(collect.IsCollected);
+            Assert.AreEqual("In your story", collect.AddLabel.text, "the button says where it went");
+            Assert.IsTrue(CardTestInput.IsShown(collect.AddMark, collect.Add) && collect.AddMark.worldBound.width > 4f, "a tick element, not only a colour");
+            Assert.IsTrue(collect.StampStar.Filled, "the stamp's star is filled");
+            Assert.AreEqual("2 of 4 collected", collect.Progress.text);
+            Assert.AreEqual(0.5f, collect.ProgressFill.resolvedStyle.width / collect.ProgressTrack.resolvedStyle.width, 0.02f, "the bar is half full");
+            Assert.AreEqual(1, events.Raised.Count);
+            var raised = events.Raised[0];
+            Assert.AreEqual(CardEventKinds.Collect, raised.Kind);
+            Assert.AreEqual(entry, raised.PoiId);
+            Assert.AreEqual(CardGalleryDefinitions.QuizBlockKey, raised.BlockKey);
+            Assert.AreEqual("collected", raised.Value);
+            Assert.IsTrue(_harness.State.Collected(entry, CardGalleryDefinitions.QuizBlockKey), "kept in CardLocalState under the POI and the block");
+            Assert.IsTrue(_harness.StateStore.TryGet("ts.card.gallery." + entry + "." + CardGalleryDefinitions.QuizBlockKey + ".collected", out string stored));
+            Assert.AreEqual("1", stored);
+            yield return Render("Card_collect_collected");
+
+            // - once: a second tap changes nothing and reports nothing
+            yield return ScrollAndTap(collect.Add);
+            Assert.AreEqual(1, events.Raised.Count, "no second event");
+            Assert.AreEqual("2 of 4 collected", collect.Progress.text);
+
+            // - the card opened again: still collected, nothing reported
+            yield return ShowBlock(entry, v => collect = (CollectBlockView)v);
+            Assert.IsTrue(collect.IsCollected, "remembered across a rebind");
+            Assert.AreEqual("2 of 4 collected", collect.Progress.text);
+            Assert.AreEqual(1, events.Raised.Count);
+
+            // - the wall's total is the config's: the same block on a wall where it is the only collectable says 1
+            yield return ShowBlock("collect_add_to_story_alone", v => collect = (CollectBlockView)v);
+            Assert.AreEqual(1, collect.Total, "a total that is not a constant");
+            Assert.AreEqual("0 of 1 collected", collect.Progress.text);
+            // - a wall that switches Collect off in its Block Library counts none of its items
+            var wall = CardGalleryDefinitions.Taxonomy();
+            wall.card_settings.kinds.Add(new BlockKindSetting { kind = BuiltInBlocks.CollectKind, enabled = false });
+            Assert.AreEqual(0, CollectRule.Items(new[] { new POIData { id = "a", card = new POICardData { blocks = { new BlockInstanceData { key = "b", kind = BuiltInBlocks.CollectKind } } } } }, wall.card_settings).Count);
+
+            // - nothing written: the point's card title and its category
+            yield return ShowBlock("collect_add_to_story_defaults", v => collect = (CollectBlockView)v);
+            Assert.AreEqual("Gate", collect.ItemName.text, "the point's card title");
+            Assert.AreEqual("Civic Buildings", collect.Series.text, "the point's category name");
+        }
+
+        private static string StateKeys(CardGalleryHarness harness) => string.Join("\n", harness.StateStore.Keys);
+
+        [UnityTest]
+        public IEnumerator Dialogue_ARealTapRevealsOneLineAtATime_ChoicesAnswerInTheThread_TheReachedLineIsNeverStored()
+        {
+            DialogueBlockView dialogue = null;
+            yield return ShowBlock("dialogue_choices_short", v => dialogue = (DialogueBlockView)v);
+            Assert.AreEqual(3, dialogue.Count);
+            Assert.AreEqual(1, dialogue.Bubbles.Count, "the first line is said when the card opens");
+            Assert.AreEqual("The mason", dialogue.Bubbles[0].Speaker.text);
+            Assert.AreEqual("Welcome. Mind the dust: we are mending the arch.", dialogue.Bubbles[0].Text.text);
+            Assert.IsTrue(CardTestInput.IsShown(dialogue.Continue, dialogue.Root));
+            Assert.AreEqual("Continue", dialogue.Continue.Q<Label>().text);
+            Assert.IsFalse(CardTestInput.IsShown(dialogue.Again, dialogue.Root), "nothing to start again yet");
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(dialogue.Continue.worldBound.width, dialogue.Continue.worldBound.height), "Continue is a tap target >= 44 px");
+
+            yield return ScrollAndTap(dialogue.Continue);
+            Assert.AreEqual(2, dialogue.Bubbles.Count, "one tap, one more line");
+            Assert.AreEqual("The stone comes from the quarry across the river.", dialogue.Bubbles[1].Text.text);
+            yield return ScrollAndTap(dialogue.Continue);
+            Assert.AreEqual(3, dialogue.Bubbles.Count);
+            Assert.AreEqual(3, dialogue.Reached);
+            Assert.IsFalse(CardTestInput.IsShown(dialogue.Continue, dialogue.Root), "the last line is said: no Continue");
+            Assert.IsTrue(CardTestInput.IsShown(dialogue.Again, dialogue.Root), "...but Start again");
+            Assert.AreEqual("Start again", dialogue.Again.Q<Label>().text);
+            yield return Render("Card_dialogue_ended");
+
+            // - where the visitor got to is VIEW state: nothing of it was stored, and a rebind starts at the first line
+            StringAssert.DoesNotContain(CardGalleryDefinitions.QuizBlockKey, StateKeys(_harness), "the reached line is never in CardLocalState");
+            yield return ShowBlock("dialogue_choices_short", v => dialogue = (DialogueBlockView)v);
+            Assert.AreEqual(1, dialogue.Bubbles.Count, "a rebind starts again");
+            yield return ScrollAndTap(dialogue.Continue);
+            yield return ScrollAndTap(dialogue.Continue);
+            yield return ScrollAndTap(dialogue.Again);
+            Assert.AreEqual(1, dialogue.Bubbles.Count, "Start again: back at the first line");
+            Assert.AreEqual(1, dialogue.Reached);
+
+            // - the choice look: the first line offers two replies, and Continue gives way to them
+            yield return ShowBlock("dialogue_choices_choices", v => dialogue = (DialogueBlockView)v);
+            Assert.IsTrue(dialogue.AwaitsChoice);
+            Assert.IsFalse(CardTestInput.IsShown(dialogue.Continue, dialogue.Root), "a line with replies waits for one");
+            CollectionAssert.AreEqual(new[] { "No, tell me", "Yes, the earthquake" }, dialogue.Choices.Select(c => c.Label.text).ToList());
+            foreach (var choice in dialogue.Choices)
+                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(choice.Button.worldBound.width, choice.Button.worldBound.height), "a reply is a tap target >= 44 px");
+            yield return ScrollAndTap(dialogue.Choices[0].Button);
+            Assert.IsFalse(dialogue.AwaitsChoice);
+            Assert.AreEqual(3, dialogue.Bubbles.Count, "the line, the visitor's own reply, the speaker's answer");
+            Assert.AreEqual("You", dialogue.Bubbles[1].Speaker.text, "the visitor's name, from the card strings");
+            Assert.AreEqual("No, tell me", dialogue.Bubbles[1].Text.text);
+            Assert.IsTrue(dialogue.Bubbles[1].Box.ClassListContains("card-dialogue__bubble--visitor"));
+            Assert.Greater(dialogue.Bubbles[1].Box.worldBound.xMin, dialogue.Bubbles[0].Box.worldBound.xMin, "the visitor's bubble sits on the other side");
+            Assert.AreEqual("The mason", dialogue.Bubbles[2].Speaker.text);
+            Assert.AreEqual("The earthquake brought it down in 1755.", dialogue.Bubbles[2].Text.text);
+            Assert.IsTrue(CardTestInput.IsShown(dialogue.Continue, dialogue.Root), "the conversation goes on");
+            yield return Render("Card_dialogue_reply");
+
+            // - the third line offers three replies; one of them has no answer: the visitor's bubble only
+            yield return ScrollAndTap(dialogue.Continue);
+            yield return ScrollAndTap(dialogue.Continue);
+            Assert.IsTrue(dialogue.AwaitsChoice);
+            Assert.AreEqual(3, dialogue.Choices.Count);
+            int before = dialogue.Bubbles.Count;
+            yield return ScrollAndTap(dialogue.Choices[1].Button);
+            Assert.AreEqual(before + 1, dialogue.Bubbles.Count, "a reply with no answer adds only the visitor's line");
+            yield return ScrollAndTap(dialogue.Continue);
+            Assert.AreEqual(4, dialogue.Reached);
+            Assert.IsTrue(CardTestInput.IsShown(dialogue.Again, dialogue.Root));
+
+            // - rows the block leaves out; a line with no speaker; a reply nobody can pick
+            yield return ShowBlock("dialogue_choices_partial", v => dialogue = (DialogueBlockView)v);
+            Assert.AreEqual(2, dialogue.Count, "the row with no words is left out");
+            yield return ScrollAndTap(dialogue.Continue);
+            Assert.IsFalse(CardTestInput.IsShown(dialogue.Bubbles[1].Speaker, dialogue.Bubbles[1].Box), "no speaker: no speaker line");
+            Assert.AreEqual(1, dialogue.Choices.Count, "the reply with no label is never offered");
+            Assert.AreEqual("Go on", dialogue.Choices[0].Label.text);
+
+            // - one line: nothing to continue and nothing to start again
+            yield return ShowBlock("dialogue_choices_oneline", v => dialogue = (DialogueBlockView)v);
+            Assert.AreEqual(1, dialogue.Bubbles.Count);
+            Assert.IsFalse(CardTestInput.IsShown(dialogue.Continue, dialogue.Root) || CardTestInput.IsShown(dialogue.Again, dialogue.Root));
+        }
+
+        [UnityTest]
+        public IEnumerator ShowOnWall_ARealTapLowersTheCardToPeek_TheNeighboursAreTheNearestPoints_AndATapOnOneSelectsIt()
+        {
+            SelectionEventBus.ResetState();
+            ShowOnWallBlockView view = null;
+            yield return ShowBlock("show_on_wall_button_short", v => view = (ShowOnWallBlockView)v);
+            Assert.AreEqual("Show me where it is", view.ButtonLabel.text, "the card strings' words");
+            Assert.AreEqual(0, view.Neighbours.Count, "the button look names no neighbours");
+            Assert.IsFalse(CardTestInput.IsShown(view.NeighboursRow, view.Root));
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(view.Button.worldBound.width, view.Button.worldBound.height), "the button is a tap target >= 44 px");
+            Assert.AreEqual(SheetStopRule.Stop.Full, _harness.Sheet.Stop, "the entry opens at full");
+            yield return ScrollAndTap(view.Button);
+            yield return CardTestInput.Settle();
+            Assert.AreEqual(SheetStopRule.Stop.Peek, _harness.Sheet.Stop, "the card dropped to its peek so the wall shows");
+            Assert.IsTrue(_harness.Sheet.IsOpen, "...and stays open");
+
+            // - the neighbours: the three nearest of four (the fourth is 30 m away), by their card titles
+            yield return ShowBlock("show_on_wall_with_neighbours_short", v => view = (ShowOnWallBlockView)v);
+            CollectionAssert.AreEqual(new[] { "near_a", "near_b", "near_c" }, view.Neighbours.Select(n => n.PoiId).ToList(), "nearest first, three at most");
+            Assert.AreEqual("The chapel of Saint George with its bell tower and the old cemetery", view.Neighbours[2].Title.text);
+            Assert.AreEqual("Also nearby", view.Caption.text);
+            foreach (var n in view.Neighbours)
+                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(n.Button.worldBound.width, n.Button.worldBound.height), "a neighbour is a tap target >= 44 px");
+            yield return ScrollAndTap(view.Neighbours[1].Button);
+            Assert.AreEqual("near_b", SelectionEventBus.CurrentPoiId, "a real tap on a neighbour selected it through the selection bus");
+            SelectionEventBus.ResetState();
         }
     }
 }

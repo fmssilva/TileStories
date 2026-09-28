@@ -12,26 +12,29 @@
     padding: 0;
 }
 
-/* the question's card: the true / false look's card is what a swipe moves; an answered question outlines it in the verdict's colour */
+/* the question: plain prompt text above the options (multiple_choice, image_choice) -- no box, so it never reads as one more option
+   and never takes the verdict's colour. Only the true / false look is a card: the statement card is what a swipe moves; answered, it
+   is outlined in the verdict's colour (the tick / cross of the verdict says the same without the colour). */
 .card-quiz__stage {
+    margin: 0 0 var(--ts-space-3) 0;
+    padding: 0;
+}
+
+.card-quiz--true_false_swipe .card-quiz__stage {
     background-color: var(--ts-surface-2);
     border-width: var(--ts-choice-border);
     border-color: var(--ts-clear);
     border-radius: var(--ts-radius-m);
     padding: var(--ts-space-4);
-    margin: 0 0 var(--ts-space-3) 0;
-}
-
-.card-quiz--true_false_swipe .card-quiz__stage {
     min-height: var(--ts-grid-cell-height);
     justify-content: center;
 }
 
-.card-quiz__stage--correct {
+.card-quiz--true_false_swipe .card-quiz__stage--correct {
     border-color: var(--ts-correct);
 }
 
-.card-quiz__stage--wrong {
+.card-quiz--true_false_swipe .card-quiz__stage--wrong {
     border-color: var(--ts-wrong);
 }
 
@@ -139,6 +142,58 @@
     height: var(--ts-choice-picture);
 }
 
+/* ---- the marks: a tick on the right choice, a cross on the wrong one picked, and one before the verdict's words. The colour is
+   never the only signal: the shape says it too (a vector glyph, CardIcons). Hidden until the question is answered. ---- */
+
+.card-quiz__mark {
+    display: none;
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    color: var(--ts-ink);
+}
+
+.card-quiz__mark--tick {
+    color: var(--ts-correct);
+}
+
+.card-quiz__mark--cross {
+    color: var(--ts-wrong);
+}
+
+.card-quiz__choice-mark {
+    position: absolute;
+    right: var(--ts-space-3);
+    top: var(--ts-space-3);
+}
+
+/* the marks sit in the choice's right edge: its words stop before them, answered or not (so answering never re-wraps the words) */
+.card-quiz--multiple_choice .card-quiz__choice {
+    padding-right: var(--ts-touch-target);
+}
+
+.card-quiz--true_false_swipe .card-quiz__choice-mark {
+    right: auto;
+    left: var(--ts-space-4);
+}
+
+.card-quiz--image_choice .card-quiz__choice-mark {
+    right: var(--ts-space-3);
+    top: var(--ts-space-3);
+    padding: var(--ts-space-1);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface);
+}
+
+.card-quiz__verdict-row {
+    flex-direction: row;
+    align-items: center;
+    margin: 0 0 var(--ts-space-1) 0;
+}
+
+.card-quiz__verdict-row .card-quiz__mark {
+    margin-right: var(--ts-space-2);
+}
+
 /* ---- the verdict and the explanation, under the choices once a question is answered ---- */
 
 .card-quiz__result {
@@ -164,7 +219,7 @@
     -unity-font-style: bold;
     color: var(--ts-ink);
     white-space: normal;
-    margin: 0 0 var(--ts-space-1) 0;
+    margin: 0;
     padding: 0;
 }
 
@@ -206,4 +261,216 @@
 
 .card-quiz__next .card-quiz__button-label {
     color: var(--ts-on-accent);
+}
+
+/* ---- poll: the question, the options as tappable rows, "Your choice" and a thank-you once voted. The results bar behind an option
+   is hidden unless an IPollResults gave numbers (there is no backend: no invented percentages) ---- */
+
+.card-poll__question {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-3) 0;
+    padding: 0;
+}
+
+.card-poll__options {
+    flex-direction: column;
+}
+
+.card-poll__option {
+    flex-direction: row;
+    align-items: center;
+    min-height: var(--ts-touch-target);
+    margin: 0 0 var(--ts-space-2) 0;
+    padding: var(--ts-space-3);
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+    overflow: hidden;
+}
+
+/* the picked option: the accent border, a tick and "Your choice" -- three signals, the colour is only one */
+.card-poll__option--chosen {
+    border-color: var(--ts-accent);
+}
+
+.card-poll__fill {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--ts-result-fill);
+}
+
+.card-poll__words {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.card-poll__option-text {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: middle-left;
+    margin: 0;
+    padding: 0;
+}
+
+.card-poll__option--other .card-poll__option-text {
+    color: var(--ts-ink-2);
+}
+
+.card-poll__caption {
+    display: none;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-accent-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+}
+
+.card-poll__percent {
+    display: none;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    margin: 0 var(--ts-space-2) 0 var(--ts-space-2);
+    padding: 0;
+}
+
+.card-poll__mark {
+    display: none;
+    flex-shrink: 0;
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    margin-left: var(--ts-space-2);
+    color: var(--ts-accent);
+}
+
+.card-poll__thanks {
+    display: none;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+}
+
+/* ---- collect: the stamp tile, the Add to my story pill, "3 of 12 collected" with a thin bar ---- */
+
+.card-collect__tile {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--ts-space-3);
+    margin: 0 0 var(--ts-space-3) 0;
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+/* the stamp: a ring that holds a star; the ring fills with the accent once collected */
+.card-collect__stamp {
+    width: var(--ts-stamp-size);
+    height: var(--ts-stamp-size);
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    margin: 0 var(--ts-space-3) 0 0;
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-stamp-radius);
+}
+
+.card-collect--collected .card-collect__stamp {
+    border-color: var(--ts-accent);
+}
+
+.card-collect__star {
+    width: var(--ts-vote-glyph);
+    height: var(--ts-vote-glyph);
+    color: var(--ts-ink-3);
+}
+
+.card-collect--collected .card-collect__star {
+    color: var(--ts-accent);
+}
+
+.card-collect__words {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.card-collect__series {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-collect__item {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+/* the pill: the accent while there is something to add, the quiet surface once it is in the story (with a tick) */
+.card-collect__add {
+    align-self: flex-start;
+    margin: 0 0 var(--ts-space-3) 0;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-accent);
+    background-color: var(--ts-accent);
+}
+
+.card-collect__add-label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-on-accent);
+    margin: 0;
+    padding: 0;
+}
+
+.card-collect__add-mark {
+    display: none;
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    margin-right: var(--ts-space-2);
+    color: var(--ts-accent);
+}
+
+.card-collect--collected .card-collect__add {
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface-2);
+}
+
+.card-collect--collected .card-collect__add-label {
+    color: var(--ts-ink);
+}
+
+.card-collect__progress {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+.card-collect__track {
+    height: var(--ts-progress-height);
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-line);
+    overflow: hidden;
+}
+
+.card-collect__fill {
+    height: 100%;
+    background-color: var(--ts-accent);
 }

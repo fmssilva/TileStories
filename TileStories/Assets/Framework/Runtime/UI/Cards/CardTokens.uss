@@ -160,6 +160,14 @@
     --ts-choice-picture: 96px;
     --ts-vote-size: 64px;
     --ts-vote-glyph: 28px;
+    /* poll (Play.uss): the tint of a results bar behind an option's words (only drawn when an app supplies results) */
+    --ts-result-fill: rgba(245, 158, 11, 0.28);
+    /* collect (Play.uss): the stamp's round badge, and the thin progress bar under the count */
+    --ts-stamp-size: 56px;
+    --ts-stamp-radius: 28px;
+    --ts-progress-height: 6px;
+    /* dialogue (Stories.uss): the widest a line's bubble grows, as a share of the block */
+    --ts-bubble-max-width: 85%;
     /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
     --ts-clear: rgba(0, 0, 0, 0);
 }

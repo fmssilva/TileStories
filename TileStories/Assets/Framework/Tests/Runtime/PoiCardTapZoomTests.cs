@@ -34,6 +34,9 @@ namespace TileStories.Tests
             _savedSettings = InputSystem.settings;
             _testSettings = Object.Instantiate(_savedSettings);
             _testSettings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            // - and when the Editor is not the active application (the developer is in another window) the Input System would switch the
+            //   touchscreen off (backgroundBehavior's default): every real-finger test then read "no touch" and failed. Keep it on.
+            _testSettings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             InputSystem.settings = _testSettings;
         }
 
@@ -336,6 +339,71 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.2f);
             Assert.AreEqual(zoomed, zoom.Scale, 1e-4f, "a plain wheel never zooms");
             Assert.Less(stack.Scroll.scrollOffset.y, scroll - 5f, "...it scrolled the long card up");
+        }
+
+        private static void AssertStageHoldsNoPointer(KnowledgeCheckBlockView quiz, string when)
+        {
+            Assert.IsFalse(quiz.IsSwiping, when + ": not a swipe");
+            for (int id = 0; id < PointerId.maxPointers; id++)
+                Assert.IsFalse(quiz.Stage.HasPointerCapture(id), when + ": the statement card holds no pointer (id " + id + ")");
+        }
+
+        // _3.1 8A-fix: The Lamp's true / false statement is a big card, and a finger that lands on it must still be able to scroll the
+        // stack. With REAL fingers: a vertical drag that starts on the statement scrolls the stack and answers nothing; a sideways
+        // swipe from the same place answers True and does not scroll.
+        [UnityTest]
+        public IEnumerator TheLampsTrueFalseStatement_ARealVerticalFingerScrollsTheStack_AndAnswersNothing_ARealSidewaysSwipeAnswers()
+        {
+            // - the answer goes into a memory store: a test run must never write the developer's saved answers
+            Card.State = new CardLocalState(new MemoryCardStateStore(), Session.SearchConfig.wall_id);
+            yield return OpenLampCard();
+            Card.Sheet.SetStop(SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle();
+            var stack = Card.Sheet.Stack;
+            // - the question waits for the reading: a real wheel to the end of the card reveals it
+            for (int notch = 0; notch < 400 && !stack.ContentSeen; notch++) yield return CardTestInput.Wheel(stack.Scroll, 12f);
+            Assert.IsTrue(stack.ContentSeen, "precondition: the wheel reached the end of the card");
+            var quiz = System.Linq.Enumerable.First(System.Linq.Enumerable.OfType<KnowledgeCheckBlockView>(stack.BoundViews),
+                q => q.Root.ClassListContains("card-quiz--" + BuiltInBlocks.KnowledgeCheckTrueFalseSwipe));
+            stack.Scroll.ScrollTo(quiz.Stage);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.Greater(stack.Scroll.scrollOffset.y, 100f, "precondition: room to scroll back up");
+            var centre = ScreenPointOf(quiz.Stage);
+            Assert.IsTrue(ScreenUIHit.IsOverScreenUI(centre), "precondition: the finger goes down on the statement card");
+            float perPanelUnit = Screen.width / quiz.Stage.panel.visualTree.layout.width;
+
+            // - a real finger dragging DOWN from the statement: the stack scrolls up under it, nothing is answered
+            float before = stack.Scroll.scrollOffset.y;
+            var drag = new Vector2(2f, -160f);
+            QueueFinger(1, TouchPhase.Began, centre);
+            yield return null;
+            // - the finger only TOUCHES the card: the card has not taken it (the old card captured the pointer at once, on the touch)
+            AssertStageHoldsNoPointer(quiz, "a finger that only touched the statement");
+            for (int i = 1; i <= 10; i++)
+            {
+                QueueFinger(1, TouchPhase.Moved, centre + drag * i / 10f);
+                yield return null;
+                if (i == 5) AssertStageHoldsNoPointer(quiz, "halfway down, clearly vertical");
+            }
+            QueueFinger(1, TouchPhase.Ended, centre + drag);
+            yield return null;
+            yield return null;
+            yield return CardTestInput.Settle(0.2f);
+            Assert.Less(stack.Scroll.scrollOffset.y, before - 30f, "a vertical drag that started on the statement scrolled the stack");
+            Assert.AreEqual(-1, quiz.Chosen, "...and answered nothing");
+            Assert.IsFalse(quiz.IsSwiping, "the card was never taken by the swipe");
+            Assert.AreEqual(0f, quiz.Stage.resolvedStyle.translate.x, 0.01f, "the card did not move");
+
+            // - a real sideways swipe from the same place: True (the statement is true), and the stack stays where it is
+            stack.Scroll.ScrollTo(quiz.Stage);
+            yield return CardTestInput.Settle(0.2f);
+            centre = ScreenPointOf(quiz.Stage);
+            before = stack.Scroll.scrollOffset.y;
+            yield return Swipe(centre, new Vector2(quiz.Stage.worldBound.width * perPanelUnit * 0.5f, 4f), frames: 10);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(KnowledgeCheckRule.ChoiceTrue, quiz.Chosen, "a real sideways swipe answered True");
+            Assert.AreEqual(before, stack.Scroll.scrollOffset.y, 2f, "a sideways swipe does not scroll the stack");
+            yield return Capture("Card_Lamp_KnowledgeCheck_TrueFalse_RealSwipe");
         }
     }
 }

@@ -8,15 +8,16 @@ namespace TileStories
     //   stars  -- one to five stars; the vote fills the stars up to it
     // The question is the block's own, else the card's wording for the look (CardStrings). A vote is remembered through the
     // card's CardLocalState (the block opens showing it as given, with the thank-you) and reported ONCE as a feedback event
-    // through ICardEvents; there is no changing it and no backend. The thumbs and stars are drawn by USS (no glyph font, no
-    // picture). Only classes here; Community.uss draws it.
+    // through ICardEvents; there is no changing it and no backend. The thumbs and stars are painted vector glyphs
+    // (CardIcons.VectorGlyph: outlined while off, filled once voted; no glyph font, no picture). Only classes here; Community.uss
+    // draws it.
     public sealed class FeedbackBlockView : IBlockView
     {
         // One thing the visitor can tap: a thumb or a star
         public sealed class Vote
         {
             public Button Button;
-            public VisualElement Glyph;
+            public CardIcons.VectorGlyph Glyph;
             public Label Text;
             // What it votes (FeedbackRule: thumbs 1 up / 0 down, stars 1..5)
             public int Value;
@@ -78,11 +79,11 @@ namespace TileStories
             Thanks.text = _strings?.Get(CardStrings.Keys.FeedbackThanks) ?? "";
 
             if (stars)
-                for (int star = 1; star <= FeedbackRule.StarCount; star++) Add(star, "star");
+                for (int star = 1; star <= FeedbackRule.StarCount; star++) Add(star, CardIcons.Shape.Star);
             else
             {
-                Add(FeedbackRule.ThumbUp, "up");
-                Add(FeedbackRule.ThumbDown, "down");
+                Add(FeedbackRule.ThumbUp, CardIcons.Shape.ThumbUp);
+                Add(FeedbackRule.ThumbDown, CardIcons.Shape.ThumbDown);
             }
             Voted = FeedbackRule.Stored(_variant, _state?.Vote(_poiId, _blockKey) ?? -1);
             ShowVoted();
@@ -117,18 +118,21 @@ namespace TileStories
             Root.EnableInClassList("card-feedback--voted", voted);
             bool stars = _variant == BuiltInBlocks.FeedbackStars;
             foreach (var vote in _shown)
-                vote.Button.EnableInClassList("card-feedback__vote--on", voted && (stars ? vote.Value <= Voted : vote.Value == Voted));
+            {
+                bool on = voted && (stars ? vote.Value <= Voted : vote.Value == Voted);
+                vote.Button.EnableInClassList("card-feedback__vote--on", on);
+                // - off: an outline; on: filled (the shape says it, not only the colour)
+                vote.Glyph.Filled = on;
+            }
             Thanks.style.display = voted ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        private void Add(int value, string glyphKind)
+        private void Add(int value, CardIcons.Shape shape)
         {
             var vote = Take(_shown.Count);
             vote.Value = value;
-            vote.Glyph.ClearClassList();
-            vote.Glyph.AddToClassList("card-feedback__glyph");
-            vote.Glyph.AddToClassList("card-feedback__glyph--" + glyphKind);
-            bool stars = glyphKind == "star";
+            vote.Glyph.Kind = shape;
+            bool stars = shape == CardIcons.Shape.Star;
             // - thumbs carry words under the glyph (they say what each thumb means); a star needs none
             vote.Text.text = stars ? "" : _strings?.Get(value == FeedbackRule.ThumbUp ? CardStrings.Keys.FeedbackThumbUp : CardStrings.Keys.FeedbackThumbDown) ?? "";
             vote.Text.style.display = stars ? DisplayStyle.None : DisplayStyle.Flex;
@@ -144,18 +148,12 @@ namespace TileStories
         {
             while (_pool.Count <= index)
             {
-                var vote = new Vote { Button = new Button(), Glyph = new VisualElement { pickingMode = PickingMode.Ignore }, Text = new Label { pickingMode = PickingMode.Ignore } };
+                // - the star / thumb is painted (CardIcons.VectorGlyph): outlined while off, filled once voted
+                var vote = new Vote { Button = new Button(), Glyph = CardIcons.CreateVector(CardIcons.Shape.Star), Text = new Label { pickingMode = PickingMode.Ignore } };
                 vote.Button.AddToClassList("card-feedback__vote");
                 vote.Button.AddToClassList("card-tap");
                 vote.Text.AddToClassList("card-feedback__vote-text");
-                // - a star is two squares, one turned an eighth of a turn: an eight-pointed star, no font glyph needed
-                for (int point = 0; point < 2; point++)
-                {
-                    var square = new VisualElement { pickingMode = PickingMode.Ignore };
-                    square.AddToClassList("card-feedback__star-square");
-                    square.AddToClassList(point == 0 ? "card-feedback__star-square--a" : "card-feedback__star-square--b");
-                    vote.Glyph.Add(square);
-                }
+                vote.Glyph.AddToClassList("card-feedback__glyph");
                 vote.Button.Add(vote.Glyph);
                 vote.Button.Add(vote.Text);
                 var captured = vote;

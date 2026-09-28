@@ -1,7 +1,7 @@
 /* The community family's looks (_3.1 Tier 3): what the visitor tells back -- feedback.
    Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
    _3.3). UI Toolkit USS only: no sibling selectors (an import ERROR that drops the whole sheet), no % radius, no web-CSS
-   gap / cursor / calc. Thumbs and stars are drawn from borders and rotations: no glyph font, no picture. */
+   gap / cursor / calc. Thumbs and stars are painted vector glyphs (CardIcons): no glyph font, no picture. */
 
 /* ---- feedback: the question, the row of thumbs or stars, the thank-you ---- */
 
@@ -54,60 +54,16 @@
     padding: 0;
 }
 
+/* a thumb or a star: a painted vector glyph (CardIcons.VectorGlyph) -- its colour is this `color`, its size this box; it is an outline
+   while off and filled once voted (the shape carries "on" as well as the colour) */
 .card-feedback__glyph {
     width: var(--ts-vote-glyph);
     height: var(--ts-vote-glyph);
-    align-items: center;
-    justify-content: center;
+    color: var(--ts-ink-2);
 }
 
-/* a thumb: a chevron -- a square with two borders, turned so its corner points up (up) or down (down) */
-.card-feedback__glyph--up,
-.card-feedback__glyph--down {
-    width: var(--ts-icon-size);
-    height: var(--ts-icon-size);
-    border-left-width: var(--ts-spotlight-ring-width);
-    border-top-width: var(--ts-spotlight-ring-width);
-    border-color: var(--ts-ink-2);
-}
-
-.card-feedback__glyph--up {
-    rotate: 45deg;
-    margin-top: var(--ts-space-1);
-}
-
-.card-feedback__glyph--down {
-    rotate: 225deg;
-    margin-bottom: var(--ts-space-1);
-}
-
-.card-feedback__vote--on .card-feedback__glyph--up,
-.card-feedback__vote--on .card-feedback__glyph--down {
-    border-color: var(--ts-accent);
-}
-
-/* a star: two solid squares, one turned an eighth of a turn -- an eight-pointed star, pale until voted */
-.card-feedback__star-square {
-    display: none;
-    position: absolute;
-    left: 15%;
-    top: 15%;
-    width: 70%;
-    height: 70%;
-    background-color: var(--ts-ink-3);
-    border-width: 0;
-}
-
-.card-feedback__glyph--star .card-feedback__star-square {
-    display: flex;
-}
-
-.card-feedback__star-square--b {
-    rotate: 45deg;
-}
-
-.card-feedback__vote--on .card-feedback__star-square {
-    background-color: var(--ts-accent);
+.card-feedback__vote--on .card-feedback__glyph {
+    color: var(--ts-accent);
 }
 
 .card-feedback__thanks {

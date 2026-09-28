@@ -163,5 +163,64 @@ namespace TileStories
                 if (wallPois[i] != null && wallPois[i].id == id) return wallPois[i];
             return null;
         }
+
+        // ---------------- dialogue (step 8B) ----------------
+
+        public const string DialogueKind = "dialogue";
+        public const string DialogueChoices = "choices";
+        public const string DialogueLinesField = "lines";
+        public const string DialogueSpeakerField = "speaker";
+        public const string DialogueTextField = "line";
+        // choice_1 .. choice_3 and reply_1 .. reply_3 (DialogueRule.MaxChoices): a line row cannot nest a list
+        public const string DialogueChoicePrefix = "choice_";
+        public const string DialogueReplyPrefix = "reply_";
+
+        // The fields of one dialogue row: who speaks, what is said, and up to three replies the visitor may pick
+        private static BlockFieldDefinition[] DialogueRowFields()
+        {
+            var fields = new List<BlockFieldDefinition>
+            {
+                new BlockFieldDefinition { Key = DialogueSpeakerField, Type = BlockFieldType.LocalizedText, Label = "Speaker", Help = "Who says the line (The mason). May stay empty." },
+                new BlockFieldDefinition { Key = DialogueTextField, Type = BlockFieldType.LocalizedText, Label = "Line", Required = true, Help = "What is said. A row with no words is not shown." },
+            };
+            for (int slot = 1; slot <= DialogueRule.MaxChoices; slot++)
+                fields.Add(new BlockFieldDefinition
+                {
+                    Key = DialogueRule.ChoiceField(slot), Type = BlockFieldType.LocalizedText, Label = "Choice " + slot,
+                    Help = "A reply the visitor may pick after this line (leave all three empty for a plain line). A choice with no words is not offered.",
+                });
+            for (int slot = 1; slot <= DialogueRule.MaxChoices; slot++)
+                fields.Add(new BlockFieldDefinition
+                {
+                    Key = DialogueRule.ReplyField(slot), Type = BlockFieldType.LocalizedText, Label = "Reply " + slot,
+                    Help = "What the speaker answers when the visitor picks Choice " + slot + ". May stay empty: the conversation then simply goes on.",
+                });
+            return fields.ToArray();
+        }
+
+        // Tier 3: a conversation revealed one line at a time, a line may offer a few replies
+        public static readonly BlockKindDefinition Dialogue = new()
+        {
+            Key = DialogueKind,
+            Family = "stories",
+            DisplayName = "Dialogue",
+            Help = "A short conversation told one line at a time: the first line shows, and each tap on Continue shows the next. A line may " +
+                   "offer up to three replies; the visitor picks one, it appears as their own line, and the speaker's answer follows, then " +
+                   "the conversation goes on. One level of choices only. Where the visitor has got to is not remembered: the block starts " +
+                   "again each time the card opens. The Continue and Start again words are Detail Card > Card Texts. A row with no words " +
+                   "is not shown.",
+            Variants = new[] { DialogueChoices },
+            DefaultVariant = DialogueChoices,
+            DisplayModes = new[] { CardOptions.DisplayInline },
+            Fields = new[]
+            {
+                new BlockFieldDefinition
+                {
+                    Key = DialogueLinesField, Type = BlockFieldType.Items, Label = "Lines", Required = true,
+                    Help = "One row per line, in the order they are said.",
+                    ItemFields = DialogueRowFields(),
+                },
+            },
+        };
     }
 }

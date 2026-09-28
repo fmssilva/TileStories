@@ -108,5 +108,84 @@ namespace TileStories
                 },
             },
         };
+
+        // ---------------- poll and collect (step 8B) ----------------
+
+        public const string PollKind = "poll";
+        public const string PollBars = "bars";
+        public const string PollQuestionField = "question";
+        public const string PollOptionsField = "options";
+        public const string PollOptionTextField = "text";
+
+        public const string CollectKind = "collect";
+        public const string CollectAddToStory = "add_to_story";
+        public const string CollectItemNameField = "item_name";
+        public const string CollectSeriesField = "series";
+
+        // Tier 3: one question with a few options; the visitor's vote is kept on the device, results only when an app has them
+        public static readonly BlockKindDefinition Poll = new()
+        {
+            Key = PollKind,
+            Family = "play",
+            DisplayName = "Poll",
+            Help = "Asks the visitor a question with two to six options and takes one vote. The vote is kept on the visitor's device and " +
+                   "reported once as a poll event; the block then shows the option the visitor picked (Your choice) and a thank-you. " +
+                   "There is no server yet, so the card shows NO percentages: results bars only appear once an app supplies other " +
+                   "visitors' votes. The words Your choice and the thank-you are Detail Card > Card Texts. Shown only with a question " +
+                   "and at least two options that have words. Reordering the option rows changes which option an older vote points at, " +
+                   "so settle the rows before the card goes live.",
+            Variants = new[] { PollBars },
+            DefaultVariant = PollBars,
+            DisplayModes = new[] { CardOptions.DisplayInline },
+            ShowsFor = (_, block, _, _) => PollRule.CanShow(new BlockFieldReader(block, null, null)),
+            NotShownForPoiNote = "it needs a question and at least two options that have words.",
+            Fields = new[]
+            {
+                new BlockFieldDefinition
+                {
+                    Key = PollQuestionField, Type = BlockFieldType.LocalizedText, Label = "Question", Required = true,
+                    Help = "What the visitor is asked (Which side of the wall would you visit first?).",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = PollOptionsField, Type = BlockFieldType.Items, Label = "Options", Required = true,
+                    Help = "One row per option, in the order shown (two to six; a row with no words is not shown).",
+                    ItemFields = new[]
+                    {
+                        new BlockFieldDefinition { Key = PollOptionTextField, Type = BlockFieldType.LocalizedText, Label = "Option", Required = true, Help = "The words of the option." },
+                    },
+                },
+            },
+        };
+
+        // Tier 3: this point's collectable item (a stamp or tile card); what the visitor has collected is kept on the device
+        public static readonly BlockKindDefinition Collect = new()
+        {
+            Key = CollectKind,
+            Family = "play",
+            DisplayName = "Collect",
+            Help = "This point's collectable item, like a stamp: the visitor taps Add to my story and the item is kept on their device, " +
+                   "with a count of how many of this wall's items they have (3 of 12). The total is counted from the collect blocks " +
+                   "on the wall's points, so it grows as you author more of them (a wall whose Block Library switches Collect off " +
+                   "counts none). Item Name empty: the point's card title. Series empty: the point's category name. The button words " +
+                   "and the count line are Detail Card > Card Texts.",
+            Variants = new[] { CollectAddToStory },
+            DefaultVariant = CollectAddToStory,
+            DisplayModes = new[] { CardOptions.DisplayInline },
+            DefaultHeadingKey = CardStrings.Keys.CollectHeading,
+            Fields = new[]
+            {
+                new BlockFieldDefinition
+                {
+                    Key = CollectItemNameField, Type = BlockFieldType.LocalizedText, Label = "Item Name",
+                    Help = "What the collectable is called (Stamp of the old gate). Empty: the point's card title.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = CollectSeriesField, Type = BlockFieldType.LocalizedText, Label = "Series",
+                    Help = "The set the item belongs to (Gates and towers), shown small above its name. Empty: the point's category name.",
+                },
+            },
+        };
     }
 }

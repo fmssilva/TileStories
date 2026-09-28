@@ -208,6 +208,26 @@ namespace TileStories.Editor
         internal const string CardCompareWithItselfNote =
             "Compare With is this point itself: the card shows the same condition twice. Pick another point.";
 
+        // A Poll block holds more options with words than it shows
+        internal static string CardPollExtraOptionsText(int hidden) =>
+            "A poll shows at most " + PollRule.MaxOptions + " options: the last " + hidden + (hidden == 1 ? " option is" : " options are") + " not shown. Delete " +
+            (hidden == 1 ? "it" : "them") + " or merge options.";
+
+        // A Dialogue block has rows that will not show, listed by their row number in the Lines table
+        internal static string CardDialogueEmptyRowsText(IReadOnlyList<int> rows) =>
+            "Not shown: " + (rows.Count == 1 ? "line " : "lines ") + string.Join(", ", rows) + " (a row with no words in Line).";
+
+        // A Dialogue block holds a Reply whose Choice has no words, so the reply can never be picked
+        internal static string CardDialogueOrphanReplyText(IReadOnlyList<int> rows) =>
+            "A reply in " + (rows.Count == 1 ? "line " : "lines ") + string.Join(", ", rows) + " has no words in its Choice, so the visitor can never pick it. " +
+            "Write the Choice, or clear the Reply.";
+
+        // A block with Show After Reading on is not the last content block of the card
+        internal const string CardShowAfterReadingMidCardNote =
+            "Show After Reading is on, but this block is not the last one before Sources: it appears when the visitor reaches the end of the card, " +
+            "so here it would appear above them, where nobody is looking, and push the blocks below it down. Move it to the end of the card " +
+            "(only Sources may follow it), or turn Show After Reading off.";
+
         // An Actions block in the Sticky look holds more buttons than the one it shows
         internal static string CardStickyExtraButtonsText(int hidden) =>
             "Sticky shows only the first button: the other " + hidden + (hidden == 1 ? " row is" : " rows are") +

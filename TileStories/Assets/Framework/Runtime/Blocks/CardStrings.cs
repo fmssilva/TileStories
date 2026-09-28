@@ -94,6 +94,24 @@ namespace TileStories
             public const string FeedbackStar = "feedback_star";
             public const string FeedbackThanks = "feedback_thanks";
 
+            // poll: "Your choice" on the option the visitor picked, the thank-you after voting, and "{0}%" for a results bar (only
+            // ever drawn when an IPollResults gives numbers)
+            public const string PollYourChoice = "poll_your_choice";
+            public const string PollThanks = "poll_thanks";
+            public const string PollPercent = "poll_percent";
+            // collect: its default heading, the two states of its button, and "{0} of {1} collected" ({0} = the visitor's, {1} = this wall's)
+            public const string CollectHeading = "collect_heading";
+            public const string CollectAdd = "collect_add";
+            public const string CollectCollected = "collect_collected";
+            public const string CollectProgress = "collect_progress";
+            // dialogue: the button that reveals the next line, the one that starts over, and the visitor's own name in the chat
+            public const string DialogueContinue = "dialogue_continue";
+            public const string DialogueAgain = "dialogue_again";
+            public const string DialogueYou = "dialogue_you";
+            // show_on_wall: its button, and the caption over the neighbours of the with_neighbours look
+            public const string ShowOnWallButton = "show_on_wall_button";
+            public const string ShowOnWallNearby = "show_on_wall_nearby";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Close, FunFactLabel, FunFactHint, StatusHeading, StatusUnknownMark, StatusUnknown, StatusPercent,
@@ -104,6 +122,8 @@ namespace TileStories
                 KnowledgeCheckHeading, KnowledgeQuestionOf, KnowledgeCorrect, KnowledgeWrong, KnowledgeTrue, KnowledgeFalse, KnowledgeSwipeHint,
                 KnowledgePrevious, KnowledgeNext,
                 FeedbackThumbsQuestion, FeedbackStarsQuestion, FeedbackThumbUp, FeedbackThumbDown, FeedbackStar, FeedbackThanks,
+                PollYourChoice, PollThanks, PollPercent, CollectHeading, CollectAdd, CollectCollected, CollectProgress,
+                DialogueContinue, DialogueAgain, DialogueYou, ShowOnWallButton, ShowOnWallNearby,
             };
         }
 
