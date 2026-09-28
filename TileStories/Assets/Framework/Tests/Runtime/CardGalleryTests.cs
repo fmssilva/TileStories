@@ -227,15 +227,7 @@ namespace TileStories.Tests
         }
 
         // --ts-block-gap as CardTokens.uss defines it (the one place the value lives)
-        private static float BlockGap(VisualElement inCard)
-        {
-            var match = System.Text.RegularExpressions.Regex.Match(
-                System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Cards/CardTokens.uss"), @"--ts-block-gap:\s*([0-9.]+)px");
-            Assert.IsTrue(match.Success, "the token is defined in CardTokens.uss");
-            float gap = float.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
-            Assert.Greater(gap, 0f);
-            return gap;
-        }
+        private static float BlockGap(VisualElement inCard) => CardTestInput.TokenPx("--ts-block-gap");
 
         // ---------------- rich_text ----------------
 
@@ -964,11 +956,11 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             var sheet = _harness.Sheet;
 
-            yield return CardTestInput.Drag(sheet.Handle, -(sheet.Stops.Half - sheet.Stops.Peek));
+            yield return CardTestInput.Drag(sheet.Handle, -(sheet.Stops.Half - sheet.Stops.Peek), slowSheet: sheet);
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Half, sheet.Stop, "a slow drag up by the peek-half gap lands on half");
 
-            yield return CardTestInput.Drag(sheet.Stack.HeaderSlot, -(sheet.Stops.Full - sheet.Stops.Half));
+            yield return CardTestInput.Drag(sheet.Stack.HeaderSlot, -(sheet.Stops.Full - sheet.Stops.Half), slowSheet: sheet);
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop, "the header drags the sheet too");
             // - layout snaps to physical pixels: one screen pixel in panel units is the honest tolerance (as for every header entry)
@@ -1179,6 +1171,338 @@ namespace TileStories.Tests
             Assert.IsTrue(ghost.Root.ClassListContains("card-image--unavailable"));
             Assert.AreEqual("Picture unavailable", ghost.Unavailable.text);
             Assert.IsTrue(CardTestInput.IsShown(ghost.Unavailable, gallery.Root), "the frame says so");
+        }
+
+        // _3.1 [7B]: the lightbox turns by a real sideways drag, zooms like zoom_image, and an enlarged picture moves
+        // instead of turning. (Two real fingers on the real scene: PoiCardTapZoomTests.)
+        [UnityTest]
+        public IEnumerator Lightbox_ARealSwipeTurnsThePage_AZoomedPictureMovesInstead_AndNothingTurnsPastTheEnds()
+        {
+            GalleryBlockView gallery = null;
+            yield return ShowBlock("gallery_grid_long", v => gallery = (GalleryBlockView)v);
+            var takeover = _harness.Sheet.Takeover;
+            yield return CardTestInput.Tap(gallery.Root.panel, gallery.Shots[1].Box.worldBound.center);
+            yield return CardTestInput.Settle(0.15f);
+            Assert.AreEqual(1, takeover.PageIndex, "precondition: the lightbox at picture 2");
+            var panel = takeover.Page.panel;
+            VisualElement Frame() => takeover.Page.Q("card-gallery-full");
+            float travel = Frame().worldBound.width * (SwipePageRule.MinTravelShare + 0.15f);
+
+            yield return CardTestInput.DragFrom(panel, Frame().worldBound.center, new Vector2(-travel, 0f));
+            yield return CardTestInput.Settle(0.15f);
+            Assert.AreEqual(2, takeover.PageIndex, "a real drag to the left: the next picture");
+            Assert.AreEqual(2, takeover.Chips.Children().ToList().FindIndex(c => c.ClassListContains("card-takeover__chip--current")), "its chip is marked");
+            var picture = takeover.Page.Q(className: "card-image");
+            yield return PixelAt(picture, picture.worldBound.center, c => AssertColour(PictureColour("three.png"), c, "the page shows picture 3"));
+            Assert.AreEqual(1, _harness.Media.RefCount("two.png"), "the page it left gave its picture back");
+
+            yield return CardTestInput.DragFrom(panel, Frame().worldBound.center, new Vector2(travel, 0f));
+            yield return CardTestInput.Settle(0.15f);
+            Assert.AreEqual(1, takeover.PageIndex, "a real drag to the right: back one picture");
+
+            yield return CardTestInput.DragFrom(panel, Frame().worldBound.center, new Vector2(-travel * 0.3f, 0f));
+            yield return CardTestInput.Settle(0.15f);
+            Assert.AreEqual(1, takeover.PageIndex, "a short drag is not a swipe");
+            yield return CardTestInput.DragFrom(panel, Frame().worldBound.center, new Vector2(-travel * 0.4f, travel));
+            yield return CardTestInput.Settle(0.15f);
+            Assert.AreEqual(1, takeover.PageIndex, "a mostly vertical drag is not a swipe");
+
+            // - the ends: nothing before the first picture
+            yield return CardTestInput.DragFrom(panel, Frame().worldBound.center, new Vector2(travel, 0f));
+            yield return CardTestInput.Settle(0.15f);
+            Assert.AreEqual(0, takeover.PageIndex);
+            yield return CardTestInput.DragFrom(panel, Frame().worldBound.center, new Vector2(travel, 0f));
+            yield return CardTestInput.Settle(0.15f);
+            Assert.AreEqual(0, takeover.PageIndex, "no page before the first");
+            Assert.IsTrue(takeover.IsOpen, "...and the lightbox stays open");
+
+            // - zoom like zoom_image (Ctrl + wheel = the desktop pinch), then the same sideways drag MOVES the picture
+            Rect frame = Frame().worldBound;
+            yield return CardTestInput.CtrlWheel(panel, frame.center, -24f);
+            yield return CardTestInput.Settle(0.1f);
+            var zoomed = takeover.Page.Q(className: "card-zoompan__image");
+            Assert.Greater(zoomed.worldBound.width, frame.width * 1.5f, "Ctrl + wheel enlarged the lightbox picture");
+            float x0 = zoomed.worldBound.x;
+            yield return CardTestInput.DragFrom(panel, frame.center, new Vector2(-travel, 0f));
+            yield return CardTestInput.Settle(0.15f);
+            Assert.AreEqual(0, takeover.PageIndex, "an enlarged picture never turns the page...");
+            Assert.Less(takeover.Page.Q(className: "card-zoompan__image").worldBound.x, x0 - 10f, "...the drag moved it instead");
+            Assert.LessOrEqual(zoomed.worldBound.xMin, frame.xMin + 0.5f, "never an empty edge");
+            Assert.GreaterOrEqual(zoomed.worldBound.xMax, frame.xMax - 0.5f);
+            yield return Render("Card_gallery_lightbox_zoomed");
+
+            // - a chip goes back to 1x on its page (a new page is always whole)
+            yield return CardTestInput.Tap(takeover.Chips[3].panel, takeover.Chips[3].worldBound.center);
+            yield return CardTestInput.Settle(0.15f);
+            Assert.AreEqual(3, takeover.PageIndex);
+            Assert.LessOrEqual(takeover.Page.Q(className: "card-zoompan__image").worldBound.width, Frame().worldBound.width + 0.5f, "the new page shows its picture whole");
+            takeover.Close();
+        }
+
+        // ---------------- hotspot_image (Tier 2 group B) ----------------
+
+        // Where a spot's point is on the screen: x / y of the PICTURE's rectangle (never the frame's)
+        private static Vector2 SpotPoint(HotspotImageBlockView view, int i)
+        {
+            Rect picture = view.Image.Root.worldBound;
+            return new Vector2(picture.x + view.Spots[i].At.x * picture.width, picture.y + view.Spots[i].At.y * picture.height);
+        }
+
+        [UnityTest]
+        public IEnumerator HotspotImage_Numbered_EverySpotSitsOnItsPointOfThePicture_ARealTapOpensItsText_ASecondClosesIt()
+        {
+            HotspotImageBlockView view = null;
+            yield return ShowBlock("hotspot_image_numbered_long", v => view = (HotspotImageBlockView)v);
+            Assert.AreEqual(5, view.Spots.Count, "a spot per row");
+            Rect frame = view.Frame.worldBound, picture = view.Image.Root.worldBound;
+            Assert.Less(picture.width, frame.width - 10f, "precondition: a portrait picture, narrower than its frame (whole, centred)");
+            Assert.AreEqual(frame.center.x, picture.center.x, 1f, "the picture is centred in the frame");
+            for (int i = 0; i < view.Spots.Count; i++)
+            {
+                Assert.AreEqual((i + 1).ToString(), view.Spots[i].Number.text, "numbered in row order, on the picture");
+                var pin = view.Spots[i].Pin.worldBound;
+                Assert.AreEqual(SpotPoint(view, i).x, pin.center.x, 1f, "spot " + (i + 1) + " sits on its point of the picture (across)");
+                Assert.AreEqual(SpotPoint(view, i).y, pin.center.y, 1f, "...and down");
+                Assert.IsTrue(view.Spots[i].Pin.ClassListContains("card-tap"), "a numbered spot is the tap target");
+            }
+            yield return PixelAt(view.Frame, view.Image.Root.worldBound.center + new Vector2(0f, 40f), c => AssertColour(PictureColour("three.png"), c, "the frame shows the picture"));
+            Assert.IsFalse(CardTestInput.IsShown(view.Detail, view.Root), "no text is open before a tap");
+            Assert.AreEqual("Tap a spot to read about it", view.Hint.text, "the hint from the card's texts");
+
+            yield return CardTestInput.Tap(view.Root.panel, view.Spots[1].Pin.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual(1, view.OpenIndex, "a real tap on spot 2 opened it");
+            Assert.IsTrue(CardTestInput.IsShown(view.Detail, view.Root), "its text shows under the picture");
+            Assert.Greater(view.Detail.worldBound.yMin, frame.yMax - 0.5f, "...under it, not over it");
+            Assert.AreEqual("2", view.DetailNumber.text);
+            Assert.AreEqual("The bell tower", view.DetailTitle.text);
+            StringAssert.Contains("Rebuilt after the earthquake, taller than before.", view.DetailText.Paragraphs[0].text);
+            Assert.IsTrue(view.Spots[1].Pin.ClassListContains("card-hotspot__pin--open"), "the open spot is marked");
+            yield return Render("Card_hotspot_image_numbered_open");
+
+            yield return CardTestInput.Tap(view.Root.panel, view.Spots[0].Pin.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual(0, view.OpenIndex, "another spot: its text replaces the first");
+            Assert.AreEqual(2, view.DetailText.Paragraphs.Count, "its two paragraphs");
+            Assert.IsFalse(view.Spots[1].Pin.ClassListContains("card-hotspot__pin--open"));
+
+            yield return CardTestInput.Tap(view.Root.panel, view.Spots[0].Pin.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual(-1, view.OpenIndex, "a second tap on the open spot closes it");
+            Assert.IsFalse(CardTestInput.IsShown(view.Detail, view.Root));
+        }
+
+        [UnityTest]
+        public IEnumerator HotspotImage_ARowWithNoTitleIsLeftOut_TheCountHasNoGap_AndCornerSpotsSitOnTheCorners()
+        {
+            HotspotImageBlockView view = null;
+            yield return ShowBlock("hotspot_image_numbered_partial", v => view = (HotspotImageBlockView)v);
+            Assert.AreEqual(2, view.Spots.Count, "the row with no title is not shown");
+            Assert.AreEqual("2", view.Spots[1].Number.text, "...and the next one is still 2");
+            Assert.AreEqual("Bottom right corner", view.Spots[1].Title);
+            Rect picture = view.Image.Root.worldBound;
+            Assert.AreEqual(new Vector2(picture.xMin, picture.yMin), view.Spots[0].Pin.worldBound.center, "0 / 0: the picture's top-left corner");
+            Assert.AreEqual(picture.xMax, view.Spots[1].Pin.worldBound.center.x, 1f, "1 / 1: its bottom-right corner");
+            Assert.AreEqual(picture.yMax, view.Spots[1].Pin.worldBound.center.y, 1f);
+            // - the frame leaves room for half a circle round the picture: a corner spot is never cut in half
+            Rect frame = view.Frame.worldBound;
+            foreach (var corner in new[] { view.Spots[0].Number.worldBound, view.Spots[1].Number.worldBound })
+                Assert.IsTrue(corner.xMin >= frame.xMin - 0.5f && corner.yMin >= frame.yMin - 0.5f && corner.xMax <= frame.xMax + 0.5f && corner.yMax <= frame.yMax + 0.5f,
+                    "a corner spot's circle " + corner + " lies whole inside the frame " + frame);
+
+            yield return ShowBlock("hotspot_image_numbered_missing", v => view = (HotspotImageBlockView)v);
+            Assert.IsTrue(view.Image.Root.ClassListContains("card-image--unavailable"), "a missing picture says so");
+            Assert.AreEqual(2, view.Spots.Count, "...and its spots still open their texts");
+            yield return CardTestInput.Tap(view.Root.panel, view.Spots[0].Pin.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual(0, view.OpenIndex);
+        }
+
+        [UnityTest]
+        public IEnumerator HotspotImage_Loupes_EachCloseUpShowsItsSpotEnlarged_ARealTapOnOneOpensItsText()
+        {
+            HotspotImageBlockView view = null;
+            yield return ShowBlock("hotspot_image_loupes_long", v => view = (HotspotImageBlockView)v);
+            Assert.IsTrue(CardTestInput.IsShown(view.Loupes, view.Root), "a row of close-ups under the picture");
+            Assert.AreEqual(5, view.Loupes.childCount, "one per spot");
+            for (int i = 0; i < view.Spots.Count; i++)
+            {
+                var spot = view.Spots[i];
+                Assert.IsFalse(spot.Pin.ClassListContains("card-tap"), "loupes: the mark on the picture is not the tap target...");
+                Assert.IsTrue(spot.Loupe.ClassListContains("card-tap"), "...the close-up is");
+                Assert.AreEqual(SpotPoint(view, i).x, spot.Pin.worldBound.center.x, 1f, "the small ring sits on the spot");
+                // - the close-up is placed inside the loupe's border
+                Rect box = spot.Loupe.LocalToWorld(spot.Loupe.contentRect);
+                var crop = SpotlightCropRule.Place(box.size, spot.LoupeImage.Aspect, spot.At, HotspotImageBlockView.LoupeZoom);
+                Assert.AreEqual(crop.Size.x, spot.LoupeImage.Root.worldBound.width, 1f, "loupe " + (i + 1) + ": the picture enlarged " + HotspotImageBlockView.LoupeZoom + " times");
+                Assert.AreEqual(box.x + crop.Focus.x, spot.LoupeRing.worldBound.center.x, 1f, "...and its ring on the spot inside the close-up");
+                Assert.AreEqual(box.y + crop.Focus.y, spot.LoupeRing.worldBound.center.y, 1f);
+                Assert.IsTrue(box.Contains(spot.LoupeRing.worldBound.center), "the spot is inside its close-up");
+            }
+            // - a spot away from the edges sits at the centre of its close-up (the middle spot: 0.5 / 0.5)
+            Assert.AreEqual(view.Spots[2].Loupe.worldBound.center.x, view.Spots[2].LoupeRing.worldBound.center.x, 1f, "a middle spot is centred");
+            Assert.AreEqual("", view.Spots[0].Number.text, "loupes: a bare ring on the picture, no number to read");
+            yield return PixelAt(view.Spots[2].Loupe, view.Spots[2].Loupe.worldBound.center + new Vector2(12f, 0f), c => AssertColour(PictureColour("three.png"), c, "a close-up shows the picture"));
+
+            yield return CardTestInput.Tap(view.Root.panel, view.Spots[3].Loupe.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual(3, view.OpenIndex, "a real tap on the fourth close-up opened spot 4");
+            Assert.AreEqual("The river gate", view.DetailTitle.text);
+            Assert.AreEqual("4", view.DetailNumber.text, "the open spot's number beside its title");
+            Assert.IsTrue(view.Spots[3].Loupe.ClassListContains("card-hotspot__loupe--open"), "that close-up is marked");
+            yield return Render("Card_hotspot_image_loupes_open");
+        }
+
+        // ---------------- wall_locator (Tier 2 group B) ----------------
+
+        // Where a share of the strip is on screen: the track's left edge + share x its width
+        private static float TrackX(WallLocatorBlockView view, float share) => view.Track.worldBound.x + share * view.Track.worldBound.width;
+
+        [UnityTest]
+        public IEnumerator WallLocator_Strip_EveryPointIsADotAtItsPlaceAlongTheWall_ThisOneMarked_AndTheVisitorIsHere()
+        {
+            WallLocatorBlockView view = null;
+            yield return ShowBlock("wall_locator_strip_short", v => view = (WallLocatorBlockView)v);
+            Assert.AreEqual("On this wall", _harness.Sheet.Stack.HeadingOf(view).text, "no heading written: the kind's own (Card Texts)");
+            Assert.AreEqual(2, view.Dots.Count, "a dot per OTHER point of the wall");
+            // - West Gate x = -2, this point 0, East Tower 3: the ends of the strip are the wall's end points
+            Assert.AreEqual(0.4f, view.SelfShare, 1e-3f, "this point: 2 m of the wall's 5 from its left end");
+            var dotsX = view.Dots.Select(d => d.worldBound.center.x).OrderBy(x => x).ToList();
+            Assert.AreEqual(TrackX(view, 0f), dotsX[0], 1f, "West Gate at the left end");
+            Assert.AreEqual(TrackX(view, 1f), dotsX[1], 1f, "East Tower at the right end");
+            Assert.AreEqual(TrackX(view, 0.4f), view.Self.worldBound.center.x, 1f, "this point's dot at its place");
+            Assert.Greater(view.Self.worldBound.width, view.Dots[0].worldBound.width, "...and larger than the others");
+            Assert.AreEqual(0.6f, view.YouShare, 1e-3f, "the visitor stands 1 m right of this point: 3 m of 5");
+            Assert.AreEqual(TrackX(view, 0.6f), view.You.worldBound.center.x, 1f, "the visitor's ring at their place");
+            Assert.AreEqual("Gate", view.SelfTitle.text, "the legend names this point by its card title");
+            Assert.AreEqual("You are here", view.YouLabel.text);
+            Assert.IsTrue(CardTestInput.IsShown(view.YouLegend, view.Root));
+            yield return Render("Card_wall_locator_strip_you");
+
+            // - the visitor walks to the West Gate: the ring follows while the block is shown
+            _harness.Sheet.Viewer = () => new Vector3(-2f, 1.6f, 1f);
+            yield return new WaitForSecondsRealtime(WallLocatorBlockView.ViewerRefreshMs / 1000f * 2.5f);
+            Assert.AreEqual(0f, view.YouShare, 1e-3f, "the visitor's ring followed them to the wall's left end");
+            Assert.AreEqual(TrackX(view, 0f), view.You.worldBound.center.x, 1f);
+            _harness.Sheet.Viewer = () => null;
+            yield return new WaitForSecondsRealtime(WallLocatorBlockView.ViewerRefreshMs / 1000f * 2.5f);
+            Assert.IsFalse(CardTestInput.IsShown(view.You, view.Root), "the visitor lost (no camera): no ring...");
+            Assert.IsFalse(CardTestInput.IsShown(view.YouLegend, view.Root), "...and no 'You are here'");
+
+            yield return ShowBlock("wall_locator_strip_noviewer", v => view = (WallLocatorBlockView)v);
+            Assert.AreEqual(-1f, view.YouShare, "no viewer known: no ring at all");
+            Assert.IsFalse(CardTestInput.IsShown(view.YouLegend, view.Root));
+        }
+
+        [UnityTest]
+        public IEnumerator WallLocator_Strip_OnAWallAtAnAngle_FindsItsOwnAxis_HeightNeverCounts_AndAFarVisitorSitsAtTheEnd()
+        {
+            WallLocatorBlockView view = null;
+            yield return ShowBlock("wall_locator_strip_long", v => view = (WallLocatorBlockView)v);
+            Assert.AreEqual(12, view.Dots.Count, "twelve other points");
+            Assert.AreEqual(0.5f, view.SelfShare, 1e-3f, "the middle of twelve points spaced evenly along the ANGLED wall (at three heights)");
+            var shares = view.Dots.Select(d => (d.worldBound.center.x - view.Track.worldBound.x) / view.Track.worldBound.width).OrderBy(x => x).ToList();
+            for (int i = 1; i < shares.Count; i++)
+                Assert.Greater(shares[i] - shares[i - 1], 0.05f, "evenly spread: no two points folded together (the wall's own axis, not world x)");
+            Assert.AreEqual(1f, view.YouShare, 1e-4f, "a visitor far past the right end: the ring waits at that end");
+        }
+
+        [UnityTest]
+        public IEnumerator WallLocator_Neighbours_NameTheNearestPointOnEachSide_ARealTapSelectsItThroughTheBus()
+        {
+            WallLocatorBlockView view = null;
+            SelectionEventBus.ResetState();
+            yield return ShowBlock("wall_locator_neighbours_short", v => view = (WallLocatorBlockView)v);
+            Assert.AreEqual("West Gate", view.LeftTitle.text, "the nearest point to the left along the wall");
+            Assert.AreEqual("East Tower", view.RightTitle.text, "...and to the right");
+            Assert.Less(view.Left.worldBound.center.x, view.Right.worldBound.center.x, "left on the left");
+            yield return CardTestInput.Tap(view.Root.panel, view.Right.worldBound.center);
+            yield return null;
+            Assert.AreEqual("east_tower", SelectionEventBus.CurrentPoiId, "a real tap selected East Tower through the selection bus");
+            SelectionEventBus.ResetState();
+
+            yield return ShowBlock("wall_locator_neighbours_end", v => view = (WallLocatorBlockView)v);
+            Assert.IsNull(view.LeftPoiId, "the wall's left end: nothing to its left");
+            Assert.AreEqual(Visibility.Hidden, view.Left.resolvedStyle.visibility, "...so no left button");
+            Assert.AreEqual("West Gate", view.RightTitle.text, "the nearest to its right");
+            Assert.Greater(view.Right.worldBound.center.x, view.Root.worldBound.center.x, "the right button keeps its side");
+            yield return CardTestInput.Tap(view.Root.panel, view.Left.worldBound.center);
+            yield return null;
+            Assert.IsNull(SelectionEventBus.CurrentPoiId, "a tap where the hidden button would be selects nothing");
+
+            yield return ShowBlock("wall_locator_neighbours_long", v => view = (WallLocatorBlockView)v);
+            StringAssert.StartsWith("The Royal Palace", view.LeftTitle.text, "a neighbour is named by its own card title");
+            StringAssert.StartsWith("The chapel of Saint George", view.RightTitle.text);
+            Assert.AreEqual(TextAnchor.MiddleLeft, view.LeftTitle.resolvedStyle.unityTextAlign, "the left title reads from its chevron");
+            Assert.AreEqual(TextAnchor.MiddleRight, view.RightTitle.resolvedStyle.unityTextAlign, "...the right one towards its chevron");
+            yield return Render("Card_wall_locator_neighbours_long");
+            SelectionEventBus.ResetState();
+        }
+
+        // ---------------- today_map (Tier 2 group B) ----------------
+
+        // What the card would hand to the device (the IUrlOpener seam: nothing leaves Unity)
+        private sealed class RecordingOpener : IUrlOpener
+        {
+            public readonly System.Collections.Generic.List<string> Opened = new();
+            public void Open(string url) => Opened.Add(url);
+        }
+
+        [UnityTest]
+        public IEnumerator TodayMap_Static_ShowsTheMapAndCoordinates_ARealTapOnDirectionsOpensTheLinkOnce()
+        {
+            TodayMapBlockView view = null;
+            var opener = new RecordingOpener();
+            yield return ShowBlock("today_map_static_short", v => view = (TodayMapBlockView)v);
+            _harness.Sheet.UrlOpener = opener;
+            Assert.AreEqual("Where it is today", _harness.Sheet.Stack.HeadingOf(view).text, "no heading written: the default");
+            yield return PixelAt(view.Map.Root, view.Map.Root.worldBound.center + new Vector2(10f, 10f), c => AssertColour(PictureColour("wide.png"), c, "the map picture"));
+            Assert.AreEqual("38.71390, -9.13340", view.Coordinates.text, "both coordinates, joined by the card's format");
+            Assert.AreEqual("Directions", view.Directions.text);
+            Assert.IsTrue(CardTestInput.IsShown(view.Directions, view.Root));
+
+            yield return CardTestInput.Tap(view.Root.panel, view.Directions.worldBound.center);
+            yield return null;
+            CollectionAssert.AreEqual(new[] { CardGalleryDefinitions.TodayMapUrl }, opener.Opened, "a real tap opened the Maps Link, once");
+            yield return Render("Card_today_map_static_directions");
+
+            yield return ShowBlock("today_map_static_nourl", v => view = (TodayMapBlockView)v);
+            Assert.IsFalse(CardTestInput.IsShown(view.Directions, view.Root), "no link: no button");
+            Assert.IsTrue(CardTestInput.IsShown(view.Coordinates, view.Root), "...the coordinates still show");
+            yield return ShowBlock("today_map_static_badurl", v => view = (TodayMapBlockView)v);
+            Assert.IsFalse(CardTestInput.IsShown(view.Directions, view.Root), "a link that is not a web address: no button");
+            _harness.Sheet.OpenUrl("javascript:alert(1)");
+            Assert.AreEqual(1, opener.Opened.Count, "...and the card never hands it to the device, even if asked");
+            yield return ShowBlock("today_map_static_nocoords", v => view = (TodayMapBlockView)v);
+            Assert.IsFalse(CardTestInput.IsShown(view.Coordinates, view.Root), "only a latitude written: no coordinates line (never '38.7, 0')");
+            yield return ShowBlock("today_map_static_missing", v => view = (TodayMapBlockView)v);
+            Assert.IsTrue(view.Map.Root.ClassListContains("card-image--unavailable"), "a missing map says so");
+        }
+
+        [UnityTest]
+        public IEnumerator TodayMap_Bridge_ThePointAsTheWallShowsItBesideTodaysMap()
+        {
+            TodayMapBlockView view = null;
+            yield return ShowBlock("today_map_bridge_short", v => view = (TodayMapBlockView)v);
+            Assert.IsTrue(CardTestInput.IsShown(view.Bridge, view.Root));
+            Assert.IsFalse(CardTestInput.IsShown(view.Map.Root, view.Root), "the bridge replaces the large map");
+            Assert.AreEqual("On the wall", view.ThenLabel.text);
+            Assert.AreEqual("Today", view.NowLabel.text);
+            Assert.AreEqual("Gate", view.ThenTitle.text, "the point's card title");
+            Assert.Less(view.ThenPicture.Root.worldBound.center.x, view.NowMap.Root.worldBound.center.x, "the wall on the left, today on the right");
+            Assert.AreEqual(view.ThenLabel.worldBound.yMin, view.NowLabel.worldBound.yMin, 0.5f, "the two sides line up: their words...");
+            Assert.AreEqual(view.ThenPicture.Root.worldBound.yMin, view.NowMap.Root.worldBound.yMin, 0.5f, "...and their pictures");
+            Assert.AreEqual(view.ThenTitle.worldBound.xMin, view.Coordinates.worldBound.xMin, 0.5f, "the coordinates start where the title starts");
+            yield return PixelAt(view.ThenPicture.Root, view.ThenPicture.Root.worldBound.center + new Vector2(6f, 6f), c => AssertColour(PictureColour("then.png"), c, "the point's own header picture"));
+            yield return PixelAt(view.NowMap.Root, view.NowMap.Root.worldBound.center + new Vector2(6f, 6f), c => AssertColour(PictureColour("now.png"), c, "today's map"));
+            Assert.AreEqual("38.71390, -9.13340", view.Coordinates.text);
+            yield return Render("Card_today_map_bridge_pictures");
+
+            yield return ShowBlock("today_map_bridge_noheaderpicture", v => view = (TodayMapBlockView)v);
+            Assert.IsFalse(CardTestInput.IsShown(view.ThenPicture.Root, view.Root),
+                "a picture stored on a text-only header: the card's header shows none, so neither does the bridge (the title alone)");
+            Assert.AreEqual(0, _harness.Media.RefCount("then.png"), "...and it is not even loaded");
+            Assert.AreEqual("Gate", view.ThenTitle.text);
         }
 
         [UnityTest]

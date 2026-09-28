@@ -180,7 +180,7 @@ namespace TileStories.Tests
                 {
                     var p = new Vector2(x, Screen.height - y);
                     if (awayFrom.HasValue && Vector2.Distance(p, awayFrom.Value) < minDistance) continue;
-                    if (!PoiCardHost.AnythingUnder(p)) return p;
+                    if (!ScreenUIHit.IsOverAnything(p)) return p;
                 }
             Assert.Fail("precondition: the camera view has an empty spot");
             return default;

@@ -1,6 +1,7 @@
 namespace TileStories
 {
-    // The media family: the point's pictures -- a gallery, a before / after pair, one picture to zoom into.
+    // The media family: the point's pictures -- a gallery, a before / after pair, one picture to zoom into, a picture with
+    // spots to tap.
     // Part of BuiltInBlocks (BuiltInBlocks.cs registers every kind, in catalog order): each kind's key, variant and
     // field constants first, then the definitions.
     public static partial class BuiltInBlocks
@@ -27,6 +28,16 @@ namespace TileStories
         public const string ZoomImagePinch = "pinch";
         public const string ZoomImageImageField = "image";
         public const string ZoomImageCaptionField = "caption";
+
+        public const string HotspotImageKind = "hotspot_image";
+        public const string HotspotNumbered = "numbered";
+        public const string HotspotLoupes = "loupes";
+        public const string HotspotImageField = "image";
+        public const string HotspotItemsField = "spots";
+        public const string HotspotXField = "x";
+        public const string HotspotYField = "y";
+        public const string HotspotTitleField = "title";
+        public const string HotspotTextField = "text";
 
         private const string PictureHelp = "A PNG or JPG inside the wall's Media Folder (Detail Card > Card Container).";
 
@@ -81,6 +92,45 @@ namespace TileStories
                 {
                     Key = BeforeAfterStartField, Type = BlockFieldType.Number, Label = "Start At", NumberMin = 0f, NumberMax = 1f, NumberDefault = 0.5f,
                     Help = "Where the handle starts: 0 = all After, 1 = all Before, 0.5 = half and half.",
+                },
+            },
+        };
+
+        // Tier 2: one picture with spots on it; a tap on a spot opens its text under the picture
+        public static readonly BlockKindDefinition HotspotImage = new()
+        {
+            Key = HotspotImageKind,
+            Family = "media",
+            DisplayName = "Hotspot Image",
+            Help = "One picture with spots on it to explore: a tap on a spot opens its title and text under the picture (a " +
+                   "second tap closes it). Numbered: numbered circles on the picture itself. Loupes: small rings on the picture " +
+                   "and, under it, a row of round close-ups of each spot to tap. A spot with no title is not shown.",
+            Variants = new[] { HotspotNumbered, HotspotLoupes },
+            DefaultVariant = HotspotNumbered,
+            DisplayModes = new[] { CardOptions.DisplayInline },
+            Fields = new[]
+            {
+                new BlockFieldDefinition { Key = HotspotImageField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Picture", Required = true, Help = PictureHelp },
+                new BlockFieldDefinition
+                {
+                    Key = HotspotItemsField, Type = BlockFieldType.Items, Label = "Spots", Required = true,
+                    Help = "One row per spot, numbered in this order. Place each with Across and Down (a click-to-place picker on " +
+                           "the picture is planned).",
+                    ItemFields = new[]
+                    {
+                        new BlockFieldDefinition
+                        {
+                            Key = HotspotXField, Type = BlockFieldType.Number, Label = "Across", NumberMin = 0f, NumberMax = 1f, NumberDefault = 0.5f,
+                            Help = "Where the spot is across the picture: 0 = its left edge, 1 = its right edge.",
+                        },
+                        new BlockFieldDefinition
+                        {
+                            Key = HotspotYField, Type = BlockFieldType.Number, Label = "Down", NumberMin = 0f, NumberMax = 1f, NumberDefault = 0.5f,
+                            Help = "Where the spot is down the picture: 0 = its top edge, 1 = its bottom edge.",
+                        },
+                        new BlockFieldDefinition { Key = HotspotTitleField, Type = BlockFieldType.LocalizedText, Label = "Title", Required = true, Help = "The spot's name (The coat of arms)." },
+                        new BlockFieldDefinition { Key = HotspotTextField, Type = BlockFieldType.LocalizedLongText, Label = "Text", Help = "What the visitor reads when they tap the spot. May stay empty. " + LongTextHelp },
+                    },
                 },
             },
         };

@@ -29,6 +29,10 @@ namespace TileStories
         }
         public bool Flag(string key) => Find(key)?.flag ?? false;
         public string Value(string key) => Find(key)?.value ?? "";
+        // Whether this field was ever written (a Number or Toggle that was never set reads its default: not stored)
+        public bool Stored(string key) => Find(key) != null;
+        // A Url field's link when WebLinkRule opens it, else ""
+        public string OpenableUrl(string key) => WebLinkRule.Openable(Value(key));
         public string Asset(string key) => Find(key)?.asset ?? "";
         // An image field's path when MediaPathRule accepts it, else "" (the view shows its "unavailable" state)
         public string ValidAsset(string key, MediaKind kind) => MediaPathRule.IsValid(Asset(key), kind) ? Asset(key).Trim() : "";
@@ -49,6 +53,13 @@ namespace TileStories
 
         // The Toggle of one Items row's sub-field
         public bool ItemFlag(BlockItemData item, string key) => FindItemField(item, key)?.flag ?? false;
+        // A Number sub-field of one row, or its definition's default while none is stored, kept inside the definition's range
+        // (static: the Editor's slider shows the same value)
+        public static float ItemNumber(BlockItemData item, BlockFieldDefinition sub)
+        {
+            var value = FindItemField(item, sub.Key);
+            return value == null ? sub.NumberDefault : Mathf.Clamp(value.number, sub.NumberMin, sub.NumberMax);
+        }
 
         // The colour of one Items row's Color sub-field; false when it is empty or not a colour (TryParseColor)
         public bool ItemColor(BlockItemData item, string key, out Color color) => TryParseColor(FindItemField(item, key)?.value, out color);
@@ -67,6 +78,8 @@ namespace TileStories
                     return !string.IsNullOrWhiteSpace(value.value);
                 case BlockFieldType.Color:
                     return TryParseColor(value.value, out _);
+                case BlockFieldType.Url:
+                    return WebLinkRule.IsOpenable(value.value);
                 case BlockFieldType.Asset:
                     return !string.IsNullOrWhiteSpace(value.asset);
                 case BlockFieldType.Items:
@@ -102,6 +115,8 @@ namespace TileStories
                     return !string.IsNullOrWhiteSpace(value.value);
                 case BlockFieldType.Color:
                     return TryParseColor(value.value, out _);
+                case BlockFieldType.Url:
+                    return WebLinkRule.IsOpenable(value.value);
                 case BlockFieldType.Asset:
                     return MediaPathRule.IsValid(value.asset, sub.Media);
                 default:

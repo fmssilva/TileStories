@@ -35,8 +35,13 @@ namespace TileStories
         public bool IsDragging { get; private set; }
 
         private static readonly CustomStyleProperty<float> TopGapProperty = new("--ts-sheet-top-gap");
+        private static readonly CustomStyleProperty<float> CollapsedHeaderProperty = new("--ts-header-collapsed-max-height");
         private float _topGap;
         private float _halfMaxRatio = CardContainerSettings.HalfMaxRatioMax;
+
+        // The drag's clock (velocity sampling): Time.unscaledTime in the app. A test sets its own, so a simulated drag's
+        // speed is what the test says -- no real frame rate decides whether it reads as a flick (mirrors PoiCardHost.Clock)
+        internal System.Func<float> Clock { get; set; } = () => Time.unscaledTime;
 
         private float _dragStartPointerY;
         private float _dragStartHeight;
@@ -129,6 +134,32 @@ namespace TileStories
             if (IsOpen) SetStop(SheetStopRule.Stop.Peek);
         }
 
+        // Where the visitor stands in the wall's frame, handed over by the card's owner (the scene's camera through the wall;
+        // a gallery's fabricated place); null = none known
+        public System.Func<Vector3?> Viewer { get; set; }
+
+        // Hands a block's web link to the device (Application.OpenURL in the app; a test sets its own to see the call)
+        public IUrlOpener UrlOpener { get; set; } = new ApplicationUrlOpener();
+
+        // A block asked to open a web link: only an open card, only a link the rule accepts
+        public void OpenUrl(string url)
+        {
+            if (IsOpen && WebLinkRule.IsOpenable(url)) UrlOpener?.Open(url.Trim());
+        }
+
+        // A block asked to open another POI of the wall: through the one selection bus, like a marker tap
+        public void SelectPoi(string poiId)
+        {
+            if (IsOpen && !string.IsNullOrEmpty(poiId)) SelectionEventBus.Select(poiId);
+        }
+
+        public bool TryGetViewer(out Vector3 wallPosition)
+        {
+            var viewer = Viewer?.Invoke();
+            wallPosition = viewer ?? Vector3.zero;
+            return viewer.HasValue;
+        }
+
         // A block asked for the full-screen view: the breadcrumb starts with this card's title
         public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage)
         {
@@ -159,7 +190,10 @@ namespace TileStories
             float available = Layer.layout.height;
             if (float.IsNaN(available) || available <= 0f) return;
             var peekPart = Stack.PeekPart;
-            float peek = float.IsNaN(peekPart.worldBound.yMax) || float.IsNaN(Root.worldBound.yMin)
+            // - the peek stop is the OPEN header's top part: a collapsed (one-line) header keeps the last measure, or
+            //   collapsing would move the stops, resize the sheet, change the scroll range... and loop
+            float peek = Stack.HeaderCollapsed ? Stops.Peek
+                : float.IsNaN(peekPart.worldBound.yMax) || float.IsNaN(Root.worldBound.yMin)
                 ? 0f
                 : peekPart.worldBound.yMax + peekPart.resolvedStyle.marginBottom - Root.worldBound.yMin;
             Stops = SheetStopRule.Compute(available, peek, _halfMaxRatio, _topGap);
@@ -174,6 +208,8 @@ namespace TileStories
 
         private void OnCustomStyle(CustomStyleResolvedEvent evt)
         {
+            // - the card's tokens are declared on this root (.ts-card): the stack's header reads its ceiling from here
+            if (evt.customStyle.TryGetValue(CollapsedHeaderProperty, out float ceiling)) Stack.CollapsedCeiling = ceiling;
             if (evt.customStyle.TryGetValue(TopGapProperty, out float gap) && !Mathf.Approximately(gap, _topGap))
             {
                 _topGap = gap;
@@ -191,7 +227,7 @@ namespace TileStories
             _dragStartPointerY = evt.position.y;
             _dragStartHeight = TargetHeight;
             _lastSampleHeight = TargetHeight;
-            _lastSampleTime = Time.unscaledTime;
+            _lastSampleTime = Clock();
             _velocity = 0f;
             evt.StopPropagation();
         }
@@ -201,7 +237,7 @@ namespace TileStories
             if (!IsDragging || !((VisualElement)evt.currentTarget).HasPointerCapture(evt.pointerId)) return;
             // - panel y grows downward: dragging up (smaller y) makes the sheet taller
             float height = Mathf.Clamp(_dragStartHeight + (_dragStartPointerY - evt.position.y), 0f, Stops.Full);
-            float now = Time.unscaledTime;
+            float now = Clock();
             // - several events in one frame have no time between them: keep the last measured speed
             if (now > _lastSampleTime)
             {

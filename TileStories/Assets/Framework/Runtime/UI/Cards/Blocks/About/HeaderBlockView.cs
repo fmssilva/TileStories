@@ -88,7 +88,8 @@ namespace TileStories
             _title.text = title.Length > 0 ? title : context.Poi?.name ?? "";
 
             _chip.text = PoiSubtitle.Of(context.Poi, context.Taxonomy, read.Flag(BuiltInBlocks.HeaderShowLevelField));
-            _chip.style.display = _chip.text.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            // - a class, not an inline display: the collapsed header hides the chip through USS too
+            _chip.EnableInClassList("card-chip--empty", _chip.text.Length == 0);
 
             bool compact = context.Variant == BuiltInBlocks.HeaderCompact;
             Root.EnableInClassList("card-header--compact", compact);

@@ -1,4 +1,4 @@
-/* The visit family's blocks: practical_info.
+/* The visit family's blocks: practical_info, wall_locator, today_map, related.
    Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
    _3.3). UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
 
@@ -40,4 +40,285 @@
     white-space: normal;
     margin: 0;
     padding: 0;
+}
+
+/* ---- wall_locator: strip, neighbours. The strip is a line with a dot per POI at its place along the wall (the view sets
+   each dot's left as a share of the line), this POI's dot larger, the visitor's ring; a legend names the two marks ---- */
+
+.card-locator__track {
+    height: var(--ts-locator-height);
+    margin: var(--ts-space-2) var(--ts-space-3);
+}
+
+.card-locator__line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--ts-line-width);
+    background-color: var(--ts-line);
+}
+
+.card-locator__dot {
+    position: absolute;
+    top: 50%;
+    width: var(--ts-locator-dot);
+    height: var(--ts-locator-dot);
+    border-radius: var(--ts-locator-dot);
+    translate: -50% -50%;
+    background-color: var(--ts-ink-2);
+}
+
+.card-locator__dot--self {
+    width: var(--ts-locator-self);
+    height: var(--ts-locator-self);
+    border-radius: var(--ts-locator-self);
+    border-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-on-accent);
+    background-color: var(--ts-accent);
+}
+
+.card-locator__you {
+    position: absolute;
+    top: 50%;
+    width: var(--ts-locator-you);
+    height: var(--ts-locator-you);
+    border-radius: var(--ts-locator-you);
+    translate: -50% -50%;
+    border-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-ink);
+    background-color: var(--ts-clear);
+}
+
+.card-locator__legend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: var(--ts-space-2);
+}
+
+.card-locator__legend-item {
+    flex-direction: row;
+    align-items: center;
+    margin-right: var(--ts-space-4);
+    flex-shrink: 1;
+}
+
+/* a legend mark is its mark drawn in place (not on the line): no absolute position, no centring shift */
+.card-locator__legend-mark {
+    position: relative;
+    top: 0;
+    translate: 0 0;
+    flex-shrink: 0;
+    margin-right: var(--ts-space-2);
+}
+
+.card-locator__legend-text {
+    flex-shrink: 1;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-locator__neighbours {
+    flex-direction: row;
+}
+
+/* one neighbour: a pill button, its chevron pointing its way (the right one mirrored) */
+.card-locator__neighbour {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    flex-basis: 0;
+    min-height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-3);
+    border-width: 0;
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface-2);
+}
+
+.card-locator__neighbour--left {
+    margin-right: var(--ts-space-2);
+}
+
+.card-locator__neighbour--right {
+    flex-direction: row-reverse;
+}
+
+.card-locator__chevron {
+    width: var(--ts-chevron);
+    height: var(--ts-chevron);
+    flex-shrink: 0;
+    border-left-width: var(--ts-spotlight-ring-width);
+    border-bottom-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-accent);
+    rotate: 45deg;
+    margin: 0 var(--ts-space-2);
+}
+
+.card-locator__neighbour--right .card-locator__chevron {
+    rotate: -135deg;
+}
+
+.card-locator__neighbour-title {
+    flex-shrink: 1;
+    flex-grow: 1;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: var(--ts-space-2) 0;
+    /* a Button centres its text by default: each title reads from its own chevron */
+    -unity-text-align: middle-left;
+}
+
+.card-locator__neighbour--right .card-locator__neighbour-title {
+    -unity-text-align: middle-right;
+}
+
+/* ---- today_map: static, bridge. The map (or the wall-to-today pair), the coordinates, the Directions button ---- */
+
+.card-today__map {
+    height: var(--ts-media-height);
+}
+
+/* a map (and the wall's picture beside it) shows WHOLE: a crop could cut the pin, or the place, out of view */
+.card-today__map .card-image__picture,
+.card-today__thumb .card-image__picture {
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.card-today__bridge {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.card-today__side {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-shrink: 1;
+}
+
+.card-today__side-label {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-accent-text);
+    -unity-font-style: bold;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+.card-today__thumb {
+    height: var(--ts-today-thumb);
+}
+
+.card-today__then-title {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+}
+
+/* from the wall to today: the same chevron as a wall_locator neighbour, pointing right */
+.card-today__arrow {
+    width: var(--ts-chevron);
+    height: var(--ts-chevron);
+    flex-shrink: 0;
+    border-left-width: var(--ts-spotlight-ring-width);
+    border-bottom-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-accent);
+    rotate: -135deg;
+    margin: 0 var(--ts-space-3);
+    /* the sides line up at their tops; the chevron sits halfway between them */
+    align-self: center;
+}
+
+.card-today__coordinates {
+    margin: var(--ts-space-2) 0 0 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+}
+
+.card-today__directions {
+    margin: var(--ts-space-3) 0 0 0;
+    border-width: 0;
+    background-color: var(--ts-accent);
+    color: var(--ts-on-accent);
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+}
+
+/* ---- related: carousel, next_along_wall. A strip of small cards, or one "next" button along the wall ---- */
+
+.card-related__track {
+    flex-direction: row;
+}
+
+.card-related__track-content {
+    flex-direction: row;
+}
+
+.card-related__card {
+    width: var(--ts-related-card);
+    min-height: var(--ts-touch-target);
+    flex-shrink: 0;
+    margin-right: var(--ts-space-3);
+    border-width: 0;
+    padding: 0;
+    background-color: var(--ts-clear);
+}
+
+.card-related__picture {
+    height: var(--ts-related-picture);
+    border-radius: var(--ts-radius-m);
+}
+
+.card-related__title {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+}
+
+/* one "next" button: the same chevron and pill look as a wall_locator neighbour, pointing right (wrap: pointing left) */
+.card-related__next {
+    flex-direction: row;
+    align-items: center;
+    min-height: var(--ts-touch-target);
+    width: 100%;
+    margin: 0;
+    padding: 0 var(--ts-space-3);
+    border-width: 0;
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface-2);
+}
+
+.card-related__chevron {
+    width: var(--ts-chevron);
+    height: var(--ts-chevron);
+    flex-shrink: 0;
+    border-left-width: var(--ts-spotlight-ring-width);
+    border-bottom-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-accent);
+    rotate: -135deg;
+    margin-right: var(--ts-space-2);
+}
+
+.card-related__chevron--wrap {
+    rotate: 45deg;
+}
+
+.card-related__next-title {
+    flex-shrink: 1;
+    flex-grow: 1;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: var(--ts-space-2) 0;
+    -unity-text-align: middle-left;
 }

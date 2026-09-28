@@ -137,6 +137,22 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(220f - 440f, panned.Offset.y, 1e-3f, "...nor under the picture");
         }
 
+        // _3.1 [7B] the lightbox swipe
+        [Test]
+        public void SwipePageRule_TurnsOnlyOnAFarEnoughClearlySidewaysDrag_LeftBringsTheNextPage()
+        {
+            const float page = 390f;
+            float far = SwipePageRule.MinTravelShare * page + 1f;
+            Assert.AreEqual(1, SwipePageRule.Direction(new UnityEngine.Vector2(-far, 0f), page), "finger moves left: the next page");
+            Assert.AreEqual(-1, SwipePageRule.Direction(new UnityEngine.Vector2(far, 0f), page), "finger moves right: the previous page");
+            Assert.AreEqual(0, SwipePageRule.Direction(new UnityEngine.Vector2(-(far - 2f), 0f), page), "not far enough: a wobbly tap, no turn");
+            Assert.AreEqual(1, SwipePageRule.Direction(new UnityEngine.Vector2(-far, far / SwipePageRule.MinSideways - 1f), page), "a little up or down is fine");
+            Assert.AreEqual(0, SwipePageRule.Direction(new UnityEngine.Vector2(-far, far / SwipePageRule.MinSideways + 1f), page), "too diagonal: not a page swipe");
+            Assert.AreEqual(0, SwipePageRule.Direction(new UnityEngine.Vector2(0f, -page), page), "straight up: never a turn");
+            Assert.AreEqual(0, SwipePageRule.Direction(new UnityEngine.Vector2(-page, 0f), 0f), "no page laid out yet: nothing");
+            Assert.AreEqual(0, SwipePageRule.Direction(new UnityEngine.Vector2(-page, 0f), float.NaN), "...nor a NaN width");
+        }
+
         [Test]
         public void SpotlightCropRule_CoversTheFrame_CentresTheFocus_WithinThePicturesEdges()
         {

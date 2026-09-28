@@ -1,4 +1,4 @@
-"""Generate the LivingRoom Detail Card's placeholder pictures (_3.1 step 7, Tier 2 group A).
+"""Generate the LivingRoom Detail Card's placeholder pictures (_3.1 step 7, Tier 2 groups A and B).
 
 Tile-panel-like pictures (white glaze, cobalt drawing, grout lines), each with a dark banner reading PLACEHOLDER and
 what the picture stands for, so nobody mistakes them for real content. Python standard library only (no PIL): a small
@@ -22,6 +22,9 @@ GROUT = (200, 194, 180)
 HOLE = (120, 112, 104)       # bare mortar where a tile is missing
 BANNER = (28, 24, 20)
 INK = (250, 246, 236)
+PAPER = (232, 226, 210)      # a street map's city blocks
+STREET = (252, 250, 244)
+RIVER = (126, 168, 204)
 
 # 5x7 glyphs, one string of 5 bits per row
 FONT = {
@@ -35,6 +38,7 @@ FONT = {
     "H": ["10001", "10001", "10001", "11111", "10001", "10001", "10001"],
     "I": ["11111", "00100", "00100", "00100", "00100", "00100", "11111"],
     "L": ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
+    "M": ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
     "N": ["10001", "11001", "10101", "10011", "10001", "10001", "10001"],
     "O": ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
     "P": ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
@@ -143,6 +147,30 @@ def castle(ink):
     return at
 
 
+def street_map(width, height, label):
+    """A plain street map (today_map, group B): city blocks between streets, a river along the bottom, a pin on the
+    place (slightly left of the middle), and the PLACEHOLDER banner."""
+    banner = banner_text(width, height, "PLACEHOLDER " + label, max(2, width // 160))
+    pin_x, pin_y, pin_r = width * 0.42, height * 0.40, height * 0.07
+
+    def pixel(x, y):
+        b = banner(x, y)
+        if b is not None:
+            return b
+        d = math.hypot(x - pin_x, y - pin_y)
+        if d < pin_r * 0.45:
+            return COBALT
+        if d < pin_r:
+            return YELLOW
+        if y > height * 0.72 + 12 * math.sin(x / width * 6.0):
+            return RIVER
+        # - streets: a grid, one avenue at a slant
+        if x % 96 < 10 or y % 72 < 8 or abs((x - y * 1.3) % 240) < 12:
+            return STREET
+        return PAPER
+    return pixel
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     pictures = {
@@ -162,6 +190,8 @@ def main():
                                              missing=lambda tx, ty: 3 <= tx <= 6 and 1 <= ty <= 4 and (tx + ty) % 3 != 0)),
         # zoom_image: a large, finely drawn panel worth pinching into
         "tile_detail.png": (1024, 1024, panel(1024, 1024, 32, COBALT, YELLOW, "DETAIL")),
+        # today_map (group B): where the place is today, a pin on a street map
+        "castle_map.png": (768, 432, street_map(768, 432, "MAP")),
     }
     for name, (w, h, pixel) in pictures.items():
         write_png(os.path.join(OUT, name), w, h, pixel)

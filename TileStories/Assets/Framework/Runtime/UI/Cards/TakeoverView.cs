@@ -3,8 +3,9 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // Draws page `page` of a full-screen view into `container`, loading its media through `media` (the view's own scope)
-    public delegate void TakeoverPageDrawer(VisualElement container, IMediaSource media, int page);
+    // Draws page `page` of the full-screen `view` into `container`, loading its media through `media` (the view's own
+    // scope); a page that pages itself (the lightbox's swipe) turns through view.Turn
+    public delegate void TakeoverPageDrawer(TakeoverView view, VisualElement container, IMediaSource media, int page);
 
     // The full-screen view over the card (_3.1 section 4, "Takeover"; first user: the gallery's lightbox, step 7). It
     // covers the whole card layer above the sheet: a bar with the way back and the breadcrumb ("St George's Castle >
@@ -93,8 +94,15 @@ namespace TileStories
             PageIndex = UnityEngine.Mathf.Clamp(page, 0, PageCount - 1);
             _media.ReleaseAll();
             Page.Clear();
-            _draw(Page, _media, PageIndex);
+            _draw(this, Page, _media, PageIndex);
             for (int i = 0; i < PageCount; i++) _chips[i].EnableInClassList("card-takeover__chip--current", i == PageIndex);
+        }
+
+        // Turn `direction` pages (+1 the next, -1 the previous; a page swipe): nothing past the first or the last page
+        public void Turn(int direction)
+        {
+            int page = PageIndex + direction;
+            if (IsOpen && page >= 0 && page < PageCount) ShowPage(page);
         }
 
         // Back to the card: every file of the view given back, the card as it was

@@ -56,7 +56,7 @@ namespace TileStories.Tests
         public IEnumerator DraggingUp_GoesToHalf_AtMost40Percent_ThenFull()
         {
             yield return Select("lamp");
-            yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Half - Sheet.Stops.Peek));
+            yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Half - Sheet.Stops.Peek), slowSheet: Sheet);
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop);
             Assert.LessOrEqual(Sheet.Root.resolvedStyle.height, Sheet.Layer.layout.height * 0.40f + 1f, "half never passes 40% of the screen");
@@ -64,7 +64,7 @@ namespace TileStories.Tests
             Assert.LessOrEqual(subtitle.worldBound.yMax, Sheet.Root.worldBound.yMax + 1f, "half shows the subtitle");
             yield return Capture("Card_Lamp_Half");
 
-            yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Full - Sheet.Stops.Half));
+            yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Full - Sheet.Stops.Half), slowSheet: Sheet);
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop);
             Assert.AreEqual(Sheet.Layer.layout.height - Sheet.Stops.Full, 48f, 1f, "full leaves the token's top gap (--ts-sheet-top-gap)");
@@ -81,7 +81,7 @@ namespace TileStories.Tests
             Host.SetQuery("lamp");
             yield return Select("lamp");
             Assert.IsTrue(Host.TopShown, "peek: the search bar shows");
-            yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Half - Sheet.Stops.Peek));
+            yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Half - Sheet.Stops.Peek), slowSheet: Sheet);
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop);
             Assert.IsTrue(Host.TopShown, "half: the search bar shows");
@@ -89,7 +89,7 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(Sheet.Root.worldBound.yMin, top.worldBound.yMax, "half: the sheet's top edge stays below the search bar");
             Rect bar = top.worldBound;
 
-            yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Full - Sheet.Stops.Half));
+            yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Full - Sheet.Stops.Half), slowSheet: Sheet);
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "a real drag up to full");
             Assert.IsFalse(Host.TopShown, "full: the search bar steps aside");
@@ -105,7 +105,7 @@ namespace TileStories.Tests
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "another POI keeps the stop");
             Assert.IsFalse(Host.TopShown, "...and the bar stays aside");
 
-            yield return CardTestInput.Drag(Sheet.Handle, Sheet.Stops.Full - Sheet.Stops.Half);
+            yield return CardTestInput.Drag(Sheet.Handle, Sheet.Stops.Full - Sheet.Stops.Half, slowSheet: Sheet);
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop);
             Assert.IsTrue(Host.TopShown, "back at half: the bar is back");
@@ -134,6 +134,9 @@ namespace TileStories.Tests
             float openHeader = stack.HeaderSlot.worldBound.height, openViewport = stack.Scroll.contentViewport.worldBound.height;
             var headerView = Header;
             Assert.IsTrue(headerView.SubtitleShown && !stack.HeaderCollapsed, "precondition: open, the subtitle shown");
+            float openTitleSize = headerView.Root.Q<Label>("card-header-title").resolvedStyle.fontSize;
+            var openStops = Sheet.Stops;
+            Assert.IsTrue(CardTestInput.IsShown(headerView.Root.Q<Label>("card-header-chip"), stack.HeaderSlot), "precondition: the open header shows its chip");
 
             yield return CardTestInput.Wheel(stack.Scroll.contentViewport, 12f, frames: 4);
             yield return CardTestInput.Settle(0.2f);
@@ -143,9 +146,19 @@ namespace TileStories.Tests
             Assert.AreSame(headerView, Header, "the same header view, no second header");
             Assert.IsFalse(headerView.SubtitleShown, "the subtitle steps out");
             Assert.AreEqual("St George's Castle", headerView.TitleText, "the title stays");
-            Assert.IsTrue(CardTestInput.IsShown(headerView.PeekPart, headerView.Root), "...with its chip (the compact look)");
+            // _3.1 [7B]: collapsed = ONE line -- a smaller title, no chip, the whole header under the token
+            var title = headerView.Root.Q<Label>("card-header-title");
+            Assert.IsTrue(CardTestInput.IsShown(title, stack.HeaderSlot), "the title is the one line left");
+            Assert.IsFalse(CardTestInput.IsShown(headerView.Root.Q<Label>("card-header-chip"), stack.HeaderSlot), "the chip steps out too");
+            Assert.Less(title.resolvedStyle.fontSize, openTitleSize, "a smaller title");
+            Assert.AreEqual(WhiteSpace.NoWrap, title.resolvedStyle.whiteSpace, "one line: a long title is cut, never wrapped");
+            float ceiling = CardTestInput.TokenPx("--ts-header-collapsed-max-height");
+            Assert.AreEqual(ceiling, stack.CollapsedCeiling, 0.01f, "the stack reads the same token (its no-loop estimate is measured against it)");
+            Assert.LessOrEqual(stack.HeaderSlot.worldBound.height, ceiling,
+                "the collapsed header (" + stack.HeaderSlot.worldBound.height + ") is at most --ts-header-collapsed-max-height");
             Assert.Less(stack.HeaderSlot.worldBound.height, openHeader - 10f, "the header is shorter");
             Assert.Greater(stack.Scroll.contentViewport.worldBound.height, openViewport + 10f, "...and the scroll area got that room");
+            Assert.AreEqual(openStops.Peek, Sheet.Stops.Peek, 0.5f, "collapsing never moves the peek stop (it is the open header's)");
             yield return Capture("Card_Lamp_Full_HeaderCollapsed");
 
             yield return CardTestInput.Wheel(stack.Scroll.contentViewport, -40f, frames: 4);
@@ -153,7 +166,10 @@ namespace TileStories.Tests
             Assert.AreEqual(0f, stack.Scroll.scrollOffset.y, 0.01f, "wheeled back to the top");
             Assert.IsFalse(stack.HeaderCollapsed, "at the top: open again");
             Assert.IsTrue(headerView.SubtitleShown);
+            Assert.IsTrue(CardTestInput.IsShown(headerView.Root.Q<Label>("card-header-chip"), stack.HeaderSlot), "the chip is back");
+            Assert.AreEqual(openTitleSize, headerView.Root.Q<Label>("card-header-title").resolvedStyle.fontSize, 0.01f, "the full-size title is back");
             Assert.AreEqual(openHeader, stack.HeaderSlot.worldBound.height, 1f, "the header is its full size again");
+            yield return Capture("Card_Lamp_Full_HeaderOpenAgain");
 
             // - a new card always starts open, even after a scrolled one
             yield return CardTestInput.Wheel(stack.Scroll.contentViewport, 12f, frames: 4);
@@ -190,7 +206,7 @@ namespace TileStories.Tests
         public IEnumerator ATapOnEmptyCameraSpace_Closes_ButATapOnTheCardOrAMarkerDoesNot()
         {
             yield return Select("lamp");
-            Assert.IsTrue(PoiCardHost.AnythingUnder(ScreenPointOf(Sheet.CloseButton)), "the EventSystem sees the card (UI Toolkit panel raycaster)");
+            Assert.IsTrue(ScreenUIHit.IsOverAnything(ScreenPointOf(Sheet.CloseButton)), "the EventSystem sees the card (UI Toolkit panel raycaster)");
             Assert.IsFalse(Card.HandleScreenTap(ScreenPointOf(Header.PeekPart), ScreenPointOf(Header.PeekPart), Time.unscaledTime - 0.1f, Time.unscaledTime), "a tap on the card");
 
             var marker = Session.SpawnedMarkers.Where(m => m != null && m.IsVisible).Select(m => ScreenPointOf(m)).FirstOrDefault(p => p.HasValue && p.Value.y > Screen.height * 0.5f);
@@ -523,8 +539,9 @@ namespace TileStories.Tests
                 "fun_fact", "fun_fact", "pull_quote", "pull_quote",
                 "process_steps", "swatches", "timeline", "timeline", "person", "person", "story_chapters", "compare_points", "practical_info",
                 "gallery", "gallery", "gallery", "gallery", "before_after", "zoom_image",
+                "hotspot_image", "hotspot_image", "wall_locator", "wall_locator", "today_map", "today_map",
                 "sources", "sources", "actions", "actions", "actions",
-            }, ShownKinds(), "one block per kind and variant (Tier 1, Tier 2 group A), nothing skipped");
+            }, ShownKinds(), "one block per kind and variant (Tier 1, Tier 2), nothing skipped");
             var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
             CollectionAssert.IsEmpty(BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Skipped, "no authored block skipped");
             var variants = Sheet.Stack.BoundViews.Select(v => v.Root.GetClasses().FirstOrDefault(c => c.Contains("--"))).Where(c => c != null).ToList();
@@ -628,6 +645,155 @@ namespace TileStories.Tests
             Sheet.Stack.Scroll.ScrollTo(swatches.Root);
             yield return CardTestInput.Settle(0.2f);
             yield return Capture("Card_Lamp_StepsSwatches");
+        }
+
+        // _3.1 step 7B: The Lamp's two hotspot_image blocks on the real wall: the picture from the wall's media folder, each
+        // spot on its point of the picture, a real tap opens its authored text (a second closes it), a loupe does the same
+        [UnityTest]
+        public IEnumerator TheLamp_HotspotImage_ARealTapOnASpotOpensItsAuthoredText_ALoupeToo_AndInPortuguese()
+        {
+            yield return OpenFull("lamp");
+            var hotspots = Sheet.Stack.BoundViews.OfType<HotspotImageBlockView>().ToList();
+            Assert.AreEqual(2, hotspots.Count, "numbered and loupes");
+            var numbered = hotspots[0];
+            Assert.AreEqual("castle_then", numbered.Image.Texture?.name, "the picture from the wall's own media folder (the historic panel, its own file: the header counts castle_hero alone)");
+            Assert.AreEqual(4, numbered.Spots.Count, "the four authored spots");
+            Assert.AreEqual("Explore the panel", Sheet.Stack.HeadingOf(numbered).text, "its authored heading");
+            Sheet.Stack.Scroll.ScrollTo(numbered.Root);
+            yield return CardTestInput.Settle(0.2f);
+            Rect picture = numbered.Image.Root.worldBound;
+            Assert.AreEqual(picture.x + 0.5f * picture.width, numbered.Spots[1].Pin.worldBound.center.x, 1f, "the keep's spot: half across the picture");
+            Assert.AreEqual(picture.y + 0.3f * picture.height, numbered.Spots[1].Pin.worldBound.center.y, 1f, "...and 0.3 down it");
+
+            yield return CardTestInput.Tap(numbered.Root.panel, numbered.Spots[1].Pin.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual(1, numbered.OpenIndex, "a real tap on spot 2");
+            Assert.AreEqual("The keep", numbered.DetailTitle.text);
+            StringAssert.Contains("the last refuge of the castle", numbered.DetailText.Paragraphs[0].text);
+            Assert.IsTrue(Sheet.IsOpen, "a tap on a spot never closes the card");
+            yield return Capture("Card_Lamp_Hotspot_Numbered");
+            yield return CardTestInput.Tap(numbered.Root.panel, numbered.Spots[1].Pin.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual(-1, numbered.OpenIndex, "a second tap closes it");
+
+            var loupes = hotspots[1];
+            Sheet.Stack.Scroll.ScrollTo(loupes.Root);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(4, loupes.Loupes.childCount, "a close-up per spot");
+            yield return CardTestInput.Tap(loupes.Root.panel, loupes.Spots[3].Loupe.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual("The curtain wall", loupes.DetailTitle.text, "a real tap on the fourth close-up");
+            Assert.AreEqual(0, loupes.DetailText.Paragraphs.Count, "a spot with no text: its title alone");
+            yield return Capture("Card_Lamp_Hotspot_Loupes");
+
+            LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
+            SelectionEventBus.Clear();
+            yield return OpenFull("lamp");
+            numbered = Sheet.Stack.BoundViews.OfType<HotspotImageBlockView>().First();
+            Assert.AreEqual("Toque num ponto para saber mais", numbered.Hint.text, "the framework's Portuguese hint");
+            Sheet.Stack.Scroll.ScrollTo(numbered.Root);
+            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.Tap(numbered.Root.panel, numbered.Spots[1].Pin.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual("A torre de menagem", numbered.DetailTitle.text, "the wall's Portuguese title");
+        }
+
+        // _3.1 step 7B: The Lamp's wall_locator on the real wall: the strip lays out the RUNNING wall's POIs by the one
+        // along-the-wall rule with the scene camera as the visitor; a real tap on a neighbour selects it through the
+        // selection bus -- the same OnMarkerSelected a marker tap raises (zoom-on-select listens to it) -- and the card rebinds
+        [UnityTest]
+        public IEnumerator TheLamp_WallLocator_LaysOutTheRunningWall_WithTheCamera_AndARealTapOnANeighbourOpensItsCard()
+        {
+            yield return OpenFull("lamp");
+            var locators = Sheet.Stack.BoundViews.OfType<WallLocatorBlockView>().ToList();
+            Assert.AreEqual(2, locators.Count, "strip and neighbours");
+            var strip = locators[0];
+            var places = WallAxisRule.Places(Session.SearchPois);
+            Assert.AreEqual(Session.SearchPois.Count - 1, strip.Dots.Count, "a dot per other running POI");
+            Assert.AreEqual("On this wall", Sheet.Stack.HeadingOf(strip).text, "no heading written: the default");
+            float min = places.Along.Min(), max = places.Along.Max();
+            Assert.AreEqual((places.Along[places.IndexOf("lamp")] - min) / (max - min), strip.SelfShare, 1e-4f, "The Lamp at its place by the one rule");
+            var viewer = Session.MarkerSpawnRoot.InverseTransformPoint(Camera.main.transform.position);
+            Assert.AreEqual(Mathf.Clamp01((places.Axis.Along(viewer) - min) / (max - min)), strip.YouShare, 1e-4f, "the scene camera is the visitor");
+            Assert.IsTrue(CardTestInput.IsShown(strip.You, strip.Root), "'You are here' shows in the app");
+            Sheet.Stack.Scroll.ScrollTo(strip.Root);
+            yield return CardTestInput.Settle(0.2f);
+            yield return Capture("Card_Lamp_WallLocator_Strip");
+
+            var neighbours = locators[1];
+            Assert.AreEqual("Next to it on the wall", Sheet.Stack.HeadingOf(neighbours).text);
+            Assert.AreEqual("lamp_military", neighbours.LeftPoiId, "its own satellite on the left along the room's wall");
+            Assert.AreEqual("lamp_religious", neighbours.RightPoiId, "...and on the right");
+            var military = Session.SearchPois.First(p => p.id == "lamp_military");
+            Assert.AreEqual(BlockStackBuilder.CardTitleOf(military, "en", "en"), neighbours.LeftTitle.text, "named by its card title");
+            Sheet.Stack.Scroll.ScrollTo(neighbours.Root);
+            yield return CardTestInput.Settle(0.2f);
+
+            var raised = new System.Collections.Generic.List<string>();
+            System.Action<string> probe = raised.Add;
+            SelectionEventBus.OnMarkerSelected += probe;
+            try
+            {
+                yield return CardTestInput.Tap(neighbours.Root.panel, neighbours.Left.worldBound.center);
+                yield return CardTestInput.Settle();
+            }
+            finally { SelectionEventBus.OnMarkerSelected -= probe; }
+            CollectionAssert.AreEqual(new[] { "lamp_military" }, raised, "one OnMarkerSelected, the event a marker tap raises");
+            Assert.AreEqual("lamp_military", SelectionEventBus.CurrentPoiId);
+            Assert.AreEqual("lamp_military", Card.ShownPoiId, "the card rebound to the neighbour");
+            Assert.IsTrue(Sheet.IsOpen);
+            Assert.AreEqual(BlockStackBuilder.CardTitleOf(military, "en", "en"), Header.TitleText, "its own header");
+        }
+
+        // What the card would hand to the device (the IUrlOpener seam: nothing leaves Unity)
+        private sealed class RecordingOpener : IUrlOpener
+        {
+            public readonly System.Collections.Generic.List<string> Opened = new();
+            public void Open(string url) => Opened.Add(url);
+        }
+
+        // _3.1 step 7B: The Lamp's today_map on the real wall: the map from the wall's media folder, the castle's
+        // coordinates, a real tap on Directions hands exactly the authored link to the device once, the bridge shows the
+        // header's own picture; in Portuguese the card's words
+        [UnityTest]
+        public IEnumerator TheLamp_TodayMap_ARealTapOnDirectionsOpensTheAuthoredLink_TheBridgeShowsTheHeadersPicture()
+        {
+            yield return OpenFull("lamp");
+            var opener = new RecordingOpener();
+            Sheet.UrlOpener = opener;
+            var maps = Sheet.Stack.BoundViews.OfType<TodayMapBlockView>().ToList();
+            Assert.AreEqual(2, maps.Count, "static and bridge");
+            var map = maps[0];
+            Assert.AreEqual("castle_map", map.Map.Texture?.name, "the street map from the wall's media folder");
+            Assert.AreEqual("38.71390, -9.13340", map.Coordinates.text, "the castle's coordinates");
+            Assert.AreEqual(BackgroundSizeType.Contain, map.Map.Picture.resolvedStyle.backgroundSize.sizeType, "the map shows whole (a crop could hide the pin)");
+            Assert.AreEqual("Where it is today", Sheet.Stack.HeadingOf(map).text);
+            Sheet.Stack.Scroll.ScrollTo(map.Root);
+            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.Tap(map.Root.panel, map.Directions.worldBound.center);
+            yield return null;
+            var authored = Session.SearchPois.First(p => p.id == "lamp").card.blocks.First(b => b.kind == BuiltInBlocks.TodayMapKind)
+                .fields.First(f => f.key == BuiltInBlocks.TodayMapUrlField).value;
+            CollectionAssert.AreEqual(new[] { authored }, opener.Opened, "a real tap handed the authored Maps Link to the device, once");
+            Assert.IsTrue(Sheet.IsOpen, "the card stays as it was");
+            yield return Capture("Card_Lamp_TodayMap_Static");
+
+            var bridge = maps[1];
+            Assert.AreEqual("castle_hero", bridge.ThenPicture.Texture?.name, "the wall's side: The Lamp's own header picture");
+            Assert.AreEqual("castle_map", bridge.NowMap.Texture?.name, "today's side: the map");
+            Assert.AreEqual(Header.TitleText, bridge.ThenTitle.text);
+            Sheet.Stack.Scroll.ScrollTo(bridge.Root);
+            yield return CardTestInput.Settle(0.2f);
+            yield return Capture("Card_Lamp_TodayMap_Bridge");
+
+            LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
+            SelectionEventBus.Clear();
+            yield return OpenFull("lamp");
+            bridge = Sheet.Stack.BoundViews.OfType<TodayMapBlockView>().Last();
+            Assert.AreEqual("Como chegar", bridge.Directions.text);
+            Assert.AreEqual("Na parede", bridge.ThenLabel.text);
+            Assert.AreEqual("Hoje", bridge.NowLabel.text);
+            Assert.AreEqual("Do painel a hoje", Sheet.Stack.HeadingOf(bridge).text, "the wall's Portuguese heading");
         }
 
         [UnityTest]
@@ -773,7 +939,10 @@ namespace TileStories.Tests
             Assert.IsTrue(Header.HasHero, "The Lamp's header is the Image Parallax look");
             Assert.IsNotNull(Header.Picture.Texture, "castle_hero.png loaded from the wall's Media Folder (Resources)");
             Assert.AreEqual("castle_hero", Header.Picture.Texture.name);
-            Assert.AreEqual(1, Card.Media.RefCount("castle_hero.png"), "loaded once, lazily, when the card was bound");
+            // - The Lamp's today_map bridge shows the header's picture as the wall's side of the bridge (its own copy)
+            int bridges = Sheet.Stack.BoundViews.OfType<TodayMapBlockView>().Count(v => v.ThenPicture.Path == "castle_hero.png");
+            Assert.AreEqual(1, bridges, "precondition: the fixture's bridge holds the header picture too");
+            Assert.AreEqual(1 + bridges, Card.Media.RefCount("castle_hero.png"), "loaded once by the header, lazily when the card was bound (+ the bridge's copy)");
             Assert.AreEqual(0, Sheet.Stack.Scroll.contentContainer.IndexOf(Header.HeroPart), "the hero opens what scrolls");
             yield return Capture("Card_Lamp_Full_Hero");
 
@@ -849,7 +1018,7 @@ namespace TileStories.Tests
             Assert.AreEqual(1, takeover.PageIndex);
             Assert.AreEqual("St George's Castle > Gallery", takeover.Crumb.text, "the card's title > the gallery");
             Assert.AreEqual(before + 1, Card.Media.RefCount("gallery_2.png"), "the full-screen view loaded its own copy");
-            Assert.IsTrue(PoiCardHost.AnythingUnder(ScreenPointOf(takeover.Page)), "a tap on the full-screen view is on the UI: never 'empty space'");
+            Assert.IsTrue(ScreenUIHit.IsOverAnything(ScreenPointOf(takeover.Page)), "a tap on the full-screen view is on the UI: never 'empty space'");
             Assert.AreEqual("lamp", SelectionEventBus.CurrentPoiId, "the selection stays");
             yield return Capture("Card_Lamp_Lightbox");
 

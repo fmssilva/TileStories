@@ -41,6 +41,11 @@ namespace TileStories
         // Whether the header is collapsed now (the stack was scrolled down)
         public bool HeaderCollapsed { get; private set; }
 
+        // --ts-header-collapsed-max-height (CardTokens.uss), handed over by the sheet that reads the card's tokens: the one-line
+        // collapsed header's ceiling, what "freed" is measured against (0 until the styles resolve: then freed = the whole
+        // header, the safe over-estimate)
+        internal float CollapsedCeiling { get; set; }
+
         // The bound views in stack order (the header first)
         public IReadOnlyList<IBlockView> BoundViews
         {
@@ -110,10 +115,9 @@ namespace TileStories
         private void UpdateHeaderCollapse()
         {
             float range = Scroll.contentContainer.layout.height - Scroll.contentViewport.layout.height;
-            // - what collapsing gives back: the header slot below the part the compact look keeps (title + chip)
-            var keep = PeekPart;
-            float freed = HeaderCollapsed || float.IsNaN(range) ? 0f
-                : HeaderSlot.layout.height - (keep.layout.height + keep.resolvedStyle.marginBottom);
+            // - what collapsing gives back: the open header down to the one-line look's ceiling (the token). Never an
+            //   under-estimate, so the rule's "can it still scroll afterwards" guard stays safe
+            float freed = HeaderCollapsed || float.IsNaN(range) ? 0f : UnityEngine.Mathf.Max(0f, HeaderSlot.layout.height - CollapsedCeiling);
             SetHeaderCollapsed(HeaderCollapseRule.Next(HeaderCollapsed, Scroll.scrollOffset.y, float.IsNaN(range) ? 0f : range, freed));
         }
 

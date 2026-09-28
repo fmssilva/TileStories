@@ -24,10 +24,21 @@ namespace TileStories
     }
 
     // What a block may ask of its card (_3.1 section 3): lower the card so the selected POI's marker shows on the wall;
-    // open the full-screen view over the card (Tier 2: the gallery's lightbox). Tier 4 adds audio with its first block.
+    // open the full-screen view over the card (Tier 2: the gallery's lightbox); select another POI of the wall and where
+    // the visitor stands (Tier 2 group B: wall_locator, related). Tier 4 adds audio with its first block.
     public interface IBlockHost
     {
         void ShowOnWall();
+
+        // Select another POI of this wall, as a tap on its marker does (SelectionEventBus: the card rebinds to it, the
+        // markers, list and zoom-on-select follow)
+        void SelectPoi(string poiId);
+
+        // Where the visitor is, in the wall's own frame (the POI positions' frame); false where no viewer is known
+        bool TryGetViewer(out UnityEngine.Vector3 wallPosition);
+
+        // Open a web link on the device (its browser or maps app); a link WebLinkRule refuses is never opened
+        void OpenUrl(string url);
 
         // Open the full-screen view: `name` ends the breadcrumb after the card's title, `pageCount` sibling pages starting
         // at `startPage`, each drawn by `drawPage` through the view's own media scope

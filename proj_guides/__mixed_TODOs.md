@@ -46,4 +46,11 @@ check thee FOV splike thing???
 - Interrupted agent sessions leave the tree broken: the card 7A session found the previous (interrupted) run had left
   code that did not compile and 22 red tests. Commit after every verified session so an interruption costs only
   the current session.
+- Two notions of "where a POI sits on the wall": `WallAxisRule` (Runtime/POI, principal axis on the floor plane;
+  card wall_locator + related) and `MinimapLayout`'s projection (wall x/y vs floor x/z, widest spread). They can
+  disagree about left/right. In the minimap domain, consider building the minimap's wall projection on
+  `WallAxisRule` so the minimap and the card's strip always agree.
+- Agent session size: two card sessions in a row were interrupted mid-way and left uncommitted, non-compiling
+  work for the next agent. Keep one session = one close-out-able scope (about 4-6 block kinds), and make the
+  first step of every prompt "verify the tree compiles and is committed".
 

@@ -188,3 +188,66 @@ MonoBehaviour:
       value: Pinch to zoom in
     - lang: pt
       value: Afaste os dedos para ampliar
+  - key: hotspot_hint
+    where: The hint under a Hotspot Image picture (a tap on a spot opens its text).
+    text:
+    - lang: en
+      value: Tap a spot to read about it
+    - lang: pt
+      value: Toque num ponto para saber mais
+  - key: wall_locator_heading
+    where: The title over a Wall Locator block when its Heading is empty.
+    text:
+    - lang: en
+      value: On this wall
+    - lang: pt
+      value: Nesta parede
+  - key: wall_locator_you
+    where: 'Wall Locator, Strip: the mark of the visitor''s own place along the wall (in the app).'
+    text:
+    - lang: en
+      value: You are here
+    - lang: pt
+      value: Esta aqui
+  - key: today_map_heading
+    where: The title over a Today Map block when its Heading is empty.
+    text:
+    - lang: en
+      value: Where it is today
+    - lang: pt
+      value: Onde fica hoje
+  - key: today_map_directions
+    where: 'Today Map: the button that opens the Maps Link.'
+    text:
+    - lang: en
+      value: Directions
+    - lang: pt
+      value: Como chegar
+  - key: today_map_then
+    where: 'Today Map, Bridge: the word over the point as the wall shows it.'
+    text:
+    - lang: en
+      value: On the wall
+    - lang: pt
+      value: Na parede
+  - key: today_map_now
+    where: 'Today Map, Bridge: the word over the map of where it is now.'
+    text:
+    - lang: en
+      value: Today
+    - lang: pt
+      value: Hoje
+  - key: today_map_coordinates
+    where: 'Today Map: how the latitude ({0}) and longitude ({1}) are written under the map.'
+    text:
+    - lang: en
+      value: '{0}, {1}'
+    - lang: pt
+      value: '{0}, {1}'
+  - key: related_heading
+    where: The title over a Related block when its Heading is empty.
+    text:
+    - lang: en
+      value: Related
+    - lang: pt
+      value: Relacionado

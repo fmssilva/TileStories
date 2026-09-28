@@ -96,50 +96,50 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: POI Detail Card -- _3.1 Tier 2 group B (step 7B) + the [7B] TODOs`
+
+## `And now: POI Detail Card -- close out 7B (step 7C), then Tier 3 group A (step 8A)`
+
+GATE (extra, before anything else): take one Unity screenshot (Game view AND the POI Editor window) and open
+it. If no capture tool works in this session, STOP and tell me -- visual checks are required in this domain.
+Then confirm the tree compiles and `git status` shows it committed; if not, STOP and report what is there.
 
 Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md
--- start with "## TODOs" (the [7B] items) and the status table (steps 0-7A DONE and verified).
-Context only: _3.2 (families), _3.3 (tokens), _5.1 (Editor rules + "Verifying and debugging layout"),
-_2.6 (selection bus, zoom on select) for wall_locator / related.
-Re-verify the baseline first (compile clean, EditMode + PlayMode all green; the tree was committed).
+-- start with "## TODOs" (the [7C] items) and the status table (0-7B done; 7C, 8A, 8B planned).
+Context only: _3.2, _3.3, _5.1 (Editor rules + "Verifying and debugging layout"), _2.6 (selection bus).
+Re-verify the baseline (compile clean, EditMode + PlayMode all green).
 
-PART 1 -- the four [7B] TODOs:
-1. One screen-UI raycast: move PoiCardHost.AnythingUnder into ScreenUIHit, one hit list, host calls it.
-   Behaviour unchanged; the existing tap-outside and pinch tests must stay green.
-2. Collapsed header = one line (smaller title, chip hidden); its max height is a token; a real-scroll test
-   asserts collapsed height <= token and full header back at scroll top. Capture both.
-3. Lightbox: swipe left/right between pictures + pinch-zoom inside (reuse ZoomPanRule). Real drag/pinch tests.
-4. Make PoiCardTapZoomTests deterministic: inject a time source into the host's tap path (or queue the taps
-   with explicit timestamps) so no real-time wait decides the result. Run the suite 5 times: 5/5 green.
-   Then delete the [watch] flake line.
+PART 1 -- step 7C (close-out, no new features):
+1. `related` finished through the section 7 micro-cycle: add it to The Lamp (carousel with manual items
+   incl. "Lamp - Military", and next_along_wall), a Phase B real-scene test (a real tap on a related POI
+   selects it through SelectionEventBus, the card rebinds to that POI; next_along_wall goes to the neighbour
+   WallAxisRule says, on the running wall), captures of both variants in the real scene.
+2. Capture + checklist of the Card Content Editor rows of hotspot_image, wall_locator, today_map and
+   related (headers over cells, (i) column, Choice / PoiRef / slider rows, warnings), and today_map in the
+   real scene. Fix what the captures show. Update _5.1 (pending list + Card Content section).
+3. Mark row 7C done with proof; delete the [7C] TODO lines.
+Commit checkpoint suggestion in your summary before Part 2.
 
-PART 2 -- Tier 2 group B, one kind at a time through the section 7 micro-cycle (definition -> round trip
--> view -> Phase A gallery + tests -> Editor rows -> fixture on "The Lamp" -> Phase B real-scene test
--> capture + checklist -> docs):
-- hotspot_image (numbered, loupes): image*, spots* items: x, y (0-1 sliders), title*, text. Tap a spot ->
-  its text opens under the picture; loupes = magnified circle crops. The Editor needs a way to place x/y:
-  sliders are enough now; note a click-to-place picker as a TODO, do not build it.
-- wall_locator (strip, neighbours): no authored fields; reads this wall's POI positions (captured
-  positions -> a horizontal strip, this POI highlighted, the camera's position as "you" in Play Mode).
-  neighbours = the nearest POI left and right along the strip, tap selects it through SelectionEventBus
-  (the card rebinds, zoom-on-select as for a marker tap). Define "along the wall" in ONE pure rule
-  (project on the wall's main axis, same idea as the minimap's MinimapLayout -- reuse it if it fits).
-- today_map (static, bridge): map image*, lat, lng (Number), maps_url; "Directions" opens the URL
-  (Application.OpenURL behind an interface so tests can check the call without leaving Unity).
-- related (carousel, next_along_wall): source Choice (manual / same_category / nearest), items: PoiRef;
-  tap selects that POI through the bus. next_along_wall reuses wall_locator's rule.
-Fixture: The Lamp gets every group B kind x variant; Lamp - Military keeps its short card + gallery.
-Never change any POI's id/name/category/summary/keywords (git diff = card data + media only).
-
-Rules as before: no literal colours/sizes in card C#/UXML, no visitor strings in code (CardStrings),
-capture and check every new Editor row and render yourself (40-testing 4.5).
-Stop when both parts are green. Update _3.1 (row 7B with proof, delete done TODO lines, design history
-for any deviation), 10-structure.md, _5.1. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+PART 2 -- step 8A, Tier 3 group A, one kind at a time through the section 7 micro-cycle:
+- CardLocalState first (pure core + a PlayerPrefs store behind an interface; keys scoped by wall + POI +
+  block key; reset in the Detail Card > Test sub-foldout). It is the ONE store for answered/voted/seen;
+  view-only state (flip, glossary open) must not go in it (see the [Tier 3] TODO).
+- knowledge_check (multiple_choice, true_false_swipe, image_choice): questions* items: question*, options
+  (items: text / image for image_choice), correct index*, explanation*; show_after_viewed (Toggle: the
+  question appears only once the card was scrolled past the content). Correct = confirm + explanation;
+  wrong = gentle "Actually..." + explanation, no penalty (texts from CardStrings). Answers persist in
+  CardLocalState. Real-tap tests for each variant incl. a real swipe for true/false.
+- feedback (thumbs, stars): question; result persists in CardLocalState; emits one event through a small
+  ICardEvents seam (the future telemetry Type A/B boundary of the work plan) -- no backend.
+Fixture: The Lamp gets every 8A kind x variant; never change POI id/name/category/summary/keywords.
+Rules as before (no literal colours/sizes, no visitor strings in code, capture and check every new Editor
+row and render yourself). Stop when 8A is green. Update _3.1 (rows 7C and 8A with proof, TODOs, design
+history), 10-structure.md, _5.1. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If _3.1 is wrong against the real code, STOP and report.
 
-and then also i am trying to commit to git but something is giving errors... you try to commit: 
-"POI card: Tier 1 group B, 6C review fixes (family split, search hides at full, header collapse, block headings) and Tier 2 group A (picture fields, header pictures, gallery + lightbox, before/after, zoom image)"
+
+and start by commiting the current whole folder "add ." to git with mssage
+POI card: Tier 2 group B (hotspot image, wall locator, today map, related rule + view), collapsed header, lightbox swipe/pinch, deterministic tap and drag clocks
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

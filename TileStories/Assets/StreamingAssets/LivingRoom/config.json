@@ -3726,6 +3726,633 @@
                         ]
                     },
                     {
+                        "key": "block_35",
+                        "kind": "hotspot_image",
+                        "variant": "numbered",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Explore the panel"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Explore o painel"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "image",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "castle_then.png",
+                                "items": []
+                            },
+                            {
+                                "key": "spots",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "x",
+                                                "text": [],
+                                                "number": 0.30000001192092898,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "y",
+                                                "text": [],
+                                                "number": 0.44999998807907107,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The west tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre oeste"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The first tower the painter drew, square and plain."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A primeira torre que o pintor desenhou, quadrada e simples."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "x",
+                                                "text": [],
+                                                "number": 0.5,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "y",
+                                                "text": [],
+                                                "number": 0.30000001192092898,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The keep"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre de menagem"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The tallest tower: the last refuge of the castle."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre mais alta: o ultimo refugio do castelo."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "x",
+                                                "text": [],
+                                                "number": 0.7200000286102295,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "y",
+                                                "text": [],
+                                                "number": 0.5,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The east tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre leste"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Its battlements lost two merlons in the earthquake."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As ameias perderam duas merlas no terramoto."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "x",
+                                                "text": [],
+                                                "number": 0.5,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "y",
+                                                "text": [],
+                                                "number": 0.800000011920929,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The curtain wall"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A muralha"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_36",
+                        "kind": "hotspot_image",
+                        "variant": "loupes",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The towers up close"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "As torres de perto"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "image",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "castle_then.png",
+                                "items": []
+                            },
+                            {
+                                "key": "spots",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "x",
+                                                "text": [],
+                                                "number": 0.30000001192092898,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "y",
+                                                "text": [],
+                                                "number": 0.44999998807907107,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The west tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre oeste"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The first tower the painter drew, square and plain."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A primeira torre que o pintor desenhou, quadrada e simples."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "x",
+                                                "text": [],
+                                                "number": 0.5,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "y",
+                                                "text": [],
+                                                "number": 0.30000001192092898,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The keep"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre de menagem"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The tallest tower: the last refuge of the castle."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre mais alta: o ultimo refugio do castelo."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "x",
+                                                "text": [],
+                                                "number": 0.7200000286102295,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "y",
+                                                "text": [],
+                                                "number": 0.5,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The east tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre leste"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Its battlements lost two merlons in the earthquake."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As ameias perderam duas merlas no terramoto."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "x",
+                                                "text": [],
+                                                "number": 0.5,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "y",
+                                                "text": [],
+                                                "number": 0.800000011920929,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The curtain wall"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A muralha"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_37",
+                        "kind": "wall_locator",
+                        "variant": "strip",
+                        "display": "inline",
+                        "fields": []
+                    },
+                    {
+                        "key": "block_38",
+                        "kind": "wall_locator",
+                        "variant": "neighbours",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Next to it on the wall"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Ao lado, na parede"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_39",
+                        "kind": "today_map",
+                        "variant": "static",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "map",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "castle_map.png",
+                                "items": []
+                            },
+                            {
+                                "key": "lat",
+                                "text": [],
+                                "number": 38.71390151977539,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "lng",
+                                "text": [],
+                                "number": -9.133399963378907,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "maps_url",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "https://www.openstreetmap.org/?mlat=38.71390&mlon=-9.13340#map=17/38.71390/-9.13340",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_40",
+                        "kind": "today_map",
+                        "variant": "bridge",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "From the panel to today"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Do painel a hoje"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "map",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "castle_map.png",
+                                "items": []
+                            },
+                            {
+                                "key": "lat",
+                                "text": [],
+                                "number": 38.71390151977539,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "lng",
+                                "text": [],
+                                "number": -9.133399963378907,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "maps_url",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "https://www.openstreetmap.org/?mlat=38.71390&mlon=-9.13340#map=17/38.71390/-9.13340",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
                         "key": "block_15",
                         "kind": "sources",
                         "variant": "list",

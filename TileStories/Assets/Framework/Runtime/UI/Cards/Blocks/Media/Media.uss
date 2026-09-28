@@ -282,13 +282,10 @@
     color: var(--ts-on-accent);
 }
 
+/* the lightbox page's picture: a ZoomPanSurface filling the page (swipe to turn, pinch to look closer) */
 .card-gallery__full {
     flex-grow: 1;
     background-color: var(--ts-bg);
-}
-
-.card-gallery__full .card-image__picture {
-    -unity-background-scale-mode: scale-to-fit;
 }
 
 .card-gallery__full-caption {
@@ -377,21 +374,26 @@
 
 /* ---- zoom_image: the picture's size and place come from ZoomPanRule ---- */
 
-.card-zoom__frame {
-    height: var(--ts-media-height);
+/* ZoomPanSurface (zoom_image's frame, the lightbox page): the picture is placed and sized by ZoomPanRule inside a frame
+   that cuts it off at its edges */
+.card-zoompan {
     overflow: hidden;
-    border-radius: var(--ts-radius-m);
-    background-color: var(--ts-surface-2);
 }
 
-.card-zoom__image {
+.card-zoompan__image {
     position: absolute;
     border-radius: 0;
     background-color: var(--ts-clear);
 }
 
-.card-zoom__image .card-image__picture {
+.card-zoompan__image .card-image__picture {
     -unity-background-scale-mode: stretch-to-fill;
+}
+
+.card-zoom__frame {
+    height: var(--ts-media-height);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
 }
 
 .card-zoom__caption {
@@ -405,4 +407,171 @@
     margin-top: var(--ts-space-1);
     font-size: var(--ts-size-caption);
     color: var(--ts-ink-2);
+}
+
+/* ---- hotspot_image: numbered, loupes. The picture whole in its frame, every spot placed ON the picture by the view
+   (HotspotImageBlockView), centred on its point; a tapped spot's text opens under the picture ---- */
+
+.card-hotspot__frame {
+    height: var(--ts-media-height);
+    overflow: hidden;
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+.card-hotspot__picture {
+    position: absolute;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.card-hotspot__picture .card-image__picture {
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* a spot: a touch-target square centred on its point, the numbered circle in its middle */
+.card-hotspot__pin {
+    position: absolute;
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    translate: -50% -50%;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    background-color: var(--ts-clear);
+    align-items: center;
+    justify-content: center;
+}
+
+.card-hotspot__number {
+    width: var(--ts-hotspot-pin);
+    height: var(--ts-hotspot-pin);
+    border-radius: var(--ts-hotspot-pin-radius);
+    border-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-on-accent);
+    background-color: var(--ts-accent);
+    color: var(--ts-on-accent);
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
+}
+
+.card-hotspot__pin--open .card-hotspot__number {
+    background-color: var(--ts-ink);
+    border-color: var(--ts-accent);
+}
+
+/* loupes: the spot on the picture is only a small bare ring (the loupe under the picture is what the visitor taps) */
+.card-hotspot--loupes .card-hotspot__number {
+    width: var(--ts-hotspot-mark);
+    height: var(--ts-hotspot-mark);
+    border-radius: var(--ts-hotspot-mark-radius);
+    background-color: var(--ts-clear);
+    border-color: var(--ts-accent);
+}
+
+.card-hotspot__loupes {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: var(--ts-space-3);
+}
+
+.card-hotspot__loupe {
+    width: var(--ts-loupe-size);
+    height: var(--ts-loupe-size);
+    border-radius: var(--ts-loupe-radius);
+    overflow: hidden;
+    margin: 0 var(--ts-space-3) var(--ts-space-3) 0;
+    padding: 0;
+    border-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface-2);
+}
+
+.card-hotspot__loupe--open {
+    border-color: var(--ts-accent);
+}
+
+.card-hotspot__loupe-picture {
+    position: absolute;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.card-hotspot__loupe-picture .card-image__picture {
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* a close-up of a missing picture stays an empty circle: the picture above already says it is unavailable, and the
+   words do not fit a loupe */
+.card-hotspot__loupe-picture.card-image--unavailable > .card-image__unavailable {
+    display: none;
+}
+
+/* where the spot is inside its close-up (it leaves the centre near the picture's edges) */
+.card-hotspot__loupe-ring {
+    position: absolute;
+    width: var(--ts-hotspot-mark);
+    height: var(--ts-hotspot-mark);
+    translate: -50% -50%;
+    border-radius: var(--ts-hotspot-mark-radius);
+    border-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-accent);
+}
+
+.card-hotspot__hint {
+    margin-top: var(--ts-space-1);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+}
+
+/* the open spot's number + title and text; nothing while no spot is open */
+.card-hotspot__detail {
+    display: none;
+    margin-top: var(--ts-space-3);
+    padding: var(--ts-space-3);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+.card-hotspot__detail--open {
+    display: flex;
+}
+
+.card-hotspot__detail-heading {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* the open spot's number beside its title: the same circle as on the picture, in every variant */
+.card-hotspot__detail-heading .card-hotspot__number {
+    width: var(--ts-hotspot-pin);
+    height: var(--ts-hotspot-pin);
+    border-radius: var(--ts-hotspot-pin-radius);
+    background-color: var(--ts-accent);
+    border-color: var(--ts-on-accent);
+    color: var(--ts-on-accent);
+    flex-shrink: 0;
+    margin-right: var(--ts-space-2);
+}
+
+.card-hotspot__detail-title {
+    flex-shrink: 1;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-hotspot__paragraph {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: var(--ts-space-2) 0 0 0;
+    padding: 0;
 }

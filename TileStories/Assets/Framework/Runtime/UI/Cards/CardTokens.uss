@@ -111,6 +111,10 @@
     --ts-timeline-now: 16px;
     --ts-timeline-cell: 160px;
 
+    /* The pinned header collapsed by a scrolled stack: one line at most this tall. Read by PoiCardSheetView as a plain
+       number (panel units, like --ts-sheet-top-gap) for the stack's no-loop estimate; a test holds the collapsed look to it */
+    --ts-header-collapsed-max-height: 40;
+
     /* A person's monogram (the photo's place until Tier 2 images) */
     --ts-monogram-size: 48px;
 
@@ -131,6 +135,25 @@
     --ts-slider-line: 3px;
     --ts-dot-size: 8px;
     --ts-carousel-page: 300px;
+    /* hotspot_image (Media.uss): a spot's numbered circle on the picture (its tap area is --ts-touch-target), the loupes'
+       small ring on the picture, a loupe (a round close-up under it) and each one's radius (half its size) */
+    --ts-hotspot-pin: 28px;
+    --ts-hotspot-pin-radius: 14px;
+    --ts-hotspot-mark: 16px;
+    --ts-hotspot-mark-radius: 8px;
+    --ts-loupe-size: 72px;
+    --ts-loupe-radius: 36px;
+    /* wall_locator (Visit.uss): the strip's height, a POI's dot, this POI's dot, the visitor's ring, a neighbour's chevron */
+    --ts-locator-height: 24px;
+    --ts-locator-dot: 8px;
+    --ts-locator-self: 18px;
+    --ts-locator-you: 16px;
+    --ts-chevron: 10px;
+    /* today_map (Visit.uss): a bridge side's small picture (the wall's, today's map) */
+    --ts-today-thumb: 120px;
+    /* related (Visit.uss): a carousel card's width and picture height */
+    --ts-related-card: 140px;
+    --ts-related-picture: 96px;
     /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
     --ts-clear: rgba(0, 0, 0, 0);
 }

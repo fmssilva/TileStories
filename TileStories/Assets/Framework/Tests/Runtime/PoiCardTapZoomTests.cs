@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
 namespace TileStories.Tests
@@ -11,7 +12,9 @@ namespace TileStories.Tests
     // Tap outside vs double-tap zoom (_3.1 step 5b) proven with REAL touches in the REAL wall scene: a Touchscreen is
     // added to the running Input System and finger states are queued on it, so the zoom's own gesture reader
     // (ARZoomGestureInput, EnhancedTouch) and the card's tap poll (PoiCardHost, Pointer.current) both receive exactly
-    // what a finger gives them -- nothing is called directly, and event times are the Input System's real clock.
+    // what a finger gives them -- nothing is called directly. TIME is the test's, not the frame rate's (_3.1 [7B]): every
+// finger state carries an explicit event time (the zoom's double tap reads Touch.time) and the card's tap clock
+// (PoiCardHost.Clock) reads the same test time, so no slow frame can decide whether two taps fell inside one window.
     // (Not InputTestFixture: its reset re-enables the scene's shared UI actions against a fresh device set, which
     // throws inside InputSystemUIInputModule once another suite has used them.)
     public class PoiCardTapZoomTests : SearchSceneFixture
@@ -19,6 +22,9 @@ namespace TileStories.Tests
         private Touchscreen _screen;
         private InputSettings _savedSettings;
         private InputSettings _testSettings;
+        // The test's own time: seconds since BeginTestTime; the Input System events get _eventBase + it
+        private float _t;
+        private double _eventBase;
 
         [SetUp]
         public void AddFinger()
@@ -37,18 +43,40 @@ namespace TileStories.Tests
             if (_screen != null && _screen.added) InputSystem.RemoveDevice(_screen);
             if (_savedSettings != null) InputSystem.settings = _savedSettings;
             if (_testSettings != null) Object.Destroy(_testSettings);
+            if (Card != null) Card.Clock = () => Time.unscaledTime;
+        }
+
+        // From here on the card's tap clock and the finger events run on the test's time (starting at 0)
+        private void BeginTestTime()
+        {
+            _t = 0f;
+            _eventBase = InputState.currentTime;
+            Card.Clock = () => _t;
+        }
+
+        // Move the test's time forward by `seconds` (a pending close falls due on the card's next frame)
+        private IEnumerator Advance(float seconds)
+        {
+            _t += seconds;
+            yield return null;
+            yield return null;
         }
 
         private void Queue(TouchPhase phase, Vector2 screenPoint) =>
-            InputSystem.QueueStateEvent(_screen, new TouchState { touchId = 1, phase = phase, position = screenPoint, pressure = 1f });
+            InputSystem.QueueStateEvent(_screen, new TouchState { touchId = 1, phase = phase, position = screenPoint, pressure = 1f },
+                _eventBase + _t);
 
-        // One finger tap at `screenPoint`: down, held ~2 frames, up. Each state is processed in its frame's own input
-        // update, before MonoBehaviour.Update (where "pressed / released this frame" is true).
+        // How long a tap's finger stays down (test time), well under any double-tap window
+        private const float PressSeconds = 0.05f;
+
+        // One finger tap at `screenPoint` starting NOW (test time): down, up PressSeconds later. Each state is processed in
+        // its frame's own input update, before MonoBehaviour.Update (where "pressed / released this frame" is true).
         private IEnumerator Tap(Vector2 screenPoint)
         {
             Queue(TouchPhase.Began, screenPoint);
             yield return null;
             yield return null;
+            _t += PressSeconds;
             Queue(TouchPhase.Ended, screenPoint);
             yield return null;
             yield return null;
@@ -68,17 +96,44 @@ namespace TileStories.Tests
         {
             yield return OpenLampCard();
             var empty = EmptyScreenPoint();
+            float window = Session.ZoomSettings.double_tap_window_s;
+            BeginTestTime();
 
             yield return Tap(empty);
             Assert.IsTrue(Card.ClosePending, "the first real tap on nothing is heard by the card: a close is pending");
             Assert.IsTrue(Card.Sheet.IsOpen, "...but it does not close yet");
+            _t += window * 0.3f;
             yield return Tap(empty + new Vector2(6f, -4f));
 
-            yield return CardTestInput.Settle(Session.ZoomSettings.double_tap_window_s + Session.ZoomSettings.transition_duration_s + 0.2f);
+            // - the whole window passes on the test's clock, then the zoom's step animation gets its real time
+            yield return Advance(window * 2f);
+            yield return CardTestInput.Settle(Session.ZoomSettings.transition_duration_s + 0.2f);
             Assert.IsTrue(Card.Sheet.IsOpen, "the zoom won: the card is still open");
             Assert.AreEqual("lamp", SelectionEventBus.CurrentPoiId, "and the POI is still selected");
             Assert.IsFalse(Card.ClosePending);
             Assert.Greater(ARZoomState.ZoomFactor, 1.01f, "the same two real taps stepped the zoom in");
+        }
+
+        // The proof the test's time decides (_3.1 [7B]): the same two taps as above, a few REAL frames apart but a window and
+        // a half apart in event time -- neither the zoom nor the card may call them a double tap
+        [UnityTest]
+        public IEnumerator TwoRealTaps_AWindowAndAHalfApartInEventTime_AreTwoLoneTaps_EvenWhenFramesAreQuick()
+        {
+            yield return OpenLampCard();
+            var empty = EmptyScreenPoint();
+            float window = Session.ZoomSettings.double_tap_window_s;
+            BeginTestTime();
+
+            yield return Tap(empty);
+            _t += window * 1.5f;
+            // - the first tap's close fell due on the card's clock: it closes on this frame, before the second tap lands
+            yield return null;
+            yield return null;
+            Assert.IsFalse(Card.Sheet.IsOpen, "the window passed on the test's clock: the lone first tap closed the card");
+            yield return Tap(empty + new Vector2(6f, -4f));
+            yield return Advance(window * 2f);
+            yield return CardTestInput.Settle(Session.ZoomSettings.transition_duration_s + 0.2f);
+            Assert.AreEqual(1f, ARZoomState.ZoomFactor, 1e-4f, "the zoom read the event times too: no double tap, no zoom step");
         }
 
         [UnityTest]
@@ -86,11 +141,15 @@ namespace TileStories.Tests
         {
             yield return OpenLampCard();
             var empty = EmptyScreenPoint();
+            float window = Session.ZoomSettings.double_tap_window_s;
+            BeginTestTime();
 
             yield return Tap(empty);
-            Assert.IsTrue(Card.Sheet.IsOpen, "still inside the double-tap window");
-            yield return CardTestInput.Settle(Session.ZoomSettings.double_tap_window_s + 0.2f);
-            Assert.IsFalse(Card.Sheet.IsOpen, "no second tap came: the card closed");
+            yield return Advance(window * 0.5f);
+            Assert.IsTrue(Card.Sheet.IsOpen, "still inside the double-tap window (half of it passed)");
+            Assert.IsTrue(Card.ClosePending);
+            yield return Advance(window);
+            Assert.IsFalse(Card.Sheet.IsOpen, "no second tap came and the window passed: the card closed");
             Assert.IsNull(SelectionEventBus.CurrentPoiId, "through the bus");
             Assert.AreEqual(1f, ARZoomState.ZoomFactor, 1e-4f, "a single tap is not a zoom");
         }
@@ -101,14 +160,16 @@ namespace TileStories.Tests
             yield return OpenLampCard();
             var empty = EmptyScreenPoint();
             var far = EmptyScreenPoint(empty, Session.ZoomSettings.double_tap_move_tolerance_px * 3f);
+            float window = Session.ZoomSettings.double_tap_window_s;
+            BeginTestTime();
 
-            float start = Time.unscaledTime;
             yield return Tap(empty);
+            _t += window * 0.3f;
             yield return Tap(far);
-            Assert.Less(Time.unscaledTime - start, Session.ZoomSettings.double_tap_window_s, "precondition: both taps inside one double-tap window");
+            Assert.Less(_t, window, "by construction: both taps inside one double-tap window (test time)");
             Assert.IsTrue(Card.Sheet.IsOpen, "the second tap came before the first one's close was due");
             Assert.IsTrue(Card.ClosePending, "the far tap is a new lone tap on nothing: its own close is pending");
-            yield return CardTestInput.Settle(Session.ZoomSettings.double_tap_window_s + 0.2f);
+            yield return Advance(window + PressSeconds);
             Assert.IsFalse(Card.Sheet.IsOpen, "two lone taps on nothing: the card closes");
             Assert.AreEqual(1f, ARZoomState.ZoomFactor, 1e-4f, "the zoom did not take them as a double tap either");
         }
@@ -172,11 +233,75 @@ namespace TileStories.Tests
             yield return Pinch(a, b, 160f);
             Assert.AreEqual(1f, ARZoomState.ZoomFactor, 1e-4f, "fingers that started on the card never zoom the camera");
 
+            BeginTestTime();
             yield return Tap(centre);
+            _t += Session.ZoomSettings.double_tap_window_s * 0.3f;
             yield return Tap(centre + new Vector2(4f, 2f));
-            yield return CardTestInput.Settle(Session.ZoomSettings.double_tap_window_s + Session.ZoomSettings.transition_duration_s + 0.2f);
+            yield return Advance(Session.ZoomSettings.double_tap_window_s * 2f);
+            yield return CardTestInput.Settle(Session.ZoomSettings.transition_duration_s + 0.2f);
             Assert.AreEqual(1f, ARZoomState.ZoomFactor, 1e-4f, "...nor does a double tap on the card");
             Assert.IsTrue(Card.Sheet.IsOpen, "and the card stays open");
+        }
+
+        // One real finger down at `from`, moved by `delta` over `frames` frames, lifted
+        private IEnumerator Swipe(Vector2 from, Vector2 delta, int frames = 8)
+        {
+            QueueFinger(1, TouchPhase.Began, from);
+            yield return null;
+            for (int i = 1; i <= frames; i++)
+            {
+                QueueFinger(1, TouchPhase.Moved, from + delta * i / frames);
+                yield return null;
+            }
+            QueueFinger(1, TouchPhase.Ended, from + delta);
+            yield return null;
+            yield return null;
+        }
+
+        // _3.1 [7B]: The Lamp's gallery lightbox under REAL fingers -- a tap opens it, one finger swiping left turns to the
+        // next picture, two fingers enlarge the picture; the AR camera never zooms, and the enlarged picture is not turned
+        [UnityTest]
+        public IEnumerator TheLampsLightbox_ARealSwipeTurnsThePage_ARealPinchEnlargesIt_AndTheCameraNeverZooms()
+        {
+            yield return OpenLampCard();
+            Card.Sheet.SetStop(SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle();
+            var stack = Card.Sheet.Stack;
+            var gallery = System.Linq.Enumerable.First(System.Linq.Enumerable.OfType<GalleryBlockView>(stack.BoundViews),
+                g => g.Shots.Count >= 2);
+            stack.Scroll.ScrollTo(gallery.Shots[0].Box);
+            yield return CardTestInput.Settle(0.2f);
+            BeginTestTime();
+            yield return Tap(ScreenPointOf(gallery.Shots[0].Box));
+            yield return CardTestInput.Settle(0.2f);
+            var takeover = Card.Sheet.Takeover;
+            Assert.IsTrue(takeover.IsOpen, "a real finger tap on the picture opened the lightbox");
+            int start = takeover.PageIndex;
+            Assert.Less(start, takeover.PageCount - 1, "precondition: a next picture exists");
+
+            var frame = takeover.Page.Q("card-gallery-full");
+            Vector2 centre = ScreenPointOf(frame);
+            float travel = frame.worldBound.width * Screen.width / frame.panel.visualTree.layout.width * 0.4f;
+            Assert.IsTrue(ScreenUIHit.IsOverScreenUI(centre), "precondition: the finger goes down on the lightbox");
+            yield return Swipe(centre, new Vector2(-travel, 0f));
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(start + 1, takeover.PageIndex, "one real finger swiping left: the next picture");
+            Assert.IsTrue(takeover.IsOpen && Card.Sheet.IsOpen, "the lightbox and the card stay open");
+
+            frame = takeover.Page.Q("card-gallery-full");
+            centre = ScreenPointOf(frame);
+            yield return Pinch(centre + new Vector2(-30f, 0f), centre + new Vector2(30f, 0f), 200f, frames: 10);
+            yield return CardTestInput.Settle(0.2f);
+            var picture = takeover.Page.Q(className: "card-zoompan__image");
+            Assert.Greater(picture.worldBound.width, frame.worldBound.width * 1.3f, "two real fingers spreading enlarged the picture");
+            Assert.AreEqual(1f, ARZoomState.ZoomFactor, 1e-4f, "the camera did not zoom");
+            Assert.AreEqual(start + 1, takeover.PageIndex, "a pinch is not a page turn");
+            yield return Capture("Card_Lamp_Lightbox_Pinched");
+
+            yield return Swipe(centre, new Vector2(-travel, 0f));
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(start + 1, takeover.PageIndex, "an enlarged picture moves under a swipe, it does not turn");
+            takeover.Close();
         }
 
         // _3.1 step 7: The Lamp's zoom_image under two REAL fingers (Touchscreen -> the UI input module -> one UI Toolkit

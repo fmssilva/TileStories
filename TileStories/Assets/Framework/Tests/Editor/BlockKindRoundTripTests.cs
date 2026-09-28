@@ -39,6 +39,7 @@ namespace TileStories.Editor.Tests
                 case BlockFieldType.Asset: v.asset = "folder/" + f.Key + ".png"; break;
                 case BlockFieldType.PoiRef: v.value = "poi_2"; break;
                 case BlockFieldType.Color: v.value = "#1F3F8F"; break;
+                case BlockFieldType.Url: v.value = "https://example.org/" + f.Key; break;
                 case BlockFieldType.Items:
                     for (int row = 0; row < 2; row++)
                     {
@@ -51,6 +52,8 @@ namespace TileStories.Editor.Tests
                             else if (sub.Type == BlockFieldType.Color) s.value = ColourOf(row);
                             else if (sub.Type == BlockFieldType.Toggle) s.flag = row == 0;
                             else if (sub.Type == BlockFieldType.Asset) s.asset = "folder/" + sub.Key + row + ".png";
+                            else if (sub.Type == BlockFieldType.PoiRef) s.value = "poi_" + (row + 2);
+                            else if (sub.Type == BlockFieldType.Url) s.value = "https://example.org/" + sub.Key + row;
                             else s.text = Languages.Select(l => new LocalizedEntry { lang = l, value = TextOf(sub.Key + row, l) }).ToList();
                             item.fields.Add(s);
                         }
@@ -119,6 +122,7 @@ namespace TileStories.Editor.Tests
                 case BlockFieldType.Asset: Assert.AreEqual("folder/" + f.Key + ".png", read.Asset(f.Key), where); break;
                 case BlockFieldType.PoiRef: Assert.AreEqual("poi_2", read.Value(f.Key), where); break;
                 case BlockFieldType.Color: Assert.AreEqual("#1F3F8F", read.Value(f.Key), where); break;
+                case BlockFieldType.Url: Assert.AreEqual("https://example.org/" + f.Key, read.OpenableUrl(f.Key), where + ": a link the card opens"); break;
                 case BlockFieldType.Items:
                     var items = read.Items(f.Key);
                     Assert.AreEqual(2, items.Count, where + ": both rows");
@@ -138,6 +142,10 @@ namespace TileStories.Editor.Tests
                                 Assert.AreEqual(row == 0, read.ItemFlag(items[row], sub.Key), where + " row " + row);
                             else if (sub.Type == BlockFieldType.Asset)
                                 Assert.AreEqual("folder/" + sub.Key + row + ".png", read.ItemValidAsset(items[row], sub.Key, sub.Media), where + " row " + row + ": a path the rule accepts");
+                            else if (sub.Type == BlockFieldType.PoiRef)
+                                Assert.AreEqual("poi_" + (row + 2), read.ItemValue(items[row], sub.Key), where + " row " + row);
+                            else if (sub.Type == BlockFieldType.Url)
+                                Assert.AreEqual("https://example.org/" + sub.Key + row, read.ItemValue(items[row], sub.Key), where + " row " + row);
                             else
                                 Assert.AreEqual(TextOf(sub.Key + row, lang), read.ItemText(items[row], sub.Key), where + " row " + row + "." + sub.Key);
                         }

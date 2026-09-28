@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
@@ -43,6 +42,10 @@ namespace TileStories
         public bool ClosePending => _tapOutside.IsPending;
 
         private readonly TapOutsideDismissal _tapOutside = new();
+
+        // The tap path's clock (press and release times, a pending close falling due): Time.unscaledTime in the app. A test
+        // sets its own, so its taps' times are what it says -- no slow frame can decide whether two taps fell in one window
+        internal System.Func<float> Clock { get; set; } = () => Time.unscaledTime;
         private bool _subscribed;
         private Vector2 _pressPosition;
         private float _pressTime;
@@ -87,9 +90,18 @@ namespace TileStories
             var root = GetComponent<UIDocument>().rootVisualElement;
             Sheet = new PoiCardSheetView(root, BlockRegistry.Shared, CardStyleSheets(tokens, cardStyle, blockStyles));
             Sheet.CloseRequested += SelectionEventBus.Clear;
+            Sheet.Viewer = ViewerOnTheWall;
             // - the full card would cover the search bar half-way (neither readable nor tappable): the bar steps aside
             Sheet.StopChanged += stop => { if (searchUI != null) searchUI.SetTopCoveredByCard(SheetStopRule.CoversScreenTop(stop)); };
             Sheet.Layer.RegisterCallback<GeometryChangedEvent>(_ => SafeAreaHelper.ApplyAsOffsets(Sheet.Layer));
+        }
+
+        // The camera's place in the wall's frame (where the POI positions live: the markers' spawn root), or null
+        private Vector3? ViewerOnTheWall()
+        {
+            var cam = Camera.main;
+            if (cam == null || wallSession == null) return null;
+            return wallSession.MarkerSpawnRoot.InverseTransformPoint(cam.transform.position);
         }
 
         // Every stylesheet of the card, in the order they apply: tokens, container, then the blocks' (shared by the
@@ -154,7 +166,7 @@ namespace TileStories
         private void Update()
         {
             if (Sheet == null) return;
-            if (_tapOutside.TakeDue(Time.unscaledTime, TapOutsideDismissal.DelayFor(wallSession != null ? wallSession.ZoomSettings : null)))
+            if (_tapOutside.TakeDue(Clock(), TapOutsideDismissal.DelayFor(wallSession != null ? wallSession.ZoomSettings : null)))
                 SelectionEventBus.Clear();
             var pointer = Pointer.current;
             if (pointer == null) return;
@@ -162,16 +174,16 @@ namespace TileStories
             {
                 _pressed = true;
                 _pressPosition = pointer.position.ReadValue();
-                _pressTime = Time.unscaledTime;
+                _pressTime = Clock();
             }
             else if (_pressed && pointer.press.wasReleasedThisFrame)
             {
                 _pressed = false;
-                HandleScreenTap(_pressPosition, pointer.position.ReadValue(), _pressTime, Time.unscaledTime);
+                HandleScreenTap(_pressPosition, pointer.position.ReadValue(), _pressTime, Clock());
             }
         }
 
-        // A press at `down` released at `up` (screen pixels, times on the Time.unscaledTime clock). A tap on empty
+        // A press at `down` released at `up` (screen pixels, times on the Clock). A tap on empty
         // camera space closes the card -- at once while zoom is off, else once the zoom's double-tap window passes
         // with no second tap (ClosePending meanwhile). Returns true when it closed NOW. The input poll above calls
         // it; so can a test, with real positions and times.
@@ -181,23 +193,13 @@ namespace TileStories
             var zoom = wallSession != null ? wallSession.ZoomSettings : null;
             bool isTap = CardTapRule.IsTap(down, up, downTime, upTime, Screen.height);
             bool closes = CardTapRule.ShouldDismiss(Sheet != null && Sheet.IsOpen, settings?.container.dismiss_on_tap_outside ?? true,
-                isTap, isTap && AnythingUnder(up));
+                isTap, isTap && ScreenUIHit.IsOverAnything(up));
             float window = TapOutsideDismissal.DelayFor(zoom);
             _tapOutside.OnTap(upTime, up, closes, window, zoom?.double_tap_move_tolerance_px ?? 0f);
             // - zoom off: no second tap can make it a double tap, so there is nothing to wait for
             if (!_tapOutside.TakeDue(upTime, window)) return false;
             SelectionEventBus.Clear();
             return true;
-        }
-
-        // Whether anything the EventSystem raycasts (a marker, the card, the search UI) is under this screen point
-        public static bool AnythingUnder(Vector2 screenPoint)
-        {
-            var eventSystem = EventSystem.current;
-            if (eventSystem == null) return false;
-            var hits = new List<RaycastResult>();
-            eventSystem.RaycastAll(new PointerEventData(eventSystem) { position = screenPoint }, hits);
-            return hits.Count > 0;
         }
 
         private POIData FindPoi(string id)

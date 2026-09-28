@@ -66,6 +66,10 @@ namespace TileStories
             // - the marker palettes the status block reads, configured exactly as a wall configures them
             MarkerVisualSettings.ApplyPalettes(wall);
             var poi = CardGalleryDefinitions.Poi(entry);
+            // - as on a real wall, the shown POI is one of the wall's POIs (wall_locator lays it among them)
+            wall.pois.Add(poi);
+            var viewer = entry.Viewer;
+            Sheet.Viewer = () => viewer;
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wall.pois);
             var context = new BlockBindContext
             {

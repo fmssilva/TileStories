@@ -150,5 +150,23 @@ namespace TileStories.Editor.Tests
                 "collapsing would leave less than CollapseAfter to scroll: stays open (no snap-open loop)");
             Assert.IsTrue(HeaderCollapseRule.Next(false, 40f, freed + HeaderCollapseRule.CollapseAfter + 1f, freed), "just enough left to scroll: collapses");
         }
+
+        // _3.1 step 7B: only a whole web address ever reaches the device (today_map's Directions)
+        [Test]
+        public void WebLinkRule_OpensOnlyAWholeHttpOrHttpsAddress()
+        {
+            Assert.IsTrue(WebLinkRule.IsOpenable("https://maps.example.org/place?q=38.7,-9.1"));
+            Assert.IsTrue(WebLinkRule.IsOpenable("http://example.org"));
+            Assert.AreEqual("https://example.org/a", WebLinkRule.Openable("  https://example.org/a  "), "trimmed");
+            foreach (var refused in new[] { null, "", "   ", "www.example.org", "example.org/place", "javascript:alert(1)", "file:///C:/secret.txt",
+                         "mailto:someone@example.org", "https://", "maps" })
+            {
+                Assert.IsFalse(WebLinkRule.IsOpenable(refused), "refused: '" + refused + "'");
+                Assert.AreEqual("", WebLinkRule.Openable(refused));
+            }
+            // - a stored Url field: HasContent is "a link the card opens", so a required one that is not is not shown
+            Assert.IsTrue(BlockFieldReader.HasContent(new BlockFieldValue { value = "https://example.org" }, BlockFieldType.Url));
+            Assert.IsFalse(BlockFieldReader.HasContent(new BlockFieldValue { value = "example.org" }, BlockFieldType.Url));
+        }
     }
 }

@@ -136,6 +136,13 @@
     display: none;
 }
 
+/* the one-line collapsed header sits on a hairline, so its title never reads as the next block's heading */
+.poi-card__header--collapsed {
+    padding-bottom: var(--ts-space-2);
+    border-bottom-width: var(--ts-line-width);
+    border-bottom-color: var(--ts-line);
+}
+
 .poi-card__header .card-block-slot,
 .poi-card__footer .card-block-slot {
     margin-bottom: 0;

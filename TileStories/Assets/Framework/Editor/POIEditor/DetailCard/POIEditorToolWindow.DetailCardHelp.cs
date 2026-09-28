@@ -165,6 +165,11 @@ namespace TileStories.Editor
             fieldLabel + " '" + typed.Trim() + "' is not a colour: write it as #RRGGBB (for example #1F3F8F), or pick it. " +
             "Until then the card leaves this row out.";
 
+        // A Url field holds text that is not a link the card opens (WebLinkRule)
+        internal static string CardUrlInvalidText(string fieldLabel, string typed) =>
+            fieldLabel + " '" + typed.Trim() + "' is not a web link the card opens: write the whole address, starting with https:// " +
+            "(for example https://maps.example.org/place). Until then the card shows no button for it.";
+
         // A Compare Points block names its own point in Compare With
         internal const string CardCompareWithItselfNote =
             "Compare With is this point itself: the card shows the same condition twice. Pick another point.";

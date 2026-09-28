@@ -24,7 +24,7 @@ namespace TileStories.Editor
         internal static bool HasBlockFieldDrawer(BlockFieldType type) =>
             type == BlockFieldType.LocalizedText || type == BlockFieldType.LocalizedLongText || type == BlockFieldType.Items
             || type == BlockFieldType.Choice || type == BlockFieldType.Color || type == BlockFieldType.Toggle
-            || type == BlockFieldType.PoiRef || type == BlockFieldType.Asset || type == BlockFieldType.Number;
+            || type == BlockFieldType.PoiRef || type == BlockFieldType.Asset || type == BlockFieldType.Number || type == BlockFieldType.Url;
 
         // Every field of one block, as its kind defines them
         private void DrawBlockFields(BlockInstanceData block, BlockKindDefinition definition, int blockIndex)
@@ -62,6 +62,9 @@ namespace TileStories.Editor
                 else if (field.Type == BlockFieldType.Number)
                     DrawNumberRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
                         () => NumberValue(block, field), value => EnsureBlockField(block, field.Key).number = value);
+                else if (field.Type == BlockFieldType.Url)
+                    DrawUrlRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
+                        () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value));
                 else
                     DrawLocalizedRows(field, languages, IndentLevel1, "Block field " + field.Key, blockIndex,
                         lang => LocalizedValue(block, field.Key, lang), (lang, text) => SetLocalizedValue(block, field.Key, lang, text));
@@ -131,7 +134,7 @@ namespace TileStories.Editor
                 EditorRowEnd();
 
                 foreach (var sub in field.ItemFields)
-                    DrawItemSubField(item, sub, languages, probe + i + " " + sub.Key, blockIndex, _config.card_settings?.media_resources_path);
+                    DrawItemSubField(item, sub, languages, probe + i + " " + sub.Key, blockIndex, _config.card_settings?.media_resources_path, _config.pois);
             }
 
             DrawEditorRow(out float addRow, out _, IndentLevel1);
@@ -146,7 +149,8 @@ namespace TileStories.Editor
         }
 
         // One sub-field of one Items row
-        private static void DrawItemSubField(BlockItemData item, BlockFieldDefinition sub, List<string> languages, string probeName, int probeIndex, string mediaFolder)
+        private static void DrawItemSubField(BlockItemData item, BlockFieldDefinition sub, List<string> languages, string probeName, int probeIndex, string mediaFolder,
+            List<POIData> pois)
         {
             if (sub.Type == BlockFieldType.Asset)
                 DrawAssetRow(sub, IndentLevel2, probeName, probeIndex, mediaFolder, () => ItemAssetValue(item, sub.Key), value => EnsureItemField(item, sub.Key).asset = value);
@@ -156,6 +160,12 @@ namespace TileStories.Editor
                 DrawColorRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
             else if (sub.Type == BlockFieldType.Toggle)
                 DrawToggleRow(sub, IndentLevel2, probeName, probeIndex, () => ItemFlagValue(item, sub.Key), value => EnsureItemField(item, sub.Key).flag = value);
+            else if (sub.Type == BlockFieldType.Number)
+                DrawNumberRow(sub, IndentLevel2, probeName, probeIndex, () => BlockFieldReader.ItemNumber(item, sub), value => EnsureItemField(item, sub.Key).number = value);
+            else if (sub.Type == BlockFieldType.PoiRef)
+                DrawPoiRefRow(sub, IndentLevel2, probeName, probeIndex, pois, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
+            else if (sub.Type == BlockFieldType.Url)
+                DrawUrlRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
             else
                 DrawLocalizedRows(sub, languages, IndentLevel2, probeName, probeIndex,
                     lang => ItemLocalizedValue(item, sub.Key, lang), (lang, text) => SetItemLocalizedValue(item, sub.Key, lang, text));
@@ -196,6 +206,22 @@ namespace TileStories.Editor
             if (edited != current) set(edited);
             if (!string.IsNullOrWhiteSpace(get()) && !BlockFieldReader.TryParseColor(get(), out _))
                 EditorGUILayout.HelpBox(CardColorInvalidText(field.Label, get()), MessageType.Warning);
+        }
+
+        // A Url field: one text field (a link is the same in every language), stored as typed. Text the card would not open
+        // (WebLinkRule) stays, with a warning under it -- the card shows no button for it until it is fixed. Drawing never writes.
+        private static void DrawUrlRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<string> get, Action<string> set)
+        {
+            string current = get();
+            DrawEditorRow(out float rowWidth, out _, indent);
+            EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
+            string edited = EditorGUILayout.TextField(current, GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
+            ReportTableCellRect(probeName, probeIndex);
+            HelpInfoButton.Draw(field.Label, field.Help);
+            EditorRowEnd();
+            if (edited != current) set(edited);
+            if (!string.IsNullOrWhiteSpace(get()) && !WebLinkRule.IsOpenable(get()))
+                EditorGUILayout.HelpBox(CardUrlInvalidText(field.Label, get()), MessageType.Warning);
         }
 
         // A PoiRef field: a popup of this wall's POIs named as the POI list names them ("3. North tower", never an id). A

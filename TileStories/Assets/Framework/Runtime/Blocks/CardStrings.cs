@@ -61,12 +61,27 @@ namespace TileStories
             public const string TakeoverBack = "takeover_back";
             // The hint under a zoom_image picture
             public const string ZoomHint = "zoom_hint";
+            // The hint under a hotspot_image picture (tap a spot)
+            public const string HotspotHint = "hotspot_hint";
+            // wall_locator: its default heading, and the visitor's own place on the strip
+            public const string WallLocatorHeading = "wall_locator_heading";
+            public const string WallLocatorYou = "wall_locator_you";
+            // today_map: its default heading, the button, the bridge's two sides, and how two coordinates are written
+            public const string TodayMapHeading = "today_map_heading";
+            public const string TodayMapDirections = "today_map_directions";
+            public const string TodayMapThen = "today_map_then";
+            public const string TodayMapNow = "today_map_now";
+            public const string TodayMapCoordinates = "today_map_coordinates";
+            // related: its default heading
+            public const string RelatedHeading = "related_heading";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Close, FunFactLabel, FunFactHint, StatusHeading, StatusUnknownMark, StatusUnknown, StatusPercent,
                 SourcesHeading, SourcesVerified, SourcesDraft, TimelineNow, StoryChapterOf, StoryPrevious, StoryNext, CompareHeading,
                 MediaUnavailable, HeaderThen, HeaderNow, BeforeLabel, AfterLabel, GalleryName, GalleryCount, TakeoverBack, ZoomHint,
+                HotspotHint, WallLocatorHeading, WallLocatorYou,
+                TodayMapHeading, TodayMapDirections, TodayMapThen, TodayMapNow, TodayMapCoordinates, RelatedHeading,
             };
         }
 

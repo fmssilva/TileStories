@@ -10,21 +10,35 @@ namespace TileStories.Tests
     // exactly as a finger's events would. A drag is spread over frames so the sheet measures a real speed.
     public static class CardTestInput
     {
-        // Drag from the centre of `from` by `deltaY` panel units (negative = up), over `frames` frames
-        public static IEnumerator Drag(VisualElement from, float deltaY, int frames = 12)
+        // A slow drag's per-frame time (seconds) when `slowSheet` drives it (Drag below): comfortably under the flick
+        // threshold for any pair of stops (a stop distance never exceeds the available height -- SheetStopRule.Compute
+        // clamps every stop to it -- so this margin holds regardless of the wall or device), whatever the real frame rate is
+        private const float SlowDragFrameSeconds = 0.1f;
+
+        // Drag from the centre of `from` by `deltaY` panel units (negative = up), over `frames` frames. `slowSheet`, when
+        // given, is a PoiCardSheetView whose Clock this drives on a fixed per-frame timestep instead of real time, so a
+        // deliberately "slow" drag (the default frame count, no flick intended) reads as slow to SheetStopRule.Snap on any
+        // machine: real `yield return null` frames can run faster than intended, which would otherwise misread the same
+        // drag as a flick and overshoot a stop (_3.1 [7B], the sheet's own version of PoiCardHost.Clock's fix). Leave it
+        // null for a drag that must stay real-time (a flick test drives its own explicit low frame count on purpose).
+        public static IEnumerator Drag(VisualElement from, float deltaY, int frames = 12, PoiCardSheetView slowSheet = null)
         {
             Assert.IsNotNull(from?.panel, "the drag starts on an element of a live panel");
             var panel = from.panel;
             Vector2 start = from.worldBound.center;
+            float fakeTime = 0f;
+            if (slowSheet != null) slowSheet.Clock = () => fakeTime;
             Send(panel, EventType.MouseDown, start);
             yield return null;
             for (int i = 1; i <= frames; i++)
             {
+                if (slowSheet != null) fakeTime += SlowDragFrameSeconds;
                 Send(panel, EventType.MouseDrag, start + new Vector2(0f, deltaY * i / frames));
                 yield return null;
             }
             Send(panel, EventType.MouseUp, start + new Vector2(0f, deltaY));
             yield return null;
+            if (slowSheet != null) slowSheet.Clock = () => Time.unscaledTime;
         }
 
         // Drag from panel position `start` by `delta` (panel units, any direction), over `frames` frames
@@ -97,6 +111,18 @@ namespace TileStories.Tests
         {
             var bg = element.resolvedStyle.backgroundImage;
             return bg.sprite != null ? bg.sprite.name : bg.texture != null ? bg.texture.name : null;
+        }
+
+        // A --ts-* size token as CardTokens.uss defines it (the one place the value lives): "24px", or a plain number the C#
+        // reads (panel units, like --ts-sheet-top-gap)
+        public static float TokenPx(string token)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(
+                System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Cards/CardTokens.uss"), token + @":\s*([0-9.]+)(px)?\s*;");
+            Assert.IsTrue(match.Success, token + " is defined in CardTokens.uss");
+            float value = float.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+            Assert.Greater(value, 0f, token);
+            return value;
         }
 
         // Whether an element is laid out as shown (it and every ancestor up to `root` displayed)

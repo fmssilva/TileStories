@@ -186,15 +186,18 @@ namespace TileStories
             var pictures = new List<Picture>(_pictures);
             var strings = _context.Strings;
             _context.Host.OpenTakeover(strings?.Get(CardStrings.Keys.GalleryName) ?? "", pictures.Count, page,
-                (container, media, index) => DrawLightboxPage(container, media, strings, pictures[index]));
+                (view, container, media, index) => DrawLightboxPage(view, container, media, strings, pictures[index]));
         }
 
-        // One lightbox page: the picture fitted to the screen, its caption and credit under it
-        private static void DrawLightboxPage(VisualElement container, IMediaSource media, CardStrings strings, Picture picture)
+        // One lightbox page: the picture fitted to the screen -- a swipe sideways turns the page, two fingers look closer
+        // (ZoomPanSurface, as zoom_image) -- its caption and credit under it
+        private static void DrawLightboxPage(TakeoverView view, VisualElement container, IMediaSource media, CardStrings strings, Picture picture)
         {
-            var image = new CardImage("card-gallery__full");
-            image.Show(media, picture.Path, strings);
-            container.Add(image.Root);
+            var surface = new ZoomPanSurface("card-gallery__full", "card-gallery__full-picture") { Swipes = true };
+            surface.Frame.name = "card-gallery-full";
+            surface.Swiped += view.Turn;
+            container.Add(surface.Frame);
+            surface.Show(media, picture.Path, strings);
             foreach (var (text, cls) in new[] { (picture.Caption, "card-gallery__full-caption"), (picture.Credit, "card-gallery__full-credit") })
             {
                 if (text.Length == 0) continue;

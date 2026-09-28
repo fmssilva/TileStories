@@ -13,6 +13,24 @@
     display: none;
 }
 
+/* collapsed = ONE line: the title smaller and cut with an ellipsis, the chip gone, the whole header at most
+   --ts-header-collapsed-max-height (a test holds it to that) */
+.card-chip--empty,
+.poi-card__header--collapsed .card-chip {
+    display: none;
+}
+
+.poi-card__header--collapsed .card-header__top {
+    margin-bottom: 0;
+}
+
+.poi-card__header--collapsed .card-header__title {
+    font-size: var(--ts-size-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .card-header__top {
     margin-bottom: var(--ts-space-3);
     padding-right: var(--ts-space-6);

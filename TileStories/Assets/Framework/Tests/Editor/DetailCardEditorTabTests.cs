@@ -655,6 +655,50 @@ namespace TileStories.Editor.Tests
             Assert.IsNull(Slider().fields.Find(f => f.key == start.Key), "one Ctrl+Z: back to the default, nothing stored");
         }
 
+        // _3.1 step 7B: a Number INSIDE an Items row (hotspot_image's Across / Down) is the same real slider, per row
+        [UnityTest]
+        public IEnumerator AHotspotSpotRow_AcrossAndDownAreRealSliders_DrawingNeverWrites_AClickPlacesTheSpot_AndCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var block = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.HotspotImageKind };
+            var spots = new BlockFieldValue { key = BuiltInBlocks.HotspotItemsField };
+            spots.items.Add(new BlockItemData { fields = new List<BlockItemFieldValue>
+            {
+                new() { key = BuiltInBlocks.HotspotTitleField, text = new List<LocalizedEntry> { new() { lang = "en", value = "The bell" } } },
+            } });
+            block.fields.Add(spots);
+            config.pois[0].card.blocks.Add(block);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            BlockItemData Spot() => _window.Config.pois[0].card.blocks[0].fields.Single(f => f.key == BuiltInBlocks.HotspotItemsField).items[0];
+            var rowFields = BuiltInBlocks.HotspotImage.Field(BuiltInBlocks.HotspotItemsField).ItemFields;
+            var across = rowFields.Single(f => f.Key == BuiltInBlocks.HotspotXField);
+            var down = rowFields.Single(f => f.Key == BuiltInBlocks.HotspotYField);
+            Rect acrossRow = _window.RectOf("Block item spots 0 x#0");
+            Rect downRow = _window.RectOf("Block item spots 0 y#0");
+            Assert.Greater(downRow.y, acrossRow.y, "Across, then Down, each its own slider row under the spot");
+            Assert.IsFalse(_window.Unsaved, "drawing the sliders writes nothing");
+            Assert.IsNull(Spot().fields.Find(f => f.key == across.Key), "no Across stored yet");
+            Assert.AreEqual(0.5f, BlockFieldReader.ItemNumber(Spot(), across), "the row shows the default: the middle");
+
+            // - a real click near the RIGHT end of the Across track (the slider's number box sits after the track, at the
+            //   row's end): the spot moves to the picture's right edge
+            _window.ClickAt(new Vector2(acrossRow.xMax - EditorGUIUtility.fieldWidth - 12f, acrossRow.center.y));
+            yield return _window.WaitForRepaint();
+            var stored = Spot().fields.Find(f => f.key == across.Key);
+            Assert.IsNotNull(stored, "a real click wrote Across");
+            Assert.Greater(stored.number, 0.8f, "near the track's right end: near 1 (the right edge)");
+            Assert.LessOrEqual(stored.number, across.NumberMax);
+            Assert.IsNull(Spot().fields.Find(f => f.key == down.Key), "Down is untouched");
+
+            yield return _window.PressUndo();
+            Assert.IsNull(Spot().fields.Find(f => f.key == across.Key), "one Ctrl+Z: back to the default, nothing stored");
+        }
+
         [Test]
         public void AStickyActionsBlockWithSeveralButtons_WarnsThatOnlyTheFirstShows_WhateverSetsTheLook()
         {
