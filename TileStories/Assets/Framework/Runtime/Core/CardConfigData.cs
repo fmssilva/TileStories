@@ -32,6 +32,20 @@ namespace TileStories
         // The wall's glossary: a card text marks a word as [[term]] (or [[shown words|term]]) and the visitor taps it
         // for this definition (GlossaryMarkup, CardGlossary)
         public List<GlossaryEntry> glossary = new();
+        // Developer-only: open one POI's card by itself in Play Mode (Detail Card > Card Container > Test > Show demo card). Off by default,
+        // ignored by release builds (CardDemoRule.IsAllowed), registered in DevFeatureBuildGuard
+        public CardDemoSettings demo_card = new();
+    }
+
+    // The developer-only demo card: which POI's card opens on its own, and at which stop
+    [Serializable]
+    public class CardDemoSettings
+    {
+        public bool enabled = false;
+        // The POI whose card opens (its id: the POI Editor's popup names it by its list title); blank = none picked yet
+        public string poi_id = "";
+        // "peek" | "half" | "full" (CardOptions.DemoStops): unlike the wall's Open At, the demo may also open the full card
+        public string stop = CardOptions.StopHalf;
     }
 
     // One glossary word and its definition in every language it is written in
@@ -149,6 +163,8 @@ namespace TileStories
         public const string StopHalf = "half";
         public const string StopFull = "full";
         public static readonly string[] OpenStops = { StopPeek, StopHalf };
+        // The stops the developer-only demo card may open at (the wall's own Open At never opens the full card)
+        public static readonly string[] DemoStops = { StopPeek, StopHalf, StopFull };
 
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";

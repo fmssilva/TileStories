@@ -19,17 +19,12 @@ namespace TileStories.Tests
         public static float OnePixel(VisualElement e) =>
             RuntimePanelUtils.ScreenToPanel(e.panel, Vector2.right).x - RuntimePanelUtils.ScreenToPanel(e.panel, Vector2.zero).x;
 
-        // Save the frame on screen as Assets/Screenshots/<name>.png (the vision pass reads it)
+        // Save the frame on screen as TestEvidence/Card/<name>.png (the vision pass reads it)
         public static IEnumerator Render(string name)
         {
             yield return new WaitForEndOfFrame();
             var tex = ScreenCapture.CaptureScreenshotAsTexture();
-            try
-            {
-                string dir = Path.Combine(Application.dataPath, "Screenshots");
-                Directory.CreateDirectory(dir);
-                File.WriteAllBytes(Path.Combine(dir, name + ".png"), tex.EncodeToPNG());
-            }
+            try { File.WriteAllBytes(TestEvidence.PathFor("Card", name + ".png"), tex.EncodeToPNG()); }
             finally { Object.Destroy(tex); }
         }
 
@@ -110,7 +105,7 @@ namespace TileStories.Tests
             var definition = BlockRegistry.Shared.TryGet(entry.Kind, out var d) ? d : null;
             string expected = CardGalleryDefinitions.HasHeading(entry)
                 ? CardGalleryDefinitions.HeadingPrefix + entry.Kind.Replace('_', ' ')
-                : definition?.DefaultHeadingKey != null ? new CardStrings(harness.StringTable.Entries(), null, "en", "en").Get(definition.DefaultHeadingKey) : "";
+                : definition?.DefaultHeadingKey != null ? new CardStrings(harness.StringTable.Entries(), harness.StringSources.Entries(), null, harness.Language, harness.Language).Get(definition.DefaultHeadingKey) : "";
             Assert.AreEqual(expected, heading.text, entry.Name + ": the heading the stack draws");
             if (expected.Length > 0)
             {

@@ -54,6 +54,9 @@ namespace TileStories
         // at startup. No poll backend is registered today, so a poll shows no results (8B). A test hands its own registry
         internal CardServices Services { get; set; } = CardServices.Shared;
 
+        // The visitor words the app added for the kinds it ships (an app registers its table at startup, like its kinds). A test hands its own
+        internal CardStringSources StringSources { get; set; } = CardStringSources.Shared;
+
         // The tap path's clock (press and release times, a pending close falling due): Time.unscaledTime in the app. A test
         // sets its own, so its taps' times are what it says -- no slow frame can decide whether two taps fell in one window
         internal System.Func<float> Clock { get; set; } = () => Time.unscaledTime;
@@ -82,7 +85,9 @@ namespace TileStories
             SelectionEventBus.OnMarkerSelected += Show;
             SelectionEventBus.OnSelectionCleared += Close;
             wallSession.SearchDataChanged += OnWallDataChanged;
+            wallSession.CardSettingsChanged += OnWallDataChanged;
             if (SelectionEventBus.CurrentPoiId != null) Show(SelectionEventBus.CurrentPoiId);
+            ApplyDemo();
         }
 
         private void Unsubscribe()
@@ -91,7 +96,12 @@ namespace TileStories
             _subscribed = false;
             SelectionEventBus.OnMarkerSelected -= Show;
             SelectionEventBus.OnSelectionCleared -= Close;
-            if (wallSession != null) wallSession.SearchDataChanged -= OnWallDataChanged;
+            if (wallSession != null)
+            {
+                wallSession.SearchDataChanged -= OnWallDataChanged;
+                wallSession.CardSettingsChanged -= OnWallDataChanged;
+            }
+            _demoRequest = "";
             Close();
         }
 
@@ -152,7 +162,7 @@ namespace TileStories
             var context = new BlockBindContext
             {
                 Poi = poi, Taxonomy = wallSession.SearchConfig, Language = language, FallbackLanguage = language, Media = Media,
-                Strings = new CardStrings(strings != null ? strings.Entries() : null, settings.strings, language, language),
+                Strings = new CardStrings(strings != null ? strings.Entries() : null, StringSources.Entries(), settings.strings, language, language),
                 MarkerLook = wallSession.MarkerLook,
                 Glossary = new CardGlossary(settings.glossary, language, language),
                 State = StateOfThisWall(),
@@ -178,10 +188,44 @@ namespace TileStories
             ShownPoiId = null;
         }
 
-        // The wall's POI set was rebuilt (a live edit, a demo switched on): show the same POI's new data
+        // The wall's POI set or the card's own settings changed (a live edit, a demo switched on): the open card shows the new data, and the
+        // developer-only demo card gets its turn
         private void OnWallDataChanged()
         {
-            if (ShownPoiId != null) Show(ShownPoiId);
+            Rebind();
+            ApplyDemo();
+        }
+
+        // Show the open card's POI again with the data as it is now, keeping the sheet's stop and the stack's scroll (a live edit must not throw the
+        // reader back to the top). Does nothing while the card is closed.
+        public void Rebind()
+        {
+            if (ShownPoiId == null || Sheet == null) return;
+            var scroll = Sheet.Stack.Scroll;
+            var offset = scroll.scrollOffset;
+            Show(ShownPoiId);
+            // - a new stack starts at the top and has a new height: ask for the old offset now (clamped to what fits), and once more after the
+            //   layout pass that measures the new content
+            scroll.scrollOffset = offset;
+            scroll.schedule.Execute(() => scroll.scrollOffset = offset);
+        }
+
+        // The demo request last acted on (CardDemoRule.Request): the card opens again only when it changes
+        private string _demoRequest = "";
+
+        // Developer-only demo card (card_settings.demo_card): when its switch is ON, this build allows it and its POI is on the wall, that POI's
+        // card opens by itself at the chosen stop. Off by default; nothing happens in a release build.
+        private void ApplyDemo()
+        {
+            var demo = wallSession.CardSettings?.demo_card;
+            string request = CardDemoRule.Request(demo, CardDemoRule.IsAllowed(Application.isEditor, Debug.isDebugBuild), wallSession.SearchPois);
+            if (request == _demoRequest) return;
+            _demoRequest = request;
+            if (request.Length == 0) return;
+            // - selecting the POI that is already selected would CLEAR it (tap again to deselect): only select another one
+            if (SelectionEventBus.CurrentPoiId != demo.poi_id) SelectionEventBus.Select(demo.poi_id);
+            else if (ShownPoiId != demo.poi_id) Show(demo.poi_id);
+            if (Sheet != null && Sheet.IsOpen) Sheet.SetStop(CardDemoRule.StopOf(demo));
         }
 
         // - a tap is judged on release: pressed and released in about the same place, quickly

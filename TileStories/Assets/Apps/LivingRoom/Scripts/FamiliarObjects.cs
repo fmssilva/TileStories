@@ -2,18 +2,23 @@ using System.Collections.Generic;
 
 namespace TileStories.LivingRoom
 {
-    // One everyday object whose real size every visitor knows (a card, a coin, a phone): its size in centimetres
+    // One everyday object whose real size every visitor knows (a card, a coin, a phone): its size in centimetres, the key of its
+    // name in the app's card texts (what the drawing writes under it) and whether it is drawn round (a coin) or as a rectangle
     public readonly struct FamiliarObject
     {
         public readonly string Key;
         public readonly float WidthCm;
         public readonly float HeightCm;
+        public readonly string NameKey;
+        public readonly bool Round;
 
-        public FamiliarObject(string key, float widthCm, float heightCm)
+        public FamiliarObject(string key, float widthCm, float heightCm, string nameKey, bool round = false)
         {
             Key = key;
             WidthCm = widthCm;
             HeightCm = heightCm;
+            NameKey = nameKey;
+            Round = round;
         }
     }
 
@@ -41,10 +46,10 @@ namespace TileStories.LivingRoom
         // Real sizes (ISO 7810 card, the coin's diameter, a common phone, ISO 216 A4), width x height with the object upright
         private static readonly FamiliarObject[] Table =
         {
-            new(CreditCard, 5.4f, 8.56f),
-            new(TwoEuroCoin, 2.575f, 2.575f),
-            new(Smartphone, 7.2f, 15f),
-            new(SheetA4, 21f, 29.7f),
+            new(CreditCard, 5.4f, 8.56f, LivingRoomCardTexts.Keys.ObjectCreditCard),
+            new(TwoEuroCoin, 2.575f, 2.575f, LivingRoomCardTexts.Keys.ObjectTwoEuroCoin, round: true),
+            new(Smartphone, 7.2f, 15f, LivingRoomCardTexts.Keys.ObjectSmartphone),
+            new(SheetA4, 21f, 29.7f, LivingRoomCardTexts.Keys.ObjectSheetA4),
         };
 
         public bool TryGet(string key, out FamiliarObject familiar)

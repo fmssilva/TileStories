@@ -144,6 +144,37 @@ namespace TileStories.Editor.Tests
         }
 
         [Test]
+        public void ShowDemoCard_On_IsReportedForADevelopmentBuild_WithTheHowToDisableText_AndIgnoredForRelease()
+        {
+            var config = new WallConfigData();
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true), "off by default: nothing to report");
+            config.card_settings.demo_card.enabled = true;
+            var messages = DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true);
+            Assert.AreEqual(1, messages.Count);
+            StringAssert.Contains("Show demo card", messages[0]);
+            StringAssert.Contains("Detail Card > Card Container > Test", messages[0], "it says where to turn it off");
+            StringAssert.Contains("Copy to StreamingAssets", messages[0]);
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: false), "release builds ignore the demo card");
+            // - a wall saved before the demo card existed has no such block: never a crash, never a report
+            config.card_settings.demo_card = null;
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true));
+            config.card_settings = null;
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(config, developmentBuild: true));
+        }
+
+        [Test]
+        public void ShowDemoCardReleaseFlag_MatchesWhatTheRuntimeReallyDoes()
+        {
+            var demoSwitch = DevFeatureBuildGuard.Registry.Single(r => r.Name == "Show demo card");
+            Assert.IsFalse(demoSwitch.ActiveInReleaseBuild);
+            Assert.IsFalse(CardDemoRule.IsAllowed(isEditor: false, isDebugBuild: false), "release must ignore the demo card");
+            Assert.IsTrue(CardDemoRule.IsAllowed(isEditor: false, isDebugBuild: true), "development builds DO show it");
+            Assert.IsFalse(new CardDemoSettings().enabled, "the switch is OFF by default");
+            // - what the shipped LivingRoom config says must not trip the guard
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(ShippedConfig(), developmentBuild: true), "the shipped wall holds no developer switch ON");
+        }
+
+        [Test]
         public void EveryRegisteredSwitch_HasNameHowToAndPredicate_InAscii()
         {
             foreach (var sw in DevFeatureBuildGuard.Registry)

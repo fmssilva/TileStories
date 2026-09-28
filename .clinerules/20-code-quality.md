@@ -95,6 +95,11 @@
   - Replace `✓` with `[ok]`
   - Replace `→` with `->`
   - Replace `»` with `>>`
+  - **Exception -- visitor-facing content is real language, not ASCII.** Text a visitor reads (the card's string tables
+    `CardStrings.asset` / an app's table, a wall's Card Texts and POI content in `config.json`, any future localized
+    content) is written with its proper letters: Portuguese keeps its tildes, c-cedillas and accents (`Descricao`
+    without the c-cedilla and the tilde is a spelling mistake). It lives in UTF-8 data files, never in C# literals, and is never logged verbatim. The
+    ASCII rule keeps covering code, comments, logs, Editor labels / help and file names.
 - **Logging is minimal and single-line.** A log line exists to help pinpoint a failure,
   not to narrate everything happening. Prefix log lines by system so they're easy to find
   in a long device log: `[Tracking] localized in 2.3s`, `[POI] spawned 12/12`,

@@ -19,7 +19,7 @@ namespace TileStories.Tests
     // its WallSession, mock camera, EventSystem, zoom rig and SearchUI object with SearchUIHost + SearchUI.uss,
     // the shipped config) is loaded, the tests act the way a visitor or the live Editor push does (real
     // raycast taps, real panel events, WallSession.ApplySearchSettings / ApplySearchDemo), and it is unloaded
-    // after. Renders of the real Game view (UI included) are saved as Assets/Screenshots/Search_*.png.
+    // after. Renders of the real Game view (UI included) are saved as TestEvidence/Search/Search_*.png.
     public abstract class SearchSceneFixture
     {
         private const string ScenePath = "Assets/Apps/LivingRoom/LivingRoomScene.unity";
@@ -186,17 +186,12 @@ namespace TileStories.Tests
             return default;
         }
 
-        // Save what the Game view shows (3D and UI) under Assets/Screenshots
+        // Save what the Game view shows (3D and UI) under TestEvidence/Search
         protected static IEnumerator Capture(string name)
         {
             yield return new WaitForEndOfFrame();
             var tex = ScreenCapture.CaptureScreenshotAsTexture();
-            try
-            {
-                string dir = Path.Combine(Application.dataPath, "Screenshots");
-                Directory.CreateDirectory(dir);
-                File.WriteAllBytes(Path.Combine(dir, "Search_" + name + ".png"), tex.EncodeToPNG());
-            }
+            try { File.WriteAllBytes(TestEvidence.PathFor("Search", "Search_" + name + ".png"), tex.EncodeToPNG()); }
             finally { Object.Destroy(tex); }
         }
     }

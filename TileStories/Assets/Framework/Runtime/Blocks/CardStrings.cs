@@ -3,11 +3,11 @@ using System.Collections.Generic;
 namespace TileStories
 {
     // The card's own UI texts (_3.1 step 5b, 30-ui-content.md: no visitor string in code). The framework ships a
-    // default per key and language (CardStringTable, CardStrings.asset); a wall rewords any of them in
-    // card_settings.strings. A text is looked up in this order, so a wall's English wording never hides the
-    // framework's Portuguese one from a Portuguese visitor:
-    //   wall [language] -> framework [language] -> wall [fallback] -> framework [fallback] -> the key itself
-    // (the key only shows for a key missing from the framework table -- CardStringsTests guard that).
+    // default per key and language (CardStringTable, CardStrings.asset); an APP adds its own rows for the kinds it ships
+    // (CardStringSources, step 11-fix); a wall rewords any of them in card_settings.strings. A text is looked up in this
+    // order, so a wall's English wording never hides the framework's Portuguese one from a Portuguese visitor:
+    //   wall [language] -> app [language] -> framework [language] -> wall [fallback] -> app [fallback] -> framework [fallback] -> the key
+    // (the key only shows for a key missing from every table -- CardStringsTests guard that for the framework's and the app's).
     public sealed class CardStrings
     {
         // Every key a card view reads. A key is added with the view that first shows it.
@@ -128,22 +128,27 @@ namespace TileStories
         }
 
         private readonly IReadOnlyList<CardStringEntry> _framework;
+        private readonly IReadOnlyList<CardStringEntry> _app;
         private readonly IReadOnlyList<CardStringEntry> _wall;
         private readonly string _language;
         private readonly string _fallback;
 
-        public CardStrings(IReadOnlyList<CardStringEntry> framework, IReadOnlyList<CardStringEntry> wall, string language, string fallbackLanguage)
+        // Any table may be null (nothing from that layer)
+        public CardStrings(IReadOnlyList<CardStringEntry> framework, IReadOnlyList<CardStringEntry> app, IReadOnlyList<CardStringEntry> wall,
+            string language, string fallbackLanguage)
         {
             _framework = framework;
+            _app = app;
             _wall = wall;
             _language = language;
             _fallback = fallbackLanguage;
         }
 
-        public string Get(string key) =>
-            Find(_wall, key, _language) ?? Find(_framework, key, _language)
-            ?? Find(_wall, key, _fallback) ?? Find(_framework, key, _fallback)
-            ?? key;
+        public string Get(string key) => In(key, _language) ?? In(key, _fallback) ?? key;
+
+        // The text of `key` in one language: the wall's wording first, then the app's, then the framework's
+        private string In(string key, string language) =>
+            Find(_wall, key, language) ?? Find(_app, key, language) ?? Find(_framework, key, language);
 
         // The non-blank text of `key` in `language` in one table, or null
         public static string Find(IReadOnlyList<CardStringEntry> table, string key, string language)

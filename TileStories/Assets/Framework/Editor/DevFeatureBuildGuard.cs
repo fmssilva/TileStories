@@ -53,6 +53,13 @@ namespace TileStories.Editor
                 ActiveInReleaseBuild = false,
                 IsOn = c => c.search_demo != null && c.search_demo.enabled,
             },
+            new DevSwitch
+            {
+                Name = "Show demo card",
+                HowToDisable = "POI Editor > Detail Card > Card Container > Test > untick 'Show demo card', then Save All to JSON and Copy to StreamingAssets",
+                ActiveInReleaseBuild = false,
+                IsOn = c => c.card_settings != null && c.card_settings.demo_card != null && c.card_settings.demo_card.enabled,
+            },
         };
 
         // Messages for every switch that is ON and would take effect in this kind of build

@@ -566,7 +566,7 @@ namespace TileStories.Tests
             // - the question that waits for the reading is revealed the way a visitor does it, so every slot can be measured
             yield return ReadTheWholeCard();
             var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
-            var strings = new CardStrings(Card.StringTable.Entries(), LiveSettings.strings, "en", "en");
+            var strings = new CardStrings(Card.StringTable.Entries(), Card.StringSources.Entries(), LiveSettings.strings, "en", "en");
             var stack = Sheet.Stack;
             var views = stack.BoundViews;
             Assert.AreEqual(lampConfig.card.blocks.Count, views.Count, "precondition: every block shown, in order");

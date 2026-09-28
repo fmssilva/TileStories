@@ -13,10 +13,6 @@ check thee FOV splike thing???
 
 ## From the POI Detail Card review (2026-09-27)
 
-- Test renders live INSIDE `Assets/Screenshots/` (143 PNGs, 17 MB and growing ~150 per card tier). Unity imports
-  every one as a texture (import time, `.meta` churn) and git tracks them all. Move every suite's evidence renders
-  to a folder next to `Assets/` (like `TileStories/MarkerGalleryScreenshots/`), e.g. `TileStories/TestEvidence/<domain>/`,
-  gitignore it, and keep only the few captures a doc links to. One shared helper for the output path.
 - Flaky EditMode test seen twice across sessions: `TaxonomyRowIdentityTests` (`...ReportsBothRowsByPosition`,
   `...TypingADuplicateAndABlankCategoryLabel_...`), right after leaving Play Mode. Likely leftover window /
   undo state between tests; investigate in a taxonomy session. Same pattern seen 2026-09-27 on
@@ -35,8 +31,6 @@ check thee FOV splike thing???
 - `Editor.log` is 3.9 GB (`%LOCALAPPDATA%/Unity/Editor/Editor.log`): every compile check greps its tail and a search for an
   import error from an hour earlier needs the last 400 MB. Unity truncates it on restart; restart the Editor now and then, or
   add a small Editor-only "compile check" tool that reads only the lines after the last compile start.
-- The test renders (`Assets/Screenshots/`) grew by about 60 files with Tier 2 (see the item above about moving them out of
-  `Assets/`). Card galleries keep one render per entry; a picture-heavy tier makes that folder the slowest thing to import.
 - A reusable Editor capture helper (open the window, scroll to a section, `ReadScreenPixel` cropped to the part of the window
   that is on screen) would save every UI session rebuilding it by hand in `execute_code`; keep it Editor-only, in `Editor/Dev/`.
 - Flaky tests keep appearing "right after leaving Play Mode" (TaxonomyRowIdentityTests x2, KeywordListFieldTypingTests).
@@ -87,20 +81,29 @@ check thee FOV splike thing???
 
 ## From the Architect review of 8A-fix + 8B (2026-09-28)
 
-- `TileStories/MarkerGalleryScreenshots/` is TRACKED in git (291 PNGs, 68 MB) and every full PlayMode run rewrites them, so every
-  commit carries dozens of changed binaries nobody reviews. Together with `Assets/Screenshots/` (36 MB, imported by Unity) this is
-  the evidence-hygiene item above: move test renders to one gitignored folder next to `Assets/` and `git rm --cached` the tracked
-  ones (developer's call, once). Until then leave the regenerated marker PNGs out of commits.
 - Reviews from the Cowork VM see every CRLF file as modified unless git runs with `-c core.autocrlf=true`; the Windows side is
   clean. Not a repo problem; the Architect command (`__AI_Architect.md`) says so.
 
 ## From the Architect review of step 11 (2026-09-28)
 
-- Repo hygiene found on disk (for the evidence clean-up block): 14 `Assets/InitTestScene<guid>.unity` leftovers from aborted test
-  runs (ignored by git, but Unity imports them); `Assets/Screenshots/` tracked (708 files incl. metas) and written by five test files,
-  each with its own copy of `Path.Combine(Application.dataPath, "Screenshots")` (CardGalleryChecks, CardGalleryTests,
-  DisplacementDemoFixture, EffectsPreviewRenderTests, LodRealPipelineTests): one shared evidence-path helper is the fix. Tracked
-  files the developer should decide on: `TileStories/Assets.7z` (48 MB backup), `TileStories/__orientation_screenshot.png`,
-  `edit_file.py`, `Fundo Desktop.jpg`.
+- Repo hygiene, developer's call (the evidence clean-up of 2026-09-28 left these alone): tracked files `TileStories/Assets.7z` (48 MB
+  backup), `TileStories/__orientation_screenshot.png`, `edit_file.py`, `Fundo Desktop.jpg`.
 - Commit scope: `git add TileStories .clinerules proj_guides` instead of `git add .`, so `IPCE/`, `report/` and
   `flutter_prototypes/` never ride along by accident.
+
+## From the POI Detail Card evidence clean-up, step 11-fix and step 12 (2026-09-28)
+
+- The Block Library's family order is derived, not chosen: families sort by the order they first appear in the registry (about, stories, visit,
+  meta, media, play, community, ar), so `meta` (Sources) now sits before the picture, play and community kinds. Fine for a first grouping;
+  if the catalog should read differently (Sources last, say), give a family an explicit order (`BlockRegistry.Ordered`) instead of hoping
+  registration order says it.
+- `LivePlayModeConfigPush` applies EVERY domain on the first push of a Play run (a new wall knows nothing of earlier pushes). That is fine as
+  long as each applier's runtime seam is idempotent; `WallSession.RebuildDemoField` was not (it cleared the selection even with no demo on, so the
+  developer's first edit closed the open card) and was fixed in step 12. Worth one look at the other `Apply...` seams when a domain next needs to
+  keep something across a push (the LOD / zoom / displacement seams were not audited for this).
+- An EditMode `[UnityTest]` can enter Play Mode (`yield return new EnterPlayMode(expectDomainReload: false)`, this project has domain reload off)
+  and then drive the REAL POI Editor window against the running scene: `LivePlayModeCardTests` is the pattern for the live-sync Phase B of any other
+  domain. It needs `UnityEditor.TestRunner` in the Editor test asmdef; the runner's own scene is the open one, so load the wall scene with
+  `EditorSceneManager.LoadSceneAsyncInPlayMode`.
+- `Open Gallery` in Edit Mode replaces the open scene (after refusing to do so over unsaved changes). Loading the gallery additively, or in its
+  own window, would keep the wall scene open beside it; not needed yet.

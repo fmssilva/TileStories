@@ -23,6 +23,7 @@ namespace TileStories.Editor
             new LivePlayModeDisplacementDemoApplier(),
             new LivePlayModeSearchApplier(),
             new LivePlayModeSearchDemoApplier(),
+            new LivePlayModeCardApplier(),
         });
 
         // Push the config to the running WallSession, if there is one (does nothing in Edit Mode)

@@ -48,6 +48,10 @@ namespace TileStories.Editor.Tests
             public Action<WallConfigData> Setup;       // optional: state the field needs, before spawn
             public Action<WallConfigData> Edit;        // the edit the Editor Tab field makes
             public string PoiId = DefaultPoi;
+            // Optional: what the field reaches when it is NOT the marker's look (the Detail Card's data). Read off the running wall before and after.
+            public Func<WallSession, MarkerView, string> Probe;
+            // Optional: the ONE domain the edit must reach (a card edit must not re-apply the markers, nor a marker edit the card)
+            public string Only;
             public override string ToString() => Field;
         }
 
@@ -189,10 +193,34 @@ namespace TileStories.Editor.Tests
             yield return R("pois[].editor_rotation_z_deg", c => P(c).editor_rotation_z_deg = 15f);
         }
 
+        // The POI Detail Card (_3.1 step 12): every card_settings field and a POI's own card. The running wall must end up holding the edit
+        // (the wall's card settings and the POI's card as the anchor's data -- what PoiCardHost reads), and ONLY the card domain re-applies.
+        // The pixels of the open card are proven in PlayMode (PoiCardLiveUpdateTests) and through the real window (LivePlayModeCardTests).
+        private static string CardProbe(WallSession session, MarkerView marker) =>
+            JsonUtility.ToJson(session.CardSettings) + "|" + JsonUtility.ToJson(marker.GetComponentInParent<POIAnchor>().Data.card);
+
+        private static Row CardRow(string field, Action<WallConfigData> edit) =>
+            new Row { Field = field, Edit = edit, Probe = CardProbe, Only = "detail card" };
+
+        private static IEnumerable<Row> CardRows()
+        {
+            yield return CardRow("card_settings.enabled", c => c.card_settings.enabled = !c.card_settings.enabled);
+            yield return CardRow("card_settings.languages", c => c.card_settings.languages = new List<string> { "pt", "en", "es" });
+            yield return CardRow("card_settings.media_resources_path", c => c.card_settings.media_resources_path = "LivingRoom/OtherMedia");
+            yield return CardRow("card_settings.container", c => c.card_settings.container.half_max_ratio = c.card_settings.container.half_max_ratio > 0.3f ? 0.26f : 0.36f);
+            yield return CardRow("card_settings.kinds", c => c.card_settings.kinds.Add(new BlockKindSetting { kind = "rich_text", enabled = false }));
+            yield return CardRow("card_settings.strings", c => c.card_settings.strings.Add(new CardStringEntry
+                { key = CardStrings.Keys.Close, text = new List<LocalizedEntry> { new() { lang = "en", value = "Dismiss" } } }));
+            yield return CardRow("card_settings.glossary", c => c.card_settings.glossary.Add(new GlossaryEntry
+                { term = "keep", definition = new List<LocalizedEntry> { new() { lang = "en", value = "The strongest tower." } } }));
+            yield return CardRow("card_settings.demo_card", c => { c.card_settings.demo_card.enabled = true; c.card_settings.demo_card.poi_id = DefaultPoi; });
+            yield return CardRow("pois[].card", c => P(c).card.blocks.Add(new BlockInstanceData { key = "block_live_sync", kind = "show_on_wall" }));
+        }
+
         public static IEnumerable<TestCaseData> AllRows()
         {
             foreach (var row in MarkerRows().Concat(BadgeRows()).Concat(OutlineRows()).Concat(EffectRows())
-                         .Concat(LevelRows()).Concat(OrientationRows()).Concat(PoiRows()))
+                         .Concat(LevelRows()).Concat(OrientationRows()).Concat(PoiRows()).Concat(CardRows()))
                 yield return new TestCaseData(row).SetName("LiveSync_" + row.Field);
         }
 
@@ -217,14 +245,16 @@ namespace TileStories.Editor.Tests
             dispatcher.Push(session, authoring);   // first push of a Play session: every domain once
 
             var marker = session.SpawnedMarkers.First(m => m.name == row.PoiId);
-            string before = Snapshot(marker);
+            string Read() => row.Probe != null ? row.Probe(session, marker) : Snapshot(marker);
+            string before = Read();
 
             row.Edit(authoring);
             var applied = dispatcher.Push(session, authoring);
 
             Assert.IsNotEmpty(applied, row.Field + ": the edit must trigger a live push (no applier fingerprints it)");
-            string after = Snapshot(marker);
-            Assert.AreNotEqual(before, after, row.Field + ": pushed (" + string.Join(", ", applied) + ") but the running marker did not change");
+            if (row.Only != null) CollectionAssert.AreEqual(new[] { row.Only }, applied, row.Field + ": the edit reaches its own domain and no other");
+            string after = Read();
+            Assert.AreNotEqual(before, after, row.Field + ": pushed (" + string.Join(", ", applied) + ") but the running wall did not change");
         }
 
         // ---------------- completeness ----------------
@@ -268,9 +298,6 @@ namespace TileStories.Editor.Tests
             // every field live in SearchFilterEditorTabTests (fingerprints) and SearchSceneTests / SearchDemoTests (PlayMode)
             { "select_filter_search", "SearchSceneTests" }, { "search_demo", "SearchDemoTests" },
             { "search_fields", "SearchFilterEditorTabTests" }, { "synonym_groups", "SearchFilterEditorTabTests" },
-            // POI Detail Card (_3.1): a screen-space card, not a marker visual; not live in Play Mode until _3.1 step 12
-            // (LivePlayModeCardApplier). Round trip: CardConfigRoundTripTests; on the real card: PoiCardSceneTests
-            { "card_settings", "CardConfigRoundTripTests, PoiCardSceneTests" }, { "pois[].card", "CardConfigRoundTripTests, PoiCardSceneTests" },
         };
 
         [Test]

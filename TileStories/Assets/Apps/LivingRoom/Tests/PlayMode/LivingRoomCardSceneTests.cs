@@ -69,7 +69,37 @@ namespace TileStories.LivingRoom.Tests
             Assert.GreaterOrEqual(poi.xMin, card.xMin - tol, "inside the card");
             Assert.LessOrEqual(obj.xMax, card.xMax + tol);
             Assert.LessOrEqual(stage.yMax, card.yMax + tol);
+
+            // - a name under each shape (step 11-fix): the card's own title under the point, the app's word under the phone
+            string title = HeaderTitle();
+            Assert.IsNotEmpty(title, "precondition: the card has a title");
+            Assert.AreEqual(title, size.PoiName.text, "the point is named by the card's own title");
+            Assert.AreEqual("Smartphone", size.ObjectName.text, "the phone is named by the app's card texts");
+            Assert.GreaterOrEqual(size.PoiName.worldBound.yMin, stage.yMax - tol, "the names sit under the ground line");
+            Assert.AreEqual(poi.center.x, size.PoiName.worldBound.center.x, tol, "the point's name is centred under the point");
+            Assert.AreEqual(obj.center.x, size.ObjectName.worldBound.center.x, tol, "the phone's name is centred under the phone");
+            Assert.LessOrEqual(size.PoiName.worldBound.xMax, size.ObjectName.worldBound.xMin + tol, "the two names do not overlap");
+            Assert.IsTrue(CardTestInput.IsShown(size.PoiName, size.Root) && CardTestInput.IsShown(size.ObjectName, size.Root), "both names are on the card");
             yield return Capture("Lamp_SizeComparison");
+        }
+
+        // The card's own title, as the visitor reads it in the pinned header
+        private string HeaderTitle() => ((HeaderBlockView)Sheet.Stack.BoundViews[0]).TitleText;
+
+        [UnityTest]
+        public IEnumerator AWallsCardTextsWording_RewordsTheAppsObjectName_OnTheRealCard_InThatLanguageOnly()
+        {
+            Session.CardSettings.strings.Add(new CardStringEntry
+            {
+                key = LivingRoomCardTexts.Keys.ObjectSmartphone,
+                text = new System.Collections.Generic.List<LocalizedEntry> { new() { lang = "en", value = "Mobile phone" } },
+            });
+            yield return OpenFull("lamp");
+            Assert.AreEqual("Mobile phone", SizeView().ObjectName.text, "the wall's wording beats the app's on the real card");
+            Session.CardSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
+            yield return OpenFull("lamp_military");
+            yield return OpenFull("lamp");
+            Assert.AreEqual("Telemovel", SizeView().ObjectName.text, "the wall reworded English only: Portuguese keeps the app's word");
         }
 
         [UnityTest]
@@ -81,6 +111,8 @@ namespace TileStories.LivingRoom.Tests
             yield return ScrollTo(size);
             Assert.AreEqual("Qual e o tamanho?", Sheet.Stack.HeadingOf(size).text);
             Assert.AreEqual("Tao alto como quase quatro telemoveis empilhados.", size.Caption.text);
+            Assert.AreEqual("Telemovel", size.ObjectName.text, "the app's Portuguese word under the phone");
+            Assert.AreEqual(HeaderTitle(), size.PoiName.text, "the point's name is the card's title in Portuguese too");
             yield return Capture("Lamp_SizeComparison_pt");
         }
 
@@ -103,7 +135,7 @@ namespace TileStories.LivingRoom.Tests
             finally
             {
                 // - what the app's own startup does
-                LivingRoomBlocks.Register(BlockRegistry.Shared, CardServices.Shared);
+                LivingRoomBlocks.Register(BlockRegistry.Shared, CardServices.Shared, CardStringSources.Shared);
             }
             yield return OpenFull("lamp_military");
             yield return OpenFull("lamp");

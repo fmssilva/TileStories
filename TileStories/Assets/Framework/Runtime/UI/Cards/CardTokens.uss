@@ -60,6 +60,7 @@
     --ts-radius-s: 6px;
     --ts-radius-m: 12px;
     --ts-radius-l: 20px;
+    --ts-radius-round: 50%;
     --ts-space-1: 4px;
     --ts-space-2: 8px;
     --ts-space-3: 12px;

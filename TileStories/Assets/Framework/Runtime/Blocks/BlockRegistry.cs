@@ -26,8 +26,27 @@ namespace TileStories
         }
         private static BlockRegistry _shared;
 
-        // Every registered kind, in registration order (the Editor's Block Library order)
+        // Every registered kind, in registration order (the order the catalog and its tests are written in)
         public IReadOnlyList<BlockKindDefinition> All => _kinds;
+
+        // Every registered kind grouped by family, for a person choosing one (the Editor's Block Library and "+ Add block"): the families in the
+        // order each first appeared, then the kinds of a family in registration order. An app's kind therefore sits with its own family,
+        // not after every built-in kind.
+        public IReadOnlyList<BlockKindDefinition> Ordered
+        {
+            get
+            {
+                // - a list, not a dictionary: only a list promises to keep the order the families first appeared in
+                var families = new List<string>();
+                foreach (var kind in _kinds)
+                    if (!families.Contains(kind.Family)) families.Add(kind.Family);
+                var ordered = new List<BlockKindDefinition>(_kinds.Count);
+                foreach (var family in families)
+                    foreach (var kind in _kinds)
+                        if (kind.Family == family) ordered.Add(kind);
+                return ordered;
+            }
+        }
 
         // Add a kind and the factory of its view. A second kind with the same key is refused (a silent
         // replace would hide a clash between an app kind and a framework kind).

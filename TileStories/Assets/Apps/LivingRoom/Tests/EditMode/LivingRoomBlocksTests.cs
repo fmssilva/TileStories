@@ -89,15 +89,21 @@ namespace TileStories.LivingRoom.Tests
             var blocks = new BlockRegistry();
             BuiltInBlocks.Register(blocks);
             var services = new CardServices();
+            var texts = new CardStringSources();
             int before = blocks.All.Count;
-            LivingRoomBlocks.Register(blocks, services);
+            LivingRoomBlocks.Register(blocks, services, texts);
             Assert.AreEqual(before + 1, blocks.All.Count);
             var service = services.Get<IFamiliarObjects>();
             Assert.IsNotNull(service);
-            Assert.DoesNotThrow(() => LivingRoomBlocks.Register(blocks, services), "Play Mode after a script reload runs both startup entry points");
+            Assert.IsTrue(texts.Has(LivingRoomCardTexts.AppName), "the app's card texts are registered under its name");
+            var table = texts.All.Single().Table;
+            Assert.DoesNotThrow(() => LivingRoomBlocks.Register(blocks, services, texts), "Play Mode after a script reload runs both startup entry points");
             Assert.AreEqual(before + 1, blocks.All.Count, "no second copy of the kind");
             Assert.AreSame(service, services.Get<IFamiliarObjects>(), "the first service instance stays");
-            Assert.DoesNotThrow(() => LivingRoomBlocks.Register(BlockRegistry.Shared, CardServices.Shared));
+            Assert.AreEqual(1, texts.All.Count, "no second copy of the table");
+            Assert.AreSame(table, texts.All.Single().Table);
+            Assert.DoesNotThrow(() => LivingRoomBlocks.Register(BlockRegistry.Shared, CardServices.Shared, CardStringSources.Shared));
+            Assert.IsTrue(CardStringSources.Shared.Has(LivingRoomCardTexts.AppName), "the app's startup put its words on the card's shared registry, in Edit Mode");
         }
 
         // ---------------- the Framework never references the app ----------------
@@ -169,7 +175,7 @@ namespace TileStories.LivingRoom.Tests
         public void TheFit_DrawsBothShapesAtOneScale_AsLargeAsTheStageAllows_NeverCropped()
         {
             // - a tall point next to a small object in a wide stage: the height limits, one scale for both
-            Assert.IsTrue(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(32f, 58f), new Vector2(7.2f, 15f), out var tall));
+            Assert.IsTrue(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(32f, 58f), new Vector2(7.2f, 15f), 0f, 0f, out var tall));
             Assert.AreEqual(200f / 58f, tall.PixelsPerCm, 1e-4f, "the taller of the two fills the stage");
             Assert.AreEqual(58f * tall.PixelsPerCm, tall.Poi.y, 1e-3f);
             Assert.AreEqual(15f * tall.PixelsPerCm, tall.Object.y, 1e-3f, "the object at the same scale: true to the point");
@@ -177,29 +183,58 @@ namespace TileStories.LivingRoom.Tests
             Assert.LessOrEqual(tall.Poi.x + 16f + tall.Object.x, 400f + 1e-3f, "and the pair fits the width");
 
             // - a wide point in a narrow stage: the width limits, gap included
-            Assert.IsTrue(SizeComparisonRule.TryFit(300f, 400f, 20f, new Vector2(100f, 50f), new Vector2(50f, 25f), out var wide));
+            Assert.IsTrue(SizeComparisonRule.TryFit(300f, 400f, 20f, new Vector2(100f, 50f), new Vector2(50f, 25f), 0f, 0f, out var wide));
             Assert.AreEqual((300f - 20f) / 150f, wide.PixelsPerCm, 1e-4f, "the pair with its gap fills the stage width");
             Assert.AreEqual(300f, wide.Poi.x + 20f + wide.Object.x, 1e-3f);
 
             // - the object bigger than the point: it is the larger drawing
-            Assert.IsTrue(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(8f, 10f), new Vector2(21f, 29.7f), out var bigger));
+            Assert.IsTrue(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(8f, 10f), new Vector2(21f, 29.7f), 0f, 0f, out var bigger));
             Assert.Greater(bigger.Object.y, bigger.Poi.y);
             Assert.AreEqual(200f, bigger.Object.y, 1e-3f, "the taller one is the object now");
 
             // - no object (the service does not know it): the point alone, no gap taken from the width
-            Assert.IsTrue(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(100f, 50f), null, out var alone));
+            Assert.IsTrue(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(100f, 50f), null, 0f, 0f, out var alone));
             Assert.AreEqual(Vector2.zero, alone.Object);
             Assert.AreEqual(4f, alone.PixelsPerCm, 1e-4f, "100 x 50 cm alone: the width fills 400 px");
+            Assert.AreEqual(0f, alone.ObjectSlotWidth, "no object, no slot");
+        }
+
+        [Test]
+        public void TheFit_GivesEachShapeASlotAsWideAsItsName_TheSlotsNotTheShapesFitTheStage_AndAnEnormousNameWraps()
+        {
+            // - a name narrower than its shape changes nothing: the slots are the shapes
+            Assert.IsTrue(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(32f, 58f), new Vector2(7.2f, 15f), 40f, 20f, out var plain));
+            Assert.AreEqual(200f / 58f, plain.PixelsPerCm, 1e-4f);
+            Assert.AreEqual(plain.Poi.x, plain.PoiSlotWidth, 1e-3f, "the point's slot is its shape");
+            Assert.AreEqual(plain.Object.x, plain.ObjectSlotWidth, 1e-3f, "the object's slot is its shape");
+
+            // - a coin a few pixels wide with a name 80 px wide: its slot is the name, and the point gives up width for it
+            var coin = new Vector2(2.575f, 2.575f);
+            Assert.IsTrue(SizeComparisonRule.TryFit(200f, 200f, 16f, new Vector2(32f, 58f), coin, 0f, 80f, out var named));
+            Assert.AreEqual(80f, named.ObjectSlotWidth, 1e-3f, "the coin's slot is as wide as its name");
+            Assert.Less(named.Object.x, 20f, "the coin itself stays a few pixels wide, true to scale");
+            Assert.AreEqual(200f, named.PoiSlotWidth + 16f + named.ObjectSlotWidth, 0.05f, "the two slots and the gap fill the stage width exactly");
+            Assert.AreEqual((200f - 16f - 80f) / 32f, named.PixelsPerCm, 1e-3f, "the point shrank so its slot plus the coin's name fit");
+            Assert.AreEqual(58f / 32f, named.Poi.y / named.Poi.x, 1e-3f, "one scale: the point keeps its proportions");
+
+            // - a name that would take more than half of the room wraps: the slot never takes more than its share
+            Assert.IsTrue(SizeComparisonRule.TryFit(300f, 200f, 16f, new Vector2(32f, 58f), coin, 0f, 500f, out var wrapped));
+            Assert.AreEqual((300f - 16f) / 2f, wrapped.ObjectSlotWidth, 1e-3f, "capped at half of what is left");
+            Assert.LessOrEqual(wrapped.PoiSlotWidth + 16f + wrapped.ObjectSlotWidth, 300f + 0.05f);
+
+            // - the point alone with a long name: its slot may take the whole row
+            Assert.IsTrue(SizeComparisonRule.TryFit(300f, 200f, 16f, new Vector2(32f, 58f), null, 250f, 0f, out var alone));
+            Assert.AreEqual(250f, alone.PoiSlotWidth, 1e-3f);
         }
 
         [Test]
         public void TheFit_RefusesWhatCannotBeDrawn()
         {
-            Assert.IsFalse(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(0f, 58f), new Vector2(7f, 15f), out _), "no width");
-            Assert.IsFalse(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(32f, 0f), new Vector2(7f, 15f), out _), "no height");
-            Assert.IsFalse(SizeComparisonRule.TryFit(0f, 200f, 16f, new Vector2(32f, 58f), null, out _), "a stage with no width yet");
-            Assert.IsFalse(SizeComparisonRule.TryFit(400f, 0f, 16f, new Vector2(32f, 58f), null, out _), "a stage with no height yet");
-            Assert.IsFalse(SizeComparisonRule.TryFit(10f, 200f, 16f, new Vector2(32f, 58f), new Vector2(7f, 15f), out _), "a stage narrower than the gap");
+            Assert.IsFalse(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(0f, 58f), new Vector2(7f, 15f), 0f, 0f, out _), "no width");
+            Assert.IsFalse(SizeComparisonRule.TryFit(400f, 200f, 16f, new Vector2(32f, 0f), new Vector2(7f, 15f), 0f, 0f, out _), "no height");
+            Assert.IsFalse(SizeComparisonRule.TryFit(0f, 200f, 16f, new Vector2(32f, 58f), null, 0f, 0f, out _), "a stage with no width yet");
+            Assert.IsFalse(SizeComparisonRule.TryFit(400f, 0f, 16f, new Vector2(32f, 58f), null, 0f, 0f, out _), "a stage with no height yet");
+            Assert.IsFalse(SizeComparisonRule.TryFit(10f, 200f, 16f, new Vector2(32f, 58f), new Vector2(7f, 15f), 0f, 0f, out _), "a stage narrower than the gap");
             Assert.IsFalse(SizeComparisonRule.HasSize(0f, 1f));
             Assert.IsTrue(SizeComparisonRule.HasSize(0.1f, 0.1f));
         }
@@ -320,7 +355,8 @@ namespace TileStories.LivingRoom.Tests
                 string source = File.ReadAllText(AppFolder + "/Scripts/SizeComparison/" + file);
                 var literals = Regex.Matches(source, @"""((?:[^""\\\n]|\\.)*)""").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
                 foreach (string literal in literals)
-                    StringAssert.IsMatch("^[a-z][a-z0-9_-]*$", literal, file + ": '" + literal + "' is not a class or a name: visitor words come from the block's fields");
+                    // - an empty string is "no words yet", not a visitor word
+                    StringAssert.IsMatch("^([a-z][a-z0-9_-]*)?$", literal, file + ": '" + literal + "' is not a class or a name: visitor words come from the block's fields and the app's card texts");
                 StringAssert.DoesNotContain("new Color", source, file);
                 StringAssert.DoesNotContain("Color.", source, file);
                 StringAssert.DoesNotContain("Color32", source, file);
@@ -353,7 +389,8 @@ namespace TileStories.LivingRoom.Tests
             _window = new PoiEditorWindowHost(TwoPoiConfig(), "_showCardBlockLibrary");
             OpenTab("DetailCard");
             yield return _window.WaitForRepaint();
-            int row = BlockRegistry.Shared.All.ToList().FindIndex(k => k.Key == SizeComparisonBlock.Kind);
+            // - the table lists kinds by family (Ordered), so the row index is the kind's place there
+            int row = BlockRegistry.Shared.Ordered.ToList().FindIndex(k => k.Key == SizeComparisonBlock.Kind);
             Assert.GreaterOrEqual(row, 0, "the app's kind is in the registry the window reads");
             _window.RectOf("Block Library enabled#" + row);
             // - the app's row is the last of the table: a person scrolls down to it, so the test does
@@ -381,7 +418,7 @@ namespace TileStories.LivingRoom.Tests
             var foldouts = (System.Collections.Generic.Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_poiFoldouts", Instance).GetValue(_window.Editor);
             foldouts["poi_1"] = true;
             // - the "+ Add block" picker lists every registered kind, family / name: the app's is one of them
-            int index = BlockRegistry.Shared.All.ToList().FindIndex(k => k.Key == SizeComparisonBlock.Kind);
+            int index = BlockRegistry.Shared.Ordered.ToList().FindIndex(k => k.Key == SizeComparisonBlock.Kind);
             typeof(POIEditorToolWindow).GetField("_newCardBlockKindIndex", Instance).SetValue(_window.Editor, index);
             yield return _window.WaitForRepaint();
 
@@ -401,6 +438,111 @@ namespace TileStories.LivingRoom.Tests
             Assert.AreEqual("As tall as a phone.", new BlockFieldReader(_window.Config.pois[0].card.blocks[0], "en", "en").Text(SizeComparisonBlock.CaptionField));
             yield return _window.PressUndo();
             Assert.AreEqual("", new BlockFieldReader(_window.Config.pois[0].card.blocks[0], "en", "en").Text(SizeComparisonBlock.CaptionField), "Ctrl+Z takes the typed words back");
+        }
+
+        // ---------------- the app's own visitor words (step 11-fix) ----------------
+
+        [Test]
+        public void TheAppsCardTexts_HaveARowForEveryKeyTheAppReads_EnglishAndPortuguese_AndNoKeyClashesWithTheFramework()
+        {
+            var table = UnityEngine.Resources.Load<CardStringTable>(LivingRoomCardTexts.TableResourcePath);
+            CardStringTableChecks.AssertTableHasEveryKey(table, LivingRoomCardTexts.Keys.All, "LivingRoom");
+            // - the same source scan the framework's table gets: every key the app's code reads is listed (a key read but not listed would never be guarded)
+            CardStringTableChecks.AssertEveryKeyReadInSourceIsListed(AppFolder + "/Scripts", "LivingRoomCardTexts.Keys.", typeof(LivingRoomCardTexts.Keys),
+                LivingRoomCardTexts.Keys.All, "LivingRoom");
+            CollectionAssert.IsEmpty(LivingRoomCardTexts.Keys.All.Intersect(CardStrings.Keys.All), "an app key never repeats a framework key");
+            foreach (string key in LivingRoomCardTexts.Keys.All)
+                StringAssert.StartsWith("living_room_", key, "the app's word starts every key, so no other app can clash with it");
+            // - every familiar object names itself with one of the app's keys
+            var service = new FamiliarObjects();
+            foreach (string objectKey in FamiliarObjects.Keys)
+            {
+                Assert.IsTrue(service.TryGet(objectKey, out var familiar));
+                CollectionAssert.Contains(LivingRoomCardTexts.Keys.All, familiar.NameKey, objectKey + " has a name in the app's table");
+            }
+            Assert.IsTrue(service.TryGet(FamiliarObjects.TwoEuroCoin, out var coin) && coin.Round, "the coin is drawn round");
+            Assert.IsFalse(service.TryGet(FamiliarObjects.Smartphone, out var phone) && phone.Round, "a phone is a rectangle");
+        }
+
+        [Test]
+        public void TheAppsWords_ReachTheLookup_InBothLanguages_AndAWallCanOverrideThem()
+        {
+            var framework = CardStringTableChecks.FrameworkEntries();
+            var app = CardStringSources.Shared.Entries();
+            Assert.AreEqual("2 euro coin", new CardStrings(framework, app, null, "en", "en").Get(LivingRoomCardTexts.Keys.ObjectTwoEuroCoin));
+            Assert.AreEqual("Moeda de 2 euros", new CardStrings(framework, app, null, "pt", "en").Get(LivingRoomCardTexts.Keys.ObjectTwoEuroCoin));
+            var wall = new System.Collections.Generic.List<CardStringEntry>
+                { new() { key = LivingRoomCardTexts.Keys.ObjectTwoEuroCoin, text = Words("Two euros") } };
+            Assert.AreEqual("Two euros", new CardStrings(framework, app, wall, "en", "en").Get(LivingRoomCardTexts.Keys.ObjectTwoEuroCoin), "the wall's own wording wins");
+            Assert.AreEqual("Moeda de 2 euros", new CardStrings(framework, app, wall, "pt", "en").Get(LivingRoomCardTexts.Keys.ObjectTwoEuroCoin), "the visitor's language before the wall's fallback wording");
+            Assert.AreEqual("Fechar", new CardStrings(framework, app, wall, "pt", "en").Get(CardStrings.Keys.Close), "the app's table never hides a framework text");
+        }
+
+        [Test]
+        public void TheBlockRegistry_ListsTheAppsKindWithItsFamily_NotAfterEveryBuiltInKind()
+        {
+            var ordered = BlockRegistry.Shared.Ordered.Select(k => k.Key).ToList();
+            var all = BlockRegistry.Shared.All.Select(k => k.Key).ToList();
+            CollectionAssert.AreEquivalent(all, ordered, "the same kinds, only regrouped");
+            var aboutKeys = BlockRegistry.Shared.Ordered.Where(k => k.Family == "about").Select(k => k.Key).ToList();
+            int firstAbout = ordered.IndexOf(aboutKeys.First());
+            Assert.AreEqual(aboutKeys.Count, ordered.Skip(firstAbout).TakeWhile(k => aboutKeys.Contains(k)).Count(), "the about kinds sit together");
+            Assert.AreEqual(SizeComparisonBlock.Kind, aboutKeys.Last(), "the app's kind follows the built-in about kinds, in registration order");
+            Assert.Less(ordered.IndexOf(SizeComparisonBlock.Kind), ordered.IndexOf("timeline"), "and comes before the next family's kinds (stories)");
+            Assert.Less(ordered.IndexOf(SizeComparisonBlock.Kind), ordered.IndexOf("sources"), "...and before every later family");
+        }
+
+        [UnityTest]
+        public IEnumerator TheRealWindow_TheBlockLibraryDrawsTheAppsKindInItsFamilyGroup_WithTheOrderTheRegistrySays()
+        {
+            _window = new PoiEditorWindowHost(TwoPoiConfig(), "_showCardBlockLibrary");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            var ordered = BlockRegistry.Shared.Ordered;
+            int app = ordered.ToList().FindIndex(k => k.Key == SizeComparisonBlock.Kind);
+            Assert.Less(app, ordered.Count - 1, "the app's kind is no longer the last row");
+            // - the rows sit one under another in registry order: each Enabled box is lower on screen than the one above it
+            float previous = float.MinValue;
+            for (int i = 0; i < ordered.Count; i++)
+            {
+                float y = _window.RectOf("Block Library enabled#" + i).y;
+                Assert.Greater(y, previous, "row " + i + " (" + ordered[i].DisplayName + ") is drawn below the row before it");
+                previous = y;
+            }
+            Assert.Greater(_window.RectOf("Block Library enabled#" + app).y, _window.RectOf("Block Library enabled#" + (app - 1)).y, "the app's row follows the last built-in about kind");
+        }
+
+        [UnityTest]
+        public IEnumerator TheRealWindow_CardTexts_ListTheAppsRows_RealTypingMakesTheWallsWording_AndCtrlZTakesItBack()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardTexts");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            foreach (string key in LivingRoomCardTexts.Keys.All)
+                foreach (string lang in new[] { "en", "pt" })
+                    _window.RectOf("Card text " + key + " " + lang + "#0");
+            Assert.IsFalse(_window.Unsaved, "drawing the app's rows writes nothing");
+            CollectionAssert.IsEmpty(_window.Config.card_settings.strings, "precondition: the shipped wall keeps the app's and the framework's wording");
+
+            string key2 = LivingRoomCardTexts.Keys.ObjectTwoEuroCoin;
+            string field = "Card text " + key2 + " pt#0";
+            // - the app's rows come after every framework row: a person scrolls down to them, so the test does (the click must land on the window)
+            float contentY = _window.Local(_window.RectOf(field).center).y;
+            _window.SetWindowField("_scrollPos", new Vector2(0f, Mathf.Max(0f, contentY - 300f)));
+            yield return _window.WaitForRepaint();
+            Assert.That(_window.Local(_window.RectOf(field).center).y, Is.InRange(20f, 860f), "precondition: the app's row is inside the host window, where a click can reach it");
+            yield return _window.ReplaceText(field, "Dois euros");
+            yield return _window.ClickAway();
+            var s = _window.Config.card_settings;
+            Assert.AreEqual("Dois euros", CardStringTableChecks.WallWording(s, key2, "pt"), "real typing on an app row wrote the wall's wording");
+            Assert.AreEqual("", CardStringTableChecks.WallWording(s, key2, "en"), "the other language stays the app's");
+            var framework = CardStringTableChecks.FrameworkEntries();
+            var app = CardStringSources.Shared.Entries();
+            Assert.AreEqual("Dois euros", new CardStrings(framework, app, s.strings, "pt", "en").Get(key2), "the card reads the wall's wording first");
+            Assert.AreEqual("2 euro coin", new CardStrings(framework, app, s.strings, "en", "en").Get(key2), "an untouched language keeps the app's wording");
+
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.strings, "one Ctrl+Z: back to the app's wording, no empty row left");
         }
     }
 }

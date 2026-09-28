@@ -112,6 +112,9 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
         // edit): the search UI rebuilds its facets, minimap and results
         public event System.Action SearchDataChanged;
 
+        // Raised when the Detail Card's settings or any POI's card were swapped on the running wall (ApplyCardSettings): the open card rebinds
+        public event System.Action CardSettingsChanged;
+
         // Selection responders (spec _2.6 section 11): the highlight / filter dim and zoom-on-select.
         // Created after spawning, disposed in OnDisable so the static SelectionEventBus keeps no stale
         // listeners across scene reloads.
@@ -258,6 +261,7 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
         // otherwise. LOD forgets every decision about the markers that are replaced.
         private void RebuildDemoField()
         {
+            var markersBefore = SpawnedMarkers;
             var lod = FindLodController();
             if (lod != null) { lod.RestoreAllMarkers(); lod.ClearDisplacement(); }
 
@@ -282,8 +286,9 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
             SpawnedMarkers = demo != null ? new List<MarkerView>(demo.Markers) : _wallMarkers;
             if (lod != null) lod.RestoreAllMarkers();
 
-            // - a new marker set is a new search set: nothing stays selected across the swap
-            SelectionEventBus.Clear();
+            // - a new marker set is a new search set: nothing stays selected across the swap. The wall's own set staying the wall's own
+            //   is no swap: the first live push of a Play run applies every domain once, and it must not close the card being read
+            if (!ReferenceEquals(markersBefore, SpawnedMarkers)) SelectionEventBus.Clear();
             RebuildSearchIndex();
         }
 
@@ -358,6 +363,25 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
             if (_config == null || settings == null) return;
             _config.search_demo = settings;
             RebuildDemoField();
+        }
+
+        // Swap in new Detail Card settings and every POI's own card on a running wall (a live edit in the POI Editor): the wall's card
+        // settings are replaced and each running POI takes its `card` from `source`, then the open card (PoiCardHost) rebinds. `source` is
+        // the caller's own copy, never the authoring object. Nothing else of a POI changes: not its id, name, category, summary or keywords.
+        public void ApplyCardSettings(WallConfigData source)
+        {
+            if (_config == null || source == null) return;
+            _config.card_settings = source.card_settings ?? new CardSettings();
+            foreach (var poi in _config.pois) TakeCardFrom(poi, source);
+            // - the card reads the POIs the markers run (SearchPois): the same objects in a normal wall, but a demo may run its own
+            foreach (var poi in _searchPois) TakeCardFrom(poi, source);
+            CardSettingsChanged?.Invoke();
+        }
+
+        private static void TakeCardFrom(POIData poi, WallConfigData source)
+        {
+            var from = source.pois?.Find(p => p != null && p.id == poi.id);
+            if (from != null) poi.card = from.card ?? new POICardData();
         }
 
         // How a demo marker is set up: exactly like a wall POI (same visual settings, orientation)

@@ -400,7 +400,7 @@ namespace TileStories.Tests
 
         // ---------------- Tier 1 evidence: what the camera really renders ----------------
 
-        // Render the test camera once and save it under Assets/Screenshots (a vision-check artefact);
+        // Render the test camera once and save it under TestEvidence/Lod (a vision-check artefact);
         // returns the rendered pixels (the caller destroys the texture)
         private Texture2D RenderToPng(string fileName)
         {
@@ -414,9 +414,7 @@ namespace TileStories.Tests
             tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
             tex.Apply();
             RenderTexture.active = previous;
-            string dir = System.IO.Path.Combine(Application.dataPath, "Screenshots");
-            System.IO.Directory.CreateDirectory(dir);
-            System.IO.File.WriteAllBytes(System.IO.Path.Combine(dir, fileName), tex.EncodeToPNG());
+            System.IO.File.WriteAllBytes(TestEvidence.PathFor("Lod", fileName), tex.EncodeToPNG());
             return tex;
         }
 

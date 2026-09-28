@@ -118,6 +118,13 @@ namespace TileStories.Editor.Tests
                 else if (f.FieldType == typeof(List<BlockKindSetting>)) edits.Add((f.Name, s => s.kinds.Add(new BlockKindSetting { kind = "header", default_variant = "compact" })));
                 else if (f.FieldType == typeof(List<CardStringEntry>)) edits.Add((f.Name, s => POIEditorToolWindow.SetCardTextOverride(s, CardStrings.Keys.Close, "pt", "Sair")));
                 else if (f.FieldType == typeof(List<GlossaryEntry>)) edits.Add((f.Name, s => s.glossary.Add(new GlossaryEntry { term = "keep" })));
+                else if (f.FieldType == typeof(CardDemoSettings))
+                    foreach (var d in typeof(CardDemoSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        if (d.FieldType == typeof(bool)) edits.Add((d.Name, s => d.SetValue(s.demo_card, !(bool)d.GetValue(s.demo_card))));
+                        else if (d.FieldType == typeof(string)) edits.Add((d.Name, s => d.SetValue(s.demo_card, d.Name == "stop" ? CardOptions.StopFull : "lamp")));
+                        else Assert.Fail("no edit for demo card field " + d.Name);
+                    }
                 else if (f.FieldType == typeof(CardContainerSettings))
                     foreach (var c in typeof(CardContainerSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
                     {
@@ -128,7 +135,7 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(6 + 4, edits.Count, "every card_settings field (walked by reflection) has an edit: 6 wall-level + 4 container");
+            Assert.AreEqual(6 + 4 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 6 wall-level + 4 container + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -177,8 +184,8 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("Sair", POIEditorToolWindow.CardTextOverride(s, CardStrings.Keys.Close, "pt"), "real typing wrote the wall's wording");
             Assert.AreEqual("", POIEditorToolWindow.CardTextOverride(s, CardStrings.Keys.Close, "en"), "the other language stays the framework's");
             var framework = POIEditorToolWindow.FrameworkCardStrings().Entries();
-            Assert.AreEqual("Sair", new CardStrings(framework, s.strings, "pt", "en").Get(CardStrings.Keys.Close), "the card reads it");
-            Assert.AreEqual("Close", new CardStrings(framework, s.strings, "en", "en").Get(CardStrings.Keys.Close));
+            Assert.AreEqual("Sair", new CardStrings(framework, null, s.strings, "pt", "en").Get(CardStrings.Keys.Close), "the card reads it");
+            Assert.AreEqual("Close", new CardStrings(framework, null, s.strings, "en", "en").Get(CardStrings.Keys.Close));
 
             yield return _window.PressUndo();
             CollectionAssert.IsEmpty(_window.Config.card_settings.strings, "one Ctrl+Z: back to the framework's wording, no empty row left");
@@ -752,7 +759,8 @@ namespace TileStories.Editor.Tests
         private static readonly string[] ForbiddenTerms =
         {
             ".md", ".cs", "_3.", "_5.1", "LivingRoom", "lamp", "Lamp", "painting", "PoiCardHost", "BlockStackBuilder",
-            "card_settings", "CardOptions", "Assets/", "Gallery",
+            // - "Open Gallery" is a real button of the tab, so the word is allowed; the scene's and the harness's own names are not
+            "card_settings", "CardOptions", "Assets/", "CardGallery",
         };
 
         [Test]
@@ -779,11 +787,78 @@ namespace TileStories.Editor.Tests
             }
             StringAssert.Contains("Not possible in Scene test", texts["CardSceneTestGuide"]);
             StringAssert.Contains("Not possible in Scene test", texts["BlockLibrarySceneTestGuide"]);
-            foreach (string control in new[] { "Enable Detail Card", "Languages", "Open At", "Half Height Max", "Tap Outside Closes" })
+            foreach (string control in new[] { "Enable Detail Card", "Languages", "Open At", "Half Height Max", "Tap Outside Closes",
+                         "Show demo card", "Demo Point", "Demo Stop", "Open Gallery" })
                 StringAssert.Contains(control, texts["CardPlaymodeTestGuide"], "the Playmode guide names " + control);
-            StringAssert.Contains("not live yet", texts["CardPlaymodeTestGuide"], "the guide says edits need Save + Copy + Play");
+            StringAssert.Contains("Card edits are live", texts["CardPlaymodeTestGuide"], "the guide says edits reach the running card");
+            StringAssert.DoesNotContain("not live yet", texts["CardPlaymodeTestGuide"], "the old 'save, copy and play again' line is gone");
+            // - the demo's own texts say it is developer-only, off by default, and how to turn it off (20-code-quality.md)
+            StringAssert.Contains("Developer-only", texts["CardDemoShowHelp"]);
+            StringAssert.Contains("Off by default", texts["CardDemoShowHelp"]);
+            StringAssert.Contains("release build ignores it", texts["CardDemoShowHelp"]);
+            StringAssert.Contains("Save All to JSON", texts["CardDemoShowHelp"], "it says how to turn it off");
+            // - the Scene guide says the card renders only in Play Mode / UI Builder (no Scene-view parity)
+            StringAssert.Contains("Play Mode", texts["CardSceneTestGuide"]);
+            StringAssert.Contains("UI Builder", texts["CardSceneTestGuide"]);
+            Assert.AreEqual(CardOptions.DemoStops.Length, ((string[])typeof(POIEditorToolWindow).GetField("CardDemoStopLabels", Static).GetValue(null)).Length, "one label per Demo Stop option");
             var openLabels = (string[])typeof(POIEditorToolWindow).GetField("CardOpenStopLabels", Static).GetValue(null);
             Assert.AreEqual(CardOptions.OpenStops.Length, openLabels.Length, "one label per Open At option");
+        }
+
+        // ---------------- the developer-only demo card and the gallery (_3.1 step 12) ----------------
+
+        private void InMutationScope(Action edit) =>
+            typeof(POIEditorToolWindow).GetMethod("DrawConfigMutationScope", Instance).Invoke(_window.Editor, new object[] { edit, false });
+
+        [UnityTest]
+        public IEnumerator ShowDemoCard_ARealClickTurnsItOn_TheChoicesAreStored_TheBuildGuardSeesIt_AndEachEditUndoes()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Show demo card");
+            Assert.IsFalse(_window.Config.card_settings.demo_card.enabled, "off by default on the shipped wall");
+            Assert.IsFalse(_window.Unsaved, "drawing the Test rows writes nothing");
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(_window.Config, developmentBuild: true), "nothing for the build guard to report");
+
+            _window.Click("Show demo card");
+            yield return _window.WaitForRepaint();
+            var demo = _window.Config.card_settings.demo_card;
+            Assert.IsTrue(demo.enabled, "a real click on the checkbox turned it on");
+            Assert.IsTrue(_window.Unsaved);
+            Assert.AreEqual("", demo.poi_id, "no point picked yet: the row drew without writing one");
+            var guard = DevFeatureBuildGuard.ActiveMessages(_window.Config, developmentBuild: true);
+            Assert.AreEqual(1, guard.Count, "the switch the window just set is the one the build guard watches");
+            StringAssert.Contains("Show demo card", guard[0]);
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(_window.Config, developmentBuild: false), "a release build ignores it");
+
+            // - the two popups are native menus no test can click: their write path is the window's own edit setters, in its own edit scope
+            InMutationScope(() => _window.Editor.SetCardDemoPoi("lamp"));
+            InMutationScope(() => _window.Editor.SetCardDemoStop(CardOptions.StopFull));
+            yield return _window.WaitForRepaint();
+            Assert.AreEqual("lamp", _window.Config.card_settings.demo_card.poi_id);
+            Assert.AreEqual(CardOptions.StopFull, _window.Config.card_settings.demo_card.stop);
+            Assert.AreEqual("lamp", CardDemoRule.PoiToOpen(_window.Config.card_settings.demo_card, true, _window.Config.pois), "the runtime rule finds the point the popup stored");
+
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.StopHalf, _window.Config.card_settings.demo_card.stop, "Ctrl+Z: the stop is back");
+            yield return _window.PressUndo();
+            Assert.AreEqual("", _window.Config.card_settings.demo_card.poi_id, "Ctrl+Z: the point is back");
+            yield return _window.PressUndo();
+            Assert.IsFalse(_window.Config.card_settings.demo_card.enabled, "Ctrl+Z: the demo is off again");
+            Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(_window.Config, developmentBuild: true));
+        }
+
+        [Test]
+        public void OpenGallery_LoadsInPlayMode_OpensInTheEditorWhenNothingIsUnsaved_AndOtherwiseAsksToSaveFirst()
+        {
+            Assert.AreEqual(CardGalleryOpener.Plan.LoadInPlayMode, CardGalleryOpener.PlanFor(isPlaying: true, anySceneHasUnsavedChanges: false));
+            Assert.AreEqual(CardGalleryOpener.Plan.LoadInPlayMode, CardGalleryOpener.PlanFor(isPlaying: true, anySceneHasUnsavedChanges: true), "Play Mode loads on top: nothing is replaced on disk");
+            Assert.AreEqual(CardGalleryOpener.Plan.OpenInEditor, CardGalleryOpener.PlanFor(isPlaying: false, anySceneHasUnsavedChanges: false));
+            Assert.AreEqual(CardGalleryOpener.Plan.SaveTheOpenSceneFirst, CardGalleryOpener.PlanFor(isPlaying: false, anySceneHasUnsavedChanges: true), "never over unsaved work");
+            Assert.IsNotNull(AssetDatabase.LoadAssetAtPath<SceneAsset>(CardGalleryOpener.ScenePath), "the gallery scene the button opens exists");
+            foreach (var scene in EditorBuildSettings.scenes)
+                Assert.AreNotEqual(CardGalleryOpener.ScenePath, scene.path, "the gallery stays out of Build Settings (40-testing.md 4.4)");
         }
 
         // ---------------- Tier 3 group A: Reset Saved Card State and the Knowledge Check rows (_3.1 step 8A) ----------------

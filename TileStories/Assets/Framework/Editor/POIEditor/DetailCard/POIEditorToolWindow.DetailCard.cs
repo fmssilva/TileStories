@@ -83,18 +83,12 @@ namespace TileStories.Editor
             DrawDomainTestSubSection(_cardGlossaryTest, CardGlossarySceneTestGuide, CardGlossaryPlaymodeTestGuide, CardGlossaryDeviceTestGuide);
         }
 
-        // The framework's default card texts (CardStrings.asset), found once per domain reload
+        // The framework's default card texts (CardStrings.asset, next to PoiCard.uss), loaded once per domain reload. By its own path, never
+        // "the first CardStringTable found": an app's table is a CardStringTable too (CardStringSources) and must not pass for the framework's.
+        private const string FrameworkCardStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
         private static CardStringTable _frameworkCardStrings;
-        internal static CardStringTable FrameworkCardStrings()
-        {
-            if (_frameworkCardStrings != null) return _frameworkCardStrings;
-            foreach (string guid in AssetDatabase.FindAssets("t:" + nameof(CardStringTable)))
-            {
-                _frameworkCardStrings = AssetDatabase.LoadAssetAtPath<CardStringTable>(AssetDatabase.GUIDToAssetPath(guid));
-                if (_frameworkCardStrings != null) break;
-            }
-            return _frameworkCardStrings;
-        }
+        internal static CardStringTable FrameworkCardStrings() =>
+            _frameworkCardStrings != null ? _frameworkCardStrings : _frameworkCardStrings = AssetDatabase.LoadAssetAtPath<CardStringTable>(FrameworkCardStringsPath);
 
         // card_settings.strings: one row per framework text, named by its framework wording (never its key), then one
         // field per wall language holding this wall's own wording. Empty field = the framework's. Drawing never writes.
@@ -114,40 +108,55 @@ namespace TileStories.Editor
                 HelpInfoButton.Draw("Card Texts", CardTextsHelp);
                 EditorRowEnd();
 
-                var framework = table.Entries();
-                foreach (var row in table.rows)
+                DrawCardTextRows(s, table, languages, "Framework");
+                // - an app's own words, each app under its own name (the same rows, the same override field per language)
+                foreach (var source in CardStringSources.Shared.All)
                 {
-                    if (row == null || string.IsNullOrEmpty(row.key)) continue;
-                    // - quoted: the row IS that text (a one-character wording like "?" reads as a title otherwise)
-                    string name = "\"" + (CardStrings.Find(framework, row.key, languages[0]) ?? CardStrings.Find(framework, row.key, "en") ?? row.key) + "\"";
-                    DrawEditorRow(out float nameRow, out _, IndentLevel1);
-                    GUILayout.Label(name, EditorStyles.boldLabel, GUILayout.Width(Mathf.Max(40f, nameRow - 36f)), GUILayout.ExpandWidth(false));
-                    HelpInfoButton.Draw(name, CardTextRowHelp(row));
+                    DrawEditorRow(out float appRow, out _);
+                    GUILayout.Label(source.AppName + " (app texts)", EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, appRow - 36f)), GUILayout.ExpandWidth(false));
                     EditorRowEnd();
-
-                    foreach (string lang in languages)
-                    {
-                        string current = CardTextOverride(s, row.key, lang);
-                        DrawEditorRow(out float rowWidth, out _, IndentLevel1);
-                        EditorGUILayout.PrefixLabel(lang);
-                        string edited = EditorGUILayout.TextField(current, GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth)), GUILayout.ExpandWidth(false));
-                        ReportTableCellRect("Card text " + row.key + " " + lang, 0);
-                        EditorRowEnd();
-                        if (edited != current) SetCardTextOverride(s, row.key, lang, edited);
-                    }
+                    DrawCardTextRows(s, source.Table, languages, source.AppName);
                 }
             }
 
             DrawDomainTestSubSection(_cardTextsTest, CardTextsSceneTestGuide, CardTextsPlaymodeTestGuide, CardTextsDeviceTestGuide);
         }
 
-        // The row's (i): where the card shows it, then the framework's wording in each of its languages
-        private static string CardTextRowHelp(CardStringTable.Row row)
+        // One row per text of a table (the framework's, or one app's), then one field per wall language holding this wall's own wording
+        private void DrawCardTextRows(CardSettings s, CardStringTable table, List<string> languages, string owner)
+        {
+            var entries = table.Entries();
+            foreach (var row in table.rows)
+            {
+                if (row == null || string.IsNullOrEmpty(row.key)) continue;
+                // - quoted: the row IS that text (a one-character wording like "?" reads as a title otherwise)
+                string name = "\"" + (CardStrings.Find(entries, row.key, languages[0]) ?? CardStrings.Find(entries, row.key, "en") ?? row.key) + "\"";
+                DrawEditorRow(out float nameRow, out _, IndentLevel1);
+                GUILayout.Label(name, EditorStyles.boldLabel, GUILayout.Width(Mathf.Max(40f, nameRow - 36f)), GUILayout.ExpandWidth(false));
+                HelpInfoButton.Draw(name, CardTextRowHelp(row, owner));
+                EditorRowEnd();
+
+                foreach (string lang in languages)
+                {
+                    string current = CardTextOverride(s, row.key, lang);
+                    DrawEditorRow(out float rowWidth, out _, IndentLevel1);
+                    EditorGUILayout.PrefixLabel(lang);
+                    string edited = EditorGUILayout.TextField(current, GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth)), GUILayout.ExpandWidth(false));
+                    ReportTableCellRect("Card text " + row.key + " " + lang, 0);
+                    EditorRowEnd();
+                    if (edited != current) SetCardTextOverride(s, row.key, lang, edited);
+                }
+            }
+        }
+
+        // The row's (i): where the card shows it, then its owner's wording (the framework's, or the app's) in each of its languages
+        private static string CardTextRowHelp(CardStringTable.Row row, string owner)
         {
             var words = new List<string>();
             foreach (var t in row.text)
                 if (t != null && !string.IsNullOrWhiteSpace(t.value)) words.Add(t.lang + ": " + t.value);
-            return row.where + "\n\nFramework wording (used where your field is empty): " + string.Join("; ", words) + ".";
+            string who = owner == "Framework" ? "Framework wording" : owner + " wording";
+            return row.where + "\n\n" + who + " (used where your field is empty): " + string.Join("; ", words) + ".";
         }
 
         // This wall's own wording of one text in one language ("" when it has none)
@@ -188,8 +197,51 @@ namespace TileStories.Editor
                 c.keep_audio_on_close = DrawToggleField("Keep Audio Playing", c.keep_audio_on_close, CardKeepAudioHelp);
             }
 
-            DrawDomainTestSubSection(_cardContainerTest, CardSceneTestGuide, CardPlaymodeTestGuide, CardDeviceTestGuide, DrawCardStateResetRow);
+            DrawDomainTestSubSection(_cardContainerTest, CardSceneTestGuide, CardPlaymodeTestGuide, CardDeviceTestGuide, DrawCardTestRows);
         }
+
+        // The Test foldout's own rows: forget the saved answers, then the developer-only demo card and the gallery
+        private void DrawCardTestRows()
+        {
+            DrawCardStateResetRow();
+            DrawCardDemoRows();
+        }
+
+        // Developer-only: Show demo card (+ which point, which stop) opens one card by itself in Play Mode, and Open Gallery loads the card's
+        // isolated test scene. Off by default; ignored by release builds (CardDemoRule); registered in DevFeatureBuildGuard.
+        private void DrawCardDemoRows()
+        {
+            var demo = _config.card_settings.demo_card ??= new CardDemoSettings();
+            demo.enabled = DrawToggleField("Show demo card", demo.enabled, CardDemoShowHelp, IndentLevel1);
+            if (demo.enabled)
+            {
+                var pois = _config.pois ?? new List<POIData>();
+                var ids = new List<string>();
+                var titles = new List<string>();
+                for (int i = 0; i < pois.Count; i++)
+                {
+                    ids.Add(pois[i]?.id);
+                    titles.Add(EditorNames.Poi(i, pois[i]));
+                }
+                string poi = DrawReferencePopupField("Demo Point", demo.poi_id, ids, titles, allowNone: true, CardDemoPoiHelp, IndentLevel1 * 2);
+                if (poi != demo.poi_id) SetCardDemoPoi(poi);
+                string stop = DrawPopupField("Demo Stop", demo.stop, CardOptions.DemoStops, CardDemoStopLabels, CardDemoStopHelp, IndentLevel1 * 2);
+                if (stop != demo.stop) SetCardDemoStop(stop);
+                if (string.IsNullOrEmpty(demo.poi_id))
+                    EditorGUILayout.HelpBox(CardDemoNoPointNote, MessageType.Info);
+            }
+
+            DrawEditorRow(out float rowWidth, out _, IndentLevel1);
+            if (GUILayout.Button("Open Gallery", GUILayout.Width(Mathf.Max(40f, rowWidth - 36f)), GUILayout.ExpandWidth(false)))
+                CardGalleryOpener.Open();
+            ReportTableCellRect("Card gallery open", 0);
+            HelpInfoButton.Draw("Open Gallery", CardGalleryHelp);
+            EditorRowEnd();
+        }
+
+        internal void SetCardDemoPoi(string poiId) => _config.card_settings.demo_card.poi_id = poiId ?? "";
+
+        internal void SetCardDemoStop(string stop) => _config.card_settings.demo_card.stop = stop;
 
         // The Test row that forgets what the card remembered on this computer (answers, votes, revealed questions)
         private void DrawCardStateResetRow()
@@ -245,7 +297,8 @@ namespace TileStories.Editor
                 GUILayout.Space(AddButtonRowRightMargin);
             }
 
-            var kinds = BlockRegistry.Shared.All;
+            // - by family, so an app's kind sits with its family (Ordered), not after every built-in one
+            var kinds = BlockRegistry.Shared.Ordered;
             for (int i = 0; i < kinds.Count; i++)
             {
                 var kind = kinds[i];

@@ -97,45 +97,57 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
 So start by reading them all. 
 
 
-## `And now: POI Detail Card -- step 11 (an app registers its own block kind) + card services on the bind context`
+## `And now: POI Detail Card -- evidence clean-up, step 11-fix (app strings), step 12 (live Play Mode + demo card)`
 
 GATE: take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Close every
-capture window afterwards with window.Close() and confirm none is left (.clinerules/40-testing.md 4.2.3). Confirm the tree
-compiles and is committed (`git --no-optional-locks status`); if not, STOP and report. Re-verify the baseline (0 `error CS`,
-EditMode + PlayMode all green) -- with Unity allowed to be in the background.
+capture window with window.Close() and confirm none is left (.clinerules/40-testing.md 4.2.3). Confirm the tree compiles and is
+committed (`git --no-optional-locks status`); if not, STOP and report. Re-verify the baseline (0 `error CS`, EditMode + PlayMode
+all green) with Unity allowed to be in the background.
 
 Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- start with "## TODOs"
-(the [step 11] item and the "nearby points" SHOULD item) and the status table (0-8B done; 11 next, before Tier 4).
-Context only: _3.1 sections 3 and 10 (step 11), .clinerules/10-structure.md (Framework vs Apps), _5.1.
+([11-fix] items) and the status table (0-11 done; 12 planned), and sections 8.3 / 8.4.
+Context only: _5.1 ("PlayMode Live Config" handout, "Dev-only features and build safety"), .clinerules/20-code-quality.md
+(dev-only rule), proj_guides/__mixed_TODOs.md (the two "Repo hygiene" items).
 
-PART 1 -- card services (the [step 11] TODO):
-1. Add ONE small typed service lookup to BlockBindContext (e.g. `T Service<T>() where T : class`, null when absent), filled by
-   PoiCardHost from a registry an app can add to at startup. Move PollResults onto it (PollBlockView asks for IPollResults;
-   absent = NoPollResults behaviour). Keep Strings, Media, Host, State, Events as plain fields. No reflection magic, no DI
-   framework. EditMode tests: absent -> null, registered -> the instance, poll behaviour unchanged (existing tests stay green).
+PART 0 -- evidence clean-up (one small commit-able unit, no behaviour change):
+1. One shared helper for every test render path (e.g. `TestEvidence.PathFor(domain, fileName)`) writing to
+   `TileStories/TestEvidence/<domain>/` (next to Assets/, NOT inside it); replace the five copies of
+   `Path.Combine(Application.dataPath, "Screenshots")` (CardGalleryChecks, CardGalleryTests, DisplacementDemoFixture,
+   EffectsPreviewRenderTests, LodRealPipelineTests) and the marker gallery's MarkerGalleryScreenshots path with it.
+2. Move today's PNGs from Assets/Screenshots into TestEvidence/ (keep them: they are review evidence), delete Assets/Screenshots
+   and its metas; add `TestEvidence/` and `MarkerGalleryScreenshots/` to TileStories/.gitignore and run
+   `git rm -r --cached TileStories/MarkerGalleryScreenshots` (staging only -- do not commit).
+3. Delete the 14 `Assets/InitTestScene<guid>.unity` (+ .meta) leftovers. Do NOT touch Assets.7z, __orientation_screenshot.png,
+   edit_file.py or "Fundo Desktop.jpg" (the developer decides).
+4. Update every doc path that says Assets/Screenshots (_3.1, _5.1, 40-testing.md, 10-structure.md). A full test run proves no
+   render lands inside Assets/ any more.
 
-PART 2 -- step 11, the extension proof (zero Framework edits beyond Part 1):
-2. Create the app's own assembly: Assets/Apps/LivingRoom/Scripts/ with an asmdef referencing the Framework runtime (never the
-   reverse). LivingRoomBlocks.cs registers `size_comparison` (family `about`) through the public BlockRegistry.Register, at
-   runtime start AND in the Editor (so the POI Editor's Block Library and "+ Add block" list it). Keep the kind simple: e.g. the
-   POI's real size vs a familiar object (fields: object Choice, the POI's width / height in cm as Number), one variant, its own
-   USS in the app folder using only --ts-* tokens. It also registers ONE app service through Part 1 and uses it (a tiny example
-   is enough) -- the proof that app kinds get their dependencies without touching Framework.
-3. Tests live in an app test assembly (Assets/Apps/LivingRoom/Tests/, referencing the app + Framework test utilities), not in
-   Framework tests: registration visible to the registry and to the Editor (real window: the kind appears in Block Library and
-   "+ Add block"), round trip, Phase A gallery entry through the generic checks, Phase B on the real scene with The Lamp showing
-   it. A guard test: Framework assemblies never reference the app assembly.
-4. The Lamp gets one size_comparison block (never change POI id/name/category/summary/keywords).
-5. Card Content warning (the SHOULD item): a card with a show_on_wall block AND a sticky show_on_wall action. EditMode test.
+PART 1 -- step 11-fix:
+5. App string tables: an app registers its own CardStringTable (asset in its folder) like its kinds; CardStrings lookup
+   wall[lang] > app[lang] > framework[lang], then the same for the fallback language. Detail Card > Card Texts lists app rows
+   too (grouped under the app's name) so a wall can override them. The CardStrings source-scan test covers app keys. EditMode tests
+   for the order; a real-typing Editor test for an app row.
+6. size_comparison: a label under each shape -- the point's card title and the object's name from the app table (en + pt);
+   the coin drawn round; shapes never told apart by colour alone. Recapture gallery + real scene (EN and PT) and check them.
+7. Block Library and "+ Add block": order rows by family order, then registration order (the app kind sits with `about`).
 
-Capture and check yourself: the new card block (gallery + real scene), the Block Library row and the Card Content row of the
-app kind, the new warning. Rules as before: no literal colours/sizes, no visitor strings in code (app strings go through the
-card's string table or the wall's Card Texts), real input in tests.
-OUT OF SCOPE: Tier 4 audio/video, a DI container, moving the other context fields, the evidence-folder move.
-Stop when step 11 is green. Update _3.1 (row 11 with proof, TODOs, design history), 10-structure.md (the new app assembly),
-_5.1. Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP and report.
-Finish with: suites + counts, what you looked at, what you could not verify, a one-line commit message (no trailer).
-Commit only if I ask.
+PART 2 -- step 12 (_3.1 8.3 / 8.4):
+8. LivePlayModeCardApplier (Editor assembly, ILivePlayModeApplier, the _5.1 handout pattern): a card_settings edit or a POI's card
+   edit in the POI Editor rebinds the open card in the running scene (PoiCardHost.Rebind), keeping the stop and the scroll.
+   Update LiveSyncFieldMatrixTests (the card fields are now live; remove their reasoned exclusion). Phase B: a real edit in the
+   window while Play Mode runs changes the open card (text, a block added, a variant changed), undo brings it back.
+9. Dev-only demo card: Detail Card > Test > "Show demo card" (POI popup + stop popup) opens that card in Play Mode, and "Open
+   Gallery" loads the Phase A scene; off by default, registered in DevFeatureBuildGuard; the Test guide says the card renders only
+   in Play Mode / UI Builder (no Scene-view parity). Real-click Editor test + a build-guard test.
+
+Capture and check yourself: the labelled size comparison (EN, PT), Card Texts with app rows, the Block Library order, the Test
+foldout with the demo controls, a live edit before/after in the Game view. Rules as before: no literal colours/sizes, no visitor
+strings in code, real input in tests, never change POI id/name/category/summary/keywords.
+OUT OF SCOPE: Tier 4 audio/video, Tier 5, _3.2 navigation, _3.3 styles, moving other context fields onto CardServices.
+Stop when Parts 0-2 are green. Update _3.1 (rows 11-fix and 12 with proof, TODOs, design history), 10-structure.md, _5.1.
+Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP and report.
+Finish with: suites + counts, what you looked at, what you could not verify, a one-line commit message (no trailer), and the
+exact `git add` paths (never `git add .`). Commit only if the developer asks.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

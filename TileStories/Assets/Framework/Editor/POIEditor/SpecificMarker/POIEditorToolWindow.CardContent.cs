@@ -21,7 +21,7 @@ namespace TileStories.Editor
 
         // Which block rows are open, by "poiId/blockKey" (UI state, never saved)
         private readonly Dictionary<string, bool> _cardBlockFoldouts = new();
-        // The kind "+ Add block" adds (index into BlockRegistry.Shared.All)
+        // The kind "+ Add block" adds (index into BlockRegistry.Shared.Ordered: the picker lists kinds by family)
         private int _newCardBlockKindIndex;
 
         private void DrawPoiCardContent(POIData poi)
@@ -116,7 +116,7 @@ namespace TileStories.Editor
         // The kind picker + "+ Add block": appends a new block of that kind, open, with a fresh key
         private void DrawCardAddBlockRow(POIData poi)
         {
-            var kinds = BlockRegistry.Shared.All;
+            var kinds = BlockRegistry.Shared.Ordered;
             if (kinds.Count == 0) return;
             var labels = new string[kinds.Count];
             for (int k = 0; k < kinds.Count; k++) labels[k] = kinds[k].Family + "/" + kinds[k].DisplayName;

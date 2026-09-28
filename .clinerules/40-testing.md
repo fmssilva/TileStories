@@ -190,6 +190,19 @@ application is a broken test, not a flaky one.
   capture window before starting a run (an open utility window takes focus from real-click Editor tests).
 - Blank windows the developer finds are safe to close with their X; they hold nothing.
 
+### 4.2.4 Test renders live outside Assets/
+
+Every picture a test or a capture saves (a Game-view render, a gallery entry, a POI Editor window capture) goes to
+`TileStories/TestEvidence/<domain>/`, next to `Assets/`, git-ignored -- never inside `Assets/`, where Unity would import hundreds of
+generated PNGs and git would track them.
+
+- A test asks `TileStories.Tests.TestEvidence.PathFor(domain, fileName)` (`Framework/Tests/Runtime/TestEvidence.cs`, public: the app's test
+  assemblies use it too). Never `Path.Combine(Application.dataPath, "Screenshots")` -- `TestEvidenceRuleTests` fails on it.
+- An agent's own captures (the `execute_code` window capture, `manage_camera screenshot`) write to `TestEvidence/<domain>/` as well; the
+  domain is the tested area (`Card`, `Search`, `Editor`, `Displacement`, `Lod`, `Effects`, `MarkerGallery`).
+- An aborted run can leave `Assets/InitTestScene<guid>.unity` files: delete them (`TestEvidenceRuleTests` fails while one sits there).
+- A capture that shows another application (a chat window, a browser) is private content: delete it and capture again.
+
 ### 4.3 Asset Database Refresh Discipline
 
 Any edit to a `.meta`, `.prefab`, `.asset`, or raw asset file (texture, audio, model)

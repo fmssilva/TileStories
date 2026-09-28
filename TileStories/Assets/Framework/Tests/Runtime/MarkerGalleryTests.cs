@@ -435,14 +435,12 @@ namespace TileStories.Tests
         // Visual verification: captures a screenshot of each marker to confirm it renders
         // with the correct shape, color, and features (not just a brown square).
         // This test requires a human to inspect the saved screenshots in the project's
-        // Screenshots folder to verify visual correctness.
+        // TestEvidence/MarkerGallery folder to verify visual correctness.
         [UnityTest]
         public IEnumerator Visual_EachMarkerRendersCorrectShape()
         {
             var prefab = MarkerGalleryTestFixture.LoadPrefab();
             int tested = 0;
-            string outputDir = System.IO.Path.Combine(Application.dataPath, "..", "MarkerGalleryScreenshots");
-            System.IO.Directory.CreateDirectory(outputDir);
 
             foreach (var entry in MarkerGalleryDefinitions.Entries)
             {
@@ -453,7 +451,7 @@ namespace TileStories.Tests
 
                 // Capture screenshot for this marker
                 string filename = SanitizeFileName($"{entry.Group}_{entry.Label}_{entry.OutlineMode}_{entry.Shape}.png");
-                string filepath = System.IO.Path.Combine(outputDir, filename);
+                string filepath = TestEvidence.PathFor("MarkerGallery", filename);
                 ScreenCapture.CaptureScreenshot(filepath);
                 yield return new WaitForEndOfFrame();
 
@@ -467,7 +465,7 @@ namespace TileStories.Tests
                 tested++;
             }
 
-            Debug.Log($"[VisualTest] Captured {tested} marker screenshots in {outputDir}");
+            Debug.Log($"[VisualTest] Captured {tested} marker screenshots in {System.IO.Path.GetDirectoryName(TestEvidence.PathFor("MarkerGallery", "x.png"))}");
             yield break;
         }
 

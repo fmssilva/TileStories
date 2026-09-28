@@ -193,13 +193,9 @@ namespace TileStories.Tests
             return tex;
         }
 
-        // Evidence for the vision pass: Assets/Screenshots/<name>.png
-        protected static void SavePng(Texture2D tex, string name)
-        {
-            string dir = Path.Combine(Application.dataPath, "Screenshots");
-            Directory.CreateDirectory(dir);
-            File.WriteAllBytes(Path.Combine(dir, name + ".png"), tex.EncodeToPNG());
-        }
+        // Evidence for the vision pass: TestEvidence/Displacement/<name>.png
+        protected static void SavePng(Texture2D tex, string name) =>
+            File.WriteAllBytes(TestEvidence.PathFor("Displacement", name + ".png"), tex.EncodeToPNG());
 
         protected static void SetField(object target, string name, object value)
         {

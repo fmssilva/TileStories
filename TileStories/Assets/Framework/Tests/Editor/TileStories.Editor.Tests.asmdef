@@ -3,7 +3,9 @@
     "rootNamespace": "TileStories.Editor.Tests",
     "references": [
         "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
         "TileStories.Editor",
+        "TileStories.Tests.Runtime",
         "TileStories",
         "Unity.TextMeshPro"
     ],

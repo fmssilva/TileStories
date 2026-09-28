@@ -1,13 +1,24 @@
-/* The living room's size_comparison block: the point and a familiar object, two shapes standing on one ground line.
+/* The living room's size_comparison block: the point and a familiar object, two shapes standing on one ground line, a name under each.
    Written ONLY with the --ts-* tokens of the framework's CardTokens.uss: no literal colour, size or radius here or in C# (_3.1
-   section 3). The shapes' width and height are set by the view (SizeComparisonRule): they are the real sizes, not design values.
-   UI Toolkit USS only: no web-CSS gap / calc (UI Toolkit drops them with a warning). */
+   section 3). The shapes' and slots' width and height are set by the view (SizeComparisonRule): they are the real sizes, not design
+   values. UI Toolkit USS only: no web-CSS gap / calc (UI Toolkit drops them with a warning). */
 
 .card-size__stage {
     flex-direction: row;
     align-items: flex-end;
     justify-content: center;
     height: var(--ts-media-height);
+}
+
+/* a slot is the column one shape stands in: as wide as the shape or its name, the shape centred in it, feet on the ground line */
+.card-size__slot {
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.card-size__slot--object {
+    margin-left: var(--ts-space-4);
 }
 
 .card-size__shape {
@@ -21,11 +32,31 @@
     border-color: var(--ts-accent);
 }
 
-/* the familiar object is plainer than the point: a solid, quiet shape beside it */
+/* the familiar object is plainer than the point: a solid, quiet shape beside it (a coin is round: the name says which, the shape helps) */
 .card-size__shape--object {
     background-color: var(--ts-ink-3);
     border-color: var(--ts-ink-2);
-    margin-left: var(--ts-space-4);
+}
+
+.card-size__shape--round {
+    border-radius: var(--ts-radius-round);
+}
+
+/* the names row: one label per slot, the same widths and the same gap, so a name is centred under its own shape */
+.card-size__names {
+    flex-direction: row;
+    justify-content: center;
+    margin: var(--ts-space-2) 0 0 0;
+}
+
+.card-size__name {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: upper-center;
 }
 
 .card-size__caption {

@@ -10,7 +10,7 @@ namespace TileStories.Tests
     // Every Displacement setting (Global Scene > Displacement), one by one, changes what REAL markers do:
     // swapped live through WallSession.ApplyDisplacementSettings (the POI Editor's live push seam) on the
     // displacement demo's crowded groups, evaluated by the real LODController, read back from the markers'
-    // labels, roots and leader lines -- plus renders saved under Assets/Screenshots for the vision pass.
+    // labels, roots and leader lines -- plus renders saved under TestEvidence/Displacement for the vision pass.
     public class DisplacementSettingsRealMarkerTests : DisplacementDemoFixture
     {
         private IEnumerator StartDemo(DisplacementSettings settings)

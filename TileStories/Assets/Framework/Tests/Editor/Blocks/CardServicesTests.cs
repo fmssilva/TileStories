@@ -150,7 +150,7 @@ namespace TileStories.Editor.Tests
             {
                 Poi = poi, Language = "en", FallbackLanguage = "en", Variant = "bars", Services = services,
                 State = new CardLocalState(new MemoryCardStateStore(), "w"),
-                Strings = new CardStrings(new List<CardStringEntry> { new() { key = CardStrings.Keys.PollPercent, text = En("{0}%") } }, null, "en", "en"),
+                Strings = new CardStrings(new List<CardStringEntry> { new() { key = CardStrings.Keys.PollPercent, text = En("{0}%") } }, null, null, "en", "en"),
             };
 
             // - no IPollResults registered (today's app): the vote is kept and thanked, no bar, no percentage

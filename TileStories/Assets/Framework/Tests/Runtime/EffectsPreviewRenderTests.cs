@@ -134,12 +134,8 @@ namespace TileStories.Tests
         private static bool Differs(Color32 a, Color32 b) =>
             Mathf.Abs(a.r - b.r) > 22 || Mathf.Abs(a.g - b.g) > 22 || Mathf.Abs(a.b - b.b) > 22;
 
-        private static void SavePng(Texture2D tex, string name)
-        {
-            string dir = Path.Combine(Application.dataPath, "Screenshots");
-            Directory.CreateDirectory(dir);
-            File.WriteAllBytes(Path.Combine(dir, name), tex.EncodeToPNG());
-        }
+        private static void SavePng(Texture2D tex, string name) =>
+            File.WriteAllBytes(TestEvidence.PathFor("Effects", name), tex.EncodeToPNG());
 
         private static float PixelRadius(Camera viewCam, Vector3 worldCentre, float worldRadius)
         {

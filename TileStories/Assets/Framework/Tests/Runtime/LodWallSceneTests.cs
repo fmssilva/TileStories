@@ -21,7 +21,7 @@ namespace TileStories.Tests
     // Every earlier demo-field test built its own camera at the origin with no room mesh, so none of them
     // could see that the field spawned INSIDE the room mesh (invisible) and that its yaw_only markers were
     // turned edge-on. These tests look through the scene's own camera, render real pixels, and fail on
-    // either. Renders are saved under Assets/Screenshots as LodDemoFieldScene_*.png.
+    // either. Renders are saved under TestEvidence/Lod as LodDemoFieldScene_*.png.
     public class LodWallSceneTests
     {
         private const string ScenePath = "Assets/Apps/LivingRoom/LivingRoomScene.unity";
@@ -378,12 +378,7 @@ namespace TileStories.Tests
             rt.Release();
             Object.Destroy(rt);
             _tracked.Add(tex);
-            if (fileName != null)
-            {
-                string dir = System.IO.Path.Combine(Application.dataPath, "Screenshots");
-                System.IO.Directory.CreateDirectory(dir);
-                System.IO.File.WriteAllBytes(System.IO.Path.Combine(dir, fileName), tex.EncodeToPNG());
-            }
+            if (fileName != null) System.IO.File.WriteAllBytes(TestEvidence.PathFor("Lod", fileName), tex.EncodeToPNG());
             return tex;
         }
     }

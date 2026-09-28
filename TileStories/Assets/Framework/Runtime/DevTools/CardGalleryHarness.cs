@@ -35,6 +35,10 @@ namespace TileStories
         public ICardEvents Events { get; set; } = new LogCardEvents();
         // The services the gallery card's blocks may ask for: the app's shared registry, like the wall's card (a test hands its own)
         public CardServices Services { get; set; } = CardServices.Shared;
+        // The app's own card words, like the wall's card (a test hands its own)
+        public CardStringSources StringSources { get; set; } = CardStringSources.Shared;
+        // The visitor's language for the next ShowPoi (Phase A shows one language at a time; English unless a test says otherwise)
+        public string Language { get; set; } = "en";
 
         public CardGalleryHarness() => State = new CardLocalState(StateStore, "gallery");
 
@@ -88,9 +92,9 @@ namespace TileStories
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wall.pois);
             var context = new BlockBindContext
             {
-                Poi = poi, Taxonomy = wall, Language = "en", FallbackLanguage = "en",
-                Strings = new CardStrings(strings != null ? strings.Entries() : null, settings.strings, "en", "en"),
-                Glossary = new CardGlossary(settings.glossary, "en", "en"),
+                Poi = poi, Taxonomy = wall, Language = Language, FallbackLanguage = Language,
+                Strings = new CardStrings(strings != null ? strings.Entries() : null, StringSources.Entries(), settings.strings, Language, Language),
+                Glossary = new CardGlossary(settings.glossary, Language, Language),
                 MarkerLook = MarkerVisualSettings.Resolve(wall, null),
                 Media = Media,
                 State = State,

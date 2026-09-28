@@ -23,7 +23,7 @@ namespace TileStories.Tests
     // Every Select, Filter & Search setting, ONE AT A TIME, on the REAL wall scene with the search demo on: each
     // test changes only its field through WallSession.ApplySearchSettings (the seam the Editor's live push
     // calls), asserts what really changed on real markers / the real search UI, and saves a render of that
-    // state (Assets/Screenshots/Search_Field_*.png) for the vision checklist (_2.6.1).
+    // state (TestEvidence/Search/Search_Field_*.png) for the vision checklist (_2.6.1).
     public class SearchSettingsFieldTests : SearchSceneFixture
     {
         private IEnumerator Demo()

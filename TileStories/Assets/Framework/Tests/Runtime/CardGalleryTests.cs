@@ -922,7 +922,7 @@ namespace TileStories.Tests
             Assert.IsFalse(_harness.Sheet.IsOpen);
         }
 
-        // Save what the Game view shows under Assets/Screenshots
+        // Save what the Game view shows under TestEvidence/Card
         private static IEnumerator Render(string name) => CardGalleryChecks.Render(name);
             // ---------------- Tier 2: pictures (_3.1 step 7) ----------------
 

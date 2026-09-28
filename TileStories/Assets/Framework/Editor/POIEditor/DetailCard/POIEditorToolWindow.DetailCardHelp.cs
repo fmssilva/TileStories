@@ -12,6 +12,8 @@ namespace TileStories.Editor
     {
         // Open At labels, in CardOptions.OpenStops order
         private static readonly string[] CardOpenStopLabels = { "Peek (title only)", "Half" };
+        // Demo Stop labels, in CardOptions.DemoStops order
+        private static readonly string[] CardDemoStopLabels = { "Peek (title only)", "Half", "Full" };
 
         private const string CardEnabledHelp =
             "Whether tapping a point opens its Detail Card. Off: a tap still selects the point (highlight, zoom), no card opens. " +
@@ -68,12 +70,40 @@ namespace TileStories.Editor
             "The Detail Card is off for this wall (Detail Card > Card Container > Enable Detail Card): this content is kept but not shown.";
 
         private const string CardSceneTestGuide =
-            "Not possible in Scene test: the card is screen-space UI and only draws in Play Mode. Use How to Playmode Test.";
+            "Not possible in Scene test: the card is screen-space UI Toolkit, so it draws only in Play Mode (or in Unity's UI Builder for " +
+            "the bare layout); the Scene view has no preview of it to keep in sync. Use How to Playmode Test.";
+
+        private const string CardDemoShowHelp =
+            "Developer-only. Opens one point's card by itself in Play Mode, at the stop you pick, so a card can be checked without tapping a " +
+            "marker: it opens when Play starts, and again whenever you change Demo Point or Demo Stop while Play runs. Off by default. It works " +
+            "in the Editor and in development builds only; a release build ignores it. Before a build you want to see normally: untick it, " +
+            "then Save All to JSON and Copy to StreamingAssets.";
+
+        private const string CardDemoPoiHelp =
+            "The point whose card the demo opens, named as the POI list names it. Empty: the demo opens nothing.";
+
+        private const string CardDemoStopHelp =
+            "How far the demo card opens: Peek (title only), Half or Full. Unlike Open At, the demo may open the full card, so a long card can " +
+            "be read without dragging.";
+
+        private const string CardDemoNoPointNote =
+            "Pick a Demo Point: with none, Show demo card opens nothing.";
+
+        private const string CardGalleryHelp =
+            "Opens the card's isolated test scene, the gallery: every block kind, look and content state on a made-up point, with no AR and no " +
+            "wall data. In Play Mode use the Left and Right arrow keys to step through the entries and Space to reopen one. Outside Play Mode " +
+            "it opens the scene (it asks you to save the open scene first). Developer-only: the gallery is not part of any build.";
 
         private const string CardPlaymodeTestGuide =
             "SETUP\n" +
             "- Save All to JSON, then Copy to StreamingAssets (Play reads that copy).\n" +
-            "- Open the wall scene, press Play. Card edits are not live yet: stop, save, copy and Play again after a change.\n\n" +
+            "- Open the wall scene, press Play. Card edits are live: change a text, add a block or pick another variant here and the open " +
+            "card changes in place, keeping its height and its scroll. Ctrl+Z here brings the old card back.\n\n" +
+            "DEMO CARD\n" +
+            "- Tick Show demo card, pick a Demo Point and a Demo Stop, press Play: that point's card opens by itself at that stop.\n" +
+            "- Change Demo Stop while Play runs: the card moves to it. Untick it: the card stays, nothing reopens.\n" +
+            "- Open Gallery loads the isolated card scene: every block kind, look and content state, one entry at a time (Left / Right " +
+            "arrow keys).\n\n" +
             "CARD CONTAINER\n" +
             "- Tap a marker: the card opens at Open At (Peek: the title and the category chip only).\n" +
             "- Drag the grabber or the title up: Half, never taller than Half Height Max; drag again: full.\n" +
@@ -145,7 +175,9 @@ namespace TileStories.Editor
             "The card's own words that no block holds: button names, small headings, hints. Each row is one text, named by " +
             "its framework wording; under it, one field per language of Card Container > Languages. Type your wall's wording " +
             "to replace the framework's; leave a field empty to keep the framework's. The (i) of a row says where the card " +
-            "shows it.";
+            "shows it. A wall app that ships its own block kinds may add words of its own: they are listed below the " +
+            "framework's, under the app's name, and work the same way (your field first, then the app's wording, then the " +
+            "framework's).";
 
         private const string CardTextsMissingNote =
             "The framework's card texts were not found in the project. Reimport the framework (the card still works, but its " +
@@ -156,8 +188,8 @@ namespace TileStories.Editor
 
         private const string CardTextsPlaymodeTestGuide =
             "SETUP\n" +
-            "- Save All to JSON, then Copy to StreamingAssets; open the wall scene, press Play. Card edits are not live yet: " +
-            "stop, save, copy and Play again after a change.\n\n" +
+            "- Save All to JSON, then Copy to StreamingAssets; open the wall scene, press Play. Card Texts edits are live: the open card " +
+            "changes as you type.\n\n" +
             "CARD TEXTS\n" +
             "- Type your own wording for Close in the first language; tap a marker; point at the round close button: its " +
             "name is your wording.\n" +
