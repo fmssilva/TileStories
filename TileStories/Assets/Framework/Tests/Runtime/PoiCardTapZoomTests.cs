@@ -29,7 +29,6 @@ namespace TileStories.Tests
         [SetUp]
         public void AddFinger()
         {
-            _screen = InputSystem.AddDevice<Touchscreen>();
             // - an unfocused Game view drops pointer input in the Editor; a copy of the settings lets these touches in
             _savedSettings = InputSystem.settings;
             _testSettings = Object.Instantiate(_savedSettings);
@@ -38,6 +37,11 @@ namespace TileStories.Tests
             //   touchscreen off (backgroundBehavior's default): every real-finger test then read "no touch" and failed. Keep it on.
             _testSettings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             InputSystem.settings = _testSettings;
+            // - the device is added AFTER the settings: a device added while the default settings are active and the Editor is in the
+            //   background is switched off on the spot (InputManager.AddDevice), and swapping the settings later never switches it back on
+            _screen = InputSystem.AddDevice<Touchscreen>();
+            if (!_screen.enabled) InputSystem.EnableDevice(_screen);
+            Assert.IsTrue(_screen.enabled, "precondition: the real touchscreen is on, whichever application has the focus");
         }
 
         [TearDown]

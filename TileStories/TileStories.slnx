@@ -3,5 +3,8 @@
   <Project Path="TileStories.Editor.Tests.csproj" />
   <Project Path="TileStories.csproj" />
   <Project Path="TileStories.Editor.csproj" />
+  <Project Path="TileStories.LivingRoom.csproj" />
+  <Project Path="TileStories.LivingRoom.Tests.Runtime.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="TileStories.LivingRoom.Editor.Tests.csproj" />
 </Solution>

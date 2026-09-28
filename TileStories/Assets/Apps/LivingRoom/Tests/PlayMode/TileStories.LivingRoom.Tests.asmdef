@@ -1,0 +1,22 @@
+{
+    "name": "TileStories.LivingRoom.Tests.Runtime",
+    "rootNamespace": "TileStories.LivingRoom.Tests",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "references": [
+        "TileStories",
+        "TileStories.LivingRoom",
+        "TileStories.Tests.Runtime",
+        "nunit",
+        "UnityEngine.UI",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

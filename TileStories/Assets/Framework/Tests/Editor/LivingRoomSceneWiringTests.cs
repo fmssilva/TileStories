@@ -118,8 +118,14 @@ namespace TileStories.Tests
                     var host = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren(type, true)).Single();
                     var list = new SerializedObject(host).FindProperty("blockStyles");
                     var wired = Enumerable.Range(0, list.arraySize).Select(i => AssetDatabase.GetAssetPath(list.GetArrayElementAtIndex(i).objectReferenceValue)).ToList();
-                    CollectionAssert.AreEquivalent(onDisk, wired, path + ": every block stylesheet, nothing missing or extra");
+                    // - a wall's own kinds bring their own stylesheets (_3.1 step 11): the wall scene may add sheets from Assets/Apps, and only there,
+                    //   after every framework one; the Phase A gallery is the framework's alone and names no app
+                    var appSheets = wired.Where(w => w.StartsWith("Assets/Apps/")).ToList();
+                    var frameworkSheets = wired.Where(w => !w.StartsWith("Assets/Apps/")).ToList();
+                    CollectionAssert.AreEquivalent(onDisk, frameworkSheets, path + ": every block stylesheet, nothing missing or extra");
                     Assert.AreEqual(cards + "/CardParts.uss", wired[0], path + ": the shared parts first, the families after");
+                    CollectionAssert.AreEqual(frameworkSheets.Concat(appSheets).ToList(), wired, path + ": the app's own sheets come after the framework's");
+                    if (type == typeof(CardGalleryHarness)) CollectionAssert.IsEmpty(appSheets, "the framework's gallery names no app");
                 }
                 finally
                 {

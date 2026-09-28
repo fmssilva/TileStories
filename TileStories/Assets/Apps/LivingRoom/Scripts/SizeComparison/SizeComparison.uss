@@ -1,0 +1,37 @@
+/* The living room's size_comparison block: the point and a familiar object, two shapes standing on one ground line.
+   Written ONLY with the --ts-* tokens of the framework's CardTokens.uss: no literal colour, size or radius here or in C# (_3.1
+   section 3). The shapes' width and height are set by the view (SizeComparisonRule): they are the real sizes, not design values.
+   UI Toolkit USS only: no web-CSS gap / calc (UI Toolkit drops them with a warning). */
+
+.card-size__stage {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+    height: var(--ts-media-height);
+}
+
+.card-size__shape {
+    flex-shrink: 0;
+    border-width: var(--ts-choice-border);
+    border-radius: var(--ts-radius-s);
+}
+
+.card-size__shape--poi {
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-accent);
+}
+
+/* the familiar object is plainer than the point: a solid, quiet shape beside it */
+.card-size__shape--object {
+    background-color: var(--ts-ink-3);
+    border-color: var(--ts-ink-2);
+    margin-left: var(--ts-space-4);
+}
+
+.card-size__caption {
+    margin: var(--ts-space-3) 0 0 0;
+    padding: 0;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+    white-space: normal;
+}

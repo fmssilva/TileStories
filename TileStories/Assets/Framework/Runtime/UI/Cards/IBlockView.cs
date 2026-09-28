@@ -25,8 +25,12 @@ namespace TileStories
         // the visitor did (_3.1 step 8A). Null where the caller has none: a block then keeps its state in the view only
         public CardLocalState State;
         public ICardEvents Events;
-        // Where a poll block would get the other visitors' votes (_3.1 step 8B); null or NoPollResults = none, the poll shows no results
-        public IPollResults PollResults;
+        // The card's other services (_3.1 step 11): what a kind needs beyond the fields above (a poll's IPollResults, an app kind's own).
+        // Null where the caller has none: every Service<T>() is then null
+        public CardServices Services;
+
+        // The registered service of type T, or null when there is none: a kind that needs a service treats null as "nothing to show"
+        public T Service<T>() where T : class => Services?.Get<T>();
     }
 
     // What a block may ask of its card (_3.1 section 3): lower the card so the selected POI's marker shows on the wall;

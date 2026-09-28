@@ -1,0 +1,21 @@
+{
+    "name": "TileStories.LivingRoom.Editor.Tests",
+    "rootNamespace": "TileStories.LivingRoom.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "TileStories",
+        "TileStories.Editor",
+        "TileStories.Editor.Tests",
+        "TileStories.LivingRoom"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

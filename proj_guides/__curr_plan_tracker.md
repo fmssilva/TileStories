@@ -1,24 +1,27 @@
-# Current plan tracker: POI Detail Card, step 7C then step 8A (2026-09-28)
+# Current plan: POI Detail Card step 11 (an app registers its own block kind) + card services on the bind context
 
-Ground truth for the two parts. Tick a line only when its proof was re-derived this session.
+Gate done 2026-09-28: UnityMCP answered (telemetry_status), Game view capture and POI Editor window capture opened and checked, capture windows
+closed, tree committed (only docs + screenshots modified). Baseline: 0 error CS, EditMode 1295/1295 (Unity in background), PlayMode 542: 8 red in
+PoiCardTapZoomTests (real touches) -> reproduced with another application in front, fixed at its cause (AddFinger order), 9/9 in the background.
 
-## Gate
-- [x] UnityMCP works (telemetry_status ok); Game view capture opened; POI Editor window capture opened (read in POINT coordinates)
-- [x] Commit "POI card: Tier 2 group B ..." done (stale .git/index.lock removed first)
-- [x] Baseline: compile clean, EditMode 1229/1229, PlayMode 486/486
+## Part 1 -- card services (Framework)
+- [x] 1.1 Runtime/Blocks/CardServices.cs (Add / Get / Has / Remove, static Shared)
+- [x] 1.2 BlockBindContext.Services + Service<T>(); BlockStackView copies it; PoiCardHost.Services + CardGalleryHarness.Services
+- [x] 1.3 PollResults removed from context / host / harness; PollBlockView asks Service<IPollResults>()
+- [x] 1.4 Existing tests moved to Services (CardGalleryTests poll, PoiCardSceneTests seam assert)
+- [x] 1.5 CardServicesTests (EditMode) 6/6
+- [x] 1.6 Compile + EditMode green; PlayMode (below)
 
-## Part 1 - step 7C (close-out, no new features)
-- [x] 1.1 Fixture: The Lamp gets `related` carousel (manual: Lamp - Military + others) and `related` next_along_wall (nearest), before `sources`; both config.json copies
-- [x] 1.2 Phase B test (PoiCardSceneTests): real tap on a carousel card selects via SelectionEventBus, card rebinds; next_along_wall = neighbour the WallAxisRule says (computed independently); wrap on the running wall; catalog-order test updated
-- [x] 1.3 Captures in the real scene: related carousel + next_along_wall; today_map static + bridge (existing PNGs) - checklist answered
-- [x] 1.4 Editor captures + checklist: Card Content rows of hotspot_image, wall_locator, today_map, related on The Lamp; fix what shows
-- [x] 1.5 _5.1 updated (pending list, Card Content section, capture procedure note); _3.1 row 7C done with proof; [7C] TODO lines deleted
-- [x] 1.6 Full EditMode + PlayMode green; commit checkpoint suggested
+## Part 2 -- the app kind (zero Framework runtime edits)
+- [x] 2.1 Assets/Apps/LivingRoom/Scripts/: asmdef, LivingRoomBlocks.cs, SizeComparison/ (definition, rule, view, uss), IFamiliarObjects + FamiliarObjects
+- [x] 2.2 Framework tests: CardGalleryChecks extracted; wiring test allows Assets/Apps sheets; Lamp catalog test filters non-built-in kinds
+- [x] 2.3 App tests: Tests/EditMode 13/13, Tests/PlayMode 15 (guard mutation-checked: planting the app's name in a Framework file turned it red)
+- [x] 2.4 The Lamp gets one size_comparison block (round trip byte-identical first; +71 / -0 per config copy); scene blockStyles += app uss (1 line)
+- [x] 2.5 Card Content warning: show_on_wall block + sticky show_on_wall action (Tier3GroupBRulesTests +2)
+- [x] 2.6 Captures checked: gallery Card_size_comparison_*, Search_Lamp_SizeComparison(_pt), Editor_BlockLibrary_AppKind, Editor_CardContent_SizeComparison_a/_b
 
-## Part 2 - step 8A (Tier 3 group A), one kind at a time through section 7
-- [x] 2.1 CardLocalState: ICardStateStore + MemoryCardStateStore + PlayerPrefsCardStateStore, pure CardLocalState (wall + POI + block key), ICardEvents seam; tests; Detail Card > Test "Reset card state" row
-- [x] 2.2 ContentSeenRule + stack/host seam (show_after_viewed); tests
-- [x] 2.3 knowledge_check: definition, KnowledgeCheckRule (pure), round trip, view + Play.uss, Phase A entries + tests, Editor rows captured, Lamp fixture, Phase B
-- [x] 2.4 feedback: definition, view + Community.uss, Phase A, event through ICardEvents, Editor rows captured, Lamp fixture, Phase B
-- [x] 2.5 Docs: _3.1 (rows 7C + 8A, TODOs, design history), 10-structure.md, _5.1, __mixed_TODOs.md
-- [x] 2.6 Final: EditMode + PlayMode green, 0 error CS, captures named
+## Docs
+- [x] _3.1 (row 11 needs final counts), 10-structure.md, _5.1
+
+## Final runs (fill in)
+- [x] full EditMode 1317/1317 + PlayMode 557/557 (0 skipped) after the last code edit; Editor.log no error CS this session

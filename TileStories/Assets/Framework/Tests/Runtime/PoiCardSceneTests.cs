@@ -533,6 +533,10 @@ namespace TileStories.Tests
         public IEnumerator TheLamp_IsTheFullCard_EveryKindAndVariantOfTiers1To3_InCatalogOrder()
         {
             yield return OpenFull("lamp");
+            // - a kind the wall's own app registered (LivingRoom's size_comparison, _3.1 step 11) is that app's to test, not the framework
+            //   catalog's: this list is what BuiltInBlocks registers
+            var builtIn = new BlockRegistry();
+            BuiltInBlocks.Register(builtIn);
             CollectionAssert.AreEqual(new[]
             {
                 "header", "status", "status", "quick_facts", "quick_facts", "quick_facts", "rich_text", "rich_text", "rich_text", "rich_text",
@@ -542,7 +546,7 @@ namespace TileStories.Tests
                 "hotspot_image", "hotspot_image", "wall_locator", "wall_locator", "today_map", "today_map", "related", "related",
                 "knowledge_check", "knowledge_check", "knowledge_check", "poll", "collect", "feedback", "feedback", "dialogue", "show_on_wall", "show_on_wall",
                 "sources", "sources", "actions", "actions", "actions",
-            }, ShownKinds(), "one block per kind and variant (Tiers 1 to 3), nothing skipped");
+            }, ShownKinds().Where(k => builtIn.TryGet(k, out _)).ToList(), "one block per kind and variant (Tiers 1 to 3), nothing skipped");
             var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
             CollectionAssert.IsEmpty(BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Skipped, "no authored block skipped");
             var variants = Sheet.Stack.BoundViews.Select(v => v.Root.GetClasses().FirstOrDefault(c => c.Contains("--"))).Where(c => c != null).ToList();
@@ -1423,7 +1427,7 @@ namespace TileStories.Tests
             Assert.IsTrue(CardTestInput.IsShown(poll.Options[1].Mark, poll.Options[1].Button) && poll.Options[1].Mark.worldBound.width > 4f, "the tick element on the picked option");
             Assert.AreEqual("Thank you for voting", poll.Thanks.text);
             Assert.IsFalse(poll.ResultsShown, "the card's own poll results seam has nothing (no backend)");
-            Assert.IsInstanceOf<NoPollResults>(Card.PollResults, "the app's seam today");
+            Assert.IsNull(Card.Services.Get<IPollResults>(), "no poll backend is registered today");
             Assert.IsFalse(poll.Root.Query<Label>().ToList().Any(l => CardTestInput.IsShown(l, poll.Root) && l.text.Contains("%")), "no percentage anywhere in the block");
             Assert.AreEqual(1, _cardEvents.Raised.Count(e => e.Kind == CardEventKinds.Poll), "one poll event");
             var raised = _cardEvents.Raised.Single(e => e.Kind == CardEventKinds.Poll);

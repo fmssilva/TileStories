@@ -208,6 +208,11 @@ namespace TileStories.Editor
         internal const string CardCompareWithItselfNote =
             "Compare With is this point itself: the card shows the same condition twice. Pick another point.";
 
+        // A Show On Wall block on a card whose sticky call to action already lowers the card to the wall (_3.1 [SHOULD])
+        internal const string CardShowOnWallRepeatsStickyText =
+            "The Sticky button of this card's Actions block already does what this Show On Wall block does, so the card offers the same " +
+            "button twice. Delete one of the two.";
+
         // A Poll block holds more options with words than it shows
         internal static string CardPollExtraOptionsText(int hidden) =>
             "A poll shows at most " + PollRule.MaxOptions + " options: the last " + hidden + (hidden == 1 ? " option is" : " options are") + " not shown. Delete " +

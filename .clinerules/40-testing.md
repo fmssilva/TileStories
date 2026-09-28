@@ -171,6 +171,25 @@ A modal dialog (a native `EditorUtility.DisplayDialog*`, a Play / Build gate) fr
 - If a run or tool call stalls, assume a dialog is open before retrying: tell the developer "a dialog may be open in Unity, please click it" (a screen capture can confirm), then continue. Do not queue new runs on a blocked Editor.
 - If a task truly needs a dialog (a real build with a guard), announce it first and say which button to click.
 
+### 4.2.3 Tests never depend on window focus; tools leave no windows behind
+
+The developer works in other applications while a run is going, so a test that passes only while Unity is the active
+application is a broken test, not a flaky one.
+
+- **Real input devices ignore focus.** A PlayMode fixture that feeds a real `Touchscreen` / `Mouse` through the Input System sets,
+  on a copy of `InputSystem.settings` restored in TearDown: `editorInputBehaviorInPlayMode = AllDeviceInputAlwaysGoesToGameView`
+  (an unfocused Game view) AND `backgroundBehavior = IgnoreFocus` (Unity not the active application: the default switches the
+  device off and every finger reads "no touch"). `PoiCardTapZoomTests.AddFinger` is the reference; the second fixture that needs it
+  moves it into one shared test helper instead of copying it.
+- **A failure that goes away on rerun is investigated, not dismissed.** Before calling a failure "focus" or "flaky", reproduce it
+  on purpose (e.g. run the fixture with Unity in the background). If it reproduces, fix the harness; "passed on the second run" is
+  not a finish.
+- **Tools leave no windows.** A capture or helper script that opens an Editor window closes it with `window.Close()` (never only
+  `DestroyImmediate`, which can leave an empty native shell -- the blank "POI Editor capture" / "gate" windows) and then checks
+  `Resources.FindObjectsOfTypeAll<EditorWindow>()` holds none of its windows. Captures and test runs never overlap: close every
+  capture window before starting a run (an open utility window takes focus from real-click Editor tests).
+- Blank windows the developer finds are safe to close with their X; they hold nothing.
+
 ### 4.3 Asset Database Refresh Discipline
 
 Any edit to a `.meta`, `.prefab`, `.asset`, or raw asset file (texture, audio, model)

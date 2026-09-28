@@ -29,20 +29,13 @@ namespace TileStories.Tests
 
         // One screen pixel in panel units: layout snaps each edge to a physical pixel, so a width and a height set by the
         // same token may differ by up to that much (the honest tolerance whatever the Game view's size)
-        private static float OnePixel(VisualElement e) =>
-            RuntimePanelUtils.ScreenToPanel(e.panel, Vector2.right).x - RuntimePanelUtils.ScreenToPanel(e.panel, Vector2.zero).x;
+        private static float OnePixel(VisualElement e) => CardGalleryChecks.OnePixel(e);
 
         // Show a block entry and scroll its block into view; returns the block's view
         private IEnumerator ShowBlock(string name, System.Action<IBlockView> got)
         {
             _harness.Show(IndexOf(name));
-            yield return CardTestInput.Settle();
-            var views = _harness.Sheet.Stack.BoundViews;
-            Assert.AreEqual(2, views.Count, name + ": the header + the block");
-            // - a footer block (sticky) is pinned outside the scroll: nothing to scroll to
-            if (_harness.Sheet.Stack.SlotOf(views[1]).parent == _harness.Sheet.Stack.Scroll.contentContainer) _harness.Sheet.Stack.Scroll.ScrollTo(_harness.Sheet.Stack.SlotOf(views[1]));
-            yield return CardTestInput.Settle(0.15f);
-            got(views[1]);
+            yield return CardGalleryChecks.SettledBlock(_harness, name, got);
         }
 
         [UnitySetUp]
@@ -145,89 +138,18 @@ namespace TileStories.Tests
             yield return Render("Card_" + entry.Name);
         }
 
-        // Every block entry, whatever its kind: it builds at the full stop, every shown text sits inside the phone-width
-        // card, reads against what is really behind it (>= 4.5:1, 3:1 for large text), every tap target is >= 44x44,
-        // and a render Card_<kind>_<variant>_<content>.png is saved for the vision pass
+        // Every block entry, whatever its kind (CardGalleryChecks.AssertBlockEntry: it builds at the full stop, every shown text sits
+        // inside the phone-width card and reads against what is behind it, every tap target is >= 44x44, its heading and gap are the
+        // card's one look), and a render Card_<kind>_<variant>_<content>.png is saved for the vision pass
         [UnityTest]
         public IEnumerator EveryBlockEntry_BuildsFitsReadsAndRenders([ValueSource(nameof(BlockEntryNames))] string name)
         {
             var entry = CardGalleryDefinitions.All[IndexOf(name)];
             IBlockView view = null;
             yield return ShowBlock(name, v => view = v);
-            var sheet = _harness.Sheet;
-            Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop);
-            Assert.AreEqual(BlockRegistry.Shared.CreateView(entry.Kind).GetType(), view.GetType(), "the entry's kind drew it");
-            Assert.Greater(view.Root.worldBound.height, 0f, "the block takes space on the card");
-            Assert.AreEqual(DisplayStyle.None, sheet.Stack.Scroll.verticalScroller.resolvedStyle.display, "no desktop scroll bar on the phone card");
-
-            Rect card = sheet.Root.worldBound;
-            int texts = 0;
-            foreach (var label in view.Root.Query<Label>().ToList())
-            {
-                if (string.IsNullOrEmpty(label.text) || !CardTestInput.IsShown(label, view.Root)) continue;
-                texts++;
-                string what = name + " '" + label.text.Substring(0, System.Math.Min(24, label.text.Length)) + "'";
-                // - a label in a horizontal swipe track may lie beyond the card's edge until swiped to: it must fit the
-                //   track's viewport (reachable whole), and the track itself must sit inside the card
-                var track = label.GetFirstAncestorOfType<ScrollView>();
-                if (track != null && track.mode == ScrollViewMode.Horizontal)
-                {
-                    Assert.LessOrEqual(label.worldBound.width, track.contentViewport.worldBound.width + 0.5f, what + " fits the swipe track's view");
-                    Assert.GreaterOrEqual(track.worldBound.xMin, card.xMin - 0.5f, what + ": its track starts inside the card");
-                    Assert.LessOrEqual(track.worldBound.xMax, card.xMax + 0.5f, what + ": its track ends inside the card");
-                }
-                else
-                {
-                    Assert.GreaterOrEqual(label.worldBound.xMin, card.xMin - 0.5f, what + " starts inside the card");
-                    Assert.LessOrEqual(label.worldBound.xMax, card.xMax + 0.5f, what + " wraps inside the card");
-                }
-                bool large = label.resolvedStyle.fontSize >= 24f || (label.resolvedStyle.fontSize >= 18.66f && label.resolvedStyle.unityFontStyleAndWeight != FontStyle.Normal);
-                float ratio = CardTestInput.Contrast(label.resolvedStyle.color, CardTestInput.EffectiveBackground(label));
-                Assert.GreaterOrEqual(ratio, large ? UIAccessibility.MinRatioLargeTextOrUIComponent : UIAccessibility.MinRatioNormalText, what + " contrast");
-            }
-            // - a picture-only look (a grid of pictures) shows no text: a loaded picture counts as content too
-            int pictures = view.Root.Query(className: "card-image").ToList().Count(e => CardTestInput.IsShown(e, view.Root) && !e.ClassListContains("card-image--unavailable"));
-            Assert.Greater(texts + pictures, 0, name + ": the block shows text or a picture (not vacuous)");
-            foreach (var tap in view.Root.Query(className: "card-tap").ToList().Where(e => CardTestInput.IsShown(e, view.Root)))
-                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(tap.worldBound.width, tap.worldBound.height), name + ": a tap target is " + tap.worldBound.size);
-
-            AssertHeadingAndGap(entry, view);
+            CardGalleryChecks.AssertBlockEntry(_harness, entry, view);
             yield return Render("Card_" + entry.Name);
         }
-
-        // _3.1 step 6C: the stack draws the block's heading (authored, else the kind's default, else none) above the
-        // block in ONE look, and the ONE gap under every scrolling block is --ts-block-gap -- no block adds its own margin
-        private void AssertHeadingAndGap(CardGalleryDefinitions.Entry entry, IBlockView view)
-        {
-            var stack = _harness.Sheet.Stack;
-            var heading = stack.HeadingOf(view);
-            var slot = stack.SlotOf(view);
-            var definition = BlockRegistry.Shared.TryGet(entry.Kind, out var d) ? d : null;
-            string expected = CardGalleryDefinitions.HasHeading(entry)
-                ? CardGalleryDefinitions.HeadingPrefix + entry.Kind.Replace('_', ' ')
-                : definition?.DefaultHeadingKey != null ? new CardStrings(_harness.StringTable.Entries(), null, "en", "en").Get(definition.DefaultHeadingKey) : "";
-            Assert.AreEqual(expected, heading.text, entry.Name + ": the heading the stack draws");
-            if (expected.Length > 0)
-            {
-                Assert.IsTrue(CardTestInput.IsShown(heading, slot), entry.Name + ": the heading shows");
-                Assert.LessOrEqual(heading.worldBound.yMax, view.Root.worldBound.yMin + 0.5f, entry.Name + ": above its block");
-                // - the same look in the scroll and in the footer (only the pinned header styles its kicker its own way)
-                var reference = _harness.Sheet.Root.Query<Label>(className: "card-block-heading").ToList().First(l => !stack.HeaderSlot.Contains(l));
-                Assert.AreEqual(reference.resolvedStyle.fontSize, heading.resolvedStyle.fontSize, "one heading look");
-                Assert.GreaterOrEqual(CardTestInput.Contrast(heading.resolvedStyle.color, CardTestInput.EffectiveBackground(heading)), UIAccessibility.MinRatioNormalText,
-                    entry.Name + ": heading contrast");
-            }
-            else Assert.AreEqual(DisplayStyle.None, heading.resolvedStyle.display, entry.Name + ": no heading, no empty line");
-
-            if (slot.parent != stack.Scroll.contentContainer) return;
-            Assert.AreEqual(0f, view.Root.resolvedStyle.marginTop, 0.01f, entry.Name + ": the block adds no top margin of its own");
-            Assert.AreEqual(0f, view.Root.resolvedStyle.marginBottom, 0.01f, entry.Name + ": ...nor a bottom one");
-            Assert.AreEqual(BlockGap(slot), slot.resolvedStyle.marginBottom, OnePixel(slot) + 0.01f, entry.Name + ": the gap under it is the token (snapped to a screen pixel)");
-            Assert.AreEqual(slot.worldBound.yMax, view.Root.worldBound.yMax, OnePixel(slot) + 0.01f, entry.Name + ": the block ends where its slot ends");
-        }
-
-        // --ts-block-gap as CardTokens.uss defines it (the one place the value lives)
-        private static float BlockGap(VisualElement inCard) => CardTestInput.TokenPx("--ts-block-gap");
 
         // ---------------- rich_text ----------------
 
@@ -1001,18 +923,7 @@ namespace TileStories.Tests
         }
 
         // Save what the Game view shows under Assets/Screenshots
-        private static IEnumerator Render(string name)
-        {
-            yield return new WaitForEndOfFrame();
-            var tex = ScreenCapture.CaptureScreenshotAsTexture();
-            try
-            {
-                string dir = Path.Combine(Application.dataPath, "Screenshots");
-                Directory.CreateDirectory(dir);
-                File.WriteAllBytes(Path.Combine(dir, name + ".png"), tex.EncodeToPNG());
-            }
-            finally { Object.Destroy(tex); }
-        }
+        private static IEnumerator Render(string name) => CardGalleryChecks.Render(name);
             // ---------------- Tier 2: pictures (_3.1 step 7) ----------------
 
         // The colour a real render shows at a panel position (which picture a frame shows): the darkest pixel of the 7x7
@@ -2150,7 +2061,9 @@ namespace TileStories.Tests
         public IEnumerator Poll_TheResultsSeam_DrawsBarsAndSharesOnlyFromWhatAnIPollResultsGives_AfterTheVote()
         {
             var results = new FakePollResults { Counts = new[] { 1, 3, 0 } };
-            _harness.PollResults = results;
+            var withResults = new CardServices();
+            withResults.Add<IPollResults>(results);
+            _harness.Services = withResults;
             PollBlockView poll = null;
             yield return ShowBlock("poll_bars_short", v => poll = (PollBlockView)v);
             Assert.IsFalse(poll.ResultsShown, "results wait for the visitor's own vote");
@@ -2165,8 +2078,8 @@ namespace TileStories.Tests
             Assert.AreEqual(0f, poll.Options[2].Fill.resolvedStyle.width, 0.5f, "no votes: no bar");
             yield return Render("Card_poll_bars_with_results");
 
-            // - the seam answering nothing again (NoPollResults, today): the bars are hidden and the block shows no percentage
-            _harness.PollResults = new NoPollResults();
+            // - the seam answering nothing again (no IPollResults registered, today): the bars are hidden and the block shows no percentage
+            _harness.Services = new CardServices();
             yield return ShowBlock("poll_bars_short", v => poll = (PollBlockView)v);
             Assert.IsFalse(poll.ResultsShown);
             CollectionAssert.IsEmpty(ShownPercents(poll.Root), "no data: no percentage");

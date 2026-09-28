@@ -186,6 +186,9 @@ namespace TileStories.Editor
                 if (at >= 0 && !ContentSeenRule.RevealsInView(FamiliesAfter(blocks, at)))
                     warnings.Add(CardShowAfterReadingMidCardNote);
             }
+            // - a Show On Wall block on a card whose pinned (sticky) button already does the same
+            if (definition.Key == BuiltInBlocks.ShowOnWallKind && HasStickyShowOnWall(poi, settings))
+                warnings.Add(CardShowOnWallRepeatsStickyText);
             // - a poll with more options than it shows
             if (definition.Key == BuiltInBlocks.PollKind)
             {
@@ -214,6 +217,31 @@ namespace TileStories.Editor
                 }
             }
             return warnings;
+        }
+
+        // Whether this card pins a Show On The Wall button in its footer: an enabled Actions block whose look is Sticky (its own, else the
+        // Block Library's) and whose FIRST shown button -- the only one the sticky look draws -- is that action
+        private static bool HasStickyShowOnWall(POIData poi, CardSettings settings)
+        {
+            var blocks = poi?.card?.blocks;
+            if (blocks == null || !BlockLibraryRule.IsEnabled(settings, BuiltInBlocks.ActionsKind)) return false;
+            foreach (var block in blocks)
+            {
+                if (block?.kind != BuiltInBlocks.ActionsKind) continue;
+                string variant = BuiltInBlocks.Actions.HasVariant(block.variant) ? block.variant : BlockLibraryRule.DefaultVariant(settings, BuiltInBlocks.Actions);
+                if (variant != BuiltInBlocks.ActionsStickyCta) continue;
+                var read = new BlockFieldReader(block, null, null);
+                foreach (var row in read.Items(BuiltInBlocks.ActionsItemsField))
+                {
+                    // - a row with no words, or with no known action, is not drawn: the first one that is drawn is the sticky button
+                    if (read.ItemText(row, BuiltInBlocks.ActionsLabelField).Length == 0) continue;
+                    string action = read.ItemValue(row, BuiltInBlocks.ActionsActionField);
+                    if (System.Array.IndexOf(BuiltInBlocks.ActionOptions, action) < 0) continue;
+                    if (action == BuiltInBlocks.ActionShowOnWall) return true;
+                    break;
+                }
+            }
+            return false;
         }
 
         // The family of every block written after `blocks[index]` (a kind that is not registered counts as content)

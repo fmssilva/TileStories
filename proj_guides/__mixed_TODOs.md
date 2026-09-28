@@ -84,3 +84,23 @@ check thee FOV splike thing???
 - Real touches drive UI Toolkit's `ScrollView` even while a child holds the pointer capture; a child that wants to keep vertical
   scrolling alive should still not capture at touch-down (the card then swallows the finger for its own gestures elsewhere, e.g. inside a
   horizontal ScrollView). `SwipeGrabRule` is the pattern for the next swipeable block.
+
+## From the Architect review of 8A-fix + 8B (2026-09-28)
+
+- `TileStories/MarkerGalleryScreenshots/` is TRACKED in git (291 PNGs, 68 MB) and every full PlayMode run rewrites them, so every
+  commit carries dozens of changed binaries nobody reviews. Together with `Assets/Screenshots/` (36 MB, imported by Unity) this is
+  the evidence-hygiene item above: move test renders to one gitignored folder next to `Assets/` and `git rm --cached` the tracked
+  ones (developer's call, once). Until then leave the regenerated marker PNGs out of commits.
+- Reviews from the Cowork VM see every CRLF file as modified unless git runs with `-c core.autocrlf=true`; the Windows side is
+  clean. Not a repo problem; the Architect command (`__AI_Architect.md`) says so.
+
+## From the Architect review of step 11 (2026-09-28)
+
+- Repo hygiene found on disk (for the evidence clean-up block): 14 `Assets/InitTestScene<guid>.unity` leftovers from aborted test
+  runs (ignored by git, but Unity imports them); `Assets/Screenshots/` tracked (708 files incl. metas) and written by five test files,
+  each with its own copy of `Path.Combine(Application.dataPath, "Screenshots")` (CardGalleryChecks, CardGalleryTests,
+  DisplacementDemoFixture, EffectsPreviewRenderTests, LodRealPipelineTests): one shared evidence-path helper is the fix. Tracked
+  files the developer should decide on: `TileStories/Assets.7z` (48 MB backup), `TileStories/__orientation_screenshot.png`,
+  `edit_file.py`, `Fundo Desktop.jpg`.
+- Commit scope: `git add TileStories .clinerules proj_guides` instead of `git add .`, so `IPCE/`, `report/` and
+  `flutter_prototypes/` never ride along by accident.

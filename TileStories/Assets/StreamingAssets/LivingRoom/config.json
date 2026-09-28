@@ -5278,6 +5278,77 @@
                         "fields": []
                     },
                     {
+                        "key": "block_53",
+                        "kind": "size_comparison",
+                        "variant": "",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "How big is it?"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Qual e o tamanho?"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "object",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "smartphone",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "width_cm",
+                                "text": [],
+                                "number": 32.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "height_cm",
+                                "text": [],
+                                "number": 58.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "caption",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "As tall as almost four phones standing on top of each other."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Tao alto como quase quatro telemoveis empilhados."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
                         "key": "block_15",
                         "kind": "sources",
                         "variant": "list",

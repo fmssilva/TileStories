@@ -75,7 +75,7 @@ namespace TileStories
             _strings = context.Strings;
             _state = context.State;
             _events = context.Events;
-            _results = context.PollResults;
+            _results = context.Service<IPollResults>();
             _wallId = context.State?.WallId ?? context.Taxonomy?.wall_id ?? "";
             _poiId = context.Poi?.id ?? "";
             _blockKey = instance.key ?? "";

@@ -277,5 +277,78 @@ namespace TileStories.Editor.Tests
             foreach (string w in warnings) StringAssert.DoesNotContain("block_", w, "rows are named by their place in the table, never an id");
             CollectionAssert.IsEmpty(POIEditorToolWindow.CardBlockWarnings(Dialogue(Row(("line", "Only line."))), BuiltInBlocks.Dialogue, settings, poi));
         }
+
+        // ---------------- a Show On Wall block next to a sticky Show On The Wall button (_3.1 [SHOULD]) ----------------
+
+        private static BlockInstanceData ActionsBlock(string variant, params (string words, string action)[] buttons)
+        {
+            var block = new BlockInstanceData { key = "block_3", kind = BuiltInBlocks.ActionsKind, variant = variant };
+            var rows = new List<BlockItemData>();
+            foreach (var (words, action) in buttons)
+            {
+                var row = new BlockItemData();
+                row.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.ActionsLabelField, text = En(words) });
+                row.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.ActionsActionField, value = action });
+                rows.Add(row);
+            }
+            block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.ActionsItemsField, items = rows });
+            return block;
+        }
+
+        private static POIData CardWith(params BlockInstanceData[] blocks)
+        {
+            var poi = new POIData { id = "p", name = "Tower" };
+            poi.card.blocks.AddRange(blocks);
+            return poi;
+        }
+
+        private static List<string> ShowOnWallWarnings(POIData poi, CardSettings settings = null)
+        {
+            var block = poi.card.blocks.First(b => b.kind == BuiltInBlocks.ShowOnWallKind);
+            return POIEditorToolWindow.CardBlockWarnings(block, BuiltInBlocks.ShowOnWall, settings ?? new CardSettings(), poi);
+        }
+
+        [Test]
+        public void ACardWithAShowOnWallBlock_AndAStickyShowOnWallButton_WarnsOnTheBlock_InTheEditorsWords()
+        {
+            var showOnWall = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.ShowOnWallKind, variant = BuiltInBlocks.ShowOnWallButton };
+            var poi = CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("See it on the wall", BuiltInBlocks.ActionShowOnWall)));
+            var warning = ShowOnWallWarnings(poi).Single();
+            Assert.AreEqual(POIEditorToolWindow.CardShowOnWallRepeatsStickyText, warning);
+            foreach (string word in new[] { "Actions", "Sticky", "Show On Wall" }) StringAssert.Contains(word, warning, "named as the Editor names it");
+            StringAssert.DoesNotContain("block_", warning, "never an id");
+            // - the same card, the with_neighbours look: its button is the same button
+            showOnWall.variant = BuiltInBlocks.ShowOnWallWithNeighbours;
+            Assert.AreEqual(1, ShowOnWallWarnings(poi).Count, "the neighbours look repeats the button too");
+            // - the warning is on the Show On Wall block: the Actions block itself has none of it
+            CollectionAssert.IsEmpty(POIEditorToolWindow.CardBlockWarnings(poi.card.blocks[1], BuiltInBlocks.Actions, new CardSettings(), poi));
+        }
+
+        [Test]
+        public void TheShowOnWallWarning_NeedsTheStickyButtonToReallyBeDrawn_AndSilentOtherwise()
+        {
+            var showOnWall = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.ShowOnWallKind };
+            var see = ("See it on the wall", BuiltInBlocks.ActionShowOnWall);
+
+            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall)), "no Actions block at all");
+            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsPillRow, see))), "a pill row is not pinned: two buttons on the card, not a repeat of the pinned one");
+            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsCircles, see))), "circles too");
+            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("", BuiltInBlocks.ActionShowOnWall)))), "a sticky button with no words is not drawn");
+            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("See", "")))), "a sticky button with no action is not drawn");
+            Assert.AreEqual(1, ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("", ""), see))).Count,
+                "rows that are not drawn are skipped: the first DRAWN row is the sticky button");
+
+            // - no look on the block: the Block Library's default decides, exactly as the card does
+            var poi = CardWith(showOnWall, ActionsBlock("", see));
+            CollectionAssert.IsEmpty(ShowOnWallWarnings(poi), "default look is the pill row");
+            var sticky = new CardSettings();
+            sticky.kinds.Add(new BlockKindSetting { kind = BuiltInBlocks.ActionsKind, enabled = true, default_variant = BuiltInBlocks.ActionsStickyCta });
+            Assert.AreEqual(1, ShowOnWallWarnings(poi, sticky).Count, "the Block Library made Sticky the default look");
+
+            // - the Actions kind switched off wall-wide: nothing is pinned, nothing repeats
+            var off = new CardSettings();
+            off.kinds.Add(new BlockKindSetting { kind = BuiltInBlocks.ActionsKind, enabled = false });
+            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, see)), off), "Actions is off in the Block Library");
+        }
     }
 }
