@@ -80,8 +80,42 @@ namespace TileStories.Editor
             "- Close it three ways: the X; drag it down below the title; tap empty camera space (only while Tap Outside Closes is on).\n" +
             "- Tap another marker while it is open: the card keeps its height and shows the new point.\n" +
             "- Enable Detail Card off: a tap still selects the marker, no card opens.\n" +
-            "- Languages: put another language first; the card shows that language (a missing text falls back).\n" +
+            "- Languages: put another language first; the card shows that language (a missing text falls back).\n\n" +
+            "QUESTIONS AND FEEDBACK\n" +
+            "- Answer a Knowledge Check: a right answer shows the confirmation and the explanation; a wrong one shows \"Actually...\", " +
+            "the explanation and marks the right choice. Close the card and open it again: the answer is still there and cannot be changed.\n" +
+            "- Show After Reading on: the question stays hidden until you have scrolled to the end of the card (or all of it fits on the screen).\n" +
+            "- Give a Feedback block a thumb or stars: it shows the vote with a thank-you, once.\n" +
+            "- Reset Saved Card State (above) forgets every saved answer, vote and revealed question of this wall on this computer: close " +
+            "and reopen the card afterwards to answer again.\n" +
             "- Test Runner: EditMode + PlayMode, zero failures.";
+
+        private const string CardStateResetHelp =
+            "The card remembers on this device what a visitor did: the answer to each Knowledge Check question, the vote of each " +
+            "Feedback block and the questions that were revealed after reading. This clears all of it for this wall, on this " +
+            "computer only, so a question can be answered again. It never changes the config. Close and reopen a card that is open " +
+            "in Play Mode to see the cleared state.";
+
+        // Why one question row of a Knowledge Check is not shown for the look it will be drawn in
+        internal static string CardQuestionProblemText(int rowNumber, KnowledgeCheckRule.Problem problem, string variant)
+        {
+            string row = "Row " + rowNumber + " of Questions is not shown: ";
+            bool pictures = variant == BuiltInBlocks.KnowledgeCheckImageChoice;
+            switch (problem)
+            {
+                case KnowledgeCheckRule.Problem.NoQuestion: return row + "its Question is empty.";
+                case KnowledgeCheckRule.Problem.NoExplanation:
+                    return row + "its Explanation is empty (every question needs one: it is what the visitor reads after answering).";
+                case KnowledgeCheckRule.Problem.TooFewOptions:
+                    return pictures
+                        ? row + "Image Choice needs at least two pictures inside the Media Folder (Picture 1 to Picture 4)."
+                        : row + "it needs at least two options with words (Option 1 to Option 4).";
+                case KnowledgeCheckRule.Problem.NoCorrect: return row + "no Right Option is picked.";
+                case KnowledgeCheckRule.Problem.CorrectIsEmpty:
+                    return row + "its Right Option is one this look does not show" + (pictures ? " (a slot with no picture)." : " (an option with no words).");
+                default: return row + "it is incomplete.";
+            }
+        }
 
         private const string CardDeviceTestGuide =
             "SETUP\n" +

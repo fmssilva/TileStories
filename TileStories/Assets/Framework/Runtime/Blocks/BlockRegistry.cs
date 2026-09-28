@@ -62,7 +62,11 @@ namespace TileStories
             if (d.Variants == null || d.Variants.Count == 0) return "no variants";
             if (!d.HasVariant(d.DefaultVariant)) return "its default variant '" + d.DefaultVariant + "' is not one of its variants";
             if (d.DisplayModes == null || d.DisplayModes.Count == 0) return "no display modes";
-            return ValidateFields(d.Fields, allowItems: true);
+            string fieldProblem = ValidateFields(d.Fields, allowItems: true);
+            if (fieldProblem != null) return fieldProblem;
+            if (d.ShowAfterViewedField != null && d.Field(d.ShowAfterViewedField)?.Type != BlockFieldType.Toggle)
+                return "its show-after-viewed field '" + d.ShowAfterViewedField + "' is not one of its Toggle fields";
+            return null;
         }
 
         private static string ValidateFields(IReadOnlyList<BlockFieldDefinition> fields, bool allowItems)

@@ -54,3 +54,22 @@ check thee FOV splike thing???
   work for the next agent. Keep one session = one close-out-able scope (about 4-6 block kinds), and make the
   first step of every prompt "verify the tree compiles and is committed".
 
+
+## From the POI Detail Card step 7C + Tier 3 group A session (2026-09-28)
+
+- A stale zero-byte `.git/index.lock` blocked the first commit of the session (no git process was running). A crashed
+  editor git integration leaves it behind; worth knowing before assuming a broken repo. Check with `ls .git/*.lock` and
+  `tasklist | grep git`, then remove it.
+  Cause found 2026-09-28: the reviewer's read-only `git status` from the Cowork VM (mounted folder, no delete right)
+  creates `index.lock` and cannot remove it. Reviews now use `git --no-optional-locks status`; if a lock is there after a
+  review, it is safe to delete when no git process runs.
+- The `_5.1` capture recipe multiplied a window's rect by `pixelsPerPoint`; on the 1920 x 1080 / 1.25 machine that captured
+  another application. The recipe now says to open the first capture and try the other scale. The Editor capture helper
+  idea above (`Editor/Dev/`) should read the real scale from a known-good probe (capture a known corner, compare) instead
+  of assuming one.
+- `LogCardEvents` (one log line) is the placeholder behind `ICardEvents`: the work plan's Stage 3 telemetry (Type A / B
+  events, consent) replaces it. The card only raises `feedback` today (`CardEventKinds`); poll votes and collect events
+  join the same seam in 8B, and answering a knowledge question is a natural third event once the consent story exists.
+- `PlayerPrefs` keeps the visitor's answers and votes on the device only (`CardLocalState`); there is no export, no
+  cross-device sync and no per-visitor profile. If the evaluation protocol (`_7.1`) wants per-visitor answer data, that is a
+  telemetry decision, not a card one.

@@ -188,7 +188,29 @@ namespace TileStories.Editor
                 c.keep_audio_on_close = DrawToggleField("Keep Audio Playing", c.keep_audio_on_close, CardKeepAudioHelp);
             }
 
-            DrawDomainTestSubSection(_cardContainerTest, CardSceneTestGuide, CardPlaymodeTestGuide, CardDeviceTestGuide);
+            DrawDomainTestSubSection(_cardContainerTest, CardSceneTestGuide, CardPlaymodeTestGuide, CardDeviceTestGuide, DrawCardStateResetRow);
+        }
+
+        // The Test row that forgets what the card remembered on this computer (answers, votes, revealed questions)
+        private void DrawCardStateResetRow()
+        {
+            DrawEditorRow(out float rowWidth, out _, IndentLevel1);
+            if (GUILayout.Button("Reset Saved Card State", GUILayout.Width(Mathf.Max(40f, rowWidth - 36f)), GUILayout.ExpandWidth(false)))
+                ResetSavedCardState();
+            ReportTableCellRect("Card state reset", 0);
+            HelpInfoButton.Draw("Reset Saved Card State", CardStateResetHelp);
+            EditorRowEnd();
+        }
+
+        // Forget every answer, vote and revealed question this wall's cards stored on this computer (CardLocalState.ResetAll over
+        // the same PlayerPrefs the app uses) and say how many entries went. Never touches the config.
+        internal int ResetSavedCardState()
+        {
+            int removed = new CardLocalState(new PlayerPrefsCardStateStore(), _config?.wall_id).ResetAll();
+            EditorNotice.Queue("Saved card state cleared", removed == 0
+                ? "Nothing was saved for this wall on this computer."
+                : removed + (removed == 1 ? " saved entry" : " saved entries") + " (answers, votes, revealed questions) cleared for this wall on this computer.");
+            return removed;
         }
 
         // Languages: one comma-separated list (the first is the fallback); written only when the text changes

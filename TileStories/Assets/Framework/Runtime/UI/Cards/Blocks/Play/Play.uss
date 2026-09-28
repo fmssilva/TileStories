@@ -1,0 +1,209 @@
+/* The play family's looks (_3.1 Tier 3): what the visitor answers -- knowledge_check.
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
+   _3.3). UI Toolkit USS only: no sibling selectors (an import ERROR that drops the whole sheet), no % radius, no web-CSS
+   gap / cursor / calc. */
+
+/* ---- knowledge_check: the question on its card, the choices, the verdict ---- */
+
+.card-quiz__counter {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    margin: 0 0 var(--ts-space-2) 0;
+    padding: 0;
+}
+
+/* the question's card: the true / false look's card is what a swipe moves; an answered question outlines it in the verdict's colour */
+.card-quiz__stage {
+    background-color: var(--ts-surface-2);
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-clear);
+    border-radius: var(--ts-radius-m);
+    padding: var(--ts-space-4);
+    margin: 0 0 var(--ts-space-3) 0;
+}
+
+.card-quiz--true_false_swipe .card-quiz__stage {
+    min-height: var(--ts-grid-cell-height);
+    justify-content: center;
+}
+
+.card-quiz__stage--correct {
+    border-color: var(--ts-correct);
+}
+
+.card-quiz__stage--wrong {
+    border-color: var(--ts-wrong);
+}
+
+.card-quiz__prompt {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-quiz__swipe-hint {
+    display: none;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-3);
+    white-space: normal;
+    margin: var(--ts-space-2) 0 0 0;
+    padding: 0;
+}
+
+.card-quiz--true_false_swipe .card-quiz__swipe-hint {
+    display: flex;
+}
+
+.card-quiz--answered .card-quiz__swipe-hint {
+    display: none;
+}
+
+/* ---- the choices: a column of buttons (multiple_choice), a wrapping grid of pictures (image_choice), two pills side by side
+   (true_false_swipe) ---- */
+
+.card-quiz__choices {
+    flex-direction: column;
+}
+
+.card-quiz--image_choice .card-quiz__choices {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.card-quiz--true_false_swipe .card-quiz__choices {
+    flex-direction: row;
+}
+
+.card-quiz__choice {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: var(--ts-touch-target);
+    margin: 0 0 var(--ts-space-2) 0;
+    padding: var(--ts-space-3);
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+.card-quiz--image_choice .card-quiz__choice {
+    align-items: stretch;
+    justify-content: flex-start;
+    flex-grow: 1;
+    flex-basis: 45%;
+    margin-left: var(--ts-space-1);
+    margin-right: var(--ts-space-1);
+    padding: var(--ts-space-2);
+}
+
+.card-quiz--true_false_swipe .card-quiz__choice {
+    align-items: center;
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-left: var(--ts-space-1);
+    margin-right: var(--ts-space-1);
+    border-radius: var(--ts-pill-radius);
+}
+
+.card-quiz__choice--correct {
+    border-color: var(--ts-correct);
+}
+
+.card-quiz__choice--wrong {
+    border-color: var(--ts-wrong);
+}
+
+.card-quiz__choice-text {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: middle-left;
+    margin: 0;
+    padding: 0;
+}
+
+.card-quiz--true_false_swipe .card-quiz__choice-text {
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
+.card-quiz--image_choice .card-quiz__choice-text {
+    margin: var(--ts-space-1) 0 0 0;
+}
+
+.card-quiz__picture {
+    height: var(--ts-choice-picture);
+}
+
+/* ---- the verdict and the explanation, under the choices once a question is answered ---- */
+
+.card-quiz__result {
+    display: none;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: var(--ts-space-3);
+    border-left-width: var(--ts-space-1);
+    border-left-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+.card-quiz__result--correct {
+    border-left-color: var(--ts-correct);
+}
+
+.card-quiz__result--wrong {
+    border-left-color: var(--ts-wrong);
+}
+
+.card-quiz__verdict {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+.card-quiz__explanation {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- Previous / Next between several questions: the shape is the shared .card-pill (CardParts.uss), here only the colours ---- */
+
+.card-quiz__nav {
+    flex-direction: row;
+    justify-content: space-between;
+    margin: var(--ts-space-3) 0 0 0;
+}
+
+.card-quiz__button {
+    margin: 0;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface-2);
+}
+
+.card-quiz__next {
+    background-color: var(--ts-accent);
+    border-color: var(--ts-accent);
+}
+
+.card-quiz__button-label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    margin: 0;
+    padding: 0;
+}
+
+.card-quiz__next .card-quiz__button-label {
+    color: var(--ts-on-accent);
+}

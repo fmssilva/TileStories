@@ -178,6 +178,17 @@ namespace TileStories.Editor
             if (definition.Key == BuiltInBlocks.HeaderKind && System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, variant) >= 0
                 && !BuiltInBlocks.HeaderShowsPicture(variant, block))
                 warnings.Add(CardHeaderNeedsPictureText(variant));
+            // - a question row the look would leave out (the block still shows its other rows): name the row and the reason
+            if (definition.Key == BuiltInBlocks.KnowledgeCheckKind)
+            {
+                var read = new BlockFieldReader(block, null, null);
+                var rows = read.Items(BuiltInBlocks.KnowledgeCheckQuestionsField);
+                for (int row = 0; row < rows.Count; row++)
+                {
+                    var problem = KnowledgeCheckRule.Read(read, rows[row], row, variant, out _);
+                    if (problem != KnowledgeCheckRule.Problem.None) warnings.Add(CardQuestionProblemText(row + 1, problem, variant));
+                }
+            }
             return warnings;
         }
 

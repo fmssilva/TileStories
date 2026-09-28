@@ -27,6 +27,14 @@ namespace TileStories
         public CardGalleryMedia Media { get; } = new();
         public VisualElement Frame { get; private set; }
         public int Index { get; private set; }
+        // What the gallery card remembers (answers, votes, revealed blocks): in memory, so a run never touches the developer's
+        // saved answers; every entry is its own POI, so no two entries share an answer
+        public MemoryCardStateStore StateStore { get; } = new();
+        public CardLocalState State { get; }
+        // Where the gallery card reports what the visitor did (a test hands its own to see the events)
+        public ICardEvents Events { get; set; } = new LogCardEvents();
+
+        public CardGalleryHarness() => State = new CardLocalState(StateStore, "gallery");
 
         private void Start() => EnsureBuilt();
 
@@ -62,13 +70,18 @@ namespace TileStories
             var entry = entries[Index];
             var wall = CardGalleryDefinitions.Taxonomy();
             entry.WallSetup?.Invoke(wall);
+            ShowPoi(CardGalleryDefinitions.Poi(entry), wall, entry.Viewer, entry.Stop);
+        }
+
+        // Show any POI of a fabricated wall at `stop` (an entry's own, or one a test builds: the gated question's card)
+        public void ShowPoi(POIData poi, WallConfigData wall, Vector3? viewer, SheetStopRule.Stop stop)
+        {
+            EnsureBuilt();
             var settings = wall.card_settings;
             // - the marker palettes the status block reads, configured exactly as a wall configures them
             MarkerVisualSettings.ApplyPalettes(wall);
-            var poi = CardGalleryDefinitions.Poi(entry);
             // - as on a real wall, the shown POI is one of the wall's POIs (wall_locator lays it among them)
             wall.pois.Add(poi);
-            var viewer = entry.Viewer;
             Sheet.Viewer = () => viewer;
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wall.pois);
             var context = new BlockBindContext
@@ -78,10 +91,12 @@ namespace TileStories
                 Glossary = new CardGlossary(settings.glossary, "en", "en"),
                 MarkerLook = MarkerVisualSettings.Resolve(wall, null),
                 Media = Media,
+                State = State,
+                Events = Events,
             };
             Sheet.Hide();
             Sheet.Show(stack.Entries, context, SheetStopRule.Stop.Peek, settings.container.half_max_ratio);
-            Sheet.SetStop(entry.Stop);
+            Sheet.SetStop(stop);
         }
 
         private void Update()

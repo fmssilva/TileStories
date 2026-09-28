@@ -178,7 +178,7 @@ namespace TileStories.Editor.Tests
         {
             var r = Registry();
             var status = Kind("status");
-            status.ShowsFor = (p, _, _) => p.has_status;
+            status.ShowsFor = (p, _, _, _) => p.has_status;
             status.NotShownForPoiNote = "this point has no status.";
             r.Register(status, () => new PlainView());
             var poi = Poi(Block("block_2", "status"));
@@ -196,8 +196,8 @@ namespace TileStories.Editor.Tests
         [Test]
         public void TheBuiltInStatusKind_ShowsOnlyForAPoiWithAStatus()
         {
-            Assert.IsFalse(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = false }, null, null));
-            Assert.IsTrue(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = true, status_unknown = true }, null, null), "unknown is still a status: the question mark");
+            Assert.IsFalse(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = false }, null, BuiltInBlocks.StatusRing, null));
+            Assert.IsTrue(BuiltInBlocks.Status.ShowsFor(new POIData { has_status = true, status_unknown = true }, null, BuiltInBlocks.StatusRing, null), "unknown is still a status: the question mark");
             Assert.IsFalse(string.IsNullOrWhiteSpace(BuiltInBlocks.Status.NotShownForPoiNote));
         }
 

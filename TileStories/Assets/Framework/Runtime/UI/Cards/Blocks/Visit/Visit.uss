@@ -267,20 +267,23 @@
     flex-shrink: 0;
     margin-right: var(--ts-space-3);
     border-width: 0;
-    padding: 0;
-    background-color: var(--ts-clear);
+    border-radius: var(--ts-radius-m);
+    padding: var(--ts-space-2);
+    justify-content: center;
+    background-color: var(--ts-surface-2);
 }
 
 .card-related__picture {
     height: var(--ts-related-picture);
     border-radius: var(--ts-radius-m);
+    margin-bottom: var(--ts-space-1);
 }
 
 .card-related__title {
     font-size: var(--ts-size-caption);
     color: var(--ts-ink);
     white-space: normal;
-    margin: var(--ts-space-1) 0 0 0;
+    margin: 0;
     padding: 0;
 }
 

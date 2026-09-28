@@ -133,7 +133,7 @@ namespace TileStories
             DefaultVariant = ComparePointsRings,
             DisplayModes = new[] { CardOptions.DisplayInline },
             DefaultHeadingKey = CardStrings.Keys.CompareHeading,
-            ShowsFor = (poi, block, wallPois) => poi != null && poi.has_status && OtherPoi(block, wallPois) is { has_status: true },
+            ShowsFor = (poi, block, _, wallPois) => poi != null && poi.has_status && OtherPoi(block, wallPois) is { has_status: true },
             NotShownForPoiNote = "this point or the point it is compared with has no status (Specific Marker > Outline > Has status), " +
                                  "or Compare With names a point that is no longer on this wall.",
             Fields = new[]

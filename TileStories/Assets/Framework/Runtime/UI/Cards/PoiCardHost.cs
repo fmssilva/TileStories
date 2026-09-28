@@ -43,6 +43,13 @@ namespace TileStories
 
         private readonly TapOutsideDismissal _tapOutside = new();
 
+        // What the visitor did on this wall's cards (answers, votes, revealed blocks): PlayerPrefs, scoped by the wall's id. A
+        // test hands its own (over a MemoryCardStateStore) so a run never touches the developer's saved answers
+        internal CardLocalState State { get; set; }
+
+        // Where the cards report what the visitor did (feedback): a log line until the telemetry work replaces it
+        internal ICardEvents Events { get; set; } = new LogCardEvents();
+
         // The tap path's clock (press and release times, a pending close falling due): Time.unscaledTime in the app. A test
         // sets its own, so its taps' times are what it says -- no slow frame can decide whether two taps fell in one window
         internal System.Func<float> Clock { get; set; } = () => Time.unscaledTime;
@@ -144,9 +151,19 @@ namespace TileStories
                 Strings = new CardStrings(strings != null ? strings.Entries() : null, settings.strings, language, language),
                 MarkerLook = wallSession.MarkerLook,
                 Glossary = new CardGlossary(settings.glossary, language, language),
+                State = StateOfThisWall(),
+                Events = Events,
             };
             Sheet.Show(stack.Entries, context, SheetStopRule.OpenStop(settings.container.open_stop), settings.container.half_max_ratio);
             ShownPoiId = poiId;
+        }
+
+        // The card state of the wall this host shows (rebuilt when the host is bound to a wall with another id)
+        private CardLocalState StateOfThisWall()
+        {
+            string wallId = wallSession.SearchConfig?.wall_id ?? "";
+            if (State == null || State.WallId != wallId) State = new CardLocalState(new PlayerPrefsCardStateStore(), wallId);
+            return State;
         }
 
         private void Close()

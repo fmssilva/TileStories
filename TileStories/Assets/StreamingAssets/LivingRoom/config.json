@@ -4353,6 +4353,574 @@
                         ]
                     },
                     {
+                        "key": "block_41",
+                        "kind": "related",
+                        "variant": "carousel",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Also worth seeing"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Tambem vale a pena ver"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "source",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "manual",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "items",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "poi",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "lamp_military",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "poi",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "lamp_religious",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "poi",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "lamp_residential",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_42",
+                        "kind": "related",
+                        "variant": "next_along_wall",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "source",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "nearest",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_43",
+                        "kind": "knowledge_check",
+                        "variant": "multiple_choice",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "questions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "question",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "What is the tallest tower of a castle called?"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Como se chama a torre mais alta de um castelo?"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "option_1",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The curtain wall"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A cortina de muralhas"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "option_2",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The keep"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre de menagem"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "option_3",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The gatehouse"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A porta fortificada"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "correct",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "2",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "explanation",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The keep is the strongest tower: the last refuge when the walls fell."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A torre de menagem e a torre mais forte: o ultimo refugio quando as muralhas caiam."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "question",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Which of these did the old palace NOT have?"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Qual destes NAO existia no antigo palacio?"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "option_1",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A chapel"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Uma capela"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "option_2",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A long arcade"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Uma longa arcada"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "option_3",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A lighthouse"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Um farol"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "correct",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "3",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "explanation",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace stood by the river with a chapel and an arcade; there was no lighthouse."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O palacio ficava junto ao rio, com capela e arcada; nao havia farol."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_44",
+                        "kind": "knowledge_check",
+                        "variant": "true_false_swipe",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "questions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "question",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A curtain wall joins the towers of a castle."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Uma cortina de muralhas liga as torres de um castelo."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "is_true",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": true,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "explanation",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Yes: the curtain wall runs between the towers and closes the ring."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Sim: a cortina de muralhas corre entre as torres e fecha o anel."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "question",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The panel was painted after the earthquake of 1755."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O painel foi pintado depois do terramoto de 1755."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "explanation",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "No: it shows the city as it was before, which is why it matters."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Nao: mostra a cidade como era antes, e por isso e importante."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "key": "show_after_viewed",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": true,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_45",
+                        "kind": "knowledge_check",
+                        "variant": "image_choice",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "questions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "question",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Which picture shows the tiles before the earthquake?"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Qual das imagens mostra os azulejos antes do terramoto?"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "option_1",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Before"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Antes"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "option_2",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "After"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Depois"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "image_1",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "damage_before.png"
+                                            },
+                                            {
+                                                "key": "image_2",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "damage_after.png"
+                                            },
+                                            {
+                                                "key": "correct",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "1",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "explanation",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The earlier picture still has every tile in place."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A imagem anterior ainda tem todos os azulejos no lugar."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_46",
+                        "kind": "feedback",
+                        "variant": "thumbs",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "question",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Was this description useful?"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Esta descricao foi util?"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_47",
+                        "kind": "feedback",
+                        "variant": "stars",
+                        "display": "inline",
+                        "fields": []
+                    },
+                    {
                         "key": "block_15",
                         "kind": "sources",
                         "variant": "list",

@@ -170,7 +170,7 @@ namespace TileStories
             Variants = new[] { StatusRing, StatusScale },
             DefaultVariant = StatusRing,
             DisplayModes = new[] { CardOptions.DisplayInline },
-            ShowsFor = (poi, _, _) => poi != null && poi.has_status,
+            ShowsFor = (poi, _, _, _) => poi != null && poi.has_status,
             NotShownForPoiNote = "this point has no status (Specific Marker > Outline > Has status is off).",
             Fields = new[]
             {

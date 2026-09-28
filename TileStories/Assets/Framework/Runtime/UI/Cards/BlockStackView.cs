@@ -31,6 +31,13 @@ namespace TileStories
 
         private readonly Dictionary<string, Stack<Slot>> _pool = new();
         private readonly List<(string Kind, Slot Slot, ScopedMediaSource Media)> _bound = new();
+        // The slots of blocks kept hidden until the card was read (ShowAfterViewedField), with what remembers their reveal
+        private readonly List<(Slot Slot, string PoiId, string BlockKey)> _waiting = new();
+        private CardLocalState _state;
+
+        // Whether the visitor has scrolled past the card's content since it was bound (ContentSeenRule): it latches, and a new
+        // card starts unseen
+        public bool ContentSeen { get; private set; }
 
         // How many views were ever built (pooling makes this stop growing once every kind was seen)
         public int CreatedViewCount { get; private set; }
@@ -108,7 +115,28 @@ namespace TileStories
             {
                 UpdateHeaderCollapse();
                 HeaderView?.OnStackScrolled(Scroll.scrollOffset.y);
+                UpdateContentSeen();
             };
+            // - the content or the visible part changing size (a sheet dragged to another stop, a picture loading) can also
+            //   leave nothing more to scroll to: the scroll offset alone would miss it
+            Scroll.contentContainer.RegisterCallback<GeometryChangedEvent>(_ => UpdateContentSeen());
+            Scroll.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => UpdateContentSeen());
+        }
+
+        // Reveal the blocks that wait for the card to be read once the visitor got to the end of its content (ContentSeenRule),
+        // and remember it so they show at once the next time
+        private void UpdateContentSeen()
+        {
+            if (ContentSeen) return;
+            float range = Scroll.contentContainer.layout.height - Scroll.contentViewport.layout.height;
+            if (!ContentSeenRule.HasSeenAll(Scroll.scrollOffset.y, range, Scroll.contentViewport.layout.height)) return;
+            ContentSeen = true;
+            foreach (var (slot, poiId, blockKey) in _waiting)
+            {
+                slot.Root.style.display = DisplayStyle.Flex;
+                _state?.MarkSeen(poiId, blockKey);
+            }
+            _waiting.Clear();
         }
 
         // Collapse or open the header for the stack's current scroll (HeaderCollapseRule)
@@ -132,13 +160,21 @@ namespace TileStories
         public void Bind(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockBindContext context)
         {
             UnbindAll();
+            _state = context.State;
+            ContentSeen = false;
             foreach (var entry in entries)
             {
                 var slotOf = Take(entry.Definition.Key);
                 if (slotOf == null) continue;
                 var view = slotOf.View;
                 var media = new ScopedMediaSource(context.Media);
-                string heading = new BlockFieldReader(entry.Instance, context.Language, context.FallbackLanguage).Text(BlockKindDefinition.HeadingField);
+                var read = new BlockFieldReader(entry.Instance, context.Language, context.FallbackLanguage);
+                // - a block that waits for the card to be read stays out of sight (its heading and gap with it) until then
+                bool waits = entry.Definition.ShowAfterViewedField != null && read.Flag(entry.Definition.ShowAfterViewedField)
+                    && !(context.State?.Seen(context.Poi?.id, entry.Instance.key) ?? false);
+                slotOf.Root.style.display = waits ? DisplayStyle.None : DisplayStyle.Flex;
+                if (waits) _waiting.Add((slotOf, context.Poi?.id, entry.Instance.key));
+                string heading = read.Text(BlockKindDefinition.HeadingField);
                 if (heading.Length == 0 && entry.Definition.DefaultHeadingKey != null && context.Strings != null)
                     heading = context.Strings.Get(entry.Definition.DefaultHeadingKey);
                 slotOf.Heading.text = heading;
@@ -155,6 +191,8 @@ namespace TileStories
                     MarkerLook = context.MarkerLook,
                     Glossary = context.Glossary,
                     Host = context.Host,
+                    State = context.State,
+                    Events = context.Events,
                 });
                 bool header = _bound.Count == 0 && entry.Definition.Key == BuiltInBlocks.HeaderKind;
                 var parent = header ? HeaderSlot : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;
@@ -181,6 +219,7 @@ namespace TileStories
                 stack.Push(slot);
             }
             _bound.Clear();
+            _waiting.Clear();
         }
 
         private Slot Take(string kind)

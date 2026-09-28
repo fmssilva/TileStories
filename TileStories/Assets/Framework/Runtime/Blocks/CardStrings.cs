@@ -74,6 +74,25 @@ namespace TileStories
             public const string TodayMapCoordinates = "today_map_coordinates";
             // related: its default heading
             public const string RelatedHeading = "related_heading";
+            // knowledge_check: its default heading, "Question {0} of {1}", the verdict words, the two fixed choices of a true / false
+            // statement, the swipe hint under it and the two buttons that move between questions
+            public const string KnowledgeCheckHeading = "knowledge_check_heading";
+            public const string KnowledgeQuestionOf = "knowledge_question_of";
+            public const string KnowledgeCorrect = "knowledge_correct";
+            public const string KnowledgeWrong = "knowledge_wrong";
+            public const string KnowledgeTrue = "knowledge_true";
+            public const string KnowledgeFalse = "knowledge_false";
+            public const string KnowledgeSwipeHint = "knowledge_swipe_hint";
+            public const string KnowledgePrevious = "knowledge_previous";
+            public const string KnowledgeNext = "knowledge_next";
+            // feedback: the question each look asks when the block names none, the two thumbs, a star's name ("{0} of {1} stars")
+            // and the thank-you after a vote
+            public const string FeedbackThumbsQuestion = "feedback_thumbs_question";
+            public const string FeedbackStarsQuestion = "feedback_stars_question";
+            public const string FeedbackThumbUp = "feedback_thumb_up";
+            public const string FeedbackThumbDown = "feedback_thumb_down";
+            public const string FeedbackStar = "feedback_star";
+            public const string FeedbackThanks = "feedback_thanks";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -82,6 +101,9 @@ namespace TileStories
                 MediaUnavailable, HeaderThen, HeaderNow, BeforeLabel, AfterLabel, GalleryName, GalleryCount, TakeoverBack, ZoomHint,
                 HotspotHint, WallLocatorHeading, WallLocatorYou,
                 TodayMapHeading, TodayMapDirections, TodayMapThen, TodayMapNow, TodayMapCoordinates, RelatedHeading,
+                KnowledgeCheckHeading, KnowledgeQuestionOf, KnowledgeCorrect, KnowledgeWrong, KnowledgeTrue, KnowledgeFalse, KnowledgeSwipeHint,
+                KnowledgePrevious, KnowledgeNext,
+                FeedbackThumbsQuestion, FeedbackStarsQuestion, FeedbackThumbUp, FeedbackThumbDown, FeedbackStar, FeedbackThanks,
             };
         }
 

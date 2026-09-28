@@ -1637,5 +1637,376 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.15f);
             Assert.AreEqual(1f, zoom.Scale, "a plain wheel never zooms (it is the stack's: PoiCardTapZoomTests scrolls the long real card with it)");
         }
+
+        // ---------------- Tier 3 group A: knowledge_check and feedback (_3.1 step 8A) ----------------
+
+        // The events the gallery card's sink was told, in order: a real ICardEvents implementation that keeps them
+        private sealed class RecordingEvents : ICardEvents
+        {
+            public readonly System.Collections.Generic.List<CardEvent> Raised = new();
+            public void Raise(CardEvent cardEvent) => Raised.Add(cardEvent);
+        }
+
+        // Scroll `target` into view, then a real tap on its centre: what a visitor does when the block is taller than what shows
+        // (an answer's verdict pushes Previous / Next below the visible part of the card)
+        private IEnumerator ScrollAndTap(VisualElement target)
+        {
+            _harness.Sheet.Stack.Scroll.ScrollTo(target);
+            yield return CardTestInput.Settle(0.15f);
+            yield return CardTestInput.Tap(target.panel, target.worldBound.center);
+            yield return null;
+        }
+
+        private static string StateKeyOf(string entry, int row = 0) =>
+            "ts.card.gallery." + entry + "." + CardGalleryDefinitions.QuizBlockKey + ".answer-" + row;
+
+        // The border colour a real render draws around an element (the verdict's colour, from the tokens)
+        private static Color BorderOf(VisualElement e) => e.resolvedStyle.borderTopColor;
+
+        [UnityTest]
+        public IEnumerator KnowledgeCheck_MultipleChoice_AWrongTapSaysActually_ExplainsMarksTheRightOne_IsRemembered_AndNeverRetried()
+        {
+            const string entry = "knowledge_check_multiple_choice_short";
+            KnowledgeCheckBlockView quiz = null;
+            yield return ShowBlock(entry, v => quiz = (KnowledgeCheckBlockView)v);
+            Assert.AreEqual(1, quiz.Count);
+            Assert.AreEqual(CardGalleryDefinitions.KeepQuestion, quiz.Prompt.text);
+            CollectionAssert.AreEqual(new[] { "The curtain wall", "The keep", "The gatehouse" }, quiz.Choices.Select(c => c.Text.text).ToList());
+            Assert.IsFalse(quiz.Answered, "a fresh visitor: nothing answered");
+            Assert.IsFalse(CardTestInput.IsShown(quiz.Result, quiz.Root), "no verdict before an answer");
+            Assert.IsFalse(CardTestInput.IsShown(quiz.Counter, quiz.Root), "one question: no 'Question 1 of 1'");
+            Assert.IsFalse(CardTestInput.IsShown(quiz.Nav, quiz.Root), "one question: no Previous / Next");
+            foreach (var choice in quiz.Choices)
+                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(choice.Button.worldBound.width, choice.Button.worldBound.height), "each choice is a tap target >= 44 px");
+
+            // - a real tap on a WRONG option
+            yield return ScrollAndTap(quiz.Choices[0].Button);
+            Assert.AreEqual(0, quiz.Chosen);
+            Assert.AreEqual("Actually...", quiz.Verdict.text, "a gentle correction, no 'Wrong!'");
+            Assert.AreEqual(CardGalleryDefinitions.KeepExplanation, quiz.Explanation.text);
+            Assert.IsTrue(CardTestInput.IsShown(quiz.Result, quiz.Root));
+            Assert.IsTrue(quiz.Choices[0].Button.ClassListContains("card-quiz__choice--wrong"), "the tapped one is marked wrong");
+            Assert.IsTrue(quiz.Choices[1].Button.ClassListContains("card-quiz__choice--correct"), "the right one is shown");
+            Assert.IsFalse(quiz.Choices[2].Button.ClassListContains("card-quiz__choice--wrong") || quiz.Choices[2].Button.ClassListContains("card-quiz__choice--correct"));
+            Assert.AreNotEqual(BorderOf(quiz.Choices[0].Button), BorderOf(quiz.Choices[1].Button), "wrong and right are told apart by more than a class name");
+            Assert.AreEqual(BorderOf(quiz.Choices[0].Button), BorderOf(quiz.Stage), "the question's card wears the verdict's colour");
+            Assert.GreaterOrEqual(CardTestInput.Contrast(quiz.Explanation.resolvedStyle.color, CardTestInput.EffectiveBackground(quiz.Explanation)),
+                UIAccessibility.MinRatioNormalText, "the explanation reads");
+            Assert.AreEqual(0, _harness.State.Answer(entry, CardGalleryDefinitions.QuizBlockKey, 0), "remembered under the POI, the block and the question's row");
+            Assert.IsTrue(_harness.StateStore.TryGet(StateKeyOf(entry), out string stored));
+            Assert.AreEqual("0", stored);
+            yield return Render("Card_knowledge_check_multiple_choice_wrong");
+
+            // - no retry: a second tap on the right option changes nothing
+            yield return ScrollAndTap(quiz.Choices[1].Button);
+            Assert.AreEqual(0, quiz.Chosen, "the first answer stands");
+            Assert.AreEqual("Actually...", quiz.Verdict.text);
+            Assert.AreEqual(0, _harness.State.Answer(entry, CardGalleryDefinitions.QuizBlockKey, 0));
+
+            // - close and open the card again: the answer is still there, with its verdict
+            yield return ShowBlock(entry, v => quiz = (KnowledgeCheckBlockView)v);
+            Assert.AreEqual(0, quiz.Chosen, "remembered across a rebind");
+            Assert.IsTrue(CardTestInput.IsShown(quiz.Result, quiz.Root));
+            Assert.AreEqual("Actually...", quiz.Verdict.text);
+            Assert.IsTrue(quiz.Choices[1].Button.ClassListContains("card-quiz__choice--correct"));
+        }
+
+        [UnityTest]
+        public IEnumerator KnowledgeCheck_ARightTapConfirms_SeveralQuestionsMoveWithPreviousNext_AndItReopensAtTheFirstUnanswered()
+        {
+            const string entry = "knowledge_check_multiple_choice_long";
+            KnowledgeCheckBlockView quiz = null;
+            yield return ShowBlock(entry, v => quiz = (KnowledgeCheckBlockView)v);
+            Assert.AreEqual(3, quiz.Count);
+            Assert.AreEqual("Question 1 of 3", quiz.Counter.text, "the counter from the card strings");
+            Assert.AreEqual(Visibility.Hidden, quiz.Previous.resolvedStyle.visibility, "nothing before the first question");
+            Assert.AreEqual("Next question", quiz.Next.Q<Label>().text);
+            Assert.AreEqual(3, quiz.Choices.Count);
+
+            // - the RIGHT option of the first question (the second one)
+            yield return ScrollAndTap(quiz.Choices[1].Button);
+            Assert.AreEqual(1, quiz.Chosen);
+            Assert.AreEqual("Correct!", quiz.Verdict.text);
+            StringAssert.StartsWith("The keep is the strongest tower of a castle.", quiz.Explanation.text);
+            Assert.IsTrue(quiz.Choices[1].Button.ClassListContains("card-quiz__choice--correct"));
+            Assert.IsFalse(quiz.Choices.Any(c => c.Button.ClassListContains("card-quiz__choice--wrong")), "nothing wrong to show");
+            Assert.AreEqual(BorderOf(quiz.Choices[1].Button), BorderOf(quiz.Stage), "the card wears the right answer's colour");
+            yield return Render("Card_knowledge_check_multiple_choice_correct");
+
+            // - Next: the second question (four options), answered wrong on a real tap; the first one keeps its answer
+            yield return ScrollAndTap(quiz.Next);
+            Assert.AreEqual(1, quiz.Index);
+            Assert.AreEqual("Question 2 of 3", quiz.Counter.text);
+            Assert.AreEqual(4, quiz.Choices.Count);
+            Assert.IsFalse(quiz.Answered);
+            yield return ScrollAndTap(quiz.Choices[0].Button);
+            Assert.AreEqual("Actually...", quiz.Verdict.text);
+            Assert.AreEqual(2, quiz.Choices.Count(c => c.Button.ClassListContains("card-quiz__choice--wrong") || c.Button.ClassListContains("card-quiz__choice--correct")),
+                "one wrong, one right");
+            yield return ScrollAndTap(quiz.Previous);
+            Assert.AreEqual(0, quiz.Index);
+            Assert.AreEqual(1, quiz.Chosen, "question 1 still shows its own answer");
+            Assert.AreEqual("Correct!", quiz.Verdict.text);
+
+            // - a rebind opens at the first question with no answer: the third
+            yield return ShowBlock(entry, v => quiz = (KnowledgeCheckBlockView)v);
+            Assert.AreEqual(2, quiz.Index, "questions 1 and 2 are answered: it opens on the third");
+            Assert.AreEqual("Question 3 of 3", quiz.Counter.text);
+            Assert.IsFalse(quiz.Answered);
+            Assert.AreEqual(Visibility.Hidden, quiz.Next.resolvedStyle.visibility, "nothing after the last question");
+            Assert.AreEqual(2, _harness.StateStore.Keys.Count(k => k.Contains(".answer-")), "two answers stored, one per question row");
+        }
+
+        [UnityTest]
+        public IEnumerator KnowledgeCheck_TrueFalse_ARealSwipeRightIsTrue_LeftIsFalse_ShortOrVerticalDragsDoNothing_TheButtonsWorkToo()
+        {
+            const string entry = "knowledge_check_true_false_swipe_short";
+            KnowledgeCheckBlockView quiz = null;
+            yield return ShowBlock(entry, v => quiz = (KnowledgeCheckBlockView)v);
+            Assert.AreEqual(CardGalleryDefinitions.CurtainStatement, quiz.Prompt.text);
+            Assert.AreEqual("Swipe right for true, left for false", quiz.SwipeHint.text);
+            Assert.IsTrue(CardTestInput.IsShown(quiz.SwipeHint, quiz.Root));
+            CollectionAssert.AreEqual(new[] { "True", "False" }, quiz.Choices.Select(c => c.Text.text).ToList(), "the two fixed choices, from the card strings");
+            Rect stage = quiz.Stage.worldBound;
+            Vector2 centre = stage.center;
+
+            // - a short drag and a vertical drag are no answer, and the card is back in its place
+            yield return CardTestInput.DragFrom(quiz.Root.panel, centre, new Vector2(stage.width * 0.1f, 0f));
+            Assert.IsFalse(quiz.Answered, "a short drag is not a swipe");
+            Assert.AreEqual(0f, quiz.Stage.resolvedStyle.translate.x, 0.01f, "the card came back");
+            yield return CardTestInput.DragFrom(quiz.Root.panel, centre, new Vector2(0f, 90f));
+            Assert.IsFalse(quiz.Answered, "a vertical drag is not a swipe");
+            Assert.IsFalse(quiz.IsSwiping, "the pointer was let go");
+
+            // - a real swipe to the right: True, and the statement IS true
+            yield return CardTestInput.DragFrom(quiz.Root.panel, centre, new Vector2(stage.width * 0.5f, 6f));
+            yield return null;
+            Assert.AreEqual(KnowledgeCheckRule.ChoiceTrue, quiz.Chosen, "a real swipe right answered True");
+            Assert.AreEqual("Correct!", quiz.Verdict.text);
+            Assert.AreEqual(CardGalleryDefinitions.CurtainExplanation, quiz.Explanation.text);
+            Assert.AreEqual(0f, quiz.Stage.resolvedStyle.translate.x, 0.01f, "the card came back after the swipe");
+            Assert.IsFalse(CardTestInput.IsShown(quiz.SwipeHint, quiz.Root), "no hint once answered");
+            Assert.AreEqual(0, _harness.State.Answer(entry, CardGalleryDefinitions.QuizBlockKey, 0));
+            yield return Render("Card_knowledge_check_true_false_swipe_correct");
+
+            // - answered: another swipe does nothing
+            yield return CardTestInput.DragFrom(quiz.Root.panel, centre, new Vector2(-stage.width * 0.5f, 0f));
+            Assert.AreEqual(KnowledgeCheckRule.ChoiceTrue, quiz.Chosen, "no retry");
+
+            // - the long look: the first statement is FALSE; a real swipe LEFT is False, and correct
+            yield return ShowBlock("knowledge_check_true_false_swipe_long", v => quiz = (KnowledgeCheckBlockView)v);
+            stage = quiz.Stage.worldBound;
+            yield return CardTestInput.DragFrom(quiz.Root.panel, stage.center, new Vector2(-stage.width * 0.5f, -4f));
+            yield return null;
+            Assert.AreEqual(KnowledgeCheckRule.ChoiceFalse, quiz.Chosen, "a real swipe left answered False");
+            Assert.AreEqual("Correct!", quiz.Verdict.text, "the statement is false: swiping left is right");
+
+            // - the second statement is TRUE; the two buttons are the way without a gesture: a real tap on False is wrong
+            yield return ScrollAndTap(quiz.Next);
+            Assert.AreEqual("Question 2 of 3", quiz.Counter.text);
+            yield return ScrollAndTap(quiz.Choices[KnowledgeCheckRule.ChoiceFalse].Button);
+            Assert.AreEqual(KnowledgeCheckRule.ChoiceFalse, quiz.Chosen);
+            Assert.AreEqual("Actually...", quiz.Verdict.text);
+            Assert.IsTrue(quiz.Choices[KnowledgeCheckRule.ChoiceTrue].Button.ClassListContains("card-quiz__choice--correct"), "True is shown as the right one");
+            yield return Render("Card_knowledge_check_true_false_swipe_wrong");
+        }
+
+        [UnityTest]
+        public IEnumerator KnowledgeCheck_ImageChoice_PicturesAreTheChoices_ARealTapAnswers_AndEveryPictureIsGivenBack()
+        {
+            const string entry = "knowledge_check_image_choice_short";
+            KnowledgeCheckBlockView quiz = null;
+            yield return ShowBlock(entry, v => quiz = (KnowledgeCheckBlockView)v);
+            Assert.AreEqual(2, quiz.Choices.Count);
+            Assert.AreEqual("before.png", quiz.Choices[0].Image.Path, "the first choice is the first picture");
+            Assert.IsNotNull(quiz.Choices[0].Image.Texture, "and it loaded");
+            Assert.AreEqual("after.png", quiz.Choices[1].Image.Path);
+            CollectionAssert.AreEqual(new[] { "Before", "After" }, quiz.Choices.Select(c => c.Text.text).ToList(), "the captions");
+            Assert.AreEqual(1, _harness.Media.RefCount("before.png"));
+            Assert.Greater(quiz.Choices[0].Image.Root.worldBound.height, 40f, "a picture, not a text button");
+
+            // - the RIGHT one is the first (the earlier picture): a real tap on the second is wrong
+            yield return ScrollAndTap(quiz.Choices[1].Button);
+            Assert.AreEqual(1, quiz.Chosen);
+            Assert.AreEqual("Actually...", quiz.Verdict.text);
+            Assert.AreEqual(CardGalleryDefinitions.PanelExplanation, quiz.Explanation.text);
+            Assert.IsTrue(quiz.Choices[0].Button.ClassListContains("card-quiz__choice--correct"), "the right picture is framed");
+            Assert.IsTrue(quiz.Choices[1].Button.ClassListContains("card-quiz__choice--wrong"));
+            yield return Render("Card_knowledge_check_image_choice_wrong");
+
+            _harness.Sheet.Hide();
+            yield return null;
+            Assert.AreEqual(0, _harness.Media.HeldCount, "a closed card holds no picture");
+
+            // - the long look: four pictures with captions; the right one is the third; a real tap on it is right
+            yield return ShowBlock("knowledge_check_image_choice_long", v => quiz = (KnowledgeCheckBlockView)v);
+            Assert.AreEqual(4, quiz.Choices.Count);
+            yield return ScrollAndTap(quiz.Choices[2].Button);
+            Assert.AreEqual("Correct!", quiz.Verdict.text);
+            yield return Render("Card_knowledge_check_image_choice_correct");
+        }
+
+        [UnityTest]
+        public IEnumerator KnowledgeCheck_RowsTheLookCannotShow_AreLeftOut_ForEveryLook()
+        {
+            foreach (string variant in BuiltInBlocks.KnowledgeCheck.Variants)
+            {
+                KnowledgeCheckBlockView quiz = null;
+                yield return ShowBlock("knowledge_check_" + variant + "_partial", v => quiz = (KnowledgeCheckBlockView)v);
+                Assert.AreEqual(1, quiz.Count, variant + ": only the complete question is shown");
+                Assert.AreEqual("Complete question.", quiz.Prompt.text, variant);
+                Assert.IsFalse(CardTestInput.IsShown(quiz.Nav, quiz.Root), variant + ": one question left, no Previous / Next");
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator KnowledgeCheck_ShowAfterReading_StaysHiddenUntilARealWheelReachesTheEnd_ThenStays_AndACardThatFitsShowsItAtOnce()
+        {
+            var wall = CardGalleryDefinitions.Taxonomy();
+            var poi = CardGalleryDefinitions.GatedKnowledgePoi(longText: true);
+            _harness.ShowPoi(poi, wall, null, SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle();
+            var stack = _harness.Sheet.Stack;
+            var quiz = stack.BoundViews.OfType<KnowledgeCheckBlockView>().Single();
+            var slot = stack.SlotOf(quiz);
+            Assert.AreEqual(DisplayStyle.None, slot.resolvedStyle.display, "hidden while the card is unread (its heading and gap with it)");
+            Assert.IsFalse(stack.ContentSeen);
+            Assert.IsFalse(_harness.State.Seen(poi.id, CardGalleryDefinitions.GatedQuizBlockKey));
+            Assert.Greater(stack.Scroll.contentContainer.layout.height, stack.Scroll.contentViewport.layout.height, "precondition: the long card scrolls");
+
+            // - a real wheel, notch by notch: hidden before every notch, and it appears exactly when the offset reaches the end the
+            //   card had before the question was added to it
+            float rangeBeforeTheLastNotch = 0f;
+            for (int notch = 0; notch < 60 && !stack.ContentSeen; notch++)
+            {
+                Assert.AreEqual(DisplayStyle.None, slot.resolvedStyle.display, "unread: the question is still hidden (notch " + notch + ")");
+                rangeBeforeTheLastNotch = stack.Scroll.contentContainer.layout.height - stack.Scroll.contentViewport.layout.height;
+                yield return CardTestInput.Wheel(stack.Scroll, 2f);
+            }
+            Assert.IsTrue(stack.ContentSeen, "the wheel got to the end");
+            Assert.GreaterOrEqual(stack.Scroll.scrollOffset.y, rangeBeforeTheLastNotch - ContentSeenRule.EndTolerance - 1f, "it appeared at the end of the unread card");
+            Assert.AreNotEqual(DisplayStyle.None, slot.resolvedStyle.display, "the question appeared");
+            Assert.IsTrue(_harness.State.Seen(poi.id, CardGalleryDefinitions.GatedQuizBlockKey), "the reveal is remembered");
+            yield return CardTestInput.Wheel(stack.Scroll, -3f);
+            Assert.AreNotEqual(DisplayStyle.None, slot.resolvedStyle.display, "once revealed it stays, whichever way the card is scrolled");
+
+            // - opened again: shown at once (remembered), before any scrolling
+            _harness.ShowPoi(CardGalleryDefinitions.GatedKnowledgePoi(longText: true), CardGalleryDefinitions.Taxonomy(), null, SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle();
+            stack = _harness.Sheet.Stack;
+            quiz = stack.BoundViews.OfType<KnowledgeCheckBlockView>().Single();
+            Assert.AreNotEqual(DisplayStyle.None, stack.SlotOf(quiz).resolvedStyle.display, "a visitor who read it once meets the question at once");
+            Assert.IsFalse(stack.ContentSeen, "...although this time nothing has been scrolled");
+
+            // - a card that all fits on the screen: nothing to scroll past, the question shows at once, at full
+            _harness.State.ResetAll();
+            var shortPoi = CardGalleryDefinitions.GatedKnowledgePoi(longText: false);
+            _harness.ShowPoi(shortPoi, CardGalleryDefinitions.Taxonomy(), null, SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle();
+            stack = _harness.Sheet.Stack;
+            quiz = stack.BoundViews.OfType<KnowledgeCheckBlockView>().Single();
+            Assert.IsTrue(stack.ContentSeen, "everything fits: nothing left to read");
+            Assert.AreNotEqual(DisplayStyle.None, stack.SlotOf(quiz).resolvedStyle.display);
+
+            // - at the peek stop nothing is visible, so nothing counts as read
+            _harness.State.ResetAll();
+            _harness.ShowPoi(CardGalleryDefinitions.GatedKnowledgePoi(longText: false), CardGalleryDefinitions.Taxonomy(), null, SheetStopRule.Stop.Peek);
+            yield return CardTestInput.Settle();
+            stack = _harness.Sheet.Stack;
+            Assert.IsFalse(stack.ContentSeen, "peek: the content is not on screen");
+            Assert.AreEqual(DisplayStyle.None, stack.SlotOf(stack.BoundViews.OfType<KnowledgeCheckBlockView>().Single()).resolvedStyle.display);
+        }
+
+        [UnityTest]
+        public IEnumerator Feedback_Thumbs_ARealTapVotesOnce_RaisesOneEvent_IsRemembered_AndShowsThanks()
+        {
+            var events = new RecordingEvents();
+            _harness.Events = events;
+            const string entry = "feedback_thumbs_short";
+            FeedbackBlockView feedback = null;
+            yield return ShowBlock(entry, v => feedback = (FeedbackBlockView)v);
+            Assert.AreEqual(CardGalleryDefinitions.FeedbackQuestion, feedback.Question.text);
+            CollectionAssert.AreEqual(new[] { "Helpful", "Not helpful" }, feedback.Votes.Select(v => v.Text.text).ToList(), "the words under each thumb, from the card strings");
+            Assert.IsFalse(CardTestInput.IsShown(feedback.Thanks, feedback.Root), "no thank-you before a vote");
+            Assert.AreEqual(-1, feedback.Voted);
+            foreach (var vote in feedback.Votes)
+                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(vote.Button.worldBound.width, vote.Button.worldBound.height), "a thumb is a tap target >= 44 px");
+            Assert.Greater(feedback.Votes[0].Glyph.worldBound.height, 4f, "the thumb has a drawn glyph");
+            yield return Render("Card_feedback_thumbs_open");
+
+            yield return ScrollAndTap(feedback.Votes[0].Button);
+            Assert.AreEqual(FeedbackRule.ThumbUp, feedback.Voted);
+            Assert.AreEqual(1, events.Raised.Count, "exactly one event");
+            var raised = events.Raised[0];
+            Assert.AreEqual(CardEventKinds.Feedback, raised.Kind);
+            Assert.AreEqual("gallery", raised.WallId);
+            Assert.AreEqual(entry, raised.PoiId);
+            Assert.AreEqual(CardGalleryDefinitions.QuizBlockKey, raised.BlockKey);
+            Assert.AreEqual("thumbs", raised.Variant);
+            Assert.AreEqual("up", raised.Value);
+            Assert.AreEqual(FeedbackRule.ThumbUp, _harness.State.Vote(entry, CardGalleryDefinitions.QuizBlockKey), "remembered");
+            Assert.IsTrue(feedback.Votes[0].Button.ClassListContains("card-feedback__vote--on"));
+            Assert.IsFalse(feedback.Votes[1].Button.ClassListContains("card-feedback__vote--on"));
+            Assert.IsTrue(CardTestInput.IsShown(feedback.Thanks, feedback.Root));
+            Assert.AreEqual("Thank you for your feedback", feedback.Thanks.text);
+            yield return Render("Card_feedback_thumbs_voted");
+
+            // - the vote is final: a tap on the other thumb changes nothing and raises nothing
+            yield return ScrollAndTap(feedback.Votes[1].Button);
+            Assert.AreEqual(FeedbackRule.ThumbUp, feedback.Voted);
+            Assert.AreEqual(1, events.Raised.Count, "no second event");
+
+            // - closed and opened again: shown as given, and no new event
+            yield return ShowBlock(entry, v => feedback = (FeedbackBlockView)v);
+            Assert.AreEqual(FeedbackRule.ThumbUp, feedback.Voted, "remembered across a rebind");
+            Assert.IsTrue(feedback.Votes[0].Button.ClassListContains("card-feedback__vote--on"));
+            Assert.IsTrue(CardTestInput.IsShown(feedback.Thanks, feedback.Root));
+            Assert.AreEqual(1, events.Raised.Count, "showing a remembered vote reports nothing");
+
+            // - the thumb down, on another block, reports "down"
+            yield return ShowBlock("feedback_thumbs_long", v => feedback = (FeedbackBlockView)v);
+            yield return ScrollAndTap(feedback.Votes[1].Button);
+            Assert.AreEqual(2, events.Raised.Count);
+            Assert.AreEqual("down", events.Raised[1].Value);
+            Assert.AreEqual(FeedbackRule.ThumbDown, _harness.State.Vote("feedback_thumbs_long", CardGalleryDefinitions.QuizBlockKey));
+        }
+
+        [UnityTest]
+        public IEnumerator Feedback_Stars_ARealTapOnTheFourthStarFillsFourAndReportsFour_AndTheQuestionDefaultsToTheCardsOwn()
+        {
+            var events = new RecordingEvents();
+            _harness.Events = events;
+            const string entry = "feedback_stars_short";
+            FeedbackBlockView feedback = null;
+            yield return ShowBlock(entry, v => feedback = (FeedbackBlockView)v);
+            Assert.AreEqual(FeedbackRule.StarCount, feedback.Votes.Count);
+            Assert.IsFalse(feedback.Votes.Any(v => CardTestInput.IsShown(v.Text, v.Button)), "a star carries no words");
+            foreach (var vote in feedback.Votes)
+                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(vote.Button.worldBound.width, vote.Button.worldBound.height), "a star is a tap target >= 44 px");
+            Assert.AreEqual("4 of 5 stars", feedback.Votes[3].Button.tooltip);
+
+            yield return ScrollAndTap(feedback.Votes[3].Button);
+            Assert.AreEqual(4, feedback.Voted);
+            CollectionAssert.AreEqual(new[] { true, true, true, true, false }, feedback.Votes.Select(v => v.Button.ClassListContains("card-feedback__vote--on")).ToList(),
+                "the stars up to the vote are filled");
+            Assert.AreEqual(1, events.Raised.Count);
+            Assert.AreEqual("4", events.Raised[0].Value);
+            Assert.AreEqual("stars", events.Raised[0].Variant);
+            Assert.AreEqual(4, _harness.State.Vote(entry, CardGalleryDefinitions.QuizBlockKey));
+            yield return Render("Card_feedback_stars_voted");
+
+            // - no question written: the card asks its own, per look
+            yield return ShowBlock("feedback_stars_noquestion", v => feedback = (FeedbackBlockView)v);
+            Assert.AreEqual("How would you rate this?", feedback.Question.text);
+            yield return ShowBlock("feedback_thumbs_noquestion", v => feedback = (FeedbackBlockView)v);
+            Assert.AreEqual("Was this useful?", feedback.Question.text);
+
+            // - a stored vote the look cannot have (a 4 for the thumbs) is no vote, and nothing is reported for it
+            _harness.State.SetVote("feedback_thumbs_short", CardGalleryDefinitions.QuizBlockKey, 4);
+            yield return ShowBlock("feedback_thumbs_short", v => feedback = (FeedbackBlockView)v);
+            Assert.AreEqual(-1, feedback.Voted, "a 4 does not exist on the thumbs");
+            Assert.IsFalse(CardTestInput.IsShown(feedback.Thanks, feedback.Root));
+            Assert.AreEqual(1, events.Raised.Count);
+        }
     }
 }

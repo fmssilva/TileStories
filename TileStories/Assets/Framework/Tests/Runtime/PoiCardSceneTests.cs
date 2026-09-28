@@ -539,7 +539,8 @@ namespace TileStories.Tests
                 "fun_fact", "fun_fact", "pull_quote", "pull_quote",
                 "process_steps", "swatches", "timeline", "timeline", "person", "person", "story_chapters", "compare_points", "practical_info",
                 "gallery", "gallery", "gallery", "gallery", "before_after", "zoom_image",
-                "hotspot_image", "hotspot_image", "wall_locator", "wall_locator", "today_map", "today_map",
+                "hotspot_image", "hotspot_image", "wall_locator", "wall_locator", "today_map", "today_map", "related", "related",
+                "knowledge_check", "knowledge_check", "knowledge_check", "feedback", "feedback",
                 "sources", "sources", "actions", "actions", "actions",
             }, ShownKinds(), "one block per kind and variant (Tier 1, Tier 2), nothing skipped");
             var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
@@ -558,6 +559,8 @@ namespace TileStories.Tests
         public IEnumerator TheLamp_EveryBlockShowsItsHeadingAboveIt_InTheCardsLanguage_AndEveryGapIsTheOneToken()
         {
             yield return OpenFull("lamp");
+            // - the question that waits for the reading is revealed the way a visitor does it, so every slot can be measured
+            yield return ReadTheWholeCard();
             var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
             var strings = new CardStrings(Card.StringTable.Entries(), LiveSettings.strings, "en", "en");
             var stack = Sheet.Stack;
@@ -794,6 +797,107 @@ namespace TileStories.Tests
             Assert.AreEqual("Na parede", bridge.ThenLabel.text);
             Assert.AreEqual("Hoje", bridge.NowLabel.text);
             Assert.AreEqual("Do painel a hoje", Sheet.Stack.HeadingOf(bridge).text, "the wall's Portuguese heading");
+        }
+
+        // The ids one real tap makes the selection bus announce (the event a marker tap raises), tapping `target` on its panel
+        private IEnumerator TapAndCollectSelections(VisualElement target, System.Collections.Generic.List<string> raised)
+        {
+            System.Action<string> probe = raised.Add;
+            SelectionEventBus.OnMarkerSelected += probe;
+            try
+            {
+                yield return CardTestInput.Tap(target.panel, target.worldBound.center);
+                yield return CardTestInput.Settle();
+            }
+            finally { SelectionEventBus.OnMarkerSelected -= probe; }
+        }
+
+        // _3.1 step 7C: The Lamp's related carousel on the real wall: the written Points in the written order (Lamp - Military
+        // first), each named by its card title; a real tap on a card selects that POI through the selection bus -- exactly one
+        // OnMarkerSelected, as a marker tap raises -- and the card rebinds to it
+        [UnityTest]
+        public IEnumerator TheLamp_RelatedCarousel_ARealTapOnACardSelectsThatPoiThroughTheBus_AndTheCardRebinds()
+        {
+            yield return OpenFull("lamp");
+            var blocks = Sheet.Stack.BoundViews.OfType<RelatedBlockView>().ToList();
+            Assert.AreEqual(2, blocks.Count, "carousel and next_along_wall");
+            var carousel = blocks[0];
+            Assert.AreEqual("Also worth seeing", Sheet.Stack.HeadingOf(carousel).text, "the heading written for it");
+            CollectionAssert.AreEqual(new[] { "lamp_military", "lamp_religious", "lamp_residential" }, carousel.Cards.Select(c => c.PoiId).ToList(),
+                "the Points, in the order written");
+            var military = Session.SearchPois.First(p => p.id == "lamp_military");
+            Assert.AreEqual("Lamp - Military", military.name, "the fixture's own name is untouched");
+            Assert.AreEqual(BlockStackBuilder.CardTitleOf(military, "en", "en"), carousel.Cards[0].Title.text, "named by its card title");
+            foreach (var card in carousel.Cards)
+                Assert.IsTrue(CardTestInput.IsShown(card.Box, carousel.Root), "every picked card can be seen in the strip");
+            yield return ScrollTo(carousel);
+            yield return Capture("Card_Lamp_Related_Carousel");
+
+            var raised = new System.Collections.Generic.List<string>();
+            yield return TapAndCollectSelections(carousel.Cards[0].Box, raised);
+            CollectionAssert.AreEqual(new[] { "lamp_military" }, raised, "one OnMarkerSelected");
+            Assert.AreEqual("lamp_military", SelectionEventBus.CurrentPoiId);
+            Assert.AreEqual("lamp_military", Card.ShownPoiId, "the card rebound to the tapped POI");
+            Assert.IsTrue(Sheet.IsOpen);
+            Assert.AreEqual(BlockStackBuilder.CardTitleOf(military, "en", "en"), Header.TitleText, "its own header");
+            CollectionAssert.IsEmpty(Sheet.Stack.BoundViews.OfType<RelatedBlockView>().ToList(), "Lamp - Military's short card has no related block");
+        }
+
+        // _3.1 step 7C: The Lamp's next_along_wall on the running wall goes where the wall's axis says: the picked (nearest) point
+        // with the smallest place to the RIGHT of The Lamp -- worked out here from WallAxisRule.Places alone, not from the rule
+        // under test -- and a real tap on the button selects it through the bus
+        [UnityTest]
+        public IEnumerator TheLamp_NextAlongWall_GoesToTheNeighbourTheWallAxisSays_ARealTapSelectsIt()
+        {
+            yield return OpenFull("lamp");
+            var next = Sheet.Stack.BoundViews.OfType<RelatedBlockView>().Last();
+            Assert.AreEqual("Related", Sheet.Stack.HeadingOf(next).text, "no heading written: the default");
+            var wall = Session.SearchPois;
+            var lamp = wall.First(p => p.id == "lamp");
+            var places = WallAxisRule.Places(wall);
+            var block = lamp.card.blocks.Last(b => b.kind == BuiltInBlocks.RelatedKind);
+            var picked = RelatedPoisRule.Of(lamp, block, wall);
+            Assert.AreEqual(RelatedPoisRule.MaxAutomatic, picked.Count, "nearest: the wall's six nearest other points");
+            float self = places.Along[places.IndexOf("lamp")];
+            float expected = picked.Select(p => places.Along[places.IndexOf(p.id)]).Where(a => a > self).Min();
+            Assert.AreEqual(expected, places.Along[places.IndexOf(next.NextPoiId)], 1e-5f, "the nearest picked point to the right along the wall");
+            Assert.Greater(places.Along[places.IndexOf(next.NextPoiId)], self, "to the right, not the left");
+            Assert.AreEqual(BlockStackBuilder.CardTitleOf(wall.First(p => p.id == next.NextPoiId), "en", "en"), next.NextTitle.text);
+            Assert.IsFalse(next.NextChevron.ClassListContains("card-related__chevron--wrap"), "not a wrap");
+            yield return ScrollTo(next);
+            yield return Capture("Card_Lamp_Related_NextAlongWall");
+
+            string target = next.NextPoiId;
+            var raised = new System.Collections.Generic.List<string>();
+            yield return TapAndCollectSelections(next.Next, raised);
+            CollectionAssert.AreEqual(new[] { target }, raised, "one OnMarkerSelected");
+            Assert.AreEqual(target, Card.ShownPoiId, "the card rebound to the neighbour");
+        }
+
+        // _3.1 step 7C: at the wall's right end there is nothing to the right: next_along_wall wraps to the nearest point on the
+        // left. Run on the real wall by giving its rightmost POI such a block in memory (the running session only)
+        [UnityTest]
+        public IEnumerator NextAlongWall_AtTheWallsRightEnd_WrapsLeftOnTheRunningWall_ARealTapSelectsThatPoint()
+        {
+            var wall = Session.SearchPois;
+            var places = WallAxisRule.Places(wall);
+            int last = places.Along.IndexOf(places.Along.Max());
+            var rightmost = places.Pois[last];
+            var block = new BlockInstanceData { key = "block_wrap", kind = BuiltInBlocks.RelatedKind, variant = BuiltInBlocks.RelatedNextAlongWall };
+            block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.RelatedSourceField, value = RelatedPoisRule.SourceNearest });
+            rightmost.card = new POICardData { blocks = new System.Collections.Generic.List<BlockInstanceData> { block } };
+            yield return OpenFull(rightmost.id);
+            var next = Sheet.Stack.BoundViews.OfType<RelatedBlockView>().Single();
+            var picked = RelatedPoisRule.Of(rightmost, block, wall);
+            float expected = picked.Select(p => places.Along[places.IndexOf(p.id)]).Where(a => a < places.Along[last]).Max();
+            Assert.AreEqual(expected, places.Along[places.IndexOf(next.NextPoiId)], 1e-5f, "the nearest picked point on the LEFT");
+            Assert.IsTrue(next.NextChevron.ClassListContains("card-related__chevron--wrap"), "shown as a wrap");
+            string target = next.NextPoiId;
+            yield return ScrollTo(next);
+            var raised = new System.Collections.Generic.List<string>();
+            yield return TapAndCollectSelections(next.Next, raised);
+            CollectionAssert.AreEqual(new[] { target }, raised);
+            Assert.AreEqual(target, Card.ShownPoiId);
         }
 
         [UnityTest]
@@ -1057,6 +1161,243 @@ namespace TileStories.Tests
             Assert.AreEqual(frame.width * slider.Position, slider.BeforeClip.worldBound.width, 1f);
             Assert.AreEqual(scroll, Sheet.Stack.Scroll.scrollOffset.y, 0.01f, "the card did not scroll under the drag");
             yield return Capture("Card_Lamp_BeforeAfter");
+        }
+
+        // ---------------- Tier 3 group A: knowledge_check and feedback on the real wall (_3.1 step 8A) ----------------
+
+        // What the card told the events sink (a real ICardEvents implementation that keeps the events)
+        private sealed class RecordingCardEvents : ICardEvents
+        {
+            public readonly System.Collections.Generic.List<CardEvent> Raised = new();
+            public void Raise(CardEvent cardEvent) => Raised.Add(cardEvent);
+        }
+
+        private MemoryCardStateStore _cardStore;
+        private RecordingCardEvents _cardEvents;
+
+        // The card of these tests remembers in memory, so a run never touches the developer's own saved answers (one test below
+        // uses the real PlayerPrefs store, cleans up after itself and says so)
+        [UnitySetUp]
+        public IEnumerator UseAnInMemoryCardState()
+        {
+            _cardStore = new MemoryCardStateStore();
+            Card.State = new CardLocalState(_cardStore, Session.SearchConfig.wall_id);
+            _cardEvents = new RecordingCardEvents();
+            Card.Events = _cardEvents;
+            yield break;
+        }
+
+        // Scroll `target` into view, then a real tap on its centre (a block taller than what shows: the visitor scrolls first)
+        private IEnumerator ScrollAndTap(VisualElement target)
+        {
+            Sheet.Stack.Scroll.ScrollTo(target);
+            yield return CardTestInput.Settle(0.2f);
+            yield return CardTestInput.Tap(target.panel, target.worldBound.center);
+            yield return null;
+        }
+
+        // Read the card the way a visitor does: a real wheel, a few notches per frame, until the end of it (what reveals a block
+        // that waits for the reading)
+        private IEnumerator ReadTheWholeCard()
+        {
+            for (int notch = 0; notch < 400 && !Sheet.Stack.ContentSeen; notch++) yield return CardTestInput.Wheel(Sheet.Stack.Scroll, 12f);
+            Assert.IsTrue(Sheet.Stack.ContentSeen, "the wheel reached the end of the card");
+            yield return CardTestInput.Settle(0.15f);
+        }
+
+        private System.Collections.Generic.List<KnowledgeCheckBlockView> Quizzes() => Sheet.Stack.BoundViews.OfType<KnowledgeCheckBlockView>().ToList();
+
+        // _3.1 step 8A: The Lamp's multiple-choice question on the real card: a real tap on a wrong option says "Actually..." with
+        // the explanation and marks the right one; the answer is remembered under wall + POI + block + row, so the card reopens
+        // on the next question; in Portuguese the card's words and the authored Portuguese text
+        [UnityTest]
+        public IEnumerator TheLamp_KnowledgeCheck_MultipleChoice_ARealTapAnswers_ItIsRemembered_AndInPortugueseTheWordsFollow()
+        {
+            yield return OpenFull("lamp");
+            var quiz = Quizzes()[0];
+            Assert.AreEqual("Test yourself", Sheet.Stack.HeadingOf(quiz).text, "no heading written: the card's default");
+            Assert.AreEqual(2, quiz.Count, "two questions authored");
+            Assert.AreEqual("What is the tallest tower of a castle called?", quiz.Prompt.text);
+            CollectionAssert.AreEqual(new[] { "The curtain wall", "The keep", "The gatehouse" }, quiz.Choices.Select(c => c.Text.text).ToList());
+            Assert.AreEqual("Question 1 of 2", quiz.Counter.text);
+            Assert.IsFalse(quiz.Answered);
+
+            yield return ScrollAndTap(quiz.Choices[0].Button);
+            Assert.AreEqual(0, quiz.Chosen);
+            Assert.AreEqual("Actually...", quiz.Verdict.text);
+            Assert.AreEqual("The keep is the strongest tower: the last refuge when the walls fell.", quiz.Explanation.text);
+            Assert.IsTrue(quiz.Choices[1].Button.ClassListContains("card-quiz__choice--correct"), "the right option is marked");
+            Assert.AreEqual(0, Card.State.Answer("lamp", "block_43", 0), "remembered under the wall, the POI, the block and the question's row");
+            Assert.IsTrue(_cardStore.TryGet("ts.card." + Session.SearchConfig.wall_id + ".lamp.block_43.answer-0", out string stored), "the scoped key");
+            Assert.AreEqual("0", stored);
+            yield return ScrollTo(quiz);
+            yield return Capture("Card_Lamp_KnowledgeCheck_MultipleChoice");
+
+            // - closed and opened again: the first question is answered, so it opens on the second
+            SelectionEventBus.Clear();
+            yield return OpenFull("lamp");
+            quiz = Quizzes()[0];
+            Assert.AreEqual(1, quiz.Index, "question 1 is answered: it opens on question 2");
+            Assert.AreEqual("Question 2 of 2", quiz.Counter.text);
+            Assert.IsFalse(quiz.Answered);
+
+            // - Portuguese: the authored Portuguese text and the card's Portuguese words; a real tap on the right option
+            SelectionEventBus.Clear();
+            LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
+            yield return OpenFull("lamp");
+            quiz = Quizzes()[0];
+            Assert.AreEqual("Teste-se", Sheet.Stack.HeadingOf(quiz).text, "the default heading in Portuguese");
+            Assert.AreEqual("Pergunta 2 de 2", quiz.Counter.text);
+            Assert.AreEqual("Qual destes NAO existia no antigo palacio?", quiz.Prompt.text);
+            yield return ScrollAndTap(quiz.Choices[2].Button);
+            Assert.AreEqual("Certo!", quiz.Verdict.text);
+            StringAssert.StartsWith("O palacio ficava junto ao rio", quiz.Explanation.text);
+            Assert.AreEqual(2, Card.State.Answer("lamp", "block_43", 1));
+        }
+
+        // _3.1 step 8A: The Lamp's true / false question waits for the reading (show_after_viewed): hidden on a fresh card, a real
+        // wheel to the end reveals it (and it is remembered), a real swipe to the right answers True on the real card
+        [UnityTest]
+        public IEnumerator TheLamp_KnowledgeCheck_TrueFalse_WaitsForTheReading_ARealWheelRevealsIt_ARealSwipeAnswers()
+        {
+            yield return OpenFull("lamp");
+            var quiz = Quizzes()[1];
+            var slot = Sheet.Stack.SlotOf(quiz);
+            Assert.AreEqual(DisplayStyle.None, slot.resolvedStyle.display, "the card is unread: the question waits");
+            Assert.IsFalse(Sheet.Stack.ContentSeen);
+            Assert.IsFalse(Card.State.Seen("lamp", "block_44"));
+            var others = Quizzes().Where(q => q != quiz).ToList();
+            foreach (var other in others) Assert.AreNotEqual(DisplayStyle.None, Sheet.Stack.SlotOf(other).resolvedStyle.display, "only the block that asks to wait waits");
+
+            yield return ReadTheWholeCard();
+            Assert.AreNotEqual(DisplayStyle.None, slot.resolvedStyle.display, "the wheel got to the end: the question appeared");
+            Assert.IsTrue(Card.State.Seen("lamp", "block_44"), "and that is remembered");
+
+            yield return ScrollTo(quiz);
+            Assert.AreEqual("A curtain wall joins the towers of a castle.", quiz.Prompt.text);
+            Rect stage = quiz.Stage.worldBound;
+            yield return CardTestInput.DragFrom(quiz.Root.panel, stage.center, new Vector2(stage.width * 0.5f, 4f));
+            yield return null;
+            Assert.AreEqual(KnowledgeCheckRule.ChoiceTrue, quiz.Chosen, "a real swipe to the right answered True");
+            Assert.AreEqual("Correct!", quiz.Verdict.text);
+            Assert.AreEqual(0, Card.State.Answer("lamp", "block_44", 0));
+            yield return Capture("Card_Lamp_KnowledgeCheck_TrueFalse");
+
+            // - a visitor who read it once meets the question at once the next time
+            SelectionEventBus.Clear();
+            yield return OpenFull("lamp");
+            Assert.AreNotEqual(DisplayStyle.None, Sheet.Stack.SlotOf(Quizzes()[1]).resolvedStyle.display, "remembered: no waiting");
+            Assert.IsFalse(Sheet.Stack.ContentSeen, "...although this time nothing has been read");
+        }
+
+        // _3.1 step 8A: The Lamp's picture question: the pictures come from the wall's media folder, a real tap on the right one
+        [UnityTest]
+        public IEnumerator TheLamp_KnowledgeCheck_ImageChoice_PicturesFromTheWallsFolder_ARealTapOnTheRightOneConfirms()
+        {
+            yield return OpenFull("lamp");
+            var quiz = Quizzes()[2];
+            Assert.AreEqual(2, quiz.Choices.Count);
+            Assert.AreEqual("damage_before", quiz.Choices[0].Image.Texture?.name, "the wall's own picture");
+            Assert.AreEqual("damage_after", quiz.Choices[1].Image.Texture?.name);
+            CollectionAssert.AreEqual(new[] { "Before", "After" }, quiz.Choices.Select(c => c.Text.text).ToList());
+            yield return ScrollAndTap(quiz.Choices[0].Button);
+            Assert.AreEqual("Correct!", quiz.Verdict.text);
+            Assert.AreEqual("The earlier picture still has every tile in place.", quiz.Explanation.text);
+            Assert.AreEqual(0, Card.State.Answer("lamp", "block_45", 0));
+            yield return ScrollTo(quiz);
+            yield return Capture("Card_Lamp_KnowledgeCheck_ImageChoice");
+        }
+
+        // _3.1 step 8A: The Lamp's feedback blocks: a real tap on a thumb and on a star each raises ONE event through the card's
+        // events seam (wall, POI, block, look, value) and is remembered; a Portuguese card asks and thanks in Portuguese
+        [UnityTest]
+        public IEnumerator TheLamp_Feedback_ARealTapOnAThumbAndOnAStar_EachRaisesOneEvent_IsRemembered_AndInPortugueseTheWordsFollow()
+        {
+            yield return OpenFull("lamp");
+            var feedback = Sheet.Stack.BoundViews.OfType<FeedbackBlockView>().ToList();
+            Assert.AreEqual(2, feedback.Count, "thumbs and stars");
+            var thumbs = feedback[0];
+            var stars = feedback[1];
+            Assert.AreEqual("Was this description useful?", thumbs.Question.text, "the question written for it");
+            Assert.AreEqual("How would you rate this?", stars.Question.text, "none written: the card's own");
+
+            yield return ScrollAndTap(thumbs.Votes[0].Button);
+            Assert.AreEqual(FeedbackRule.ThumbUp, thumbs.Voted);
+            Assert.AreEqual(1, _cardEvents.Raised.Count, "one event for the thumb");
+            var first = _cardEvents.Raised[0];
+            Assert.AreEqual(CardEventKinds.Feedback, first.Kind);
+            Assert.AreEqual(Session.SearchConfig.wall_id, first.WallId);
+            Assert.AreEqual("lamp", first.PoiId);
+            Assert.AreEqual("block_46", first.BlockKey);
+            Assert.AreEqual("thumbs", first.Variant);
+            Assert.AreEqual("up", first.Value);
+            Assert.AreEqual(FeedbackRule.ThumbUp, Card.State.Vote("lamp", "block_46"));
+
+            yield return ScrollAndTap(stars.Votes[4].Button);
+            Assert.AreEqual(5, stars.Voted);
+            Assert.AreEqual(2, _cardEvents.Raised.Count);
+            Assert.AreEqual("5", _cardEvents.Raised[1].Value);
+            Assert.AreEqual("block_47", _cardEvents.Raised[1].BlockKey);
+            Assert.IsTrue(stars.Votes.All(v => v.Button.ClassListContains("card-feedback__vote--on")), "five stars filled");
+            yield return ScrollTo(stars);
+            yield return Capture("Card_Lamp_Feedback");
+
+            // - closed and opened again: both votes shown as given, nothing reported again
+            SelectionEventBus.Clear();
+            yield return OpenFull("lamp");
+            feedback = Sheet.Stack.BoundViews.OfType<FeedbackBlockView>().ToList();
+            Assert.AreEqual(FeedbackRule.ThumbUp, feedback[0].Voted);
+            Assert.AreEqual(5, feedback[1].Voted);
+            Assert.AreEqual(2, _cardEvents.Raised.Count, "a remembered vote reports nothing");
+
+            // - Portuguese, on a fresh device: the authored question, the card's default question and thank-you
+            _cardStore.Keys.ToList().ForEach(k => _cardStore.Remove(k));
+            SelectionEventBus.Clear();
+            LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
+            yield return OpenFull("lamp");
+            feedback = Sheet.Stack.BoundViews.OfType<FeedbackBlockView>().ToList();
+            Assert.AreEqual("Esta descricao foi util?", feedback[0].Question.text);
+            Assert.AreEqual("Como avalia isto?", feedback[1].Question.text);
+            CollectionAssert.AreEqual(new[] { "Util", "Pouco util" }, feedback[0].Votes.Select(v => v.Text.text).ToList());
+            yield return ScrollAndTap(feedback[0].Votes[1].Button);
+            Assert.AreEqual("Obrigado pelo seu comentario", feedback[0].Thanks.text);
+            Assert.AreEqual("down", _cardEvents.Raised[2].Value);
+        }
+
+        // _3.1 step 8A: the card's own state, when nothing replaces it, is PlayerPrefs scoped by the wall's id: a real answer
+        // reaches PlayerPrefs under the scoped key. It touches the developer's PlayerPrefs, so it puts back exactly what was there
+        [UnityTest]
+        public IEnumerator TheCardsOwnState_IsPlayerPrefsScopedByTheWall_ARealAnswerReachesIt()
+        {
+            string wall = Session.SearchConfig.wall_id;
+            var real = new CardLocalState(new PlayerPrefsCardStateStore(), wall);
+            string answerKey = real.KeyOf("lamp", "block_43", "answer-0");
+            string indexKey = CardLocalState.KeyPrefix + wall + ".index";
+            string answerBefore = PlayerPrefs.HasKey(answerKey) ? PlayerPrefs.GetString(answerKey) : null;
+            string indexBefore = PlayerPrefs.HasKey(indexKey) ? PlayerPrefs.GetString(indexKey) : null;
+            try
+            {
+                PlayerPrefs.DeleteKey(answerKey);
+                Card.State = null; // - the host builds its own on the next selection: the app's
+                yield return OpenFull("lamp");
+                var quiz = Quizzes()[0];
+                Assert.IsFalse(quiz.Answered, "precondition: nothing saved under the key");
+                yield return ScrollAndTap(quiz.Choices[1].Button);
+                Assert.AreEqual("Correct!", quiz.Verdict.text);
+                Assert.IsTrue(PlayerPrefs.HasKey(answerKey), "the answer is in PlayerPrefs under wall.poi.block.slot");
+                Assert.AreEqual("1", PlayerPrefs.GetString(answerKey));
+                Assert.AreEqual(wall, Card.State.WallId, "the host's state is this wall's");
+
+                SelectionEventBus.Clear();
+                yield return OpenFull("lamp");
+                Assert.AreEqual(1, Quizzes()[0].Index, "a new bind reads it back from PlayerPrefs: opens on question 2");
+            }
+            finally
+            {
+                if (answerBefore == null) PlayerPrefs.DeleteKey(answerKey); else PlayerPrefs.SetString(answerKey, answerBefore);
+                if (indexBefore == null) PlayerPrefs.DeleteKey(indexKey); else PlayerPrefs.SetString(indexKey, indexBefore);
+                PlayerPrefs.Save();
+            }
         }
     }
 }

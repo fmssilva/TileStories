@@ -84,7 +84,8 @@ namespace TileStories
                         result.Skipped.Add(new Skipped(instance, SkipReason.KindDisabled));
                         continue;
                     }
-                    if (definition.ShowsFor != null && !definition.ShowsFor(poi, instance, wallPois))
+                    string variant = definition.HasVariant(instance.variant) ? instance.variant : BlockLibraryRule.DefaultVariant(settings, definition);
+                    if (definition.ShowsFor != null && !definition.ShowsFor(poi, instance, variant, wallPois))
                     {
                         result.Skipped.Add(new Skipped(instance, SkipReason.NotForThisPoint));
                         continue;
@@ -96,7 +97,6 @@ namespace TileStories
                         continue;
                     }
 
-                    string variant = definition.HasVariant(instance.variant) ? instance.variant : BlockLibraryRule.DefaultVariant(settings, definition);
                     var entry = new Entry(instance, definition, variant, synthesized: false);
                     if (definition.Key != BuiltInBlocks.HeaderKind) body.Add(entry);
                     else if (header == null) header = entry;

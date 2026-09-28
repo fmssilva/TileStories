@@ -21,6 +21,10 @@ namespace TileStories
         public CardGlossary Glossary;
         // What a block may ask of the card it sits on (the sheet)
         public IBlockHost Host;
+        // What the visitor did on the cards on this device (answers, votes, revealed blocks) and where a block reports what
+        // the visitor did (_3.1 step 8A). Null where the caller has none: a block then keeps its state in the view only
+        public CardLocalState State;
+        public ICardEvents Events;
     }
 
     // What a block may ask of its card (_3.1 section 3): lower the card so the selected POI's marker shows on the wall;

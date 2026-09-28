@@ -1,0 +1,119 @@
+/* The community family's looks (_3.1 Tier 3): what the visitor tells back -- feedback.
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
+   _3.3). UI Toolkit USS only: no sibling selectors (an import ERROR that drops the whole sheet), no % radius, no web-CSS
+   gap / cursor / calc. Thumbs and stars are drawn from borders and rotations: no glyph font, no picture. */
+
+/* ---- feedback: the question, the row of thumbs or stars, the thank-you ---- */
+
+.card-feedback__question {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-3) 0;
+    padding: 0;
+}
+
+.card-feedback__row {
+    flex-direction: row;
+}
+
+.card-feedback__vote {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--ts-vote-size);
+    min-height: var(--ts-vote-size);
+    margin: 0 var(--ts-space-3) 0 0;
+    padding: var(--ts-space-2) var(--ts-space-3);
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+.card-feedback__vote--on {
+    border-color: var(--ts-accent);
+}
+
+/* stars carry no button chrome: five outlined stars, the ones up to the vote filled */
+.card-feedback--stars .card-feedback__vote {
+    min-width: var(--ts-touch-target);
+    min-height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    background-color: var(--ts-clear);
+}
+
+.card-feedback__vote-text {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+}
+
+.card-feedback__glyph {
+    width: var(--ts-vote-glyph);
+    height: var(--ts-vote-glyph);
+    align-items: center;
+    justify-content: center;
+}
+
+/* a thumb: a chevron -- a square with two borders, turned so its corner points up (up) or down (down) */
+.card-feedback__glyph--up,
+.card-feedback__glyph--down {
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    border-left-width: var(--ts-spotlight-ring-width);
+    border-top-width: var(--ts-spotlight-ring-width);
+    border-color: var(--ts-ink-2);
+}
+
+.card-feedback__glyph--up {
+    rotate: 45deg;
+    margin-top: var(--ts-space-1);
+}
+
+.card-feedback__glyph--down {
+    rotate: 225deg;
+    margin-bottom: var(--ts-space-1);
+}
+
+.card-feedback__vote--on .card-feedback__glyph--up,
+.card-feedback__vote--on .card-feedback__glyph--down {
+    border-color: var(--ts-accent);
+}
+
+/* a star: two solid squares, one turned an eighth of a turn -- an eight-pointed star, pale until voted */
+.card-feedback__star-square {
+    display: none;
+    position: absolute;
+    left: 15%;
+    top: 15%;
+    width: 70%;
+    height: 70%;
+    background-color: var(--ts-ink-3);
+    border-width: 0;
+}
+
+.card-feedback__glyph--star .card-feedback__star-square {
+    display: flex;
+}
+
+.card-feedback__star-square--b {
+    rotate: 45deg;
+}
+
+.card-feedback__vote--on .card-feedback__star-square {
+    background-color: var(--ts-accent);
+}
+
+.card-feedback__thanks {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: var(--ts-space-3) 0 0 0;
+    padding: 0;
+}

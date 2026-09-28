@@ -35,6 +35,8 @@ namespace TileStories
             registry.Register(WallLocator, () => new WallLocatorBlockView());
             registry.Register(TodayMap, () => new TodayMapBlockView());
             registry.Register(Related, () => new RelatedBlockView());
+            registry.Register(KnowledgeCheck, () => new KnowledgeCheckBlockView());
+            registry.Register(Feedback, () => new FeedbackBlockView());
         }
     }
 }

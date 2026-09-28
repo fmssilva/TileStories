@@ -35,12 +35,18 @@ namespace TileStories
         // Whether the kind has something to show for this POI, this block and the wall's POIs (null = always). A block
         // it refuses is skipped (BlockStackBuilder, NotForThisPoint) -- e.g. a status block on a POI without a status
         // never draws an empty ring; a compare block whose other POI is gone or has no status never draws half a pair.
-        // The wall's POIs may be null (a caller with no wall): then no other POI resolves.
-        public System.Func<POIData, BlockInstanceData, IReadOnlyList<POIData>, bool> ShowsFor;
+        // The wall's POIs may be null (a caller with no wall): then no other POI resolves. The string is the variant the block
+        // WILL be drawn in (its own, else the Block Library's default): a kind whose rows are valid per variant reads it.
+        public System.Func<POIData, BlockInstanceData, string, IReadOnlyList<POIData>, bool> ShowsFor;
         // The Editor's words for that skip, under the block's row in Card Content ("this point has no status...")
         public string NotShownForPoiNote;
         // Variants drawn in the card's footer, pinned under the scrolling blocks (a sticky call to action)
         public IReadOnlyList<string> FooterVariants;
+
+        // The key of one of the kind's Toggle fields (null = none): while it is on, the stack keeps the block hidden until the
+        // visitor has scrolled past the card's content (ContentSeenRule), then shows it and remembers that (CardLocalState.Seen).
+        // A question that should come after the reading (knowledge_check's show_after_viewed)
+        public string ShowAfterViewedField;
 
         // The key of the common heading field: a short title above the block, drawn by BlockStackView for every kind
         public const string HeadingField = "heading";

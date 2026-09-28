@@ -154,6 +154,12 @@
     /* related (Visit.uss): a carousel card's width and picture height */
     --ts-related-card: 140px;
     --ts-related-picture: 96px;
+    --ts-correct: rgb(111, 191, 115);
+    --ts-wrong: rgb(210, 85, 63);
+    --ts-choice-border: 2px;
+    --ts-choice-picture: 96px;
+    --ts-vote-size: 64px;
+    --ts-vote-glyph: 28px;
     /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
     --ts-clear: rgba(0, 0, 0, 0);
 }

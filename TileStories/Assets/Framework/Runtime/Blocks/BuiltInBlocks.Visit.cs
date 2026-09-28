@@ -48,7 +48,7 @@ namespace TileStories
             DefaultVariant = WallLocatorStrip,
             DisplayModes = new[] { CardOptions.DisplayInline },
             DefaultHeadingKey = CardStrings.Keys.WallLocatorHeading,
-            ShowsFor = (poi, block, wallPois) => poi != null && WallAxisRule.Places(wallPois) is var places
+            ShowsFor = (poi, block, _, wallPois) => poi != null && WallAxisRule.Places(wallPois) is var places
                                                  && places.IndexOf(poi.id) >= 0 && places.Pois.Count >= 2,
             NotShownForPoiNote = "this point is the only point on this wall (or its Position holds an invalid number).",
         };
@@ -111,7 +111,7 @@ namespace TileStories
             DefaultVariant = RelatedCarousel,
             DisplayModes = new[] { CardOptions.DisplayInline },
             DefaultHeadingKey = CardStrings.Keys.RelatedHeading,
-            ShowsFor = (poi, block, wallPois) => poi != null && RelatedPoisRule.Of(poi, block, wallPois).Count > 0,
+            ShowsFor = (poi, block, _, wallPois) => poi != null && RelatedPoisRule.Of(poi, block, wallPois).Count > 0,
             NotShownForPoiNote = "no other point could be picked for it (Manual names none still on this wall; Same Category / " +
                                  "Nearest need at least one other point on this wall).",
             Fields = new[]

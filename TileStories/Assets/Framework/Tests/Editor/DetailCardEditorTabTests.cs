@@ -785,5 +785,160 @@ namespace TileStories.Editor.Tests
             var openLabels = (string[])typeof(POIEditorToolWindow).GetField("CardOpenStopLabels", Static).GetValue(null);
             Assert.AreEqual(CardOptions.OpenStops.Length, openLabels.Length, "one label per Open At option");
         }
+
+        // ---------------- Tier 3 group A: Reset Saved Card State and the Knowledge Check rows (_3.1 step 8A) ----------------
+
+        [UnityTest]
+        public IEnumerator ResetSavedCardState_ARealClick_ClearsThisWallsSavedState_AndOnlyThisWalls_NeverTheConfig()
+        {
+            string wall = "reset_test_" + Guid.NewGuid().ToString("N");
+            string otherWall = "reset_test_other_" + Guid.NewGuid().ToString("N");
+            var mine = new CardLocalState(new PlayerPrefsCardStateStore(), wall);
+            var theirs = new CardLocalState(new PlayerPrefsCardStateStore(), otherWall);
+            try
+            {
+                mine.SetAnswer("poi_1", "block_1", 0, 2);
+                mine.SetVote("poi_1", "block_2", 5);
+                mine.MarkSeen("poi_1", "block_3");
+                theirs.SetAnswer("poi_1", "block_1", 0, 1);
+                var config = TwoPoiConfig();
+                config.wall_id = wall;
+                _window = new PoiEditorWindowHost(config, "_showCardContainer");
+                OpenTab("DetailCard");
+                yield return _window.WaitForRepaint();
+                Assert.AreEqual(2, mine.Answer("poi_1", "block_1", 0), "precondition: this wall has saved state");
+                Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+
+                _window.Click("Card state reset#0");
+                yield return _window.WaitForRepaint();
+                Assert.AreEqual(-1, mine.Answer("poi_1", "block_1", 0), "the answer is forgotten");
+                Assert.AreEqual(-1, mine.Vote("poi_1", "block_2"), "the vote too");
+                Assert.IsFalse(mine.Seen("poi_1", "block_3"), "and the revealed question");
+                Assert.AreEqual(1, theirs.Answer("poi_1", "block_1", 0), "another wall's saved state is untouched");
+                Assert.IsFalse(_window.Unsaved, "a reset never changes the config");
+                Assert.AreEqual(wall, _window.Config.wall_id);
+
+                _window.Click("Card state reset#0");
+                yield return _window.WaitForRepaint();
+                Assert.AreEqual(1, theirs.Answer("poi_1", "block_1", 0), "a second click has nothing to clear and harms nothing");
+            }
+            finally
+            {
+                mine.ResetAll();
+                theirs.ResetAll();
+            }
+        }
+
+        [Test]
+        public void ResetSavedCardState_ReturnsHowManyEntriesWentAndSaysItInAnotherNotice()
+        {
+            string wall = "reset_test_" + Guid.NewGuid().ToString("N");
+            var state = new CardLocalState(new PlayerPrefsCardStateStore(), wall);
+            try
+            {
+                var config = TwoPoiConfig();
+                config.wall_id = wall;
+                var window = ScriptableObject.CreateInstance<POIEditorToolWindow>();
+                try
+                {
+                    typeof(POIEditorToolWindow).GetField("_config", Instance).SetValue(window, config);
+                    var reset = typeof(POIEditorToolWindow).GetMethod("ResetSavedCardState", Instance);
+                    Assert.AreEqual(0, (int)reset.Invoke(window, null), "nothing saved: nothing cleared");
+                    state.SetAnswer("poi_1", "block_1", 0, 1);
+                    state.SetAnswer("poi_1", "block_1", 1, 2);
+                    Assert.AreEqual(2, (int)reset.Invoke(window, null), "two saved answers cleared");
+                }
+                finally { UnityEngine.Object.DestroyImmediate(window); }
+            }
+            finally { state.ResetAll(); }
+        }
+
+        [Test]
+        public void KnowledgeCheck_TheEditorNamesEachQuestionRowTheLookWouldLeaveOut_ByItsRowNumberAndTheReason()
+        {
+            BlockItemFieldValue Text(string key, string value) => new() { key = key, text = new List<LocalizedEntry> { new() { lang = "en", value = value } } };
+            BlockItemData Row(params BlockItemFieldValue[] fields) => new() { fields = new List<BlockItemFieldValue>(fields) };
+            var block = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.KnowledgeCheckKind, variant = BuiltInBlocks.KnowledgeCheckMultipleChoice };
+            var questions = new BlockFieldValue { key = "questions" };
+            questions.items.Add(Row(Text("question", "Fine"), Text("explanation", "Because."), Text("option_1", "a"), Text("option_2", "b"), new() { key = "correct", value = "1" }));
+            questions.items.Add(Row(Text("question", "No explanation"), Text("option_1", "a"), Text("option_2", "b"), new() { key = "correct", value = "1" }));
+            questions.items.Add(Row(Text("question", "One option"), Text("explanation", "Because."), Text("option_1", "a"), new() { key = "correct", value = "1" }));
+            questions.items.Add(Row(Text("question", "Right one blank"), Text("explanation", "Because."), Text("option_1", "a"), Text("option_2", "b"), new() { key = "correct", value = "4" }));
+            questions.items.Add(Row(Text("explanation", "No question"), Text("option_1", "a"), Text("option_2", "b"), new() { key = "correct", value = "1" }));
+            questions.items.Add(Row(Text("question", "No right option"), Text("explanation", "Because."), Text("option_1", "a"), Text("option_2", "b")));
+            block.fields.Add(questions);
+            var poi = new POIData { id = "poi_1", name = "North Tower" };
+
+            var warnings = POIEditorToolWindow.CardBlockWarnings(block, BuiltInBlocks.KnowledgeCheck, new CardSettings(), poi);
+            CollectionAssert.AreEqual(new[]
+            {
+                "Row 2 of Questions is not shown: its Explanation is empty (every question needs one: it is what the visitor reads after answering).",
+                "Row 3 of Questions is not shown: it needs at least two options with words (Option 1 to Option 4).",
+                "Row 4 of Questions is not shown: its Right Option is one this look does not show (an option with no words).",
+                "Row 5 of Questions is not shown: its Question is empty.",
+                "Row 6 of Questions is not shown: no Right Option is picked.",
+            }, warnings, "every row the multiple-choice look leaves out, by the number the Items rows show");
+
+            block.variant = BuiltInBlocks.KnowledgeCheckImageChoice;
+            var pictures = POIEditorToolWindow.CardBlockWarnings(block, BuiltInBlocks.KnowledgeCheck, new CardSettings(), poi);
+            Assert.AreEqual(6, pictures.Count, "no row has a picture: Image Choice leaves every one out");
+            StringAssert.Contains("Image Choice needs at least two pictures inside the Media Folder", pictures[0]);
+
+            block.variant = BuiltInBlocks.KnowledgeCheckTrueFalseSwipe;
+            var trueFalse = POIEditorToolWindow.CardBlockWarnings(block, BuiltInBlocks.KnowledgeCheck, new CardSettings(), poi);
+            CollectionAssert.AreEqual(new[]
+            {
+                "Row 2 of Questions is not shown: its Explanation is empty (every question needs one: it is what the visitor reads after answering).",
+                "Row 5 of Questions is not shown: its Question is empty.",
+            }, trueFalse, "true / false needs only a statement and an explanation: options are not its business");
+
+            block.variant = "";
+            var byLibrary = new CardSettings();
+            byLibrary.kinds.Add(new BlockKindSetting { kind = BuiltInBlocks.KnowledgeCheckKind, default_variant = BuiltInBlocks.KnowledgeCheckTrueFalseSwipe });
+            Assert.AreEqual(2, POIEditorToolWindow.CardBlockWarnings(block, BuiltInBlocks.KnowledgeCheck, byLibrary, poi).Count,
+                "no look picked: the warnings judge the look the Block Library will give it");
+            foreach (string text in warnings.Concat(pictures).Concat(trueFalse))
+                Assert.IsTrue(text.All(c => c < 128), "ASCII only: " + text);
+        }
+
+        [UnityTest]
+        public IEnumerator KnowledgeCheckRows_RealClicksAddARowAndTypeItsQuestionAndExplanation_AndTheRowSaysWhatIsMissing()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            config.pois[0].card.blocks.Add(new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.KnowledgeCheckKind, variant = BuiltInBlocks.KnowledgeCheckMultipleChoice });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            Assert.IsFalse(_window.Unsaved, "drawing an empty Knowledge Check writes nothing");
+            Assert.IsEmpty(_window.Config.pois[0].card.blocks[0].fields, "no field value created by drawing");
+
+            _window.Click("Block item questions add#0");
+            yield return _window.WaitForRepaint();
+            yield return _window.ReplaceText("Block item questions 0 question en#0", "What is a keep?");
+            yield return _window.ClickAway();
+            // - a question row has twelve fields: its last one (the explanation) lies below the window's first screen, as it does for a
+            //   developer, who scrolls; the same here
+            _window.SetWindowField("_scrollPos", new Vector2(0f, 4000f));
+            yield return _window.WaitForRepaint();
+            yield return _window.ReplaceText("Block item questions 0 explanation en#0", "The strongest tower.");
+            yield return _window.ClickAway();
+            var row = _window.Config.pois[0].card.blocks[0].fields.Single(f => f.key == "questions").items.Single();
+            Assert.AreEqual("What is a keep?", POIEditorToolWindow.ItemLocalizedValue(row, "question", "en"), "typed for real");
+            Assert.AreEqual("The strongest tower.", POIEditorToolWindow.ItemLocalizedValue(row, "explanation", "en"));
+            Assert.IsTrue(_window.Unsaved);
+
+            var warnings = POIEditorToolWindow.CardBlockWarnings(_window.Config.pois[0].card.blocks[0], BuiltInBlocks.KnowledgeCheck, _window.Config.card_settings, _window.Config.pois[0]);
+            Assert.AreEqual(1, warnings.Count, "the typed row still lacks options");
+            StringAssert.StartsWith("Row 1 of Questions is not shown: it needs at least two options", warnings[0]);
+
+            yield return _window.PressUndo();
+            yield return _window.PressUndo();
+            yield return _window.PressUndo();
+            yield return _window.PressUndo();
+            Assert.IsEmpty(_window.Config.pois[0].card.blocks[0].fields.Where(f => f.items.Count > 0).ToList(), "each real edit undoes: back to no rows");
+        }
     }
 }

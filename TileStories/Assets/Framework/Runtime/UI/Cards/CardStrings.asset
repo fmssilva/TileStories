@@ -91,14 +91,16 @@ MonoBehaviour:
     - lang: pt
       value: Rascunho
   - key: timeline_now
-    where: The end point a Timeline block adds after its last event while Highlight Now is on.
+    where: The end point a Timeline block adds after its last event while Highlight
+      Now is on.
     text:
     - lang: en
       value: Now
     - lang: pt
       value: Hoje
   - key: story_chapter_of
-    where: The line above a Story Chapters chapter, where {0} is the chapter shown and {1} how many there are.
+    where: The line above a Story Chapters chapter, where {0} is the chapter shown
+      and {1} how many there are.
     text:
     - lang: en
       value: Chapter {0} of {1}
@@ -119,14 +121,16 @@ MonoBehaviour:
     - lang: pt
       value: Seguinte
   - key: compare_heading
-    where: The small heading of a Compare Points block, above the two points' conditions side by side.
+    where: The small heading of a Compare Points block, above the two points' conditions
+      side by side.
     text:
     - lang: en
       value: Side by side
     - lang: pt
       value: Lado a lado
   - key: media_unavailable
-    where: The frame of a picture whose file cannot be shown (missing, or not a picture the card may use).
+    where: The frame of a picture whose file cannot be shown (missing, or not a picture
+      the card may use).
     text:
     - lang: en
       value: Picture unavailable
@@ -147,21 +151,24 @@ MonoBehaviour:
     - lang: pt
       value: Hoje
   - key: before_label
-    where: The label of the left side of a Before and After slider when the block names none.
+    where: The label of the left side of a Before and After slider when the block
+      names none.
     text:
     - lang: en
       value: Before
     - lang: pt
       value: Antes
   - key: after_label
-    where: The label of the right side of a Before and After slider when the block names none.
+    where: The label of the right side of a Before and After slider when the block
+      names none.
     text:
     - lang: en
       value: After
     - lang: pt
       value: Depois
   - key: gallery_name
-    where: A gallery's name in the breadcrumb of the full-screen picture view (card title > this).
+    where: A gallery's name in the breadcrumb of the full-screen picture view (card
+      title > this).
     text:
     - lang: en
       value: Gallery
@@ -203,7 +210,8 @@ MonoBehaviour:
     - lang: pt
       value: Nesta parede
   - key: wall_locator_you
-    where: 'Wall Locator, Strip: the mark of the visitor''s own place along the wall (in the app).'
+    where: 'Wall Locator, Strip: the mark of the visitor''s own place along the wall
+      (in the app).'
     text:
     - lang: en
       value: You are here
@@ -238,7 +246,8 @@ MonoBehaviour:
     - lang: pt
       value: Hoje
   - key: today_map_coordinates
-    where: 'Today Map: how the latitude ({0}) and longitude ({1}) are written under the map.'
+    where: 'Today Map: how the latitude ({0}) and longitude ({1}) are written under
+      the map.'
     text:
     - lang: en
       value: '{0}, {1}'
@@ -251,3 +260,115 @@ MonoBehaviour:
       value: Related
     - lang: pt
       value: Relacionado
+  - key: knowledge_check_heading
+    where: The default heading of a Knowledge Check block, when its own Heading is
+      empty.
+    text:
+    - lang: en
+      value: Test yourself
+    - lang: pt
+      value: Teste-se
+  - key: knowledge_question_of
+    where: Above a question when a Knowledge Check has more than one ({0} = this
+      question, {1} = how many).
+    text:
+    - lang: en
+      value: Question {0} of {1}
+    - lang: pt
+      value: Pergunta {0} de {1}
+  - key: knowledge_correct
+    where: The line shown after a right answer, before the explanation.
+    text:
+    - lang: en
+      value: Correct!
+    - lang: pt
+      value: Certo!
+  - key: knowledge_wrong
+    where: The gentle line shown after a wrong answer, before the explanation.
+    text:
+    - lang: en
+      value: Actually...
+    - lang: pt
+      value: Na verdade...
+  - key: knowledge_true
+    where: The button that answers a true / false statement with True.
+    text:
+    - lang: en
+      value: True
+    - lang: pt
+      value: Verdadeiro
+  - key: knowledge_false
+    where: The button that answers a true / false statement with False.
+    text:
+    - lang: en
+      value: False
+    - lang: pt
+      value: Falso
+  - key: knowledge_swipe_hint
+    where: 'The hint under a true / false statement: which way to swipe.'
+    text:
+    - lang: en
+      value: Swipe right for true, left for false
+    - lang: pt
+      value: Deslize para a direita se for verdadeiro, para a esquerda se for falso
+  - key: knowledge_previous
+    where: The button under a Knowledge Check with several questions that goes back
+      one question.
+    text:
+    - lang: en
+      value: Previous question
+    - lang: pt
+      value: Pergunta anterior
+  - key: knowledge_next
+    where: The button under a Knowledge Check with several questions that goes on
+      to the next question.
+    text:
+    - lang: en
+      value: Next question
+    - lang: pt
+      value: Pergunta seguinte
+  - key: feedback_thumbs_question
+    where: The question of a Feedback block with the Thumbs look, when the block
+      writes none.
+    text:
+    - lang: en
+      value: Was this useful?
+    - lang: pt
+      value: Foi util?
+  - key: feedback_stars_question
+    where: The question of a Feedback block with the Stars look, when the block writes
+      none.
+    text:
+    - lang: en
+      value: How would you rate this?
+    - lang: pt
+      value: Como avalia isto?
+  - key: feedback_thumb_up
+    where: The words under the thumb up of a Feedback block.
+    text:
+    - lang: en
+      value: Helpful
+    - lang: pt
+      value: Util
+  - key: feedback_thumb_down
+    where: The words under the thumb down of a Feedback block.
+    text:
+    - lang: en
+      value: Not helpful
+    - lang: pt
+      value: Pouco util
+  - key: feedback_star
+    where: 'The name of one star of a Feedback block ({0} = which star, {1} = how
+      many stars): its tooltip.'
+    text:
+    - lang: en
+      value: '{0} of {1} stars'
+    - lang: pt
+      value: '{0} de {1} estrelas'
+  - key: feedback_thanks
+    where: The thank-you a Feedback block shows once the visitor has voted.
+    text:
+    - lang: en
+      value: Thank you for your feedback
+    - lang: pt
+      value: Obrigado pelo seu comentario

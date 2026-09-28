@@ -93,6 +93,8 @@ namespace TileStories
             AddWallLocators(list);
             AddTodayMaps(list);
             AddRelated(list);
+            AddKnowledgeChecks(list);
+            AddFeedback(list);
             AddHeadings(list);
             return list;
         }
@@ -454,6 +456,186 @@ namespace TileStories
             var poi = new POIData { id = id, name = name, category = category, hierarchy_level_key = LevelKey };
             At(position)(poi);
             return poi;
+        }
+
+        // ---------------- knowledge_check (Tier 3 group A) ----------------
+
+        // One authored question row: the question, the option texts and pictures (slot 1, 2...), the right slot (1-based; 0 = none
+        // written), whether a true / false statement is true, and the explanation
+        private readonly struct QuestionRow
+        {
+            public readonly string Question;
+            public readonly string[] Options;
+            public readonly string[] Images;
+            public readonly int Right;
+            public readonly bool IsTrue;
+            public readonly string Explanation;
+
+            public QuestionRow(string question, string[] options, string[] images, int right, bool isTrue, string explanation)
+            {
+                Question = question;
+                Options = options;
+                Images = images;
+                Right = right;
+                IsTrue = isTrue;
+                Explanation = explanation;
+            }
+        }
+
+        // - a property, not a field: `All = Build()` above runs first, so a static field declared down here would still be null
+        private static string[] None => System.Array.Empty<string>();
+
+        // The short question the promise tests answer, right and wrong
+        public const string KeepQuestion = "What is the tallest tower of a castle called?";
+        public const string KeepExplanation = "The keep is the strongest tower: the last refuge when the walls fell.";
+        public const string CurtainStatement = "A curtain wall joins the towers of a castle.";
+        public const string CurtainExplanation = "Yes: the curtain wall runs between the towers and closes the ring.";
+        public const string PanelQuestion = "Which picture shows the panel before the earthquake?";
+        public const string PanelExplanation = "The earlier picture still has the whole arcade standing.";
+        // The block key of every knowledge_check entry: the answers are stored under it
+        public const string QuizBlockKey = "block_2";
+
+        private static void AddKnowledgeChecks(List<Entry> list)
+        {
+            foreach (var variant in BuiltInBlocks.KnowledgeCheck.Variants)
+                foreach (string content in new[] { "short", "long", "partial" })
+                    list.Add(new Entry(BuiltInBlocks.KnowledgeCheckKind, variant, content, KnowledgeBlock(variant, KnowledgeRows(variant, content))));
+        }
+
+        private static QuestionRow[] KnowledgeRows(string variant, string content)
+        {
+            bool tf = variant == BuiltInBlocks.KnowledgeCheckTrueFalseSwipe;
+            bool pictures = variant == BuiltInBlocks.KnowledgeCheckImageChoice;
+            if (content == "short")
+                return new[]
+                {
+                    tf ? new QuestionRow(CurtainStatement, None, None, 0, true, CurtainExplanation)
+                    : pictures ? new QuestionRow(PanelQuestion, new[] { "Before", "After" }, new[] { "before.png", "after.png" }, 1, false, PanelExplanation)
+                    : new QuestionRow(KeepQuestion, new[] { "The curtain wall", "The keep", "The gatehouse" }, None, 2, false, KeepExplanation),
+                };
+            if (content == "long")
+                return LongRows(tf, pictures);
+            // - "partial": one complete question and rows the look must leave out (no explanation, too few options, a right option
+            //   that is not shown, no question)
+            const string good = "Complete question.";
+            const string why = "Because it is complete.";
+            if (tf)
+                return new[]
+                {
+                    new QuestionRow(good, None, None, 0, false, why),
+                    new QuestionRow("No explanation written.", None, None, 0, true, ""),
+                    new QuestionRow("", None, None, 0, true, why),
+                };
+            if (pictures)
+                return new[]
+                {
+                    new QuestionRow(good, new[] { "One", "Two" }, new[] { "one.png", "two.png" }, 2, false, why),
+                    new QuestionRow("Only one picture.", new[] { "One" }, new[] { "one.png" }, 1, false, why),
+                    new QuestionRow("The right one has no picture.", new[] { "One", "Two", "Three" }, new[] { "one.png", "two.png" }, 3, false, why),
+                };
+            return new[]
+            {
+                new QuestionRow(good, new[] { "Wrong", "Right", "Also wrong" }, None, 2, false, why),
+                new QuestionRow("No explanation written.", new[] { "A", "B" }, None, 1, false, ""),
+                new QuestionRow("Only one option.", new[] { "A" }, None, 1, false, why),
+                new QuestionRow("The right option is blank.", new[] { "A", "B" }, None, 4, false, why),
+            };
+        }
+
+        // Three questions with long words, each look: the first is the one the promise tests answer
+        private static QuestionRow[] LongRows(bool tf, bool pictures)
+        {
+            const string longQuestion = "Long ago the castle on the hill was rebuilt again and again, after every siege and every earthquake; which of these is the " +
+                                        "tallest and strongest tower, the one the defenders kept as their last refuge when everything else had fallen?";
+            const string longWhy = "The keep is the strongest tower of a castle. It stood apart from the walls, so the defenders could hold it even when the " +
+                                   "walls and the other towers had been taken, and the painter of the panel drew it larger than all the rest.";
+            if (tf)
+                return new[]
+                {
+                    new QuestionRow("The keep of a castle was usually built on the lowest ground, far from the walls, so that the enemy could not see it from the towers.",
+                        None, None, 0, false, longWhy),
+                    new QuestionRow("Biscuit is clay fired once, hard but not yet glazed.", None, None, 0, true, "Yes: the first firing makes the clay hard, the glaze comes after."),
+                    new QuestionRow("The panel was made after the earthquake of 1755.", None, None, 0, false, "No: it shows the city as it was before, which is why it matters."),
+                };
+            if (pictures)
+                return new[]
+                {
+                    new QuestionRow(longQuestion, new[] { "The panel as first painted, with the arcade", "The panel today, with its missing tiles", "The keep seen from the river", "The old cathedral" },
+                        new[] { "one.png", "two.png", "three.png", "four.png" }, 3, false, longWhy),
+                    new QuestionRow("Which picture is the after one?", new[] { "Before", "After" }, new[] { "before.png", "after.png" }, 2, false, PanelExplanation),
+                    new QuestionRow("Which of these is portrait?", new[] { "One", "Two", "Three" }, new[] { "one.png", "two.png", "three.png" }, 3, false, "The third picture is taller than it is wide."),
+                };
+            return new[]
+            {
+                new QuestionRow(longQuestion,
+                    new[] { "The curtain wall that joins the towers all around the hill", "The keep, the tallest and strongest tower of the castle",
+                            "The gatehouse with its two round towers and the old drawbridge" }, None, 2, false, longWhy),
+                new QuestionRow("Which of these was NOT part of the old palace?", new[] { "The chapel", "The arcade", "The lighthouse", "The customs house" }, None, 3,
+                    false, "The palace stood on the riverside with a chapel, an arcade and the customs house; there was no lighthouse."),
+                new QuestionRow("What is biscuit?", new[] { "Clay fired once, hard but not yet glazed", "Clay that is glazed but not fired" }, None, 1, false,
+                    "Biscuit is the first firing of a tile, before any glaze."),
+            };
+        }
+
+        private static BlockInstanceData KnowledgeBlock(string variant, QuestionRow[] rows, bool showAfterViewed = false)
+        {
+            var block = new BlockInstanceData { key = QuizBlockKey, kind = BuiltInBlocks.KnowledgeCheckKind, variant = variant };
+            var questions = new BlockFieldValue { key = BuiltInBlocks.KnowledgeCheckQuestionsField };
+            foreach (var row in rows)
+            {
+                var item = Item(ItemText(BuiltInBlocks.KnowledgeCheckQuestionField, row.Question), ItemText(BuiltInBlocks.KnowledgeCheckExplanationField, row.Explanation));
+                for (int i = 0; i < row.Options.Length; i++) item.fields.Add(ItemText(KnowledgeCheckRule.OptionField(i + 1), row.Options[i]));
+                for (int i = 0; i < row.Images.Length; i++) item.fields.Add(new BlockItemFieldValue { key = KnowledgeCheckRule.ImageField(i + 1), asset = row.Images[i] });
+                if (row.Right > 0) item.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.KnowledgeCheckCorrectField, value = row.Right.ToString() });
+                if (row.IsTrue) item.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.KnowledgeCheckIsTrueField, flag = true });
+                questions.items.Add(item);
+            }
+            block.fields.Add(questions);
+            if (showAfterViewed) block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.KnowledgeCheckShowAfterViewedField, flag = true });
+            return block;
+        }
+
+        // The POI of the gated question: a header, a long text, then a multiple-choice question that waits until the card was read
+        // (show_after_viewed). `longText` false: the text is one short paragraph, so all of it fits on a card at full
+        public const string GatedPoiId = "gated_knowledge_check";
+        public const string GatedQuizBlockKey = "block_3";
+
+        public static POIData GatedKnowledgePoi(bool longText)
+        {
+            var poi = new POIData { id = GatedPoiId, name = "Gate", category = CategoryKey, hierarchy_level_key = LevelKey };
+            var header = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.HeaderKind, variant = BuiltInBlocks.HeaderTextOnly };
+            header.fields.Add(Text(BlockStackBuilder.HeaderTitleField, "Gate"));
+            poi.card.blocks.Add(header);
+            var text = RichText(BuiltInBlocks.RichTextPlain, longText ? LongText + "\n\n" + LongText + "\n\n" + LongText : "Built on the hill.", false);
+            text.key = "block_2";
+            poi.card.blocks.Add(text);
+            var quiz = KnowledgeBlock(BuiltInBlocks.KnowledgeCheckMultipleChoice, KnowledgeRows(BuiltInBlocks.KnowledgeCheckMultipleChoice, "short"), showAfterViewed: true);
+            quiz.key = GatedQuizBlockKey;
+            poi.card.blocks.Add(quiz);
+            return poi;
+        }
+
+        // ---------------- feedback (Tier 3 group A) ----------------
+
+        public const string FeedbackQuestion = "Was this description useful?";
+        public const string FeedbackLongQuestion = "You have just read what the panel shows and how it was made, from the arcade to the river; how well did this description help you to understand what you saw?";
+
+        private static void AddFeedback(List<Entry> list)
+        {
+            foreach (var variant in BuiltInBlocks.Feedback.Variants)
+            {
+                list.Add(new Entry(BuiltInBlocks.FeedbackKind, variant, "short", FeedbackBlock(variant, FeedbackQuestion)));
+                list.Add(new Entry(BuiltInBlocks.FeedbackKind, variant, "long", FeedbackBlock(variant, FeedbackLongQuestion)));
+                // - no question written: the card asks its own, in its own words
+                list.Add(new Entry(BuiltInBlocks.FeedbackKind, variant, "noquestion", FeedbackBlock(variant, null)));
+            }
+        }
+
+        private static BlockInstanceData FeedbackBlock(string variant, string question)
+        {
+            var block = new BlockInstanceData { key = QuizBlockKey, kind = BuiltInBlocks.FeedbackKind, variant = variant };
+            if (question != null) block.fields.Add(Text(BuiltInBlocks.FeedbackQuestionField, question));
+            return block;
         }
 
         // ---------------- status ----------------
