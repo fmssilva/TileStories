@@ -52,12 +52,27 @@ namespace TileStories
         private float _audioClock;
         private CardSettings _shownSettings = new();
 
+        // The gallery card's video (_3.1 step 9B): the SAME service and sound coordinator as the wall's card, over a ManualVideoOutput that
+        // decodes nothing. Video time moves only through AdvanceVideo (a test) or, while AutoAdvanceVideo is on, with real time; the clips are
+        // the small generated files of CardGalleryDefinitions.Videos
+        public ManualVideoOutput VideoOutput { get; } = new();
+        public CardVideoService VideoService { get; private set; }
+        public bool AutoAdvanceVideo { get; set; } = true;
+        private CardSoundCoordinator _sound;
+
         // `seconds` of audio time pass: the output's clip moves on, the fade's clock too, and the service takes its step
         public void AdvanceAudio(float seconds)
         {
             _audioClock += seconds;
             AudioOutput.Advance(seconds);
             AudioService.Tick();
+        }
+
+        // `seconds` of video time pass: the output's clip moves on (its first frame arrives) and the service takes its step
+        public void AdvanceVideo(float seconds)
+        {
+            VideoOutput.Advance(seconds);
+            VideoService.Tick();
         }
 
         public CardGalleryHarness() => State = new CardLocalState(StateStore, "gallery");
@@ -87,12 +102,22 @@ namespace TileStories
             AudioCoordinator = new CardAudioCoordinator(AudioService, new MiniPlayerView(Sheet.Layer, AudioService), () => _shownSettings, () => Sheet.IsOpen);
             // - the gallery has no wall to select a point on: the mini-player's tap shows the current entry again
             AudioCoordinator.Mini.OpenRequested += _ => Show(Index);
+            VideoService = new CardVideoService(VideoOutput, () => Media);
+            _sound = new CardSoundCoordinator(AudioService, VideoService);
             Sheet.CloseRequested += () =>
             {
                 Sheet.Hide();
                 AudioCoordinator.CardClosed();
+                VideoService.CardClosed();
             };
             Show(0);
+        }
+
+        private void OnDestroy()
+        {
+            _sound?.Dispose();
+            VideoService?.CardClosed();
+            VideoOutput.Release();
         }
 
         // Show entry `index` at its own stop
@@ -130,16 +155,20 @@ namespace TileStories
                 Events = Events,
                 Services = Services,
                 Audio = AudioService,
+                Video = VideoService,
+                ReduceMotion = settings.container.reduce_motion,
             };
             Sheet.Hide();
             Sheet.Show(stack.Entries, context, SheetStopRule.Stop.Peek, settings.container.half_max_ratio);
             Sheet.SetStop(stop);
             AudioCoordinator.CardShown(poi.id, context.Strings);
+            VideoService.CardShown(poi.id);
         }
 
         private void Update()
         {
             if (AutoAdvanceAudio && AudioService != null) AdvanceAudio(Time.unscaledDeltaTime);
+            if (AutoAdvanceVideo && VideoService != null) AdvanceVideo(Time.unscaledDeltaTime);
             var keyboard = Keyboard.current;
             if (keyboard == null || Sheet == null) return;
             if (keyboard.rightArrowKey.wasPressedThisFrame) Show(Index + 1);

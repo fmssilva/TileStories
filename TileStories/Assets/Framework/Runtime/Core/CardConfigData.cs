@@ -83,6 +83,9 @@ namespace TileStories
         // AudioSettings.OnAudioConfigurationChanged is reported not to fire reliably there (work plan Stage 2 item 3). Off until a device
         // test shows the callback alone is not enough
         public bool audio_android_output_poll;
+        // The wall's default for motion the visitor did not ask for (step 9B): on, a header's video loop shows its poster only. The visitor's
+        // own reduce-motion setting (_3.3) will join it; today this is the only switch
+        public bool reduce_motion;
 
         public const float HalfMaxRatioMin = 0.25f;
         public const float HalfMaxRatioMax = 0.40f;

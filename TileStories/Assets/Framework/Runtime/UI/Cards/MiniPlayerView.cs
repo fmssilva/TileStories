@@ -4,16 +4,18 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // The mini-player on the wall (_3.1 step 9A): a small bar at the bottom of the screen while audio started in a card plays on after the
-    // card closed (Keep Audio Playing). A round play / pause button, and -- one tap target -- the audio's title and time: a tap on that
-    // asks for the audio's card to be opened again (OpenRequested, the host selects the point), a thin progress line under them. It holds
-    // no audio state: it draws what the audio owner says and asks it to pause or resume. Only classes here; PoiCard.uss draws it with the
-    // card tokens (the bar carries the token classes itself, like the full-screen view).
+    // The mini-player on the wall (_3.1 step 9A, stop button added in 9A-fix): a small bar at the bottom of the screen while audio started
+    // in a card plays on after the card closed (Keep Audio Playing). A round play / pause button, -- one tap target -- the audio's title
+    // and time: a tap on that asks for the audio's card to be opened again (OpenRequested, the host selects the point); a stop button ends
+    // the audio and sends the bar away; a thin progress line under them. It holds no audio state: it draws what the audio owner says and
+    // asks it to pause, resume or stop. Only classes here; PoiCard.uss draws it with the card tokens (the bar carries the token classes
+    // itself, like the full-screen view).
     public sealed class MiniPlayerView
     {
         public VisualElement Root { get; }
         public Button PlayButton { get; }
         public CardIcons.VectorGlyph PlayGlyph { get; }
+        public Button StopButton { get; }
         public Button OpenButton { get; }
         public Label Title { get; }
         public Label TimeText { get; }
@@ -45,6 +47,14 @@ namespace TileStories
                 if (_audio.Current != null) _audio.Toggle(_audio.Current);
             };
 
+            StopButton = new Button { name = "poi-card-mini-stop" };
+            StopButton.AddToClassList("poi-card-mini__stop");
+            var stopGlyph = CardIcons.CreateVector(CardIcons.Shape.Stop);
+            stopGlyph.Filled = true;
+            stopGlyph.AddToClassList("card-audio__glyph");
+            StopButton.Add(stopGlyph);
+            StopButton.clicked += () => _audio.Stop();
+
             OpenButton = new Button { name = "poi-card-mini-open" };
             OpenButton.AddToClassList("poi-card-mini__open");
             Title = new Label { pickingMode = PickingMode.Ignore };
@@ -67,6 +77,7 @@ namespace TileStories
 
             Root.Add(PlayButton);
             Root.Add(OpenButton);
+            Root.Add(StopButton);
             Root.Add(bar);
             Root.style.display = DisplayStyle.None;
             layer.Add(Root);
@@ -87,6 +98,7 @@ namespace TileStories
             PlayGlyph.Kind = playing ? CardIcons.Shape.Pause : CardIcons.Shape.Play;
             PlayButton.tooltip = _strings?.Get(playing ? CardStrings.Keys.AudioPause : CardStrings.Keys.AudioPlay) ?? "";
             OpenButton.tooltip = _strings?.Get(CardStrings.Keys.MiniPlayerOpen) ?? "";
+            StopButton.tooltip = _strings?.Get(CardStrings.Keys.MiniPlayerStop) ?? "";
             Title.text = current?.Title ?? "";
             float position = _audio.Position, length = _audio.Length;
             TimeText.text = length > 0f ? AudioTimeRule.Format(position) + " / " + AudioTimeRule.Format(length) : AudioTimeRule.Format(position);

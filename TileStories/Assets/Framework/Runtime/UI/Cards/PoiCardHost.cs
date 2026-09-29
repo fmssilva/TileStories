@@ -47,6 +47,13 @@ namespace TileStories
         public ICardAudio Audio => AudioCoordinator?.Audio;
         private CardAudioPlayer _audioPlayer;
 
+        // The card's video (_3.1 step 9B): ONE owner (CardVideoService over the ONE VideoPlayer of CardVideoPlayer) beside the audio one, and
+        // the coordinator that keeps the two from sounding at once (CardSoundRule). Blocks reach the owner through BlockBindContext.Video.
+        public CardVideoService VideoService { get; private set; }
+        public ICardVideo Video => VideoService;
+        private CardVideoPlayer _videoPlayer;
+        private CardSoundCoordinator _sound;
+
         private readonly TapOutsideDismissal _tapOutside = new();
 
         // What the visitor did on this wall's cards (answers, votes, revealed blocks): PlayerPrefs, scoped by the wall's id. A
@@ -111,6 +118,7 @@ namespace TileStories
             Close();
             // - switched off: no card and no mini-player would be left to pause it
             AudioCoordinator?.Shutdown();
+            VideoService?.CardClosed();
         }
 
         private void BuildOnce()
@@ -127,6 +135,25 @@ namespace TileStories
             _audioPlayer.PollForOutputLoss = () => wallSession != null && (wallSession.CardSettings?.container.audio_android_output_poll ?? false);
             UseAudioService(new CardAudioService(_audioPlayer.CreateOutput(), () => Media, () => Clock(),
                 () => wallSession != null ? wallSession.CardSettings?.container.audio_when_another_starts : null));
+            _videoPlayer = GetComponent<CardVideoPlayer>() != null ? GetComponent<CardVideoPlayer>() : gameObject.AddComponent<CardVideoPlayer>();
+            UseVideoService(new CardVideoService(_videoPlayer.CreateOutput(), () => Media));
+        }
+
+        // Make `service` the card's video owner (the app's own is built in BuildOnce; a test hands one over a ManualVideoOutput so video time is
+        // a number it sets): the old owner lets go of its clip, the player ticks the new one
+        internal void UseVideoService(CardVideoService service)
+        {
+            VideoService?.CardClosed();
+            _videoPlayer.Service = service;
+            VideoService = service;
+            JoinTheTwoPlayers();
+        }
+
+        // One coordinator over the owners the card has now (rebuilt when a test swaps either)
+        private void JoinTheTwoPlayers()
+        {
+            _sound?.Dispose();
+            _sound = new CardSoundCoordinator(Audio, VideoService);
         }
 
         // Make `service` the card's audio owner (the app's own is built in BuildOnce; a test hands one over a silent ManualAudioOutput so audio
@@ -142,6 +169,7 @@ namespace TileStories
             var mini = new MiniPlayerView(Sheet.Layer, service);
             mini.OpenRequested += OpenAudiosCard;
             AudioCoordinator = new CardAudioCoordinator(service, mini, () => wallSession != null ? wallSession.CardSettings : null, () => Sheet != null && Sheet.IsOpen);
+            JoinTheTwoPlayers();
         }
 
         // The mini-player's tap: show that point's card again through the bus, like a tap on its marker (never on the point already
@@ -203,10 +231,13 @@ namespace TileStories
                 Events = Events,
                 Services = Services,
                 Audio = Audio,
+                Video = Video,
+                ReduceMotion = settings.container.reduce_motion,
             };
             Sheet.Show(stack.Entries, context, SheetStopRule.OpenStop(settings.container.open_stop), settings.container.half_max_ratio);
             ShownPoiId = poiId;
             AudioCoordinator.CardShown(poiId, context.Strings);
+            VideoService.CardShown(poiId);
         }
 
         // The card state of the wall this host shows (rebuilt when the host is bound to a wall with another id)
@@ -223,6 +254,7 @@ namespace TileStories
             Sheet?.Hide();
             ShownPoiId = null;
             AudioCoordinator?.CardClosed();
+            VideoService?.CardClosed();
         }
 
         // The wall's POI set or the card's own settings changed (a live edit, a demo switched on): the open card shows the new data, and the

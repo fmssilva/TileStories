@@ -10,6 +10,8 @@ namespace TileStories
         Audio,
         // A WebVTT captions file (.vtt), imported by the framework's VttTextImporter as a TextAsset
         Captions,
+        // A video clip (video, header video_loop; step 9B): mp4 / webm, imported by Unity as a VideoClip
+        Video,
     }
 
     // What is wrong with a stored media path, if anything (MediaPathRule.Check)
@@ -35,6 +37,8 @@ namespace TileStories
         public static readonly string[] ImageExtensions = { ".png", ".jpg", ".jpeg" };
         public static readonly string[] AudioExtensions = { ".mp3", ".wav", ".ogg" };
         public static readonly string[] CaptionExtensions = { ".vtt" };
+        // - the two containers Unity decodes on every platform the app targets (H.264 mp4 and VP8 webm)
+        public static readonly string[] VideoExtensions = { ".mp4", ".webm" };
 
         // The extensions a field of this kind takes (empty for None)
         public static string[] ExtensionsOf(MediaKind kind) => kind switch
@@ -42,6 +46,7 @@ namespace TileStories
             MediaKind.Image => ImageExtensions,
             MediaKind.Audio => AudioExtensions,
             MediaKind.Captions => CaptionExtensions,
+            MediaKind.Video => VideoExtensions,
             _ => System.Array.Empty<string>(),
         };
 
@@ -57,22 +62,23 @@ namespace TileStories
 
         public static bool IsValid(string path, MediaKind kind) => Check(path, kind) == MediaPathProblem.None;
 
-        // The kind a path's extension names (.mp3 = Audio, .vtt = Captions, .png = Image), or None for no or another extension
+        // The kind a path's extension names (.mp3 = Audio, .vtt = Captions, .png = Image, .mp4 = Video), or None for no or another extension
         public static MediaKind KindOfExtension(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) return MediaKind.None;
             string p = Normalize(path);
-            foreach (var kind in new[] { MediaKind.Image, MediaKind.Audio, MediaKind.Captions })
+            foreach (var kind in new[] { MediaKind.Image, MediaKind.Audio, MediaKind.Captions, MediaKind.Video })
                 if (HasExtensionOf(p, kind)) return kind;
             return MediaKind.None;
         }
 
-        // Whether a loaded Unity asset is the type a kind is read as (a texture, an AudioClip, a TextAsset); None fits anything
+        // Whether a loaded Unity asset is the type a kind is read as (a texture, an AudioClip, a TextAsset, a VideoClip); None fits anything
         public static bool IsAssetOfKind(UnityEngine.Object asset, MediaKind kind) => kind switch
         {
             MediaKind.Image => asset is UnityEngine.Texture,
             MediaKind.Audio => asset is UnityEngine.AudioClip,
             MediaKind.Captions => asset is UnityEngine.TextAsset,
+            MediaKind.Video => asset is UnityEngine.Video.VideoClip,
             _ => true,
         };
 

@@ -9,11 +9,16 @@ namespace TileStories
     // picture a frame shows and a moving grid shows a picture moving; a clip is silence of the length its name is given, a captions file
     // is the WebVTT text its name is given. Counted like the real source (ResourcesMediaSource): loads per name, the last release destroys
     // the asset -- the gallery tests check that a block gives back everything it took.
+    // Videos are the exception (step 9B): Unity cannot make a VideoClip in memory, so a video name reads one of the small generated files
+    // in VideoFolder (CardGalleryDefinitions.Videos) -- in the Editor only, where every gallery run happens; a project file is never
+    // destroyed on release, only let go.
     public sealed class CardGalleryMedia : IMediaSource
     {
         public const int GridStep = 32;
         // A gallery clip's sample rate: the lowest that keeps a ten-minute clip small (nothing is heard)
         private const int ClipRate = 2000;
+        // Where the gallery's generated video files live (CardGalleryVideoGenerator)
+        public const string VideoFolder = "Assets/Framework/Runtime/DevTools/GalleryVideo";
 
         private readonly Dictionary<string, (Object Asset, int Count)> _held = new();
 
@@ -34,7 +39,8 @@ namespace TileStories
             var asset = Make(key, typeof(T));
             if (asset == null) return null;
             TotalLoads++;
-            asset.name = key;
+            // - a project file keeps its own name (renaming it in memory could reach the asset on the next save)
+            if (!(asset is UnityEngine.Video.VideoClip)) asset.name = key;
             _held[key] = (asset, 1);
             return asset as T;
         }
@@ -49,7 +55,11 @@ namespace TileStories
                 return;
             }
             _held.Remove(key);
-            Object.Destroy(held.Asset);
+            // - a generated video is a project file: let go of it, never destroy it
+            if (held.Asset is UnityEngine.Video.VideoClip) return;
+            // - an EditMode test uses the gallery's media too, where only DestroyImmediate is allowed
+            if (Application.isPlaying) Object.Destroy(held.Asset);
+            else Object.DestroyImmediate(held.Asset);
         }
 
         // The asset the gallery has under `key` for the type asked, or null (a missing file)
@@ -60,7 +70,18 @@ namespace TileStories
             if (type.IsAssignableFrom(typeof(AudioClip)) && CardGalleryDefinitions.Clips.TryGetValue(key, out float seconds))
                 return AudioClip.Create(key, Mathf.CeilToInt(seconds * ClipRate), 1, ClipRate, false);
             if (type.IsAssignableFrom(typeof(TextAsset)) && CardGalleryDefinitions.Captions.TryGetValue(key, out string vtt)) return new TextAsset(vtt);
+            if (type.IsAssignableFrom(typeof(UnityEngine.Video.VideoClip)) && CardGalleryDefinitions.Videos.TryGetValue(key, out var video)) return LoadVideo(video.File);
             return null;
+        }
+
+        // A generated gallery video (Editor only: outside the Editor the gallery has no video, and the block shows it unavailable)
+        private static Object LoadVideo(string file)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.Video.VideoClip>(VideoFolder + "/" + file);
+#else
+            return null;
+#endif
         }
 
         private static Texture2D MakePicture(Vector2Int size, Color colour)

@@ -30,8 +30,14 @@ namespace TileStories
         public CardServices Services;
         // The card's ONE audio owner (_3.1 step 9A): what an audio block asks to play, pause or seek, and the mini-player draws. Null where
         // the caller has none (a block then shows its idle state and plays nothing). Not a CardServices entry: it belongs to the card host
-        // and outlives the card, and every playing kind (audio now, video in 9B) uses it
+        // and outlives the card
         public ICardAudio Audio;
+        // The card's ONE video owner (_3.1 step 9B), beside the audio one and for the same reasons: what a video block and a header loop ask
+        // to play, and whose picture they draw. Null where the caller has none (a video then shows its poster and plays nothing)
+        public ICardVideo Video;
+        // Show still pictures instead of motion (card_settings.container.reduce_motion today; the visitor's own setting joins it with _3.3):
+        // a header loop shows its poster only
+        public bool ReduceMotion;
 
         // The registered service of type T, or null when there is none: a kind that needs a service treats null as "nothing to show"
         public T Service<T>() where T : class => Services?.Get<T>();

@@ -575,3 +575,177 @@
     margin: var(--ts-space-2) 0 0 0;
     padding: 0;
 }
+
+/* ---- video (step 9B): the surface (poster, the video's frames over it, a round play button in the middle), then the controls row,
+   the shared scrubber and caption line (Guides.uss) and the chapter buttons; the takeover display's teaser is the same surface ---- */
+
+.card-video__surface {
+    height: var(--ts-media-height);
+    overflow: hidden;
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+    align-items: center;
+    justify-content: center;
+}
+
+/* the poster and the frames fill the surface; the frames keep the video's own shape (letterboxed), the poster is cropped to fill */
+.card-video__surface .card-video__poster {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+}
+
+.card-video__frames {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* no poster written: a plain frame (the surface's own colour) with the play button */
+.card-video--no-poster .card-video__poster {
+    display: none;
+}
+
+/* a clip that cannot be loaded: a quiet button and no bar with a knob that only looks draggable (the audio guide's unavailable look) */
+.card-video--unavailable .card-audio__play {
+    background-color: var(--ts-surface-2);
+}
+
+.card-video--unavailable .card-audio__glyph {
+    color: var(--ts-ink-3);
+}
+
+.card-video--unavailable .card-audio__scrubber {
+    display: none;
+}
+
+/* while the video's frames show: the poster steps back and the bars around a video of another shape are one plain colour */
+.card-video--frames .card-video__poster {
+    display: none;
+}
+
+.card-video--frames .card-video__frames {
+    background-color: var(--ts-video-letterbox);
+}
+
+.card-video__overlay {
+    width: var(--ts-video-overlay);
+    height: var(--ts-video-overlay);
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-width: 0;
+    border-radius: var(--ts-video-overlay-radius);
+    background-color: var(--ts-accent);
+}
+
+.card-video__overlay-glyph {
+    width: var(--ts-video-overlay-glyph);
+    height: var(--ts-video-overlay-glyph);
+    color: var(--ts-on-accent);
+}
+
+/* the teaser's length, bottom right on the poster */
+.card-video__length {
+    position: absolute;
+    right: var(--ts-space-2);
+    bottom: var(--ts-space-2);
+    padding: var(--ts-space-1) var(--ts-space-2);
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-surface);
+    color: var(--ts-ink);
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+}
+
+.card-video__controls {
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--ts-space-2);
+}
+
+.card-video__words {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    margin-left: var(--ts-space-3);
+}
+
+/* the captions chip keeps the audio guide's look (Guides.uss); here it sits in the row, not under the bar */
+.card-video__controls .card-audio__chip {
+    margin: 0 var(--ts-space-2) 0 0;
+}
+
+.card-video__full-screen {
+    flex-shrink: 0;
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface-2);
+}
+
+.card-video__full-screen-glyph {
+    width: var(--ts-video-icon);
+    height: var(--ts-video-icon);
+    color: var(--ts-ink);
+}
+
+.card-video__chapters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: var(--ts-space-2);
+}
+
+.card-video__chapter {
+    min-height: var(--ts-touch-target);
+    max-width: var(--ts-video-chapter-max);
+    margin: 0 var(--ts-space-2) var(--ts-space-2) 0;
+    padding: var(--ts-space-1) var(--ts-space-3);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: middle-left;
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+}
+
+.card-video__chapter--current {
+    color: var(--ts-accent-text);
+    border-color: var(--ts-accent);
+}
+
+/* full screen: the surface takes the page's height, the rest stays under it */
+.card-video--full {
+    flex-grow: 1;
+}
+
+.card-video--full .card-video__surface {
+    height: auto;
+    flex-grow: 1;
+}
+
+/* ---- the header's video_loop: the loop's frames over the poster (cropped to fill the hero like a picture) ---- */
+
+.card-hero__loop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-and-crop;
+}

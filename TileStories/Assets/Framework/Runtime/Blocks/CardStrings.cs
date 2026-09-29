@@ -122,6 +122,13 @@ namespace TileStories
             public const string AudioQueued = "audio_queued";
             public const string AudioUnavailable = "audio_unavailable";
             public const string MiniPlayerOpen = "mini_player_open";
+            // the mini-player's stop / dismiss button: ends the audio and sends the bar away
+            public const string MiniPlayerStop = "mini_player_stop";
+            // video (step 9B): the full-screen button (and the teaser's words), the state of a clip that cannot be loaded, the name of the
+            // chapter buttons' row. Play / pause / captions / the bar reuse the audio words above
+            public const string VideoFullScreen = "video_full_screen";
+            public const string VideoUnavailable = "video_unavailable";
+            public const string VideoChapters = "video_chapters";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -136,6 +143,7 @@ namespace TileStories
                 PollYourChoice, PollThanks, PollPercent, CollectHeading, CollectAdd, CollectCollected, CollectProgress,
                 DialogueContinue, DialogueAgain, DialogueYou, ShowOnWallButton, ShowOnWallNearby,
                 AudioPlay, AudioPause, AudioSpeed, AudioCaptions, AudioSeek, AudioQueued, AudioUnavailable, MiniPlayerOpen,
+                MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters,
             };
         }
 

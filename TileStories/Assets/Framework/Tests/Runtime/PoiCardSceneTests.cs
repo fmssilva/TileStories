@@ -545,7 +545,7 @@ namespace TileStories.Tests
                 "fun_fact", "fun_fact", "pull_quote", "pull_quote",
                 "process_steps", "swatches", "timeline", "timeline", "person", "person", "story_chapters", "compare_points", "practical_info",
                 "gallery", "gallery", "gallery", "gallery", "before_after", "zoom_image",
-                "hotspot_image", "hotspot_image", "wall_locator", "wall_locator", "today_map", "today_map", "related", "related",
+                "hotspot_image", "hotspot_image", "video", "video", "wall_locator", "wall_locator", "today_map", "today_map", "related", "related",
                 "knowledge_check", "knowledge_check", "knowledge_check", "poll", "collect", "feedback", "feedback", "dialogue", "show_on_wall", "show_on_wall",
                 "audio_guide", "audio_guide",
                 "sources", "sources", "actions", "actions", "actions",

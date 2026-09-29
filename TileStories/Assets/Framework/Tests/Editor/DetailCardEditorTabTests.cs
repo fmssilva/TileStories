@@ -135,7 +135,7 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(6 + 6 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 6 wall-level + 6 container + 3 demo card");
+            Assert.AreEqual(6 + 7 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 6 wall-level + 7 container + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -265,16 +265,20 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(BlockStackBuilder.SkipReason.MissingRequired, skipped.Reason, "an empty required field is reported first");
             Assert.AreEqual("Not shown: Title is empty in every language.",
                 POIEditorToolWindow.CardBlockSkipText(skipped.Reason, BuiltInBlocks.Header.Field(skipped.FieldKey)), "the row names the field by its label");
+            // - two open headers reach below the window's visible edge: scroll to the second one's title first, as a person would
+            yield return _window.ScrollTo("Block field title en#1");
             yield return _window.ReplaceText("Block field title en#1", "Gate");
             yield return _window.ClickAway();
             skipped = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared).Skipped.Single();
             Assert.AreEqual(BlockStackBuilder.SkipReason.ExtraHeader, skipped.Reason);
             StringAssert.Contains("one Header", POIEditorToolWindow.CardBlockSkipText(skipped.Reason, null), "the row says why");
 
+            yield return _window.ScrollTo("Card block down#0");
             _window.Click("Card block down#0");
             yield return _window.WaitForRepaint();
             CollectionAssert.AreEqual(new[] { "block_2", "block_1" }, _window.Config.pois[0].card.blocks.Select(b => b.key), "a real click moves it down");
 
+            yield return _window.ScrollTo("Card block delete#0");
             _window.Click("Card block delete#0");
             yield return _window.WaitForRepaint();
             CollectionAssert.AreEqual(new[] { "block_1" }, _window.Config.pois[0].card.blocks.Select(b => b.key), "a real click deletes it (no question: Ctrl+Z restores it)");
@@ -710,6 +714,25 @@ namespace TileStories.Editor.Tests
             var (withStale, staleLabels) = POIEditorToolWindow.BlockChoiceOptions(speeds, "turbo");
             Assert.AreEqual("turbo", withStale[withStale.Count - 1]);
             StringAssert.Contains("(missing)", staleLabels[staleLabels.Count - 1]);
+        }
+
+        // The Card Container's Reduce Motion row (step 9B): off in the shipped wall, drawing writes nothing, a real click turns it on, Ctrl+Z
+        [UnityTest]
+        public IEnumerator TheReduceMotionRow_IsDrawnOff_ARealClickTurnsItOn_AndCtrlZTakesItBack()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Reduce Motion");
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.IsFalse(_window.Config.card_settings.container.reduce_motion, "off in the shipped wall: header loops play");
+
+            _window.Click("Reduce Motion");
+            yield return _window.WaitForRepaint();
+            Assert.IsTrue(_window.Config.card_settings.container.reduce_motion, "a real click turned it on");
+            Assert.IsTrue(_window.Unsaved);
+            yield return _window.PressUndo();
+            Assert.IsFalse(_window.Config.card_settings.container.reduce_motion, "Ctrl+Z");
         }
 
         // The Card Container's audio rows: Keep Audio Playing and the Android earbud check are toggles a real click edits (Ctrl+Z takes it

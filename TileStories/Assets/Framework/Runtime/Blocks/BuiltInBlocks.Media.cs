@@ -39,6 +39,18 @@ namespace TileStories
         public const string HotspotTitleField = "title";
         public const string HotspotTextField = "text";
 
+        public const string VideoKind = "video";
+        public const string VideoInline = "inline";
+        public const string VideoChapters = "chapters";
+        public const string VideoClipField = "clip";
+        public const string VideoPosterField = "poster";
+        public const string VideoCaptionsField = "captions";
+        public const string VideoTitleField = "title";
+        public const string VideoCaptionsOnField = "captions_on";
+        public const string VideoChaptersField = "chapters";
+        public const string VideoChapterTimeField = "t";
+        public const string VideoChapterLabelField = "label";
+
         private const string PictureHelp = "A PNG or JPG inside the wall's Media Folder (Detail Card > Card Container).";
 
         // Tier 2: several pictures; a tap on one opens it full screen (the lightbox)
@@ -151,6 +163,72 @@ namespace TileStories
             {
                 new BlockFieldDefinition { Key = ZoomImageImageField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Picture", Required = true, Help = PictureHelp },
                 new BlockFieldDefinition { Key = ZoomImageCaptionField, Type = BlockFieldType.LocalizedText, Label = "Caption", Help = "One line under the picture. May stay empty." },
+            },
+        };
+
+        // Tier 4: a film of the point, played by the card's ONE video owner (step 9B); the first kind with a teaser display
+        public static readonly BlockKindDefinition Video = new()
+        {
+            Key = VideoKind,
+            Family = "media",
+            DisplayName = "Video",
+            Help = "A film the visitor plays on the card. Inline: the poster with a play button, then a bar to drag to any point, the " +
+                   "time, a captions switch and a full-screen button. Chapters: the same, plus a button per chapter that jumps to it " +
+                   "(the one playing is lit). Display Takeover shows only the poster with a play button on the card; a tap opens the " +
+                   "video full screen. Full screen, the same playback goes on, and Back returns to the card where it was. Starting a " +
+                   "video pauses the card's audio guide, and starting the audio pauses the video. Closing the card stops the video.",
+            Variants = new[] { VideoInline, VideoChapters },
+            DefaultVariant = VideoInline,
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayTakeover },
+            Fields = new[]
+            {
+                new BlockFieldDefinition
+                {
+                    Key = VideoClipField, Type = BlockFieldType.Asset, Media = MediaKind.Video, Label = "Clip", Required = true,
+                    Help = "An MP4 (H.264) or WEBM file inside the wall's Media Folder (Detail Card > Card Container). Tick Transcode in " +
+                           "its import settings with a Low bitrate to keep the app small.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = VideoPosterField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Poster",
+                    Help = "The still picture shown before the video plays and until its first frame is ready. " + PictureHelp +
+                           " Empty: a plain frame with the play button.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = VideoCaptionsField, Type = BlockFieldType.Asset, Media = MediaKind.Captions, Label = "Captions",
+                    Help = "A WebVTT (.vtt) captions file inside the Media Folder, in the language the video is spoken in. Empty: no " +
+                           "captions switch.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = VideoTitleField, Type = BlockFieldType.LocalizedText, Label = "Title",
+                    Help = "The video's name, shown full screen after the card's title. Empty: the point's card title.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = VideoCaptionsOnField, Type = BlockFieldType.Toggle, Label = "Captions On By Default",
+                    Help = "Show the caption line as soon as the video is shown (the visitor can still switch it off). Needs a Captions file.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = VideoChaptersField, Type = BlockFieldType.Items, Label = "Chapters",
+                    Help = "The Chapters look only: one row per chapter, a button each. A row needs a Start time and a Label; the " +
+                           "buttons run in time order, and a time past the end of the clip is not shown.",
+                    ItemFields = new[]
+                    {
+                        new BlockFieldDefinition
+                        {
+                            Key = VideoChapterTimeField, Type = BlockFieldType.Time, Label = "Start", Required = true,
+                            Help = "Where the chapter starts in the clip: minutes:seconds (1:30), hours:minutes:seconds (1:02:03) or seconds (90).",
+                        },
+                        new BlockFieldDefinition
+                        {
+                            Key = VideoChapterLabelField, Type = BlockFieldType.LocalizedText, Label = "Label", Required = true,
+                            Help = "The chapter's short name on its button, one per language.",
+                        },
+                    },
+                },
             },
         };
     }

@@ -117,3 +117,16 @@ check thee FOV splike thing???
   "audit the WIP" cost a whole run. Keep each brief to ONE step, and have the Worker commit-suggest after each Part.
 - The MCP-for-Unity bridge can keep an orphaned test job after Unity is idle; every new run is then refused. `editor_state` +
   `get_test_job` diagnose it; restarting the Editor clears it. Worth a line in `50-terminal_and_tools.md` if it happens again.
+
+## From _3.1 9A-fix / 9B (2026-09-29)
+
+- [zoom domain] The AR zoom strip's labels ("Zoom out", "Fit", "Zoom in") are wider than their 48 px round buttons and spill past
+  them (every Search_* capture with the strip shows it). An icon per button, or pill-shaped buttons sized to the word, would fix it.
+- [testing] It happened again, in another form: the whole EditMode baseline was red with Unity's own `[Assert] Access version should be
+  odd when acquiring lock` (from `UnityEditor.TestRunner` internals, on every real-click Editor test), identical over four runs, focused
+  or not; only an Editor restart cleared it. Proposed line for `40-testing.md` 4.2.2/4.2.3: identical failures whose message comes
+  from Unity's test framework and that include tests unrelated to the change -> one confirming rerun, then ask for an Editor restart;
+  do not chase focus (the suites are meant to pass in the background). Also: close stray `*Tests+Host` windows before a baseline run.
+- [tooling] When Claude Code's auto-mode permission check stops answering ("no verdict"), every mutating call (Bash, execute_code,
+  run_tests...) fails and ten in a row end the turn. After two, stop mutating calls and ask the developer (switch permission mode, or
+  wait); reads still work. Proposed for `50-terminal_and_tools.md`.

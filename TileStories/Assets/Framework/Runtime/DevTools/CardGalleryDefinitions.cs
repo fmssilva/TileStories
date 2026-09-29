@@ -90,6 +90,7 @@ namespace TileStories
             AddBeforeAfter(list);
             AddZoomImages(list);
             AddHotspots(list);
+            AddVideos(list);
             AddWallLocators(list);
             AddTodayMaps(list);
             AddRelated(list);
@@ -140,10 +141,14 @@ namespace TileStories
                 foreach (var (content, title, subtitle) in contents)
                     foreach (var stop in new[] { SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half, SheetStopRule.Stop.Full })
                         list.Add(new Entry(variant, content, title, subtitle, stop));
-            // - a picture look with no picture written: the text-only look, no hero
+            // - a picture look with no picture written (the video loop: no clip): the text-only look, no hero
             foreach (string variant in BuiltInBlocks.HeaderImageVariants)
                 list.Add(new Entry(variant, NoPicture, "Gate", "1640", SheetStopRule.Stop.Full));
+            list.Add(new Entry(BuiltInBlocks.HeaderVideoLoop, NoPicture, "Gate", "1640", SheetStopRule.Stop.Full));
         }
+
+        // The header video_loop entries' clip (a generated gallery video, CardGalleryDefinitions.Videos)
+        public const string LoopClip = "long.mp4";
 
         // ---------------- pictures (Tier 2) ----------------
 
@@ -1325,6 +1330,12 @@ namespace TileStories
             if (e.Subtitle.Length > 0) header.fields.Add(Text(BlockStackBuilder.HeaderSubtitleField, e.Subtitle));
             if (e.IsHeader && System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, e.Variant) >= 0 && e.Content != NoPicture)
                 AddPictureFields(header, e.Variant);
+            // - the video loop: the gallery's short clip, the wide picture as its poster
+            if (e.IsHeader && e.Variant == BuiltInBlocks.HeaderVideoLoop && e.Content != NoPicture)
+            {
+                header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderLoopClipField, asset = LoopClip });
+                header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderImageField, asset = "wide.png" });
+            }
             poi.card.blocks.Add(header);
             if (e.Block != null) poi.card.blocks.Add(e.Block);
             e.Setup?.Invoke(poi);

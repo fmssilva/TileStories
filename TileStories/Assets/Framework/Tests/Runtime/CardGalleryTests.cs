@@ -91,7 +91,7 @@ namespace TileStories.Tests
             bool subtitleExpected = entry.Variant != BuiltInBlocks.HeaderCompact && entry.Subtitle.Length > 0;
             Assert.AreEqual(subtitleExpected, header.SubtitleShown, "compact never shows a subtitle; every other look does");
             // - the picture looks: a hero first in the scroll, its picture really loaded; without a picture, the text-only look
-            bool pictureLook = System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, entry.Variant) >= 0;
+            bool pictureLook = System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, entry.Variant) >= 0 || entry.Variant == BuiltInBlocks.HeaderVideoLoop;
             bool heroExpected = pictureLook && entry.Content != CardGalleryDefinitions.NoPicture;
             Assert.AreEqual(heroExpected, header.HasHero, "a hero exactly for a picture look that has its picture");
             if (heroExpected)
@@ -926,30 +926,9 @@ namespace TileStories.Tests
         private static IEnumerator Render(string name) => CardGalleryChecks.Render(name);
             // ---------------- Tier 2: pictures (_3.1 step 7) ----------------
 
-        // The colour a real render shows at a panel position (which picture a frame shows): the darkest pixel of the 7x7
-        // patch there -- every gallery picture is its flat colour crossed by LIGHTER grid lines (CardGalleryMedia), so the
-        // darkest pixel is the picture's own colour wherever the point falls
-        private static IEnumerator PixelAt(VisualElement inPanel, Vector2 panelPoint, System.Action<Color> got)
-        {
-            yield return new WaitForEndOfFrame();
-            var tex = ScreenCapture.CaptureScreenshotAsTexture();
-            try
-            {
-                var origin = RuntimePanelUtils.ScreenToPanel(inPanel.panel, Vector2.zero);
-                float unit = RuntimePanelUtils.ScreenToPanel(inPanel.panel, Vector2.right).x - origin.x;
-                var screen = (panelPoint - origin) / unit;
-                int cx = Mathf.RoundToInt(screen.x), cy = tex.height - 1 - Mathf.RoundToInt(screen.y);
-                Color darkest = Color.white;
-                for (int dy = -3; dy <= 3; dy++)
-                    for (int dx = -3; dx <= 3; dx++)
-                    {
-                        var c = tex.GetPixel(cx + dx, cy + dy);
-                        if (c.grayscale < darkest.grayscale) darkest = c;
-                    }
-                got(darkest);
-            }
-            finally { Object.Destroy(tex); }
-        }
+        // The colour a real render shows at a panel position (the shared helper)
+        private static IEnumerator PixelAt(VisualElement inPanel, Vector2 panelPoint, System.Action<Color> got) =>
+            CardGalleryChecks.PixelAt(inPanel, panelPoint, got);
 
         private static void AssertColour(Color expected, Color seen, string what)
         {

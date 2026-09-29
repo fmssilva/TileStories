@@ -54,6 +54,11 @@ The SMALLEST block that moves the domain forward without building on a known pro
 engineering choices yourself; ask the developer only for a real product / architecture trade-off (options, trade-offs, your
 recommendation, the exact question).
 
+**References check (before writing the brief):** list what the Worker must READ, not only what it may consult: the domain
+guide's TODOs + status + the sections of the step, and the rule sections the block will hit (Editor rows -> `_5.1` section 0;
+tests with real input or captures -> `40-testing.md` 4.2.3 / 4.5; dev-only switches -> `20-code-quality.md`; live Play Mode ->
+`_5.1` "PlayMode Live Config"). Lessons learned live in those sections; a Worker that skips them repeats old bugs.
+
 ## 6. Answer (in this order, short)
 
 1. **Developer's direct questions** -- answered first.
@@ -71,6 +76,9 @@ compiles and is committed (`git --no-optional-locks status`); if not, STOP and r
 EditMode + PlayMode all green) with Unity allowed to be in the background.
 
 Domain spec (read ALL lines): <guide path> -- start with "## TODOs" (<tags>) and the status table (<done>; <planned>).
+REQUIRED READING (all lines): <the exact sections the block touches -- always `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" +
+section "0. Guidelines" when the block adds or changes any POI Editor row, table, popup or capture; `40-testing.md` 4.2.3 + 4.5
+when it adds real-input tests or captures; any other guide whose rules apply>.
 Context only: <other guides>.
 
 PART 1 -- <fixes>: numbered, each = what + where + the test that proves it + recapture.

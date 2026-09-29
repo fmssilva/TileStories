@@ -205,6 +205,8 @@ namespace TileStories
                     Events = context.Events,
                     Services = context.Services,
                     Audio = context.Audio,
+                    Video = context.Video,
+                    ReduceMotion = context.ReduceMotion,
                 });
                 bool header = _bound.Count == 0 && entry.Definition.Key == BuiltInBlocks.HeaderKind;
                 var parent = header ? HeaderSlot

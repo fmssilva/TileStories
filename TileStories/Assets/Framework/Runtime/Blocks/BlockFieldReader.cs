@@ -64,6 +64,9 @@ namespace TileStories
         // The colour of one Items row's Color sub-field; false when it is empty or not a colour (TryParseColor)
         public bool ItemColor(BlockItemData item, string key, out Color color) => TryParseColor(FindItemField(item, key)?.value, out color);
 
+        // The seconds of one Items row's Time sub-field; false when it is empty or not a time (TimeCodeRule)
+        public bool ItemTime(BlockItemData item, string key, out float seconds) => TimeCodeRule.TryParse(FindItemField(item, key)?.value, out seconds);
+
         // Whether the field holds anything a visitor would see (a required field that fails this hides the block)
         public static bool HasContent(BlockFieldValue value, BlockFieldType type)
         {
@@ -80,6 +83,8 @@ namespace TileStories
                     return TryParseColor(value.value, out _);
                 case BlockFieldType.Url:
                     return WebLinkRule.IsOpenable(value.value);
+                case BlockFieldType.Time:
+                    return TimeCodeRule.IsValid(value.value);
                 case BlockFieldType.Asset:
                     return !string.IsNullOrWhiteSpace(value.asset);
                 case BlockFieldType.Items:
@@ -90,7 +95,7 @@ namespace TileStories
         }
 
         // Whether one Items row is complete: every sub-field its definition marks Required holds something a visitor
-        // would see (a Color: a real colour; an Asset: a path MediaPathRule accepts). An incomplete row is not shown; a required Items field with no complete
+        // would see (a Color: a real colour; a Time: a time TimeCodeRule reads; an Asset: a path MediaPathRule accepts). An incomplete row is not shown; a required Items field with no complete
         // row hides the block (BlockStackBuilder, NoCompleteRow). A row of a field with no required sub-field is complete.
         public static bool ItemIsComplete(BlockItemData item, IReadOnlyList<BlockFieldDefinition> itemFields)
         {
@@ -117,6 +122,8 @@ namespace TileStories
                     return TryParseColor(value.value, out _);
                 case BlockFieldType.Url:
                     return WebLinkRule.IsOpenable(value.value);
+                case BlockFieldType.Time:
+                    return TimeCodeRule.IsValid(value.value);
                 case BlockFieldType.Asset:
                     return MediaPathRule.IsValid(value.asset, sub.Media);
                 default:

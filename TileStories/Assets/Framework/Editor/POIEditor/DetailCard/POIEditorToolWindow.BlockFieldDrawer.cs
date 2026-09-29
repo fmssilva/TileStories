@@ -24,7 +24,8 @@ namespace TileStories.Editor
         internal static bool HasBlockFieldDrawer(BlockFieldType type) =>
             type == BlockFieldType.LocalizedText || type == BlockFieldType.LocalizedLongText || type == BlockFieldType.Items
             || type == BlockFieldType.Choice || type == BlockFieldType.Color || type == BlockFieldType.Toggle
-            || type == BlockFieldType.PoiRef || type == BlockFieldType.Asset || type == BlockFieldType.Number || type == BlockFieldType.Url;
+            || type == BlockFieldType.PoiRef || type == BlockFieldType.Asset || type == BlockFieldType.Number || type == BlockFieldType.Url
+            || type == BlockFieldType.Time;
 
         // Every field of one block, as its kind defines them
         private void DrawBlockFields(BlockInstanceData block, BlockKindDefinition definition, int blockIndex)
@@ -64,6 +65,9 @@ namespace TileStories.Editor
                         () => NumberValue(block, field), value => EnsureBlockField(block, field.Key).number = value);
                 else if (field.Type == BlockFieldType.Url)
                     DrawUrlRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
+                        () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value));
+                else if (field.Type == BlockFieldType.Time)
+                    DrawTimeRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
                         () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value));
                 else
                     DrawLocalizedRows(field, languages, IndentLevel1, "Block field " + field.Key, blockIndex,
@@ -166,6 +170,8 @@ namespace TileStories.Editor
                 DrawPoiRefRow(sub, IndentLevel2, probeName, probeIndex, pois, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
             else if (sub.Type == BlockFieldType.Url)
                 DrawUrlRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
+            else if (sub.Type == BlockFieldType.Time)
+                DrawTimeRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
             else
                 DrawLocalizedRows(sub, languages, IndentLevel2, probeName, probeIndex,
                     lang => ItemLocalizedValue(item, sub.Key, lang), (lang, text) => SetItemLocalizedValue(item, sub.Key, lang, text));
@@ -222,6 +228,22 @@ namespace TileStories.Editor
             if (edited != current) set(edited);
             if (!string.IsNullOrWhiteSpace(get()) && !WebLinkRule.IsOpenable(get()))
                 EditorGUILayout.HelpBox(CardUrlInvalidText(field.Label, get()), MessageType.Warning);
+        }
+
+        // A Time field: one text field (a time is the same in every language), stored as typed. Text that is not a time
+        // (TimeCodeRule) stays, with a warning under it -- the card leaves that row out until it is fixed. Drawing never writes.
+        private static void DrawTimeRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<string> get, Action<string> set)
+        {
+            string current = get();
+            DrawEditorRow(out float rowWidth, out _, indent);
+            EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
+            string edited = EditorGUILayout.TextField(current, GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
+            ReportTableCellRect(probeName, probeIndex);
+            HelpInfoButton.Draw(field.Label, field.Help);
+            EditorRowEnd();
+            if (edited != current) set(edited);
+            if (!string.IsNullOrWhiteSpace(get()) && !TimeCodeRule.IsValid(get()))
+                EditorGUILayout.HelpBox(CardTimeInvalidText(field.Label, get()), MessageType.Warning);
         }
 
         // A PoiRef field: a popup of this wall's POIs named as the POI list names them ("3. North tower", never an id). A
@@ -307,11 +329,13 @@ namespace TileStories.Editor
             return Resources.Load(folder.Length > 0 ? folder + "/" + noExtension : noExtension, type);
         }
 
-        // The Unity type an Asset field of this kind holds: a texture, an AudioClip, a TextAsset (a captions file, made by VttTextImporter)
+        // The Unity type an Asset field of this kind holds: a texture, an AudioClip, a TextAsset (a captions file, made by VttTextImporter),
+        // a VideoClip
         internal static System.Type MediaObjectType(MediaKind kind) => kind switch
         {
             MediaKind.Audio => typeof(AudioClip),
             MediaKind.Captions => typeof(TextAsset),
+            MediaKind.Video => typeof(UnityEngine.Video.VideoClip),
             _ => typeof(Texture2D),
         };
 

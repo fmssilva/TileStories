@@ -464,15 +464,15 @@ MonoBehaviour:
     - lang: pt
       value: "Tamb\xE9m perto"
   - key: audio_play
-    where: The play button's name (its tooltip and accessible name) on an Audio Guide
-      and on the small player on the wall.
+    where: The play button's name (its tooltip and accessible name) on an Audio Guide,
+      on the small player on the wall and on a Video.
     text:
     - lang: en
       value: Play
     - lang: pt
       value: Reproduzir
   - key: audio_pause
-    where: The same button's name while the audio plays.
+    where: The same button's name while the audio or the video plays.
     text:
     - lang: en
       value: Pause
@@ -487,15 +487,16 @@ MonoBehaviour:
     - lang: pt
       value: "Velocidade de reprodu\xE7\xE3o"
   - key: audio_captions
-    where: 'The captions switch of an Audio Guide player: its words and its name.'
+    where: 'The captions switch of an Audio Guide player and of a Video: its words and
+      its name.'
     text:
     - lang: en
       value: Captions
     - lang: pt
       value: Legendas
   - key: audio_seek
-    where: The name of the bar an Audio Guide player is dragged along to move through
-      the recording.
+    where: The name of the bar an Audio Guide player or a Video is dragged along to
+      move through the recording.
     text:
     - lang: en
       value: Position in the audio
@@ -525,3 +526,34 @@ MonoBehaviour:
       value: Open the card
     - lang: pt
       value: "Abrir o cart\xE3o"
+  - key: mini_player_stop
+    where: The name of the small player's stop button on the wall; tapping it ends
+      the audio and sends the mini-player away.
+    text:
+    - lang: en
+      value: Stop
+    - lang: pt
+      value: Parar
+  - key: video_full_screen
+    where: The name of a Video's full-screen button (its tooltip and accessible name),
+      and the words over a Video shown as a teaser that opens full screen.
+    text:
+    - lang: en
+      value: Full screen
+    - lang: pt
+      value: "Ecr\xE3 inteiro"
+  - key: video_unavailable
+    where: The words a Video shows instead of playing when its clip cannot be loaded.
+    text:
+    - lang: en
+      value: Video unavailable
+    - lang: pt
+      value: "V\xEDdeo indispon\xEDvel"
+  - key: video_chapters
+    where: The name of a Video's row of chapter buttons (read by screen readers); each
+      button shows its chapter's time and name.
+    text:
+    - lang: en
+      value: Chapters
+    - lang: pt
+      value: "Cap\xEDtulos"

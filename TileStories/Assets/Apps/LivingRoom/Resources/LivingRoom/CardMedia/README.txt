@@ -27,6 +27,14 @@ castelo_s_jorge_guide_pt.mp3         -- 200.4 s Portuguese narration about the c
 portugal_tourism_guide_en.mp3        -- 232.9 s English promotional audio (tag: "Visit Portugal"); the long clip with no captions
 Both mp3 files stream from disk (import: Streaming, Vorbis) so nothing is decoded until they are played.
 
+video/ (added 2026-09-29, _3.1 step 9B)
+castelo_s_jorge_video.mp4            -- 200.3 s, 640x360, 30 fps, with sound: a full copy of MediaAssets/Videos/castelo_s_jorge_video.mp4
+                                        (not trimmed: no trimming tool on the dev machine, and Unity trims only by transcoding). Supplied by
+                                        the developer as DEVELOPMENT TEST MEDIA; licence NOT established (same rule as the mp3s above).
+                                        Import: transcoded to H.264 at a Low bitrate, original size -- 16.4 MB on disk, 8.4 MB in a build.
+                                        Its length matches audio/castelo_s_jorge_guide_pt.mp3 (200.3 s vs 200.4 s; not listened to), so the
+                                        video blocks reuse that clip's PLACEHOLDER captions (audio/castelo_s_jorge_guide_pt.vtt).
+
 photos/ (added 2026-09-28)
 castelo_s_jorge_1.jpg, castelo_s_jorge_2.jpg -- real photographs supplied by the developer as development test media; licence NOT
                                         established (same rule as above). Placed here so the card can load them; no block uses them yet.

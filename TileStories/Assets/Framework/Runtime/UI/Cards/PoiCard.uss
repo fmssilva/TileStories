@@ -108,7 +108,8 @@
 }
 
 /* The mini-player on the wall (MiniPlayerView): a small bar at the bottom while audio started in a card plays on after it closed --
-   a round play / pause button and, tappable, the audio's title and time (a tap reopens its card), a thin progress line under them */
+   a round play / pause button and, tappable, the audio's title and time (a tap reopens its card), a stop button (9A-fix: ends the
+   audio and sends the bar away), a thin progress line under them */
 .poi-card-mini {
     position: absolute;
     left: var(--ts-space-4);
@@ -135,6 +136,25 @@
     border-width: 0;
     border-radius: var(--ts-pill-radius);
     background-color: var(--ts-accent);
+}
+
+.poi-card-mini__stop {
+    flex-shrink: 0;
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0 0 0 var(--ts-space-1);
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-clear);
+}
+
+/* the audio glyph is dark ink for the accent play button; on the bar's own surface the stop square needs the bar's ink */
+.poi-card-mini__stop .card-audio__glyph {
+    color: var(--ts-ink);
 }
 
 .poi-card-mini__open {

@@ -96,67 +96,49 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-
-## `And now: POI Detail Card -- 9-pre (Portuguese spelling), step 9A (audio_guide + card audio)`
+## `And now: POI Detail Card -- 9A-fix (mini-player stop, flaky check), step 9B (video)`
 
 GATE: take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Close every
 capture window with window.Close() and confirm none is left. Confirm the tree compiles and is committed
-(`git --no-optional-locks status`); if not, STOP and report. Re-verify the baseline (0 `error CS`, EditMode + PlayMode all
-green) with Unity allowed to be in the background.
+(`git --no-optional-locks status`); if not, STOP and report -- do not audit or finish someone else's uncommitted work without
+telling me first. Re-verify the baseline (0 `error CS`, EditMode + PlayMode all green) with Unity allowed to be in the background.
+If `Markers/Fonts/Oswald Bold SDF.asset` shows as modified after a run, never commit it (see __mixed_TODOs.md).
 
 Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- start with "## TODOs"
-([9-pre]) and the status table (0-12 done; 9A next, 9B planned), and "Tier 4 -- audio and video".
-Context only: .clinerules/20-code-quality.md (the new visitor-content exception to the ASCII rule), proj_guides/_0_work_plan.md
-(Stage 2 item 3: audio interruption handling -- follow it, do not re-derive it), _5.1.
+([9A-fix], [Tier 4/5, first teaser kind]) and the status table (0-12, 9-pre, 9A done; 9B planned), and "Tier 4 -- audio and
+video". Context only: _0_work_plan.md Stage 2 item 3 (audio rules), _5.1.
 
-PART 1 -- 9-pre, Portuguese spelling (no behaviour change):
-1. Tests: visitor wording (CardStrings.asset rows' text, an app table's text, Card Texts values, POI card content) must be valid
-   text with no control characters; Editor labels, help, where-notes, warnings stay ASCII. Keep a test that proves an Editor
-   help text with an accent still fails.
-2. Rewrite the pt rows of CardStrings.asset, LivingRoomCardStrings.asset and the LivingRoom fixture's pt card content (both
-   config copies, byte-identical round trip first) with proper Portuguese (descricao -> the right spelling, util, comentario,
-   Tao, etc.). Never change POI id/name/category/summary/keywords.
-3. PT renders: the Lamp card in Portuguese (feedback, poll, size comparison, a rich text block) read item by item for c-cedilla,
-   tildes and accents drawn by the card's font (no missing-glyph boxes). If a glyph is missing, add it to the font asset.
+PART 1 -- 9A-fix (then suggest a commit message before Part 2):
+1. Mini-player stop: a stop / dismiss button (48 px, CardIcons.VectorGlyph shape, name from CardStrings en + pt) calling
+   ICardAudio.Stop; the bar never overlaps the zoom controls or the search bar at 390 px. Phase B: a real tap -> audio Idle,
+   mini-player gone; capture before/after.
+2. Run the hero_chip / subtitle layout fixture three times with Unity in the background; if it fails once, find the cause and fix.
 
-PART 2 -- step 9A, audio_guide (one kind through the section 7 micro-cycle):
-4. Media: MediaKind.Audio (+ .vtt captions as a text asset) in MediaPathRule and the Asset drawer; fixture: a short generated WAV
-   (stdlib Python, placeholder tone/voice-free) + a matching .vtt in the Lamp's media folder, licence note in the README.
-5. Card audio as ONE service the host owns (IBlockHost gains Play/Pause/Seek/State or a card audio service -- one owner of the
-   AudioSource, never one per view): play, pause, seek, speed options, captions line for the current time (pure VttRule), queue-or-
-   switch when another POI's audio starts (card_settings setting), keep_audio_on_close -> a mini-player on the wall after the card
-   closes, tap it to reopen that card. Interruptions exactly per work plan Stage 2 item 3.
-6. Views: `player` (play/pause, scrubber, time, speed chip, captions toggle) and `hero_chip` (a compact chip in the header area
-   that plays/pauses and shows progress). Tokens only; icons through CardIcons.VectorGlyph (add Play / Pause shapes); tap
-   targets >= 48 px.
-7. Tests: pure (VttRule parse + lookup, speed list, queue-or-switch rule, MediaPathRule audio); Phase A gallery (both variants x
-   short / long / no captions, real taps on play / pause / scrubber drag / speed); Phase B on the real Lamp (a real tap plays, the
-   captions line follows the clip time, closing the card with Keep Audio Playing on shows the mini-player and a tap reopens the
-   card, another POI's audio switches or queues per the setting, a live edit of the block while playing keeps playback sane).
-   Audio time in tests comes from the service's injectable clock/position, never real-time waits.
+PART 2 -- step 9B, video (one kind + the header look, through the section 7 micro-cycle):
+3. Media: MediaKind.Video (VideoClip through IMediaSource from the wall's media folder; import settings that keep the clip small).
+   Fixture: copy the developer's `MediaAssets/Videos/castelo_s_jorge_video.mp4` into CardMedia/video/ (README: development test
+   media, licence NOT established, same rule as the mp3s) -- or a trimmed copy if the build size warrants it; say which.
+4. ONE video owner beside the audio owner (a VideoPlayer rendering to a RenderTexture shown as the view's background image; never
+   one VideoPlayer per view). Sound rule: starting a video pauses the card's audio; starting audio pauses the video (a pure rule,
+   tested). Captions reuse VttRule; chapters (items: t, label) are chips that seek.
+5. `video` variants: `inline` (poster, play overlay, scrubber, captions toggle) and `chapters` (the same + the chapter chips).
+   This is the first teaser kind: add display mode `takeover` for video (a full-screen button opens it in TakeoverView, same
+   playback continues, Back returns with the stop and scroll kept) -- see the [Tier 4/5, first teaser kind] TODO.
+6. header `video_loop`: a muted looping clip in the header with its poster; the poster shows until the first frame and whenever
+   the card's (future) reduce-motion setting is on -- add only the config flag + poster path now, the visitor setting is _3.3.
+7. Tests: pure (sound rule, chapter lookup, MediaPathRule video); Phase A gallery (both variants x poster / no captions / long
+   chapters; real taps on play, a chapter chip, the takeover button); Phase B on the real Lamp (real tap plays, the audio guide
+   pauses when the video starts, takeover and Back keep the stop and scroll, header loop shows its poster first). Video time in
+   tests from an injectable clock / manual output like ManualAudioOutput, never real-time waits.
 
-Capture and check yourself: both variants (idle, playing, captions on, PT), the mini-player on the wall, the Editor rows (Asset
-field for audio and captions, speed options, the new container setting). Rules as before: no literal colours/sizes, no visitor
-strings in code, real input in tests, identity fields untouched.
-OUT OF SCOPE: video / header video_loop (9B), device Bluetooth check (list it for the developer), _3.2, _3.3.
-Stop when 9-pre and 9A are green. Update _3.1 (rows 9-pre / 9A with proof, TODOs, design history), 10-structure.md, _5.1.
+Capture and check yourself: both video variants (poster, playing, captions on, PT), the takeover, the header loop, the Editor rows
+(Asset field for video, chapters rows, the header's new fields). Rules as before: no literal colours/sizes, no visitor strings
+in code, real input in tests, identity fields untouched, Portuguese spelled properly.
+OUT OF SCOPE: Tier 5, the visitor reduce-motion setting (_3.3), _3.2, streaming from a URL.
+Stop when 9A-fix and 9B are green. Update _3.1 (rows 9A-fix / 9B with proof, TODOs, design history), 10-structure.md, _5.1.
 Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP and report.
 Finish with: suites + counts, what you looked at, what you could not verify, a one-line commit message (no trailer), and the
-`git add` paths (default: `git add TileStories .clinerules proj_guides`). Commit only if the developer asks.
-
-
-AND, to make sure you use real images, audio and videos, i put some examples of those in these folders in the living room. we can add them to our Living Room POIs??
-C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Videos
-C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Audio\castelo_s_jorge_audio.mp4
-C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Audio\PT_Tourism_Audio.mp3
-C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Images\castelo_s_jorge_1.avif
-C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Images\castelo_s_jorge_1.jpg
-C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Images\castelo_s_jorge_2.jpg
-C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Videos\castelo_s_jorge_video.mp3
-C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Videos\PT_Tourism_video.mp4
-
-See where we should put them and where we should use them to actually test things well
-
+`git add` paths (default: `git add TileStories .clinerules proj_guides`, never the Oswald font). Commit only if the developer asks.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

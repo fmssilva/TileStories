@@ -174,8 +174,9 @@ namespace TileStories.Editor
             if (definition.Key == BuiltInBlocks.ComparePointsKind && poi != null
                 && new BlockFieldReader(block, null, null).Value(BuiltInBlocks.ComparePointsOtherField) == poi.id)
                 warnings.Add(CardCompareWithItselfNote);
-            // - a header picture look without its picture(s) quietly falls back to text only: say so
-            if (definition.Key == BuiltInBlocks.HeaderKind && System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, variant) >= 0
+            // - a header picture look without its picture(s) -- the video loop without its clip -- quietly falls back to text only: say so
+            if (definition.Key == BuiltInBlocks.HeaderKind
+                && (System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, variant) >= 0 || variant == BuiltInBlocks.HeaderVideoLoop)
                 && !BuiltInBlocks.HeaderShowsPicture(variant, block))
                 warnings.Add(CardHeaderNeedsPictureText(variant));
             // - a block that waits for the reading, in the middle of the card, is revealed above the visitor

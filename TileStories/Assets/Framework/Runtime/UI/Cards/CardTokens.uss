@@ -176,6 +176,15 @@
     --ts-audio-knob: 16px;
     --ts-audio-knob-radius: 8px;
     --ts-audio-caption-min: 48px;
+    /* video (Media.uss, step 9B): the round play button over a poster (and its radius, half its size), its glyph, the full-screen button's
+       glyph, and a chapter button's widest (its name wraps under it past that) */
+    --ts-video-overlay: 64px;
+    --ts-video-overlay-radius: 32px;
+    --ts-video-overlay-glyph: 28px;
+    --ts-video-icon: 20px;
+    --ts-video-chapter-max: 200px;
+    /* the bars around a playing video whose shape differs from its frame's */
+    --ts-video-letterbox: rgb(0, 0, 0);
     /* the mini-player on the wall (PoiCard.uss): its distance from the bottom edge -- above the AR zoom buttons (ZoomControlView: 14 px from
        the edge, a 60 px strip) so it never covers them -- and how wide it grows */
     --ts-mini-bottom: 88px;

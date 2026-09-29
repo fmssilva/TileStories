@@ -60,6 +60,11 @@ namespace TileStories.Editor
             "are still the output and restarts the narration where it was when they are not. Leave it off unless a device test " +
             "shows the narration stays silent after the earbuds change. Has no effect anywhere else.";
 
+        private const string CardReduceMotionHelp =
+            "On: the cards of this wall show still pictures instead of motion the visitor did not ask for -- a header in the Video Loop " +
+            "look shows its poster (Picture) and never plays its loop. A video the visitor plays still plays. Off by default. A " +
+            "setting the visitor can change themselves is planned; this is the wall's own default.";
+
         private const string BlockLibraryHelp =
             "Every block kind this wall can show, wall-wide. Enabled: off hides every block of that kind on every card (Header " +
             "is the card's title and cannot be switched off). Default Variant: the look a block gets when Card Content does not " +
@@ -259,6 +264,11 @@ namespace TileStories.Editor
             fieldLabel + " '" + typed.Trim() + "' is not a web link the card opens: write the whole address, starting with https:// " +
             "(for example https://maps.example.org/place). Until then the card shows no button for it.";
 
+        // A Time field holds text TimeCodeRule cannot read
+        internal static string CardTimeInvalidText(string fieldLabel, string typed) =>
+            fieldLabel + " '" + typed.Trim() + "' is not a time: write minutes:seconds (1:30), hours:minutes:seconds (1:02:03) or seconds (90). " +
+            "Until then the card leaves this row out.";
+
         // A Compare Points block names its own point in Compare With
         internal const string CardCompareWithItselfNote =
             "Compare With is this point itself: the card shows the same condition twice. Pick another point.";
@@ -320,6 +330,7 @@ namespace TileStories.Editor
                 BlockFieldType.Items => label + " has no rows",
                 BlockFieldType.Choice or BlockFieldType.PoiRef => label + " is not picked",
                 BlockFieldType.Color => label + " is not a colour written as #RRGGBB",
+                BlockFieldType.Time => label + " is not a time written as 1:30",
                 _ => label + " is empty",
             };
         }
@@ -328,16 +339,18 @@ namespace TileStories.Editor
         private static string CardNoCompleteRowText(BlockFieldDefinition field)
         {
             var needed = new List<string>();
-            bool colour = false, picture = false;
+            bool colour = false, picture = false, time = false;
             foreach (var sub in field?.ItemFields ?? System.Array.Empty<BlockFieldDefinition>())
             {
                 if (!sub.Required) continue;
                 needed.Add(sub.Label);
                 colour |= sub.Type == BlockFieldType.Color;
                 picture |= sub.Type == BlockFieldType.Asset;
+                time |= sub.Type == BlockFieldType.Time;
             }
             return "no row of " + (field?.Label ?? "the list") + " is complete: each needs " + string.Join(" and ", needed)
-                   + (colour ? " (a colour written as #RRGGBB)" : "") + (picture ? " (a picture from the Media Folder)" : "");
+                   + (colour ? " (a colour written as #RRGGBB)" : "") + (picture ? " (a picture from the Media Folder)" : "")
+                   + (time ? " (a time written as 1:30)" : "");
         }
 
         // What is wrong with a picture field, for the warning under it and the "Not shown" line. `problem` None = say
@@ -362,13 +375,15 @@ namespace TileStories.Editor
         {
             MediaKind.Audio => "audio file",
             MediaKind.Captions => "captions file",
+            MediaKind.Video => "video file",
             _ => "picture",
         };
 
         // A header picture look that lacks what it needs (Picture; Split Then Now: both pictures)
-        internal static string CardHeaderNeedsPictureText(string variant) =>
-            "The " + variant + " look needs " + (variant == BuiltInBlocks.HeaderSplitThenNow ? "Picture and Second Picture" : "Picture") +
-            " (pictures inside the Media Folder): until then the card shows the text-only look.";
+        internal static string CardHeaderNeedsPictureText(string variant) => variant == BuiltInBlocks.HeaderVideoLoop
+            ? "The " + variant + " look needs a Loop Clip (an MP4 or WEBM inside the Media Folder): until then the card shows the text-only look."
+            : "The " + variant + " look needs " + (variant == BuiltInBlocks.HeaderSplitThenNow ? "Picture and Second Picture" : "Picture") +
+              " (pictures inside the Media Folder): until then the card shows the text-only look.";
 
         // A picture path that is fine by the rule but has no file behind it (deleted or renamed after it was picked)
         internal static string CardMediaMissingText(string label, string path, MediaKind kind = MediaKind.Image) => kind == MediaKind.Image

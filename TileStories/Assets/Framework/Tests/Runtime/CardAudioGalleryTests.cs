@@ -459,6 +459,36 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
+        public IEnumerator TheMiniPlayersStopButton_ARealTapEndsTheAudioAndSendsTheBarAway_ItIsNeverTheAccentPlayButton()
+        {
+            AudioGuideBlockView view = null;
+            yield return Show("audio_guide_player_short", v => view = v);
+            var mini = _harness.AudioCoordinator.Mini;
+            yield return Tap(view.PlayButton);
+            _harness.AdvanceAudio(2f);
+            yield return Tap(_harness.Sheet.CloseButton);
+            Assert.IsTrue(mini.IsShown, "precondition: the mini-player took over");
+            Assert.AreEqual(CardAudioState.Playing, Audio.State);
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(mini.StopButton.worldBound.width, mini.StopButton.worldBound.height), "the stop button is finger-sized");
+            Assert.AreEqual("Stop", mini.StopButton.tooltip);
+            Assert.AreNotEqual(mini.PlayButton.resolvedStyle.backgroundColor, mini.StopButton.resolvedStyle.backgroundColor,
+                "the stop button never reads as the same accent-filled control as play/pause");
+            var stopGlyph = mini.StopButton.Q<CardIcons.VectorGlyph>();
+            Assert.AreEqual(CardIcons.Shape.Stop, stopGlyph.Kind);
+            Assert.IsTrue(stopGlyph.Filled, "a solid square, not an outline");
+            Assert.Greater(stopGlyph.worldBound.width, 4f, "the glyph is laid out");
+            Assert.GreaterOrEqual(CardTestInput.Contrast(stopGlyph.resolvedStyle.color, CardTestInput.EffectiveBackground(stopGlyph)),
+                UIAccessibility.MinRatioLargeTextOrUIComponent, "the stop square stands out from the bar it sits on");
+            yield return CardGalleryChecks.Render("Card_audio_miniplayer_before_stop");
+
+            yield return Tap(mini.StopButton);
+            Assert.AreEqual(CardAudioState.Idle, Audio.State, "a real tap on Stop ends the audio, not just pauses it");
+            Assert.IsFalse(Output.IsPlaying);
+            Assert.IsFalse(mini.IsShown, "the bar is sent away");
+            Assert.AreEqual(0, _harness.Media.HeldCount, "and every clip and caption file was given back");
+        }
+
+        [UnityTest]
         public IEnumerator WithKeepAudioPlayingOff_TheAudioStopsWithItsCard_AndNoMiniPlayerAppears()
         {
             var entry = new CardGalleryDefinitions.Entry(BuiltInBlocks.AudioGuideKind, BuiltInBlocks.AudioGuidePlayer, "keepoff",

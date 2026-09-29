@@ -21,6 +21,9 @@ namespace TileStories
         public const string HeaderFocusXField = "focus_x";
         public const string HeaderFocusYField = "focus_y";
         public const string HeaderZoomField = "zoom";
+        // Tier 4: a muted looping film under the title, Picture as its poster (step 9B)
+        public const string HeaderVideoLoop = "video_loop";
+        public const string HeaderLoopClipField = "loop_clip";
 
         public const string StatusKind = "status";
         public const string StatusRing = "ring";
@@ -84,7 +87,7 @@ namespace TileStories
         public const string ActionShowOnWall = "show_on_wall";
         public static readonly string[] ActionOptions = { ActionShowOnWall };
 
-        // Tier 1: the header; Tier 2 adds the picture looks. Video / 3D header variants arrive with Tiers 4 and 5.
+        // Tier 1: the header; Tier 2 adds the picture looks, Tier 4 the video loop. 3D header variants arrive with Tier 5.
         public static readonly BlockKindDefinition Header = new()
         {
             Key = HeaderKind,
@@ -94,10 +97,12 @@ namespace TileStories
                    "point's category only; Show Level adds its hierarchy level. Compact: title and chip. Text only: with the " +
                    "subtitle. The picture looks show a picture under them, at the top of what scrolls: Image Parallax (the " +
                    "picture slides slower than the text as the visitor scrolls), Split Then Now (Picture as it was beside Second " +
-                   "Picture as it is), Spotlight Crop (Picture enlarged around a focus point, with a ring on it). A picture look " +
-                   "without its picture(s) shows the text-only look. It is always shown and always first; a point with no " +
-                   "header block gets one made from its name and summary.",
-            Variants = new[] { HeaderCompact, HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop },
+                   "Picture as it is), Spotlight Crop (Picture enlarged around a focus point, with a ring on it), Video Loop (Loop " +
+                   "Clip playing silently over and over, Picture as its poster: shown until the first frame, while another video of " +
+                   "the card plays, and always when Detail Card > Card Container > Reduce Motion is on). A picture look without its " +
+                   "picture(s) -- Video Loop without its Loop Clip -- shows the text-only look. It is always shown and always first; a " +
+                   "point with no header block gets one made from its name and summary.",
+            Variants = new[] { HeaderCompact, HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop },
             DefaultVariant = HeaderTextOnly,
             DisplayModes = new[] { CardOptions.DisplayInline },
             Fields = new[]
@@ -121,8 +126,8 @@ namespace TileStories
                 new BlockFieldDefinition
                 {
                     Key = HeaderImageField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Picture",
-                    Help = "The picture of the picture looks (in Split Then Now: as it was). A PNG or JPG inside the wall's Media " +
-                           "Folder (Detail Card > Card Container). The text looks do not show it.",
+                    Help = "The picture of the picture looks (in Split Then Now: as it was; in Video Loop: the poster). A PNG or JPG " +
+                           "inside the wall's Media Folder (Detail Card > Card Container). The text looks do not show it.",
                 },
                 new BlockFieldDefinition
                 {
@@ -144,13 +149,20 @@ namespace TileStories
                     Key = HeaderZoomField, Type = BlockFieldType.Number, Label = "Crop Zoom", NumberMin = 1f, NumberMax = 4f, NumberDefault = 2f,
                     Help = "Spotlight Crop only: how much the picture is enlarged around the focus point (1 = the whole picture).",
                 },
+                new BlockFieldDefinition
+                {
+                    Key = HeaderLoopClipField, Type = BlockFieldType.Asset, Media = MediaKind.Video, Label = "Loop Clip",
+                    Help = "Video Loop only: a short silent-looking film (its sound is never played) inside the Media Folder, MP4 or " +
+                           "WEBM. A few seconds that loop cleanly work best.",
+                },
             },
         };
 
         // Whether a header look shows a picture, and whether this header has what that look needs (a picture the card
-        // can load, and for Split Then Now the second one too). A picture look without it falls back to text only.
+        // can load, and for Split Then Now the second one too; for Video Loop its Loop Clip). A look without it falls back to text only.
         public static bool HeaderShowsPicture(string variant, BlockInstanceData header)
         {
+            if (variant == HeaderVideoLoop) return new BlockFieldReader(header, null, null).ValidAsset(HeaderLoopClipField, MediaKind.Video).Length > 0;
             if (System.Array.IndexOf(HeaderImageVariants, variant) < 0) return false;
             var read = new BlockFieldReader(header, null, null);
             if (read.ValidAsset(HeaderImageField, MediaKind.Image).Length == 0) return false;

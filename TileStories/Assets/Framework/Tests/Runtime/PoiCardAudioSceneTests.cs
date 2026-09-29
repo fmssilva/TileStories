@@ -221,6 +221,37 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
+        public IEnumerator TheMiniPlayersStopButton_ARealTapEndsTheAudio_AndSendsTheBarAway()
+        {
+            Assert.IsTrue(Live.container.keep_audio_on_close, "precondition: the shipped setting");
+            yield return Select("lamp");
+            yield return Tap(Chip.PlayButton);
+            Advance(4f);
+            yield return Tap(Sheet.CloseButton);
+            Assert.IsTrue(Mini.IsShown, "precondition: the mini-player is on the wall");
+            Assert.AreEqual(CardAudioState.Playing, _audio.State, "precondition: the narration plays on");
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(Mini.StopButton.worldBound.width, Mini.StopButton.worldBound.height));
+            // - the bar is pinned above the zoom strip by its bottom offset, so it can only reach it by growing a second row
+            float panelWidth = Mini.Root.panel.visualTree.worldBound.width;
+            Assert.AreEqual(Mini.PlayButton.worldBound.center.y, Mini.StopButton.worldBound.center.y, 1f, "play and stop sit on one row at panel width " + panelWidth);
+            Assert.AreEqual(Mini.PlayButton.worldBound.center.y, Mini.OpenButton.worldBound.center.y, 1f, "the title too: nothing wraps at panel width " + panelWidth);
+            Assert.Greater(Mini.OpenButton.worldBound.width, Mini.StopButton.worldBound.width, "the title keeps more room than a button");
+            var zoomRoot = Object.FindFirstObjectByType<ZoomControlView>().Root.Q("zoom-control-root");
+            Assert.IsFalse(Mini.Root.worldBound.Overlaps(zoomRoot.worldBound), "the mini-player (with its stop button) never covers the zoom buttons");
+            var searchBar = Object.FindFirstObjectByType<SearchUIHost>().SearchBar.Root;
+            Assert.IsTrue(searchBar.worldBound.width > 0f && searchBar.worldBound.height > 0f, "precondition: the search bar is laid out");
+            Assert.IsFalse(Mini.Root.worldBound.Overlaps(searchBar.worldBound), "the mini-player " + Mini.Root.worldBound + " never covers the search bar " + searchBar.worldBound);
+            yield return Capture("Lamp_Audio_MiniPlayer_Stop_Before");
+
+            yield return Tap(Mini.StopButton);
+            Assert.AreEqual(CardAudioState.Idle, _audio.State, "a real tap on Stop ends the audio, not just pauses it");
+            Assert.IsFalse(_out.IsPlaying);
+            Assert.IsFalse(Mini.IsShown, "the bar is sent away");
+            Assert.AreEqual(0, Card.Media.RefCount(GuidePath), "and the clip was given back");
+            yield return Capture("Lamp_Audio_MiniPlayer_Stop_After");
+        }
+
+        [UnityTest]
         public IEnumerator ClosingTheCard_WithKeepAudioPlayingOff_StopsTheAudio_AndNoMiniPlayerAppears()
         {
             Live.container.keep_audio_on_close = false;

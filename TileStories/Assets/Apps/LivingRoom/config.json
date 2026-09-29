@@ -4214,6 +4214,274 @@
                         ]
                     },
                     {
+                        "key": "block_56",
+                        "kind": "video",
+                        "variant": "inline",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "On film"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Em vídeo"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "clip",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "video/castelo_s_jorge_video.mp4",
+                                "items": []
+                            },
+                            {
+                                "key": "poster",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "photos/castelo_s_jorge_2.jpg",
+                                "items": []
+                            },
+                            {
+                                "key": "captions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "audio/castelo_s_jorge_guide_pt.vtt",
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The castle on film"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O castelo em vídeo"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_57",
+                        "kind": "video",
+                        "variant": "chapters",
+                        "display": "takeover",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Chapter by chapter"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Capítulo a capítulo"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "clip",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "video/castelo_s_jorge_video.mp4",
+                                "items": []
+                            },
+                            {
+                                "key": "poster",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "photos/castelo_s_jorge_1.jpg",
+                                "items": []
+                            },
+                            {
+                                "key": "captions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "audio/castelo_s_jorge_guide_pt.vtt",
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The castle, chapter by chapter"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O castelo, capítulo a capítulo"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "chapters",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "t",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "0:00",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Opening"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Abertura"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "t",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "0:50",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Part two"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Segunda parte"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "t",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "1:40",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Part three"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Terceira parte"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "t",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "2:30",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Closing"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Encerramento"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "key": "block_37",
                         "kind": "wall_locator",
                         "variant": "strip",
@@ -5920,7 +6188,7 @@
                     {
                         "key": "block_1",
                         "kind": "header",
-                        "variant": "compact",
+                        "variant": "video_loop",
                         "display": "inline",
                         "fields": [
                             {
@@ -5939,6 +6207,24 @@
                                 "flag": false,
                                 "value": "",
                                 "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "loop_clip",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "video/castelo_s_jorge_video.mp4",
+                                "items": []
+                            },
+                            {
+                                "key": "image",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "photos/castelo_s_jorge_1.jpg",
                                 "items": []
                             }
                         ]
@@ -7217,7 +7503,8 @@
             "dismiss_on_tap_outside": true,
             "keep_audio_on_close": true,
             "audio_when_another_starts": "switch",
-            "audio_android_output_poll": false
+            "audio_android_output_poll": false,
+            "reduce_motion": false
         },
         "kinds": [],
         "strings": [],

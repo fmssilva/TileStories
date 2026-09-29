@@ -10,6 +10,9 @@ namespace TileStories
     //   image_parallax -- the picture slides at half the scroll's speed inside its frame (OnStackScrolled)
     //   split_then_now -- Picture (then) beside Second Picture (now), each with its CardStrings label
     //   spotlight_crop -- Picture enlarged around the focus point with a ring on it (SpotlightCropRule)
+    //   video_loop     -- Picture as a poster, the Loop Clip's frames over it: the header asks the card's ONE video owner for its muted loop
+    //                     (ICardVideo.PlayLoop) and shows the frames only while that loop holds the player and has a frame -- the poster
+    //                     shows until the first frame, while a visitor's video holds the player, and always with ReduceMotion (no loop asked)
     // A picture look without what it needs (HeaderShowsPicture) shows no hero: the text-only look.
     // Only classes here; About.uss / Media.uss hold every size and colour.
     public sealed class HeaderBlockView : IBlockView
@@ -25,6 +28,10 @@ namespace TileStories
         public Label ThenLabel { get; }
         public Label NowLabel { get; }
         public VisualElement Ring { get; }
+        // video_loop: the loop's frames over the poster, the loop this header asks for, and whether its frames show now
+        public VisualElement LoopFrames { get; }
+        public VideoTrack LoopTrack { get; private set; }
+        public bool LoopShowsFrames { get; private set; }
 
         // image_parallax: how far the picture lags behind the scroll (0.5 = half the speed)
         public const float ParallaxFactor = 0.5f;
@@ -37,6 +44,7 @@ namespace TileStories
         private float _zoom = 1f;
         // The frame size the spotlight was last placed for: a layout pass that did not change it places nothing
         private Vector2 _placedFor;
+        private ICardVideo _video;
 
         public HeaderBlockView()
         {
@@ -66,6 +74,8 @@ namespace TileStories
             NowLabel.AddToClassList("card-hero__label");
             Ring = new VisualElement { pickingMode = PickingMode.Ignore };
             Ring.AddToClassList("card-hero__ring");
+            LoopFrames = new VisualElement { name = "card-hero-loop", pickingMode = PickingMode.Ignore };
+            LoopFrames.AddToClassList("card-hero__loop");
             HeroPart.RegisterCallback<GeometryChangedEvent>(evt =>
             {
                 // - only a new frame size re-places the picture (its own new size must never feed back into the frame's)
@@ -124,9 +134,24 @@ namespace TileStories
             if (!BuiltInBlocks.HeaderShowsPicture(context.Variant, instance)) return;
             _variant = context.Variant;
             HeroPart.AddToClassList("card-hero--" + _variant);
-            Picture.Show(context.Media, read.ValidAsset(BuiltInBlocks.HeaderImageField, MediaKind.Image), context.Strings);
+            string picture = read.ValidAsset(BuiltInBlocks.HeaderImageField, MediaKind.Image);
+            // - a video loop may have no poster: a plain frame until its first frame, never the "picture unavailable" words
+            if (_variant == BuiltInBlocks.HeaderVideoLoop && picture.Length == 0) Picture.Clear(null);
+            else Picture.Show(context.Media, picture, context.Strings);
             HeroPart.Add(Picture.Root);
-            if (_variant == BuiltInBlocks.HeaderSplitThenNow)
+            if (_variant == BuiltInBlocks.HeaderVideoLoop)
+            {
+                HeroPart.Add(LoopFrames);
+                LoopTrack = new VideoTrack(context.Poi?.id, read.ValidAsset(BuiltInBlocks.HeaderLoopClipField, MediaKind.Video), "");
+                _video = context.Video;
+                if (_video != null)
+                {
+                    _video.Changed += RefreshLoop;
+                    if (!context.ReduceMotion) _video.PlayLoop(LoopTrack);
+                }
+                RefreshLoop();
+            }
+            else if (_variant == BuiltInBlocks.HeaderSplitThenNow)
             {
                 SecondPicture.Show(context.Media, read.ValidAsset(BuiltInBlocks.HeaderSecondImageField, MediaKind.Image), context.Strings);
                 HeroPart.Add(SecondPicture.Root);
@@ -147,8 +172,27 @@ namespace TileStories
             HasHero = true;
         }
 
+        // video_loop: show the loop's frames while THIS header's loop holds the player and has a frame, else the poster
+        private void RefreshLoop()
+        {
+            LoopShowsFrames = _video != null && LoopTrack != null && _video.PlayingLoop && _video.IsCurrent(LoopTrack) && _video.HasFrame
+                              && _video.Texture is RenderTexture;
+            LoopFrames.style.backgroundImage = LoopShowsFrames ? new StyleBackground(Background.FromRenderTexture((RenderTexture)_video.Texture)) : StyleKeyword.Null;
+            // - the texture's pixels change every frame without UI Toolkit knowing: ask for a repaint
+            if (LoopShowsFrames) LoopFrames.MarkDirtyRepaint();
+        }
+
         private void ClearHero()
         {
+            if (_video != null)
+            {
+                _video.Changed -= RefreshLoop;
+                if (LoopTrack != null) _video.StopLoop(LoopTrack);
+            }
+            _video = null;
+            LoopTrack = null;
+            LoopShowsFrames = false;
+            LoopFrames.style.backgroundImage = StyleKeyword.Null;
             if (_variant != null) HeroPart.RemoveFromClassList("card-hero--" + _variant);
             _variant = null;
             HasHero = false;

@@ -29,6 +29,8 @@ namespace TileStories.Editor.Tests
 
         // A row's colour: both written forms the Editor accepts
         private static string ColourOf(int row) => row == 0 ? "#1F3F8F" : "#abc";
+        // A row's time: minutes:seconds, then plain seconds (TimeCodeRule reads both)
+        private static string TimeOf(int row) => row == 0 ? "1:30" : "95";
 
         // One value of every field type, from the definition
         private static BlockFieldValue Filled(BlockFieldDefinition f)
@@ -47,6 +49,7 @@ namespace TileStories.Editor.Tests
                 case BlockFieldType.PoiRef: v.value = "poi_2"; break;
                 case BlockFieldType.Color: v.value = "#1F3F8F"; break;
                 case BlockFieldType.Url: v.value = "https://example.org/" + f.Key; break;
+                case BlockFieldType.Time: v.value = TimeOf(0); break;
                 case BlockFieldType.Items:
                     for (int row = 0; row < 2; row++)
                     {
@@ -61,6 +64,7 @@ namespace TileStories.Editor.Tests
                             else if (sub.Type == BlockFieldType.Asset) s.asset = "folder/" + sub.Key + row + AssetExtension(sub);
                             else if (sub.Type == BlockFieldType.PoiRef) s.value = "poi_" + (row + 2);
                             else if (sub.Type == BlockFieldType.Url) s.value = "https://example.org/" + sub.Key + row;
+                            else if (sub.Type == BlockFieldType.Time) s.value = TimeOf(row);
                             else s.text = Languages.Select(l => new LocalizedEntry { lang = l, value = TextOf(sub.Key + row, l) }).ToList();
                             item.fields.Add(s);
                         }
@@ -130,6 +134,7 @@ namespace TileStories.Editor.Tests
                 case BlockFieldType.PoiRef: Assert.AreEqual("poi_2", read.Value(f.Key), where); break;
                 case BlockFieldType.Color: Assert.AreEqual("#1F3F8F", read.Value(f.Key), where); break;
                 case BlockFieldType.Url: Assert.AreEqual("https://example.org/" + f.Key, read.OpenableUrl(f.Key), where + ": a link the card opens"); break;
+                case BlockFieldType.Time: Assert.AreEqual(TimeOf(0), read.Value(f.Key), where); break;
                 case BlockFieldType.Items:
                     var items = read.Items(f.Key);
                     Assert.AreEqual(2, items.Count, where + ": both rows");
@@ -153,6 +158,12 @@ namespace TileStories.Editor.Tests
                                 Assert.AreEqual("poi_" + (row + 2), read.ItemValue(items[row], sub.Key), where + " row " + row);
                             else if (sub.Type == BlockFieldType.Url)
                                 Assert.AreEqual("https://example.org/" + sub.Key + row, read.ItemValue(items[row], sub.Key), where + " row " + row);
+                            else if (sub.Type == BlockFieldType.Time)
+                            {
+                                Assert.AreEqual(TimeOf(row), read.ItemValue(items[row], sub.Key), where + " row " + row);
+                                Assert.IsTrue(read.ItemTime(items[row], sub.Key, out float at), where + " row " + row + ": a time the card reads");
+                                Assert.AreEqual(row == 0 ? 90f : 95f, at, 0.001f, where + " row " + row);
+                            }
                             else
                                 Assert.AreEqual(TextOf(sub.Key + row, lang), read.ItemText(items[row], sub.Key), where + " row " + row + "." + sub.Key);
                         }

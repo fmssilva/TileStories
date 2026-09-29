@@ -92,6 +92,22 @@ namespace TileStories.Editor.Tests
         // Screen point -> the host's own GUI coordinates
         public Vector2 Local(Vector2 screen) => screen - Host.RootScreen;
 
+        // The host's real height in points: the OS clamps the 900 asked for to the screen (about 780 pt on a 1080 px screen at 125 %)
+        public float VisibleHeight => _host.position.height;
+
+        // Scroll the window so one drawn control is inside what the host really shows, the way a person scrolls to it (a control
+        // below the visible edge is drawn and probed, but a click there never reaches it)
+        public IEnumerator ScrollTo(string probeKey)
+        {
+            SetWindowField("_scrollPos", Vector2.zero);
+            yield return WaitForRepaint();
+            float contentY = Local(RectOf(probeKey).center).y;
+            SetWindowField("_scrollPos", new Vector2(0f, Mathf.Max(0f, contentY - VisibleHeight * 0.4f)));
+            yield return WaitForRepaint();
+            Assert.That(Local(RectOf(probeKey).center).y, Is.InRange(20f, VisibleHeight - 40f),
+                "precondition: '" + probeKey + "' is inside the window (" + VisibleHeight + " pt tall), where a click can reach it");
+        }
+
         public void Send(Event e) => _host.SendEvent(e);
 
         // A real left click at the centre of a probed control (or 4 px inside its left edge, for a text cell)

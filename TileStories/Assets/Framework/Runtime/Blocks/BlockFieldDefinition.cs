@@ -15,6 +15,7 @@ namespace TileStories
         PoiRef,             // value: a POI id of this wall
         Color,              // value: a colour written "#RRGGBB" or "#RGB" (content, e.g. a swatch; BlockFieldReader.TryParseColor)
         Url,                // value: a web link the card may open (http / https: WebLinkRule), one for every language
+        Time,               // value: a time in a clip, "1:30" / "90" / "1:02:03" (TimeCodeRule), one for every language
     }
 
     // One field of a block kind: the schema the view, the Editor drawer and the validator all read

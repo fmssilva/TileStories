@@ -147,16 +147,8 @@ namespace TileStories.Editor.Tests
             _window.SetWindowField("_selectedTab", Enum.Parse(tabField.FieldType, tab));
         }
 
-        // Scroll the window so one drawn control is inside it, the way a person scrolls to it
-        private IEnumerator ScrollWindowTo(string probe)
-        {
-            _window.SetWindowField("_scrollPos", Vector2.zero);
-            yield return _window.WaitForRepaint();
-            float contentY = _window.Local(_window.RectOf(probe).center).y;
-            _window.SetWindowField("_scrollPos", new Vector2(0f, Mathf.Max(0f, contentY - 300f)));
-            yield return _window.WaitForRepaint();
-            Assert.That(_window.Local(_window.RectOf(probe).center).y, Is.InRange(20f, 860f), "precondition: '" + probe + "' is inside the window, where a click can reach it");
-        }
+        // Scroll the window so one drawn control is inside it, the way a person scrolls to it (the shared helper)
+        private IEnumerator ScrollWindowTo(string probe) => _window.ScrollTo(probe);
 
         private static IEnumerator Frames(int count)
         {

@@ -28,6 +28,31 @@ namespace TileStories.Tests
             finally { Object.Destroy(tex); }
         }
 
+        // The colour a real render shows at a panel position (which picture a frame shows): the darkest pixel of the 7x7
+        // patch there -- every gallery picture is its flat colour crossed by LIGHTER grid lines (CardGalleryMedia), so the
+        // darkest pixel is the picture's own colour wherever the point falls
+        public static IEnumerator PixelAt(VisualElement inPanel, Vector2 panelPoint, System.Action<Color> got)
+        {
+            yield return new WaitForEndOfFrame();
+            var tex = ScreenCapture.CaptureScreenshotAsTexture();
+            try
+            {
+                var origin = RuntimePanelUtils.ScreenToPanel(inPanel.panel, Vector2.zero);
+                float unit = RuntimePanelUtils.ScreenToPanel(inPanel.panel, Vector2.right).x - origin.x;
+                var screen = (panelPoint - origin) / unit;
+                int cx = Mathf.RoundToInt(screen.x), cy = tex.height - 1 - Mathf.RoundToInt(screen.y);
+                Color darkest = Color.white;
+                for (int dy = -3; dy <= 3; dy++)
+                    for (int dx = -3; dx <= 3; dx++)
+                    {
+                        var c = tex.GetPixel(cx + dx, cy + dy);
+                        if (c.grayscale < darkest.grayscale) darkest = c;
+                    }
+                got(darkest);
+            }
+            finally { Object.Destroy(tex); }
+        }
+
         // Show a block entry that is NOT in CardGalleryDefinitions.All (an app's own), exactly as the harness shows one of its own
         public static void ShowEntry(CardGalleryHarness harness, CardGalleryDefinitions.Entry entry)
         {
