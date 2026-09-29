@@ -397,8 +397,10 @@ namespace TileStories.Editor
                         ReportTableCellRect("Default media preview", i);
                         GUILayout.Label(entry.kind.ToString(), GUILayout.Width(DefaultMediaKindColumnWidth));
                         GUILayout.Label(entry.key, GUILayout.Width(DefaultMediaKeyColumnWidth));
-                        HelpInfoButton.Draw(entry.key, CardDefaultMediaRowHelp(entry));
                         GUILayout.FlexibleSpace();
+                        // (i) sits at the row's own right edge, in the tab's one (i) column -- same as the "Framework
+                        // defaults" title's button above -- not right after Key, which reads as its own stray column.
+                        HelpInfoButton.Draw(entry.key, CardDefaultMediaRowHelp(entry));
                     }
                 }
             }
