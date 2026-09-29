@@ -35,6 +35,11 @@ namespace TileStories
         // The card's ONE video owner (_3.1 step 9B), beside the audio one and for the same reasons: what a video block and a header loop ask
         // to play, and whose picture they draw. Null where the caller has none (a video then shows its poster and plays nothing)
         public ICardVideo Video;
+        // The card's ONE preview owner (_3.1 step 10A.2), beside audio/video: what a model_3d / panorama_360 block (or a
+        // header model_turntable) asks for its slot (by its own block key) and renders through. Null where the caller has
+        // none (a block then shows its fallback picture). Unlike Audio/Video, several slots can be live at once: this is
+        // a slot manager, not a single current owner (see ICardPreview)
+        public ICardPreview Preview;
         // Show still pictures instead of motion (card_settings.container.reduce_motion today; the visitor's own setting joins it with _3.3):
         // a header loop shows its poster only
         public bool ReduceMotion;
