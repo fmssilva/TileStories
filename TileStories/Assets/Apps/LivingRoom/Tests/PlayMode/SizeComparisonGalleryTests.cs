@@ -51,9 +51,9 @@ namespace TileStories.LivingRoom.Tests
         // What the app's card texts say under each familiar object, in English and Portuguese (the authored words, written out here on purpose)
         private static readonly System.Collections.Generic.Dictionary<string, (string En, string Pt)> ObjectNames = new()
         {
-            { FamiliarObjects.CreditCard, ("Credit card", "Cartao de credito") },
+            { FamiliarObjects.CreditCard, ("Credit card", "Cart\u00e3o de cr\u00e9dito") },
             { FamiliarObjects.TwoEuroCoin, ("2 euro coin", "Moeda de 2 euros") },
-            { FamiliarObjects.Smartphone, ("Smartphone", "Telemovel") },
+            { FamiliarObjects.Smartphone, ("Smartphone", "Telem\u00f3vel") },
             { FamiliarObjects.SheetA4, ("A4 sheet", "Folha A4") },
         };
 
@@ -61,7 +61,7 @@ namespace TileStories.LivingRoom.Tests
         {
             new("phone", FamiliarObjects.Smartphone, 32f, 58f, "As tall as almost four phones standing on top of each other.", heading: true),
             // - a small point beside a coin that is a real, visible circle (the other coin case is a speck)
-            new("coin_round", FamiliarObjects.TwoEuroCoin, 6f, 6f, "As wide as two and a half coins.", captionPt: "Tao largo como duas moedas e meia."),
+            new("coin_round", FamiliarObjects.TwoEuroCoin, 6f, 6f, "As wide as two and a half coins.", captionPt: "T\u00e3o largo como duas moedas e meia."),
             new("card_long", FamiliarObjects.CreditCard, 120f, 70f,
                 "About fourteen credit cards wide and eight of them tall, which is a good deal more than it looks from across the room, so " +
                 "the caption runs over several lines of the phone-width card and must wrap inside it."),

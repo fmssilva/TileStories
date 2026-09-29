@@ -6,6 +6,10 @@ namespace TileStories
     {
         None,
         Image,
+        // A sound clip (audio_guide, step 9A): mp3 / wav / ogg, imported by Unity as an AudioClip
+        Audio,
+        // A WebVTT captions file (.vtt), imported by the framework's VttTextImporter as a TextAsset
+        Captions,
     }
 
     // What is wrong with a stored media path, if anything (MediaPathRule.Check)
@@ -27,8 +31,19 @@ namespace TileStories
     // (SkipReason.InvalidMedia; an Items row with such an image is incomplete). Pure, so every case is a unit test.
     public static class MediaPathRule
     {
-        // The file types each kind takes (what Resources.Load<Texture2D> reads from the imported files)
+        // The file types each kind takes (what Resources.Load reads from the imported files)
         public static readonly string[] ImageExtensions = { ".png", ".jpg", ".jpeg" };
+        public static readonly string[] AudioExtensions = { ".mp3", ".wav", ".ogg" };
+        public static readonly string[] CaptionExtensions = { ".vtt" };
+
+        // The extensions a field of this kind takes (empty for None)
+        public static string[] ExtensionsOf(MediaKind kind) => kind switch
+        {
+            MediaKind.Image => ImageExtensions,
+            MediaKind.Audio => AudioExtensions,
+            MediaKind.Captions => CaptionExtensions,
+            _ => System.Array.Empty<string>(),
+        };
 
         public static MediaPathProblem Check(string path, MediaKind kind)
         {
@@ -41,6 +56,25 @@ namespace TileStories
         }
 
         public static bool IsValid(string path, MediaKind kind) => Check(path, kind) == MediaPathProblem.None;
+
+        // The kind a path's extension names (.mp3 = Audio, .vtt = Captions, .png = Image), or None for no or another extension
+        public static MediaKind KindOfExtension(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return MediaKind.None;
+            string p = Normalize(path);
+            foreach (var kind in new[] { MediaKind.Image, MediaKind.Audio, MediaKind.Captions })
+                if (HasExtensionOf(p, kind)) return kind;
+            return MediaKind.None;
+        }
+
+        // Whether a loaded Unity asset is the type a kind is read as (a texture, an AudioClip, a TextAsset); None fits anything
+        public static bool IsAssetOfKind(UnityEngine.Object asset, MediaKind kind) => kind switch
+        {
+            MediaKind.Image => asset is UnityEngine.Texture,
+            MediaKind.Audio => asset is UnityEngine.AudioClip,
+            MediaKind.Captions => asset is UnityEngine.TextAsset,
+            _ => true,
+        };
 
         // The path to store for a project file (`assetPath` "Assets/.../Resources/<mediaFolder>/castle/hero.png"): the part
         // after the media folder ("castle/hero.png") when the file lies inside it, else the project path unchanged -- stored
@@ -57,9 +91,8 @@ namespace TileStories
 
         private static bool HasExtensionOf(string path, MediaKind kind)
         {
-            if (kind != MediaKind.Image) return false;
             string lower = path.ToLowerInvariant();
-            foreach (string ext in ImageExtensions)
+            foreach (string ext in ExtensionsOf(kind))
                 if (lower.EndsWith(ext)) return true;
             return false;
         }

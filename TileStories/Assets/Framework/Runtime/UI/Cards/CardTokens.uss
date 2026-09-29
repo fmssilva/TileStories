@@ -169,6 +169,17 @@
     --ts-progress-height: 6px;
     /* dialogue (Stories.uss): the widest a line's bubble grows, as a share of the block */
     --ts-bubble-max-width: 85%;
+    /* audio_guide (Guides.uss): the play / pause glyph inside its round button, the scrubber's thin track and its knob (and the
+       knob's radius, half its size), the caption line's minimum height (so switching captions on does not move the block) */
+    --ts-audio-glyph: 24px;
+    --ts-audio-track: 4px;
+    --ts-audio-knob: 16px;
+    --ts-audio-knob-radius: 8px;
+    --ts-audio-caption-min: 48px;
+    /* the mini-player on the wall (PoiCard.uss): its distance from the bottom edge -- above the AR zoom buttons (ZoomControlView: 14 px from
+       the edge, a 60 px strip) so it never covers them -- and how wide it grows */
+    --ts-mini-bottom: 88px;
+    --ts-mini-max-width: 480px;
     /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
     --ts-clear: rgba(0, 0, 0, 0);
 }

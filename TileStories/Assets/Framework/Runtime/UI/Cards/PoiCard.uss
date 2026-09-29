@@ -91,6 +91,100 @@
     padding-right: var(--ts-space-6);
 }
 
+/* Blocks pinned right under the header (BlockKindDefinition.PinnedTopVariants: the audio hero chip): they never scroll and count in
+   the peek stop; the header's collapse cannot cut them (they sit outside the header slot); a small gap under them, not the block gap */
+.poi-card__pinned-top {
+    flex-shrink: 0;
+}
+
+.poi-card__pinned-top .card-block-slot {
+    padding-top: var(--ts-space-2);
+    margin-bottom: var(--ts-space-2);
+}
+
+/* the collapsed (scrolled-past) header gives up everything but its one-line title, the pinned block with it */
+.poi-card__header--collapsed .poi-card__pinned-top {
+    display: none;
+}
+
+/* The mini-player on the wall (MiniPlayerView): a small bar at the bottom while audio started in a card plays on after it closed --
+   a round play / pause button and, tappable, the audio's title and time (a tap reopens its card), a thin progress line under them */
+.poi-card-mini {
+    position: absolute;
+    left: var(--ts-space-4);
+    right: var(--ts-space-4);
+    bottom: var(--ts-mini-bottom);
+    max-width: var(--ts-mini-max-width);
+    flex-direction: row;
+    align-items: center;
+    padding: var(--ts-space-1);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface);
+}
+
+.poi-card-mini__play {
+    flex-shrink: 0;
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-width: 0;
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-accent);
+}
+
+.poi-card-mini__open {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    min-height: var(--ts-touch-target);
+    margin: 0 0 0 var(--ts-space-2);
+    padding: 0 var(--ts-space-3);
+    align-items: flex-start;
+    justify-content: center;
+    border-width: 0;
+    background-color: var(--ts-clear);
+}
+
+.poi-card-mini__title {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+    padding: 0;
+}
+
+.poi-card-mini__time {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    margin: 0;
+    padding: 0;
+}
+
+.poi-card-mini__bar {
+    position: absolute;
+    left: var(--ts-space-4);
+    right: var(--ts-space-4);
+    bottom: 0;
+    height: var(--ts-audio-track);
+    border-radius: var(--ts-audio-track);
+    background-color: var(--ts-ink-3);
+}
+
+.poi-card-mini__fill {
+    width: 0;
+    height: var(--ts-audio-track);
+    border-radius: var(--ts-audio-track);
+    background-color: var(--ts-accent);
+}
+
 .poi-card__stack {
     flex-grow: 1;
     flex-shrink: 1;
@@ -130,6 +224,15 @@
     font-size: var(--ts-size-caption);
     color: var(--ts-accent-text);
     margin: 0 0 var(--ts-space-1) 0;
+}
+
+/* a block PINNED under the header (the audio hero chip, inside .poi-card__header since Bind() sits it between the title/chip and
+   the subtitle) keeps the stack's ordinary heading look, not the header's own small kicker: same specificity as the rule above,
+   later in the file wins */
+.poi-card__pinned-top .card-block-heading {
+    font-size: var(--ts-size-heading);
+    color: var(--ts-ink);
+    margin: 0 var(--ts-space-4) var(--ts-space-2) var(--ts-space-4);
 }
 
 .poi-card__header--collapsed .card-block-heading {

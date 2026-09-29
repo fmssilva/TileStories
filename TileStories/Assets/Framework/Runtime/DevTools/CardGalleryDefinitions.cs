@@ -9,7 +9,7 @@ namespace TileStories
     //   - header entries: every header variant x content (short, long, no subtitle) x stop
     //   - block entries: every other kind x variant x content (short, long, and the states that kind has: an optional
     //     field left empty, unknown...), each shown at the full stop under a short header
-    public static class CardGalleryDefinitions
+    public static partial class CardGalleryDefinitions
     {
         public readonly struct Entry
         {
@@ -99,6 +99,7 @@ namespace TileStories
             AddFeedback(list);
             AddDialogues(list);
             AddShowOnWall(list);
+            AddAudioGuides(list);
             AddHeadings(list);
             return list;
         }

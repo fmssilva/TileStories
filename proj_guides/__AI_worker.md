@@ -97,57 +97,65 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
 So start by reading them all. 
 
 
-## `And now: POI Detail Card -- evidence clean-up, step 11-fix (app strings), step 12 (live Play Mode + demo card)`
+## `And now: POI Detail Card -- 9-pre (Portuguese spelling), step 9A (audio_guide + card audio)`
 
 GATE: take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Close every
-capture window with window.Close() and confirm none is left (.clinerules/40-testing.md 4.2.3). Confirm the tree compiles and is
-committed (`git --no-optional-locks status`); if not, STOP and report. Re-verify the baseline (0 `error CS`, EditMode + PlayMode
-all green) with Unity allowed to be in the background.
+capture window with window.Close() and confirm none is left. Confirm the tree compiles and is committed
+(`git --no-optional-locks status`); if not, STOP and report. Re-verify the baseline (0 `error CS`, EditMode + PlayMode all
+green) with Unity allowed to be in the background.
 
 Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- start with "## TODOs"
-([11-fix] items) and the status table (0-11 done; 12 planned), and sections 8.3 / 8.4.
-Context only: _5.1 ("PlayMode Live Config" handout, "Dev-only features and build safety"), .clinerules/20-code-quality.md
-(dev-only rule), proj_guides/__mixed_TODOs.md (the two "Repo hygiene" items).
+([9-pre]) and the status table (0-12 done; 9A next, 9B planned), and "Tier 4 -- audio and video".
+Context only: .clinerules/20-code-quality.md (the new visitor-content exception to the ASCII rule), proj_guides/_0_work_plan.md
+(Stage 2 item 3: audio interruption handling -- follow it, do not re-derive it), _5.1.
 
-PART 0 -- evidence clean-up (one small commit-able unit, no behaviour change):
-1. One shared helper for every test render path (e.g. `TestEvidence.PathFor(domain, fileName)`) writing to
-   `TileStories/TestEvidence/<domain>/` (next to Assets/, NOT inside it); replace the five copies of
-   `Path.Combine(Application.dataPath, "Screenshots")` (CardGalleryChecks, CardGalleryTests, DisplacementDemoFixture,
-   EffectsPreviewRenderTests, LodRealPipelineTests) and the marker gallery's MarkerGalleryScreenshots path with it.
-2. Move today's PNGs from Assets/Screenshots into TestEvidence/ (keep them: they are review evidence), delete Assets/Screenshots
-   and its metas; add `TestEvidence/` and `MarkerGalleryScreenshots/` to TileStories/.gitignore and run
-   `git rm -r --cached TileStories/MarkerGalleryScreenshots` (staging only -- do not commit).
-3. Delete the 14 `Assets/InitTestScene<guid>.unity` (+ .meta) leftovers. Do NOT touch Assets.7z, __orientation_screenshot.png,
-   edit_file.py or "Fundo Desktop.jpg" (the developer decides).
-4. Update every doc path that says Assets/Screenshots (_3.1, _5.1, 40-testing.md, 10-structure.md). A full test run proves no
-   render lands inside Assets/ any more.
+PART 1 -- 9-pre, Portuguese spelling (no behaviour change):
+1. Tests: visitor wording (CardStrings.asset rows' text, an app table's text, Card Texts values, POI card content) must be valid
+   text with no control characters; Editor labels, help, where-notes, warnings stay ASCII. Keep a test that proves an Editor
+   help text with an accent still fails.
+2. Rewrite the pt rows of CardStrings.asset, LivingRoomCardStrings.asset and the LivingRoom fixture's pt card content (both
+   config copies, byte-identical round trip first) with proper Portuguese (descricao -> the right spelling, util, comentario,
+   Tao, etc.). Never change POI id/name/category/summary/keywords.
+3. PT renders: the Lamp card in Portuguese (feedback, poll, size comparison, a rich text block) read item by item for c-cedilla,
+   tildes and accents drawn by the card's font (no missing-glyph boxes). If a glyph is missing, add it to the font asset.
 
-PART 1 -- step 11-fix:
-5. App string tables: an app registers its own CardStringTable (asset in its folder) like its kinds; CardStrings lookup
-   wall[lang] > app[lang] > framework[lang], then the same for the fallback language. Detail Card > Card Texts lists app rows
-   too (grouped under the app's name) so a wall can override them. The CardStrings source-scan test covers app keys. EditMode tests
-   for the order; a real-typing Editor test for an app row.
-6. size_comparison: a label under each shape -- the point's card title and the object's name from the app table (en + pt);
-   the coin drawn round; shapes never told apart by colour alone. Recapture gallery + real scene (EN and PT) and check them.
-7. Block Library and "+ Add block": order rows by family order, then registration order (the app kind sits with `about`).
+PART 2 -- step 9A, audio_guide (one kind through the section 7 micro-cycle):
+4. Media: MediaKind.Audio (+ .vtt captions as a text asset) in MediaPathRule and the Asset drawer; fixture: a short generated WAV
+   (stdlib Python, placeholder tone/voice-free) + a matching .vtt in the Lamp's media folder, licence note in the README.
+5. Card audio as ONE service the host owns (IBlockHost gains Play/Pause/Seek/State or a card audio service -- one owner of the
+   AudioSource, never one per view): play, pause, seek, speed options, captions line for the current time (pure VttRule), queue-or-
+   switch when another POI's audio starts (card_settings setting), keep_audio_on_close -> a mini-player on the wall after the card
+   closes, tap it to reopen that card. Interruptions exactly per work plan Stage 2 item 3.
+6. Views: `player` (play/pause, scrubber, time, speed chip, captions toggle) and `hero_chip` (a compact chip in the header area
+   that plays/pauses and shows progress). Tokens only; icons through CardIcons.VectorGlyph (add Play / Pause shapes); tap
+   targets >= 48 px.
+7. Tests: pure (VttRule parse + lookup, speed list, queue-or-switch rule, MediaPathRule audio); Phase A gallery (both variants x
+   short / long / no captions, real taps on play / pause / scrubber drag / speed); Phase B on the real Lamp (a real tap plays, the
+   captions line follows the clip time, closing the card with Keep Audio Playing on shows the mini-player and a tap reopens the
+   card, another POI's audio switches or queues per the setting, a live edit of the block while playing keeps playback sane).
+   Audio time in tests comes from the service's injectable clock/position, never real-time waits.
 
-PART 2 -- step 12 (_3.1 8.3 / 8.4):
-8. LivePlayModeCardApplier (Editor assembly, ILivePlayModeApplier, the _5.1 handout pattern): a card_settings edit or a POI's card
-   edit in the POI Editor rebinds the open card in the running scene (PoiCardHost.Rebind), keeping the stop and the scroll.
-   Update LiveSyncFieldMatrixTests (the card fields are now live; remove their reasoned exclusion). Phase B: a real edit in the
-   window while Play Mode runs changes the open card (text, a block added, a variant changed), undo brings it back.
-9. Dev-only demo card: Detail Card > Test > "Show demo card" (POI popup + stop popup) opens that card in Play Mode, and "Open
-   Gallery" loads the Phase A scene; off by default, registered in DevFeatureBuildGuard; the Test guide says the card renders only
-   in Play Mode / UI Builder (no Scene-view parity). Real-click Editor test + a build-guard test.
-
-Capture and check yourself: the labelled size comparison (EN, PT), Card Texts with app rows, the Block Library order, the Test
-foldout with the demo controls, a live edit before/after in the Game view. Rules as before: no literal colours/sizes, no visitor
-strings in code, real input in tests, never change POI id/name/category/summary/keywords.
-OUT OF SCOPE: Tier 4 audio/video, Tier 5, _3.2 navigation, _3.3 styles, moving other context fields onto CardServices.
-Stop when Parts 0-2 are green. Update _3.1 (rows 11-fix and 12 with proof, TODOs, design history), 10-structure.md, _5.1.
+Capture and check yourself: both variants (idle, playing, captions on, PT), the mini-player on the wall, the Editor rows (Asset
+field for audio and captions, speed options, the new container setting). Rules as before: no literal colours/sizes, no visitor
+strings in code, real input in tests, identity fields untouched.
+OUT OF SCOPE: video / header video_loop (9B), device Bluetooth check (list it for the developer), _3.2, _3.3.
+Stop when 9-pre and 9A are green. Update _3.1 (rows 9-pre / 9A with proof, TODOs, design history), 10-structure.md, _5.1.
 Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP and report.
 Finish with: suites + counts, what you looked at, what you could not verify, a one-line commit message (no trailer), and the
-exact `git add` paths (never `git add .`). Commit only if the developer asks.
+`git add` paths (default: `git add TileStories .clinerules proj_guides`). Commit only if the developer asks.
+
+
+AND, to make sure you use real images, audio and videos, i put some examples of those in these folders in the living room. we can add them to our Living Room POIs??
+C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Videos
+C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Audio\castelo_s_jorge_audio.mp4
+C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Audio\PT_Tourism_Audio.mp3
+C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Images\castelo_s_jorge_1.avif
+C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Images\castelo_s_jorge_1.jpg
+C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Images\castelo_s_jorge_2.jpg
+C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Videos\castelo_s_jorge_video.mp3
+C:\Users\franc\Desktop\TileStories\TileStories\Assets\Apps\LivingRoom\MediaAssets\Videos\PT_Tourism_video.mp4
+
+See where we should put them and where we should use them to actually test things well
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

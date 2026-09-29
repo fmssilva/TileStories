@@ -98,6 +98,8 @@ namespace TileStories
             Root.RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyle);
             Layer.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Stack.HeaderSlot.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
+            // - a block pinned under the header (the audio hero chip) is part of the peek stop: its size moves the stops too
+            Stack.PinnedTop.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Hide();
         }
 

@@ -40,6 +40,26 @@ namespace TileStories
         // The visitor's language for the next ShowPoi (Phase A shows one language at a time; English unless a test says otherwise)
         public string Language { get; set; } = "en";
 
+        // The gallery card's audio (_3.1 step 9A): the SAME service, coordinator and mini-player as the wall's card, over a silent
+        // ManualAudioOutput and a clock of its own. Audio time moves only through AdvanceAudio (a test) or, while AutoAdvanceAudio is on,
+        // with real time (the developer looking at the gallery); every clip is a silent in-memory one (CardGalleryDefinitions.Clips)
+        public ManualAudioOutput AudioOutput { get; } = new();
+        public CardAudioService AudioService { get; private set; }
+        public CardAudioCoordinator AudioCoordinator { get; private set; }
+        // What starting an audio does while another plays (the wall's audio_when_another_starts)
+        public string AudioMode { get; set; } = CardOptions.AudioSwitch;
+        public bool AutoAdvanceAudio { get; set; } = true;
+        private float _audioClock;
+        private CardSettings _shownSettings = new();
+
+        // `seconds` of audio time pass: the output's clip moves on, the fade's clock too, and the service takes its step
+        public void AdvanceAudio(float seconds)
+        {
+            _audioClock += seconds;
+            AudioOutput.Advance(seconds);
+            AudioService.Tick();
+        }
+
         public CardGalleryHarness() => State = new CardLocalState(StateStore, "gallery");
 
         private void Start() => EnsureBuilt();
@@ -63,7 +83,15 @@ namespace TileStories
             // - Phase A checks LAYOUT: the sheet jumps to its stop (no height animation for a measurement to race after a
             //   slow first frame); the motion itself is the real scene's to test (PoiCardSceneTests)
             Sheet.Root.style.transitionDuration = new StyleList<TimeValue>(new System.Collections.Generic.List<TimeValue> { new TimeValue(0f) });
-            Sheet.CloseRequested += Sheet.Hide;
+            AudioService = new CardAudioService(AudioOutput, () => Media, () => _audioClock, () => AudioMode);
+            AudioCoordinator = new CardAudioCoordinator(AudioService, new MiniPlayerView(Sheet.Layer, AudioService), () => _shownSettings, () => Sheet.IsOpen);
+            // - the gallery has no wall to select a point on: the mini-player's tap shows the current entry again
+            AudioCoordinator.Mini.OpenRequested += _ => Show(Index);
+            Sheet.CloseRequested += () =>
+            {
+                Sheet.Hide();
+                AudioCoordinator.CardClosed();
+            };
             Show(0);
         }
 
@@ -84,6 +112,7 @@ namespace TileStories
         {
             EnsureBuilt();
             var settings = wall.card_settings;
+            _shownSettings = settings;
             // - the marker palettes the status block reads, configured exactly as a wall configures them
             MarkerVisualSettings.ApplyPalettes(wall);
             // - as on a real wall, the shown POI is one of the wall's POIs (wall_locator lays it among them)
@@ -100,14 +129,17 @@ namespace TileStories
                 State = State,
                 Events = Events,
                 Services = Services,
+                Audio = AudioService,
             };
             Sheet.Hide();
             Sheet.Show(stack.Entries, context, SheetStopRule.Stop.Peek, settings.container.half_max_ratio);
             Sheet.SetStop(stop);
+            AudioCoordinator.CardShown(poi.id, context.Strings);
         }
 
         private void Update()
         {
+            if (AutoAdvanceAudio && AudioService != null) AdvanceAudio(Time.unscaledDeltaTime);
             var keyboard = Keyboard.current;
             if (keyboard == null || Sheet == null) return;
             if (keyboard.rightArrowKey.wasPressedThisFrame) Show(Index + 1);

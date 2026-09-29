@@ -57,7 +57,7 @@ namespace TileStories
         // ---- vector glyphs (8A-fix): shapes USS borders cannot draw, painted with Painter2D ----
 
         // The shapes a VectorGlyph draws
-        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown }
+        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown, Play, Pause }
 
         // One outline of a shape, in 0..1 units of the glyph's square. `Points` are joined in order; a `Closed` outline can be filled.
         public readonly struct Outline
@@ -90,6 +90,15 @@ namespace TileStories
                     };
                 case Shape.Star:
                     return new[] { new Outline(StarPoints(), true) };
+                case Shape.Play:
+                    // - a triangle pointing right, a hair right of centre so it reads centred (its weight sits at the left)
+                    return new[] { new Outline(new[] { new Vector2(0.30f, 0.16f), new Vector2(0.84f, 0.50f), new Vector2(0.30f, 0.84f) }, true) };
+                case Shape.Pause:
+                    return new[]
+                    {
+                        new Outline(new[] { new Vector2(0.24f, 0.16f), new Vector2(0.42f, 0.16f), new Vector2(0.42f, 0.84f), new Vector2(0.24f, 0.84f) }, true),
+                        new Outline(new[] { new Vector2(0.58f, 0.16f), new Vector2(0.76f, 0.16f), new Vector2(0.76f, 0.84f), new Vector2(0.58f, 0.84f) }, true),
+                    };
                 case Shape.ThumbUp:
                     return ThumbOutlines(false);
                 default:

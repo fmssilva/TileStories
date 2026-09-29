@@ -41,6 +41,12 @@ namespace TileStories
         // A tap on empty space waits out the zoom's double-tap window before it closes (TapOutsideDismissal)
         public bool ClosePending => _tapOutside.IsPending;
 
+        // The card's audio (_3.1 step 9A): ONE owner (CardAudioService over the ONE AudioSource of CardAudioPlayer) and the mini-player that
+        // shows it after the card closes; the coordinator applies Keep Audio Playing. Blocks reach the owner through BlockBindContext.Audio.
+        public CardAudioCoordinator AudioCoordinator { get; private set; }
+        public ICardAudio Audio => AudioCoordinator?.Audio;
+        private CardAudioPlayer _audioPlayer;
+
         private readonly TapOutsideDismissal _tapOutside = new();
 
         // What the visitor did on this wall's cards (answers, votes, revealed blocks): PlayerPrefs, scoped by the wall's id. A
@@ -103,6 +109,8 @@ namespace TileStories
             }
             _demoRequest = "";
             Close();
+            // - switched off: no card and no mini-player would be left to pause it
+            AudioCoordinator?.Shutdown();
         }
 
         private void BuildOnce()
@@ -115,6 +123,32 @@ namespace TileStories
             // - the full card would cover the search bar half-way (neither readable nor tappable): the bar steps aside
             Sheet.StopChanged += stop => { if (searchUI != null) searchUI.SetTopCoveredByCard(SheetStopRule.CoversScreenTop(stop)); };
             Sheet.Layer.RegisterCallback<GeometryChangedEvent>(_ => SafeAreaHelper.ApplyAsOffsets(Sheet.Layer));
+            _audioPlayer = GetComponent<CardAudioPlayer>() != null ? GetComponent<CardAudioPlayer>() : gameObject.AddComponent<CardAudioPlayer>();
+            _audioPlayer.PollForOutputLoss = () => wallSession != null && (wallSession.CardSettings?.container.audio_android_output_poll ?? false);
+            UseAudioService(new CardAudioService(_audioPlayer.CreateOutput(), () => Media, () => Clock(),
+                () => wallSession != null ? wallSession.CardSettings?.container.audio_when_another_starts : null));
+        }
+
+        // Make `service` the card's audio owner (the app's own is built in BuildOnce; a test hands one over a silent ManualAudioOutput so audio
+        // time is a number it sets): the old owner stops, the player ticks the new one, the mini-player is drawn for it
+        internal void UseAudioService(CardAudioService service)
+        {
+            if (AudioCoordinator != null)
+            {
+                AudioCoordinator.Shutdown();
+                AudioCoordinator.Mini.Root.RemoveFromHierarchy();
+            }
+            _audioPlayer.Service = service;
+            var mini = new MiniPlayerView(Sheet.Layer, service);
+            mini.OpenRequested += OpenAudiosCard;
+            AudioCoordinator = new CardAudioCoordinator(service, mini, () => wallSession != null ? wallSession.CardSettings : null, () => Sheet != null && Sheet.IsOpen);
+        }
+
+        // The mini-player's tap: show that point's card again through the bus, like a tap on its marker (never on the point already
+        // selected: selecting it again would clear it)
+        private void OpenAudiosCard(string poiId)
+        {
+            if (SelectionEventBus.CurrentPoiId != poiId) SelectionEventBus.Select(poiId);
         }
 
         // The camera's place in the wall's frame (where the POI positions live: the markers' spawn root), or null
@@ -168,9 +202,11 @@ namespace TileStories
                 State = StateOfThisWall(),
                 Events = Events,
                 Services = Services,
+                Audio = Audio,
             };
             Sheet.Show(stack.Entries, context, SheetStopRule.OpenStop(settings.container.open_stop), settings.container.half_max_ratio);
             ShownPoiId = poiId;
+            AudioCoordinator.CardShown(poiId, context.Strings);
         }
 
         // The card state of the wall this host shows (rebuilt when the host is bound to a wall with another id)
@@ -186,6 +222,7 @@ namespace TileStories
             _tapOutside.Cancel();
             Sheet?.Hide();
             ShownPoiId = null;
+            AudioCoordinator?.CardClosed();
         }
 
         // The wall's POI set or the card's own settings changed (a live edit, a demo switched on): the open card shows the new data, and the

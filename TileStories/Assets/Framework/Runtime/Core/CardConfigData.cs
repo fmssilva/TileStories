@@ -76,6 +76,13 @@ namespace TileStories
         public bool dismiss_on_tap_outside = true;
         // Audio started in the card keeps playing in a mini-player after the card closes (Tier 4)
         public bool keep_audio_on_close = true;
+        // What starting an audio does while another one plays: "switch" (fade the playing one out, start the new) or "queue" (the new
+        // one waits for the playing one to end); never two at once (CardOptions.AudioModes, AudioSwitchRule)
+        public string audio_when_another_starts = CardOptions.AudioSwitch;
+        // Android only: also ask the platform every second or two whether Bluetooth earbuds are still the output, because
+        // AudioSettings.OnAudioConfigurationChanged is reported not to fire reliably there (work plan Stage 2 item 3). Off until a device
+        // test shows the callback alone is not enough
+        public bool audio_android_output_poll;
 
         public const float HalfMaxRatioMin = 0.25f;
         public const float HalfMaxRatioMax = 0.40f;
@@ -165,6 +172,12 @@ namespace TileStories
         public static readonly string[] OpenStops = { StopPeek, StopHalf };
         // The stops the developer-only demo card may open at (the wall's own Open At never opens the full card)
         public static readonly string[] DemoStops = { StopPeek, StopHalf, StopFull };
+
+        // What starting an audio does while another plays (CardContainerSettings.audio_when_another_starts), and the Editor's words for them
+        public const string AudioSwitch = "switch";
+        public const string AudioQueue = "queue";
+        public static readonly string[] AudioModes = { AudioSwitch, AudioQueue };
+        public static readonly string[] AudioModeLabels = { "Switch To The New One", "Queue The New One" };
 
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";

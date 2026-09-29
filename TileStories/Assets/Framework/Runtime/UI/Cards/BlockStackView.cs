@@ -19,6 +19,8 @@ namespace TileStories
         public ScrollView Scroll { get; }
         // Pinned under the scroll: the blocks whose variant is a footer (BlockKindDefinition.FooterVariants)
         public VisualElement Footer { get; }
+        // Pinned right under the header, above the scroll: the blocks whose variant is pinned to the top (BlockKindDefinition.PinnedTopVariants)
+        public VisualElement PinnedTop { get; }
 
         private readonly BlockRegistry _registry;
         // One block's place in the stack: its heading, then its view (pooled together per kind)
@@ -83,11 +85,14 @@ namespace TileStories
         // The bound header view (null when the header is another view type, or nothing is bound)
         public HeaderBlockView HeaderView => _bound.Count > 0 ? _bound[0].Slot.View as HeaderBlockView : null;
 
-        // The element the peek stop must show in full: the header's top part (its whole root for another header view)
+        // The element the peek stop must show in full: the header's top part (its whole root for another header view) -- or, when a block is
+        // pinned to it, that pinned strip (Bind() sits it between the title/chip and the subtitle, so its bottom edge already
+        // includes the title/chip above it and stays above the subtitle, never dragging the subtitle into the peek stop with it)
         public VisualElement PeekPart
         {
             get
             {
+                if (PinnedTop.childCount > 0) return PinnedTop;
                 if (_bound.Count == 0 || _bound[0].Kind != BuiltInBlocks.HeaderKind) return HeaderSlot;
                 return _bound[0].Slot.View is HeaderBlockView header ? header.PeekPart : _bound[0].Slot.View.Root;
             }
@@ -99,6 +104,11 @@ namespace TileStories
             HeaderSlot = new VisualElement { name = "poi-card-header" };
             HeaderSlot.AddToClassList("poi-card__header");
             headerParent.Add(HeaderSlot);
+            // - a placeholder position until the header binds and moves it inside itself (Bind()): between the title/chip and the
+            //   subtitle, so a pinned block (the audio hero chip) counts in the peek stop without dragging the subtitle in with it
+            PinnedTop = new VisualElement { name = "poi-card-pinned-top" };
+            PinnedTop.AddToClassList("poi-card__pinned-top");
+            headerParent.Add(PinnedTop);
             // - a phone card scrolls by dragging its content: no desktop scroll bar (it took width and ignored the tokens)
             Scroll = new ScrollView(ScrollViewMode.Vertical)
             {
@@ -194,12 +204,23 @@ namespace TileStories
                     State = context.State,
                     Events = context.Events,
                     Services = context.Services,
+                    Audio = context.Audio,
                 });
                 bool header = _bound.Count == 0 && entry.Definition.Key == BuiltInBlocks.HeaderKind;
-                var parent = header ? HeaderSlot : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;
+                var parent = header ? HeaderSlot
+                    : entry.Definition.IsPinnedTop(entry.Variant) ? PinnedTop
+                    : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;
                 parent.Add(slotOf.Root);
-                // - a picture header's hero opens what scrolls: the title stays pinned while the picture scrolls away
-                if (header && view is HeaderBlockView h && h.HasHero) Scroll.contentContainer.Insert(0, h.HeroPart);
+                if (header && view is HeaderBlockView h)
+                {
+                    // - a picture header's hero opens what scrolls: the title stays pinned while the picture scrolls away
+                    if (h.HasHero) Scroll.contentContainer.Insert(0, h.HeroPart);
+                    // - PinnedTop sits INSIDE the header, between the title/chip and the subtitle (never after the subtitle): a
+                    //   pinned block (the audio hero chip) must count in the peek stop WITHOUT dragging the subtitle into peek
+                    //   with it -- Root's two children are always [PeekPart, subtitle] (HeaderBlockView's constructor), so index 1
+                    //   is exactly between them. Re-inserting an already-attached element just moves it: harmless on every rebind.
+                    h.Root.Insert(1, PinnedTop);
+                }
                 _bound.Add((entry.Definition.Key, slotOf, media));
             }
             Scroll.scrollOffset = UnityEngine.Vector2.zero;

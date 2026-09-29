@@ -111,8 +111,10 @@ namespace TileStories.Tests
             {
                 Assert.IsTrue(CardTestInput.IsShown(heading, slot), entry.Name + ": the heading shows");
                 Assert.LessOrEqual(heading.worldBound.yMax, view.Root.worldBound.yMin + 0.5f, entry.Name + ": above its block");
-                // - the same look in the scroll and in the footer (only the pinned header styles its kicker its own way)
-                var reference = harness.Sheet.Root.Query<Label>(className: "card-block-heading").ToList().First(l => !stack.HeaderSlot.Contains(l));
+                // - the same look in the scroll, the footer and a block pinned under the header (only the header's OWN heading --
+                //   inside HeaderSlot but not inside the pinned strip nested in it -- styles its kicker its own way)
+                var reference = harness.Sheet.Root.Query<Label>(className: "card-block-heading").ToList()
+                    .First(l => !stack.HeaderSlot.Contains(l) || stack.PinnedTop.Contains(l));
                 Assert.AreEqual(reference.resolvedStyle.fontSize, heading.resolvedStyle.fontSize, "one heading look");
                 Assert.GreaterOrEqual(CardTestInput.Contrast(heading.resolvedStyle.color, CardTestInput.EffectiveBackground(heading)), UIAccessibility.MinRatioNormalText,
                     entry.Name + ": heading contrast");

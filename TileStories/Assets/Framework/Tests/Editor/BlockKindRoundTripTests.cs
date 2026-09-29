@@ -14,6 +14,13 @@ namespace TileStories.Editor.Tests
     public class BlockKindRoundTripTests
     {
         private const BindingFlags Instance = BindingFlags.NonPublic | BindingFlags.Instance;
+        // The file type a filled Asset field carries: one its media kind's rule accepts (a picture unless the field names another kind)
+        private static string AssetExtension(BlockFieldDefinition field)
+        {
+            var extensions = MediaPathRule.ExtensionsOf(field.Media);
+            return extensions.Length > 0 ? extensions[0] : ".png";
+        }
+
         private static readonly string[] Languages = { "en", "pt" };
 
         private static IEnumerable<string> KindKeys => BlockRegistry.Shared.All.Select(k => k.Key);
@@ -36,7 +43,7 @@ namespace TileStories.Editor.Tests
                 case BlockFieldType.Number: v.number = 3.5f; break;
                 case BlockFieldType.Toggle: v.flag = true; break;
                 case BlockFieldType.Choice: v.value = f.Options[f.Options.Count - 1]; break;
-                case BlockFieldType.Asset: v.asset = "folder/" + f.Key + ".png"; break;
+                case BlockFieldType.Asset: v.asset = "folder/" + f.Key + AssetExtension(f); break;
                 case BlockFieldType.PoiRef: v.value = "poi_2"; break;
                 case BlockFieldType.Color: v.value = "#1F3F8F"; break;
                 case BlockFieldType.Url: v.value = "https://example.org/" + f.Key; break;
@@ -51,7 +58,7 @@ namespace TileStories.Editor.Tests
                             else if (sub.Type == BlockFieldType.Number) s.number = row + 1;
                             else if (sub.Type == BlockFieldType.Color) s.value = ColourOf(row);
                             else if (sub.Type == BlockFieldType.Toggle) s.flag = row == 0;
-                            else if (sub.Type == BlockFieldType.Asset) s.asset = "folder/" + sub.Key + row + ".png";
+                            else if (sub.Type == BlockFieldType.Asset) s.asset = "folder/" + sub.Key + row + AssetExtension(sub);
                             else if (sub.Type == BlockFieldType.PoiRef) s.value = "poi_" + (row + 2);
                             else if (sub.Type == BlockFieldType.Url) s.value = "https://example.org/" + sub.Key + row;
                             else s.text = Languages.Select(l => new LocalizedEntry { lang = l, value = TextOf(sub.Key + row, l) }).ToList();
@@ -119,7 +126,7 @@ namespace TileStories.Editor.Tests
                 case BlockFieldType.Number: Assert.AreEqual(3.5f, read.Number(f.Key), where); break;
                 case BlockFieldType.Toggle: Assert.IsTrue(read.Flag(f.Key), where); break;
                 case BlockFieldType.Choice: Assert.AreEqual(f.Options[f.Options.Count - 1], read.Value(f.Key), where); break;
-                case BlockFieldType.Asset: Assert.AreEqual("folder/" + f.Key + ".png", read.Asset(f.Key), where); break;
+                case BlockFieldType.Asset: Assert.AreEqual("folder/" + f.Key + AssetExtension(f), read.Asset(f.Key), where); Assert.AreEqual("folder/" + f.Key + AssetExtension(f), read.ValidAsset(f.Key, f.Media == MediaKind.None ? MediaKind.Image : f.Media), where + ": a path the rule accepts"); break;
                 case BlockFieldType.PoiRef: Assert.AreEqual("poi_2", read.Value(f.Key), where); break;
                 case BlockFieldType.Color: Assert.AreEqual("#1F3F8F", read.Value(f.Key), where); break;
                 case BlockFieldType.Url: Assert.AreEqual("https://example.org/" + f.Key, read.OpenableUrl(f.Key), where + ": a link the card opens"); break;
@@ -141,7 +148,7 @@ namespace TileStories.Editor.Tests
                             else if (sub.Type == BlockFieldType.Toggle)
                                 Assert.AreEqual(row == 0, read.ItemFlag(items[row], sub.Key), where + " row " + row);
                             else if (sub.Type == BlockFieldType.Asset)
-                                Assert.AreEqual("folder/" + sub.Key + row + ".png", read.ItemValidAsset(items[row], sub.Key, sub.Media), where + " row " + row + ": a path the rule accepts");
+                                Assert.AreEqual("folder/" + sub.Key + row + AssetExtension(sub), read.ItemValidAsset(items[row], sub.Key, sub.Media), where + " row " + row + ": a path the rule accepts");
                             else if (sub.Type == BlockFieldType.PoiRef)
                                 Assert.AreEqual("poi_" + (row + 2), read.ItemValue(items[row], sub.Key), where + " row " + row);
                             else if (sub.Type == BlockFieldType.Url)

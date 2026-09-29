@@ -43,7 +43,7 @@ namespace TileStories.LivingRoom.Tests
             block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.ObjectField, value = objectKey });
             block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.WidthField, number = width });
             block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.HeightField, number = height });
-            block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.CaptionField, text = Words("Four phones tall.", "Quatro telemoveis de altura.") });
+            block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.CaptionField, text = Words("Four phones tall.", "Quatro telem\u00f3veis de altura.") });
             return block;
         }
 
@@ -253,7 +253,7 @@ namespace TileStories.LivingRoom.Tests
             Assert.AreEqual(12.5f, en.Number(SizeComparisonBlock.WidthField));
             Assert.AreEqual(7.25f, en.Number(SizeComparisonBlock.HeightField));
             Assert.AreEqual("Four phones tall.", en.Text(SizeComparisonBlock.CaptionField));
-            Assert.AreEqual("Quatro telemoveis de altura.", pt.Text(SizeComparisonBlock.CaptionField));
+            Assert.AreEqual("Quatro telem\u00f3veis de altura.", pt.Text(SizeComparisonBlock.CaptionField));
             Assert.AreEqual("Que tamanho?", pt.Text(BlockKindDefinition.HeadingField));
         }
 

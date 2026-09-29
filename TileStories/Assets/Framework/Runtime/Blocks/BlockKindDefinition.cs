@@ -42,6 +42,9 @@ namespace TileStories
         public string NotShownForPoiNote;
         // Variants drawn in the card's footer, pinned under the scrolling blocks (a sticky call to action)
         public IReadOnlyList<string> FooterVariants;
+        // Variants drawn in a slot pinned right under the card's header, above the scrolling blocks, and counted in the peek stop (an audio
+        // guide's hero chip: it plays from the top of the card without opening it)
+        public IReadOnlyList<string> PinnedTopVariants;
 
         // The key of one of the kind's Toggle fields (null = none): while it is on, the stack keeps the block hidden until the
         // visitor has scrolled past the card's content (ContentSeenRule), then shows it and remembers that (CardLocalState.Seen).
@@ -70,6 +73,8 @@ namespace TileStories
         }
 
         public bool IsFooter(string variant) => FooterVariants != null && variant != null && ContainsString(FooterVariants, variant);
+
+        public bool IsPinnedTop(string variant) => PinnedTopVariants != null && variant != null && ContainsString(PinnedTopVariants, variant);
 
         public bool HasVariant(string variant) => Variants != null && variant != null && ContainsString(Variants, variant);
 

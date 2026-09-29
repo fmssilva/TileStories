@@ -1,0 +1,157 @@
+/* The guides family's looks (_3.1 Tier 4): what the visitor listens to -- audio_guide, in a player or as a chip under the header.
+   Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3, _3.3).
+   UI Toolkit USS only: no sibling selectors (an import ERROR that drops the whole sheet), no % radius, no web-CSS gap / cursor / calc.
+   The play / pause shapes are painted vector glyphs (CardIcons): no glyph font, no picture. */
+
+/* ---- audio_guide: the top row -- the round play / pause button, then the title and the time ---- */
+
+.card-audio__top {
+    flex-direction: row;
+    align-items: center;
+}
+
+.card-audio__play {
+    flex-shrink: 0;
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-width: 0;
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-accent);
+}
+
+/* the glyph takes the colour that reads on the accent, so it holds contrast in both states */
+.card-audio__glyph {
+    width: var(--ts-audio-glyph);
+    height: var(--ts-audio-glyph);
+    color: var(--ts-on-accent);
+}
+
+.card-audio--unavailable .card-audio__play {
+    background-color: var(--ts-surface-2);
+}
+
+.card-audio--unavailable .card-audio__glyph {
+    color: var(--ts-ink-3);
+}
+
+/* nothing to scrub in a clip that cannot be loaded: no bar with a knob that only looks draggable */
+.card-audio--unavailable .card-audio__scrubber {
+    display: none;
+}
+
+.card-audio__words {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    margin-left: var(--ts-space-3);
+}
+
+.card-audio__title {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+    padding: 0;
+}
+
+.card-audio__time {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    margin: 0;
+    padding: 0;
+}
+
+.card-audio__note {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-accent-text);
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- the scrubber: a finger-tall hit area around a thin track; the played part and the knob follow the position ---- */
+
+.card-audio__scrubber {
+    height: var(--ts-touch-target);
+    justify-content: center;
+    margin-top: var(--ts-space-1);
+}
+
+.card-audio__track {
+    height: var(--ts-audio-track);
+    border-radius: var(--ts-audio-track);
+    background-color: var(--ts-ink-3);
+}
+
+.card-audio__fill {
+    width: 0;
+    height: var(--ts-audio-track);
+    border-radius: var(--ts-audio-track);
+    background-color: var(--ts-accent);
+}
+
+.card-audio__knob {
+    position: absolute;
+    top: 50%;
+    width: var(--ts-audio-knob);
+    height: var(--ts-audio-knob);
+    border-radius: var(--ts-audio-knob-radius);
+    background-color: var(--ts-accent);
+    translate: -50% -50%;
+}
+
+/* ---- the chips under the bar (speed, captions) and the caption line ---- */
+
+.card-audio__chips {
+    flex-direction: row;
+    margin-top: var(--ts-space-1);
+}
+
+.card-audio__chip {
+    min-width: var(--ts-touch-target);
+    min-height: var(--ts-touch-target);
+    margin: 0 var(--ts-space-2) 0 0;
+    padding: 0 var(--ts-space-3);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink);
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface-2);
+}
+
+.card-audio__chip--on {
+    color: var(--ts-accent-text);
+    border-color: var(--ts-accent);
+}
+
+.card-audio__caption-line {
+    min-height: var(--ts-audio-caption-min);
+    margin: var(--ts-space-2) 0 0 0;
+    padding: 0;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: upper-left;
+}
+
+/* ---- hero_chip: the same button and words in one row, a thin progress line under it, no chips and no caption line ---- */
+
+.card-audio--hero_chip .card-audio__chips {
+    display: none;
+}
+
+.card-audio--hero_chip .card-audio__scrubber {
+    height: var(--ts-audio-track);
+    margin: var(--ts-space-1) 0 0 0;
+}
+
+.card-audio--hero_chip .card-audio__knob {
+    display: none;
+}

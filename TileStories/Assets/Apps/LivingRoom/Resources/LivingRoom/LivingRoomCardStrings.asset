@@ -20,7 +20,7 @@ MonoBehaviour:
     - lang: en
       value: Credit card
     - lang: pt
-      value: Cartao de credito
+      value: "Cart\xE3o de cr\xE9dito"
   - key: living_room_object_two_euro_coin
     where: The name written under the 2 euro coin drawn beside a point in a Size
       Comparison block.
@@ -36,7 +36,7 @@ MonoBehaviour:
     - lang: en
       value: Smartphone
     - lang: pt
-      value: Telemovel
+      value: "Telem\xF3vel"
   - key: living_room_object_sheet_a4
     where: The name written under the A4 sheet drawn beside a point in a Size Comparison
       block.

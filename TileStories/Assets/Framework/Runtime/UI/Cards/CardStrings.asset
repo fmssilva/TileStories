@@ -58,7 +58,7 @@ MonoBehaviour:
     - lang: en
       value: Not assessed
     - lang: pt
-      value: Nao avaliado
+      value: "N\xE3o avaliado"
   - key: status_percent
     where: The condition's name in a Status block when the wall's outline types do
       not name it; {0} is the damage percentage.
@@ -105,7 +105,7 @@ MonoBehaviour:
     - lang: en
       value: Chapter {0} of {1}
     - lang: pt
-      value: Capitulo {0} de {1}
+      value: "Cap\xEDtulo {0} de {1}"
   - key: story_previous
     where: The button of a Story Chapters block that goes back one chapter.
     text:
@@ -135,7 +135,7 @@ MonoBehaviour:
     - lang: en
       value: Picture unavailable
     - lang: pt
-      value: Imagem indisponivel
+      value: "Imagem indispon\xEDvel"
   - key: header_then
     where: The label on the left half of a Then and Now header picture.
     text:
@@ -216,7 +216,7 @@ MonoBehaviour:
     - lang: en
       value: You are here
     - lang: pt
-      value: Esta aqui
+      value: "Est\xE1 aqui"
   - key: today_map_heading
     where: The title over a Today Map block when its Heading is empty.
     text:
@@ -334,7 +334,7 @@ MonoBehaviour:
     - lang: en
       value: Was this useful?
     - lang: pt
-      value: Foi util?
+      value: "Foi \xFAtil?"
   - key: feedback_stars_question
     where: The question of a Feedback block with the Stars look, when the block writes
       none.
@@ -349,14 +349,14 @@ MonoBehaviour:
     - lang: en
       value: Helpful
     - lang: pt
-      value: Util
+      value: "\xDAtil"
   - key: feedback_thumb_down
     where: The words under the thumb down of a Feedback block.
     text:
     - lang: en
       value: Not helpful
     - lang: pt
-      value: Pouco util
+      value: "Pouco \xFAtil"
   - key: feedback_star
     where: 'The name of one star of a Feedback block ({0} = which star, {1} = how
       many stars): its tooltip.'
@@ -371,7 +371,7 @@ MonoBehaviour:
     - lang: en
       value: Thank you for your feedback
     - lang: pt
-      value: Obrigado pelo seu comentario
+      value: "Obrigado pelo seu coment\xE1rio"
   - key: poll_your_choice
     where: The caption on the option the visitor picked in a Poll block.
     text:
@@ -387,7 +387,8 @@ MonoBehaviour:
     - lang: pt
       value: Obrigado pelo seu voto
   - key: poll_percent
-    where: 'The share of the votes an option got, when results exist ({0} = the percentage): a Poll block only shows it when the app has results to show.'
+    where: 'The share of the votes an option got, when results exist ({0} = the percentage):
+      a Poll block only shows it when the app has results to show.'
     text:
     - lang: en
       value: '{0}%'
@@ -399,23 +400,26 @@ MonoBehaviour:
     - lang: en
       value: Your story
     - lang: pt
-      value: A sua historia
+      value: "A sua hist\xF3ria"
   - key: collect_add
-    where: The button of a Collect block that adds this point's item to the visitor's story.
+    where: The button of a Collect block that adds this point's item to the visitor's
+      story.
     text:
     - lang: en
       value: Add to my story
     - lang: pt
-      value: Adicionar a minha historia
+      value: "Adicionar \xE0 minha hist\xF3ria"
   - key: collect_collected
-    where: The words of a Collect block's button once the item is in the visitor's story.
+    where: The words of a Collect block's button once the item is in the visitor's
+      story.
     text:
     - lang: en
       value: In your story
     - lang: pt
-      value: Na sua historia
+      value: "Na sua hist\xF3ria"
   - key: collect_progress
-    where: 'How many of this wall''s collectable items the visitor has ({0} = theirs, {1} = all of the wall''s).'
+    where: How many of this wall's collectable items the visitor has ({0} = theirs,
+      {1} = all of the wall's).
     text:
     - lang: en
       value: '{0} of {1} collected'
@@ -429,30 +433,95 @@ MonoBehaviour:
     - lang: pt
       value: Continuar
   - key: dialogue_again
-    where: The button of a Dialogue block that starts the conversation over once it has ended.
+    where: The button of a Dialogue block that starts the conversation over once
+      it has ended.
     text:
     - lang: en
       value: Start again
     - lang: pt
-      value: Recomecar
+      value: "Recome\xE7ar"
   - key: dialogue_you
     where: The name shown on the visitor's own reply in a Dialogue block.
     text:
     - lang: en
       value: You
     - lang: pt
-      value: Voce
+      value: "Voc\xEA"
   - key: show_on_wall_button
-    where: 'The button of a Show On Wall block, which lowers the card so the point''s marker shows on the wall.'
+    where: The button of a Show On Wall block, which lowers the card so the point's
+      marker shows on the wall.
     text:
     - lang: en
       value: Show me where it is
     - lang: pt
       value: Mostra-me onde fica
   - key: show_on_wall_nearby
-    where: The caption over the neighbouring points of a Show On Wall block in the With Neighbours look.
+    where: The caption over the neighbouring points of a Show On Wall block in the
+      With Neighbours look.
     text:
     - lang: en
       value: Also nearby
     - lang: pt
-      value: Tambem perto
+      value: "Tamb\xE9m perto"
+  - key: audio_play
+    where: The play button's name (its tooltip and accessible name) on an Audio Guide
+      and on the small player on the wall.
+    text:
+    - lang: en
+      value: Play
+    - lang: pt
+      value: Reproduzir
+  - key: audio_pause
+    where: The same button's name while the audio plays.
+    text:
+    - lang: en
+      value: Pause
+    - lang: pt
+      value: Pausar
+  - key: audio_speed
+    where: The name of the speed chip of an Audio Guide (its own text is the speed,
+      like 1.5x).
+    text:
+    - lang: en
+      value: Playback speed
+    - lang: pt
+      value: "Velocidade de reprodu\xE7\xE3o"
+  - key: audio_captions
+    where: 'The captions switch of an Audio Guide player: its words and its name.'
+    text:
+    - lang: en
+      value: Captions
+    - lang: pt
+      value: Legendas
+  - key: audio_seek
+    where: The name of the bar an Audio Guide player is dragged along to move through
+      the recording.
+    text:
+    - lang: en
+      value: Position in the audio
+    - lang: pt
+      value: "Posi\xE7\xE3o no \xE1udio"
+  - key: audio_queued
+    where: 'Under the title of an Audio Guide whose audio waits its turn (Card Container
+      > When Another Audio Starts: Queue The New One).'
+    text:
+    - lang: en
+      value: Up next
+    - lang: pt
+      value: A seguir
+  - key: audio_unavailable
+    where: Under the title of an Audio Guide whose file cannot be loaded (missing,
+      or not a sound Unity can read).
+    text:
+    - lang: en
+      value: Audio unavailable
+    - lang: pt
+      value: "\xC1udio indispon\xEDvel"
+  - key: mini_player_open
+    where: 'The name of the small player''s title on the wall: a tap shows the card
+      of the audio again.'
+    text:
+    - lang: en
+      value: Open the card
+    - lang: pt
+      value: "Abrir o cart\xE3o"

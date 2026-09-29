@@ -195,6 +195,8 @@ namespace TileStories.Editor
                     CardContainerSettings.HalfMaxRatioMax, CardHalfHeightHelp);
                 c.dismiss_on_tap_outside = DrawToggleField("Tap Outside Closes", c.dismiss_on_tap_outside, CardTapOutsideHelp);
                 c.keep_audio_on_close = DrawToggleField("Keep Audio Playing", c.keep_audio_on_close, CardKeepAudioHelp);
+                c.audio_when_another_starts = DrawPopupField("Audio Overlap", c.audio_when_another_starts, CardOptions.AudioModes, CardOptions.AudioModeLabels, CardAudioSwitchHelp);
+                c.audio_android_output_poll = DrawToggleField("Android Earbud Check", c.audio_android_output_poll, CardAudioAndroidPollHelp);
             }
 
             DrawDomainTestSubSection(_cardContainerTest, CardSceneTestGuide, CardPlaymodeTestGuide, CardDeviceTestGuide, DrawCardTestRows);

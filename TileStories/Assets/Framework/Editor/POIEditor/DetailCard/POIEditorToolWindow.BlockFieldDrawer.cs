@@ -267,7 +267,7 @@ namespace TileStories.Editor
             if (edited != current) set(edited);
         }
 
-        // An Asset field (a picture today): an object field that offers only files of the field's media kind, stored as the
+        // An Asset field (a picture, an audio clip, a captions file): an object field that offers only files of the field's media kind, stored as the
         // path inside the wall's Media Folder (MediaPathRule.StoredPathFor). A file picked from outside that folder is
         // stored as picked and warned about (the card leaves it out, BlockStackBuilder's InvalidMedia), never silently
         // refused; a stored path with no file behind it is warned about too. Drawing never writes.
@@ -275,10 +275,10 @@ namespace TileStories.Editor
             Func<string> get, Action<string> set)
         {
             string current = get();
-            var shown = MediaAssetFor(current, mediaFolder);
+            var shown = MediaAssetFor(current, mediaFolder, field.Media);
             DrawEditorRow(out float rowWidth, out _, indent);
             EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
-            var picked = EditorGUILayout.ObjectField(shown, typeof(Texture2D), false,
+            var picked = EditorGUILayout.ObjectField(shown, MediaObjectType(field.Media), false,
                 GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
             ReportTableCellRect(probeName, probeIndex);
             HelpInfoButton.Draw(field.Label, field.Help);
@@ -289,22 +289,31 @@ namespace TileStories.Editor
             var problem = MediaPathRule.Check(stored, field.Media);
             if (problem == MediaPathProblem.OutsideFolder || problem == MediaPathProblem.WrongType)
                 EditorGUILayout.HelpBox(CardMediaProblemText(field.Label, field.Media, problem), MessageType.Warning);
-            else if (problem == MediaPathProblem.None && MediaAssetFor(stored, mediaFolder) == null)
-                EditorGUILayout.HelpBox(CardMediaMissingText(field.Label, stored), MessageType.Warning);
+            else if (problem == MediaPathProblem.None && MediaAssetFor(stored, mediaFolder, field.Media) == null)
+                EditorGUILayout.HelpBox(CardMediaMissingText(field.Label, stored, field.Media), MessageType.Warning);
         }
 
-        // The picture a stored path names: inside the Media Folder through Resources (what the app loads), a project path
+        // The asset a stored path names: inside the Media Folder through Resources (what the app loads), a project path
         // as picked (outside the folder: shown so the developer sees what they chose), else none
-        internal static Texture2D MediaAssetFor(string stored, string mediaFolder)
+        internal static UnityEngine.Object MediaAssetFor(string stored, string mediaFolder, MediaKind kind = MediaKind.Image)
         {
             if (string.IsNullOrWhiteSpace(stored)) return null;
+            var type = MediaObjectType(kind);
             string p = stored.Trim().Replace('\\', '/');
-            if (p.StartsWith("Assets/")) return AssetDatabase.LoadAssetAtPath<Texture2D>(p);
-            if (!MediaPathRule.IsValid(p, MediaKind.Image)) return null;
+            if (p.StartsWith("Assets/")) return AssetDatabase.LoadAssetAtPath(p, type);
+            if (!MediaPathRule.IsValid(p, kind)) return null;
             string folder = (mediaFolder ?? "").Trim().Trim('/');
             string noExtension = p.Substring(0, p.LastIndexOf('.'));
-            return Resources.Load<Texture2D>(folder.Length > 0 ? folder + "/" + noExtension : noExtension);
+            return Resources.Load(folder.Length > 0 ? folder + "/" + noExtension : noExtension, type);
         }
+
+        // The Unity type an Asset field of this kind holds: a texture, an AudioClip, a TextAsset (a captions file, made by VttTextImporter)
+        internal static System.Type MediaObjectType(MediaKind kind) => kind switch
+        {
+            MediaKind.Audio => typeof(AudioClip),
+            MediaKind.Captions => typeof(TextAsset),
+            _ => typeof(Texture2D),
+        };
 
         // A Number field: a slider over the definition's range, showing its default while nothing is stored; the value is
         // created by the first real change, never by drawing

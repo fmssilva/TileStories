@@ -28,6 +28,10 @@ namespace TileStories
         // The card's other services (_3.1 step 11): what a kind needs beyond the fields above (a poll's IPollResults, an app kind's own).
         // Null where the caller has none: every Service<T>() is then null
         public CardServices Services;
+        // The card's ONE audio owner (_3.1 step 9A): what an audio block asks to play, pause or seek, and the mini-player draws. Null where
+        // the caller has none (a block then shows its idle state and plays nothing). Not a CardServices entry: it belongs to the card host
+        // and outlives the card, and every playing kind (audio now, video in 9B) uses it
+        public ICardAudio Audio;
 
         // The registered service of type T, or null when there is none: a kind that needs a service treats null as "nothing to show"
         public T Service<T>() where T : class => Services?.Get<T>();

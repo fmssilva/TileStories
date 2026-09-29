@@ -126,7 +126,11 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             Sheet.SetStop(SheetStopRule.Stop.Half);
             yield return CardTestInput.Settle();
-            float halfBefore = Sheet.Stops.Half;
+            // - the peek content (title, chip, the pinned audio hero chip) does not change with the ratio: work out what the new
+            //   ratio must give directly from the rule itself (SheetStopRule.Compute), rather than a loose "smaller than before"
+            //   guess -- with a pinned block this tall, a looser ratio can already be clamped up to peek, so "smaller" is not
+            //   always true; "exactly what the formula says" always is (--ts-sheet-top-gap is 48, DraggingUp_GoesToHalf's own check)
+            float expectedHalfAfter = SheetStopRule.Compute(Sheet.Layer.layout.height, Sheet.Stops.Peek, CardContainerSettings.HalfMaxRatioMin, 48f).Half;
             string closeBefore = Sheet.CloseButton.tooltip;
             Assert.AreEqual("Close", closeBefore, "precondition: the framework's wording");
             Assert.Greater(Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().Count(), 0, "precondition: The Lamp shows quick facts");
@@ -139,7 +143,7 @@ namespace TileStories.Tests
             });
             Assert.AreEqual("Dismiss", Sheet.CloseButton.tooltip, "the wall's Card Texts wording reached the close button");
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "the stop is kept");
-            Assert.Less(Sheet.Stops.Half, halfBefore - 1f, "the Half Height Max is the new, smaller one");
+            Assert.AreEqual(expectedHalfAfter, Sheet.Stops.Half, 1f, "the Half Height Max is the new one (SheetStopRule.Compute over the unchanged peek content)");
             Assert.AreEqual(0, Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().Count(), "the Block Library switched the kind off: its blocks are gone");
         }
 

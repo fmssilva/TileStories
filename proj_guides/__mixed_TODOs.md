@@ -107,3 +107,13 @@ check thee FOV splike thing???
   `EditorSceneManager.LoadSceneAsyncInPlayMode`.
 - `Open Gallery` in Edit Mode replaces the open scene (after refusing to do so over unsaved changes). Loading the gallery additively, or in its
   own window, would keep the wall scene open beside it; not needed yet.
+
+## From the Architect review of 9-pre + 9A (2026-09-29)
+
+- `Markers/Fonts/Oswald Bold SDF.asset` changes on test runs (-944 lines: its dynamic glyph table and atlas are rewritten). A
+  TextMeshPro font in Dynamic mode saves whatever glyphs a run happened to use. Keep it out of commits (`git checkout -- <file>`)
+  and, in the marker domain, make it Static with the needed character set (Latin + Portuguese) or clear dynamic data on build.
+- Two Worker sessions in a row began from an interrupted, uncommitted predecessor (8B earlier, 9A now). Sessions that end with
+  "audit the WIP" cost a whole run. Keep each brief to ONE step, and have the Worker commit-suggest after each Part.
+- The MCP-for-Unity bridge can keep an orphaned test job after Unity is idle; every new run is then refused. `editor_state` +
+  `get_test_job` diagnose it; restarting the Editor clears it. Worth a line in `50-terminal_and_tools.md` if it happens again.

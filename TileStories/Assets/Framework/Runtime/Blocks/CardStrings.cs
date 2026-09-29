@@ -111,6 +111,17 @@ namespace TileStories
             // show_on_wall: its button, and the caption over the neighbours of the with_neighbours look
             public const string ShowOnWallButton = "show_on_wall_button";
             public const string ShowOnWallNearby = "show_on_wall_nearby";
+            // audio_guide and the mini-player (step 9A): the names of the play / pause button, the speed chip, the captions switch and the
+            // scrubber (tooltips and accessible names -- the chip's own text is a number), "Up next" for an audio waiting in the queue,
+            // the state of a clip that cannot be loaded, and the mini-player's way back to the card
+            public const string AudioPlay = "audio_play";
+            public const string AudioPause = "audio_pause";
+            public const string AudioSpeed = "audio_speed";
+            public const string AudioCaptions = "audio_captions";
+            public const string AudioSeek = "audio_seek";
+            public const string AudioQueued = "audio_queued";
+            public const string AudioUnavailable = "audio_unavailable";
+            public const string MiniPlayerOpen = "mini_player_open";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -124,6 +135,7 @@ namespace TileStories
                 FeedbackThumbsQuestion, FeedbackStarsQuestion, FeedbackThumbUp, FeedbackThumbDown, FeedbackStar, FeedbackThanks,
                 PollYourChoice, PollThanks, PollPercent, CollectHeading, CollectAdd, CollectCollected, CollectProgress,
                 DialogueContinue, DialogueAgain, DialogueYou, ShowOnWallButton, ShowOnWallNearby,
+                AudioPlay, AudioPause, AudioSpeed, AudioCaptions, AudioSeek, AudioQueued, AudioUnavailable, MiniPlayerOpen,
             };
         }
 

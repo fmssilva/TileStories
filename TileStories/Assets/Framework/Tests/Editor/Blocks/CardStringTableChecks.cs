@@ -19,7 +19,7 @@ namespace TileStories.Editor.Tests
         // This wall's own wording of one text in one language ("" when it has none): what typing in Card Texts writes
         public static string WallWording(CardSettings settings, string key, string language) => POIEditorToolWindow.CardTextOverride(settings, key, language);
 
-        // The table has a row for every key (en + pt text, a where note, ASCII only) and no row the code never reads
+        // The table has a row for every key (en + pt text that is valid visitor text, an ASCII where note) and no row the code never reads
         public static void AssertTableHasEveryKey(CardStringTable table, IReadOnlyCollection<string> keys, string owner)
         {
             Assert.IsNotNull(table, owner + ": the table asset exists");
@@ -30,7 +30,9 @@ namespace TileStories.Editor.Tests
                 foreach (string lang in new[] { "en", "pt" })
                     Assert.IsNotNull(CardStrings.Find(table.Entries(), key, lang), owner + ": " + key + " has " + lang + " text");
                 Assert.IsFalse(string.IsNullOrWhiteSpace(row.where), owner + ": " + key + " says where the card shows it (the Editor (i))");
-                Assert.IsTrue((row.where + string.Concat(row.text.Select(t => t.value))).All(c => c < 128), owner + ": " + key + ": ASCII only");
+                // - the where-note is an Editor text (ASCII); the row's words are what a visitor reads (proper letters, valid text)
+                EditorTextChecks.AssertAscii(row.where, owner + ": " + key + " where-note");
+                foreach (var t in row.text) VisitorTextChecks.AssertValid(t.value, owner + ": " + key + " [" + t.lang + "]");
             }
             CollectionAssert.AreEquivalent(keys, table.rows.Select(r => r.key), owner + ": no row the code never reads, no key without a row");
         }

@@ -46,8 +46,19 @@ namespace TileStories.Editor
             "a drag across the view never closes it. The X and a swipe down always close it.";
 
         private const string CardKeepAudioHelp =
-            "For audio blocks: the sound goes on in a small player after the card closes. No built-in block plays audio yet, " +
-            "so this has no effect today.";
+            "For Audio Guide blocks: on, the sound goes on in a small player at the bottom of the wall after the card closes (or " +
+            "another point's card opens); a tap on its title shows that card again. Off, the sound stops when its card closes.";
+
+        private const string CardAudioSwitchHelp =
+            "What starting an audio does while another one plays (two never play together). Switch To The New One: the playing audio " +
+            "fades out over half a second and the new one starts. Queue The New One: the playing audio finishes first, then the queued " +
+            "ones play in the order they were asked for.";
+
+        private const string CardAudioAndroidPollHelp =
+            "Android only. Unity should tell the app when earbuds connect or disconnect, but on some Android phones it does not, and " +
+            "the narration goes silent. On: while audio plays, the app asks the phone every second or two whether Bluetooth earbuds " +
+            "are still the output and restarts the narration where it was when they are not. Leave it off unless a device test " +
+            "shows the narration stays silent after the earbuds change. Has no effect anywhere else.";
 
         private const string BlockLibraryHelp =
             "Every block kind this wall can show, wall-wide. Enabled: off hides every block of that kind on every card (Header " +
@@ -111,6 +122,14 @@ namespace TileStories.Editor
             "- Tap another marker while it is open: the card keeps its height and shows the new point.\n" +
             "- Enable Detail Card off: a tap still selects the marker, no card opens.\n" +
             "- Languages: put another language first; the card shows that language (a missing text falls back).\n\n" +
+            "AUDIO\n" +
+            "- Tap the play button of an Audio Guide: the sound starts. Drag its bar to move to any point, tap the speed chip to change the " +
+            "speed, tap Captions to show the line of the moment. A Hero Chip under the title does the same from the Peek stop.\n" +
+            "- Close the card while it plays: with Keep Audio Playing on, a small player stays at the bottom of the wall (tap its button to " +
+            "pause, tap its title to show the card again); off, the sound stops with the card.\n" +
+            "- Start another point's audio while one plays: Audio Overlap decides. Switch fades the first out and plays the new " +
+            "one; Queue lets the first finish (the second block shows Up Next).\n" +
+            "- Send the app to the background and back while it plays: it pauses, then goes on from the same place.\n\n" +
             "QUESTIONS AND FEEDBACK\n" +
             "- Answer a Knowledge Check: a right answer shows the confirmation and the explanation; a wrong one shows \"Actually...\", " +
             "the explanation and marks the right choice. Close the card and open it again: the answer is still there and cannot be changed.\n" +
@@ -155,7 +174,11 @@ namespace TileStories.Editor
             "CARD CONTAINER\n" +
             "- Swipe the card up and down with a real finger: it follows the finger, a quick flick goes one stop further.\n" +
             "- The X and the grabber are easy to reach with one thumb; the card clears the home indicator.\n" +
-            "- Read the title and the chip outdoors in bright light.";
+            "- Read the title and the chip outdoors in bright light.\n\n" +
+            "AUDIO\n" +
+            "- Play an Audio Guide with Bluetooth earbuds on, then switch them off and on again while it plays: the narration must go on " +
+            "from the same place. If it stays silent, tick Android Earbud Check and test again.\n" +
+            "- Take a phone call or lock the phone while it plays: it pauses and goes on from the same place afterwards.";
 
         private const string BlockLibrarySceneTestGuide =
             "Not possible in Scene test: blocks only draw on the card in Play Mode. Use How to Playmode Test.";
@@ -321,15 +344,26 @@ namespace TileStories.Editor
         // what the field takes (the builder's reason carries no detail).
         internal static string CardMediaProblemText(string label, MediaKind kind, MediaPathProblem problem)
         {
-            string types = string.Join(" / ", MediaPathRule.ImageExtensions).Replace(".", "").ToUpperInvariant();
+            string types = string.Join(" / ", MediaPathRule.ExtensionsOf(kind)).Replace(".", "").ToUpperInvariant();
+            string noun = CardMediaNoun(kind);
+            // - the acronym's first letter decides the article: "an MP3", "a PNG", "a VTT"
+            string article = "AEFHILMNORSX".IndexOf(types.Length > 0 ? types[0] : ' ') >= 0 ? "an " : "a ";
             return problem switch
             {
                 MediaPathProblem.OutsideFolder => label + " is outside the wall's Media Folder (Detail Card > Card Container): the app cannot load it. Move the file into that folder and pick it again",
-                MediaPathProblem.WrongType => label + " is not a picture the card can show (" + types + ")",
+                MediaPathProblem.WrongType => label + " is not " + (noun == "picture" ? "a picture" : article + noun) + " the card can use (" + types + ")",
                 MediaPathProblem.Empty => label + " is empty",
-                _ => label + " must be a " + types + " picture inside the wall's Media Folder (Detail Card > Card Container)",
+                _ => label + " must be " + article + types + " " + noun + " inside the wall's Media Folder (Detail Card > Card Container)",
             };
         }
+
+        // What the Editor calls a file of this media kind
+        internal static string CardMediaNoun(MediaKind kind) => kind switch
+        {
+            MediaKind.Audio => "audio file",
+            MediaKind.Captions => "captions file",
+            _ => "picture",
+        };
 
         // A header picture look that lacks what it needs (Picture; Split Then Now: both pictures)
         internal static string CardHeaderNeedsPictureText(string variant) =>
@@ -337,7 +371,8 @@ namespace TileStories.Editor
             " (pictures inside the Media Folder): until then the card shows the text-only look.";
 
         // A picture path that is fine by the rule but has no file behind it (deleted or renamed after it was picked)
-        internal static string CardMediaMissingText(string label, string path) =>
-            label + ": no picture \"" + path + "\" in the Media Folder any more. The card shows its \"picture unavailable\" frame until another is picked.";
+        internal static string CardMediaMissingText(string label, string path, MediaKind kind = MediaKind.Image) => kind == MediaKind.Image
+            ? label + ": no picture \"" + path + "\" in the Media Folder any more. The card shows its \"picture unavailable\" frame until another is picked."
+            : label + ": no " + CardMediaNoun(kind) + " \"" + path + "\" in the Media Folder any more. The card shows it as unavailable until another is picked.";
     }
 }

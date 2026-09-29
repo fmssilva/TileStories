@@ -99,7 +99,7 @@ namespace TileStories.LivingRoom.Tests
             Session.CardSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
             yield return OpenFull("lamp_military");
             yield return OpenFull("lamp");
-            Assert.AreEqual("Telemovel", SizeView().ObjectName.text, "the wall reworded English only: Portuguese keeps the app's word");
+            Assert.AreEqual("Telem\u00f3vel", SizeView().ObjectName.text, "the wall reworded English only: Portuguese keeps the app's word");
         }
 
         [UnityTest]
@@ -109,9 +109,9 @@ namespace TileStories.LivingRoom.Tests
             yield return OpenFull("lamp");
             var size = SizeView();
             yield return ScrollTo(size);
-            Assert.AreEqual("Qual e o tamanho?", Sheet.Stack.HeadingOf(size).text);
-            Assert.AreEqual("Tao alto como quase quatro telemoveis empilhados.", size.Caption.text);
-            Assert.AreEqual("Telemovel", size.ObjectName.text, "the app's Portuguese word under the phone");
+            Assert.AreEqual("Qual é o tamanho?", Sheet.Stack.HeadingOf(size).text);
+            Assert.AreEqual("T\u00e3o alto como quase quatro telem\u00f3veis empilhados.", size.Caption.text);
+            Assert.AreEqual("Telem\u00f3vel", size.ObjectName.text, "the app's Portuguese word under the phone");
             Assert.AreEqual(HeaderTitle(), size.PoiName.text, "the point's name is the card's title in Portuguese too");
             yield return Capture("Lamp_SizeComparison_pt");
         }

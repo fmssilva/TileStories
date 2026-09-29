@@ -311,7 +311,9 @@ namespace TileStories.Tests
         {
             LiveSettings.container.open_stop = CardOptions.StopHalf;
             LiveSettings.container.half_max_ratio = 0.25f;
-            yield return Select("lamp");
+            // - a header-only point (no authored card): its peek content (title + chip only, no pinned audio chip) is short enough
+            //   for the cap to actually bind; a mechanism test should not depend on how tall a specific point's own content is
+            yield return Select("painting");
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "Open At = half");
             Assert.AreEqual(Sheet.Layer.layout.height * 0.25f, Sheet.Root.resolvedStyle.height, 1f, "Half Height Max = 25%");
         }
@@ -321,7 +323,7 @@ namespace TileStories.Tests
         {
             LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
             yield return Select("lamp");
-            Assert.AreEqual("Castelo de Sao Jorge", Header.TitleText);
+            Assert.AreEqual("Castelo de São Jorge", Header.TitleText);
             Assert.AreEqual("Militar - c. 1700 no painel", Header.SubtitleText);
         }
 
@@ -394,7 +396,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Tap(first.panel, onWord);
             Assert.AreEqual("keep", plain.Body.OpenTerm, "a real tap on the linked word");
             Assert.AreEqual("Torre de menagem", plain.Body.DefinitionTitle.text);
-            Assert.AreEqual("A torre mais forte de um castelo, o seu ultimo refugio.", plain.Body.DefinitionText.text, "the wall's glossary, in Portuguese");
+            Assert.AreEqual("A torre mais forte de um castelo, o seu \u00faltimo ref\u00fagio.", plain.Body.DefinitionText.text, "the wall's glossary, in Portuguese");
             yield return Capture("Card_Lamp_Glossary_pt");
         }
 
@@ -431,7 +433,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Tap(flip.Box.panel, flip.Box.worldBound.center);
             yield return null;
             Assert.IsTrue(flip.Revealed, "a real tap on the card reveals the fact");
-            StringAssert.Contains("nao tem porta ao nivel do chao", flip.Text.Paragraphs[0].text);
+            StringAssert.Contains("n\u00e3o tem porta ao n\u00edvel do ch\u00e3o", flip.Text.Paragraphs[0].text);
             Assert.IsTrue(fun[1].Facts[0].Revealed, "the postcard shows at once");
             StringAssert.Contains("uma torre inteira", fun[1].Facts[0].Text.Paragraphs[0].text);
             yield return CardTestInput.Settle(0.1f);
@@ -530,7 +532,7 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator TheLamp_IsTheFullCard_EveryKindAndVariantOfTiers1To3_InCatalogOrder()
+        public IEnumerator TheLamp_IsTheFullCard_EveryKindAndVariantOfTiers1To4_InCatalogOrder()
         {
             yield return OpenFull("lamp");
             // - a kind the wall's own app registered (LivingRoom's size_comparison, _3.1 step 11) is that app's to test, not the framework
@@ -545,8 +547,9 @@ namespace TileStories.Tests
                 "gallery", "gallery", "gallery", "gallery", "before_after", "zoom_image",
                 "hotspot_image", "hotspot_image", "wall_locator", "wall_locator", "today_map", "today_map", "related", "related",
                 "knowledge_check", "knowledge_check", "knowledge_check", "poll", "collect", "feedback", "feedback", "dialogue", "show_on_wall", "show_on_wall",
+                "audio_guide", "audio_guide",
                 "sources", "sources", "actions", "actions", "actions",
-            }, ShownKinds().Where(k => builtIn.TryGet(k, out _)).ToList(), "one block per kind and variant (Tiers 1 to 3), nothing skipped");
+            }, ShownKinds().Where(k => builtIn.TryGet(k, out _)).ToList(), "one block per kind and variant of Tiers 1 to 4, nothing skipped");
             var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
             CollectionAssert.IsEmpty(BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Skipped, "no authored block skipped");
             var variants = Sheet.Stack.BoundViews.Select(v => v.Root.GetClasses().FirstOrDefault(c => c.Contains("--"))).Where(c => c != null).ToList();
@@ -604,7 +607,7 @@ namespace TileStories.Tests
             SelectionEventBus.Clear();
             LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
             yield return OpenFull("lamp");
-            Assert.AreEqual("Como esta hoje", Sheet.Stack.HeadingOf(Sheet.Stack.BoundViews[1]).text, "the Portuguese heading");
+            Assert.AreEqual("Como está hoje", Sheet.Stack.HeadingOf(Sheet.Stack.BoundViews[1]).text, "the Portuguese heading");
             Assert.AreEqual("Lado a lado", Sheet.Stack.HeadingOf(Sheet.Stack.BoundViews.OfType<ComparePointsBlockView>().Single()).text,
                 "the default heading in Portuguese");
         }
@@ -910,7 +913,7 @@ namespace TileStories.Tests
             LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
             yield return OpenFull("lamp");
             var story = Sheet.Stack.BoundViews.OfType<StoryChaptersBlockView>().Single();
-            Assert.AreEqual("Capitulo 1 de 3", story.Counter.text, "the framework's Portuguese counter");
+            Assert.AreEqual("Cap\u00edtulo 1 de 3", story.Counter.text, "the framework's Portuguese counter");
             Assert.AreEqual("O cerco", story.Title.text);
             Assert.AreEqual("Seguinte", story.Next.Q<Label>().text);
             Sheet.Stack.Scroll.ScrollTo(story.Root);
@@ -918,8 +921,8 @@ namespace TileStories.Tests
 
             yield return CardTestInput.Tap(story.Next.panel, story.Next.worldBound.center);
             yield return null;
-            Assert.AreEqual("Capitulo 2 de 3", story.Counter.text, "a real tap on Seguinte");
-            Assert.AreEqual("O palacio", story.Title.text);
+            Assert.AreEqual("Cap\u00edtulo 2 de 3", story.Counter.text, "a real tap on Seguinte");
+            Assert.AreEqual("O pal\u00e1cio", story.Title.text);
             Assert.AreEqual("Anterior", story.Previous.Q<Label>().text);
             yield return Capture("Card_Lamp_Story_pt");
 
@@ -994,8 +997,8 @@ namespace TileStories.Tests
         public IEnumerator LampMilitary_IsTheShortCard_HeaderRichTextQuickFactsAndGallery()
         {
             yield return OpenFull("lamp_military");
-            CollectionAssert.AreEqual(new[] { BuiltInBlocks.HeaderKind, BuiltInBlocks.RichTextKind, BuiltInBlocks.QuickFactsKind, BuiltInBlocks.GalleryKind }, ShownKinds(),
-                "the short card (_3.1 section 9): header, rich_text, quick_facts, gallery");
+            CollectionAssert.AreEqual(new[] { BuiltInBlocks.HeaderKind, BuiltInBlocks.RichTextKind, BuiltInBlocks.QuickFactsKind, BuiltInBlocks.GalleryKind, BuiltInBlocks.AudioGuideKind }, ShownKinds(),
+                "the short card (_3.1 section 9): header, rich_text, quick_facts, gallery, and (step 9A) a hero chip on the tone");
             Assert.IsTrue(Sheet.Stack.BoundViews.OfType<GalleryBlockView>().Single().Shots.All(s => s.Image.Texture != null), "its pictures load");
             var facts = Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().Single();
             CollectionAssert.AreEqual(new[] { "Last refuge", "3 m thick" }, facts.Facts.Select(f => f.Value.text));
@@ -1252,10 +1255,10 @@ namespace TileStories.Tests
             quiz = Quizzes()[0];
             Assert.AreEqual("Teste-se", Sheet.Stack.HeadingOf(quiz).text, "the default heading in Portuguese");
             Assert.AreEqual("Pergunta 2 de 2", quiz.Counter.text);
-            Assert.AreEqual("Qual destes NAO existia no antigo palacio?", quiz.Prompt.text);
+            Assert.AreEqual("Qual destes N\u00c3O existia no antigo pal\u00e1cio?", quiz.Prompt.text);
             yield return ScrollAndTap(quiz.Choices[2].Button);
             Assert.AreEqual("Certo!", quiz.Verdict.text);
-            StringAssert.StartsWith("O palacio ficava junto ao rio", quiz.Explanation.text);
+            StringAssert.StartsWith("O pal\u00e1cio ficava junto ao rio", quiz.Explanation.text);
             Assert.AreEqual(2, Card.State.Answer("lamp", "block_43", 1));
         }
 
@@ -1360,11 +1363,11 @@ namespace TileStories.Tests
             LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
             yield return OpenFull("lamp");
             feedback = Sheet.Stack.BoundViews.OfType<FeedbackBlockView>().ToList();
-            Assert.AreEqual("Esta descricao foi util?", feedback[0].Question.text);
+            Assert.AreEqual("Esta descri\u00e7\u00e3o foi \u00fatil?", feedback[0].Question.text);
             Assert.AreEqual("Como avalia isto?", feedback[1].Question.text);
-            CollectionAssert.AreEqual(new[] { "Util", "Pouco util" }, feedback[0].Votes.Select(v => v.Text.text).ToList());
+            CollectionAssert.AreEqual(new[] { "\u00datil", "Pouco \u00fatil" }, feedback[0].Votes.Select(v => v.Text.text).ToList());
             yield return ScrollAndTap(feedback[0].Votes[1].Button);
-            Assert.AreEqual("Obrigado pelo seu comentario", feedback[0].Thanks.text);
+            Assert.AreEqual("Obrigado pelo seu coment\u00e1rio", feedback[0].Thanks.text);
             Assert.AreEqual("down", _cardEvents.Raised[2].Value);
         }
 
@@ -1517,10 +1520,10 @@ namespace TileStories.Tests
                 LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
                 yield return OpenFull("lamp");
                 collect = Only<CollectBlockView>();
-                Assert.AreEqual("A sua historia", Sheet.Stack.HeadingOf(collect).text);
+                Assert.AreEqual("A sua hist\u00f3ria", Sheet.Stack.HeadingOf(collect).text);
                 Assert.AreEqual("Selo do castelo", collect.ItemName.text);
                 Assert.AreEqual("Castelos e torres", collect.Series.text);
-                Assert.AreEqual("Adicionar a minha historia", collect.AddLabel.text);
+                Assert.AreEqual("Adicionar \u00e0 minha hist\u00f3ria", collect.AddLabel.text);
                 Assert.AreEqual("0 de 2 recolhidos", collect.Progress.text);
             }
             finally
@@ -1565,10 +1568,10 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             dialogue = Only<DialogueBlockView>();
             Assert.AreEqual("O pedreiro", dialogue.Bubbles[0].Speaker.text);
-            Assert.AreEqual("Nao, conte-me", dialogue.Choices[0].Label.text);
+            Assert.AreEqual("N\u00e3o, conte-me", dialogue.Choices[0].Label.text);
             yield return ScrollAndTap(dialogue.Choices[1].Button);
-            Assert.AreEqual("Voce", dialogue.Bubbles[1].Speaker.text, "the visitor's own name in Portuguese");
-            Assert.AreEqual("Entao tem bom olho.", dialogue.Bubbles[2].Text.text);
+            Assert.AreEqual("Voc\u00ea", dialogue.Bubbles[1].Speaker.text, "the visitor's own name in Portuguese");
+            Assert.AreEqual("Então tem bom olho.", dialogue.Bubbles[2].Text.text);
             Assert.AreEqual("Continuar", dialogue.Continue.Q<Label>().text);
         }
 

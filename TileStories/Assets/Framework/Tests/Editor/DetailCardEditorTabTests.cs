@@ -130,12 +130,12 @@ namespace TileStories.Editor.Tests
                     {
                         if (c.FieldType == typeof(bool)) edits.Add((c.Name, s => c.SetValue(s.container, !(bool)c.GetValue(s.container))));
                         else if (c.FieldType == typeof(float)) edits.Add((c.Name, s => c.SetValue(s.container, 0.3f)));
-                        else if (c.FieldType == typeof(string)) edits.Add((c.Name, s => c.SetValue(s.container, CardOptions.StopHalf)));
+                        else if (c.FieldType == typeof(string)) edits.Add((c.Name, s => c.SetValue(s.container, c.Name == "open_stop" ? CardOptions.StopHalf : CardOptions.AudioQueue)));
                         else Assert.Fail("no edit for container field " + c.Name);
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(6 + 4 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 6 wall-level + 4 container + 3 demo card");
+            Assert.AreEqual(6 + 6 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 6 wall-level + 6 container + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -633,6 +633,107 @@ namespace TileStories.Editor.Tests
             Assert.IsNull(POIEditorToolWindow.MediaAssetFor("ghost.png", MediaFolder), "a path with no file: the row can tell (the missing-file warning)");
         }
 
+        // _3.1 step 9A: the audio kind's Asset rows take a real AudioClip and a real captions file (a TextAsset made by the .vtt importer),
+        // each stored as its path inside the Media Folder; a picture (or the other kind of file) dropped on the wrong row is not taken
+        [UnityTest]
+        public IEnumerator TheAudioGuideRows_RealDropsOfARealClipAndItsCaptions_StoreTheirPaths_TheWrongKindIsNotTaken_AndCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            config.card_settings.media_resources_path = MediaFolder;
+            config.pois[0].card.blocks.Add(new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.AudioGuideKind });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Block field clip#0");
+            _window.RectOf("Block field captions#0");
+            _window.RectOf("Block field speeds#0");
+            _window.RectOf("Block field captions_on#0");
+            BlockInstanceData Audio() => _window.Config.pois[0].card.blocks[0];
+            Assert.IsNull(Audio().fields.Find(f => f.key == BuiltInBlocks.AudioGuideClipField), "drawing the rows writes nothing");
+            Assert.IsFalse(_window.Unsaved);
+
+            const string audioFolder = "Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/";
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioFolder + "audio/lamp_tone.wav");
+            var captions = AssetDatabase.LoadAssetAtPath<TextAsset>(audioFolder + "audio/lamp_tone.vtt");
+            Assert.IsNotNull(clip, "precondition: the fixture clip imports as an AudioClip");
+            Assert.IsNotNull(captions, "precondition: the fixture captions import as a TextAsset");
+
+            yield return DropOnto("Block field clip#0", clip);
+            Assert.AreEqual("audio/lamp_tone.wav", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideClipField), "a real drop of a clip stores its path inside the Media Folder");
+            yield return DropOnto("Block field captions#0", captions);
+            Assert.AreEqual("audio/lamp_tone.vtt", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideCaptionsField), "and so does a captions file");
+            Assert.IsTrue(_window.Unsaved);
+            CollectionAssert.IsEmpty(BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared).Skipped, "the card shows the block");
+
+            // - the wrong kind of file on a row: a picture on the clip row, a clip on the captions row, a captions file on the clip row
+            var picture = AssetDatabase.LoadAssetAtPath<Texture2D>(audioFolder + "tile_detail.png");
+            yield return DropOnto("Block field clip#0", picture);
+            yield return DropOnto("Block field captions#0", clip);
+            yield return DropOnto("Block field clip#0", captions);
+            Assert.AreEqual("audio/lamp_tone.wav", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideClipField), "the clip row takes clips only");
+            Assert.AreEqual("audio/lamp_tone.vtt", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideCaptionsField), "the captions row takes captions files only");
+
+            Assert.AreSame(clip, POIEditorToolWindow.MediaAssetFor("audio/lamp_tone.wav", MediaFolder, MediaKind.Audio), "the row shows the clip the app will load (through Resources)");
+            Assert.AreSame(captions, POIEditorToolWindow.MediaAssetFor("audio/lamp_tone.vtt", MediaFolder, MediaKind.Captions));
+            Assert.IsNull(POIEditorToolWindow.MediaAssetFor("audio/ghost.wav", MediaFolder, MediaKind.Audio), "a path with no file: the row can tell");
+            Assert.IsNull(POIEditorToolWindow.MediaAssetFor("audio/lamp_tone.wav", MediaFolder, MediaKind.Captions), "the wrong type for the field is no asset");
+
+            yield return _window.PressUndo();
+            Assert.AreEqual("", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideCaptionsField), "one Ctrl+Z takes the captions drop back");
+            yield return _window.PressUndo();
+            Assert.AreEqual("", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideClipField), "and the next the clip's");
+            yield return _window.PressRedo();
+            Assert.AreEqual("audio/lamp_tone.wav", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideClipField), "Ctrl+Y");
+        }
+
+        // The words of a refused audio file, and the speeds list the Choice offers (with its "none" first, as every optional Choice has)
+        [Test]
+        public void TheAudioGuideFields_WarnInTheirOwnWords_AndTheSpeedsChoiceListsThePresets()
+        {
+            var clip = BuiltInBlocks.AudioGuide.Field(BuiltInBlocks.AudioGuideClipField);
+            var captions = BuiltInBlocks.AudioGuide.Field(BuiltInBlocks.AudioGuideCaptionsField);
+            StringAssert.Contains("an MP3 / WAV / OGG audio file inside the wall's Media Folder", POIEditorToolWindow.CardMediaProblemText(clip.Label, clip.Media, MediaPathProblem.None));
+            StringAssert.Contains("not an audio file the card can use (MP3 / WAV / OGG)", POIEditorToolWindow.CardMediaProblemText(clip.Label, clip.Media, MediaPathProblem.WrongType));
+            StringAssert.Contains("a VTT captions file", POIEditorToolWindow.CardMediaProblemText(captions.Label, captions.Media, MediaPathProblem.None));
+            StringAssert.Contains("outside the wall's Media Folder", POIEditorToolWindow.CardMediaProblemText(clip.Label, clip.Media, MediaPathProblem.OutsideFolder));
+            StringAssert.Contains("no audio file \"audio/x.mp3\"", POIEditorToolWindow.CardMediaMissingText(clip.Label, "audio/x.mp3", clip.Media));
+            var speeds = BuiltInBlocks.AudioGuide.Field(BuiltInBlocks.AudioGuideSpeedsField);
+            var (values, labels) = POIEditorToolWindow.BlockChoiceOptions(speeds, "");
+            CollectionAssert.AreEqual(new[] { "", AudioSpeedRule.Narration, AudioSpeedRule.Wide, AudioSpeedRule.Off }, values, "none, then the presets");
+            Assert.AreEqual(values.Count, labels.Count);
+            StringAssert.Contains("0.75x to 1.5x", labels[1]);
+            foreach (string text in labels.Concat(new[] { clip.Help, captions.Help, speeds.Help, BuiltInBlocks.AudioGuide.Help })) EditorTextChecks.AssertAscii(text, "an audio guide Editor text");
+            // - a stored preset that does not exist stays selected as "(missing)", never dropped silently
+            var (withStale, staleLabels) = POIEditorToolWindow.BlockChoiceOptions(speeds, "turbo");
+            Assert.AreEqual("turbo", withStale[withStale.Count - 1]);
+            StringAssert.Contains("(missing)", staleLabels[staleLabels.Count - 1]);
+        }
+
+        // The Card Container's audio rows: Keep Audio Playing and the Android earbud check are toggles a real click edits (Ctrl+Z takes it
+        // back); Audio Overlap is a popup, edited through the window's history by EveryCardSettingsField_... and read in the capture
+        [UnityTest]
+        public IEnumerator TheCardContainerAudioRows_AreDrawn_ARealClickTicksTheAndroidCheck_AndCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Keep Audio Playing");
+            _window.RectOf("Android Earbud Check");
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            Assert.IsFalse(_window.Config.card_settings.container.audio_android_output_poll, "off until a device test asks for it");
+            Assert.AreEqual(CardOptions.AudioSwitch, _window.Config.card_settings.container.audio_when_another_starts, "the shipped default");
+
+            _window.Click("Android Earbud Check");
+            yield return _window.WaitForRepaint();
+            Assert.IsTrue(_window.Config.card_settings.container.audio_android_output_poll, "a real click ticked it");
+            Assert.IsTrue(_window.Unsaved);
+            yield return _window.PressUndo();
+            Assert.IsFalse(_window.Config.card_settings.container.audio_android_output_poll, "Ctrl+Z");
+        }
+
         [UnityTest]
         public IEnumerator ANumberField_ShowsItsDefaultWithoutWriting_ARealSliderClickStoresAValue_AndCtrlZ()
         {
@@ -724,7 +825,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(BuiltInBlocks.ActionsStickyCta, BlockStackBuilder.Build(new POIData { id = "p", card = new POICardData { blocks = { libraryBlock } } }, settings, BlockRegistry.Shared).Entries[1].Variant,
                 "precondition: the card really draws it sticky");
             Assert.AreEqual(1, POIEditorToolWindow.CardBlockWarnings(libraryBlock, BuiltInBlocks.Actions, settings, null).Count, "a sticky Block Library default warns too");
-            Assert.IsTrue(warning.All(c => c < 128), "ASCII only");
+            EditorTextChecks.AssertAscii(warning, "the warning");
             foreach (string term in ForbiddenTerms) StringAssert.DoesNotContain(term, warning);
         }
 
@@ -744,13 +845,13 @@ namespace TileStories.Editor.Tests
                     Assert.IsTrue(POIEditorToolWindow.HasBlockFieldDrawer(field.Type), kind.Key + "." + field.Key + ": no Editor drawer for " + field.Type);
                     Assert.IsFalse(string.IsNullOrWhiteSpace(field.Label), kind.Key + "." + field.Key + " has a label");
                     Assert.IsFalse(string.IsNullOrWhiteSpace(field.Help), kind.Key + "." + field.Key + " has a (i) text");
-                    Assert.IsTrue((field.Label + field.Help + kind.Help).All(c => c < 128), kind.Key + "." + field.Key + ": ASCII only");
+                    EditorTextChecks.AssertAscii(field.Label + field.Help + kind.Help, kind.Key + "." + field.Key);
                     foreach (var sub in field.ItemFields ?? Array.Empty<BlockFieldDefinition>())
                     {
                         Assert.AreNotEqual(BlockFieldType.Items, sub.Type, kind.Key + "." + field.Key + "." + sub.Key + ": items cannot nest");
                         Assert.IsTrue(POIEditorToolWindow.HasBlockFieldDrawer(sub.Type), kind.Key + "." + field.Key + "." + sub.Key + ": no Editor drawer for " + sub.Type);
                         Assert.IsFalse(string.IsNullOrWhiteSpace(sub.Label) || string.IsNullOrWhiteSpace(sub.Help), kind.Key + "." + field.Key + "." + sub.Key + " has a label and a (i) text");
-                        Assert.IsTrue((sub.Label + sub.Help).All(c => c < 128), kind.Key + "." + field.Key + "." + sub.Key + ": ASCII only");
+                        EditorTextChecks.AssertAscii(sub.Label + sub.Help, kind.Key + "." + field.Key + "." + sub.Key);
                     }
                 }
             }
@@ -781,7 +882,7 @@ namespace TileStories.Editor.Tests
             foreach (var pair in texts)
             {
                 Assert.IsFalse(string.IsNullOrWhiteSpace(pair.Value), pair.Key);
-                Assert.IsTrue(pair.Value.All(c => c < 128), pair.Key + " must be ASCII only");
+                EditorTextChecks.AssertAscii(pair.Value, pair.Key);
                 foreach (string term in ForbiddenTerms)
                     StringAssert.DoesNotContain(term, pair.Value, pair.Key + " must not contain '" + term + "'");
             }
@@ -973,7 +1074,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(2, POIEditorToolWindow.CardBlockWarnings(block, BuiltInBlocks.KnowledgeCheck, byLibrary, poi).Count,
                 "no look picked: the warnings judge the look the Block Library will give it");
             foreach (string text in warnings.Concat(pictures).Concat(trueFalse))
-                Assert.IsTrue(text.All(c => c < 128), "ASCII only: " + text);
+                EditorTextChecks.AssertAscii(text, "a Knowledge Check warning");
         }
 
         [UnityTest]
