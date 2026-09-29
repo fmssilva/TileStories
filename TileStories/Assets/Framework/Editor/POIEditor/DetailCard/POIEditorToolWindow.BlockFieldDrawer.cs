@@ -316,9 +316,10 @@ namespace TileStories.Editor
             if (defaultKey != null)
             {
                 GUILayout.Label("Default: " + defaultKey, EditorStyles.miniLabel, GUILayout.ExpandWidth(false));
-                GUILayout.FlexibleSpace();
+                // - right after its label, like "Pick default..." (a FlexibleSpace BEFORE it pushed it to the window's edge, far outside the row)
                 if (GUILayout.Button("Clear default", EditorStyles.miniButton, GUILayout.Width(90f))) set("");
                 ReportTableCellRect(probeName + " clear default", probeIndex);
+                GUILayout.FlexibleSpace();
             }
             else
             {
@@ -357,13 +358,14 @@ namespace TileStories.Editor
             return Resources.Load(folder.Length > 0 ? folder + "/" + noExtension : noExtension, type);
         }
 
-        // The Unity type an Asset field of this kind holds: a texture, an AudioClip, a TextAsset (a captions file, made by VttTextImporter),
-        // a VideoClip
+        // The Unity type an Asset field of this kind holds: a texture (a picture or a panorama), an AudioClip, a TextAsset (a captions file,
+        // made by VttTextImporter), a VideoClip, a GameObject (a model: the prefab glTFast imports a .glb as)
         internal static System.Type MediaObjectType(MediaKind kind) => kind switch
         {
             MediaKind.Audio => typeof(AudioClip),
             MediaKind.Captions => typeof(TextAsset),
             MediaKind.Video => typeof(UnityEngine.Video.VideoClip),
+            MediaKind.Model => typeof(GameObject),
             _ => typeof(Texture2D),
         };
 

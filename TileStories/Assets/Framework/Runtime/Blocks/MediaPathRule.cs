@@ -12,6 +12,11 @@ namespace TileStories
         Captions,
         // A video clip (video, header video_loop; step 9B): mp4 / webm, imported by Unity as a VideoClip
         Video,
+        // A 3D model (model_3d, header model_turntable; step 10A): glb / gltf, imported by glTFast as a prefab (a GameObject)
+        Model,
+        // A 360 equirect picture (panorama_360; step 10A): the picture file types, read as a texture, but its own kind so the picker and the
+        // default library keep panoramas apart from ordinary pictures
+        Panorama,
     }
 
     // What is wrong with a stored media path, if anything (MediaPathRule.Check)
@@ -46,6 +51,10 @@ namespace TileStories
         public static readonly string[] CaptionExtensions = { ".vtt" };
         // - the two containers Unity decodes on every platform the app targets (H.264 mp4 and VP8 webm)
         public static readonly string[] VideoExtensions = { ".mp4", ".webm" };
+        // - what glTFast imports as a prefab (a .gltf keeps its .bin and pictures beside it; a .glb is one file)
+        public static readonly string[] ModelExtensions = { ".glb", ".gltf" };
+        // - an equirect 360 picture is a picture file (2:1)
+        public static readonly string[] PanoramaExtensions = ImageExtensions;
 
         // Whether a stored value names a default-library key rather than a path
         public static bool IsDefaultKey(string path) => !string.IsNullOrWhiteSpace(path) && Normalize(path).StartsWith(DefaultKeyPrefix, System.StringComparison.Ordinal);
@@ -65,7 +74,16 @@ namespace TileStories
             if (typeof(UnityEngine.AudioClip).IsAssignableFrom(type)) return MediaKind.Audio;
             if (typeof(UnityEngine.TextAsset).IsAssignableFrom(type)) return MediaKind.Captions;
             if (typeof(UnityEngine.Video.VideoClip).IsAssignableFrom(type)) return MediaKind.Video;
+            if (typeof(UnityEngine.GameObject).IsAssignableFrom(type)) return MediaKind.Model;
             return MediaKind.None;
+        }
+
+        // Every kind a loaded asset TYPE may be read as, in the order a default key is looked up: a texture is a picture first, then a
+        // panorama (both are textures: only the library entry's kind tells them apart)
+        public static MediaKind[] KindsOfAssetType(System.Type type)
+        {
+            var kind = KindOfAssetType(type);
+            return kind == MediaKind.Image ? new[] { MediaKind.Image, MediaKind.Panorama } : new[] { kind };
         }
 
         // The extensions a field of this kind takes (empty for None)
@@ -75,6 +93,8 @@ namespace TileStories
             MediaKind.Audio => AudioExtensions,
             MediaKind.Captions => CaptionExtensions,
             MediaKind.Video => VideoExtensions,
+            MediaKind.Model => ModelExtensions,
+            MediaKind.Panorama => PanoramaExtensions,
             _ => System.Array.Empty<string>(),
         };
 
@@ -91,23 +111,27 @@ namespace TileStories
 
         public static bool IsValid(string path, MediaKind kind) => Check(path, kind) == MediaPathProblem.None;
 
-        // The kind a path's extension names (.mp3 = Audio, .vtt = Captions, .png = Image, .mp4 = Video), or None for no or another extension
+        // The kind a path's extension names (.mp3 = Audio, .vtt = Captions, .png = Image, .mp4 = Video, .glb = Model), or None for no or
+        // another extension. A picture file names Image (a panorama is a picture file too: its field's kind, not its extension, says so)
         public static MediaKind KindOfExtension(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) return MediaKind.None;
             string p = Normalize(path);
-            foreach (var kind in new[] { MediaKind.Image, MediaKind.Audio, MediaKind.Captions, MediaKind.Video })
+            foreach (var kind in new[] { MediaKind.Image, MediaKind.Audio, MediaKind.Captions, MediaKind.Video, MediaKind.Model })
                 if (HasExtensionOf(p, kind)) return kind;
             return MediaKind.None;
         }
 
-        // Whether a loaded Unity asset is the type a kind is read as (a texture, an AudioClip, a TextAsset, a VideoClip); None fits anything
+        // Whether a loaded Unity asset is the type a kind is read as (a texture, an AudioClip, a TextAsset, a VideoClip, a prefab); None fits
+        // anything
         public static bool IsAssetOfKind(UnityEngine.Object asset, MediaKind kind) => kind switch
         {
             MediaKind.Image => asset is UnityEngine.Texture,
             MediaKind.Audio => asset is UnityEngine.AudioClip,
             MediaKind.Captions => asset is UnityEngine.TextAsset,
             MediaKind.Video => asset is UnityEngine.Video.VideoClip,
+            MediaKind.Model => asset is UnityEngine.GameObject,
+            MediaKind.Panorama => asset is UnityEngine.Texture,
             _ => true,
         };
 

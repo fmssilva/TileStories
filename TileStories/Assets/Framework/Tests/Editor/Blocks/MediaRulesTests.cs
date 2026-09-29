@@ -41,7 +41,7 @@ namespace TileStories.Editor.Tests
 
             Assert.AreEqual("default:azulejo_blue", MediaPathRule.PathForDefaultKey("azulejo_blue"));
 
-            foreach (var kind in new[] { MediaKind.Image, MediaKind.Audio, MediaKind.Captions, MediaKind.Video, MediaKind.None })
+            foreach (var kind in new[] { MediaKind.Image, MediaKind.Audio, MediaKind.Captions, MediaKind.Video, MediaKind.Model, MediaKind.Panorama, MediaKind.None })
                 Assert.AreEqual(MediaPathProblem.None, MediaPathRule.Check("default:azulejo_blue", kind), kind + ": a non-empty key is a valid value for any kind");
             Assert.AreEqual(MediaPathProblem.Empty, MediaPathRule.Check("default:", MediaKind.Image), "the prefix alone with no key is still nothing picked");
         }
@@ -53,8 +53,48 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(MediaKind.Audio, MediaPathRule.KindOfAssetType(typeof(UnityEngine.AudioClip)));
             Assert.AreEqual(MediaKind.Captions, MediaPathRule.KindOfAssetType(typeof(UnityEngine.TextAsset)));
             Assert.AreEqual(MediaKind.Video, MediaPathRule.KindOfAssetType(typeof(UnityEngine.Video.VideoClip)));
-            Assert.AreEqual(MediaKind.None, MediaPathRule.KindOfAssetType(typeof(UnityEngine.GameObject)));
+            Assert.AreEqual(MediaKind.Model, MediaPathRule.KindOfAssetType(typeof(UnityEngine.GameObject)), "a model is the prefab glTFast imports (10A)");
+            Assert.AreEqual(MediaKind.None, MediaPathRule.KindOfAssetType(typeof(UnityEngine.Material)));
             Assert.AreEqual(MediaKind.None, MediaPathRule.KindOfAssetType(null));
+            CollectionAssert.AreEqual(new[] { MediaKind.Image, MediaKind.Panorama }, MediaPathRule.KindsOfAssetType(typeof(UnityEngine.Texture2D)),
+                "a texture is looked up as a picture first, then as a panorama");
+            CollectionAssert.AreEqual(new[] { MediaKind.Model }, MediaPathRule.KindsOfAssetType(typeof(UnityEngine.GameObject)));
+        }
+
+        // _3.1 step 10A: a model is a .glb / .gltf (glTFast's prefab); a panorama is a picture FILE but its own kind
+        [Test]
+        public void MediaPathRule_AModelIsAGlbOrGltf_APanoramaIsAPictureFile_EachOnlyInItsOwnField()
+        {
+            foreach (string model in new[] { "castle.glb", " arch/Arch.GLB ", "scan.gltf" })
+                Assert.AreEqual(MediaPathProblem.None, MediaPathRule.Check(model, MediaKind.Model), model);
+            foreach (string wrong in new[] { "castle.png", "castle.fbx", "castle.obj", "castle.glb.meta", "castle" })
+                Assert.AreEqual(MediaPathProblem.WrongType, MediaPathRule.Check(wrong, MediaKind.Model), wrong + " is not a model the card loads");
+            Assert.AreEqual(MediaPathProblem.OutsideFolder, MediaPathRule.Check("Assets/Apps/LivingRoom/scan.glb", MediaKind.Model), "a model outside the folder");
+            Assert.AreEqual(MediaPathProblem.WrongType, MediaPathRule.Check("castle.glb", MediaKind.Image), "a model is not a picture");
+
+            foreach (string pano in new[] { "room_360.jpg", "room_360.JPEG", "sky.png" })
+                Assert.AreEqual(MediaPathProblem.None, MediaPathRule.Check(pano, MediaKind.Panorama), pano);
+            Assert.AreEqual(MediaPathProblem.WrongType, MediaPathRule.Check("room.mp4", MediaKind.Panorama));
+            Assert.AreEqual(MediaPathProblem.None, MediaPathRule.Check("default:tiled_room_360", MediaKind.Panorama), "a default key");
+
+            Assert.AreEqual(MediaKind.Model, MediaPathRule.KindOfExtension("arch.glb"));
+            Assert.AreEqual(MediaKind.Model, MediaPathRule.KindOfExtension("arch.gltf"));
+            Assert.AreEqual(MediaKind.Image, MediaPathRule.KindOfExtension("room_360.jpg"), "by its extension a panorama is a picture file: its field says 360");
+
+            var prefab = new UnityEngine.GameObject("model");
+            var picture = new UnityEngine.Texture2D(2, 1);
+            try
+            {
+                Assert.IsTrue(MediaPathRule.IsAssetOfKind(prefab, MediaKind.Model));
+                Assert.IsFalse(MediaPathRule.IsAssetOfKind(picture, MediaKind.Model));
+                Assert.IsTrue(MediaPathRule.IsAssetOfKind(picture, MediaKind.Panorama));
+                Assert.IsFalse(MediaPathRule.IsAssetOfKind(prefab, MediaKind.Panorama));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(prefab);
+                UnityEngine.Object.DestroyImmediate(picture);
+            }
         }
 
         [Test]

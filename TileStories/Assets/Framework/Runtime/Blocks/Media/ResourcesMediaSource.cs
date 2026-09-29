@@ -37,7 +37,10 @@ namespace TileStories
             if (MediaPathRule.IsDefaultKey(path))
             {
                 string defaultKey = MediaPathRule.DefaultKeyOf(path);
-                var found = CardMediaLibraryLookup.Resolve(defaultKey, MediaPathRule.KindOfAssetType(typeof(T)), WallDefaults, FrameworkDefaults) as T;
+                // - a texture may be a picture or a panorama entry: the first kind that holds the key wins
+                T found = null;
+                foreach (var kind in MediaPathRule.KindsOfAssetType(typeof(T)))
+                    if ((found = CardMediaLibraryLookup.Resolve(defaultKey, kind, WallDefaults, FrameworkDefaults) as T) != null) break;
                 if (found == null && _reportedMissing.Add("default:" + defaultKey + "|" + typeof(T).Name))
                     Debug.LogWarning("[Card] default media key not found: " + defaultKey);
                 return found;

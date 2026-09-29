@@ -53,3 +53,13 @@ MonoBehaviour:
     kind: 4
     asset: {fileID: 32900000, guid: 5dcb0e8f580f34f4d90c66d7835269fb, type: 3}
     note: A sliding azulejo tile pattern, ~4 s, silent, low bitrate
+  - key: azulejo_arch
+    kind: 5
+    asset: {fileID: -1385697270316433382, guid: 1bc970a257ca0bc48989db1837801302, type: 3}
+    note: A small stone arch with tiled pillars, a few hundred triangles, vertex
+      colours -- a model_3d / header model default
+  - key: tiled_room_360
+    kind: 6
+    asset: {fileID: 2800000, guid: 59fd3d15672d3244c823d933af17285e, type: 3}
+    note: 'A 360 view of a small tiled room (2:1): a doorway ahead, a window behind
+      -- a panorama_360 default'

@@ -413,6 +413,8 @@ namespace TileStories.Editor
             MediaKind.Audio => "audio file",
             MediaKind.Captions => "captions file",
             MediaKind.Video => "video file",
+            MediaKind.Model => "3D model",
+            MediaKind.Panorama => "360 picture",
             _ => "picture",
         };
 

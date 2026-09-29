@@ -26,10 +26,30 @@ namespace TileStories.Editor.Tests
         [TestCase("ambient", MediaKind.Audio)]
         [TestCase("ambient", MediaKind.Captions)]
         [TestCase("tile_pattern", MediaKind.Video)]
+        [TestCase("azulejo_arch", MediaKind.Model)]
+        [TestCase("tiled_room_360", MediaKind.Panorama)]
         public void EveryPromisedKey_ResolvesToARealAsset(string key, MediaKind kind)
         {
             var asset = CardMediaLibraryLookup.Framework.Get(key, kind);
             Assert.IsNotNull(asset, key + " (" + kind + ") is missing from the shipped default library");
+        }
+
+        // _3.1 step 10A: a panorama is a texture but its own kind -- the picker's picture list never offers it, yet a texture load of its
+        // key through the card's real media source finds it (a texture is looked up as a picture first, then as a panorama)
+        [Test]
+        public void ThePanoramaKey_IsNotAPicture_ButATextureLoadThroughTheCardsSourceFindsIt()
+        {
+            var library = CardMediaLibraryLookup.Framework;
+            Assert.IsNull(library.Get("tiled_room_360", MediaKind.Image), "not in the pictures");
+            CollectionAssert.DoesNotContain(library.Keys(MediaKind.Image), "tiled_room_360");
+            CollectionAssert.Contains(library.Keys(MediaKind.Panorama), "tiled_room_360");
+            CollectionAssert.Contains(library.Keys(MediaKind.Model), "azulejo_arch");
+
+            var source = new ResourcesMediaSource("") { FrameworkDefaults = library };
+            Assert.IsNotNull(source.Load<Texture2D>("default:tiled_room_360"), "a texture load finds the panorama entry");
+            Assert.IsNotNull(source.Load<Texture2D>("default:azulejo_blue"), "and a picture entry as before");
+            Assert.IsNotNull(source.Load<GameObject>("default:azulejo_arch"), "a model load finds the model entry");
+            Assert.IsNull(source.Load<GameObject>("default:azulejo_blue"), "a picture key is no model");
         }
 
         [Test]
