@@ -72,6 +72,47 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("old_icon", LiveConfig.category_styles[0].icon_key, "Ctrl+Z must restore the previous symbol");
         }
 
+        // _3.1 step 13: the default-media picker follows the same real-factory / real-callback rule as the symbol
+        // picker above -- a pick must be undoable and mark the config unsaved through the SAME mutation scope
+        [Test]
+        public void DefaultMediaPicked_FromTheCuratedPicker_IsUndoable_AndMarksTheConfigUnsaved_AndRedoable()
+        {
+            _config.card_settings.media_resources_path = "";
+            var popup = Call<CardMediaDefaultPickerPopup>("CreateCardMediaDefaultPickerPopup", MediaKind.Image,
+                (Action<string>)(key => _config.card_settings.media_resources_path = MediaPathRule.PathForDefaultKey(key)));
+            var onPicked = (Action<string>)typeof(CardMediaDefaultPickerPopup).GetField("_onPicked", Instance).GetValue(popup);
+
+            onPicked("azulejo_blue");   // exactly what the popup calls when a row is clicked
+
+            Assert.AreEqual("default:azulejo_blue", LiveConfig.card_settings.media_resources_path, "the pick must reach the config");
+            Assert.IsTrue(Unsaved, "a pick must mark the config unsaved");
+            Assert.IsTrue(Call<bool>("CanUndoConfigChange"));
+
+            Call<object>("UndoConfigChange");
+            Assert.AreEqual("", LiveConfig.card_settings.media_resources_path, "Ctrl+Z must restore the previous value");
+            Call<object>("RedoConfigChange");
+            Assert.AreEqual("default:azulejo_blue", LiveConfig.card_settings.media_resources_path, "Ctrl+Y must bring the pick back");
+        }
+
+        [Test]
+        public void DefaultMediaPicker_OffersOnlyKeysOfTheFieldsOwnMediaKind()
+        {
+            var pictures = Call<CardMediaDefaultPickerPopup>("CreateCardMediaDefaultPickerPopup", MediaKind.Image, (Action<string>)(_ => { }));
+            var audio = Call<CardMediaDefaultPickerPopup>("CreateCardMediaDefaultPickerPopup", MediaKind.Audio, (Action<string>)(_ => { }));
+            Assert.Greater(pictures.RowCount, 0, "the Framework ships default pictures");
+            Assert.Greater(audio.RowCount, 0, "the Framework ships default audio");
+            Assert.AreNotEqual(pictures.RowCount, 0);
+        }
+
+        // An unknown default key (renamed or removed from the library, or typed by hand into a saved config):
+        // resolving it returns nothing and the Editor's own row warns instead of throwing
+        [Test]
+        public void AnUnknownDefaultKey_ResolvesToNothing_AndTheRowsWarningNamesIt()
+        {
+            Assert.IsNull(POIEditorToolWindow.MediaAssetFor("default:not_a_real_key", "", MediaKind.Image, ""));
+            StringAssert.Contains("not_a_real_key", POIEditorToolWindow.CardUnknownDefaultKeyText("Picture", "not_a_real_key"));
+        }
+
         [Test]
         public void DetailsTyped_InTheDetailsPopup_IsUndoable_AndMarksTheConfigUnsaved()
         {
@@ -99,10 +140,10 @@ namespace TileStories.Editor.Tests
                 if (file.EndsWith("POIEditorToolWindow.ConfigHistory.cs")) continue;   // the factories themselves
                 string[] lines = File.ReadAllLines(file);
                 for (int i = 0; i < lines.Length; i++)
-                    if (Regex.IsMatch(lines[i], @"new\s+(ExistingSymbolPickerPopup|EntryDetailsPopup)\s*\("))
+                    if (Regex.IsMatch(lines[i], @"new\s+(ExistingSymbolPickerPopup|EntryDetailsPopup|CardMediaDefaultPickerPopup)\s*\("))
                         offenders.Add(Path.GetFileName(file) + ":" + (i + 1));
             }
-            Assert.IsEmpty(offenders, "Build popups with CreateSymbolPickerPopup / CreateDetailsPopup: " + string.Join(", ", offenders));
+            Assert.IsEmpty(offenders, "Build popups with CreateSymbolPickerPopup / CreateDetailsPopup / CreateCardMediaDefaultPickerPopup: " + string.Join(", ", offenders));
         }
     }
 }

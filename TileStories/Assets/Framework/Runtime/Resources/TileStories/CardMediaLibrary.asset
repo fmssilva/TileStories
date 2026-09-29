@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 437fb01363451c14d83988b67735bbb1, type: 3}
+  m_Name: CardMediaLibrary
+  m_EditorClassIdentifier: TileStories::TileStories.CardMediaLibrary
+  entries:
+  - key: azulejo_blue
+    kind: 1
+    asset: {fileID: 2800000, guid: 563a5c97d4f56a84495447c896167cad, type: 3}
+    note: Blue-on-white tile pattern, generated
+  - key: azulejo_ochre
+    kind: 1
+    asset: {fileID: 2800000, guid: e68f3c97b932bf04b869e3de7a722e01, type: 3}
+    note: Ochre-on-blue tile pattern, generated
+  - key: azulejo_detail
+    kind: 1
+    asset: {fileID: 2800000, guid: d0f0435ec28a07d4394f0ef9fb146099, type: 3}
+    note: One tile motif, large -- a zoom_image / detail default
+  - key: panel_plain
+    kind: 1
+    asset: {fileID: 2800000, guid: 764de42cee85d794fabedf2ac77418c7, type: 3}
+    note: A plain bordered panel -- a generic surface placeholder
+  - key: poster_plain
+    kind: 1
+    asset: {fileID: 2800000, guid: 10d5ea847ca327041b1da584a9efd0b1, type: 3}
+    note: A plain portrait poster frame
+  - key: map_plan
+    kind: 1
+    asset: {fileID: 2800000, guid: ba9b196257570b44699947a46838d2ce, type: 3}
+    note: An abstract street grid -- a generic today_map / wall_locator default
+  - key: chime
+    kind: 2
+    asset: {fileID: 8300000, guid: ca5359a82bb3ac44c9751d3c176eaee6, type: 3}
+    note: A short two-note chime, 3 s, no captions (too short to caption)
+  - key: ambient
+    kind: 2
+    asset: {fileID: 8300000, guid: cad616a7249fc2742b7e55bf3e7bfa7e, type: 3}
+    note: A 10 s ambient tone, with captions
+  - key: ambient
+    kind: 3
+    asset: {fileID: -2770782284537849634, guid: e743866c556faee4c9f37ef9f6574ae8, type: 3}
+    note: Two cues describing the ambient tone's halves
+  - key: tile_pattern
+    kind: 4
+    asset: {fileID: 32900000, guid: 5dcb0e8f580f34f4d90c66d7835269fb, type: 3}
+    note: A sliding azulejo tile pattern, ~4 s, silent, low bitrate

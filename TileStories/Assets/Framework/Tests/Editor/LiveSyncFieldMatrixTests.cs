@@ -207,6 +207,7 @@ namespace TileStories.Editor.Tests
             yield return CardRow("card_settings.enabled", c => c.card_settings.enabled = !c.card_settings.enabled);
             yield return CardRow("card_settings.languages", c => c.card_settings.languages = new List<string> { "pt", "en", "es" });
             yield return CardRow("card_settings.media_resources_path", c => c.card_settings.media_resources_path = "LivingRoom/OtherMedia");
+            yield return CardRow("card_settings.default_media_library_resources_path", c => c.card_settings.default_media_library_resources_path = "LivingRoom/OtherMediaLibrary");
             yield return CardRow("card_settings.container", c => c.card_settings.container.half_max_ratio = c.card_settings.container.half_max_ratio > 0.3f ? 0.26f : 0.36f);
             yield return CardRow("card_settings.kinds", c => c.card_settings.kinds.Add(new BlockKindSetting { kind = "rich_text", enabled = false }));
             yield return CardRow("card_settings.strings", c => c.card_settings.strings.Add(new CardStringEntry

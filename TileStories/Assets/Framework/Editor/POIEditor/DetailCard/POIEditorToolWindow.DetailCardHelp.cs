@@ -254,6 +254,43 @@ namespace TileStories.Editor
             "GLOSSARY\n" +
             "- Tap a linked word with a real finger: the definition opens; a slow drag across the text scrolls the card instead.";
 
+        // _3.1 step 13
+        private const string CardDefaultMediaLibraryHelp =
+            "This wall's own default media library, if it has one: a CardMediaLibrary asset (Create > TileStories > Card Media " +
+            "Library) placed inside a Resources folder of the wall, written as the part after Resources/ (a framework default " +
+            "suggestion: <WallName>/CardMediaLibrary). Every Asset field's 'Pick default...' offers this wall's own entries " +
+            "first, then the Framework's below. Empty: only the Framework's defaults are offered.";
+
+        private const string CardDefaultMediaTableHelp =
+            "The Framework's own default media, shipped with every wall: generated pictures, two short audio clips and one " +
+            "short video, made only by the framework's own scripts (no licence question). Any Asset field in Card Content can " +
+            "pick one of these by its key through 'Pick default...' instead of a file of your own -- useful as a placeholder, " +
+            "a poster, or a quick way to try a new wall before its own media is ready.";
+
+        private static string CardDefaultMediaRowHelp(CardMediaLibrary.Entry entry) =>
+            "Kind: " + entry.kind + ".\n\n" + (string.IsNullOrWhiteSpace(entry.note) ? "" : entry.note);
+
+        private const string CardDefaultMediaSceneTestGuide =
+            "Not possible in Scene test: the card is screen-space UI and only draws in Play Mode. Use How to Playmode Test.";
+
+        private const string CardDefaultMediaPlaymodeTestGuide =
+            "SETUP\n" +
+            "- Open Specific Marker > Card Content on a point, open a block with a Picture / Audio / Video field.\n\n" +
+            "DEFAULT MEDIA\n" +
+            "- Click 'Pick default...' on the field: a picker lists this wall's own default library (if one is set here) then " +
+            "the Framework's, each row a preview and its key.\n" +
+            "- Pick a row: the field shows the key under it ('Default: <key>') and previews the picked asset. 'Clear default' " +
+            "removes it.\n" +
+            "- Save All to JSON, Copy to StreamingAssets, open the wall scene, press Play: the block shows the picked default.\n" +
+            "- Rename or remove the entry in the library asset (or type an unknown key by hand in the saved config) and reopen " +
+            "the row: a warning names the missing key.";
+
+        private const string CardDefaultMediaDeviceTestGuide =
+            "SETUP\n" +
+            "- Save All to JSON, Copy to StreamingAssets, Build And Run.\n\n" +
+            "DEFAULT MEDIA\n" +
+            "- Open a point whose card uses a default picture, audio clip or video: it shows exactly as it did in Play Mode.";
+
         // A Color field holds text that is not a colour the card accepts
         internal static string CardColorInvalidText(string fieldLabel, string typed) =>
             fieldLabel + " '" + typed.Trim() + "' is not a colour: write it as #RRGGBB (for example #1F3F8F), or pick it. " +
@@ -389,5 +426,10 @@ namespace TileStories.Editor
         internal static string CardMediaMissingText(string label, string path, MediaKind kind = MediaKind.Image) => kind == MediaKind.Image
             ? label + ": no picture \"" + path + "\" in the Media Folder any more. The card shows its \"picture unavailable\" frame until another is picked."
             : label + ": no " + CardMediaNoun(kind) + " \"" + path + "\" in the Media Folder any more. The card shows it as unavailable until another is picked.";
+
+        // _3.1 step 13: the picked default key no longer exists in either default media library (renamed, or the wall's
+        // own library no longer has it and the Framework's never did)
+        internal static string CardUnknownDefaultKeyText(string label, string key) =>
+            label + ": the default key \"" + key + "\" is not in the wall's own default library nor the Framework's. The card shows it as unavailable until another is picked.";
     }
 }

@@ -221,6 +221,9 @@ namespace TileStories
             string language = settings.languages != null && settings.languages.Count > 0 ? settings.languages[0] : "";
             if (Media == null || Media.Root != (settings.media_resources_path ?? "").Trim().Trim('/'))
                 Media = new ResourcesMediaSource(settings.media_resources_path);
+            // - re-resolved every Show so a live edit to the wall's own default library takes effect at once
+            Media.FrameworkDefaults = CardMediaLibraryLookup.Framework;
+            Media.WallDefaults = CardMediaLibraryLookup.WallFrom(settings.default_media_library_resources_path);
             var context = new BlockBindContext
             {
                 Poi = poi, Taxonomy = wallSession.SearchConfig, Language = language, FallbackLanguage = language, Media = Media,

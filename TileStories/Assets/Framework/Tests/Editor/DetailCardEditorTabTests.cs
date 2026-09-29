@@ -135,7 +135,7 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(6 + 7 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 6 wall-level + 7 container + 3 demo card");
+            Assert.AreEqual(7 + 7 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 7 wall-level + 7 container + 3 demo card");
 
             foreach (var (name, change) in edits)
             {

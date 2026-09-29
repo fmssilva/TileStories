@@ -29,6 +29,11 @@ namespace TileStories
 
         public T Load<T>(string path) where T : Object
         {
+            // - a "default:<key>" entry (_3.1 step 13) resolves through the REAL Framework default library, same
+            //   as production: never held/counted here either, so the gallery's own refcount tests are untouched
+            if (MediaPathRule.IsDefaultKey(path))
+                return CardMediaLibraryLookup.Resolve(MediaPathRule.DefaultKeyOf(path), MediaPathRule.KindOfAssetType(typeof(T)), null, CardMediaLibraryLookup.Framework) as T;
+
             string key = path?.Trim() ?? "";
             if (_held.TryGetValue(key, out var held) && held.Asset is T cached)
             {
@@ -47,6 +52,7 @@ namespace TileStories
 
         public void Release(string path)
         {
+            if (MediaPathRule.IsDefaultKey(path)) return;
             string key = path?.Trim() ?? "";
             if (!_held.TryGetValue(key, out var held)) return;
             if (held.Count > 1)

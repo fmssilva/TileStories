@@ -47,6 +47,8 @@ namespace TileStories
                 list.Add(new Entry(BuiltInBlocks.AudioGuideKind, variant, "nospeed", AudioBlock(variant, "short.mp3", "short.vtt", AudioTitle, AudioSpeedRule.Off)));
                 // - a clip that is not there: the block says so and stays quiet
                 list.Add(new Entry(BuiltInBlocks.AudioGuideKind, variant, "unavailable", AudioBlock(variant, "ghost.mp3", null, AudioTitle)));
+                // _3.1 step 13: a default:<key> clip (the Framework's own generated chime) binds and renders exactly like an authored one
+                list.Add(new Entry(BuiltInBlocks.AudioGuideKind, variant, "default", AudioBlock(variant, MediaPathRule.PathForDefaultKey("chime"), null, AudioTitle)));
             }
         }
 

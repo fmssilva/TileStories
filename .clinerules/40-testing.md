@@ -189,6 +189,11 @@ application is a broken test, not a flaky one.
   `Resources.FindObjectsOfTypeAll<EditorWindow>()` holds none of its windows. Captures and test runs never overlap: close every
   capture window before starting a run (an open utility window takes focus from real-click Editor tests).
 - Blank windows the developer finds are safe to close with their X; they hold nothing.
+- **Pixel and layout assertions never depend on the Editor's window sizes.** A test that checks positions or sizes in panel pixels
+  first fixes its own frame (a fixed Game view resolution or a fixed-size panel / RenderTexture set in SetUp and restored in
+  TearDown). If such a test fails only after the Editor layout changed, the test is wrong, not the environment: fix the fixture.
+  A capture that keeps catching a neighbouring panel is fixed the same way (restore the default layout with
+  `EditorUtility.LoadWindowLayout` or ask the developer once), never by skipping the capture.
 
 ### 4.2.4 Test renders live outside Assets/
 

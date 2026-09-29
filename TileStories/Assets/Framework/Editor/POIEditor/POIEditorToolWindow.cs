@@ -301,6 +301,7 @@ namespace TileStories.Editor
         [SerializeField] private bool _showCardBlockLibrary = false;
         [SerializeField] private bool _showCardTexts = false;
         [SerializeField] private bool _showCardGlossary = false;
+        [SerializeField] private bool _showCardDefaultMedia = false;
 
         [SerializeField] private SpriteKeyLibrary _defaultIconLibrary;
         [SerializeField] private SpriteKeyLibrary _wallIconLibrary;

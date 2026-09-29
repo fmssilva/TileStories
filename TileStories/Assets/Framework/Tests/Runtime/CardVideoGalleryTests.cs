@@ -96,10 +96,11 @@ namespace TileStories.Tests
             Assert.AreEqual("0:00 / 0:12", panel.TimeText.text, "the clip's real length is known before it plays");
             Assert.IsNotNull(panel.Poster.Texture, "the poster was loaded through the block's scope");
             Assert.AreEqual(DisplayStyle.Flex, panel.PlayOverlay.resolvedStyle.display, "a play button over the poster");
+            Assert.AreEqual(DisplayStyle.None, panel.PlayButton.resolvedStyle.display, "before the first play, only the centre overlay -- not the bar's button too");
             Assert.AreEqual(DisplayStyle.None, panel.ChapterRow.resolvedStyle.display, "the inline look shows no chapter buttons, even with rows written");
             Assert.AreEqual(DisplayStyle.Flex, panel.FullScreenButton.resolvedStyle.display);
             Assert.AreEqual("Full screen", panel.FullScreenButton.tooltip);
-            foreach (var button in new[] { panel.PlayOverlay, panel.PlayButton, panel.FullScreenButton, panel.CaptionsButton })
+            foreach (var button in new[] { panel.PlayOverlay, panel.FullScreenButton, panel.CaptionsButton })
                 Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(button.worldBound.width, button.worldBound.height), button.name + " is finger-sized");
             Assert.AreEqual(CardVideoState.Idle, Video.State, "nothing plays until asked");
             Color seen = default;
@@ -113,6 +114,8 @@ namespace TileStories.Tests
             Assert.AreEqual(CardVideoState.Playing, Video.State, "a real tap on the play button started it");
             Assert.IsTrue(Video.IsCurrent(view.Track));
             Assert.IsFalse(Output.Muted, "with its sound");
+            Assert.AreEqual(DisplayStyle.Flex, panel.PlayButton.resolvedStyle.display, "once started, the bar's own play/pause appears");
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(panel.PlayButton.worldBound.width, panel.PlayButton.worldBound.height), "the bar's button is finger-sized");
             Assert.IsFalse(panel.ShowsFrames, "no frame yet: the poster stays");
             yield return CardGalleryChecks.PixelAt(panel.Surface, Beside(panel.Surface), c => seen = c);
             Assert.IsTrue(Near(PosterColour, seen), "still the poster while the clip prepares");
@@ -130,6 +133,7 @@ namespace TileStories.Tests
             yield return Tap(panel.PlayButton);
             Assert.AreEqual(CardVideoState.Paused, Video.State, "the small button pauses");
             Assert.AreEqual(DisplayStyle.Flex, panel.PlayOverlay.resolvedStyle.display, "the big play button is back");
+            Assert.AreEqual(DisplayStyle.Flex, panel.PlayButton.resolvedStyle.display, "and the bar's stays too: once played, it does not hide again on pause");
             _harness.AdvanceVideo(3f);
             Assert.AreEqual("0:02 / 0:12", panel.TimeText.text, "paused: the time stands still");
             yield return Tap(panel.PlayOverlay);

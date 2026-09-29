@@ -135,5 +135,19 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(view.Root.ClassListContains("card-media--unavailable"), "the block shows its media-unavailable state");
             stack.UnbindAll();
         }
+
+        // _3.1 step 13: the Phase A gallery's own IMediaSource resolves "default:<key>" through the REAL Framework
+        // default library too (never through its in-memory stand-ins), exactly like ResourcesMediaSource does in
+        // production -- so a gallery entry proves the same seam a wall's card uses
+        [Test]
+        public void GalleryMedia_ResolvesADefaultKey_ThroughTheRealFrameworkLibrary_NeverCountedOrDestroyed()
+        {
+            var gallery = new CardGalleryMedia();
+            var texture = gallery.Load<Texture2D>(MediaPathRule.PathForDefaultKey("azulejo_blue"));
+            Assert.IsNotNull(texture, "the Framework's own shipped default resolves");
+            Assert.AreEqual(0, gallery.HeldCount, "a default asset is a static reference, never held/counted here");
+            Assert.DoesNotThrow(() => gallery.Release(MediaPathRule.PathForDefaultKey("azulejo_blue")));
+            Assert.IsNull(gallery.Load<Texture2D>(MediaPathRule.PathForDefaultKey("not_a_real_key")), "an unknown default key: null, never an exception");
+        }
     }
 }

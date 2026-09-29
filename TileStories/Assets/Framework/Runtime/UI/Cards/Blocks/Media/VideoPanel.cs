@@ -207,6 +207,9 @@ namespace TileStories
             PlayButton.tooltip = _strings?.Get(playing ? CardStrings.Keys.AudioPause : CardStrings.Keys.AudioPlay) ?? "";
             PlayOverlay.tooltip = _strings?.Get(CardStrings.Keys.AudioPlay) ?? "";
             PlayOverlay.style.display = playing || !ClipAvailable ? DisplayStyle.None : DisplayStyle.Flex;
+            // - before the first play, this video is not "mine" yet (IsCurrent is false until Start()): only the
+            //   centre overlay shows. Once started, the bar's own play/pause stays visible even while paused.
+            PlayButton.style.display = mine ? DisplayStyle.Flex : DisplayStyle.None;
             Root.EnableInClassList("card-video--playing", playing);
             Root.EnableInClassList("card-video--unavailable", !ClipAvailable);
 

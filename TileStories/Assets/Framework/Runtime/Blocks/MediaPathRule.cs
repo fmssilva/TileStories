@@ -31,14 +31,42 @@ namespace TileStories
     // Editor stores whatever the developer picked -- a file outside the folder keeps its project path -- so this rule, not
     // the drawer, decides: the Editor warns with it and BlockStackBuilder gives it as a "Not shown" reason
     // (SkipReason.InvalidMedia; an Items row with such an image is incomplete). Pure, so every case is a unit test.
+    //
+    // A value may instead be a DEFAULT key (_3.1 step 13, "default:<key>"): a pointer into the Framework's own generated
+    // media library (or a wall's override of it, CardMediaLibraryLookup), never a path on disk. Check treats a non-empty
+    // key as valid for any kind here -- whether the key actually HOLDS media of that kind is a lookup question, checked
+    // where the library is available (the Editor drawer, CardMediaSource.Load), not here.
     public static class MediaPathRule
     {
+        public const string DefaultKeyPrefix = "default:";
+
         // The file types each kind takes (what Resources.Load reads from the imported files)
         public static readonly string[] ImageExtensions = { ".png", ".jpg", ".jpeg" };
         public static readonly string[] AudioExtensions = { ".mp3", ".wav", ".ogg" };
         public static readonly string[] CaptionExtensions = { ".vtt" };
         // - the two containers Unity decodes on every platform the app targets (H.264 mp4 and VP8 webm)
         public static readonly string[] VideoExtensions = { ".mp4", ".webm" };
+
+        // Whether a stored value names a default-library key rather than a path
+        public static bool IsDefaultKey(string path) => !string.IsNullOrWhiteSpace(path) && Normalize(path).StartsWith(DefaultKeyPrefix, System.StringComparison.Ordinal);
+
+        // The key part of a "default:<key>" value, or null when `path` is not a default key
+        public static string DefaultKeyOf(string path) => IsDefaultKey(path) ? Normalize(path).Substring(DefaultKeyPrefix.Length) : null;
+
+        // The value to store for picking a default library entry by key
+        public static string PathForDefaultKey(string key) => DefaultKeyPrefix + (key ?? "");
+
+        // The MediaKind a loaded asset TYPE reads as (the reverse of IsAssetOfKind), used to look a default key up in a
+        // CardMediaLibrary by kind when only the generic Load<T> knows the wanted type
+        public static MediaKind KindOfAssetType(System.Type type)
+        {
+            if (type == null) return MediaKind.None;
+            if (typeof(UnityEngine.Texture).IsAssignableFrom(type)) return MediaKind.Image;
+            if (typeof(UnityEngine.AudioClip).IsAssignableFrom(type)) return MediaKind.Audio;
+            if (typeof(UnityEngine.TextAsset).IsAssignableFrom(type)) return MediaKind.Captions;
+            if (typeof(UnityEngine.Video.VideoClip).IsAssignableFrom(type)) return MediaKind.Video;
+            return MediaKind.None;
+        }
 
         // The extensions a field of this kind takes (empty for None)
         public static string[] ExtensionsOf(MediaKind kind) => kind switch
@@ -54,6 +82,7 @@ namespace TileStories
         {
             if (string.IsNullOrWhiteSpace(path)) return MediaPathProblem.Empty;
             string p = Normalize(path);
+            if (IsDefaultKey(p)) return DefaultKeyOf(p).Length > 0 ? MediaPathProblem.None : MediaPathProblem.Empty;
             if (p.StartsWith("/") || p.Contains(":") || p.StartsWith("Assets/") || p.StartsWith("Packages/")
                 || p == ".." || p.StartsWith("../") || p.Contains("/../") || p.EndsWith("/.."))
                 return MediaPathProblem.OutsideFolder;

@@ -6578,6 +6578,41 @@
                                 "items": []
                             }
                         ]
+                    },
+                    {
+                        "key": "block_6",
+                        "kind": "zoom_image",
+                        "variant": "pinch",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "image",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:azulejo_detail",
+                                "items": []
+                            },
+                            {
+                                "key": "caption",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "A generated tile pattern, from the framework's own default media -- no wall picture authored yet."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Um padrão de azulejos gerado pela framework, ainda sem imagem própria desta parede."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
                     }
                 ]
             }
@@ -7497,6 +7532,7 @@
             "pt"
         ],
         "media_resources_path": "LivingRoom/CardMedia",
+        "default_media_library_resources_path": "",
         "container": {
             "open_stop": "peek",
             "half_max_ratio": 0.4000000059604645,

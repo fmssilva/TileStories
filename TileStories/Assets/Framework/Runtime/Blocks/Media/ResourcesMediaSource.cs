@@ -19,6 +19,13 @@ namespace TileStories
 
         public string Root => _root;
 
+        // A "default:<key>" value resolves through these instead of Resources.Load (_3.1 step 13): the wall's own
+        // override first, then the Framework's shipped library. Both null = every default key is unresolved (the
+        // block's "media unavailable" state, same as a missing file). Never reference-counted: a library asset is
+        // a static Framework/wall reference, never loaded or unloaded by this source.
+        public CardMediaLibrary WallDefaults { get; set; }
+        public CardMediaLibrary FrameworkDefaults { get; set; }
+
         // How many different assets are held right now
         public int LoadedCount => _held.Count;
 
@@ -27,6 +34,15 @@ namespace TileStories
 
         public T Load<T>(string path) where T : Object
         {
+            if (MediaPathRule.IsDefaultKey(path))
+            {
+                string defaultKey = MediaPathRule.DefaultKeyOf(path);
+                var found = CardMediaLibraryLookup.Resolve(defaultKey, MediaPathRule.KindOfAssetType(typeof(T)), WallDefaults, FrameworkDefaults) as T;
+                if (found == null && _reportedMissing.Add("default:" + defaultKey + "|" + typeof(T).Name))
+                    Debug.LogWarning("[Card] default media key not found: " + defaultKey);
+                return found;
+            }
+
             string key = Key(path);
             if (key.Length == 0) return null;
             var slot = (key, typeof(T));
@@ -49,6 +65,8 @@ namespace TileStories
 
         public void Release(string path)
         {
+            // - a default-library asset is never counted or unloaded here (it is a static Framework/wall reference)
+            if (MediaPathRule.IsDefaultKey(path)) return;
             if (!Find(path, out var slot)) return;
             var held = _held[slot];
             if (held.Count > 1)

@@ -997,8 +997,10 @@ namespace TileStories.Tests
         public IEnumerator LampMilitary_IsTheShortCard_HeaderRichTextQuickFactsAndGallery()
         {
             yield return OpenFull("lamp_military");
-            CollectionAssert.AreEqual(new[] { BuiltInBlocks.HeaderKind, BuiltInBlocks.RichTextKind, BuiltInBlocks.QuickFactsKind, BuiltInBlocks.GalleryKind, BuiltInBlocks.AudioGuideKind }, ShownKinds(),
-                "the short card (_3.1 section 9): header, rich_text, quick_facts, gallery, and (step 9A) a hero chip on the tone");
+            CollectionAssert.AreEqual(
+                new[] { BuiltInBlocks.HeaderKind, BuiltInBlocks.RichTextKind, BuiltInBlocks.QuickFactsKind, BuiltInBlocks.GalleryKind, BuiltInBlocks.AudioGuideKind, BuiltInBlocks.ZoomImageKind },
+                ShownKinds(),
+                "the short card (_3.1 section 9): header, rich_text, quick_facts, gallery, (step 9A) a hero chip on the tone, and (step 13) a zoom_image on a Framework default picture");
             Assert.IsTrue(Sheet.Stack.BoundViews.OfType<GalleryBlockView>().Single().Shots.All(s => s.Image.Texture != null), "its pictures load");
             var facts = Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().Single();
             CollectionAssert.AreEqual(new[] { "Last refuge", "3 m thick" }, facts.Facts.Select(f => f.Value.text));
@@ -1007,6 +1009,23 @@ namespace TileStories.Tests
             Assert.AreEqual(1, rich.Count);
             StringAssert.Contains("last refuge of the garrison", rich[0].Body.Paragraphs[0].text);
             Assert.AreEqual("Lamp - Military", Session.SearchPois.First(p => p.id == "lamp_military").name, "the card never renames the POI");
+        }
+
+        // _3.1 step 13: the Lamp - Military zoom_image block picks a Framework default picture by key (no wall media
+        // authored for it) and the real card loads it exactly like an authored one
+        [UnityTest]
+        public IEnumerator LampMilitary_ZoomImage_PicksAFrameworkDefaultPicture_AndLoadsItLikeAnyOther()
+        {
+            yield return OpenFull("lamp_military");
+            var zoom = Sheet.Stack.BoundViews.OfType<ZoomImageBlockView>().Single();
+            Assert.IsNotNull(zoom.Image.Texture, "the default:azulejo_detail key resolved to a real texture");
+            StringAssert.Contains("framework's own default media", zoom.Caption.text);
+
+            SelectionEventBus.Clear();
+            LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
+            yield return OpenFull("lamp_military");
+            var zoomPt = Sheet.Stack.BoundViews.OfType<ZoomImageBlockView>().Single();
+            StringAssert.Contains("própria desta parede", zoomPt.Caption.text, "the caption's own Portuguese, real accents");
         }
 
         [UnityTest]

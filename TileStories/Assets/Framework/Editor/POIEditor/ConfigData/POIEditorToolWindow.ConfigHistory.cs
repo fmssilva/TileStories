@@ -41,6 +41,16 @@ namespace TileStories.Editor
                 key => ApplyPopupEdit(() => assignKey(key)), IsStillEditing(_config));
         }
 
+        // _3.1 step 13: the default-media key picker, filtered to one MediaKind, offering the wall's own default
+        // library (if configured) and the Framework's shipped one
+        private CardMediaDefaultPickerPopup CreateCardMediaDefaultPickerPopup(MediaKind kind, Action<string> assignKey)
+        {
+            var wall = CardMediaLibraryLookup.WallFrom(_config?.card_settings?.default_media_library_resources_path);
+            var framework = CardMediaLibraryLookup.Framework;
+            return new CardMediaDefaultPickerPopup(kind, wall, framework,
+                key => ApplyPopupEdit(() => assignKey(key)), IsStillEditing(_config));
+        }
+
         // Same rule for a free-text note popup (one undo step per keystroke: its field lives in another window, see ActiveEditGesture)
         private EntryDetailsPopup CreateDetailsPopup(string title, Func<string> get, Action<string> set)
         {

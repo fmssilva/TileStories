@@ -59,6 +59,7 @@ namespace TileStories.Editor
                         () => FlagValue(block, field.Key), value => EnsureBlockField(block, field.Key).flag = value);
                 else if (field.Type == BlockFieldType.Asset)
                     DrawAssetRow(field, IndentLevel1, "Block field " + field.Key, blockIndex, _config.card_settings?.media_resources_path,
+                        _config.card_settings?.default_media_library_resources_path,
                         () => AssetValue(block, field.Key), value => EnsureBlockField(block, field.Key).asset = value);
                 else if (field.Type == BlockFieldType.Number)
                     DrawNumberRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
@@ -138,7 +139,8 @@ namespace TileStories.Editor
                 EditorRowEnd();
 
                 foreach (var sub in field.ItemFields)
-                    DrawItemSubField(item, sub, languages, probe + i + " " + sub.Key, blockIndex, _config.card_settings?.media_resources_path, _config.pois);
+                    DrawItemSubField(item, sub, languages, probe + i + " " + sub.Key, blockIndex, _config.card_settings?.media_resources_path,
+                        _config.card_settings?.default_media_library_resources_path, _config.pois);
             }
 
             DrawEditorRow(out float addRow, out _, IndentLevel1);
@@ -153,11 +155,12 @@ namespace TileStories.Editor
         }
 
         // One sub-field of one Items row
-        private static void DrawItemSubField(BlockItemData item, BlockFieldDefinition sub, List<string> languages, string probeName, int probeIndex, string mediaFolder,
-            List<POIData> pois)
+        private void DrawItemSubField(BlockItemData item, BlockFieldDefinition sub, List<string> languages, string probeName, int probeIndex, string mediaFolder,
+            string defaultLibraryPath, List<POIData> pois)
         {
             if (sub.Type == BlockFieldType.Asset)
-                DrawAssetRow(sub, IndentLevel2, probeName, probeIndex, mediaFolder, () => ItemAssetValue(item, sub.Key), value => EnsureItemField(item, sub.Key).asset = value);
+                DrawAssetRow(sub, IndentLevel2, probeName, probeIndex, mediaFolder, defaultLibraryPath,
+                    () => ItemAssetValue(item, sub.Key), value => EnsureItemField(item, sub.Key).asset = value);
             else if (sub.Type == BlockFieldType.Choice)
                 DrawChoiceRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
             else if (sub.Type == BlockFieldType.Color)
@@ -293,11 +296,11 @@ namespace TileStories.Editor
         // path inside the wall's Media Folder (MediaPathRule.StoredPathFor). A file picked from outside that folder is
         // stored as picked and warned about (the card leaves it out, BlockStackBuilder's InvalidMedia), never silently
         // refused; a stored path with no file behind it is warned about too. Drawing never writes.
-        private static void DrawAssetRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, string mediaFolder,
+        private void DrawAssetRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, string mediaFolder, string defaultLibraryPath,
             Func<string> get, Action<string> set)
         {
             string current = get();
-            var shown = MediaAssetFor(current, mediaFolder, field.Media);
+            var shown = MediaAssetFor(current, mediaFolder, field.Media, defaultLibraryPath);
             DrawEditorRow(out float rowWidth, out _, indent);
             EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
             var picked = EditorGUILayout.ObjectField(shown, MediaObjectType(field.Media), false,
@@ -308,19 +311,44 @@ namespace TileStories.Editor
             if (picked != shown) set(picked == null ? "" : MediaPathRule.StoredPathFor(AssetDatabase.GetAssetPath(picked), mediaFolder));
 
             string stored = get();
+            string defaultKey = MediaPathRule.DefaultKeyOf(stored);
+            DrawEditorRow(out _, out _, indent);
+            if (defaultKey != null)
+            {
+                GUILayout.Label("Default: " + defaultKey, EditorStyles.miniLabel, GUILayout.ExpandWidth(false));
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Clear default", EditorStyles.miniButton, GUILayout.Width(90f))) set("");
+                ReportTableCellRect(probeName + " clear default", probeIndex);
+            }
+            else
+            {
+                if (GUILayout.Button("Pick default...", EditorStyles.miniButton, GUILayout.Width(110f)))
+                    EditorPopup.ShowAt(CreateCardMediaDefaultPickerPopup(field.Media, key => set(MediaPathRule.PathForDefaultKey(key))), GUILayoutUtility.GetLastRect());
+                ReportTableCellRect(probeName + " pick default", probeIndex);
+                GUILayout.FlexibleSpace();
+            }
+            EditorRowEnd();
+
             var problem = MediaPathRule.Check(stored, field.Media);
             if (problem == MediaPathProblem.OutsideFolder || problem == MediaPathProblem.WrongType)
                 EditorGUILayout.HelpBox(CardMediaProblemText(field.Label, field.Media, problem), MessageType.Warning);
-            else if (problem == MediaPathProblem.None && MediaAssetFor(stored, mediaFolder, field.Media) == null)
+            else if (defaultKey != null && MediaAssetFor(stored, mediaFolder, field.Media, defaultLibraryPath) == null)
+                EditorGUILayout.HelpBox(CardUnknownDefaultKeyText(field.Label, defaultKey), MessageType.Warning);
+            else if (problem == MediaPathProblem.None && defaultKey == null && MediaAssetFor(stored, mediaFolder, field.Media, defaultLibraryPath) == null)
                 EditorGUILayout.HelpBox(CardMediaMissingText(field.Label, stored, field.Media), MessageType.Warning);
         }
 
-        // The asset a stored path names: inside the Media Folder through Resources (what the app loads), a project path
-        // as picked (outside the folder: shown so the developer sees what they chose), else none
-        internal static UnityEngine.Object MediaAssetFor(string stored, string mediaFolder, MediaKind kind = MediaKind.Image)
+        // The asset a stored path names: a "default:<key>" resolves through the wall's own default library (if
+        // configured) then the Framework's; a plain path resolves inside the Media Folder through Resources (what
+        // the app loads), or as a project path as picked (outside the folder: shown so the developer sees what
+        // they chose); else none
+        internal static UnityEngine.Object MediaAssetFor(string stored, string mediaFolder, MediaKind kind = MediaKind.Image, string defaultLibraryPath = null)
         {
             if (string.IsNullOrWhiteSpace(stored)) return null;
             var type = MediaObjectType(kind);
+            if (MediaPathRule.IsDefaultKey(stored))
+                return CardMediaLibraryLookup.Resolve(MediaPathRule.DefaultKeyOf(stored), kind,
+                    CardMediaLibraryLookup.WallFrom(defaultLibraryPath), CardMediaLibraryLookup.Framework);
             string p = stored.Trim().Replace('\\', '/');
             if (p.StartsWith("Assets/")) return AssetDatabase.LoadAssetAtPath(p, type);
             if (!MediaPathRule.IsValid(p, kind)) return null;

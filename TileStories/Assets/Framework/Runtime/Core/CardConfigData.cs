@@ -22,6 +22,10 @@ namespace TileStories
         // Resources-relative folder holding this wall's card media (images, audio...), e.g. "LivingRoom/CardMedia".
         // An Asset field stores a path under it. Empty = the wall has no card media yet.
         public string media_resources_path = "";
+        // Resources-relative path to this wall's own CardMediaLibrary.asset (_3.1 step 13), same pattern as
+        // marker_icon_library_resources_path: a "default:<key>" value resolves here first, then the Framework's
+        // shipped library. Empty = the wall has no override library; every default key resolves from the Framework's.
+        public string default_media_library_resources_path = "";
         public CardContainerSettings container = new();
         // The Block Library: one row per kind the developer changed. A kind with no row is enabled with
         // its own default variant (BlockLibraryRule), so a new built-in kind needs no config edit.

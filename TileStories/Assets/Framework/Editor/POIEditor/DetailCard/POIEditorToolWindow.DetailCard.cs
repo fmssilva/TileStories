@@ -28,6 +28,7 @@ namespace TileStories.Editor
         private readonly TestGuideState _blockLibraryTest = new TestGuideState();
         private readonly TestGuideState _cardTextsTest = new TestGuideState();
         private readonly TestGuideState _cardGlossaryTest = new TestGuideState();
+        private readonly TestGuideState _cardDefaultMediaTest = new TestGuideState();
 
         private void DrawDetailCardOptions()
         {
@@ -37,6 +38,7 @@ namespace TileStories.Editor
             _showCardBlockLibrary = DrawFramedFoldout(ref _showCardBlockLibrary, DrawBlockLibrarySection, "Block Library", BlockLibrarySectionColor);
             _showCardTexts = DrawFramedFoldout(ref _showCardTexts, DrawCardTextsSection, "Card Texts", CardTextsSectionColor);
             _showCardGlossary = DrawFramedFoldout(ref _showCardGlossary, DrawCardGlossarySection, "Glossary", CardGlossarySectionColor);
+            _showCardDefaultMedia = DrawFramedFoldout(ref _showCardDefaultMedia, DrawCardDefaultMediaSection, "Default Media", CardDefaultMediaSectionColor);
         }
 
         // card_settings.glossary: one row per word (its Term, then its definition in each wall language), a delete per
@@ -352,5 +354,56 @@ namespace TileStories.Editor
         internal void SetBlockLibraryEnabled(string kind, bool enabled) => EnsureBlockLibraryRow(kind).enabled = enabled;
 
         internal void SetBlockLibraryVariant(string kind, string variant) => EnsureBlockLibraryRow(kind).default_variant = variant;
+
+        // _3.1 step 13: this wall's own default media library path (like Media Folder), then a read-only table of
+        // the Framework's own shipped defaults (preview, kind, key, (i)) -- every Asset field's "Pick default..."
+        // offers this wall's own library first, then these
+        private const float DefaultMediaPreviewSize = 32f;
+        private const float DefaultMediaKindColumnWidth = 70f;
+        private const float DefaultMediaKeyColumnWidth = 150f;
+
+        private void DrawCardDefaultMediaSection()
+        {
+            var s = _config.card_settings;
+            s.default_media_library_resources_path = DrawTextRow("Default Media Library", s.default_media_library_resources_path,
+                CardDefaultMediaLibraryHelp, IndentLevel0);
+
+            DrawEditorRow(out float titleRow, out _);
+            GUILayout.Label("Framework defaults", EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, titleRow - 36f)), GUILayout.ExpandWidth(false));
+            HelpInfoButton.Draw("Framework defaults", CardDefaultMediaTableHelp);
+            EditorRowEnd();
+
+            var library = CardMediaLibraryLookup.Framework;
+            if (library == null || library.Entries.Count == 0)
+            {
+                EditorGUILayout.HelpBox("No default media found (CardMediaLibrary.asset is missing or empty).", MessageType.Warning);
+            }
+            else
+            {
+                using (new TableRowScope())
+                {
+                    GUILayout.Label("", GUILayout.Width(DefaultMediaPreviewSize));
+                    GUILayout.Label("Kind", EditorStyles.miniBoldLabel, GUILayout.Width(DefaultMediaKindColumnWidth));
+                    GUILayout.Label("Key", EditorStyles.miniBoldLabel, GUILayout.Width(DefaultMediaKeyColumnWidth));
+                    GUILayout.FlexibleSpace();
+                }
+                for (int i = 0; i < library.Entries.Count; i++)
+                {
+                    var entry = library.Entries[i];
+                    using (new TableRowScope())
+                    {
+                        Texture2D preview = entry.asset != null ? AssetPreview.GetAssetPreview(entry.asset) ?? AssetPreview.GetMiniThumbnail(entry.asset) : null;
+                        GUILayout.Box(preview != null ? (Texture)preview : Texture2D.grayTexture, GUILayout.Width(DefaultMediaPreviewSize), GUILayout.Height(DefaultMediaPreviewSize));
+                        ReportTableCellRect("Default media preview", i);
+                        GUILayout.Label(entry.kind.ToString(), GUILayout.Width(DefaultMediaKindColumnWidth));
+                        GUILayout.Label(entry.key, GUILayout.Width(DefaultMediaKeyColumnWidth));
+                        HelpInfoButton.Draw(entry.key, CardDefaultMediaRowHelp(entry));
+                        GUILayout.FlexibleSpace();
+                    }
+                }
+            }
+
+            DrawDomainTestSubSection(_cardDefaultMediaTest, CardDefaultMediaSceneTestGuide, CardDefaultMediaPlaymodeTestGuide, CardDefaultMediaDeviceTestGuide);
+        }
     }
 }

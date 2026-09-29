@@ -96,49 +96,54 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: POI Detail Card -- 9A-fix (mini-player stop, flaky check), step 9B (video)`
+
+## `And now: POI Detail Card -- 9B-owed (background runs), 9B-fix, step 13 (Framework default media library)`
 
 GATE: take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Close every
 capture window with window.Close() and confirm none is left. Confirm the tree compiles and is committed
-(`git --no-optional-locks status`); if not, STOP and report -- do not audit or finish someone else's uncommitted work without
-telling me first. Re-verify the baseline (0 `error CS`, EditMode + PlayMode all green) with Unity allowed to be in the background.
-If `Markers/Fonts/Oswald Bold SDF.asset` shows as modified after a run, never commit it (see __mixed_TODOs.md).
+(`git --no-optional-locks status`); if not, STOP and report -- never finish someone else's uncommitted work without telling me.
+Never commit `Markers/Fonts/Oswald Bold SDF.asset` (restore it with git checkout after runs).
 
-Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- start with "## TODOs"
-([9A-fix], [Tier 4/5, first teaser kind]) and the status table (0-12, 9-pre, 9A done; 9B planned), and "Tier 4 -- audio and
-video". Context only: _0_work_plan.md Stage 2 item 3 (audio rules), _5.1.
+REQUIRED READING (all lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- "## TODOs" ([9B-owed],
+[9B-fix], [13]), the status table (0-12, 9-pre, 9A, 9B done; 13 next, then 10) and section 8 (Editor);
+`_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (this block adds Editor rows, a table and a picker);
+`.clinerules/40-testing.md` 4.2.3 and 4.5; `.clinerules/20-code-quality.md` (dev-only rule, ASCII + visitor-content exception).
+Context only: how the marker icon / font libraries work (SpriteKeyLibrary, FontKeyLibrary, WallSession's
+`marker_icon_library_resources_path`) -- step 13 follows the same pattern.
 
-PART 1 -- 9A-fix (then suggest a commit message before Part 2):
-1. Mini-player stop: a stop / dismiss button (48 px, CardIcons.VectorGlyph shape, name from CardStrings en + pt) calling
-   ICardAudio.Stop; the bar never overlaps the zoom controls or the search bar at 390 px. Phase B: a real tap -> audio Idle,
-   mini-player gone; capture before/after.
-2. Run the hero_chip / subtitle layout fixture three times with Unity in the background; if it fails once, find the cause and fix.
+PART 0 -- 9B-owed: ask me ONCE to switch to another app, then run the hero_chip fixture 3x and both full suites with Unity in
+the background. Any failure: find the cause and fix it (4.2.3). Report the three counts.
 
-PART 2 -- step 9B, video (one kind + the header look, through the section 7 micro-cycle):
-3. Media: MediaKind.Video (VideoClip through IMediaSource from the wall's media folder; import settings that keep the clip small).
-   Fixture: copy the developer's `MediaAssets/Videos/castelo_s_jorge_video.mp4` into CardMedia/video/ (README: development test
-   media, licence NOT established, same rule as the mp3s) -- or a trimmed copy if the build size warrants it; say which.
-4. ONE video owner beside the audio owner (a VideoPlayer rendering to a RenderTexture shown as the view's background image; never
-   one VideoPlayer per view). Sound rule: starting a video pauses the card's audio; starting audio pauses the video (a pure rule,
-   tested). Captions reuse VttRule; chapters (items: t, label) are chips that seek.
-5. `video` variants: `inline` (poster, play overlay, scrubber, captions toggle) and `chapters` (the same + the chapter chips).
-   This is the first teaser kind: add display mode `takeover` for video (a full-screen button opens it in TakeoverView, same
-   playback continues, Back returns with the stop and scroll kept) -- see the [Tier 4/5, first teaser kind] TODO.
-6. header `video_loop`: a muted looping clip in the header with its poster; the poster shows until the first frame and whenever
-   the card's (future) reduce-motion setting is on -- add only the config flag + poster path now, the visitor setting is _3.3.
-7. Tests: pure (sound rule, chapter lookup, MediaPathRule video); Phase A gallery (both variants x poster / no captions / long
-   chapters; real taps on play, a chapter chip, the takeover button); Phase B on the real Lamp (real tap plays, the audio guide
-   pauses when the video starts, takeover and Back keep the stop and scroll, header loop shows its poster first). Video time in
-   tests from an injectable clock / manual output like ManualAudioOutput, never real-time waits.
+PART 1 -- 9B-fix (suggest a commit message after it):
+1. One play button before the first play: with a poster, only the centre overlay; the bar's play/pause appears once playing.
+   Phase A test + recapture `Card_video_*_poster`.
+2. Split CardGalleryDefinitions.cs into per-family partials (like .Audio / .Video). No behaviour change; every gallery test
+   still green.
 
-Capture and check yourself: both video variants (poster, playing, captions on, PT), the takeover, the header loop, the Editor rows
-(Asset field for video, chapters rows, the header's new fields). Rules as before: no literal colours/sizes, no visitor strings
-in code, real input in tests, identity fields untouched, Portuguese spelled properly.
-OUT OF SCOPE: Tier 5, the visitor reduce-motion setting (_3.3), _3.2, streaming from a URL.
-Stop when 9A-fix and 9B are green. Update _3.1 (rows 9A-fix / 9B with proof, TODOs, design history), 10-structure.md, _5.1.
+PART 2 -- step 13, Framework default media library:
+3. `CardMediaLibrary` (ScriptableObject: rows of key, kind, asset(s), a short Editor note), one Framework default asset and an
+   optional wall library path in card_settings (like the icon library). The media source resolves `default:<key>` from the wall's
+   library first, then the Framework's; a plain path stays the wall's media folder. MediaPathRule accepts `default:` keys.
+4. Generated default media only (our own scripts, no third-party material): about 6 pictures (azulejo patterns in two palettes, a
+   panel, a poster, a map-like plan), 2 short audio clips (a chime, a 10 s ambient tone) with a .vtt, 1 short video (tile pattern
+   motion, MediaEncoder, low bitrate). Total in a build <= 3 MB, proved by a test that sums the imported sizes. A generator script
+   in Editor/DevTools rebuilds them; a README says they are generated, CC0.
+5. Editor: Detail Card > Default Media (a table with a preview per row, kind, key, (i)); every Asset field in Card Content gets
+   "Pick default..." that stores `default:<key>` and shows the key; warnings for an unknown key. Real-click Editor tests (pick,
+   undo, redo, unknown-key warning).
+6. Use it: the Phase A gallery reads defaults where it now uses in-memory stand-ins (keep the silent ManualAudio/VideoOutput for
+   timing); Lamp - Military gets one block that uses only defaults (identity fields untouched).
+7. Tests: pure (key parsing, lookup order wall > framework, size budget); Phase A (a default picture, audio and video bind and
+   render); Phase B on the real scene (a default-media block shows on Lamp - Military; a wall library overrides one key).
+
+Capture and check yourself: the Default Media table (previews, (i) column, narrow 620 pt), the picker on an Asset row, the card
+blocks using defaults. Rules as before: no literal colours/sizes, no visitor strings in code, real input in tests, identity fields
+untouched, Portuguese spelled properly.
+OUT OF SCOPE: 3D models and panoramas (Tier 5, step 10), _3.2, _3.3, landscape full-screen video.
+Stop when Parts 0-2 are green. Update _3.1 (rows 9B-fix / 13 with proof, TODOs, design history), 10-structure.md, _5.1.
 Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP and report.
-Finish with: suites + counts, what you looked at, what you could not verify, a one-line commit message (no trailer), and the
-`git add` paths (default: `git add TileStories .clinerules proj_guides`, never the Oswald font). Commit only if the developer asks.
+Finish with: suites + counts (foreground and background), what you looked at, what you could not verify, a one-line commit
+message (no trailer), and the `git add` paths (default: `git add TileStories .clinerules proj_guides`). Commit only if I ask.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

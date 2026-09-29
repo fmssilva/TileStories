@@ -58,6 +58,10 @@ namespace TileStories
                 list.Add(new Entry(BuiltInBlocks.VideoKind, variant, "unavailable", VideoBlock(variant, "ghost.mp4", "wide.png", null, null)));
                 list.Add(new Entry(BuiltInBlocks.VideoKind, variant, "takeover",
                     VideoBlock(variant, "short.mp4", "wide.png", "short.vtt", ShortChapters, display: CardOptions.DisplayTakeover)));
+                // _3.1 step 13: a default:<key> clip and poster (the Framework's own generated tile pattern) bind and render
+                // exactly like authored ones
+                list.Add(new Entry(BuiltInBlocks.VideoKind, variant, "default",
+                    VideoBlock(variant, MediaPathRule.PathForDefaultKey("tile_pattern"), MediaPathRule.PathForDefaultKey("azulejo_blue"), null, null)));
             }
         }
 

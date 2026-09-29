@@ -24,6 +24,39 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(MediaPathProblem.WrongType, MediaPathRule.Check("hero.png", MediaKind.None), "a field that names no media kind takes nothing");
         }
 
+        // _3.1 step 13: a "default:<key>" value names a library entry, not a path -- valid for any kind here
+        // (the library lookup, not this syntactic rule, decides whether the key actually holds that kind's media)
+        [Test]
+        public void MediaPathRule_TakesADefaultKey_AsValidForAnyKind_ButAnEmptyKeyIsStillEmpty()
+        {
+            Assert.IsTrue(MediaPathRule.IsDefaultKey("default:azulejo_blue"));
+            Assert.IsTrue(MediaPathRule.IsDefaultKey(" default:azulejo_blue "), "trimmed first");
+            Assert.IsFalse(MediaPathRule.IsDefaultKey("castle_hero.png"));
+            Assert.IsFalse(MediaPathRule.IsDefaultKey(""));
+            Assert.IsFalse(MediaPathRule.IsDefaultKey(null));
+
+            Assert.AreEqual("azulejo_blue", MediaPathRule.DefaultKeyOf("default:azulejo_blue"));
+            Assert.AreEqual("azulejo_blue", MediaPathRule.DefaultKeyOf(" default:azulejo_blue "));
+            Assert.IsNull(MediaPathRule.DefaultKeyOf("castle_hero.png"), "not a default key at all");
+
+            Assert.AreEqual("default:azulejo_blue", MediaPathRule.PathForDefaultKey("azulejo_blue"));
+
+            foreach (var kind in new[] { MediaKind.Image, MediaKind.Audio, MediaKind.Captions, MediaKind.Video, MediaKind.None })
+                Assert.AreEqual(MediaPathProblem.None, MediaPathRule.Check("default:azulejo_blue", kind), kind + ": a non-empty key is a valid value for any kind");
+            Assert.AreEqual(MediaPathProblem.Empty, MediaPathRule.Check("default:", MediaKind.Image), "the prefix alone with no key is still nothing picked");
+        }
+
+        [Test]
+        public void KindOfAssetType_MapsEachLoadedTypeBackToItsMediaKind()
+        {
+            Assert.AreEqual(MediaKind.Image, MediaPathRule.KindOfAssetType(typeof(UnityEngine.Texture2D)));
+            Assert.AreEqual(MediaKind.Audio, MediaPathRule.KindOfAssetType(typeof(UnityEngine.AudioClip)));
+            Assert.AreEqual(MediaKind.Captions, MediaPathRule.KindOfAssetType(typeof(UnityEngine.TextAsset)));
+            Assert.AreEqual(MediaKind.Video, MediaPathRule.KindOfAssetType(typeof(UnityEngine.Video.VideoClip)));
+            Assert.AreEqual(MediaKind.None, MediaPathRule.KindOfAssetType(typeof(UnityEngine.GameObject)));
+            Assert.AreEqual(MediaKind.None, MediaPathRule.KindOfAssetType(null));
+        }
+
         [Test]
         public void StoredPathFor_IsThePathInsideTheMediaFolder_ElseTheProjectPathAsPicked()
         {
