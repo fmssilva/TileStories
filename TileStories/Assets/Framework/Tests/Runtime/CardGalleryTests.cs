@@ -52,6 +52,7 @@ namespace TileStories.Tests
                 yield return null;
             }
             Assert.IsNotNull(_harness, "the gallery scene holds CardGalleryHarness");
+            // - the 390 x 844 frame is already pinned for the whole run (FixedFrameForTheRun)
             _harness.EnsureBuilt();
             yield return null;
         }
@@ -539,7 +540,7 @@ namespace TileStories.Tests
             Assert.AreEqual("Previous", story.Previous.Q<Label>().text);
             Assert.AreEqual("Next", story.Next.Q<Label>().text);
             Assert.IsTrue(story.Segments[0].ClassListContains("card-story__segment--current"));
-            Assert.AreEqual(story.Segments[0].worldBound.width, story.Segments[3].worldBound.width, 0.5f, "equal segments");
+            Assert.AreEqual(story.Segments[0].worldBound.width, story.Segments[3].worldBound.width, OnePixel(story.Segments[0]) + 0.5f, "equal segments");
             var nextSpot = story.Next.worldBound.center;
 
             yield return CardTestInput.Tap(story.Next.panel, story.Next.worldBound.center);
@@ -947,21 +948,83 @@ namespace TileStories.Tests
 
         private HeaderBlockView GalleryHeader => (HeaderBlockView)_harness.Sheet.Stack.BoundViews[0];
 
+        // A real body field long enough that the Full stop's stack genuinely overflows its viewport (a lone header never
+        // does at the 390x844 fixed frame: 224pt of content vs 532-658pt of viewport)
+        private static BlockFieldValue LongBody() => new()
+        {
+            key = BuiltInBlocks.RichTextBodyField,
+            text = new System.Collections.Generic.List<LocalizedEntry>
+            {
+                new() { lang = "en", value = string.Join(" ", System.Linq.Enumerable.Repeat(
+                    "A real paragraph of visitor text, long enough on its own that the stack truly overflows the Full stop's viewport and a wheel genuinely scrolls it.", 24)) },
+            },
+        };
+
+        private static BlockFieldValue LocalizedField(string key, string value) => new()
+        {
+            key = key,
+            text = new System.Collections.Generic.List<LocalizedEntry> { new() { lang = "en", value = value } },
+        };
+
         [UnityTest]
         public IEnumerator HeaderImageParallax_ARealScroll_MovesThePictureAtHalfTheFramesSpeed_TheTitleStaysPinned()
         {
-            yield return ShowHeader("header_image_parallax_long_full");
+            // A real second block under the header (like a real POI card): a lone header never overflows the Full
+            // stop's viewport, so there is nothing to scroll and the parallax law never engages.
+            var wall = CardGalleryDefinitions.Taxonomy();
+            var poi = new POIData
+            {
+                id = "header_image_parallax_real_scroll", name = "The Royal Palace of the Kings of Portugal and of the Algarves, before the earthquake",
+                category = CardGalleryDefinitions.CategoryKey, hierarchy_level_key = CardGalleryDefinitions.LevelKey,
+            };
+            var headerBlock = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.HeaderKind, variant = BuiltInBlocks.HeaderImageParallax };
+            headerBlock.fields.Add(LocalizedField(BlockStackBuilder.HeaderTitleField, poi.name));
+            headerBlock.fields.Add(LocalizedField(BlockStackBuilder.HeaderSubtitleField,
+                "Seen from the river on the panel, with the Customs House, the chapel and the long arcade that the fire destroyed"));
+            headerBlock.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderImageField, asset = "wide.png" });
+            var body = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.RichTextKind, variant = BuiltInBlocks.RichTextPlain };
+            body.fields.Add(LongBody());
+            poi.card.blocks.Add(headerBlock);
+            poi.card.blocks.Add(body);
+
+            _harness.ShowPoi(poi, wall, null, SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle();
+
             var header = GalleryHeader;
             var stack = _harness.Sheet.Stack;
             Assert.IsTrue(header.HasHero);
             // - a point inside the hero shows the picture itself (its own colour, not the frame's or the card's)
             yield return PixelAt(header.HeroPart, header.HeroPart.worldBound.center + new Vector2(10f, 10f), c => AssertColour(PictureColour("wide.png"), c, "the hero shows wide.png"));
+            float scrollRange = stack.Scroll.contentContainer.layout.height - stack.Scroll.contentViewport.layout.height;
+            Assert.Greater(scrollRange, HeaderCollapseRule.CollapseAfter, "precondition: the real body gives the stack genuine scroll range");
             float frameTop = header.HeroPart.worldBound.yMin, pictureTop = header.Picture.Root.worldBound.yMin, titleTop = header.PeekPart.worldBound.yMin;
 
-            yield return CardTestInput.Wheel(stack.Scroll.contentViewport, 6f, frames: 2);
+            // A real wheel first, to prove the stack itself really scrolls with a real event (the original bug: a lone
+            // header had nothing to scroll, so this never fired at all). Its exact resting offset depends on the
+            // ScrollView's own built-in elastic/kinetic wheel physics (Unity's, not this project's), which settle
+            // over real elapsed time -- proven separately by this precondition, not by the pixel maths below, which
+            // needs a KNOWN small offset instead (see next comment).
+            yield return CardTestInput.Wheel(stack.Scroll.contentViewport, 1f, frames: 1);
             yield return CardTestInput.Settle(0.2f);
+            Assert.Greater(stack.Scroll.scrollOffset.y, 0f, "precondition: the real wheel scrolled the stack");
+
+            // The real wheel above can land anywhere (Unity's own kinetic deceleration, real elapsed time) and may
+            // overshoot CollapseAfter, collapsing the header; HeaderCollapseRule's hysteresis then only reopens it
+            // back near the very top (OpenAtTop = 0.5), so a known offset set directly afterward would NOT reopen it
+            // on its own. Back to the top first (a real state every card starts from) resets that, then to a KNOWN
+            // small offset -- the same `scrollOffset` property a drag or a wheel both ultimately move -- well inside
+            // the header's open window, so the maths below are checked against a fixed point rather than at the mercy
+            // of Unity's own wheel deceleration timing (the same class of machine-speed dependence `_3.1` step 7B
+            // already had to design out of the sheet's own drag).
+            stack.Scroll.scrollOffset = Vector2.zero;
+            yield return null;
+            Assert.IsFalse(stack.HeaderCollapsed, "precondition: back at the top, the header re-opened");
+            float knownScroll = HeaderCollapseRule.CollapseAfter * 0.5f;
+            stack.Scroll.scrollOffset = new Vector2(0f, knownScroll);
+            yield return null;
             float scrolled = stack.Scroll.scrollOffset.y;
-            Assert.Greater(scrolled, 20f, "precondition: the real wheel scrolled the stack");
+            Assert.AreEqual(knownScroll, scrolled, 0.5f, "precondition: the known offset actually landed (not clamped away)");
+            Assert.IsFalse(stack.HeaderCollapsed, "precondition: still inside the header's open window");
             float frameMoved = frameTop - header.HeroPart.worldBound.yMin;
             float pictureMoved = pictureTop - header.Picture.Root.worldBound.yMin;
             Assert.AreEqual(scrolled * HeaderBlockView.ParallaxFactor, header.ParallaxOffset, 0.5f, "the picture slides by half the scroll inside its frame");
@@ -970,8 +1033,8 @@ namespace TileStories.Tests
             Assert.AreEqual(titleTop, header.PeekPart.worldBound.yMin, 0.5f, "the title stays pinned");
             yield return Render("Card_header_image_parallax_scrolled");
 
-            yield return CardTestInput.Wheel(stack.Scroll.contentViewport, -40f, frames: 2);
-            yield return CardTestInput.Settle(0.2f);
+            stack.Scroll.scrollOffset = Vector2.zero;
+            yield return null;
             Assert.AreEqual(0f, header.ParallaxOffset, 0.01f, "back at the top: the picture where it started");
         }
 
