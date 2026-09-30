@@ -14,7 +14,7 @@ namespace TileStories
         private sealed class Handle : IPreviewHandle
         {
             private readonly ManualPreviewStage _owner;
-            public RenderTexture Texture { get; }
+            public RenderTexture Texture { get; private set; }
             public bool Released { get; private set; }
             public int RenderCount { get; private set; }
 
@@ -22,6 +22,19 @@ namespace TileStories
             {
                 _owner = owner;
                 Texture = texture;
+            }
+
+            // Recreates the fake texture at the asked-for size (matching the real stage's contract) so a gallery/scene
+            // test that checks aspect or resolution sees the same shape a real CardPreviewStage would give it.
+            public void Resize(int width, int height)
+            {
+                if (Released) return;
+                width = Mathf.Max(1, width);
+                height = Mathf.Max(1, height);
+                if (Texture != null && Texture.width == width && Texture.height == height) return;
+                var old = Texture;
+                Texture = new RenderTexture(width, height, 0);
+                if (old != null) UnityEngine.Object.DestroyImmediate(old);
             }
 
             public void RenderNow(TurntableState turntable, PanoramaViewState panorama) => RenderCount++;

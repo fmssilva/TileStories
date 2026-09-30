@@ -146,6 +146,7 @@ namespace TileStories
             foreach (string variant in BuiltInBlocks.HeaderImageVariants)
                 list.Add(new Entry(variant, NoPicture, "Gate", "1640", SheetStopRule.Stop.Full));
             list.Add(new Entry(BuiltInBlocks.HeaderVideoLoop, NoPicture, "Gate", "1640", SheetStopRule.Stop.Full));
+            list.Add(new Entry(BuiltInBlocks.HeaderModelTurntable, NoPicture, "Gate", "1640", SheetStopRule.Stop.Full));
         }
 
         // The header video_loop entries' clip (a generated gallery video, CardGalleryDefinitions.Videos)
@@ -229,6 +230,12 @@ namespace TileStories
             if (e.IsHeader && e.Variant == BuiltInBlocks.HeaderVideoLoop && e.Content != NoPicture)
             {
                 header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderLoopClipField, asset = LoopClip });
+                header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderImageField, asset = "wide.png" });
+            }
+            // - model_turntable (10A.3.2): the Framework's own default model, the wide picture as its Fallback
+            if (e.IsHeader && e.Variant == BuiltInBlocks.HeaderModelTurntable && e.Content != NoPicture)
+            {
+                header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderModelField, asset = MediaPathRule.PathForDefaultKey("azulejo_arch") });
                 header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderImageField, asset = "wide.png" });
             }
             poi.card.blocks.Add(header);

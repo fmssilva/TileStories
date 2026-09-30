@@ -119,6 +119,40 @@ namespace TileStories.Tests
             Assert.AreEqual(yawOnTouch, view.State.Yaw, 0.5f, "just touched: the pause has not elapsed again yet, so no new spin");
         }
 
+        // _3.1 10A.2c.2: auto-spin used to tick (and render) every 33 ms for as long as the block was bound, even
+        // scrolled out of the stack's viewport or sitting under the sheet's Peek stop. Scrolling the block out (a
+        // real ScrollView.ScrollTo, the same one the stack itself uses) proves the state stops advancing; scrolling
+        // it back proves it resumes without needing a rebind.
+        [UnityTest]
+        public IEnumerator AutoSpin_StopsAdvancing_WhileScrolledOutOfTheViewport_AndResumesBackInView()
+        {
+            ModelTurntableBlockView view = null;
+            yield return ShowBlock("model_3d_turntable_autospin", v => view = v);
+            yield return null;
+            Assert.IsTrue(view.ShowsModel);
+
+            var stack = _harness.Sheet.Stack;
+            var slot = stack.SlotOf(view);
+            var farAway = new VisualElement { style = { height = 4000f } };
+            stack.Scroll.contentContainer.Add(farAway);
+            yield return null; // let the new spacer's height enter layout before asking to scroll to it
+            stack.Scroll.ScrollTo(farAway);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.IsFalse(slot.worldBound.Overlaps(stack.Scroll.contentViewport.worldBound), "the block's slot is really out of the viewport now");
+
+            float yawWhileHidden = view.State.Yaw;
+            yield return new WaitForSecondsRealtime(2.6f); // past TurntableRule.AutoSpinResumeAfter
+            Assert.AreEqual(yawWhileHidden, view.State.Yaw, "scrolled out: auto spin asked for nothing, so the state never advanced");
+
+            stack.Scroll.ScrollTo(slot);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.IsTrue(slot.worldBound.Overlaps(stack.Scroll.contentViewport.worldBound), "back in the viewport");
+            yield return new WaitForSecondsRealtime(2.6f);
+            Assert.AreNotEqual(yawWhileHidden, view.State.Yaw, "back in view: auto spin resumed on its own, no rebind needed");
+
+            stack.Scroll.contentContainer.Remove(farAway);
+        }
+
         [UnityTest]
         public IEnumerator AMissingModel_WithAFallbackPicture_ShowsTheFallback_NeverTheSurface()
         {
@@ -139,6 +173,63 @@ namespace TileStories.Tests
             Assert.IsFalse(view.ShowsModel);
             Assert.AreEqual(DisplayStyle.Flex, view.Fallback.Root.resolvedStyle.display);
             Assert.AreNotEqual("", view.Fallback.Unavailable.text, "no Fallback Picture authored: CardImage's own 'unavailable' words");
+        }
+
+        // _3.1 10A.3.1: Display Takeover shows a non-interactive teaser (the same first render, the model's name, an
+        // open-full-screen button); a real tap opens the model full screen through a SECOND preview slot (the card's
+        // own resting slot, and its picture, are untouched); Back closes it and releases that second slot, leaving
+        // nothing behind.
+        [UnityTest]
+        public IEnumerator DisplayTakeover_IsANonInteractiveTeaser_ARealTapOpensItFullScreen_ARealDragRotatesIt_BackReleasesTheSecondSlot()
+        {
+            ModelTurntableBlockView view = null;
+            yield return ShowBlock("model_3d_turntable_takeover", v => view = v);
+            yield return null;
+            Assert.AreEqual(CardOptions.DisplayTakeover, view.Display);
+            Assert.AreEqual(DisplayStyle.None, view.Hint.resolvedStyle.display, "no drag hint on a teaser that cannot be dragged");
+            Assert.AreEqual(DisplayStyle.Flex, view.TeaserOpenButton.resolvedStyle.display);
+            Assert.AreEqual("The stone arch", view.TeaserName.text);
+            Assert.IsTrue(view.ShowsModel, "the teaser's own static first render (no fallback authored)");
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(view.TeaserOpenButton.worldBound.width, view.TeaserOpenButton.worldBound.height));
+            yield return CardGalleryChecks.Render("Card_model3d_takeover_teaser");
+
+            // - dragging the teaser's own picture must never rotate it: only the open-full-screen button reacts
+            float restingYaw = view.State.Yaw;
+            yield return CardTestInput.DragFrom(view.Frame.panel, view.Frame.worldBound.center, new Vector2(120f, 0f));
+            yield return null;
+            Assert.AreEqual(restingYaw, view.State.Yaw, "the teaser itself does not rotate on drag");
+
+            int before = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None).Length;
+
+            yield return CardTestInput.Tap(view.TeaserOpenButton.panel, view.TeaserOpenButton.worldBound.center);
+            yield return CardTestInput.Settle(0.15f);
+            var takeover = _harness.Sheet.Takeover;
+            Assert.IsTrue(takeover.IsOpen, "a real tap on the teaser's button opened it full screen");
+            Assert.IsTrue(takeover.Crumb.text.EndsWith(" > The stone arch"), "the card's title, then the model's own");
+
+            var full = view.FullScreenView;
+            Assert.IsNotNull(full, "a second instance over a second preview slot");
+            Assert.AreEqual(CardOptions.DisplayInline, full.Display, "full screen is never itself a teaser");
+            Assert.AreEqual(DisplayStyle.Flex, full.Hint.resolvedStyle.display, "the full-screen view offers the real drag/pinch hint");
+            Assert.AreNotSame(view.Texture, full.Texture, "a second slot: its own RenderTexture, not the teaser's");
+            Assert.IsTrue(full.ShowsModel);
+            yield return CardGalleryChecks.Render("Card_model3d_takeover_fullscreen");
+
+            float before2 = full.State.Yaw;
+            yield return CardTestInput.DragFrom(full.Frame.panel, full.Frame.worldBound.center, new Vector2(120f, 0f));
+            yield return null;
+            Assert.AreNotEqual(before2, full.State.Yaw, "a real one-finger drag rotates it full screen");
+            Assert.AreEqual(restingYaw, view.State.Yaw, "and never touches the teaser's own (resting) state");
+
+            yield return CardTestInput.Tap(takeover.Back.panel, takeover.Back.worldBound.center);
+            yield return CardTestInput.Settle(0.15f);
+            Assert.IsFalse(takeover.IsOpen, "Back closed it");
+            Assert.IsNull(view.FullScreenView, "and the second slot was let go");
+            Assert.IsTrue(view.ShowsModel, "the card's own teaser picture is untouched");
+
+            yield return null;
+            int after = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None).Length;
+            Assert.AreEqual(before, after, "nothing was left behind: the second slot's model/root are gone, the shared rig stays");
         }
     }
 }

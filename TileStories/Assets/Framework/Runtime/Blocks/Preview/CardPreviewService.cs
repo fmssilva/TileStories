@@ -22,6 +22,7 @@ namespace TileStories
             public RenderTexture Texture => Handle?.Texture;
             public IPreviewHandle Handle;
 
+            public void Resize(int width, int height) => Handle?.Resize(width, height);
             public void RenderNow(TurntableState turntable, PanoramaViewState panorama) => Handle?.RenderNow(turntable, panorama);
 
             public Slot(string key, MediaKind kind, string path)

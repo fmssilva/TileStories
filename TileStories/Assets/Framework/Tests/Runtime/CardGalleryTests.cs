@@ -92,14 +92,19 @@ namespace TileStories.Tests
             bool subtitleExpected = entry.Variant != BuiltInBlocks.HeaderCompact && entry.Subtitle.Length > 0;
             Assert.AreEqual(subtitleExpected, header.SubtitleShown, "compact never shows a subtitle; every other look does");
             // - the picture looks: a hero first in the scroll, its picture really loaded; without a picture, the text-only look
-            bool pictureLook = System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, entry.Variant) >= 0 || entry.Variant == BuiltInBlocks.HeaderVideoLoop;
+            bool pictureLook = System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, entry.Variant) >= 0 || entry.Variant == BuiltInBlocks.HeaderVideoLoop || entry.Variant == BuiltInBlocks.HeaderModelTurntable;
             bool heroExpected = pictureLook && entry.Content != CardGalleryDefinitions.NoPicture;
             Assert.AreEqual(heroExpected, header.HasHero, "a hero exactly for a picture look that has its picture");
             if (heroExpected)
             {
                 Assert.AreEqual(0, sheet.Stack.Scroll.contentContainer.IndexOf(header.HeroPart), "the hero opens what scrolls, under the pinned title");
-                Assert.IsNotNull(header.Picture.Texture, "the picture was loaded (lazily, on bind)");
-                Assert.AreEqual(1, _harness.Media.RefCount(header.Picture.Path), "...once, through the header's own media scope");
+                if (entry.Variant == BuiltInBlocks.HeaderModelTurntable)
+                    Assert.AreSame(header.HeroPart, header.ModelView.Root.parent, "the hero holds the model view, not a picture");
+                else
+                {
+                    Assert.IsNotNull(header.Picture.Texture, "the picture was loaded (lazily, on bind)");
+                    Assert.AreEqual(1, _harness.Media.RefCount(header.Picture.Path), "...once, through the header's own media scope");
+                }
             }
             else Assert.IsNull(header.HeroPart.parent, "no hero on the card");
 

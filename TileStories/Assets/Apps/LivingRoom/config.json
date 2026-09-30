@@ -6132,7 +6132,7 @@
                         "key": "block_58",
                         "kind": "model_3d",
                         "variant": "turntable",
-                        "display": "inline",
+                        "display": "takeover",
                         "fields": [
                             {
                                 "key": "model",
@@ -6141,6 +6141,24 @@
                                 "flag": false,
                                 "value": "",
                                 "asset": "default:azulejo_arch",
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The stone arch"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O arco de pedra"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
                                 "items": []
                             }
                         ]
@@ -6190,7 +6208,52 @@
             "has_custom_symbol": false,
             "custom_symbol_key": "",
             "card": {
-                "blocks": []
+                "blocks": [
+                    {
+                        "key": "block_1",
+                        "kind": "header",
+                        "variant": "model_turntable",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Sacred Arch"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Arco Sagrado"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "model",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:azulejo_arch",
+                                "items": []
+                            },
+                            {
+                                "key": "image",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:azulejo_detail",
+                                "items": []
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

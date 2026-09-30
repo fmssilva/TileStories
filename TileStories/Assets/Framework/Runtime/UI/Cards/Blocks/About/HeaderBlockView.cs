@@ -32,6 +32,9 @@ namespace TileStories
         public VisualElement LoopFrames { get; }
         public VideoTrack LoopTrack { get; private set; }
         public bool LoopShowsFrames { get; private set; }
+        // model_turntable (10A.3.2): the SAME turntable view a model_3d block uses, embedded in the hero -- built once,
+        // added/removed from HeroPart as the variant changes, so drag/pinch/auto-spin never need re-implementing here
+        public ModelTurntableBlockView ModelView { get; }
 
         // image_parallax: how far the picture lags behind the scroll (0.5 = half the speed)
         public const float ParallaxFactor = 0.5f;
@@ -76,6 +79,8 @@ namespace TileStories
             Ring.AddToClassList("card-hero__ring");
             LoopFrames = new VisualElement { name = "card-hero-loop", pickingMode = PickingMode.Ignore };
             LoopFrames.AddToClassList("card-hero__loop");
+            ModelView = new ModelTurntableBlockView();
+            ModelView.Root.AddToClassList("card-hero__model");
             HeroPart.RegisterCallback<GeometryChangedEvent>(evt =>
             {
                 // - only a new frame size re-places the picture (its own new size must never feed back into the frame's)
@@ -134,6 +139,22 @@ namespace TileStories
             if (!BuiltInBlocks.HeaderShowsPicture(context.Variant, instance)) return;
             _variant = context.Variant;
             HeroPart.AddToClassList("card-hero--" + _variant);
+            if (_variant == BuiltInBlocks.HeaderModelTurntable)
+            {
+                HeroPart.Add(ModelView.Root);
+                // - the SAME turntable a model_3d block binds, given a synthetic instance keyed off the header's own
+                // fields (Model, Picture-as-Fallback) so ModelView never needs to know it is inside a header. Auto Spin
+                // is always on here (no authored toggle for the header, unlike the block's own field) and the display
+                // resolves to Model3D's default (inline): a header teaser/takeover is not offered.
+                var modelInstance = new BlockInstanceData { key = (instance?.key ?? "") + "::header_model" };
+                modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DModelField, asset = read.ValidAsset(BuiltInBlocks.HeaderModelField, MediaKind.Model) });
+                modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DFallbackField, asset = read.ValidAsset(BuiltInBlocks.HeaderImageField, MediaKind.Image) });
+                modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DAutoSpinField, flag = true });
+                ModelView.Bind(modelInstance, context);
+                ModelView.Hint.style.display = DisplayStyle.None; // the hero has no room for a caption line
+                HasHero = true;
+                return;
+            }
             string picture = read.ValidAsset(BuiltInBlocks.HeaderImageField, MediaKind.Image);
             // - a video loop may have no poster: a plain frame until its first frame, never the "picture unavailable" words
             if (_variant == BuiltInBlocks.HeaderVideoLoop && picture.Length == 0) Picture.Clear(null);
@@ -184,6 +205,7 @@ namespace TileStories
 
         private void ClearHero()
         {
+            ModelView.Unbind();
             if (_video != null)
             {
                 _video.Changed -= RefreshLoop;

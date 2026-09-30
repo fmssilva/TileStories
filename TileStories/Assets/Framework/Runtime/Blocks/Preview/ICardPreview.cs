@@ -33,6 +33,10 @@ namespace TileStories
         bool Failed { get; }
         UnityEngine.RenderTexture Texture { get; }
 
+        // The view's own stage element resized (or is reporting its size for the first time): recreate the texture at
+        // this pixel size so its aspect matches the stage, a no-op while loading/failed/released or already this size
+        void Resize(int width, int height);
+
         // Render one frame now (a no-op while loading/failed, or once released): the view calls this after a real
         // gesture moved `turntable`/`panorama` (whichever this slot's kind uses), never every frame on its own
         void RenderNow(TurntableState turntable, PanoramaViewState panorama);

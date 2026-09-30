@@ -24,6 +24,10 @@ namespace TileStories
         // Tier 4: a muted looping film under the title, Picture as its poster (step 9B)
         public const string HeaderVideoLoop = "video_loop";
         public const string HeaderLoopClipField = "loop_clip";
+        // Tier 5: a 3D model under the title, auto-spinning, a drag allowed there too; Picture as its Fallback while it
+        // loads (step 10A.3.2)
+        public const string HeaderModelTurntable = "model_turntable";
+        public const string HeaderModelField = "model";
 
         public const string StatusKind = "status";
         public const string StatusRing = "ring";
@@ -99,10 +103,12 @@ namespace TileStories
                    "picture slides slower than the text as the visitor scrolls), Split Then Now (Picture as it was beside Second " +
                    "Picture as it is), Spotlight Crop (Picture enlarged around a focus point, with a ring on it), Video Loop (Loop " +
                    "Clip playing silently over and over, Picture as its poster: shown until the first frame, while another video of " +
-                   "the card plays, and always when Detail Card > Card Container > Reduce Motion is on). A picture look without its " +
-                   "picture(s) -- Video Loop without its Loop Clip -- shows the text-only look. It is always shown and always first; a " +
-                   "point with no header block gets one made from its name and summary.",
-            Variants = new[] { HeaderCompact, HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop },
+                   "the card plays, and always when Detail Card > Card Container > Reduce Motion is on), Model Turntable (Model " +
+                   "auto-spinning and draggable, Picture as its Fallback while it loads). A picture look without what it needs -- " +
+                   "Video Loop without its Loop Clip, Model Turntable without its Model -- shows the text-only look. It is always " +
+                   "shown and always first; a point with no header block gets one made from its name and summary. The peek stop " +
+                   "always shows only the title, whatever the look.",
+            Variants = new[] { HeaderCompact, HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable },
             DefaultVariant = HeaderTextOnly,
             DisplayModes = new[] { CardOptions.DisplayInline },
             Fields = new[]
@@ -126,8 +132,9 @@ namespace TileStories
                 new BlockFieldDefinition
                 {
                     Key = HeaderImageField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Picture",
-                    Help = "The picture of the picture looks (in Split Then Now: as it was; in Video Loop: the poster). A PNG or JPG " +
-                           "inside the wall's Media Folder (Detail Card > Card Container). The text looks do not show it.",
+                    Help = "The picture of the picture looks (in Split Then Now: as it was; in Video Loop: the poster; in Model " +
+                           "Turntable: the Fallback, shown while the model loads and if it cannot be loaded). A PNG or JPG inside " +
+                           "the wall's Media Folder (Detail Card > Card Container). The text looks do not show it.",
                 },
                 new BlockFieldDefinition
                 {
@@ -155,6 +162,11 @@ namespace TileStories
                     Help = "Video Loop only: a short silent-looking film (its sound is never played) inside the Media Folder, MP4 or " +
                            "WEBM. A few seconds that loop cleanly work best.",
                 },
+                new BlockFieldDefinition
+                {
+                    Key = HeaderModelField, Type = BlockFieldType.Asset, Media = MediaKind.Model, Label = "Model",
+                    Help = "Model Turntable only: a .glb or .gltf file inside the Media Folder, or a Framework/wall default.",
+                },
             },
         };
 
@@ -163,6 +175,7 @@ namespace TileStories
         public static bool HeaderShowsPicture(string variant, BlockInstanceData header)
         {
             if (variant == HeaderVideoLoop) return new BlockFieldReader(header, null, null).ValidAsset(HeaderLoopClipField, MediaKind.Video).Length > 0;
+            if (variant == HeaderModelTurntable) return new BlockFieldReader(header, null, null).ValidAsset(HeaderModelField, MediaKind.Model).Length > 0;
             if (System.Array.IndexOf(HeaderImageVariants, variant) < 0) return false;
             var read = new BlockFieldReader(header, null, null);
             if (read.ValidAsset(HeaderImageField, MediaKind.Image).Length == 0) return false;

@@ -171,6 +171,7 @@ moved from Apps/LivingRoom/ into Resources/LivingRoom/CardMedia/models/ with its
 scene's own EditorOnly reference prefab re-links instead of going missing); CardPreviewStageTests.cs,
 PoiCardPreviewWiringTests.cs, ModelTurntableGalleryTests.cs and PoiCardModel3DSceneTests.cs (Tests/Runtime/) --
 verified against disk the same day.
+The same day, _3.1 10A.2c + 10A.3: CardPreviewStage fits the model to 80 % of the stage's shorter side and every slot can Resize its RenderTexture to the view's aspect; BlockBindContext.ForBlock (IBlockView.cs) is the one reflection copy BlockStackView.Bind uses; ModelTurntableBlockView gained the Display Takeover teaser (a second `::takeover` slot through IBlockHost.OpenTakeover) and ticks auto-spin only while visible; HeaderBlockView embeds it as the header look `model_turntable` (Media.uss .card-hero__model); Tests/Editor/Blocks/BlockBindContextTests.cs and Tests/Editor/FixedFrameForTheRunTests.cs are new; Lamp - Religious carries the model_turntable header fixture -- verified against disk the same day.
 
 ## 0. How to read and edit this file
 

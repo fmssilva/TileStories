@@ -130,7 +130,8 @@ namespace TileStories
             public const string VideoUnavailable = "video_unavailable";
             public const string VideoChapters = "video_chapters";
             // model_3d (step 10A.2b.3): the hint under a turntable, and its words while the model is still loading
-            // (a failed/missing model shows CardImage's own MediaUnavailable, on the fallback picture)
+            // (a failed/missing model shows CardImage's own MediaUnavailable, on the fallback picture). The Display
+            // Takeover teaser's open-full-screen button reuses VideoFullScreen's exact wording (step 10A.3.1).
             public const string Model3DHint = "model_3d_hint";
             public const string Model3DLoading = "model_3d_loading";
 

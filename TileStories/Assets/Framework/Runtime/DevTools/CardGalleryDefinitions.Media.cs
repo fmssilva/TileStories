@@ -152,6 +152,12 @@ namespace TileStories
                 var missingNoFallback = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Model3DKind, variant = variant };
                 missingNoFallback.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DModelField, asset = "ghost.glb" });
                 list.Add(new Entry(BuiltInBlocks.Model3DKind, variant, "missing-no-fallback", missingNoFallback));
+
+                // - Display Takeover (_3.1 step 10A.3.1): a teaser on the card, the model full screen through a second slot
+                var takeover = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Model3DKind, variant = variant, display = CardOptions.DisplayTakeover };
+                takeover.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DModelField, asset = MediaPathRule.PathForDefaultKey("azulejo_arch") });
+                takeover.fields.Add(Text(BuiltInBlocks.Model3DTitleField, "The stone arch"));
+                list.Add(new Entry(BuiltInBlocks.Model3DKind, variant, "takeover", takeover));
             }
         }
     }

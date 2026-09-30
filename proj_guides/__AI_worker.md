@@ -82,6 +82,7 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
    doc, _5.1 and 10-structure.md. End with a plain summary of what the domain does and how to test each option.
 
 
+confirma o estado deste ultimo conjunto de tarefas
 
 # `claude agent`
 - **GATE TASK:** start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
@@ -97,55 +98,51 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
 So start by reading them all. 
 
 
-## `And now: POI Detail Card -- step 10A.2b (the real 3D preview stage + model_3d turntable)`
+## `And now: POI Detail Card -- 10A.2c (model framing + review fixes), 10A.3 (model takeover + header model_turntable)`
 
 GATE: take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree
 compiles; if not, STOP and report. If `Markers/Fonts/Oswald Bold SDF.asset` shows as modified, `git checkout --` it.
 
-Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- "## TODOs" ([10A],
-[Tier 5] expandable) and the status table (10A.1 done; 10A.2 in progress: rules + CardPreviewService done, stage + wiring
-open), and "Tier 5 -- 3D, 360 and AR actions".
-REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.1 (Tier A in the Editor), 4.2 (test levels), 4.2.3, 4.2.4b, 4.2.5,
-4.5; `.clinerules/20-code-quality.md` (DevLog 2.1); `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (the
-model_3d Card Content row).
-Context only: Runtime/Blocks/Preview/* (ICardPreview, IPreviewStage, CardPreviewService, TurntableRule, EquirectRule),
-CardVideoService / CardVideoPlayer (how an owner is built and wired in PoiCardHost), the 10A.1 generator.
-TEST PLAN: no opening full PlayMode baseline if the tree is a green commit (say which); targeted fixtures after each sub-step;
-ONE full EditMode + PlayMode at the end. Background full run: not this block (next one).
+Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- "## TODOs" ([10A.2c],
+[10A-fix] x2, [Tier 5] expandable, [FUTURE] landscape video) and the status table (10A.2 done; 10A.3 next; 10A.4, 10B planned),
+and "Tier 5 -- 3D, 360 and AR actions".
+REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, and 4.5 incl. the NEW design-questions
+paragraph; `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (the header row gains a look).
+Context only: CardPreviewStage, ModelTurntableBlockView, TakeoverView + VideoPanel (how video's takeover reuses the same owner),
+HeaderBlockView (how video_loop was added as a header look).
+TEST PLAN: no opening full baseline (the tree is green commit 482284a). Targeted fixtures per sub-step. ONE full EditMode +
+PlayMode at the end, and that closing PlayMode run is done with Unity in the BACKGROUND (3 blocks since the last one; ask me once
+to switch app).
 
-SCOPE (only this): the real stage, its wiring, and ONE kind look -- model_3d `turntable` inline. NOT the model takeover, NOT
-the header model_turntable (10A.3), NOT panorama_360 (10A.4), NOT place_in_ar (10B).
+10A.2c.1 -- Framing (MUST): the model's combined renderer bounds fill ~80 % of the stage's shorter side at zoom 1; the
+  RenderTexture takes the stage's aspect (re-created when the stage resizes); the pivot is the bounds' centre so it turns in
+  place; zoom limits stay TurntableRule's. Pixel test for BOTH Lamp models: non-background pixels span >= 70 % of the stage's
+  shorter side at zoom 1. Recapture both and answer the design questions of 4.5.
+10A.2c.2 -- Auto-spin only while visible: tick only while the stage is inside the scroll viewport and the card is above peek;
+  test: scrolled out -> no renders; back in view -> spins.
+10A.2c.3 -- BlockBindContext copy: one method that copies every field for a block (used by BlockStackView), and a reflection
+  test that every public field of the outer context reaches the block's context.
+10A.2c.4 -- FixedFrameForTheRun pins EVERY open Game view (or fails SetUp with a clear message when it cannot); test with two
+  Game views open.
+  -> learning summary + commit message after each, and go straight on (same reply as the next tool call).
+10A.3.1 -- model_3d `takeover`: a teaser in the card (fallback picture or a first render, the model's name, an open-full-screen
+  button) that opens the model full screen in TakeoverView through the SAME preview owner (a second slot is fine; the card's slot
+  may pause); drag / pinch / auto-spin work there; Back returns with the card's stop and scroll kept and the full-screen slot
+  released. Phase A + Phase B (real tap opens it, real drag rotates it, Back restores, nothing leaks).
+10A.3.2 -- header `model_turntable`: the header's picture area shows the model (auto-spin on, drag allowed; the fallback picture
+  while loading); the peek stop shows only the title as today. Card Content header row gains Model / Fallback (Asset, model kind,
+  default picker). Phase A (header entries at peek / half / full) + Phase B (Lamp - Religious gets a model header on
+  `default:azulejo_arch`; identity fields untouched, round trip checked).
+10A.3.3 -- Close: full EditMode + PlayMode (PlayMode in the background); captures checked with the 4.5 design questions (card
+  turntable framed, takeover, header model at half and full, the header row at 620 pt); update _3.1 (10A.2c / 10A.3 rows with
+  proof, TODOs, design history), 10-structure.md, _5.1.
 
-10A.2b.1 -- CardPreviewStage (the real IPreviewStage), Runtime/UI/Cards/:
-  - far from the wall (its own layer), a DISABLED camera rendering on demand into one RenderTexture per handle, key + fill
-    light, URP; glTFast 6.19 loads the .glb through the media source (default keys included); a missing / wrong file calls
-    onFailed exactly once.
-  - Render rule: render while the model is being dragged or auto-spinning; stop rendering when idle (not every frame forever).
-  - Release leaves no GameObject, mesh, material or RenderTexture behind.
-  - Phase B-style PlayMode tests with the REAL stage: `default:azulejo_arch` loads and renders non-empty pixels; a missing file
-    fails once; after Release the counts of GameObjects / meshes / RenderTextures are back to the baseline.
-  -> learning summary, commit message, continue.
-10A.2b.2 -- Wiring: PoiCardHost owns one CardPreviewService over the stage; BlockBindContext.Preview (shared field, like
-  Audio); slots released on unbind and on card close. Test: open and close The Lamp card 3 times -> no leftover preview objects.
-  -> learning summary, commit message, continue.
-10A.2b.3 -- model_3d `turntable` (BuiltInBlocks.Media, a view in Blocks/Media/): the stage's texture in the card; drag rotates
-  (TurntableRule), pinch zooms within limits, auto-spin stops on touch and resumes after the rule's pause; a fallback picture
-  while loading and on failure; a small loading state. Card Content row: Model (Asset, model kind, default picker), Fallback
-  Picture, Auto Spin toggle. CardStrings for any visitor words (en + pt, proper Portuguese).
-  Tests: Phase A gallery (default model / missing file -> fallback; real drag and pinch change the render); Phase B on the
-  real Lamp: model_3d on `default:azulejo_arch`, and one on the heavy room scan `Apps/LivingRoom/146267-LivingRoom2-tex.glb`
-  (a LivingRoom TEST fixture only, never a default); a real drag rotates it; closing the card releases it. Identity fields
-  untouched, round trip checked.
-  -> learning summary, commit message, continue.
-10A.2b.4 -- Close: full EditMode + PlayMode; captures checked item by item (idle, dragged, zoomed, fallback, the heavy scan,
-  the Card Content row at 620 pt); update _3.1 (rows 10A.2 done with proof, 10A.3 / 10A.4 still planned), 10-structure.md, _5.1.
-
-Keep going between sub-steps (__AI_worker.md 2.4b): do not ask whether to continue. Rules as before: no literal colours/sizes,
-no visitor strings in code, real input in tests, detail logs only through DevLog, identity fields untouched.
+Keep going between sub-steps (__AI_worker.md 2.4b). Rules as before: no literal colours/sizes, no visitor strings in code,
+real input in tests, detail logs only through DevLog, identity fields untouched, Portuguese spelled properly.
+OUT OF SCOPE: panorama_360 (10A.4), place_in_ar (10B), runtime glTF download, _3.2, _3.3.
 Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP and report.
-Finish with: suites + counts, what you looked at, what you could not verify, a one-line commit message (no trailer). Commit
-only if the developer asks.
-
+Finish with: suites + counts (say which run was in the background), what you looked at, what you could not verify, a one-line
+commit message (no trailer). Commit only if the developer asks.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
@@ -234,6 +231,10 @@ Per ./.clinerules/50-terminal_and_tools.md:
 ### 2.4b. Keep going (the brief is the approval)
 - The brief below IS the developer's approval for everything in it. Do NOT stop between sub-steps to ask "should I continue?".
   After each sub-step: tests green, a short learning summary, a suggested one-line commit message -- then go straight on.
+- **The GATE is not optional.** Do every GATE item first (captures opened, compile, the Oswald font restored) and report
+  each one in your final summary; a summary that skips a GATE item is incomplete.
+- **Language and commit message:** write summaries in English. Suggest ONE short, natural commit message (one line,
+  imperative, about 50-72 characters, no step codes), e.g. "Add 360 panorama viewer to the POI card".
 - **How to go straight on:** in Claude Code a reply that contains ONLY text ends your turn and waits for the developer. So
   write the sub-step's learning summary and, in the SAME reply, make the first tool call of the next sub-step. Never end a
   reply with "continuing to X next" and no tool call.

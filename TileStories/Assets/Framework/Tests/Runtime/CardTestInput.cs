@@ -192,10 +192,18 @@ namespace TileStories.Tests
 #if UNITY_EDITOR
             // One custom Game view size per frame, named by its size (a label shared by two sizes would select the wrong one)
             private static string SizeLabel(int width, int height) => "TileStories_TestFrame_" + width + "x" + height;
-            private readonly object _group;
-            private readonly int _previousIndex;
-            private readonly object _gameView;
-            private readonly System.Reflection.PropertyInfo _selectedSizeIndexProperty;
+
+            // One pinned window: its own previous size index, restored on Dispose (_3.1 10A.2c.4 -- the old single-window
+            // version left a second open Game view at whatever size the developer had it, which broke pixel tests just as
+            // surely as no pin at all: SetUp now pins every one that exists when the run starts).
+            private sealed class PinnedWindow
+            {
+                public UnityEditor.EditorWindow Window;
+                public System.Reflection.PropertyInfo SelectedSizeIndexProperty;
+                public int PreviousIndex;
+            }
+
+            private readonly System.Collections.Generic.List<PinnedWindow> _pinned = new();
 
             public FixedGameViewSize(int width = 390, int height = 844)
             {
@@ -203,18 +211,17 @@ namespace TileStories.Tests
                 var singletonType = typeof(UnityEditor.ScriptableSingleton<>).MakeGenericType(gameViewSizesType);
                 object gameViewSizes = singletonType.GetProperty("instance").GetValue(null, null);
                 object currentGroupType = gameViewSizesType.GetProperty("currentGroupType").GetValue(gameViewSizes, null);
-                _group = gameViewSizesType.GetMethod("GetGroup").Invoke(gameViewSizes, new[] { currentGroupType });
-                var groupType = _group.GetType();
+                object group = gameViewSizesType.GetMethod("GetGroup").Invoke(gameViewSizes, new[] { currentGroupType });
+                var groupType = group.GetType();
 
-                _gameView = Resources.FindObjectsOfTypeAll(typeof(UnityEditor.EditorWindow))
-                    .FirstOrDefault(w => w.GetType().Name == "GameView");
-                Assert.IsNotNull(_gameView, "an open Game view (docked or floating) to pin its resolution");
-                _selectedSizeIndexProperty = _gameView.GetType().GetProperty("selectedSizeIndex",
-                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                _previousIndex = (int)_selectedSizeIndexProperty.GetValue(_gameView, null);
+                var gameViews = Resources.FindObjectsOfTypeAll(typeof(UnityEditor.EditorWindow))
+                    .Where(w => w.GetType().Name == "GameView")
+                    .Cast<UnityEditor.EditorWindow>()
+                    .ToList();
+                Assert.IsNotEmpty(gameViews, "an open Game view (docked or floating) to pin its resolution");
 
                 string label = SizeLabel(width, height);
-                int existing = FindSize(_group, label);
+                int existing = FindSize(group, label);
                 if (existing < 0)
                 {
                     var sizeType = System.Type.GetType("UnityEditor.GameViewSize,UnityEditor");
@@ -222,12 +229,27 @@ namespace TileStories.Tests
                         .GetField("FixedResolution").GetValue(null);
                     var ctor = sizeType.GetConstructor(new[] { fixedResolution.GetType(), typeof(int), typeof(int), typeof(string) });
                     object size = ctor.Invoke(new object[] { fixedResolution, width, height, label });
-                    groupType.GetMethod("AddCustomSize").Invoke(_group, new[] { size });
-                    existing = FindSize(_group, label);
+                    groupType.GetMethod("AddCustomSize").Invoke(group, new[] { size });
+                    existing = FindSize(group, label);
                 }
                 Assert.GreaterOrEqual(existing, 0, "the fixed test size was added to the current Game view size group");
-                _selectedSizeIndexProperty.SetValue(_gameView, existing, null);
-                ((UnityEditor.EditorWindow)_gameView).Repaint();
+
+                foreach (var gameView in gameViews)
+                {
+                    try
+                    {
+                        var property = gameView.GetType().GetProperty("selectedSizeIndex",
+                            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                        int previous = (int)property.GetValue(gameView, null);
+                        property.SetValue(gameView, existing, null);
+                        gameView.Repaint();
+                        _pinned.Add(new PinnedWindow { Window = gameView, SelectedSizeIndexProperty = property, PreviousIndex = previous });
+                    }
+                    catch (System.Exception e)
+                    {
+                        Assert.Fail($"FixedFrameForTheRun could not pin Game view '{gameView.titleContent.text}' to {width}x{height}: {e.Message}");
+                    }
+                }
             }
 
             private static int FindSize(object group, string label)
@@ -245,8 +267,13 @@ namespace TileStories.Tests
 
             public void Dispose()
             {
-                _selectedSizeIndexProperty.SetValue(_gameView, _previousIndex, null);
-                ((UnityEditor.EditorWindow)_gameView).Repaint();
+                foreach (var pinned in _pinned)
+                {
+                    if (pinned.Window == null) continue; // a window closed mid-run: nothing left to restore
+                    pinned.SelectedSizeIndexProperty.SetValue(pinned.Window, pinned.PreviousIndex, null);
+                    pinned.Window.Repaint();
+                }
+                _pinned.Clear();
             }
 #else
             public FixedGameViewSize(int width = 390, int height = 844) { }

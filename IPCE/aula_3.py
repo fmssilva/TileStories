@@ -114,8 +114,7 @@ a) Ciclo for -> repetir uma tarefa muitas vezes [7 min -> 10:25] ----------
     Escrevam e corram cada um destes pequenos exemplos (um por célula).
     Antes de correr, tentem adivinhar que números vão aparecer.
 """
-# forma só com FIM (vai de 0 até FIM, não incluído)
-for numero in range(5):
+for numero in range(5): # forma só com FIM (vai de 0 até FIM, não incluído)
     print("numero =", numero)
 
 # tudo o que está INDENTADO debaixo do for repete-se, uma vez por cada número.
@@ -134,6 +133,9 @@ for numero in range(2,5):
 # forma com INICIO, FIM e PASSO (vai de INICIO até FIM, não incluído, de PASSO em PASSO)
 for numero in range(0, 20, 5):
     print("numero =", numero)
+
+
+
 
 
 
@@ -170,7 +172,9 @@ b) EXERCICIO (EXTRA) — Tabuada do 7 [6 min -> 10:31] ----------------------
 """
 
 for i in range(1, 11):
-    print(f"7 x {i} = {7 * i}")
+    res = i*7
+    print(res)
+    # print(f"7 x {i} = {7 * i}")
 
 # O que acabou de acontecer:
 # o código indentado debaixo do "for" correu 10 vezes.
@@ -197,7 +201,7 @@ def factorial(n: int) -> int:
         Precondition: n >= 0
     """
     fact = 1
-    for i in range(1, n + 1, 1):
+    for i in range(2, n + 1, 1):
         fact = fact * i
         print(f"   volta com i={i}  ->  fact passou a valer {fact}")   # o raio-X
     return fact
@@ -239,7 +243,8 @@ def sum_naturals(n: int) -> int:
     return total
 
 def main() -> None:
-    x = int(input("Introduza um número natural: "))
+    # x = int(input("Introduza um número natural: "))
+    x = 4
     print(sum_naturals(x))
 
 main()
@@ -264,13 +269,14 @@ def sum_squares(n: int) -> int:
         Precondition: n >= 0
     """
     total = 0
-    for i in range(0, n, 1):
+    for i in range(0, n+1, 1):
         total = total + i * i       # a ÚNICA diferença para o 19a
         # total = total + i ** 2    # também dá
     return total
 
 def main() -> None:
-    x = int(input("Introduza um número natural: "))
+    # x = int(input("Introduza um número natural: "))
+    x = 10
     print(sum_squares(x))
 
 main()
@@ -324,6 +330,10 @@ for x in [0, 10, 1]:               # uma lista (vamos ver listas com calma mais 
     print(x)
 
 
+for idx, letra in enumerate("IPCE"):               # uma string é uma sequência de caracteres
+    print(letra, "IPCE"[idx])
+
+
 # PERGUNTA DE TESTE (Teste 1 2024/25, 1b) — sintaticamente correto ou incorreto?
 #
 #     for i in [0,10,1]:
@@ -356,7 +366,7 @@ c) O padrão ACUMULADOR [3 min -> 11:00] -----------------------------------
 def sum_naturals_v2(n: int) -> int:
     acc = 0
     for i in range(n):
-        acc += i
+        acc = acc + i
     return acc
 
 print(sum_naturals_v2(4))
@@ -478,7 +488,12 @@ g) Curiosidade — para esta soma nem precisamos de for: o truque de Gauss [4 mi
 
     Qual a diferença em termos de tempo?
 """
+for i in range(0,5): 
+    print("range: ", i)
+    i = 3
+    print("after: ", i)
 
+# %%
 import time
 
 def sum_naturals_loop(n: int) -> int:
@@ -611,8 +626,7 @@ def read_and_sum(n: int) -> int:
     """
     total = 0
     for i in range(1, n + 1):              # 1, 2, ..., n -> para o prompt dizer "1>", "2>", ...
-        x = int(input(f"{i}> "))           # o input pode estar DENTRO do ciclo!
-        total += x
+        total += int(input(f"{i}> ")) # ou usar o input diretamente aqui: int(input(f"{i}> "))
     return total
 
     # Alternativa: o ciclo começa em 0, mas temos de somar 1 no texto do prompt
@@ -668,27 +682,34 @@ def f1(n: int) -> int:
         total += i
     return total
 
+print("f1(5) =", f1(5))           # 10
+
+# %%
 def f2(n: int) -> int:
     total = 0
     for i in range(0, n, 1):
         total += i
         return total              # <- mais indentado que no f1
 
+print("f2(5) =", f2(5))           # 0
+
+# %%
 def f3(n: int) -> int:
     for i in range(0, n, 1):
-        total = 0                 # <- dentro do ciclo
+        total = 0 
+        print(total)                # <- dentro do ciclo
         total += i
     return total
 
+print("f3(5) =", f3(5))           # 4
+
+# %%
 def f4(n: int) -> int:
     for i in range(0, n, 1):      # <- falta o "total = 0"
         total += i
     return total
 
-print("f1(5) =", f1(5))           # 10
-print("f2(5) =", f2(5))           # 0
-print("f3(5) =", f3(5))           # 4
-# print("f4(5) =", f4(5))        # <- descomenta e corre: UnboundLocalError
+print("f4(5) =", f4(5))        # <- descomenta e corre: UnboundLocalError
 
 # f1 é a versão correta: 0 + 1 + 2 + 3 + 4 = 10.
 # As outras 3 são os 3 erros mais comuns com acumuladores.
@@ -927,17 +948,17 @@ def month_length(month: int, year: int) -> int:
         return 30
     elif is_leap_year(year):          # se chegámos aqui, só pode ser fevereiro
         return 29
-    else:
-        return 28
+    return 28
 
     # Sem o "in", teríamos de escrever:
     # if month == 1 or month == 3 or month == 5 or month == 7 or month == 8 or month == 10 or month == 12:
     #     return 31
 
 # Testes rápidos
-print(month_length(4, 2023), month_length(12, 2023))  # 30 31
-print(month_length(2, 2024), month_length(2, 2023))   # 29 28
-print(month_length(2, 1900), month_length(2, 2000))   # 28 29
+print(month_length(2, 2000))
+# , month_length(12, 2023))  # 30 31
+# print(month_length(2, 2024), month_length(2, 2023))   # 29 28
+# print(month_length(2, 1900), month_length(2, 2000))   # 28 29
 
 # Reparem no terceiro ramo: "elif is_leap_year(year)" não pergunta pelo mês!
 # Não precisa: se os dois primeiros ramos falharam, e a precondição
@@ -1001,17 +1022,19 @@ def day_order(day: int, month: int, year: int) -> int:
     """
     total = day                           # o acumulador começa já com os dias do mês atual
     for m in range(1, month):             # meses COMPLETOS antes: 1, 2, ..., month-1
+        print(total)
         total += month_length(m, year)
     return total
 
 # Exemplos para testar:
 print(day_order(1, 1, 2008))              # 1    -> janeiro: range(1, 1) é vazio, só soma o dia
-print(day_order(31, 12, 2008))            # 366
+print(day_order(31, 12, 2000))            # 366
 print(day_order(10, 3, 2024))             # 70   -> o do exemplo lá em cima
-print(is_date_valid(29, 2, 2023))         # False (2023 não é bissexto)
-print(is_date_valid(29, 2, 2024))         # True
-print(is_date_valid(5, 13, 2024))         # False (não há mês 13)
-print(is_date_valid(0, 5, 2024))          # False (não há dia 0)
+
+# print(is_date_valid(29, 2, 2023))         # False (2023 não é bissexto)
+# print(is_date_valid(29, 2, 2024))         # True
+# print(is_date_valid(5, 13, 2024))         # False (não há mês 13)
+# print(is_date_valid(0, 5, 2024))          # False (não há dia 0)
 
 
 

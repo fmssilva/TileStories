@@ -56,6 +56,7 @@ namespace TileStories
         public const string Model3DModelField = "model";
         public const string Model3DFallbackField = "fallback";
         public const string Model3DAutoSpinField = "auto_spin";
+        public const string Model3DTitleField = "title";
 
         private const string PictureHelp = "A PNG or JPG inside the wall's Media Folder (Detail Card > Card Container).";
 
@@ -238,9 +239,12 @@ namespace TileStories
             },
         };
 
-        // Tier 5: a 3D model the visitor turns (_3.1 step 10A.2b.3). Turntable: the model on the card, a drag rotates it,
-        // a pinch zooms (within limits), and it auto-spins on its own after a pause -- a touch stops the spin and it
-        // resumes after the same pause. A fallback picture shows while the model loads and if it fails to load.
+        // Tier 5: a 3D model the visitor turns (_3.1 step 10A.2b.3, takeover in 10A.3.1). Turntable: the model on the
+        // card, a drag rotates it, a pinch zooms (within limits), and it auto-spins on its own after a pause -- a
+        // touch stops the spin and it resumes after the same pause. A fallback picture shows while the model loads
+        // and if it fails to load. Display Takeover shows only a teaser (the same picture, the model's name, an
+        // open-full-screen button); a tap opens the model full screen through a second preview slot of the SAME
+        // owner, same as video's takeover (BuiltInBlocks.Video).
         public static readonly BlockKindDefinition Model3D = new()
         {
             Key = Model3DKind,
@@ -248,10 +252,12 @@ namespace TileStories
             DisplayName = "Model 3D",
             Help = "A 3D model the visitor turns to look at from every side: a drag rotates it, two fingers pinch to zoom " +
                    "(within limits), and it slowly spins on its own until touched (Auto Spin). The Fallback Picture shows " +
-                   "while the model loads and if it cannot be loaded.",
+                   "while the model loads and if it cannot be loaded. Display Takeover shows only a teaser (the picture, " +
+                   "the model's name, an open-full-screen button); a tap opens the model full screen, where it can still " +
+                   "be turned and zoomed. Back returns to the card where it was.",
             Variants = new[] { Model3DTurntable },
             DefaultVariant = Model3DTurntable,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayTakeover },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -268,6 +274,12 @@ namespace TileStories
                 {
                     Key = Model3DAutoSpinField, Type = BlockFieldType.Toggle, Label = "Auto Spin",
                     Help = "The model slowly turns on its own until the visitor touches it, then resumes a couple of seconds after they let go.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = Model3DTitleField, Type = BlockFieldType.LocalizedText, Label = "Title",
+                    Help = "The model's name, shown full screen after the card's title (Display Takeover only, useful when a card " +
+                           "holds more than one model). Empty: the point's card title.",
                 },
             },
         };

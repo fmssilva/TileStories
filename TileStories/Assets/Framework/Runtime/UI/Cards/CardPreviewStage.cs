@@ -14,12 +14,18 @@ namespace TileStories
         // A different height than the other far-away dev rigs (EffectsPreviewSpawner 5000, OutlinePreviewSpawner
         // 6500) so none of them ever coincide.
         public const float FarOffsetMetres = 8000f;
-        // Square, small enough to stay cheap when several blocks hold a live handle at once, large enough that a
-        // half-card-width turntable does not show resampling.
+        // The initial guess before the view's own GeometryChangedEvent reports its real pixel size (Resize then
+        // recreates this at the stage's real aspect): square, small enough to stay cheap, large enough that the
+        // very first frame or two are not visibly blocky.
         public const int TextureSize = 512;
         // Spacing between concurrently-held handles along the stage's own X axis: generous enough that a model's
         // bounds (the fitted camera distance) never lets one handle's render bleed into a neighbour's.
         private const float HandleSpacingMetres = 50f;
+        // The model's bounding-sphere diameter fills this fraction of the STAGE'S SHORTER side at zoom 1
+        // (_3.1 10A.2c: both Lamp models used to draw at about a fifth of the stage's width). A sphere -- not the
+        // raw AABB -- is fitted so the same distance frames the model from any turntable yaw/pitch without ever
+        // clipping a corner as it spins.
+        private const float TargetFillOfShorterSide = 0.8f;
 
         private sealed class Handle : IPreviewHandle
         {
@@ -29,10 +35,11 @@ namespace TileStories
             private GameObject _root;
             private GameObject _model;
             private RenderTexture _texture;
-            private float _fitDistance = 2f;
+            private float _fitDistance;
+            private Vector3 _pivot;
             private bool _released;
 
-            public Handle(CardPreviewStage stage, IMediaSource media, string path, GameObject root, GameObject model, RenderTexture texture, float fitDistance)
+            public Handle(CardPreviewStage stage, IMediaSource media, string path, GameObject root, GameObject model, RenderTexture texture, float fitDistance, Vector3 pivot)
             {
                 _stage = stage;
                 _media = media;
@@ -41,14 +48,38 @@ namespace TileStories
                 _model = model;
                 _texture = texture;
                 _fitDistance = fitDistance;
+                _pivot = pivot;
             }
 
             public RenderTexture Texture => _texture;
 
+            // The stage element resized: recreate the texture at its real aspect and refit the camera distance to it
+            // (a no-op if the size did not actually change -- a GeometryChangedEvent can fire with the same rect).
+            public void Resize(int width, int height)
+            {
+                if (_released || _model == null) return;
+                width = Mathf.Max(1, width);
+                height = Mathf.Max(1, height);
+                if (_texture != null && _texture.width == width && _texture.height == height) return;
+
+                var old = _texture;
+                var texture = new RenderTexture(width, height, 16) { name = old != null ? old.name : "CardPreview" };
+                texture.Create();
+                _texture = texture;
+                if (old != null)
+                {
+                    old.Release();
+                    UnityEngine.Object.Destroy(old);
+                }
+
+                float aspect = (float)width / height;
+                (_fitDistance, _pivot) = _stage.FitFor(_model, aspect);
+            }
+
             public void RenderNow(TurntableState turntable, PanoramaViewState panorama)
             {
                 if (_released || _model == null || _texture == null) return;
-                _stage.RenderModel(_model, _texture, turntable, _fitDistance);
+                _stage.RenderModel(_texture, turntable, _fitDistance, _pivot);
             }
 
             public void Release()
@@ -68,10 +99,11 @@ namespace TileStories
             }
         }
 
-        // A handle whose media never resolved: RenderNow/Release are both no-ops (onFailed already fired once)
+        // A handle whose media never resolved: Resize/RenderNow/Release are all no-ops (onFailed already fired once)
         private sealed class FailedHandle : IPreviewHandle
         {
             public RenderTexture Texture => null;
+            public void Resize(int width, int height) { }
             public void RenderNow(TurntableState turntable, PanoramaViewState panorama) { }
             public void Release() { }
         }
@@ -105,20 +137,19 @@ namespace TileStories
             model.transform.localPosition = Vector3.zero;
             SetLayerRecursively(model, _previewLayer);
 
-            float fitDistance = FitDistanceFor(model, _camera.fieldOfView, _camera.aspect);
-
             var texture = new RenderTexture(TextureSize, TextureSize, 16) { name = "CardPreview_" + slot };
             texture.Create();
+            var (fitDistance, pivot) = FitFor(model, 1f); // TextureSize is square; Resize refits once the real stage size is known
 
             onReady?.Invoke();
-            return new Handle(this, media, path, root, model, texture, fitDistance);
+            return new Handle(this, media, path, root, model, texture, fitDistance, pivot);
         }
 
-        private void RenderModel(GameObject model, RenderTexture texture, TurntableState turntable, float fitDistance)
+        private void RenderModel(RenderTexture texture, TurntableState turntable, float fitDistance, Vector3 pivot)
         {
-            var pivot = model.transform.position;
             var rotation = Quaternion.Euler(turntable.Pitch, turntable.Yaw, 0f);
             float distance = fitDistance / Mathf.Max(TurntableRule.MinZoom, turntable.Zoom);
+            _camera.aspect = (float)texture.width / texture.height;
             _camera.transform.position = pivot - rotation * Vector3.forward * distance;
             _camera.transform.rotation = rotation;
             _camera.targetTexture = texture;
@@ -166,21 +197,28 @@ namespace TileStories
             _fill.intensity = 0.4f;
         }
 
-        // The camera distance that frames the model's own bounds fully, at its own field of view/aspect (the same
-        // fit-to-bounds idea as DevPreviewGridLayout.FitDistance, but off one renderer's real bounds instead of a
-        // fixed grid extent, since a model_3d asset can be any size)
-        private static float FitDistanceFor(GameObject model, float fovDegrees, float aspect)
+        // The camera distance (and the pivot to orbit around) that fits the model's own combined-renderer bounds to
+        // TargetFillOfShorterSide of the STAGE's shorter axis at yaw/pitch 0 (the same fit-to-extent idea as
+        // DevPreviewGridLayout.FitDistance, off one renderer's real bounds instead of a fixed grid extent). Sizes off
+        // the model's real AABB width/height at rest, not a bounding-sphere radius: a sphere's worst-case-from-any-
+        // angle guarantee sounds safer, but it is exactly what made both Lamp models draw as a speck (10A.2c) -- a
+        // room-scan model's diagonal is far bigger than its front-on silhouette. `aspect` is the stage's own
+        // width/height (a rotated view can show a different silhouette and is not re-fitted -- see 10A.2c's own note).
+        private (float Distance, Vector3 Pivot) FitFor(GameObject model, float aspect)
         {
             var renderers = model.GetComponentsInChildren<Renderer>();
-            if (renderers.Length == 0) return 2f;
+            if (renderers.Length == 0) return (2f, model.transform.position);
             var bounds = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
-            float radius = Mathf.Max(bounds.extents.magnitude, 0.01f);
-            float halfFov = fovDegrees * 0.5f * Mathf.Deg2Rad;
-            float verticalDistance = radius / Mathf.Sin(halfFov);
-            float horizontalFov = 2f * Mathf.Atan(Mathf.Tan(halfFov) * Mathf.Max(aspect, 0.01f));
-            float horizontalDistance = radius / Mathf.Sin(horizontalFov * 0.5f);
-            return Mathf.Max(verticalDistance, horizontalDistance) * 1.15f;
+
+            float halfFovTan = Mathf.Tan(_camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+            aspect = Mathf.Max(aspect, 0.01f);
+            // aspect <= 1: the stage is taller than wide (or square), so its width is the shorter, more constraining
+            // axis -- fit the model's own width to it. Otherwise the stage's height is the shorter axis.
+            float distance = aspect <= 1f
+                ? bounds.size.x / (2f * TargetFillOfShorterSide * halfFovTan * aspect)
+                : bounds.size.y / (2f * TargetFillOfShorterSide * halfFovTan);
+            return (Mathf.Max(distance, 0.01f), bounds.center);
         }
 
         private static void SetLayerRecursively(GameObject go, int layer)

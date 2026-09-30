@@ -60,6 +60,65 @@ namespace TileStories.Tests
             handle.Release();
         }
 
+        // _3.1 10A.2c.1 review fix: both Lamp models used to draw at about a fifth of the stage's width (a square
+        // RenderTexture shown letterboxed inside a non-square stage, fitted with an over-generous margin). Resize
+        // to a deliberately non-square size (the real .card-model3d__frame is not square either) and check the
+        // model's own non-background pixels really do span most of whichever axis is the stage's shorter one.
+        [UnityTest]
+        public IEnumerator Load_TheFrameworkDefaultModel_FillsAtLeast70PercentOfTheStagesShorterSide_AtZoom1()
+        {
+            yield return AssertFillsShorterSide(_media, "default:azulejo_arch");
+        }
+
+        [UnityTest]
+        public IEnumerator Load_TheLivingRoomRoomScanModel_FillsAtLeast70PercentOfTheStagesShorterSide_AtZoom1()
+        {
+            var livingRoomMedia = new ResourcesMediaSource("LivingRoom/CardMedia");
+            yield return AssertFillsShorterSide(livingRoomMedia, "models/146267-LivingRoom2-tex.glb");
+        }
+
+        private IEnumerator AssertFillsShorterSide(IMediaSource media, string path)
+        {
+            var handle = _stage.Load(MediaKind.Model, media, path, null, null);
+            yield return null;
+            handle.Resize(360, 220); // landscape, on purpose: proves the fit follows the STAGE's real aspect
+            handle.RenderNow(TurntableState.Start, default);
+            yield return null;
+
+            var prev = RenderTexture.active;
+            RenderTexture.active = handle.Texture;
+            var pixels = new Texture2D(handle.Texture.width, handle.Texture.height, TextureFormat.RGBA32, false);
+            pixels.ReadPixels(new Rect(0, 0, handle.Texture.width, handle.Texture.height), 0, 0);
+            pixels.Apply();
+            RenderTexture.active = prev;
+
+            int w = pixels.width, h = pixels.height;
+            int minX = w, maxX = -1, minY = h, maxY = -1;
+            var raw = pixels.GetPixels32();
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    var p = raw[y * w + x];
+                    if (p.a <= 0) continue;
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+            Object.Destroy(pixels);
+            Assert.GreaterOrEqual(maxX, minX, path + ": nothing rendered");
+
+            int shorterSide = Mathf.Min(w, h);
+            int spanOnShorterAxis = w <= h ? (maxX - minX + 1) : (maxY - minY + 1);
+            float fraction = (float)spanOnShorterAxis / shorterSide;
+            Assert.GreaterOrEqual(fraction, 0.7f,
+                $"{path}: model spans {fraction:P0} of the stage's shorter side ({shorterSide}px), expected >= 70%");
+
+            handle.Release();
+        }
+
         [UnityTest]
         public IEnumerator Load_AMissingFile_CallsOnFailedExactlyOnce_NeverOnReady()
         {

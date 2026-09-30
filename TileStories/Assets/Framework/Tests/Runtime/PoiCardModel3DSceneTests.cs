@@ -3,14 +3,16 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 
 namespace TileStories.Tests
 {
-    // Phase B of model_3d, turntable (_3.1 step 10A.2b.3): the REAL LivingRoomScene, its shipped config and the real
-    // CardPreviewStage behind PoiCardHost. The Lamp holds two turntable blocks: one on the Framework's own
-    // `default:azulejo_arch`, and one on the LivingRoom-only `146267-LivingRoom2-tex.glb` test fixture (a real
-    // room scan, never a Framework default). A real one-finger drag rotates the model; closing the card releases it
-    // (PreviewService.ReleaseAll through PoiCardHost.Close).
+    // Phase B of model_3d, turntable (_3.1 step 10A.2b.3) and Display Takeover (10A.3.1): the REAL LivingRoomScene, its
+    // shipped config and the real CardPreviewStage behind PoiCardHost. The Lamp holds two turntable blocks: block_58,
+    // the Framework's own `default:azulejo_arch`, is Display Takeover (a teaser on the card, full screen through a
+    // second slot); block_59, the LivingRoom-only `146267-LivingRoom2-tex.glb` test fixture (a real room scan, never
+    // a Framework default), stays Display Inline (a real one-finger drag rotates it right on the card). Closing the
+    // card releases every slot (PreviewService.ReleaseAll through PoiCardHost.Close).
     public class PoiCardModel3DSceneTests : SearchSceneFixture
     {
         private PoiCardSheetView Sheet => Card.Sheet;
@@ -27,34 +29,114 @@ namespace TileStories.Tests
             Sheet.Stack.BoundViews.OfType<ModelTurntableBlockView>().ToList();
 
         [UnityTest]
-        public IEnumerator TheLamp_HoldsBothTurntableBlocks_TheDefaultModelAndTheRealRoomScan_BothRenderAndARealDragRotates()
+        public IEnumerator TheLamp_HoldsBothTurntableBlocks_TheTakeoverTeaserAndTheInlineRoomScan()
         {
             yield return OpenFull("lamp");
             var models = Models;
-            Assert.AreEqual(2, models.Count, "the Lamp's two model_3d blocks (default + the room scan) are both bound");
+            Assert.AreEqual(2, models.Count, "the Lamp's two model_3d blocks (the takeover teaser + the inline room scan) are both bound");
 
-            string[] captureNames = { "Default_Idle", "RoomScan_Idle" };
-            string[] draggedNames = { "Default_Dragged", "RoomScan_Dragged" };
-            for (int i = 0; i < models.Count; i++)
-            {
-                var model = models[i];
-                Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(model));
-                yield return CardTestInput.Settle(0.2f);
-                Assert.IsTrue(model.ShowsModel, "the real CardPreviewStage rendered this block's model");
-                Assert.IsNotNull(model.Texture);
-                yield return Capture("Model3D_" + captureNames[i]);
+            var teaser = models[0];
+            Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(teaser));
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(CardOptions.DisplayTakeover, teaser.Display, "block_58's real config display");
+            Assert.IsTrue(teaser.ShowsModel, "the real CardPreviewStage rendered the teaser's own first render");
+            Assert.IsNotNull(teaser.Texture);
+            yield return Capture("Model3D_Default_Idle");
+            float teaserYaw = teaser.State.Yaw;
+            yield return CardTestInput.DragFrom(teaser.Frame.panel, teaser.Frame.worldBound.center, new Vector2(150f, 0f));
+            yield return null;
+            Assert.AreEqual(teaserYaw, teaser.State.Yaw, "the teaser itself never rotates on drag");
 
-                float before = model.State.Yaw;
-                yield return CardTestInput.DragFrom(model.Frame.panel, model.Frame.worldBound.center, new Vector2(150f, 0f));
-                yield return null;
-                Assert.AreNotEqual(before, model.State.Yaw, "a real one-finger drag rotated this model");
-                yield return CardTestInput.Settle(0.1f);
-                yield return Capture("Model3D_" + draggedNames[i]);
-            }
-
-            // - the room scan is the LivingRoom-only test fixture, never a Framework default
             var roomScan = models[1];
-            Assert.IsTrue(roomScan.ShowsModel);
+            Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(roomScan));
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(CardOptions.DisplayInline, roomScan.Display);
+            Assert.IsTrue(roomScan.ShowsModel, "the real CardPreviewStage rendered this block's model");
+            Assert.IsNotNull(roomScan.Texture);
+            yield return Capture("Model3D_RoomScan_Idle");
+            float before = roomScan.State.Yaw;
+            yield return CardTestInput.DragFrom(roomScan.Frame.panel, roomScan.Frame.worldBound.center, new Vector2(150f, 0f));
+            yield return null;
+            Assert.AreNotEqual(before, roomScan.State.Yaw, "a real one-finger drag rotated the inline room scan");
+            yield return CardTestInput.Settle(0.1f);
+            yield return Capture("Model3D_RoomScan_Dragged");
+
+            SelectionEventBus.Clear();
+            yield return CardTestInput.Settle();
+        }
+
+        [UnityTest]
+        public IEnumerator TheLamp_TakeoverTeaser_ARealTapOpensItFullScreen_ARealDragRotatesIt_BackKeepsTheCardsStopAndScroll()
+        {
+            yield return OpenFull("lamp");
+            var teaser = Models[0];
+            Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(teaser));
+            yield return CardTestInput.Settle(0.2f);
+            var scroll = Sheet.Stack.Scroll;
+            float scrollOffset = scroll.scrollOffset.y;
+            Assert.Greater(scrollOffset, 0f, "precondition: the card is really scrolled to the teaser");
+
+            yield return CardTestInput.Tap(teaser.TeaserOpenButton.panel, teaser.TeaserOpenButton.worldBound.center);
+            yield return CardTestInput.Settle(0.15f);
+            var takeover = Sheet.Takeover;
+            Assert.IsTrue(takeover.IsOpen, "a real tap opened the model full screen");
+            Assert.IsTrue(takeover.Crumb.text.EndsWith(" > The stone arch"), "the Lamp's title, then the model's authored one");
+            var full = teaser.FullScreenView;
+            Assert.IsNotNull(full);
+            Assert.IsTrue(full.ShowsModel);
+            yield return Capture("Model3D_Takeover_FullScreen");
+
+            float before = full.State.Yaw;
+            yield return CardTestInput.DragFrom(full.Frame.panel, full.Frame.worldBound.center, new Vector2(150f, 0f));
+            yield return null;
+            Assert.AreNotEqual(before, full.State.Yaw, "a real one-finger drag rotates it full screen");
+
+            yield return CardTestInput.Tap(takeover.Back.panel, takeover.Back.worldBound.center);
+            yield return CardTestInput.Settle(0.15f);
+            Assert.IsFalse(takeover.IsOpen, "Back closed it");
+            Assert.IsNull(teaser.FullScreenView, "and released the second slot");
+            Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the card kept the stop it had");
+            Assert.AreEqual(scrollOffset, scroll.scrollOffset.y, 1f, "and the scroll it had");
+            Assert.IsTrue(teaser.ShowsModel, "the card's own teaser picture is untouched");
+
+            SelectionEventBus.Clear();
+            yield return CardTestInput.Settle();
+        }
+
+        // 10A.3.2, Phase B: Lamp - Religious's header is model_turntable on `default:azulejo_arch` (the Framework's own
+        // default-key Fallback picture `default:azulejo_detail`): at peek only the title shows, at half and full the
+        // hero shows the model, auto-spin turns it and a real drag rotates it.
+        [UnityTest]
+        public IEnumerator LampReligious_HeaderShowsTheModel_AtHalfAndFull_OnlyTheTitleAtPeek_ARealDragRotatesIt()
+        {
+            SelectionEventBus.Select("lamp_religious");
+            yield return CardTestInput.Settle();
+            var header = (HeaderBlockView)Sheet.Stack.BoundViews[0];
+            Assert.IsTrue(header.HasHero, "the real config's model_turntable header has a hero");
+            var model = header.ModelView;
+            Assert.IsTrue(header.PeekPart.worldBound.height > 0f, "the title part is what the peek stop shows");
+            Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop);
+
+            Sheet.SetStop(SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle(0.4f);
+            Assert.IsTrue(model.ShowsModel, "the real CardPreviewStage rendered the header's model");
+            var hero = header.HeroPart.worldBound;
+            Assert.GreaterOrEqual(model.Frame.worldBound.width, hero.width - 2f, "the model's stage fills the hero's whole width, not a corner of it");
+            Assert.GreaterOrEqual(model.Frame.worldBound.height, hero.height - 2f, "and its whole height");
+            Assert.AreEqual(model.Frame.worldBound.width / model.Frame.worldBound.height, (float)model.Texture.width / model.Texture.height, 0.05f,
+                "the RenderTexture has the hero stage's aspect");
+            Assert.IsFalse(model.Hint.resolvedStyle.display == DisplayStyle.Flex, "the hero shows no caption line");
+            yield return Capture("Religious_Header_Model_Half");
+
+            float before = model.State.Yaw;
+            yield return CardTestInput.DragFrom(model.Frame.panel, model.Frame.worldBound.center, new Vector2(120f, 0f));
+            yield return null;
+            Assert.AreNotEqual(before, model.State.Yaw, "a real one-finger drag rotates the header's model");
+
+            Sheet.SetStop(SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle(0.4f);
+            Assert.IsTrue(model.ShowsModel);
+            yield return Capture("Religious_Header_Model_Full");
 
             SelectionEventBus.Clear();
             yield return CardTestInput.Settle();

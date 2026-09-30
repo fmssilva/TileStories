@@ -1,3 +1,4 @@
+using System.Reflection;
 using UnityEngine.UIElements;
 
 namespace TileStories
@@ -7,6 +8,11 @@ namespace TileStories
     // Media is the view's OWN scope: whatever it loads is released for it when it is unbound (BlockStackView).
     public sealed class BlockBindContext
     {
+        // Every public instance field, cached once: ForBlock copies through this list by reflection instead of
+        // naming each field by hand, so a field added here later reaches every block automatically (_3.1 10A-fix:
+        // BlockStackView.Bind's old hand-written copy silently dropped Preview when it was added in 10A.2b.3).
+        private static readonly FieldInfo[] Fields = typeof(BlockBindContext).GetFields(BindingFlags.Public | BindingFlags.Instance);
+
         public POIData Poi;
         public WallConfigData Taxonomy;
         public string Variant;
@@ -46,6 +52,19 @@ namespace TileStories
 
         // The registered service of type T, or null when there is none: a kind that needs a service treats null as "nothing to show"
         public T Service<T>() where T : class => Services?.Get<T>();
+
+        // A copy of this (the STACK's own context) for one bound block: `media` is that block's own scoped media source
+        // and `variant` is its resolved look -- the two things that actually differ per block in BlockStackView.Bind's
+        // loop. Every other field reaches the copy through Fields above, so it can never again fall out of sync with a
+        // field added here later (see BlockBindContextTests).
+        public BlockBindContext ForBlock(IMediaSource media, string variant)
+        {
+            var copy = new BlockBindContext();
+            foreach (var field in Fields) field.SetValue(copy, field.GetValue(this));
+            copy.Media = media;
+            copy.Variant = variant;
+            return copy;
+        }
     }
 
     // What a block may ask of its card (_3.1 section 3): lower the card so the selected POI's marker shows on the wall;

@@ -59,6 +59,18 @@
     border-radius: 0;
 }
 
+/* model_turntable: the SAME model view fills the hero frame (no block margin, no drag hint), its stage the whole hero */
+.card-hero .card-hero__model {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+.card-hero__model .card-model3d__frame {
+    height: 100%;
+    border-radius: 0;
+}
+
 /* then | now: two equal halves side by side, the frame's colour showing as a thin line between them */
 .card-hero--split_then_now .card-hero__picture {
     position: relative;
@@ -784,6 +796,29 @@
     margin-top: var(--ts-space-1);
     font-size: var(--ts-size-caption);
     color: var(--ts-ink-2);
+}
+
+/* Display Takeover's teaser (10A.3.1): the name badge opposite corner from Loading's, the open-full-screen button
+   reuses video's own centred round overlay (card-video__overlay/-glyph) so both media kinds share one look */
+/* the full-screen page (10A.3.1): the frame takes ALL the height the page leaves it, same as card-video--full */
+.card-model3d--full {
+    flex-grow: 1;
+}
+
+.card-model3d--full .card-model3d__frame {
+    height: auto;
+    flex-grow: 1;
+}
+
+.card-model3d__teaser-name {
+    position: absolute;
+    bottom: var(--ts-space-2);
+    left: var(--ts-space-2);
+    padding: var(--ts-space-1) var(--ts-space-2);
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-surface);
+    color: var(--ts-ink);
+    font-size: var(--ts-size-caption);
 }
 
 /* ---- the header's video_loop: the loop's frames over the poster (cropped to fill the hero like a picture) ---- */

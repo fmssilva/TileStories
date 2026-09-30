@@ -54,6 +54,9 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
   terminal), so pass the Windows settings explicitly:
   `git -c core.autocrlf=true -c user.name="Francisco Miguel Sousa da Silva" -c user.email="fmso.silva@campus.fct.unl.pt" commit -m "..."`
   (stage with `git -c core.autocrlf=true add -A`), then check `git log -1` and that no `.git/*.lock` is left.
+- **Commit messages:** short and natural, the way a developer writes them: one line, imperative, about 50-72 characters,
+  what changed for the project, no step codes or lists ("Add 3D model previews to the POI card", "Fix model framing and
+  auto-spin at peek"). In the chat, name the commit by its message, not its hash.
 - **Test plan (you decide it):** every brief carries a `TEST PLAN:` line: whether the opening full baseline is needed (only if
   the tree moved since the last green commit), that ONE full EditMode + PlayMode run closes the block, any shared-ground change
   that needs an extra full run, and -- every third block -- one full PlayMode run with Unity in the background

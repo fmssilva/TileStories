@@ -189,26 +189,7 @@ namespace TileStories
                     heading = context.Strings.Get(entry.Definition.DefaultHeadingKey);
                 slotOf.Heading.text = heading;
                 slotOf.Heading.EnableInClassList("card-block-heading--empty", heading.Length == 0);
-                view.Bind(entry.Instance, new BlockBindContext
-                {
-                    Poi = context.Poi,
-                    Taxonomy = context.Taxonomy,
-                    Variant = entry.Variant,
-                    Language = context.Language,
-                    FallbackLanguage = context.FallbackLanguage,
-                    Media = media,
-                    Strings = context.Strings,
-                    MarkerLook = context.MarkerLook,
-                    Glossary = context.Glossary,
-                    Host = context.Host,
-                    State = context.State,
-                    Events = context.Events,
-                    Services = context.Services,
-                    Audio = context.Audio,
-                    Video = context.Video,
-                    Preview = context.Preview,
-                    ReduceMotion = context.ReduceMotion,
-                });
+                view.Bind(entry.Instance, context.ForBlock(media, entry.Variant));
                 bool header = _bound.Count == 0 && entry.Definition.Key == BuiltInBlocks.HeaderKind;
                 var parent = header ? HeaderSlot
                     : entry.Definition.IsPinnedTop(entry.Variant) ? PinnedTop

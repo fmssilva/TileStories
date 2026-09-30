@@ -21,6 +21,11 @@ namespace TileStories
     {
         RenderTexture Texture { get; }
 
+        // The stage the view draws into just resized (or is asking for the first time): recreate the RenderTexture at
+        // this pixel size (a no-op if unchanged) so its aspect matches what the card actually shows, and refit the
+        // camera distance to it. Both dimensions must be > 0; the view guards that.
+        void Resize(int width, int height);
+
         // Render one frame now, the model/sphere looking the way `turntable`/`panorama` (whichever this kind uses) says
         void RenderNow(TurntableState turntable, PanoramaViewState panorama);
 
