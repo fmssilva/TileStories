@@ -27,9 +27,6 @@ namespace TileStories
         [Header("References")]
         [SerializeField] private WallSession _wallSession;
 
-        [Header("Debug")]
-        [SerializeField] private bool _debug = false;
-
         [Header("FOV")]
         [Tooltip("Camera whose Field of View narrows as ZoomFactor grows (spec section 9: " +
                 "global, FOV-based zoom). If left unassigned, defaults to Camera.main at Start.")]
@@ -64,7 +61,7 @@ namespace TileStories
             {
                 _baseFov = _camera.fieldOfView;
                 _fovCaptured = true;
-                if (_debug) Debug.Log($"[ARZoom] FOV driver active, base {_baseFov:F1}");
+                DevLog.Detail(LogDomain.Tracking, $"[ARZoom] FOV driver active, base {_baseFov:F1}");
             }
         }
 
@@ -120,7 +117,7 @@ namespace TileStories
             _targetZoom = Mathf.Clamp(targetZoomFactor, settings.min_factor, settings.max_factor);
             ARZoomState.SetZoom(_targetZoom, settings.min_factor, settings.max_factor);
             _animating = false;
-            if (_debug) Debug.Log($"[ARZoom] immediate -> {_targetZoom:F2}");
+            DevLog.Detail(LogDomain.Tracking, $"[ARZoom] immediate -> {_targetZoom:F2}");
         }
 
         public void SetZoomAnimated(float targetZoomFactor)
@@ -131,7 +128,7 @@ namespace TileStories
             _animFrom = ARZoomState.ZoomFactor;   // - a new click restarts from where the view is now
             _animElapsed = 0f;
             _animating = true;
-            if (_debug) Debug.Log($"[ARZoom] animated -> {_targetZoom:F2}");
+            DevLog.Detail(LogDomain.Tracking, $"[ARZoom] animated -> {_targetZoom:F2}");
         }
 
         // --- entry points invoked by UI buttons / input bindings ---
@@ -189,7 +186,7 @@ namespace TileStories
             ARZoomState.ResetToBase(settings.min_factor, settings.max_factor);
             _targetZoom = ARZoomState.ZoomFactor;
             _animating = false;
-            if (_debug) Debug.Log("[ARZoom] reset to base");
+            DevLog.Detail(LogDomain.Tracking, "[ARZoom] reset to base");
         }
     }
 }

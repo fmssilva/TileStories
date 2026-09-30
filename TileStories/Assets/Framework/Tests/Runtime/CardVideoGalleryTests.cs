@@ -75,6 +75,9 @@ namespace TileStories.Tests
             yield return CardTestInput.Tap(target.panel, target.worldBound.center);
         }
 
+        // Scroll `target` into the card's visible part, check it is there, then tap it for real (CardTestInput.TapInView)
+        private IEnumerator TapInView(VisualElement target) => CardTestInput.TapInView(_harness.Sheet.Stack.Scroll, target);
+
         // The colour a render shows in the middle of `surface`
         private static IEnumerator ColourIn(VisualElement surface, System.Action<Color> got)
         {
@@ -251,14 +254,22 @@ namespace TileStories.Tests
         {
             VideoBlockView view = null;
             yield return Show("video_chapters_poster", v => view = v);
-            yield return Tap(view.Panel.PlayOverlay);
-            _harness.AdvanceVideo(3f);
-            yield return Tap(view.Panel.CaptionsButton);
+            // - at the half stop, where the phone-sized card is shorter than header + video, so the stack really scrolls to the video:
+            //   Back must then give back BOTH a stop that is not the default Full and a scroll that is not 0 (at Full the lone block fits
+            //   the 390 x 844 frame -- nothing to scroll, nothing proven)
             var scroll = _harness.Sheet.Stack.Scroll;
+            _harness.Sheet.SetStop(SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle();
+            yield return TapInView(view.Panel.PlayOverlay);
+            Assert.AreEqual(1, Output.LoadCount, "the real tap on play loaded the clip");
+            _harness.AdvanceVideo(3f);
+            yield return TapInView(view.Panel.CaptionsButton);
+            scroll.ScrollTo(view.Panel.FullScreenButton);
+            yield return CardTestInput.Settle(0.15f);
             float offset = scroll.scrollOffset.y;
             Assert.Greater(offset, 0f, "precondition: the card is scrolled to the video");
 
-            yield return Tap(view.Panel.FullScreenButton);
+            yield return TapInView(view.Panel.FullScreenButton);
             yield return CardTestInput.Settle(0.15f);
             yield return CardGalleryChecks.Render("Card_video_fullscreen_opened");
             var takeover = _harness.Sheet.Takeover;
@@ -290,7 +301,7 @@ namespace TileStories.Tests
             Assert.IsFalse(takeover.IsOpen, "Back closed it");
             Assert.IsNull(view.FullScreenPanel, "the full-screen panel was let go");
             Assert.IsNull(full.Track, "and stopped listening to the video");
-            Assert.AreEqual(SheetStopRule.Stop.Full, _harness.Sheet.Stop, "the card at the stop it had");
+            Assert.AreEqual(SheetStopRule.Stop.Half, _harness.Sheet.Stop, "the card at the stop it had");
             Assert.AreEqual(offset, scroll.scrollOffset.y, 1f, "and the scroll it had");
             Assert.AreEqual(CardVideoState.Playing, Video.State, "the video still plays on the card");
             Assert.AreEqual("0:04 / 0:12", view.Panel.TimeText.text);

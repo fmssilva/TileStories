@@ -76,12 +76,6 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
         }
 
-        private IEnumerator ScrollTo(IBlockView view)
-        {
-            Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(view));
-            yield return CardTestInput.Settle(0.2f);
-        }
-
         private static IEnumerator Tap(VisualElement e)
         {
             yield return CardTestInput.Tap(e.panel, e.worldBound.center);
@@ -101,8 +95,9 @@ namespace TileStories.Tests
             Assert.AreEqual(DisplayStyle.None, inline.Panel.ChapterRow.resolvedStyle.display, "the inline look: no chapter buttons");
             Assert.AreEqual(CardVideoState.Idle, _video.State, "opening a card plays nothing by itself");
 
-            yield return ScrollTo(inline);
-            yield return Tap(inline.Panel.PlayOverlay);
+            // - each tap first scrolls its own button into view and checks it is there (a tap outside the view once left the captions
+            //   off and read as a caption-timing failure, 2026-09-29): the timing itself is the stand-in device's, exact to the second
+            yield return CardTestInput.TapInView(Sheet.Stack.Scroll, inline.Panel.PlayOverlay);
             Assert.AreEqual(CardVideoState.Playing, _video.State, "a real tap started it");
             Assert.AreEqual("castelo_s_jorge_video", _videoOut.Clip.name, "the real clip, through the card's media source");
             Assert.IsFalse(_videoOut.Muted, "with its sound");
@@ -115,7 +110,8 @@ namespace TileStories.Tests
             yield return null;
             Assert.AreEqual(DisplayStyle.None, inline.Panel.Poster.Root.resolvedStyle.display, "the poster stepped back");
 
-            yield return Tap(inline.Panel.CaptionsButton);
+            yield return CardTestInput.TapInView(Sheet.Stack.Scroll, inline.Panel.CaptionsButton);
+            Assert.IsTrue(inline.Panel.CaptionsShown, "a real tap switched the captions on");
             Advance(11f);
             yield return null;
             Assert.AreEqual("Legenda de teste 2 de 20: texto provisório, não é a transcrição.", inline.Panel.CaptionLine.text,
@@ -137,8 +133,7 @@ namespace TileStories.Tests
             Advance(5f);
 
             yield return OpenFull("lamp");
-            yield return ScrollTo(Inline);
-            yield return Tap(Inline.Panel.PlayOverlay);
+            yield return CardTestInput.TapInView(Sheet.Stack.Scroll, Inline.Panel.PlayOverlay);
             Assert.AreEqual(CardVideoState.Playing, _video.State);
             Assert.AreEqual(CardAudioState.Paused, _audio.State, "the video started: the audio guide paused, not stopped");
             Assert.AreEqual(5f, _audio.Position, 0.01f, "at its place");
@@ -163,12 +158,14 @@ namespace TileStories.Tests
             Assert.AreEqual(DisplayStyle.None, teaser.Panel.Root.resolvedStyle.display, "the takeover display: no player on the card");
             Assert.AreEqual("3:20", teaser.TeaserLength.text);
             Assert.AreEqual("castelo_s_jorge_1", teaser.TeaserPoster.Texture.name);
-            yield return ScrollTo(teaser);
+            // - to the teaser's own button (then the tap below finds it in view and scrolls no further: the offset Back must give back)
+            Sheet.Stack.Scroll.ScrollTo(teaser.TeaserButton);
+            yield return CardTestInput.Settle(0.2f);
             float offset = Sheet.Stack.Scroll.scrollOffset.y;
             Assert.Greater(offset, 500f, "precondition: the card is scrolled far down");
             yield return Capture("Lamp_Video_Teaser");
 
-            yield return Tap(teaser.TeaserButton);
+            yield return CardTestInput.TapInView(Sheet.Stack.Scroll, teaser.TeaserButton);
             yield return CardTestInput.Settle(0.2f);
             Assert.IsTrue(Sheet.Takeover.IsOpen, "a real tap opened it full screen");
             Assert.AreEqual(Header.TitleText + " > The castle, chapter by chapter", Sheet.Takeover.Crumb.text);
@@ -203,8 +200,7 @@ namespace TileStories.Tests
             Assert.AreEqual("Ecrã inteiro", Inline.Panel.FullScreenButton.tooltip);
             Assert.AreEqual("Legendas", Inline.Panel.CaptionsButton.text);
             Assert.AreEqual("Reproduzir", Inline.Panel.PlayButton.tooltip);
-            yield return ScrollTo(Teaser);
-            yield return Tap(Teaser.TeaserButton);
+            yield return CardTestInput.TapInView(Sheet.Stack.Scroll, Teaser.TeaserButton);
             yield return CardTestInput.Settle(0.2f);
             StringAssert.EndsWith("O castelo, capítulo a capítulo", Sheet.Takeover.Crumb.text);
             CollectionAssert.AreEqual(new[] { "0:00  Abertura", "0:50  Segunda parte", "1:40  Terceira parte", "2:30  Encerramento" },
@@ -253,8 +249,7 @@ namespace TileStories.Tests
         public IEnumerator ClosingTheCard_StopsTheVideoAndGivesTheClipBack_SoDoesAnotherPointsCard()
         {
             yield return OpenFull("lamp");
-            yield return ScrollTo(Inline);
-            yield return Tap(Inline.Panel.PlayOverlay);
+            yield return CardTestInput.TapInView(Sheet.Stack.Scroll, Inline.Panel.PlayOverlay);
             Advance(2f);
             yield return Tap(Sheet.CloseButton);
             Assert.IsFalse(Sheet.IsOpen);
@@ -262,8 +257,7 @@ namespace TileStories.Tests
             Assert.AreEqual(0, Card.Media.RefCount(ClipPath), "and the clip was given back");
 
             yield return OpenFull("lamp");
-            yield return ScrollTo(Inline);
-            yield return Tap(Inline.Panel.PlayOverlay);
+            yield return CardTestInput.TapInView(Sheet.Stack.Scroll, Inline.Panel.PlayOverlay);
             Assert.AreEqual(CardVideoState.Playing, _video.State);
             yield return Select("lamp_economic");
             Assert.AreEqual(CardVideoState.Idle, _video.State, "another point's card: the video stopped");

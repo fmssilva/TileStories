@@ -91,6 +91,26 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
+**Which tests, when (three levels; measured 2026-09-29: full EditMode ~50 s, full PlayMode ~18 min, one PlayMode
+fixture 15-60 s).** Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
+
+- **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
+  that exercise the changed code: the fixture(s) of the feature itself plus any fixture that reaches it through a seam
+  (grep `Tests/` for the changed type or method). Pass the class names as a JSON array in `test_names`
+  (`["TileStories.Tests.CardVideoGalleryTests", ...]`; a comma-separated string runs 0 tests).
+- **Full PlayMode -- at these points only (it costs ~18 min, so it is planned, not reflexive):**
+  - the opening baseline, ONLY when the tree differs from the last commit whose full runs were green (a clean tree on a green
+    commit needs no second baseline; say which commit you trusted);
+  - ONCE at the end of the block, before its commit message -- not after every numbered sub-step of a block;
+  - at once after a change to shared ground that every fixture stands on -- test infrastructure (`CardTestInput`,
+    `SearchSceneFixture`, the harnesses, `FixedFrameForTheRun`), `WallSession`, `PanelSettings`, the card tokens
+    (`CardTokens.uss`), the sheet / stack;
+  - whenever the Architect's brief asks for one (its TEST PLAN line). Report every full run with its count.
+- **Background runs** (Unity not in front, 4.2.3) are owed where a TODO or a fixture's subject asks for them (one targeted
+  fixture), plus ONE full background PlayMode run every third block, scheduled by the Architect in the brief's TEST PLAN line.
+
+A targeted run never replaces the step-end full run: a fixture you did not think of is exactly what the full run is for.
+
 **Fallback — batch-mode (only when MCP is unavailable).** In this workspace,
 batch-mode Unity frequently exits with return code 1 and produces no test XML — this
 is a known, persistent issue. If a batch run exits 1 with no XML output, **stop
@@ -184,16 +204,33 @@ application is a broken test, not a flaky one.
 - **A failure that goes away on rerun is investigated, not dismissed.** Before calling a failure "focus" or "flaky", reproduce it
   on purpose (e.g. run the fixture with Unity in the background). If it reproduces, fix the harness; "passed on the second run" is
   not a finish.
+- **How to make a run really "in the background".** The Game view's Enter Play Mode setting is "Play Focused", so entering Play Mode
+  brings Unity back to the front: leaving Unity behind BEFORE `run_tests` is not enough (2026-09-29: four "background" runs were in
+  fact focused). Start the run, then ask the developer to click into another application about 5 seconds later, and count only a
+  run whose `get_test_job` progress reads `editor_is_focused: false` both early (first poll, `wait_timeout` ~25) and at the end.
 - **Tools leave no windows.** A capture or helper script that opens an Editor window closes it with `window.Close()` (never only
   `DestroyImmediate`, which can leave an empty native shell -- the blank "POI Editor capture" / "gate" windows) and then checks
   `Resources.FindObjectsOfTypeAll<EditorWindow>()` holds none of its windows. Captures and test runs never overlap: close every
   capture window before starting a run (an open utility window takes focus from real-click Editor tests).
 - Blank windows the developer finds are safe to close with their X; they hold nothing.
-- **Pixel and layout assertions never depend on the Editor's window sizes.** A test that checks positions or sizes in panel pixels
-  first fixes its own frame (a fixed Game view resolution or a fixed-size panel / RenderTexture set in SetUp and restored in
-  TearDown). If such a test fails only after the Editor layout changed, the test is wrong, not the environment: fix the fixture.
-  A capture that keeps catching a neighbouring panel is fixed the same way (restore the default layout with
-  `EditorUtility.LoadWindowLayout` or ask the developer once), never by skipping the capture.
+- **Pixel and layout assertions never depend on the Editor's window sizes.** Every PlayMode run lays out in ONE frame: 390 x 844,
+  the PanelSettings reference resolution (a phone in portrait), pinned for the whole run by an assembly-wide NUnit `[SetUpFixture]`
+  (`Tests/Runtime/FixedFrameForTheRun.cs`, and `LivingRoomFixedFrameForTheRun.cs` for the app's PlayMode assembly -- a SetUpFixture
+  only covers its own assembly, so a new PlayMode test assembly adds its own). Fixtures do not pin it again. The pin selects a
+  fixed-resolution Game view size (`CardTestInput.FixedGameViewSize`; a RenderTexture panel would break `PixelAt`, which reads the
+  real Game view). A test whose subject is built for the Editor's desktop view (a dev-only demo on its Editor stage) says so and
+  takes its own landscape frame for its lifetime (`using var desktopFrame = new CardTestInput.FixedGameViewSize(1280, 720);`,
+  `LodWallSceneTests`); everything else is judged at the phone frame. If a test fails only after the Editor layout changed, the
+  test is wrong, not the environment: fix the fixture. (2026-09-29: the Default layout's landscape Free Aspect Game view broke
+  11 card tests at once; with the run pinned, 5 more showed they had only ever passed at one lucky window size.)
+- **Measure relative to the thing itself, and prove the precondition.** An offset is measured from the element's own rest
+  position, not from a neighbour whose distance depends on the screen (`DisplacementLabelTests`); a tap first scrolls its target
+  into view and asserts it is inside the visible part (`CardVideoGalleryTests.TapInView` -- `ScrollTo(block)` on a block taller
+  than the viewport lines up its far edge); an "empty spot" is empty under a whole finger (22 px around it,
+  `SearchSceneFixture.IsEmptyAround`), not one pixel; a test about scrolling asserts the stack really scrolls (content taller
+  than the viewport at the stop it uses), never a 0 that proves nothing.
+- A capture that keeps catching a neighbouring panel is fixed by restoring the default layout (`Window/Layouts/Default`
+  through `execute_menu_item`, or `EditorUtility.LoadWindowLayout`, or ask the developer once), never by skipping the capture.
 
 ### 4.2.4 Test renders live outside Assets/
 
@@ -207,6 +244,60 @@ generated PNGs and git would track them.
   domain is the tested area (`Card`, `Search`, `Editor`, `Displacement`, `Lod`, `Effects`, `MarkerGallery`).
 - An aborted run can leave `Assets/InitTestScene<guid>.unity` files: delete them (`TestEvidenceRuleTests` fails while one sits there).
 - A capture that shows another application (a chat window, a browser) is private content: delete it and capture again.
+
+### 4.2.4b Precise tests that survive harmless changes
+
+A test should fail when the feature breaks and stay green when something unrelated moves (a window, a token, a frame rate).
+Precision is kept by asserting the right thing exactly, not by loosening tolerances. Before calling a test finished, check:
+
+1. **Fixed ground.** It runs in the run's pinned frame (4.2.3); a test that needs another frame takes it explicitly.
+2. **Expected values come from their source**, never re-typed: a size from `CardTestInput.TokenPx("--ts-...")`, a count or text
+   from the wall's config / the gallery definitions, a colour from the palette. A token change then moves test and card together.
+3. **Relative, not absolute.** Positions and offsets are measured from the element itself or its own container (rest position,
+   parent bounds, `OnePixel`), never as screen coordinates that depend on the frame.
+4. **Preconditions are asserted, with numbers in the message.** "The stack scrolls", "the button is inside the visible part", "this
+   spot is empty under a finger", "the clip loaded": when one fails the message says the SETUP is wrong, not the feature -- and
+   a test never passes on a 0 that proves nothing.
+5. **Time is the test's.** Event times, `ManualVideoOutput` / manual audio devices, injected clocks (`Card.Clock`,
+   `slowSheet`); waits end on a condition or a frame count, not on seconds of real time.
+6. **Every tolerance has a named reason** (one physical pixel, a finger's radius, a float epsilon). A tolerance is never
+   widened to make a red test green; a test that fails by a hair at a new frame is measuring the wrong thing (as
+   `DisplacementLabelTests` did, 2026-09-29).
+7. **Real input stays real** (panel events, Input System devices); only its timing and its target point are the test's.
+
+### 4.2.5 One Unity job at a time (never compile under a running test)
+
+A compile (`refresh_unity` with a compile request, a saved `.cs`, an asset import that triggers one) reloads the C# domain,
+and a domain reload in the middle of a test run does not pause it: it destroys it. The Test Framework throws inside
+`TestJobRunner`, the MCP job stays "running" with nothing behind it (an orphan: every later `run_tests` is refused), and
+the aborted run leaves `Assets/InitTestScene<guid>.unity` behind. Found in the Editor log on 2026-09-29: a `refresh_unity`
+sent while a PlayMode job was still going cost two Editor restarts.
+
+- **Serialize.** Edit -> `refresh_unity` -> `run_tests` -> `get_test_job` (with `wait_timeout` 60, repeated) until the job
+  says `succeeded` / `failed` -> only then the next edit, refresh, `execute_code` that saves assets, or run. A `get_test_job`
+  that timed out means "still running", never "go on".
+- **Check before every compile.** Read `editor_state`: `tests.is_running` false and `compilation.is_compiling` false. If a job
+  is running, wait for it; do not cancel it to go faster (stopping Play Mode aborts the run and loses its results).
+- **Unity preference, set once per machine:** Edit > Preferences > Asset Pipeline > Auto Refresh = "Enabled Outside
+  Playmode" (EditorPrefs `kAutoRefreshMode` = 2), so a file saved while a PlayMode run is going waits for the run to end.
+  It does not guard EditMode runs or an explicit `refresh_unity` -- the serialize rule above does.
+- **An orphaned job heals without a restart.** The MCP `TestJobManager` marks a "running" job failed when a domain reload
+  finds it untouched for more than 5 minutes (log line `[TestJobManager] Clearing stale job`). So: confirm Play Mode is
+  off and no run is progressing, wait until 5 minutes have passed since the job's last update, then request one compile
+  (`refresh_unity` compile=request). Ask the developer to restart Unity only if the job is still there after that.
+- After any aborted run, delete the `InitTestScene` leftovers (4.2.4); if one is the active scene, open another scene first.
+
+### 4.2.6 The Editor log stays small
+
+`%LOCALAPPDATA%\Unity\Editor\Editor.log` (and `Editor-prev.log`, the previous session) is where a stuck run, a compile in
+the middle of a job or a crash shows up -- read it before guessing (rank repeated lines: strip digits, `sort | uniq -c | sort -rn`).
+Writing it is not free: before 2026-09-29 one session's log reached 823 MB, 91% of it stack-trace frames of `Debug.Log`
+lines repeated per POI on every wall build of every test.
+
+- Player Settings keep **Stack Trace for Log = None** (`m_StackTraceTypes`, the fourth pair = 00): an info line is one line.
+  Warnings, errors and exceptions keep their stack traces.
+- Per-item / per-frame detail goes through `DevLog.Detail(LogDomain.X, ...)` (20-code-quality 2.1), off by default, so a test
+  run writes only one-line summaries, warnings and errors. Deleting the log file fixes nothing: the cost is writing it.
 
 ### 4.3 Asset Database Refresh Discipline
 

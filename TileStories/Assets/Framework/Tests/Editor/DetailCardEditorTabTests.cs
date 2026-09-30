@@ -637,6 +637,41 @@ namespace TileStories.Editor.Tests
             Assert.IsNull(POIEditorToolWindow.MediaAssetFor("ghost.png", MediaFolder), "a path with no file: the row can tell (the missing-file warning)");
         }
 
+        // _3.1 13-fix: an Asset field holding a Framework default shows "Default: <key>" with its Clear default button INSIDE the row (a
+        // capture showed it pushed to the window's far edge), a real click clears it, and the "Pick default..." button that replaces it
+        // sits inside the row as well; Ctrl+Z gives the default back
+        [UnityTest]
+        public IEnumerator AnAssetFieldWithADefault_ClearDefaultSitsInsideTheRow_ARealClickClearsIt_PickDefaultTakesItsPlace_AndCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            config.card_settings.media_resources_path = MediaFolder;
+            var block = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.ZoomImageKind };
+            block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.ZoomImageImageField, asset = MediaPathRule.PathForDefaultKey("azulejo_detail") });
+            config.pois[0].card.blocks.Add(block);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            BlockInstanceData Zoom() => _window.Config.pois[0].card.blocks[0];
+
+            Rect field = _window.RectOf("Block field image#0");
+            Rect clear = _window.RectOf("Block field image clear default#0");
+            Assert.LessOrEqual(clear.xMax, field.xMax + 1f, "Clear default ends inside the row, under its field: " + clear + " vs " + field);
+            Assert.Greater(clear.y, field.y, "on the line under the field");
+
+            _window.Click("Block field image clear default#0");
+            yield return _window.WaitForRepaint();
+            Assert.AreEqual("", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField), "a real click cleared the default");
+            Rect pick = _window.RectOf("Block field image pick default#0");
+            Assert.LessOrEqual(pick.xMax, field.xMax + 1f, "Pick default... sits inside the row too: " + pick + " vs " + field);
+
+            yield return _window.PressUndo();
+            Assert.AreEqual(MediaPathRule.PathForDefaultKey("azulejo_detail"), POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField),
+                "one Ctrl+Z gives the default back");
+        }
+
         // _3.1 step 9A: the audio kind's Asset rows take a real AudioClip and a real captions file (a TextAsset made by the .vtt importer),
         // each stored as its path inside the Media Folder; a picture (or the other kind of file) dropped on the wrong row is not taken
         [UnityTest]

@@ -29,9 +29,6 @@ namespace TileStories
         [SerializeField] private WallSession _wallSession;
         [SerializeField] private Camera _camera;
 
-        [Header("Debug")]
-        [SerializeField] private bool _debug = false;
-
                 // Runtime state
         private LodSettings _settings;
         private float _timer;
@@ -403,9 +400,9 @@ namespace TileStories
                 _prevEffectiveDistance[id] = effectiveDistance;
                 result[id] = newBand;
 
-                if (_debug && hasPrev && newBand.Index != prevBand.Index)
+                if (DevLog.IsOn(LogDomain.Lod) && hasPrev && newBand.Index != prevBand.Index)
                 {
-                    Debug.Log($"[LOD] marker {id} band {prevBand.Index} -> {newBand.Index} at {effectiveDistance:F1}m");
+                    DevLog.Detail(LogDomain.Lod, $"[LOD] marker {id} band {prevBand.Index} -> {newBand.Index} at {effectiveDistance:F1}m");
                 }
             }
 
@@ -547,9 +544,9 @@ namespace TileStories
                     units[i].isVisible = false;
                 }
 
-                if (_debug)
+                if (DevLog.IsOn(LogDomain.Lod))
                 {
-                    Debug.Log($"[LOD] band {band.Index}: showing {Mathf.Min(band.MaxVisibleCount, units.Count)}/{units.Count} markers (cap={band.MaxVisibleCount})");
+                    DevLog.Detail(LogDomain.Lod, $"[LOD] band {band.Index}: showing {Mathf.Min(band.MaxVisibleCount, units.Count)}/{units.Count} markers (cap={band.MaxVisibleCount})");
                 }
             }
         }

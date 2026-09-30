@@ -130,3 +130,17 @@ check thee FOV splike thing???
 - [tooling] When Claude Code's auto-mode permission check stops answering ("no verdict"), every mutating call (Bash, execute_code,
   run_tests...) fails and ten in a row end the turn. After two, stop mutating calls and ask the developer (switch permission mode, or
   wait); reads still work. Proposed for `50-terminal_and_tools.md`.
+  ROOT FIX (2026-09-29): the developer added `.claude/settings.local.json` with `{"permissions":{"allow":["mcp__UnityMCP"]}}` --
+  allowed tools skip the check, so a check outage no longer stops Unity work (file edits and Bash still go through it).
+
+## From the stability pass (2026-09-29)
+
+- [LOD / demo field] At the phone's own frame (390 x 844, portrait) only 3 of the 15 LOD demo-field markers are on screen from
+  the stage start: the default field (5 m wide at 1.5 m) is laid out for the Editor's landscape Game view. The field is also
+  allowed in development builds, where a phone in portrait sees a narrow slice of it. Decide in the LOD domain: size the default
+  field from the camera's own view (fit the width), or keep it Editor-shaped and say so in its help. `LodWallSceneTests` now
+  takes an explicit 1280 x 720 frame for this test (40-testing 4.2.3).
+- [MCP config] `~/.claude.json` holds two project entries for this folder, `C:/...` and `c:/...` (drive-letter case). The VS
+  Code extension uses the lowercase one, whose project-scoped `UnityMCP` URL is written `http:\127.0.0.1:8080\mcp` (works: URL
+  parsers read `\` as `/`). The user-scoped entry (`http://127.0.0.1:8080/mcp`) points at the same server. Cosmetic; tidy it with
+  VS Code closed if it ever matters.

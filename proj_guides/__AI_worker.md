@@ -97,53 +97,57 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
 So start by reading them all. 
 
 
-## `And now: POI Detail Card -- 9B-owed (background runs), 9B-fix, step 13 (Framework default media library)`
+## `And now: POI Detail Card -- 13-fix (parallax test), step 10A.2-10A.4 (3D preview owner, model_3d, panorama_360, header model)`
 
-GATE: take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Close every
-capture window with window.Close() and confirm none is left. Confirm the tree compiles and is committed
-(`git --no-optional-locks status`); if not, STOP and report -- never finish someone else's uncommitted work without telling me.
-Never commit `Markers/Fonts/Oswald Bold SDF.asset` (restore it with git checkout after runs).
+GATE: take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree
+compiles; if not, STOP and report. `git checkout --` the Oswald font if it shows as modified; never commit it.
 
-REQUIRED READING (all lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- "## TODOs" ([9B-owed],
-[9B-fix], [13]), the status table (0-12, 9-pre, 9A, 9B done; 13 next, then 10) and section 8 (Editor);
-`_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (this block adds Editor rows, a table and a picker);
-`.clinerules/40-testing.md` 4.2.3 and 4.5; `.clinerules/20-code-quality.md` (dev-only rule, ASCII + visitor-content exception).
-Context only: how the marker icon / font libraries work (SpriteKeyLibrary, FontKeyLibrary, WallSession's
-`marker_icon_library_resources_path`) -- step 13 follows the same pattern.
+Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- start with "## TODOs"
+([13-fix, NEW] parallax, [10A-fix], [10A], [Tier 5] expandable, [FUTURE] landscape video) and the status table (0-13, 13-fix,
+10A.1 done; 10A.2-10A.4 next, 10B planned), and "Tier 5 -- 3D, 360 and AR actions".
+REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.2 (test levels), 4.2.3, 4.2.4b, 4.2.5 (one Unity job at a time), 4.2.6,
+4.5; `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (new Asset kinds in the drawer and picker, the (i)
+column); `.clinerules/20-code-quality.md` 2.1 (DevLog for any detail log).
+Context only: CardAudioService / CardVideoService (the one-owner pattern), TakeoverView, EquirectRule + the 10A.1 generator.
+TEST PLAN: the opening full PlayMode baseline is NOT needed if the tree is the checkpoint commit (say which); if uncommitted work
+is present, run it once. Full EditMode + PlayMode ONCE at the end of the block. This block is the third since the last background
+full run: the closing PlayMode run is done with Unity in the BACKGROUND (ask me once to switch app).
 
-PART 0 -- 9B-owed: ask me ONCE to switch to another app, then run the hero_chip fixture 3x and both full suites with Unity in
-the background. Any failure: find the cause and fix it (4.2.3). Report the three counts.
+PART 1 -- fixes (suggest a commit message after it):
+1. HeaderImageParallax_ARealScroll: at the fixed 390x844 frame a lone header does not overflow. Give the test content that
+   really scrolls (a header + enough blocks) and assert the parallax ratio relative to the header itself (4.2.4b); red with the
+   parallax switched off, green with it on.
+2. Default Media table: its (i) buttons in the tab's one (i) column (with the Default Media Library row); recapture at 620 pt.
 
-PART 1 -- 9B-fix (suggest a commit message after it):
-1. One play button before the first play: with a poster, only the centre overlay; the bar's play/pause appears once playing.
-   Phase A test + recapture `Card_video_*_poster`.
-2. Split CardGalleryDefinitions.cs into per-family partials (like .Audio / .Video). No behaviour change; every gallery test
-   still green.
+PART 2 -- 10A.2 to 10A.4 (one sub-step at a time, targeted fixtures in between):
+3. 10A.2 One card-owned 3D preview: ICardPreview / CardPreviewService (slots, load on bind, release on unbind / card close) and a
+   CardPreviewStage far from the wall (disabled camera rendering on demand to one RenderTexture per slot, key + fill light, URP;
+   glTFast 6.19 for .glb). Pure TurntableRule (drag -> yaw/pitch with limits, auto-spin that stops on touch and resumes after a
+   pause, pinch zoom within limits) and PanoramaViewRule (yaw wraps, pitch and FOV clamped). Wired through BlockBindContext.Preview
+   (shared, like Audio) and PoiCardHost. Memory: a released model leaves no GameObject, mesh or texture behind (test it).
+4. 10A.3 model_3d: `turntable` (inline stage, drag / pinch, fallback picture while loading or on failure) and `takeover` (a
+   teaser that opens the model full screen in TakeoverView; Back keeps the card's stop and scroll). header `model_turntable`.
+   MediaKind.Model in the Asset drawer and the default picker (shows `azulejo_arch`).
+5. 10A.4 panorama_360: `drag` (look around, pinch changes FOV) and `gyro` (device attitude through the Input System; drag is the
+   fallback where no gyroscope exists, e.g. the Editor); inline and full screen through takeover. The viewer's sphere is built
+   from EquirectRule, so "ahead" matches the generated picture. MediaKind.Panorama in the drawer / picker (`tiled_room_360`).
+6. Fixtures: The Lamp gets model_3d (both looks, one on `default:azulejo_arch`, one on the heavy room scan
+   `Apps/LivingRoom/146267-LivingRoom2-tex.glb` -- a LivingRoom TEST fixture only, never a default) and panorama_360 (both looks
+   on `default:tiled_room_360`); Lamp - Military's header stays video_loop. Identity fields untouched, round trip checked.
+7. Tests: pure (TurntableRule, PanoramaViewRule, MediaPathRule for .glb / panoramas); Phase A (every look x default media /
+   missing file -> fallback; real drags and pinches, rendering waits on frames); Phase B on the real Lamp (a real drag rotates the
+   model; the takeover opens and Back restores; a panorama drag turns the view; the room scan loads and after closing the card
+   the preview objects and textures are gone).
 
-PART 2 -- step 13, Framework default media library:
-3. `CardMediaLibrary` (ScriptableObject: rows of key, kind, asset(s), a short Editor note), one Framework default asset and an
-   optional wall library path in card_settings (like the icon library). The media source resolves `default:<key>` from the wall's
-   library first, then the Framework's; a plain path stays the wall's media folder. MediaPathRule accepts `default:` keys.
-4. Generated default media only (our own scripts, no third-party material): about 6 pictures (azulejo patterns in two palettes, a
-   panel, a poster, a map-like plan), 2 short audio clips (a chime, a 10 s ambient tone) with a .vtt, 1 short video (tile pattern
-   motion, MediaEncoder, low bitrate). Total in a build <= 3 MB, proved by a test that sums the imported sizes. A generator script
-   in Editor/DevTools rebuilds them; a README says they are generated, CC0.
-5. Editor: Detail Card > Default Media (a table with a preview per row, kind, key, (i)); every Asset field in Card Content gets
-   "Pick default..." that stores `default:<key>` and shows the key; warnings for an unknown key. Real-click Editor tests (pick,
-   undo, redo, unknown-key warning).
-6. Use it: the Phase A gallery reads defaults where it now uses in-memory stand-ins (keep the silent ManualAudio/VideoOutput for
-   timing); Lamp - Military gets one block that uses only defaults (identity fields untouched).
-7. Tests: pure (key parsing, lookup order wall > framework, size budget); Phase A (a default picture, audio and video bind and
-   render); Phase B on the real scene (a default-media block shows on Lamp - Military; a wall library overrides one key).
-
-Capture and check yourself: the Default Media table (previews, (i) column, narrow 620 pt), the picker on an Asset row, the card
-blocks using defaults. Rules as before: no literal colours/sizes, no visitor strings in code, real input in tests, identity fields
-untouched, Portuguese spelled properly.
-OUT OF SCOPE: 3D models and panoramas (Tier 5, step 10), _3.2, _3.3, landscape full-screen video.
-Stop when Parts 0-2 are green. Update _3.1 (rows 9B-fix / 13 with proof, TODOs, design history), 10-structure.md, _5.1.
+Capture and check yourself: turntable (idle, dragged, zoomed, fallback), model takeover, panorama inline + full screen, header
+model, the Editor rows and the picker listing the model and panorama defaults. Rules as before: no literal colours/sizes, no
+visitor strings in code, real input in tests, identity fields untouched, Portuguese spelled properly, detail logs via DevLog only.
+OUT OF SCOPE: place_in_ar (10B, device), _3.2, _3.3, landscape full-screen video, a wall-library create flow.
+Stop when Parts 1-2 are green. Update _3.1 (rows 13-fix / 10A with proof, TODOs, design history), 10-structure.md, _5.1.
 Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP and report.
-Finish with: suites + counts (foreground and background), what you looked at, what you could not verify, a one-line commit
-message (no trailer), and the `git add` paths (default: `git add TileStories .clinerules proj_guides`). Commit only if I ask.
+Finish with: suites + counts (say which run was in the background), what you looked at, what you could not verify, a one-line
+commit message (no trailer). Commit only if the developer asks.
+
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
@@ -228,6 +232,16 @@ Repeat steps 1–6 until every step/group of sub-tasks in the plan is done.
 Per ./.clinerules/50-terminal_and_tools.md:
 - Chain commands with `;`, not `&&`.
 - Use editor with verbatim old_text (including leading whitespace and allway replacing complete lines); if matching fails or is ambiguous, fall back to unityMCP__apply_text_edits or python edit_file.py. Always verify immediately by re-reading the edited region, running refresh_unity, and passing all tests.
+
+### 2.4b. Keep going (the brief is the approval)
+- The brief below IS the developer's approval for everything in it. Do NOT stop between sub-steps to ask "should I continue?".
+  After each sub-step: tests green, a short learning summary, a suggested one-line commit message -- then go straight on.
+- Stop ONLY for: (1) a failed GATE; (2) a decision with a real trade-off that the brief and the guides do not settle; (3) the
+  brief's stop condition; (4) the session budget below. "The rest looks big" is not a reason to stop: finish the current
+  sub-step green and continue with the next.
+- **Session budget:** if the session is past roughly 500K tokens (or the context has been compacted once), finish the current
+  sub-step green, then stop with a HANDOFF: what is done (with commits), what is not, the exact next sub-step, and the state of
+  the tree. Never leave the tree red or half-edited.
 
 ### 2.5. Hard Stop
 When you complete all the Iterative Execution Cycles for each step/task in the plan AND WE ACHIEVE AND TESTED WITH REAL TEST THAT ALL FEATURES WORK, ALL CONFIG PARAMS WORK AND ALL TESTS PASS, so then **STOP immediately**. Output the final learning summary and STOP. 

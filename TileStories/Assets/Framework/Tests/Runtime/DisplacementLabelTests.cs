@@ -222,13 +222,16 @@ namespace TileStories.Tests
             var m0 = SpawnMarker(new Vector2(400, 300), "m0");
             yield return null; // let MarkerBillboard's default (unrolled) LateUpdate settle
 
-            Vector2 markerCentre = ScreenPos(m0.transform.position);
+            // - measured from the label's OWN rest position (ApplyLabelOffset moves it from there), never from the marker's
+            //   centre: the label rests under the symbol by a screen-size-dependent number of pixels, which a loose
+            //   tolerance used to absorb until the frame changed (40-testing 4.2.3: relative, not absolute, positions)
+            Vector2 labelAtRest = ScreenPos(m0.LabelRect.position);
             var requested = new Vector2(30f, 0f);
             m0.ApplyLabelOffset(_cam, requested);
             yield return null;
 
-            Vector2 actualOffset = ScreenPos(m0.LabelRect.position) - markerCentre;
-            AssertVecEqual(requested, actualOffset, 5f);
+            Vector2 actualOffset = ScreenPos(m0.LabelRect.position) - labelAtRest;
+            AssertVecEqual(requested, actualOffset, 1.5f);
         }
 
         [UnityTest]
@@ -242,13 +245,14 @@ namespace TileStories.Tests
             _cam.transform.rotation = Quaternion.Euler(0f, 0f, 45f);
             yield return null; // let LateUpdate resolve the rolled, world_up rotation
 
-            Vector2 markerCentre = ScreenPos(m0.transform.position);
+            // - from the label's own rest position, like the unrolled case above
+            Vector2 labelAtRest = ScreenPos(m0.LabelRect.position);
             var requested = new Vector2(30f, 0f);
             m0.ApplyLabelOffset(_cam, requested);
             yield return null;
 
-            Vector2 actualOffset = ScreenPos(m0.LabelRect.position) - markerCentre;
-            AssertVecEqual(requested, actualOffset, 5f);
+            Vector2 actualOffset = ScreenPos(m0.LabelRect.position) - labelAtRest;
+            AssertVecEqual(requested, actualOffset, 1.5f);
         }
     }
 }

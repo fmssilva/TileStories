@@ -47,11 +47,8 @@ REVIÕES/DÚVIDAS ----------------------------------------------------
 """
 def maximo(a: int, b: int) -> int:
     """ Devolve o maior de dois números inteiros. """
-    if a > b:
-        return a
-    else:
-        return b
-
+    # TODO
+    
 print(maximo(3, 5))   # 5
 print(maximo(5, 3))   # 5
 
@@ -64,10 +61,7 @@ print(maximo(5, 3))   # 5
 """
 def is_multiple(a: int, b: int) -> bool:
     """ Devolve True se a for múltiplo de b, False caso contrário. """
-    if a % b == 0: 
-        return True
-    else:
-        return False
+    # TODO
 
 print(is_multiple(10, 2))   # True
 print(is_multiple(10, 3))   # False
@@ -77,9 +71,7 @@ print(is_multiple(10, 3))   # False
 # Porque se chega aqui, é porque todas as condições anteriores de if/elif não se verificaram 
 def is_multiple(a: int, b: int) -> bool:
     """ Devolve True se a for múltiplo de b, False caso contrário. """
-    if a % b == 0: 
-        return True
-    return False
+    # TODO
 
 print(is_multiple(10, 2))   # True
 print(is_multiple(10, 3))   # False
@@ -88,7 +80,7 @@ print(is_multiple(10, 3))   # False
 # Se a função retorna só True ou False, podemos retornar logo a expressão booleana
 def is_multiple(a: int, b: int) -> bool:
     """ Devolve True se a for múltiplo de b, False caso contrário. """
-    return a % b == 0
+    # TODO
 
 print(is_multiple(10, 2))   # True
 print(is_multiple(10, 3))   # False
@@ -169,8 +161,8 @@ b) EXERCICIO (EXTRA) — Tabuada do 7 [6 min -> 10:31] ----------------------
         7 x 10 = 70
 """
 
-for i in range(1, 11):
-    print(f"7 x {i} = {7 * i}")
+# TODO 
+#   print(f"7 x {i} = {7 * i}")
 
 # O que acabou de acontecer:
 # o código indentado debaixo do "for" correu 10 vezes.
@@ -233,13 +225,11 @@ def sum_naturals(n: int) -> int:
     """ Soma dos n primeiros naturais: 0 + 1 + ... + (n-1).
         Precondition: n >= 0
     """
-    total = 0                       # uma soma começa em 0 (o fatorial começava em 1)
-    for i in range(0, n, 1):        # i = 0, 1, 2, ..., n-1  (n números!)
-        total = total + i
-    return total
+    # TODO
 
 def main() -> None:
-    x = int(input("Introduza um número natural: "))
+    # x = int(input("Introduza um número natural: "))
+    x = 4
     print(sum_naturals(x))
 
 main()
@@ -263,14 +253,12 @@ def sum_squares(n: int) -> int:
     """ Soma dos n primeiros quadrados perfeitos: 0 + 1 + 4 + ... + (n-1)^2.
         Precondition: n >= 0
     """
-    total = 0
-    for i in range(0, n, 1):
-        total = total + i * i       # a ÚNICA diferença para o 19a
-        # total = total + i ** 2    # também dá
-    return total
+    # TODO
+    
 
 def main() -> None:
-    x = int(input("Introduza um número natural: "))
+    # x = int(input("Introduza um número natural: "))
+    x = 4
     print(sum_squares(x))
 
 main()
@@ -557,10 +545,12 @@ def year_length(year: int) -> int:
     return 365 # reparem que não é preciso o "else" - se chega a este ponto já estamos no else
 
 def main() -> None:
-    a = int(input("A: "))
-    b = int(input("B: "))
-    for year in range(a, b + 1):   # b + 1 -> o 2010 TEM de aparecer (off-by-one!)
-        print(f"{year} {year_length(year)}")
+    # a = int(input("A: "))
+    # b = int(input("B: "))
+    a = 2010
+    b = 2026
+    # TODO
+    #    print(f"{year} {year_length(year)}")
 
 main()
 
@@ -609,17 +599,8 @@ def read_and_sum(n: int) -> int:
     """ The sum of a sequence of integers gathered from the input.
         Precondition: n >= 0
     """
-    total = 0
-    for i in range(1, n + 1):              # 1, 2, ..., n -> para o prompt dizer "1>", "2>", ...
-        x = int(input(f"{i}> "))           # o input pode estar DENTRO do ciclo!
-        total += x
-    return total
-
-    # Alternativa: o ciclo começa em 0, mas temos de somar 1 no texto do prompt
-    # for i in range(n):
-    #     x = int(input(f"{i + 1}> "))
-    #     total += x
-
+    # TODO
+    
 def main() -> None:
     n = int(input("Introduza a quantidade de números a somar: "))
     print(read_and_sum(n))
@@ -921,15 +902,8 @@ def month_length(month: int, year: int) -> int:
     """ Number of days of a given month (in a given year).
         Precondition: 1 <= month <= 12
     """
-    if month in {1, 3, 5, 7, 8, 10, 12}:
-        return 31
-    elif month in {4, 6, 9, 11}:
-        return 30
-    elif is_leap_year(year):          # se chegámos aqui, só pode ser fevereiro
-        return 29
-    else:
-        return 28
-
+    # TODO
+    
     # Sem o "in", teríamos de escrever:
     # if month == 1 or month == 3 or month == 5 or month == 7 or month == 8 or month == 10 or month == 12:
     #     return 31
@@ -981,29 +955,15 @@ c) EXERCICIO 24 (GUIÃO, Mooshak H) — Posição de uma data no ano [14 min -> 
 
 def is_date_valid(day: int, month: int, year: int) -> bool:
     """ Validate a calendar date. """
-    return 1 <= month <= 12 and 1 <= day <= month_length(month, year)
-
-    # reparem que por vezes é bom pensar também a sequencia das condições numa expressão
-    # colocar as condiçõoes mais fáceis primeiro e as mais complexas depois, 
-    # assim o programa verifica rápido as primeiras condições, e talvez decide logo, 
-    # e só mesmo em ultimo caso verifica as ultimas condições mais complexas/que demoram mais tempo... 
-
-    # A versão "comprida" (funciona, mas é o que se chama escrever código a mais):
-    # if 1 <= month <= 12 and 1 <= day <= month_length(month, year):
-    #     return True
-    # else:
-    #     return False
-    # A condição JÁ É True ou False -> devolvemo-la diretamente.
+    # TODO
+    
 
 def day_order(day: int, month: int, year: int) -> int:
     """ Position of a date within the respective year, starting with 1.
         Precondition: is_date_valid(day, month, year)
     """
-    total = day                           # o acumulador começa já com os dias do mês atual
-    for m in range(1, month):             # meses COMPLETOS antes: 1, 2, ..., month-1
-        total += month_length(m, year)
-    return total
-
+    # TODO
+    
 # Exemplos para testar:
 print(day_order(1, 1, 2008))              # 1    -> janeiro: range(1, 1) é vazio, só soma o dia
 print(day_order(31, 12, 2008))            # 366
@@ -1017,6 +977,7 @@ print(is_date_valid(0, 5, 2024))          # False (não há dia 0)
 
 # %%
 # c.1) main() para o problema 24 [3 min -> 12:54]
+# reparem como fazemos a validação ANTES de chamar a função que calcula a posição da data.
 def main() -> None:
     day = int(input("Dia: "))
     month = int(input("Mês: "))
@@ -1036,6 +997,9 @@ main()
 #
 # Aqui o FIM excluído do range dá-nos jeito: range(1, month) pára no mês anterior.
 # NÃO queremos o próprio mês (esse ainda não está completo, contamos só "day" dias dele).
+
+
+
 
 
 

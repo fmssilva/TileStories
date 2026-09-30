@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -73,6 +74,19 @@ namespace TileStories.Tests
             yield return null;
             Send(panel, EventType.MouseUp, position);
             yield return null;
+        }
+
+        // A real tap on `target` after scrolling `scroll` to it and asserting it is inside the visible part (40-testing 4.2.4b):
+        // scrolled to as a whole, a block taller than the viewport lines up its far edge and can leave a button outside the
+        // view, where the tap would land on something else -- the precondition names that instead of a confusing later failure
+        public static IEnumerator TapInView(ScrollView scroll, VisualElement target)
+        {
+            scroll.ScrollTo(target);
+            yield return Settle(0.15f);
+            Rect visible = scroll.contentViewport.worldBound;
+            Assert.IsTrue(visible.Contains(target.worldBound.center),
+                "precondition: " + target.name + " is inside the visible part of the card: " + target.worldBound + " in " + visible);
+            yield return Tap(target.panel, target.worldBound.center);
         }
 
         // Scroll the mouse wheel over the centre of `over` (panel units per notch as the ScrollView defines them; + = down),
@@ -160,6 +174,84 @@ namespace TileStories.Tests
         {
             var blended = Color.Lerp(background, new Color(text.r, text.g, text.b, 1f), text.a);
             return UIAccessibility.ContrastRatio(blended, background);
+        }
+
+        // Pins the Editor's actual Game view resolution while it lives -- for the whole run, through FixedFrameForTheRun and
+        // LivingRoomFixedFrameForTheRun (_3.1 [13-fix]): the shared PanelSettings
+        // scales by "Scale With Screen Size" / "Match Width Or Height" (0.5), which blends BOTH axes from the real Game
+        // view's own pixel size -- so an Editor whose Game view shrank or changed shape (a previous session's own screen
+        // captures did this) silently reflows text wrapping and grid row breaks. That is a real layout bug this once
+        // caused (Gallery_/QuickFacts_/Swatches_ failing on absolute grid positions), not environment noise. A
+        // RenderTexture-backed panel would decouple layout from the Game view too, but PixelAt reads pixels via
+        // ScreenCapture (the real Game view framebuffer), so redirecting the panel's render target breaks every
+        // colour-reading test instead -- the fix must pin the real window, not move rendering off it. Unity exposes no
+        // public API for this: GameViewSizes/GameViewSizeGroupType/GameViewSize/GameView are all internal to
+        // UnityEditor.dll, so every step below goes through reflection. Dispose to restore the Editor's own selection.
+        public sealed class FixedGameViewSize : System.IDisposable
+        {
+#if UNITY_EDITOR
+            // One custom Game view size per frame, named by its size (a label shared by two sizes would select the wrong one)
+            private static string SizeLabel(int width, int height) => "TileStories_TestFrame_" + width + "x" + height;
+            private readonly object _group;
+            private readonly int _previousIndex;
+            private readonly object _gameView;
+            private readonly System.Reflection.PropertyInfo _selectedSizeIndexProperty;
+
+            public FixedGameViewSize(int width = 390, int height = 844)
+            {
+                var gameViewSizesType = System.Type.GetType("UnityEditor.GameViewSizes,UnityEditor");
+                var singletonType = typeof(UnityEditor.ScriptableSingleton<>).MakeGenericType(gameViewSizesType);
+                object gameViewSizes = singletonType.GetProperty("instance").GetValue(null, null);
+                object currentGroupType = gameViewSizesType.GetProperty("currentGroupType").GetValue(gameViewSizes, null);
+                _group = gameViewSizesType.GetMethod("GetGroup").Invoke(gameViewSizes, new[] { currentGroupType });
+                var groupType = _group.GetType();
+
+                _gameView = Resources.FindObjectsOfTypeAll(typeof(UnityEditor.EditorWindow))
+                    .FirstOrDefault(w => w.GetType().Name == "GameView");
+                Assert.IsNotNull(_gameView, "an open Game view (docked or floating) to pin its resolution");
+                _selectedSizeIndexProperty = _gameView.GetType().GetProperty("selectedSizeIndex",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                _previousIndex = (int)_selectedSizeIndexProperty.GetValue(_gameView, null);
+
+                string label = SizeLabel(width, height);
+                int existing = FindSize(_group, label);
+                if (existing < 0)
+                {
+                    var sizeType = System.Type.GetType("UnityEditor.GameViewSize,UnityEditor");
+                    object fixedResolution = System.Type.GetType("UnityEditor.GameViewSizeType,UnityEditor")
+                        .GetField("FixedResolution").GetValue(null);
+                    var ctor = sizeType.GetConstructor(new[] { fixedResolution.GetType(), typeof(int), typeof(int), typeof(string) });
+                    object size = ctor.Invoke(new object[] { fixedResolution, width, height, label });
+                    groupType.GetMethod("AddCustomSize").Invoke(_group, new[] { size });
+                    existing = FindSize(_group, label);
+                }
+                Assert.GreaterOrEqual(existing, 0, "the fixed test size was added to the current Game view size group");
+                _selectedSizeIndexProperty.SetValue(_gameView, existing, null);
+                ((UnityEditor.EditorWindow)_gameView).Repaint();
+            }
+
+            private static int FindSize(object group, string label)
+            {
+                var displayTexts = (string[])group.GetType().GetMethod("GetDisplayTexts").Invoke(group, null);
+                for (int i = 0; i < displayTexts.Length; i++)
+                {
+                    string text = displayTexts[i];
+                    int paren = text.IndexOf(" (");
+                    if (paren >= 0) text = text.Substring(0, paren);
+                    if (text == label) return i;
+                }
+                return -1;
+            }
+
+            public void Dispose()
+            {
+                _selectedSizeIndexProperty.SetValue(_gameView, _previousIndex, null);
+                ((UnityEditor.EditorWindow)_gameView).Repaint();
+            }
+#else
+            public FixedGameViewSize(int width = 390, int height = 844) { }
+            public void Dispose() { }
+#endif
         }
     }
 }

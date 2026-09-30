@@ -680,19 +680,23 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
 
                 _spawnedPOIs.Add(go);
 
-                var cam = Camera.main;
-                if (cam != null)
+                // Per-POI placement detail: only with TileStories > Detail Logs > Wall ticked (one line per POI per spawn)
+                if (DevLog.IsOn(LogDomain.Wall))
                 {
-                    Vector3 worldPos = go.transform.position;
-                    var toMarker = (worldPos - cam.transform.position);
-                    var distance = toMarker.magnitude;
-                    var forwardDot = Vector3.Dot(cam.transform.forward, toMarker.normalized);
-                    var inFront = forwardDot > 0f;
-                    Debug.Log($"[WallSession] POI ready id={poi.id} localPos={localPos} dist={distance:F2}m inFront={inFront} dot={forwardDot:F3}");
-                }
-                else
-                {
-                    Debug.Log($"[WallSession] POI ready id={poi.id} localPos={localPos} (no Camera.main found)");
+                    var cam = Camera.main;
+                    if (cam != null)
+                    {
+                        Vector3 worldPos = go.transform.position;
+                        var toMarker = (worldPos - cam.transform.position);
+                        var distance = toMarker.magnitude;
+                        var forwardDot = Vector3.Dot(cam.transform.forward, toMarker.normalized);
+                        var inFront = forwardDot > 0f;
+                        DevLog.Detail(LogDomain.Wall, $"[WallSession] POI ready id={poi.id} localPos={localPos} dist={distance:F2}m inFront={inFront} dot={forwardDot:F3}");
+                    }
+                    else
+                    {
+                        DevLog.Detail(LogDomain.Wall, $"[WallSession] POI ready id={poi.id} localPos={localPos} (no Camera.main found)");
+                    }
                 }
             }
 

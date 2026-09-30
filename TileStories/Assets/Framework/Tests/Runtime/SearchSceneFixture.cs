@@ -169,7 +169,24 @@ namespace TileStories.Tests
             return new Vector2(sp.x, sp.y);
         }
 
-        // A screen point (pixels) with nothing the EventSystem can hit under it, above the open card -- and at least
+        // Half the 44 px minimum tap target (UIAccessibility.MeetsMinTapTarget): how far around a tap a finger reaches
+        private const float FingerRadiusPx = 22f;
+
+        // Nothing the EventSystem can hit anywhere under a finger at `p`: the point itself and eight points on the finger's rim.
+        // Checking one pixel was not enough -- a second tap a few pixels away, or a marker still growing in, landed on a marker's
+        // edge and selected it (seen once the run used the phone frame, where the wall's markers sit closer together on screen)
+        private static bool IsEmptyAround(Vector2 p)
+        {
+            if (ScreenUIHit.IsOverAnything(p)) return false;
+            for (int i = 0; i < 8; i++)
+            {
+                float a = i * Mathf.PI / 4f;
+                if (ScreenUIHit.IsOverAnything(p + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * FingerRadiusPx)) return false;
+            }
+            return true;
+        }
+
+        // A finger-sized screen spot (pixels) with nothing the EventSystem can hit under it, above the open card -- and at least
         // `minDistance` pixels from `awayFrom` when one is given
         protected Vector2 EmptyScreenPoint(Vector2? awayFrom = null, float minDistance = 0f)
         {
@@ -180,7 +197,7 @@ namespace TileStories.Tests
                 {
                     var p = new Vector2(x, Screen.height - y);
                     if (awayFrom.HasValue && Vector2.Distance(p, awayFrom.Value) < minDistance) continue;
-                    if (!ScreenUIHit.IsOverAnything(p)) return p;
+                    if (IsEmptyAround(p)) return p;
                 }
             Assert.Fail("precondition: the camera view has an empty spot");
             return default;

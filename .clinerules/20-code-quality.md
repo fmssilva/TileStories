@@ -105,6 +105,14 @@
   in a long device log: `[Tracking] localized in 2.3s`, `[POI] spawned 12/12`,
   `[Config] loaded 45 POIs for wall Panorama`. Strip temporary trace logs once a task is
   verified working — don't leave debug noise permanently wired into shipped code.
+- **Detail logs go through `DevLog`, per domain, off by default.** A line that repeats per item (per POI, per marker,
+  per block) or per frame is written with `DevLog.Detail(LogDomain.Wall, "...")` (`Runtime/Core/DevLog.cs`), never a
+  plain `Debug.Log` and never a component's own `_debug` checkbox. The developer ticks the domain they are working on in
+  **TileStories > Detail Logs** (remembered per machine); test runs and device builds keep every domain off. When
+  building the message costs work (a `Camera.main`, a string join), wrap it in `if (DevLog.IsOn(LogDomain.X))`.
+  The `LogDomain` enum is the one list of domains (Wall, Markers, Lod, Search, Card, Tracking): add a domain there, with a
+  one-line comment saying what it covers, only when a new area really needs its own detail lines. One-per-run summaries
+  (`[WallSession] Ready 24/24 POIs`), warnings and errors stay plain `Debug.Log` / `LogWarning` / `LogError`.
 - **Never trust a bare print/log line to mean something is actually correct — assert it.**
   If a log message says something like `[ok] wall localized`, back that claim with an
   actual assertion right above or below it, so that if the condition were ever false the

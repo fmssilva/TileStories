@@ -129,6 +129,10 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator DemoField_InTheRealWallScene_IsOnAnEmptyStage_SeenAndFacingTheCamera_ThenGivesTheWallBack()
         {
+            // - the dev-only field is laid out for the Editor's desktop Game view (its stage is DemoFieldStage.EditorStagePosition): this
+            //   test looks through a landscape frame of its own, inside the run's phone frame, and gives that one back when it ends
+            using var desktopFrame = new CardTestInput.FixedGameViewSize(1280, 720);
+            yield return null;
             LogAssert.ignoreFailingMessages = true; // reset by the framework per phase; CollectUnexpectedErrors still guards
             var wallCameraPose = new Pose(_camera.transform.position, _camera.transform.rotation);
             var wallMarkers = _session.SpawnedMarkers.ToList();

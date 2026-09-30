@@ -45,10 +45,19 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
 ## 4. Logistics
 
 - Untracked / generated files: evidence, garbage, or content? You can delete things you are certain are "temp files or garbage"; if in doubt don't delete and ask user to decide.
-- Is the block a coherent checkpoint? Commit it YOURSELF (one-line message, no trailer, `git add TileStories .clinerules
-  proj_guides`, never the Oswald font) only when you are certain: the Worker's last full runs are green, the diff is only this
-  block + docs, and nothing unexpected is staged. Any doubt (a red or unexplained test, stray files, the developer's own
-  half-edited files) -> do NOT commit; give the message and the exact reason, and let the developer decide.
+- Is the block a coherent checkpoint? Commit it YOURSELF (one-line message, no trailer) only when you are certain: the Worker's
+  last FULL runs (EditMode + PlayMode) are green, the diff is only this block + docs, and nothing unexpected is staged. Stage by
+  name, `git add TileStories .clinerules proj_guides`, never `git add .` (the repo also holds `IPCE/`, `report/`,
+  `flutter_prototypes/` and the local `.claude/` settings), and never the Oswald font (`git checkout --` it first). Any doubt (a red
+  or unexplained test, stray files, the developer's own half-edited files) -> do NOT commit; give the exact commands, the message
+  and the reason, and let the developer decide.
+- **Where the commit runs:** from the Cowork VM the commit is NOT safe (git 2.34 without git-lfs and without the developer's
+  identity, writing the index the Windows git owns). There, always hand the exact commands to the developer. Commit yourself
+  only from a session that runs on the developer's own machine (the Windows git with LFS).
+- **Test plan (you decide it):** every brief carries a `TEST PLAN:` line: whether the opening full baseline is needed (only if
+  the tree moved since the last green commit), that ONE full EditMode + PlayMode run closes the block, any shared-ground change
+  that needs an extra full run, and -- every third block -- one full PlayMode run with Unity in the background
+  (`40-testing.md` 4.2). Count the blocks since the last background full run in your answer.
 - Session advice: new chat for the Worker by default (a fresh context per block).
 
 ## 5. Plan the next block
@@ -57,6 +66,12 @@ The SMALLEST block that moves the domain forward without building on a known pro
 4-6 block kinds or one architectural step -- something one Worker session can finish green and committed. Decide normal
 engineering choices yourself; ask the developer only for a real product / architecture trade-off (options, trade-offs, your
 recommendation, the exact question).
+
+**Block size (one Worker session, well under ~500K tokens):** ONE new owner/service/architectural piece, OR up to 2 heavy
+block kinds (media, 3D, anything with its own owner) OR up to 4-6 light kinds (text / list / choice) -- each with its Phase A
+and Phase B tests, captures and docs -- plus small review fixes. About 3-8 new files and one closing full PlayMode run. Number
+the sub-steps (e.g. 10A.2b.1, .2, .3) so the Worker can report and commit after each. If a block would need two new owners, it
+is two blocks.
 
 **References check (before writing the brief):** list what the Worker must READ, not only what it may consult: the domain
 guide's TODOs + status + the sections of the step, and the rule sections the block will hit (Editor rows -> `_5.1` section 0;
@@ -86,6 +101,7 @@ REQUIRED READING (all lines): <the exact sections the block touches -- always `_
 section "0. Guidelines" when the block adds or changes any POI Editor row, table, popup or capture; `40-testing.md` 4.2.3 + 4.5
 when it adds real-input tests or captures; any other guide whose rules apply>.
 Context only: <other guides>.
+TEST PLAN: <baseline full run needed? / full EditMode + PlayMode once at the end / background full run: yes or no>.
 
 PART 1 -- <fixes>: numbered, each = what + where + the test that proves it + recapture.
 PART 2 -- <new work>: per kind / step: WHAT (behaviour + acceptance), HOW (reuse first; decisions already taken), TESTS (pure
