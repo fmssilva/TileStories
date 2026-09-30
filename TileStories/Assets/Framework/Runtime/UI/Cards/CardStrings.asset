@@ -557,3 +557,17 @@ MonoBehaviour:
       value: Chapters
     - lang: pt
       value: "Cap\xEDtulos"
+  - key: model_3d_hint
+    where: The hint under a Model 3D turntable.
+    text:
+    - lang: en
+      value: Drag to rotate, pinch to zoom
+    - lang: pt
+      value: "Arraste para rodar, afaste os dedos para ampliar"
+  - key: model_3d_loading
+    where: The words a Model 3D turntable shows while its model is still loading.
+    text:
+    - lang: en
+      value: Loading...
+    - lang: pt
+      value: "A carregar..."

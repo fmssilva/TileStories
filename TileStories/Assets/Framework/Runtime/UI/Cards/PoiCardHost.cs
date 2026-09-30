@@ -54,6 +54,13 @@ namespace TileStories
         private CardVideoPlayer _videoPlayer;
         private CardSoundCoordinator _sound;
 
+        // The card's 3D/360 previews (_3.1 step 10A.2b.2): ONE slot manager (CardPreviewService) over the ONE
+        // CardPreviewStage rig, unlike Audio/Video's single current: several model_3d/panorama_360 blocks can each
+        // hold their own live slot at once. Blocks reach it through BlockBindContext.Preview.
+        public CardPreviewService PreviewService { get; private set; }
+        public ICardPreview Preview => PreviewService;
+        private CardPreviewStage _previewStage;
+
         private readonly TapOutsideDismissal _tapOutside = new();
 
         // What the visitor did on this wall's cards (answers, votes, revealed blocks): PlayerPrefs, scoped by the wall's id. A
@@ -119,6 +126,7 @@ namespace TileStories
             // - switched off: no card and no mini-player would be left to pause it
             AudioCoordinator?.Shutdown();
             VideoService?.CardClosed();
+            PreviewService?.ReleaseAll();
         }
 
         private void BuildOnce()
@@ -137,6 +145,16 @@ namespace TileStories
                 () => wallSession != null ? wallSession.CardSettings?.container.audio_when_another_starts : null));
             _videoPlayer = GetComponent<CardVideoPlayer>() != null ? GetComponent<CardVideoPlayer>() : gameObject.AddComponent<CardVideoPlayer>();
             UseVideoService(new CardVideoService(_videoPlayer.CreateOutput(), () => Media));
+            _previewStage = GetComponent<CardPreviewStage>() != null ? GetComponent<CardPreviewStage>() : gameObject.AddComponent<CardPreviewStage>();
+            UsePreviewService(new CardPreviewService(_previewStage, () => Media));
+        }
+
+        // Make `service` the card's preview owner (the app's own is built in BuildOnce over the real CardPreviewStage; a test
+        // hands one over a ManualPreviewStage so nothing touches the scene): the old owner gives back every slot it still held
+        internal void UsePreviewService(CardPreviewService service)
+        {
+            PreviewService?.ReleaseAll();
+            PreviewService = service;
         }
 
         // Make `service` the card's video owner (the app's own is built in BuildOnce; a test hands one over a ManualVideoOutput so video time is
@@ -235,6 +253,7 @@ namespace TileStories
                 Services = Services,
                 Audio = Audio,
                 Video = Video,
+                Preview = Preview,
                 ReduceMotion = settings.container.reduce_motion,
             };
             Sheet.Show(stack.Entries, context, SheetStopRule.OpenStop(settings.container.open_stop), settings.container.half_max_ratio);
@@ -258,6 +277,7 @@ namespace TileStories
             ShownPoiId = null;
             AudioCoordinator?.CardClosed();
             VideoService?.CardClosed();
+            PreviewService?.ReleaseAll();
         }
 
         // The wall's POI set or the card's own settings changed (a live edit, a demo switched on): the open card shows the new data, and the

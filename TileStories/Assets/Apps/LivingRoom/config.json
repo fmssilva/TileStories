@@ -6127,6 +6127,40 @@
                                 ]
                             }
                         ]
+                    },
+                    {
+                        "key": "block_58",
+                        "kind": "model_3d",
+                        "variant": "turntable",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "model",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:azulejo_arch",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_59",
+                        "kind": "model_3d",
+                        "variant": "turntable",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "model",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "models/146267-LivingRoom2-tex.glb",
+                                "items": []
+                            }
+                        ]
                     }
                 ]
             }

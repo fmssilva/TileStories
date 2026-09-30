@@ -60,6 +60,12 @@ namespace TileStories
         public bool AutoAdvanceVideo { get; set; } = true;
         private CardSoundCoordinator _sound;
 
+        // The gallery card's 3D/360 previews (_3.1 step 10A.2b.2): the SAME CardPreviewStage/CardPreviewService as the wall's
+        // card (a `default:` model resolves through the real Framework library regardless of media source, so the gallery
+        // proves the same seam production uses -- no fake stage here, unlike Audio/Video's ManualOutput)
+        public CardPreviewStage PreviewStage { get; private set; }
+        public CardPreviewService PreviewService { get; private set; }
+
         // `seconds` of audio time pass: the output's clip moves on, the fade's clock too, and the service takes its step
         public void AdvanceAudio(float seconds)
         {
@@ -104,11 +110,14 @@ namespace TileStories
             AudioCoordinator.Mini.OpenRequested += _ => Show(Index);
             VideoService = new CardVideoService(VideoOutput, () => Media);
             _sound = new CardSoundCoordinator(AudioService, VideoService);
+            PreviewStage = GetComponent<CardPreviewStage>() != null ? GetComponent<CardPreviewStage>() : gameObject.AddComponent<CardPreviewStage>();
+            PreviewService = new CardPreviewService(PreviewStage, () => Media);
             Sheet.CloseRequested += () =>
             {
                 Sheet.Hide();
                 AudioCoordinator.CardClosed();
                 VideoService.CardClosed();
+                PreviewService.ReleaseAll();
             };
             Show(0);
         }
@@ -118,6 +127,7 @@ namespace TileStories
             _sound?.Dispose();
             VideoService?.CardClosed();
             VideoOutput.Release();
+            PreviewService?.ReleaseAll();
         }
 
         // Show entry `index` at its own stop
@@ -156,6 +166,7 @@ namespace TileStories
                 Services = Services,
                 Audio = AudioService,
                 Video = VideoService,
+                Preview = PreviewService,
                 ReduceMotion = settings.container.reduce_motion,
             };
             Sheet.Hide();

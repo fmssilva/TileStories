@@ -124,5 +124,35 @@ namespace TileStories
             return block;
         }
 
+
+        // ---------------- model_3d, turntable (_3.1 step 10A.2b.3) ----------------
+
+        private static void AddModel3D(List<Entry> list)
+        {
+            foreach (var variant in BuiltInBlocks.Model3D.Variants)
+            {
+                // - the Framework's own default model (_3.1 step 13): a "default:<key>" model resolves and renders
+                //   exactly like an authored .glb, real drag and pinch move the turntable
+                var withDefault = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Model3DKind, variant = variant };
+                withDefault.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DModelField, asset = MediaPathRule.PathForDefaultKey("azulejo_arch") });
+                list.Add(new Entry(BuiltInBlocks.Model3DKind, variant, "default", withDefault));
+
+                var autoSpin = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Model3DKind, variant = variant };
+                autoSpin.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DModelField, asset = MediaPathRule.PathForDefaultKey("azulejo_arch") });
+                autoSpin.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DAutoSpinField, flag = true });
+                list.Add(new Entry(BuiltInBlocks.Model3DKind, variant, "autospin", autoSpin));
+
+                // - a model file that is not there: the authored Fallback Picture shows instead
+                var missingWithFallback = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Model3DKind, variant = variant };
+                missingWithFallback.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DModelField, asset = "ghost.glb" });
+                missingWithFallback.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DFallbackField, asset = "wide.png" });
+                list.Add(new Entry(BuiltInBlocks.Model3DKind, variant, "missing-with-fallback", missingWithFallback));
+
+                // - a model file that is not there, and no Fallback Picture authored: CardImage's own "unavailable" words
+                var missingNoFallback = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Model3DKind, variant = variant };
+                missingNoFallback.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DModelField, asset = "ghost.glb" });
+                list.Add(new Entry(BuiltInBlocks.Model3DKind, variant, "missing-no-fallback", missingNoFallback));
+            }
+        }
     }
 }

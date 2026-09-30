@@ -129,6 +129,10 @@ namespace TileStories
             public const string VideoFullScreen = "video_full_screen";
             public const string VideoUnavailable = "video_unavailable";
             public const string VideoChapters = "video_chapters";
+            // model_3d (step 10A.2b.3): the hint under a turntable, and its words while the model is still loading
+            // (a failed/missing model shows CardImage's own MediaUnavailable, on the fallback picture)
+            public const string Model3DHint = "model_3d_hint";
+            public const string Model3DLoading = "model_3d_loading";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -143,7 +147,7 @@ namespace TileStories
                 PollYourChoice, PollThanks, PollPercent, CollectHeading, CollectAdd, CollectCollected, CollectProgress,
                 DialogueContinue, DialogueAgain, DialogueYou, ShowOnWallButton, ShowOnWallNearby,
                 AudioPlay, AudioPause, AudioSpeed, AudioCaptions, AudioSeek, AudioQueued, AudioUnavailable, MiniPlayerOpen,
-                MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters,
+                MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters, Model3DHint, Model3DLoading,
             };
         }
 

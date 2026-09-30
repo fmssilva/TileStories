@@ -739,6 +739,53 @@
     flex-grow: 1;
 }
 
+/* ---- model_3d, turntable (step 10A.2b.3): the stage's RenderTexture over the frame; the fallback picture (or its own
+   "unavailable" words) underneath while the model loads or if it never does, with a small loading note on top ---- */
+
+.card-model3d__frame {
+    height: var(--ts-media-height);
+    overflow: hidden;
+    border-radius: var(--ts-radius-m);
+    background-color: var(--ts-surface-2);
+    align-items: center;
+    justify-content: center;
+}
+
+.card-model3d__surface {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.card-model3d__fallback {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+}
+
+.card-model3d__loading {
+    position: absolute;
+    bottom: var(--ts-space-2);
+    right: var(--ts-space-2);
+    padding: var(--ts-space-1) var(--ts-space-2);
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-surface);
+    color: var(--ts-ink-2);
+    font-size: var(--ts-size-caption);
+}
+
+.card-model3d__hint {
+    margin-top: var(--ts-space-1);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+}
+
 /* ---- the header's video_loop: the loop's frames over the poster (cropped to fill the hero like a picture) ---- */
 
 .card-hero__loop {

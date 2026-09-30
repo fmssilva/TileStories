@@ -510,6 +510,10 @@ and checked BY THE AGENT before it is reported done: take the capture (Unity MCP
 numbered checklist of falsifiable claims (Tier 1 above), answer each item from what the capture actually
 shows, fix what it shows wrong and capture again. "Tested with real clicks but not looked at, please check"
 is not an acceptable finish while a capture is possible. The developer's own look is the fallback below.
+The checklist always includes the DESIGN questions, not only "is it there": does the subject use its space (a model, picture
+or chart fills most of its frame, not a speck in the middle), is the hierarchy readable at 390 px, does it look like a finished
+product a visitor would trust. "Renders and rotates" is a test result; "fills the frame and reads well" is the visual check
+(10A.2b: both previews were drawn at about a fifth of their stage and passed a "correct" visual check).
 
 **Visual evidence needs the Editor on screen.** A screen capture reads whatever is on the desktop; if another application covers Unity it captures that application instead (private content). Always open a capture and confirm it shows the Editor window, and delete any that does not. When Unity is covered: do not stop the whole task. Finish everything that needs no pixels, then, before the final report, ask the developer ONCE to leave Unity in front and retry (ask early when the whole task is visual). If it still cannot be captured, do not claim visual verification: record the unverified items in the domain's pending-verification list (for the POI Editor window: `proj_guides/_5.1_Editor_Tab.md`, "Verifying and debugging layout") and say so in the report.
 

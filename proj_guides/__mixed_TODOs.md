@@ -144,3 +144,11 @@ check thee FOV splike thing???
   Code extension uses the lowercase one, whose project-scoped `UnityMCP` URL is written `http:\127.0.0.1:8080\mcp` (works: URL
   parsers read `\` as `/`). The user-scoped entry (`http://127.0.0.1:8080/mcp`) points at the same server. Cosmetic; tidy it with
   VS Code closed if it ever matters.
+
+## Repo (2026-09-30)
+
+- **Git LFS is not in effect.** The `[attr]lfs` macro is defined in `TileStories/.gitattributes`, but git allows macro
+  definitions only in the TOP-level `.gitattributes`, so `*.png lfs`, `*.mp4 lfs` etc. set nothing (git warns "not allowed" on
+  every command). Every binary is committed as a normal blob (checked: the 17 MB castle video and the PNGs are raw in HEAD). To
+  use LFS: move the macro lines to a root `.gitattributes` (or write `filter=lfs diff=lfs merge=lfs -text` directly), install
+  git-lfs, and run `git lfs migrate` if the history should shrink. Developer's decision (needs a remote that supports LFS).

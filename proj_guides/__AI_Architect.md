@@ -46,14 +46,14 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
 
 - Untracked / generated files: evidence, garbage, or content? You can delete things you are certain are "temp files or garbage"; if in doubt don't delete and ask user to decide.
 - Is the block a coherent checkpoint? Commit it YOURSELF (one-line message, no trailer) only when you are certain: the Worker's
-  last FULL runs (EditMode + PlayMode) are green, the diff is only this block + docs, and nothing unexpected is staged. Stage by
-  name, `git add TileStories .clinerules proj_guides`, never `git add .` (the repo also holds `IPCE/`, `report/`,
-  `flutter_prototypes/` and the local `.claude/` settings), and never the Oswald font (`git checkout --` it first). Any doubt (a red
-  or unexplained test, stray files, the developer's own half-edited files) -> do NOT commit; give the exact commands, the message
-  and the reason, and let the developer decide.
-- **Where the commit runs:** from the Cowork VM the commit is NOT safe (git 2.34 without git-lfs and without the developer's
-  identity, writing the index the Windows git owns). There, always hand the exact commands to the developer. Commit yourself
-  only from a session that runs on the developer's own machine (the Windows git with LFS).
+  last FULL runs (EditMode + PlayMode) are green, no Worker session is running right now (two gits writing one index), and
+  nothing unexpected is in the tree. The developer tracks the WHOLE workspace (IPCE/, report/, flutter_prototypes/ included), so
+  stage everything, `git add -A`, except the Oswald font (`git checkout --` it first). Any doubt (a red or unexplained test, a
+  running Worker, stray files) -> do NOT commit; give the exact commands, the message and the reason.
+- **How to commit from the Cowork VM:** the shell here is a Linux VM with the workspace mounted (not the developer's Windows
+  terminal), so pass the Windows settings explicitly:
+  `git -c core.autocrlf=true -c user.name="Francisco Miguel Sousa da Silva" -c user.email="fmso.silva@campus.fct.unl.pt" commit -m "..."`
+  (stage with `git -c core.autocrlf=true add -A`), then check `git log -1` and that no `.git/*.lock` is left.
 - **Test plan (you decide it):** every brief carries a `TEST PLAN:` line: whether the opening full baseline is needed (only if
   the tree moved since the last green commit), that ONE full EditMode + PlayMode run closes the block, any shared-ground change
   that needs an extra full run, and -- every third block -- one full PlayMode run with Unity in the background

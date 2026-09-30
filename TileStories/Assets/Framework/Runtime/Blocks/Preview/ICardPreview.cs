@@ -32,5 +32,9 @@ namespace TileStories
         bool IsLoading { get; }
         bool Failed { get; }
         UnityEngine.RenderTexture Texture { get; }
+
+        // Render one frame now (a no-op while loading/failed, or once released): the view calls this after a real
+        // gesture moved `turntable`/`panorama` (whichever this slot's kind uses), never every frame on its own
+        void RenderNow(TurntableState turntable, PanoramaViewState panorama);
     }
 }

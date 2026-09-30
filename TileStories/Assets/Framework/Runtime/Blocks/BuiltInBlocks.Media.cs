@@ -51,6 +51,12 @@ namespace TileStories
         public const string VideoChapterTimeField = "t";
         public const string VideoChapterLabelField = "label";
 
+        public const string Model3DKind = "model_3d";
+        public const string Model3DTurntable = "turntable";
+        public const string Model3DModelField = "model";
+        public const string Model3DFallbackField = "fallback";
+        public const string Model3DAutoSpinField = "auto_spin";
+
         private const string PictureHelp = "A PNG or JPG inside the wall's Media Folder (Detail Card > Card Container).";
 
         // Tier 2: several pictures; a tap on one opens it full screen (the lightbox)
@@ -228,6 +234,40 @@ namespace TileStories
                             Help = "The chapter's short name on its button, one per language.",
                         },
                     },
+                },
+            },
+        };
+
+        // Tier 5: a 3D model the visitor turns (_3.1 step 10A.2b.3). Turntable: the model on the card, a drag rotates it,
+        // a pinch zooms (within limits), and it auto-spins on its own after a pause -- a touch stops the spin and it
+        // resumes after the same pause. A fallback picture shows while the model loads and if it fails to load.
+        public static readonly BlockKindDefinition Model3D = new()
+        {
+            Key = Model3DKind,
+            Family = "media",
+            DisplayName = "Model 3D",
+            Help = "A 3D model the visitor turns to look at from every side: a drag rotates it, two fingers pinch to zoom " +
+                   "(within limits), and it slowly spins on its own until touched (Auto Spin). The Fallback Picture shows " +
+                   "while the model loads and if it cannot be loaded.",
+            Variants = new[] { Model3DTurntable },
+            DefaultVariant = Model3DTurntable,
+            DisplayModes = new[] { CardOptions.DisplayInline },
+            Fields = new[]
+            {
+                new BlockFieldDefinition
+                {
+                    Key = Model3DModelField, Type = BlockFieldType.Asset, Media = MediaKind.Model, Label = "Model", Required = true,
+                    Help = "A .glb or .gltf file inside the wall's Media Folder (Detail Card > Card Container), or a Framework/wall default.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = Model3DFallbackField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Fallback Picture",
+                    Help = "Shown while the model loads and if it cannot be loaded. " + PictureHelp,
+                },
+                new BlockFieldDefinition
+                {
+                    Key = Model3DAutoSpinField, Type = BlockFieldType.Toggle, Label = "Auto Spin",
+                    Help = "The model slowly turns on its own until the visitor touches it, then resumes a couple of seconds after they let go.",
                 },
             },
         };
