@@ -34,6 +34,7 @@ namespace TileStories
             registry.Register(HotspotImage, () => new HotspotImageBlockView());
             registry.Register(Video, () => new VideoBlockView());
             registry.Register(Model3D, () => new ModelTurntableBlockView());
+            registry.Register(Panorama360, () => new PanoramaBlockView());
             registry.Register(WallLocator, () => new WallLocatorBlockView());
             registry.Register(TodayMap, () => new TodayMapBlockView());
             registry.Register(Related, () => new RelatedBlockView());

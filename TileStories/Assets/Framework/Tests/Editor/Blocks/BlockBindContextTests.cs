@@ -14,6 +14,7 @@ namespace TileStories.Editor.Tests
         // A block never calls these; they only need to exist as distinct, checkable references.
         private sealed class StubHost : IBlockHost
         {
+            public SheetStopRule.Stop Stop => SheetStopRule.Stop.Half;
             public void ShowOnWall() { }
             public void SelectPoi(string poiId) { }
             public bool TryGetViewer(out UnityEngine.Vector3 wallPosition) { wallPosition = default; return false; }

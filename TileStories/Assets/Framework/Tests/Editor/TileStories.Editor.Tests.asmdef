@@ -7,7 +7,8 @@
         "TileStories.Editor",
         "TileStories.Tests.Runtime",
         "TileStories",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

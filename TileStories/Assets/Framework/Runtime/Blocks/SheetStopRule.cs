@@ -54,6 +54,11 @@ namespace TileStories
         // full does -- half is capped at 40% of the height. What sits there steps aside (SearchPanelsRule's topCovered).
         public static bool CoversScreenTop(Stop stop) => stop == Stop.Full;
 
+        // Whether the sheet resting at `stop` shows anything below the header's top part: half and full do, peek (the compact
+        // header only) and dismissed do not. A block's stage sits under the sheet there, still "inside" the scroll viewport's own
+        // rectangle, so a live preview asks the stop (IBlockHost.Stop), not just the viewport (_3.1 10A.3-fix.1).
+        public static bool RevealsBlocks(Stop stop) => stop == Stop.Half || stop == Stop.Full;
+
         // Where the card opens for a new selection: "half" opens at half, anything else at peek (never full)
         public static Stop OpenStop(string openStop) => openStop == CardOptions.StopHalf ? Stop.Half : Stop.Peek;
 

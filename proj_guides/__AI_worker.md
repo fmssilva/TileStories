@@ -82,7 +82,6 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
    doc, _5.1 and 10-structure.md. End with a plain summary of what the domain does and how to test each option.
 
 
-confirma o estado deste ultimo conjunto de tarefas
 
 # `claude agent`
 - **GATE TASK:** start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
@@ -98,51 +97,48 @@ confirma o estado deste ultimo conjunto de tarefas
 So start by reading them all. 
 
 
-## `And now: POI Detail Card -- 10A.2c (model framing + review fixes), 10A.3 (model takeover + header model_turntable)`
+## `And now: POI Detail Card -- 10A.3-fix (auto-spin at peek, sphere framing, header row capture), 10A.4 (panorama_360)`
 
-GATE: take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree
-compiles; if not, STOP and report. If `Markers/Fonts/Oswald Bold SDF.asset` shows as modified, `git checkout --` it.
+GATE (mandatory, report each item): take one Unity capture (Game view AND the POI Editor window) and open it; if none works,
+STOP and say so. `git checkout --` `Markers/Fonts/Oswald Bold SDF.asset` if modified. Confirm the tree compiles; if not, STOP.
 
-Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- "## TODOs" ([10A.2c],
-[10A-fix] x2, [Tier 5] expandable, [FUTURE] landscape video) and the status table (10A.2 done; 10A.3 next; 10A.4, 10B planned),
+Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- "## TODOs"
+([10A.3-fix] x3, [10A.3-followup], [FUTURE] landscape video) and the status table (10A.3 done; 10A.4 next; 10B planned),
 and "Tier 5 -- 3D, 360 and AR actions".
-REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, and 4.5 incl. the NEW design-questions
-paragraph; `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (the header row gains a look).
-Context only: CardPreviewStage, ModelTurntableBlockView, TakeoverView + VideoPanel (how video's takeover reuses the same owner),
-HeaderBlockView (how video_loop was added as a header look).
-TEST PLAN: no opening full baseline (the tree is green commit 482284a). Targeted fixtures per sub-step. ONE full EditMode +
-PlayMode at the end, and that closing PlayMode run is done with Unity in the BACKGROUND (3 blocks since the last one; ask me once
-to switch app).
+REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, 4.5 (incl. the design questions);
+`_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines"; `__AI_worker.md` 2.4b (keep going, GATE, English).
+Context only: CardPreviewStage + ModelTurntableBlockView + the model takeover (the patterns to reuse), EquirectRule,
+PanoramaViewRule, the 10A.1 panorama generator (`default:tiled_room_360`).
+TEST PLAN: the opening FULL PlayMode baseline IS needed (the tree moved and the last full run was not green end to end); fix
+anything red before new work. Targeted fixtures per sub-step. ONE full EditMode + PlayMode at the end (Unity may be in front).
 
-10A.2c.1 -- Framing (MUST): the model's combined renderer bounds fill ~80 % of the stage's shorter side at zoom 1; the
-  RenderTexture takes the stage's aspect (re-created when the stage resizes); the pivot is the bounds' centre so it turns in
-  place; zoom limits stay TurntableRule's. Pixel test for BOTH Lamp models: non-background pixels span >= 70 % of the stage's
-  shorter side at zoom 1. Recapture both and answer the design questions of 4.5.
-10A.2c.2 -- Auto-spin only while visible: tick only while the stage is inside the scroll viewport and the card is above peek;
-  test: scrolled out -> no renders; back in view -> spins.
-10A.2c.3 -- BlockBindContext copy: one method that copies every field for a block (used by BlockStackView), and a reflection
-  test that every public field of the outer context reaches the block's context.
-10A.2c.4 -- FixedFrameForTheRun pins EVERY open Game view (or fails SetUp with a clear message when it cannot); test with two
-  Game views open.
-  -> learning summary + commit message after each, and go straight on (same reply as the next tool call).
-10A.3.1 -- model_3d `takeover`: a teaser in the card (fallback picture or a first render, the model's name, an open-full-screen
-  button) that opens the model full screen in TakeoverView through the SAME preview owner (a second slot is fine; the card's slot
-  may pause); drag / pinch / auto-spin work there; Back returns with the card's stop and scroll kept and the full-screen slot
-  released. Phase A + Phase B (real tap opens it, real drag rotates it, Back restores, nothing leaks).
-10A.3.2 -- header `model_turntable`: the header's picture area shows the model (auto-spin on, drag allowed; the fallback picture
-  while loading); the peek stop shows only the title as today. Card Content header row gains Model / Fallback (Asset, model kind,
-  default picker). Phase A (header entries at peek / half / full) + Phase B (Lamp - Religious gets a model header on
-  `default:azulejo_arch`; identity fields untouched, round trip checked).
-10A.3.3 -- Close: full EditMode + PlayMode (PlayMode in the background); captures checked with the 4.5 design questions (card
-  turntable framed, takeover, header model at half and full, the header row at 620 pt); update _3.1 (10A.2c / 10A.3 rows with
-  proof, TODOs, design history), 10-structure.md, _5.1.
+10A.3-fix.1 -- Auto-spin ticks only while the card is open above peek AND the stage is inside the scroll viewport. Phase B on the
+  real Lamp: at peek no renders happen; at half with the block in view it spins.
+10A.3-fix.2 -- Fit to the renderers' bounding sphere (turning never changes it), ~80 % of the stage's shorter side. Pixel test:
+  after a 90 degree drag the model's pixels stay inside the stage with a margin, for the arch and the room scan. Recapture the
+  header at Full after a drag. Delete [10A.3-followup].
+10A.3-fix.3 -- Capture the Header row with the model look at 620 pt and the Model 3D rows; clear the _5.1 pending entry.
+  -> learning summary + short commit message after each, and go straight on.
+10A.4.1 -- The stage gains the panorama: an inside-out sphere built from EquirectRule (so "ahead" matches the generated
+  picture), the equirect texture on an unlit material, the camera at the centre; PanoramaViewRule drives yaw / pitch / FOV.
+  Same owner, same slots, same release guarantees (test: nothing left after release).
+10A.4.2 -- panorama_360 `drag`: drag looks around, pinch changes the FOV within PanoramaViewRule's limits, inline + full screen
+  through the takeover (same pattern as the model). `gyro`: device attitude through the Input System (AttitudeSensor), drag as
+  the fallback where no sensor exists (the Editor); a small "move your phone" hint. Card Content row: Panorama (Asset, panorama
+  kind, default picker), Start Heading, Look (drag / gyro). CardStrings en + pt for any visitor words.
+10A.4.3 -- Tests: pure (anything new in the rules); Phase A (both looks x default panorama / missing file -> fallback; real
+  drag and pinch change the render); Phase B on the real Lamp (panorama_360 on `default:tiled_room_360`, a real drag turns the
+  view, the takeover opens and Back restores, nothing leaks). Gyro: an Editor test that feeds a simulated AttitudeSensor
+  (Input System test device) and checks the view follows. Identity fields untouched, round trip checked.
+10A.4.4 -- Close: full EditMode + PlayMode green END TO END (re-run the FULL suite after any fix, not a subset); captures
+  checked with the 4.5 design questions (inline drag, zoomed, full screen, gyro hint, the Card Content row at 620 pt); update
+  _3.1, 10-structure.md, _5.1.
 
-Keep going between sub-steps (__AI_worker.md 2.4b). Rules as before: no literal colours/sizes, no visitor strings in code,
-real input in tests, detail logs only through DevLog, identity fields untouched, Portuguese spelled properly.
-OUT OF SCOPE: panorama_360 (10A.4), place_in_ar (10B), runtime glTF download, _3.2, _3.3.
-Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP and report.
-Finish with: suites + counts (say which run was in the background), what you looked at, what you could not verify, a one-line
-commit message (no trailer). Commit only if the developer asks.
+Rules as before: no literal colours/sizes, no visitor strings in code, real input in tests, detail logs only through DevLog,
+identity fields untouched, Portuguese spelled properly. OUT OF SCOPE: place_in_ar (10B), runtime glTF download, landscape
+full-screen, _3.2, _3.3. Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP.
+Finish in English with: GATE items, suites + counts, what you looked at, what you could not verify, one short natural commit
+message. Commit only if the developer asks.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

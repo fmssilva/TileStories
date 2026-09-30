@@ -72,6 +72,10 @@ namespace TileStories
     // the visitor stands (Tier 2 group B: wall_locator, related). Tier 4 adds audio with its first block.
     public interface IBlockHost
     {
+        // Where the card rests now (peek / half / full): a live preview that animates on its own pauses while
+        // SheetStopRule.RevealsBlocks is false, since its stage is hidden under the sheet
+        SheetStopRule.Stop Stop { get; }
+
         void ShowOnWall();
 
         // Select another POI of this wall, as a tap on its marker does (SelectionEventBus: the card rebinds to it, the

@@ -59,6 +59,7 @@ namespace TileStories.Tests
             yield return null;
             Assert.AreNotEqual(before, roomScan.State.Yaw, "a real one-finger drag rotated the inline room scan");
             yield return CardTestInput.Settle(0.1f);
+            PreviewPixels.AssertDrawnInsideWithMargin(roomScan.Texture, "the inline room scan after a real drag");
             yield return Capture("Model3D_RoomScan_Dragged");
 
             SelectionEventBus.Clear();
@@ -136,7 +137,85 @@ namespace TileStories.Tests
             Sheet.SetStop(SheetStopRule.Stop.Full);
             yield return CardTestInput.Settle(0.4f);
             Assert.IsTrue(model.ShowsModel);
+            // - 10A.3-fix.2: dragged to another angle, the header's arch used to touch the frame's bottom edge at Full
+            PreviewPixels.AssertDrawnInsideWithMargin(model.Texture, "the header's model after a real drag, at full");
             yield return Capture("Religious_Header_Model_Full");
+
+            SelectionEventBus.Clear();
+            yield return CardTestInput.Settle();
+        }
+
+        // 10A.3-fix.1, Phase B: the header's auto-spin clock (TurntableState.IdleSeconds grows only while a tick really runs)
+        // stands still while the card rests at peek -- the header's hero sits under the sheet there, hidden -- and runs
+        // at half. The same model, the same frames: the half stop is the positive control that the clock CAN run.
+        [UnityTest]
+        public IEnumerator LampReligious_HeaderModelAutoSpin_TicksOnlyWhileTheCardIsAbovePeek()
+        {
+            SelectionEventBus.Select("lamp_religious");
+            yield return CardTestInput.Settle();
+            var model = ((HeaderBlockView)Sheet.Stack.BoundViews[0]).ModelView;
+            Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop, "precondition: the card opened at peek");
+            for (int i = 0; i < 120 && !model.ShowsModel; i++) yield return null;
+            Assert.IsTrue(model.ShowsModel, "precondition: the real stage rendered the header's model (nothing else can stop the clock)");
+
+            float atPeek = model.State.IdleSeconds;
+            yield return CardTestInput.Settle(0.5f);
+            Assert.AreEqual(atPeek, model.State.IdleSeconds, 0f, "at peek the hidden header model asked for nothing: its idle clock did not move");
+
+            Sheet.SetStop(SheetStopRule.Stop.Half);
+            for (int i = 0; i < 120 && model.State.IdleSeconds <= atPeek; i++) yield return null;
+            float atHalf = model.State.IdleSeconds;
+            Assert.Greater(atHalf, atPeek, "at half the same model ticks: its idle clock moved (" + atPeek + " -> " + atHalf + ")");
+
+            Sheet.SetStop(SheetStopRule.Stop.Peek);
+            yield return CardTestInput.Settle(0.1f);
+            float backAtPeek = model.State.IdleSeconds;
+            yield return CardTestInput.Settle(0.5f);
+            Assert.AreEqual(backAtPeek, model.State.IdleSeconds, 0f, "lowered back to peek it stops again");
+
+            SelectionEventBus.Clear();
+            yield return CardTestInput.Settle();
+        }
+
+        // The same law for a model block IN the stack (the Lamp's inline room scan, Auto Spin on): it ticks at half with the block
+        // in view, stops when the card is lowered to peek (the block is then only a stage under the sheet), and stops when it is
+        // scrolled out of the viewport at half.
+        [UnityTest]
+        public IEnumerator TheLamp_InlineRoomScanAutoSpin_TicksOnlyWhileInViewAndAbovePeek()
+        {
+            SelectionEventBus.Select("lamp");
+            yield return CardTestInput.Settle();
+            Sheet.SetStop(SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle();
+            var roomScan = Models[1];
+            Assert.AreEqual(CardOptions.DisplayInline, roomScan.Display, "precondition: block_59 is the inline room scan");
+            Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(roomScan));
+            yield return CardTestInput.Settle(0.2f);
+            for (int i = 0; i < 120 && !roomScan.ShowsModel; i++) yield return null;
+            Assert.IsTrue(roomScan.ShowsModel, "precondition: the real stage rendered the room scan");
+            var viewport = Sheet.Stack.Scroll.contentViewport.worldBound;
+            Assert.IsTrue(roomScan.Frame.worldBound.Overlaps(viewport), "precondition: the block is in view at half: " + roomScan.Frame.worldBound + " in " + viewport);
+
+            float start = roomScan.State.IdleSeconds;
+            for (int i = 0; i < 120 && roomScan.State.IdleSeconds <= start; i++) yield return null;
+            Assert.Greater(roomScan.State.IdleSeconds, start, "in view at half the room scan ticks (Auto Spin)");
+
+            Sheet.SetStop(SheetStopRule.Stop.Peek);
+            yield return CardTestInput.Settle(0.3f);
+            float atPeek = roomScan.State.IdleSeconds;
+            yield return CardTestInput.Settle(0.5f);
+            Assert.AreEqual(atPeek, roomScan.State.IdleSeconds, 0f,
+                "at peek the block asks for nothing (its stage " + roomScan.Frame.worldBound + ", the card " + Sheet.Root.worldBound + ")");
+
+            Sheet.SetStop(SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle(0.3f);
+            Sheet.Stack.Scroll.scrollOffset = Vector2.zero;
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsFalse(roomScan.Frame.worldBound.Overlaps(Sheet.Stack.Scroll.contentViewport.worldBound),
+                "precondition: scrolled to the top, the room scan is out of the viewport");
+            float scrolledAway = roomScan.State.IdleSeconds;
+            yield return CardTestInput.Settle(0.5f);
+            Assert.AreEqual(scrolledAway, roomScan.State.IdleSeconds, 0f, "scrolled out of view it asks for nothing");
 
             SelectionEventBus.Clear();
             yield return CardTestInput.Settle();

@@ -32,7 +32,13 @@ namespace TileStories
             // - a "default:<key>" entry (_3.1 step 13) resolves through the REAL Framework default library, same
             //   as production: never held/counted here either, so the gallery's own refcount tests are untouched
             if (MediaPathRule.IsDefaultKey(path))
-                return CardMediaLibraryLookup.Resolve(MediaPathRule.DefaultKeyOf(path), MediaPathRule.KindOfAssetType(typeof(T)), null, CardMediaLibraryLookup.Framework) as T;
+            {
+                // - a texture may be a picture or a panorama entry (10A.4): the first kind that holds the key wins, as in ResourcesMediaSource
+                T found = null;
+                foreach (var kind in MediaPathRule.KindsOfAssetType(typeof(T)))
+                    if ((found = CardMediaLibraryLookup.Resolve(MediaPathRule.DefaultKeyOf(path), kind, null, CardMediaLibraryLookup.Framework) as T) != null) break;
+                return found;
+            }
 
             string key = path?.Trim() ?? "";
             if (_held.TryGetValue(key, out var held) && held.Asset is T cached)

@@ -60,61 +60,46 @@ namespace TileStories.Tests
             handle.Release();
         }
 
-        // _3.1 10A.2c.1 review fix: both Lamp models used to draw at about a fifth of the stage's width (a square
-        // RenderTexture shown letterboxed inside a non-square stage, fitted with an over-generous margin). Resize
-        // to a deliberately non-square size (the real .card-model3d__frame is not square either) and check the
-        // model's own non-background pixels really do span most of whichever axis is the stage's shorter one.
+        // _3.1 10A.3-fix.2: the camera fits the model's bounding SPHERE (ModelFitRule), so no turn of the model can push a pixel
+        // of it out of the picture. Drawn on a deliberately non-square stage (the real one is not square either), each model is
+        // turned to several angles -- including the 90 degree turn that used to put the arch's base on the frame's edge -- and
+        // its own drawn pixels must stay inside the stage with a margin (PreviewPixels.AssertDrawnInsideWithMargin).
+        private static readonly (float Yaw, float Pitch)[] Turns = { (0f, 0f), (90f, 0f), (180f, 0f), (45f, 30f), (270f, -30f), (90f, 75f) };
+        // At zoom 1 the model must still be a subject, not a speck: its widest turned pixels span at least 55 % of the sphere's
+        // own diameter (the arch and the room scan measured 64 % and 63 % of the shorter side against the sphere's 80 %)
+        private const float MinShareOfTheSphere = 0.55f;
+
         [UnityTest]
-        public IEnumerator Load_TheFrameworkDefaultModel_FillsAtLeast70PercentOfTheStagesShorterSide_AtZoom1()
+        public IEnumerator Load_TheFrameworkDefaultModel_StaysInsideTheStageAtEveryTurn_AndFillsItAtZoom1()
         {
-            yield return AssertFillsShorterSide(_media, "default:azulejo_arch");
+            yield return AssertStaysInsideAtEveryTurn(_media, "default:azulejo_arch");
         }
 
         [UnityTest]
-        public IEnumerator Load_TheLivingRoomRoomScanModel_FillsAtLeast70PercentOfTheStagesShorterSide_AtZoom1()
+        public IEnumerator Load_TheLivingRoomRoomScanModel_StaysInsideTheStageAtEveryTurn_AndFillsItAtZoom1()
         {
             var livingRoomMedia = new ResourcesMediaSource("LivingRoom/CardMedia");
-            yield return AssertFillsShorterSide(livingRoomMedia, "models/146267-LivingRoom2-tex.glb");
+            yield return AssertStaysInsideAtEveryTurn(livingRoomMedia, "models/146267-LivingRoom2-tex.glb");
         }
 
-        private IEnumerator AssertFillsShorterSide(IMediaSource media, string path)
+        private IEnumerator AssertStaysInsideAtEveryTurn(IMediaSource media, string path)
         {
             var handle = _stage.Load(MediaKind.Model, media, path, null, null);
             yield return null;
             handle.Resize(360, 220); // landscape, on purpose: proves the fit follows the STAGE's real aspect
-            handle.RenderNow(TurntableState.Start, default);
-            yield return null;
-
-            var prev = RenderTexture.active;
-            RenderTexture.active = handle.Texture;
-            var pixels = new Texture2D(handle.Texture.width, handle.Texture.height, TextureFormat.RGBA32, false);
-            pixels.ReadPixels(new Rect(0, 0, handle.Texture.width, handle.Texture.height), 0, 0);
-            pixels.Apply();
-            RenderTexture.active = prev;
-
-            int w = pixels.width, h = pixels.height;
-            int minX = w, maxX = -1, minY = h, maxY = -1;
-            var raw = pixels.GetPixels32();
-            for (int y = 0; y < h; y++)
+            int w = handle.Texture.width, h = handle.Texture.height;
+            Assert.AreEqual(360, w, "precondition: the texture took the stage's size");
+            int shorter = Mathf.Min(w, h);
+            float widestSpan = 0f;
+            foreach (var (yaw, pitch) in Turns)
             {
-                for (int x = 0; x < w; x++)
-                {
-                    var p = raw[y * w + x];
-                    if (p.a <= 0) continue;
-                    if (x < minX) minX = x;
-                    if (x > maxX) maxX = x;
-                    if (y < minY) minY = y;
-                    if (y > maxY) maxY = y;
-                }
+                handle.RenderNow(new TurntableState(yaw, pitch, 1f, 0f), default);
+                yield return null;
+                var drawn = PreviewPixels.AssertDrawnInsideWithMargin(handle.Texture, path + " at yaw " + yaw + " pitch " + pitch);
+                widestSpan = Mathf.Max(widestSpan, Mathf.Max(drawn.width, drawn.height) / (float)shorter);
             }
-            Object.Destroy(pixels);
-            Assert.GreaterOrEqual(maxX, minX, path + ": nothing rendered");
-
-            int shorterSide = Mathf.Min(w, h);
-            int spanOnShorterAxis = w <= h ? (maxX - minX + 1) : (maxY - minY + 1);
-            float fraction = (float)spanOnShorterAxis / shorterSide;
-            Assert.GreaterOrEqual(fraction, 0.7f,
-                $"{path}: model spans {fraction:P0} of the stage's shorter side ({shorterSide}px), expected >= 70%");
+            Assert.GreaterOrEqual(widestSpan, ModelFitRule.TargetFillOfShorterSide * MinShareOfTheSphere,
+                path + ": the model draws as a speck (" + widestSpan.ToString("P0") + " of the shorter side)");
 
             handle.Release();
         }
@@ -131,6 +116,173 @@ namespace TileStories.Tests
             Assert.AreEqual(1, failedCount);
             Assert.IsNull(handle.Texture);
             handle.Release(); // - a no-op on a failed handle, must not throw
+        }
+
+        // ---------------- panorama (10A.4.1): the stage's second subject, an inside-out sphere ----------------
+
+        private const string DefaultPanorama = "default:tiled_room_360";
+
+        private static int CountNamed<T>(string prefix) where T : Object
+        {
+            int n = 0;
+            foreach (var o in Resources.FindObjectsOfTypeAll<T>()) if (o.name.StartsWith(prefix)) n++;
+            return n;
+        }
+
+        // The middle of the stage, averaged over a small patch (one pixel of a tiled picture is noise): the panorama's colour at
+        // the point the camera looks at
+        private static Color CentrePatch(RenderTexture texture)
+        {
+            var box = new RectInt(texture.width / 2 - 4, texture.height / 2 - 4, 9, 9);
+            float r = 0f, g = 0f, b = 0f;
+            for (int y = box.yMin; y < box.yMax; y++)
+                for (int x = box.xMin; x < box.xMax; x++)
+                {
+                    Color32 c = PreviewPixels.At(texture, x, y);
+                    r += c.r; g += c.g; b += c.b;
+                }
+            float n = 255f * box.width * box.height;
+            return new Color(r / n, g / n, b / n);
+        }
+
+        [UnityTest]
+        public IEnumerator Panorama_TheShippedDefault_FillsEveryPixelOfTheStage_AndTheViewTurnsToADifferentWall()
+        {
+            bool ready = false, failed = false;
+            var handle = _stage.Load(MediaKind.Panorama, _media, DefaultPanorama, () => ready = true, () => failed = true);
+            yield return null;
+            Assert.IsTrue(ready, "the default panorama resolves through the framework library");
+            Assert.IsFalse(failed);
+            handle.Resize(360, 220);
+
+            handle.RenderNow(default, new PanoramaViewState(0f, 0f, PanoramaViewState.DefaultFov));
+            yield return null;
+            var drawn = PreviewPixels.DrawnBounds(handle.Texture);
+            Assert.AreEqual(new RectInt(0, 0, 360, 220), drawn, "from inside a sphere every pixel of the stage shows the picture (no background left)");
+            Color ahead = CentrePatch(handle.Texture);
+
+            handle.RenderNow(default, new PanoramaViewState(180f, 0f, PanoramaViewState.DefaultFov));
+            yield return null;
+            Color behind = CentrePatch(handle.Texture);
+            float difference = Mathf.Abs(ahead.r - behind.r) + Mathf.Abs(ahead.g - behind.g) + Mathf.Abs(ahead.b - behind.b);
+            // - the generated room has a doorway ahead and a window behind (CardMediaLibraryGenerator.TiledRoom): not the same colour
+            Assert.Greater(difference, 0.15f, "turned half way round the view shows another wall: ahead " + ahead + " behind " + behind);
+
+            handle.Release();
+        }
+
+        [UnityTest]
+        public IEnumerator Panorama_AheadIsThePicturesMiddle_TheViewSeesTheTextureItself()
+        {
+            var picture = _media.Load<Texture2D>(DefaultPanorama);
+            Assert.IsNotNull(picture, "precondition: the default picture loads");
+            // - a readable copy of the picture (the import keeps it GPU-only): the texel at the picture's middle, averaged over a patch
+            var copy = new RenderTexture(picture.width, picture.height, 0);
+            Graphics.Blit(picture, copy);
+            var previous = RenderTexture.active;
+            RenderTexture.active = copy;
+            var readable = new Texture2D(picture.width, picture.height, TextureFormat.RGBA32, false);
+            readable.ReadPixels(new Rect(0, 0, picture.width, picture.height), 0, 0);
+            readable.Apply();
+            RenderTexture.active = previous;
+            Object.Destroy(copy);
+            Color expected = Color.clear;
+            for (int dy = -4; dy <= 4; dy++)
+                for (int dx = -4; dx <= 4; dx++) expected += readable.GetPixel(picture.width / 2 + dx, picture.height / 2 + dy);
+            expected /= 81f;
+            Object.Destroy(readable);
+            _media.Release(DefaultPanorama);
+
+            var handle = _stage.Load(MediaKind.Panorama, _media, DefaultPanorama, null, null);
+            yield return null;
+            handle.RenderNow(default, new PanoramaViewState(0f, 0f, PanoramaViewState.DefaultFov));
+            yield return null;
+            Color seen = CentrePatch(handle.Texture);
+            // - an unlit material, the picture sampled as it is: the same colour to within filtering and the 8-bit round trip
+            Assert.AreEqual(expected.r, seen.r, 0.06f, "red: the view ahead shows the picture's middle. expected " + expected + " seen " + seen);
+            Assert.AreEqual(expected.g, seen.g, 0.06f, "green");
+            Assert.AreEqual(expected.b, seen.b, 0.06f, "blue");
+            handle.Release();
+        }
+
+        [UnityTest]
+        public IEnumerator Panorama_AWiderFieldOfView_ShowsMoreOfThePicture_ThanANarrowerOne()
+        {
+            var handle = _stage.Load(MediaKind.Panorama, _media, DefaultPanorama, null, null);
+            yield return null;
+            handle.Resize(360, 220);
+            handle.RenderNow(default, new PanoramaViewState(0f, 0f, PanoramaViewRule.MinFov));
+            yield return null;
+            Color narrow = PreviewPixels.Average(handle.Texture);
+            handle.RenderNow(default, new PanoramaViewState(0f, 0f, PanoramaViewRule.MaxFov));
+            yield return null;
+            Color wide = PreviewPixels.Average(handle.Texture);
+            float difference = Mathf.Abs(narrow.r - wide.r) + Mathf.Abs(narrow.g - wide.g) + Mathf.Abs(narrow.b - wide.b);
+            Assert.Greater(difference, 0.02f, "a different field of view changes what the whole stage shows: narrow " + narrow + " wide " + wide);
+            handle.Release();
+        }
+
+        [UnityTest]
+        public IEnumerator Panorama_AMissingFile_CallsOnFailedExactlyOnce_NeverOnReady()
+        {
+            int readyCount = 0, failedCount = 0;
+            var handle = _stage.Load(MediaKind.Panorama, _media, "panoramas/this_file_does_not_exist.jpg", () => readyCount++, () => failedCount++);
+            yield return null;
+            Assert.AreEqual(0, readyCount);
+            Assert.AreEqual(1, failedCount);
+            Assert.IsNull(handle.Texture);
+            handle.RenderNow(default, default); // a no-op on a failed handle, must not throw
+            handle.Release();
+        }
+
+        [UnityTest]
+        public IEnumerator Panorama_Release_LeavesNoSphereMeshMaterialOrTextureBehind()
+        {
+            int meshesBefore = CountNamed<Mesh>("CardPanoramaSphere_");
+            int materialsBefore = CountNamed<Material>("CardPanorama_");
+            int texturesBefore = CountNamed<RenderTexture>("CardPreview_");
+
+            var handle = _stage.Load(MediaKind.Panorama, _media, DefaultPanorama, null, null);
+            yield return null;
+            handle.Resize(300, 200); // a resized texture is released too
+            handle.RenderNow(default, PanoramaViewState.Start);
+            yield return null;
+            Assert.AreEqual(meshesBefore + 1, CountNamed<Mesh>("CardPanoramaSphere_"), "precondition: the handle's sphere mesh exists while it is held");
+            Assert.AreEqual(materialsBefore + 1, CountNamed<Material>("CardPanorama_"), "and its own material");
+            Assert.AreEqual(texturesBefore + 1, CountNamed<RenderTexture>("CardPreview_"), "and one RenderTexture");
+            int objectsHeld = GameObjectsUnderHost();
+
+            handle.Release();
+            yield return null; // Destroy() applies at the end of the frame
+
+            Assert.AreEqual(meshesBefore, CountNamed<Mesh>("CardPanoramaSphere_"), "the sphere mesh is gone");
+            Assert.AreEqual(materialsBefore, CountNamed<Material>("CardPanorama_"), "the material instance is gone");
+            Assert.AreEqual(texturesBefore, CountNamed<RenderTexture>("CardPreview_"), "the RenderTexture is gone");
+            Assert.Less(GameObjectsUnderHost(), objectsHeld, "the handle's root and sphere GameObjects are gone");
+            handle.Release(); // a second Release is harmless
+        }
+
+        [UnityTest]
+        public IEnumerator ModelAndPanoramaHandles_HeldTogether_DoNotShowUpBehindEachOther()
+        {
+            // A model's camera looking along the stage's X axis (yaw 90) used to have a neighbour handle 50 m away in its view; the
+            // far plane now ends at the model's own sphere, so the picture is the same with a panorama slot beside it or without.
+            var model = _stage.Load(MediaKind.Model, _media, "default:azulejo_arch", null, null);
+            yield return null;
+            model.Resize(300, 200);
+            var turn = new TurntableState(90f, 0f, 1f, 0f);
+            model.RenderNow(turn, default);
+            yield return null;
+            var alone = PreviewPixels.DrawnBounds(model.Texture);
+
+            var panorama = _stage.Load(MediaKind.Panorama, _media, DefaultPanorama, null, null);
+            yield return null;
+            model.RenderNow(turn, default);
+            yield return null;
+            Assert.AreEqual(alone, PreviewPixels.DrawnBounds(model.Texture), "with a panorama slot beside it the model's picture is unchanged");
+
+            panorama.Release();
+            model.Release();
         }
 
         // Counts scoped to this test's OWN host GameObject subtree, never the whole scene: a global

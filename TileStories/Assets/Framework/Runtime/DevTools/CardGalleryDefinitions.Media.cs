@@ -160,5 +160,41 @@ namespace TileStories
                 list.Add(new Entry(BuiltInBlocks.Model3DKind, variant, "takeover", takeover));
             }
         }
+
+        // ---------------- panorama_360, drag and gyro (_3.1 step 10A.4) ----------------
+
+        private static void AddPanorama360(List<Entry> list)
+        {
+            foreach (var variant in BuiltInBlocks.Panorama360.Variants)
+            {
+                // - the Framework's own default 360 picture (`default:tiled_room_360`): the viewer draws it from inside a sphere
+                var withDefault = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Panorama360Kind, variant = variant };
+                withDefault.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Panorama360PanoramaField, asset = MediaPathRule.PathForDefaultKey("tiled_room_360") });
+                list.Add(new Entry(BuiltInBlocks.Panorama360Kind, variant, "default", withDefault));
+
+                // - Start Heading turns the first view a quarter to the right
+                var startHeading = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Panorama360Kind, variant = variant };
+                startHeading.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Panorama360PanoramaField, asset = MediaPathRule.PathForDefaultKey("tiled_room_360") });
+                startHeading.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Panorama360StartHeadingField, number = 90f });
+                list.Add(new Entry(BuiltInBlocks.Panorama360Kind, variant, "start-heading", startHeading));
+
+                // - a picture that is not there: the authored Fallback Picture shows instead
+                var missingWithFallback = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Panorama360Kind, variant = variant };
+                missingWithFallback.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Panorama360PanoramaField, asset = "ghost.jpg" });
+                missingWithFallback.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Panorama360FallbackField, asset = "wide.png" });
+                list.Add(new Entry(BuiltInBlocks.Panorama360Kind, variant, "missing-with-fallback", missingWithFallback));
+
+                // - a picture that is not there, and no Fallback Picture authored: CardImage's own "unavailable" words
+                var missingNoFallback = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Panorama360Kind, variant = variant };
+                missingNoFallback.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Panorama360PanoramaField, asset = "ghost.jpg" });
+                list.Add(new Entry(BuiltInBlocks.Panorama360Kind, variant, "missing-no-fallback", missingNoFallback));
+
+                // - Display Takeover: a teaser on the card, the panorama full screen through a second slot
+                var takeover = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.Panorama360Kind, variant = variant, display = CardOptions.DisplayTakeover };
+                takeover.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Panorama360PanoramaField, asset = MediaPathRule.PathForDefaultKey("tiled_room_360") });
+                takeover.fields.Add(Text(BuiltInBlocks.Panorama360TitleField, "The tiled room"));
+                list.Add(new Entry(BuiltInBlocks.Panorama360Kind, variant, "takeover", takeover));
+            }
+        }
     }
 }

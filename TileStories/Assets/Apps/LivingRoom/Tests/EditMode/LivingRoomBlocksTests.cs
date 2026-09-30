@@ -392,10 +392,9 @@ namespace TileStories.LivingRoom.Tests
             // - the table lists kinds by family (Ordered), so the row index is the kind's place there
             int row = BlockRegistry.Shared.Ordered.ToList().FindIndex(k => k.Key == SizeComparisonBlock.Kind);
             Assert.GreaterOrEqual(row, 0, "the app's kind is in the registry the window reads");
-            _window.RectOf("Block Library enabled#" + row);
-            // - the app's row is the last of the table: a person scrolls down to it, so the test does
-            _window.SetWindowField("_scrollPos", new Vector2(0f, 300f));
-            yield return _window.WaitForRepaint();
+            // - the app's row is the last of the table: a person scrolls down to it, so the test does (to wherever the row is: every
+            // new framework kind adds a row above it, a fixed scroll distance would fall short again)
+            yield return _window.ScrollTo("Block Library enabled#" + row);
             var screen = _window.RectOf("Block Library enabled#" + row);
             Assert.That(screen.yMin, Is.GreaterThan(40f).And.LessThan(940f - screen.height), "precondition: the row is inside the host window (40 .. 940 on screen), where a click can reach it");
             CollectionAssert.IsEmpty(_window.Config.card_settings.kinds, "drawing the table creates no row");

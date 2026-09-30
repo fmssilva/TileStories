@@ -99,6 +99,23 @@ namespace TileStories.Tests
             Assert.AreEqual(TurntableRule.MaxZoom, view.State.Zoom, 0.001f, "zoom stays inside TurntableRule's own limits");
         }
 
+        // _3.1 10A.3-fix.2: a real 90 degree drag (DegreesPerPixel 0.3 -> 300 px) is the turn that used to put the arch's base on
+        // the frame's edge. Its real drawn pixels, read back from the slot's own texture, stay inside with a margin.
+        [UnityTest]
+        public IEnumerator DefaultModel_ARealNinetyDegreeDrag_KeepsEveryPixelInsideTheStage()
+        {
+            ModelTurntableBlockView view = null;
+            yield return ShowBlock("model_3d_turntable_default", v => view = v);
+            yield return null;
+            Assert.IsTrue(view.ShowsModel, "precondition: the model is drawn");
+            PreviewPixels.AssertDrawnInsideWithMargin(view.Texture, "at rest");
+
+            yield return CardTestInput.DragFrom(view.Frame.panel, view.Frame.worldBound.center, new Vector2(300f, 0f));
+            yield return null;
+            Assert.AreEqual(90f, view.State.Yaw, 1f, "precondition: the real drag turned the model a quarter turn");
+            PreviewPixels.AssertDrawnInsideWithMargin(view.Texture, "after a real 90 degree drag");
+        }
+
         [UnityTest]
         public IEnumerator AutoSpin_TurnsOnItsOwnAfterAPause_AndAFingerStopsIt()
         {

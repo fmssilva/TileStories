@@ -20,8 +20,7 @@ namespace TileStories.Tests
     public class PoiCardTapZoomTests : SearchSceneFixture
     {
         private Touchscreen _screen;
-        private InputSettings _savedSettings;
-        private InputSettings _testSettings;
+        private BackgroundSafeInput _input;
         // The test's own time: seconds since BeginTestTime; the Input System events get _eventBase + it
         private float _t;
         private double _eventBase;
@@ -29,18 +28,9 @@ namespace TileStories.Tests
         [SetUp]
         public void AddFinger()
         {
-            // - an unfocused Game view drops pointer input in the Editor; a copy of the settings lets these touches in
-            _savedSettings = InputSystem.settings;
-            _testSettings = Object.Instantiate(_savedSettings);
-            _testSettings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
-            // - and when the Editor is not the active application (the developer is in another window) the Input System would switch the
-            //   touchscreen off (backgroundBehavior's default): every real-finger test then read "no touch" and failed. Keep it on.
-            _testSettings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
-            InputSystem.settings = _testSettings;
-            // - the device is added AFTER the settings: a device added while the default settings are active and the Editor is in the
-            //   background is switched off on the spot (InputManager.AddDevice), and swapping the settings later never switches it back on
-            _screen = InputSystem.AddDevice<Touchscreen>();
-            if (!_screen.enabled) InputSystem.EnableDevice(_screen);
+            // - settings that let these touches in whichever application has the focus (BackgroundSafeInput), then the device
+            _input = new BackgroundSafeInput();
+            _screen = BackgroundSafeInput.AddEnabled<Touchscreen>();
             Assert.IsTrue(_screen.enabled, "precondition: the real touchscreen is on, whichever application has the focus");
         }
 
@@ -48,8 +38,7 @@ namespace TileStories.Tests
         public void RemoveFinger()
         {
             if (_screen != null && _screen.added) InputSystem.RemoveDevice(_screen);
-            if (_savedSettings != null) InputSystem.settings = _savedSettings;
-            if (_testSettings != null) Object.Destroy(_testSettings);
+            _input?.Dispose();
             if (Card != null) Card.Clock = () => Time.unscaledTime;
         }
 

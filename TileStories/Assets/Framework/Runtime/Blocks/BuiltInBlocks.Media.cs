@@ -58,6 +58,14 @@ namespace TileStories
         public const string Model3DAutoSpinField = "auto_spin";
         public const string Model3DTitleField = "title";
 
+        public const string Panorama360Kind = "panorama_360";
+        public const string Panorama360Drag = "drag";
+        public const string Panorama360Gyro = "gyro";
+        public const string Panorama360PanoramaField = "panorama";
+        public const string Panorama360FallbackField = "fallback";
+        public const string Panorama360StartHeadingField = "start_heading";
+        public const string Panorama360TitleField = "title";
+
         private const string PictureHelp = "A PNG or JPG inside the wall's Media Folder (Detail Card > Card Container).";
 
         // Tier 2: several pictures; a tap on one opens it full screen (the lightbox)
@@ -280,6 +288,52 @@ namespace TileStories
                     Key = Model3DTitleField, Type = BlockFieldType.LocalizedText, Label = "Title",
                     Help = "The model's name, shown full screen after the card's title (Display Takeover only, useful when a card " +
                            "holds more than one model). Empty: the point's card title.",
+                },
+            },
+        };
+
+        // Tier 5: a 360 picture the visitor looks around in (_3.1 step 10A.4). Drag: a finger drag turns the view like grabbing the
+        // scene, two fingers pinch the field of view. Gyro: turning the phone turns the view (the drag look stays as the fallback
+        // where the device has no attitude sensor). Display Takeover works as the model's does: a teaser on the card, the full
+        // viewer through a second preview slot of the same owner.
+        public static readonly BlockKindDefinition Panorama360 = new()
+        {
+            Key = Panorama360Kind,
+            Family = "media",
+            DisplayName = "Panorama 360",
+            Help = "A 360 degree picture the visitor looks around in. Drag look: drag to turn the view, pinch to zoom. Gyro look: " +
+                   "turn the phone to look around (where the device has no motion sensor, the Editor for one, it falls back to " +
+                   "dragging). Start Heading sets where the view points when it opens. The Fallback Picture shows while the " +
+                   "panorama loads and if it cannot be loaded. Display Takeover shows only a teaser (the picture, the name, an " +
+                   "open-full-screen button); a tap opens the panorama full screen. Back returns to the card where it was.",
+            Variants = new[] { Panorama360Drag, Panorama360Gyro },
+            DefaultVariant = Panorama360Drag,
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayTakeover },
+            Fields = new[]
+            {
+                new BlockFieldDefinition
+                {
+                    Key = Panorama360PanoramaField, Type = BlockFieldType.Asset, Media = MediaKind.Panorama, Label = "Panorama", Required = true,
+                    Help = "An equirectangular 360 picture (twice as wide as it is tall; a PNG or JPG) inside the wall's Media Folder " +
+                           "(Detail Card > Card Container), or a Framework/wall default.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = Panorama360FallbackField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Fallback Picture",
+                    Help = "Shown while the panorama loads and if it cannot be loaded. " + PictureHelp,
+                },
+                new BlockFieldDefinition
+                {
+                    Key = Panorama360StartHeadingField, Type = BlockFieldType.Number, Label = "Start Heading", NumberMin = 0f, NumberMax = 360f,
+                    Help = "Where the view points when it opens, in degrees turned to the right from the middle of the picture " +
+                           "(0 = the middle, 90 = a quarter turn right, 180 = the picture's edge, straight behind). With the Gyro look " +
+                           "it is the direction the visitor faces when the viewer opens.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = Panorama360TitleField, Type = BlockFieldType.LocalizedText, Label = "Title",
+                    Help = "The panorama's name, shown full screen after the card's title (Display Takeover only, useful when a card " +
+                           "holds more than one). Empty: the point's card title.",
                 },
             },
         };

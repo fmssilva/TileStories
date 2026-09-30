@@ -124,6 +124,8 @@ namespace TileStories
 
         private void OnDestroy()
         {
+            // - the shown blocks unbind first (a gyro panorama gives the attitude sensor back), like PoiCardHost.Close on switch-off
+            Sheet?.Hide();
             _sound?.Dispose();
             VideoService?.CardClosed();
             VideoOutput.Release();

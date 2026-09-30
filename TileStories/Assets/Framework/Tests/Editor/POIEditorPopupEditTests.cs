@@ -104,6 +104,31 @@ namespace TileStories.Editor.Tests
             Assert.AreNotEqual(pictures.RowCount, 0);
         }
 
+        // 10A.4: a Panorama field's picker lists the shipped 360 picture, and a picture field's does not list it (both are textures:
+        // only the library entry's kind tells them apart), and picking it stores the exact `default:` value the view resolves
+        [Test]
+        public void DefaultMediaPicker_ForAPanoramaField_OffersTheShippedPanorama_AndAPictureFieldDoesNot()
+        {
+            System.Collections.Generic.List<string> KeysOf(MediaKind kind)
+            {
+                var popup = Call<CardMediaDefaultPickerPopup>("CreateCardMediaDefaultPickerPopup", kind, (Action<string>)(_ => { }));
+                var rows = (System.Collections.IEnumerable)typeof(CardMediaDefaultPickerPopup).GetField("_rows", Instance).GetValue(popup);
+                var keys = new System.Collections.Generic.List<string>();
+                foreach (CardMediaLibrary.Entry row in rows) keys.Add(row.key);
+                return keys;
+            }
+
+            CollectionAssert.Contains(KeysOf(MediaKind.Panorama), "tiled_room_360", "the Framework's 360 picture is offered to a Panorama field");
+            CollectionAssert.DoesNotContain(KeysOf(MediaKind.Image), "tiled_room_360", "and not to a picture field");
+            CollectionAssert.DoesNotContain(KeysOf(MediaKind.Panorama), "azulejo_detail", "a Panorama field offers no ordinary picture");
+
+            string picked = null;
+            var popup2 = Call<CardMediaDefaultPickerPopup>("CreateCardMediaDefaultPickerPopup", MediaKind.Panorama, (Action<string>)(key => picked = MediaPathRule.PathForDefaultKey(key)));
+            ((Action<string>)typeof(CardMediaDefaultPickerPopup).GetField("_onPicked", Instance).GetValue(popup2))("tiled_room_360");
+            Assert.AreEqual("default:tiled_room_360", picked);
+            Assert.IsTrue(MediaPathRule.IsValid(picked, MediaKind.Panorama), "a Panorama field accepts the picked value");
+        }
+
         // An unknown default key (renamed or removed from the library, or typed by hand into a saved config):
         // resolving it returns nothing and the Editor's own row warns instead of throwing
         [Test]

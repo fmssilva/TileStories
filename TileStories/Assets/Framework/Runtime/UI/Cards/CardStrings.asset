@@ -571,3 +571,24 @@ MonoBehaviour:
       value: Loading...
     - lang: pt
       value: "A carregar..."
+  - key: panorama_360_drag_hint
+    where: The hint under a Panorama 360 viewer that turns by dragging.
+    text:
+    - lang: en
+      value: Drag to look around, pinch to zoom
+    - lang: pt
+      value: "Arraste para olhar à volta, afaste os dedos para ampliar"
+  - key: panorama_360_gyro_hint
+    where: The hint under a Panorama 360 viewer that follows the phone's own movement.
+    text:
+    - lang: en
+      value: Move your phone to look around
+    - lang: pt
+      value: "Mova o telemóvel para olhar à volta"
+  - key: panorama_360_loading
+    where: The words a Panorama 360 viewer shows while its picture is still loading.
+    text:
+    - lang: en
+      value: Loading...
+    - lang: pt
+      value: "A carregar..."

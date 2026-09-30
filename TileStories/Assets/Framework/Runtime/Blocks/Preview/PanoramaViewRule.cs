@@ -32,10 +32,20 @@ namespace TileStories
         public const float MinFov = 40f;
         public const float MaxFov = 100f;
 
-        // A drag of `delta` screen units at `degreesPerUnit`: dragging right turns the view left (as if turning your
-        // head away from where your hand pulls), dragging up looks up
+        // A drag of `delta` panel units at `degreesPerUnit` (panel y grows DOWNWARD): the scene follows the finger, so dragging
+        // right turns the view left and dragging DOWN looks up (the same grab-the-world feel as a street-view map)
         public static PanoramaViewState Drag(PanoramaViewState state, Vector2 delta, float degreesPerUnit) =>
             Clamp(new PanoramaViewState(state.Yaw - delta.x * degreesPerUnit, state.Pitch + delta.y * degreesPerUnit, state.Fov));
+
+        // The field of view is measured along the stage's SHORTER side, so a zoom feels the same in a wide inline stage and a tall
+        // full-screen page (70 degrees across a portrait page, not 36). This is the camera's vertical field of view for it: the field
+        // itself on a wide stage (aspect = width / height >= 1), a wider one on a tall stage.
+        public static float VerticalFov(float fov, float aspect) =>
+            aspect >= 1f || aspect <= 0f ? fov : 2f * Mathf.Atan(Mathf.Tan(fov * 0.5f * Mathf.Deg2Rad) / aspect) * Mathf.Rad2Deg;
+
+        // How many degrees one panel unit of drag turns the view so the scene follows the finger: the stage's shorter side is the field
+        // of view (a stage not laid out yet, a side unknown or under one unit, counts as one unit)
+        public static float DegreesPerUnit(float fov, float stageShorterSide) => fov / (stageShorterSide >= 1f ? stageShorterSide : 1f);
 
         // A pinch by `factor` (>1 spreads fingers apart = zooms in = a narrower field of view)
         public static PanoramaViewState Pinch(PanoramaViewState state, float factor) =>

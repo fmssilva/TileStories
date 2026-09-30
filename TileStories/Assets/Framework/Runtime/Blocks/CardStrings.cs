@@ -134,6 +134,12 @@ namespace TileStories
             // Takeover teaser's open-full-screen button reuses VideoFullScreen's exact wording (step 10A.3.1).
             public const string Model3DHint = "model_3d_hint";
             public const string Model3DLoading = "model_3d_loading";
+            // panorama_360 (step 10A.4.2): the hint under the viewer for each look (the gyro look shows the drag one where the device has no
+            // motion sensor), and its words while the picture is still loading (a failed/missing panorama shows CardImage's own MediaUnavailable
+            // on the fallback picture). The teaser's open-full-screen button reuses VideoFullScreen's wording, as the model's does.
+            public const string Panorama360DragHint = "panorama_360_drag_hint";
+            public const string Panorama360GyroHint = "panorama_360_gyro_hint";
+            public const string Panorama360Loading = "panorama_360_loading";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -149,6 +155,7 @@ namespace TileStories
                 DialogueContinue, DialogueAgain, DialogueYou, ShowOnWallButton, ShowOnWallNearby,
                 AudioPlay, AudioPause, AudioSpeed, AudioCaptions, AudioSeek, AudioQueued, AudioUnavailable, MiniPlayerOpen,
                 MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters, Model3DHint, Model3DLoading,
+                Panorama360DragHint, Panorama360GyroHint, Panorama360Loading,
             };
         }
 

@@ -92,6 +92,7 @@ namespace TileStories
             AddHotspots(list);
             AddVideos(list);
             AddModel3D(list);
+            AddPanorama360(list);
             AddWallLocators(list);
             AddTodayMaps(list);
             AddRelated(list);

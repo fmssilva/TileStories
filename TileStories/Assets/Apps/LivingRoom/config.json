@@ -6177,6 +6177,76 @@
                                 "value": "",
                                 "asset": "models/146267-LivingRoom2-tex.glb",
                                 "items": []
+                            },
+                            {
+                                "key": "auto_spin",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": true,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_60",
+                        "kind": "panorama_360",
+                        "variant": "drag",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "panorama",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:tiled_room_360",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_61",
+                        "kind": "panorama_360",
+                        "variant": "gyro",
+                        "display": "takeover",
+                        "fields": [
+                            {
+                                "key": "panorama",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:tiled_room_360",
+                                "items": []
+                            },
+                            {
+                                "key": "start_heading",
+                                "text": [],
+                                "number": 90.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The tiled room"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "A sala de azulejos"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
                             }
                         ]
                     }

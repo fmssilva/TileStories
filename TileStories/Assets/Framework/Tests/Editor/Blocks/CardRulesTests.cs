@@ -93,6 +93,15 @@ namespace TileStories.Editor.Tests
         }
 
         [Test]
+        public void RevealsBlocks_OnlyHalfAndFull_NotPeekOrDismissed()
+        {
+            Assert.IsTrue(SheetStopRule.RevealsBlocks(SheetStopRule.Stop.Half));
+            Assert.IsTrue(SheetStopRule.RevealsBlocks(SheetStopRule.Stop.Full));
+            Assert.IsFalse(SheetStopRule.RevealsBlocks(SheetStopRule.Stop.Peek), "peek shows the compact header only: a block's stage sits under the sheet");
+            Assert.IsFalse(SheetStopRule.RevealsBlocks(SheetStopRule.Stop.Dismissed));
+        }
+
+        [Test]
         public void ASlowRelease_SnapsToTheNearestStop_OrClosesWellBelowPeek()
         {
             var s = SheetStopRule.Compute(800f, 120f, 0.40f, 48f);   // 120 / 320 / 752

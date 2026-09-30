@@ -59,14 +59,14 @@
     border-radius: 0;
 }
 
-/* model_turntable: the SAME model view fills the hero frame (no block margin, no drag hint), its stage the whole hero */
+/* model_turntable: the SAME preview view fills the hero frame (no block margin, no drag hint), its stage the whole hero */
 .card-hero .card-hero__model {
     width: 100%;
     height: 100%;
     margin: 0;
 }
 
-.card-hero__model .card-model3d__frame {
+.card-hero__model .card-preview__frame {
     height: 100%;
     border-radius: 0;
 }
@@ -751,10 +751,10 @@
     flex-grow: 1;
 }
 
-/* ---- model_3d, turntable (step 10A.2b.3): the stage's RenderTexture over the frame; the fallback picture (or its own
+/* ---- model_3d and panorama_360 (steps 10A.2b.3, 10A.4): the stage's RenderTexture over the frame; the fallback picture (or its own
    "unavailable" words) underneath while the model loads or if it never does, with a small loading note on top ---- */
 
-.card-model3d__frame {
+.card-preview__frame {
     height: var(--ts-media-height);
     overflow: hidden;
     border-radius: var(--ts-radius-m);
@@ -763,7 +763,7 @@
     justify-content: center;
 }
 
-.card-model3d__surface {
+.card-preview__surface {
     position: absolute;
     left: 0;
     top: 0;
@@ -772,7 +772,7 @@
     -unity-background-scale-mode: scale-to-fit;
 }
 
-.card-model3d__fallback {
+.card-preview__fallback {
     position: absolute;
     left: 0;
     top: 0;
@@ -781,7 +781,7 @@
     border-radius: 0;
 }
 
-.card-model3d__loading {
+.card-preview__loading {
     position: absolute;
     bottom: var(--ts-space-2);
     right: var(--ts-space-2);
@@ -792,7 +792,7 @@
     font-size: var(--ts-size-caption);
 }
 
-.card-model3d__hint {
+.card-preview__hint {
     margin-top: var(--ts-space-1);
     font-size: var(--ts-size-caption);
     color: var(--ts-ink-2);
@@ -801,16 +801,16 @@
 /* Display Takeover's teaser (10A.3.1): the name badge opposite corner from Loading's, the open-full-screen button
    reuses video's own centred round overlay (card-video__overlay/-glyph) so both media kinds share one look */
 /* the full-screen page (10A.3.1): the frame takes ALL the height the page leaves it, same as card-video--full */
-.card-model3d--full {
+.card-preview--full {
     flex-grow: 1;
 }
 
-.card-model3d--full .card-model3d__frame {
+.card-preview--full .card-preview__frame {
     height: auto;
     flex-grow: 1;
 }
 
-.card-model3d__teaser-name {
+.card-preview__teaser-name {
     position: absolute;
     bottom: var(--ts-space-2);
     left: var(--ts-space-2);

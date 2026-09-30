@@ -55,9 +55,15 @@ namespace TileStories.Tests
             CategoryPalette.Configure(_config.category_styles);
             MarkerHierarchyResolver.Configure(_config.hierarchy_levels);
 
+            // - MarkerBillboard finds its camera through Camera.main, which is the FIRST MainCamera-tagged camera alive: one left by
+            // an earlier fixture (seen in full runs and in the model fixtures run before this one) made every billboard follow that
+            // camera, so turning this test's own camera moved nothing. Clear strays first, as EffectsPreviewRenderTests does.
+            foreach (var stray in GameObject.FindGameObjectsWithTag("MainCamera"))
+                Object.DestroyImmediate(stray);
             var camGO = new GameObject("TestCam", typeof(Camera));
             camGO.tag = "MainCamera";
             _camera = camGO.GetComponent<Camera>();
+            Assert.AreSame(_camera, Camera.main, "precondition: this test's camera is THE main camera the billboards will follow");
             _camera.transform.position = LampCentroid + new Vector3(0f, 0f, 20f);
             _camera.transform.LookAt(LampCentroid);
             _camera.fieldOfView = 60f;
@@ -143,11 +149,20 @@ namespace TileStories.Tests
             Quaternion before = clusterGO.transform.rotation;
 
             _camera.transform.RotateAround(LampCentroid, Vector3.up, 60f);
-            yield return null; // let LateUpdate resolve against the new camera pose
+            // - the billboard eases toward the new pose by Time.deltaTime (MarkerBillboard.RotationSmoothingTimeS), so ONE frame moves
+            // it by however long that frame was: wait for the move by condition, with a frame cap, instead of betting on one
+            // frame (40-testing 4.2.4b, "time is the test's").
+            int frames = 0;
+            while (frames < 60 && Quaternion.Angle(before, clusterGO.transform.rotation) <= 1f)
+            {
+                yield return null;
+                frames++;
+            }
 
             Quaternion after = clusterGO.transform.rotation;
             Assert.Greater(Quaternion.Angle(before, after), 1f,
-                "the real spawned cluster's rotation must change when the camera rotates - it must not be stuck at Quaternion.identity forever (S7).");
+                "the real spawned cluster's rotation must change when the camera rotates - it must not be stuck at Quaternion.identity forever (S7)."
+                + " After " + frames + " frames, Time.deltaTime " + Time.deltaTime + ", timeScale " + Time.timeScale + ".");
         }
 
         // ---- harness (mirrors ClusterPipelineIntegrationTests.cs) ----
