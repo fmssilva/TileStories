@@ -26,6 +26,9 @@ namespace TileStories
         // camera distance to it. Both dimensions must be > 0; the view guards that.
         void Resize(int width, int height);
 
+        // How a model is framed from now on (ModelFitRule; a panorama ignores it)
+        void SetFit(ModelFitMode mode);
+
         // Render one frame now, the model/sphere looking the way `turntable`/`panorama` (whichever this kind uses) says
         void RenderNow(TurntableState turntable, PanoramaViewState panorama);
 

@@ -97,48 +97,65 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
 So start by reading them all. 
 
 
-## `And now: POI Detail Card -- 10A.3-fix (auto-spin at peek, sphere framing, header row capture), 10A.4 (panorama_360)`
+## `And now: POI Detail Card -- 10B-pre (model fit options, kind names), 10B (place_in_ar, Play Mode first)`
 
 GATE (mandatory, report each item): take one Unity capture (Game view AND the POI Editor window) and open it; if none works,
 STOP and say so. `git checkout --` `Markers/Fonts/Oswald Bold SDF.asset` if modified. Confirm the tree compiles; if not, STOP.
 
 Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- "## TODOs"
-([10A.3-fix] x3, [10A.3-followup], [FUTURE] landscape video) and the status table (10A.3 done; 10A.4 next; 10B planned),
-and "Tier 5 -- 3D, 360 and AR actions".
-REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, 4.5 (incl. the design questions);
-`_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines"; `__AI_worker.md` 2.4b (keep going, GATE, English).
-Context only: CardPreviewStage + ModelTurntableBlockView + the model takeover (the patterns to reuse), EquirectRule,
-PanoramaViewRule, the 10A.1 panorama generator (`default:tiled_room_360`).
-TEST PLAN: the opening FULL PlayMode baseline IS needed (the tree moved and the last full run was not green end to end); fix
-anything red before new work. Targeted fixtures per sub-step. ONE full EditMode + PlayMode at the end (Unity may be in front).
+([10B-pre] x2, [Tier 5 / device], show_on_wall notes) and the status table (10A done; 10B next), and "Tier 5 -- 3D, 360 and
+AR actions".
+REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.1 (Tier A mock localization, Tier B XR Simulation), 4.2, 4.2.3,
+4.2.4b, 4.2.5, 4.5 (incl. design questions); `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (new Choice
+rows, Block Library defaults); `__AI_worker.md` 2.4b.
+Context only: Tracking/IWallTracker + MockLocalizationProvider (the wall pose in the Editor), WallSession (POI positions in the
+wall frame), IBlockHost.ShowOnWall (card to peek), CardPreviewStage + ModelFitRule, glTFast import.
+WORKER MODEL: Opus-class (a new AR placement owner, world-pose math and three fit options).
+TEST PLAN: no opening full baseline (the tree is the green commit "Add 360 panorama viewer and fit 3D models by their bounding
+sphere"). Targeted fixtures per sub-step. ONE full EditMode + PlayMode at the end (Unity may be in front; the background run is
+due next block).
 
-10A.3-fix.1 -- Auto-spin ticks only while the card is open above peek AND the stage is inside the scroll viewport. Phase B on the
-  real Lamp: at peek no renders happen; at half with the block in view it spins.
-10A.3-fix.2 -- Fit to the renderers' bounding sphere (turning never changes it), ~80 % of the stage's shorter side. Pixel test:
-  after a 90 degree drag the model's pixels stay inside the stage with a margin, for the arch and the room scan. Recapture the
-  header at Full after a drag. Delete [10A.3-followup].
-10A.3-fix.3 -- Capture the Header row with the model look at 620 pt and the Model 3D rows; clear the _5.1 pending entry.
+FRAMEWORK RULE for this block: a behaviour that is a trade-off is a developer CHOICE (a Choice field with a sensible default,
+each option explained in its (i) and tested), not one hard-coded rule.
+
+10B-pre.1 -- Model fit options: a `Fit` Choice on model_3d and on the header model look, default settable in the Block Library:
+  `yaw_safe` (DEFAULT: the extent swept turning about the vertical axis + the margin TurntableRule's pitch limit needs),
+  `sphere` (bounding sphere, inside at any rotation, smallest), `at_rest` (bounds at the start angle, largest, may clip when
+  turned). One pure ModelFitRule per option, EditMode tests. Pixel tests: yaw_safe -> the room scan >= 65 % of the stage's
+  shorter side at rest and every allowed yaw/pitch inside with a 5 % margin; sphere -> inside at every turn; at_rest -> >= 80 %
+  at rest. The Lamp's two inline models use yaw_safe; recapture them and the header arch after a drag.
+10B-pre.2 -- Kind display names "3D Model" and "360 Panorama" (Editor, default headings, gallery); keys unchanged; a test that no
+  kind display name contains a lowercase unit like "3d".
   -> learning summary + short commit message after each, and go straight on.
-10A.4.1 -- The stage gains the panorama: an inside-out sphere built from EquirectRule (so "ahead" matches the generated
-  picture), the equirect texture on an unlit material, the camera at the centre; PanoramaViewRule drives yaw / pitch / FOV.
-  Same owner, same slots, same release guarantees (test: nothing left after release).
-10A.4.2 -- panorama_360 `drag`: drag looks around, pinch changes the FOV within PanoramaViewRule's limits, inline + full screen
-  through the takeover (same pattern as the model). `gyro`: device attitude through the Input System (AttitudeSensor), drag as
-  the fallback where no sensor exists (the Editor); a small "move your phone" hint. Card Content row: Panorama (Asset, panorama
-  kind, default picker), Start Heading, Look (drag / gyro). CardStrings en + pt for any visitor words.
-10A.4.3 -- Tests: pure (anything new in the rules); Phase A (both looks x default panorama / missing file -> fallback; real
-  drag and pinch change the render); Phase B on the real Lamp (panorama_360 on `default:tiled_room_360`, a real drag turns the
-  view, the takeover opens and Back restores, nothing leaks). Gyro: an Editor test that feeds a simulated AttitudeSensor
-  (Input System test device) and checks the view follows. Identity fields untouched, round trip checked.
-10A.4.4 -- Close: full EditMode + PlayMode green END TO END (re-run the FULL suite after any fix, not a subset); captures
-  checked with the 4.5 design questions (inline drag, zoomed, full screen, gyro hint, the Card Content row at 620 pt); update
-  _3.1, 10-structure.md, _5.1.
+10B.1 -- One AR placement owner (ICardArPlacement / ArPlacementService, host-owned like Audio / Video / Preview, reached through
+  BlockBindContext): ONE placed model at a time in the WORLD; placing another replaces it; closing the card or "Remove" takes it
+  away; release leaves nothing behind. A pure rule for the placement pose, with EditMode tests, from these CHOICES:
+  - Anchor: `poi_on_wall` (only option built now: the POI's wall position pushed out along the wall normal by Offset From Wall,
+    facing the viewer's side). Name `surface` (AR plane detection) in the (i) as not yet available, so the field is ready for it.
+  - Scale: `real_size` (the model's own metres), `height_cm` (scale so the model is this tall), `marker_multiple` (a multiple of
+    the POI marker's world size). Default `real_size`.
+10B.2 -- place_in_ar `button`: a primary button (label from CardStrings en + pt, or the optional authored Button Label) that
+  places the model and drops the card to peek (IBlockHost.ShowOnWall pattern); while placed, a "Remove" chip on the card (and
+  re-opening keeps it placed). Card Content row: Model (Asset, model kind, default picker), Anchor, Offset From Wall (cm),
+  Scale Mode + its value, Button Label. Disabled with a short explanation while the wall is not localised (IWallTracker state).
+10B.3 -- Tests, Play Mode first (40-testing 4.1 Tier A): Phase A gallery (button states: localised / not localised / placed);
+  Phase B on the real LivingRoom scene with MockLocalizationProvider: a real tap places `default:azulejo_arch` at The Lamp's wall
+  position (assert the world pose from the rule for each Scale option, within a stated tolerance), the card goes to peek, the
+  model renders in the Game view where the POI is (pixel check), Remove takes it away, a second placement replaces the first,
+  closing the card removes it, nothing leaks. No device, no plane detection.
+10B.4 -- Close: full EditMode + PlayMode green end to end (re-run the FULL suite after any fix); captures with the 4.5 design
+  questions (the model standing at The Lamp in the Game view for each Scale option, the card at peek with the Remove chip, the
+  not-localised state, the Card Content and Block Library rows at 620 pt); update _3.1 (10B-pre / 10B rows with proof; a
+  [device] TODO listing what only the phone can confirm: real scale, lighting, anchoring drift, frame rate), 10-structure.md,
+  _5.1.
 
 Rules as before: no literal colours/sizes, no visitor strings in code, real input in tests, detail logs only through DevLog,
-identity fields untouched, Portuguese spelled properly. OUT OF SCOPE: place_in_ar (10B), runtime glTF download, landscape
-full-screen, _3.2, _3.3. Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP.
+identity fields untouched, Portuguese spelled properly. OUT OF SCOPE: building the `surface` anchor (plane detection), moving or
+scaling the placed model by gesture, device builds, _3.2, _3.3.
+Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP.
 Finish in English with: GATE items, suites + counts, what you looked at, what you could not verify, one short natural commit
 message. Commit only if the developer asks.
+
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

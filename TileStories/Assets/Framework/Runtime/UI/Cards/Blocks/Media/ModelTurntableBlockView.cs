@@ -18,6 +18,8 @@ namespace TileStories
         private const float DegreesPerPixel = 0.3f;
 
         private bool _autoSpin;
+        // How the model is framed (the block's Fit, else the Block Library's default for model_3d): handed to the slot on every bind
+        public ModelFitMode Fit { get; private set; }
 
         // `modifierClass`: the instance's place ("card-preview--full" for the full-screen page)
         public ModelTurntableBlockView(string modifierClass = null) : base("card-model3d", modifierClass) { }
@@ -33,7 +35,11 @@ namespace TileStories
         {
             _autoSpin = read.Flag(BuiltInBlocks.Model3DAutoSpinField);
             State = TurntableState.Start;
+            Fit = ModelFitRule.ModeOf(BlockLibraryRule.Choice(Context?.Taxonomy?.card_settings, BuiltInBlocks.Model3D,
+                BuiltInBlocks.Model3D.Field(BuiltInBlocks.Model3DFitField), read));
         }
+
+        protected override void OnSlotRequested(ICardPreviewSlot slot) => slot?.SetFit(Fit);
 
         protected override string HintText(CardStrings strings) => strings?.Get(CardStrings.Keys.Model3DHint);
         protected override string LoadingText(CardStrings strings) => strings?.Get(CardStrings.Keys.Model3DLoading);

@@ -66,10 +66,10 @@ namespace TileStories
             SetLayerRecursively(model, _previewLayer);
 
             var texture = NewTexture("CardPreview_" + slot, TextureSize, TextureSize);
-            var fit = FitFor(model, 1f); // TextureSize is square; Resize refits once the real stage size is known
+            var fit = FitFor(model, 1f, ModelFitMode.YawSafe); // TextureSize is square; Resize and SetFit refit once the stage is known
 
             onReady?.Invoke();
-            return new ModelHandle(this, media, path, root, texture, model, fit);
+            return new ModelHandle(this, media, path, root, texture, fit);
         }
 
         private IPreviewHandle LoadPanorama(IMediaSource media, string path, Action onReady, Action onFailed)
@@ -123,7 +123,7 @@ namespace TileStories
         private void RenderModel(RenderTexture texture, TurntableState turntable, ModelFit fit)
         {
             var rotation = Quaternion.Euler(turntable.Pitch, turntable.Yaw, 0f);
-            float distance = fit.Distance / Mathf.Max(TurntableRule.MinZoom, turntable.Zoom);
+            float distance = fit.DistanceAt(turntable.Pitch) / Mathf.Max(TurntableRule.MinZoom, turntable.Zoom);
             float reach = fit.Radius * SubjectMarginRatio;
             _camera.fieldOfView = ModelFieldOfView;
             _camera.nearClipPlane = Mathf.Max(NearPlaneMetres, distance - reach);
@@ -190,17 +190,54 @@ namespace TileStories
             _fill.intensity = 0.4f;
         }
 
-        // Where the camera stands and what it orbits so the model's bounding SPHERE fills ModelFitRule.TargetFillOfShorterSide of
-        // the STAGE's shorter axis (_3.1 10A.3-fix.2). A sphere never changes when the model turns, so a drag or auto-spin to any
-        // yaw/pitch keeps every pixel of the model inside the picture (the box fitted at rest let a turned, wide model touch the
-        // frame's edge). `aspect` is the stage's own width / height.
-        private static ModelFit FitFor(GameObject model, float aspect)
+        // What the camera orbits and how far back it stands for `mode` (ModelFitRule, _3.1 10B-pre.1): the renderers' boxes give the
+        // pivot, the bounding sphere and the corners the box fits keep inside the STAGE's frame. `aspect` is the stage's width / height.
+        private static ModelFit FitFor(GameObject model, float aspect, ModelFitMode mode)
         {
             var boxes = new List<Bounds>();
             foreach (var renderer in model.GetComponentsInChildren<Renderer>()) boxes.Add(renderer.bounds);
-            if (boxes.Count == 0) return new ModelFit(2f, model.transform.position, 1f);
+            if (boxes.Count == 0) return new ModelFit(mode, model.transform.position, 1f, new List<Vector3>(), null, aspect);
             var (centre, radius) = ModelFitRule.SphereOf(boxes);
-            return new ModelFit(ModelFitRule.DistanceFor(radius, ModelFieldOfView, aspect), centre, radius);
+            return new ModelFit(mode, centre, radius, ModelFitRule.CornersAround(boxes, centre), null, aspect);
+        }
+
+        // At most this many triangles feed the visible fit: an even stride through a bigger mesh keeps its outline (all of a room
+        // scan's triangles would cost a noticeable pause per pitch degree)
+        private const int MaxVisibleFitTriangles = 20000;
+
+        // The model's triangles in world space around `pivot`, corner triples in the mesh's winding, evenly strided down to
+        // MaxVisibleFitTriangles; empty when no mesh can be read (a mesh not marked readable in a build)
+        private static List<Vector3> TrianglesAround(GameObject model, Vector3 pivot)
+        {
+            var filters = model.GetComponentsInChildren<MeshFilter>();
+            long total = 0;
+            foreach (var filter in filters)
+            {
+                var mesh = filter.sharedMesh;
+                if (mesh == null || !mesh.isReadable) continue;
+                for (int sub = 0; sub < mesh.subMeshCount; sub++) total += mesh.GetIndexCount(sub) / 3;
+            }
+            var triangles = new List<Vector3>();
+            if (total == 0) return triangles;
+            long stride = System.Math.Max(1L, (total + MaxVisibleFitTriangles - 1) / MaxVisibleFitTriangles);
+            long index = 0;
+            foreach (var filter in filters)
+            {
+                var mesh = filter.sharedMesh;
+                if (mesh == null || !mesh.isReadable) continue;
+                var vertices = mesh.vertices;
+                var toWorld = filter.transform.localToWorldMatrix;
+                for (int sub = 0; sub < mesh.subMeshCount; sub++)
+                {
+                    var indices = mesh.GetTriangles(sub);
+                    for (int t = 0; t + 2 < indices.Length; t += 3, index++)
+                    {
+                        if (index % stride != 0) continue;
+                        for (int k = 0; k < 3; k++) triangles.Add(toWorld.MultiplyPoint3x4(vertices[indices[t + k]]) - pivot);
+                    }
+                }
+            }
+            return triangles;
         }
 
         private static void SetLayerRecursively(GameObject go, int layer)

@@ -22,6 +22,36 @@ namespace TileStories
             return row == null || row.enabled;
         }
 
+        // The option a block of this kind reads for a Choice field while it stores none of its own: the Block Library's default
+        // for a LibraryDefault field (when it is one of the options), else the field's own ChoiceDefault ("" without one)
+        public static string ChoiceDefault(CardSettings settings, BlockKindDefinition definition, BlockFieldDefinition field)
+        {
+            if (field == null) return "";
+            if (field.LibraryDefault && definition != null)
+            {
+                var entries = Row(settings, definition.Key)?.field_defaults;
+                if (entries != null)
+                    foreach (var entry in entries)
+                        if (entry != null && entry.key == field.Key && HasOption(field, entry.value)) return entry.value;
+            }
+            return field.ChoiceDefault ?? "";
+        }
+
+        // The ONE read of a Choice field with a default: the block's own value when it is one of the options, else ChoiceDefault
+        public static string Choice(CardSettings settings, BlockKindDefinition definition, BlockFieldDefinition field, BlockFieldReader read)
+        {
+            string own = read?.Value(field.Key) ?? "";
+            return HasOption(field, own) ? own : ChoiceDefault(settings, definition, field);
+        }
+
+        private static bool HasOption(BlockFieldDefinition field, string value)
+        {
+            if (string.IsNullOrEmpty(value) || field.Options == null) return false;
+            for (int i = 0; i < field.Options.Count; i++)
+                if (field.Options[i] == value) return true;
+            return false;
+        }
+
         // The variant an instance gets when it names none (or one the kind lacks): the row's, when the kind has it
         public static string DefaultVariant(CardSettings settings, BlockKindDefinition definition)
         {

@@ -66,6 +66,11 @@ namespace TileStories
         public CardPreviewStage PreviewStage { get; private set; }
         public CardPreviewService PreviewService { get; private set; }
 
+        // The gallery card's AR placement (_3.1 step 10B.1): the SAME ArPlacementService as the wall's card over a ManualArWall (localised
+        // unless a test says otherwise, its frame at the world origin); every entry shown starts with nothing placed
+        public ManualArWall ArWall { get; } = new();
+        public ArPlacementService ArPlacementService { get; private set; }
+
         // `seconds` of audio time pass: the output's clip moves on, the fade's clock too, and the service takes its step
         public void AdvanceAudio(float seconds)
         {
@@ -112,12 +117,14 @@ namespace TileStories
             _sound = new CardSoundCoordinator(AudioService, VideoService);
             PreviewStage = GetComponent<CardPreviewStage>() != null ? GetComponent<CardPreviewStage>() : gameObject.AddComponent<CardPreviewStage>();
             PreviewService = new CardPreviewService(PreviewStage, () => Media);
+            ArPlacementService = new ArPlacementService(ArWall, () => Media);
             Sheet.CloseRequested += () =>
             {
                 Sheet.Hide();
                 AudioCoordinator.CardClosed();
                 VideoService.CardClosed();
                 PreviewService.ReleaseAll();
+                ArPlacementService.Remove();
             };
             Show(0);
         }
@@ -130,6 +137,8 @@ namespace TileStories
             VideoService?.CardClosed();
             VideoOutput.Release();
             PreviewService?.ReleaseAll();
+            ArPlacementService?.Dispose();
+            ArWall.Dispose();
         }
 
         // Show entry `index` at its own stop
@@ -155,6 +164,7 @@ namespace TileStories
             // - as on a real wall, the shown POI is one of the wall's POIs (wall_locator lays it among them)
             wall.pois.Add(poi);
             Sheet.Viewer = () => viewer;
+            ArPlacementService.Remove();
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wall.pois);
             var context = new BlockBindContext
             {
@@ -169,6 +179,7 @@ namespace TileStories
                 Audio = AudioService,
                 Video = VideoService,
                 Preview = PreviewService,
+                ArPlacement = ArPlacementService,
                 ReduceMotion = settings.container.reduce_motion,
             };
             Sheet.Hide();

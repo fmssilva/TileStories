@@ -18,6 +18,15 @@ namespace TileStories.Editor
         private const float BlockLibraryFamilyColumnWidth = 80f;
         private const float BlockLibraryEnabledColumnWidth = 60f;
         private const float BlockLibraryVariantColumnWidth = 130f;
+        // A field-default row under its kind: indented in the Kind column, named "Default <field>"
+        private const float BlockLibraryFieldDefaultIndent = 12f;
+        private const string BlockLibraryFieldDefaultPrefix = "Default ";
+        // GUILayout's gap between the Details button and the (i) of a kind's row (the collapsed margin of two buttons), which a
+        // field-default row, with no Details button, reproduces as plain space
+        private const float BlockLibraryDetailsToHelpGap = 4f;
+        // The margins the Family label and the Enabled toggle add to a kind's row, which a field-default row (plain space where those
+        // controls stand) reproduces so its popup starts under the Default Variant popups (measured on a 620 pt capture: 6 pt short)
+        private const float BlockLibrarySkippedControlMargins = 6f;
 
         private static GUIStyle _blockLibraryFamilyStyle;
         // The family word: mini type, vertically centred so it shares the kind name's line
@@ -335,9 +344,49 @@ namespace TileStories.Editor
                     GUILayout.FlexibleSpace();
                     GUILayout.Space(AddButtonRowRightMargin);
                 }
+                DrawBlockLibraryFieldDefaults(kind, i);
             }
 
             DrawDomainTestSubSection(_blockLibraryTest, BlockLibrarySceneTestGuide, BlockLibraryPlaymodeTestGuide, BlockLibraryDeviceTestGuide);
+        }
+
+        // Under a kind's row, one row per field whose wall-wide default the Library sets (LibraryDefault, e.g. a model's Fit): its
+        // label across the Kind and Family columns, its options in the Default Variant column, its (i) in the (i) column. Drawing never writes: the
+        // row and its entry are made by the first real pick (SetBlockLibraryFieldDefault).
+        private void DrawBlockLibraryFieldDefaults(BlockKindDefinition kind, int kindIndex)
+        {
+            foreach (var field in kind.Fields)
+            {
+                if (!field.LibraryDefault) continue;
+                using (new TableRowScope())
+                {
+                    GUILayout.Space(BlockLibraryFieldDefaultIndent);
+                    // - the label spans the Kind AND Family columns (a default row has no family of its own): "Default Scale Mode" fits
+                    GUILayout.Label(BlockLibraryFieldDefaultPrefix + field.Label, GUILayout.Width(BlockLibraryKindColumnWidth + BlockLibraryFamilyColumnWidth - BlockLibraryFieldDefaultIndent));
+                    GUILayout.Space(TableGapBetweenGroups + BlockLibraryEnabledColumnWidth + BlockLibrarySkippedControlMargins);
+                    string current = BlockLibraryRule.ChoiceDefault(_config.card_settings, kind, field);
+                    var options = new List<string>(field.Options);
+                    var labels = new List<string>();
+                    for (int o = 0; o < options.Count; o++) labels.Add(field.OptionLabels != null ? field.OptionLabels[o] : options[o]);
+                    int picked = EditorGUILayout.Popup(options.IndexOf(current), labels.ToArray(), GUILayout.Width(BlockLibraryVariantColumnWidth));
+                    ReportTableCellRect("Block Library default " + kind.Key + "." + field.Key, kindIndex);
+                    if (picked >= 0 && options[picked] != current) SetBlockLibraryFieldDefault(kind.Key, field.Key, options[picked]);
+                    GUILayout.Space(26f + BlockLibraryDetailsToHelpGap);
+                    HelpInfoButton.Draw(field.Label, field.Help);
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Space(AddButtonRowRightMargin);
+                }
+            }
+        }
+
+        // Set a kind's Library default of one field (creates the kind's row and the entry on the first pick)
+        internal void SetBlockLibraryFieldDefault(string kind, string fieldKey, string value)
+        {
+            var row = EnsureBlockLibraryRow(kind);
+            row.field_defaults ??= new List<BlockFieldDefault>();
+            var entry = row.field_defaults.Find(e => e != null && e.key == fieldKey);
+            if (entry == null) row.field_defaults.Add(new BlockFieldDefault { key = fieldKey, value = value });
+            else entry.value = value;
         }
 
         // The Block Library row of a kind, created on the first edit (keeps its kind's defaults until changed)

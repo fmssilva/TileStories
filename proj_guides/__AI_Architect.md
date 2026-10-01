@@ -54,6 +54,9 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
   terminal), so pass the Windows settings explicitly:
   `git -c core.autocrlf=true -c user.name="Francisco Miguel Sousa da Silva" -c user.email="fmso.silva@campus.fct.unl.pt" commit -m "..."`
   (stage with `git -c core.autocrlf=true add -A`), then check `git log -1` and that no `.git/*.lock` is left.
+  Git must be able to delete its own lock files: the VM's delete right is granted per session, so request delete permission
+  for the workspace folder BEFORE the first commit of a session. Without it the commit lands but leaves `.git/HEAD.lock` /
+  `index.lock` behind and the developer's next git command fails.
 - **Commit messages:** short and natural, the way a developer writes them: one line, imperative, about 50-72 characters,
   what changed for the project, no step codes or lists ("Add 3D model previews to the POI card", "Fix model framing and
   auto-spin at peek"). In the chat, name the commit by its message, not its hash.
@@ -75,6 +78,19 @@ block kinds (media, 3D, anything with its own owner) OR up to 4-6 light kinds (t
 and Phase B tests, captures and docs -- plus small review fixes. About 3-8 new files and one closing full PlayMode run. Number
 the sub-steps (e.g. 10A.2b.1, .2, .3) so the Worker can report and commit after each. If a block would need two new owners, it
 is two blocks.
+
+**Options, not one hard-coded heuristic:** this is a framework. When a behaviour is a trade-off (how a model fits its frame,
+how a picture crops, how an AR model is scaled, when something auto-plays), the brief makes it a developer choice: a Choice
+field (per block, default in the Block Library or card settings) with a sensible default, each option explained in its (i),
+and each option tested. A single rule is fine only where one answer is clearly right for every wall.
+
+**Worker model (state it in every brief):** pick the cheapest model that can do the block well. The Worker must use tools
+reliably (Unity MCP, files) and must SEE images (the captures are its visual check), so a text-only model is never enough.
+- Opus-class (strongest): a new owner / service / architectural piece, cross-cutting refactors, 3D / AR / math-heavy work, or a
+  block after a session that failed or produced subtle bugs.
+- Sonnet-class: new kinds that follow an existing pattern closely, review fixes, Editor rows, fixtures, docs.
+- Smaller / cheaper models (Haiku-class or others): only mechanical, well-specified edits (renames, doc sync, moving files)
+  with a narrow test to run; not for anything that needs design judgement or visual checks.
 
 **References check (before writing the brief):** list what the Worker must READ, not only what it may consult: the domain
 guide's TODOs + status + the sections of the step, and the rule sections the block will hit (Editor rows -> `_5.1` section 0;
@@ -104,6 +120,7 @@ REQUIRED READING (all lines): <the exact sections the block touches -- always `_
 section "0. Guidelines" when the block adds or changes any POI Editor row, table, popup or capture; `40-testing.md` 4.2.3 + 4.5
 when it adds real-input tests or captures; any other guide whose rules apply>.
 Context only: <other guides>.
+WORKER MODEL: <Opus-class / Sonnet-class / smaller, and why in a few words>.
 TEST PLAN: <baseline full run needed? / full EditMode + PlayMode once at the end / background full run: yes or no>.
 
 PART 1 -- <fixes>: numbered, each = what + where + the test that proves it + recapture.

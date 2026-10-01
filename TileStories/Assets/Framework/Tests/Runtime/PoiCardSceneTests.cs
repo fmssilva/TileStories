@@ -549,9 +549,10 @@ namespace TileStories.Tests
                 "knowledge_check", "knowledge_check", "knowledge_check", "poll", "collect", "feedback", "feedback", "dialogue", "show_on_wall", "show_on_wall",
                 "audio_guide", "audio_guide",
                 "sources", "sources", "actions", "actions", "actions",
-                // - Tier 5 (10A.2b.3 on): the Lamp's own model_3d and panorama_360 fixtures, excluded from THIS list on purpose
+                // - Tier 5 (10A.2b.3 on): the Lamp's own model_3d, panorama_360 and place_in_ar fixtures, excluded from THIS list on purpose
                 //   (its own name says Tiers 1 to 4) rather than folded in as more rows every time a later tier adds one
-            }, ShownKinds().Where(k => builtIn.TryGet(k, out _) && k != BuiltInBlocks.Model3DKind && k != BuiltInBlocks.Panorama360Kind).ToList(),
+            }, ShownKinds().Where(k => builtIn.TryGet(k, out _) && k != BuiltInBlocks.Model3DKind && k != BuiltInBlocks.Panorama360Kind
+                && k != BuiltInBlocks.PlaceInArKind).ToList(),
                 "one block per kind and variant of Tiers 1 to 4, nothing skipped");
             var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
             CollectionAssert.IsEmpty(BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Skipped, "no authored block skipped");

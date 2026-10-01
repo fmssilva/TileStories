@@ -6249,6 +6249,41 @@
                                 "items": []
                             }
                         ]
+                    },
+                    {
+                        "key": "block_62",
+                        "kind": "place_in_ar",
+                        "variant": "button",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The arch, here in the room"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O arco, aqui na sala"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "model",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:azulejo_arch",
+                                "items": []
+                            }
+                        ]
                     }
                 ]
             }

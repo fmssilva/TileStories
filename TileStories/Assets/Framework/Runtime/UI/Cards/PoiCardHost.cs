@@ -61,6 +61,12 @@ namespace TileStories
         public ICardPreview Preview => PreviewService;
         private CardPreviewStage _previewStage;
 
+        // The card's AR placement (_3.1 step 10B.1): ONE owner over this wall (WallArSurface: the session's frame and tracker) and the card's
+        // media; one model stands in the world at a time and goes when the card closes. Blocks reach it through BlockBindContext.ArPlacement.
+        public ArPlacementService ArPlacementService { get; private set; }
+        public ICardArPlacement ArPlacement => ArPlacementService;
+        private WallArSurface _arWall;
+
         private readonly TapOutsideDismissal _tapOutside = new();
 
         // What the visitor did on this wall's cards (answers, votes, revealed blocks): PlayerPrefs, scoped by the wall's id. A
@@ -127,6 +133,7 @@ namespace TileStories
             AudioCoordinator?.Shutdown();
             VideoService?.CardClosed();
             PreviewService?.ReleaseAll();
+            ArPlacementService?.Remove();
         }
 
         private void BuildOnce()
@@ -147,6 +154,23 @@ namespace TileStories
             UseVideoService(new CardVideoService(_videoPlayer.CreateOutput(), () => Media));
             _previewStage = GetComponent<CardPreviewStage>() != null ? GetComponent<CardPreviewStage>() : gameObject.AddComponent<CardPreviewStage>();
             UsePreviewService(new CardPreviewService(_previewStage, () => Media));
+            _arWall = new WallArSurface(wallSession);
+            UseArPlacementService(new ArPlacementService(_arWall, () => Media));
+        }
+
+        // Make `service` the card's AR placement owner (the app's own is built in BuildOnce over this wall; a test may hand one over a
+        // ManualArWall): the old owner takes its model away first
+        internal void UseArPlacementService(ArPlacementService service)
+        {
+            ArPlacementService?.Dispose();
+            ArPlacementService = service;
+        }
+
+        // - the host going away: nothing it placed stays in the world, nothing listens to the tracker
+        private void OnDestroy()
+        {
+            ArPlacementService?.Dispose();
+            _arWall?.Dispose();
         }
 
         // Make `service` the card's preview owner (the app's own is built in BuildOnce over the real CardPreviewStage; a test
@@ -254,6 +278,7 @@ namespace TileStories
                 Audio = Audio,
                 Video = Video,
                 Preview = Preview,
+                ArPlacement = ArPlacement,
                 ReduceMotion = settings.container.reduce_motion,
             };
             Sheet.Show(stack.Entries, context, SheetStopRule.OpenStop(settings.container.open_stop), settings.container.half_max_ratio);
@@ -278,6 +303,7 @@ namespace TileStories
             AudioCoordinator?.CardClosed();
             VideoService?.CardClosed();
             PreviewService?.ReleaseAll();
+            ArPlacementService?.Remove();
         }
 
         // The wall's POI set or the card's own settings changed (a live edit, a demo switched on): the open card shows the new data, and the

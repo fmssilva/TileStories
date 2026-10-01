@@ -124,6 +124,114 @@ namespace TileStories.Editor.Tests
             Assert.Greater(ModelFitRule.DistanceFor(0f, 60f, 1f), 0f, "a degenerate model still gets a positive distance");
         }
 
+        // ---------------- ModelFitRule box fits (10B-pre.1) ----------------
+
+        // An elongated box off its pivot's axis, shaped like the LivingRoom room scan (5.3 x 3.3 x 8.5 m), plus a small second box
+        private static readonly Bounds[] LongModel = { new Bounds(new Vector3(0.4f, 1.6f, -0.2f), new Vector3(5.3f, 3.3f, 8.5f)), new Bounds(new Vector3(2f, 3.5f, 3f), Vector3.one) };
+        private const float Fov = 60f;
+
+        // The largest share of the frame's half-extent any corner reaches, projected through Unity's OWN camera rotation (the stage's
+        // Quaternion.Euler(pitch, yaw, 0) about the pivot), independently of the rule's closed form: 1 = on the frame's edge
+        private static float WorstShareOfFrame(System.Collections.Generic.List<Vector3> corners, float yaw, float pitch, float distance, float aspect)
+        {
+            var toCamera = Quaternion.Inverse(Quaternion.Euler(pitch, yaw, 0f));
+            float tanV = Mathf.Tan(Fov * 0.5f * Mathf.Deg2Rad), tanH = tanV * aspect, worst = 0f;
+            foreach (var corner in corners)
+            {
+                var c = toCamera * corner;
+                float depth = distance + c.z;
+                Assert.Greater(depth, 0f, "every corner stays in front of the camera");
+                worst = Mathf.Max(worst, Mathf.Abs(c.x) / (tanH * depth), Mathf.Abs(c.y) / (tanV * depth));
+            }
+            return worst;
+        }
+
+        [Test]
+        public void ModelFit_YawSafe_KeepsEveryCornerInsideTheFrameFill_AtEveryYaw_OfThePitchHeld_AndOneCornerTouchesIt()
+        {
+            var pivot = ModelFitRule.UnionCentre(LongModel);
+            var corners = ModelFitRule.CornersAround(LongModel, pivot);
+            foreach (float aspect in new[] { 360f / 220f, 390f / 844f, 1f })
+                foreach (float pitch in new[] { 0f, 15f, -40f, TurntableRule.MaxPitch, TurntableRule.MinPitch })
+                {
+                    float d = ModelFitRule.YawSafeDistance(corners, pitch, Fov, aspect);
+                    float worstOverYaw = 0f;
+                    for (int yaw = 0; yaw < 360; yaw++) worstOverYaw = Mathf.Max(worstOverYaw, WorstShareOfFrame(corners, yaw, pitch, d, aspect));
+                    string what = "aspect " + aspect + " pitch " + pitch;
+                    // - 1e-3: float rounding of the projection; the 1 degree yaw step can only miss the exact peak, never overshoot it
+                    Assert.LessOrEqual(worstOverYaw, ModelFitRule.FrameFill + 1e-3f, what + ": a corner leaves the frame fill at some yaw");
+                    Assert.GreaterOrEqual(worstOverYaw, ModelFitRule.FrameFill * 0.995f, what + ": the fit is loose (no corner reaches the frame fill at any yaw)");
+                }
+        }
+
+        [Test]
+        public void ModelFit_AtRest_FillsTheFrameAtTheStartAngle_AndIsNeverFartherThanYawSafe_WhichFollowsThePitch()
+        {
+            var corners = ModelFitRule.CornersAround(LongModel, ModelFitRule.UnionCentre(LongModel));
+            float aspect = 360f / 220f;
+            float atRest = ModelFitRule.AtRestDistance(corners, Fov, aspect);
+            Assert.AreEqual(ModelFitRule.FrameFill, WorstShareOfFrame(corners, 0f, 0f, atRest, aspect), 1e-3f, "at rest the farthest-reaching corner sits on the frame fill");
+            float yawSafeLevel = ModelFitRule.YawSafeDistance(corners, 0f, Fov, aspect);
+            Assert.LessOrEqual(atRest, yawSafeLevel + 1e-4f, "at_rest is the largest picture: never farther back than yaw_safe");
+            Assert.Greater(ModelFitRule.YawSafeDistance(corners, 60f, Fov, aspect), yawSafeLevel, "tilting a long model moves the yaw_safe camera back");
+            Assert.Less(WorstShareOfFrame(corners, 0f, 0f, yawSafeLevel, aspect), ModelFitRule.FrameFill + 1e-3f);
+        }
+
+        // A box's triangles around the origin, wound so their normal cross(b - a, c - a) points OUT (a solid) or IN (a room seen
+        // from outside: one-sided walls that only show from inside); `withFloorAndCeiling` false leaves the two y faces out
+        private static System.Collections.Generic.List<Vector3> BoxTriangles(Vector3 half, bool facingOut, bool withFloorAndCeiling = true)
+        {
+            var tris = new System.Collections.Generic.List<Vector3>();
+            for (int axis = 0; axis < 3; axis++)
+                for (int sign = -1; sign <= 1; sign += 2)
+                {
+                    if (axis == 1 && !withFloorAndCeiling) continue;
+                    Vector3 n = Vector3.zero; n[axis] = sign;
+                    Vector3 u = Vector3.zero; u[(axis + 1) % 3] = 1f;
+                    Vector3 v = Vector3.Cross(n, u);
+                    Vector3 c = Vector3.Scale(n, half), du = Vector3.Scale(u, half), dv = Vector3.Scale(v, half);
+                    Vector3 p0 = c - du - dv, p1 = c + du - dv, p2 = c + du + dv, p3 = c - du + dv;
+                    foreach (var (a, b, d) in new[] { (p0, p1, p2), (p0, p2, p3) })
+                    {
+                        bool outward = Vector3.Dot(Vector3.Cross(b - a, d - a), n) > 0f;
+                        tris.Add(a);
+                        if (outward == facingOut) { tris.Add(b); tris.Add(d); } else { tris.Add(d); tris.Add(b); }
+                    }
+                }
+            return tris;
+        }
+
+        [Test]
+        public void ModelFit_Visible_FramesASolidLikeYawSafe_AndAOneSidedRoomTighterThanItsBox_WithEveryFacingCornerInside()
+        {
+            var half = new Vector3(2.65f, 1.65f, 4.25f);
+            var solid = BoxTriangles(half, facingOut: true);
+            // - four one-sided walls: a floor and a ceiling would show from outside at mid-height and hold every corner themselves
+            var room = BoxTriangles(half, facingOut: false, withFloorAndCeiling: false);
+            var corners = ModelFitRule.CornersAround(new[] { new Bounds(Vector3.zero, half * 2f) }, Vector3.zero);
+            float aspect = 360f / 220f;
+            foreach (float pitch in new[] { 0f, 30f, -60f })
+            {
+                float box = ModelFitRule.YawSafeDistance(corners, pitch, Fov, aspect);
+                float solidFit = ModelFitRule.VisibleDistance(solid, pitch, box, Fov, aspect);
+                float roomFit = ModelFitRule.VisibleDistance(room, pitch, box, Fov, aspect);
+                // - 2 %: the visible fit samples the yaw circle every VisibleYawStepDegrees, the box fit takes its exact peak
+                Assert.AreEqual(box, solidFit, box * 0.02f, "pitch " + pitch + ": a closed solid shows its near corners, so it frames like its box");
+                Assert.Less(roomFit, box * 0.99f, "pitch " + pitch + ": the room's near walls face away (culled), so their corners stop counting and it frames closer");
+            }
+        }
+
+        [Test]
+        public void ModelFit_ModeOf_ReadsTheThreeOptions_AndAnythingElseIsYawSafe()
+        {
+            Assert.AreEqual(ModelFitMode.Visible, ModelFitRule.ModeOf(ModelFitRule.FitVisible));
+            Assert.AreEqual(ModelFitMode.YawSafe, ModelFitRule.ModeOf(ModelFitRule.FitYawSafe));
+            Assert.AreEqual(ModelFitMode.Sphere, ModelFitRule.ModeOf(ModelFitRule.FitSphere));
+            Assert.AreEqual(ModelFitMode.AtRest, ModelFitRule.ModeOf(ModelFitRule.FitAtRest));
+            Assert.AreEqual(ModelFitMode.YawSafe, ModelFitRule.ModeOf(""));
+            Assert.AreEqual(ModelFitMode.YawSafe, ModelFitRule.ModeOf("box"), "a stale value is the default, never an exception");
+        }
+
         // ---------------- PanoramaSphereRule (10A.4.1) ----------------
 
         [Test]

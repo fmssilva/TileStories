@@ -62,5 +62,19 @@ namespace TileStories.Editor.Tests
             }
             CollectionAssert.AreEquivalent(registry.All.Select(k => k.Key), registry.Ordered.Select(k => k.Key), "only regrouped, nothing lost");
         }
+
+        // A kind's display name reads in a sentence ("About the 3D Model"): no number glued to a lowercase unit like "3d" (_3.1 10B-pre.2);
+        // the keys stay what saved configs hold
+        [Test]
+        public void TheBuiltInKinds_DisplayNamesHaveNoLowercaseUnit_AndThe3DAnd360KindsReadNumberFirst()
+        {
+            var registry = new BlockRegistry();
+            BuiltInBlocks.Register(registry);
+            var lowercaseUnit = new System.Text.RegularExpressions.Regex(@"\d+[a-z]");
+            foreach (var kind in registry.All)
+                Assert.IsFalse(lowercaseUnit.IsMatch(kind.DisplayName), kind.Key + ": display name '" + kind.DisplayName + "' has a lowercase unit");
+            Assert.IsTrue(registry.TryGet("model_3d", out var model) && model.DisplayName == "3D Model", "model_3d keeps its key and reads '3D Model'");
+            Assert.IsTrue(registry.TryGet("panorama_360", out var panorama) && panorama.DisplayName == "360 Panorama", "panorama_360 keeps its key and reads '360 Panorama'");
+        }
     }
 }

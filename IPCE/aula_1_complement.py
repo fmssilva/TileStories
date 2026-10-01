@@ -1,7 +1,7 @@
-# %% 
+# %%
 """
 ---------------------------------------------------------------------------
------ [Aula 1] Bem-vindo(a) à Programação em Python! 
+----- [Aula 1] Bem-vindo(a) à Programação em Python!
 ---------------------------------------------------------------------------
 
 Este ficheiro é o teu resumo da primeira aula
@@ -20,6 +20,7 @@ iluminados no IDE. Isso são as células (blocos separados por # %%).
     Com o cursor dentro da célula pretendida,
     faz Ctrl + Enter
     e vê o resultado da célula na consola.
+    (Shift + Enter faz o mesmo e salta logo para a célula seguinte)
 
 Experimenta já:
     coloca o cursor dentro desta célula e faz Ctrl+Enter
@@ -28,10 +29,14 @@ Experimenta já:
 print("Output da 1ª célula!")
 
 
-# %% 
+
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
----- Comentário vs Código 
+---- Comentário vs Código
 ---------------------------------------------------------------------------
 
 Uma linha que começa com # é um COMENTÁRIO:
@@ -44,10 +49,14 @@ Tudo o resto é CÓDIGO: o Python lê, interpreta e executa.
 print("Exemplo - isto é código -> aparece na consola")  # também podes comentar no fim da linha
 
 
-# %% 
+
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
----- Indentação: a "gramática visual" do Python 
+---- Indentação: a "gramática visual" do Python
 ---------------------------------------------------------------------------
 
 Nalgumas linguagens usamos chavetas { } para delimitar o código que
@@ -68,7 +77,11 @@ else:
     print("És menor de idade")
 
 
-# %% 
+
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
 ---- Tipos de dados básicos
@@ -97,7 +110,11 @@ print(esta_a_chover, type(esta_a_chover))
 print(resultado, type(resultado))
 
 
-# %% 
+
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
 ---- Converter entre tipos (cast)
@@ -109,26 +126,26 @@ o valor com o nome do tipo que queremos: int(...), float(...), str(...).
 """
 
 
-# int para string: 
-a = 1                   # int 
+# int para string:
+a = 1                   # int
 b = str(a)              # "1"  (agora é str)
 print("int -> str")
 print(a, type(a))
-print(b, type(b), "\n")       
+print(b, type(b), "\n")
 
-# string para int: 
+# string para int:
 a = "25"     # string
 b = int(a)   # 25   (agora é int, já dá para somar/multiplicar)
 print("str -> int")
 print(a, type(a))
 print(b, type(b), "\n")
-       
-# string para float 
+
+# string para float
 a = "3.5"
 b = float(a)
 print("str -> float")
 print(a, type(a))
-print(b, type(b), "\n")       
+print(b, type(b), "\n")
 
 # float para int (repara que a parte decimal é truncada - não arredonda)
 a = 3.9
@@ -137,13 +154,17 @@ print("float -> int")
 print(a, type(a))
 print(b, type(b))
 
-# Algumas conversão não são exequíveis e dão erro
-# exemplo isto vai dar erro (remove o comentário e corre para veres): 
+# Algumas conversões não são possíveis e dão erro
+# exemplo isto vai dar erro (remove o comentário e corre para veres):
 
 # a = int("vinte")
 
 
-# %% 
+
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
 ---- Input e Output: print() e input()
@@ -154,7 +175,7 @@ Estas duas funções são a forma mais simples de "comunicar com o programa"
     print(...)  -> ESCREVE algo no ecrã            (OUTPUT)
     input(...)  -> LÊ o que a pessoa escreve        (INPUT)
 
-Com input() podemos passar uma mensagem prompt para mostrar no terminal 
+Com input() podemos passar uma mensagem prompt para mostrar no terminal
 e assim o user saber o que tem de escrever
 
 Com print() podemos usar f"...{variavel}" - ou seja, colocando um f antes da string
@@ -165,17 +186,20 @@ nome = input("Como te chamas? - escreve aqui o teu nome:")
 # Aqui repara na consola e escreve lá o teu nome
 print("Olá, " + nome + "!")
 
-# Important: input() devolve sempre texto (str)
-# Se queremos obter "números" temos que converter, exemplo para int: 
+# Importante: input() devolve sempre texto (str)
+# Se queremos obter "números" temos que converter, exemplo para int:
 idade = int(input("Que idade tens?"))
 
-# repara como usamos as variaveis entre chavetas no meio da string, 
-# ao usar f"" no inicio da string 
+# repara como usamos as variaveis entre chavetas no meio da string,
+# ao usar f"" no inicio da string
 print(f"O {nome} tem {idade} anos")
 
 
 
-# %% 
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
 ---- Operadores aritméticos
@@ -199,12 +223,18 @@ print("resto:", num_float % num_int)
 print("potência:", num_float ** num_int)
 
 
-# Quando fazemos operações com int, o resultado é sempre int
-# EXCETO na divisão que devolve float
-print (3/2)
+# Quando fazemos operações só com int, o resultado é int
+# EXCETO na divisão "/", que devolve sempre float
+print(3 / 2)      # 1.5
+print(4 / 2)      # 2.0  -> float, mesmo sendo uma divisão exata
+# (e também nas potências com expoente negativo: 2 ** -1 dá 0.5)
 
 
-# %% 
+
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
 ---- Operadores com String
@@ -218,7 +248,7 @@ print("string a ..." + "...string b")
 # Não podemos misturar em operações string com int/float
 # Python não tenta adivinhar que número a string representa
 # Ou seja - Python é FORTEMENTE TIPADO
-# Exemplo se correres a linha seguinte vai dar erro (remove o comentario para veres): 
+# Exemplo se correres a linha seguinte vai dar erro (remove o comentario para veres):
 # print(5 + "10")   # TypeError: unsupported operand type(s) for +: 'int' and 'str'
 
 # A forma correta é converter explicitamente, para dizeres tu o que queres:
@@ -226,11 +256,15 @@ print(5 + int("10"))    # queremos somar -> converte o texto para número: 15
 print(str(5) + "10")    # queremos concatenar -> converte o número para texto: "510"
 
 # Algumas linguagens são de tipagem fraca (Exemplo JavaScript)
-# Nessa linguagem podemos fazer "5"-2 e obtemos 3; "5"*2 e obtemos 10... 
-# Mas se fizerms "5"+2 a linguagem interpreta como string e obtemos "52"
+# Nessa linguagem podemos fazer "5"-2 e obtemos 3; "5"*2 e obtemos 10...
+# Mas se fizermos "5"+2 a linguagem interpreta como string e obtemos "52"
 
 
-# %% 
+
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
 ---- Operadores de comparação e lógicos
@@ -256,7 +290,11 @@ print(idade < 18 or tem_bilhete)
 print(not tem_bilhete)
 
 
-# %% 
+
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
 ---- Próxima aula - Pequeno Spoiler!!
@@ -264,7 +302,7 @@ print(not tem_bilhete)
 
 Hoje aprendeste os "ingredientes": tipos de dados e operadores.
 Na próxima aula vamos aprender a combiná-los com lógica para construir
-um programa a sério. 
+um programa a sério.
 
 Vamos aprender:
 """
@@ -282,7 +320,8 @@ for numero in range(5):
 
 # funções -> escrever um bloco de código com uma lógica e depois
 #            poder chamá-lo (reutilizá-lo) sempre que precisarmos
-def soma(a, b):  # função simples que soma 2 números dados como input (argumentos)
+def soma(a: int, b: int) -> int:   # recebe 2 números (argumentos) e devolve a soma
+    """ Soma de dois inteiros. """
     return a + b
 
 result = soma(2, 2)
@@ -292,18 +331,23 @@ print(soma(6, 5))
 
 # recursividade -> uma função pode chamar-se a si mesma, criando uma
 #                  espécie de ciclo, mas com um mecanismo diferente
-def funcao_recursiva(numero):
+def funcao_recursiva(numero: int) -> None:
+    """ Escreve numero, numero-1, ..., 0. """
     if numero < 0:      # condição de paragem -- sem isto, corria para sempre!
         return
     print(numero)
     funcao_recursiva(numero - 1)
 
 funcao_recursiva(5)
-# repara que aqui vamos fazer print de valores 0-5, 
+# repara que aqui vamos fazer print de valores 0-5,
 # mas ao contrário porque começamos com 5 e vamos decrescendo até 0
 
 
-# %% 
+
+
+
+
+# %%
 """
 ---------------------------------------------------------------------------
 ---- Atalhos úteis no Spyder
@@ -324,3 +368,21 @@ Não precisas de decorar tudo já, mas estes poupam-te muito tempo:
     Alt + seta (cima/baixo)    -> mover a linha (ou bloco selecionado) para cima/baixo
 """
 pass
+
+
+
+
+
+
+# %%
+"""
+---------------------------------------------------------------------------
+---- Para treinar mais
+---------------------------------------------------------------------------
+
+Tudo o que está neste ficheiro (variáveis, tipos, operadores, conversões,
+print e input) está explicado com mais calma, e com muitos exercícios
+com solução, em:
+
+    revisoes_1_variaveis_tipos_input.py
+"""

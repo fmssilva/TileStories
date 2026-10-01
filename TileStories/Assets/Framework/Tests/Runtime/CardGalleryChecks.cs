@@ -129,7 +129,7 @@ namespace TileStories.Tests
             var slot = stack.SlotOf(view);
             var definition = BlockRegistry.Shared.TryGet(entry.Kind, out var d) ? d : null;
             string expected = CardGalleryDefinitions.HasHeading(entry)
-                ? CardGalleryDefinitions.HeadingPrefix + entry.Kind.Replace('_', ' ')
+                ? CardGalleryDefinitions.HeadingFor(entry.Kind)
                 : definition?.DefaultHeadingKey != null ? new CardStrings(harness.StringTable.Entries(), harness.StringSources.Entries(), null, harness.Language, harness.Language).Get(definition.DefaultHeadingKey) : "";
             Assert.AreEqual(expected, heading.text, entry.Name + ": the heading the stack draws");
             if (expected.Length > 0)

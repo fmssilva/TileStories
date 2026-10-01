@@ -1,4 +1,4 @@
-# `Aula 3 - IPCE`
+# `Aula N - IPCE` (guia de sessão da aula prática)
 Sou professor das aulas práticas do turno **P1**, ano letivo 2026/2027. A prática do P1 é dada **antes** da teórica da mesma matéria (que é à tarde) — por isso as coisas têm de ser explicadas de forma simples e clara para que mesmo quem não sabe nada consiga acompanhar
 
 ## Alguns factos da aula: 
@@ -6,12 +6,13 @@ Sou professor das aulas práticas do turno **P1**, ano letivo 2026/2027. A prát
 - Aula prática de 2:50 horas seguidas, entre as 10:10 e as 13:00 (é bom então pensar 1 intervalo maior de 20 minutos a meio para a turma descansar) 
 - Aula prática começa às 10:10
   
-## Agora vamos preparar a `aula 4` - Envio agora em anexo: 
+## Agora vamos preparar a `aula N` (guiões `Na` e `Nb`) - Envio agora em anexo: 
 * Envio em anexo as aulas teoricas dadas até agora. Reparar que nem sempre a aula teórica bate certo com a prática. Por vezes a prática aborda conceitos ainda praticamente não dados na teorica... por isso não podemos assumir que sabem coisas e dizer: "como viram na teorica". 
-* Envio também o guião da aula prática que é o guião que eu devo seguir na aula pratica `4a e 4b` (como vês é um guia bem feito e completo e basicamente a aula podia ser eu dizer "leiam este guia de exercícios e façam e qualquer dúvida perguntem", mas pronto, quero ser um professor de qualidade que realmente sabe ensinar e cativar a aula e ir além desses guias práticos!). 
+* Envio também o guião da aula prática que é o guião que eu devo seguir na aula pratica `Na e Nb` (como vês é um guia bem feito e completo e basicamente a aula podia ser eu dizer "leiam este guia de exercícios e façam e qualquer dúvida perguntem", mas pronto, quero ser um professor de qualidade que realmente sabe ensinar e cativar a aula e ir além desses guias práticos!). 
 * Envio também as soluções dos exercícios (repara que envio as soluções de todos os exercícios da cadeira então confirma os exercicios em concretos desta aula prática)
 * Envio também uns exemplos de testes dos anos anteriores (é para este nível de dificuldade ou superior que devo preparar os alunos)
 * Envio também o exemplo de plano guia de sessão da última aula.
+* Existe também a série de ficheiros de revisões (`revisoes_1` a `revisoes_6`). Não é preciso mudá-los, mas o guia novo deve apontar para as secções que treinam a matéria da aula (ver "Fecho da aula"). Se a matéria da aula ainda não estiver coberta nas revisões, diz-me.
  
 
 ## Estilo de ensino (importante manter)
@@ -56,6 +57,32 @@ para ficar tudo bem organizado.
 - Deixar 6 linhas em branco entre o fim de uma célula e o # %% seguinte, para separar bem ao projetar.
 - Podes colocar e manter código duplicado comentado para mostrar uma solução alternativa - isto é bom e intencional e deve-se manter e não remover.
 
+### Cabeçalho do ficheiro
+- Título da aula, link do guião (https://ipce-184ea7.gitlab.io/) e como usar o ficheiro no Spyder:
+  Ctrl+Enter corre a célula, Shift+Enter corre e salta para a seguinte, F5 corre o ficheiro todo.
+- Avisar que as soluções aparecem depois de muito espaço em branco, para tentarem primeiro.
+
+### Enunciado e solução separados (como nas revisões)
+- Em todos os exercícios (guião e inventados): a célula do enunciado tem a assinatura da função, docstring e `pass` (ou só o código a prever).
+- No fim da célula do enunciado, o separador:
+      # ======================================================================
+      #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+      # ======================================================================
+  seguido de muitas linhas em branco, e só depois o `# %%` com a solução.
+- Exercícios "o que escreve este código?": o código fica no enunciado,
+  mas a resposta (comentários tipo `# 10`) vai só para a célula da solução.
+- Não é preciso usar os níveis das revisões ([FAZ], [PENSA], [DESAFIO]...) na aula,
+  mas os exercícios de consolidação podem ter um marcado [DESAFIO] para quem acabar mais cedo.
+
+### Matéria ainda não dada
+- Não usar ferramentas que ainda não foram dadas (nem na teórica nem nos guiões anteriores),
+  por exemplo `enumerate`, `while`, `break`, métodos de strings.
+- Se valer a pena mostrar, fica como curiosidade comentada, claramente marcada como extra.
+
+### Fecho da aula
+- Última célula "PARA TREINAR MAIS": aponta para os ficheiros e secções das revisões
+  que treinam a matéria desta aula (ex: `revisoes_3`, secções 7 e 8).
+
 ### Tempos: 
 Depois pensa também em termos de tempo, o tempo que devo dar para cada exercício e para cada grande bloco para ser fácil eu ir gerindo a aula
 - Formato uniforme em todos os blocos/exercícios: [X min -> HH:MM] (duração + hora-limite acumulada, não só duração).
@@ -83,6 +110,20 @@ No fim:
 - Verificar o timing à mão (soma total + checkpoints acumulados).
 - Verificar que cada secção com tag de tempo tem o seu próprio separador # %%.
 - Verificar typos e caracteres partidos (acentos mal escritos).
+- F5 tem de correr o ficheiro até ao fim sem rebentar. Demos de erros que lançam exceção
+  (UnboundLocalError, IndexError...) ficam comentadas com "descomenta e corre", ou o ficheiro pára a meio.
+- Correr cada célula ISOLADA (estado limpo, como quem abre o ficheiro e corre só aquela célula).
+  Se falhar porque precisa de uma função ou import de outra célula: ou se redefine/importa ali,
+  ou se põe uma nota "corre primeiro a célula X". Cada `import math` vai na célula que o usa.
+- Confirmar que os exemplos do enunciado do guião dão mesmo o valor que o guião diz
+  (ex: se o guião diz que f(4) dá 14, correr f(4)), e que a `main` usa esses mesmos valores.
+- Todo o valor escrito num comentário (`# dá 0.30000000000000004`, "faz 1077 divisões") é confirmado a correr, nunca de cabeça.
+- Procurar e remover prints de debug esquecidos dentro das funções.
+- Confirmar que nenhuma célula de enunciado tem a resposta à vista.
+- Confirmar que cada separador "SOLUÇÃO NA CÉLULA DE BAIXO" aparece uma só vez por exercício.
+- Zero travessões (—): usar hífen, dois pontos ou vírgula.
+- Contar as células e os separadores no fim e dizer-me os números, com a prova das verificações
+  (o que foi corrido e o resultado), não só "está verificado".
   
 ## Coisas a evitar (erros já cometidos)
 - Explicar conceitos antes de pôr a programar (o erro principal identificado).
@@ -91,9 +132,17 @@ No fim:
 - Escrever linguagem "meta" dirigida ao professor no documento final para os alunos.
 - Remover código duplicado comentado (é intencional).
 - Assumir que "corre sem erro" = "está conceptualmente certo" — pode haver bugs silenciosos ou inconsistências texto/código.
+- Deixar uma demo de erro descomentada, que faz o F5 rebentar a meio do ficheiro.
+- Copiar um exemplo de `range` ou um valor do guião sem confirmar (ex: `range(n+1)` em vez de `range(n)`, que dava 30 em vez de 14).
+- Escrever valores em comentários sem os correr.
+- Deixar as respostas de "o que escreve?" ao lado do código no enunciado.
+- Usar matéria que ainda não foi dada fora de uma curiosidade comentada.
+
+## Entrega
+- Fazer primeiro o guia completo, verificado, e enviá-lo como ficheiro na conversa.
+- Não fazer upload para o Google Drive reescrevendo o conteúdo do ficheiro (gasta tokens e pode perder partes).
+  Eu próprio ponho o ficheiro no Drive.
+- Se eu pedir alterações depois, dizer exatamente o que mudou e confirmar que os tempos continuam a somar até 13:00.
 
 ## Se bom e completo, não rápido
 Esta é uma tarefa complexa e longa. Quero que te foques em fazer bem e não rápido. Não tentes fazer a tarefa neste comando. Se for preciso continuamos a tarefa no comando ou sessão seguintes. Quero que façam uma análise profunda e crítica a tudo e faças boa pesquisa se necessário para confirmar alguma coisa para garantir que tudo está correto tanto em termos de "conteúdo" como em termos "motivacionais" para dar uma classe que realmente cativa os alunos. Sê bom, não rápido.
-
-
-

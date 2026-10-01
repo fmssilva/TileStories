@@ -80,7 +80,7 @@ namespace TileStories.LivingRoom.Tests
         {
             var block = new BlockInstanceData { key = "block_2", kind = SizeComparisonBlock.Kind, variant = SizeComparisonBlock.SideBySide };
             if (c.Heading)
-                block.fields.Add(new BlockFieldValue { key = BlockKindDefinition.HeadingField, text = En(CardGalleryDefinitions.HeadingPrefix + SizeComparisonBlock.Kind.Replace('_', ' ')) });
+                block.fields.Add(new BlockFieldValue { key = BlockKindDefinition.HeadingField, text = En(CardGalleryDefinitions.HeadingFor(SizeComparisonBlock.Kind)) });
             block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.ObjectField, value = c.Object });
             block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.WidthField, number = c.Width });
             block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.HeightField, number = c.Height });

@@ -104,6 +104,98 @@ namespace TileStories.Tests
             handle.Release();
         }
 
+        // ---------------- The Fit choice (_3.1 10B-pre.1): the solid arch and the hollow LivingRoom room scan ----------------
+
+        private const string RoomScan = "models/146267-LivingRoom2-tex.glb";
+        private const string Arch = "default:azulejo_arch";
+        // Every yaw in 30 degree steps at the turntable's whole pitch range (its limits included)
+        private static System.Collections.Generic.IEnumerable<(int Yaw, float Pitch)> AllowedTurns()
+        {
+            foreach (float pitch in new[] { TurntableRule.MinPitch, -40f, 0f, 40f, TurntableRule.MaxPitch })
+                for (int yaw = 0; yaw < 360; yaw += 30) yield return (yaw, pitch);
+        }
+
+        // A model on the landscape test stage, framed by `mode`
+        private IEnumerator LoadFitted(string path, ModelFitMode mode, System.Action<IPreviewHandle> got)
+        {
+            IMediaSource media = path == RoomScan ? new ResourcesMediaSource("LivingRoom/CardMedia") : _media;
+            var handle = _stage.Load(MediaKind.Model, media, path, null, null);
+            yield return null;
+            handle.Resize(360, 220);
+            handle.SetFit(mode);
+            Assert.AreEqual(220, handle.Texture.height, "precondition: the texture took the stage's size");
+            got(handle);
+        }
+
+        // What the model draws at the start angle
+        private static IEnumerator DrawnAtRest(IPreviewHandle handle, System.Action<RectInt> got)
+        {
+            handle.RenderNow(TurntableState.Start, default);
+            yield return null;
+            got(PreviewPixels.DrawnBounds(handle.Texture));
+        }
+
+        private static IEnumerator AssertInsideAtEveryAllowedTurn(IPreviewHandle handle, string what)
+        {
+            foreach ((int yaw, float pitch) in AllowedTurns())
+            {
+                handle.RenderNow(new TurntableState(yaw, pitch, 1f, 0f), default);
+                yield return null;
+                PreviewPixels.AssertDrawnInsideWithMargin(handle.Texture, what + " at yaw " + yaw + " pitch " + pitch);
+            }
+        }
+
+        // The hollow room scan's walls show only from inside, so from outside most of its box draws nothing: the box fits frame the
+        // box, and Visible -- sized to the faces that face the camera -- is the option for it. Accepted 2026-10-01 (_3.1 10B-pre.1):
+        // it draws the scan at 62 % of the shorter side (the brief's target was 65 %; what draws sits off-centre in the box, and the
+        // orbit stays about the box centre so the model turns in place), so the promise asserted is "clearly larger than yaw_safe"
+        [UnityTest]
+        public IEnumerator Fit_Visible_DrawsTheHollowRoomScanAtLeast30PercentLargerThanYawSafe_AndStaysInsideAtEveryAllowedTurn()
+        {
+            IPreviewHandle handle = null;
+            yield return LoadFitted(RoomScan, ModelFitMode.YawSafe, h => handle = h);
+            RectInt yawSafe = default, visible = default;
+            yield return DrawnAtRest(handle, r => yawSafe = r);
+            handle.SetFit(ModelFitMode.Visible);
+            yield return DrawnAtRest(handle, r => visible = r);
+            Assert.GreaterOrEqual(visible.height, yawSafe.height * 1.3f, "visible draws the hollow scan larger: " + visible + " vs yaw_safe " + yawSafe);
+            yield return AssertInsideAtEveryAllowedTurn(handle, "visible room scan");
+            handle.Release();
+        }
+
+        [UnityTest]
+        public IEnumerator Fit_YawSafe_StaysInsideAtEveryAllowedTurn_AndDrawsTheRoomScanAtLeastHalfAgainAsTallAsTheSphere()
+        {
+            IPreviewHandle handle = null;
+            yield return LoadFitted(RoomScan, ModelFitMode.Sphere, h => handle = h);
+            RectInt sphere = default, yawSafe = default;
+            yield return DrawnAtRest(handle, r => sphere = r);
+            yield return AssertInsideAtEveryAllowedTurn(handle, "sphere room scan");
+
+            handle.SetFit(ModelFitMode.YawSafe);
+            yield return DrawnAtRest(handle, r => yawSafe = r);
+            Assert.GreaterOrEqual(yawSafe.height, sphere.height * 1.5f, "yaw_safe draws the long model larger than the sphere: " + yawSafe + " vs " + sphere);
+            yield return AssertInsideAtEveryAllowedTurn(handle, "yaw_safe room scan");
+            handle.Release();
+
+            yield return LoadFitted(Arch, ModelFitMode.YawSafe, h => handle = h);
+            yield return AssertInsideAtEveryAllowedTurn(handle, "yaw_safe arch");
+            handle.Release();
+        }
+
+        [UnityTest]
+        public IEnumerator Fit_AtRest_FillsAtLeast80PercentOfTheFrameAtRest_OnASolidModel()
+        {
+            IPreviewHandle handle = null;
+            yield return LoadFitted(Arch, ModelFitMode.AtRest, h => handle = h);
+            RectInt rest = default;
+            yield return DrawnAtRest(handle, r => rest = r);
+            float fill = Mathf.Max(rest.width / (float)handle.Texture.width, rest.height / (float)handle.Texture.height);
+            Assert.GreaterOrEqual(fill, 0.8f, "at_rest: the arch fills " + fill.ToString("P0") + " of the frame on its binding axis, drawn " + rest);
+            PreviewPixels.AssertDrawnInsideWithMargin(handle.Texture, "at_rest arch at rest");
+            handle.Release();
+        }
+
         [UnityTest]
         public IEnumerator Load_AMissingFile_CallsOnFailedExactlyOnce_NeverOnReady()
         {

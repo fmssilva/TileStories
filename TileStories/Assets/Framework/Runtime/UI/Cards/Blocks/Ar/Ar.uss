@@ -1,4 +1,4 @@
-/* The ar family's looks (_3.1 Tier 3): what ties the card to the wall in front of the visitor -- show_on_wall.
+/* The ar family's looks (_3.1 Tier 3, Tier 5): what ties the card to the wall in front of the visitor -- show_on_wall, place_in_ar.
    Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
    _3.3). UI Toolkit USS only: no sibling selectors (an import ERROR that drops the whole sheet), no % radius, no web-CSS
    gap / cursor / calc. */
@@ -65,6 +65,67 @@
     font-size: var(--ts-size-body);
     color: var(--ts-ink);
     white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- place_in_ar (Tier 5, step 10B.2): the accent pill places the model; disabled (the wall not found) it goes quiet and a line says
+   why; while the model stands, a Remove chip under it ---- */
+
+/* an authored Button Label may be long: the pill shrinks to the card and its words wrap, centred */
+.card-place-in-ar__button {
+    align-self: flex-start;
+    flex-shrink: 1;
+    max-width: 100%;
+    margin: 0;
+    padding: var(--ts-space-2) var(--ts-space-4);
+    border-width: 0;
+    background-color: var(--ts-accent);
+}
+
+.card-place-in-ar__label {
+    flex-shrink: 1;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    color: var(--ts-on-accent);
+    margin: 0;
+    padding: 0;
+}
+
+.card-place-in-ar__button:disabled {
+    background-color: var(--ts-surface-2);
+}
+
+.card-place-in-ar__button:disabled .card-place-in-ar__label {
+    color: var(--ts-ink-2);
+}
+
+.card-place-in-ar__note {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: var(--ts-space-2) 0 0 0;
+    padding: 0;
+}
+
+.card-place-in-ar__remove {
+    flex-direction: row;
+    align-self: flex-start;
+    align-items: center;
+    min-height: var(--ts-touch-target);
+    margin: var(--ts-space-3) 0 0 0;
+    padding: 0 var(--ts-space-3);
+    border-width: 0;
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface-2);
+}
+
+.card-place-in-ar__remove-label {
+    -unity-text-align: middle-left;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
     margin: 0;
     padding: 0;
 }

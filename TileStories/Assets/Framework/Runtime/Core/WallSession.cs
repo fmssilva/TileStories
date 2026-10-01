@@ -583,8 +583,8 @@ public Transform MarkerSpawnRoot => correctionAnchor != null ? correctionAnchor 
             }
         }
 
-        // A POI's authored facing as a local rotation: the one formula spawn and live edits share
-        private static Quaternion AuthoredRotationOf(POIData poi) =>
+        // A POI's authored facing as a local rotation in the wall frame: the one formula spawn, live edits and place_in_ar (ArPlacementService) share
+        public static Quaternion AuthoredRotationOf(POIData poi) =>
             Quaternion.Euler(poi.editor_rotation_x_deg, poi.editor_rotation_deg, poi.editor_rotation_z_deg);
 
         // Swap which hierarchy level each spawned POI uses, on a running wall: size, label, label

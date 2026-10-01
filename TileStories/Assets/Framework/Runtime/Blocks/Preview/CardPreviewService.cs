@@ -23,6 +23,7 @@ namespace TileStories
             public IPreviewHandle Handle;
 
             public void Resize(int width, int height) => Handle?.Resize(width, height);
+            public void SetFit(ModelFitMode mode) => Handle?.SetFit(mode);
             public void RenderNow(TurntableState turntable, PanoramaViewState panorama) => Handle?.RenderNow(turntable, panorama);
 
             public Slot(string key, MediaKind kind, string path)

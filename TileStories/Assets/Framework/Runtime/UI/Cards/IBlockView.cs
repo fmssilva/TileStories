@@ -46,6 +46,10 @@ namespace TileStories
         // none (a block then shows its fallback picture). Unlike Audio/Video, several slots can be live at once: this is
         // a slot manager, not a single current owner (see ICardPreview)
         public ICardPreview Preview;
+        // The card's ONE AR placement owner (_3.1 step 10B.1), beside audio/video/preview: what a place_in_ar block asks to place its model
+        // in the world at its POI (one model at a time) and whether the wall is localised. Null where the caller has none (the block's
+        // button then stays disabled)
+        public ICardArPlacement ArPlacement;
         // Show still pictures instead of motion (card_settings.container.reduce_motion today; the visitor's own setting joins it with _3.3):
         // a header loop shows its poster only
         public bool ReduceMotion;

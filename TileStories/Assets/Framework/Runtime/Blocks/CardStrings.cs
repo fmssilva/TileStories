@@ -140,6 +140,11 @@ namespace TileStories
             public const string Panorama360DragHint = "panorama_360_drag_hint";
             public const string Panorama360GyroHint = "panorama_360_gyro_hint";
             public const string Panorama360Loading = "panorama_360_loading";
+            // place_in_ar (step 10B.2): its button (unless the block authors its own Button Label), the chip that takes the placed model away,
+            // and the line under the disabled button while the wall is not localised
+            public const string PlaceInArButton = "place_in_ar_button";
+            public const string PlaceInArRemove = "place_in_ar_remove";
+            public const string PlaceInArNotLocalised = "place_in_ar_not_localised";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -155,7 +160,7 @@ namespace TileStories
                 DialogueContinue, DialogueAgain, DialogueYou, ShowOnWallButton, ShowOnWallNearby,
                 AudioPlay, AudioPause, AudioSpeed, AudioCaptions, AudioSeek, AudioQueued, AudioUnavailable, MiniPlayerOpen,
                 MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters, Model3DHint, Model3DLoading,
-                Panorama360DragHint, Panorama360GyroHint, Panorama360Loading,
+                Panorama360DragHint, Panorama360GyroHint, Panorama360Loading, PlaceInArButton, PlaceInArRemove, PlaceInArNotLocalised,
             };
         }
 

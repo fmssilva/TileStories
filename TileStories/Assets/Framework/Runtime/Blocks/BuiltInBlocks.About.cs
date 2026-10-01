@@ -28,6 +28,7 @@ namespace TileStories
         // loads (step 10A.3.2)
         public const string HeaderModelTurntable = "model_turntable";
         public const string HeaderModelField = "model";
+        public const string HeaderModelFitField = "model_fit";
 
         public const string StatusKind = "status";
         public const string StatusRing = "ring";
@@ -167,6 +168,7 @@ namespace TileStories
                     Key = HeaderModelField, Type = BlockFieldType.Asset, Media = MediaKind.Model, Label = "Model",
                     Help = "Model Turntable only: a .glb or .gltf file inside the Media Folder, or a Framework/wall default.",
                 },
+                ModelFitField(HeaderModelFitField, "Model Turntable only. "),
             },
         };
 

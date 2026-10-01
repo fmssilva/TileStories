@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TileStories
@@ -7,19 +8,57 @@ namespace TileStories
     // a panorama) and Release leaves none of it behind. The stage does the drawing; a handle only says what to draw.
     public sealed partial class CardPreviewStage
     {
-        // Where the model camera stands: how far back, what it orbits, and the model's bounding-sphere radius (the far plane's reach)
-        private readonly struct ModelFit
+        // What the model camera orbits and how far back it stands (ModelFitRule): the fit mode, the pivot, the bounding-sphere radius
+        // (also the far plane's reach), the box corners around the pivot, the stage's aspect and -- for the visible fit only -- a sample
+        // of the model's triangles. yaw_safe and visible follow the pitch, so their distance is asked per render (DistanceAt); visible
+        // keeps what it worked out per whole degree of pitch, since it walks the triangles at every sampled yaw.
+        private sealed class ModelFit
         {
-            public readonly float Distance;
+            public readonly ModelFitMode Mode;
             public readonly Vector3 Pivot;
             public readonly float Radius;
+            public readonly float Aspect;
+            private readonly List<Vector3> _corners;
+            private readonly List<Vector3> _triangles;
+            private readonly float _fixedDistance;
+            private readonly Dictionary<int, float> _visibleByPitch = new();
 
-            public ModelFit(float distance, Vector3 pivot, float radius)
+            public ModelFit(ModelFitMode mode, Vector3 pivot, float radius, List<Vector3> corners, List<Vector3> triangles, float aspect)
             {
-                Distance = distance;
+                // - no triangle can be read (a mesh not marked readable in a build): the box of yaw_safe instead
+                Mode = mode == ModelFitMode.Visible && (triangles == null || triangles.Count == 0) ? ModelFitMode.YawSafe : mode;
                 Pivot = pivot;
                 Radius = radius;
+                Aspect = aspect;
+                _corners = corners;
+                _triangles = triangles;
+                _fixedDistance = corners.Count == 0 ? 2f
+                    : Mode == ModelFitMode.Sphere ? ModelFitRule.DistanceFor(radius, ModelFieldOfView, aspect)
+                    : Mode == ModelFitMode.AtRest ? ModelFitRule.AtRestDistance(corners, ModelFieldOfView, aspect)
+                    : 0f;
             }
+
+            // The camera distance for a camera pitched `pitchDegrees` (yaw_safe and visible depend on it)
+            public float DistanceAt(float pitchDegrees)
+            {
+                if (_corners.Count == 0 || (Mode != ModelFitMode.YawSafe && Mode != ModelFitMode.Visible)) return _fixedDistance;
+                if (Mode == ModelFitMode.YawSafe) return ModelFitRule.YawSafeDistance(_corners, pitchDegrees, ModelFieldOfView, Aspect);
+                int degree = Mathf.RoundToInt(pitchDegrees);
+                if (!_visibleByPitch.TryGetValue(degree, out float distance))
+                {
+                    // - the faces are judged from where the box fit would stand: never closer than the camera ends up
+                    float reference = ModelFitRule.YawSafeDistance(_corners, degree, ModelFieldOfView, Aspect);
+                    distance = ModelFitRule.VisibleDistance(_triangles, degree, reference, ModelFieldOfView, Aspect);
+                    _visibleByPitch[degree] = distance;
+                }
+                return distance;
+            }
+
+            // The same fit for another stage aspect or another mode (the triangles are kept; they depend on neither)
+            public ModelFit With(float aspect, ModelFitMode mode, List<Vector3> triangles) =>
+                new(mode, Pivot, Radius, _corners, triangles ?? _triangles, aspect);
+
+            public bool HasTriangles => _triangles != null && _triangles.Count > 0;
         }
 
         // What every handle shares: its slot's root GameObject, the RenderTexture the view draws, resizing that texture to the
@@ -64,6 +103,9 @@ namespace TileStories
             // The texture has a new aspect: a model refits its camera distance to it
             protected virtual void OnResized(float aspect) { }
 
+            // How a model is framed (a panorama ignores it)
+            public virtual void SetFit(ModelFitMode mode) { }
+
             public void RenderNow(TurntableState turntable, PanoramaViewState panorama)
             {
                 if (Released || _root == null || _texture == null) return;
@@ -100,19 +142,24 @@ namespace TileStories
 
         private sealed class ModelHandle : HandleBase
         {
-            private readonly GameObject _model;
             private ModelFit _fit;
+            // What the block asked for (the fit falls back to yaw_safe while the visible fit has no triangles to read)
+            private ModelFitMode _requested = ModelFitMode.YawSafe;
 
-            public ModelHandle(CardPreviewStage stage, IMediaSource media, string path, GameObject root, RenderTexture texture, GameObject model, ModelFit fit)
+            public ModelHandle(CardPreviewStage stage, IMediaSource media, string path, GameObject root, RenderTexture texture, ModelFit fit)
                 : base(stage, media, path, root, texture)
             {
-                _model = model;
                 _fit = fit;
             }
 
-            protected override void OnResized(float aspect)
+            protected override void OnResized(float aspect) => _fit = _fit.With(aspect, _requested, null);
+
+            // - the visible fit reads the model's triangles the first time it is picked, never for the other fits
+            public override void SetFit(ModelFitMode mode)
             {
-                if (_model != null) _fit = FitFor(_model, aspect);
+                _requested = mode;
+                bool needsTriangles = mode == ModelFitMode.Visible && !_fit.HasTriangles && Root != null;
+                _fit = _fit.With(_fit.Aspect, mode, needsTriangles ? TrianglesAround(Root, _fit.Pivot) : null);
             }
 
             protected override void Draw(RenderTexture texture, TurntableState turntable, PanoramaViewState panorama) =>
@@ -149,6 +196,7 @@ namespace TileStories
         {
             public RenderTexture Texture => null;
             public void Resize(int width, int height) { }
+            public void SetFit(ModelFitMode mode) { }
             public void RenderNow(TurntableState turntable, PanoramaViewState panorama) { }
             public void Release() { }
         }

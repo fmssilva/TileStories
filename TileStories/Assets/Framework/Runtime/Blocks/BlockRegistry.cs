@@ -97,6 +97,10 @@ namespace TileStories
                 if (f == null || string.IsNullOrWhiteSpace(f.Key)) return "a field has no key";
                 if (!keys.Add(f.Key)) return "two fields are keyed '" + f.Key + "'";
                 if (f.Type == BlockFieldType.Choice && (f.Options == null || f.Options.Count == 0)) return "Choice field '" + f.Key + "' has no options";
+                if (f.ChoiceDefault != null && (f.Type != BlockFieldType.Choice || !Contains(f.Options, f.ChoiceDefault)))
+                    return "field '" + f.Key + "' defaults to '" + f.ChoiceDefault + "', which is not one of its Choice options";
+                if (f.LibraryDefault && (f.Type != BlockFieldType.Choice || f.ChoiceDefault == null || !allowItems))
+                    return "field '" + f.Key + "' takes a Block Library default but is not a top-level Choice with a default";
                 if (f.Type == BlockFieldType.Choice && f.OptionLabels != null && f.OptionLabels.Count != f.Options.Count)
                     return "Choice field '" + f.Key + "' has " + f.OptionLabels.Count + " labels for " + f.Options.Count + " options";
                 if (f.Type == BlockFieldType.Items)
@@ -108,6 +112,14 @@ namespace TileStories
                 }
             }
             return null;
+        }
+
+        private static bool Contains(IReadOnlyList<string> list, string value)
+        {
+            if (list == null) return false;
+            for (int i = 0; i < list.Count; i++)
+                if (list[i] == value) return true;
+            return false;
         }
     }
 }

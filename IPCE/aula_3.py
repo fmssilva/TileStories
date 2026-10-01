@@ -1,7 +1,7 @@
 # %%
 """
 ===========================================================================
-GUIA DE SESSÃO — Prática 03 — IPCE 2026/2027
+GUIA DE SESSÃO - Prática 03 - IPCE 2026/2027
 ===========================================================================
 
 Cobre os guiões 03a (ex. 19-21) e 03b (ex. 22-24).
@@ -14,9 +14,15 @@ Tema de hoje: o ciclo FOR.
 Como usar este ficheiro no Spyder:
     - cada bloco que começa com "# %%" é uma célula
     - Ctrl + Enter  -> corre só a célula onde está o cursor
+    - Shift + Enter -> corre a célula e salta para a seguinte
     - F5            -> corre o ficheiro todo (vai pedir vários inputs!)
+    - nos exercícios, a solução está na célula a seguir, depois de muito espaço:
+      tentem primeiro!
 
 """
+
+
+
 
 
 
@@ -27,24 +33,59 @@ LOGÍSTICA / Revisões [8 min -> 10:18]
 ===========================================================================
 
     - Baixar este guia da drive e abrir no Spyder
-        (guia na drive mais vazio para eles fazerem na aula)
 
-    - Confirmar bom horario de dúvidas para o turno
+    - Confirmar bom horário de dúvidas para o turno
 
     - Folha de Presenças (50% presenças para quem faz cadeira 1ª vez)
-    
+
     - Mooshak: já conseguem entrar? (precisa de Eduroam ou VPN)
 
-    - Sobre VPN sempre a abrir - façam "shut down client" duas vezes e depis deve parar 
+    - Sobre VPN sempre a abrir - façam "shut down client" duas vezes e depois deve parar
 
-REVIÕES/DÚVIDAS ----------------------------------------------------
+REVISÕES/DÚVIDAS ----------------------------------------------------
     - Dúvidas da aula passada (if / elif / else, and / or / not)
 
     - EXERCICIO PARA CONSOLIDAR:
 
-        a) Escreve uma função que dados 2 números inteiros a e b, 
-            devolve o valor maior deles 
+        a) Escreve uma função que dados 2 números inteiros a e b,
+            devolve o valor maior deles
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: máximo
+
 def maximo(a: int, b: int) -> int:
     """ Devolve o maior de dois números inteiros. """
     if a > b:
@@ -57,14 +98,53 @@ print(maximo(5, 3))   # 5
 
 
 
-#%%
+
+
+
+# %%
 """
-    b) Escreve uma função que dados 2 números inteiros a e b, 
+    b) Escreve uma função que dados 2 números inteiros a e b,
         devolve True se o primeiro for múltiplo do segundo, e False caso contrário
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: is_multiple
+
 def is_multiple(a: int, b: int) -> bool:
     """ Devolve True se a for múltiplo de b, False caso contrário. """
-    if a % b == 0: 
+    if a % b == 0:
         return True
     else:
         return False
@@ -72,17 +152,27 @@ def is_multiple(a: int, b: int) -> bool:
 print(is_multiple(10, 2))   # True
 print(is_multiple(10, 3))   # False
 
+
+
+
+
+
 # %%
 # O else final muitas vezes pode ser omitido.
-# Porque se chega aqui, é porque todas as condições anteriores de if/elif não se verificaram 
+# Porque se chega aqui, é porque todas as condições anteriores de if/elif não se verificaram
 def is_multiple(a: int, b: int) -> bool:
     """ Devolve True se a for múltiplo de b, False caso contrário. """
-    if a % b == 0: 
+    if a % b == 0:
         return True
     return False
 
 print(is_multiple(10, 2))   # True
 print(is_multiple(10, 3))   # False
+
+
+
+
+
 
 # %%
 # Se a função retorna só True ou False, podemos retornar logo a expressão booleana
@@ -94,7 +184,7 @@ print(is_multiple(10, 2))   # True
 print(is_multiple(10, 3))   # False
 
 
-# Atenção: Esta forma simples não é opcional. 
+# Atenção: Esta forma simples não é opcional.
 # É para ser a forma default para código simples.
 
 
@@ -105,7 +195,7 @@ print(is_multiple(10, 3))   # False
 # %%
 """
 ===========================================================================
-CICLO FOR — primeiros passos + Guião 03a, ex. 19a, 19b [34 min -> 10:52]
+CICLO FOR - primeiros passos + Guião 03a, ex. 19a, 19b [34 min -> 10:52]
 https://ipce-184ea7.gitlab.io/
 ===========================================================================
 
@@ -122,10 +212,16 @@ for numero in range(5): # forma só com FIM (vai de 0 até FIM, não incluído)
 
 
 
+
+
+
 # %%
 # forma com INICIO e FIM (vai de INICIO até FIM, não incluído)
 for numero in range(2,5):
     print("numero =", numero)
+
+
+
 
 
 
@@ -146,10 +242,16 @@ for numero in range(-5, 5, 2):
 
 
 
+
+
+
 # %%
 # com PASSO negativo vai a descer (e o FIM também pode ser negativo)
 for numero in range(7, -5, -2):
     print("numero =", numero)
+
+
+
 
 
 
@@ -160,9 +262,12 @@ for numero in range(5, 5):
 
 
 
+
+
+
 # %%
 """
-b) EXERCICIO (EXTRA) — Tabuada do 7 [6 min -> 10:31] ----------------------
+b) EXERCICIO (EXTRA) - Tabuada do 7 [6 min -> 10:31] ----------------------
 
     Escrever a tabuada do 7 no ecrã:
         7 x 1 = 7
@@ -171,10 +276,47 @@ b) EXERCICIO (EXTRA) — Tabuada do 7 [6 min -> 10:31] ----------------------
         7 x 10 = 70
 """
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: tabuada do 7
+
+
 for i in range(1, 11):
-    res = i*7
-    print(res)
-    # print(f"7 x {i} = {7 * i}")
+    print(f"7 x {i} = {7 * i}")
+    # versão mais simples, só com o resultado:
+    # res = i * 7
+    # print(res)
 
 # O que acabou de acontecer:
 # o código indentado debaixo do "for" correu 10 vezes.
@@ -186,9 +328,12 @@ for i in range(1, 11):
 
 
 
+
+
+
 # %%
 """
-c) EXERCICIO (GUIÃO, exemplo do início do 03a) — Fatorial [6 min -> 10:37] --
+c) EXERCICIO (GUIÃO, exemplo do início do 03a) - Fatorial [6 min -> 10:37] --
 
     O fatorial de n é o produto de todos os inteiros de 1 até n:
     5! = 1 * 2 * 3 * 4 * 5 = 120
@@ -219,9 +364,12 @@ print("resultado:", factorial(5))
 
 
 
+
+
+
 # %%
 """
-d) EXERCICIO 19a (GUIÃO) — Soma dos n primeiros naturais [10 min -> 10:47] ---
+d) EXERCICIO 19a (GUIÃO) - Soma dos n primeiros naturais [10 min -> 10:47] ---
 
     19a - Escreva um programa que receba do utilizador um número natural n
     e que calcule a soma dos n primeiros números naturais.
@@ -232,6 +380,42 @@ d) EXERCICIO 19a (GUIÃO) — Soma dos n primeiros naturais [10 min -> 10:47] --
     com a da função factorial.
 
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: exercício 19a
+
 
 def sum_naturals(n: int) -> int:
     """ Soma dos n primeiros naturais: 0 + 1 + ... + (n-1).
@@ -255,29 +439,68 @@ main()
 
 
 
+
+
+
 # %%
 """
-e) EXERCICIO 19b (GUIÃO) — Soma dos n primeiros quadrados [5 min -> 10:52] ---
+e) EXERCICIO 19b (GUIÃO) - Soma dos n primeiros quadrados [5 min -> 10:52] ---
 
     19b - Escreva um programa que receba do utilizador um número natural n
     e que calcule a soma dos primeiros n quadrados perfeitos.
     Por exemplo, para n igual a 4, o resultado deve ser 14 (= 0 + 1 + 4 + 9).
 """
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: exercício 19b
+
+
 def sum_squares(n: int) -> int:
     """ Soma dos n primeiros quadrados perfeitos: 0 + 1 + 4 + ... + (n-1)^2.
         Precondition: n >= 0
     """
     total = 0
-    for i in range(0, n+1, 1):
+    for i in range(0, n, 1):        # o mesmo range do 19a: n números, 0 a n-1
         total = total + i * i       # a ÚNICA diferença para o 19a
         # total = total + i ** 2    # também dá
     return total
 
 def main() -> None:
     # x = int(input("Introduza um número natural: "))
-    x = 10
-    print(sum_squares(x))
+    x = 4
+    print(sum_squares(x))           # 14
 
 main()
 
@@ -288,10 +511,13 @@ main()
 
 
 
+
+
+
 # %%
 """
 ===========================================================================
-CICLO FOR — CONCEITOS [22 min -> 11:14]
+CICLO FOR - CONCEITOS [22 min -> 11:14]
 ===========================================================================
 
 a) Sintaxe do for com range [2 min -> 10:54] ------------------------------
@@ -314,6 +540,9 @@ a) Sintaxe do for com range [2 min -> 10:54] ------------------------------
 
 
 
+
+
+
 # %%
 """
 b) O "for" pode correr em qualquer sequência, não só range [3 min -> 10:57] --
@@ -330,11 +559,12 @@ for x in [0, 10, 1]:               # uma lista (vamos ver listas com calma mais 
     print(x)
 
 
-for idx, letra in enumerate("IPCE"):               # uma string é uma sequência de caracteres
-    print(letra, "IPCE"[idx])
+# Curiosidade (vem mais à frente): o enumerate dá a POSIÇÃO e o valor ao mesmo tempo
+# for idx, letra in enumerate("IPCE"):
+#     print(idx, letra)          # 0 I, 1 P, 2 C, 3 E
 
 
-# PERGUNTA DE TESTE (Teste 1 2024/25, 1b) — sintaticamente correto ou incorreto?
+# PERGUNTA DE TESTE (Teste 1 2024/25, 1b) - sintaticamente correto ou incorreto?
 #
 #     for i in [0,10,1]:
 #         a[i] = 3*i
@@ -344,6 +574,9 @@ for idx, letra in enumerate("IPCE"):               # uma string é uma sequênci
 #   range(0, 10, 1) -> 0, 1, 2, ..., 9   (10 voltas)
 #   [0, 10, 1]      -> 0, 10, 1          (3 voltas, com esses 3 valores)
 # É uma armadilha clássica de teste: parece igual, mas não é.
+
+
+
 
 
 
@@ -370,6 +603,9 @@ def sum_naturals_v2(n: int) -> int:
     return acc
 
 print(sum_naturals_v2(4))
+
+
+
 
 
 
@@ -406,9 +642,12 @@ print(factorial_v2(5))
 
 
 
+
+
+
 # %%
 """
-e) Off-by-one — o erro mais comum [4 min -> 11:07] ------------------------
+e) Off-by-one - o erro mais comum [4 min -> 11:07] ------------------------
 
     "Off-by-one error" (erro de um-a-mais ou um-a-menos)
     é quando um ciclo dá uma volta a mais ou uma volta a menos.
@@ -440,6 +679,9 @@ print("total: ", total)   # 55
 
 
 
+
+
+
 # %%
 """
 f) Curiosidade - Não chamem "sum" às vossas variáveis ou funções [3 min -> 11:10] ---------
@@ -453,7 +695,7 @@ print(sum([1, 2, 3]))              # 6 -> a sum do Python
 print(sum(range(4)))               # 6 -> o 19a numa linha só!
 
 # Se criarmos uma variável com o mesmo nome, ela "tapa" a função do Python
-# (em inglês diz-se shadowing — a nossa variável faz sombra à original).
+# (em inglês diz-se shadowing - a nossa variável faz sombra à original).
 # Dentro desta função, "sum" deixou de ser a função e passou a ser um int:
 
 def demo_shadowing() -> int:
@@ -469,9 +711,12 @@ def demo_shadowing() -> int:
 
 
 
+
+
+
 # %%
 """
-g) Curiosidade — para esta soma nem precisamos de for: o truque de Gauss [4 min -> 11:14]
+g) Curiosidade - para esta soma nem precisamos de for: o truque de Gauss [4 min -> 11:14]
 
     Diz a lenda que um professor, para ter a turma entretida, mandou
     somar 1 + 2 + ... + 100. O pequeno Gauss (que viria a ser um dos
@@ -488,10 +733,11 @@ g) Curiosidade — para esta soma nem precisamos de for: o truque de Gauss [4 mi
 
     Qual a diferença em termos de tempo?
 """
-for i in range(0,5): 
-    print("range: ", i)
-    i = 3
-    print("after: ", i)
+
+
+
+
+
 
 # %%
 import time
@@ -536,6 +782,9 @@ print("dão o mesmo?", r1 == r2)
 
 
 
+
+
+
 # %%
 """
 ===========================================================================
@@ -543,7 +792,7 @@ Guião 03a, exercícios 20, 21 [21 min -> 11:35]
 https://ipce-184ea7.gitlab.io/
 ===========================================================================
 
-EXERCICIO 20 (GUIÃO, Mooshak F) — Tabela de anos [10 min -> 11:24] ---------
+EXERCICIO 20 (GUIÃO, Mooshak F) - Tabela de anos [10 min -> 11:24] ---------
 
     20 - Escreva um programa que, dado um intervalo de anos, por exemplo
     de 2000 a 2020, apresente uma tabela com a duração de cada ano em dias,
@@ -560,6 +809,42 @@ EXERCICIO 20 (GUIÃO, Mooshak F) — Tabela de anos [10 min -> 11:24] ---------
         2010 365
 
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: exercício 20
+
 
 def is_leap_year(year: int) -> bool:
     """ Check if the year is a leap year. """
@@ -590,19 +875,22 @@ main()
 # "2000 366" e não "2000: 366" nem "2000  366".
 
 
-# reparem como dividir o programa em funções com nome claro 
+# reparem como dividir o programa em funções com nome claro
 # ajuda a perceber tudo de forma mais fácil
-# Exemplo aqui, ao escrevermos uma função: 
+# Exemplo aqui, ao escrevermos uma função:
 #       if is_leap_year(year):
-# toda a gente percebe o que isso faz. 
-# se escrevessemos o código direto é dificil perceber e é preciso escever comentários 
+# toda a gente percebe o que isso faz.
+# se escrevessemos o código direto é difícil perceber e é preciso escrever comentários
 #       if ((year % 4 == 0 and year % 100 != 0) or year % 400 == 0):
+
+
+
 
 
 
 # %%
 """
-EXERCICIO 21 (GUIÃO, Mooshak G) — Ler e somar [11 min -> 11:35] ------------
+EXERCICIO 21 (GUIÃO, Mooshak G) - Ler e somar [11 min -> 11:35] ------------
 
     21 - Escreva um programa para somar uma sequência de números inteiros.
     O programa começa por perguntar qual o número de valores a somar;
@@ -619,6 +907,42 @@ EXERCICIO 21 (GUIÃO, Mooshak G) — Ler e somar [11 min -> 11:35] ------------
         129
 
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: exercício 21
+
 
 def read_and_sum(n: int) -> int:
     """ The sum of a sequence of integers gathered from the input.
@@ -650,6 +974,9 @@ main()
 
 
 
+
+
+
 # %%
 """
 ===========================================================================
@@ -659,14 +986,17 @@ INTERVALO [20 min -> 11:55]
 
 
 
+
+
+
 # %%
 """
 ===========================================================================
-Guião 03b, exercício 22 — 4 funções quase iguais [21 min -> 12:16]
+Guião 03b, exercício 22 - 4 funções quase iguais [21 min -> 12:16]
 https://ipce-184ea7.gitlab.io/
 ===========================================================================
 
-a) EXERCICIO 22 (GUIÃO) — Prever e correr [7 min -> 12:02] ------------------
+a) EXERCICIO 22 (GUIÃO) - Prever e correr [7 min -> 12:02] ------------------
 
     22 - Considere as seguintes quatro funções.
     Explique com detalhe o que cada função está a fazer e porque produz
@@ -682,7 +1012,12 @@ def f1(n: int) -> int:
         total += i
     return total
 
-print("f1(5) =", f1(5))           # 10
+print("f1(5) =", f1(5))
+
+
+
+
+
 
 # %%
 def f2(n: int) -> int:
@@ -691,17 +1026,26 @@ def f2(n: int) -> int:
         total += i
         return total              # <- mais indentado que no f1
 
-print("f2(5) =", f2(5))           # 0
+print("f2(5) =", f2(5))
+
+
+
+
+
 
 # %%
 def f3(n: int) -> int:
     for i in range(0, n, 1):
-        total = 0 
-        print(total)                # <- dentro do ciclo
+        total = 0                   # <- dentro do ciclo
         total += i
     return total
 
-print("f3(5) =", f3(5))           # 4
+print("f3(5) =", f3(5))
+
+
+
+
+
 
 # %%
 def f4(n: int) -> int:
@@ -709,7 +1053,7 @@ def f4(n: int) -> int:
         total += i
     return total
 
-print("f4(5) =", f4(5))        # <- descomenta e corre: UnboundLocalError
+# print("f4(5) =", f4(5))      # <- descomenta e corre: UnboundLocalError
 
 # f1 é a versão correta: 0 + 1 + 2 + 3 + 4 = 10.
 # As outras 3 são os 3 erros mais comuns com acumuladores.
@@ -717,9 +1061,12 @@ print("f4(5) =", f4(5))        # <- descomenta e corre: UnboundLocalError
 
 
 
+
+
+
 # %%
 """
-b) f2 — o return dentro do ciclo [3 min -> 12:05] --------------------------
+b) f2 - o return dentro do ciclo [3 min -> 12:05] --------------------------
 
     O return faz DUAS coisas:
         1. devolve o valor
@@ -746,6 +1093,9 @@ print("f2_(0) =", f2_(0))           # None!
 
 
 
+
+
+
 # %%
 """
 b.1) Um return dentro do ciclo nem sempre é bug [4 min -> 12:09] -----------
@@ -769,9 +1119,12 @@ print(has_multiple_of_7(8, 13))   # False
 
 
 
+
+
+
 # %%
 """
-c) f3 — o acumulador dentro do ciclo [3 min -> 12:12] ----------------------
+c) f3 - o acumulador dentro do ciclo [3 min -> 12:12] ----------------------
 
     No f3 o "total = 0" está DENTRO do ciclo.
     Então em CADA volta o total volta a zero antes de somar:
@@ -799,9 +1152,10 @@ print("f3(5) =", f3_(5))
 
 
 
+
 # %%
 """
-d) f4 — variável sem valor: UnboundLocalError [2 min -> 12:14] -------------
+d) f4 - variável sem valor: UnboundLocalError [2 min -> 12:14] -------------
 
     No f4 ninguém disse com que valor o total começa.
     Na 1ª volta, "total += i" significa "total = total + i"
@@ -820,7 +1174,7 @@ def f4_corrigida(n: int) -> int:
 print("f4 corrigida (5) =", f4_corrigida(5))
 
 
-# Resumo do ex 22 — os 3 bugs clássicos de um acumulador:
+# Resumo do ex 22 - os 3 bugs clássicos de um acumulador:
 #   f2 -> return dentro do ciclo   -> sai logo na 1ª volta
 #   f3 -> inicialização no ciclo   -> reset a cada volta, só fica a última
 #   f4 -> sem inicialização        -> UnboundLocalError
@@ -834,7 +1188,7 @@ print("f4 corrigida (5) =", f4_corrigida(5))
 # %%
 """
 ===========================================================================
-CICLO FOR + IF/ELSE — executar à mão, como no teste [6 min -> 12:22]
+CICLO FOR + IF/ELSE - executar à mão, como no teste [6 min -> 12:22]
 ===========================================================================
 
     No teste não há computador.
@@ -867,6 +1221,40 @@ for i in range(0, 14, 1):
         x = i
 print("x =", x)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: pergunta de teste 1c
 # Resposta: D. 13
 #
 # O truque: aqui é "x = ...", não é "x += ..."!
@@ -883,6 +1271,9 @@ print("x =", x)
 #   C. 28  = 14 * 2  -> quem pensou que o 14 estava incluído (off-by-one!)
 #   B. 26  = 13 * 2  -> quem se enganou no elif do 7
 #   A. 195 = 15 * 13 -> quem se enganou no 13 % 3
+
+
+
 
 
 
@@ -914,7 +1305,7 @@ print(4 not in {1, 3, 5})          # True   -> "not in" é o contrário
 #   - tuplo: preserva a ordem (1º, 2º, 3º...) e pode ter repetidos, mas é imutável
 #   - set: não preserva a ordem e sem repetidos, e a pesquisa é super rápida
 #   - dicionário: pares chave -> valor; chaves sem repetidos; o "in" procura nas CHAVES (não nos valores)
-# (tuplos e dicionários vêm mais para a frente — por agora basta saber que o "in" funciona com todos)
+# (tuplos e dicionários vêm mais para a frente - por agora basta saber que o "in" funciona com todos)
 #
 # Atenção: o "in" do "for i in range(...)" e o "in" de "3 in {1,3,5}"
 # escrevem-se igual mas são coisas diferentes:
@@ -923,9 +1314,12 @@ print(4 not in {1, 3, 5})          # True   -> "not in" é o contrário
 
 
 
+
+
+
 # %%
 """
-b) EXERCICIO 23 (GUIÃO) — Duração de um mês [9 min -> 12:35] ------------------
+b) EXERCICIO 23 (GUIÃO) - Duração de um mês [9 min -> 12:35] ------------------
 
     23 - Escreva um programa que receba do utilizador um mês e um ano,
     ambos valores inteiros, e escreva a duração desse mês em dias.
@@ -933,6 +1327,42 @@ b) EXERCICIO 23 (GUIÃO) — Duração de um mês [9 min -> 12:35] -------------
     ser ou não bissexto.
 
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: exercício 23
+
 
 def is_leap_year(year: int) -> bool:
     """ Check if the year is a leap year. """
@@ -955,10 +1385,9 @@ def month_length(month: int, year: int) -> int:
     #     return 31
 
 # Testes rápidos
-print(month_length(2, 2000))
-# , month_length(12, 2023))  # 30 31
-# print(month_length(2, 2024), month_length(2, 2023))   # 29 28
-# print(month_length(2, 1900), month_length(2, 2000))   # 28 29
+print(month_length(4, 2023), month_length(12, 2023))   # 30 31
+print(month_length(2, 2024), month_length(2, 2023))    # 29 28
+print(month_length(2, 1900), month_length(2, 2000))    # 28 29
 
 # Reparem no terceiro ramo: "elif is_leap_year(year)" não pergunta pelo mês!
 # Não precisa: se os dois primeiros ramos falharam, e a precondição
@@ -967,8 +1396,12 @@ print(month_length(2, 2000))
 
 
 
+
+
+
 # %%
 # b.1) main() para o problema 23 [2 min -> 12:37]
+# (usa as funções das células de cima: corram-nas primeiro)
 def main() -> None:
     month = int(input("Mês: "))
     year = int(input("Ano: "))
@@ -978,9 +1411,12 @@ main()
 
 
 
+
+
+
 # %%
 """
-c) EXERCICIO 24 (GUIÃO, Mooshak H) — Posição de uma data no ano [14 min -> 12:51]
+c) EXERCICIO 24 (GUIÃO, Mooshak H) - Posição de uma data no ano [14 min -> 12:51]
 
     24 - Escreva um programa que receba do utilizador uma data completa
     - usando três inteiros: dia (1..31), mês (1..12) e ano - e responda
@@ -996,7 +1432,43 @@ c) EXERCICIO 24 (GUIÃO, Mooshak H) — Posição de uma data no ano [14 min -> 
     Ou seja: somar os meses COMPLETOS antes do mês da data, e depois o dia.
 """
 
-# correr células acima para ativar estas funções:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: exercício 24
+
+
+# correr as células do ex 23 primeiro, para ativar estas funções:
 # def is_leap_year(year: int) -> bool:
 # def month_length(month: int, year: int) -> int:
 
@@ -1005,9 +1477,9 @@ def is_date_valid(day: int, month: int, year: int) -> bool:
     return 1 <= month <= 12 and 1 <= day <= month_length(month, year)
 
     # reparem que por vezes é bom pensar também a sequencia das condições numa expressão
-    # colocar as condiçõoes mais fáceis primeiro e as mais complexas depois, 
-    # assim o programa verifica rápido as primeiras condições, e talvez decide logo, 
-    # e só mesmo em ultimo caso verifica as ultimas condições mais complexas/que demoram mais tempo... 
+    # colocar as condições mais fáceis primeiro e as mais complexas depois,
+    # assim o programa verifica rápido as primeiras condições, e talvez decide logo,
+    # e só mesmo em ultimo caso verifica as ultimas condições mais complexas/que demoram mais tempo...
 
     # A versão "comprida" (funciona, mas é o que se chama escrever código a mais):
     # if 1 <= month <= 12 and 1 <= day <= month_length(month, year):
@@ -1022,7 +1494,6 @@ def day_order(day: int, month: int, year: int) -> int:
     """
     total = day                           # o acumulador começa já com os dias do mês atual
     for m in range(1, month):             # meses COMPLETOS antes: 1, 2, ..., month-1
-        print(total)
         total += month_length(m, year)
     return total
 
@@ -1038,8 +1509,12 @@ print(day_order(10, 3, 2024))             # 70   -> o do exemplo lá em cima
 
 
 
+
+
+
 # %%
 # c.1) main() para o problema 24 [3 min -> 12:54]
+# (usa as funções das células de cima: corram-nas primeiro)
 def main() -> None:
     day = int(input("Dia: "))
     month = int(input("Mês: "))
@@ -1064,22 +1539,26 @@ main()
 
 
 
+
 # %%
 """
 ===========================================================================
-CONSOLIDAR — exercícios de testes anteriores
-(se sobrar tempo na aula; senão, ficam para casa — todos com solução)
+CONSOLIDAR - exercícios de testes anteriores
+(se sobrar tempo na aula; senão, ficam para casa - todos com solução)
 ===========================================================================
 
-    Tentem primeiro sem olhar para a solução: 
+    Tentem primeiro sem olhar para a solução:
     é exatamente este o nível do teste.
 """
 
 
 
+
+
+
 # %%
 """
-PERGUNTA DE TESTE (Teste 1 2025/26, 1b) — executar à mão ------------------
+PERGUNTA DE TESTE (Teste 1 2025/26, 1b) - executar à mão ------------------
 
     Escreva o resultado da seguinte chamada: add([1,2,3,4]) = ____
 
@@ -1099,6 +1578,40 @@ def add(l: list[int]) -> int:
 
 print("add([1,2,3,4]) =", add([1, 2, 3, 4]))
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: add([1,2,3,4])
 # Tabela:
 #   v | par? | total
 #   - |  -   |   0    (antes do ciclo)
@@ -1112,9 +1625,12 @@ print("add([1,2,3,4]) =", add([1, 2, 3, 4]))
 
 
 
+
+
+
 # %%
 """
-EXERCICIO (TESTE 1 2024/25, pergunta 3) — Soma de múltiplos ---------------
+EXERCICIO (TESTE 1 2024/25, pergunta 3) - Soma de múltiplos ---------------
 
     Escreva uma função inteira para somar todos os múltiplos dum número
     inteiro positivo m que sejam menores ou iguais que outro número inteiro
@@ -1132,6 +1648,42 @@ EXERCICIO (TESTE 1 2024/25, pergunta 3) — Soma de múltiplos ---------------
                 Precondition: m > 0 and lim > 0
             '''
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: soma de múltiplos
+
 
 def sum_multiples_v1(m: int, lim: int) -> int:
     """ Sum all the multiples of m until lim inclusive.
@@ -1170,9 +1722,12 @@ print(sum_multiples_v1(10, 10), sum_multiples_v1(5, 10), sum_multiples_v1(2, 10)
 
 
 
+
+
+
 # %%
 """
-EXERCICIO (TESTE 1 2025/26, pergunta 3) — Série de Zeno -----------------
+EXERCICIO (TESTE 1 2025/26, pergunta 3) - Série de Zeno -----------------
 
     Considere a famosa série do paradoxo de Zeno. A soma desta série vale 1.
 
@@ -1188,6 +1743,42 @@ EXERCICIO (TESTE 1 2025/26, pergunta 3) — Série de Zeno -----------------
         def zeno(k: int) -> float:
             ''' Sum of the k first terms of the Zeno series '''
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: série de Zeno
+
 
 def zeno_v1(k: int) -> float:
     """ Sum of the k first terms of the Zeno series.
@@ -1225,9 +1816,12 @@ print(zeno(50))                                        # quase 1 (a flecha lá c
 
 
 
+
+
+
 # %%
 """
-EXERCICIO (EXAME RECURSO 2023/24, pergunta 2) — Série de ln(2) ------------
+EXERCICIO (EXAME RECURSO 2023/24, pergunta 2) - Série de ln(2) ------------
 
     Esta famosa série alternada converge para o logaritmo natural de 2:
 
@@ -1242,6 +1836,42 @@ EXERCICIO (EXAME RECURSO 2023/24, pergunta 2) — Série de ln(2) ------------
 
     Dica: é o zeno com um sinal que vai trocando.
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: série de ln(2)
+
 
 def ln2(n: int) -> float:
     """ Soma dos n primeiros termos da série 1 - 1/2 + 1/3 - ...
@@ -1266,9 +1896,12 @@ print(ln2(100_000))                       # perto de 0.693147... (= ln 2)
 
 
 
+
+
+
 # %%
 """
-EXERCICIO (TESTE 1 2025/26, pergunta 4) — O mês de um dia do ano ----------
+EXERCICIO (TESTE 1 2025/26, pergunta 4) - O mês de um dia do ano ----------
 
     É o ex 24 AO CONTRÁRIO: dado o número de ordem de um dia no ano,
     dizer qual o mês. A função recebe o número de ordem e se o ano é
@@ -1280,7 +1913,7 @@ EXERCICIO (TESTE 1 2025/26, pergunta 4) — O mês de um dia do ano ----------
         get_month(366, True)  == 12    # dezembro
 
     Para saber o número de dias de cada mês, a função usa a constante
-    local DURATIONS (uma lista — spoiler: listas vêm aí nas próximas aulas).
+    local DURATIONS (uma lista - spoiler: listas vêm aí nas próximas aulas).
     DURATIONS[0] é a duração de janeiro, DURATIONS[1] de fevereiro, etc.
 
         def get_month(order: int, leap_year: bool) -> int:
@@ -1291,6 +1924,42 @@ EXERCICIO (TESTE 1 2025/26, pergunta 4) — O mês de um dia do ano ----------
     Ideia: ir "gastando" os dias mês a mês.
     Enquanto o order não couber no mês atual, tira-se esse mês e avança-se.
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: get_month
+
 
 def get_month(order: int, leap_year: bool) -> int:
     """ Calculate the month corresponding to some day order in a year
@@ -1311,9 +1980,12 @@ print(get_month(5, False), get_month(31, False), get_month(60, True),
 
 
 
+
+
+
 # %%
 """
-EXERCICIO (TESTE 1 2024/25, pergunta 5, "Difícil") — Pinheiro de Natal -----
+EXERCICIO (TESTE 1 2024/25, pergunta 5, "Difícil") - Pinheiro de Natal -----
 
     Escreva uma função para desenhar um pinheiro de Natal com copa de
     tamanho n. A copa é um triângulo isósceles com n linhas:
@@ -1336,6 +2008,42 @@ EXERCICIO (TESTE 1 2024/25, pergunta 5, "Difícil") — Pinheiro de Natal -----
         espaços  = n - 1 - k
         símbolos = 2 * k + 1   (1, 3, 5, 7, ...)
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: pinheiro de Natal
+
 
 def draw_segment(x: str, n: int) -> None:
     """ Draw a partial line with length n using the char x.
@@ -1382,7 +2090,7 @@ draw_pine_tree('*', '^', '#', 10)
 ===========================================================================
 Contexto / Escopo de variáveis
 ===========================================================================
-    Conceito 1: 
+    Conceito 1:
     Antes de ler ou usarmos uma variável, temos de lhe dar um valor.
 """
 
@@ -1393,38 +2101,44 @@ Contexto / Escopo de variáveis
 
 
 
+
+
+
 # %%
 """
-    Conceito 2: 
+    Conceito 2:
     Não dá para aceder às variáveis dentro de uma função a partir de fora.
 
     Cada função tem o seu próprio "espaço de nomes" (namespace).
     Se criamos variáveis dentro de uma função, elas só existem lá dentro.
 
 """
-# Este código dá erro - o print exterior não consegue ver a variavel dentro da função
+# Este código dá erro - o print exterior não consegue ver a variável dentro da função
 def fun():
     a = 2
 # print(a)
 
 
 
+
+
+
 # %%
 """
     Conceito 3:
-    Quando criamos variavel dentro de função com mesmo nome,
+    Quando criamos variável dentro de função com mesmo nome,
     ela "tapa" a variável de fora (shadowing).
 
     Ou seja, dá para LER variáveis de fora a partir de dentro duma função,
     mas só enquanto a função não lhes ATRIBUIR nenhum valor.
 
-     A regra é: 
-        - se a variável é atribuída dentro da função, 
+     A regra é:
+        - se a variável é atribuída dentro da função,
             o Python considera-a local e já não consegue ver a global
-        - se a variável é apenas lida, 
+        - se a variável é apenas lida,
             o Python procura primeiro uma local, depois uma global
 
-    O Python decide isto lendo a função INTEIRA antes de a correr, 
+    O Python decide isto lendo a função INTEIRA antes de a correr,
     não linha a linha:
         - se em QUALQUER linha da função houver uma atribuição a esse nome
           (=, +=, -=, ...), o Python já a marca como LOCAL na função TODA,
@@ -1432,44 +2146,47 @@ def fun():
         - senão, quando o nome é lido, o Python vai procurá-lo fora
 """
 
-# só leitura -> o print dentro da função consegue ver o total fora da funçao 
+# só leitura -> o print dentro da função consegue ver o total fora da função
 total = 0
 def so_le() -> None:
     print("só leitura:", total)
 so_le()
 
-# mudar variavel -> essa variável passa a ser local à função TODA
+# mudar variável -> essa variável passa a ser local à função TODA
 # (mesmo que a atribuição só apareça numa linha a seguir ao print)
 def le_e_muda() -> None:
     print("total local (ainda sem valor):", total)   # <- dá erro AQUI, não na linha de baixo!
-    total = 5          
+    total = 5
 
 # le_e_muda()   # <- descomenta e corre: UnboundLocalError, já na linha do print
 #               # prova que o Python decidiu ANTES de correr que "total" era local
 
 def le_e_muda_certo() -> None:
     total = 5
-    print("criado total local à funçao:", total)
-    
-le_e_muda_certo()   
+    print("criado total local à função:", total)
+
+le_e_muda_certo()
 print("total global não mudou:", total)  # <- imprime 0, a variável global não mudou
+
+
+
 
 
 
 # %%
 """
     Conceito 4:
-    Estes limites só se aplicam a funções, 
+    Estes limites só se aplicam a funções,
     não se aplicam a ciclos for/while ou if/else.
 
     Em termos de variáveis, mesmo que criadas dentro de um if ou for
-    é como se estivesse tudo ao mesmo nível. 
+    é como se estivesse tudo ao mesmo nível.
 """
 
-# Mesmo tendo vários níveis na logica do cdigo:
+# Mesmo tendo vários níveis na lógica do código:
 #       - global, função, for, if,
 # em termos de variáveis só temos 2 níveis:
-#       - global, funçao
+#       - global, função
 a = 5
 def fun2() -> None:
     a = 10
@@ -1490,9 +2207,31 @@ print("a global no fim:", a)
 
 
 
+
+
 # %%
 """
-EXERCICIO A — Prever o output -----------------------------------------
+    Conceito 5:
+    Mudar a variável do for DENTRO do ciclo não muda as voltas.
+"""
+
+for i in range(0, 5):
+    print("range: ", i)
+    i = 3
+    print("after: ", i)
+
+# Em cada volta, o for dá ao i o valor SEGUINTE do range,
+# ignorando o que o corpo do ciclo lhe tenha feito.
+# O "i = 3" só dura até ao fim dessa volta.
+
+
+
+
+
+
+# %%
+"""
+EXERCICIO A - Prever o output -----------------------------------------
 
     Sem correr, escrevam no papel o que os dois prints vão mostrar.
     Depois corram e confirmem.
@@ -1510,17 +2249,55 @@ def misterio(x):
 r = misterio(x)
 print(r, x)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: exercício A
 # Solução: 205 100
-# Dentro da função, x começa como CÓPIA do valor de fora (100), passa a 101,
+# Dentro da função, o parâmetro x recebe o valor de fora (100). Como um número
+# não pode ser alterado, é como se fosse uma cópia: o x local passa a 101,
 # e y = 202. O for depois soma 0+1+2 = 3, logo y fica 205 -> é o que é devolvido.
 # O x de fora nunca é tocado: o x da função é outra caixa, só com o mesmo nome
 # (tal como vimos no f do início desta secção).
 
 
 
+
+
+
 # %%
 """
-EXERCICIO B — Encontrar e corrigir o bug ------------------------------
+EXERCICIO B - Encontrar e corrigir o bug ------------------------------
 
     Este código tenta classificar uma nota, mas tem um bug escondido
     de contexto de variáveis. Corram e vejam o que acontece com
@@ -1538,10 +2315,44 @@ print(classifica(15))   # Aprovado
 print(classifica(5))    # Reprovado
 # print(classifica(10))   # <- descomenta: UnboundLocalError!
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: exercício B
 # O que se passa: nota > 10 e nota < 10 NÃO cobrem o caso nota == 10.
 # Nesse caso nenhum ramo do if corre, "resultado" nunca é criado,
 # e o return tenta ler uma variável local que não tem valor -> erro.
-# É a mesma armadilha do Conceito 3: o if/elif não é uma "caixa" 
+# É a mesma armadilha do Conceito 3: o if/elif não é uma "caixa"
 # separada, mas se nenhum ramo correr, a variável simplesmente não existe.
 
 # Solução: garantir que HÁ SEMPRE um ramo que cria "resultado"
@@ -1559,9 +2370,12 @@ print(classifica_certo(15), classifica_certo(5), classifica_certo(10))
 
 
 
+
+
+
 # %%
 """
-EXERCICIO C — Encontrar e corrigir o bug ------------------------------
+EXERCICIO C - Encontrar e corrigir o bug ------------------------------
 
     Esta função devia contar quantos números pares há numa lista.
     Tem o mesmo tipo de bug do f4 (ex. 22). Encontrem-no antes de correr.
@@ -1575,6 +2389,40 @@ def conta_pares(lista):
 
 # print(conta_pares([1, 2, 3, 4, 5, 6]))  # <- descomenta: UnboundLocalError
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução: exercício C
 # O bug: falta inicializar o acumulador ANTES do ciclo.
 # Como há "count += 1" lá dentro, o Python trata count como local à função
 # toda, mas nunca lhe deu um valor inicial -> rebenta logo no primeiro par.
@@ -1587,3 +2435,22 @@ def conta_pares_certo(lista):
     return count
 
 print(conta_pares_certo([1, 2, 3, 4, 5, 6]))   # 3
+
+
+
+
+
+
+# %%
+"""
+===========================================================================
+PARA TREINAR MAIS (em casa)
+===========================================================================
+
+    A matéria desta aula está explicada com calma, e com muitos exercícios
+    com solução (por níveis: exemplos, exercícios, desafios de teste), em:
+
+        revisoes_4_ciclos_for_e_listas.py        secção 11 (ciclo for, acumuladores)
+        revisoes_3_condicoes_e_if.py             secção 8 (if/elif/else)
+        revisoes_5_valores_referencias_escopo.py secções 16 e 17 (escopo de variáveis)
+"""

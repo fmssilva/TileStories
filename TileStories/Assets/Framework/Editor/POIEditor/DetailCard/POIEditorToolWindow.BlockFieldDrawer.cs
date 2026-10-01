@@ -16,6 +16,8 @@ namespace TileStories.Editor
     {
         private const float BlockItemButtonWidth = 22f;
         private const string BlockChoiceNoneLabel = "(none)";
+        // The empty entry of a Choice that has a default: it says which option the card will use ("Default: Yaw Safe")
+        private const string BlockChoiceDefaultPrefix = "Default: ";
         private const string BlockPoiMissingLabel = "(missing)";
         // GUILayout's own gap between two controls on one row (the colour picker and its hex field)
         private const float BlockRowControlGap = 3f;
@@ -47,7 +49,8 @@ namespace TileStories.Editor
                     DrawItemsBlockField(block, field, languages, blockIndex);
                 else if (field.Type == BlockFieldType.Choice)
                     DrawChoiceRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
-                        () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value));
+                        () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value),
+                        BlockChoiceDefaultLabel(field, BlockLibraryRule.ChoiceDefault(_config.card_settings, definition, field)));
                 else if (field.Type == BlockFieldType.Color)
                     DrawColorRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
                         () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value));
@@ -183,9 +186,10 @@ namespace TileStories.Editor
         // A Choice field: a popup of the definition's option labels (the value stored is the option, never the label). An
         // optional field offers "(none)"; a value that is no longer an option stays, shown as "<value> (missing)", until
         // the developer picks another -- drawing never rewrites it.
-        private static void DrawChoiceRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<string> get, Action<string> set)
+        private static void DrawChoiceRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<string> get, Action<string> set,
+            string emptyLabel = null)
         {
-            var (values, labels) = BlockChoiceOptions(field, get());
+            var (values, labels) = BlockChoiceOptions(field, get(), emptyLabel);
             int index = values.IndexOf(get());
             DrawEditorRow(out float rowWidth, out _, indent);
             EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
@@ -404,14 +408,24 @@ namespace TileStories.Editor
         }
 
         // The popup of a Choice field: its values and, in the same order, what the Editor shows for them
-        internal static (List<string> Values, List<string> Labels) BlockChoiceOptions(BlockFieldDefinition field, string current)
+        // The empty entry's label of a Choice with a default (null without one: the plain "(none)"), naming the option by its label
+        internal static string BlockChoiceDefaultLabel(BlockFieldDefinition field, string defaultValue)
+        {
+            if (field?.ChoiceDefault == null || field.Options == null) return null;
+            int at = -1;
+            for (int i = 0; i < field.Options.Count; i++) if (field.Options[i] == defaultValue) at = i;
+            if (at < 0) return null;
+            return BlockChoiceDefaultPrefix + (field.OptionLabels != null ? field.OptionLabels[at] : field.Options[at]);
+        }
+
+        internal static (List<string> Values, List<string> Labels) BlockChoiceOptions(BlockFieldDefinition field, string current, string emptyLabel = null)
         {
             var values = new List<string>();
             var labels = new List<string>();
             if (!field.Required)
             {
                 values.Add("");
-                labels.Add(BlockChoiceNoneLabel);
+                labels.Add(emptyLabel ?? BlockChoiceNoneLabel);
             }
             for (int i = 0; i < field.Options.Count; i++)
             {

@@ -33,6 +33,11 @@ namespace TileStories
         // Choice only: the option values (stored in config) and, in the same order, the names the Editor shows
         public IReadOnlyList<string> Options;
         public IReadOnlyList<string> OptionLabels;
+        // Choice only: the option read while the block stores none (null = none: the field reads empty, as before)
+        public string ChoiceDefault;
+        // Choice only: a wall may set this field's default for every block of the kind in the Block Library
+        // (card_settings.kinds[].field_defaults); a block's own value still wins (BlockLibraryRule.Choice)
+        public bool LibraryDefault;
         // Items only: the sub-fields of one row (never Items themselves)
         public IReadOnlyList<BlockFieldDefinition> ItemFields;
         // Asset only: what the file must be (MediaPathRule checks the stored path against it)

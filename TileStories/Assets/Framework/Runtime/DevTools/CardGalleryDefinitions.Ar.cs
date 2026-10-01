@@ -33,6 +33,29 @@ namespace TileStories
         private static BlockInstanceData ShowOnWallBlock(string variant) =>
             new() { key = QuizBlockKey, kind = BuiltInBlocks.ShowOnWallKind, variant = variant };
 
+        // place_in_ar (_3.1 step 10B.3): the Framework's own model with every default (real size, 10 cm out); and an authored long Button
+        // Label with the Height scale. The localised / not-localised / placed states are the harness's ArWall and a real tap
+        // (CardGalleryTests.PlaceInAr_...), not entries: the same block draws all three.
+        private static void AddPlaceInAr(List<Entry> list)
+        {
+            list.Add(new Entry(BuiltInBlocks.PlaceInArKind, BuiltInBlocks.PlaceInArButton, "short", PlaceInArBlock(null, null)));
+            list.Add(new Entry(BuiltInBlocks.PlaceInArKind, BuiltInBlocks.PlaceInArButton, "long",
+                PlaceInArBlock("Stand the tiled arch here in front of you, life size, and walk around it", ArPlacementRule.ScaleHeightCm)));
+        }
+
+        private static BlockInstanceData PlaceInArBlock(string label, string scale)
+        {
+            var block = new BlockInstanceData { key = QuizBlockKey, kind = BuiltInBlocks.PlaceInArKind, variant = BuiltInBlocks.PlaceInArButton };
+            block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.PlaceInArModelField, asset = MediaPathRule.PathForDefaultKey("azulejo_arch") });
+            if (label != null) block.fields.Add(Text(BuiltInBlocks.PlaceInArLabelField, label));
+            if (scale != null)
+            {
+                block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.PlaceInArScaleField, value = scale });
+                block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.PlaceInArHeightField, number = 45f });
+            }
+            return block;
+        }
+
 
     }
 }

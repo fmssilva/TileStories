@@ -44,6 +44,7 @@ namespace TileStories
             registry.Register(Feedback, () => new FeedbackBlockView());
             registry.Register(Dialogue, () => new DialogueBlockView());
             registry.Register(ShowOnWall, () => new ShowOnWallBlockView());
+            registry.Register(PlaceInAr, () => new PlaceInArBlockView());
             registry.Register(AudioGuide, () => new AudioGuideBlockView());
         }
     }

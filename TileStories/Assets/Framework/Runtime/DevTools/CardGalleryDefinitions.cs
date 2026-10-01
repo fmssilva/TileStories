@@ -102,6 +102,7 @@ namespace TileStories
             AddFeedback(list);
             AddDialogues(list);
             AddShowOnWall(list);
+            AddPlaceInAr(list);
             AddAudioGuides(list);
             AddHeadings(list);
             return list;
@@ -111,6 +112,10 @@ namespace TileStories
         // carries one, so every kind is seen with a heading above it and without one. A kind with a default heading
         // (compare, sources) gets it on its "long" entry instead: there the authored heading must win over the default.
         public const string HeadingPrefix = "About the ";
+
+        // The gallery's heading for a kind: its display name in a sentence ("About the 3D Model"), the key when it is not registered
+        public static string HeadingFor(string kind) =>
+            HeadingPrefix + (BlockRegistry.Shared.TryGet(kind, out var definition) ? definition.DisplayName : kind.Replace('_', ' '));
 
         private static void AddHeadings(List<Entry> list)
         {
@@ -122,7 +127,7 @@ namespace TileStories
                 if (hasDefault && entry.Content != "long") continue;
                 if (!seen.Add(entry.Kind + "/" + entry.Variant)) continue;
                 if (entry.Block.fields.Exists(f => f.key == BlockKindDefinition.HeadingField)) continue;
-                entry.Block.fields.Add(Text(BlockKindDefinition.HeadingField, HeadingPrefix + entry.Kind.Replace('_', ' ')));
+                entry.Block.fields.Add(Text(BlockKindDefinition.HeadingField, HeadingFor(entry.Kind)));
             }
         }
 

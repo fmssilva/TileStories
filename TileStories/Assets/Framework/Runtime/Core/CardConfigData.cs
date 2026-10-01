@@ -105,6 +105,17 @@ namespace TileStories
         public string default_variant = "";
         // Developer note (the table's Details popup)
         public string details = "";
+        // The wall's default of a Choice field the kind marks LibraryDefault (e.g. a model's Fit): a block that stores
+        // no value of its own reads this one (BlockLibraryRule.Choice). No entry = the field's own ChoiceDefault
+        public List<BlockFieldDefault> field_defaults = new();
+    }
+
+    // One Block Library default: a field key of the kind and the option it defaults to
+    [Serializable]
+    public class BlockFieldDefault
+    {
+        public string key;
+        public string value;
     }
 
     // A POI's card: its ordered blocks. No blocks = a header-only card from the POI's name and summary.

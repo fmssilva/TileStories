@@ -19,7 +19,7 @@ namespace TileStories.Editor.Tests
         {
             typeof(CardSettings), typeof(CardContainerSettings), typeof(BlockKindSetting), typeof(POICardData),
             typeof(BlockInstanceData), typeof(BlockFieldValue), typeof(BlockItemData), typeof(BlockItemFieldValue),
-            typeof(LocalizedEntry), typeof(CardStringEntry), typeof(GlossaryEntry),
+            typeof(LocalizedEntry), typeof(CardStringEntry), typeof(GlossaryEntry), typeof(BlockFieldDefault),
         };
 
         // Set every public field of `target` (and of everything it holds) to a value that differs from the default

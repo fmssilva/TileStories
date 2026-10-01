@@ -57,6 +57,23 @@ namespace TileStories
         public const string Model3DFallbackField = "fallback";
         public const string Model3DAutoSpinField = "auto_spin";
         public const string Model3DTitleField = "title";
+        public const string Model3DFitField = "fit";
+
+        // The Fit choice of a model preview (_3.1 10B-pre.1): a trade-off between size and safety, so the developer picks it per
+        // block, and per wall in the Block Library (LibraryDefault); yaw_safe unless either says otherwise
+        public static BlockFieldDefinition ModelFitField(string key, string appliesTo) => new()
+        {
+            Key = key, Type = BlockFieldType.Choice, Label = "Fit",
+            Options = new[] { ModelFitRule.FitYawSafe, ModelFitRule.FitSphere, ModelFitRule.FitAtRest, ModelFitRule.FitVisible },
+            OptionLabels = new[] { "Yaw Safe", "Sphere", "At Rest", "Visible" },
+            ChoiceDefault = ModelFitRule.FitYawSafe,
+            LibraryDefault = true,
+            Help = appliesTo + "How large the model is drawn. Yaw Safe (default): as large as it can be while it turns all the way " +
+                   "round; tilting it up or down moves it back just enough to stay whole. Sphere: small enough to stay whole at any " +
+                   "angle without moving (a long model reads small). At Rest: as large as possible at the start angle; turned, a long " +
+                   "model can be cut at the edges. Visible: like Yaw Safe, but sized to the surfaces the visitor actually sees -- for a scan " +
+                   "seen from outside (a room scan whose walls show only from inside), which otherwise reads small. Empty: the Block Library's default for this kind.",
+        };
 
         public const string Panorama360Kind = "panorama_360";
         public const string Panorama360Drag = "drag";
@@ -257,7 +274,7 @@ namespace TileStories
         {
             Key = Model3DKind,
             Family = "media",
-            DisplayName = "Model 3D",
+            DisplayName = "3D Model",
             Help = "A 3D model the visitor turns to look at from every side: a drag rotates it, two fingers pinch to zoom " +
                    "(within limits), and it slowly spins on its own until touched (Auto Spin). The Fallback Picture shows " +
                    "while the model loads and if it cannot be loaded. Display Takeover shows only a teaser (the picture, " +
@@ -278,6 +295,7 @@ namespace TileStories
                     Key = Model3DFallbackField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Fallback Picture",
                     Help = "Shown while the model loads and if it cannot be loaded. " + PictureHelp,
                 },
+                ModelFitField(Model3DFitField, ""),
                 new BlockFieldDefinition
                 {
                     Key = Model3DAutoSpinField, Type = BlockFieldType.Toggle, Label = "Auto Spin",
@@ -300,7 +318,7 @@ namespace TileStories
         {
             Key = Panorama360Kind,
             Family = "media",
-            DisplayName = "Panorama 360",
+            DisplayName = "360 Panorama",
             Help = "A 360 degree picture the visitor looks around in. Drag look: drag to turn the view, pinch to zoom. Gyro look: " +
                    "turn the phone to look around (where the device has no motion sensor, the Editor for one, it falls back to " +
                    "dragging). Start Heading sets where the view points when it opens. The Fallback Picture shows while the " +

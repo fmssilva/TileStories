@@ -37,6 +37,10 @@ namespace TileStories
                 if (old != null) UnityEngine.Object.DestroyImmediate(old);
             }
 
+            // The fake draws nothing, so it only remembers the framing it was asked for
+            public ModelFitMode Fit { get; private set; }
+            public void SetFit(ModelFitMode mode) => Fit = mode;
+
             public void RenderNow(TurntableState turntable, PanoramaViewState panorama) => RenderCount++;
 
             public void Release()

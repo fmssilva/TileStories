@@ -1,27 +1,21 @@
-# Plan tracker -- POI Card 10A.3-fix (x3) + 10A.4 panorama_360 (started 2026-09-30)
+# Plan tracker -- POI Card 10B-pre (fit options, kind names) + 10B place_in_ar (started 2026-09-30)
 
-Baseline (tree = commit e5822e5 + __AI_worker.md only): EditMode 1483/1483 green. Full PlayMode: see row P0.
-GATE: Game-view + POI Editor captures taken and opened (TileStories/TestEvidence/Gate/), tree compiles, Oswald font unmodified.
+Tree = green commit 5481dc5 (+ docs only). GATE: TestEvidence/Gate/gate_10B_game_view.png + gate_10B_poi_editor.png opened and read,
+Oswald font unmodified, Editor.log 0 `error CS` / ExitCode 0.
 
 ## Design decisions (autonomous)
-- ONE shared base view `PreviewBlockView` (pointer / pinch / slot / teaser / takeover / visibility gate), the model view and the
-  new panorama view are thin subclasses. Reason: 10A.3-fix.1 and every later fix must land once, not twice.
-  USS classes card-model3d* -> card-preview* (same rules, neutral name).
-- Sheet stop reaches blocks through IBlockHost.Stop + pure SheetStopRule.RevealsBlocks(stop) (Half/Full only).
-- Fit: pure ModelFitRule (bounding sphere of the renderers' bound corners, distance = r / sin(atan(0.8 * tanHalfFovOfShorterAxis))).
-- Panorama sphere: pure PanoramaSphereRule (vertices = EquirectRule.DirectionOf, uv = (u,v), inward winding), unlit URP material
-  asset in Resources (a Shader.Find would be stripped from a build).
-- Gyro: pure PanoramaGyroRule (attitude quaternion -> yaw/pitch, anchored to the first reading) + DeviceAttitude (reads the real
-  Input System AttitudeSensor.current, enables it). Drag is the fallback wherever no sensor exists.
-- panorama_360 fields: panorama (Asset/Panorama*), fallback (Asset/Image), start_heading (Number 0..360), title (LocalizedText);
-  looks (variants) drag / gyro; display modes inline + takeover.
+- yaw_safe: the camera distance FOLLOWS THE PITCH -- exact fit of every yaw at the current pitch (closed form per box corner);
+  a fixed yaw-safe distance with the turntable's +-80 tilt equals the sphere (every box corner lies on the bounding sphere).
+  Room scan at rest ~0.74 of the shorter side (python check), never clipped at any allowed turn.
+- sphere keeps TargetFill 0.8; yaw_safe / at_rest fit box corners to FrameFill 0.9 (5 % margin each side).
+- Choice defaults: BlockFieldDefinition.ChoiceDefault + LibraryDefault, BlockKindSetting.field_defaults, BlockLibraryRule.Choice.
+- AR: pure ArPlacementRule; ICardArPlacement / ArPlacementService over IArPlacementStage (ArPlacementStage MonoBehaviour) and
+  IArWall (WallArSurface over WallSession + IWallTracker); the model shows the viewer the side the card preview shows at rest.
 
 ## Steps
-- [x] P0  opening full PlayMode baseline: EditMode 1483/1483; PlayMode 701/702 (OrientationClusterIntegrationTests, stray MainCamera from an earlier fixture; fixed in F1)
-- [x] F1  10A.3-fix.1 auto-spin gated on sheet stop + viewport (IBlockHost.Stop, SheetStopRule.RevealsBlocks, Phase B on the Lamp) -- EditMode 1484, targeted PlayMode 14/14
-- [x] F2  10A.3-fix.2 bounding-sphere fit (ModelFitRule, stage), pixel test after a 90 degree drag (arch + room scan), header Full recapture, delete [10A.3-followup] -- EditMode 1487, targeted PlayMode 22/22; room scan reads small by design (note in _3.1)
-- [x] F3  10A.3-fix.3 capture Header row (model look, 620 pt) + Model 3D rows; clear _5.1 pending entry
-- [x] A1  10A.4.1 PreviewBlockView extraction + stage panorama (PanoramaSphereRule, material, handle), release guarantees
-- [x] A2  10A.4.2 panorama_360 kind + PanoramaBlockView (drag / pinch / takeover / gyro), CardStrings en+pt, Card Content row, Lamp fixture
-- [x] A3  10A.4.3 tests (pure, Phase A gallery entries, Phase B Lamp, gyro with a real Input System test device, round trip)
-- [x] A4  10A.4.4 full EditMode 1507/1507 + full PlayMode 732/732 (end to end, after the last fix), captures checked (4.5 questions), docs: _3.1, 10-structure.md, _5.1
+- [x] P1  10B-pre.1 Fit choice -- yaw_safe / sphere / at_rest + visible (developer, 2026-10-01; scan 62 % accepted), Choice defaults, Editor rows; EditMode 1514/1514, PlayMode targeted 31/31; Default Fit row recapture pending (_5.1)
+- [x] P2  10B-pre.2 kind display names 3D Model / 360 Panorama -- HeadingFor(kind), guard test; EditMode 1514/1515 (typing flake, 5/5 alone), PlayMode gallery 342/342
+- [x] B1  10B.1 ArPlacementRule + ICardArPlacement / ArPlacementService (no separate stage: the service instantiates) + WallArSurface / ManualArWall; ArPlacementTests 10/10
+- [x] B2  10B.2 place_in_ar kind + view + strings + Card Content row (drawn from the definition); EditMode 1526/1526
+- [x] B3  10B.3 Phase A gallery 3/3 + Phase B LivingRoom 2/2 (block_62 fixture +35/-0 per copy); long-label wrap fixed from the capture
+- [x] B4  10B.4 EditMode 1526/1526 + PlayMode 740/740; Editor captures at 620 pt (Default Scale Mode label fixed); docs _3.1 / 10-structure / _5.1

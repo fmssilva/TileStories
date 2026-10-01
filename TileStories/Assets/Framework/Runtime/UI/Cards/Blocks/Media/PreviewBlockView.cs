@@ -128,6 +128,8 @@ namespace TileStories
         protected virtual bool OnTick(float deltaSeconds) => false;
         // The view became bound / is about to be unbound: start / stop whatever a look needs (the gyro sensor)
         protected virtual void OnBound() { }
+        // The slot was just requested for this bind (a model hands it its framing)
+        protected virtual void OnSlotRequested(ICardPreviewSlot slot) { }
         protected virtual void OnUnbinding() { }
 
         // ---- what a subclass may look at ----
@@ -188,6 +190,7 @@ namespace TileStories
             if (!_teaser) OnBound();
             RefreshHint();
             _slot = context.Preview?.Request(_previewKey, SubjectKind, subjectPath);
+            OnSlotRequested(_slot);
             // - the Frame may already be laid out (a pooled view rebinding to the same slot size): size the new slot's
             // texture at once rather than waiting for a GeometryChangedEvent that may never fire again for this size
             ApplySize(Frame.resolvedStyle.width, Frame.resolvedStyle.height);

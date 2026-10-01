@@ -152,3 +152,7 @@ check thee FOV splike thing???
   every command). Every binary is committed as a normal blob (checked: the 17 MB castle video and the PNGs are raw in HEAD). To
   use LFS: move the macro lines to a root `.gitattributes` (or write `filter=lfs diff=lfs merge=lfs -text` directly), install
   git-lfs, and run `git lfs migrate` if the history should shrink. Developer's decision (needs a remote that supports LFS).
+- **Real-typing EditMode tests depend on Unity's focus.** `LivePlayModeCardTests.TheRealWindow_WhilePlayModeRuns_ATypedText...` loses
+  characters ("Dis" for "Dismiss", "L" for "Live heading") when a full run happens with Unity in the background (seen 9B-fix and again
+  2026-10-01; 5/5 alone with focus). Either give these tests their own category that a background run skips, or have the typing helper
+  wait until each character has landed before the next. Test-infrastructure work, not a card domain change.

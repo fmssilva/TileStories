@@ -15,7 +15,9 @@ Temas de hoje:
 Como usar este ficheiro no Spyder:
     - cada bloco que começa com "# %%" é uma célula
     - Ctrl + Enter  -> corre só a célula onde está o cursor
+    - Shift + Enter -> corre a célula e salta para a seguinte
     - F5            -> corre o ficheiro todo (vai pedir vários inputs!)
+    - corram as células POR ORDEM: muitas usam funções das células de cima
 
 Mooshak de hoje: I (ex 26), J (ex 27), K (ex 29), L (ex 31)
 """
@@ -31,8 +33,6 @@ Mooshak de hoje: I (ex 26), J (ex 27), K (ex 29), L (ex 31)
 LOGÍSTICA / Revisões [8 min -> 10:18]
 ===========================================================================
 
-    - Façam download deste documento da drive
-
     - Folha de Presenças
     - Mooshak: problemas F, G, H da aula passada já submetidos?
     - Dúvidas da aula passada (ciclo for, range, acumuladores)
@@ -45,7 +45,6 @@ AQUECIMENTO - prever o output (sem correr!) --------------------------------
 total = 0
 for i in range(1, 10, 3):
     total += i
-    print(i, total)
 print(total)
 
 # Solução: 12
@@ -54,21 +53,6 @@ print(total)
 # Receita do acumulador: começa ANTES do ciclo, cresce DENTRO, usa-se DEPOIS.
 
 
-
-
-
-# %%
-"""
-    Ciclos dentro de ciclos
-
-    EXERCICIO: Desenhe um quadrado de asteriscos com 5 linhas e 5 colunas.
-"""
-rows = 3
-cols = 6
-for i in range(rows):         
-    for j in range(cols):  
-        print(" * ", end="")  # end="" evita o salto de linha
-    print()                 # salto de linha no fim da linha
 
 
 
@@ -82,26 +66,23 @@ https://ipce-184ea7.gitlab.io/
 
 a) Aquecimento - tabela da verdade com dois for [6 min -> 10:24] -----------
 
-    Exercício: print tabela de verdade AND e OR
-    
-    »» Um bool só tem 2 valores: False e True.
+    Um bool só tem 2 valores: False e True.
     Então podemos pôr um for a passar pelos dois!
     E um for DENTRO de outro for passa por todas as combinações (2 x 2 = 4).
 
     Corram e comparem com o que aprenderam no secundário.
 """
 
-print("a   b  |  and")
-for a in [0, 1]:
-    for b in [0, 1]:
-        print(f"{a}   {b}  |   {a and b:<5}")
+for a in [False, True]:
+    for b in [False, True]:
+        print(a, b, "|  and:", a and b, "  or:", a or b)
 
-print("\na   b  |  or")
-for a in [0, 1]:
-    for b in [0, 1]:
-        print(f"{a}   {b}  |   {a or b:<5}")
-
-
+# Output:
+#   False False |  and: False   or: False
+#   False True  |  and: False   or: True
+#   True  False |  and: False   or: True
+#   True  True  |  and: True    or: True
+#
 # Para cada valor do "a" de fora, o for de dentro dá a volta completa ao "b".
 # (ciclos dentro de ciclos: vamos ver mais disto nas próximas aulas)
 #
@@ -123,6 +104,18 @@ b) EXERCICIO 25 (GUIÃO) - and, or e not sem usar and, or e not [12 min -> 10:36
     código abaixo da forma mais compacta possível. Não pode usar os três
     operadores lógicos, mas pode usar o if.
 
+        def and_(a: bool, b: bool) -> bool:
+            ''' AND - Boolean operation. '''
+            ...
+
+        def or_(a: bool, b: bool) -> bool:
+            ''' OR - Boolean operation. '''
+            ...
+
+        def not_(a: bool) -> bool:
+            ''' NOT - Boolean operation. '''
+            ...
+
     Nota sobre os nomes: "and" é palavra reservada, não pode ser nome de função.
     Daí o "_" no fim: and_, or_, not_ (é uma convenção habitual em Python).
 
@@ -130,52 +123,174 @@ b) EXERCICIO 25 (GUIÃO) - and, or e not sem usar and, or e not [12 min -> 10:36
         and: "o a é True?"  Se não é, a resposta já está decidida...
 """
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução do exercício 25
+
 def and_(a: bool, b: bool) -> bool:
     """ AND - Boolean operation. """
     if a:
         return b          # a é True -> quem decide é o b
-    return False      # a é False -> nem vale a pena olhar para o b
+    else:
+        return False      # a é False -> nem vale a pena olhar para o b
 
-print(and_(True, True))
-print(and_(True, False))
-print(and_(False, True))
-print(and_(False, False))
-
-# Reparem que podemos diretamente "if a:" e não "if a == True:".
-# (regra de estilo da cadeira: nada de "== True" nem "== False")
-
-
-
-
-
-# %%
 def or_(a: bool, b: bool) -> bool:
     """ OR - Boolean operation. """
     if a:
         return True       # a é True -> já está, é True
-    return b          # a é False -> quem decide é o b
+    else:
+        return b          # a é False -> quem decide é o b
+
+def not_(a: bool) -> bool:
+    """ NOT - Boolean operation. """
+    if a:
+        return False
+    else:
+        return True
+
+# Reparem no "if a:" e não "if a == True:".
+# O a JÁ É um booleano, não é preciso compará-lo com True.
+# (regra de estilo da cadeira: nada de "== True" nem "== False")
+#
+# Versão ainda mais curta, sem else (se o if faz return, o else é redundante):
+#
+#   def and_(a: bool, b: bool) -> bool:
+#       if a:
+#           return b
+#       return False
 
 
-
-print(or_(True, True))
-print(or_(True, False))
-print(or_(False, True))
-print(or_(False, False))
 
 
 
 
 # %%
-def not_(a: bool) -> bool:
-    """ NOT - Boolean operation. """
-    if a:
-        return False
-    return True
+# Teste: as nossas funções dão sempre o mesmo que os operadores do Python?
+# (usa as funções da célula de cima: corram-na primeiro)
+# Em vez de confiar "a olho", pomos o computador a comparar as 4 combinações.
 
-print(not_(True))
-print(not_(False))
+for a in [False, True]:
+    for b in [False, True]:
+        print(a, b,
+              and_(a, b) == (a and b),
+              or_(a, b) == (a or b),
+              not_(a) == (not a))
+
+# Deve aparecer True True True em todas as linhas.
+# Testar TODAS as combinações possíveis é fácil aqui porque só há 4.
+# Chama-se "teste exaustivo". Com inteiros já não dá (há infinitos)...
 
 
+
+
+
+
+# %%
+"""
+c) and / or são "preguiçosos" (avaliação em curto-circuito) [5 min -> 10:41]
+
+    Olhem outra vez para o and_ que escrevemos:
+    se o a for False, a função devolve False SEM olhar para o b.
+
+    O and verdadeiro do Python faz exatamente o mesmo!
+    Se a parte da esquerda já decide o resultado, a da direita NEM É CALCULADA.
+
+    Isto serve para alguma coisa? Serve, e muito. Corram:
+"""
+
+x = 0
+
+print(x != 0 and 10 / x > 1)      # False, e sem erro!
+
+# O Python viu "x != 0" -> False -> o and já é False de certeza.
+# Por isso NUNCA chegou a fazer 10 / 0.
+# A condição da esquerda funciona como "guarda" da condição da direita.
+
+# print(10 / x > 1 and x != 0)    # <- descomenta: ZeroDivisionError
+# Mesmas condições, ordem trocada -> rebenta. A ORDEM importa!
+
+# print(and_(x != 0, 10 / x > 1)) # <- descomenta: ZeroDivisionError
+# E com a NOSSA função também rebenta! Porquê?
+# Antes de chamar uma função, o Python calcula TODOS os argumentos.
+# Portanto o 10 / x é calculado antes de o and_ ter hipótese de o evitar.
+# O and do Python é mais esperto que qualquer função: é um operador especial.
+#
+# O or também é preguiçoso: se a esquerda for True, a direita não é calculada.
+# (isto já apareceu no is_date_valid da aula passada:
+#  "1 <= month <= 12 and 1 <= day <= month_length(month, year)"
+#  se o mês for 13, o month_length nunca é chamado com um mês inválido)
+
+
+
+
+
+
+# %%
+"""
+d) Negar condições: leis de De Morgan [4 min -> 10:45] ---------------------
+
+    Nos main que validam dados escrevemos muitas vezes:
+        if not (a > 0 and b > 0):
+            print("Argumentos inválidos")
+
+    Há outra forma de escrever o mesmo. Corram e vejam se as colunas batem:
+"""
+
+for p in [False, True]:
+    for q in [False, True]:
+        print(p, q, "|", not (p and q), (not p) or (not q),
+                    "|", not (p or q),  (not p) and (not q))
+
+# As duas primeiras colunas depois do "|" são sempre iguais. As duas últimas também.
+# São as leis de De Morgan:
+#     not (p and q)  ==  (not p) or  (not q)
+#     not (p or q)   ==  (not p) and (not q)
+# Em português: "negar" troca o and pelo or (e vice-versa), e nega cada pedaço.
+#
+# Exemplo: "não é verdade que (lower < upper e n > 1)"
+#     if not (lower < upper and n > 1):
+#     if lower >= upper or n <= 1:          # exatamente o mesmo!
+#
+# CUIDADO com os parêntesis! O not "cola" mais do que o and:
+#     not lower < upper and n > 1
+# é lido pelo Python como
+#     (not lower < upper) and (n > 1)
+# que é OUTRA condição. Vejam com lower = 0, upper = 1, n = 0:
+lower, upper, n = 0, 1, 0
+print(not (lower < upper and n > 1))    # True  -> "inválido" (correto, n = 0 é inválido)
+print(not lower < upper and n > 1)      # False -> deixava passar um n inválido!
+# Na dúvida: parêntesis. Nunca fazem mal.
 
 
 
@@ -189,7 +304,9 @@ Guião 04a, exercício 26 - Números reais e tabelas [35 min -> 11:20]
 https://ipce-184ea7.gitlab.io/
 ===========================================================================
 
-a) Tipo de dados float [6 min -> 10:51] -----------------------------
+a) Primeiros passos com float [6 min -> 10:51] -----------------------------
+
+    Corram linha a linha e tentem adivinhar antes cada resultado.
 """
 
 print(7 / 2)            # 3.5  -> a divisão "/" dá SEMPRE float
@@ -198,36 +315,23 @@ print(7 // 2)           # 3    -> divisão inteira (int com int dá int)
 print(2 + 0.5)          # 2.5  -> int misturado com float dá float
 print(2 ** 0.5)         # 1.4142135623730951 -> raiz quadrada sem math!
 
-
-
-
-# %%
-# print floats com um número fixo de casas decimais: f-string com ":.Nf"
+# Escrever reais com um número fixo de casas decimais: f-string com ":.Nf"
 r = 2 / 3
 print(r)                # 0.6666666666666666  (o Python decide)
 print(f"{r:.6f}")       # 0.666667            (6 casas, e arredonda)
 print(f"{r:.2f}")       # 0.67
 print(f"{5:.6f}")       # 5.000000 -> também funciona com int
 
-
-
-
-
-# %%
 # E o que acontece se misturarmos texto com números?
-# dá erro:
 # print("3" + 4)        # <- descomenta: TypeError
-
+#
 # O Python recusa: não adivinha se queríamos 7 ou "34".
 # Chama-se TIPAGEM FORTE: o Python não converte tipos "às escondidas".
 # (int + float é uma exceção aceite, porque aí não há dúvida nenhuma)
+# Em JavaScript, "3" + 4 dá "34" e "3" - 4 dá -1... Tipagem fraca. Boa sorte!
 # Se quisermos mesmo juntar, dizemos explicitamente:
 print("3" + str(4))     # 34
 print(int("3") + 4)     # 7
-
-# Em JavaScript usa-se Tipagem fraca. 
-# Javascript tenta adivinhar os tipos. 
-# Então "3" + 4 dá "34" e "3" - 4 dá -1
 
 
 
@@ -239,10 +343,16 @@ print(int("3") + 4)     # 7
 b) EXERCICIO 26 (GUIÃO, Mooshak I) - Tabela de um polinómio [17 min -> 11:08]
 
     26 - Escreva um programa para tabelar o polinómio quadrático ax2+bx+c
-    num dado intervalo [limInf, limSup] 
-    para um determinado número de pontos numPontos (superior a 1). 
-    O programa pede ao utilizador os valores reais a, b, c, limInf, limSup e o valor inteiro numPontos.
-    
+    num dado intervalo [limInf, limSup] para um determinado número de
+    pontos numPontos (superior a 1). O programa pede ao utilizador os
+    valores reais a, b, c, limInf, limSup e o valor inteiro numPontos.
+
+    Organização do programa:
+        (1) uma função real para avaliar um polinómio quadrático num ponto;
+        (2) uma função sem resultado mas com 6 parâmetros para calcular
+            e escrever a tabela;
+        (3) função main que pede os dados e manda escrever a tabela.
+
     Exemplo de execução
         A: 0.0
         B: 1.0
@@ -256,27 +366,66 @@ b) EXERCICIO 26 (GUIÃO, Mooshak I) - Tabela de um polinómio [17 min -> 11:08]
         0.750000 0.750000
         1.000000 1.000000
 
-    Organização do programa:
-        (1) uma função real para avaliar um polinómio quadrático num ponto;
-        (2) uma função sem resultado mas com 6 parâmetros para calcular
-            e escrever a tabela;
-        (3) função main que pede os dados e manda escrever a tabela.
+    Cabeçalhos (do guião):
 
-    Nota: O Python só tem ranges de inteiros. 
-        Não existe range(0.0, 1.0, 0.25). 
-        O ciclo for vai ter de usar uma variável inteira.
-        Podemos usar o for com um inteiro i = 0, 1, 2, ..., n-1
-        e CALCULAR o x a partir do i.
+        def quadratic_polynomial_value(a: float, b: float, c: float, x: float) -> float:
+        def print_table(a: float, b: float, c: float,
+                        lower_bound: float, upper_bound: float,
+                        n: int) -> None:
+
+    O problema: não existe range(0.0, 1.0, 0.25). O range só aceita int.
+    A ideia é fazer o for com um inteiro i = 0, 1, 2, ..., n-1
+    e CALCULAR o x a partir do i.
 
     Pensar no papel com o exemplo: 5 pontos entre 0 e 1.
         0.00   0.25   0.50   0.75   1.00
           |------|------|------|------|
     5 pontos, mas só 4 espaços entre eles!
+    É como uma vedação: 5 postes precisam de 4 tábuas.
+    (em inglês chama-se "fencepost error": um primo do off-by-one)
+        step = (1.0 - 0.0) / 4 = 0.25
+        x    = lower_bound + i * step
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução do exercício 26 (funções)
 
 def quadratic_polynomial_value(a: float, b: float, c: float, x: float) -> float:
     """ Eval a quadratic polynomial for the given value x """
-    return a * x ** 2 + b * x + c   
+    return a * x * x + b * x + c
+    # return a * x ** 2 + b * x + c   # também dá
 
 def print_table(a: float, b: float, c: float,
                 lower_bound: float, upper_bound: float,
@@ -289,21 +438,6 @@ def print_table(a: float, b: float, c: float,
         x = lower_bound + i * step
         y = quadratic_polynomial_value(a, b, c, x)
         print(f"{x:.6f} {y:.6f}")
-
-
-def main() -> None:
-    a = float(input("A: "))
-    b = float(input("B: "))
-    c = float(input("C: "))
-    lower_bound = float(input("LOWER: "))
-    upper_bound = float(input("UPPER: "))
-    n_points = int(input("N: "))
-    if not (lower_bound < upper_bound and n_points > 1):
-        print("Valores inválidos")
-    else:
-        print_table(a, b, c, lower_bound, upper_bound, n_points)
-
-main()
 
 print_table(0.0, 1.0, 0.0, 0.0, 1.0, 5)     # o exemplo do guião
 print()
@@ -320,6 +454,28 @@ print_table(1.0, 0.0, 0.0, -2.0, 2.0, 5)    # x ao quadrado: 4 1 0 1 4
 #   print_table                -> ciclo + escrita (não devolve nada: None)
 #   main                       -> fala com o utilizador
 
+
+
+
+
+
+# %%
+# Solução do exercício 26 (main)
+# (usa as funções da célula de cima: corram-na primeiro)
+
+def main() -> None:
+    a = float(input("A: "))
+    b = float(input("B: "))
+    c = float(input("C: "))
+    lower_bound = float(input("LOWER: "))
+    upper_bound = float(input("UPPER: "))
+    n_points = int(input("N: "))
+    if not (lower_bound < upper_bound and n_points > 1):
+        print("Valores inválidos")
+    else:
+        print_table(a, b, c, lower_bound, upper_bound, n_points)
+
+main()
 
 # Caça aos bugs: o main que vem no enunciado do guião tem 2 gralhas.
 #   1. "and n > 1"  -> a variável chama-se n_points, não n (NameError)
@@ -459,6 +615,33 @@ a) EXERCICIO 27 (GUIÃO, Mooshak J) - Fórmula resolvente [15 min -> 11:55] --
 
 
 
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # %%
 # Solução do exercício 27 (funções)
 import math
@@ -520,6 +703,7 @@ print(root_left(-1.0, 0.0, 4.0), root_right(-1.0, 0.0, 4.0))        # -2.0 2.0 (
 
 # %%
 # Solução do exercício 27 (main, dado no guião)
+# (usa as funções da célula de cima: corram-na primeiro)
 
 def main() -> None:
     a = float(input("A: "))
@@ -551,6 +735,7 @@ b) O bug escondido: d == 0 com reais [6 min -> 12:01] ----------------------
     Testem a equação (x - 0.7)² = 0, ou seja  x² - 1.4x + 0.49 = 0.
     Matemática: d = 1.96 - 1.96 = 0 -> 1 raiz, x = 0.7.
     O nosso programa diz...
+    (usa as funções da solução do ex 27: corram essas células primeiro)
 """
 
 print(discriminant(1.0, -1.4, 0.49))     # -2.220446049250313e-16  (devia ser 0!)
@@ -575,6 +760,10 @@ print(how_many_roots(1.0, -0.2, 0.01))   # 2  -> "duas raízes". ERRADO!
 # %%
 # Versão corrigida do exercício 27 (substitui as funções de cima)
 import math
+
+def discriminant(a: float, b: float, c: float) -> float:
+    """ Discriminant of ax^2+bx+c. """
+    return b * b - 4 * a * c
 
 EPSILON = 1e-9            # "quase zero": abaixo disto consideramos que é zero
 
@@ -660,6 +849,42 @@ c) PERGUNTA DE TESTE (Teste 1 2025/26, pergunta 2, 3 valores) - is_root [7 min -
     E já sabemos: "dar 0" com floats é "dar QUASE 0".
 """
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução da PERGUNTA DE TESTE is_root (Teste 1 2025/26, pergunta 2)
+import math
+
 def is_root(r: float, a: float, b: float, c: float) -> bool:
     """ Check if r is a root of ax^2+bx+c=0 """
     EPSILON = 1e-9                                 # constante local à função
@@ -713,6 +938,41 @@ a) EXERCICIO 28 (GUIÃO) - Graus para radianos [6 min -> 12:14] -----------
         360 graus   ->  2 * pi radianos
         degrees     ->  ?
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução do exercício 28
 import math
 
 def degrees_to_radians(degrees: float) -> float:
@@ -736,6 +996,7 @@ print(math.radians(90))           # a função pronta dá o mesmo
 
 # %%
 # Exercício 28 (main, dado no guião)
+# (usa as funções da célula de cima: corram-na primeiro)
 
 def main() -> None:
     degrees = float(input("Introduza graus: "))
@@ -776,6 +1037,12 @@ b) EXERCICIO 29 (GUIÃO, Mooshak K) - log16, parte decimal, centésimas [13 min 
         decimal_part(1.23456780) = 0.23456780
         round_hundredths(1.23456780) = 1.23000000
 
+    Cabeçalhos (do guião):
+        def log16(x: float) -> float:
+        def decimal_part(x: float) -> float:
+        def round_hundredths(x: float) -> float:
+    (as três com a precondição x > 0; a main é dada no guião)
+
     Ferramentas (experimentem antes de resolver!):
 """
 import math
@@ -792,6 +1059,33 @@ print(int(-3.7))            # -3   -> o int() corta, não arredonda para baixo
 #               34.5678 -> 3456.78 -> 3457 -> 34.57
 #   arredondar às unidades só com floor: floor(x + 0.5)
 #               3456.78 + 0.5 = 3457.28 -> floor -> 3457
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
 
 
 
@@ -838,6 +1132,7 @@ print(round_hundredths(34.5678))         # 34.57
 
 # %%
 # Solução do exercício 29 (main, dado no guião)
+# (usa as funções da célula de cima: corram-na primeiro)
 
 def main() -> None:
     # ler
@@ -866,6 +1161,8 @@ main()
 # %%
 """
 c) Arredondar não é tão simples como parece [5 min -> 12:32] ---------------
+
+    (a última parte usa o round_hundredths do ex 29)
 """
 
 print(round(0.5), round(1.5), round(2.5), round(3.5))   # 0 2 2 4  (!!)
@@ -930,8 +1227,35 @@ a) EXERCICIO 30 (GUIÃO) - O seno pela série de Taylor [14 min -> 12:46] ----
 
 
 
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # %%
-# Solução do exercício 30 - versão 1, a mais direta (faz o pedido "especial"? não)
+# Solução do exercício 30 - versão 1, a mais direta (recalcula cada termo do zero)
 import math
 
 def taylor_sin_v1(x: float, n: int) -> float:
@@ -987,6 +1311,7 @@ print(taylor_sin(1.0, 5), math.sin(1.0))
 
 # %%
 # Exercício 30 (main, dado no guião)
+# (usa as funções da célula de cima: corram-na primeiro)
 import math
 
 def main() -> None:
@@ -1051,6 +1376,41 @@ b) EXERCICIO 31 (GUIÃO, Mooshak L) - sin(h)/h quando h vai para 0 [9 min -> 12:
     Pista: o parâmetro h é uma variável como as outras.
     Pode ser alterado dentro do ciclo: h /= 2 no fim de cada volta.
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução do exercício 31
 import math
 
 def f(x: float) -> float:
@@ -1113,6 +1473,8 @@ FECHO [5 min -> 13:00]
     Para casa:
         - Mooshak: I (26), J (27), K (29), L (31)
         - Exercícios de testes anteriores logo a seguir (com solução)
+        - Para rever as bases desta aula com calma:
+          revisoes_3_condicoes_e_if.py, secção 7 (booleanos, De Morgan, floats)
 """
 
 
@@ -1151,7 +1513,41 @@ print(not (a > 3 or b == 0))            # ?
 print(b != 0 and a / b > 1)             # ?
 print(3 < a < 10)                       # ?
 
-# Soluções:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução de PREVER O OUTPUT
+#
 #   False  -> 5 > 3 é True, 0 > 3 é False -> and dá False
 #   True   -> a esquerda já é True -> o or nem calcula o b / 0 (senão rebentava!)
 #   True   -> lê-se (not a > 3) or (b == 0) = False or True
@@ -1180,6 +1576,41 @@ EXERCICIO (TESTE 1 2024/25, pergunta 2, 4 valores) - Período do Natal ------
         def christmas(day: int, month: int) -> bool:
             ''' Check if it is a Christmas date. '''
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução do Período do Natal (Teste 1 2024/25, pergunta 2)
 
 def christmas(day: int, month: int) -> bool:
     """ Check if it is a Christmas date. """
@@ -1237,6 +1668,41 @@ EXERCICIO (TESTE 1 2025/26, pergunta 6, 4 valores) - Celsius / Fahrenheit --
 
     É o ex 26 + ex 31 com outra roupa: um for com int e um x calculado.
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução do Celsius / Fahrenheit (Teste 1 2025/26, pergunta 6)
 
 LINES = 10          # número de linhas da tabela
 
@@ -1313,6 +1779,41 @@ EXERCICIO (TESTE 1 2024/25, pergunta 6, 4 valores) - Conta da eletricidade -
     Recomenda-se: uma função para o custo, outra para a sobretaxa,
     outra para o total, e a main. Com comentário e precondição.
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução da Conta da eletricidade (Teste 1 2024/25, pergunta 6)
 
 SURCHARGE_LIMIT = 45.0      # acima disto paga sobretaxa
 SURCHARGE_RATE = 0.15       # 15%

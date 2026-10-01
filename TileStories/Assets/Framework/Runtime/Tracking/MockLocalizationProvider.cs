@@ -40,6 +40,22 @@ namespace TileStories
             OnWallLocalised?.Invoke(pose);
         }
 
+        // Lose the wall, as a phone does when the camera turns away (tests, and a developer checking a not-localised state)
+        public void LoseTracking()
+        {
+            if (!IsLocalised) return;
+            IsLocalised = false;
+            OnTrackingLost?.Invoke();
+        }
+
+        // Find the wall again at the same pose
+        public void Relocalise()
+        {
+            if (IsLocalised) return;
+            IsLocalised = true;
+            OnWallLocalised?.Invoke(CurrentPose);
+        }
+
 #if UNITY_EDITOR
         // Reads WASD/look/roll input through the shared DevCameraInput (Runtime/DevTools) --
         // the same reader the demo grid cameras use (EffectsPreviewFocus/OutlinePreviewFocus) --

@@ -2307,5 +2307,107 @@ namespace TileStories.Tests
             Assert.AreEqual("near_b", SelectionEventBus.CurrentPoiId, "a real tap on a neighbour selected it through the selection bus");
             SelectionEventBus.ResetState();
         }
+
+        // place_in_ar (_3.1 step 10B.3, Phase A): the three states one block draws -- localised (the button), placed (the Remove chip,
+        // kept while the card rises again), not localised (disabled, and a line why) -- each through REAL taps on the gallery card, with the
+        // SAME ArPlacementService as the wall's over the harness's ManualArWall, and the real Framework model placed in the world.
+        [UnityTest]
+        public IEnumerator PlaceInAr_ARealTapPlacesTheModelAndLowersTheCard_TheRemoveChipTakesItAway_AndNotLocalisedTheButtonIsDisabledWithWhy()
+        {
+            var placement = _harness.ArPlacementService;
+            var wall = _harness.ArWall;
+            wall.IsLocalised = true;
+            PlaceInArBlockView view = null;
+            yield return ShowBlock("place_in_ar_button_short", v => view = (PlaceInArBlockView)v);
+            Assert.AreEqual("See it here in 3D", view.ButtonLabel.text, "the card strings' words");
+            Assert.IsTrue(view.Button.enabledInHierarchy, "localised: the button works");
+            Assert.IsFalse(CardTestInput.IsShown(view.Note, view.Root), "localised: no line why not");
+            Assert.IsFalse(CardTestInput.IsShown(view.RemoveChip, view.Root), "nothing placed: no Remove chip");
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(view.Button.worldBound.width, view.Button.worldBound.height), "the button is a tap target >= 44 px");
+            yield return Render("Card_place_in_ar_localised");
+
+            // - a real tap: the model stands in the world where the rule says, and the card drops to its peek
+            yield return ScrollAndTap(view.Button);
+            yield return CardTestInput.Settle();
+            Assert.IsNotNull(placement.Placed, "a real tap placed the model");
+            Assert.AreSame(wall.Root, placement.Placed.transform.parent, "in the wall's frame");
+            Assert.AreEqual(1, wall.Root.childCount, "one model");
+            Assert.AreEqual(SheetStopRule.Stop.Peek, _harness.Sheet.Stop, "the card dropped to its peek so the model shows");
+            Assert.IsTrue(_harness.Sheet.IsOpen);
+            var poi = placement.Current.Poi;
+            Assert.IsTrue(POIPositionResolver.TryResolvePosition(poi, out var poiPosition, logErrors: false));
+            var expected = ArPlacementRule.Place(new ArPlacementRule.Input
+            {
+                PoiPosition = poiPosition, PoiRotation = WallSession.AuthoredRotationOf(poi), Viewer = null, OffsetCm = 10f,
+                ScaleMode = ArPlacementRule.ScaleRealSize, MarkerDiameter = wall.MarkerDiameter, WallScale = 1f,
+                ModelBounds = ArPlacementService.LocalBoundsOf(placement.Placed),
+            });
+            Assert.Less(Vector3.Distance(expected.LocalPosition, placement.Placed.transform.localPosition), 0.001f, "the defaults' pose: 10 cm out, real size");
+            Assert.AreEqual(1f, placement.Placed.transform.localScale.x, 0.0001f, "Real Size is the default");
+
+            // - the card rises again: the model stays, the chip shows
+            _harness.Sheet.SetStop(SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(view.IsPlaced, "re-opening the card keeps the model placed");
+            Assert.IsNotNull(placement.Placed);
+            Assert.IsTrue(CardTestInput.IsShown(view.RemoveChip, view.Root), "placed: the Remove chip");
+            Assert.AreEqual("Remove", view.RemoveLabel.text);
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(view.RemoveChip.worldBound.width, view.RemoveChip.worldBound.height), "the chip is a tap target >= 44 px");
+            Assert.GreaterOrEqual(CardTestInput.Contrast(view.RemoveLabel.resolvedStyle.color, CardTestInput.EffectiveBackground(view.RemoveLabel)),
+                UIAccessibility.MinRatioNormalText, "the chip's words read");
+            yield return Render("Card_place_in_ar_placed");
+
+            yield return ScrollAndTap(view.RemoveChip);
+            yield return CardTestInput.Settle();
+            Assert.IsNull(placement.Placed, "a real tap on Remove took the model away");
+            Assert.AreEqual(0, wall.Root.childCount, "nothing left in the world");
+            Assert.IsFalse(CardTestInput.IsShown(view.RemoveChip, view.Root), "the chip goes with it");
+
+            // - the wall lost: disabled, a line says why, and a real tap places nothing and leaves the card where it is
+            wall.IsLocalised = false;
+            yield return CardTestInput.Settle();
+            Assert.IsFalse(view.Button.enabledInHierarchy, "not localised: the button is disabled");
+            Assert.IsTrue(CardTestInput.IsShown(view.Note, view.Root), "...and a line says why");
+            Assert.AreEqual("Point the camera at the wall first, then place it.", view.Note.text);
+            Assert.GreaterOrEqual(CardTestInput.Contrast(view.Note.resolvedStyle.color, CardTestInput.EffectiveBackground(view.Note)),
+                UIAccessibility.MinRatioNormalText, "the line why reads");
+            Assert.GreaterOrEqual(CardTestInput.Contrast(view.ButtonLabel.resolvedStyle.color, CardTestInput.EffectiveBackground(view.ButtonLabel)),
+                UIAccessibility.MinRatioNormalText, "the disabled button's words still read");
+            yield return Render("Card_place_in_ar_not_localised");
+            yield return ScrollAndTap(view.Button);
+            yield return CardTestInput.Settle();
+            Assert.IsNull(placement.Placed, "a tap on the disabled button places nothing");
+            Assert.AreEqual(SheetStopRule.Stop.Full, _harness.Sheet.Stop, "...and the card stays where it is");
+            wall.IsLocalised = true;
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(view.Button.enabledInHierarchy, "the wall found again: the button works again");
+
+            // - the authored label and the Height scale: a real tap stands the arch 45 cm tall
+            yield return ShowBlock("place_in_ar_button_long", v => view = (PlaceInArBlockView)v);
+            Assert.AreEqual("Stand the tiled arch here in front of you, life size, and walk around it", view.ButtonLabel.text, "the authored Button Label wins");
+            // - a long label wraps inside the pill (the first capture showed it on one line, running off both sides)
+            var card = _harness.Sheet.Root.worldBound;
+            Assert.LessOrEqual(view.Button.worldBound.xMax, card.xMax + 0.5f, "the button stays inside the card");
+            Assert.GreaterOrEqual(view.ButtonLabel.worldBound.xMin, view.Button.worldBound.xMin - 0.5f, "the words start inside the button");
+            Assert.LessOrEqual(view.ButtonLabel.worldBound.xMax, view.Button.worldBound.xMax + 0.5f, "the words end inside the button");
+            var oneLine = view.ButtonLabel.MeasureTextSize(view.ButtonLabel.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined);
+            Assert.Greater(oneLine.x, view.ButtonLabel.contentRect.width, "precondition: the words are wider than the button");
+            Assert.GreaterOrEqual(view.ButtonLabel.contentRect.height, oneLine.y * 1.8f, "so they wrap onto more lines");
+            yield return ScrollAndTap(view.Button);
+            yield return CardTestInput.Settle();
+            Assert.IsNotNull(placement.Placed);
+            var renderers = placement.Placed.GetComponentsInChildren<Renderer>();
+            var box = renderers[0].bounds;
+            foreach (var r in renderers) box.Encapsulate(r.bounds);
+            Assert.AreEqual(0.45f, box.size.y, 0.005f, "Height 45 cm: the arch stands 45 cm tall in the world");
+
+            // - the card closing takes it away
+            _harness.Sheet.SetStop(SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle();
+            yield return CardTestInput.Tap(_harness.Sheet.CloseButton.panel, _harness.Sheet.CloseButton.worldBound.center);
+            yield return CardTestInput.Settle();
+            Assert.IsNull(placement.Placed, "closing the card removed the model");
+            Assert.AreEqual(0, wall.Root.childCount);
+        }
     }
 }
