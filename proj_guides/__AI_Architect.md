@@ -14,6 +14,20 @@ claims to check, not proof.
 
 ---
 
+## 0. Where the rules live (one home per rule)
+
+- `.clinerules/` -- the SHARED rules both agents obey (00-process "Shared Core Rules": framework completeness, evidence,
+  scope lock, the two-level WHERE / HOW decision with real alternatives, no backward-compatibility shims, teaching; 20 code;
+  30 UI; 40 tests; 60 finishing). You review against them; you do not restate them here.
+- `proj_guides/__AI_Architect.md` (this file) -- only the Architect's procedure: review, decide, commit, plan, brief.
+- `proj_guides/__AI_worker.md` -- only the Worker's session procedure (plan / act cycle, keep going, GATE, summaries).
+- `proj_guides/skills/` -- procedures used at specific moments (e.g. `Domain_Review.md`), indexed in `skills/README.md`.
+- Domain guides (`_x.y_*.md`) -- the spec, status table and TODOs of one domain; `__mixed_TODOs.md` -- the rest.
+
+**Guide hygiene (every review):** if a lesson, rule or instruction you are about to write already lives elsewhere, point to it
+instead of copying it; if two places disagree, fix the one that is wrong and say so. Your own decisions on a specific block go
+in the brief, not in a guide.
+
 ## 1. Ground (every session)
 
 - Read fully: `.clinerules/00-process.md`, `20-code-quality.md`, `30-ui-content.md`, `40-testing.md`, `60-finishing.md`, and the
@@ -79,11 +93,6 @@ and Phase B tests, captures and docs -- plus small review fixes. About 3-8 new f
 the sub-steps (e.g. 10A.2b.1, .2, .3) so the Worker can report and commit after each. If a block would need two new owners, it
 is two blocks.
 
-**Options, not one hard-coded heuristic:** this is a framework. When a behaviour is a trade-off (how a model fits its frame,
-how a picture crops, how an AR model is scaled, when something auto-plays), the brief makes it a developer choice: a Choice
-field (per block, default in the Block Library or card settings) with a sensible default, each option explained in its (i),
-and each option tested. A single rule is fine only where one answer is clearly right for every wall.
-
 **Worker model (state it in every brief):** pick the cheapest model that can do the block well. The Worker must use tools
 reliably (Unity MCP, files) and must SEE images (the captures are its visual check), so a text-only model is never enough.
 - Opus-class (strongest): a new owner / service / architectural piece, cross-cutting refactors, 3D / AR / math-heavy work, or a
@@ -97,6 +106,12 @@ guide's TODOs + status + the sections of the step, and the rule sections the blo
 tests with real input or captures -> `40-testing.md` 4.2.3 / 4.5; dev-only switches -> `20-code-quality.md`; live Play Mode ->
 `_5.1` "PlayMode Live Config"). Lessons learned live in those sections; a Worker that skips them repeats old bugs.
 
+## 5b. Closing a domain (when its status table is all done)
+
+A domain is not finished when its last step is green: run `proj_guides/skills/Domain_Review.md` (AUDIT mode first, a report
+only), then plan fix blocks from its fix list (usual block size) until no gap that matters is left. Only then start the next
+domain.
+
 ## 6. Answer (in this order, short)
 
 1. **Developer's direct questions** -- answered first.
@@ -104,7 +119,7 @@ tests with real input or captures -> `40-testing.md` 4.2.3 / 4.5; dev-only switc
 3. **Findings** -- by class; what you wrote into which file.
 4. **Where the domain stands** -- done / next / remaining, one line each.
 5. **Commit** -- yes/no + message - did you do it or the user has to do?
-6. **Architect and/or Worker Guidelines update?** -- should we update something in the guidelines to force next steps to execute something or in certain way or some new default procedure...? (proj_guides\__AI_Architect.md, proj_guides\__AI_worker.md, .clinerules) if yes, change the guidelines AND TELL IN CHAT EXACTLY YOUR ADITION OR REPLACEMENT FOR USER CONFIRMATION. 
+6. **Guidelines update and sync?** -- apply Guide hygiene (section 0) first. Then: -- should we update something in the guidelines to force next steps to execute something or in certain way or some new default procedure...? (proj_guides\__AI_Architect.md, proj_guides\__AI_worker.md, .clinerules) if yes, change the guidelines AND TELL IN CHAT EXACTLY YOUR ADITION OR REPLACEMENT FOR USER CONFIRMATION. 
 7. **Worker brief** -- one ready-to-paste block -- this block will be pasted inside the `# claude agent` main command for each new session, in the file `proj_guides\__AI_worker.md`:
 
 
@@ -129,8 +144,8 @@ EditMode + Phase A gallery + Phase B real scene with real input), VISUALS (captu
 
 Rules as before: <the domain's standing rules>. OUT OF SCOPE: <nearby ideas not to build>.
 Stop when <condition> is green. Update <docs>. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
-If the guide disagrees with the real code, STOP and report. Finish with: suites + counts, what you looked at, what you could not
-verify, a one-line commit message (no trailer). Commit only if the developer asks.
+If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
+Commit only if the developer asks.
 ```
 
 Principle: the review is only as good as its evidence; the plan is only as good as its smallness.

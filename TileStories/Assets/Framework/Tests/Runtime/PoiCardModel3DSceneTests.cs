@@ -11,7 +11,7 @@ namespace TileStories.Tests
     // shipped config and the real CardPreviewStage behind PoiCardHost. The Lamp holds two turntable blocks: block_58,
     // the Framework's own `default:azulejo_arch`, is Display Takeover (a teaser on the card, full screen through a
     // second slot); block_59, the LivingRoom-only `146267-LivingRoom2-tex.glb` test fixture (a real room scan, never
-    // a Framework default), stays Display Inline (a real one-finger drag rotates it right on the card). Closing the
+    // a Framework default), stays Display Inline with Fit Visible (a real one-finger drag rotates it right on the card). Closing the
     // card releases every slot (PreviewService.ReleaseAll through PoiCardHost.Close).
     public class PoiCardModel3DSceneTests : SearchSceneFixture
     {
@@ -51,6 +51,9 @@ namespace TileStories.Tests
             Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(roomScan));
             yield return CardTestInput.Settle(0.2f);
             Assert.AreEqual(CardOptions.DisplayInline, roomScan.Display);
+            // - the hollow scan is the fixture of Fit = Visible (_3.1 step 14); the arch keeps the default, so both choices run here
+            Assert.AreEqual(ModelFitMode.Visible, roomScan.Fit, "block_59's authored Fit reached the real card");
+            Assert.AreEqual(ModelFitMode.YawSafe, teaser.Fit, "block_58 sets no Fit: the default Yaw Safe");
             Assert.IsTrue(roomScan.ShowsModel, "the real CardPreviewStage rendered this block's model");
             Assert.IsNotNull(roomScan.Texture);
             yield return Capture("Model3D_RoomScan_Idle");

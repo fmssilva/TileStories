@@ -19,7 +19,7 @@ or a log line saying success. Before saying something is done:
   by the agent with an answered item-by-item checklist (`40-testing.md` 4.5, "Visual verification is the
   agent's job"). Name the captures in the report. Only when no capture is possible: the pending-verification
   list in `_5.1` + say so.
-- Re-run the actual EditMode/PlayMode tests relevant to the change via Unity MCP
+- Re-run the actual EditMode/PlayMode tests RELEVANT to the change via Unity MCP
   `run_tests` + `get_test_job` (preferred) or batch-mode XML. Acceptance gate:
   **zero failed tests** — never a fixed count. If the task added or changed a test,
   confirm that specific test's name appears in the results, not just that a count
@@ -87,16 +87,20 @@ that the current task actually touched. The goal is continuous accuracy
 without making every agent re-verify the whole project.
 
 The structure guide lives at `.clinerules/10-structure.md`. Update it as
-the final step of §6.2's plan-file update, immediately before the §6.3
-chat summary.
+the final step of §6.2's plan-file update, immediately before the §6.4
+final report.
 
 
-### 6.4 Chat summary
+### 6.4 Final report (chat)
 
-- End with a detailed summary in chat: files touched, what changed, and the
-  resulting behaviour. Don't create a separate summary file for this --
-  the plan file update in §6.2 is the durable record; the chat message is
-  for the person reading right now.
-- State plainly what was and wasn't independently re-verified this
-  session, per §6.1 -- don't blur "I re-ran this and confirmed it" together
-  with "the plan file already said this was done."
+The last message of a session, in English, short, in this order (the durable record is the plan file of 6.2, not this message):
+1. **GATE** -- each item and its result.
+2. **What changed** -- the behaviour a developer / visitor now gets, and the main files.
+3. **Suites** -- full / targeted runs with counts (and which ran with Unity in the background).
+4. **What I looked at** -- the captures, judged.
+5. **Not verified** -- what was not independently re-verified this session, and why (6.1); never blur "re-ran it" with "the
+   plan file said so".
+6. **Commit** -- one short, natural commit message (one line, imperative, ~50-72 characters, no step codes).
+
+The learning summaries given along the way (the teaching notes of `__AI_worker.md`) are separate: they explain how and why
+for the developer to learn; this report states what is true now.

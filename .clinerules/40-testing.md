@@ -91,14 +91,14 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
-**Which tests, when (three levels; measured 2026-09-29: full EditMode ~50 s, full PlayMode ~18 min, one PlayMode
+**Which tests, when (three levels; measured 2026-10-01: full EditMode ~80-110 s, full PlayMode ~24-25 min, one PlayMode
 fixture 15-60 s).** Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
   that exercise the changed code: the fixture(s) of the feature itself plus any fixture that reaches it through a seam
   (grep `Tests/` for the changed type or method). Pass the class names as a JSON array in `test_names`
   (`["TileStories.Tests.CardVideoGalleryTests", ...]`; a comma-separated string runs 0 tests).
-- **Full PlayMode -- at these points only (it costs ~18 min, so it is planned, not reflexive):**
+- **Full PlayMode -- at these points only (it costs ~25 min, so it is planned, not reflexive):**
   - the opening baseline, ONLY when the tree differs from the last commit whose full runs were green (a clean tree on a green
     commit needs no second baseline; say which commit you trusted);
   - ONCE at the end of the block, before its commit message -- not after every numbered sub-step of a block;

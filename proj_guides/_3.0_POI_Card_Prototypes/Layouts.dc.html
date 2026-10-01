@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Card Presentation Modes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#07080A;font-family:'Manrope',sans-serif;color:#F4F1EA}
+.ph{position:relative;width:300px;height:620px;border-radius:40px;background:#0B0C0F;border:1px solid rgba(255,255,255,0.12);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,0.5)}
+.b{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:16px}
+.t{font-size:11px;font-weight:700}
+.m{font-size:10px;color:#8A867E}
+.cap{display:flex;flex-direction:column;gap:6px;padding-top:18px}
+.ct{font-family:'Fraunces',serif;font-size:22px;font-weight:400}
+.cd{font-size:13px;line-height:1.5;color:#A29E96}
+.tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#F0B35A}
+@keyframes up{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes side{0%,100%{transform:translateX(0)}50%{transform:translateX(-8px)}}
+.up{animation:up 3s ease-in-out infinite}
+.side{animation:side 3s ease-in-out infinite}
+</style>
+</helmet>
+<div style="width: 1464px; height: 1780px; box-sizing: border-box; padding: 60px; background: #07080A; display: flex; flex-direction: column; gap: 48px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span class="tag">Container · CardLayout</span>
+<h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; letter-spacing: -0.02em">How the same blocks can be <span style="font-style: italic; color: #F0B35A">presented</span></h1>
+</div>
+<p style="margin: 0; width: 420px; font-size: 14px; line-height: 1.6; color: #A29E96">The card holds an ordered list of blocks. A layout mode decides how they flow, and each block picks a display state. Same data, different presentation.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 48px; row-gap: 56px">
+
+<!-- A SCROLL -->
+<div>
+<div class="ph">
+<div style="height: 64px; padding: 18px 16px 0; display: flex; align-items: center; gap: 10px; background: rgba(20,21,26,0.9); border-bottom: 1px solid rgba(255,255,255,0.08)"><span style="width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg,#2F7A78,#C8553D)"></span><div style="display: flex; flex-direction: column"><span class="t">The Watcher</span><span class="m">collapsed hero · sticky</span></div></div>
+<div style="padding: 14px; display: flex; flex-direction: column; gap: 12px">
+<div class="b" style="height: 90px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span class="m">RICH TEXT</span><span style="height: 6px; width: 90%; border-radius: 3px; background: rgba(255,255,255,0.15)"></span><span style="height: 6px; width: 80%; border-radius: 3px; background: rgba(255,255,255,0.15)"></span><span style="height: 6px; width: 60%; border-radius: 3px; background: rgba(255,255,255,0.15)"></span></div>
+<div style="height: 140px; border-radius: 16px; background: linear-gradient(135deg,#EDE3D1 0 30%,#2F7A78 30% 60%,#2B231D 60%); position: relative"><span class="m" style="position: absolute; left: 10px; top: 8px; color: #0B0C0F; font-weight: 700">GALLERY</span></div>
+<div class="b" style="height: 110px; padding: 12px; background: rgba(240,179,90,0.1); border-color: rgba(240,179,90,0.3)"><span class="m" style="color: #F0B35A">FUN FACT</span></div>
+<div class="b" style="height: 150px; padding: 12px"><span class="m">3D MODEL</span></div>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(180deg, rgba(11,12,15,0), #0B0C0F)"></div>
+<div style="position: absolute; right: 5px; top: 90px; width: 3px; height: 70px; border-radius: 2px; background: rgba(255,255,255,0.35)"></div>
+<div class="up" style="position: absolute; left: 0; right: 0; bottom: 18px; display: flex; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F4F1EA" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+</div>
+<div class="cap"><span class="tag">A · layout: scroll</span><span class="ct">Scroll sequence</span><span class="cd">One long flow. Hero parallaxes then collapses to a sticky title. Next block always cut off at the fold so there is a reason to keep scrolling.</span></div>
+</div>
+
+<!-- B TABS -->
+<div>
+<div class="ph">
+<div style="height: 150px; background: linear-gradient(160deg,#2F7A78,#2B231D 70%); position: relative"><div style="position: absolute; left: 16px; bottom: 14px"><span style="font-family: 'Fraunces', serif; font-size: 22px">The Watcher</span></div></div>
+<div style="margin: 12px; padding: 4px; border-radius: 16px; display: flex; gap: 2px; background: rgba(255,255,255,0.05)"><span style="flex-grow: 1; text-align: center; padding: 7px 0; border-radius: 12px; font-size: 11px; color: #A29E96">About</span><span style="flex-grow: 1; text-align: center; padding: 7px 0; border-radius: 12px; font-size: 11px; font-weight: 700; background: #F4F1EA; color: #0B0C0F">Media</span><span style="flex-grow: 1; text-align: center; padding: 7px 0; border-radius: 12px; font-size: 11px; color: #A29E96">Play</span><span style="flex-grow: 1; text-align: center; padding: 7px 0; border-radius: 12px; font-size: 11px; color: #A29E96">Visit</span></div>
+<div style="padding: 0 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="height: 120px; border-radius: 14px; background: #2F7A78; position: relative"><span class="m" style="position: absolute; left: 8px; bottom: 8px; color: #F4F1EA">VIDEO</span></div>
+<div style="height: 120px; border-radius: 14px; background: #C8553D; position: relative"><span class="m" style="position: absolute; left: 8px; bottom: 8px; color: #F4F1EA">360°</span></div>
+<div style="height: 120px; border-radius: 14px; background: #3E6B52; position: relative"><span class="m" style="position: absolute; left: 8px; bottom: 8px; color: #F4F1EA">3D</span></div>
+<div style="height: 120px; border-radius: 14px; background: #5B4A3C; position: relative"><span class="m" style="position: absolute; left: 8px; bottom: 8px; color: #F4F1EA">AUDIO</span></div>
+<div style="grid-column: span 2; height: 90px; border-radius: 14px; background: rgba(111,214,200,0.12); border: 1px solid rgba(111,214,200,0.3); position: relative"><span class="m" style="position: absolute; left: 10px; top: 8px; color: #6FD6C8">AR TIME TRAVEL</span></div>
+</div>
+</div>
+<div class="cap"><span class="tag">B · layout: tabs</span><span class="ct">Tabs by group</span><span class="cd">Blocks carry a group tag (About, Media, Play, Visit). Each tab shows its group. Good when a POI has a lot of content.</span></div>
+</div>
+
+<!-- C SNAP PAGES -->
+<div>
+<div class="ph">
+<div class="side" style="position: absolute; left: 14px; top: 50px; width: 250px; height: 500px; border-radius: 26px; background: linear-gradient(170deg,#1B2B2A,#101214); border: 1px solid rgba(255,255,255,0.1); padding: 18px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<span class="m" style="color: #F0B35A">PAGE 3 · STORY CHAPTER</span>
+<div style="height: 200px; border-radius: 16px; background: linear-gradient(135deg,#101C24,#2B231D)"></div>
+<span style="font-family: 'Fraunces', serif; font-size: 20px">The night of the stencils</span>
+<span style="height: 6px; width: 90%; border-radius: 3px; background: rgba(255,255,255,0.15)"></span><span style="height: 6px; width: 70%; border-radius: 3px; background: rgba(255,255,255,0.15)"></span>
+</div>
+<div style="position: absolute; left: 276px; top: 70px; width: 250px; height: 460px; border-radius: 26px; background: #2F7A78"></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 30px; display: flex; justify-content: center; gap: 5px"><span style="width: 5px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.3)"></span><span style="width: 5px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.3)"></span><span style="width: 16px; height: 5px; border-radius: 3px; background: #F0B35A"></span><span style="width: 5px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.3)"></span><span style="width: 5px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.3)"></span></div>
+</div>
+<div class="cap"><span class="tag">C · layout: pages</span><span class="ct">Snap pages</span><span class="cd">Every block is a full-height page, swiped sideways like stories. The next page peeks on the right edge. Best for guided tours and kids.</span></div>
+</div>
+
+<!-- D ACCORDION -->
+<div>
+<div class="ph">
+<div style="padding: 50px 14px 14px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-family: 'Fraunces', serif; font-size: 24px; padding: 0 4px 8px">The Watcher</span>
+<div class="b" style="height: 56px; padding: 0 14px; display: flex; align-items: center; gap: 10px"><span style="width: 28px; height: 28px; border-radius: 8px; background: rgba(240,179,90,0.2)"></span><div style="flex-grow: 1; display: flex; flex-direction: column"><span class="t">About</span><span class="m">Painted across the last gate…</span></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A867E" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div class="b" style="padding: 14px; display: flex; flex-direction: column; gap: 10px; border-color: rgba(240,179,90,0.4)"><div style="display: flex; align-items: center; gap: 10px"><span style="width: 28px; height: 28px; border-radius: 8px; background: #F0B35A"></span><div style="flex-grow: 1; display: flex; flex-direction: column"><span class="t">Making of · video</span><span class="m">3:42 · expanded</span></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F4F1EA" stroke-width="2"><path d="M6 15l6-6 6 6"></path></svg></div><div style="height: 150px; border-radius: 12px; background: linear-gradient(135deg,#1B1714,#C8553D)"></div></div>
+<div class="b" style="height: 56px; padding: 0 14px; display: flex; align-items: center; gap: 10px"><span style="width: 28px; height: 28px; border-radius: 8px; background: rgba(111,214,200,0.2)"></span><div style="flex-grow: 1; display: flex; flex-direction: column"><span class="t">Quiz</span><span class="m">5 questions · +50 XP</span></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A867E" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div class="b" style="height: 56px; padding: 0 14px; display: flex; align-items: center; gap: 10px"><span style="width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.1)"></span><div style="flex-grow: 1; display: flex; flex-direction: column"><span class="t">Timeline</span><span class="m">1370s → today</span></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A867E" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div class="b" style="height: 56px; padding: 0 14px; display: flex; align-items: center; gap: 10px"><span style="width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.1)"></span><div style="flex-grow: 1; display: flex; flex-direction: column"><span class="t">Visit</span><span class="m">Always visible · step-free</span></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A867E" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+</div>
+</div>
+<div class="cap"><span class="tag">D · layout: accordion</span><span class="ct">Compact list, expand in place</span><span class="cd">Every block starts as a one-line teaser and opens inline. Light and fast; ideal when the camera view must stay visible.</span></div>
+</div>
+
+<!-- E BENTO -->
+<div>
+<div class="ph">
+<div style="padding: 50px 12px 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="grid-column: span 2; height: 150px; border-radius: 18px; background: linear-gradient(160deg,#2F7A78,#2B231D); position: relative"><span style="position: absolute; left: 12px; bottom: 10px; font-family: 'Fraunces', serif; font-size: 20px">The Watcher</span></div>
+<div style="height: 110px; border-radius: 18px; background: rgba(240,179,90,0.14); border: 1px solid rgba(240,179,90,0.3); padding: 10px; box-sizing: border-box"><span class="m" style="color: #F0B35A">FUN FACT</span></div>
+<div style="height: 110px; border-radius: 18px; background: #3E6B52; padding: 10px; box-sizing: border-box"><span class="m" style="color: #F4F1EA">3D</span></div>
+<div style="height: 230px; border-radius: 18px; background: #1B2B2A; padding: 10px; box-sizing: border-box"><span class="m">STORY</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="height: 111px; border-radius: 18px; background: #C8553D; padding: 10px; box-sizing: border-box"><span class="m" style="color: #F4F1EA">VIDEO</span></div><div class="b" style="height: 111px; border-radius: 18px; padding: 10px; box-sizing: border-box"><span class="m">QUIZ</span></div></div>
+</div>
+</div>
+<div class="cap"><span class="tag">E · layout: bento</span><span class="ct">Bento grid</span><span class="cd">Blocks declare a size (1×1, 2×1, 1×2). Tapping any tile opens its full view. A visual overview of everything at once.</span></div>
+</div>
+
+<!-- F TEASER EXPAND -->
+<div>
+<div class="ph">
+<div style="padding: 50px 14px; display: flex; flex-direction: column; gap: 10px; opacity: 0.35"><div class="b" style="height: 90px"></div><div class="b" style="height: 120px"></div></div>
+<div style="position: absolute; inset: 0; background: rgba(0,0,0,0.45)"></div>
+<div class="up" style="position: absolute; left: 0; right: 0; top: 70px; bottom: 0; border-radius: 30px 30px 0 0; background: #15161A; border-top: 1px solid rgba(255,255,255,0.14); padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -20px 50px rgba(0,0,0,0.5)">
+<span style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.25)"></span>
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="t">3D Model · expanded</span><span class="m">close ✕</span></div>
+<div style="height: 260px; border-radius: 20px; background: radial-gradient(circle at 50% 45%, rgba(240,179,90,0.3), rgba(255,255,255,0.03) 65%); display: flex; align-items: center; justify-content: center"><svg width="120" height="120" viewBox="0 0 160 160" aria-hidden="true"><path d="M80 20 L140 50 L80 80 L20 50 Z" fill="#8C7A66"></path><path d="M20 50 L80 80 L80 140 L20 110 Z" fill="#5E5144"></path><path d="M140 50 L80 80 L80 140 L140 110 Z" fill="#74655A"></path></svg></div>
+<div style="display: flex; gap: 6px"><span class="b" style="flex-grow: 1; height: 36px; border-radius: 10px"></span><span class="b" style="flex-grow: 1; height: 36px; border-radius: 10px"></span><span style="flex-grow: 1.4; height: 36px; border-radius: 10px; background: #F0B35A"></span></div>
+<span class="m">Layers, annotations and controls that the inline teaser hides.</span>
+</div>
+</div>
+<div class="cap"><span class="tag">F · block state: expandable</span><span class="ct">Teaser → full view</span><span class="cd">Any block can show a light inline version and open a richer sheet or fullscreen view. The expanded view is a second template of the same block.</span></div>
+</div>
+
+<!-- G BOTTOM SHEET -->
+<div>
+<div class="ph">
+<svg width="300" height="620" viewBox="0 0 300 620" style="position: absolute; left: 0; top: 0" aria-hidden="true"><defs><pattern id="brickL" width="40" height="20" patternUnits="userSpaceOnUse"><rect width="40" height="20" fill="#2B231D"></rect><path d="M0 0.5H40M0 10.5H40M20 0V10M0 10V20M40 10V20" stroke="#1A1512" stroke-width="1.5"></path></pattern></defs><rect width="300" height="620" fill="url(#brickL)"></rect><ellipse cx="150" cy="170" rx="90" ry="46" fill="#EDE3D1"></ellipse><circle cx="150" cy="170" r="34" fill="#2F7A78"></circle><circle cx="150" cy="170" r="14" fill="#0B0C0F"></circle><path d="M50 110 v-16 h16 M250 110 v-16 h-16 M50 230 v16 h16 M250 230 v16 h-16" fill="none" stroke="#F0B35A" stroke-width="2.5"></path></svg>
+<span style="position: absolute; left: 118px; top: 262px; padding: 5px 10px; border-radius: 10px; background: rgba(11,12,15,0.7); font-size: 10px; font-weight: 700">Live camera</span>
+<div style="position: absolute; left: 0; right: 0; top: 330px; bottom: 0; border-radius: 28px 28px 0 0; background: rgba(15,16,20,0.92); border-top: 1px solid rgba(255,255,255,0.14); padding: 12px 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.3)"></span>
+<span style="font-family: 'Fraunces', serif; font-size: 20px">The Watcher</span>
+<div style="display: flex; gap: 6px"><span class="b" style="flex-grow: 1; height: 44px; border-radius: 12px"></span><span class="b" style="flex-grow: 1; height: 44px; border-radius: 12px"></span><span class="b" style="flex-grow: 1; height: 44px; border-radius: 12px"></span></div>
+<div class="b" style="height: 90px"></div>
+</div>
+<div style="position: absolute; right: 8px; top: 150px; display: flex; flex-direction: column; gap: 150px; align-items: flex-end"><span class="m" style="color: #F4F1EA">full ─</span><span class="m" style="color: #F0B35A">half ─</span><span class="m" style="color: #F4F1EA">peek ─</span></div>
+</div>
+<div class="cap"><span class="tag">G · container: sheet</span><span class="ct">Sheet over camera</span><span class="cd">Same block list inside a draggable sheet with peek, half and full stops. Full stop equals the full-screen card. Keeps the wall in view.</span></div>
+</div>
+
+<!-- H STATES LEGEND -->
+<div>
+<div style="width: 300px; height: 620px; box-sizing: border-box; border-radius: 40px; border: 1px dashed rgba(255,255,255,0.18); padding: 26px 22px; display: flex; flex-direction: column; gap: 16px">
+<span class="tag">displayMode per block</span>
+<div style="display: flex; gap: 12px; align-items: center"><div style="width: 64px; height: 44px; border-radius: 10px; background: rgba(255,255,255,0.08)"></div><div style="display: flex; flex-direction: column; gap: 2px"><span class="t" style="font-size: 13px">inline</span><span class="m">full block in the flow</span></div></div>
+<div style="display: flex; gap: 12px; align-items: center"><div style="width: 64px; height: 20px; border-radius: 6px; background: rgba(255,255,255,0.08)"></div><div style="display: flex; flex-direction: column; gap: 2px"><span class="t" style="font-size: 13px">compact</span><span class="m">one-line teaser row</span></div></div>
+<div style="display: flex; gap: 12px; align-items: center"><div style="width: 64px; height: 44px; border-radius: 10px; background: rgba(255,255,255,0.08); position: relative"><span style="position: absolute; right: 4px; top: 4px; width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid #F0B35A"></span></div><div style="display: flex; flex-direction: column; gap: 2px"><span class="t" style="font-size: 13px">expandable</span><span class="m">teaser + sheet/fullscreen</span></div></div>
+<div style="display: flex; gap: 12px; align-items: center"><div style="width: 64px; height: 44px; border-radius: 10px; background: #F0B35A"></div><div style="display: flex; flex-direction: column; gap: 2px"><span class="t" style="font-size: 13px">takeover</span><span class="m">opens straight to fullscreen</span></div></div>
+<div style="display: flex; gap: 12px; align-items: center"><div style="width: 64px; height: 44px; border-radius: 10px; border: 1.5px dashed rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A867E" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></div><div style="display: flex; flex-direction: column; gap: 2px"><span class="t" style="font-size: 13px">locked</span><span class="m">visible, unlocks by condition</span></div></div>
+<div style="display: flex; gap: 12px; align-items: center"><div style="width: 64px; height: 44px; border-radius: 10px; background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.14), rgba(255,255,255,0.05))"></div><div style="display: flex; flex-direction: column; gap: 2px"><span class="t" style="font-size: 13px">loading</span><span class="m">skeleton while assets stream</span></div></div>
+<div style="display: flex; gap: 12px; align-items: center"><div style="width: 64px; height: 44px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08)"></div><div style="display: flex; flex-direction: column; gap: 2px"><span class="t" style="font-size: 13px">hidden</span><span class="m">by distance, time or locale</span></div></div>
+</div>
+<div class="cap"><span class="tag">H · block states</span><span class="ct">Display states</span><span class="cd">Layout mode is set on the card; display state is set on each block. They combine freely.</span></div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1464,"height":1780}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

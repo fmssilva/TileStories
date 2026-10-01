@@ -1,3 +1,12 @@
+# SKILL: End-of-chat process review
+
+1. **Name:** "revê o processo deste chat" -- extract reusable process lessons from one long chat.
+2. **Trigger:** the end of a long or bumpy chat. Input: the chat itself and the guides available in it. If the guides are not
+   available, mark comparisons as "nao verificavel" instead of guessing.
+3. **Procedure:** sections 1-6 below.
+4. **Result:** the five-part answer of section 7, ending with the fixed closing sentence; proposals only, nothing applied.
+   Few strong changes over many weak ones; "no change recommended" is a valid result.
+
 # END-OF-CHAT — PROCESS LEARNING REVIEW
 Analisa este chat exclusivamente como uma revisão do processo de trabalho entre utilizador e agente.
 O objetivo é extrair melhorias reutilizáveis para futuras tarefas, não avaliar nem resumir o conteúdo da tarefa realizada.

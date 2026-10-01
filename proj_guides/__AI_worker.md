@@ -1,86 +1,9 @@
 
-# 1. `Git`
-# 2. `DELETE MODE && __CURR_PLAN_TRACKER!!!`
-# 3. `Unity MCP Connected??`
-# 4. `npx adb-qr-connect`
-
-
-# TODO
-» fazer label board in ui toolit pra mostrar automatico primeira vez que corremo app e dp usar pode escolher fechar e escolher nao voltar a motrar... 
-
-
-
-# future task?? 
-
-lets create a size and resize domain?? where we set the size of markers and lables of each hierarhcy level and we adjuts the distance scaling? ?? should we have this domain on its own or better to just keep things more closed to the current domains like marker, label, hierarchy, LOD? 
-
-LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 or 5 markers in some area, but there is good space between them, so maybe we can show some labels anyway? so when we have "empty screen" we can add more info and so we can add some labels??? is there a way to check the "empty screen level" per region of screen and decide if we add some label or not??? or is there some feature related with this that we should add to our framework??? 
-
-
-# where is the zoom domain file? 
-
-
-
-## `And now: Lets confirm the whole "Select, Filter, Search" domain`
-I want to verify everything we have done in this domain. To that end: 
-
-a) Start by reading these files fully and check the necessary and respective code files in the project to confirm how everything is implemented currently: 
-C:\Users\franc\Desktop\TileStories\proj_guides\_2.6_Select_Filter_Search.md
-C:\Users\franc\Desktop\TileStories\proj_guides\_2.6.1_Vision_Tests.md
-C:\Users\franc\Desktop\TileStories\proj_guides\_2.6.2_Human_Tests.md
-C:\Users\franc\Desktop\TileStories\proj_guides\_2.6.3__curr_plan_tracker copy.md
-C:\Users\franc\Desktop\TileStories\proj_guides\_5.1_Editor_Tab.md
-
-b) Then tell me the normal sequence of user flow of actions in this domain. Example: 
-b.1) The user starts by creating a new POI, and what are the default fields that are created and with which values? maybe we can "copy the values of the "original POI that we used as reference to copy", similar to how we do with the position and orientation values?
-
-b.2) Is there any feature or functionality in the guide files that is not implemented yet and should be? Or is there some missing functionality or feature that you think would enrich our framework regarding this domain that we should implement?  
-b.3) Is there some feature or functionality of this domain that we have in code and not exposed in a UI in the editor tab that maybe we should have because the developer should be able to enable/disable or config, considering we are implementing a framework to allow the creation of apps for different scenarios? 
-
-b.4) Take the proj_guides\_5.1_Editor_Tab.md file. Read the section ## HOW TO USE THIS FILE (read this first), and then use the section ## 0. Guidelines as a checklist to evaluate the whole quality of this domain, are all the rows well formated, with the good width, indentation, elements and components, helpers, etc... the save, undo, redo things are all working corrected for all fields... we have the correct warnings and pop ups if needed... what is a good sequence of "editing" and config of all those fields, do we have a good "UI Ontology and hierarchy in the editor tab to be everything easy and well organized and intuitive to use by the developer? What are the lowest level we can test each config? (Scene, PlayMode, Device)... Do we have already implemented an updated "Domain Manual Tests" sub component to guide the developer on how to config and test things? Do we have already "live sync between the editor tab values of the fields and the scene mode preview? For the PlayMode tests do we have the "playmode live sync between the editor tab and the playmode view also? About info buttons, pop ups, warnings, and the Manual Tests guides are all of them general as a framework and not Living Room speific, and they reference the Editor Tab UI components instead of the code files? Make a deep analysis of everything we have and how and where we have it. is it all good or can we make it better, implement what is missing, improve some feature, make the code simpler or better organized... ?? 
- 
-b.5) In terms of code, is there any dead or duplicated or unused or bad organized or unnecessary complexity code that we should improve according to the .clinerules? 
-
-b.6) Do we have good set of tests to confirm that each field configuration actually works well and has the expected results in the markers, in the scene and playmode? Lets confirm we have good REAL tests, and also take some screen shots to confirm visually if things are working well (I will keep unity open and without any window in front of it during this session so you can take prints when necessary - and if your tests capture my screen outside unity window, don't worry - i don't have any secret showing, soo you can still use that print for your tests, and you don't even need to tell me that happened in chat). 
-
-b.7) Any other detail we should be aware or think about for this domain? 
-
-b.8) in terms of possible details missing: 
-i) do we have a clean and well defined "config ontology" for this domain? for example previously the orientation domain was very bad organized with some weird mixed groups that in practice had different things inside them and similar things in different groups... so think also the whole "config ontology" to be well defined, with clear separation of responsability of each sub set of fields, with clear names of things so we understand them easy, with clear UI organization of fields so it is easy to config things...
-ii) and also cnfirm the best way for the developer to test all these search, filter, select config fields... should we have some other "demo grid in playmode" and besides the normal "add demo grid" check, maybe we can have some "demo grid" config where we can add for example different quantity of markers of different sizes and clusters and categories and keywords overall, and with or without labels etc... and can we actually test in the play mode that each field actually works and the whole search,select, filter  options actually work well? is there a way to see this in an easy way? example maybe we can have a good set of demo POIs to actually test each feature of this domain and we actually see each feature working well in the demo grid...?? do a deep analysis about this and think the best way to have a easy to use and clear usefull demo for all these domain config fields we should have in our framework 
-iii) and then, after you implement this "search, select, filter" demo grid ... confirm that its cnfig fields actually work and we actually see the changes in the demo grid... add good tests to confirm that also  - confirm the demo grid actually works... So confirm that each cnfig field of the Test cmponent for the search, filter, select actually work well. test that each field wrk 1 by 1 and also take some screen shots to confirm visually the results. (and add these "add tests to test the demo grid works well with all config fields to the 5_Editor in the correct place, so an agent in the future don't just create the demo grid things but actually test it, for each config field, with tests and with print screens)
-iv) and then give me a summary in the chat of this whole search, filter, select domain... what features we really have and with what options to config? so i can better understand the options we have and what they do and how to test and confirm their effects...
-v) and cnfirm we have really all UI things about this domain?? example minimap and lists and so on? some of those i think maybe are or should be already in UI toolkit and nt UGUI maybe yes? This is a big domain and very spread around, example we have key words beeing set up in a lot of other domains like marker, badge, outline, hierarchy etc... and then the POIs themselves... and we have "real" features like the search and select and filter algorithms and libraries and helpers...??? and also confirm the way we organize the whole keywords final list for each poi... do we keep some sort of "ontology" of key words or map or tree or something for each little domain or area of keywords... and then at run time we cnvrt that into a simple list or what doo we do? AND WHAT SHOULD WE DO? and the methods and algorithms and libraries we are using are they all good or should we do something better, or have some selection of tools and options in the editor tab for a good framewrk flexible to build any app and use any method... ??? do a deep analysis of all this... confirm and test everything well...
- 
-
-
-c) If there is a lot of things to do, before you start implementing things, make a deep and complete and detailed plan to make sure things get clean and well organized and working well and well tested... keep in mind that this is the first version of project so lets just make things better and organized and clean - no backward compatibility concerns and weird code just to avoid some bigger change... let just change what is necessary to make it all better and simple and clean and well organized, so it gets easier to understand and to maintain in the future with less "coupling" and weird dependencies as possible... lets keep things well organized and easy to change and improve... 
-
-d) after we do and implement and clean and test everything, lets update, if necessary the files: proj_guides\_5.1_Editor_Tab.md and .clinerules\10-structure.md, and also update the domain guide file. 
-
-
-
-
-
-
-creview and complete the <DOMAIN> domain`
-Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, and _5.1_Editor_Tab.md
-(HOW TO USE + section 0). Check the real code; don't trust the docs.
-1. Developer flow: the normal sequence of actions in the Editor and Play Mode; the defaults a new POI /
-   row gets (copied from the reference POI where that makes sense).
-2. Gaps: features in the doc not built; features worth adding for a flexible framework; features in code
-   but not exposed in the Editor Tab that a developer should be able to switch or tune.
-3. Config ontology: clear groups with one responsibility each, clear names, UI order = ontology.
-4. Editor quality: use _5.1 section 0 as a checklist (rows, width, indentation, tables, (i) help, popups,
-   undo/redo/save for EVERY field, warnings, Test sub-foldout with Scene/Playmode/Device guides that are
-   app-agnostic and name Editor controls, not code files, live sync in Scene and in Play Mode).
-5. Code: dead, duplicated, unused, or needlessly complex code per 20-code-quality.md.
-6. Demo + tests: a demo that shows every setting; every demo control and every domain setting proven
-   one by one on the real scene with a coverage guard (_5.1 "A demo is not done until...").
-7. Visual: capture the Editor section and the demo's key states; answer an item-by-item checklist.
-8. Then plan (no backward-compatibility shims; this is v1), implement, test, look, and update the domain
-   doc, _5.1 and 10-structure.md. End with a plain summary of what the domain does and how to test each option.
-
+# `Confirm before each new command:`
+## 1. `Git`
+## 2. `DELETE MODE && __CURR_PLAN_TRACKER!!!`
+## 3. `Unity MCP Connected??`
+## 4. `npx adb-qr-connect`
 
 
 # `claude agent`
@@ -97,65 +20,51 @@ Read fully: the domain doc(s) <_x.y_...md + its _Vision_Tests / _Human_Tests>, a
 So start by reading them all. 
 
 
-## `And now: POI Detail Card -- 10B-pre (model fit options, kind names), 10B (place_in_ar, Play Mode first)`
+## `And now: POI Detail Card -- step 14, domain close-out AUDIT (no feature work)`
 
 GATE (mandatory, report each item): take one Unity capture (Game view AND the POI Editor window) and open it; if none works,
 STOP and say so. `git checkout --` `Markers/Fonts/Oswald Bold SDF.asset` if modified. Confirm the tree compiles; if not, STOP.
 
-Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- "## TODOs"
-([10B-pre] x2, [Tier 5 / device], show_on_wall notes) and the status table (10A done; 10B next), and "Tier 5 -- 3D, 360 and
-AR actions".
-REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.1 (Tier A mock localization, Tier B XR Simulation), 4.2, 4.2.3,
-4.2.4b, 4.2.5, 4.5 (incl. design questions); `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (new Choice
-rows, Block Library defaults); `__AI_worker.md` 2.4b.
-Context only: Tracking/IWallTracker + MockLocalizationProvider (the wall pose in the Editor), WallSession (POI positions in the
-wall frame), IBlockHost.ShowOnWall (card to peek), CardPreviewStage + ModelFitRule, glTFast import.
-WORKER MODEL: Opus-class (a new AR placement owner, world-pose math and three fit options).
-TEST PLAN: no opening full baseline (the tree is the green commit "Add 360 panorama viewer and fit 3D models by their bounding
-sphere"). Targeted fixtures per sub-step. ONE full EditMode + PlayMode at the end (Unity may be in front; the background run is
-due next block).
+Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- the whole file: TODOs,
+the status table (0-13, 9x, 10A, 10B done; 14 = this audit, 15 = fix blocks), every section.
+REQUIRED READING (all lines): `proj_guides/__AI_Architect.md` section 0 (the standing principles you audit against) and 5b
+(what this audit must deliver); `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (the Editor checklist);
+`.clinerules/20-code-quality.md`, `30-ui-content.md`, `40-testing.md` (4.2, 4.2.3, 4.2.4b, 4.5); `10-structure.md` (the card parts).
+Context only: `_3.2` and `_3.3` (what the card domain must hand over to navigation and styles).
+WORKER MODEL: Opus-class (judgement across the whole domain: architecture, Editor UX, tests, product).
+TEST PLAN: FULL EditMode + PlayMode at the start (they are part of the audit: counts, run times, slowest fixtures). This is the
+third block since the last background run, so the PlayMode run is with Unity in the BACKGROUND (ask me once to switch app).
+No other full runs unless you fix something.
 
-FRAMEWORK RULE for this block: a behaviour that is a trade-off is a developer CHOICE (a Choice field with a sensible default,
-each option explained in its (i) and tested), not one hard-coded rule.
+SCOPE: READ, RUN, CAPTURE, WRITE THE REPORT. Do NOT add features or refactor. Allowed fixes, each with its test: (a) the
+focus-dependent typing test ([14, MUST]); (b) The Lamp's room scan to the `visible` fit ([14, decided]); (c) trivial doc
+corrections. Everything else goes into the report as a finding.
 
-10B-pre.1 -- Model fit options: a `Fit` Choice on model_3d and on the header model look, default settable in the Block Library:
-  `yaw_safe` (DEFAULT: the extent swept turning about the vertical axis + the margin TurntableRule's pitch limit needs),
-  `sphere` (bounding sphere, inside at any rotation, smallest), `at_rest` (bounds at the start angle, largest, may clip when
-  turned). One pure ModelFitRule per option, EditMode tests. Pixel tests: yaw_safe -> the room scan >= 65 % of the stage's
-  shorter side at rest and every allowed yaw/pitch inside with a 5 % margin; sphere -> inside at every turn; at_rest -> >= 80 %
-  at rest. The Lamp's two inline models use yaw_safe; recapture them and the header arch after a drag.
-10B-pre.2 -- Kind display names "3D Model" and "360 Panorama" (Editor, default headings, gallery); keys unchanged; a test that no
-  kind display name contains a lowercase unit like "3d".
-  -> learning summary + short commit message after each, and go straight on.
-10B.1 -- One AR placement owner (ICardArPlacement / ArPlacementService, host-owned like Audio / Video / Preview, reached through
-  BlockBindContext): ONE placed model at a time in the WORLD; placing another replaces it; closing the card or "Remove" takes it
-  away; release leaves nothing behind. A pure rule for the placement pose, with EditMode tests, from these CHOICES:
-  - Anchor: `poi_on_wall` (only option built now: the POI's wall position pushed out along the wall normal by Offset From Wall,
-    facing the viewer's side). Name `surface` (AR plane detection) in the (i) as not yet available, so the field is ready for it.
-  - Scale: `real_size` (the model's own metres), `height_cm` (scale so the model is this tall), `marker_multiple` (a multiple of
-    the POI marker's world size). Default `real_size`.
-10B.2 -- place_in_ar `button`: a primary button (label from CardStrings en + pt, or the optional authored Button Label) that
-  places the model and drops the card to peek (IBlockHost.ShowOnWall pattern); while placed, a "Remove" chip on the card (and
-  re-opening keeps it placed). Card Content row: Model (Asset, model kind, default picker), Anchor, Offset From Wall (cm),
-  Scale Mode + its value, Button Label. Disabled with a short explanation while the wall is not localised (IWallTracker state).
-10B.3 -- Tests, Play Mode first (40-testing 4.1 Tier A): Phase A gallery (button states: localised / not localised / placed);
-  Phase B on the real LivingRoom scene with MockLocalizationProvider: a real tap places `default:azulejo_arch` at The Lamp's wall
-  position (assert the world pose from the rule for each Scale option, within a stated tolerance), the card goes to peek, the
-  model renders in the Game view where the POI is (pixel check), Remove takes it away, a second placement replaces the first,
-  closing the card removes it, nothing leaks. No device, no plane detection.
-10B.4 -- Close: full EditMode + PlayMode green end to end (re-run the FULL suite after any fix); captures with the 4.5 design
-  questions (the model standing at The Lamp in the Game view for each Scale option, the card at peek with the Remove chip, the
-  not-localised state, the Card Content and Block Library rows at 620 pt); update _3.1 (10B-pre / 10B rows with proof; a
-  [device] TODO listing what only the phone can confirm: real scale, lighting, anchoring drift, frame rate), 10-structure.md,
-  _5.1.
+Deliver `proj_guides/_3.1.1_Audit.md` with these sections:
+1. OPTION COVERAGE MATRIX -- one table row per kind x variant x field / Choice option (include card_settings and Block Library
+   options): Editor row | (i) | default (Library / settings) | undo-redo-round trip | live sync in Play Mode | Phase A entry |
+   Phase B test | capture. Mark each cell ok / gap / n.a. Build it from the code (BuiltInBlocks, field definitions, tests), not
+   from memory, and say how you built it. Name every gap.
+2. EDITOR TAB -- Detail Card tab + Card Content rows against _5.1 section 0, captured at the default width and 620 pt (Card
+   Container, Block Library, Card Texts, Glossary, Default Media, a long Card Content stack). Include: fields shown that do not
+   apply to the chosen option (Scale Mode -> Height / Marker Multiple; Knowledge Check 12 fields; Dialogue 8 fields) and propose
+   ONE framework-level fix (a field declares when it is shown) with its cost.
+3. CODE HEALTH -- files over ~300 lines; duplicated concepts (owners, panels, copy code); dead code; rule scans (colour / size
+   literals, visitor strings, ASCII); every owner (audio, video, preview, AR placement) with its release path and a test that
+   proves it.
+4. TEST HEALTH -- the full-run counts and times, the 10 slowest fixtures, every flaky or focus-dependent test you see, tests
+   that assert on mocks only.
+5. DOCS vs CODE -- _3.1, 10-structure.md, _5.1 mismatches; then a TRIAGE of every open _3.1 TODO: fix now (which block) / later
+   (which domain or stage) / drop (why).
+6. PRODUCT PASS -- The Lamp's card scrolled end to end at 390 px (EN and PT), every block judged with the 4.5 design questions
+   (does it read, is it the right size, does it look finished); list what a visitor would find confusing or ugly, e.g. the
+   place_in_ar button still reading "See it here in 3D" while the model is placed.
+7. FIX LIST -- prioritised (MUST / SHOULD / LATER), grouped into block-sized chunks (one owner OR 2 heavy OR 4-6 light items
+   each), each chunk with its acceptance tests.
 
-Rules as before: no literal colours/sizes, no visitor strings in code, real input in tests, detail logs only through DevLog,
-identity fields untouched, Portuguese spelled properly. OUT OF SCOPE: building the `surface` anchor (plane detection), moving or
-scaling the placed model by gesture, device builds, _3.2, _3.3.
-Ideas outside this domain -> proj_guides/__mixed_TODOs.md. If _3.1 disagrees with the real code, STOP.
-Finish in English with: GATE items, suites + counts, what you looked at, what you could not verify, one short natural commit
-message. Commit only if the developer asks.
-
+Finish in English with: GATE items, suites + counts + times (say which run was in the background), the report's headline numbers
+(gaps per matrix column), the top 5 findings, what you could not verify, one short natural commit message. Commit only if the
+developer asks.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
@@ -218,7 +127,7 @@ c) gate:
 After the plan, lets continue for the implementation. You are now already in ACT MODE. Proceed directly with disk edits, script execution, and code implementation.
 
 ### 2.1. Plan as Ground Truth
-- Follow the implementation plan we just did. Also check if I copied it to the file "./proj_guides/__curr_plan_tracker.md" and so you can use that file as a clear TODO list so you can keep track of progress. 
+- Follow the implementation plan we just did. Write it to `./proj_guides/__curr_plan_tracker.md`, REPLACING whatever the previous block left there (it is in git), and tick its steps as you go: it is your TODO list and what you re-read after a compaction.
 
 ### 2.2. Strict Scope Lock
 - Lets implement things related to the given tasks only. 

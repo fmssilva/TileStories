@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New Blocks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,700;1,9..144,300;1,9..144,400&amp;family=DM+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0C0A08;font-family:'DM Sans',sans-serif;color:#F0E6CC}
+button{font-family:inherit}
+.stage{background:#16130F;border:1px solid rgba(240,230,204,0.08);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px;min-height:290px;box-sizing:border-box;position:relative;overflow:hidden}
+.cap{display:flex;flex-direction:column;gap:4px;padding:12px 4px 0}
+.tg{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#F59E0B}
+.nm{font-family:'Fraunces',serif;font-size:18px}
+.ds{font-size:12px;line-height:1.5;color:#A89F8C}
+.cf{font-family:'JetBrains Mono',monospace;font-size:10px;color:#7D7564}
+.eb{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#D6A94E;font-weight:700}
+.h{font-family:'Fraunces',serif;font-size:20px;line-height:1.15;color:#F0E6CC}
+.p{margin:0;font-size:13px;line-height:1.55;color:#CFC5B1}
+.m{font-size:11px;color:#A89F8C}
+.sf{background:rgba(240,230,204,0.04);border:1px solid rgba(240,230,204,0.09);border-radius:14px}
+.btn{height:40px;border-radius:20px;background:#F59E0B;color:#1A1206;font-weight:700;font-size:12px;border:none;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 16px}
+.btn2{height:40px;border-radius:20px;background:rgba(240,230,204,0.07);color:#F0E6CC;font-weight:600;font-size:12px;border:1px solid rgba(240,230,204,0.12);display:flex;align-items:center;justify-content:center;gap:6px;padding:0 14px}
+.chip{padding:5px 10px;border-radius:12px;font-size:11px;font-weight:600;background:rgba(240,230,204,0.07);color:#CFC5B1;white-space:nowrap}
+.on{background:#F59E0B;color:#1A1206}
+.mono{font-family:'JetBrains Mono',monospace}
+.sec{grid-column:span 5;display:flex;align-items:baseline;gap:16px;padding-top:16px;border-top:1px solid rgba(240,230,204,0.08)}
+.sech{margin:0;font-family:'Fraunces',serif;font-weight:300;font-size:32px}
+.secd{font-size:13px;color:#A89F8C;max-width:760px}
+@keyframes wv{0%,100%{transform:scaleY(0.35)}50%{transform:scaleY(1)}}
+.wv{transform-origin:center;animation:wv 1.1s ease-in-out infinite}
+@keyframes glw{0%,100%{opacity:0.5}50%{opacity:1}}
+.glw{animation:glw 2.4s ease-in-out infinite}
+</style>
+</helmet>
+<div style="width: 1764px; height: 6300px; box-sizing: border-box; padding: 60px; background: #0C0A08; display: flex; flex-direction: column; gap: 40px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="tg">TileStories alignment · 43 new block variants</span><h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; letter-spacing: -0.02em">Blocks the <span style="font-style: italic; color: #F59E0B">plan</span> asks for</h1></div>
+<p style="margin: 0; width: 620px; font-size: 14px; line-height: 1.6; color: #A89F8C">Each tile is one variant of a block (N·A, N·B…). Variants of the same block share one data asset and differ only by a <span class="mono" style="color: #CFC5B1">variant</span> field. Styled in Stone &amp; Gold Luxury, the main theme from the style files.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 36px; row-gap: 44px; align-items: start">
+
+<!-- ============ S1 STATUS ============ -->
+<div class="sec"><h2 class="sech">Wall-defined status axis</h2><span class="secd">One Status block renders whatever axis the wall declares (earthquake fate, conservation, restoration), and disappears when the wall has none.</span></div>
+
+<div><div class="stage">
+<span class="eb">1755 fate</span>
+<div style="display: flex; gap: 16px; align-items: center">
+<svg width="104" height="104" viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="42" fill="none" stroke="rgba(240,230,204,0.1)" stroke-width="9"></circle><defs><linearGradient id="gr1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F59E0B"></stop><stop offset="1" stop-color="#C2562E"></stop></linearGradient></defs><circle cx="52" cy="52" r="42" fill="none" stroke="url(#gr1)" stroke-width="9" stroke-dasharray="158 264" stroke-linecap="round" transform="rotate(-90 52 52)"></circle><text x="52" y="56" text-anchor="middle" font-family="Fraunces" font-size="24" fill="#F0E6CC">60%</text></svg>
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="h" style="font-size: 18px">Partially destroyed</span><span class="m">Damaged in 1755 and rebuilt afterwards</span></div>
+</div>
+<div style="display: flex; justify-content: space-between" class="m"><span>0 intact</span><span>100 vanished</span></div>
+</div><div class="cap"><span class="tg">01·A · status</span><span class="nm">Ring gauge</span><span class="ds">Same ramp as the marker ring, so the card and the wall speak one visual language.</span><span class="cf">status_pct: 60 · variant: ring</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Earthquake fate</span>
+<div style="display: flex; gap: 3px"><span style="flex-grow: 1; height: 12px; border-radius: 6px 2px 2px 6px; background: #F59E0B"></span><span style="flex-grow: 1; height: 12px; background: #E68A1A"></span><span style="flex-grow: 1; height: 12px; background: #D9782A"></span><span style="flex-grow: 1; height: 12px; background: #CC662C"></span><span style="flex-grow: 1; height: 12px; border-radius: 2px 6px 6px 2px; background: #C2562E"></span></div>
+<div style="position: relative; height: 16px"><svg width="14" height="10" viewBox="0 0 14 10" style="position: absolute; left: 57%; top: 0" aria-hidden="true"><path d="M7 0L14 10H0z" fill="#F0E6CC"></path></svg></div>
+<div style="display: flex; justify-content: space-between; font-size: 10px; color: #A89F8C"><span>Intact</span><span>Altered</span><span style="color: #F0E6CC; font-weight: 700">Damaged</span><span>Ruined</span><span>Vanished</span></div>
+<svg width="258" height="14" viewBox="0 0 258 14" aria-hidden="true"><path d="M4 7h38" stroke="#F59E0B" stroke-width="3"></path><path d="M58 7h38" stroke="#E68A1A" stroke-width="3" stroke-dasharray="10 4"></path><path d="M112 7h38" stroke="#D9782A" stroke-width="3" stroke-dasharray="6 4"></path><path d="M166 7h38" stroke="#CC662C" stroke-width="3" stroke-dasharray="3 4"></path><path d="M220 7h36" stroke="#C2562E" stroke-width="3" stroke-dasharray="1 4" stroke-linecap="round"></path></svg>
+<span class="m">Dash rhythm repeats the colour, for colour-blind readers.</span>
+</div><div class="cap"><span class="tg">01·B · status</span><span class="nm">Scale bar</span><span class="ds">Named bands a content author thinks in, mapped onto the continuous value.</span><span class="cf">variant: scale · bands: wall-defined</span></div></div>
+
+<div><div class="stage">
+<span class="eb">1755 fate</span>
+<div style="display: flex; gap: 14px; align-items: center">
+<span style="flex-shrink: 0; width: 64px; height: 64px; border-radius: 32px; border: 2px dashed rgba(240,230,204,0.4); display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 30px; color: #F0E6CC">?</span>
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="h" style="font-size: 18px">Fate unknown</span><span class="m">Historical sources disagree about what happened here.</span></div>
+</div>
+<p class="p">We show this honestly instead of guessing a value.</p>
+<button class="btn2" style="align-self: flex-start">See the 3 sources</button>
+</div><div class="cap"><span class="tg">01·C · status</span><span class="nm">Unknown state</span><span class="ds">A neutral “?” state, distinct from “this wall has no status axis”.</span><span class="cf">status_unknown: true</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Conservation · IUCN</span>
+<div style="display: flex; gap: 4px">
+<span style="flex-grow: 1; text-align: center; padding: 10px 0; border-radius: 10px; background: #7FC8A0; color: #0B1A12; font-size: 12px; font-weight: 800">LC</span><span style="flex-grow: 1; text-align: center; padding: 10px 0; border-radius: 10px; background: rgba(240,230,204,0.07); font-size: 12px; font-weight: 700; color: #A89F8C">NT</span><span style="flex-grow: 1; text-align: center; padding: 10px 0; border-radius: 10px; background: rgba(240,230,204,0.07); font-size: 12px; font-weight: 700; color: #A89F8C">VU</span><span style="flex-grow: 1; text-align: center; padding: 10px 0; border-radius: 10px; background: rgba(240,230,204,0.07); font-size: 12px; font-weight: 700; color: #A89F8C">EN</span><span style="flex-grow: 1; text-align: center; padding: 10px 0; border-radius: 10px; background: rgba(240,230,204,0.07); font-size: 12px; font-weight: 700; color: #A89F8C">CR</span>
+</div>
+<span class="h" style="font-size: 18px">Least concern</span>
+<p class="p">Golden eagle, global assessment. [VERIFY FOR PORTUGAL]</p>
+<span class="m">Same Status block. The mural wall declares its own axis in its config.</span>
+</div><div class="cap"><span class="tg">01·D · status</span><span class="nm">Custom axis</span><span class="ds">Proves the axis is wall data, not a framework enum.</span><span class="cf">axis: iucn · wall: mural</span></div></div>
+
+<div><div class="stage" style="background: transparent; border: 1.5px dashed rgba(240,230,204,0.18); align-items: center; justify-content: center; text-align: center">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#7D7564" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M5 19L19 5"></path></svg>
+<span class="h" style="font-size: 17px; color: #A89F8C">Nothing rendered</span>
+<p class="p" style="color: #A89F8C">The wall has no status axis, so the block is skipped entirely. No empty ring, no “0% intact”.</p>
+</div><div class="cap"><span class="tg">01·E · status</span><span class="nm">Absent axis</span><span class="ds">The mural test case, drawn so it can’t be forgotten.</span><span class="cf">has_status: false → skip</span></div></div>
+
+<!-- ============ S2 LENSES ============ -->
+<div class="sec"><h2 class="sech">Lenses</h2><span class="secd">Cross-cutting mechanisms, not blocks: they change what every block shows. Era, visitor profile, language and accessibility, each reachable from inside the card.</span></div>
+
+<div><div class="stage">
+<div style="position: relative; height: 110px; border-radius: 14px; background: linear-gradient(160deg, #1B2D4F, #3A2F20); overflow: hidden">
+<svg width="100%" height="110" viewBox="0 0 258 110" preserveAspectRatio="none" aria-hidden="true"><path d="M0 80 L30 60 L50 70 L80 40 L110 55 L140 30 L170 50 L200 35 L230 55 L258 45 V110 H0z" fill="rgba(240,230,204,0.12)"></path></svg>
+<span style="position: absolute; left: 10px; bottom: 8px; padding: 4px 9px; border-radius: 9px; background: rgba(12,10,8,0.7); font-size: 11px; font-weight: 700">Lisboa, ~1700</span>
+</div>
+<div style="display: flex; gap: 5px; flex-wrap: wrap"><span class="chip on">~1700</span><span class="chip">1755</span><span class="chip">1760–1800</span><span class="chip">Hoje</span></div>
+<p class="p">Hero image, text and 3D swap to this era’s variant.</p>
+</div><div class="cap"><span class="tg">02·A · epoch lens</span><span class="nm">Era chips in the card</span><span class="ds">Same states as the wall slider, kept in sync both ways.</span><span class="cf">lapse_states · labels from wall</span></div></div>
+
+<div><div class="stage">
+<div class="sf" style="padding: 14px; display: flex; flex-direction: column; gap: 10px; opacity: 0.9">
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#A89F8C" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+<span class="h" style="font-size: 17px">Not built yet in ~1700</span>
+<p class="p" style="color: #A89F8C">This 3D model belongs to the Reconstrução era.</p>
+<button class="btn2" style="align-self: flex-start">Jump to 1760–1800</button>
+</div>
+<span class="m">Gated blocks collapse to this instead of vanishing.</span>
+</div><div class="cap"><span class="tg">02·B · epoch lens</span><span class="nm">Out-of-era state</span><span class="ds">Keeps the card stable when the era changes under it.</span><span class="cf">block.visibleIn: [pombaline, today]</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Active hours</span>
+<div style="display: flex; gap: 14px; align-items: center">
+<svg width="110" height="110" viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="44" fill="none" stroke="rgba(240,230,204,0.08)" stroke-width="12"></circle><path d="M55 11 A44 44 0 0 1 99 55" fill="none" stroke="rgba(240,230,204,0.12)" stroke-width="12"></path><path d="M16 34 A44 44 0 0 1 34 17" fill="none" stroke="#F59E0B" stroke-width="12"></path><path d="M93 76 A44 44 0 0 1 76 93" fill="none" stroke="#C2562E" stroke-width="12"></path><text x="55" y="52" text-anchor="middle" font-family="DM Sans" font-size="10" fill="#A89F8C">active at</text><text x="55" y="67" text-anchor="middle" font-family="Fraunces" font-size="14" fill="#F0E6CC">dawn · dusk</text></svg>
+<div style="display: flex; flex-direction: column; gap: 6px" class="m"><span style="color: #F59E0B">● dawn</span><span>○ day</span><span style="color: #C2562E">● dusk</span><span>○ night</span></div>
+</div>
+<p class="p">Golden eagle · sample data</p>
+</div><div class="cap"><span class="tg">02·C · epoch lens</span><span class="nm">Time-of-day ring</span><span class="ds">The mural’s lapse axis, read as a clock instead of a timeline.</span><span class="cf">lapse axis: dawn | day | dusk | night</span></div></div>
+
+<div><div class="stage">
+<div style="padding: 4px; border-radius: 14px; background: rgba(240,230,204,0.06); display: flex; gap: 2px"><span style="flex-grow: 1; text-align: center; padding: 7px 0; border-radius: 10px; background: #F0E6CC; color: #16130F; font-size: 11px; font-weight: 800">Tourist</span><span style="flex-grow: 1; text-align: center; padding: 7px 0; font-size: 11px; font-weight: 600; color: #A89F8C">Student</span><span style="flex-grow: 1; text-align: center; padding: 7px 0; font-size: 11px; font-weight: 600; color: #A89F8C">Historian</span><span style="flex-grow: 1; text-align: center; padding: 7px 0; font-size: 11px; font-weight: 600; color: #A89F8C">Family</span></div>
+<p class="p">A hilltop castle that watched over Lisbon long before the earthquake. Look for its walls at the top of the panel. [PLACEHOLDER COPY]</p>
+<span class="m">Reading as Tourist · change any time</span>
+</div><div class="cap"><span class="tg">02·D · profile lens</span><span class="nm">Profile switch</span><span class="ds">“Change profile” reachable from any card, never buried in settings.</span><span class="cf">content_by_profile.tourist</span></div></div>
+
+<div><div class="stage">
+<div style="display: flex; gap: 12px; align-items: flex-start">
+<svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="26" fill="#2A2116"></circle><circle cx="26" cy="21" r="9" fill="#D9B38C"></circle><path d="M15 17 q11 -12 22 0 v-3 q-11 -9 -22 0z" fill="#1B2D4F"></path><path d="M12 48 q14 -20 28 0z" fill="#1B2D4F"></path></svg>
+<p class="p" style="font-size: 17px; line-height: 1.45; color: #F0E6CC">This castle is super old! Can you spot its towers on the tiles?</p>
+</div>
+<button class="btn" style="height: 48px; font-size: 14px">Find the towers</button>
+<span class="m">Bigger type, one idea per sentence, the guide talks.</span>
+</div><div class="cap"><span class="tg">02·E · profile lens</span><span class="nm">Family rendering</span><span class="ds">The child profile also changes type scale and adds the guide.</span><span class="cf">profile: child · typeScale: 1.25</span></div></div>
+
+<div><div class="stage">
+<p class="p">The castle’s medieval enceinte is shown with a precision consistent with pre-1755 surveys.<sup style="color: #F59E0B">1</sup> Its representation of the northern towers remains debated.<sup style="color: #F59E0B">2</sup></p>
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid rgba(240,230,204,0.08)" class="mono"><span style="font-size: 10px; color: #A89F8C">1 · [ARCHIVE SOURCE, YEAR]</span><span style="font-size: 10px; color: #A89F8C">2 · [PUBLICATION, PAGE]</span></div>
+<span class="m">Footnotes and citations only appear in this profile.</span>
+</div><div class="cap"><span class="tg">02·F · profile lens</span><span class="nm">Historian rendering</span><span class="ds">Denser text, footnotes, reference list.</span><span class="cf">profile: academic · footnotes: on</span></div></div>
+
+<div><div class="stage" style="gap: 0; padding: 8px 16px">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(240,230,204,0.08)"><span style="font-size: 13px; font-weight: 600">Language</span><span style="display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: rgba(240,230,204,0.06)"><span style="padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; color: #A89F8C">PT</span><span style="padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; background: #F0E6CC; color: #16130F">EN</span></span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(240,230,204,0.08)"><span style="font-size: 13px; font-weight: 600">Text size</span><span style="display: flex; align-items: center; gap: 8px"><span style="font-size: 11px">A</span><span style="width: 80px; height: 4px; border-radius: 2px; background: rgba(240,230,204,0.15); position: relative"><span style="position: absolute; left: 0; top: 0; width: 50px; height: 4px; border-radius: 2px; background: #F59E0B"></span></span><span style="font-size: 16px">A</span></span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(240,230,204,0.08)"><span style="font-size: 13px; font-weight: 600">Captions</span><span style="width: 36px; height: 20px; border-radius: 10px; background: #F59E0B; position: relative"><span style="position: absolute; right: 2px; top: 2px; width: 16px; height: 16px; border-radius: 8px; background: #16130F"></span></span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(240,230,204,0.08)"><span style="font-size: 13px; font-weight: 600">Reduce motion</span><span style="width: 36px; height: 20px; border-radius: 10px; background: rgba(240,230,204,0.15); position: relative"><span style="position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 8px; background: #A89F8C"></span></span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0"><span style="font-size: 13px; font-weight: 600">Reading as</span><span style="font-size: 12px; color: #F59E0B; font-weight: 700">Tourist ›</span></div>
+</div><div class="cap"><span class="tg">02·G · card menu</span><span class="nm">Language &amp; access</span><span class="ds">One “Aa” menu in the card header, global but overridable per visitor.</span><span class="cf">locale · textScale · captions · reduceMotion</span></div></div>
+
+<!-- ============ S3 GUIDE & AUDIO ============ -->
+<div class="sec"><h2 class="sech">Guide &amp; audio</h2><span class="secd">The plan’s scripted audio layer and 2D guide character, plus the optional AI guide kept as its own removable block.</span></div>
+
+<div><div class="stage">
+<div style="display: flex; gap: 12px; align-items: flex-end">
+<svg width="80" height="120" viewBox="0 0 80 120" aria-hidden="true"><ellipse cx="40" cy="116" rx="30" ry="4" fill="rgba(0,0,0,0.4)"></ellipse><path d="M14 116 q2 -44 26 -46 q24 2 26 46z" fill="#1B2D4F"></path><path d="M30 72 h20 v10 h-20z" fill="#F0E6CC"></path><circle cx="40" cy="48" r="17" fill="#D9B38C"></circle><path d="M22 44 q18 -22 36 0 q-4 -16 -18 -16 q-14 0 -18 16z" fill="#8A6A4A"></path><circle cx="34" cy="48" r="2" fill="#2A2116"></circle><circle cx="46" cy="48" r="2" fill="#2A2116"></circle><path d="M35 56 q5 4 10 0" stroke="#2A2116" stroke-width="1.6" fill="none" stroke-linecap="round"></path><path d="M62 88 l12 -18" stroke="#D9B38C" stroke-width="6" stroke-linecap="round"></path><path d="M72 66 l6 -10" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"></path></svg>
+<div style="position: relative; flex-grow: 1; padding: 12px; border-radius: 16px 16px 16px 4px; background: #F0E6CC; color: #16130F; font-size: 13px; line-height: 1.45; font-weight: 500">I painted panels like this one. Shall I show you how the blue was made?</div>
+</div>
+<div style="display: flex; gap: 6px"><button class="btn" style="flex-grow: 1">Yes, show me</button><button class="btn2">Later</button></div>
+</div><div class="cap"><span class="tg">03·A · guide</span><span class="nm">Guide character</span><span class="ds">The azulejo-painter concept from the plan, speaking in a bubble.</span><span class="cf">guide: sprite-swap · pose: point</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Pose sheet · 5 sprites</span>
+<div style="display: flex; justify-content: space-between">
+<sc-for list="{{poses}}" as="p" hint-placeholder-count="5"><div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><svg width="44" height="64" viewBox="0 0 44 64" aria-hidden="true"><path d="M8 62 q1 -22 14 -24 q13 2 14 24z" fill="#1B2D4F"></path><circle cx="22" cy="26" r="9" fill="#D9B38C"></circle><path d="M13 23 q9 -12 18 0 q-2 -8 -9 -8 q-7 0 -9 8z" fill="#8A6A4A"></path><path d="{{p.arm}}" stroke="#D9B38C" stroke-width="4" stroke-linecap="round" fill="none"></path><path d="{{p.mouth}}" stroke="#2A2116" stroke-width="1.4" fill="none" stroke-linecap="round"></path></svg><span class="mono" style="font-size: 9px; color: #A89F8C">{{p.n}}</span></div></sc-for>
+</div>
+<p class="p">Legible at 120 × 200 px over the live camera. Poses are driven by audio cues.</p>
+<div class="sf" style="padding: 10px; display: flex; gap: 8px; align-items: center"><span class="mono" style="font-size: 10px; color: #F59E0B">00:12</span><span style="font-size: 12px">cue → point_right</span></div>
+</div><div class="cap"><span class="tg">03·B · guide</span><span class="nm">Pose sheet + cues</span><span class="ds">Idle / talk / point-left / point-right / surprised, timed from the script.</span><span class="cf">poses[5] · cues: [{t, pose}]</span></div></div>
+
+<div><div class="stage" style="justify-content: flex-end">
+<div style="display: flex; flex-direction: column; gap: 8px; opacity: 0.3"><span style="height: 40px; border-radius: 10px; background: rgba(240,230,204,0.1)"></span><span style="height: 60px; border-radius: 10px; background: rgba(240,230,204,0.1)"></span></div>
+<span class="m" style="text-align: center">Card closed · narration continues</span>
+<div style="border-radius: 18px; background: #221D16; border: 1px solid rgba(245,158,11,0.3); padding: 10px 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 24px rgba(0,0,0,0.5)">
+<span style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #1B2D4F, #3A2F20)"></span>
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 700">Castelo de São Jorge</span><span style="height: 3px; border-radius: 2px; background: rgba(240,230,204,0.12)"><span style="display: block; width: 55%; height: 3px; border-radius: 2px; background: #F59E0B"></span></span></div>
+<button aria-label="Pause" style="width: 36px; height: 36px; border-radius: 18px; background: #F59E0B; border: none; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="#1A1206"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg></button>
+</div>
+</div><div class="cap"><span class="tg">03·C · audio</span><span class="nm">Persistent mini-player</span><span class="ds">Visitors keep exploring the wall while they listen.</span><span class="cf">keepPlayingOnClose: true</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Transcript · synced</span>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; gap: 10px"><span class="mono" style="font-size: 10px; color: #7D7564; padding-top: 3px">0:08</span><span style="font-size: 13px; color: #7D7564">Look up to the top of the hill.</span></div>
+<div style="display: flex; gap: 10px"><span class="mono" style="font-size: 10px; color: #F59E0B; padding-top: 4px">0:14</span><span style="font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.3; color: #F0E6CC">These walls guarded the city for centuries.</span></div>
+<div style="display: flex; gap: 10px"><span class="mono" style="font-size: 10px; color: #7D7564; padding-top: 3px">0:21</span><span style="font-size: 13px; color: #A89F8C">Then, one morning in 1755…</span></div>
+</div>
+<div style="height: 3px; border-radius: 2px; background: rgba(240,230,204,0.12)"><div style="width: 40%; height: 3px; border-radius: 2px; background: #F59E0B"></div></div>
+</div><div class="cap"><span class="tg">03·D · audio</span><span class="nm">Synced captions</span><span class="ds">For noisy squares and hearing-impaired visitors. Tap a line to seek.</span><span class="cf">captions: castelo_en.vtt</span></div></div>
+
+<div><div class="stage">
+<div class="sf" style="padding: 12px; display: flex; gap: 10px; align-items: center"><span class="wv" style="width: 3px; height: 16px; background: #F59E0B; border-radius: 2px"></span><div style="display: flex; flex-direction: column"><span class="m">Now playing</span><span style="font-size: 13px; font-weight: 700">Castelo de São Jorge</span></div></div>
+<p class="p">You opened <span style="color: #F0E6CC; font-weight: 700">Sé de Lisboa</span>. Its story is ready.</p>
+<div style="display: flex; flex-direction: column; gap: 6px"><button class="btn">Play after this one</button><button class="btn2">Switch now (500 ms fade)</button></div>
+</div><div class="cap"><span class="tg">03·E · audio</span><span class="nm">Queue or switch</span><span class="ds">Never two clips at once; the choice can be remembered as a setting.</span><span class="cf">onNewPoi: ask | queue | crossfade</span></div></div>
+
+<div><div class="stage">
+<div style="align-self: flex-end; max-width: 80%; padding: 9px 12px; border-radius: 14px 14px 4px 14px; background: rgba(240,230,204,0.1); font-size: 12px">Why is the castle on a hill?</div>
+<div style="max-width: 88%; padding: 9px 12px; border-radius: 14px 14px 14px 4px; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25); font-size: 12px; line-height: 1.45">High ground was easier to defend and let guards see ships on the river. [AI ANSWER]</div>
+<span class="m" style="display: flex; align-items: center; gap: 6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A89F8C" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.5"></path></svg>AI-generated · may be inaccurate</span>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="chip">Who lived here?</span><span class="chip">What survived?</span></div>
+</div><div class="cap"><span class="tg">03·F · ai guide</span><span class="nm">Ask the guide</span><span class="ds">Optional, user-initiated, never replaces the scripted audio. A wall can omit it entirely.</span><span class="cf">type: ai_guide · optional</span></div></div>
+
+<!-- ============ S4 WALL & PLACE ============ -->
+<div class="sec"><h2 class="sech">Wall &amp; place</h2><span class="secd">Where this point sits on the wall, how to see it again in AR, and where it is in the city today.</span></div>
+
+<div><div class="stage">
+<span class="eb">On the panorama</span>
+<svg width="100%" height="84" viewBox="0 0 258 84" aria-hidden="true"><rect x="4" y="20" width="250" height="34" rx="6" fill="rgba(240,230,204,0.06)" stroke="rgba(240,230,204,0.15)"></rect><path d="M86 20v34M170 20v34" stroke="rgba(240,230,204,0.15)" stroke-dasharray="3 3"></path><circle cx="40" cy="37" r="3" fill="#A89F8C"></circle><circle cx="70" cy="30" r="3" fill="#A89F8C"></circle><circle cx="110" cy="42" r="3" fill="#A89F8C"></circle><circle cx="150" cy="33" r="3" fill="#A89F8C"></circle><circle cx="200" cy="40" r="3" fill="#A89F8C"></circle><circle cx="230" cy="28" r="3" fill="#A89F8C"></circle><circle cx="182" cy="34" r="7" fill="#F59E0B"></circle><path d="M150 76 l6 -9 l6 9z" fill="#38BDF8"></path><text x="156" y="16" font-family="DM Sans" font-size="9" fill="#A89F8C" text-anchor="middle">you</text><text x="44" y="70" font-family="DM Sans" font-size="9" fill="#7D7564">left wing</text><text x="112" y="70" font-family="DM Sans" font-size="9" fill="#7D7564">centre</text><text x="200" y="70" font-family="DM Sans" font-size="9" fill="#7D7564">right wing</text></svg>
+<span class="h" style="font-size: 17px">72% along the wall</span>
+<span class="m">About 3 steps to your right</span>
+</div><div class="cap"><span class="tg">04·A · wall locator</span><span class="nm">Wall strip</span><span class="ds">The whole surface at a glance, with you and this point on it.</span><span class="cf">wall_position.x_norm: 0.72</span></div></div>
+
+<div><div class="stage">
+<button class="btn" style="height: 48px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"></path><circle cx="12" cy="12" r="3"></circle></svg>Show it on the wall</button>
+<span class="m" style="text-align: center">Card shrinks to peek, the marker pulses</span>
+<div style="display: flex; gap: 8px">
+<div class="sf" style="flex-grow: 1; flex-basis: 0; padding: 10px; display: flex; flex-direction: column; gap: 2px"><span class="m">← left</span><span style="font-size: 12px; font-weight: 700">Sé de Lisboa</span><span class="m">[X] m</span></div>
+<div class="sf" style="flex-grow: 1; flex-basis: 0; padding: 10px; display: flex; flex-direction: column; gap: 2px; text-align: right"><span class="m">right →</span><span style="font-size: 12px; font-weight: 700">Paço da Ribeira</span><span class="m">[X] m</span></div>
+</div>
+</div><div class="cap"><span class="tg">04·B · wall locator</span><span class="nm">Show on wall + neighbours</span><span class="ds">Walk the wall from inside the card, one neighbour at a time.</span><span class="cf">neighbours: by x_norm</span></div></div>
+
+<div><div class="stage">
+<div style="position: relative; height: 130px; border-radius: 14px; overflow: hidden; background: #1E2228">
+<svg width="100%" height="130" viewBox="0 0 258 130" preserveAspectRatio="none" aria-hidden="true"><path d="M0 100 q80 -20 140 0 t118 -10 v40 h-258z" fill="#1B3A52"></path><path d="M0 40 h258 M0 72 h258 M60 0 v130 M150 0 v100 M210 0 v110" stroke="#2C323A" stroke-width="7"></path><path d="M20 20 L90 60 L160 30" stroke="#3A4250" stroke-width="4" fill="none"></path></svg>
+<span style="position: absolute; left: 140px; top: 22px; width: 26px; height: 26px; border-radius: 13px 13px 13px 2px; transform: rotate(-45deg); background: #F59E0B; box-shadow: 0 6px 14px rgba(0,0,0,0.5)"></span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center"><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">Castelo de São Jorge today</span><span class="mono" style="font-size: 10px; color: #A89F8C">38.7139, −9.1334</span></div><button class="btn2">Directions</button></div>
+</div><div class="cap"><span class="tg">04·C · today map</span><span class="nm">Where it is today</span><span class="ds">The plan’s Map block: a static map, then hand off to the maps app.</span><span class="cf">coordinates_today · static map</span></div></div>
+
+<div><div class="stage">
+<div style="display: flex; align-items: center; gap: 8px">
+<div style="flex-grow: 1; flex-basis: 0; height: 90px; border-radius: 12px; background: linear-gradient(160deg, #1B2D4F, #0E1826); position: relative"><span class="mono" style="position: absolute; left: 8px; bottom: 6px; font-size: 9px; color: #A89F8C">ON THE TILES</span><span style="position: absolute; left: 50%; top: 38%; width: 10px; height: 10px; border-radius: 5px; background: #F59E0B"></span></div>
+<svg width="28" height="16" viewBox="0 0 28 16" aria-hidden="true"><path d="M2 8h22M18 3l6 5-6 5" stroke="#F59E0B" stroke-width="2" fill="none" stroke-linecap="round"></path></svg>
+<div style="flex-grow: 1; flex-basis: 0; height: 90px; border-radius: 12px; background: #1E2228; position: relative"><span class="mono" style="position: absolute; left: 8px; bottom: 6px; font-size: 9px; color: #A89F8C">IN THE CITY</span><span style="position: absolute; left: 55%; top: 35%; width: 10px; height: 10px; border-radius: 5px; background: #F59E0B"></span></div>
+</div>
+<p class="p">Drawn around 1700, still standing today.</p>
+<span class="m">[X] km from you · [Y] min on foot</span>
+</div><div class="cap"><span class="tg">04·D · today map</span><span class="nm">Then → now link</span><span class="ds">Connects the painted place to the real one in one glance.</span><span class="cf">variant: bridge</span></div></div>
+
+<div><div class="stage" style="padding: 0; gap: 0">
+<div style="position: relative; height: 230px; overflow: hidden">
+<svg width="100%" height="230" viewBox="0 0 290 230" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="tl" width="58" height="58" patternUnits="userSpaceOnUse"><rect width="58" height="58" fill="#EFE7D6"></rect><path d="M29 6 q14 23 0 46 q-14 -23 0 -46z" fill="#1E4E8C"></path><path d="M6 29 q23 -14 46 0 q-23 14 -46 0z" fill="#2F6BB3" opacity="0.8"></path><circle cx="29" cy="29" r="6" fill="#EFE7D6" stroke="#1E4E8C" stroke-width="2"></circle><path d="M0 0.5H58M0.5 0V58" stroke="#C9BFA9"></path></pattern></defs><rect width="290" height="230" fill="url(#tl)"></rect></svg>
+<div style="position: absolute; right: 10px; top: 10px; width: 70px; height: 50px; border-radius: 6px; background: rgba(12,10,8,0.75); border: 1px solid rgba(240,230,204,0.3)"><span style="position: absolute; left: 30px; top: 16px; width: 18px; height: 14px; border: 1.5px solid #F59E0B"></span></div>
+<span style="position: absolute; left: 10px; top: 10px; padding: 4px 9px; border-radius: 9px; background: rgba(12,10,8,0.75); font-size: 11px; font-weight: 800">4×</span>
+<span style="position: absolute; left: 10px; bottom: 10px; padding: 5px 10px; border-radius: 10px; background: rgba(12,10,8,0.75); font-size: 11px">Pinch to see the brushwork</span>
+</div>
+</div><div class="cap"><span class="tg">04·E · deep zoom</span><span class="nm">Deep zoom</span><span class="ds">Tiled high-res photo of the panel, with a minimap of where you are.</span><span class="cf">image: tiled pyramid · maxZoom: 8</span></div></div>
+
+<div><div class="stage">
+<div style="position: relative; height: 130px; border-radius: 14px; background: linear-gradient(160deg, #EFE7D6, #CFC3A8)">
+<span style="position: absolute; left: 30px; top: 26px; width: 40px; height: 40px; border-radius: 20px; border: 2px solid #F59E0B"></span><span style="position: absolute; left: 130px; top: 60px; width: 40px; height: 40px; border-radius: 20px; border: 2px solid #F59E0B"></span><span style="position: absolute; left: 200px; top: 20px; width: 40px; height: 40px; border-radius: 20px; border: 2px solid #F59E0B"></span>
+</div>
+<div style="display: flex; justify-content: space-between">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px"><span style="width: 64px; height: 64px; border-radius: 32px; background: radial-gradient(circle, #2F6BB3, #1E4E8C); border: 2px solid #F59E0B"></span><span class="m">Brushstroke</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px"><span style="width: 64px; height: 64px; border-radius: 32px; background: radial-gradient(circle, #EFE7D6, #BFB293); border: 2px solid #F59E0B"></span><span class="m">Glaze crack</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px"><span style="width: 64px; height: 64px; border-radius: 32px; background: radial-gradient(circle, #6A4E8C, #3A2A52); border: 2px solid #F59E0B"></span><span class="m">Signature</span></div>
+</div>
+</div><div class="cap"><span class="tg">04·F · deep zoom</span><span class="nm">Look-closer loupes</span><span class="ds">Curated magnified details instead of free exploration.</span><span class="cf">variant: loupes · details[3]</span></div></div>
+
+<!-- ============ S5 STORY & LEARNING ============ -->
+<div class="sec"><h2 class="sech">Story &amp; learning</h2><span class="secd">Scenes where people speak, words explained in place, how the tiles were made, and the plan’s after-reading knowledge check.</span></div>
+
+<div><div class="stage">
+<div style="display: flex; gap: 8px; align-items: flex-end"><span style="flex-shrink: 0; width: 30px; height: 30px; border-radius: 15px; background: #6A4E8C"></span><div style="padding: 9px 12px; border-radius: 14px 14px 14px 4px; background: rgba(240,230,204,0.08); font-size: 12px; line-height: 1.4"><span style="display: block; font-size: 10px; color: #CDBEFA; font-weight: 700">Water carrier</span>The fountain is where all the news of the square begins. [SCRIPT]</div></div>
+<div style="display: flex; gap: 8px; align-items: flex-end; flex-direction: row-reverse"><span style="flex-shrink: 0; width: 30px; height: 30px; border-radius: 15px; background: #2F7A78"></span><div style="padding: 9px 12px; border-radius: 14px 14px 4px 14px; background: rgba(111,214,200,0.1); font-size: 12px; line-height: 1.4"><span style="display: block; font-size: 10px; color: #6FD6C8; font-weight: 700">Fishwife</span>And the gossip ends there too. [SCRIPT]</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><button class="btn2">Ask about the water</button><button class="btn2">Ask about 1755</button></div>
+</div><div class="cap"><span class="tg">05·A · dialogue</span><span class="nm">Dialogue scene</span><span class="ds">For Chafariz’s painted figures: the people in the tiles talk, with choices.</span><span class="cf">dialogue: yarn node · choices</span></div></div>
+
+<div><div class="stage">
+<p class="p">The city was rebuilt in the <span style="color: #F0E6CC; border-bottom: 1.5px dotted #F59E0B">Pombaline</span> style, and many facades were later covered in <span style="color: #F0E6CC; border-bottom: 1.5px dotted #F59E0B">azulejos</span>.</p>
+<div style="border-radius: 14px; background: #221D16; border: 1px solid rgba(245,158,11,0.3); padding: 12px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 12px 28px rgba(0,0,0,0.5)"><span style="font-family: 'Fraunces', serif; font-size: 16px">Pombaline</span><span style="font-size: 12px; line-height: 1.45; color: #CFC5B1">The style of Lisbon’s rebuilding after 1755, named after the Marquis of Pombal.</span></div>
+</div><div class="cap"><span class="tg">05·B · glossary</span><span class="nm">Inline terms</span><span class="ds">Any text block can mark terms; definitions come from one wall glossary.</span><span class="cf">glossary: wall-level · [[term]]</span></div></div>
+
+<div><div class="stage">
+<span class="eb">How a tile is made</span>
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="4"><div style="display: flex; gap: 12px; align-items: center"><span style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 14px; background: {{s.bg}}; color: {{s.fg}}; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{s.n}}</span><div style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">{{s.t}}</span><span class="m">{{s.d}}</span></div></div></sc-for>
+</div><div class="cap"><span class="tg">05·C · craft</span><span class="nm">Process steps</span><span class="ds">A numbered sequence, usable for any “how it was made” story.</span><span class="cf">steps[] · media per step</span></div></div>
+
+<div><div class="stage">
+<span class="eb">The painter’s palette</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{pigments}}" as="g" hint-placeholder-count="4"><div class="sf" style="padding: 10px; display: flex; flex-direction: column; gap: 8px"><span style="height: 38px; border-radius: 8px; background: {{g.c}}"></span><span style="font-size: 12px; font-weight: 700">{{g.n}}</span><span class="m">{{g.o}}</span></div></sc-for>
+</div>
+</div><div class="cap"><span class="tg">05·D · craft</span><span class="nm">Pigment palette</span><span class="ds">Swatches with the mineral behind each colour.</span><span class="cf">swatches[] · {hex, name, source}</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Compare fates</span>
+<div style="display: flex; gap: 8px">
+<div class="sf" style="flex-grow: 1; flex-basis: 0; padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center"><svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="22" fill="none" stroke="rgba(240,230,204,0.1)" stroke-width="6"></circle><circle cx="28" cy="28" r="22" fill="none" stroke="#D9782A" stroke-width="6" stroke-dasharray="83 138" transform="rotate(-90 28 28)"></circle></svg><span style="font-size: 12px; font-weight: 700">Castelo</span><span class="m">Damaged, rebuilt</span></div>
+<div class="sf" style="flex-grow: 1; flex-basis: 0; padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center"><svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="22" fill="none" stroke="#C2562E" stroke-width="6" stroke-dasharray="1 5" stroke-linecap="round"></circle></svg><span style="font-size: 12px; font-weight: 700">Paço da Ribeira</span><span class="m">Destroyed</span></div>
+</div>
+<button class="btn2">Highlight both on the wall</button>
+</div><div class="cap"><span class="tg">05·E · compare</span><span class="nm">Compare two points</span><span class="ds">Side by side on any shared axis: fate, era, species size.</span><span class="cf">compareWith: poi_id · axis</span></div></div>
+
+<div><div class="stage">
+<span class="m">After reading · 1 of 1</span>
+<span style="font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.3">Did this building survive the 1755 earthquake?</span>
+<div style="height: 40px; padding: 0 12px; border-radius: 12px; background: rgba(240,230,204,0.04); display: flex; align-items: center; font-size: 12px; color: #7D7564">Yes, intact</div>
+<div style="height: 40px; padding: 0 12px; border-radius: 12px; background: rgba(240,230,204,0.04); display: flex; align-items: center; font-size: 12px; color: #7D7564">No, destroyed</div>
+<div style="height: 40px; padding: 0 12px; border-radius: 12px; background: rgba(127,200,160,0.14); border: 1.5px solid #7FC8A0; display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 700">Partially<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7FC8A0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></div>
+<p class="p" style="font-size: 12px">It suffered significant damage but was rebuilt.</p>
+</div><div class="cap"><span class="tg">06·A · knowledge check</span><span class="nm">Correct answer</span><span class="ds">Shown only after the card was read; always explains.</span><span class="cf">quiz[] · showAfter: viewed</span></div></div>
+
+<div><div class="stage">
+<span class="m">After reading · 1 of 1</span>
+<span style="font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.3">Did this building survive the 1755 earthquake?</span>
+<div style="height: 40px; padding: 0 12px; border-radius: 12px; background: rgba(245,158,11,0.1); border: 1.5px solid #F59E0B; display: flex; align-items: center; font-size: 12px; font-weight: 700">Yes, intact</div>
+<div style="border-radius: 14px; background: rgba(240,230,204,0.05); padding: 12px; display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; color: #F59E0B">Actually…</span><span style="font-size: 12px; line-height: 1.5; color: #CFC5B1">It was badly damaged, then rebuilt. The answer is “Partially”.</span></div>
+<span class="m">No penalty, no lost points.</span>
+</div><div class="cap"><span class="tg">06·B · knowledge check</span><span class="nm">Gentle “Actually…”</span><span class="ds">Wrong answers teach instead of punish, as the plan asks.</span><span class="cf">feedback: gentle · penalty: none</span></div></div>
+
+<div><div class="stage" style="align-items: center">
+<div style="position: relative; width: 240px; height: 170px">
+<div style="position: absolute; left: 14px; top: 16px; width: 212px; height: 150px; border-radius: 18px; background: #221D16; transform: rotate(4deg)"></div>
+<div style="position: absolute; left: 6px; top: 8px; width: 212px; height: 150px; border-radius: 18px; background: #2A241B; transform: rotate(-3deg)"></div>
+<div style="position: absolute; left: 10px; top: 0; width: 220px; height: 156px; border-radius: 18px; background: #F0E6CC; color: #16130F; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between"><span class="mono" style="font-size: 10px; color: #8A6A4A">TRUE OR FALSE · 2/5</span><span style="font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.3">Praça do Comércio was built on rubble from the earthquake.</span></div>
+</div>
+<div style="display: flex; gap: 10px; width: 100%"><button class="btn2" style="flex-grow: 1">← False</button><button class="btn" style="flex-grow: 1">True →</button></div>
+</div><div class="cap"><span class="tg">06·C · knowledge check</span><span class="nm">Swipe true / false</span><span class="ds">Fast, thumb-friendly, great for the family profile.</span><span class="cf">variant: swipe_tf</span></div></div>
+
+<div><div class="stage">
+<span style="font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.3">Which detail shows the castle?</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="height: 76px; border-radius: 12px; background: linear-gradient(135deg, #1B2D4F, #2F6BB3)"></div>
+<div style="height: 76px; border-radius: 12px; background: linear-gradient(135deg, #3A2F20, #8A6A4A); border: 2.5px solid #F59E0B; position: relative"><span style="position: absolute; right: 6px; top: 6px; width: 20px; height: 20px; border-radius: 10px; background: #F59E0B; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1A1206" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span></div>
+<div style="height: 76px; border-radius: 12px; background: linear-gradient(135deg, #2C3E2C, #5A7A5A)"></div>
+<div style="height: 76px; border-radius: 12px; background: linear-gradient(135deg, #3A2A52, #6A4E8C)"></div>
+</div>
+<span class="m">Crops cut from the panel photo · [IMAGES]</span>
+</div><div class="cap"><span class="tg">06·D · knowledge check</span><span class="nm">Image choice</span><span class="ds">Visual recall instead of text recall; the answer is on the wall.</span><span class="cf">variant: image_choice · options[4]</span></div></div>
+
+<!-- ============ S6 PROGRESS / SHARE ============ -->
+<div class="sec"><h2 class="sech">Progress &amp; sharing</h2><span class="secd">What this POI adds to the visitor’s progress, how to keep and share it, and signals for the evaluation. Circuits live in the scene-level domain.</span></div>
+
+<div><div class="stage">
+<div style="display: flex; gap: 14px; align-items: center">
+<svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="34" fill="none" stroke="rgba(240,230,204,0.1)" stroke-width="7"></circle><circle cx="42" cy="42" r="34" fill="none" stroke="#F59E0B" stroke-width="7" stroke-dasharray="21 214" stroke-linecap="round" transform="rotate(-90 42 42)"></circle><text x="42" y="42" text-anchor="middle" font-family="Fraunces" font-size="18" fill="#F0E6CC">15</text><text x="42" y="56" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#A89F8C">of 150</text></svg>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7FC8A0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>Discovered</span><span class="chip" style="align-self: flex-start; background: rgba(245,158,11,0.15); color: #F59E0B">★ Hero point</span></div>
+</div>
+<span class="m">Buildings discovered on this wall</span>
+</div><div class="cap"><span class="tg">07·A · discovery</span><span class="nm">Discovery counter</span><span class="ds">Visited check and hierarchy level, shown where the visitor already is.</span><span class="cf">visited · hierarchy_level_key</span></div></div>
+
+<div><div class="stage">
+<div style="border-radius: 16px; padding: 14px; background: linear-gradient(135deg, rgba(245,158,11,0.16), rgba(245,158,11,0.05)); border: 1px solid rgba(245,158,11,0.3); display: flex; align-items: center; justify-content: space-between"><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Fraunces', serif; font-size: 16px; font-weight: 700">Add to your story</span><span class="m">Save this discovery</span></div><span style="width: 36px; height: 36px; border-radius: 18px; background: #F59E0B; color: #1A1206; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700">+</span></div>
+<div style="display: flex; justify-content: space-between"><span style="font-size: 12px">Earthquake series</span><span style="font-size: 12px; color: #F59E0B; font-weight: 700">6 / 8</span></div>
+<div style="height: 4px; border-radius: 2px; background: rgba(240,230,204,0.1)"><div style="width: 75%; height: 4px; border-radius: 2px; background: #F59E0B"></div></div>
+<span class="m">2 more to complete the series</span>
+</div><div class="cap"><span class="tg">07·B · collection</span><span class="nm">Collect + series</span><span class="ds">The “Add to your story” pattern from the Stone &amp; Gold style file.</span><span class="cf">collection · series: category</span></div></div>
+
+<div><div class="stage" style="align-items: center; text-align: center">
+<div style="position: relative; width: 90px; height: 90px"><div class="glw" style="position: absolute; inset: -12px; border-radius: 57px; background: radial-gradient(circle, rgba(245,158,11,0.5), rgba(245,158,11,0) 70%)"></div><div style="position: absolute; inset: 0; border-radius: 45px; padding: 4px; background: conic-gradient(#F59E0B, #FCD34D, #C2562E, #F59E0B)"><div style="width: 82px; height: 82px; border-radius: 41px; background: #1A1510; display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"></path></svg></div></div></div>
+<span class="eb">Badge unlocked</span>
+<span class="h" style="font-size: 19px">Sobrevivente 1755</span>
+<span class="m">Found a building that survived the earthquake</span>
+<div style="display: flex; gap: 8px; width: 100%"><button class="btn" style="flex-grow: 1">Share</button><button class="btn2">Later</button></div>
+</div><div class="cap"><span class="tg">07·C · badge</span><span class="nm">Badge unlock</span><span class="ds">Earned through content, not handed out on arrival.</span><span class="cf">badges[].trigger · dispatcher</span></div></div>
+
+<div><div class="stage">
+<div style="border-radius: 6px; background: #F0E6CC; padding: 8px 8px 28px; transform: rotate(-2deg); box-shadow: 0 16px 30px rgba(0,0,0,0.5); position: relative">
+<div style="height: 130px; border-radius: 3px; background: linear-gradient(160deg, #1B2D4F, #3A2F20); position: relative"><span style="position: absolute; left: 44%; top: 40%; width: 18px; height: 18px; border-radius: 9px; background: #F59E0B; box-shadow: 0 0 0 5px rgba(245,158,11,0.3)"></span></div>
+<span style="position: absolute; left: 10px; bottom: 8px; font-family: 'Fraunces', serif; font-style: italic; font-size: 12px; color: #16130F">TileStories · Grande Panorama</span>
+</div>
+<div style="display: flex; gap: 8px"><button class="btn2" style="flex-grow: 1">Save</button><button class="btn" style="flex-grow: 1">Share</button></div>
+</div><div class="cap"><span class="tg">09·A · share</span><span class="nm">Share postcard</span><span class="ds">A framed, watermarked AR capture ready for the share sheet.</span><span class="cf">frame · watermark · no leaderboard</span></div></div>
+
+<div><div class="stage">
+<span style="font-family: 'Fraunces', serif; font-size: 17px">Was this card useful?</span>
+<div style="display: flex; gap: 8px">
+<button class="btn2" style="flex-grow: 1; height: 48px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 11v9H4v-9zM7 11l4-8a2 2 0 0 1 3 2l-1 5h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 1H7"></path></svg>Yes</button>
+<button class="btn2" style="flex-grow: 1; height: 48px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 13V4H4v9zM7 13l4 8a2 2 0 0 0 3-2l-1-5h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-1H7"></path></svg>Not really</button>
+</div>
+<div style="display: flex; gap: 6px; justify-content: center"><sc-for list="{{stars}}" as="s" hint-placeholder-count="5"><svg width="24" height="24" viewBox="0 0 24 24" fill="{{s.f}}" stroke="#F59E0B" stroke-width="1.5" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"></path></svg></sc-for></div>
+<span class="m" style="text-align: center">Feeds the evaluation, anonymously</span>
+</div><div class="cap"><span class="tg">09·B · feedback</span><span class="nm">Quick feedback</span><span class="ds">One tap at the end of a card; events go through telemetry Type A/B.</span><span class="cf">event: poi_feedback</span></div></div>
+
+<div><div class="stage">
+<div style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 12px; background: rgba(127,200,160,0.1); border: 1px solid rgba(127,200,160,0.35)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FC8A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"></path><path d="M8.5 12l2.5 2.5 4.5-5"></path></svg><div style="display: flex; flex-direction: column"><span style="font-size: 12px; font-weight: 700">Verified</span><span class="m">Checked against [ARCHIVE]</span></div></div>
+<div style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 12px; background: rgba(240,230,204,0.05); border: 1px dashed rgba(240,230,204,0.25)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A89F8C" stroke-width="2" stroke-linecap="round"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg><div style="display: flex; flex-direction: column"><span style="font-size: 12px; font-weight: 700">Draft content</span><span class="m">Placeholder, pending review</span></div></div>
+<span class="m">5 sources · last reviewed [DATE]</span>
+</div><div class="cap"><span class="tg">09·C · trust</span><span class="nm">Content confidence</span><span class="ds">Honest about the plan’s placeholder / AI-drafted content, per POI.</span><span class="cf">content_status: verified | draft</span></div></div>
+
+<!-- ============ S7 MURAL ============ -->
+<div class="sec"><h2 class="sech">Custom kinds, mural wall</h2><span class="secd">Registered by the mural’s own app through the block registry, not shipped by the framework. Proof that the registry is a real extension point.</span></div>
+
+<div><div class="stage">
+<span class="eb">Bird · Accipitridae</span>
+<div style="display: flex; flex-direction: column"><span class="h" style="font-size: 24px">Golden Eagle</span><span style="font-family: 'Fraunces', serif; font-style: italic; font-size: 14px; color: #A89F8C">Aquila chrysaetos · Águia-real</span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: rgba(245,158,11,0.12); border-radius: 12px; overflow: hidden">
+<div style="background: #16130F; padding: 10px"><span class="m" style="display: block">Wingspan</span><span style="font-family: 'Fraunces', serif; font-size: 15px">1.8–2.3 m</span></div>
+<div style="background: #16130F; padding: 10px"><span class="m" style="display: block">Diet</span><span style="font-family: 'Fraunces', serif; font-size: 15px">Carnivore</span></div>
+<div style="background: #16130F; padding: 10px"><span class="m" style="display: block">Habitat</span><span style="font-family: 'Fraunces', serif; font-size: 15px">Mountains</span></div>
+<div style="background: #16130F; padding: 10px"><span class="m" style="display: block">Painted</span><span style="font-family: 'Fraunces', serif; font-size: 15px">2023</span></div>
+</div>
+</div><div class="cap"><span class="tg">10·A · species</span><span class="nm">Species card</span><span class="ds">Taxonomy line + hairline fact grid in the Stone &amp; Gold style.</span><span class="cf">Register("species", …) · app-level</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Size, next to you</span>
+<svg width="100%" height="130" viewBox="0 0 258 130" aria-hidden="true"><path d="M0 118h258" stroke="rgba(240,230,204,0.2)"></path><circle cx="40" cy="30" r="9" fill="#A89F8C"></circle><path d="M40 40v44M40 50l-14 18M40 50l14 18M40 84l-10 32M40 84l10 32" stroke="#A89F8C" stroke-width="5" stroke-linecap="round"></path><path d="M90 60 q40 -30 80 -6 q40 -24 80 6 q-40 -8 -80 18 q-40 -26 -80 -18z" fill="#F59E0B" opacity="0.85"></path><path d="M90 96h160" stroke="#F59E0B" stroke-width="1.5"></path><path d="M90 92v8M250 92v8" stroke="#F59E0B" stroke-width="1.5"></path><text x="170" y="112" text-anchor="middle" font-family="DM Sans" font-size="10" fill="#F59E0B">up to 2.3 m wingspan</text><text x="40" y="128" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#A89F8C">1.7 m</text></svg>
+<p class="p">Wider than you are tall.</p>
+</div><div class="cap"><span class="tg">10·B · species</span><span class="nm">Size comparison</span><span class="ds">A silhouette ruler; works for buildings too (height vs a person).</span><span class="cf">compare: human_1_7m · dimension</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Call of the golden eagle</span>
+<div style="display: flex; gap: 12px; align-items: center">
+<button aria-label="Play call" style="flex-shrink: 0; width: 48px; height: 48px; border-radius: 24px; background: #F59E0B; border: none; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="#1A1206"><path d="M8 5v14l11-7z"></path></svg></button>
+<div style="display: flex; align-items: center; gap: 3px; height: 40px"><sc-for list="{{wave}}" as="w" hint-placeholder-count="20"><span class="wv" style="width: 4px; height: {{w.h}}px; border-radius: 2px; background: {{w.c}}; animation-delay: {{w.d}}s"></span></sc-for></div>
+</div>
+<span class="m">Recording · [CREDIT, LICENCE]</span>
+<p class="p">Hear it, then listen for it along the coast.</p>
+</div><div class="cap"><span class="tg">10·C · species</span><span class="nm">Animal call</span><span class="ds">A short sound block, separate from the narration audio.</span><span class="cf">clip · credit · license</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Where to see one</span>
+<div style="height: 110px; border-radius: 14px; background: linear-gradient(160deg, #2C3E2C, #16211B); position: relative"><svg width="100%" height="110" viewBox="0 0 258 110" preserveAspectRatio="none" aria-hidden="true"><path d="M170 10 q30 20 20 50 q-10 30 10 50 h-60 q-10 -30 0 -60 q10 -30 30 -40z" fill="rgba(159,208,170,0.2)" stroke="#9FD0AA" stroke-dasharray="3 3"></path></svg><span style="position: absolute; left: 12px; bottom: 10px; font-size: 11px; font-weight: 700">[REGION]</span></div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="chip">Mountains</span><span class="chip">Cliffs</span><span class="chip">Open country</span></div>
+</div><div class="cap"><span class="tg">10·D · species</span><span class="nm">Habitat &amp; range</span><span class="ds">Links the painted animal to the living one.</span><span class="cf">habitats[] · range_map</span></div></div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1764,"height":6300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const poses = [
+      { n: 'idle', arm: 'M30 44 l4 10', mouth: 'M19 30 h6' },
+      { n: 'talk', arm: 'M30 44 l4 10', mouth: 'M19 30 q3 3 6 0' },
+      { n: 'point ←', arm: 'M14 44 l-12 -6', mouth: 'M19 30 q3 2 6 0' },
+      { n: 'point →', arm: 'M30 44 l12 -6', mouth: 'M19 30 q3 2 6 0' },
+      { n: 'surprised', arm: 'M30 44 l6 -12', mouth: 'M20 30 a2 2 0 1 0 4 0 a2 2 0 1 0 -4 0' }
+    ];
+    const steps = [
+      { n: 1, t: 'First firing', d: 'Clay tile fired to “biscuit”' },
+      { n: 2, t: 'Tin glaze', d: 'Dipped in white opaque glaze' },
+      { n: 3, t: 'Painting', d: 'Metal oxides brushed on raw glaze' },
+      { n: 4, t: 'Second firing', d: 'Colours fuse into the glaze' }
+    ].map((s, i) => ({ ...s, bg: i === 2 ? '#F59E0B' : 'rgba(240,230,204,0.08)', fg: i === 2 ? '#1A1206' : '#F0E6CC' }));
+    const pigments = [
+      { n: 'Cobalt blue', o: 'cobalt oxide', c: '#1E4E8C' },
+      { n: 'Manganese', o: 'purple-brown', c: '#5A3A4A' },
+      { n: 'Antimony yellow', o: 'lead antimonate', c: '#E3B23C' },
+      { n: 'Copper green', o: 'copper oxide', c: '#3F7A4E' }
+    ];
+    const stars = [1, 2, 3, 4, 5].map((i) => ({ f: i <= 4 ? '#F59E0B' : 'none' }));
+    const hs = [14, 26, 18, 34, 22, 12, 30, 20, 36, 16, 24, 10, 28, 18, 32, 14, 22, 12, 26, 16];
+    const wave = hs.map((h, i) => ({ h, c: i < 8 ? '#F59E0B' : 'rgba(240,230,204,0.25)', d: (i % 5) * 0.08 }));
+    return { poses, steps, pigments, stars, wave };
+  }
+}
+</script>
+</body>
+</html>

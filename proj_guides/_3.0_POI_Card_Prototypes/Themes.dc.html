@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Theme Presets</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,700;0,800;1,700&amp;family=Spectral:ital,wght@0,400;0,500;0,600;1,400&amp;family=Outfit:wght@400;500;600;800&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#0C0A08;font-family:'DM Sans',sans-serif;color:#F0E6CC}
+.tg{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#F59E0B}
+.rule{padding:8px 12px;border-radius:10px;background:rgba(240,230,204,0.07);font-size:12px;color:#E8E0CE}
+</style>
+</helmet>
+<div style="width: 1440px; height: 3120px; box-sizing: border-box; padding: 60px; background: #0C0A08; display: flex; flex-direction: column; gap: 40px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="tg">DesignTokens.uss · 3 styles × standard / sunlight</span><h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; letter-spacing: -0.02em">Styles with a <span style="font-style: italic; color: #F59E0B">sunlight</span> switch</h1></div>
+<p style="margin: 0; width: 560px; font-size: 14px; line-height: 1.6; color: #BDB4A0">Each style changes tokens and a few inner components (facts grid, button, divider). Every style has a high-contrast expansion for outdoor walls, in dark and light, toggled per style or per visitor.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="tg" style="color: #E8E0CE">What the high-contrast expansion swaps</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span class="rule">Text ≥ 7:1 (WCAG AAA), secondary text too</span><span class="rule">Solid surfaces, no glass or blur</span><span class="rule">No text over images; hero ends in a hard edge</span><span class="rule">Body 17 px, weight ≥ 500, no italic body</span><span class="rule">2 px borders on cells and controls</span><span class="rule">Accent used as a fill with black/white text</span><span class="rule">Status keeps dash patterns, not colour alone</span><span class="rule">Thicker focus ring, 48 px touch targets</span>
+</div>
+</div>
+
+<sc-for list="{{fams}}" as="fam" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 22px; padding-top: 24px; border-top: 1px solid rgba(240,230,204,0.1)">
+<div style="display: flex; align-items: baseline; gap: 16px"><span style="font-family: 'Fraunces', serif; font-size: 30px">{{fam.name}}</span><span style="font-size: 13px; color: #BDB4A0">{{fam.recipe}}</span></div>
+<div style="display: grid; grid-template-columns: repeat(3, 360px); justify-content: space-between">
+<sc-for list="{{fam.modes}}" as="t" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="position: relative; width: 360px; height: 720px; border-radius: 44px; overflow: hidden; background: {{t.bg}}; box-shadow: {{t.frame}}; font-family: {{t.body}}; color: {{t.ink}}">
+<div style="position: absolute; left: 0; right: 0; top: 0; height: 250px; background: {{t.hero}}; overflow: hidden">
+<div style="position: absolute; inset: 0; opacity: 0.12; background-image: linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.9) 1px, transparent 1px); background-size: 45px 45px"></div>
+<svg width="120" height="110" viewBox="0 0 120 110" style="position: absolute; left: 120px; top: 60px" aria-hidden="true"><path d="M10 100 V50 h14 v-14 h14 v14 h10 V30 h24 v20 h10 v-14 h14 v14 h14 v50z" fill="rgba(255,255,255,0.22)"></path><path d="M52 100 v-22 a8 8 0 0 1 16 0 v22" fill="rgba(0,0,0,0.3)"></path></svg>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 110px; background: {{t.fade}}"></div>
+<span style="position: absolute; left: 16px; top: 18px; height: 40px; padding: 0 14px; border-radius: 20px; background: {{t.pillBg}}; color: {{t.pillFg}}; border: {{t.pillBd}}; font-size: 13px; font-weight: 600; display: flex; align-items: center">← Back</span>
+<span style="position: absolute; right: 16px; top: 18px; height: 40px; padding: 0 12px; border-radius: 20px; background: {{t.hcBg}}; color: {{t.hcFg}}; border: {{t.pillBd}}; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"></path></svg>{{t.hcLabel}}</span>
+</div>
+<div style="position: absolute; left: 22px; right: 22px; top: {{t.top}}px; display: flex; flex-direction: column; gap: 13px">
+<span style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: {{t.eyebrow}}">Military · Power · c. 1700</span>
+<span style="font-family: {{t.display}}; font-size: 30px; font-weight: {{t.tw}}; line-height: 1.05">Castelo de <span style="font-style: {{t.emStyle}}; color: {{t.titleAccent}}">São Jorge</span></span>
+<span style="height: {{t.divH}}px; width: {{t.divW}}; background: {{t.accent}}"></span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: {{t.gGap}}; background: {{t.gridLine}}; border: {{t.gridBd}}; border-radius: 14px; overflow: hidden">
+<sc-for list="{{facts}}" as="f" hint-placeholder-count="4"><div style="background: {{t.cell}}; border: {{t.cellBd}}; border-radius: {{t.cellR}}; padding: 12px"><span style="display: block; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: {{t.label}}; margin-bottom: 4px">{{f.k}}</span><span style="font-family: {{t.display}}; font-size: 15px; font-weight: 600">{{f.v}}</span></div></sc-for>
+</div>
+<p style="margin: 0; font-size: {{t.bodySize}}px; line-height: 1.6; font-weight: {{t.bodyW}}; color: {{t.muted}}; font-style: {{t.bodyStyle}}">A hilltop fortress that watched the river for centuries. Damaged in 1755, later rebuilt.</p>
+<div style="height: 52px; border-radius: {{t.ctaR}}; background: {{t.ctaBg}}; border: {{t.ctaBd}}; color: {{t.ctaFg}}; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; letter-spacing: {{t.ctaLs}}; text-transform: {{t.ctaCase}}">{{t.cta}}</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 5px">
+<span class="tg">{{t.tag}}</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; line-height: 1.6; color: #BDB4A0">{{t.tokens}}</span>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const std = { top: 228, gGap: '1px', gridBd: 'none', cellR: '0', cellBd: 'none', emStyle: 'italic', bodyStyle: 'normal', bodySize: 15, bodyW: 400, ctaLs: '0.02em', ctaCase: 'none', ctaBd: 'none', divH: 1.5, divW: '64px',
+      pillBg: 'rgba(12,10,8,0.62)', pillFg: '#FFFFFF', pillBd: '1px solid rgba(255,255,255,0.25)', hcBg: 'rgba(12,10,8,0.62)', hcFg: '#FFFFFF', hcLabel: 'Sunlight' };
+    const hc = { top: 272, fade: 'transparent', gridBd: '2px solid', bodyStyle: 'normal', bodySize: 17, bodyW: 500, divH: 4, divW: '100%', emStyle: 'normal', pillBd: '2px solid #FFFFFF', pillBg: '#000000', pillFg: '#FFFFFF', hcLabel: 'On' };
+    const facts = [{ k: 'Wall', v: 'Grande Panorama' }, { k: 'On the wall', v: 'Right wing' }, { k: '1755', v: '60% destroyed' }, { k: 'Level', v: '★ Hero' }];
+    const fams = [
+      { name: 'Stone & Gold Luxury', recipe: 'serif display · hairline gold grid · soft block button · thin rule divider', modes: [
+        { ...std, tag: 'standard · dark', tokens: 'Fraunces + DM Sans · #1A1510 · amber #F59E0B · secondary text 78% (≥ 7:1)',
+          bg: '#1A1510', hero: 'linear-gradient(160deg,#1B2D4F,#0A1525)', fade: 'linear-gradient(0deg,#1A1510,rgba(26,21,16,0))', ink: '#F7EFDC', muted: 'rgba(247,239,220,0.8)', accent: '#F59E0B', eyebrow: '#F5B544', titleAccent: '#F5B544',
+          display: "'Fraunces', serif", body: "'DM Sans', sans-serif", tw: 700, gridLine: 'rgba(245,158,11,0.3)', cell: '#1A1510', label: 'rgba(247,239,220,0.72)',
+          ctaBg: '#F59E0B', ctaFg: '#1A1206', ctaR: '14px', cta: 'Add to your story  +', frame: '0 0 0 1px rgba(245,158,11,0.2), 0 30px 70px rgba(0,0,0,0.6)' },
+        { ...std, ...hc, tag: 'sunlight · dark', tokens: 'pure black · white ink 21:1 · amber #FFB224 fill + black text · 2 px amber grid',
+          bg: '#000000', hero: 'linear-gradient(160deg,#1B2D4F,#0A1525)', ink: '#FFFFFF', muted: '#F2ECE0', accent: '#FFB224', eyebrow: '#FFB224', titleAccent: '#FFB224',
+          display: "'Fraunces', serif", body: "'DM Sans', sans-serif", tw: 700, gridLine: '#FFB224', gridBd: '2px solid #FFB224', gGap: '2px', cell: '#000000', label: '#FFB224',
+          ctaBg: '#FFB224', ctaFg: '#000000', ctaR: '14px', cta: 'Add to your story  +', hcBg: '#FFB224', hcFg: '#000000', frame: '0 0 0 2px #FFB224, 0 30px 70px rgba(0,0,0,0.6)' },
+        { ...std, ...hc, tag: 'sunlight · light', tokens: 'white · black ink 21:1 · burnt amber #8A3B00 fill + white · 2 px black grid',
+          bg: '#FFFFFF', hero: 'linear-gradient(160deg,#1B2D4F,#243D6A)', ink: '#000000', muted: '#1F1810', accent: '#8A3B00', eyebrow: '#8A3B00', titleAccent: '#8A3B00',
+          display: "'Fraunces', serif", body: "'DM Sans', sans-serif", tw: 700, gridLine: '#000000', gridBd: '2px solid #000000', gGap: '2px', cell: '#FFFFFF', label: '#5A2700',
+          ctaBg: '#8A3B00', ctaFg: '#FFFFFF', ctaR: '14px', cta: 'Add to your story  +', hcBg: '#FFFFFF', hcFg: '#000000', pillBd: '2px solid #000000', pillBg: '#FFFFFF', pillFg: '#000000', frame: '0 0 0 2px #000000, 0 30px 70px rgba(0,0,0,0.45)' }
+      ] },
+      { name: 'Candlelit Antiquarian', recipe: 'high-contrast serif · parchment cells · uppercase pill button · full-width rule', modes: [
+        { ...std, tag: 'standard · dark', tokens: 'Playfair + Spectral · #12100E · gold #F59E0B · body upright (was italic)',
+          bg: '#12100E', hero: 'linear-gradient(160deg,#1B2D4F,#0E1C36 60%,#0A0D18)', fade: 'linear-gradient(0deg,#12100E,rgba(18,16,14,0))', ink: '#F8EBD0', muted: 'rgba(248,235,208,0.82)', accent: '#F59E0B', eyebrow: '#F5B544', titleAccent: '#F5B544',
+          display: "'Playfair Display', serif", body: "'Spectral', serif", tw: 800, gridLine: 'transparent', gGap: '8px', cell: 'rgba(248,235,208,0.07)', cellBd: '1px solid rgba(245,158,11,0.25)', cellR: '12px', label: 'rgba(248,235,208,0.72)',
+          ctaBg: '#F59E0B', ctaFg: '#0A0A0F', ctaR: '100px', ctaCase: 'uppercase', ctaLs: '0.08em', cta: 'Explore story →', divW: '100%', frame: '0 0 0 1px rgba(245,158,11,0.2), 0 30px 70px rgba(0,0,0,0.6)' },
+        { ...std, ...hc, tag: 'sunlight · dark', tokens: 'black · warm white #FFF6E2 · gold #FFC53D fill · Spectral 17/500',
+          bg: '#000000', hero: 'linear-gradient(160deg,#1B2D4F,#0E1C36)', ink: '#FFF6E2', muted: '#FFF1D6', accent: '#FFC53D', eyebrow: '#FFC53D', titleAccent: '#FFC53D',
+          display: "'Playfair Display', serif", body: "'Spectral', serif", tw: 800, gridLine: 'transparent', gridBd: 'none', gGap: '8px', cell: '#000000', cellBd: '2px solid #FFC53D', cellR: '12px', label: '#FFC53D',
+          ctaBg: '#FFC53D', ctaFg: '#000000', ctaR: '100px', ctaCase: 'uppercase', ctaLs: '0.08em', cta: 'Explore story →', hcBg: '#FFC53D', hcFg: '#000000', frame: '0 0 0 2px #FFC53D, 0 30px 70px rgba(0,0,0,0.6)' },
+        { ...std, ...hc, tag: 'sunlight · light', tokens: 'paper #FFFDF6 · black ink · navy #0B1A33 pill · 2 px navy cells',
+          bg: '#FFFDF6', hero: 'linear-gradient(160deg,#1B2D4F,#243D6A)', ink: '#000000', muted: '#1C1409', accent: '#0B1A33', eyebrow: '#7A4A00', titleAccent: '#7A4A00',
+          display: "'Playfair Display', serif", body: "'Spectral', serif", tw: 800, gridLine: 'transparent', gridBd: 'none', gGap: '8px', cell: '#FFFFFF', cellBd: '2px solid #0B1A33', cellR: '12px', label: '#0B1A33',
+          ctaBg: '#0B1A33', ctaFg: '#FFFFFF', ctaR: '100px', ctaCase: 'uppercase', ctaLs: '0.08em', cta: 'Explore story →', hcBg: '#FFFDF6', hcFg: '#000000', pillBd: '2px solid #000000', pillBg: '#FFFDF6', pillFg: '#000000', frame: '0 0 0 2px #0B1A33, 0 30px 70px rgba(0,0,0,0.45)' }
+      ] },
+      { name: 'Glassmorphic Aurora', recipe: 'geometric sans · separated rounded cells · outline button · glow line (glass turns solid in sunlight)', modes: [
+        { ...std, tag: 'standard · dark', tokens: 'Outfit · #050D1A · azure #38BDF8 · glass cells at 12% fill for legibility',
+          bg: '#050D1A', hero: 'radial-gradient(circle at 25% 30%,rgba(56,189,248,0.3),rgba(56,189,248,0) 60%),linear-gradient(160deg,#071830,#030D1F)', fade: 'linear-gradient(0deg,#050D1A,rgba(5,13,26,0))', ink: '#FFFFFF', muted: 'rgba(255,255,255,0.82)', accent: '#38BDF8', eyebrow: '#7DD3FC', titleAccent: '#7DD3FC', emStyle: 'normal',
+          display: "'Outfit', sans-serif", body: "'Outfit', sans-serif", tw: 800, gridLine: 'transparent', gGap: '8px', cell: 'rgba(56,189,248,0.12)', cellBd: '1px solid rgba(56,189,248,0.35)', cellR: '12px', label: '#7DD3FC',
+          ctaBg: 'rgba(56,189,248,0.14)', ctaBd: '1.5px solid #38BDF8', ctaFg: '#BAE6FD', ctaR: '14px', cta: 'Add to collection →', frame: '0 0 0 1px rgba(56,189,248,0.25), 0 0 60px rgba(56,189,248,0.1), 0 30px 70px rgba(0,0,0,0.7)' },
+        { ...std, ...hc, tag: 'sunlight · dark', tokens: 'black · white ink · cyan #5CD3FF fill + black · solid cells, no blur',
+          bg: '#000000', hero: 'linear-gradient(160deg,#071830,#030D1F)', ink: '#FFFFFF', muted: '#EAF6FF', accent: '#5CD3FF', eyebrow: '#5CD3FF', titleAccent: '#5CD3FF',
+          display: "'Outfit', sans-serif", body: "'Outfit', sans-serif", tw: 800, gridLine: 'transparent', gridBd: 'none', gGap: '8px', cell: '#001526', cellBd: '2px solid #5CD3FF', cellR: '12px', label: '#5CD3FF',
+          ctaBg: '#5CD3FF', ctaFg: '#000000', ctaR: '14px', cta: 'Add to collection →', hcBg: '#5CD3FF', hcFg: '#000000', frame: '0 0 0 2px #5CD3FF, 0 30px 70px rgba(0,0,0,0.7)' },
+        { ...std, ...hc, tag: 'sunlight · light', tokens: 'white · ink #00111F · deep blue #005A8C fill + white · 2 px cells',
+          bg: '#FFFFFF', hero: 'linear-gradient(160deg,#1B2D4F,#0369A1)', ink: '#00111F', muted: '#0A1B2A', accent: '#005A8C', eyebrow: '#005A8C', titleAccent: '#005A8C',
+          display: "'Outfit', sans-serif", body: "'Outfit', sans-serif", tw: 800, gridLine: 'transparent', gridBd: 'none', gGap: '8px', cell: '#FFFFFF', cellBd: '2px solid #005A8C', cellR: '12px', label: '#005A8C',
+          ctaBg: '#005A8C', ctaFg: '#FFFFFF', ctaR: '14px', cta: 'Add to collection →', hcBg: '#FFFFFF', hcFg: '#00111F', pillBd: '2px solid #00111F', pillBg: '#FFFFFF', pillFg: '#00111F', frame: '0 0 0 2px #005A8C, 0 30px 70px rgba(0,0,0,0.4)' }
+      ] }
+    ];
+    return { fams, facts };
+  }
+}
+</script>
+</body>
+</html>

@@ -6186,6 +6186,15 @@
                                 "value": "",
                                 "asset": "",
                                 "items": []
+                            },
+                            {
+                                "key": "fit",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "visible",
+                                "asset": "",
+                                "items": []
                             }
                         ]
                     },

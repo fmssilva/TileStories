@@ -1,13 +1,17 @@
-## 1. **Mode & Intent Disambiguation**
+## 1. Roles and Modes
 
-The workflow alternates strictly between two operating modes:
-- **PLAN MODE:** Analyzing requirements, auditing code, drafting options, and building execution roadmaps.
-- **ACT MODE:** Modifying files, running builds, executing tests, and verifying behavior.
+Two agents share these rules:
+- **Architect** (a review chat): verifies the last block on disk, decides, keeps the guides in sync, commits, and writes the next
+  block's brief. Its own procedure: `proj_guides/__AI_Architect.md`. It does not write code.
+- **Worker** (a fresh Claude Code session per block): plans the block, then builds it. Its own procedure: `proj_guides/__AI_worker.md`
+  with the brief pasted into it. Moment-specific procedures: `proj_guides/skills/`.
 
-### **Mode Sync Protocol**
-To prevent drift across context compaction, summarizations, or long task executions:
-* **Initial & Recovery Check:** At the start of a task or immediately following any context summarization/compaction, read `proj_guides/__mode.md` from the workspace root to confirm active mode and the current command that should be executed. 
-* **Mode Boundary:** Do not perform file modifications while in **PLAN MODE**. Do not redesign core architecture while in **ACT MODE** without returning to PLAN MODE first.
+Both work in two modes, always in this order:
+- **PLAN MODE:** read, audit the code on disk, weigh options, write the plan. No file modifications except the plan tracker.
+- **ACT MODE:** modify files, build, test, look, verify. No redesign of core architecture without going back to PLAN MODE.
+
+After a context compaction, re-read the brief and `proj_guides/__curr_plan_tracker.md` (the Worker's plan for the current block)
+before continuing.
 
 ---
 
@@ -17,6 +21,15 @@ To prevent drift across context compaction, summarizations, or long task executi
 * **Academic Reference Quality:** Write code as if this project is a reference implementation for learning. If existing code is messy or incorrect, do **not** patch around it with backward-compatibility shims, wrappers, or adapters. Propose a clean refactor, obtain agreement, and fix it properly.
 * **Patience Over Speed:** Quality and clarity supersede execution speed. Unverified, messy, or duplicate code is unacceptable.
 * **Stop & Clarify:** If existing code is ambiguous, contradictory, or appears wrong, halt immediately. Ask or flag the issue instead of building on assumptions.
+
+### Framework Completeness
+* **A complete, versatile framework, configured in the Editor.** Every feature a domain should have is built, and every
+  behaviour a wall developer may want different is a choice in the POI Editor: a row with an (i) help, a sensible default (per
+  wall, and per block / item where it makes sense), undo / redo / save, live sync in Scene and Play Mode, and a Test guide
+  (Scene / Play Mode / Device) that names Editor controls, never code, and is app-agnostic. A behaviour that is a trade-off
+  becomes options with a default, each option tested; one hard-coded rule only where one answer is right for every wall.
+* **Real fixtures.** Tests run on the LivingRoom wall's POI sets (The Lamp's 12+ POIs, The Painting, The Camera); add a POI
+  when an edge case needs one, never change an existing POI's identity fields (id, name, category, summary, keywords).
 
 ### Evidence Discipline (Mandatory Verification)
 Never report a feature, fix, rendering, visual, or behavioral task as completed or passing without providing explicit, un-paraphrased mechanical proof:

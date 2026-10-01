@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Navigation Elements</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&amp;family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#07080A;font-family:'Manrope',sans-serif;color:#F4F1EA}
+.ph{position:relative;width:300px;height:600px;border-radius:38px;background:#0B0C0F;border:1px solid rgba(255,255,255,0.12);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,0.5);flex-shrink:0}
+.stk{display:flex;flex-direction:column;gap:8px;padding:0 12px}
+.bk{border-radius:12px;padding:8px 10px;box-sizing:border-box;flex-shrink:0}
+.bl{font-size:9px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase}
+.bar{background:rgba(14,15,19,0.92);backdrop-filter:blur(18px)}
+.scrim{position:absolute;inset:0;background:rgba(5,6,8,0.62)}
+.cell{display:flex;flex-direction:column;gap:16px}
+.tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#F0B35A}
+.ct{font-family:'Fraunces',serif;font-size:21px;font-weight:400}
+.cd{font-size:13px;line-height:1.5;color:#A29E96}
+.bf{font-family:'JetBrains Mono',monospace;font-size:10px;color:#8A867E;line-height:1.5}
+.mini{font-size:10px;font-weight:700}
+.muted{color:#8A867E}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes pulseA{0%{box-shadow:0 0 0 0 rgba(240,179,90,0.55)}100%{box-shadow:0 0 0 12px rgba(240,179,90,0)}}
+.bob{animation:bob 3s ease-in-out infinite}
+.pA{animation:pulseA 1.8s ease-out infinite}
+</style>
+</helmet>
+<div style="width: 1764px; height: 4460px; box-sizing: border-box; padding: 60px; background: #07080A; display: flex; flex-direction: column; gap: 44px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="tag">Navigation toolkit · 24 elements</span><h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; letter-spacing: -0.02em">Ways to <span style="font-style: italic; color: #F0B35A">move</span> through a card</h1></div>
+<div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-end">
+<div style="display: flex; gap: 8px">
+<span style="padding: 7px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); font-size: 12px; font-weight: 700">A · Top</span><span style="padding: 7px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); font-size: 12px; font-weight: 700">B · Bottom</span><span style="padding: 7px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); font-size: 12px; font-weight: 700">C · Floating &amp; overlay</span><span style="padding: 7px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); font-size: 12px; font-weight: 700">D · In-flow nav blocks</span><span style="padding: 7px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); font-size: 12px; font-weight: 700">E · Edge &amp; spatial</span><span style="padding: 7px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); font-size: 12px; font-weight: 700">F · AR, voice &amp; modes</span>
+</div>
+<div style="display: flex; gap: 14px">
+<sc-for list="{{fams}}" as="f" hint-placeholder-count="8"><span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #A29E96"><span style="width: 10px; height: 10px; border-radius: 3px; background: {{f.c}}"></span>{{f.label}}</span></sc-for>
+</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 36px; row-gap: 56px">
+
+<!-- A1 STICKY TEXT TABS -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 112px"><sc-for list="{{stackNoHero}}" as="b" hint-placeholder-count="8"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="bar" style="position: absolute; left: 0; right: 0; top: 0; border-bottom: 1px solid rgba(255,255,255,0.08)">
+<div style="height: 54px; padding: 16px 14px 0; box-sizing: border-box; display: flex; align-items: center; gap: 10px"><span style="width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg,#3a3d44,#1a1b20)"></span><span style="flex-grow: 1; font-size: 14px; font-weight: 700">The Watcher</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A29E96" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+<div style="display: flex; gap: 18px; padding: 8px 14px 0; overflow: hidden"><sc-for list="{{fams}}" as="f" hint-placeholder-count="8"><span style="padding: 8px 0 9px; font-size: 12px; font-weight: 700; color: {{f.tfg}}; border-bottom: 2px solid {{f.ul}}; white-space: nowrap">{{f.label}}</span></sc-for></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">A1 · top · L1 · sticky</span><span class="ct">Sticky text tabs</span><span class="cd">Families as scrollable text tabs under a compact title. Scroll-spy moves the underline as you read.</span><span class="bf">best for · long scroll cards</span></div>
+</div>
+
+<!-- A2 TWO LEVEL -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 158px"><sc-for list="{{mediaStack}}" as="b" hint-placeholder-count="6"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="bar" style="position: absolute; left: 0; right: 0; top: 0; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px">
+<div style="display: flex; gap: 4px; padding: 20px 8px 8px; overflow: hidden"><sc-for list="{{fams}}" as="f" hint-placeholder-count="8"><span style="flex-shrink: 0; width: 56px; padding: 6px 0; border-radius: 12px; background: {{f.bg}}; color: {{f.fg}}; display: flex; flex-direction: column; align-items: center; gap: 4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg><span style="font-size: 9px; font-weight: 700">{{f.label}}</span></span></sc-for></div>
+<div style="display: flex; gap: 6px; padding: 4px 12px 0; overflow: hidden"><sc-for list="{{kinds}}" as="k" hint-placeholder-count="7"><span style="flex-shrink: 0; padding: 6px 11px; border-radius: 14px; background: {{k.bg}}; color: {{k.fg}}; font-size: 11px; font-weight: 700">{{k.label}}</span></sc-for></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">A2 · top · L1 + L2</span><span class="ct">Icon tabs + kind chips</span><span class="cd">Icons pick the family, chips below pick the kind. The textbook two-tap path; chips only show kinds that exist on this POI.</span><span class="bf">best for · rich POIs, the default</span></div>
+</div>
+
+<!-- A3 FLAT CHIP SCROLLER -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 104px"><sc-for list="{{stackNoHero}}" as="b" hint-placeholder-count="8"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="bar" style="position: absolute; left: 0; right: 0; top: 0; padding: 20px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 10px">
+<span style="padding: 0 14px; font-size: 14px; font-weight: 700">The Watcher</span>
+<div style="display: flex; gap: 6px; padding-left: 12px; overflow: hidden">
+<span style="flex-shrink: 0; width: 32px; height: 30px; border-radius: 15px; background: rgba(255,255,255,0.08); color: #F4F1EA; display: flex; align-items: center; justify-content: center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"></path></svg></span>
+<sc-for list="{{flatKinds}}" as="k" hint-placeholder-count="10"><span style="flex-shrink: 0; height: 30px; padding: 0 11px; border-radius: 15px; background: {{k.bg}}; border: 1px solid {{k.bd}}; color: {{k.fg}}; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px; box-sizing: border-box"><span style="width: 6px; height: 6px; border-radius: 3px; background: {{k.c}}"></span>{{k.label}}</span></sc-for>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">A3 · top · flat L2</span><span class="ct">Kind chip scroller</span><span class="cd">Skip families: every kind is one chip, dotted with its family colour. One tap to anything, but long lists get hidden off-screen.</span><span class="bf">best for · POIs with &lt; 10 blocks</span></div>
+</div>
+
+<!-- A4 SEGMENTED SUPER GROUPS -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 118px"><sc-for list="{{stackNoHero}}" as="b" hint-placeholder-count="8"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="bar" style="position: absolute; left: 0; right: 0; top: 0; padding: 20px 12px 12px; display: flex; flex-direction: column; gap: 12px">
+<span style="padding: 0 2px; font-size: 14px; font-weight: 700">The Watcher</span>
+<div style="padding: 4px; border-radius: 16px; background: rgba(255,255,255,0.06); display: flex; gap: 2px">
+<span style="flex-grow: 1; text-align: center; padding: 8px 0; border-radius: 12px; font-size: 11px; font-weight: 600; color: #A29E96">Discover</span>
+<span style="flex-grow: 1; text-align: center; padding: 8px 0; border-radius: 12px; font-size: 11px; font-weight: 800; background: #F4F1EA; color: #0B0C0F">Watch</span>
+<span style="flex-grow: 1; text-align: center; padding: 8px 0; border-radius: 12px; font-size: 11px; font-weight: 600; color: #A29E96">Explore</span>
+<span style="flex-grow: 1; text-align: center; padding: 8px 0; border-radius: 12px; font-size: 11px; font-weight: 600; color: #A29E96">Visit</span>
+</div>
+<span class="bf" style="padding: 0 2px">Watch = Media + Guides</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">A4 · top · merged L1</span><span class="ct">Segmented super-groups</span><span class="cd">Families merged into 3–4 bigger buckets that always fit on screen. The merge map is config, the ontology stays the same.</span><span class="bf">best for · small screens, simple POIs</span></div>
+</div>
+
+<!-- B1 BOTTOM TAB BAR -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px"><sc-for list="{{stack}}" as="b" hint-placeholder-count="9"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="bar" style="position: absolute; left: 0; right: 0; bottom: 0; height: 80px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; padding: 8px 6px 0; box-sizing: border-box">
+<sc-for list="{{bar5}}" as="f" hint-placeholder-count="5"><span style="flex-grow: 1; flex-basis: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; color: {{f.fg}}"><span style="width: 44px; height: 28px; border-radius: 14px; background: {{f.bg}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg></span><span style="font-size: 10px; font-weight: 700">{{f.label}}</span></span></sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">B1 · bottom · L1 · 5 slots</span><span class="ct">Bottom tab bar</span><span class="cd">Thumb-reach family switcher. Max 5 slots; slot 5 becomes “More” when there are extra families.</span><span class="bf">best for · one-handed use outdoors</span></div>
+</div>
+
+<!-- B2 FLOATING DOCK -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px"><sc-for list="{{stack}}" as="b" hint-placeholder-count="9"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 110px; background: linear-gradient(180deg, rgba(11,12,15,0), #0B0C0F)"></div>
+<div style="position: absolute; left: 22px; right: 22px; bottom: 22px; height: 58px; border-radius: 29px; background: rgba(30,31,36,0.85); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(20px); box-shadow: 0 14px 34px rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: space-between; padding: 0 8px">
+<span style="width: 40px; height: 40px; color: #A29E96; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fA.d}}"></path></svg></span>
+<span style="height: 42px; padding: 0 14px; border-radius: 21px; background: {{fM.c}}; color: #0B0C0F; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{fM.d}}"></path></svg>Media</span>
+<span style="width: 40px; height: 40px; color: #A29E96; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fS.d}}"></path></svg></span>
+<span style="width: 40px; height: 40px; color: #A29E96; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fP.d}}"></path></svg></span>
+<span style="width: 40px; height: 40px; color: #A29E96; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fV.d}}"></path></svg></span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">B2 · bottom · L1 · floating</span><span class="ct">Floating glass dock</span><span class="cd">Icon-only pill that expands the active item into icon + label. Hides on scroll down, returns on scroll up.</span><span class="bf">best for · premium feel, content-first</span></div>
+</div>
+
+<!-- B3 BAR + L2 SHEET -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px"><sc-for list="{{stack}}" as="b" hint-placeholder-count="9"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="scrim"></div>
+<div style="position: absolute; left: 8px; right: 8px; bottom: 88px; border-radius: 24px; background: #17181D; border: 1px solid rgba(255,255,255,0.12); padding: 14px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 -10px 40px rgba(0,0,0,0.5)">
+<div style="display: flex; align-items: center; gap: 8px; padding: 0 4px 8px"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{fM.c}}"></span><span style="font-size: 13px; font-weight: 800">Media</span><span class="muted" style="font-size: 11px">· 7 kinds</span></div>
+<sc-for list="{{mediaKinds}}" as="k" hint-placeholder-count="7"><div style="height: 34px; padding: 0 8px; border-radius: 10px; background: {{k.bg}}; display: flex; align-items: center; justify-content: space-between"><span style="font-size: 12px; font-weight: 600">{{k.label}}</span><span class="muted" style="font-size: 11px">{{k.n}}</span></div></sc-for>
+</div>
+<div class="bar" style="position: absolute; left: 0; right: 0; bottom: 0; height: 80px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; padding: 8px 6px 0; box-sizing: border-box">
+<sc-for list="{{bar5}}" as="f" hint-placeholder-count="5"><span style="flex-grow: 1; flex-basis: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; color: {{f.fg}}"><span style="width: 44px; height: 28px; border-radius: 14px; background: {{f.bg}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg></span><span style="font-size: 10px; font-weight: 700">{{f.label}}</span></span></sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">B3 · bottom · L1 → L2 popover</span><span class="ct">Tab bar + kind sheet</span><span class="cd">First tap on a family scrolls to it; a second tap (or long-press) pops its kinds with counts. Two taps, no top chrome.</span><span class="bf">best for · big families like Media</span></div>
+</div>
+
+<!-- B4 NEXT UP FOOTER -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px"><sc-for list="{{stack}}" as="b" hint-placeholder-count="9"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="bar" style="position: absolute; left: 0; right: 0; bottom: 0; border-top: 1px solid rgba(255,255,255,0.08); padding: 0 12px 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="height: 3px; margin: 0 -12px; background: rgba(255,255,255,0.08)"><div style="width: 38%; height: 3px; background: #F0B35A"></div></div>
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="width: 40px; height: 40px; border-radius: 20px; background: rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F4F1EA" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg></span>
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 1px"><span class="bf">UP NEXT · 5 OF 13</span><span style="font-size: 13px; font-weight: 700">360° panorama</span><span style="font-size: 11px; color: {{fM.c}}">Media · 1 min</span></div>
+<span style="height: 40px; padding: 0 14px; border-radius: 20px; background: #F4F1EA; color: #0B0C0F; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800">Next<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></span>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">B4 · bottom · linear</span><span class="ct">“Up next” footer</span><span class="cd">No menu at all: a quiet footer that previews the next block with progress. Turns the card into a gentle guided path.</span><span class="bf">best for · first-time visitors</span></div>
+</div>
+
+<!-- C1 FAB SPEED DIAL -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px"><sc-for list="{{stack}}" as="b" hint-placeholder-count="9"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="scrim"></div>
+<div style="position: absolute; right: 18px; bottom: 90px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end">
+<sc-for list="{{fams}}" as="f" hint-placeholder-count="8"><div style="display: flex; align-items: center; gap: 10px"><span style="padding: 5px 10px; border-radius: 9px; background: rgba(30,31,36,0.95); font-size: 11px; font-weight: 700">{{f.label}}</span><span style="width: 40px; height: 40px; border-radius: 20px; background: {{f.tintS}}; color: {{f.c}}; border: 1px solid {{f.bd}}; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg></span></div></sc-for>
+</div>
+<span style="position: absolute; right: 14px; bottom: 22px; width: 56px; height: 56px; border-radius: 28px; background: #F0B35A; color: #1A1206; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 28px rgba(240,179,90,0.4)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">C1 · float · L1 · on demand</span><span class="ct">FAB speed dial</span><span class="cd">A single button that fans out labelled family shortcuts. Zero chrome until needed; pairs well with sheet cards.</span><span class="bf">best for · minimal UI over camera</span></div>
+</div>
+
+<!-- C2 RADIAL FAB -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px"><sc-for list="{{stack}}" as="b" hint-placeholder-count="9"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="scrim"></div>
+<svg width="300" height="600" viewBox="0 0 300 600" style="position: absolute; left: 0; top: 0" aria-hidden="true"><path d="M20 540 A130 130 0 0 1 280 540" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="56"></path></svg>
+<sc-for list="{{arc}}" as="f" hint-placeholder-count="8"><span style="position: absolute; left: {{f.x}}px; top: {{f.y}}px; width: 44px; height: 44px; border-radius: 22px; background: {{f.abg}}; color: {{f.afg}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg></span></sc-for>
+<span style="position: absolute; left: 108px; top: 344px; width: 84px; text-align: center; padding: 6px 0; border-radius: 10px; background: rgba(30,31,36,0.95); font-size: 12px; font-weight: 800; color: {{fM.c}}">Media</span>
+<span style="position: absolute; left: 122px; top: 512px; width: 56px; height: 56px; border-radius: 28px; background: #F0B35A; color: #1A1206; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">C2 · float · L1 · gesture</span><span class="ct">Radial arc menu</span><span class="cd">Press and slide along the arc, release on a family. Fast once learned, playful, and all 8 families fit.</span><span class="bf">best for · games, repeat users</span></div>
+</div>
+
+<!-- C3 HAMBURGER DRAWER TREE -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px"><sc-for list="{{stack}}" as="b" hint-placeholder-count="9"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="scrim"></div>
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: 240px; background: #15161A; border-right: 1px solid rgba(255,255,255,0.1); padding: 22px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; box-shadow: 20px 0 40px rgba(0,0,0,0.5)">
+<span style="font-family: 'Fraunces', serif; font-size: 20px; padding: 0 8px 12px">The Watcher</span>
+<sc-for list="{{fams}}" as="f" hint-placeholder-count="8">
+<div style="height: 36px; padding: 0 8px; border-radius: 10px; background: {{f.bg}}; display: flex; align-items: center; gap: 10px; color: {{f.fg}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg><span style="flex-grow: 1; font-size: 12px; font-weight: 700; color: #F4F1EA">{{f.label}}</span><span class="muted" style="font-size: 11px">{{f.n}}</span></div>
+<sc-if value="{{f.act}}" hint-placeholder-val="{{false}}"><div style="margin: 2px 0 6px 20px; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 1px"><sc-for list="{{kindsShort}}" as="k" hint-placeholder-count="4"><span style="padding: 5px 6px; font-size: 11px; color: {{k.fg}}; font-weight: 600">{{k.label}}</span></sc-for></div></sc-if>
+</sc-for>
+<span style="margin-top: auto; padding: 8px; font-size: 11px; color: #8A867E; border-top: 1px solid rgba(255,255,255,0.08)">Info · sources &amp; credits</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">C3 · overlay · L1 + L2 tree</span><span class="ct">Hamburger drawer tree</span><span class="cd">The whole ontology as an expandable outline with counts. Least discoverable, but the most complete map of the card.</span><span class="bf">best for · deep POIs, experts</span></div>
+</div>
+
+<!-- C4 GRID MENU OVERLAY -->
+<div class="cell">
+<div class="ph" style="background: #101115">
+<div style="padding: 22px 14px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="font-family: 'Fraunces', serif; font-size: 22px">Jump to</span><span style="width: 34px; height: 34px; border-radius: 17px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F4F1EA" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{fams}}" as="f" hint-placeholder-count="8"><div style="height: 104px; border-radius: 18px; background: {{f.tint}}; border: 1px solid {{f.bd}}; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: {{f.c}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg><div style="display: flex; flex-direction: column; gap: 1px"><span style="font-size: 13px; font-weight: 800; color: #F4F1EA">{{f.label}}</span><span style="font-size: 10px; color: #A29E96">{{f.n}} blocks</span></div></div></sc-for>
+</div>
+<div style="display: flex; gap: 6px"><span style="flex-grow: 1; text-align: center; padding: 9px 0; border-radius: 12px; background: rgba(255,255,255,0.06); font-size: 11px; font-weight: 700">By purpose</span><span style="flex-grow: 1; text-align: center; padding: 9px 0; border-radius: 12px; font-size: 11px; font-weight: 600; color: #8A867E">By format</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">C4 · overlay · L1 · full screen</span><span class="ct">Grid menu overlay</span><span class="cd">A big launcher of family tiles with counts, plus the purpose / format pivot. Tapping a tile opens its kinds in the same grid.</span><span class="bf">best for · kiosk-like, big-thumb UI</span></div>
+</div>
+
+<!-- C5 SEARCH PALETTE -->
+<div class="cell">
+<div class="ph" style="background: #101115">
+<div style="padding: 22px 12px; display: flex; flex-direction: column; gap: 12px">
+<div style="height: 44px; border-radius: 14px; background: rgba(255,255,255,0.07); border: 1px solid rgba(240,179,90,0.5); display: flex; align-items: center; gap: 8px; padding: 0 12px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A29E96" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4-4"></path></svg><span style="flex-grow: 1; font-size: 13px">eye|</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A29E96" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span style="padding: 5px 10px; border-radius: 12px; background: #F0B35A; color: #1A1206; font-size: 11px; font-weight: 800">≤ 2 min</span><span style="padding: 5px 10px; border-radius: 12px; background: #F0B35A; color: #1A1206; font-size: 11px; font-weight: 800">No headphones</span><span style="padding: 5px 10px; border-radius: 12px; background: rgba(255,255,255,0.07); font-size: 11px; font-weight: 600; color: #A29E96">Kids</span><span style="padding: 5px 10px; border-radius: 12px; background: rgba(255,255,255,0.07); font-size: 11px; font-weight: 600; color: #A29E96">AR</span></div>
+<sc-for list="{{results}}" as="r" hint-placeholder-count="6">
+<sc-if value="{{r.head}}" hint-placeholder-val="{{false}}"><span class="bf" style="padding-top: 6px; color: {{r.c}}">{{r.label}}</span></sc-if>
+<sc-if value="{{r.item}}" hint-placeholder-val="{{true}}"><div style="height: 46px; padding: 0 10px; border-radius: 12px; background: rgba(255,255,255,0.04); display: flex; align-items: center; gap: 10px"><span style="width: 26px; height: 26px; border-radius: 8px; background: {{r.tint}}"></span><div style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-size: 12px; font-weight: 700">{{r.label}}</span><span style="font-size: 10px; color: #8A867E">{{r.meta}}</span></div></div></sc-if>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">C5 · overlay · facets + text</span><span class="ct">Search &amp; filter palette</span><span class="cd">Type, speak, or tap facets (time, needs, audience). Results group by family. The only element that uses facets directly.</span><span class="bf">best for · accessibility, power users</span></div>
+</div>
+
+<!-- D1 ICON GRID BLOCK -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px">
+<div class="bk" style="height: 150px; background: linear-gradient(160deg,#3a3d44,#1a1b20)"><span class="bl muted">Hero</span></div>
+<div style="border-radius: 18px; border: 1.5px solid rgba(240,179,90,0.5); background: rgba(240,179,90,0.05); padding: 12px 8px; display: flex; flex-direction: column; gap: 10px">
+<span class="bl" style="color: #F0B35A; padding: 0 4px">Nav block · icon grid</span>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 12px">
+<sc-for list="{{fams}}" as="f" hint-placeholder-count="8"><span style="display: flex; flex-direction: column; align-items: center; gap: 5px"><span style="width: 44px; height: 44px; border-radius: 14px; background: {{f.tint}}; color: {{f.c}}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg></span><span style="font-size: 10px; font-weight: 700">{{f.label}}</span></span></sc-for>
+</div>
+</div>
+<sc-for list="{{stackNoHero}}" as="b" hint-placeholder-count="8"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">D1 · in-flow block · L1</span><span class="ct">Icon grid nav block</span><span class="cd">A block you drop into the sequence, usually after the hero. Like an app home screen for the POI; tap opens the family.</span><span class="bf">best for · kids, first screen of the card</span></div>
+</div>
+
+<!-- D2 TOC BLOCK -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px">
+<div class="bk" style="height: 110px; background: linear-gradient(160deg,#3a3d44,#1a1b20)"><span class="bl muted">Hero</span></div>
+<div style="border-radius: 18px; border: 1.5px solid rgba(240,179,90,0.5); background: rgba(240,179,90,0.05); padding: 12px; display: flex; flex-direction: column; gap: 2px">
+<div style="display: flex; justify-content: space-between; padding-bottom: 6px"><span class="bl" style="color: #F0B35A">Nav block · contents</span><span class="mini muted">9 · 14 min</span></div>
+<sc-for list="{{toc}}" as="t" hint-placeholder-count="9"><div style="height: 34px; display: flex; align-items: center; gap: 10px; border-top: 1px solid rgba(255,255,255,0.06)"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{t.c}}"></span><span style="flex-grow: 1; font-size: 12px; font-weight: 600; color: {{t.fg}}">{{t.label}}</span><span class="mini muted">{{t.dur}}</span><sc-if value="{{t.seen}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6FD6C8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></sc-if></div></sc-for>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">D2 · in-flow block · L3 list</span><span class="ct">Contents list</span><span class="cd">A table of contents block with durations and “seen” ticks. Honest about length, so visitors pick what fits their time.</span><span class="bf">best for · guided visits, time-boxed tours</span></div>
+</div>
+
+<!-- D3 FAMILY RAILS -->
+<div class="cell">
+<div class="ph">
+<div style="display: flex; flex-direction: column; gap: 16px; padding-top: 12px">
+<div class="bk" style="height: 120px; margin: 0 12px; background: linear-gradient(160deg,#3a3d44,#1a1b20)"><span class="bl muted">Hero</span></div>
+<sc-for list="{{rails}}" as="r" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="padding: 0 14px; display: flex; align-items: center; gap: 8px"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{r.c}}"></span><span style="flex-grow: 1; font-size: 13px; font-weight: 800">{{r.label}}</span><span style="font-size: 11px; font-weight: 700; color: {{r.c}}">{{r.n}} ›</span></div>
+<div style="display: flex; gap: 8px; padding-left: 12px; overflow: hidden"><sc-for list="{{r.items}}" as="i" hint-placeholder-count="4"><div style="flex-shrink: 0; width: 104px; height: 70px; border-radius: 12px; background: {{r.tint}}; padding: 6px 8px; box-sizing: border-box"><span class="bl" style="color: {{r.c}}">{{i}}</span></div></sc-for></div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">D3 · in-flow · L1 rows × L2 cards</span><span class="ct">Family rails</span><span class="cd">One horizontal carousel per family, streaming-app style. The family label opens it all; each card jumps to a block.</span><span class="bf">best for · media-heavy POIs</span></div>
+</div>
+
+<!-- D4 BENTO LAUNCHER -->
+<div class="cell">
+<div class="ph">
+<div style="padding: 12px; display: flex; flex-direction: column; gap: 8px">
+<div class="bk" style="height: 120px; background: linear-gradient(160deg,#3a3d44,#1a1b20)"><span class="bl muted">Hero</span></div>
+<span class="bl" style="color: #F0B35A; padding: 4px 2px 0">Nav block · bento</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="grid-row: span 2; border-radius: 16px; background: {{fM.tint}}; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; color: {{fM.c}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fM.d}}"></path></svg><div style="display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 800; color: #F4F1EA">Media</span><span style="font-size: 10px; color: #A29E96">video · 360° · 3D</span></div></div>
+<div style="height: 90px; border-radius: 16px; background: {{fAR.tint}}; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: {{fAR.c}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fAR.d}}"></path></svg><span style="font-size: 12px; font-weight: 800; color: #F4F1EA">See 1450 in AR</span></div>
+<div style="height: 90px; border-radius: 16px; background: {{fS.tint}}; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: {{fS.c}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fS.d}}"></path></svg><span style="font-size: 12px; font-weight: 800; color: #F4F1EA">4 chapters</span></div>
+<div style="grid-column: span 2; height: 64px; border-radius: 16px; background: {{fP.tint}}; padding: 0 14px; display: flex; align-items: center; gap: 10px; color: {{fP.c}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fP.d}}"></path></svg><span style="flex-grow: 1; font-size: 12px; font-weight: 800; color: #F4F1EA">Quiz + wall hunt</span><span style="font-size: 11px; font-weight: 700">+100 XP</span></div>
+<div style="height: 64px; border-radius: 16px; background: {{fG.tint}}; padding: 0 12px; display: flex; align-items: center; gap: 8px; color: {{fG.c}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fG.d}}"></path></svg><span style="font-size: 11px; font-weight: 800; color: #F4F1EA">Audio</span></div>
+<div style="height: 64px; border-radius: 16px; background: {{fV.tint}}; padding: 0 12px; display: flex; align-items: center; gap: 8px; color: {{fV.c}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{fV.d}}"></path></svg><span style="font-size: 11px; font-weight: 800; color: #F4F1EA">Visit</span></div>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">D4 · in-flow block · curated</span><span class="ct">Bento launcher</span><span class="cd">Hand-sized tiles where the editor promotes the best stuff (“See 1450 in AR”) instead of listing every family equally.</span><span class="bf">best for · showcasing hero content</span></div>
+</div>
+
+<!-- E1 EDGE SCRUBBER -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding: 12px 34px 0 12px"><sc-for list="{{stack}}" as="b" hint-placeholder-count="9"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div style="position: absolute; right: 6px; top: 150px; width: 22px; padding: 10px 0; border-radius: 11px; background: rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; gap: 14px">
+<sc-for list="{{fams}}" as="f" hint-placeholder-count="8"><span style="width: {{f.dot}}px; height: {{f.dot}}px; border-radius: 7px; background: {{f.c}}; opacity: {{f.op}}"></span></sc-for>
+</div>
+<div style="position: absolute; right: 38px; top: 184px; padding: 10px 14px; border-radius: 14px; background: #F4F1EA; color: #0B0C0F; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 24px rgba(0,0,0,0.5)"><span style="font-size: 14px; font-weight: 800">Media</span><span style="font-size: 11px; font-weight: 600">7</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">E1 · edge · L1 · drag</span><span class="ct">Edge scrubber</span><span class="cd">Coloured dots on the right edge, like a contacts index. Drag to scrub through families with a big label bubble.</span><span class="bf">best for · very long cards</span></div>
+</div>
+
+<!-- E2 PROGRESS MINIMAP -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 70px"><sc-for list="{{stackNoHero}}" as="b" hint-placeholder-count="8"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div class="bar" style="position: absolute; left: 0; right: 0; top: 0; padding: 20px 12px 10px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between"><span style="font-size: 13px; font-weight: 700">The Watcher</span><span class="mini" style="color: {{fM.c}}">Media · 2 of 7</span></div>
+<div style="position: relative; display: flex; gap: 3px"><sc-for list="{{fams}}" as="f" hint-placeholder-count="8"><span style="flex-grow: {{f.n}}; height: 6px; border-radius: 3px; background: {{f.c}}; opacity: {{f.op}}"></span></sc-for><span style="position: absolute; left: 22%; top: -4px; width: 3px; height: 14px; border-radius: 2px; background: #F4F1EA"></span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">E2 · top edge · L1 · map</span><span class="ct">Progress minimap</span><span class="cd">A thin bar split into family segments sized by content. Shows where you are and how much is left; tap a segment to jump.</span><span class="bf">best for · orientation with almost no space</span></div>
+</div>
+
+<!-- E3 FAMILY PAGER -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding: 88px 34px 0 12px"><sc-for list="{{mediaStack}}" as="b" hint-placeholder-count="6"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div style="position: absolute; right: -150px; top: 88px; width: 170px; bottom: 0; border-radius: 12px; background: {{fG.tint}}"></div>
+<div class="bar" style="position: absolute; left: 0; right: 0; top: 0; padding: 22px 12px 12px; display: flex; flex-direction: column; gap: 10px; align-items: center">
+<div style="width: 100%; display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 12px; font-weight: 600; color: #6B6862">‹ About</span><span style="font-family: 'Fraunces', serif; font-size: 22px; color: {{fM.c}}">Media</span><span style="font-size: 12px; font-weight: 600; color: #6B6862">Guides ›</span></div>
+<div style="display: flex; gap: 5px"><sc-for list="{{fams}}" as="f" hint-placeholder-count="8"><span style="width: {{f.pw}}px; height: 5px; border-radius: 3px; background: {{f.pc}}"></span></sc-for></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">E3 · swipe · L1 pages</span><span class="ct">Family pager</span><span class="cd">Swipe sideways between families; scroll vertically inside one. The next family peeks at the edge so the gesture is discoverable.</span><span class="bf">best for · story-like browsing</span></div>
+</div>
+
+<!-- E4 HERO HOTSPOT NAV -->
+<div class="cell">
+<div class="ph">
+<div style="position: relative; height: 330px; background: linear-gradient(170deg,#3a3d44,#15161a)">
+<svg width="300" height="330" viewBox="0 0 300 330" aria-hidden="true"><ellipse cx="150" cy="150" rx="96" ry="48" fill="rgba(255,255,255,0.1)"></ellipse><circle cx="150" cy="150" r="30" fill="rgba(255,255,255,0.14)"></circle><rect x="40" y="230" width="90" height="70" rx="8" fill="rgba(255,255,255,0.07)"></rect><rect x="200" y="40" width="70" height="60" rx="8" fill="rgba(255,255,255,0.07)"></rect></svg>
+<span class="pA" style="position: absolute; left: 136px; top: 136px; width: 28px; height: 28px; border-radius: 14px; background: {{fM.c}}; color: #0B0C0F; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{fM.d}}"></path></svg></span>
+<span style="position: absolute; left: 70px; top: 180px; padding: 6px 10px; border-radius: 10px; background: #F4F1EA; color: #0B0C0F; font-size: 11px; font-weight: 800">The tiled iris · 360°</span>
+<span style="position: absolute; left: 70px; top: 252px; width: 28px; height: 28px; border-radius: 14px; background: {{fS.c}}; color: #0B0C0F; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{fS.d}}"></path></svg></span>
+<span style="position: absolute; left: 222px; top: 56px; width: 28px; height: 28px; border-radius: 14px; background: {{fAR.c}}; color: #0B0C0F; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{fAR.d}}"></path></svg></span>
+<span style="position: absolute; left: 12px; top: 20px; padding: 5px 10px; border-radius: 10px; background: rgba(11,12,15,0.6); font-size: 10px; font-weight: 700">Tap a part of the wall</span>
+</div>
+<div class="stk" style="padding-top: 10px"><sc-for list="{{stackNoHero}}" as="b" hint-placeholder-count="8"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">E4 · spatial · L3 direct</span><span class="ct">Hero hotspots</span><span class="cd">Pins on the hero picture link straight to the block about that detail. Navigation by pointing at the thing itself.</span><span class="bf">best for · detailed murals and facades</span></div>
+</div>
+
+<!-- F1 AR ORBIT RING -->
+<div class="cell">
+<div class="ph">
+<svg width="300" height="600" viewBox="0 0 300 600" style="position: absolute; left: 0; top: 0" aria-hidden="true"><defs><pattern id="brO" width="40" height="20" patternUnits="userSpaceOnUse"><rect width="40" height="20" fill="#2B231D"></rect><path d="M0 0.5H40M0 10.5H40M20 0V10M0 10V20M40 10V20" stroke="#1A1512" stroke-width="1.5"></path></pattern></defs><rect width="300" height="600" fill="url(#brO)"></rect><rect width="300" height="600" fill="rgba(0,0,0,0.25)"></rect><ellipse cx="150" cy="270" rx="70" ry="38" fill="#EDE3D1" opacity="0.8"></ellipse><circle cx="150" cy="270" r="26" fill="#2F7A78"></circle><ellipse cx="150" cy="270" rx="118" ry="150" fill="none" stroke="rgba(240,179,90,0.5)" stroke-width="1.5" stroke-dasharray="4 6"></ellipse></svg>
+<sc-for list="{{orbit}}" as="f" hint-placeholder-count="8"><span class="bob" style="position: absolute; left: {{f.x}}px; top: {{f.y}}px; width: 40px; height: 40px; border-radius: 20px; background: rgba(11,12,15,0.75); border: 1.5px solid {{f.c}}; color: {{f.c}}; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg></span></sc-for>
+<div style="position: absolute; left: 20px; right: 20px; bottom: 26px; padding: 12px 14px; border-radius: 18px; background: rgba(11,12,15,0.8); backdrop-filter: blur(14px); display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; font-weight: 800">The Watcher</span><span style="font-size: 11px; color: #A29E96">Tap an orbit icon to open the card there</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">F1 · AR space · L1 before card</span><span class="ct">AR orbit ring</span><span class="cd">Family icons float around the detected point in the camera view. The card opens already on the chosen family.</span><span class="bf">best for · camera-first, wow moment</span></div>
+</div>
+
+<!-- F2 ASK / INTENT CHIPS -->
+<div class="cell">
+<div class="ph">
+<div class="stk" style="padding-top: 12px"><sc-for list="{{stack}}" as="b" hint-placeholder-count="9"><div class="bk" style="height: {{b.h}}px; background: {{b.tint}}"><span class="bl" style="color: {{b.c}}">{{b.label}}</span></div></sc-for></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 230px; background: linear-gradient(180deg, rgba(11,12,15,0), #0B0C0F 45%)"></div>
+<div style="position: absolute; left: 12px; right: 12px; bottom: 18px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start">
+<sc-for list="{{intents}}" as="i" hint-placeholder-count="4"><span style="padding: 8px 12px; border-radius: 16px; background: rgba(30,31,36,0.95); border: 1px solid rgba(255,255,255,0.12); font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px"><span style="width: 7px; height: 7px; border-radius: 4px; background: {{i.c}}"></span>{{i.label}}</span></sc-for>
+<div style="width: 100%; height: 48px; border-radius: 24px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); display: flex; align-items: center; padding: 0 6px 0 16px; box-sizing: border-box; gap: 8px"><span style="flex-grow: 1; font-size: 13px; color: #8A867E">Ask about this wall…</span><span style="width: 38px; height: 38px; border-radius: 19px; background: #F0B35A; color: #1A1206; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">F2 · voice / text · intent → kind</span><span class="ct">Ask bar + intent chips</span><span class="cd">Plain-language suggestions map to kinds (“Tell me a story” → Stories › Chapters). Works hands-free and for people who don't know the menu.</span><span class="bf">best for · accessibility, AI guide later</span></div>
+</div>
+
+<!-- F3 GUIDED PLAYLIST -->
+<div class="cell">
+<div class="ph">
+<div style="padding: 22px 12px 0; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="bf" style="color: #F0B35A">GUIDED TOUR · 4 OF 9</span><span class="mini muted">6 min left</span></div>
+<div style="height: 220px; border-radius: 18px; background: {{fS.tint}}; border: 1.5px solid {{fS.c}}; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px"><span class="bl" style="color: {{fS.c}}">Now · Stories</span><span style="font-family: 'Fraunces', serif; font-size: 20px">The night of the stencils</span></div>
+<span class="bf">QUEUE</span>
+<sc-for list="{{queue}}" as="q" hint-placeholder-count="4"><div style="height: 40px; padding: 0 10px; border-radius: 12px; background: rgba(255,255,255,0.04); display: flex; align-items: center; gap: 10px"><span style="width: 22px; height: 22px; border-radius: 6px; background: {{q.tint}}"></span><span style="flex-grow: 1; font-size: 12px; font-weight: 600">{{q.label}}</span><span class="mini muted">{{q.dur}}</span></div></sc-for>
+</div>
+<div class="bar" style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 20px 20px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08)">
+<div style="height: 3px; border-radius: 2px; background: rgba(255,255,255,0.1)"><div style="width: 44%; height: 3px; border-radius: 2px; background: #F0B35A"></div></div>
+<div style="display: flex; justify-content: center; align-items: center; gap: 28px"><svg width="22" height="22" viewBox="0 0 24 24" fill="#F4F1EA"><path d="M6 6h2v12H6zM20 6v12l-9-6z"></path></svg><span style="width: 52px; height: 52px; border-radius: 26px; background: #F4F1EA; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0B0C0F"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg></span><svg width="22" height="22" viewBox="0 0 24 24" fill="#F4F1EA"><path d="M16 6h2v12h-2zM4 6v12l9-6z"></path></svg></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">F3 · mode · linear playlist</span><span class="ct">Guided tour mode</span><span class="cd">The card plays itself: blocks become a queue with narration, auto-advancing. Skip or reorder; exit back to free browsing.</span><span class="bf">best for · walking tours, lean-back</span></div>
+</div>
+
+<!-- F4 BREADCRUMB + SIBLINGS -->
+<div class="cell">
+<div class="ph">
+<div class="bar" style="position: absolute; left: 0; right: 0; top: 0; height: 64px; padding: 20px 12px 0; box-sizing: border-box; display: flex; align-items: center; gap: 10px; z-index: 1">
+<span style="width: 34px; height: 34px; border-radius: 17px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F4F1EA" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg></span>
+<span style="font-size: 12px; color: #8A867E">Card</span><span style="font-size: 12px; color: #6B6862">›</span><span style="font-size: 12px; font-weight: 700; color: {{fM.c}}">Media</span><span style="font-size: 12px; color: #6B6862">›</span><span style="font-size: 12px; font-weight: 800">360°</span>
+</div>
+<div style="position: absolute; left: 0; right: 0; top: 64px; bottom: 120px; background: {{fM.tint}}; display: flex; align-items: center; justify-content: center"><span class="bl" style="color: {{fM.c}}">Expanded block · 360° panorama</span></div>
+<div class="bar" style="position: absolute; left: 0; right: 0; bottom: 0; height: 120px; padding: 14px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 6px; overflow: hidden"><sc-for list="{{kinds}}" as="k" hint-placeholder-count="7"><span style="flex-shrink: 0; padding: 6px 11px; border-radius: 14px; background: {{k.bg}}; color: {{k.fg}}; font-size: 11px; font-weight: 700">{{k.label}}</span></sc-for></div>
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 12px; color: #8A867E">‹ Video</span><span style="font-size: 12px; font-weight: 700">Swipe for 3D model ›</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="tag">F4 · expanded view · L2 siblings</span><span class="ct">Breadcrumb + sibling swipe</span><span class="cd">Inside an opened block: a breadcrumb back up the ontology, and swipe (or chips) across sibling kinds without returning to the card.</span><span class="bf">best for · fullscreen / takeover blocks</span></div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1764,"height":4460}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = (h, a) => { const n = parseInt(h.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+    const F = [
+      ['about','About','#C9C2B6','M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 11v6M12 7.5v.5',3],
+      ['media','Media','#E8866A','M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM21 15l-5-5-10 9M9 8.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 1 0 0-3',7],
+      ['guides','Guides','#F0B35A','M4 15v-3a8 8 0 0 1 16 0v3M4 15h3v5H4zM17 15h3v5h-3z',2],
+      ['stories','Stories','#B8A4F4','M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',3],
+      ['ar','In AR','#6FD6C8','M12 2l9 5v10l-9 5-9-5V7zM3 7l9 5 9-5M12 12v10',2],
+      ['play','Play','#8FB8F0','M7 7h10a5 5 0 0 1 0 10H7A5 5 0 0 1 7 7zM8 10v4M6 12h4M15.5 11h.01M17.5 13h.01',3],
+      ['visit','Visit','#9FD0AA','M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 8.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 1 0 0-3',3],
+      ['community','Community','#F29BB8','M4 5h16v11H9l-5 4z',2]
+    ];
+    const fams = F.map((r) => {
+      const act = r[0] === 'media';
+      return { key: r[0], label: r[1], c: r[2], d: r[3], n: r[4], act,
+        tint: hex(r[2], 0.14), tintS: hex(r[2], 0.2), bd: hex(r[2], 0.35),
+        tfg: act ? '#F4F1EA' : '#8A867E', ul: act ? r[2] : 'transparent',
+        fg: act ? r[2] : '#8A867E', bg: act ? hex(r[2], 0.16) : 'transparent',
+        op: act ? 1 : 0.45, dot: act ? 14 : 8,
+        pw: act ? 18 : 5, pc: act ? r[2] : 'rgba(255,255,255,0.25)' };
+    });
+    const by = (k) => fams.find((f) => f.key === k);
+    const more = { label: 'More', d: 'M5 12h.01M12 12h.01M19 12h.01', fg: '#8A867E', bg: 'transparent' };
+    const bar5 = [by('about'), by('media'), by('stories'), by('play'), more];
+    const blk = (fk, label, h) => { const f = by(fk); return { label: f.label + ' · ' + label, h, c: f.c, tint: f.tint }; };
+    const hero = { label: 'Hero', h: 150, c: '#8A867E', tint: 'linear-gradient(160deg,#3a3d44,#1a1b20)' };
+    const stackNoHero = [blk('about','Description',64), blk('about','Fun fact',54), blk('media','Gallery',110), blk('media','Video',86), blk('guides','Audio guide',52), blk('stories','Chapters',96), blk('ar','Time travel',86), blk('play','Quiz',86), blk('visit','Map',96), blk('community','Notes',60)];
+    const stack = [hero].concat(stackNoHero);
+    const mediaStack = [blk('media','Photos',110), blk('media','Hotspot image',100), blk('media','Before / after',90), blk('media','Video',96), blk('media','360° panorama',110), blk('media','3D model',120)];
+    const mk = ['Photos','Gallery','Hotspots','Before / after','Video','360°','3D'];
+    const kinds = mk.map((l) => { const a = l === '360°'; return { label: l, bg: a ? '#F4F1EA' : 'rgba(255,255,255,0.07)', fg: a ? '#0B0C0F' : '#A29E96' }; });
+    const kindsShort = ['Photos','Video','360°','3D model'].map((l) => ({ label: l, fg: l === '360°' ? '#F4F1EA' : '#8A867E' }));
+    const mediaKinds = [['Photos','12'],['Gallery','1'],['Hotspot image','1'],['Before / after','1'],['Video','2'],['360° panorama','1'],['3D model','1']].map((r, i) => ({ label: r[0], n: r[1], bg: i === 5 ? 'rgba(255,255,255,0.08)' : 'transparent' }));
+    const fl = [['about','Summary'],['about','Fun facts'],['media','Gallery'],['media','Video'],['media','360°'],['guides','Audio'],['stories','Chapters'],['stories','Timeline'],['ar','Time travel'],['play','Quiz'],['visit','Map']];
+    const flatKinds = fl.map((r) => { const f = by(r[0]); const a = r[1] === 'Video'; return { label: r[1], c: f.c, bg: a ? f.tintS : 'rgba(255,255,255,0.05)', bd: a ? f.c : 'rgba(255,255,255,0.08)', fg: a ? '#F4F1EA' : '#A29E96' }; });
+    const arc = fams.map((f, i) => { const a = Math.PI - i * Math.PI / 7; const r = 128; return { d: f.d, x: Math.round(150 + r * Math.cos(a) - 22), y: Math.round(540 - r * Math.sin(a) - 22), abg: f.act ? f.c : 'rgba(30,31,36,0.95)', afg: f.act ? '#0B0C0F' : f.c }; });
+    const orbit = fams.map((f, i) => { const a = -Math.PI / 2 + i * Math.PI / 4; return { d: f.d, c: f.c, x: Math.round(150 + 118 * Math.cos(a) - 20), y: Math.round(270 + 150 * Math.sin(a) - 20) }; });
+    const tocRaw = [['about','Description','1 min',true],['about','Fun facts','30 s',true],['media','Gallery · 12 photos','1 min',false],['media','Making-of video','3:42',false],['guides','Audio guide','2 min',false],['stories','Story chapters','4 min',false],['ar','See it in 1450','1 min',false],['play','Quiz','2 min',false],['visit','Map & route','',false]];
+    const toc = tocRaw.map((r) => ({ c: by(r[0]).c, label: r[1], dur: r[2], seen: r[3], fg: r[3] ? '#8A867E' : '#F4F1EA' }));
+    const rails = [
+      { label: 'Media', c: by('media').c, tint: by('media').tint, n: 7, items: ['Video','360°','3D','Photos'] },
+      { label: 'Stories', c: by('stories').c, tint: by('stories').tint, n: 3, items: ['Chapters','Timeline','People'] },
+      { label: 'Play', c: by('play').c, tint: by('play').tint, n: 3, items: ['Quiz','Hunt','Badges'] },
+      { label: 'Visit', c: by('visit').c, tint: by('visit').tint, n: 3, items: ['Map','Nearby','Info'] }
+    ];
+    const res = (fk, label, meta) => { const f = by(fk); return { item: true, head: false, label, meta, tint: f.tint, c: f.c }; };
+    const head = (fk) => { const f = by(fk); return { head: true, item: false, label: f.label.toUpperCase(), c: f.c }; };
+    const results = [head('media'), res('media','The tiled iris · hotspot','Look · 30 s'), res('media','Iris close-up · 360°','360° · 1 min'), head('stories'), res('stories','Why an eye?','Read · 2 min'), head('play'), res('play','Spot the eye colour','Quiz · 1 min')];
+    const intents = [['stories','Tell me a story'],['media','Show me in 3D'],['about','What is this symbol?'],['guides','Give me the 2-minute version']].map((r) => ({ c: by(r[0]).c, label: r[1] }));
+    const queue = [['ar','See the gate in 1450','1 min'],['play','Quick quiz','2 min'],['visit','Walk to the Tile Fountain','3 min']].map((r) => ({ tint: by(r[0]).tint, label: r[1], dur: r[2] }));
+    return { fams, bar5, stack, stackNoHero, mediaStack, kinds, kindsShort, mediaKinds, flatKinds, arc, orbit, toc, rails, results, intents, queue,
+      fA: by('about'), fM: by('media'), fG: by('guides'), fS: by('stories'), fAR: by('ar'), fP: by('play'), fV: by('visit') };
+  }
+}
+</script>
+</body>
+</html>

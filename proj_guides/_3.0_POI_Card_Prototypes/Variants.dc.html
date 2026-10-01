@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Block Variants</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,700;1,9..144,300;1,9..144,400&amp;family=DM+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0C0A08;font-family:'DM Sans',sans-serif;color:#F0E6CC}
+button{font-family:inherit}
+.stage{background:#16130F;border:1px solid rgba(240,230,204,0.08);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px;min-height:290px;box-sizing:border-box;position:relative;overflow:hidden}
+.cap{display:flex;flex-direction:column;gap:4px;padding:12px 4px 0}
+.tg{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#F59E0B}
+.nm{font-family:'Fraunces',serif;font-size:18px}
+.ds{font-size:12px;line-height:1.5;color:#A89F8C}
+.cf{font-family:'JetBrains Mono',monospace;font-size:10px;color:#7D7564}
+.eb{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#D6A94E;font-weight:700}
+.h{font-family:'Fraunces',serif;font-size:20px;line-height:1.15;color:#F0E6CC}
+.p{margin:0;font-size:13px;line-height:1.55;color:#CFC5B1}
+.m{font-size:11px;color:#A89F8C}
+.sf{background:rgba(240,230,204,0.04);border:1px solid rgba(240,230,204,0.09);border-radius:14px}
+.btn{height:40px;border-radius:20px;background:#F59E0B;color:#1A1206;font-weight:700;font-size:12px;border:none;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 16px}
+.btn2{height:40px;border-radius:20px;background:rgba(240,230,204,0.07);color:#F0E6CC;font-weight:600;font-size:12px;border:1px solid rgba(240,230,204,0.12);display:flex;align-items:center;justify-content:center;gap:6px;padding:0 14px}
+.chip{padding:5px 10px;border-radius:12px;font-size:11px;font-weight:600;background:rgba(240,230,204,0.07);color:#CFC5B1;white-space:nowrap}
+.mono{font-family:'JetBrains Mono',monospace}
+.sec{grid-column:span 5;display:flex;align-items:baseline;gap:16px;padding-top:16px;border-top:1px solid rgba(240,230,204,0.08)}
+.sech{margin:0;font-family:'Fraunces',serif;font-weight:300;font-size:32px}
+.secd{font-size:13px;color:#A89F8C;max-width:760px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 16s linear infinite;transform-origin:center}
+@keyframes shrink{from{width:100%}to{width:0%}}
+.shrink{animation:shrink 10s linear infinite}
+</style>
+</helmet>
+<div style="width: 1764px; height: 3000px; box-sizing: border-box; padding: 60px; background: #0C0A08; display: flex; flex-direction: column; gap: 40px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="tg">Variants of existing blocks · 20</span><h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; letter-spacing: -0.02em">Same data, <span style="font-style: italic; color: #F59E0B">other</span> looks</h1></div>
+<p style="margin: 0; width: 620px; font-size: 14px; line-height: 1.6; color: #A89F8C">Second and third presentations for blocks from the first catalog. Numbers match the original blocks (01 Hero, 02 Quick facts…). A developer picks a variant per block instance; content never changes.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 36px; row-gap: 44px; align-items: start">
+
+<div class="sec"><h2 class="sech">Hero · 01</h2><span class="secd">The first thing in the card. Already had parallax image; now four more.</span></div>
+
+<div><div class="stage" style="padding: 0">
+<div style="position: relative; height: 290px; display: flex">
+<div style="flex-grow: 1; background: linear-gradient(160deg, #1B2D4F, #0E1826); position: relative"><span style="position: absolute; left: 12px; top: 12px; padding: 4px 9px; border-radius: 9px; background: rgba(12,10,8,0.7); font-size: 11px; font-weight: 700">~1700</span></div>
+<div style="flex-grow: 1; background: linear-gradient(160deg, #5A5046, #2A241B); position: relative"><span style="position: absolute; right: 12px; top: 12px; padding: 4px 9px; border-radius: 9px; background: rgba(12,10,8,0.7); font-size: 11px; font-weight: 700">Today</span></div>
+<span style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #F0E6CC"></span>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 16px; background: linear-gradient(180deg, rgba(22,19,15,0), #16130F)"><span class="h" style="font-size: 24px">Castelo de São Jorge</span></div>
+</div>
+</div><div class="cap"><span class="tg">01·B · hero</span><span class="nm">Then | Now split</span><span class="ds">Two eras side by side; tap a half to set the epoch lens.</span><span class="cf">variant: split · epochs[2]</span></div></div>
+
+<div><div class="stage" style="padding: 0">
+<div style="position: relative; height: 290px; background: radial-gradient(circle at 50% 42%, rgba(245,158,11,0.22), #16130F 65%)">
+<svg width="100%" height="220" viewBox="0 0 290 220" aria-hidden="true"><g class="spin" style="transform-origin: 145px 180px"><ellipse cx="145" cy="180" rx="100" ry="18" fill="none" stroke="rgba(240,230,204,0.3)" stroke-dasharray="4 8"></ellipse></g><path d="M145 40 L215 76 L145 112 L75 76 Z" fill="#8C7A66"></path><path d="M75 76 L145 112 L145 176 L75 140 Z" fill="#5E5144"></path><path d="M215 76 L145 112 L145 176 L215 140 Z" fill="#74655A"></path></svg>
+<div style="position: absolute; left: 16px; bottom: 16px; right: 16px; display: flex; justify-content: space-between; align-items: flex-end"><span class="h" style="font-size: 22px">Keystone</span><span class="chip">Drag to rotate</span></div>
+</div>
+</div><div class="cap"><span class="tg">01·C · hero</span><span class="nm">3D turntable hero</span><span class="ds">The model is the header; lazy-loaded, falls back to a still.</span><span class="cf">variant: model · fallback: image</span></div></div>
+
+<div><div class="stage" style="padding: 0">
+<div style="position: relative; height: 290px; background: linear-gradient(170deg, #3A2F20, #0E1826)">
+<svg width="100%" height="290" viewBox="0 0 290 290" preserveAspectRatio="none" aria-hidden="true"><path d="M0 200 q70 -50 145 -10 t145 -30 v130 h-290z" fill="rgba(240,230,204,0.08)"></path></svg>
+<span style="position: absolute; left: 14px; top: 14px; display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 10px; background: rgba(12,10,8,0.7); font-size: 11px; font-weight: 700"><span style="width: 6px; height: 6px; border-radius: 3px; background: #F59E0B"></span>Loop · 8 s</span>
+<button aria-label="Unmute" style="position: absolute; right: 14px; top: 12px; width: 36px; height: 36px; border-radius: 18px; background: rgba(12,10,8,0.7); border: none; color: #F0E6CC; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9h4l5-4v14l-5-4H4zM17 9l4 6M21 9l-4 6"></path></svg></button>
+<div style="position: absolute; left: 16px; bottom: 16px"><span class="h" style="font-size: 22px">The fountain at dawn</span></div>
+</div>
+</div><div class="cap"><span class="tg">01·D · hero</span><span class="nm">Silent video loop</span><span class="ds">Muted cinemagraph; respects reduce-motion by showing the poster.</span><span class="cf">variant: loop · muted · poster</span></div></div>
+
+<div><div class="stage">
+<div style="display: flex; gap: 12px; align-items: center">
+<span style="flex-shrink: 0; width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #1B2D4F, #3A2F20)"></span>
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="h" style="font-size: 18px">Castelo de São Jorge</span><div style="display: flex; gap: 4px"><span class="chip" style="font-size: 10px">Military</span><span class="chip" style="font-size: 10px">Power</span></div></div>
+<svg width="34" height="34" viewBox="0 0 34 34" style="margin-left: auto; flex-shrink: 0" aria-label="60 percent destroyed"><circle cx="17" cy="17" r="13" fill="none" stroke="rgba(240,230,204,0.1)" stroke-width="4"></circle><circle cx="17" cy="17" r="13" fill="none" stroke="#D9782A" stroke-width="4" stroke-dasharray="49 82" transform="rotate(-90 17 17)"></circle></svg>
+</div>
+<p class="p">Compact header for the peek state of the sheet: identity, categories and status in one row.</p>
+<span class="m">Used when the card must stay ≤ 40% of the screen</span>
+</div><div class="cap"><span class="tg">01·E · hero</span><span class="nm">Compact header</span><span class="ds">No media at all; lives in the sheet’s peek position.</span><span class="cf">variant: compact · status: ring_mini</span></div></div>
+
+<div><div class="stage" style="padding: 0">
+<div style="position: relative; height: 290px; background: #EFE7D6">
+<svg width="100%" height="290" viewBox="0 0 290 290" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><pattern id="tl2" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="48" height="48" fill="#EFE7D6"></rect><path d="M24 5 q12 19 0 38 q-12 -19 0 -38z" fill="#1E4E8C"></path><path d="M0 0.5H48M0.5 0V48" stroke="#C9BFA9"></path></pattern></defs><rect width="290" height="290" fill="url(#tl2)"></rect></svg>
+<div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(22,19,15,0) 40%, #16130F)"></div>
+<span style="position: absolute; left: 50%; top: 40%; width: 90px; height: 90px; margin-left: -45px; margin-top: -45px; border-radius: 45px; border: 2px solid #F59E0B; box-shadow: 0 0 0 999px rgba(12,10,8,0.35)"></span>
+<div style="position: absolute; left: 16px; bottom: 16px"><span class="h" style="font-size: 22px">Panel 14, row 3</span></div>
+</div>
+</div><div class="cap"><span class="tg">01·F · hero</span><span class="nm">Spotlight crop</span><span class="ds">The wall photo with this POI circled, so you know what you tapped.</span><span class="cf">variant: spotlight · crop from wall</span></div></div>
+
+<div class="sec"><h2 class="sech">Quick facts · 02 &amp; Fun fact · 06</h2><span class="secd">Fact presentations from the luxury style file, plus three new ways to reveal a fun fact.</span></div>
+
+<div><div class="stage">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: rgba(245,158,11,0.14); border: 1px solid rgba(245,158,11,0.14); border-radius: 14px; overflow: hidden">
+<div style="background: #16130F; padding: 14px"><span class="eb" style="display: block; color: #A89F8C; font-size: 9px">Length</span><span style="font-family: 'Fraunces', serif; font-size: 15px">23 m</span></div>
+<div style="background: #16130F; padding: 14px"><span class="eb" style="display: block; color: #A89F8C; font-size: 9px">Painted</span><span style="font-family: 'Fraunces', serif; font-size: 15px">c. 1700</span></div>
+<div style="background: #16130F; padding: 14px"><span class="eb" style="display: block; color: #A89F8C; font-size: 9px">Shape</span><span style="font-family: 'Fraunces', serif; font-size: 15px">U-shaped</span></div>
+<div style="background: rgba(245,158,11,0.06); padding: 14px"><span class="eb" style="display: block; color: #A89F8C; font-size: 9px">Status</span><span style="font-family: 'Fraunces', serif; font-size: 15px; color: #F59E0B">★ Hero</span></div>
+</div>
+<span class="m">Hairline grid, one highlighted cell</span>
+</div><div class="cap"><span class="tg">02·B · facts</span><span class="nm">Hairline grid</span><span class="ds">The Stone &amp; Gold facts grid: 1 px gold lines, serif values.</span><span class="cf">variant: grid · highlight: index</span></div></div>
+
+<div><div class="stage">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: baseline; gap: 10px"><span style="font-family: 'Fraunces', serif; font-weight: 300; font-size: 48px; color: #F59E0B; line-height: 1">23</span><span style="font-size: 13px; color: #CFC5B1">metres of painted city</span></div>
+<div style="display: flex; align-items: baseline; gap: 10px"><span style="font-family: 'Fraunces', serif; font-weight: 300; font-size: 48px; line-height: 1">~150</span><span style="font-size: 13px; color: #CFC5B1">buildings identified</span></div>
+<div style="display: flex; align-items: baseline; gap: 10px"><span style="font-family: 'Fraunces', serif; font-weight: 300; font-size: 48px; line-height: 1">55</span><span style="font-size: 13px; color: #CFC5B1">years before the earthquake</span></div>
+</div>
+</div><div class="cap"><span class="tg">02·C · facts</span><span class="nm">Big numbers</span><span class="ds">Count up when scrolled into view (off with reduce-motion).</span><span class="cf">variant: numbers · countUp</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Did you know?</span>
+<div style="position: relative; height: 170px; border-radius: 16px; overflow: hidden; background: #221D16; padding: 16px; box-sizing: border-box"><p class="p" style="font-family: 'Fraunces', serif; font-size: 18px; line-height: 1.35; color: #F0E6CC">Praça do Comércio was built on rubble from the earthquake.</p>
+<div style="position: absolute; inset: 0; background: repeating-linear-gradient(45deg, #8C7A66 0 6px, #74655A 6px 12px); clip-path: polygon(0 0, 100% 0, 100% 100%, 60% 100%, 40% 60%, 70% 40%, 20% 30%, 0 60%)"></div>
+</div>
+<span class="m">Scratch with your finger to reveal</span>
+</div><div class="cap"><span class="tg">06·B · fun fact</span><span class="nm">Scratch to reveal</span><span class="ds">Tactile, playful, strongest for the family profile.</span><span class="cf">reveal: scratch · threshold: 60%</span></div></div>
+
+<div><div class="stage" style="align-items: center; justify-content: center">
+<div style="width: 230px; padding: 18px; border-radius: 4px; background: #F0E6CC; color: #16130F; transform: rotate(-3deg); box-shadow: 0 18px 30px rgba(0,0,0,0.5); position: relative; display: flex; flex-direction: column; gap: 10px">
+<span style="position: absolute; right: 12px; top: 12px; width: 34px; height: 40px; border: 2px dashed #C2562E; border-radius: 3px"></span>
+<span class="mono" style="font-size: 10px; color: #8A6A4A">DID YOU KNOW</span>
+<span style="font-family: 'Fraunces', serif; font-style: italic; font-size: 17px; line-height: 1.35; padding-right: 30px">The river used to reach much closer to these streets.</span>
+<span style="font-size: 10px; color: #8A6A4A">[VERIFY] · 1 of 20</span>
+</div>
+</div><div class="cap"><span class="tg">06·C · fun fact</span><span class="nm">Postcard</span><span class="ds">A tilted keepsake card; can be saved to the collection.</span><span class="cf">variant: postcard · collectible</span></div></div>
+
+<div><div class="stage" style="justify-content: flex-start">
+<div style="display: flex; flex-direction: column; gap: 8px; opacity: 0.25"><span style="height: 70px; border-radius: 12px; background: rgba(240,230,204,0.1)"></span><span style="height: 50px; border-radius: 12px; background: rgba(240,230,204,0.1)"></span></div>
+<div style="border-radius: 18px; background: #221D16; border: 1px solid rgba(245,158,11,0.35); padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 14px 30px rgba(0,0,0,0.55)">
+<div style="display: flex; justify-content: space-between"><span class="eb">Did you know?</span><button aria-label="Dismiss" style="background: none; border: none; color: #A89F8C; padding: 0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+<span style="font-size: 13px; line-height: 1.45">Praça do Comércio was built on rubble from the earthquake.</span>
+<div style="height: 2px; border-radius: 1px; background: rgba(240,230,204,0.1)"><div class="shrink" style="height: 2px; border-radius: 1px; background: #F59E0B"></div></div>
+</div>
+</div><div class="cap"><span class="tg">06·D · fun fact</span><span class="nm">Timed toast</span><span class="ds">Wall-level facts every 5 min or 5th tap, gone after 10 s.</span><span class="cf">fun_facts[] · wall-level · 10 s</span></div></div>
+
+<div class="sec"><h2 class="sech">Gallery · 07 &amp; Timeline · 17</h2><span class="secd">Grid, filmstrip and swipe stack for images; scrubber and pairs for time.</span></div>
+
+<div><div class="stage">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; border-radius: 14px; overflow: hidden">
+<span style="height: 80px; background: #1B2D4F"></span><span style="height: 80px; background: #3A2F20"></span><span style="height: 80px; background: #2F6BB3"></span><span style="height: 80px; background: #5A5046"></span><span style="height: 80px; background: #1E4E8C"></span><span style="height: 80px; background: #74655A"></span><span style="height: 80px; background: #2C3E2C"></span><span style="height: 80px; background: #8C7A66"></span><span style="height: 80px; background: rgba(240,230,204,0.1); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700">+9</span>
+</div>
+<span class="m">Tap for full-screen lightbox</span>
+</div><div class="cap"><span class="tg">07·B · gallery</span><span class="nm">Grid + lightbox</span><span class="ds">See everything at once; best past 6 images.</span><span class="cf">layout: grid · cols: 3</span></div></div>
+
+<div><div class="stage">
+<div style="height: 170px; border-radius: 14px; background: linear-gradient(160deg, #1B2D4F, #3A2F20)"></div>
+<div style="display: flex; gap: 6px; overflow: hidden"><span style="flex-shrink: 0; width: 52px; height: 40px; border-radius: 8px; background: #1B2D4F; border: 2px solid #F59E0B"></span><span style="flex-shrink: 0; width: 52px; height: 40px; border-radius: 8px; background: #3A2F20; opacity: 0.6"></span><span style="flex-shrink: 0; width: 52px; height: 40px; border-radius: 8px; background: #2F6BB3; opacity: 0.6"></span><span style="flex-shrink: 0; width: 52px; height: 40px; border-radius: 8px; background: #5A5046; opacity: 0.6"></span><span style="flex-shrink: 0; width: 52px; height: 40px; border-radius: 8px; background: #1E4E8C; opacity: 0.6"></span></div>
+<span class="m">The Ribeira waterfront · 1 / 12</span>
+</div><div class="cap"><span class="tg">07·C · gallery</span><span class="nm">Filmstrip</span><span class="ds">Large image plus thumbnails; captions stay readable.</span><span class="cf">layout: filmstrip</span></div></div>
+
+<div><div class="stage" style="align-items: center">
+<div style="position: relative; width: 240px; height: 210px">
+<div style="position: absolute; left: 22px; top: 18px; width: 196px; height: 180px; border-radius: 18px; background: #3A2F20; transform: rotate(6deg)"></div>
+<div style="position: absolute; left: 22px; top: 14px; width: 196px; height: 180px; border-radius: 18px; background: #2F6BB3; transform: rotate(-4deg)"></div>
+<div style="position: absolute; left: 22px; top: 8px; width: 196px; height: 186px; border-radius: 18px; background: linear-gradient(160deg, #1B2D4F, #0E1826); box-shadow: 0 16px 30px rgba(0,0,0,0.5); display: flex; align-items: flex-end; padding: 12px; box-sizing: border-box"><span style="font-size: 12px; font-weight: 700">Swipe for next</span></div>
+</div>
+</div><div class="cap"><span class="tg">07·D · gallery</span><span class="nm">Swipe stack</span><span class="ds">One image at a time, card-deck feel.</span><span class="cf">layout: stack</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Drag through time</span>
+<div style="position: relative; height: 60px">
+<div style="position: absolute; left: 0; right: 0; top: 28px; height: 3px; background: rgba(240,230,204,0.15)"></div>
+<div style="position: absolute; left: 0; width: 42%; top: 28px; height: 3px; background: #F59E0B"></div>
+<span style="position: absolute; left: 0; top: 23px; width: 2px; height: 13px; background: #A89F8C"></span><span style="position: absolute; left: 33%; top: 23px; width: 2px; height: 13px; background: #A89F8C"></span><span style="position: absolute; left: 66%; top: 23px; width: 2px; height: 13px; background: #A89F8C"></span><span style="position: absolute; right: 0; top: 23px; width: 2px; height: 13px; background: #A89F8C"></span>
+<span style="position: absolute; left: 42%; top: 17px; width: 24px; height: 24px; margin-left: -12px; border-radius: 12px; background: #F0E6CC; box-shadow: 0 4px 10px rgba(0,0,0,0.4)"></span>
+<span style="position: absolute; left: 0; top: 46px" class="mono m">1370s</span><span style="position: absolute; left: 30%; top: 46px" class="mono m">1755</span><span style="position: absolute; left: 62%; top: 46px" class="mono m">1904</span><span style="position: absolute; right: 0; top: 46px" class="mono m">now</span>
+</div>
+<div class="sf" style="padding: 12px"><span class="mono" style="font-size: 11px; color: #F59E0B">1755</span><p class="p">The earthquake damages the castle walls.</p></div>
+</div><div class="cap"><span class="tg">17·B · timeline</span><span class="nm">Horizontal scrubber</span><span class="ds">One event at a time under a draggable handle.</span><span class="cf">orientation: horizontal</span></div></div>
+
+<div><div class="stage">
+<sc-for list="{{pairs}}" as="r" hint-placeholder-count="3"><div style="display: flex; gap: 8px; align-items: center"><span style="flex-grow: 1; height: 54px; border-radius: 10px; background: {{r.a}}"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><span style="flex-grow: 1; height: 54px; border-radius: 10px; background: {{r.b}}"></span></div><span class="m" style="margin-top: -6px">{{r.l}}</span></sc-for>
+</div><div class="cap"><span class="tg">17·C · timeline</span><span class="nm">Then → now pairs</span><span class="ds">Each row is one change across time, image to image.</span><span class="cf">variant: pairs</span></div></div>
+
+<div class="sec"><h2 class="sech">Text · 05, Actions · 03, Audio · 13, Related · 24</h2><span class="secd">Denser and lighter ways to read, act and continue.</span></div>
+
+<div><div class="stage">
+<p style="margin: 0; font-family: 'Fraunces', serif; font-size: 19px; line-height: 1.35">A hilltop fortress that watched the river for centuries.</p>
+<p class="p" style="color: #A89F8C">The key sentence first; the full text opens below it for those who want more. [PLACEHOLDER]</p>
+<button class="btn2" style="align-self: flex-start">Read the full story · 2 min</button>
+</div><div class="cap"><span class="tg">05·B · text</span><span class="nm">Key sentence first</span><span class="ds">One serif sentence carries the card; the rest is optional.</span><span class="cf">variant: lede · summary + body</span></div></div>
+
+<div><div class="stage" style="gap: 0; padding: 6px 16px">
+<sc-for list="{{chapters}}" as="c" hint-placeholder-count="4"><div style="padding: 13px 0; border-bottom: 1px solid rgba(240,230,204,0.08); display: flex; flex-direction: column; gap: 8px"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 13px; font-weight: 700; color: {{c.fg}}">{{c.t}}</span><span class="mono" style="font-size: 11px; color: #A89F8C">{{c.s}}</span></div><sc-if value="{{c.open}}" hint-placeholder-val="{{false}}"><p class="p" style="font-size: 12px">Built on the highest hill, the fortress controlled the river approach. [PLACEHOLDER]</p></sc-if></div></sc-for>
+</div><div class="cap"><span class="tg">05·C · text</span><span class="nm">Chapter accordion</span><span class="ds">Long texts split into titled sections that open one at a time.</span><span class="cf">variant: sections</span></div></div>
+
+<div><div class="stage" style="justify-content: flex-end">
+<div style="display: flex; flex-direction: column; gap: 8px; opacity: 0.3"><span style="height: 60px; border-radius: 12px; background: rgba(240,230,204,0.1)"></span><span style="height: 80px; border-radius: 12px; background: rgba(240,230,204,0.1)"></span></div>
+<div style="display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid rgba(240,230,204,0.1)"><button class="btn" style="flex-grow: 1; height: 48px; border-radius: 24px; text-transform: uppercase; letter-spacing: 0.08em">Explore story →</button><button class="btn2" style="height: 48px; border-radius: 24px">Save</button></div>
+</div><div class="cap"><span class="tg">03·B · actions</span><span class="nm">Sticky bottom CTA</span><span class="ds">One primary action pinned to the sheet’s bottom edge (Candlelit style).</span><span class="cf">variant: sticky_cta</span></div></div>
+
+<div><div class="stage">
+<div style="position: relative; height: 170px; border-radius: 16px; background: linear-gradient(160deg, #1B2D4F, #3A2F20)">
+<button style="position: absolute; left: 12px; bottom: 12px; height: 40px; padding: 0 14px 0 6px; border-radius: 20px; background: rgba(12,10,8,0.75); border: 1px solid rgba(240,230,204,0.2); color: #F0E6CC; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700"><span style="width: 28px; height: 28px; border-radius: 14px; background: #F59E0B; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="#1A1206"><path d="M8 5v14l11-7z"></path></svg></span>Listen · 0:58</button>
+</div>
+<span class="m">Audio lives on the hero instead of its own block</span>
+</div><div class="cap"><span class="tg">13·B · audio</span><span class="nm">Listen chip on hero</span><span class="ds">Minimal audio entry point; opens the mini-player.</span><span class="cf">variant: hero_chip</span></div></div>
+
+<div><div class="stage">
+<span class="eb">Continue along the wall</span>
+<div style="display: flex; gap: 8px">
+<div class="sf" style="flex-grow: 1; flex-basis: 0; padding: 10px; display: flex; flex-direction: column; gap: 8px"><span style="height: 70px; border-radius: 10px; background: #3A2F20"></span><span style="font-size: 12px; font-weight: 700">← Sé de Lisboa</span><span class="m">left · 3 steps</span></div>
+<div class="sf" style="flex-grow: 1; flex-basis: 0; padding: 10px; display: flex; flex-direction: column; gap: 8px"><span style="height: 70px; border-radius: 10px; background: #1B2D4F"></span><span style="font-size: 12px; font-weight: 700">Paço da Ribeira →</span><span class="m">right · 5 steps</span></div>
+</div>
+</div><div class="cap"><span class="tg">24·B · related</span><span class="nm">Next along the wall</span><span class="ds">Related by position instead of by topic: walk the wall like pages.</span><span class="cf">source: wall_neighbours</span></div></div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1764,"height":3000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const pairs = [
+      { a: '#1B2D4F', b: '#5A5046', l: 'Waterfront · c. 1700 → today' },
+      { a: '#3A2F20', b: '#74655A', l: 'Palace square → Praça do Comércio' },
+      { a: '#2F6BB3', b: '#8C7A66', l: 'River edge → filled-in quay' }
+    ];
+    const chapters = [
+      { t: 'A fortress on the hill', s: '0:40', open: true, fg: '#F59E0B' },
+      { t: 'Life inside the walls', s: '1:10', open: false, fg: '#F0E6CC' },
+      { t: 'The morning of 1755', s: '0:55', open: false, fg: '#F0E6CC' },
+      { t: 'Rebuilt and restored', s: '0:50', open: false, fg: '#F0E6CC' }
+    ];
+    return { pairs, chapters };
+  }
+}
+</script>
+</body>
+</html>

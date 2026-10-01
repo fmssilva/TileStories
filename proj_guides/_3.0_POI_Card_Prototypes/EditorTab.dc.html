@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Card Editor Tab</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&amp;family=DM+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#0C0A08;font-family:'DM Sans',sans-serif;color:#D2D2D2}
+.win{background:#383838;border:1px solid #1E1E1E;border-radius:6px;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,0.6);font-size:12px}
+.tb{height:28px;background:#282828;display:flex;align-items:center;padding:0 10px;gap:8px;color:#C4C4C4;font-size:12px}
+.tabs{display:flex;background:#2E2E2E;border-bottom:1px solid #1E1E1E}
+.tab{padding:7px 14px;color:#A8A8A8;border-right:1px solid #232323}
+.tabOn{background:#383838;color:#EDEDED;font-weight:600}
+.fo{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#3E3E3E;border-top:1px solid #2A2A2A;border-bottom:1px solid #2A2A2A;font-weight:700;color:#E4E4E4}
+.row{display:flex;align-items:center;gap:8px;padding:4px 10px;min-height:22px}
+.lb{width:170px;flex-shrink:0;color:#C8C8C8}
+.fld{height:20px;background:#2A2A2A;border:1px solid #212121;border-radius:3px;display:flex;align-items:center;padding:0 6px;color:#E0E0E0;box-sizing:border-box}
+.dd{justify-content:space-between}
+.help{width:16px;height:16px;border-radius:8px;background:#4A4A4A;color:#D0D0D0;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.th{display:flex;gap:6px;padding:5px 10px;background:#333;color:#9E9E9E;font-size:11px;font-weight:600;border-bottom:1px solid #2A2A2A}
+.tr{display:flex;gap:6px;padding:4px 10px;align-items:center;border-bottom:1px solid #333}
+.sw{width:18px;height:14px;border-radius:2px;border:1px solid #1A1A1A;flex-shrink:0}
+.ok{color:#7FD08F;font-family:'JetBrains Mono',monospace;font-size:10px}
+.bad{color:#FF8A7A;font-family:'JetBrains Mono',monospace;font-size:10px}
+.btnU{height:20px;padding:0 10px;background:#585858;border:1px solid #2A2A2A;border-radius:3px;color:#EAEAEA;display:flex;align-items:center;font-size:11px}
+.chk{width:13px;height:13px;border-radius:2px;background:#2A2A2A;border:1px solid #1A1A1A;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tg{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#F59E0B}
+.note{font-size:13px;line-height:1.55;color:#BDB4A0}
+</style>
+</helmet>
+<div style="width: 1700px; height: 1500px; box-sizing: border-box; padding: 60px; background: #0C0A08; display: flex; flex-direction: column; gap: 36px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="tg">POI Editor · new “Card” tab</span><h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; letter-spacing: -0.02em; color: #F0E6CC">Every design token, <span style="font-style: italic; color: #F59E0B">editable</span></h1></div>
+<p class="note" style="margin: 0; width: 640px">Same patterns as the existing POI Editor: foldout sections, taxonomy-style tables, a “?” help popup per field, a per-row “Aa” popup for overrides, live Play Mode sync. Wall style → block stack → one block’s overrides.</p>
+</div>
+
+<div style="display: flex; gap: 36px; align-items: flex-start">
+
+<!-- EDITOR WINDOW -->
+<div class="win" style="width: 980px">
+<div class="tb"><span style="width: 10px; height: 10px; border-radius: 5px; background: #F59E0B"></span>TileStories · POI Editor — LivingRoom<span style="margin-left: auto; color: #8E8E8E">config.json · saved</span></div>
+<div class="tabs"><span class="tab">Global Scene</span><span class="tab">POIs</span><span class="tab">Markers</span><span class="tab">LOD &amp; Zoom</span><span class="tab">Search</span><span class="tab tabOn">Card</span><span class="tab">Validation</span></div>
+
+<div class="fo">▾ Card Style (wall default)<span class="help" style="margin-left: 6px">?</span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 4px 0">
+<div class="row"><span class="lb">Style preset</span><span class="fld dd" style="flex-grow: 1">Stone &amp; Gold Luxury<span>▾</span></span></div>
+<div class="row"><span class="lb">Base mode</span><span class="fld dd" style="flex-grow: 1">Dark<span>▾</span></span></div>
+<div class="row"><span class="lb">High contrast (sunlight)</span><span class="fld dd" style="flex-grow: 1">Visitor toggle + auto on bright light<span>▾</span></span><span class="help">?</span></div>
+<div class="row"><span class="lb">Sunlight variant</span><span class="fld dd" style="flex-grow: 1">Follow base mode<span>▾</span></span></div>
+<div class="row"><span class="lb">Preview in Scene</span><span class="chk"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E0E0E0" stroke-width="4"><path d="M5 12l5 5 9-10"></path></svg></span><span style="color: #9E9E9E">Card demo panel (dev only)</span></div>
+<div class="row"><span class="lb">Show sunlight side-by-side</span><span class="chk"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E0E0E0" stroke-width="4"><path d="M5 12l5 5 9-10"></path></svg></span></div>
+</div>
+
+<div class="th"><span style="width: 150px">Token</span><span style="width: 200px">Standard</span><span style="width: 200px">Sunlight (HC)</span><span style="width: 150px">Contrast on surface</span><span style="flex-grow: 1">USS variable</span></div>
+<sc-for list="{{tokens}}" as="t" hint-placeholder-count="10">
+<div class="tr"><span style="width: 150px; color: #D8D8D8">{{t.n}}</span>
+<span style="width: 200px; display: flex; gap: 6px; align-items: center"><span class="sw" style="background: {{t.a}}; display: {{t.showSw}}"></span><span class="fld" style="flex-grow: 1">{{t.av}}</span></span>
+<span style="width: 200px; display: flex; gap: 6px; align-items: center"><span class="sw" style="background: {{t.b}}; display: {{t.showSw}}"></span><span class="fld" style="flex-grow: 1">{{t.bv}}</span></span>
+<span style="width: 150px; display: flex; gap: 6px"><span class="{{t.ca}}">{{t.cav}}</span><span class="{{t.cb}}">{{t.cbv}}</span></span>
+<span style="flex-grow: 1; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #9A9A9A">{{t.v}}</span></div>
+</sc-for>
+<div class="row" style="padding: 8px 10px"><span class="btnU">Reset to preset</span><span class="btnU">Duplicate as new preset…</span><span class="btnU">Export DesignTokens.uss</span><span style="margin-left: auto" class="bad">1 token below AA in Standard</span></div>
+
+<div class="fo">▾ Block Stack · Castelo de São Jorge<span style="margin-left: 10px; color: #9E9E9E; font-weight: 400">template: Hero POI</span></div>
+<div class="th"><span style="width: 20px"></span><span style="width: 150px">Block</span><span style="width: 150px">Variant</span><span style="width: 110px">Display</span><span style="width: 130px">Visible in eras</span><span style="width: 150px">Style</span><span style="flex-grow: 1"></span></div>
+<sc-for list="{{stack}}" as="s" hint-placeholder-count="7">
+<div class="tr" style="background: {{s.bg}}"><span style="width: 20px; color: #7A7A7A">≡</span>
+<span style="width: 150px; color: #E4E4E4">{{s.b}}</span>
+<span class="fld dd" style="width: 150px">{{s.v}}<span>▾</span></span>
+<span class="fld dd" style="width: 110px">{{s.d}}<span>▾</span></span>
+<span class="fld dd" style="width: 130px">{{s.e}}<span>▾</span></span>
+<span style="width: 150px; display: flex; gap: 6px; align-items: center"><span class="btnU" style="background: {{s.aaBg}}">Aa</span><span style="font-size: 11px; color: {{s.oc}}">{{s.o}}</span></span>
+<span style="flex-grow: 1; display: flex; justify-content: flex-end; gap: 8px; color: #9A9A9A"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF6B5E" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg></span></div>
+</sc-for>
+<div class="row" style="padding: 8px 10px"><span class="btnU">+ Add block ▾</span><span class="btnU">Apply stack to all Hero POIs</span><span style="margin-left: auto; color: #9E9E9E">43 block kinds · 20 variants registered</span></div>
+</div>
+
+<!-- RIGHT COLUMN: override popup + preview -->
+<div style="display: flex; flex-direction: column; gap: 24px; width: 560px">
+<div class="win" style="width: 420px">
+<div class="tb">Block Style — Fun Fact · flip<span style="margin-left: auto; color: #8E8E8E">✕</span></div>
+<div style="padding: 6px 0">
+<div class="row"><span class="lb" style="width: 130px">Inherit wall style</span><span class="chk"></span><span style="color: #9E9E9E">off → overrides below apply</span></div>
+<sc-for list="{{overrides}}" as="o" hint-placeholder-count="6">
+<div class="row"><span class="lb" style="width: 130px; color: {{o.lc}}">{{o.n}}</span><span class="chk">{{o.chk}}</span><span class="sw" style="background: {{o.c}}; display: {{o.sw}}"></span><span class="fld" style="flex-grow: 1; opacity: {{o.op}}">{{o.v}}</span></div>
+</sc-for>
+<div class="row" style="padding-top: 8px"><span class="ok">Sunlight value auto-derived · 9.8:1</span><span class="btnU" style="margin-left: auto">Revert all</span></div>
+</div>
+</div>
+
+<div style="display: flex; gap: 20px; align-items: flex-start">
+<div style="width: 250px; height: 500px; border-radius: 34px; overflow: hidden; background: #1A1510; border: 1px solid rgba(245,158,11,0.25); position: relative; font-family: 'DM Sans', sans-serif; color: #F7EFDC">
+<div style="height: 150px; background: linear-gradient(160deg,#1B2D4F,#0A1525)"></div>
+<div style="position: absolute; left: 14px; right: 14px; top: 124px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700">Castelo de <span style="font-style: italic; color: #F5B544">São Jorge</span></span>
+<div style="border-radius: 12px; background: #221A2E; border: 1px solid #B8A4F4; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: #CDBEFA">Did you know?</span><span style="font-family: 'Fraunces', serif; font-size: 14px; line-height: 1.3">Praça do Comércio was built on rubble from the earthquake.</span></div>
+<span style="height: 50px; border-radius: 10px; background: rgba(247,239,220,0.07)"></span>
+<span style="height: 70px; border-radius: 10px; background: rgba(247,239,220,0.07)"></span>
+</div>
+</div>
+<div style="width: 250px; height: 500px; border-radius: 34px; overflow: hidden; background: #000000; border: 2px solid #FFB224; position: relative; font-family: 'DM Sans', sans-serif; color: #FFFFFF">
+<div style="height: 150px; background: linear-gradient(160deg,#1B2D4F,#0A1525)"></div>
+<div style="position: absolute; left: 14px; right: 14px; top: 162px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700">Castelo de <span style="color: #FFB224">São Jorge</span></span>
+<div style="border-radius: 12px; background: #000000; border: 2px solid #D9CCFF; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 800; color: #D9CCFF">Did you know?</span><span style="font-size: 15px; line-height: 1.35; font-weight: 500">Praça do Comércio was built on rubble from the earthquake.</span></div>
+<span style="height: 50px; border-radius: 10px; border: 2px solid #FFFFFF"></span>
+<span style="height: 70px; border-radius: 10px; border: 2px solid #FFFFFF"></span>
+</div>
+</div>
+</div>
+<span class="note">Live preview in the editor: standard and sunlight side by side. The Fun Fact’s lilac override is kept in sunlight, but pushed to a lighter tint and a 2 px border to stay above 7:1.</span>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1700,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const T = [
+      ['Background', '#1A1510', '#1A1510', '#000000', '#000000', '', '', '', '', '--ts-bg', true],
+      ['Text', '#F7EFDC', '#F7EFDC', '#FFFFFF', '#FFFFFF', 'ok', '15.6:1', 'ok', '21:1', '--ts-ink', true],
+      ['Secondary text', '#C9BFAB', 'ink @ 80%', '#F2ECE0', '#F2ECE0', 'ok', '9.4:1', 'ok', '18:1', '--ts-ink-2', true],
+      ['Accent', '#F59E0B', '#F59E0B', '#FFB224', '#FFB224', 'ok', '8.9:1', 'ok', '11:1', '--ts-accent', true],
+      ['Label on accent', '#1A1206', '#1A1206', '#000000', '#000000', 'ok', '8.6:1', 'ok', '11:1', '--ts-on-accent', true],
+      ['Hairline / border', '#5C4418', '1 px', '#FFB224', '2 px', 'bad', '2.1:1', 'ok', '11:1', '--ts-line', true],
+      ['Display font', '', 'Fraunces 700', '', 'Fraunces 700', '', '', '', '', '--ts-font-display', false],
+      ['Body font / size', '', 'DM Sans 15 / 400', '', 'DM Sans 17 / 500', '', '', '', '', '--ts-font-body', false],
+      ['Corner radius', '', '14 px', '', '14 px', '', '', '', '', '--ts-radius-m', false],
+      ['Glass blur', '', '18 px', '', 'off (solid)', '', '', '', '', '--ts-glass', false],
+      ['Motion', '', '300 ms ease-out', '', '150 ms, no parallax', '', '', '', '', '--ts-motion', false]
+    ];
+    const tokens = T.map((r) => ({ n: r[0], a: r[1], av: r[2], b: r[3], bv: r[4], ca: r[5], cav: r[6], cb: r[7], cbv: r[8], v: r[9], showSw: r[10] ? 'block' : 'none' }));
+    const S = [
+      ['Hero', 'Then | Now split', 'inline', 'all', '—', false],
+      ['Status', 'Ring gauge', 'inline', 'all', '—', false],
+      ['Rich text', 'Key sentence first', 'expandable', 'all', '—', false],
+      ['Fun fact', 'Flip card', 'inline', 'all', '2 overrides', true],
+      ['Audio guide', 'Mini-player', 'inline', 'all', '—', false],
+      ['3D model', 'Turntable', 'takeover', '1760–1800, Hoje', '—', false],
+      ['Knowledge check', 'Swipe T/F', 'expandable', 'all', '—', false]
+    ];
+    const stack = S.map((r) => ({ b: r[0], v: r[1], d: r[2], e: r[3], o: r[4], bg: r[5] ? '#2C5D87' : 'transparent', aaBg: r[5] ? '#F59E0B' : '#585858', oc: r[5] ? '#FFFFFF' : '#8E8E8E' }));
+    const tick = '✓';
+    const O = [
+      ['Accent', '#B8A4F4', '#B8A4F4', true],
+      ['Surface', '#221A2E', '#221A2E', true],
+      ['Display font', '', 'Fraunces 400 italic', false],
+      ['Corner radius', '', '12 px (inherit 14)', false],
+      ['Border width', '', 'inherit', false],
+      ['Motion', '', 'inherit', false]
+    ];
+    const overrides = O.map((r, i) => ({ n: r[0], c: r[1], v: r[2], sw: r[1] ? 'block' : 'none', chk: r[3] || i === 3 ? tick : '', op: r[3] || i === 3 ? 1 : 0.5, lc: r[3] || i === 3 ? '#FFFFFF' : '#9E9E9E' }));
+    return { tokens, stack, overrides };
+  }
+}
+</script>
+</body>
+</html>

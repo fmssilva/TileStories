@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Block Config Schema</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#07080A;font-family:'Manrope',sans-serif;color:#F4F1EA}
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#F0B35A}
+.row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid rgba(255,255,255,0.06);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.4}
+</style>
+</helmet>
+<div style="width: 1440px; height: 3700px; box-sizing: border-box; padding: 60px; background: #07080A; display: flex; flex-direction: column; gap: 40px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end">
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="tag">Unity · ScriptableObject per block</span><h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; letter-spacing: -0.02em">Block <span style="font-style: italic; color: #F0B35A">config</span> schema</h1></div>
+<p style="margin: 0; width: 460px; font-size: 14px; line-height: 1.6; color: #A29E96">Every block = a data asset (fields below) + a view prefab. The card is an ordered list of block assets. Each block inherits the base contract and the global theme, and can override any token.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(240,179,90,0.3); padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<span class="tag">Base contract · every block</span>
+<span style="font-family: 'Fraunces', serif; font-size: 24px">PoiBlockData</span>
+<div>
+<sc-for list="{{base}}" as="f" hint-placeholder-count="10"><div class="row"><span>{{f.k}}</span><span style="color: #A29E96; text-align: right">{{f.t}}</span></div></sc-for>
+</div>
+</div>
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(111,214,200,0.3); padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<span class="tag" style="color: #6FD6C8">Theme tokens · override chain</span>
+<span style="font-family: 'Fraunces', serif; font-size: 24px">PoiTheme</span>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700">
+<span style="padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,0.08)">Global theme</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A867E" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg><span style="padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,0.08)">Card theme</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A867E" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg><span style="padding: 8px 12px; border-radius: 10px; background: rgba(111,214,200,0.18); color: #6FD6C8">Block override</span>
+</div>
+<div style="display: flex; gap: 6px">
+<span style="flex-grow: 1; height: 34px; border-radius: 8px; background: #0B0C0F; border: 1px solid rgba(255,255,255,0.15)"></span><span style="flex-grow: 1; height: 34px; border-radius: 8px; background: #1C1D22"></span><span style="flex-grow: 1; height: 34px; border-radius: 8px; background: #F4F1EA"></span><span style="flex-grow: 1; height: 34px; border-radius: 8px; background: #A29E96"></span><span style="flex-grow: 1; height: 34px; border-radius: 8px; background: #F0B35A"></span><span style="flex-grow: 1; height: 34px; border-radius: 8px; background: #6FD6C8"></span>
+</div>
+<div>
+<sc-for list="{{theme}}" as="f" hint-placeholder-count="8"><div class="row"><span>{{f.k}}</span><span style="color: #A29E96; text-align: right">{{f.t}}</span></div></sc-for>
+</div>
+</div>
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(255,255,255,0.12); padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<span class="tag" style="color: #F4F1EA">Container</span>
+<span style="font-family: 'Fraunces', serif; font-size: 24px">PoiCardData</span>
+<div>
+<sc-for list="{{card}}" as="f" hint-placeholder-count="9"><div class="row"><span>{{f.k}}</span><span style="color: #A29E96; text-align: right">{{f.t}}</span></div></sc-for>
+</div>
+</div>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding-top: 10px"><h2 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 34px">Block library</h2><span class="mono" style="font-size: 12px; color: #8A867E">28 blocks · numbers match the card</span></div>
+
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; align-items: start">
+<sc-for list="{{blocks}}" as="b" hint-placeholder-count="8">
+<div style="border-radius: 20px; background: #111216; border: 1px solid rgba(255,255,255,0.08); padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono" style="font-size: 12px; color: #F0B35A">{{b.n}}</span><span style="padding: 3px 9px; border-radius: 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: {{b.catBg}}; color: {{b.catFg}}">{{b.cat}}</span></div>
+<span style="font-family: 'Fraunces', serif; font-size: 21px">{{b.name}}</span>
+<span style="font-size: 12px; line-height: 1.5; color: #A29E96">{{b.desc}}</span>
+<div>
+<sc-for list="{{b.fields}}" as="f" hint-placeholder-count="5"><div class="row"><span>{{f.k}}</span><span style="color: #A29E96; text-align: right">{{f.t}}</span></div></sc-for>
+</div>
+<span class="mono" style="font-size: 10px; color: #8A867E; padding-top: 4px">modes · {{b.modes}}</span>
+</div>
+</sc-for>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const f = (arr) => arr.map((s) => { const i = s.indexOf('|'); return { k: s.slice(0, i), t: s.slice(i + 1) }; });
+    const cats = {
+      Core: ['rgba(244,241,234,0.12)', '#F4F1EA'],
+      Text: ['rgba(162,158,150,0.18)', '#D9D5CD'],
+      Media: ['rgba(200,85,61,0.22)', '#F2A18E'],
+      AR: ['rgba(111,214,200,0.18)', '#6FD6C8'],
+      Story: ['rgba(184,164,244,0.18)', '#CDBEFA'],
+      Play: ['rgba(240,179,90,0.18)', '#F0B35A'],
+      Visit: ['rgba(111,163,122,0.2)', '#9FD0AA'],
+      Custom: ['rgba(240,179,90,0.08)', '#F0B35A']
+    };
+    const raw = [
+      ['01','Hero Header','Core','Top media with title, category and AR anchor status. Collapses into a sticky title bar.','inline',['media|Image | Video | Model','title|string','subtitle|string','category|CategoryTag','showAnchorBadge|bool = true','parallax|float 0–1 = 0.35','collapseOnScroll|bool = true','overlay|enum fade|solid|none']],
+      ['02','Quick Facts','Core','Short label/value pairs at a glance.','inline · compact',['facts|List<Fact{icon,label,value}>','layout|enum chips|grid|row','scrollable|bool = true','maxVisible|int = 4']],
+      ['03','Action Bar','Core','Primary actions, each firing an event the app handles.','inline · sticky',['actions|List<Action{icon,label,eventId}>','primaryIndex|int = -1','style|enum circle|pill|icon','sticky|bool = false']],
+      ['04','Section Nav','Core','Jumps between block groups. Becomes tabs in tab layout.','inline · sticky',['sections|List<GroupRef>','mode|enum anchors|tabs','sticky|bool = true','showCounts|bool = false']],
+      ['05','Rich Text','Text','Markdown body with optional drop cap and read-more.','inline · expandable',['body|LocalizedMarkdown','collapsedLines|int = 5','dropCap|bool = false','showReadTime|bool = true','ttsEnabled|bool = false']],
+      ['06','Fun Fact','Text','Highlighted fact, can hide behind a reveal gesture.','inline · compact',['facts|List<LocalizedString>','reveal|enum none|flip|scratch|tap','icon|Sprite','cycle|bool = true']],
+      ['07','Image Gallery','Media','Swipeable or grid set of images with captions.','inline · expandable · takeover',['images|List<Img{src,caption,credit}>','layout|enum carousel|grid|stack|masonry','peek|float = 0.15','autoplay|bool = false','interval|float = 4','zoomOnTap|bool = true']],
+      ['08','Hotspot Image','Media','Image with tappable numbered points that explain details.','inline · expandable',['image|Texture2D','hotspots|List<Hot{pos:Vector2,title,body,linkBlock}>','numbered|bool = true','pulse|bool = true','detailStyle|enum popover|sheet']],
+      ['09','Before / After','Media','Drag slider comparing two states of the wall.','inline · expandable',['before|Img','after|Img','labels|string[2]','startPos|float = 0.5','orientation|enum horizontal|vertical']],
+      ['10','Video','Media','Clip with poster, chapters and captions.','inline · expandable · takeover',['clip|VideoClip | url','poster|Texture2D','chapters|List<Chapter{t,label}>','previewMuted|bool = true','captions|SubtitleAsset','loop|bool = false']],
+      ['11','360° Panorama','Media','Equirectangular view controlled by gyro or drag.','inline · expandable · takeover',['panorama|Texture2D (equirect)','initialYaw|float = 0','gyro|bool = true','fov|float = 70','hotspots|List<Hot3D>','showCompass|bool = true']],
+      ['12','3D Model','Media','Orbitable model with explode view and AR placement.','inline · expandable · takeover',['model|GameObject prefab | glb','autoRotate|bool = true','allowArPlace|bool = true','explodeView|bool = false','lighting|enum studio|scene|wall','annotations|List<Hot3D>']],
+      ['13','Audio Guide','Media','Narration with waveform, speed and transcript.','inline · compact · mini-player',['clip|AudioClip','transcript|LocalizedMarkdown','voices|List<Voice>','speeds|float[] = 0.75,1,1.5','backgroundPlay|bool = true','showWaveform|bool = true']],
+      ['14','AR Time Travel','AR','Anchored overlay rebuilding the wall in chosen eras.','inline · takeover',['eras|List<Era{year,label,overlayPrefab}>','anchor|enum poi|wallPlane|imageTarget','alignHint|bool = true','crossfade|float = 0.6','accent|Color = theme.accent2']],
+      ['15','Pull Quote','Text','Large quote with attribution.','inline',['quote|LocalizedString','author|string','source|string','style|enum serif|bold|minimal']],
+      ['16','Story Chapters','Story','Short narrative steps with media and progress.','inline · pages · takeover',['chapters|List<Ch{title,body,media}>','progress|enum segments|dots|none','autoAdvance|bool = false','duration|float = 8','narration|AudioClip?']],
+      ['17','Timeline','Story','Dated events leading to the present moment.','inline · expandable',['events|List<Ev{date,title,body,media}>','orientation|enum vertical|horizontal','highlightNow|bool = true','linkToAR|bool = false']],
+      ['18','Person Profile','Story','Artist, historian or character linked to the POI.','inline · compact',['person|PersonAsset','role|string','links|List<Link>','layout|enum row|card','followEvent|string']],
+      ['19','Quiz','Play','Question set with feedback and rewards.','inline · expandable · takeover',['questions|List<Q{prompt,options,correct,explain}>','rewardXp|int = 50','showExplanation|bool = true','allowRetry|bool = true','shuffle|bool = true']],
+      ['20','Wall Hunt','Play','Find targets on the real wall with the camera.','inline · takeover',['targets|List<Target{imageRef,hint}>','mode|enum camera|image','timeLimit|float? = null','rewardBadge|BadgeAsset','hintDelay|float = 20']],
+      ['21','Collectible Badge','Play','Earned and locked badges tied to conditions.','inline · compact',['badge|BadgeAsset','unlock|enum visit|quiz|hunt|time|custom','lockedStyle|enum silhouette|blur|lock','celebrate|enum confetti|glow|none']],
+      ['22','Poll / Reaction','Play','Single question with live community results.','inline · compact',['question|LocalizedString','options|List<LocalizedString>','showResults|enum afterVote|always|never','allowChange|bool = false','provider|IPollService']],
+      ['23','Nearby Map','Visit','Mini map with wall route, you, and nearby POIs.','inline · expandable',['center|GeoCoord','pois|List<PoiRef>','route|Polyline?','style|enum dark|paper|satellite','showWalkTime|bool = true','interactive|bool = false']],
+      ['24','Related POIs','Visit','Carousel of other points by tag, artist or distance.','inline',['source|enum manual|tag|nearby|artist','items|List<PoiRef>','cardSize|enum s|m|l','peek|float = 0.15','maxItems|int = 8']],
+      ['25','Visitor Notes','Visit','Short community notes left at the wall.','inline · expandable',['provider|INotesService','maxVisible|int = 3','allowPost|bool = true','moderation|enum pre|post|none','anonymous|bool = false']],
+      ['26','Practical Info','Visit','Icon rows: hours, access, address, tips.','inline · compact',['rows|List<Row{icon,label,value}>','showOpenNow|bool = false','accessibility|AccessInfo']],
+      ['27','Sources & Credits','Visit','Attribution for media and research.','inline · compact',['items|List<Src{title,author,url,license}>','collapsed|bool = true','visibleCount|int = 3']],
+      ['28','Custom Block','Custom','Developer slot: your own data class and prefab, same contract.','any',['data|PoiBlockData subclass','view|PoiBlockView prefab','inheritsTheme|bool = true','height|enum auto|fixed','editorIcon|Texture2D']]
+    ];
+    const blocks = raw.map((r) => ({ n: r[0], name: r[1], cat: r[2], desc: r[3], modes: r[4], fields: f(r[5]), catBg: cats[r[2]][0], catFg: cats[r[2]][1] }));
+    const base = f(['id|string (guid)','group|enum About|Media|Stories|Play|Visit','displayMode|enum inline|compact|expandable|takeover|locked|hidden','visibility|Rule? (distance, time, locale, unlock)','order|int','themeOverride|PoiThemeOverride?','spacing|enum tight|normal|loose','enterAnim|enum fade|rise|scale|none','parallax|float 0–1 = 0','bentoSize|enum 1x1|2x1|1x2|2x2','analyticsId|string','offlineReady|bool = true']);
+    const theme = f(['colors|bg, surface, text, muted, accent, accent2','type|display, body, mono + scale','radius|s 10 · m 16 · l 22','glass|blur 18 · opacity 0.05 · stroke 0.09','elevation|shadow presets 0–3','motion|duration, easing, reducedMotion','haptics|light, success, error']);
+    const card = f(['poi|PoiRef','layout|enum scroll|tabs|pages|accordion|bento','container|enum fullscreen|sheet','sheetDetents|float[] = 0.18, 0.5, 1','blocks|List<PoiBlockData>','theme|PoiTheme','heroCollapse|bool = true','openAnim|enum morphFromPin|slideUp|fade','locale|string']);
+    return { blocks, base, theme, card };
+  }
+}
+</script>
+</body>
+</html>

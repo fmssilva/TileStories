@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Card Lifecycle</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,700;1,9..144,300&amp;family=DM+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#0C0A08;font-family:'DM Sans',sans-serif;color:#F0E6CC}
+button{font-family:inherit}
+.ph{position:relative;width:300px;height:620px;border-radius:40px;overflow:hidden;border:1px solid rgba(240,230,204,0.14);box-shadow:0 30px 60px rgba(0,0,0,0.55);flex-shrink:0}
+.cam{position:absolute;inset:0;background-color:#23324B;background-image:linear-gradient(rgba(240,230,204,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(240,230,204,0.07) 1px,transparent 1px),radial-gradient(circle at 30% 35%,rgba(240,230,204,0.16),transparent 40%),radial-gradient(circle at 72% 60%,rgba(47,107,179,0.45),transparent 45%);background-size:26px 26px,26px 26px,100% 100%,100% 100%}
+.mk{position:absolute;width:18px;height:18px;border-radius:9px;box-sizing:border-box}
+.sheet{position:absolute;left:0;right:0;bottom:0;border-radius:26px 26px 0 0;background:#16130F;border-top:1px solid rgba(240,230,204,0.14);box-shadow:0 -16px 40px rgba(0,0,0,0.5);padding:10px 16px 16px;display:flex;flex-direction:column;gap:10px;box-sizing:border-box}
+.grab{align-self:center;width:38px;height:4px;border-radius:2px;background:rgba(240,230,204,0.3)}
+.cap{display:flex;flex-direction:column;gap:5px;padding-top:16px}
+.tg{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#F59E0B}
+.nm{font-family:'Fraunces',serif;font-size:20px}
+.ds{font-size:12px;line-height:1.5;color:#BDB4A0}
+.m{font-size:11px;color:#BDB4A0}
+.h{font-family:'Fraunces',serif;font-size:18px;line-height:1.15}
+.chip{padding:4px 9px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(240,230,204,0.08);color:#CFC5B1;white-space:nowrap}
+.act{flex-grow:1;flex-basis:0;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10px;font-weight:600;color:#CFC5B1}
+.ai{width:40px;height:40px;border-radius:20px;background:rgba(240,230,204,0.07);border:1px solid rgba(240,230,204,0.1);display:flex;align-items:center;justify-content:center}
+.sk{border-radius:10px;background:linear-gradient(90deg,rgba(240,230,204,0.05),rgba(240,230,204,0.12),rgba(240,230,204,0.05));background-size:200% 100%;animation:sh 1.6s linear infinite}
+@keyframes sh{from{background-position:200% 0}to{background-position:-200% 0}}
+@keyframes pr{0%{box-shadow:0 0 0 0 rgba(245,158,11,0.6)}100%{box-shadow:0 0 0 14px rgba(245,158,11,0)}}
+.pr{animation:pr 1.8s ease-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.bob{animation:bob 1.6s ease-in-out infinite}
+</style>
+</helmet>
+<div style="width: 1764px; height: 2020px; box-sizing: border-box; padding: 60px; background: #0C0A08; display: flex; flex-direction: column; gap: 44px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="tg">Container · bottom sheet over the camera</span><h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; letter-spacing: -0.02em">From marker to <span style="font-style: italic; color: #F59E0B">card</span>, and back</h1></div>
+<p style="margin: 0; width: 620px; font-size: 14px; line-height: 1.6; color: #A89F8C">The plan’s confirmed pattern: tap a marker, get a small floating label and a sheet that never auto-covers more than 40% of the screen. Below: each stop of that flow plus the states the card must handle.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 36px; row-gap: 56px">
+
+<!-- 1 MARKER + LABEL -->
+<div>
+<div class="ph"><div class="cam"></div>
+<span class="mk" style="left: 50px; top: 120px; background: #B8A4F4; border: 2px solid #F59E0B"></span>
+<span class="mk" style="left: 210px; top: 90px; background: #E8866A; border: 2px dashed #D9782A"></span>
+<span class="mk" style="left: 90px; top: 300px; background: #8FB8F0"></span>
+<span class="mk" style="left: 230px; top: 380px; background: #9FD0AA; border: 2px dotted #C2562E"></span>
+<span class="mk pr" style="left: 140px; top: 220px; width: 26px; height: 26px; border-radius: 13px; background: #E8866A; border: 3px solid #D9782A"></span>
+<span style="position: absolute; left: 88px; top: 180px; padding: 7px 12px; border-radius: 14px; background: rgba(12,10,8,0.85); border: 1px solid rgba(240,230,204,0.2); font-size: 12px; font-weight: 700; white-space: nowrap">Castelo de São J…</span>
+<span style="position: absolute; left: 20px; right: 20px; bottom: 30px; text-align: center; padding: 9px; border-radius: 14px; background: rgba(12,10,8,0.7); font-size: 11px; color: #CFC5B1">Tap the label or the marker again to open</span>
+</div>
+<div class="cap"><span class="tg">1 · marker → label</span><span class="nm">Floating label</span><span class="ds">~40 px, name only, cut at ~15 characters, anchored to the marker in world space.</span></div>
+</div>
+
+<!-- 2 PEEK -->
+<div>
+<div class="ph"><div class="cam"></div>
+<span class="mk pr" style="left: 140px; top: 200px; width: 26px; height: 26px; border-radius: 13px; background: #E8866A; border: 3px solid #D9782A"></span>
+<div class="sheet" style="height: 128px">
+<span class="grab"></span>
+<div style="display: flex; gap: 12px; align-items: center"><span style="flex-shrink: 0; width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #1B2D4F, #3A2F20)"></span><div style="display: flex; flex-direction: column; gap: 5px; flex-grow: 1"><span class="h">Castelo de São Jorge</span><div style="display: flex; gap: 4px"><span class="chip">Military</span><span class="chip">60% destroyed</span></div></div></div>
+<span class="m" style="text-align: center">Swipe up for more</span>
+</div>
+</div>
+<div class="cap"><span class="tg">2 · peek · ~20%</span><span class="nm">Peek</span><span class="ds">Compact header only (Hero 01·E). The wall stays almost fully visible.</span></div>
+</div>
+
+<!-- 3 HALF -->
+<div>
+<div class="ph"><div class="cam"></div>
+<span class="mk pr" style="left: 140px; top: 150px; width: 26px; height: 26px; border-radius: 13px; background: #E8866A; border: 3px solid #D9782A"></span>
+<div style="position: absolute; right: 6px; top: 372px; display: flex; align-items: center; gap: 4px"><span class="m" style="color: #F59E0B">40%</span><span style="width: 14px; height: 1px; background: #F59E0B"></span></div>
+<div class="sheet" style="height: 248px">
+<span class="grab"></span>
+<div style="display: flex; gap: 12px; align-items: center"><span style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #1B2D4F, #3A2F20)"></span><div style="display: flex; flex-direction: column; gap: 4px"><span class="h" style="font-size: 17px">Castelo de São Jorge</span><div style="display: flex; gap: 4px"><span class="chip">Military</span><span class="chip">60% destroyed</span></div></div></div>
+<p style="margin: 0; font-size: 12px; line-height: 1.5; color: #CFC5B1">A hilltop fortress that watched the river for centuries. Damaged in 1755, later rebuilt. [PLACEHOLDER]</p>
+<div style="display: flex">
+<span class="act"><span class="ai"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F0E6CC" stroke-width="1.8"><path d="M4 15v-3a8 8 0 0 1 16 0v3M4 15h3v5H4zM17 15h3v5h-3z"></path></svg></span>Listen</span>
+<span class="act"><span class="ai"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F0E6CC" stroke-width="1.8" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4z"></path></svg></span>Save</span>
+<span class="act"><span class="ai"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F0E6CC" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>1755</span>
+<span class="act"><span class="ai" style="background: #F59E0B; border: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1206" stroke-width="2" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"></path></svg></span>In AR</span>
+</div>
+</div>
+</div>
+<div class="cap"><span class="tg">3 · half · ≤ 40%</span><span class="nm">Half (default)</span><span class="ds">Summary + actions. The ceiling for anything that opens by itself.</span></div>
+</div>
+
+<!-- 4 FULL -->
+<div>
+<div class="ph" style="background: #16130F">
+<div style="position: absolute; left: 0; right: 0; top: 0; height: 170px; background: linear-gradient(160deg, #1B2D4F, #3A2F20)"></div>
+<div style="position: absolute; left: 0; right: 0; top: 110px; height: 60px; background: linear-gradient(180deg, rgba(22,19,15,0), #16130F)"></div>
+<button aria-label="Collapse" style="position: absolute; left: 14px; top: 16px; width: 36px; height: 36px; border-radius: 18px; background: rgba(12,10,8,0.6); border: 1px solid rgba(240,230,204,0.2); color: #F0E6CC; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></button>
+<div style="position: absolute; left: 16px; right: 16px; top: 140px; display: flex; flex-direction: column; gap: 10px">
+<span class="h" style="font-size: 24px">Castelo de São Jorge</span>
+<div style="display: flex; gap: 4px"><span class="chip">About</span><span class="chip" style="background: #F59E0B; color: #1A1206">Media</span><span class="chip">Stories</span><span class="chip">Play</span></div>
+<span class="sk" style="height: 70px; animation: none; background: rgba(240,230,204,0.06)"></span>
+<span style="height: 110px; border-radius: 12px; background: rgba(232,134,106,0.14)"></span>
+<span style="height: 80px; border-radius: 12px; background: rgba(184,164,244,0.14)"></span>
+<span style="height: 80px; border-radius: 12px; background: rgba(143,184,240,0.14)"></span>
+</div>
+</div>
+<div class="cap"><span class="tg">4 · full · user-expanded</span><span class="nm">Full card</span><span class="ds">Only when the visitor drags up. Any layout and nav element from the catalogs lives here.</span></div>
+</div>
+
+<!-- 5 DISMISS -->
+<div>
+<div class="ph"><div class="cam"></div>
+<span style="position: absolute; left: 110px; top: 150px; width: 60px; height: 60px; border-radius: 30px; border: 2px solid rgba(240,230,204,0.6)"></span>
+<span style="position: absolute; left: 124px; top: 164px; width: 32px; height: 32px; border-radius: 16px; background: rgba(240,230,204,0.3)"></span>
+<span style="position: absolute; left: 70px; top: 222px; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 10px; background: rgba(12,10,8,0.7)">tap the wall to close</span>
+<div class="sheet" style="height: 210px; opacity: 0.85">
+<span class="grab"></span>
+<div class="bob" style="align-self: center; display: flex; flex-direction: column; align-items: center; gap: 4px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round"><path d="M12 4v14M6 12l6 6 6-6"></path></svg><span class="m" style="color: #F59E0B">or swipe down</span></div>
+<span style="height: 40px; border-radius: 10px; background: rgba(240,230,204,0.06)"></span>
+<span style="height: 50px; border-radius: 10px; background: rgba(240,230,204,0.06)"></span>
+</div>
+</div>
+<div class="cap"><span class="tg">5 · dismiss</span><span class="nm">Two ways out</span><span class="ds">Swipe down and tap-elsewhere both close it. Audio keeps playing in the mini-player.</span></div>
+</div>
+
+<!-- 6 MICRO CARD -->
+<div>
+<div class="ph"><div class="cam"></div>
+<span class="mk pr" style="left: 200px; top: 240px; width: 16px; height: 16px; border-radius: 8px; background: #8FB8F0"></span>
+<div class="sheet" style="height: 150px">
+<span class="grab"></span>
+<div style="display: flex; justify-content: space-between; align-items: flex-start"><div style="display: flex; flex-direction: column; gap: 3px"><span class="h" style="font-size: 16px">Casa dos Bicos</span><span class="m">Secondary point · 1 of 140</span></div><span class="chip">Civic</span></div>
+<p style="margin: 0; font-size: 12px; line-height: 1.5; color: #CFC5B1">One-line summary only. [PLACEHOLDER]</p>
+<span style="font-size: 11px; color: #F59E0B; font-weight: 700">Part of: Vida Quotidiana circuit ›</span>
+</div>
+</div>
+<div class="cap"><span class="tg">6 · hierarchy level</span><span class="nm">Micro card</span><span class="ds">Secondary POIs get a smaller template; hero POIs get the full block stack.</span></div>
+</div>
+
+<!-- 7 LOADING OFFLINE -->
+<div>
+<div class="ph" style="background: #16130F">
+<div style="position: absolute; left: 16px; right: 16px; top: 18px; padding: 9px 12px; border-radius: 12px; background: rgba(240,230,204,0.07); display: flex; gap: 8px; align-items: center; font-size: 11px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A89F8C" stroke-width="2" stroke-linecap="round"><path d="M2 8a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M3 3l18 18"></path></svg>Offline · text and images still work</div>
+<div style="position: absolute; left: 16px; right: 16px; top: 70px; display: flex; flex-direction: column; gap: 10px">
+<span class="sk" style="height: 150px"></span>
+<span class="sk" style="height: 20px; width: 70%"></span>
+<span class="sk" style="height: 12px"></span>
+<span class="sk" style="height: 12px; width: 85%"></span>
+<div style="height: 130px; border-radius: 14px; background: rgba(240,230,204,0.04); border: 1px dashed rgba(240,230,204,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px"><span style="font-size: 12px; font-weight: 700">3D model · 2.4 MB</span><div style="width: 140px; height: 4px; border-radius: 2px; background: rgba(240,230,204,0.1)"><div style="width: 45%; height: 4px; border-radius: 2px; background: #F59E0B"></div></div><span class="m">Loads on open, unloads on close</span></div>
+</div>
+</div>
+<div class="cap"><span class="tg">7 · loading &amp; offline</span><span class="nm">Skeleton + lazy media</span><span class="ds">The plan’s memory rule made visible: media is fetched per card, never preloaded.</span></div>
+</div>
+
+<!-- 8 ERA CHANGE -->
+<div>
+<div class="ph"><div class="cam" style="filter: sepia(0.5)"></div>
+<span class="mk" style="left: 60px; top: 120px; background: rgba(240,230,204,0.3); border: 2px dashed rgba(240,230,204,0.4)"></span>
+<span class="mk pr" style="left: 140px; top: 140px; width: 24px; height: 24px; border-radius: 12px; background: #E8866A; border: 3px solid #F59E0B"></span>
+<div style="position: absolute; left: 12px; right: 12px; top: 228px; padding: 10px 12px; border-radius: 16px; background: rgba(12,10,8,0.82); display: flex; flex-direction: column; gap: 8px">
+<div style="position: relative; height: 18px"><div style="position: absolute; left: 0; right: 0; top: 8px; height: 2px; background: rgba(240,230,204,0.2)"></div><span style="position: absolute; left: 0; top: 2px; width: 14px; height: 14px; border-radius: 7px; background: #F59E0B"></span><span style="position: absolute; left: 33%; top: 5px; width: 8px; height: 8px; border-radius: 4px; background: rgba(240,230,204,0.5)"></span><span style="position: absolute; left: 66%; top: 5px; width: 8px; height: 8px; border-radius: 4px; background: rgba(240,230,204,0.5)"></span><span style="position: absolute; right: 0; top: 5px; width: 8px; height: 8px; border-radius: 4px; background: rgba(240,230,204,0.5)"></span></div>
+<span style="font-size: 12px; font-weight: 700">Lisboa, ~1700</span>
+</div>
+<div class="sheet" style="height: 280px">
+<span class="grab"></span>
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="h" style="font-size: 17px">Castelo de São Jorge</span><span class="chip" style="background: rgba(245,158,11,0.15); color: #F59E0B">~1700</span></div>
+<span style="height: 60px; border-radius: 10px; background: rgba(232,134,106,0.14)"></span>
+<div style="border-radius: 12px; border: 1px dashed rgba(240,230,204,0.2); padding: 10px; display: flex; justify-content: space-between; align-items: center"><span class="m">3D reconstruction · from 1760</span><span style="font-size: 11px; font-weight: 700; color: #F59E0B">Jump ›</span></div>
+<span style="height: 50px; border-radius: 10px; background: rgba(184,164,244,0.14)"></span>
+</div>
+</div>
+<div class="cap"><span class="tg">8 · lapse change</span><span class="nm">Era switch, card open</span><span class="ds">Slider above the sheet; blocks crossfade in 150 ms, out-of-era blocks collapse.</span></div>
+</div>
+
+<!-- 9 BLOCK TAKEOVER -->
+<div>
+<div class="ph" style="background: #0C0A08">
+<div style="position: absolute; left: 0; right: 0; top: 0; height: 64px; padding: 18px 12px 0; box-sizing: border-box; display: flex; align-items: center; gap: 8px; background: rgba(12,10,8,0.9)">
+<button aria-label="Back to card" style="width: 36px; height: 36px; border-radius: 18px; background: rgba(240,230,204,0.1); border: none; color: #F0E6CC; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<span style="font-size: 12px; color: #BDB4A0">Castelo</span><span style="font-size: 12px; color: #7D7564">›</span><span style="font-size: 12px; font-weight: 800">3D model</span>
+</div>
+<div style="position: absolute; left: 0; right: 0; top: 64px; bottom: 120px; background: radial-gradient(circle at 50% 45%, rgba(245,158,11,0.25), #0C0A08 70%); display: flex; align-items: center; justify-content: center">
+<svg width="170" height="170" viewBox="0 0 160 160" aria-hidden="true"><path d="M80 20 L140 50 L80 80 L20 50 Z" fill="#8C7A66"></path><path d="M20 50 L80 80 L80 140 L20 110 Z" fill="#5E5144"></path><path d="M140 50 L80 80 L80 140 L140 110 Z" fill="#74655A"></path></svg>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 120px; padding: 14px 12px; box-sizing: border-box; background: #16130F; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; gap: 6px"><span class="chip">Photos</span><span class="chip">Video</span><span class="chip">360°</span><span class="chip" style="background: #F0E6CC; color: #16130F">3D</span></div>
+<div style="display: flex; gap: 6px"><button style="flex-grow: 1; height: 40px; border-radius: 20px; background: rgba(240,230,204,0.1); border: none; color: #F0E6CC; font-size: 12px; font-weight: 700">Rotate</button><button style="flex-grow: 1; height: 40px; border-radius: 20px; background: #F59E0B; border: none; color: #1A1206; font-size: 12px; font-weight: 800">Place in AR</button></div>
+</div>
+</div>
+<div class="cap"><span class="tg">9 · block takeover</span><span class="nm">Block full screen</span><span class="ds">Heavy blocks open over the card; breadcrumb goes back, chips jump to sibling media of the same POI.</span></div>
+</div>
+
+<!-- 10 AFTER CLOSE -->
+<div>
+<div class="ph"><div class="cam"></div>
+<span class="mk" style="left: 50px; top: 120px; background: #B8A4F4; border: 2px solid #F59E0B"></span>
+<span class="mk" style="left: 210px; top: 90px; background: #E8866A; border: 2px dashed #D9782A"></span>
+<span style="position: absolute; left: 136px; top: 216px; width: 30px; height: 30px; border-radius: 15px; background: #E8866A; border: 3px solid #D9782A; box-sizing: border-box; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0C0A08" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span>
+<span style="position: absolute; left: 96px; top: 176px; padding: 6px 11px; border-radius: 12px; background: rgba(12,10,8,0.85); font-size: 11px; font-weight: 700">Visited · reopen</span>
+<div style="position: absolute; left: 12px; right: 12px; bottom: 22px; border-radius: 18px; background: #221D16; border: 1px solid rgba(245,158,11,0.35); padding: 10px 12px; display: flex; align-items: center; gap: 10px">
+<span style="width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #1B2D4F, #3A2F20)"></span>
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 700">Castelo de São Jorge</span><span style="height: 3px; border-radius: 2px; background: rgba(240,230,204,0.15)"><span style="display: block; width: 60%; height: 3px; border-radius: 2px; background: #F59E0B"></span></span></div>
+<span style="width: 34px; height: 34px; border-radius: 17px; background: #F59E0B; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="#1A1206"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg></span>
+</div>
+</div>
+<div class="cap"><span class="tg">10 · after close</span><span class="nm">Back to the wall</span><span class="ds">The marker keeps a visited tick; narration continues in the mini-player until it ends or another POI takes over.</span></div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1764,"height":2020}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

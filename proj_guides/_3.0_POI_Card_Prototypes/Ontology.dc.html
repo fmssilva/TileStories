@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Block Ontology</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#07080A;font-family:'Manrope',sans-serif;color:#F4F1EA}
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#F0B35A}
+.h2{margin:0;font-family:'Fraunces',serif;font-weight:300;font-size:34px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid rgba(255,255,255,0.06);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.4}
+.chip{padding:5px 10px;border-radius:9px;font-size:12px;font-weight:600;background:rgba(255,255,255,0.06);color:#D9D5CD}
+</style>
+</helmet>
+<div style="width: 1440px; height: 2480px; box-sizing: border-box; padding: 60px; background: #07080A; display: flex; flex-direction: column; gap: 44px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end">
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="tag">Ontology · how blocks are organised</span><h1 style="margin: 0; font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; letter-spacing: -0.02em">Every block in <span style="font-style: italic; color: #F0B35A">two taps</span></h1></div>
+<p style="margin: 0; width: 500px; font-size: 14px; line-height: 1.6; color: #A29E96">Blocks are grouped by the visitor's intent (the question they are asking), not by file type. Format, time and requirements are facets on top, so any nav element can also filter or pivot by them.</p>
+</div>
+
+<!-- LEVELS -->
+<div style="display: flex; align-items: stretch; gap: 16px">
+<div style="flex-grow: 1; flex-basis: 0; border-radius: 20px; background: #111216; border: 1px solid rgba(255,255,255,0.1); padding: 20px; display: flex; flex-direction: column; gap: 8px"><span class="tag">L1 · Family · tap 1</span><span style="font-family: 'Fraunces', serif; font-size: 24px">Media</span><span style="font-size: 13px; color: #A29E96; line-height: 1.5">8 fixed intents. Always what the primary nav shows (tabs, dock, grid, FAB).</span></div>
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8A867E" stroke-width="1.6" style="align-self: center" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+<div style="flex-grow: 1; flex-basis: 0; border-radius: 20px; background: #111216; border: 1px solid rgba(255,255,255,0.1); padding: 20px; display: flex; flex-direction: column; gap: 8px"><span class="tag">L2 · Kind · tap 2</span><span style="font-family: 'Fraunces', serif; font-size: 24px">360° panorama</span><span style="font-size: 13px; color: #A29E96; line-height: 1.5">Extensible list per family. Shown as chips, a sheet, or a sub-grid.</span></div>
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8A867E" stroke-width="1.6" style="align-self: center" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+<div style="flex-grow: 1; flex-basis: 0; border-radius: 20px; background: #111216; border: 1px solid rgba(255,255,255,0.1); padding: 20px; display: flex; flex-direction: column; gap: 8px"><span class="tag">L3 · Block instance</span><span style="font-family: 'Fraunces', serif; font-size: 24px">“Inside the gatehouse”</span><span style="font-size: 13px; color: #A29E96; line-height: 1.5">The actual block. Nav scrolls to it or opens it. Several instances can share a kind.</span></div>
+<div style="width: 330px; flex-shrink: 0; border-radius: 20px; background: rgba(240,179,90,0.08); border: 1px dashed rgba(240,179,90,0.4); padding: 20px; display: flex; flex-direction: column; gap: 8px"><span class="tag">Collapse rules</span>
+<span style="font-size: 13px; line-height: 1.55; color: #D9D5CD">Empty family → hidden.<br>Family with one block → L2 skipped, 1 tap.<br>Kind with one instance → L3 skipped.<br>More than 5 families in a bar → last slot becomes “More”.</span></div>
+</div>
+
+<!-- FAMILIES -->
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: baseline; gap: 16px"><h2 class="h2">8 families (L1) and their kinds (L2)</h2><span class="mono" style="font-size: 12px; color: #8A867E">colour + icon travel with the family into every nav element</span></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px">
+<sc-for list="{{fams}}" as="f" hint-placeholder-count="8">
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(255,255,255,0.08); padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="width: 46px; height: 46px; border-radius: 14px; background: {{f.tint}}; color: {{f.c}}; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{f.d}}"></path></svg></span>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 18px; font-weight: 700">{{f.label}}</span><span style="font-family: 'Fraunces', serif; font-style: italic; font-size: 14px; color: {{f.c}}">“{{f.q}}”</span></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{f.kinds}}" as="k" hint-placeholder-count="5"><span class="chip">{{k}}</span></sc-for>
+</div>
+<span class="mono" style="font-size: 10px; color: #8A867E">family.{{f.key}} · {{f.n}} kinds · order {{f.o}}</span>
+</div>
+</sc-for>
+</div>
+<div style="border-radius: 18px; border: 1px dashed rgba(255,255,255,0.15); padding: 16px 20px; display: flex; align-items: center; gap: 16px">
+<span class="tag" style="color: #8A867E">family.meta · not in nav</span><span style="font-size: 14px; font-weight: 700">Info</span><span class="chip">Sources</span><span class="chip">Credits</span><span class="chip">Licences</span><span class="chip">Report issue</span><span style="font-size: 13px; color: #8A867E">Always appended at the end of the card, reachable from the overflow menu.</span>
+</div>
+<div style="border-radius: 18px; background: rgba(111,214,200,0.06); border: 1px solid rgba(111,214,200,0.3); padding: 16px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+<span class="tag" style="color: #6FD6C8">Lenses · not blocks</span><span style="font-size: 14px; font-weight: 700">Cross-cutting</span><span class="chip">Epoch / lapse</span><span class="chip">Visitor profile</span><span class="chip">Language</span><span class="chip">Accessibility</span><span class="chip">Circuit context</span><span class="chip">Hierarchy level → card template</span><span style="font-size: 13px; color: #8A867E">They change what every block shows; never registered as block types.</span>
+</div>
+<div style="border-radius: 18px; border: 1px dashed rgba(240,179,90,0.35); padding: 16px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+<span class="tag">App-registered kinds</span><span style="font-size: 14px; font-weight: 700">Mural wall</span><span class="chip">Species card</span><span class="chip">Size comparison</span><span class="chip">Animal call</span><span class="chip">Habitat &amp; range</span><span style="font-size: 13px; color: #8A867E">Added by the wall’s own app via the block registry, filed under existing families.</span>
+</div>
+</div>
+
+<!-- FACETS + AXES -->
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px">
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(255,255,255,0.08); padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<span class="tag" style="color: #6FD6C8">Facets · cross-cutting tags on every block</span>
+<span style="font-size: 13px; color: #A29E96; line-height: 1.5">Families answer “what do I want?”. Facets answer “what can I do right now?”, so filters like “2 minutes, no headphones” work across families.</span>
+<sc-for list="{{facets}}" as="x" hint-placeholder-count="5">
+<div style="display: flex; gap: 14px; align-items: flex-start; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06)">
+<span class="mono" style="width: 90px; flex-shrink: 0; font-size: 11px; color: #6FD6C8; padding-top: 5px">{{x.k}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{x.v}}" as="v" hint-placeholder-count="4"><span class="chip">{{v}}</span></sc-for></div>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(255,255,255,0.08); padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<span class="tag">Two axes · pivot the nav</span>
+<div style="display: flex; gap: 12px">
+<div style="flex-grow: 1; flex-basis: 0; border-radius: 16px; background: rgba(240,179,90,0.1); border: 1px solid rgba(240,179,90,0.35); padding: 14px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 15px; font-weight: 700">By purpose (default)</span><span style="font-size: 12px; color: #A29E96; line-height: 1.5">About · Media · Guides · Stories · AR · Play · Visit · Community</span></div>
+<div style="flex-grow: 1; flex-basis: 0; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); padding: 14px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 15px; font-weight: 700">By format</span><span style="font-size: 12px; color: #A29E96; line-height: 1.5">Read · Look · Watch · Listen · 3D · 360° · AR · Interact</span></div>
+</div>
+<span style="font-size: 12px; color: #8A867E; line-height: 1.5">Same blocks, same nav elements. Set navAxis on the card, or offer a toggle in the menu / search.</span>
+</div>
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(255,255,255,0.08); padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<span class="tag">Extending the ontology</span>
+<pre class="mono" style="margin: 0; font-size: 12px; line-height: 1.7; color: #D9D5CD; white-space: pre-wrap">[PoiKind(family: "media", id: "drone",
+         label: "Drone view", icon: "drone",
+         facets: Format.Video | Needs.Network)]
+class DroneBlock : PoiBlock&lt;DroneData&gt; { }
+
+// new intent? register a family
+PoiOntology.AddFamily("taste", "Local food",
+    question: "What can I eat here?", order: 75);</pre>
+<span style="font-size: 12px; color: #8A867E; line-height: 1.5">Kinds auto-appear in every nav element. Max 10 families; beyond 5 they overflow to “More”.</span>
+</div>
+</div>
+</div>
+
+<!-- NAV CONFIG -->
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px">
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(240,179,90,0.3); padding: 22px; display: flex; flex-direction: column; gap: 10px">
+<span class="tag">Card-level</span><span style="font-family: 'Fraunces', serif; font-size: 22px">PoiNavConfig</span>
+<div><sc-for list="{{cfgCard}}" as="r" hint-placeholder-count="8"><div class="row"><span>{{r.k}}</span><span style="color: #A29E96; text-align: right">{{r.t}}</span></div></sc-for></div>
+</div>
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(255,255,255,0.12); padding: 22px; display: flex; flex-direction: column; gap: 10px">
+<span class="tag" style="color: #F4F1EA">Every nav element</span><span style="font-family: 'Fraunces', serif; font-size: 22px">PoiNavElement</span>
+<div><sc-for list="{{cfgEl}}" as="r" hint-placeholder-count="8"><div class="row"><span>{{r.k}}</span><span style="color: #A29E96; text-align: right">{{r.t}}</span></div></sc-for></div>
+</div>
+<div style="border-radius: 22px; background: #111216; border: 1px solid rgba(111,214,200,0.3); padding: 22px; display: flex; flex-direction: column; gap: 10px">
+<span class="tag" style="color: #6FD6C8">Presets · combine elements</span><span style="font-family: 'Fraunces', serif; font-size: 22px">Nav recipes</span>
+<sc-for list="{{recipes}}" as="r" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; gap: 3px; padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.06)"><span style="font-size: 14px; font-weight: 700">{{r.name}}</span><span class="mono" style="font-size: 11px; color: #A29E96; line-height: 1.5">{{r.mix}}</span></div>
+</sc-for>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2480}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const rows = (arr) => arr.map((s) => { const i = s.indexOf('|'); return { k: s.slice(0, i), t: s.slice(i + 1) }; });
+    const F = [
+      ['about','About','What is it?','#C9C2B6','M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 11v6M12 7.5v.5',['Summary','Quick facts','Description','Fun facts','Key quote','Status / fate','Glossary','Craft & materials','Source confidence'],10],
+      ['media','Media','Show me','#E8866A','M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM21 15l-5-5-10 9M9 8.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 1 0 0-3',['Photos','Gallery','Hotspot image','Deep zoom','Before / after','Video','360° panorama','3D model'],20],
+      ['guides','Guides','Guide me','#F0B35A','M4 15v-3a8 8 0 0 1 16 0v3M4 15h3v5H4zM17 15h3v5h-3z',['Audio guide','Guide character','Ask the guide (AI)','Video guide','Narrated tour','Sign language','Kids guide'],30],
+      ['stories','Stories','Tell me a story','#B8A4F4','M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',['Story chapters','Timeline','Dialogue scene','People','Compare points','Legends','Context'],40],
+      ['ar','In AR','Show it here','#6FD6C8','M12 2l9 5v10l-9 5-9-5V7zM3 7l9 5 9-5M12 12v10',['Time travel','Show on wall','Annotations','Place 3D','Hidden layer','Scale & measure'],50],
+      ['play','Play','Let me play','#8FB8F0','M7 7h10a5 5 0 0 1 0 10H7A5 5 0 0 1 7 7zM8 10v4M6 12h4M15.5 11h.01M17.5 13h.01',['Knowledge check','Wall hunt','Puzzle','Collection','Badges','Poll'],60],
+      ['visit','Visit','Plan my visit','#9FD0AA','M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 8.5a1.5 1.5 0 1 0 0 3a1.5 1.5 0 1 0 0-3',["Today's location",'Wall locator','Nearby','Related points','Practical info','Accessibility'],70],
+      ['community','Community','What do others say?','#F29BB8','M4 5h16v11H9l-5 4z',['Visitor notes','Share postcard','Feedback','Visitor photos','Reactions'],80]
+    ];
+    const hex = (h, a) => { const n = parseInt(h.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+    const fams = F.map((r) => ({ key: r[0], label: r[1], q: r[2], c: r[3], d: r[4], kinds: r[5], n: r[5].length, o: r[6], tint: hex(r[3], 0.16) }));
+    const facets = [
+      { k: 'format', v: ['Read','Look','Watch','Listen','3D','360°','AR','Interact'] },
+      { k: 'duration', v: ['< 30 s','~2 min','5 min +'] },
+      { k: 'needs', v: ['Camera','Headphones','Network','Point at wall','Stand here'] },
+      { k: 'audience', v: ['Kids','Everyone','Expert'] },
+      { k: 'depth', v: ['Glance','Read','Deep dive'] },
+      { k: 'state', v: ['New','Seen','Locked','Completed'] }
+    ];
+    const cfgCard = rows(['navAxis|enum purpose | format','primary|NavElement (L1)','secondary|NavElement? (L2)','inFlow|List<NavBlock>','overflow|enum more | menu | none','maxPrimarySlots|int = 5','scrollSpy|bool = true','deepLink|poi/{id}/{family}/{kind}','rememberLast|bool = true','hideOnScroll|enum never | down | idle']);
+    const cfgEl = rows(['type|enum (24 elements)','level|enum L1 | L2 | L1+L2 | flat','source|enum families | kinds | facets | custom','placement|top | bottom | float | edge | inline | ar','sticky|bool','labels|enum icon | text | both','showCounts|bool = false','showProgress|bool = false','onSelect|enum scroll | filter | open | sheet','themeOverride|PoiThemeOverride?']);
+    const recipes = [
+      { name: 'Casual tourist', mix: 'hero-to-tabs (L1) + chip row (L2) + next-up footer' },
+      { name: 'Museum deep dive', mix: 'drawer tree + edge scrubber + TOC block' },
+      { name: 'Kids & families', mix: 'floating dock + icon grid block + guided play' },
+      { name: 'Camera first', mix: 'AR orbit ring + sheet with family chips' },
+      { name: 'Quick glance', mix: 'accordion card + FAB speed dial' }
+    ];
+    return { fams, facets, cfgCard, cfgEl, recipes };
+  }
+}
+</script>
+</body>
+</html>

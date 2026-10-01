@@ -108,7 +108,15 @@ namespace TileStories.Editor.Tests
                 "precondition: '" + probeKey + "' is inside the window (" + VisibleHeight + " pt tall), where a click can reach it");
         }
 
-        public void Send(Event e) => _host.SendEvent(e);
+        // Send one event to the host, as a person's input would arrive. A key needs the host to hold keyboard focus (an IMGUI text
+        // field ignores keys otherwise): while Play Mode runs with Unity NOT the active application, Unity can drop
+        // EditorWindow.focusedWindow to null between two keys (_3.1 step 14: "Live heading" arrived as "L" or "Live he"), so
+        // the host takes focus back before every key -- a person typing always has the window focused (40-testing 4.2.3).
+        public void Send(Event e)
+        {
+            if (e.isKey && EditorWindow.focusedWindow != _host) _host.Focus();
+            _host.SendEvent(e);
+        }
 
         // A real left click at the centre of a probed control (or 4 px inside its left edge, for a text cell)
         public void Click(string probeKey, bool leftEdge = false)
