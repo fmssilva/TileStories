@@ -92,12 +92,14 @@ namespace TileStories
                 {
                     Key = PlaceInArHeightField, Type = BlockFieldType.Number, Label = "Height (cm)",
                     NumberMin = 1f, NumberMax = 500f, NumberDefault = 30f,
+                    ShownWhen = FieldShownWhen.Choice(PlaceInArScaleField, ArPlacementRule.ScaleHeightCm),
                     Help = "Scale Mode Height only: how tall the model stands, in centimetres.",
                 },
                 new BlockFieldDefinition
                 {
                     Key = PlaceInArMultipleField, Type = BlockFieldType.Number, Label = "Marker Multiple",
                     NumberMin = 0.5f, NumberMax = 20f, NumberDefault = 3f,
+                    ShownWhen = FieldShownWhen.Choice(PlaceInArScaleField, ArPlacementRule.ScaleMarkerMultiple),
                     Help = "Scale Mode Marker Multiple only: how many times this point's marker tall the model stands.",
                 },
                 new BlockFieldDefinition

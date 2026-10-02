@@ -95,6 +95,20 @@ namespace TileStories.Editor.Tests
         // The host's real height in points: the OS clamps the 900 asked for to the screen (about 780 pt on a 1080 px screen at 125 %)
         public float VisibleHeight => _host.position.height;
 
+        // The host's real width in points (what the window's rows lay out against: EditorGUIUtility.currentViewWidth)
+        public float Width => _host.position.width;
+
+        // Lay the window out at another width, like a developer narrowing it (a row's width depends on the window's), and repaint
+        public IEnumerator Resize(float width)
+        {
+            _host.position = new Rect(40f, 40f, width, _host.position.height);
+            yield return WaitForRepaint();
+            Assert.AreEqual(width, _host.position.width, 1f, "precondition: the host really is " + width + " pt wide");
+        }
+
+        // The host's top-left corner on the screen: probe rects are screen rects
+        public Vector2 RootScreen => Host.RootScreen;
+
         // Scroll the window so one drawn control is inside what the host really shows, the way a person scrolls to it (a control
         // below the visible edge is drawn and probed, but a click there never reaches it)
         public IEnumerator ScrollTo(string probeKey)

@@ -149,6 +149,42 @@ namespace TileStories.Tests
             Assert.AreEqual(CardIcons.Shape.Play, Inline.Panel.PlayGlyph.Kind);
         }
 
+        // _3.1 [9B follow-up], step 15.1: the visitor starts the Lamp's narration while another point's still plays (the wall's Audio Overlap
+        // is Switch: the other one fades out for half a second), then taps the video inside that half-second. The narration used to start when
+        // the fade ended, under the video; now the pause the video asked for is kept
+        [UnityTest]
+        public IEnumerator AVideoTappedWhileAnotherPointsNarrationFadesIntoTheLamps_LeavesTheLampsNarrationPaused_AndTheVideoPlays()
+        {
+            Assert.AreEqual(CardOptions.AudioSwitch, Live.container.audio_when_another_starts, "precondition: the wall switches audio with a fade");
+            Assert.IsTrue(Live.container.keep_audio_on_close, "precondition: an audio plays on when another point's card opens");
+            yield return Select("lamp_military");
+            yield return Tap(Chip.PlayButton);
+            Assert.AreEqual(CardAudioState.Playing, _audio.State, "precondition: Lamp - Military's narration plays");
+            Assert.AreEqual("lamp_tone", _audioOut.Clip.name);
+            Advance(3f);
+
+            yield return Select("lamp");
+            Assert.AreEqual(CardAudioState.Playing, _audio.State, "precondition: it plays on under the Lamp's card");
+            yield return Tap(Chip.PlayButton);
+            Assert.AreEqual("lamp", _audio.Current.PoiId, "a real tap asked for the Lamp's narration");
+            Assert.AreEqual("lamp_tone", _audioOut.Clip.name, "the other narration is fading out: the switch has begun");
+
+            yield return OpenFull("lamp");
+            yield return CardTestInput.TapInView(Sheet.Stack.Scroll, Inline.Panel.PlayOverlay);
+            Assert.AreEqual(CardVideoState.Playing, _video.State, "a real tap inside the fade started the video");
+            Assert.AreEqual(CardAudioState.Paused, _audio.State, "and the narration-to-be is paused at once");
+
+            Advance(0.6f);
+            yield return null;
+            Assert.AreEqual("castelo_s_jorge_guide_pt", _audioOut.Clip.name, "the fade is over: the Lamp's narration is loaded");
+            Assert.IsFalse(_audioOut.IsPlaying, "but it does NOT play under the video");
+            Assert.AreEqual(CardAudioState.Paused, _audio.State, "the narration ends the fade paused");
+            Assert.AreEqual(CardVideoState.Playing, _video.State, "the video plays on");
+            Sheet.Stack.Scroll.scrollOffset = Vector2.zero;
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(CardIcons.Shape.Play, Chip.PlayGlyph.Kind, "the chip offers Play: the visitor starts it when they want");
+        }
+
         [UnityTest]
         public IEnumerator TheChaptersVideo_IsATeaser_ARealTapPlaysItFullScreen_AChapterJumps_AndBackKeepsTheStopAndTheScroll()
         {

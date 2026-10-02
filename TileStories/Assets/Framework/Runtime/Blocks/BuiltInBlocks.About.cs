@@ -122,6 +122,7 @@ namespace TileStories
                 new BlockFieldDefinition
                 {
                     Key = BlockStackBuilder.HeaderSubtitleField, Type = BlockFieldType.LocalizedText, Label = "Subtitle",
+                    ShownWhen = FieldShownWhen.Looks(HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable),
                     Help = "One short line under the title (a date, a place, a one-line teaser). The Compact variant never shows it.",
                 },
                 new BlockFieldDefinition
@@ -133,6 +134,7 @@ namespace TileStories
                 new BlockFieldDefinition
                 {
                     Key = HeaderImageField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Picture",
+                    ShownWhen = FieldShownWhen.Looks(HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable),
                     Help = "The picture of the picture looks (in Split Then Now: as it was; in Video Loop: the poster; in Model " +
                            "Turntable: the Fallback, shown while the model loads and if it cannot be loaded). A PNG or JPG inside " +
                            "the wall's Media Folder (Detail Card > Card Container). The text looks do not show it.",
@@ -140,35 +142,41 @@ namespace TileStories
                 new BlockFieldDefinition
                 {
                     Key = HeaderSecondImageField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Second Picture",
+                    ShownWhen = FieldShownWhen.Looks(HeaderSplitThenNow),
                     Help = "Split Then Now only: the picture as it is today, shown on the right. A PNG or JPG inside the Media Folder.",
                 },
                 new BlockFieldDefinition
                 {
                     Key = HeaderFocusXField, Type = BlockFieldType.Number, Label = "Focus Across", NumberMin = 0f, NumberMax = 1f, NumberDefault = 0.5f,
+                    ShownWhen = FieldShownWhen.Looks(HeaderSpotlightCrop),
                     Help = "Spotlight Crop only: where the point is across the picture, 0 = left edge, 1 = right edge.",
                 },
                 new BlockFieldDefinition
                 {
                     Key = HeaderFocusYField, Type = BlockFieldType.Number, Label = "Focus Down", NumberMin = 0f, NumberMax = 1f, NumberDefault = 0.5f,
+                    ShownWhen = FieldShownWhen.Looks(HeaderSpotlightCrop),
                     Help = "Spotlight Crop only: where the point is down the picture, 0 = top edge, 1 = bottom edge.",
                 },
                 new BlockFieldDefinition
                 {
                     Key = HeaderZoomField, Type = BlockFieldType.Number, Label = "Crop Zoom", NumberMin = 1f, NumberMax = 4f, NumberDefault = 2f,
+                    ShownWhen = FieldShownWhen.Looks(HeaderSpotlightCrop),
                     Help = "Spotlight Crop only: how much the picture is enlarged around the focus point (1 = the whole picture).",
                 },
                 new BlockFieldDefinition
                 {
                     Key = HeaderLoopClipField, Type = BlockFieldType.Asset, Media = MediaKind.Video, Label = "Loop Clip",
+                    ShownWhen = FieldShownWhen.Looks(HeaderVideoLoop),
                     Help = "Video Loop only: a short silent-looking film (its sound is never played) inside the Media Folder, MP4 or " +
                            "WEBM. A few seconds that loop cleanly work best.",
                 },
                 new BlockFieldDefinition
                 {
                     Key = HeaderModelField, Type = BlockFieldType.Asset, Media = MediaKind.Model, Label = "Model",
+                    ShownWhen = FieldShownWhen.Looks(HeaderModelTurntable),
                     Help = "Model Turntable only: a .glb or .gltf file inside the Media Folder, or a Framework/wall default.",
                 },
-                ModelFitField(HeaderModelFitField, "Model Turntable only. "),
+                ModelFitField(HeaderModelFitField, "Model Turntable only. ", FieldShownWhen.Looks(HeaderModelTurntable)),
             },
         };
 

@@ -17,7 +17,12 @@ namespace TileStories.Editor
         private const float CardBlockKindColumnWidth = 130f;
         private const float CardBlockVariantColumnWidth = 150f;
         private const float CardBlockDisplayColumnWidth = 90f;
+        // The widest a block row grows (its summary column takes what is left up to it): on a wide window the delete stays near the
+        // row's cells instead of running to the far edge
+        private const float CardBlockRowMaxWidth = 800f;
         private const string CardBlockDefaultVariantLabel = "(Block Library default)";
+        // The end of a summary cut to fit its column (ASCII, like every Editor text)
+        private const string CardBlockSummaryEllipsis = "...";
 
         // Which block rows are open, by "poiId/blockKey" (UI state, never saved)
         private readonly Dictionary<string, bool> _cardBlockFoldouts = new();
@@ -46,8 +51,12 @@ namespace TileStories.Editor
                 BlockRegistry.Shared.TryGet(block.kind, out var definition);
                 string foldoutKey = poi.id + "/" + block.key;
                 _cardBlockFoldouts.TryGetValue(foldoutKey, out bool open);
+                // - read before TableRowScope zeroes the indent: the row's cells start there
+                float rowIndent = EditorGUI.IndentedRect(new Rect(0f, 0f, 0f, 0f)).x;
 
                 using (new TableRowScope())
+                // - a width-capped group, so the summary (the one flexible cell, last) stops at the row's end, inside the window
+                using (new EditorGUILayout.HorizontalScope(GUILayout.Width(CardBlockRowWidth(EditorGUIUtility.currentViewWidth, rowIndent))))
                 {
                     using (new EditorGUI.DisabledScope(i == 0))
                         if (GUILayout.Button("^", EditorStyles.miniButton, GUILayout.Width(CardBlockMoveButtonWidth))) { moveIndex = i; moveBy = -1; }
@@ -72,17 +81,36 @@ namespace TileStories.Editor
                         int pickedVariant = EditorGUILayout.Popup(variantIndex, variantLabels.ToArray(), GUILayout.Width(CardBlockVariantColumnWidth));
                         if (pickedVariant != variantIndex) block.variant = variantOptions[pickedVariant];
 
-                        var modes = new List<string>(definition.DisplayModes);
-                        int modeIndex = modes.IndexOf(block.display);
-                        int pickedMode = EditorGUILayout.Popup(modeIndex, modes.ToArray(), GUILayout.Width(CardBlockDisplayColumnWidth));
-                        if (pickedMode >= 0 && pickedMode != modeIndex) block.display = modes[pickedMode];
+                        if (CardBlockOffersDisplayChoice(definition))
+                        {
+                            var modes = new List<string>(definition.DisplayModes);
+                            int modeIndex = modes.IndexOf(block.display);
+                            int pickedMode = EditorGUILayout.Popup(modeIndex, modes.ToArray(), GUILayout.Width(CardBlockDisplayColumnWidth));
+                            ReportTableCellRect("Card block display", i);
+                            if (pickedMode >= 0 && pickedMode != modeIndex) block.display = modes[pickedMode];
+                        }
+                        else
+                            // - one display only: nothing to pick, but the column keeps its place so the next cells stay aligned
+                            GUILayoutUtility.GetRect(CardBlockDisplayColumnWidth, EditorGUIUtility.singleLineHeight, EditorStyles.popup,
+                                GUILayout.Width(CardBlockDisplayColumnWidth));
                     }
 
                     // - the delete right after the row's cells, never at the far edge of a wide window
                     GUILayout.Space(TableGapBeforeDelete);
                     if (DeleteButton.DrawLayout("Delete block: " + kindName)) deleteIndex = i;
                     ReportTableCellRect("Card block delete", i);
-                    GUILayout.FlexibleSpace();
+
+                    // - then, in what is left of the row, a collapsed row says what the block holds in one line (cut with "..." to fit; the
+                    //   whole text in its tooltip). The flexible cell stops at the capped row's end; an open row shows its fields instead
+                    GUILayout.Space(TableGapBetweenGroups);
+                    Rect summaryRect = GUILayoutUtility.GetRect(0f, EditorGUIUtility.singleLineHeight, EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
+                    if (!open && definition != null && Event.current.type == EventType.Repaint)
+                    {
+                        string summary = CardBlockSummary(block, definition, settings.languages);
+                        string shown = FitWithEllipsis(summary, summaryRect.width, EditorStyles.miniLabel);
+                        GUI.Label(summaryRect, new GUIContent(shown, summary), EditorStyles.miniLabel);
+                        if (shown.Length > 0) ReportTableCellRect("Card block summary", i, summaryRect);
+                    }
                 }
                 _cardBlockFoldouts[foldoutKey] = open;
 
@@ -111,6 +139,69 @@ namespace TileStories.Editor
             }
 
             DrawCardAddBlockRow(poi);
+        }
+
+        // Whether a block row offers the Display popup: only a kind with two displays or more has something to choose
+        internal static bool CardBlockOffersDisplayChoice(BlockKindDefinition definition) => definition?.DisplayModes != null && definition.DisplayModes.Count > 1;
+
+        // A block row's width after its indent: the window's width less the scrollbar margin, never more than CardBlockRowMaxWidth.
+        // From the view width and the indent only, so the Layout and Repaint passes agree (_5.1 "Rows")
+        internal static float CardBlockRowWidth(float viewWidth, float indent) => Mathf.Max(0f, Mathf.Min(viewWidth - AddButtonRowRightMargin - indent, CardBlockRowMaxWidth));
+
+        // What a collapsed block row says about its block, in one line: its Heading in the wall's first language, else the first words it
+        // holds (a text field in the kind's order, an Items field's first row included) -- each read in the first language, else any
+        // language that has words. Glossary marks read as their shown words. "" for a block with no words at all.
+        internal static string CardBlockSummary(BlockInstanceData block, BlockKindDefinition definition, List<string> languages)
+        {
+            string first = languages != null && languages.Count > 0 ? languages[0] : null;
+            var read = new BlockFieldReader(block, first, first);
+            foreach (var field in definition.Fields)
+            {
+                if (IsTextField(field))
+                {
+                    string text = OneLine(read.Text(field.Key));
+                    if (text.Length > 0) return text;
+                }
+                else if (field.Type == BlockFieldType.Items && field.ItemFields != null)
+                {
+                    var rows = read.Items(field.Key);
+                    if (rows.Count == 0) continue;
+                    foreach (var sub in field.ItemFields)
+                    {
+                        if (!IsTextField(sub)) continue;
+                        string text = OneLine(read.ItemText(rows[0], sub.Key));
+                        if (text.Length > 0) return text;
+                    }
+                }
+            }
+            return "";
+        }
+
+        private static bool IsTextField(BlockFieldDefinition field) => field.Type == BlockFieldType.LocalizedText || field.Type == BlockFieldType.LocalizedLongText;
+
+        // A text as one line: glossary marks as their words, line breaks and runs of spaces as one space
+        private static string OneLine(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "";
+            var words = GlossaryMarkup.PlainText(text).Split((char[])null, System.StringSplitOptions.RemoveEmptyEntries);
+            return string.Join(" ", words);
+        }
+
+        // `text` cut so it fits `width` in `style`, ending in "..." when cut ("" when not even that fits)
+        internal static string FitWithEllipsis(string text, float width, GUIStyle style)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            if (style.CalcSize(new GUIContent(text)).x <= width) return text;
+            if (style.CalcSize(new GUIContent(CardBlockSummaryEllipsis)).x > width) return "";
+            // - the longest start that still fits with the dots after it (binary search: each try is one CalcSize)
+            int fits = 0, tooLong = text.Length;
+            while (tooLong - fits > 1)
+            {
+                int mid = (fits + tooLong) / 2;
+                if (style.CalcSize(new GUIContent(text.Substring(0, mid).TrimEnd() + CardBlockSummaryEllipsis)).x <= width) fits = mid;
+                else tooLong = mid;
+            }
+            return text.Substring(0, fits).TrimEnd() + CardBlockSummaryEllipsis;
         }
 
         // The kind picker + "+ Add block": appends a new block of that kind, open, with a fresh key

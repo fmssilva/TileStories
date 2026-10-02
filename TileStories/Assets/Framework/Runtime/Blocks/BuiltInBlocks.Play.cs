@@ -41,6 +41,7 @@ namespace TileStories
                 fields.Add(new BlockFieldDefinition
                 {
                     Key = KnowledgeCheckRule.OptionField(slot), Type = BlockFieldType.LocalizedText, Label = "Option " + slot,
+                    ShownWhen = FieldShownWhen.Looks(KnowledgeCheckMultipleChoice, KnowledgeCheckImageChoice),
                     Help = "Multiple Choice: an answer the visitor can pick (two to four; a blank option is not shown). Image Choice: a caption " +
                            "under the picture (optional). True / False Swipe: not used.",
                 });
@@ -49,17 +50,20 @@ namespace TileStories
                 fields.Add(new BlockFieldDefinition
                 {
                     Key = KnowledgeCheckRule.ImageField(slot), Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Picture " + slot,
+                    ShownWhen = FieldShownWhen.Looks(KnowledgeCheckImageChoice),
                     Help = "Image Choice only: the picture of option " + slot + " (two to four; a slot with no picture is not shown). " + PictureHelp,
                 });
             fields.Add(new BlockFieldDefinition
             {
                 Key = KnowledgeCheckCorrectField, Type = BlockFieldType.Choice, Label = "Right Option", Options = slots, OptionLabels = slotLabels,
+                ShownWhen = FieldShownWhen.Looks(KnowledgeCheckMultipleChoice, KnowledgeCheckImageChoice),
                 Help = "Multiple Choice and Image Choice: which option is the right one. It must be an option that is shown, or the question is left out. " +
                        "True / False Swipe: not used.",
             });
             fields.Add(new BlockFieldDefinition
             {
                 Key = KnowledgeCheckIsTrueField, Type = BlockFieldType.Toggle, Label = "Statement Is True",
+                ShownWhen = FieldShownWhen.Looks(KnowledgeCheckTrueFalseSwipe),
                 Help = "True / False Swipe only: tick when the statement is true (a swipe to the right is right), leave clear when it is false. Not used by the other looks.",
             });
             fields.Add(new BlockFieldDefinition

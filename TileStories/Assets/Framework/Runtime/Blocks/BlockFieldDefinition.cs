@@ -46,5 +46,8 @@ namespace TileStories
         public float NumberMin;
         public float NumberMax = 1f;
         public float NumberDefault;
+        // When the Editor draws this field (null = always): e.g. a field only one look uses. A hidden field keeps its value
+        // (FieldVisibilityRule; BlockRegistry.Validate checks the looks and fields it names)
+        public FieldShownWhen ShownWhen;
     }
 }

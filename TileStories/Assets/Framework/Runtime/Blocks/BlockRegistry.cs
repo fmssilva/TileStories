@@ -81,14 +81,14 @@ namespace TileStories
             if (d.Variants == null || d.Variants.Count == 0) return "no variants";
             if (!d.HasVariant(d.DefaultVariant)) return "its default variant '" + d.DefaultVariant + "' is not one of its variants";
             if (d.DisplayModes == null || d.DisplayModes.Count == 0) return "no display modes";
-            string fieldProblem = ValidateFields(d.Fields, allowItems: true);
+            string fieldProblem = ValidateFields(d.Fields, allowItems: true, d.Variants);
             if (fieldProblem != null) return fieldProblem;
             if (d.ShowAfterViewedField != null && d.Field(d.ShowAfterViewedField)?.Type != BlockFieldType.Toggle)
                 return "its show-after-viewed field '" + d.ShowAfterViewedField + "' is not one of its Toggle fields";
             return null;
         }
 
-        private static string ValidateFields(IReadOnlyList<BlockFieldDefinition> fields, bool allowItems)
+        private static string ValidateFields(IReadOnlyList<BlockFieldDefinition> fields, bool allowItems, IReadOnlyList<string> variants)
         {
             if (fields == null) return "no field list";
             var keys = new HashSet<string>();
@@ -107,10 +107,45 @@ namespace TileStories
                 {
                     if (!allowItems) return "Items field '" + f.Key + "' inside an item (items cannot nest)";
                     if (f.ItemFields == null || f.ItemFields.Count == 0) return "Items field '" + f.Key + "' has no item fields";
-                    string inner = ValidateFields(f.ItemFields, allowItems: false);
+                    string inner = ValidateFields(f.ItemFields, allowItems: false, variants);
                     if (inner != null) return inner;
                 }
             }
+            foreach (var f in fields)
+            {
+                string shownProblem = ValidateShownWhen(f, fields, variants);
+                if (shownProblem != null) return shownProblem;
+            }
+            return null;
+        }
+
+        // A field's ShownWhen must name what really exists in its own scope (a typo would hide the field for good): looks of the kind, a
+        // Choice field of the same list with those options, a text field of the same list -- never the field itself
+        private static string ValidateShownWhen(BlockFieldDefinition f, IReadOnlyList<BlockFieldDefinition> scope, IReadOnlyList<string> variants)
+        {
+            var when = f.ShownWhen;
+            if (when == null) return null;
+            string where = "field '" + f.Key + "' is shown when ";
+            if (when.Kind == FieldShownWhen.Test.Looks)
+            {
+                if (when.Values == null || when.Values.Count == 0) return where + "no look is named";
+                foreach (string look in when.Values)
+                    if (!Contains(variants, look)) return where + "the look is '" + look + "', which is not one of the kind's looks";
+                return null;
+            }
+            BlockFieldDefinition other = null;
+            foreach (var s in scope) if (s.Key == when.FieldKey) other = s;
+            if (other == null || other == f) return where + "field '" + when.FieldKey + "' is set, but that is not another field beside it";
+            if (when.Kind == FieldShownWhen.Test.Choice)
+            {
+                if (other.Type != BlockFieldType.Choice) return where + "'" + when.FieldKey + "' is an option, but it is not a Choice field";
+                if (when.Values == null || when.Values.Count == 0) return where + "no option is named";
+                foreach (string option in when.Values)
+                    if (!Contains(other.Options, option)) return where + "'" + when.FieldKey + "' is '" + option + "', which is not one of its options";
+                return null;
+            }
+            if (other.Type != BlockFieldType.LocalizedText && other.Type != BlockFieldType.LocalizedLongText)
+                return where + "'" + when.FieldKey + "' has words, but it is not a text field";
             return null;
         }
 

@@ -182,6 +182,86 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(0f, _svc.Position, 0.01f);
         }
 
+        // _3.1 [9B follow-up], step 15.1: a pause asked in the half-second of a switch fade used to be refused (the new audio already read
+        // Playing), so it was lost and the new clip started anyway
+        [Test]
+        public void APauseAskedDuringASwitchFade_IsKept_TheNewAudioStartsPausedAtItsStart_AndResumePlaysIt()
+        {
+            _mode = CardOptions.AudioSwitch;
+            _svc.Toggle(Tone("a"));
+            Advance(2f);
+            _svc.Toggle(Guide("b"));
+            Assert.IsTrue(_svc.IsCurrent(Guide()), "precondition: the switch to the guide is fading");
+            FadeStep(0.2f);
+
+            _svc.Pause();
+            Assert.AreEqual(CardAudioState.Paused, _svc.State, "the pause is taken at once: the guide's player shows Play again");
+            Assert.IsTrue(_svc.IsCurrent(Guide()), "the guide stays the current audio");
+            Assert.AreEqual("lamp_tone", _out.Clip.name, "the old sound keeps fading out: a pause does not cut it");
+            Assert.IsTrue(_out.IsPlaying);
+
+            FadeStep(0.3f);
+            Assert.AreEqual("castelo_s_jorge_guide_pt", _out.Clip.name, "the fade is over: the guide is loaded");
+            Assert.IsFalse(_out.IsPlaying, "but NOT started: the pause asked during the fade was kept");
+            Assert.AreEqual(CardAudioState.Paused, _svc.State);
+            Assert.AreEqual(0f, _svc.Position, 0.01f, "at its start");
+            Assert.AreEqual(200.39f, _svc.Length, 0.1f, "its length is known: the player draws 0:00 / 3:20");
+            Assert.AreEqual(0, _media.RefCount(TonePath), "the old clip was given back");
+            Assert.AreEqual(1, _media.RefCount(GuidePath), "the paused guide is held");
+            Advance(1f);
+            Assert.AreEqual(0f, _svc.Position, 0.01f, "time passing moves nothing while paused");
+
+            _svc.Resume();
+            Assert.AreEqual(CardAudioState.Playing, _svc.State);
+            Assert.IsTrue(_out.IsPlaying, "Resume plays it");
+            Advance(2f);
+            Assert.AreEqual(2f, _svc.Position, 0.01f, "from its start");
+        }
+
+        [Test]
+        public void ASecondTapDuringTheFade_TakesThePauseBack_AndTheNewAudioPlaysWhenTheFadeEnds()
+        {
+            _mode = CardOptions.AudioSwitch;
+            _svc.Toggle(Tone("a"));
+            Advance(2f);
+            _svc.Toggle(Guide("b"));
+            _svc.Toggle(Guide("b"));
+            Assert.AreEqual(CardAudioState.Paused, _svc.State, "a tap on the fading-in guide pauses it");
+            _svc.Toggle(Guide("b"));
+            Assert.AreEqual(CardAudioState.Playing, _svc.State, "a second tap takes the pause back");
+            FadeStep(0.5f);
+            Assert.AreEqual("castelo_s_jorge_guide_pt", _out.Clip.name);
+            Assert.IsTrue(_out.IsPlaying, "the guide plays, as first asked");
+            Assert.AreEqual(CardAudioState.Playing, _svc.State);
+        }
+
+        [Test]
+        public void APauseDuringAFade_DoesNotCarryOver_ToAThirdAudioOrAfterAStop()
+        {
+            _mode = CardOptions.AudioSwitch;
+            _svc.Toggle(Tone("a"));
+            Advance(2f);
+            _svc.Toggle(Guide("b"));
+            _svc.Pause();
+            // - another point's audio asked while the guide waits paused: it starts now and plays (nothing of the paused guide was playing)
+            _svc.Toggle(Tone("c"));
+            Assert.IsTrue(_svc.IsCurrent(Tone("c")));
+            Assert.AreEqual(CardAudioState.Playing, _svc.State);
+            Assert.IsTrue(_out.IsPlaying, "the third audio plays at once");
+            Assert.AreEqual(1f, _out.Volume, "at full volume: the fade was let go");
+            Assert.AreEqual(1, _media.RefCount(TonePath), "only the new tone is held");
+            Assert.AreEqual(0, _media.RefCount(GuidePath));
+
+            // - and Stop in the middle of a paused fade forgets the pause: the next audio plays
+            Advance(2f);
+            _svc.Toggle(Guide("b"));
+            _svc.Pause();
+            _svc.Stop();
+            Assert.AreEqual(CardAudioState.Idle, _svc.State);
+            _svc.Toggle(Guide("b"));
+            Assert.IsTrue(_out.IsPlaying, "after Stop a new audio plays at once, no pause left over");
+        }
+
         [Test]
         public void ANewAudio_WhileOneIsPlaying_InQueueMode_WaitsItsTurn_AndStartsWhenTheFirstEnds()
         {

@@ -18,6 +18,8 @@ namespace TileStories.Editor.Tests
         private CardAudioService _audio;
         private CardSoundCoordinator _sound;
         private int _changes;
+        // The audio owner's clock (an audio switch fade's time): 0 unless a test moves it
+        private float _now;
 
         private static VideoTrack Visitor(string clip = "short.mp4", string poi = Poi) => new VideoTrack(poi, clip, "The castle film");
         private static VideoTrack Loop(string poi = Poi) => new VideoTrack(poi, "long.mp4", "");
@@ -29,7 +31,8 @@ namespace TileStories.Editor.Tests
             _videoOut = new ManualVideoOutput();
             _video = new CardVideoService(_videoOut, () => _media);
             _audioOut = new ManualAudioOutput();
-            _audio = new CardAudioService(_audioOut, () => _media, () => 0f, () => CardOptions.AudioSwitch);
+            _now = 0f;
+            _audio = new CardAudioService(_audioOut, () => _media, () => _now, () => CardOptions.AudioSwitch);
             _sound = new CardSoundCoordinator(_audio, _video);
             _changes = 0;
             _video.Changed += () => _changes++;
@@ -244,6 +247,38 @@ namespace TileStories.Editor.Tests
             _video.Toggle(Visitor());
             Assert.AreEqual(CardVideoState.Playing, _video.State);
             Assert.AreEqual(CardAudioState.Paused, _audio.State, "and back again: never both at once");
+        }
+
+        // _3.1 [9B follow-up], step 15.1: the video started in the half-second an audio switch fades. The coordinator's pause used to be refused
+        // there, the new audio started when the fade ended, and both played
+        [Test]
+        public void AVideoStartedDuringAnAudioSwitchFade_LeavesTheNewAudioPaused_WhenTheFadeEnds_NeverBothPlaying()
+        {
+            var first = new AudioTrack("poi_2", "second.mp3", "Another point's guide");
+            var guide = new AudioTrack(Poi, "short.mp3", "Guide");
+            _audio.Toggle(first);
+            _audioOut.Advance(3f);
+            _audio.Tick();
+            _audio.Toggle(guide);
+            Assert.IsTrue(_audio.IsCurrent(guide), "precondition: the switch to this point's guide is fading");
+            Assert.AreEqual(CardAudioState.Playing, _audio.State);
+
+            _now += 0.2f;
+            _audio.Tick();
+            _video.Toggle(Visitor());
+            Assert.AreEqual(CardVideoState.Playing, _video.State, "the visitor's video plays");
+            Assert.AreEqual(CardAudioState.Paused, _audio.State, "the coordinator's pause is taken, mid-fade");
+
+            _now += 0.3f;
+            _audio.Tick();
+            Assert.AreEqual("short.mp3", _audioOut.Clip.name, "the fade is over: the guide is loaded");
+            Assert.IsFalse(_audioOut.IsPlaying, "and NOT playing");
+            Assert.AreEqual(CardAudioState.Paused, _audio.State);
+            Assert.AreEqual(CardVideoState.Playing, _video.State, "the video plays on, untouched");
+
+            _audio.Toggle(guide);
+            Assert.AreEqual(CardAudioState.Playing, _audio.State, "a tap plays the guide from its start");
+            Assert.AreEqual(CardVideoState.Paused, _video.State, "and the video pauses: never both at once");
         }
     }
 }

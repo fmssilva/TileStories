@@ -324,3 +324,11 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
   sources and record the citations in the guides' References, for the thesis report. A `Domain_Planning.md` re-check pass.
 - [repo] Archive candidates for the next `Guidelines_Review.md`: `_2.6.3__curr_plan_tracker copy.md`, old `_2.x` Vision / Human
   test files that are fully done.
+
+## POI Card Editor (2026-10-01, from _3.1 15.1)
+
+- [_5.1, Editor] Collapsed Card Content rows of kinds with no words of their own (Compare Points, Show On Wall, a Place In AR with no
+  heading) show an empty summary. A kind could name what its summary reads instead (Compare Points: the other point's list title; Place
+  In AR: its model's name) -- a small `BlockKindDefinition` hook if the developer finds the blank rows hard to tell apart.
+- [_5.1, Editor] At 620 pt the summary column is about 60 pt (the Kind / Variant / Display columns are fixed): enough to recognise a
+  block, the tooltip holds the rest. If narrow windows are common, let the Variant column shrink before the summary does.

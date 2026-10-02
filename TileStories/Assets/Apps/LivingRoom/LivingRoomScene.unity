@@ -813,7 +813,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: TileStories::TileStories.LODController
   _wallSession: {fileID: 961549858}
   _camera: {fileID: 0}
-  _debug: 0
   _clusterPrefab: {fileID: 6562719482188906945, guid: a55c05809a6d1ee4d971208f12ed29ba, type: 3}
 --- !u!1 &992810842
 GameObject:
@@ -1054,7 +1053,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TileStories::TileStories.ARZoomController
   _wallSession: {fileID: 961549858}
-  _debug: 0
   _camera: {fileID: 0}
 --- !u!4 &1262802444
 Transform:

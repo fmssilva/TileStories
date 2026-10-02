@@ -400,6 +400,245 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("checked", POIEditorToolWindow.ChoiceValue(_window.Config.pois[0].card.blocks[0], BuiltInBlocks.SourcesStatusField), "Ctrl+Z");
         }
 
+        // ---------------- field visibility (_3.1 step 15.1) ----------------
+
+        // Every probe this repaint drew, from scratch: a row that is no longer drawn must not be found in an older repaint's rects
+        private IEnumerator Redraw()
+        {
+            _window.ScreenRects.Clear();
+            yield return _window.WaitForRepaint();
+        }
+
+        private bool Drawn(string probeKey) => _window.ScreenRects.ContainsKey(probeKey);
+
+        // A pick in a popup, through the window's own mutation scope (the native popup menu cannot be clicked; a real pick runs the same setter)
+        private void Pick(Action edit) =>
+            typeof(POIEditorToolWindow).GetMethod("DrawConfigMutationScope", Instance).Invoke(_window.Editor, new object[] { edit, false });
+
+        [UnityTest]
+        public IEnumerator FieldVisibility_SwitchingScaleModeAndAKnowledgeCheckLook_ShowsAndHidesRows_AHiddenValueSurvivesASwitchBack_CtrlZ_AndASave()
+        {
+            string dir = Path.GetFullPath("Temp/__FieldVisibilityTests");
+            Directory.CreateDirectory(dir);
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            // - a Place In AR block with a Height authored earlier (80 cm) and no Scale Mode: Real Size, the field's default
+            var ar = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.PlaceInArKind, display = CardOptions.DisplayInline };
+            ar.fields.Add(new BlockFieldValue { key = BuiltInBlocks.PlaceInArHeightField, number = 80f });
+            // - a Multiple Choice question whose first option has words and whose (unused) Statement Is True is ticked
+            var question = new BlockItemData();
+            question.fields.Add(new BlockItemFieldValue { key = "option_1", text = new List<LocalizedEntry> { new() { lang = "en", value = "Stone" } } });
+            question.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.KnowledgeCheckIsTrueField, flag = true });
+            var quiz = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.KnowledgeCheckKind, variant = BuiltInBlocks.KnowledgeCheckMultipleChoice, display = CardOptions.DisplayInline };
+            quiz.fields.Add(new BlockFieldValue { key = BuiltInBlocks.KnowledgeCheckQuestionsField, items = { question } });
+            config.pois[0].card.blocks.Add(ar);
+            config.pois[0].card.blocks.Add(quiz);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            _window.SetWindowField("_configPath", Path.Combine(dir, "config.json"));
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            foldouts["poi_1/block_2"] = true;
+            BlockInstanceData Ar() => _window.Config.pois[0].card.blocks[0];
+            BlockInstanceData Quiz() => _window.Config.pois[0].card.blocks[1];
+            float HeightOf(BlockInstanceData b) => POIEditorToolWindow.NumberValue(b, BuiltInBlocks.PlaceInAr.Field(BuiltInBlocks.PlaceInArHeightField));
+
+            try
+            {
+                yield return Redraw();
+                Assert.IsTrue(Drawn("Block field scale#0"), "precondition: the Place In AR row is open");
+                Assert.IsFalse(Drawn("Block field height_cm#0"), "Real Size: no Height row");
+                Assert.IsFalse(Drawn("Block field marker_multiple#0"), "Real Size: no Marker Multiple row");
+                Assert.IsTrue(Drawn("Block item questions 0 option_1 en#1"), "Multiple Choice: the options");
+                Assert.IsFalse(Drawn("Block item questions 0 image_1#1"), "Multiple Choice: no pictures");
+                Assert.IsFalse(Drawn("Block item questions 0 is_true#1"), "Multiple Choice: no Statement Is True");
+                Assert.IsFalse(_window.Unsaved, "hiding rows writes nothing");
+
+                // - Scale Mode Height: its row appears with the value authored before
+                Pick(() => POIEditorToolWindow.SetChoiceValue(Ar(), BuiltInBlocks.PlaceInArScaleField, ArPlacementRule.ScaleHeightCm));
+                yield return Redraw();
+                Assert.IsTrue(Drawn("Block field height_cm#0"), "Height: the Height row appears");
+                Assert.IsFalse(Drawn("Block field marker_multiple#0"));
+                Assert.AreEqual(80f, HeightOf(Ar()), "showing 80 cm, the value it kept");
+                // - Marker Multiple: the other row instead
+                Pick(() => POIEditorToolWindow.SetChoiceValue(Ar(), BuiltInBlocks.PlaceInArScaleField, ArPlacementRule.ScaleMarkerMultiple));
+                yield return Redraw();
+                Assert.IsTrue(Drawn("Block field marker_multiple#0"));
+                Assert.IsFalse(Drawn("Block field height_cm#0"), "Marker Multiple: Height is hidden again");
+                Assert.AreEqual(80f, HeightOf(Ar()), "hidden, never cleared");
+                // - Ctrl+Z goes back to Height: the row and its value are there again
+                yield return _window.PressUndo();
+                yield return Redraw();
+                Assert.AreEqual(ArPlacementRule.ScaleHeightCm, POIEditorToolWindow.ChoiceValue(Ar(), BuiltInBlocks.PlaceInArScaleField), "Ctrl+Z");
+                Assert.IsTrue(Drawn("Block field height_cm#0"), "after Ctrl+Z the Height row is back");
+                Assert.AreEqual(80f, HeightOf(Ar()));
+
+                // - the Knowledge Check's look: Image Choice adds the pictures, True / False swaps the options for Statement Is True
+                Pick(() => Quiz().variant = BuiltInBlocks.KnowledgeCheckImageChoice);
+                yield return Redraw();
+                Assert.IsTrue(Drawn("Block item questions 0 image_1#1"), "Image Choice: Picture 1 appears");
+                Assert.IsTrue(Drawn("Block item questions 0 image_4#1"), "and Picture 4");
+                Assert.IsTrue(Drawn("Block item questions 0 option_1 en#1"), "the options stay, as captions");
+                Pick(() => Quiz().variant = BuiltInBlocks.KnowledgeCheckTrueFalseSwipe);
+                yield return Redraw();
+                Assert.IsTrue(Drawn("Block item questions 0 is_true#1"), "True / False: Statement Is True appears");
+                Assert.IsFalse(Drawn("Block item questions 0 option_1 en#1"), "the options are hidden");
+                Assert.IsFalse(Drawn("Block item questions 0 image_1#1"));
+                Assert.IsFalse(Drawn("Block item questions 0 correct#1"), "and Right Option");
+                Assert.AreEqual("Stone", POIEditorToolWindow.ItemLocalizedValue(Quiz().fields[0].items[0], "option_1", "en"), "a hidden option keeps its words");
+                Pick(() => Quiz().variant = BuiltInBlocks.KnowledgeCheckMultipleChoice);
+                yield return Redraw();
+                Assert.IsTrue(Drawn("Block item questions 0 option_1 en#1"), "back to Multiple Choice: the option row is drawn again");
+                Assert.IsFalse(Drawn("Block item questions 0 is_true#1"));
+
+                // - Save, then load the file back through the window: every hidden value made the trip
+                typeof(POIEditorToolWindow).GetMethod("SaveAllToJson", Instance).Invoke(_window.Editor, null);
+                Assert.IsFalse(_window.Unsaved, "saved");
+                typeof(POIEditorToolWindow).GetMethod("LoadConfig", Instance).Invoke(_window.Editor, null);
+                Assert.AreEqual(80f, HeightOf(Ar()), "Height, 80 cm, saved and loaded");
+                Assert.AreEqual(ArPlacementRule.ScaleHeightCm, POIEditorToolWindow.ChoiceValue(Ar(), BuiltInBlocks.PlaceInArScaleField));
+                Assert.AreEqual("Stone", POIEditorToolWindow.ItemLocalizedValue(Quiz().fields[0].items[0], "option_1", "en"));
+                Assert.IsTrue(POIEditorToolWindow.ItemFlagValue(Quiz().fields[0].items[0], BuiltInBlocks.KnowledgeCheckIsTrueField),
+                    "the Statement Is True no look of the block drew is still ticked");
+                yield return Redraw();
+                Assert.IsTrue(Drawn("Block field height_cm#0"), "the loaded block draws its Height row");
+                Assert.IsFalse(_window.Unsaved, "and drawing the loaded file writes nothing");
+            }
+            finally { Directory.Delete(dir, true); }
+        }
+
+        // ---------------- collapsed-row summary (_3.1 step 15.1) ----------------
+
+        private static BlockFieldValue Text(string key, params (string lang, string value)[] texts) =>
+            new() { key = key, text = texts.Select(t => new LocalizedEntry { lang = t.lang, value = t.value }).ToList() };
+
+        [Test]
+        public void ABlockSummary_IsItsHeadingInTheFirstLanguage_ElseItsFirstWords_OnOneLine()
+        {
+            var languages = new List<string> { "en", "pt" };
+            var headed = new BlockInstanceData { kind = BuiltInBlocks.RichTextKind };
+            headed.fields.Add(Text(BlockKindDefinition.HeadingField, ("pt", "Antes da reconstrução"), ("en", "Before the earthquake")));
+            headed.fields.Add(Text(BuiltInBlocks.RichTextBodyField, ("en", "The tiles were made in Lisbon.")));
+            Assert.AreEqual("Before the earthquake", POIEditorToolWindow.CardBlockSummary(headed, BuiltInBlocks.RichText, languages), "the heading, in the first language");
+            Assert.AreEqual("Antes da reconstrução", POIEditorToolWindow.CardBlockSummary(headed, BuiltInBlocks.RichText, new List<string> { "pt", "en" }),
+                "the wall's FIRST language decides, with its real letters");
+
+            var body = new BlockInstanceData { kind = BuiltInBlocks.RichTextKind };
+            body.fields.Add(Text(BuiltInBlocks.RichTextBodyField, ("en", "The [[azulejo|azulejos]] were\nmade   in Lisbon.\n\nSecond paragraph.")));
+            Assert.AreEqual("The azulejo were made in Lisbon. Second paragraph.", POIEditorToolWindow.CardBlockSummary(body, BuiltInBlocks.RichText, languages),
+                "no heading: its first words, the glossary mark as the visitor reads it, on one line");
+
+            var facts = new BlockInstanceData { kind = BuiltInBlocks.QuickFactsKind };
+            var row = new BlockItemData();
+            row.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.QuickFactsLabelField, text = new List<LocalizedEntry> { new() { lang = "en", value = "Built" } } });
+            facts.fields.Add(new BlockFieldValue { key = BuiltInBlocks.QuickFactsItemsField, items = { row } });
+            Assert.AreEqual("Built", POIEditorToolWindow.CardBlockSummary(facts, BuiltInBlocks.QuickFacts, languages), "words only in rows: the first row's");
+
+            Assert.AreEqual("", POIEditorToolWindow.CardBlockSummary(new BlockInstanceData { kind = BuiltInBlocks.ShowOnWallKind }, BuiltInBlocks.ShowOnWall, languages),
+                "a block with no words says nothing");
+        }
+
+        [Test]
+        public void FitWithEllipsis_KeepsWhatFits_CutsTheRestWithThreeDots_AndNeverExceedsTheWidth()
+        {
+            var style = EditorStyles.miniLabel;
+            const string text = "Before the earthquake of 1755 the castle had seven towers";
+            float whole = style.CalcSize(new GUIContent(text)).x;
+            Assert.AreEqual(text, POIEditorToolWindow.FitWithEllipsis(text, whole + 1f, style), "room enough: the whole text");
+            foreach (float width in new[] { whole - 1f, whole * 0.5f, 40f, 20f })
+            {
+                string cut = POIEditorToolWindow.FitWithEllipsis(text, width, style);
+                StringAssert.EndsWith("...", cut, width + " pt");
+                Assert.LessOrEqual(style.CalcSize(new GUIContent(cut)).x, width, width + " pt: '" + cut + "' fits");
+                StringAssert.StartsWith(cut.Substring(0, cut.Length - 3), text, "a start of the text");
+            }
+            // - the longest start that fits: one more character would not
+            string best = POIEditorToolWindow.FitWithEllipsis(text, whole * 0.5f, style);
+            // - (a trailing space is trimmed before the dots, so step on until the start really grows)
+            int length = best.Length - 3;
+            string longer;
+            do longer = text.Substring(0, ++length).TrimEnd() + "..."; while (longer == best);
+            Assert.Greater(style.CalcSize(new GUIContent(longer)).x, whole * 0.5f, "one character more would not fit");
+            Assert.AreEqual("", POIEditorToolWindow.FitWithEllipsis(text, 2f, style), "not even the dots fit: nothing");
+        }
+
+        [UnityTest]
+        public IEnumerator ACollapsedBlockRow_ShowsItsSummaryInsideTheRow_CutToFit_AtEveryWidth_AndAnOpenRowShowsNone()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en", "pt" };
+            var shortOne = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.RichTextKind, display = CardOptions.DisplayInline };
+            shortOne.fields.Add(Text(BlockKindDefinition.HeadingField, ("en", "Tiles")));
+            var longOne = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.RichTextKind, display = CardOptions.DisplayInline };
+            longOne.fields.Add(Text(BuiltInBlocks.RichTextBodyField,
+                ("en", "Before the great earthquake of 1755 the castle on the hill had seven towers, a palace and a church inside its walls.")));
+            config.pois[0].card.blocks.Add(shortOne);
+            config.pois[0].card.blocks.Add(longOne);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            float rightMargin = (float)typeof(POIEditorToolWindow).GetField("AddButtonRowRightMargin", Static).GetRawConstantValue();
+            float rowMax = (float)typeof(POIEditorToolWindow).GetField("CardBlockRowMaxWidth", Static).GetRawConstantValue();
+            var style = EditorStyles.miniLabel;
+
+            // - the widest the screen lets the host be (the OS clamps it), then the default and the narrow window
+            foreach (float width in new[] { _window.Width, 880f, 620f })
+            {
+                yield return _window.Resize(width);
+                yield return Redraw();
+                Rect up = _window.RectOf("Card block up#1"), summary = _window.RectOf("Card block summary#1"), delete = _window.RectOf("Card block delete#1");
+                float viewRight = _window.RootScreen.x + _window.Width - rightMargin;
+                Assert.LessOrEqual(summary.xMax, viewRight + 0.5f, width + " pt: the row ends inside the window, clear of the scrollbar");
+                Assert.LessOrEqual(summary.xMax - up.xMin, rowMax + 0.5f, width + " pt: never wider than the row's cap");
+                Assert.GreaterOrEqual(summary.xMin, delete.xMax, width + " pt: the summary comes after the delete, which keeps its place beside the cells");
+                Assert.Greater(summary.width, style.CalcSize(new GUIContent("...")).x, width + " pt: precondition: the summary column has room for something");
+                Assert.AreEqual("Tiles", POIEditorToolWindow.FitWithEllipsis(POIEditorToolWindow.CardBlockSummary(shortOne, BuiltInBlocks.RichText, config.card_settings.languages),
+                    _window.RectOf("Card block summary#0").width, style), width + " pt: a short heading whole");
+                string drawn = POIEditorToolWindow.FitWithEllipsis(POIEditorToolWindow.CardBlockSummary(longOne, BuiltInBlocks.RichText, config.card_settings.languages), summary.width, style);
+                StringAssert.EndsWith("...", drawn, width + " pt: the long text is cut");
+                Assert.LessOrEqual(style.CalcSize(new GUIContent(drawn)).x, summary.width, width + " pt: and fits its column");
+            }
+            // - the delete keeps its place: the summary column is reserved for an open row too
+            Rect closedDelete = _window.RectOf("Card block delete#0");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return Redraw();
+            Assert.IsFalse(Drawn("Card block summary#0"), "an open row shows its fields, not a summary");
+            Assert.IsTrue(Drawn("Card block summary#1"), "the other row is still collapsed");
+            Assert.AreEqual(closedDelete.xMin, _window.RectOf("Card block delete#0").xMin, 0.5f, "opening a row never moves its delete");
+            Assert.IsFalse(_window.Unsaved, "a summary is drawing only");
+        }
+
+        // ---------------- Default Media (_3.1 step 15.1, audit 15.D) ----------------
+
+        [UnityTest]
+        public IEnumerator DefaultMedia_EveryRowsInfoButton_SitsInTheSectionsInfoColumn_At880And620()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardDefaultMedia");
+            OpenTab("DetailCard");
+            int entries = CardMediaLibraryLookup.Framework.Entries.Count;
+            Assert.Greater(entries, 0, "precondition: the Framework's default library is there");
+            float rightMargin = (float)typeof(POIEditorToolWindow).GetField("AddButtonRowRightMargin", Static).GetRawConstantValue();
+
+            foreach (float width in new[] { 880f, 620f })
+            {
+                yield return _window.Resize(width);
+                yield return Redraw();
+                // - the section's (i) column: where the "Framework defaults" title row puts its (i) (the shared row's rule)
+                Rect column = _window.RectOf("Default media title help#0");
+                Assert.LessOrEqual(column.xMax, _window.RootScreen.x + width - rightMargin + 0.5f, width + " pt: the column is inside the window");
+                int rows = 0;
+                for (int i = 0; Drawn("Default media help#" + i); i++, rows++)
+                {
+                    Rect help = _window.RectOf("Default media help#" + i);
+                    // - one physical pixel at 125 % is 0.8 pt: the (i) is the SAME column, not a nearby one
+                    Assert.AreEqual(column.xMin, help.xMin, 0.5f, width + " pt: row " + (i + 1) + "'s (i) is in the section's (i) column");
+                    Assert.AreEqual(column.width, help.width, 0.5f, "the same button");
+                }
+                Assert.AreEqual(entries, rows, width + " pt: precondition: every default's row was drawn");
+            }
+            Assert.IsFalse(_window.Unsaved, "drawing the table writes nothing");
+        }
+
         // ---------------- Color fields ----------------
 
         [UnityTest]

@@ -40,13 +40,15 @@ namespace TileStories.Editor
             }
             foreach (var field in definition.Fields)
             {
+                // - a field the block's look or options do not use is not drawn; its value stays (hiding is drawing, never writing)
+                if (!FieldVisibilityRule.IsShown(field, block, definition, _config.card_settings)) continue;
                 if (!HasBlockFieldDrawer(field.Type))
                 {
                     EditorGUILayout.HelpBox(field.Label + ": this kind of field cannot be edited here yet.", MessageType.Info);
                     continue;
                 }
                 if (field.Type == BlockFieldType.Items)
-                    DrawItemsBlockField(block, field, languages, blockIndex);
+                    DrawItemsBlockField(block, definition, field, languages, blockIndex);
                 else if (field.Type == BlockFieldType.Choice)
                     DrawChoiceRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
                         () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value),
@@ -109,7 +111,7 @@ namespace TileStories.Editor
 
         // An Items field (a repeater): its label + (i), then per row a "Row N" line with up / down / delete and the row's
         // own fields, then "+ Add row". The field value is created by the first Add, never by drawing.
-        private void DrawItemsBlockField(BlockInstanceData block, BlockFieldDefinition field, List<string> languages, int blockIndex)
+        private void DrawItemsBlockField(BlockInstanceData block, BlockKindDefinition definition, BlockFieldDefinition field, List<string> languages, int blockIndex)
         {
             DrawEditorRow(out float labelRow, out _, IndentLevel1);
             GUILayout.Label(field.Label + (field.Required ? " (required)" : ""), EditorStyles.miniBoldLabel,
@@ -142,8 +144,9 @@ namespace TileStories.Editor
                 EditorRowEnd();
 
                 foreach (var sub in field.ItemFields)
-                    DrawItemSubField(item, sub, languages, probe + i + " " + sub.Key, blockIndex, _config.card_settings?.media_resources_path,
-                        _config.card_settings?.default_media_library_resources_path, _config.pois);
+                    if (FieldVisibilityRule.IsShown(sub, item, field, block, definition, _config.card_settings))
+                        DrawItemSubField(item, sub, languages, probe + i + " " + sub.Key, blockIndex, _config.card_settings?.media_resources_path,
+                            _config.card_settings?.default_media_library_resources_path, _config.pois);
             }
 
             DrawEditorRow(out float addRow, out _, IndentLevel1);

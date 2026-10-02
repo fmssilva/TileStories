@@ -187,12 +187,16 @@ namespace TileStories
                 fields.Add(new BlockFieldDefinition
                 {
                     Key = DialogueRule.ChoiceField(slot), Type = BlockFieldType.LocalizedText, Label = "Choice " + slot,
-                    Help = "A reply the visitor may pick after this line (leave all three empty for a plain line). A choice with no words is not offered.",
+                    // - the next slot appears once this one has words: a plain line shows one empty Choice, not three
+                    ShownWhen = slot > 1 ? FieldShownWhen.Filled(DialogueRule.ChoiceField(slot - 1)) : null,
+                    Help = "A reply the visitor may pick after this line (leave Choice 1 empty for a plain line). A choice with no words is not " +
+                           "offered. Choice 2 and Choice 3, each with its Reply, appear once the choice before them has words.",
                 });
             for (int slot = 1; slot <= DialogueRule.MaxChoices; slot++)
                 fields.Add(new BlockFieldDefinition
                 {
                     Key = DialogueRule.ReplyField(slot), Type = BlockFieldType.LocalizedText, Label = "Reply " + slot,
+                    ShownWhen = slot > 1 ? FieldShownWhen.Filled(DialogueRule.ChoiceField(slot - 1)) : null,
                     Help = "What the speaker answers when the visitor picks Choice " + slot + ". May stay empty: the conversation then simply goes on.",
                 });
             return fields.ToArray();

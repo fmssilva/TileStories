@@ -39,6 +39,9 @@ namespace TileStories
         private float _fadeStart;
         private IMediaSource _outgoingHeld;
         private string _outgoingPath;
+        // A pause asked while the switch fades (the visitor's tap, or a video starting): the new audio then starts paused when the fade ends.
+        // The state already reads Paused, so the players and CardSoundCoordinator see the pause the moment it is asked
+        private bool _pauseAfterFade;
         // The last position seen while playing: where a lost clip is put back, and what tells "ended" from "lost"
         private float _lastPosition;
         private int _restarts;
@@ -75,8 +78,7 @@ namespace TileStories
             if (track == null || string.IsNullOrWhiteSpace(track.ClipPath)) return;
             if (IsCurrent(track))
             {
-                // - a switch still fading the old audio out has nothing to pause yet
-                if (_fading) return;
+                // - during a switch fade too: the pause (or the resume) is kept for the moment the new audio starts
                 if (_state == CardAudioState.Playing) Pause();
                 else if (_state == CardAudioState.Paused) Resume();
                 return;
@@ -108,7 +110,15 @@ namespace TileStories
 
         public void Pause()
         {
-            if (_state != CardAudioState.Playing || _fading) return;
+            if (_state != CardAudioState.Playing) return;
+            if (_fading)
+            {
+                // - nothing of the new audio plays yet: remember the pause, the fade-out of the old one goes on
+                _pauseAfterFade = true;
+                _state = CardAudioState.Paused;
+                Changed?.Invoke();
+                return;
+            }
             _lastPosition = _output.Time;
             _output.Pause();
             _interruption.Forget();
@@ -118,7 +128,15 @@ namespace TileStories
 
         public void Resume()
         {
-            if (_state != CardAudioState.Paused || _fading) return;
+            if (_state != CardAudioState.Paused) return;
+            if (_fading)
+            {
+                // - a pause asked during this fade is taken back: the new audio starts playing when the fade ends, as first asked
+                _pauseAfterFade = false;
+                _state = CardAudioState.Playing;
+                Changed?.Invoke();
+                return;
+            }
             _output.Time = _lastPosition;
             _output.Play();
             _interruption.Forget();
@@ -252,8 +270,9 @@ namespace TileStories
             if (play) _output.Play();
         }
 
-        // Load `track`'s clip through the card's media source and start it at `startAt`; false (and Idle) when the clip cannot be loaded
-        private bool StartTrack(AudioTrack track, float startAt)
+        // Load `track`'s clip through the card's media source and start it at `startAt` -- or hold it there paused (`play` false: a pause asked
+        // during a switch fade); false (and Idle) when the clip cannot be loaded
+        private bool StartTrack(AudioTrack track, float startAt, bool play = true)
         {
             var media = _media?.Invoke();
             var clip = media?.Load<AudioClip>(track.ClipPath);
@@ -271,9 +290,9 @@ namespace TileStories
             _output.Volume = 1f;
             _output.Speed = _speed;
             _output.Time = startAt;
-            _output.Play();
+            if (play) _output.Play();
             _current = track;
-            _state = CardAudioState.Playing;
+            _state = play ? CardAudioState.Playing : CardAudioState.Paused;
             _lastPosition = startAt;
             _restarts = 0;
             _interruption.Forget();
@@ -296,19 +315,23 @@ namespace TileStories
             }
             _current = next;
             _state = CardAudioState.Playing;
+            // - a new audio asked to play: a pause asked for the one it replaces no longer applies
+            _pauseAfterFade = false;
             Changed?.Invoke();
         }
 
-        // The old audio is silent: stop it, give its clip back, start the new one
+        // The old audio is silent: stop it, give its clip back, start the new one -- paused at its start when a pause was asked meanwhile
         private void FinishFade()
         {
             _fading = false;
+            bool paused = _pauseAfterFade;
+            _pauseAfterFade = false;
             _output.Stop();
             ReleaseOutgoing();
             var next = _current;
             _current = null;
             _state = CardAudioState.Idle;
-            StartTrack(next, 0f);
+            StartTrack(next, 0f, play: !paused);
         }
 
         // The current audio ran out: give its clip back and go on with the queue
@@ -332,6 +355,7 @@ namespace TileStories
         private void LetGoOfCurrent()
         {
             _fading = false;
+            _pauseAfterFade = false;
             _output.Stop();
             _output.Volume = 1f;
             ReleaseHeld();

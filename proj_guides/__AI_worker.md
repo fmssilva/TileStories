@@ -1,11 +1,4 @@
 
-# `Confirm before each new command:`
-## 1. `Git`
-## 2. `DELETE MODE && __CURR_PLAN_TRACKER!!!`
-## 3. `Unity MCP Connected??`
-## 4. `npx adb-qr-connect`
-
-
 # `claude agent`
 - **GATE TASK:** start by confirming UnityMCP server mcp is working in this claude chat. (don't confuse with a failed and different unity-mcp). check telemetry_status to confirm the good one if needed. If UnityMCP tools appear unavailable, don't assume they're unimplemented. STOP and tell the user what to check to confirm unity mcp works - check /mcp and reconnect...
 
@@ -19,52 +12,44 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-
-## `And now: POI Detail Card -- step 14, domain close-out AUDIT (no feature work)`
+## `And now: POI Detail Card -- 15.1 audit fixes A + D (field visibility per option, Default Media (i), audio fade-pause)`
 
 GATE (mandatory, report each item): take one Unity capture (Game view AND the POI Editor window) and open it; if none works,
 STOP and say so. `git checkout --` `Markers/Fonts/Oswald Bold SDF.asset` if modified. Confirm the tree compiles; if not, STOP.
 
-Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- the whole file: TODOs,
-the status table (0-13, 9x, 10A, 10B done; 14 = this audit, 15 = fix blocks), every section.
-REQUIRED READING (all lines): `proj_guides/__AI_Architect.md` section 0 (the standing principles you audit against) and 5b
-(what this audit must deliver); `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (the Editor checklist);
-`.clinerules/20-code-quality.md`, `30-ui-content.md`, `40-testing.md` (4.2, 4.2.3, 4.2.4b, 4.5); `10-structure.md` (the card parts).
-Context only: `_3.2` and `_3.3` (what the card domain must hand over to navigation and styles).
-WORKER MODEL: Opus-class (judgement across the whole domain: architecture, Editor UX, tests, product).
-TEST PLAN: FULL EditMode + PlayMode at the start (they are part of the audit: counts, run times, slowest fixtures). This is the
-third block since the last background run, so the PlayMode run is with Unity in the BACKGROUND (ask me once to switch app).
-No other full runs unless you fix something.
+Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- TODOs and status table
+(14 done; 15.1 now; 15.2-15.4 planned). The audit: proj_guides/_3.1.1_Audit.md -- sections 5 (Editor tab), 11 (fix list, chunks
+15.A and 15.D), and the [9B follow-up] audio item.
+REQUIRED READING (all lines): `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (every row this block
+touches); `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, 4.5; `.clinerules/60-finishing.md` 6.4 (final report).
+Context only: POIEditorToolWindow.BlockFieldDrawer.cs, BlockFieldDefinition.cs, BlockLibraryRule.cs, DetailCard.cs, the audio owner.
+WORKER MODEL: Opus-class (a framework-wide change to how every block row is drawn).
+TEST PLAN: no opening full baseline (the tree is the green commit "Audit the POI card domain, fix the focus-dependent typing
+test, tidy the guides"). Targeted fixtures per sub-step. ONE full EditMode + PlayMode at the end (Unity may be in front).
 
-SCOPE: READ, RUN, CAPTURE, WRITE THE REPORT. Do NOT add features or refactor. Allowed fixes, each with its test: (a) the
-focus-dependent typing test ([14, MUST]); (b) The Lamp's room scan to the `visible` fit ([14, decided]); (c) trivial doc
-corrections. Everything else goes into the report as a finding.
+15.1.1 -- Field visibility (audit chunk 15.A, items 1-3): `BlockFieldDefinition.ShownWhen` -- a small declarative predicate over the
+  block's own values (field X equals one of [values], or the resolved variant is one of [looks]); one pure rule evaluates it
+  for the drawer. Hidden fields keep their values (never cleared, still saved). Declare it for: place_in_ar (Height for
+  height_cm, Marker Multiple for marker_multiple), knowledge_check (fields per look), dialogue (Choice / Reply n+1 only after n
+  has text), header (each look's own fields, incl. Loop Clip and Model / Fit), video (Chapters per look), and the Block Library's
+  header Default Fit. The Display popup shows only when a kind has 2+ display modes. Tests: pure predicate tests; ONE real-window
+  test (switch Scale Mode and a Knowledge Check look: rows appear / disappear; a hidden value survives a switch back, undo and a
+  Save round trip); DrawingNeverWritesTests, BlockKindRoundTripTests and the every-kind-editable test stay green. Captures of the
+  four rows at 620 pt, answered with the 4.5 design questions.
+15.1.2 -- Collapsed-row summary (15.A item 4): a collapsed Card Content row shows a one-line summary (the heading in the first
+  wall language, else the first text field), clipped with an ellipsis, never wider than the row. Real-window test + capture.
+  -> learning summary + short commit message after each, and go straight on.
+15.1.3 -- Default Media (i) column (15.D item 1): the per-row (i) moves into the section's (i) column (DetailCard.cs ~449-452,
+  the `_5.1` row recipe). A render test measures the (i) x against the section's column at 880 and 620 pt; recapture.
+15.1.4 -- `_5.1` 4.7 (15.D item 2): describe Default Media, the Block Library's field-default rows and the new field visibility.
+15.1.5 -- Audio fade-pause (15.D item 3, [9B follow-up]): a pause (or a video start) asked during an audio switch fade is kept and
+  applied when the fade ends; pure test in the audio owner + one Phase B check that the narration ends paused.
+15.1.6 -- Close: full EditMode + PlayMode green end to end; update _3.1 (row 15.1 with proof, TODOs), 10-structure.md, _5.1.
 
-Deliver `proj_guides/_3.1.1_Audit.md` with these sections:
-1. OPTION COVERAGE MATRIX -- one table row per kind x variant x field / Choice option (include card_settings and Block Library
-   options): Editor row | (i) | default (Library / settings) | undo-redo-round trip | live sync in Play Mode | Phase A entry |
-   Phase B test | capture. Mark each cell ok / gap / n.a. Build it from the code (BuiltInBlocks, field definitions, tests), not
-   from memory, and say how you built it. Name every gap.
-2. EDITOR TAB -- Detail Card tab + Card Content rows against _5.1 section 0, captured at the default width and 620 pt (Card
-   Container, Block Library, Card Texts, Glossary, Default Media, a long Card Content stack). Include: fields shown that do not
-   apply to the chosen option (Scale Mode -> Height / Marker Multiple; Knowledge Check 12 fields; Dialogue 8 fields) and propose
-   ONE framework-level fix (a field declares when it is shown) with its cost.
-3. CODE HEALTH -- files over ~300 lines; duplicated concepts (owners, panels, copy code); dead code; rule scans (colour / size
-   literals, visitor strings, ASCII); every owner (audio, video, preview, AR placement) with its release path and a test that
-   proves it.
-4. TEST HEALTH -- the full-run counts and times, the 10 slowest fixtures, every flaky or focus-dependent test you see, tests
-   that assert on mocks only.
-5. DOCS vs CODE -- _3.1, 10-structure.md, _5.1 mismatches; then a TRIAGE of every open _3.1 TODO: fix now (which block) / later
-   (which domain or stage) / drop (why).
-6. PRODUCT PASS -- The Lamp's card scrolled end to end at 390 px (EN and PT), every block judged with the 4.5 design questions
-   (does it read, is it the right size, does it look finished); list what a visitor would find confusing or ugly, e.g. the
-   place_in_ar button still reading "See it here in 3D" while the model is placed.
-7. FIX LIST -- prioritised (MUST / SHOULD / LATER), grouped into block-sized chunks (one owner OR 2 heavy OR 4-6 light items
-   each), each chunk with its acceptance tests.
-
-Finish in English with: GATE items, suites + counts + times (say which run was in the background), the report's headline numbers
-(gaps per matrix column), the top 5 findings, what you could not verify, one short natural commit message. Commit only if the
-developer asks.
+Rules as before (`.clinerules`; identity fields untouched; Portuguese spelled properly; DevLog for detail logs). OUT OF SCOPE:
+chunks 15.B, 15.C, 15.E, 15.F, duplicate / copy block, _3.2, _3.3. Ideas outside this block -> proj_guides/__mixed_TODOs.md.
+If _3.1 or the audit disagrees with the real code, STOP. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
+Commit only if the developer asks.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

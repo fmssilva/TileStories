@@ -60,10 +60,11 @@ namespace TileStories
         public const string Model3DFitField = "fit";
 
         // The Fit choice of a model preview (_3.1 10B-pre.1): a trade-off between size and safety, so the developer picks it per
-        // block, and per wall in the Block Library (LibraryDefault); yaw_safe unless either says otherwise
-        public static BlockFieldDefinition ModelFitField(string key, string appliesTo) => new()
+        // block, and per wall in the Block Library (LibraryDefault); yaw_safe unless either says otherwise. `shownWhen`: the looks that
+        // draw a model, when the kind has others (the header's Model Turntable)
+        public static BlockFieldDefinition ModelFitField(string key, string appliesTo, FieldShownWhen shownWhen = null) => new()
         {
-            Key = key, Type = BlockFieldType.Choice, Label = "Fit",
+            Key = key, Type = BlockFieldType.Choice, Label = "Fit", ShownWhen = shownWhen,
             Options = new[] { ModelFitRule.FitYawSafe, ModelFitRule.FitSphere, ModelFitRule.FitAtRest, ModelFitRule.FitVisible },
             OptionLabels = new[] { "Yaw Safe", "Sphere", "At Rest", "Visible" },
             ChoiceDefault = ModelFitRule.FitYawSafe,
@@ -245,6 +246,7 @@ namespace TileStories
                 new BlockFieldDefinition
                 {
                     Key = VideoChaptersField, Type = BlockFieldType.Items, Label = "Chapters",
+                    ShownWhen = FieldShownWhen.Looks(VideoChapters),
                     Help = "The Chapters look only: one row per chapter, a button each. A row needs a Start time and a Label; the " +
                            "buttons run in time order, and a time past the end of the clip is not shown.",
                     ItemFields = new[]
