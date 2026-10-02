@@ -213,6 +213,15 @@ application is a broken test, not a flaky one.
   `Resources.FindObjectsOfTypeAll<EditorWindow>()` holds none of its windows. Captures and test runs never overlap: close every
   capture window before starting a run (an open utility window takes focus from real-click Editor tests).
 - Blank windows the developer finds are safe to close with their X; they hold nothing.
+- **What the developer can do while a Worker runs** (tell them in the brief's summary which case the block is):
+  - *Test runs (EditMode, PlayMode, Phase A / B, Game view captures in tests):* Unity may be covered by other windows or in the
+    background; the developer works in other apps. `ScreenCapture` in a PlayMode test reads Unity's own render, not the
+    desktop, and real input ignores focus (above). Unity jumps to the front when Play Mode starts ("Play Focused"); that is
+    expected. Do not minimise Unity (never tested here) and never touch Unity itself (no Play, no edits, no saves) during a run.
+  - *POI Editor window captures (the Worker's screenshot of an Editor window):* they read the DESKTOP, so the captured window must
+    be visible and not covered on screen (Unity need not be the active app). The developer keeps Unity uncovered on one screen or
+    half of it and works in the other half / screen.
+  - *A background run (every third block):* the developer clicks into another app about 5 s after the Worker starts the run.
 - **Pixel and layout assertions never depend on the Editor's window sizes.** Every PlayMode run lays out in ONE frame: 390 x 844,
   the PanelSettings reference resolution (a phone in portrait), pinned for the whole run by an assembly-wide NUnit `[SetUpFixture]`
   (`Tests/Runtime/FixedFrameForTheRun.cs`, and `LivingRoomFixedFrameForTheRun.cs` for the app's PlayMode assembly -- a SetUpFixture
