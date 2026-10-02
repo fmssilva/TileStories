@@ -261,8 +261,11 @@
     flex-direction: row;
 }
 
+/* the card token is the NARROWEST a card may be; RelatedBlockView stretches the cards so a whole number of them fills the strip
+   (CardTrackRule), and this width is what shows until the strip has a size */
 .card-related__card {
     width: var(--ts-related-card);
+    min-width: var(--ts-related-card);
     min-height: var(--ts-touch-target);
     flex-shrink: 0;
     margin-right: var(--ts-space-3);

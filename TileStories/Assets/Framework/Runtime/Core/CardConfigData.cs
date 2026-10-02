@@ -39,6 +39,10 @@ namespace TileStories
         // Developer-only: open one POI's card by itself in Play Mode (Detail Card > Card Container > Test > Show demo card). Off by default,
         // ignored by release builds (CardDemoRule.IsAllowed), registered in DevFeatureBuildGuard
         public CardDemoSettings demo_card = new();
+        // Developer-only: the language the card opens in while the developer tests (Detail Card > Card Container > Test > Preview Language).
+        // "" = the wall's first language, the default. A visitor's own pick on the card wins; release builds ignore it (CardLanguageRule.Shown,
+        // CardDemoRule.IsAllowed) and DevFeatureBuildGuard warns when a value other than the default is left in the config
+        public string preview_language = "";
     }
 
     // The developer-only demo card: which POI's card opens on its own, and at which stop

@@ -73,7 +73,10 @@ namespace TileStories.LivingRoom.Tests
             // - a name under each shape (step 11-fix): the card's own title under the point, the app's word under the phone
             string title = HeaderTitle();
             Assert.IsNotEmpty(title, "precondition: the card has a title");
-            Assert.AreEqual(title, size.PoiName.text, "the point is named by the card's own title");
+            string label = read.Text(SizeComparisonBlock.PoiLabelField);
+            Assert.AreEqual("The tile panel", label, "precondition: the fixture labels its drawing");
+            Assert.AreNotEqual(title, label);
+            Assert.AreEqual(label, size.PoiName.text, "the box is labelled as the panel it is, not named after the whole castle");
             Assert.AreEqual("Smartphone", size.ObjectName.text, "the phone is named by the app's card texts");
             Assert.GreaterOrEqual(size.PoiName.worldBound.yMin, stage.yMax - tol, "the names sit under the ground line");
             Assert.AreEqual(poi.center.x, size.PoiName.worldBound.center.x, tol, "the point's name is centred under the point");
@@ -112,7 +115,8 @@ namespace TileStories.LivingRoom.Tests
             Assert.AreEqual("Qual é o tamanho?", Sheet.Stack.HeadingOf(size).text);
             Assert.AreEqual("T\u00e3o alto como quase quatro telem\u00f3veis empilhados.", size.Caption.text);
             Assert.AreEqual("Telem\u00f3vel", size.ObjectName.text, "the app's Portuguese word under the phone");
-            Assert.AreEqual(HeaderTitle(), size.PoiName.text, "the point's name is the card's title in Portuguese too");
+            Assert.AreEqual("O painel de azulejos", size.PoiName.text, "the box's label in Portuguese");
+            Assert.AreNotEqual(HeaderTitle(), size.PoiName.text, "and not the card's title");
             yield return Capture("Lamp_SizeComparison_pt");
         }
 

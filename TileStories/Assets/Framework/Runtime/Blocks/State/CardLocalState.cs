@@ -67,6 +67,20 @@ namespace TileStories
         // Remember that the block was revealed, so it shows at once the next time
         public void MarkSeen(string poiId, string blockKey) => WriteInt(KeyOf(poiId, blockKey, "seen"), 1);
 
+        // The language the visitor picked on this wall's cards ("" = never picked: the wall's first language shows). One choice for the
+        // whole wall, not per point, so it is keyed by the wall alone
+        public string Language() => _store.TryGet(LanguageKey, out string code) ? code : "";
+
+        // Remember the picked language ("" or blank forgets it)
+        public void SetLanguage(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code)) { _store.Remove(LanguageKey); return; }
+            _store.Set(LanguageKey, code.Trim());
+            AddToIndex(LanguageKey);
+        }
+
+        private string LanguageKey => KeyPrefix + Escape(WallId) + ".language";
+
         // Forget everything this wall's cards stored (the POI Editor's reset); how many entries went
         public int ResetAll()
         {

@@ -29,6 +29,7 @@ namespace TileStories
         private readonly List<Event> _pool = new();
         private readonly List<Event> _shown = new();
         private string _variantClass;
+        private bool _horizontal;
 
         public TimelineBlockView()
         {
@@ -44,6 +45,8 @@ namespace TileStories
             };
             Track.AddToClassList("card-timeline__track");
             Track.contentContainer.AddToClassList("card-timeline__track-content");
+            // - the strip only has a width once the card lays it out (and a new one when the sheet changes): fit the events then
+            Track.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => FitEvents());
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -52,6 +55,7 @@ namespace TileStories
             _variantClass = "card-timeline--" + context.Variant;
             Root.AddToClassList(_variantClass);
             bool horizontal = context.Variant == BuiltInBlocks.TimelineHorizontal;
+            _horizontal = horizontal;
             var parent = horizontal ? Track.contentContainer : Root;
             if (horizontal) Root.Add(Track);
 
@@ -69,6 +73,19 @@ namespace TileStories
             for (int i = 0; i < _shown.Count; i++)
                 _shown[i].Rail.style.visibility = i < _shown.Count - 1 ? Visibility.Visible : Visibility.Hidden;
             Track.scrollOffset = UnityEngine.Vector2.zero;
+            FitEvents();
+        }
+
+        // Stretch the events so a whole number of them fills the swipe strip (CardTrackRule): the strip ends on a card edge at rest and at the
+        // end of the swipe, never on half an event. The narrowest an event may be is its USS min-width (the cell token).
+        private void FitEvents()
+        {
+            if (!_horizontal || _shown.Count == 0) return;
+            float strip = Track.contentViewport.layout.width;
+            float narrowest = _shown[0].Box.resolvedStyle.minWidth.value;
+            if (float.IsNaN(strip) || strip <= 0f || float.IsNaN(narrowest) || narrowest <= 0f) return;
+            float width = CardTrackRule.CellWidth(strip, narrowest, 0f);
+            foreach (var e in _shown) e.Box.style.width = width;
         }
 
         public void Unbind()
@@ -76,9 +93,12 @@ namespace TileStories
             foreach (var e in _shown)
             {
                 e.Text.Clear();
+                // - a pooled event may come back in the vertical look: give it its USS width again
+                e.Box.style.width = StyleKeyword.Null;
                 e.Box.RemoveFromHierarchy();
             }
             _shown.Clear();
+            _horizontal = false;
             Track.RemoveFromHierarchy();
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;

@@ -23,7 +23,15 @@ namespace TileStories.Editor
         private const string CardLanguagesHelp =
             "The languages the card is written in, comma-separated language codes (en, pt, es...). Every text of Card Content " +
             "gets one row per language. The FIRST language is the fallback: a text missing in the visitor's language shows the " +
-            "first language's text instead (and any language that has text when that is missing too).";
+            "first language's text instead (and any language that has text when that is missing too). The card opens in the first " +
+            "language; with two or more languages a small language chip beside the close button lets the visitor switch (the card " +
+            "remembers the pick on that phone). One language: no chip.";
+
+        private const string CardPreviewLanguageHelp =
+            "Developer-only. The language the card opens in while you test, so you can read the other language without tapping the " +
+            "language chip. Default: the first language of Languages, which is what a visitor gets. A visitor's own pick on the card " +
+            "wins over this. It works in the Editor and in development builds only; a release build ignores it. Changing it clears the " +
+            "language saved by earlier taps, so the card shows your pick at once, also while Play runs.";
 
         private const string CardNoLanguageNote =
             "No language: card texts cannot be written. Add at least one language code in Languages.";
@@ -132,7 +140,13 @@ namespace TileStories.Editor
             "- Close it three ways: the X; drag it down below the title; tap empty camera space (only while Tap Outside Closes is on).\n" +
             "- Tap another marker while it is open: the card keeps its height and shows the new point.\n" +
             "- Enable Detail Card off: a tap still selects the marker, no card opens.\n" +
-            "- Languages: put another language first; the card shows that language (a missing text falls back).\n" +
+            "- Languages: put another language first; the card shows that language (a missing text falls back to the FIRST language, then " +
+            "to any language that has text).\n" +
+            "- Language chip: with two or more Languages a round chip beside the X names the language a tap switches to; tap it: the " +
+            "card shows that language in place, keeping its height and its scroll; tap again: back. Close the card and open another: the " +
+            "pick stays. One language: no chip.\n" +
+            "- Preview Language (Test, above): pick the other language, the open card switches at once; pick the first one again and " +
+            "it is back to what a visitor gets.\n" +
             "- Sources At The End: with a Sources block in the middle of a point's Card Content, the open card shows it last; untick it and " +
             "the card shows it where Card Content puts it, at once.\n\n" +
             "AUDIO\n" +

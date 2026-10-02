@@ -5597,6 +5597,24 @@
                                 "items": []
                             },
                             {
+                                "key": "poi_label",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The tile panel"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O painel de azulejos"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
                                 "key": "caption",
                                 "text": [
                                     {

@@ -31,6 +31,8 @@ namespace TileStories.Tests
         protected Camera Cam;
         private readonly List<string> _unexpectedErrors = new();
         private string _savedRecent;
+        private string _wallIdForLanguage;
+        private string _savedLanguage = "";
 
         private void CollectUnexpectedErrors(string message, string stack, LogType type)
         {
@@ -76,6 +78,11 @@ namespace TileStories.Tests
             Assert.IsNotNull(Card, "the wall scene has the POI Detail Card (PoiCard object with a PoiCardHost)");
             Assert.IsNotNull(Card.Sheet, "precondition: the card was built when it bound to the wall");
             Cam = Camera.main;
+            // - the visitor's saved card language (PlayerPrefs, per wall) is the developer's own: a run starts from "none picked" and gives it back
+            _wallIdForLanguage = Session.SearchConfig.wall_id;
+            var savedLanguage = new CardLocalState(new PlayerPrefsCardStateStore(), _wallIdForLanguage);
+            _savedLanguage = savedLanguage.Language();
+            savedLanguage.SetLanguage("");
             // - LOD off: every POI stays visible, so what a test sees is the search's doing alone
             Session.ApplyLodSettings(new LodSettings { enabled = false });
             yield return Wait(0.8f);
@@ -93,6 +100,7 @@ namespace TileStories.Tests
             if (_savedRecent == null) PlayerPrefs.DeleteKey(RecentSearchesManager.PREFS_KEY);
             else PlayerPrefs.SetString(RecentSearchesManager.PREFS_KEY, _savedRecent);
             PlayerPrefs.DeleteKey(ViewModeControl.LastViewPrefsKey);
+            if (_wallIdForLanguage != null) new CardLocalState(new PlayerPrefsCardStateStore(), _wallIdForLanguage).SetLanguage(_savedLanguage);
 
             var wallScene = SceneManager.GetSceneByPath(ScenePath);
             SceneManager.SetActiveScene(SceneManager.CreateScene("AfterSearchSceneTest"));

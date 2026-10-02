@@ -11,6 +11,8 @@ namespace TileStories.LivingRoom
         public const string WidthField = "width_cm";
         public const string HeightField = "height_cm";
         public const string CaptionField = "caption";
+        // What the point's drawing is called under it (empty: the card's title)
+        public const string PoiLabelField = "poi_label";
 
         // The slider's top: no point on a wall is wider or taller than this (centimetres)
         public const float MaxSizeCm = 300f;
@@ -45,6 +47,13 @@ namespace TileStories.LivingRoom
                     Key = HeightField, Type = BlockFieldType.Number, Label = "Height (cm)",
                     Help = "The point's real height in centimetres. 0 means not written yet: the block is not shown.",
                     NumberMin = 0f, NumberMax = MaxSizeCm, NumberDefault = 0f,
+                },
+                new BlockFieldDefinition
+                {
+                    Key = PoiLabelField, Type = BlockFieldType.LocalizedText, Label = "Point Label",
+                    Help = "What the point's drawing is called, under it (for example \"The tile panel\"), so the visitor knows which thing is " +
+                           "that size: a point whose card title names a whole building would otherwise look as small as the object. Write it in " +
+                           "every language. Empty: the card's title.",
                 },
                 new BlockFieldDefinition
                 {

@@ -66,6 +66,8 @@ namespace TileStories
 
             Root.Add(Track);
             Root.Add(NextRow);
+            // - the strip only has a width once the card lays it out (and a new one when the sheet changes): fit the cards then
+            Track.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => FitCards());
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -113,6 +115,21 @@ namespace TileStories
                 Track.Add(card.Box);
                 _shown.Add(card);
             }
+            FitCards();
+        }
+
+        // Stretch the cards so a whole number of them fills the swipe strip (CardTrackRule): a card is never cut in half at the edge of the
+        // screen (a picture-less card read "Lamp -"), at rest or at the end of the swipe. The narrowest a card may be is its USS min-width
+        // (the card token); the gap is its right margin.
+        private void FitCards()
+        {
+            if (_shown.Count == 0) return;
+            float strip = Track.contentViewport.layout.width;
+            var style = _shown[0].Box.resolvedStyle;
+            float narrowest = style.minWidth.value, gap = style.marginRight;
+            if (float.IsNaN(strip) || strip <= 0f || float.IsNaN(narrowest) || narrowest <= 0f) return;
+            float width = CardTrackRule.CellWidth(strip, narrowest, gap);
+            foreach (var card in _shown) card.Box.style.width = width;
         }
 
         private void BindNext(BlockBindContext context, List<POIData> picked, IReadOnlyList<POIData> wallPois)

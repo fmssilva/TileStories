@@ -219,6 +219,7 @@ namespace TileStories.Editor
         private void DrawCardTestRows()
         {
             DrawCardStateResetRow();
+            DrawCardPreviewLanguageRow();
             DrawCardDemoRows();
         }
 
@@ -252,6 +253,27 @@ namespace TileStories.Editor
             ReportTableCellRect("Card gallery open", 0);
             HelpInfoButton.Draw("Open Gallery", CardGalleryHelp);
             EditorRowEnd();
+        }
+
+        // Developer-only: the language the card opens in while testing. Shown only with two or more languages; the default (the first one)
+        // is stored as "" so an untouched wall carries nothing
+        private void DrawCardPreviewLanguageRow()
+        {
+            var s = _config.card_settings;
+            var choices = CardLanguageRule.Choices(s.languages);
+            if (choices.Count < 2) return;
+            string shown = CardLanguageRule.Shown(s.languages, "", s.preview_language, previewAllowed: true);
+            string picked = DrawPopupField("Preview Language", shown, choices.ToArray(), choices.ToArray(), CardPreviewLanguageHelp, IndentLevel1);
+            if (picked != shown) SetCardPreviewLanguage(picked);
+        }
+
+        // Pick the preview language (the first language = the default, stored as ""), and forget the language earlier taps on the chip saved
+        // on this computer, so the card shows the pick at once (the visitor's own pick would win over it)
+        internal void SetCardPreviewLanguage(string language)
+        {
+            var s = _config.card_settings;
+            s.preview_language = language == CardLanguageRule.Fallback(s.languages) ? "" : language ?? "";
+            new CardLocalState(new PlayerPrefsCardStateStore(), _config.wall_id).SetLanguage("");
         }
 
         internal void SetCardDemoPoi(string poiId) => _config.card_settings.demo_card.poi_id = poiId ?? "";

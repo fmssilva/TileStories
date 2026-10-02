@@ -215,6 +215,7 @@ namespace TileStories.Editor.Tests
             yield return CardRow("card_settings.glossary", c => c.card_settings.glossary.Add(new GlossaryEntry
                 { term = "keep", definition = new List<LocalizedEntry> { new() { lang = "en", value = "The strongest tower." } } }));
             yield return CardRow("card_settings.demo_card", c => { c.card_settings.demo_card.enabled = true; c.card_settings.demo_card.poi_id = DefaultPoi; });
+            yield return CardRow("card_settings.preview_language", c => c.card_settings.preview_language = "pt");
             yield return CardRow("pois[].card", c => P(c).card.blocks.Add(new BlockInstanceData { key = "block_live_sync", kind = "show_on_wall" }));
         }
 

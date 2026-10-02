@@ -79,9 +79,12 @@
     flex-direction: row;
 }
 
+/* the cell token is the NARROWEST an event may be; TimelineBlockView stretches the events so a whole number of them fills the strip
+   (CardTrackRule), and this width is what shows until the strip has a size */
 .card-timeline--horizontal .card-timeline__event {
     flex-direction: column;
     width: var(--ts-timeline-cell);
+    min-width: var(--ts-timeline-cell);
     flex-shrink: 0;
 }
 

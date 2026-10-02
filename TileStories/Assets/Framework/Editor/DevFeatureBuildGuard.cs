@@ -60,6 +60,13 @@ namespace TileStories.Editor
                 ActiveInReleaseBuild = false,
                 IsOn = c => c.card_settings != null && c.card_settings.demo_card != null && c.card_settings.demo_card.enabled,
             },
+            new DevSwitch
+            {
+                Name = "Preview Language",
+                HowToDisable = "POI Editor > Detail Card > Card Container > Test > set 'Preview Language' back to the first language, then Save All to JSON and Copy to StreamingAssets",
+                ActiveInReleaseBuild = false,
+                IsOn = c => c.card_settings != null && !string.IsNullOrEmpty(c.card_settings.preview_language),
+            },
         };
 
         // Messages for every switch that is ON and would take effect in this kind of build

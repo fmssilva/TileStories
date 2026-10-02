@@ -142,6 +142,7 @@ namespace TileStories
             var root = GetComponent<UIDocument>().rootVisualElement;
             Sheet = new PoiCardSheetView(root, BlockRegistry.Shared, CardStyleSheets(tokens, cardStyle, blockStyles));
             Sheet.CloseRequested += SelectionEventBus.Clear;
+            Sheet.LanguageRequested += SwitchLanguage;
             Sheet.Viewer = ViewerOnTheWall;
             // - the full card would cover the search bar half-way (neither readable nor tappable): the bar steps aside
             Sheet.StopChanged += stop => { if (searchUI != null) searchUI.SetTopCoveredByCard(SheetStopRule.CoversScreenTop(stop)); };
@@ -262,7 +263,11 @@ namespace TileStories
                     Debug.LogWarning("[Card] " + poiId + ": block '" + skipped.Instance.key + "' (" + skipped.Instance.kind + ") not shown: " + skipped.Reason
                         + (skipped.FieldKey != null ? " '" + skipped.FieldKey + "'" : ""));
 
-            string language = settings.languages != null && settings.languages.Count > 0 ? settings.languages[0] : "";
+            // - the card speaks the visitor's pick, else the developer's preview, else the wall's first language; texts missing there fall back
+            //   to the wall's FIRST language (never to the shown one: that is no fallback), then to any language they have
+            string fallback = CardLanguageRule.Fallback(settings.languages);
+            string language = CardLanguageRule.Shown(settings.languages, StateOfThisWall().Language(), settings.preview_language,
+                CardDemoRule.IsAllowed(Application.isEditor, Debug.isDebugBuild));
             if (Media == null || Media.Root != (settings.media_resources_path ?? "").Trim().Trim('/'))
                 Media = new ResourcesMediaSource(settings.media_resources_path);
             // - re-resolved every Show so a live edit to the wall's own default library takes effect at once
@@ -270,10 +275,10 @@ namespace TileStories
             Media.WallDefaults = CardMediaLibraryLookup.WallFrom(settings.default_media_library_resources_path);
             var context = new BlockBindContext
             {
-                Poi = poi, Taxonomy = wallSession.SearchConfig, Settings = settings, Language = language, FallbackLanguage = language, Media = Media,
-                Strings = new CardStrings(strings != null ? strings.Entries() : null, StringSources.Entries(), settings.strings, language, language),
+                Poi = poi, Taxonomy = wallSession.SearchConfig, Settings = settings, Language = language, FallbackLanguage = fallback, Media = Media,
+                Strings = new CardStrings(strings != null ? strings.Entries() : null, StringSources.Entries(), settings.strings, language, fallback),
                 MarkerLook = wallSession.MarkerLook,
-                Glossary = new CardGlossary(settings.glossary, language, language),
+                Glossary = new CardGlossary(settings.glossary, language, fallback),
                 State = StateOfThisWall(),
                 Events = Events,
                 Services = Services,
@@ -287,6 +292,14 @@ namespace TileStories
             ShownPoiId = poiId;
             AudioCoordinator.CardShown(poiId, context.Strings);
             VideoService.CardShown(poiId);
+        }
+
+        // The visitor tapped the language chip: remember the pick for this wall on this device and show the open card again in it
+        // (Rebind keeps the sheet's stop and the stack's scroll)
+        private void SwitchLanguage(string code)
+        {
+            StateOfThisWall().SetLanguage(code);
+            Rebind();
         }
 
         // The card state of the wall this host shows (rebuilt when the host is bound to a wall with another id)

@@ -12,46 +12,47 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: POI Detail Card -- 15.2 audit fixes B + C (card order and repeated actions, place_in_ar placed state)`
+
+## `And now: POI Detail Card -- 15.3 audit fix E (visitor language) + small layout items`
 
 GATE (mandatory, report each item): take one Unity capture (Game view AND the POI Editor window) and open it; if none works,
 STOP and say so. `git checkout --` `Markers/Fonts/Oswald Bold SDF.asset` if modified. Confirm the tree compiles; if not, STOP.
 
 Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- TODOs and status table
-(15.1 done; 15.2 now; 15.3, 15.4, 16 planned). The audit: proj_guides/_3.1.1_Audit.md -- section 11 chunks 15.B and 15.C, and
-the product-pass findings they come from.
+(15.2 done; 15.3 now; 15.4, 16 planned). The audit: proj_guides/_3.1.1_Audit.md -- section 11 chunk 15.E, finding 4 (PT card
+shows English wall words) and the product pass it comes from.
 REQUIRED READING (all lines): `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines"; `.clinerules/00-process.md`
-"Framework Completeness"; `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, 4.5; `.clinerules/60-finishing.md` 6.4.
-Context only: BlockStackBuilder.cs, the Card Content warnings, ArPlacementService / ArPlacementRule, BuiltInBlocks.Ar.cs,
-FieldShownWhen / FieldVisibilityRule (new in 15.1), CardStrings.
-WORKER MODEL: Sonnet-class (follows existing patterns: builder, warnings, an owner's state, CardStrings rows).
-TEST PLAN: no opening full baseline (the tree is the green commit "Hide unused block fields, summarise rows and keep fade-time
-pauses"). Targeted fixtures per sub-step. ONE full EditMode + PlayMode at the end (Unity may be in front; background not due).
+"Framework Completeness"; `.clinerules/30-ui-content.md`; `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, 4.5;
+`.clinerules/60-finishing.md` 6.4.
+Context only: BlockFieldReader (text lookup), CardStrings, the wall's Languages setting, BlockBindContext.Settings (new in 15.2),
+the timeline, related and size_comparison views.
+WORKER MODEL: Sonnet-class (one shared language rule plus small view fixes, following existing patterns).
+TEST PLAN: no opening full baseline (the tree is the green commit "Say where Unity must be while a Worker runs"). Targeted
+fixtures per sub-step. ONE full EditMode + PlayMode at the end, Unity may be covered (background run not due: it is at 15.4).
 
-15.2.1 -- Meta blocks last (15.B item 1), as a developer OPTION: Card Container toggle "Sources At The End" (default on, (i),
-  undo, live sync). On: BlockStackBuilder moves `meta`-family blocks to the end, keeping their order; off: the authored order.
-  Pure builder test (both values, stable order); Phase B: The Lamp's Sources is the last block with the default.
-15.2.2 -- Repeated actions (15.B items 2-3): generalise the Card Content "same action as the sticky" warning to every repeated
-  action (Actions items, Show On Wall, the sticky footer), one warning per action naming the blocks. One wording per action:
-  an Actions `show_on_wall` item with an empty label reads the same CardStrings row as the show_on_wall kind; empty The Lamp's
-  sticky label so PT reads one way (keep every fixture block). Real-window test for the warning; PT capture at 390 px.
+15.3.1 -- Fallback language (15.E item 1): ONE pure rule picks a text's language: the visitor's language, else the wall's FIRST
+  language (Languages order), else the first language the field has. Today the fallback equals the shown language. All text
+  lookups (block fields, card texts, glossary) go through it. Pure tests (EN-only field on a PT card -> EN; PT-only on EN ->
+  PT; empty -> nothing shown, as today).
+15.3.2 -- Visitor language choice (15.E item 2): a small runtime setting the visitor changes on the card (the languages come
+  from the wall's Languages; hidden when the wall has one language), with a CardStrings label EN + PT; the card rebinds in
+  place (scroll kept). Developer side: Card Container > Test > "Preview Language" ((i), default = the wall's first language,
+  live sync in Play Mode). Phase B with a real tap: EN -> PT -> EN, the scroll position kept; captures at 390 px EN + PT.
   -> learning summary + short commit message, and go straight on.
-15.2.3 -- Placed state (15.C items 1-2): once placed, the Place In AR button becomes "Remove from room" (new CardStrings row,
-  EN + PT, proper accents) and a short status line "Placed by the wall" shows (new row); the card scrolls to the top and lowers
-  to the peek. Remove brings back the first state. Phase B with real taps (place, label, peek, remove); captures 390 px EN + PT.
-15.2.4 -- POI switch as a developer OPTION (15.C item 3): Toggle field "Keep Model On Switch" on place_in_ar, default off,
-  with a Block Library default row, (i), undo, live sync. Off: selecting another point removes the model through the owner's
-  release path; on: the model stays until Remove or the session ends (still one placed model at a time, the owner's rule).
-  Pure rule test for both values + Phase B real taps (place, select another POI, assert model gone / kept, no leak).
-15.2.5 -- Dialogue hidden reply (15.1 follow-up): a Reply that has words while its Choice is empty must not warn about a field
-  the developer cannot see: the warning names it ("Reply 3 has text but Choice 3 is empty: fill Choice 3 to see it").
-  Real-window test.
-15.2.6 -- Close: full EditMode + PlayMode green end to end; update _3.1 (row 15.2 with proof, TODOs), 10-structure.md, _5.1.
+15.3.3 -- English words on the PT card (finding 4): scroll The Lamp's PT card at 390 px and LIST every English word you see,
+  each with its source (card string / block field / taxonomy: category, status names). Fix every card-string and block-field
+  one (CardStrings rows or fixture text, proper accents). Taxonomy words ("Royal Government", "Intact", "Partial Damage",
+  "Destroyed") are NOT translated here: record them as one [later] TODO in _3.1 with the list. Recapture PT.
+15.3.4 -- Layout items (15.E items 3-4): the timeline's horizontal track ends on a whole card (snap or end padding); the related
+  carousel's picture-less card shows its title whole; Size Comparison labels the panel (the app kind's caption field). Phase A
+  gallery entries + captures, answered with the 4.5 design questions.
+15.3.5 -- Close: full EditMode + PlayMode green end to end; update _3.1 (row 15.3 with proof, TODOs), 10-structure.md, _5.1.
 
 Rules as before (`.clinerules`; identity fields untouched; no literal colours / sizes / visitor strings in card code; Portuguese
-spelled properly; DevLog for detail logs). OUT OF SCOPE: 15.3 (visitor language), 15.4 (code health), duplicate / copy block,
-_3.2, _3.3. Ideas outside this block -> proj_guides/__mixed_TODOs.md. If _3.1 or the audit disagrees with the real code, STOP.
-Finish with the final report of `.clinerules/60-finishing.md` 6.4. Commit only if the developer asks.
+spelled properly; DevLog for detail logs). OUT OF SCOPE: 15.4 (code health), translating taxonomy names, the Keep Model On
+Switch follow-ups (block 16 triage), _3.2, _3.3. Ideas outside this block -> proj_guides/__mixed_TODOs.md. If _3.1 or the audit
+disagrees with the real code, STOP. Finish with the final report of `.clinerules/60-finishing.md` 6.4. Commit only if the
+developer asks.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

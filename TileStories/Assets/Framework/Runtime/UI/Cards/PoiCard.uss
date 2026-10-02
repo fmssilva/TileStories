@@ -65,6 +65,29 @@
     border-radius: var(--ts-touch-target);
 }
 
+/* The language chip: the same round button as the X, left of it; its text is the code of the language a tap switches to */
+.poi-card__language {
+    position: absolute;
+    top: var(--ts-space-2);
+    right: var(--ts-language-chip-right);
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-line);
+    border-width: var(--ts-line-width);
+    border-radius: var(--ts-touch-target);
+}
+
+/* With the chip the header's end stays clear of it, so a long title wraps before the chip, not under it */
+.poi-card--has-language .poi-card__header {
+    padding-right: var(--ts-header-end-with-language);
+}
+
 /* The X: two bars crossed at the button's centre (no text glyph, so no visitor string) */
 .poi-card__close-bar {
     position: absolute;

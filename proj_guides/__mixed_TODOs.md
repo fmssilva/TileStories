@@ -165,6 +165,11 @@ so do a deep analysis and see the best options and best way to implement all thi
 
 lets create a size and resize domain?? where we set the size of markers and lables of each hierarhcy level and we adjuts the distance scaling? ?? should we have this domain on its own or better to just keep things more closed to the current domains like marker, label, hierarchy, LOD? 
 
+about this size of markers, a risk of having them to follow the natural depth distance size is that if i am staying at 8m frm the wall, so maybe ll the markers will be little small dots merely visible... so maybe we can have some sort of check like: we take the higher priority marker and we make sure that those markers are at least, even if very far away from user, they are maybe min of 10px or smething like that?? (don't knw what is a good number...)
+and maybe also for the oposite thing, if i go with the phone and move like at 1 cm from the wall, thee POI marker if it has for eexample some 30cm in the scene world, it will basically cover the whole screen. so maybe lets als have a max size of poi when nearby to be for example 40px... ?? mayeb these min when far and max when close can also be tunable by thee develper in the editor tab... maybe in the hierarchy domain?? considering we set the markers size for each level there??? and then we can add these hard limits to the "higher" hierarchy level example priority 1, and then we apply the normal "ratio rules" t the other levels??? or maybe we can have these hard limits to all levels, to make sure for example the levl 5 doesn't have some 1px markers and always have at least some 5px or smething????
+
+
+
 ## LOD - show low level hierarchy labels if space is empty 
 LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 or 5 markers in some area, but there is good space between them, so maybe we can show some labels anyway? so when we have "empty screen" we can add more info and so we can add some labels??? is there a way to check the "empty screen level" per region of screen and decide if we add some label or not??? or is there some feature related with this that we should add to our framework??? 
 

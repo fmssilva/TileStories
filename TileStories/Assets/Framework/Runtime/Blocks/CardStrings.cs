@@ -6,8 +6,10 @@ namespace TileStories
     // default per key and language (CardStringTable, CardStrings.asset); an APP adds its own rows for the kinds it ships
     // (CardStringSources, step 11-fix); a wall rewords any of them in card_settings.strings. A text is looked up in this
     // order, so a wall's English wording never hides the framework's Portuguese one from a Portuguese visitor:
-    //   wall [language] -> app [language] -> framework [language] -> wall [fallback] -> app [fallback] -> framework [fallback] -> the key
-    // (the key only shows for a key missing from every table -- CardStringsTests guard that for the framework's and the app's).
+    //   wall [language] -> app [language] -> framework [language] -> wall [fallback] -> app [fallback] -> framework [fallback]
+    //   -> any language the key has (wall, app, framework) -> the key
+    // where `fallback` is the wall's FIRST language (CardLanguageRule). The key only shows for a key missing from every table --
+    // CardStringsTests guard that for the framework's and the app's.
     public sealed class CardStrings
     {
         // Every key a card view reads. A key is added with the view that first shows it.
@@ -147,6 +149,8 @@ namespace TileStories
             public const string PlaceInArRemove = "place_in_ar_remove";
             public const string PlaceInArPlaced = "place_in_ar_placed";
             public const string PlaceInArNotLocalised = "place_in_ar_not_localised";
+            // The language chip beside the close button (15.3.2): its tooltip and accessible name
+            public const string LanguageSwitch = "language_switch";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -163,6 +167,7 @@ namespace TileStories
                 AudioPlay, AudioPause, AudioSpeed, AudioCaptions, AudioSeek, AudioQueued, AudioUnavailable, MiniPlayerOpen,
                 MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters, Model3DHint, Model3DLoading,
                 Panorama360DragHint, Panorama360GyroHint, Panorama360Loading, PlaceInArButton, PlaceInArRemove, PlaceInArPlaced, PlaceInArNotLocalised,
+                LanguageSwitch,
             };
         }
 
@@ -183,11 +188,27 @@ namespace TileStories
             _fallback = fallbackLanguage;
         }
 
-        public string Get(string key) => In(key, _language) ?? In(key, _fallback) ?? key;
+        public string Get(string key) => In(key, _language) ?? In(key, _fallback) ?? InAnyLanguage(key) ?? key;
 
         // The text of `key` in one language: the wall's wording first, then the app's, then the framework's
         private string In(string key, string language) =>
             Find(_wall, key, language) ?? Find(_app, key, language) ?? Find(_framework, key, language);
+
+        // The last resort before the raw key: the first language the key has any text in (the same third step as BlockFieldReader.Pick)
+        private string InAnyLanguage(string key) => FindAny(_wall, key) ?? FindAny(_app, key) ?? FindAny(_framework, key);
+
+        private static string FindAny(IReadOnlyList<CardStringEntry> table, string key)
+        {
+            if (table == null || key == null) return null;
+            for (int i = 0; i < table.Count; i++)
+            {
+                var entry = table[i];
+                if (entry == null || entry.key != key || entry.text == null) continue;
+                foreach (var t in entry.text)
+                    if (t != null && !string.IsNullOrWhiteSpace(t.value)) return t.value;
+            }
+            return null;
+        }
 
         // The non-blank text of `key` in `language` in one table, or null
         public static string Find(IReadOnlyList<CardStringEntry> table, string key, string language)

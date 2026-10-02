@@ -39,6 +39,8 @@ namespace TileStories
         public CardStringSources StringSources { get; set; } = CardStringSources.Shared;
         // The visitor's language for the next ShowPoi (Phase A shows one language at a time; English unless a test says otherwise)
         public string Language { get; set; } = "en";
+        // The languages the gallery wall offers (null = the gallery's own wall: English only, so no language chip). The chip's tests set two
+        public System.Collections.Generic.IReadOnlyList<string> Languages { get; set; }
 
         // The gallery card's audio (_3.1 step 9A): the SAME service, coordinator and mini-player as the wall's card, over a silent
         // ManualAudioOutput and a clock of its own. Audio time moves only through AdvanceAudio (a test) or, while AutoAdvanceAudio is on,
@@ -113,6 +115,8 @@ namespace TileStories
             AudioCoordinator = new CardAudioCoordinator(AudioService, new MiniPlayerView(Sheet.Layer, AudioService), () => _shownSettings, () => Sheet.IsOpen);
             // - the gallery has no wall to select a point on: the mini-player's tap shows the current entry again
             AudioCoordinator.Mini.OpenRequested += _ => Show(Index);
+            // - the language chip: the gallery card is shown again in the language it names
+            Sheet.LanguageRequested += code => { Language = code; Show(Index); };
             VideoService = new CardVideoService(VideoOutput, () => Media);
             _sound = new CardSoundCoordinator(AudioService, VideoService);
             PreviewStage = GetComponent<CardPreviewStage>() != null ? GetComponent<CardPreviewStage>() : gameObject.AddComponent<CardPreviewStage>();
@@ -150,6 +154,7 @@ namespace TileStories
             var entry = entries[Index];
             var wall = CardGalleryDefinitions.Taxonomy();
             entry.WallSetup?.Invoke(wall);
+            if (Languages != null) wall.card_settings.languages = new System.Collections.Generic.List<string>(Languages);
             ShowPoi(CardGalleryDefinitions.Poi(entry), wall, entry.Viewer, entry.Stop);
         }
 
@@ -166,11 +171,13 @@ namespace TileStories
             Sheet.Viewer = () => viewer;
             ArPlacementService.Remove();
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wall.pois);
+            // - the wall's first language, like the wall's card: the shown language is the gallery's own (Language)
+            string fallback = CardLanguageRule.Fallback(settings.languages);
             var context = new BlockBindContext
             {
-                Poi = poi, Taxonomy = wall, Settings = settings, Language = Language, FallbackLanguage = Language,
-                Strings = new CardStrings(strings != null ? strings.Entries() : null, StringSources.Entries(), settings.strings, Language, Language),
-                Glossary = new CardGlossary(settings.glossary, Language, Language),
+                Poi = poi, Taxonomy = wall, Settings = settings, Language = Language, FallbackLanguage = fallback,
+                Strings = new CardStrings(strings != null ? strings.Entries() : null, StringSources.Entries(), settings.strings, Language, fallback),
+                Glossary = new CardGlossary(settings.glossary, Language, fallback),
                 MarkerLook = MarkerVisualSettings.Resolve(wall, null),
                 Media = Media,
                 State = State,

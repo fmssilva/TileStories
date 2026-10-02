@@ -34,9 +34,15 @@ namespace TileStories.LivingRoom.Tests
             public readonly string CaptionPt;
             public readonly bool Heading;
             public readonly bool Service;
+            // What the block calls the point's drawing under it (null: not authored, the card's title names it)
+            public readonly string Label;
+            public readonly string LabelPt;
 
-            public Case(string content, string objectKey, float width, float height, string caption, bool heading = false, bool service = true, string captionPt = null)
+            public Case(string content, string objectKey, float width, float height, string caption, bool heading = false, bool service = true, string captionPt = null,
+                string label = null, string labelPt = null)
             {
+                Label = label;
+                LabelPt = labelPt;
                 Content = content;
                 Object = objectKey;
                 Width = width;
@@ -68,6 +74,9 @@ namespace TileStories.LivingRoom.Tests
             new("sheet_bigger", FamiliarObjects.SheetA4, 8f, 10f, "Smaller than a sheet of paper."),
             new("coin_tiny", FamiliarObjects.TwoEuroCoin, 120f, 200f, "A coin is a speck next to it."),
             new("no_service", FamiliarObjects.Smartphone, 32f, 58f, "The point alone.", service: false),
+            // - the block names its drawing: a card titled after a whole building would read as phone-sized without it
+            new("phone_labelled", FamiliarObjects.Smartphone, 32f, 58f, "As tall as almost four phones standing on top of each other.",
+                captionPt: "Tão alto como quase quatro telemóveis empilhados.", label: "The tile panel", labelPt: "O painel de azulejos"),
         };
 
         private static string[] CaseNames => Cases.Select(c => c.Content).ToArray();
@@ -87,6 +96,12 @@ namespace TileStories.LivingRoom.Tests
             var caption = En(c.Caption);
             if (c.CaptionPt != null) caption.Add(new LocalizedEntry { lang = "pt", value = c.CaptionPt });
             block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.CaptionField, text = caption });
+            if (c.Label != null)
+            {
+                var label = En(c.Label);
+                if (c.LabelPt != null) label.Add(new LocalizedEntry { lang = "pt", value = c.LabelPt });
+                block.fields.Add(new BlockFieldValue { key = SizeComparisonBlock.PoiLabelField, text = label });
+            }
             return new CardGalleryDefinitions.Entry(SizeComparisonBlock.Kind, SizeComparisonBlock.SideBySide, c.Content, block, wallSetup: wallSetup);
         }
 
@@ -203,7 +218,7 @@ namespace TileStories.LivingRoom.Tests
             SizeComparisonBlockView view = null;
             yield return Show(c, v => view = v);
             Assert.IsNotEmpty(HeaderTitle(), "precondition: the card has a title");
-            Assert.AreEqual(HeaderTitle(), view.PoiName.text, content + ": the point is named by the card's own title");
+            Assert.AreEqual(c.Label ?? HeaderTitle(), view.PoiName.text, content + ": the point is named by the block's Point Label, else the card's own title");
             Assert.AreEqual(ObjectNames[c.Object].En, view.ObjectName.text, content + ": the object is named by the app's card texts");
             Assert.AreNotEqual(view.PoiName.text, view.ObjectName.text, content + ": the two shapes are told apart by words, not by colour alone");
             Assert.IsTrue(CardTestInput.IsShown(view.PoiName, view.Root), content + ": the point's name is on the card");
@@ -224,6 +239,32 @@ namespace TileStories.LivingRoom.Tests
             Assert.LessOrEqual(objName.xMax, card.xMax + tol, content + ": inside the card (right)");
             // - a name is as wide as its slot: a coin's name is far wider than the coin
             Assert.GreaterOrEqual(objName.width + tol, view.ObjectShape.worldBound.width, content + ": a name is at least as wide as its shape");
+        }
+
+        [UnityTest]
+        public IEnumerator ThePointLabel_NamesTheDrawing_InEachLanguage_AndAnEmptyOneFallsBackToTheCardsTitle()
+        {
+            var c = CaseOf("phone_labelled");
+            SizeComparisonBlockView view = null;
+            yield return Show(c, v => view = v);
+            Assert.AreNotEqual(HeaderTitle(), view.PoiName.text, "precondition: the card's title is not the drawing's name");
+            Assert.AreEqual("The tile panel", view.PoiName.text, "the box is labelled as what it is, not as the whole building");
+            Assert.IsTrue(CardTestInput.IsShown(view.PoiName, view.Root));
+            float tol = CardGalleryChecks.OnePixel(view.Stage) * 2f + 0.5f;
+            Assert.AreEqual(view.PoiShape.worldBound.center.x, view.PoiName.worldBound.center.x, tol, "still centred under its own shape");
+            yield return CardGalleryChecks.Render("Card_size_comparison_phone_labelled");
+
+            _harness.Language = "pt";
+            yield return Show(c, v => view = v);
+            Assert.AreEqual("O painel de azulejos", view.PoiName.text, "the Portuguese label");
+            CardGalleryChecks.AssertBlockEntry(_harness, EntryOf(c), view);
+            yield return CardGalleryChecks.Render("Card_size_comparison_phone_labelled_pt");
+
+            // - no label in the visitor's language: the wall's first language (English) names it, never the building's title
+            _harness.Language = "pt";
+            var onlyEnglish = new Case("phone_label_en_only", FamiliarObjects.Smartphone, 32f, 58f, "x", label: "The tile panel");
+            yield return Show(onlyEnglish, v => view = v);
+            Assert.AreEqual("The tile panel", view.PoiName.text, "a Portuguese card with an English-only label reads the English one");
         }
 
         [UnityTest]

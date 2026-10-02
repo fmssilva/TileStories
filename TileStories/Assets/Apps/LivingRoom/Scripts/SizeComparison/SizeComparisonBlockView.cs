@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 namespace TileStories.LivingRoom
 {
     // The size_comparison block (_3.1 step 11): the point and a familiar object drawn to one scale on a shared ground line, a NAME under
-    // each shape (the point's card title; the object's name from the app's own card texts, step 11-fix -- so the two shapes are never told
+    // each shape (the point's Point Label, else its card title; the object's name from the app's own card texts, step 11-fix -- so the two shapes are never told
     // apart by colour alone) and the caption (authored words, in the card's language) under them. The object's real size comes from the
     // app's IFamiliarObjects, asked through BlockBindContext.Service<T>() -- when the app registered none (or does not know the object)
     // the point is drawn alone. The pixel sizes are worked out by SizeComparisonRule once the stage has a size; SizeComparison.uss draws
@@ -102,7 +102,9 @@ namespace TileStories.LivingRoom
             ObjectShape.style.display = objectDisplay;
             ObjectName.style.display = objectDisplay;
             ObjectShape.EnableInClassList("card-size__shape--round", ObjectKnown && familiar.Round);
-            PoiName.text = BlockStackBuilder.CardTitleOf(context.Poi, context.Language, context.FallbackLanguage);
+            // - the block's own words for the drawing (what the box IS), else the card's title
+            string poiLabel = read.Text(SizeComparisonBlock.PoiLabelField);
+            PoiName.text = poiLabel.Length > 0 ? poiLabel : BlockStackBuilder.CardTitleOf(context.Poi, context.Language, context.FallbackLanguage);
             ObjectName.text = ObjectKnown ? context.Strings?.Get(familiar.NameKey) ?? "" : "";
             Caption.text = read.Text(SizeComparisonBlock.CaptionField);
             Layout();

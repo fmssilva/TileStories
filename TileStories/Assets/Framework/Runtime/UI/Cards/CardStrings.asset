@@ -625,3 +625,12 @@ MonoBehaviour:
       value: Point the camera at the wall first, then place it.
     - lang: pt
       value: "Aponta primeiro a câmara para a parede e depois coloca-o."
+  - key: language_switch
+    where: The name of the small language chip beside the close button (its tooltip and
+      accessible name; the chip itself shows the code of the language a tap switches to).
+      The chip is hidden when the wall offers only one language.
+    text:
+    - lang: en
+      value: Language
+    - lang: pt
+      value: Idioma

@@ -135,7 +135,7 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(7 + 8 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 7 wall-level + 8 container + 3 demo card");
+            Assert.AreEqual(8 + 8 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1424,6 +1424,52 @@ namespace TileStories.Editor.Tests
             yield return _window.PressUndo();
             Assert.IsFalse(_window.Config.card_settings.demo_card.enabled, "Ctrl+Z: the demo is off again");
             Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(_window.Config, developmentBuild: true));
+        }
+
+        [UnityTest]
+        public IEnumerator PreviewLanguage_DrawsWithTwoLanguages_StoresOnlyANonDefaultPick_UndoesAndIsSeenByTheBuildGuard()
+        {
+            var config = ShippedConfig();
+            config.wall_id = "preview_language_test_" + Guid.NewGuid().ToString("N");
+            var saved = new CardLocalState(new PlayerPrefsCardStateStore(), config.wall_id);
+            try
+            {
+                config.card_settings.languages = new List<string> { "en", "pt" };
+                _window = new PoiEditorWindowHost(config, "_showCardContainer");
+                OpenTab("DetailCard");
+                yield return _window.WaitForRepaint();
+                // - a popup row reports no rect to probe (its native menu cannot be clicked either): the capture of the real window shows the row
+                _window.RectOf("Card state reset#0");
+                Assert.AreEqual("", _window.Config.card_settings.preview_language, "default: the wall's first language, nothing stored");
+                Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+                Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(_window.Config, developmentBuild: true));
+
+                // - a visitor tap saved Portuguese earlier: picking the preview forgets it, or the card would keep showing the tap's pick
+                saved.SetLanguage("pt");
+                InMutationScope(() => _window.Editor.SetCardPreviewLanguage("pt"));
+                yield return _window.WaitForRepaint();
+                Assert.AreEqual("pt", _window.Config.card_settings.preview_language, "a non-default pick is stored");
+                Assert.AreEqual("", saved.Language(), "the earlier tap's saved language is forgotten");
+                Assert.AreEqual("pt", CardLanguageRule.Shown(_window.Config.card_settings.languages, saved.Language(), _window.Config.card_settings.preview_language, true),
+                    "the card now opens in the preview language");
+                var guard = DevFeatureBuildGuard.ActiveMessages(_window.Config, developmentBuild: true);
+                Assert.AreEqual(1, guard.Count, "a preview left in the config is a developer view the build guard watches");
+                StringAssert.Contains("Preview Language", guard[0]);
+                Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(_window.Config, developmentBuild: false), "a release build ignores it");
+
+                InMutationScope(() => _window.Editor.SetCardPreviewLanguage("en"));
+                Assert.AreEqual("", _window.Config.card_settings.preview_language, "picking the first language again stores the default, not 'en'");
+                Assert.IsEmpty(DevFeatureBuildGuard.ActiveMessages(_window.Config, developmentBuild: true));
+
+                yield return _window.PressUndo();
+                Assert.AreEqual("pt", _window.Config.card_settings.preview_language, "Ctrl+Z: the preview is back");
+                yield return _window.PressUndo();
+                Assert.AreEqual("", _window.Config.card_settings.preview_language, "Ctrl+Z: the default is back");
+            }
+            finally
+            {
+                saved.SetLanguage("");
+            }
         }
 
         [Test]

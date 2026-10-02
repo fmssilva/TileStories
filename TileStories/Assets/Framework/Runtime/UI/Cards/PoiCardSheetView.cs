@@ -17,12 +17,17 @@ namespace TileStories
         public VisualElement Root { get; }
         public VisualElement Handle { get; }
         public Button CloseButton { get; }
+        // The language chip beside the X (15.3.2): shows the code of the language a tap switches to; hidden when the wall offers one language
+        public Button LanguageButton { get; }
         public BlockStackView Stack { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
 
         // Raised when the visitor closes the card (the X, or a drag / swipe below peek)
         public event Action CloseRequested;
+
+        // Raised when the visitor taps the language chip: the language code to switch to
+        public event Action<string> LanguageRequested;
 
         // Raised when the sheet comes to rest at another stop (Dismissed when it closes)
         public event Action<SheetStopRule.Stop> StopChanged;
@@ -38,6 +43,8 @@ namespace TileStories
         private static readonly CustomStyleProperty<float> CollapsedHeaderProperty = new("--ts-header-collapsed-max-height");
         private float _topGap;
         private float _halfMaxRatio = CardContainerSettings.HalfMaxRatioMax;
+        // The language the chip's next tap switches to ("" = the chip is hidden)
+        private string _nextLanguage = "";
 
         // The drag's clock (velocity sampling): Time.unscaledTime in the app. A test sets its own, so a simulated drag's
         // speed is what the test says -- no real frame rate decides whether it reads as a flick (mirrors PoiCardHost.Clock)
@@ -85,6 +92,11 @@ namespace TileStories
             }
             Root.Add(CloseButton);
 
+            // - the chip's words are the language code (data), its name comes from CardStrings
+            LanguageButton = new Button(() => { if (_nextLanguage.Length > 0) LanguageRequested?.Invoke(_nextLanguage); }) { name = "poi-card-language" };
+            LanguageButton.AddToClassList("poi-card__language");
+            Root.Add(LanguageButton);
+
             Layer.Add(Root);
             Takeover = new TakeoverView(Layer);
             parent.Add(Layer);
@@ -109,6 +121,7 @@ namespace TileStories
         {
             _halfMaxRatio = halfMaxRatio;
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
+            ShowLanguageChip(context);
             context.Host ??= this;
             // - another card replaces the full-screen view of the old one
             Takeover.Close();
@@ -116,6 +129,17 @@ namespace TileStories
             Stack.Bind(entries, context);
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
+        }
+
+        // The chip names the language a tap switches to; with fewer than two languages there is nothing to choose and it is hidden
+        private void ShowLanguageChip(BlockBindContext context)
+        {
+            _nextLanguage = CardLanguageRule.Next(context.Settings?.languages, context.Language);
+            bool shown = _nextLanguage.Length > 0;
+            LanguageButton.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+            LanguageButton.text = _nextLanguage.ToUpperInvariant();
+            LanguageButton.tooltip = context.Strings?.Get(CardStrings.Keys.LanguageSwitch) ?? "";
+            Root.EnableInClassList("poi-card--has-language", shown);
         }
 
         // Close: unbind every block (views go back to their pool) and collapse
