@@ -109,8 +109,10 @@ tests with real input or captures -> `40-testing.md` 4.2.3 / 4.5; dev-only switc
 ## 5b. Closing a domain (when its status table is all done)
 
 A domain is not finished when its last step is green: run `proj_guides/skills/Domain_Review.md` (AUDIT mode first, a report
-only), then plan fix blocks from its fix list (usual block size) until no gap that matters is left. Only then start the next
-domain.
+only), then plan fix blocks from its fix list (usual block size) until no gap that matters is left. Then close it with a
+short second pass of the same skill (AUDIT, FOCUS: the fix list is closed + every open TODO triaged to a later domain, stage or
+drop; Sonnet-class) -- not `Domain_Planning.md`, which plans a NEW domain. Last, write the hand-off for the next domain's
+Architect chat (what is done, what moved to which guide, open risks) and start that domain in a NEW chat.
 
 ## 6. Answer (in this order, short)
 
@@ -147,5 +149,10 @@ Stop when <condition> is green. Update <docs>. Ideas outside this domain -> proj
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
 ```
+
+8. **Your tasks now** -- the LAST lines of the answer, after the brief, as a short checklist for the developer: which block the
+   brief is for, where to paste it (`__AI_worker.md`, inside `# claude agent`), which model to pick (named plainly, e.g. "Opus"),
+   new Worker session or not, commit status (done by me / you commit with message "..." / nothing to commit), and any decision
+   or file waiting on them. Never leave these only inside a table or the brief.
 
 Principle: the review is only as good as its evidence; the plan is only as good as its smallness.
