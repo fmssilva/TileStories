@@ -102,7 +102,8 @@ The last message of a session, in English, short, in this order (the durable rec
    plan file said so".
 6. **Commit** -- one short, natural commit message (one line, imperative, ~50-72 characters, no step codes). When the developer
    asks you to commit: `git -c core.autocrlf=true add -A`, then `git commit -m "<that one line>"` -- no body, no `Co-Authored-By`
-   or other trailer (`.claude/settings.json` sets `attribution.commit: false`), never push unless asked.
+   or other trailer (`.claude/settings.json` sets `attribution.commit` to ""), then `git push` at once (every commit is
+   pushed; if the push fails, say so and why). At the start of a session (the GATE), push any commits the branch is ahead by.
 
 The learning summaries given along the way (the teaching notes of `__AI_worker.md`) are separate: they explain how and why
 for the developer to learn; this report states what is true now.

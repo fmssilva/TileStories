@@ -71,6 +71,9 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
   Git must be able to delete its own lock files: the VM's delete right is granted per session, so request delete permission
   for the workspace folder BEFORE the first commit of a session. Without it the commit lands but leaves `.git/HEAD.lock` /
   `index.lock` behind and the developer's next git command fails.
+- **Every commit is pushed** (the developer's rule). The Cowork VM cannot reach GitHub (the proxy answers 403), so a commit
+  made here is pushed by the NEXT Worker as the first GATE item (`git push` when `git status -sb` says "ahead"). Say in "Your
+  tasks now" how many commits wait to be pushed; the developer may also run `git push` himself.
 - **Commit messages:** short and natural, the way a developer writes them: one line, imperative, about 50-72 characters,
   what changed for the project, no step codes or lists ("Add 3D model previews to the POI card", "Fix model framing and
   auto-spin at peek"). In the chat, name the commit by its message, not its hash.
@@ -128,7 +131,7 @@ Architect chat (what is done, what moved to which guide, open risks) and start t
 ```markdown
 ## `And now: <Domain> -- <step ids and names>`
 
-GATE: take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree
+GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree
 compiles; if not, STOP and report. Re-verify the baseline (0 `error CS`,
 EditMode + PlayMode all green) with Unity allowed to be in the background.
 
