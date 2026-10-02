@@ -79,6 +79,12 @@ namespace TileStories.Editor
             "the content first and the credits last. Several Sources blocks keep their order. Off: every block stays exactly where Card " +
             "Content puts it, Sources included.";
 
+        private const string CardPeekNextHelp =
+            "For the cards that slide sideways (a Timeline in its horizontal look, a Related carousel). On (the default): at rest the strip " +
+            "shows its whole cards and a slice of the next one at the right edge, the usual sign that there is more to swipe to; at the " +
+            "end of a swipe the last card is whole. Off: whole cards only, at rest and at the end. A strip whose cards all fit shows no " +
+            "slice either way.";
+
         private const string BlockLibraryHelp =
             "Every block kind this wall can show, wall-wide. Enabled: off hides every block of that kind on every card (Header " +
             "is the card's title and cannot be switched off). Default Variant: the look a block gets when Card Content does not " +
@@ -148,7 +154,9 @@ namespace TileStories.Editor
             "- Preview Language (Test, above): pick the other language, the open card switches at once; pick the first one again and " +
             "it is back to what a visitor gets.\n" +
             "- Sources At The End: with a Sources block in the middle of a point's Card Content, the open card shows it last; untick it and " +
-            "the card shows it where Card Content puts it, at once.\n\n" +
+            "the card shows it where Card Content puts it, at once.\n" +
+            "- Peek Next Card: open a point with a horizontal Timeline or a Related carousel and scroll to it: a slice of the next card shows " +
+            "at the right edge; swipe to the end: the last card is whole. Untick it: the strip shows whole cards only, at once.\n\n" +
             "AUDIO\n" +
             "- Tap the play button of an Audio Guide: the sound starts. Drag its bar to move to any point, tap the speed chip to change the " +
             "speed, tap Captions to show the line of the moment. A Hero Chip under the title does the same from the Peek stop.\n" +

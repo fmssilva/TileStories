@@ -47,5 +47,9 @@ namespace TileStories
             int at = choices.IndexOf(shown);
             return choices[(at + 1) % choices.Count];
         }
+
+        // What the language chip says: the code of the language a tap switches to, in capitals ("PT"), so the chip names where it goes,
+        // not where the card is; "" when there is nothing to choose between (the chip hides)
+        public static string ChipLabel(IReadOnlyList<string> languages, string shown) => Next(languages, shown).ToUpperInvariant();
     }
 }

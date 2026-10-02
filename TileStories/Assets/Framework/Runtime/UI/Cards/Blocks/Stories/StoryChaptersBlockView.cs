@@ -18,14 +18,13 @@ namespace TileStories
         public VisualElement Nav { get; }
         public Button Previous { get; }
         public Button Next { get; }
-        public IReadOnlyList<VisualElement> Segments => _segments;
+        public IReadOnlyList<VisualElement> Segments => _segments.Shown;
         // The chapter shown (0-based) and how many there are
         public int Index { get; private set; }
         public int Count => _chapters.Count;
 
         private readonly List<(string Title, IReadOnlyList<string> Body)> _chapters = new();
-        private readonly List<VisualElement> _segmentPool = new();
-        private readonly List<VisualElement> _segments = new();
+        private readonly ElementPool<VisualElement> _segments = new(_ => NewSegment(), segment => segment.RemoveFromHierarchy());
         private readonly Label _previousLabel;
         private readonly Label _nextLabel;
         private CardStrings _strings;
@@ -70,17 +69,7 @@ namespace TileStories
                 if (BlockFieldReader.ItemIsComplete(item, rowFields))
                     _chapters.Add((read.ItemText(item, BuiltInBlocks.StoryChaptersTitleField),
                         GlossaryMarkup.Paragraphs(read.ItemText(item, BuiltInBlocks.StoryChaptersBodyField))));
-            for (int i = 0; i < _chapters.Count; i++)
-            {
-                while (_segmentPool.Count <= i)
-                {
-                    var segment = new VisualElement();
-                    segment.AddToClassList("card-story__segment");
-                    _segmentPool.Add(segment);
-                }
-                Progress.Add(_segmentPool[i]);
-                _segments.Add(_segmentPool[i]);
-            }
+            for (int i = 0; i < _chapters.Count; i++) Progress.Add(_segments.Take());
             _previousLabel.text = _strings?.Get(CardStrings.Keys.StoryPrevious) ?? "";
             _nextLabel.text = _strings?.Get(CardStrings.Keys.StoryNext) ?? "";
             Nav.style.display = _chapters.Count > 1 ? DisplayStyle.Flex : DisplayStyle.None;
@@ -89,8 +78,7 @@ namespace TileStories
 
         public void Unbind()
         {
-            foreach (var segment in _segments) segment.RemoveFromHierarchy();
-            _segments.Clear();
+            _segments.ReleaseAll();
             _chapters.Clear();
             Body.Clear();
             Index = 0;
@@ -108,14 +96,23 @@ namespace TileStories
             Body.Bind(body, _glossary);
             string format = _strings?.Get(CardStrings.Keys.StoryChapterOf) ?? "";
             Counter.text = string.Format(System.Globalization.CultureInfo.InvariantCulture, format, Index + 1, _chapters.Count);
-            for (int i = 0; i < _segments.Count; i++)
+            var segments = _segments.Shown;
+            for (int i = 0; i < segments.Count; i++)
             {
-                _segments[i].EnableInClassList("card-story__segment--read", i <= Index);
-                _segments[i].EnableInClassList("card-story__segment--current", i == Index);
+                segments[i].EnableInClassList("card-story__segment--read", i <= Index);
+                segments[i].EnableInClassList("card-story__segment--current", i == Index);
             }
             // - hidden, not removed: each button keeps its side of the row (Previous appearing never pushes Next sideways)
             Previous.style.visibility = Index > 0 ? Visibility.Visible : Visibility.Hidden;
             Next.style.visibility = Index < _chapters.Count - 1 ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        // One segment of the progress bar (a chapter)
+        private static VisualElement NewSegment()
+        {
+            var segment = new VisualElement();
+            segment.AddToClassList("card-story__segment");
+            return segment;
         }
 
         private static (Button, Label) NavButton(string className, System.Action onClick)

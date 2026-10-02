@@ -2,8 +2,9 @@
 //
 // Partial: the third tab, "Detail Card" (_3.1_POI_Card_Blocks.md section 8.1). One section per card domain, like
 // Global Scene holds one per marker domain: Card Container (card_settings: the sheet, languages, media folder)
-// and Block Library (card_settings.kinds: every registered block kind, wall-wide). Navigation (_3.2) and Style &
-// Contrast (_3.3) join here later. Texts live in DetailCardHelp.cs; each POI's own blocks are Specific Marker >
+// and Block Library (card_settings.kinds: every registered block kind, wall-wide) here; Card Texts, Glossary and
+// Default Media in their own partials (CardTexts.cs, CardGlossary.cs, CardDefaultMedia.cs). Navigation (_3.2) and
+// Style & Contrast (_3.3) join later. Texts live in DetailCardHelp.cs; each POI's own blocks are Specific Marker >
 // Card Content (CardContent.cs).
 
 using System.Collections.Generic;
@@ -50,145 +51,6 @@ namespace TileStories.Editor
             _showCardDefaultMedia = DrawFramedFoldout(ref _showCardDefaultMedia, DrawCardDefaultMediaSection, "Default Media", CardDefaultMediaSectionColor);
         }
 
-        // card_settings.glossary: one row per word (its Term, then its definition in each wall language), a delete per
-        // row and "+ Add term". A card text links a word to its row with [[term]]. Drawing never writes.
-        private void DrawCardGlossarySection()
-        {
-            var s = _config.card_settings;
-            var languages = s.languages;
-            DrawEditorRow(out float titleRow, out _);
-            GUILayout.Label("Words a card text can link", EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, titleRow - 36f)), GUILayout.ExpandWidth(false));
-            HelpInfoButton.Draw("Glossary", CardGlossaryHelp);
-            EditorRowEnd();
-
-            int count = s.glossary?.Count ?? 0;
-            int deleteAt = -1;
-            for (int i = 0; i < count; i++)
-            {
-                var entry = s.glossary[i];
-                // - a gap between words, so one definition does not run into the next term
-                if (i > 0) GUILayout.Space(EditorGUIUtility.singleLineHeight * 0.5f);
-                DrawEditorRow(out float rowWidth, out _, IndentLevel1);
-                EditorGUILayout.PrefixLabel("Term");
-                string term = EditorGUILayout.TextField(entry.term ?? "", GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
-                ReportTableCellRect("Glossary term", i);
-                if (DeleteButton.DrawLayout("Delete glossary term " + entry.term)) deleteAt = i;
-                ReportTableCellRect("Glossary delete", i);
-                EditorRowEnd();
-                if (term != (entry.term ?? "")) entry.term = term;
-
-                if (languages == null || languages.Count == 0) continue;
-                var definition = new BlockFieldDefinition { Key = "definition", Label = "Definition", Type = BlockFieldType.LocalizedLongText, Help = CardGlossaryDefinitionHelp };
-                DrawLocalizedRows(definition, languages, IndentLevel1, "Glossary definition", i,
-                    lang => entry.definition?.Find(e => e != null && e.lang == lang)?.value ?? "",
-                    (lang, text) => SetLanguage(entry.definition ??= new List<LocalizedEntry>(), lang, text));
-            }
-
-            DrawEditorRow(out float addRow, out _, IndentLevel1);
-            if (GUILayout.Button("+ Add term", GUILayout.Width(Mathf.Max(40f, addRow)), GUILayout.ExpandWidth(false)))
-                (s.glossary ??= new List<GlossaryEntry>()).Add(new GlossaryEntry());
-            ReportTableCellRect("Glossary add", 0);
-            EditorRowEnd();
-            if (deleteAt >= 0) s.glossary.RemoveAt(deleteAt);
-
-            DrawDomainTestSubSection(_cardGlossaryTest, CardGlossarySceneTestGuide, CardGlossaryPlaymodeTestGuide, CardGlossaryDeviceTestGuide);
-        }
-
-        // The framework's default card texts (CardStrings.asset, next to PoiCard.uss), loaded once per domain reload. By its own path, never
-        // "the first CardStringTable found": an app's table is a CardStringTable too (CardStringSources) and must not pass for the framework's.
-        private const string FrameworkCardStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
-        private static CardStringTable _frameworkCardStrings;
-        internal static CardStringTable FrameworkCardStrings() =>
-            _frameworkCardStrings != null ? _frameworkCardStrings : _frameworkCardStrings = AssetDatabase.LoadAssetAtPath<CardStringTable>(FrameworkCardStringsPath);
-
-        // card_settings.strings: one row per framework text, named by its framework wording (never its key), then one
-        // field per wall language holding this wall's own wording. Empty field = the framework's. Drawing never writes.
-        private void DrawCardTextsSection()
-        {
-            var s = _config.card_settings;
-            var table = FrameworkCardStrings();
-            var languages = s.languages;
-            if (table == null)
-                EditorGUILayout.HelpBox(CardTextsMissingNote, MessageType.Warning);
-            else if (languages == null || languages.Count == 0)
-                EditorGUILayout.HelpBox(CardNoLanguageNote, MessageType.Warning);
-            else
-            {
-                DrawEditorRow(out float titleRow, out _);
-                GUILayout.Label("Text on the card", EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, titleRow - 36f)), GUILayout.ExpandWidth(false));
-                HelpInfoButton.Draw("Card Texts", CardTextsHelp);
-                EditorRowEnd();
-
-                DrawCardTextRows(s, table, languages, "Framework");
-                // - an app's own words, each app under its own name (the same rows, the same override field per language)
-                foreach (var source in CardStringSources.Shared.All)
-                {
-                    DrawEditorRow(out float appRow, out _);
-                    GUILayout.Label(source.AppName + " (app texts)", EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, appRow - 36f)), GUILayout.ExpandWidth(false));
-                    EditorRowEnd();
-                    DrawCardTextRows(s, source.Table, languages, source.AppName);
-                }
-            }
-
-            DrawDomainTestSubSection(_cardTextsTest, CardTextsSceneTestGuide, CardTextsPlaymodeTestGuide, CardTextsDeviceTestGuide);
-        }
-
-        // One row per text of a table (the framework's, or one app's), then one field per wall language holding this wall's own wording
-        private void DrawCardTextRows(CardSettings s, CardStringTable table, List<string> languages, string owner)
-        {
-            var entries = table.Entries();
-            foreach (var row in table.rows)
-            {
-                if (row == null || string.IsNullOrEmpty(row.key)) continue;
-                // - quoted: the row IS that text (a one-character wording like "?" reads as a title otherwise)
-                string name = "\"" + (CardStrings.Find(entries, row.key, languages[0]) ?? CardStrings.Find(entries, row.key, "en") ?? row.key) + "\"";
-                DrawEditorRow(out float nameRow, out _, IndentLevel1);
-                GUILayout.Label(name, EditorStyles.boldLabel, GUILayout.Width(Mathf.Max(40f, nameRow - 36f)), GUILayout.ExpandWidth(false));
-                HelpInfoButton.Draw(name, CardTextRowHelp(row, owner));
-                EditorRowEnd();
-
-                foreach (string lang in languages)
-                {
-                    string current = CardTextOverride(s, row.key, lang);
-                    DrawEditorRow(out float rowWidth, out _, IndentLevel1);
-                    EditorGUILayout.PrefixLabel(lang);
-                    string edited = EditorGUILayout.TextField(current, GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth)), GUILayout.ExpandWidth(false));
-                    ReportTableCellRect("Card text " + row.key + " " + lang, 0);
-                    EditorRowEnd();
-                    if (edited != current) SetCardTextOverride(s, row.key, lang, edited);
-                }
-            }
-        }
-
-        // The row's (i): where the card shows it, then its owner's wording (the framework's, or the app's) in each of its languages
-        private static string CardTextRowHelp(CardStringTable.Row row, string owner)
-        {
-            var words = new List<string>();
-            foreach (var t in row.text)
-                if (t != null && !string.IsNullOrWhiteSpace(t.value)) words.Add(t.lang + ": " + t.value);
-            string who = owner == "Framework" ? "Framework wording" : owner + " wording";
-            return row.where + "\n\n" + who + " (used where your field is empty): " + string.Join("; ", words) + ".";
-        }
-
-        // This wall's own wording of one text in one language ("" when it has none)
-        internal static string CardTextOverride(CardSettings s, string key, string lang)
-        {
-            var entry = s.strings?.Find(e => e != null && e.key == key);
-            return entry?.text?.Find(t => t != null && t.lang == lang)?.value ?? "";
-        }
-
-        // Set this wall's wording of one text in one language, creating its row and language entry on the first edit
-        internal static void SetCardTextOverride(CardSettings s, string key, string lang, string text)
-        {
-            s.strings ??= new List<CardStringEntry>();
-            var entry = s.strings.Find(e => e != null && e.key == key);
-            if (entry == null) s.strings.Add(entry = new CardStringEntry { key = key });
-            entry.text ??= new List<LocalizedEntry>();
-            var t = entry.text.Find(x => x != null && x.lang == lang);
-            if (t == null) entry.text.Add(t = new LocalizedEntry { lang = lang });
-            t.value = text;
-        }
-
         // card_settings: whether the card opens, where, how it closes, which languages and where its media lives
         private void DrawCardContainerSection()
         {
@@ -210,6 +72,7 @@ namespace TileStories.Editor
                 c.audio_android_output_poll = DrawToggleField("Android Earbud Check", c.audio_android_output_poll, CardAudioAndroidPollHelp);
                 c.reduce_motion = DrawToggleField("Reduce Motion", c.reduce_motion, CardReduceMotionHelp);
                 c.sources_at_end = DrawToggleField("Sources At The End", c.sources_at_end, CardSourcesAtEndHelp);
+                c.peek_next_card = DrawToggleField("Peek Next Card", c.peek_next_card, CardPeekNextHelp);
             }
 
             DrawDomainTestSubSection(_cardContainerTest, CardSceneTestGuide, CardPlaymodeTestGuide, CardDeviceTestGuide, DrawCardTestRows);
@@ -440,79 +303,5 @@ namespace TileStories.Editor
         internal void SetBlockLibraryEnabled(string kind, bool enabled) => EnsureBlockLibraryRow(kind).enabled = enabled;
 
         internal void SetBlockLibraryVariant(string kind, string variant) => EnsureBlockLibraryRow(kind).default_variant = variant;
-
-        // _3.1 step 13: this wall's own default media library path (like Media Folder), then a read-only table of
-        // the Framework's own shipped defaults (preview, kind, key, (i)) -- every Asset field's "Pick default..."
-        // offers this wall's own library first, then these
-        private const float DefaultMediaPreviewSize = 32f;
-        private const float DefaultMediaKindColumnWidth = 70f;
-        private const float DefaultMediaKeyColumnWidth = 150f;
-        // The gap between two cells of a Default Media row (GUILayout's own gap between two labels)
-        private const float DefaultMediaCellGap = 4f;
-
-        // A Default Media row's cells: one rect the size and style of the title row's label (the row less the 36 pt (i) column), reserved
-        // in the shared row so the (i) drawn after it sits where the title's does
-        private static Rect DefaultMediaCellsRect(float rowWidth, float height)
-        {
-            float width = Mathf.Max(40f, rowWidth - 36f);
-            return GUILayoutUtility.GetRect(width, height, EditorStyles.miniBoldLabel, GUILayout.Width(width), GUILayout.Height(height), GUILayout.ExpandWidth(false));
-        }
-
-        private static Rect DefaultMediaKindRect(Rect cells) =>
-            new Rect(cells.x + DefaultMediaPreviewSize + DefaultMediaCellGap, cells.y, DefaultMediaKindColumnWidth, EditorGUIUtility.singleLineHeight);
-
-        // - never past the cells' own end, so a narrow window cuts the key instead of pushing it under the (i)
-        private static Rect DefaultMediaKeyRect(Rect cells)
-        {
-            float x = cells.x + DefaultMediaPreviewSize + DefaultMediaKindColumnWidth + 2f * DefaultMediaCellGap;
-            return new Rect(x, cells.y, Mathf.Max(0f, Mathf.Min(DefaultMediaKeyColumnWidth, cells.xMax - x)), EditorGUIUtility.singleLineHeight);
-        }
-
-        private void DrawCardDefaultMediaSection()
-        {
-            var s = _config.card_settings;
-            s.default_media_library_resources_path = DrawTextRow("Default Media Library", s.default_media_library_resources_path,
-                CardDefaultMediaLibraryHelp, IndentLevel0);
-
-            DrawEditorRow(out float titleRow, out _);
-            GUILayout.Label("Framework defaults", EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, titleRow - 36f)), GUILayout.ExpandWidth(false));
-            HelpInfoButton.Draw("Framework defaults", CardDefaultMediaTableHelp);
-            ReportTableCellRect("Default media title help", 0);
-            EditorRowEnd();
-
-            var library = CardMediaLibraryLookup.Framework;
-            if (library == null || library.Entries.Count == 0)
-            {
-                EditorGUILayout.HelpBox("No default media found (CardMediaLibrary.asset is missing or empty).", MessageType.Warning);
-            }
-            else
-            {
-                // - every row is the shared row (DrawEditorRow) built like the title above: its cells in ONE rect of the title label's
-                //   width and style, split here, then the (i). So each (i) lands exactly in the section's (i) column, whatever margins the
-                //   cells' own styles have (a FlexibleSpace in an uncapped row once ran it to the window's edge)
-                DrawEditorRow(out float headerRow, out _);
-                Rect header = DefaultMediaCellsRect(headerRow, EditorGUIUtility.singleLineHeight);
-                GUI.Label(DefaultMediaKindRect(header), "Kind", EditorStyles.miniBoldLabel);
-                GUI.Label(DefaultMediaKeyRect(header), "Key", EditorStyles.miniBoldLabel);
-                EditorRowEnd();
-                for (int i = 0; i < library.Entries.Count; i++)
-                {
-                    var entry = library.Entries[i];
-                    DrawEditorRow(out float rowWidth, out _);
-                    Rect cells = DefaultMediaCellsRect(rowWidth, DefaultMediaPreviewSize);
-                    var previewRect = new Rect(cells.x, cells.y, DefaultMediaPreviewSize, DefaultMediaPreviewSize);
-                    Texture2D preview = entry.asset != null ? AssetPreview.GetAssetPreview(entry.asset) ?? AssetPreview.GetMiniThumbnail(entry.asset) : null;
-                    GUI.Box(previewRect, preview != null ? (Texture)preview : Texture2D.grayTexture);
-                    ReportTableCellRect("Default media preview", i, previewRect);
-                    GUI.Label(DefaultMediaKindRect(cells), entry.kind.ToString());
-                    GUI.Label(DefaultMediaKeyRect(cells), entry.key);
-                    HelpInfoButton.Draw(entry.key, CardDefaultMediaRowHelp(entry));
-                    ReportTableCellRect("Default media help", i);
-                    EditorRowEnd();
-                }
-            }
-
-            DrawDomainTestSubSection(_cardDefaultMediaTest, CardDefaultMediaSceneTestGuide, CardDefaultMediaPlaymodeTestGuide, CardDefaultMediaDeviceTestGuide);
-        }
     }
 }

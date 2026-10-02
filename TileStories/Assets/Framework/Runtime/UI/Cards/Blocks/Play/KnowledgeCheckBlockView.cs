@@ -42,7 +42,7 @@ namespace TileStories
         public VisualElement Nav { get; }
         public Button Previous { get; }
         public Button Next { get; }
-        public IReadOnlyList<Choice> Choices => _shown;
+        public IReadOnlyList<Choice> Choices => _choices.Shown;
 
         // The question shown (0-based among the shown questions) and how many there are
         public int Index { get; private set; }
@@ -54,8 +54,7 @@ namespace TileStories
 
         private readonly List<KnowledgeCheckRule.Question> _questions = new();
         private readonly List<int> _chosen = new();
-        private readonly List<Choice> _pool = new();
-        private readonly List<Choice> _shown = new();
+        private readonly ElementPool<Choice> _choices;
         private readonly Label _previousLabel;
         private readonly Label _nextLabel;
         private CardStrings _strings;
@@ -76,6 +75,7 @@ namespace TileStories
             Root = new VisualElement { name = "card-quiz" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-quiz");
+            _choices = new ElementPool<Choice>(NewChoice, choice => choice.Button.RemoveFromHierarchy());
             Counter = new Label();
             Counter.AddToClassList("card-quiz__counter");
             Stage = new VisualElement { name = "card-quiz-stage" };
@@ -153,12 +153,9 @@ namespace TileStories
         public void Unbind()
         {
             EndSwipe();
-            foreach (var choice in _shown)
-            {
-                choice.Button.RemoveFromHierarchy();
-                choice.Image.Clear(null);
-            }
-            _shown.Clear();
+            // - leaving the card: the choices' pictures go too (a question switch keeps them for the next bind of the row)
+            foreach (var choice in _choices.Shown) choice.Image.Clear(null);
+            _choices.ReleaseAll();
             _questions.Clear();
             _chosen.Clear();
             Index = 0;
@@ -178,14 +175,12 @@ namespace TileStories
             string format = _strings?.Get(CardStrings.Keys.KnowledgeQuestionOf) ?? "";
             Counter.text = string.Format(System.Globalization.CultureInfo.InvariantCulture, format, Index + 1, _questions.Count);
             Counter.style.display = _questions.Count > 1 ? DisplayStyle.Flex : DisplayStyle.None;
-            foreach (var old in _shown) old.Button.RemoveFromHierarchy();
-            _shown.Clear();
+            _choices.ReleaseAll();
             for (int i = 0; i < question.Options.Count; i++)
             {
-                var choice = Take(i);
+                var choice = _choices.Take();
                 BindChoice(choice, question.Options[i]);
                 ChoicesRow.Add(choice.Button);
-                _shown.Add(choice);
             }
             // - hidden, not removed: each button keeps its side of the row
             Previous.style.visibility = Index > 0 ? Visibility.Visible : Visibility.Hidden;
@@ -212,7 +207,7 @@ namespace TileStories
             Root.EnableInClassList("card-quiz--answered", answered);
             Stage.EnableInClassList("card-quiz__stage--correct", answered && right);
             Stage.EnableInClassList("card-quiz__stage--wrong", answered && !right);
-            foreach (var choice in _shown)
+            foreach (var choice in _choices.Shown)
             {
                 bool isRight = answered && choice.Index == question.Correct;
                 bool isWrong = answered && choice.Index == chosen && !right;
@@ -251,26 +246,22 @@ namespace TileStories
             choice.Button.tooltip = words;
         }
 
-        private Choice Take(int index)
+        // The choice of place `index`: a tap answers with that place (the option the question shows there)
+        private Choice NewChoice(int index)
         {
-            while (_pool.Count <= index)
-            {
-                var choice = new Choice { Index = _pool.Count, Button = new Button(), Text = new Label { pickingMode = PickingMode.Ignore }, Image = new CardImage("card-quiz__picture") };
-                choice.Button.AddToClassList("card-quiz__choice");
-                choice.Button.AddToClassList("card-tap");
-                choice.Text.AddToClassList("card-quiz__choice-text");
-                choice.Image.Root.pickingMode = PickingMode.Ignore;
-                choice.Mark = CardIcons.CreateVector(CardIcons.Shape.Tick);
-                choice.Mark.AddToClassList("card-quiz__mark");
-                choice.Mark.AddToClassList("card-quiz__choice-mark");
-                choice.Button.Add(choice.Image.Root);
-                choice.Button.Add(choice.Text);
-                choice.Button.Add(choice.Mark);
-                var captured = choice;
-                choice.Button.clicked += () => Answer(captured.Index);
-                _pool.Add(choice);
-            }
-            return _pool[index];
+            var choice = new Choice { Index = index, Button = new Button(), Text = new Label { pickingMode = PickingMode.Ignore }, Image = new CardImage("card-quiz__picture") };
+            choice.Button.AddToClassList("card-quiz__choice");
+            choice.Button.AddToClassList("card-tap");
+            choice.Text.AddToClassList("card-quiz__choice-text");
+            choice.Image.Root.pickingMode = PickingMode.Ignore;
+            choice.Mark = CardIcons.CreateVector(CardIcons.Shape.Tick);
+            choice.Mark.AddToClassList("card-quiz__mark");
+            choice.Mark.AddToClassList("card-quiz__choice-mark");
+            choice.Button.Add(choice.Image.Root);
+            choice.Button.Add(choice.Text);
+            choice.Button.Add(choice.Mark);
+            choice.Button.clicked += () => Answer(choice.Index);
+            return choice;
         }
 
         private static (Button, Label) NavButton(string className, System.Action onClick)

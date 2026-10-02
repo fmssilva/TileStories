@@ -10,10 +10,9 @@ namespace TileStories
     {
         public VisualElement Root { get; }
         // The shown facts, in order
-        public IReadOnlyList<(VisualElement Cell, Label Label, Label Value)> Facts => _shown;
+        public IReadOnlyList<(VisualElement Cell, Label Label, Label Value)> Facts => _facts.Shown;
 
-        private readonly List<(VisualElement Cell, Label Label, Label Value)> _pool = new();
-        private readonly List<(VisualElement, Label, Label)> _shown = new();
+        private readonly ElementPool<(VisualElement Cell, Label Label, Label Value)> _facts;
         private string _variantClass;
 
         public QuickFactsBlockView()
@@ -21,6 +20,7 @@ namespace TileStories
             Root = new VisualElement { name = "card-quick-facts" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-facts");
+            _facts = new ElementPool<(VisualElement Cell, Label Label, Label Value)>(_ => NewFact(), fact => fact.Cell.RemoveFromHierarchy());
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -34,40 +34,35 @@ namespace TileStories
                 string label = read.ItemText(item, BuiltInBlocks.QuickFactsLabelField);
                 string value = read.ItemText(item, BuiltInBlocks.QuickFactsValueField);
                 if (label.Length == 0 && value.Length == 0) continue;
-                var fact = Take(_shown.Count);
+                var fact = _facts.Take();
                 fact.Label.text = label;
                 fact.Label.style.display = label.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 fact.Value.text = value;
                 fact.Value.style.display = value.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 Root.Add(fact.Cell);
-                _shown.Add(fact);
             }
         }
 
         public void Unbind()
         {
-            foreach (var (cell, _, _) in _shown) cell.RemoveFromHierarchy();
-            _shown.Clear();
+            _facts.ReleaseAll();
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
         }
 
-        private (VisualElement Cell, Label Label, Label Value) Take(int index)
+        // One fact's cell: its label and value
+        private static (VisualElement Cell, Label Label, Label Value) NewFact()
         {
-            while (_pool.Count <= index)
-            {
-                var cell = new VisualElement();
-                cell.AddToClassList("card-facts__cell");
-                var value = new Label();
-                value.AddToClassList("card-facts__value");
-                var label = new Label();
-                label.AddToClassList("card-facts__label");
-                // - the look's USS orders them (chips read "label value", big numbers "value over label")
-                cell.Add(label);
-                cell.Add(value);
-                _pool.Add((cell, label, value));
-            }
-            return _pool[index];
+            var cell = new VisualElement();
+            cell.AddToClassList("card-facts__cell");
+            var value = new Label();
+            value.AddToClassList("card-facts__value");
+            var label = new Label();
+            label.AddToClassList("card-facts__label");
+            // - the look's USS orders them (chips read "label value", big numbers "value over label")
+            cell.Add(label);
+            cell.Add(value);
+            return (cell, label, value);
         }
     }
 }

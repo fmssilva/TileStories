@@ -18,10 +18,9 @@ namespace TileStories
         }
 
         public VisualElement Root { get; }
-        public IReadOnlyList<Row> Rows => _shown;
+        public IReadOnlyList<Row> Rows => _rows.Shown;
 
-        private readonly List<Row> _pool = new();
-        private readonly List<Row> _shown = new();
+        private readonly ElementPool<Row> _rows = new(_ => NewRow(), row => row.Box.RemoveFromHierarchy());
         private string _variantClass;
 
         public PracticalInfoBlockView()
@@ -41,7 +40,7 @@ namespace TileStories
             foreach (var item in read.Items(BuiltInBlocks.PracticalInfoItemsField))
             {
                 if (!BlockFieldReader.ItemIsComplete(item, rowFields)) continue;
-                var row = Take(_shown.Count);
+                var row = _rows.Take();
                 // - only the practical keys: an action's icon (or a stale word) draws nothing, the words stay in line
                 string icon = read.ItemValue(item, BuiltInBlocks.PracticalInfoIconField);
                 bool drawn = System.Array.IndexOf(BuiltInBlocks.PracticalInfoIcons, icon) >= 0;
@@ -53,36 +52,31 @@ namespace TileStories
                 row.Value.text = value;
                 row.Value.style.display = value.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 Root.Add(row.Box);
-                _shown.Add(row);
             }
         }
 
         public void Unbind()
         {
-            foreach (var row in _shown) row.Box.RemoveFromHierarchy();
-            _shown.Clear();
+            _rows.ReleaseAll();
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
         }
 
-        private Row Take(int index)
+        // One row: its icon beside the label and value
+        private static Row NewRow()
         {
-            while (_pool.Count <= index)
-            {
-                var row = new Row { Box = new VisualElement(), Icon = CardIcons.Create(), Label = new Label(), Value = new Label() };
-                row.Box.AddToClassList("card-practical__row");
-                row.Icon.AddToClassList("card-practical__icon");
-                var words = new VisualElement();
-                words.AddToClassList("card-practical__words");
-                row.Label.AddToClassList("card-practical__label");
-                row.Value.AddToClassList("card-practical__value");
-                words.Add(row.Label);
-                words.Add(row.Value);
-                row.Box.Add(row.Icon);
-                row.Box.Add(words);
-                _pool.Add(row);
-            }
-            return _pool[index];
+            var row = new Row { Box = new VisualElement(), Icon = CardIcons.Create(), Label = new Label(), Value = new Label() };
+            row.Box.AddToClassList("card-practical__row");
+            row.Icon.AddToClassList("card-practical__icon");
+            var words = new VisualElement();
+            words.AddToClassList("card-practical__words");
+            row.Label.AddToClassList("card-practical__label");
+            row.Value.AddToClassList("card-practical__value");
+            words.Add(row.Label);
+            words.Add(row.Value);
+            row.Box.Add(row.Icon);
+            row.Box.Add(words);
+            return row;
         }
     }
 }

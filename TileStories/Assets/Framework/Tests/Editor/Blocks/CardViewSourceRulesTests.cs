@@ -6,14 +6,21 @@ using NUnit.Framework;
 namespace TileStories.Editor.Tests
 {
     // The card's two hard rules (_3.1 section 3, 30-ui-content.md), enforced on the source of every card view
-    // (Runtime/UI/Cards/**/*.cs) so a later edit cannot slip past them:
+    // (Runtime/UI/Cards/**/*.cs) and of the card's 3D/360 preview and AR placement owners (Runtime/Blocks/Preview, Runtime/Blocks/Ar:
+    // they build what the card draws and places, so a colour or a word written there would bypass the tokens and the strings table too)
+    // so a later edit cannot slip past them:
     //   - no literal colour or size: views add CLASSES, the card stylesheets + CardTokens.uss hold every value (_3.3 section 1)
     //   - no visitor string in code: a text a visitor reads comes from the config or the card strings table
     public class CardViewSourceRulesTests
     {
-        private const string CardViews = "Assets/Framework/Runtime/UI/Cards";
+        private static readonly string[] ScannedFolders =
+        {
+            "Assets/Framework/Runtime/UI/Cards",
+            "Assets/Framework/Runtime/Blocks/Preview",
+            "Assets/Framework/Runtime/Blocks/Ar",
+        };
 
-        private static string[] Files() => Directory.GetFiles(CardViews, "*.cs", SearchOption.AllDirectories);
+        private static string[] Files() => ScannedFolders.SelectMany(folder => Directory.GetFiles(folder, "*.cs", SearchOption.AllDirectories)).ToArray();
 
         // Source without comments (a comment may describe a colour or quote a visitor text)
         private static string Code(string file) =>
@@ -23,15 +30,16 @@ namespace TileStories.Editor.Tests
         public void TheScanSeesTheCardViews()
         {
             var names = Files().Select(Path.GetFileName).ToList();
-            foreach (string view in new[] { "PoiCardSheetView.cs", "RichTextBlockView.cs", "StatusBlockView.cs", "ActionsBlockView.cs", "CardTextView.cs" })
-                CollectionAssert.Contains(names, view, "not vacuous");
+            foreach (string view in new[] { "PoiCardSheetView.cs", "RichTextBlockView.cs", "StatusBlockView.cs", "ActionsBlockView.cs", "CardTextView.cs",
+                         "ModelFitRule.cs", "CardPreviewService.cs", "ArPlacementRule.cs", "ArPlacementService.cs" })
+                CollectionAssert.Contains(names, view, "not vacuous: every scanned folder is read");
         }
 
         [Test]
         public void NoCardView_WritesALiteralColourOrSize()
         {
             var literal = new Regex(
-                @"new\s+Color\s*\(|Color\.(white|black|red|green|blue|yellow|cyan|magenta|gray|grey|clear)\b|" +
+                @"new\s+(UnityEngine\.)?Color(32)?\s*\(|Color\.(white|black|red|green|blue|yellow|cyan|magenta|gray|grey|clear)\b|" +
                 @"ColorUtility\.|\brgba?\s*\(|" +
                 @"style\.(width|height|min\w*|max\w*|fontSize|margin\w*|padding\w*|border\w*Width|border\w*Radius|left|right|top|bottom)\s*=\s*-?\d");
             foreach (string file in Files())

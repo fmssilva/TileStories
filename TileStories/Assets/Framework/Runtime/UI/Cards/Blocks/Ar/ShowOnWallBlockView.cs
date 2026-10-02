@@ -26,10 +26,9 @@ namespace TileStories
         public Label ButtonLabel { get; }
         public Label Caption { get; }
         public VisualElement NeighboursRow { get; }
-        public IReadOnlyList<Neighbour> Neighbours => _shown;
+        public IReadOnlyList<Neighbour> Neighbours => _neighbours.Shown;
 
-        private readonly List<Neighbour> _pool = new();
-        private readonly List<Neighbour> _shown = new();
+        private readonly ElementPool<Neighbour> _neighbours;
         private IBlockHost _host;
         private string _variantClass;
 
@@ -56,6 +55,7 @@ namespace TileStories
             Root.Add(Button);
             Root.Add(Caption);
             Root.Add(NeighboursRow);
+            _neighbours = new ElementPool<Neighbour>(_ => NewNeighbour(), neighbour => neighbour.Button.RemoveFromHierarchy());
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -70,45 +70,39 @@ namespace TileStories
             var picked = withNeighbours ? RelatedPoisRule.Pick(context.Poi, RelatedPoisRule.SourceNearest, null, context.Taxonomy?.pois) : new List<POIData>();
             for (int i = 0; i < picked.Count && i < BuiltInBlocks.ShowOnWallNeighbourCount; i++)
             {
-                var neighbour = Take(_shown.Count);
+                var neighbour = _neighbours.Take();
                 neighbour.PoiId = picked[i].id;
                 neighbour.Title.text = BlockStackBuilder.CardTitleOf(picked[i], context.Language, context.FallbackLanguage);
                 neighbour.Button.tooltip = neighbour.Title.text;
                 NeighboursRow.Add(neighbour.Button);
-                _shown.Add(neighbour);
             }
             Caption.text = context.Strings?.Get(CardStrings.Keys.ShowOnWallNearby) ?? "";
-            bool any = _shown.Count > 0;
+            bool any = _neighbours.Shown.Count > 0;
             Caption.style.display = any ? DisplayStyle.Flex : DisplayStyle.None;
             NeighboursRow.style.display = any ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         public void Unbind()
         {
-            foreach (var neighbour in _shown) neighbour.Button.RemoveFromHierarchy();
-            _shown.Clear();
+            _neighbours.ReleaseAll();
             _host = null;
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
         }
 
-        private Neighbour Take(int index)
+        // One neighbour chip: a tap selects whichever point it names at the time
+        private Neighbour NewNeighbour()
         {
-            while (_pool.Count <= index)
+            var neighbour = new Neighbour { Button = new Button(), Title = new Label { pickingMode = PickingMode.Ignore } };
+            neighbour.Button.AddToClassList("card-show-on-wall__neighbour");
+            neighbour.Button.AddToClassList("card-tap");
+            neighbour.Title.AddToClassList("card-show-on-wall__neighbour-title");
+            neighbour.Button.Add(neighbour.Title);
+            neighbour.Button.clicked += () =>
             {
-                var neighbour = new Neighbour { Button = new Button(), Title = new Label { pickingMode = PickingMode.Ignore } };
-                neighbour.Button.AddToClassList("card-show-on-wall__neighbour");
-                neighbour.Button.AddToClassList("card-tap");
-                neighbour.Title.AddToClassList("card-show-on-wall__neighbour-title");
-                neighbour.Button.Add(neighbour.Title);
-                var captured = neighbour;
-                neighbour.Button.clicked += () =>
-                {
-                    if (!string.IsNullOrEmpty(captured.PoiId)) _host?.SelectPoi(captured.PoiId);
-                };
-                _pool.Add(neighbour);
-            }
-            return _pool[index];
+                if (!string.IsNullOrEmpty(neighbour.PoiId)) _host?.SelectPoi(neighbour.PoiId);
+            };
+            return neighbour;
         }
     }
 }

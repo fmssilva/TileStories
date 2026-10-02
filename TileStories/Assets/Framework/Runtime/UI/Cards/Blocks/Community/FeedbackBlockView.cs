@@ -27,13 +27,12 @@ namespace TileStories
         public Label Question { get; }
         public VisualElement Row { get; }
         public Label Thanks { get; }
-        public IReadOnlyList<Vote> Votes => _shown;
+        public IReadOnlyList<Vote> Votes => _votes.Shown;
 
         // The vote given (-1 = none yet)
         public int Voted { get; private set; } = -1;
 
-        private readonly List<Vote> _pool = new();
-        private readonly List<Vote> _shown = new();
+        private readonly ElementPool<Vote> _votes;
         private CardStrings _strings;
         private CardLocalState _state;
         private ICardEvents _events;
@@ -48,6 +47,7 @@ namespace TileStories
             Root = new VisualElement { name = "card-feedback" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-feedback");
+            _votes = new ElementPool<Vote>(_ => NewVote(), vote => vote.Button.RemoveFromHierarchy());
             Question = new Label();
             Question.AddToClassList("card-feedback__question");
             Row = new VisualElement();
@@ -91,8 +91,7 @@ namespace TileStories
 
         public void Unbind()
         {
-            foreach (var vote in _shown) vote.Button.RemoveFromHierarchy();
-            _shown.Clear();
+            _votes.ReleaseAll();
             Voted = -1;
             _state = null;
             _events = null;
@@ -117,7 +116,7 @@ namespace TileStories
             bool voted = Voted >= 0;
             Root.EnableInClassList("card-feedback--voted", voted);
             bool stars = _variant == BuiltInBlocks.FeedbackStars;
-            foreach (var vote in _shown)
+            foreach (var vote in _votes.Shown)
             {
                 bool on = voted && (stars ? vote.Value <= Voted : vote.Value == Voted);
                 vote.Button.EnableInClassList("card-feedback__vote--on", on);
@@ -129,7 +128,7 @@ namespace TileStories
 
         private void Add(int value, CardIcons.Shape shape)
         {
-            var vote = Take(_shown.Count);
+            var vote = _votes.Take();
             vote.Value = value;
             vote.Glyph.Kind = shape;
             bool stars = shape == CardIcons.Shape.Star;
@@ -141,26 +140,21 @@ namespace TileStories
                 : vote.Text.text;
             vote.Button.tooltip = named;
             Row.Add(vote.Button);
-            _shown.Add(vote);
         }
 
-        private Vote Take(int index)
+        // One vote button: a tap casts whichever value it carries at the time
+        private Vote NewVote()
         {
-            while (_pool.Count <= index)
-            {
-                // - the star / thumb is painted (CardIcons.VectorGlyph): outlined while off, filled once voted
-                var vote = new Vote { Button = new Button(), Glyph = CardIcons.CreateVector(CardIcons.Shape.Star), Text = new Label { pickingMode = PickingMode.Ignore } };
-                vote.Button.AddToClassList("card-feedback__vote");
-                vote.Button.AddToClassList("card-tap");
-                vote.Text.AddToClassList("card-feedback__vote-text");
-                vote.Glyph.AddToClassList("card-feedback__glyph");
-                vote.Button.Add(vote.Glyph);
-                vote.Button.Add(vote.Text);
-                var captured = vote;
-                vote.Button.clicked += () => Cast(captured.Value);
-                _pool.Add(vote);
-            }
-            return _pool[index];
+            // - the star / thumb is painted (CardIcons.VectorGlyph): outlined while off, filled once voted
+            var vote = new Vote { Button = new Button(), Glyph = CardIcons.CreateVector(CardIcons.Shape.Star), Text = new Label { pickingMode = PickingMode.Ignore } };
+            vote.Button.AddToClassList("card-feedback__vote");
+            vote.Button.AddToClassList("card-tap");
+            vote.Text.AddToClassList("card-feedback__vote-text");
+            vote.Glyph.AddToClassList("card-feedback__glyph");
+            vote.Button.Add(vote.Glyph);
+            vote.Button.Add(vote.Text);
+            vote.Button.clicked += () => Cast(vote.Value);
+            return vote;
         }
     }
 }

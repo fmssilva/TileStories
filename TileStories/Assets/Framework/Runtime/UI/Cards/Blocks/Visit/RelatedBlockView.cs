@@ -36,6 +36,9 @@ namespace TileStories
         private readonly List<Card> _shown = new();
         private IBlockHost _host;
         private string _variantClass;
+        // Peek Next Card (card_settings.container.peek_next_card), read at bind: a live edit rebinds the card
+        private bool _peekNext = true;
+        private readonly List<VisualElement> _cells = new();
 
         public RelatedBlockView()
         {
@@ -74,6 +77,7 @@ namespace TileStories
         {
             Unbind();
             _host = context.Host;
+            _peekNext = context.Settings?.container?.peek_next_card ?? true;
             _variantClass = "card-related--" + context.Variant;
             Root.AddToClassList(_variantClass);
             var wallPois = context.Taxonomy?.pois;
@@ -118,18 +122,14 @@ namespace TileStories
             FitCards();
         }
 
-        // Stretch the cards so a whole number of them fills the swipe strip (CardTrackRule): a card is never cut in half at the edge of the
-        // screen (a picture-less card read "Lamp -"), at rest or at the end of the swipe. The narrowest a card may be is its USS min-width
-        // (the card token); the gap is its right margin.
+        // Size the cards for the swipe strip (CardTrackFit): whole cards only, or -- with Peek Next Card -- whole cards and a slice of the next
+        // at rest; never a card cut at the end of the swipe (a picture-less card once read "Lamp -"). The narrowest a card may be is its USS
+        // min-width (the card token); the gap is its right margin.
         private void FitCards()
         {
-            if (_shown.Count == 0) return;
-            float strip = Track.contentViewport.layout.width;
-            var style = _shown[0].Box.resolvedStyle;
-            float narrowest = style.minWidth.value, gap = style.marginRight;
-            if (float.IsNaN(strip) || strip <= 0f || float.IsNaN(narrowest) || narrowest <= 0f) return;
-            float width = CardTrackRule.CellWidth(strip, narrowest, gap);
-            foreach (var card in _shown) card.Box.style.width = width;
+            _cells.Clear();
+            foreach (var card in _shown) _cells.Add(card.Box);
+            CardTrackFit.Apply(Track, _cells, _peekNext);
         }
 
         private void BindNext(BlockBindContext context, List<POIData> picked, IReadOnlyList<POIData> wallPois)

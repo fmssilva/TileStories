@@ -159,6 +159,10 @@
     /* related (Visit.uss): a carousel card's width and picture height */
     --ts-related-card: 140px;
     --ts-related-picture: 96px;
+    /* The swipe tracks (timeline, related) with Peek Next Card: the slice of the next card shown at rest, read as a plain number (panel
+       units, no "px": a CustomStyleProperty<float> does not parse a dimension) by CardTrackFit on this card root, like --ts-sheet-top-gap;
+       small enough that two whole cards still fit the phone strip beside it */
+    --ts-track-peek: 32;
     --ts-correct: rgb(111, 191, 115);
     --ts-wrong: rgb(210, 85, 63);
     --ts-choice-border: 2px;

@@ -150,6 +150,9 @@ namespace TileStories
                         RelatedBlock(variant, RelatedPoisRule.SourceSameCategory), null, categoryWall));
                     list.Add(new Entry(BuiltInBlocks.RelatedKind, variant, "nearest",
                         RelatedBlock(variant, RelatedPoisRule.SourceNearest), null, categoryWall));
+                    // - the swipe track both ways (Peek Next Card on above, off here)
+                    list.Add(new Entry(BuiltInBlocks.RelatedKind, variant, "nearest_nopeek",
+                        RelatedBlock(variant, RelatedPoisRule.SourceNearest), null, wall => { categoryWall(wall); PeekNextCardOff(wall); }));
                     continue;
                 }
                 // next_along_wall: the shown point between its two picks (right, no wrap), and past both (wraps left)

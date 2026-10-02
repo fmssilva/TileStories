@@ -14,7 +14,7 @@ namespace TileStories
 
         public VisualElement Root { get; }
         // The paragraph labels in order (the drop cap's paragraph label is the one beside the initial)
-        public IReadOnlyList<Label> Paragraphs => _shown;
+        public IReadOnlyList<Label> Paragraphs => _paragraphs.Shown;
         public Label DropCap { get; }
         public VisualElement DefinitionPanel { get; }
         public Label DefinitionTitle { get; }
@@ -24,13 +24,17 @@ namespace TileStories
 
         private readonly string _paragraphClass;
         private readonly VisualElement _capRow;
-        private readonly List<Label> _pool = new();
-        private readonly List<Label> _shown = new();
+        private readonly ElementPool<Label> _paragraphs;
         private CardGlossary _glossary;
 
         public CardTextView(string paragraphClass)
         {
             _paragraphClass = paragraphClass;
+            _paragraphs = new ElementPool<Label>(NewParagraph, label =>
+            {
+                label.RemoveFromClassList("card-text__beside-cap");
+                label.RemoveFromHierarchy();
+            });
             Root = new VisualElement();
             Root.AddToClassList("card-text");
 
@@ -59,7 +63,7 @@ namespace TileStories
             for (int i = 0; i < paragraphs.Count; i++)
             {
                 string text = paragraphs[i];
-                var label = Take(i);
+                var label = _paragraphs.Take();
                 label.EnableInClassList("card-text__lede", i == 0 && first == FirstParagraph.Lede);
                 if (i == 0 && first == FirstParagraph.DropCap && TrySplitInitial(text, out string initial, out string rest))
                 {
@@ -74,19 +78,13 @@ namespace TileStories
                     label.text = RichText(text);
                     Root.Add(label);
                 }
-                _shown.Add(label);
             }
         }
 
         public void Clear()
         {
             CloseDefinition();
-            foreach (var label in _shown)
-            {
-                label.RemoveFromClassList("card-text__beside-cap");
-                label.RemoveFromHierarchy();
-            }
-            _shown.Clear();
+            _paragraphs.ReleaseAll();
             DropCap.text = "";
             _capRow.RemoveFromHierarchy();
             _glossary = null;
@@ -101,13 +99,14 @@ namespace TileStories
                 return;
             }
             string definition = _glossary?.Definition(term);
-            if (definition == null || index < 0 || index >= _shown.Count) return;
+            var shown = _paragraphs.Shown;
+            if (definition == null || index < 0 || index >= shown.Count) return;
             OpenTerm = term;
             DefinitionTitle.text = shownWords;
             DefinitionText.text = definition;
             DefinitionPanel.RemoveFromHierarchy();
             // - under the paragraph (or under the drop-cap row that holds it)
-            var anchor = _shown[index].parent == _capRow ? _capRow : _shown[index];
+            var anchor = shown[index].parent == _capRow ? _capRow : shown[index];
             Root.Insert(Root.IndexOf(anchor) + 1, DefinitionPanel);
         }
 
@@ -130,18 +129,14 @@ namespace TileStories
             return true;
         }
 
-        private Label Take(int index)
+        // The paragraph of place `at`: a glossary word tapped in it opens its definition under that place
+        private Label NewParagraph(int at)
         {
-            while (_pool.Count <= index)
-            {
-                var label = new Label { enableRichText = true };
-                label.AddToClassList("card-text__paragraph");
-                label.AddToClassList(_paragraphClass);
-                int at = _pool.Count;
-                label.RegisterCallback<PointerUpLinkTagEvent>(evt => ToggleTerm(evt.linkID, evt.linkText, at));
-                _pool.Add(label);
-            }
-            return _pool[index];
+            var label = new Label { enableRichText = true };
+            label.AddToClassList("card-text__paragraph");
+            label.AddToClassList(_paragraphClass);
+            label.RegisterCallback<PointerUpLinkTagEvent>(evt => ToggleTerm(evt.linkID, evt.linkText, at));
+            return label;
         }
     }
 }

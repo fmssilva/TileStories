@@ -135,7 +135,7 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 3 demo card");
+            Assert.AreEqual(8 + 9 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 8 wall-level + 9 container + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1027,6 +1027,26 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(_window.Unsaved);
             yield return _window.PressUndo();
             Assert.IsTrue(_window.Config.card_settings.container.sources_at_end, "Ctrl+Z");
+        }
+
+        // The Card Container's Peek Next Card row (15.4.6): ON in the shipped wall (a config written before it has no field and reads the
+        // default), drawing writes nothing, a real click turns it off, Ctrl+Z puts it back
+        [UnityTest]
+        public IEnumerator ThePeekNextCardRow_IsDrawnOn_ARealClickTurnsItOff_AndCtrlZTakesItBack()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Peek Next Card");
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.IsTrue(_window.Config.card_settings.container.peek_next_card, "on in the shipped wall: the tracks show a slice of the next card");
+
+            _window.Click("Peek Next Card");
+            yield return _window.WaitForRepaint();
+            Assert.IsFalse(_window.Config.card_settings.container.peek_next_card, "a real click turned it off");
+            Assert.IsTrue(_window.Unsaved);
+            yield return _window.PressUndo();
+            Assert.IsTrue(_window.Config.card_settings.container.peek_next_card, "Ctrl+Z");
         }
 
         // The Card Container's audio rows: Keep Audio Playing and the Android earbud check are toggles a real click edits (Ctrl+Z takes it

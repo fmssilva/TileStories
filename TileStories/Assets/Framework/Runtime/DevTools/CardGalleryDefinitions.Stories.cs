@@ -65,6 +65,9 @@ namespace TileStories
                 list.Add(new Entry(BuiltInBlocks.TimelineKind, variant, "long", TimelineBlock(variant, longEvents, now: true)));
                 list.Add(new Entry(BuiltInBlocks.TimelineKind, variant, "partial", TimelineBlock(variant, partialEvents, now: true)));
             }
+            // - the swipe track both ways (Peek Next Card on above, off here)
+            list.Add(new Entry(BuiltInBlocks.TimelineKind, BuiltInBlocks.TimelineHorizontal, "long_nopeek",
+                TimelineBlock(BuiltInBlocks.TimelineHorizontal, longEvents, now: true), null, PeekNextCardOff));
         }
 
         private static BlockInstanceData TimelineBlock(string variant, (string Date, string Title, string Text)[] events, bool now)

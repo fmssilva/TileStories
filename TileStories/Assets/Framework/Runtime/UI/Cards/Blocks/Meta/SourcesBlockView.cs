@@ -20,11 +20,10 @@ namespace TileStories
 
         public VisualElement Root { get; }
         public Label Confidence { get; }
-        public IReadOnlyList<Row> Rows => _shown;
+        public IReadOnlyList<Row> Rows => _rows.Shown;
 
         private readonly VisualElement _list;
-        private readonly List<Row> _pool = new();
-        private readonly List<Row> _shown = new();
+        private readonly ElementPool<Row> _rows = new(_ => NewRow(), row => row.Box.RemoveFromHierarchy());
 
         public SourcesBlockView()
         {
@@ -57,20 +56,15 @@ namespace TileStories
                 string author = read.ItemText(item, BuiltInBlocks.SourcesAuthorField);
                 string licence = read.ItemText(item, BuiltInBlocks.SourcesLicenceField);
                 if (title.Length == 0 && author.Length == 0 && licence.Length == 0) continue;
-                var row = Take(_shown.Count);
+                var row = _rows.Take();
                 Show(row.Title, title);
                 Show(row.Author, author);
                 Show(row.Licence, licence);
                 _list.Add(row.Box);
-                _shown.Add(row);
             }
         }
 
-        public void Unbind()
-        {
-            foreach (var row in _shown) row.Box.RemoveFromHierarchy();
-            _shown.Clear();
-        }
+        public void Unbind() => _rows.ReleaseAll();
 
         private static void Show(Label label, string text)
         {
@@ -78,24 +72,21 @@ namespace TileStories
             label.style.display = text.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        private Row Take(int index)
+        // One source's row: its title over the author and licence
+        private static Row NewRow()
         {
-            while (_pool.Count <= index)
-            {
-                var row = new Row { Box = new VisualElement(), Title = new Label(), Author = new Label(), Licence = new Label() };
-                row.Box.AddToClassList("card-sources__row");
-                row.Title.AddToClassList("card-sources__title");
-                var meta = new VisualElement();
-                meta.AddToClassList("card-sources__meta");
-                row.Author.AddToClassList("card-sources__author");
-                row.Licence.AddToClassList("card-sources__licence");
-                meta.Add(row.Author);
-                meta.Add(row.Licence);
-                row.Box.Add(row.Title);
-                row.Box.Add(meta);
-                _pool.Add(row);
-            }
-            return _pool[index];
+            var row = new Row { Box = new VisualElement(), Title = new Label(), Author = new Label(), Licence = new Label() };
+            row.Box.AddToClassList("card-sources__row");
+            row.Title.AddToClassList("card-sources__title");
+            var meta = new VisualElement();
+            meta.AddToClassList("card-sources__meta");
+            row.Author.AddToClassList("card-sources__author");
+            row.Licence.AddToClassList("card-sources__licence");
+            meta.Add(row.Author);
+            meta.Add(row.Licence);
+            row.Box.Add(row.Title);
+            row.Box.Add(meta);
+            return row;
         }
     }
 }

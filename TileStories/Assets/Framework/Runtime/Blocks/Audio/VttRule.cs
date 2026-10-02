@@ -31,7 +31,8 @@ namespace TileStories
         {
             var cues = new List<Cue>();
             if (string.IsNullOrWhiteSpace(vtt)) return cues;
-            string text = vtt.TrimStart('﻿').Replace("\r\n", "\n").Replace('\r', '\n');
+            // - a file saved with a byte-order mark starts with U+FEFF before "WEBVTT": drop it (written as its escape, ASCII source)
+            string text = vtt.TrimStart('\uFEFF').Replace("\r\n", "\n").Replace('\r', '\n');
             var blocks = text.Split(new[] { "\n\n" }, System.StringSplitOptions.RemoveEmptyEntries);
             if (blocks.Length == 0 || !blocks[0].TrimStart().StartsWith("WEBVTT")) return cues;
             // - the first block is the header (it may hold lines after WEBVTT): every later block is a cue or a comment

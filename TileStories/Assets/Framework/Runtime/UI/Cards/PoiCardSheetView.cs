@@ -135,9 +135,9 @@ namespace TileStories
         private void ShowLanguageChip(BlockBindContext context)
         {
             _nextLanguage = CardLanguageRule.Next(context.Settings?.languages, context.Language);
-            bool shown = _nextLanguage.Length > 0;
+            LanguageButton.text = CardLanguageRule.ChipLabel(context.Settings?.languages, context.Language);
+            bool shown = LanguageButton.text.Length > 0;
             LanguageButton.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
-            LanguageButton.text = _nextLanguage.ToUpperInvariant();
             LanguageButton.tooltip = context.Strings?.Get(CardStrings.Keys.LanguageSwitch) ?? "";
             Root.EnableInClassList("poi-card--has-language", shown);
         }

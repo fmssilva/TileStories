@@ -12,48 +12,44 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
+## `And now: POI Detail Card -- 15.4 audit fix F (code and test health) + two 15.3 follow-ups`
 
-## `And now: POI Detail Card -- 15.3 audit fix E (visitor language) + small layout items`
-
-GATE (mandatory, report each item): take one Unity capture (Game view AND the POI Editor window) and open it; if none works,
-STOP and say so. `git checkout --` `Markers/Fonts/Oswald Bold SDF.asset` if modified. Confirm the tree compiles; if not, STOP.
+GATE (mandatory, report each item): ask me first with AskUserQuestion to keep Unity uncovered; take one Unity capture (Game view
+AND the POI Editor window) and open it; if none works, STOP and say so. `git checkout --` `Markers/Fonts/Oswald Bold SDF.asset`
+if modified. Confirm the tree compiles; if not, STOP.
 
 Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- TODOs and status table
-(15.2 done; 15.3 now; 15.4, 16 planned). The audit: proj_guides/_3.1.1_Audit.md -- section 11 chunk 15.E, finding 4 (PT card
-shows English wall words) and the product pass it comes from.
-REQUIRED READING (all lines): `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines"; `.clinerules/00-process.md`
-"Framework Completeness"; `.clinerules/30-ui-content.md`; `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, 4.5;
-`.clinerules/60-finishing.md` 6.4.
-Context only: BlockFieldReader (text lookup), CardStrings, the wall's Languages setting, BlockBindContext.Settings (new in 15.2),
-the timeline, related and size_comparison views.
-WORKER MODEL: Sonnet-class (one shared language rule plus small view fixes, following existing patterns).
-TEST PLAN: no opening full baseline (the tree is the green commit "Say where Unity must be while a Worker runs"). Targeted
-fixtures per sub-step. ONE full EditMode + PlayMode at the end, Unity may be covered (background run not due: it is at 15.4).
+(15.3 done; 15.4 now; 16 planned). The audit: proj_guides/_3.1.1_Audit.md -- sections 7 (code health), 8 (test health) and 11
+chunk 15.F.
+REQUIRED READING (all lines): `.clinerules/20-code-quality.md`; `.clinerules/40-testing.md` 4.2 (incl. RUN TIMES and "Wait
+without burning tokens"), 4.2.3, 4.2.4b, 4.2.5, 4.5; `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (for
+15.4.6); `.clinerules/60-finishing.md` 6.4.
+WORKER MODEL: Opus-class (refactors of shared ground every card view stands on: the element pools and PoiCardHost).
+TEST PLAN: no opening baseline (the tree is the green commit "Wait for long test runs quietly and drop the commit trailer").
+Sub-steps 15.4.1-15.4.5 change no behaviour: after each, full EditMode + the PlayMode families they touch. Before 15.4.1, save
+the per-test-name list of the last full PlayMode run (or produce it from the first full run you do); the block's ONE full
+PlayMode run at the end must match it name for name (except tests removed on purpose in 15.4.5, listed). That end run is
+the BACKGROUND run (third block since the last one): ask me with AskUserQuestion, start it, I click away after ~5 s, and it
+counts only with `editor_is_focused: false` early and at the end.
 
-15.3.1 -- Fallback language (15.E item 1): ONE pure rule picks a text's language: the visitor's language, else the wall's FIRST
-  language (Languages order), else the first language the field has. Today the fallback equals the shown language. All text
-  lookups (block fields, card texts, glossary) go through it. Pure tests (EN-only field on a PT card -> EN; PT-only on EN ->
-  PT; empty -> nothing shown, as today).
-15.3.2 -- Visitor language choice (15.E item 2): a small runtime setting the visitor changes on the card (the languages come
-  from the wall's Languages; hidden when the wall has one language), with a CardStrings label EN + PT; the card rebinds in
-  place (scroll kept). Developer side: Card Container > Test > "Preview Language" ((i), default = the wall's first language,
-  live sync in Play Mode). Phase B with a real tap: EN -> PT -> EN, the scroll position kept; captures at 390 px EN + PT.
+15.4.1 -- `ElementPool<T>` replaces the 16 hand-written `Take` pools (one generic, its own pure tests); no view behaves differently.
+15.4.2 -- `PoiCardHost.Show` -> a pure `CardContextBuilder` (EditMode-testable); PoiCardHost under ~250 lines.
   -> learning summary + short commit message, and go straight on.
-15.3.3 -- English words on the PT card (finding 4): scroll The Lamp's PT card at 390 px and LIST every English word you see,
-  each with its source (card string / block field / taxonomy: category, status names). Fix every card-string and block-field
-  one (CardStrings rows or fixture text, proper accents). Taxonomy words ("Royal Government", "Intact", "Partial Damage",
-  "Destroyed") are NOT translated here: record them as one [later] TODO in _3.1 with the list. Recapture PT.
-15.3.4 -- Layout items (15.E items 3-4): the timeline's horizontal track ends on a whole card (snap or end padding); the related
-  carousel's picture-less card shows its title whole; Size Comparison labels the panel (the app kind's caption field). Phase A
-  gallery entries + captures, answered with the 4.5 design questions.
-15.3.5 -- Close: full EditMode + PlayMode green end to end; update _3.1 (row 15.3 with proof, TODOs), 10-structure.md, _5.1.
+15.4.3 -- Split `DetailCard.cs` into Card Texts / Glossary / Default Media partials, and `CardGalleryTests` / `PoiCardSceneTests`
+  by family (same test names, so the name-for-name check holds; report the run time per family).
+15.4.4 -- `CardViewSourceRulesTests` also scans `Runtime/Blocks/Preview` and `Ar`; prove it is load-bearing with a planted
+  literal that makes it fail, then remove the plant. `VttRule.cs` BOM literal written as its escape.
+15.4.5 -- Test cost: `CardLanguageChipGalleryTests` (72 cases, ~+250 s of PlayMode) cut to the few cases that each prove
+  something different (one / two / three languages, EN and PT, the chip beside the X); the rest move to pure EditMode tests
+  where they test logic. List what you removed and why.
+15.4.6 -- "Peek Next Card" (15.3 follow-up): a Card Container option, default ON, ((i), undo, live sync): at rest the timeline and
+  related strips show a slice of the next card (the usual "there is more" cue); at the END of a swipe the last card is whole
+  (the 15.3 fix kept). OFF = the 15.3 whole-cards behaviour. Phase A gallery entry both ways + captures at 390 px.
+15.4.7 -- Close: the background full PlayMode + full EditMode; update RUN TIMES, _3.1 (row 15.4 with proof), 10-structure.md.
 
-Rules as before (`.clinerules`; identity fields untouched; no literal colours / sizes / visitor strings in card code; Portuguese
-spelled properly; DevLog for detail logs). OUT OF SCOPE: 15.4 (code health), translating taxonomy names, the Keep Model On
-Switch follow-ups (block 16 triage), _3.2, _3.3. Ideas outside this block -> proj_guides/__mixed_TODOs.md. If _3.1 or the audit
-disagrees with the real code, STOP. Finish with the final report of `.clinerules/60-finishing.md` 6.4. Commit only if the
-developer asks.
-
+Rules as before. OUT OF SCOPE: block 16 (domain close-out check), the Keep Model On Switch follow-ups, taxonomy translation, _3.2,
+_3.3. Ideas outside this block -> proj_guides/__mixed_TODOs.md. If _3.1 or the audit disagrees with the real code, STOP.
+Finish with the final report of `.clinerules/60-finishing.md` 6.4. Commit only if the developer asks.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

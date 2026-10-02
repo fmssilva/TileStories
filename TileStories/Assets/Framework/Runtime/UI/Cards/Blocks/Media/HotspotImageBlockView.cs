@@ -43,12 +43,11 @@ namespace TileStories
         public Label DetailNumber { get; }
         public Label DetailTitle { get; }
         public CardTextView DetailText { get; }
-        public IReadOnlyList<Spot> Spots => _shown;
+        public IReadOnlyList<Spot> Spots => _spots.Shown;
         // The spot whose text is open (-1: none)
         public int OpenIndex { get; private set; } = -1;
 
-        private readonly List<Spot> _pool = new();
-        private readonly List<Spot> _shown = new();
+        private readonly ElementPool<Spot> _spots;
         private readonly List<IReadOnlyList<string>> _texts = new();
         private string _variantClass;
         private bool _loupes;
@@ -59,6 +58,7 @@ namespace TileStories
             Root = new VisualElement { name = "card-hotspot" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-hotspot");
+            _spots = new ElementPool<Spot>(NewSpot, ReleaseSpot);
             Frame = new VisualElement { name = "card-hotspot-frame" };
             Frame.AddToClassList("card-hotspot__frame");
             Image = new CardImage("card-hotspot__picture");
@@ -109,11 +109,11 @@ namespace TileStories
             foreach (var item in read.Items(BuiltInBlocks.HotspotItemsField))
             {
                 if (!BlockFieldReader.ItemIsComplete(item, rowFields)) continue;
-                var spot = Take(_shown.Count);
+                var spot = _spots.Take();
                 spot.At = new Vector2(BlockFieldReader.ItemNumber(item, xField), BlockFieldReader.ItemNumber(item, yField));
                 spot.Title = read.ItemText(item, BuiltInBlocks.HotspotTitleField);
-                // - the card numbers the shown spots itself: a row left out never leaves a gap in the count
-                spot.Index = (_shown.Count + 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
+                // - the card numbers the shown spots itself (this one is the last taken): a row left out never leaves a gap in the count
+                spot.Index = _spots.Shown.Count.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 // - loupes: the mark on the picture is a bare ring (the close-up under the picture is what is tapped)
                 spot.Number.text = _loupes ? "" : spot.Index;
                 spot.Pin.tooltip = spot.Title;
@@ -127,9 +127,8 @@ namespace TileStories
                     Loupes.Add(spot.Loupe);
                 }
                 _texts.Add(GlossaryMarkup.Paragraphs(read.ItemText(item, BuiltInBlocks.HotspotTextField)));
-                _shown.Add(spot);
             }
-            Loupes.style.display = _loupes && _shown.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            Loupes.style.display = _loupes && _spots.Shown.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             Hint.text = context.Strings?.Get(CardStrings.Keys.HotspotHint) ?? "";
             Open(-1);
             Place();
@@ -137,13 +136,7 @@ namespace TileStories
 
         public void Unbind()
         {
-            foreach (var spot in _shown)
-            {
-                spot.Pin.RemoveFromHierarchy();
-                spot.Loupe.RemoveFromHierarchy();
-                spot.LoupeImage.Clear(null);
-            }
-            _shown.Clear();
+            _spots.ReleaseAll();
             _texts.Clear();
             Image.Clear(null);
             DetailText.Clear();
@@ -158,11 +151,11 @@ namespace TileStories
 
         private void Open(int index)
         {
-            OpenIndex = index >= 0 && index < _shown.Count ? index : -1;
-            for (int i = 0; i < _shown.Count; i++)
+            OpenIndex = index >= 0 && index < _spots.Shown.Count ? index : -1;
+            for (int i = 0; i < _spots.Shown.Count; i++)
             {
-                _shown[i].Pin.EnableInClassList("card-hotspot__pin--open", i == OpenIndex);
-                _shown[i].Loupe.EnableInClassList("card-hotspot__loupe--open", i == OpenIndex);
+                _spots.Shown[i].Pin.EnableInClassList("card-hotspot__pin--open", i == OpenIndex);
+                _spots.Shown[i].Loupe.EnableInClassList("card-hotspot__loupe--open", i == OpenIndex);
             }
             // - classes, not an inline display: the detail's look lives in Media.uss
             Detail.EnableInClassList("card-hotspot__detail--open", OpenIndex >= 0);
@@ -173,8 +166,8 @@ namespace TileStories
                 DetailText.Clear();
                 return;
             }
-            DetailNumber.text = _shown[OpenIndex].Index;
-            DetailTitle.text = _shown[OpenIndex].Title;
+            DetailNumber.text = _spots.Shown[OpenIndex].Index;
+            DetailTitle.text = _spots.Shown[OpenIndex].Title;
             DetailText.Bind(_texts[OpenIndex], _context?.Glossary);
         }
 
@@ -182,7 +175,7 @@ namespace TileStories
         private void Place()
         {
             // - room for half a mark on every side: the mark as Media.uss draws it (numbered circle / loupes ring)
-            float mark = _shown.Count > 0 ? _shown[0].Number.resolvedStyle.width : 0f;
+            float mark = _spots.Shown.Count > 0 ? _spots.Shown[0].Number.resolvedStyle.width : 0f;
             float inset = float.IsNaN(mark) ? 0f : mark / 2f;
             var room = new Vector2(Frame.layout.width, Frame.layout.height) - 2f * inset * Vector2.one;
             if (float.IsNaN(room.x) || room.x <= 0f || room.y <= 0f) return;
@@ -193,7 +186,7 @@ namespace TileStories
             Image.Root.style.top = whole.Offset.y;
             Image.Root.style.width = size.x;
             Image.Root.style.height = size.y;
-            foreach (var spot in _shown)
+            foreach (var spot in _spots.Shown)
             {
                 // - centred on its point: the mark's own size comes from Media.uss, so translate by half of it
                 spot.Pin.style.left = whole.Offset.x + spot.At.x * size.x;
@@ -212,30 +205,34 @@ namespace TileStories
             }
         }
 
-        private Spot Take(int index)
+        // The spot of place `at`: its pin on the picture and its close-up, both opening that place's text
+        private Spot NewSpot(int at)
         {
-            while (_pool.Count <= index)
-            {
-                int at = _pool.Count;
-                var spot = new Spot { Number = new Label { pickingMode = PickingMode.Ignore } };
-                spot.Pin = new Button(() => Tap(at));
-                spot.Pin.AddToClassList("card-hotspot__pin");
-                spot.Number.AddToClassList("card-hotspot__number");
-                spot.Pin.Add(spot.Number);
-                spot.Loupe = new Button(() => Tap(at));
-                spot.Loupe.AddToClassList("card-hotspot__loupe");
-                spot.Loupe.AddToClassList("card-tap");
-                spot.LoupeImage = new CardImage("card-hotspot__loupe-picture");
-                spot.LoupeImage.Root.pickingMode = PickingMode.Ignore;
-                spot.LoupeRing = new VisualElement { pickingMode = PickingMode.Ignore };
-                spot.LoupeRing.AddToClassList("card-hotspot__loupe-ring");
-                spot.Loupe.Add(spot.LoupeImage.Root);
-                spot.Loupe.Add(spot.LoupeRing);
-                // - the close-up is placed once its round box has a size
-                spot.Loupe.RegisterCallback<GeometryChangedEvent>(_ => Place());
-                _pool.Add(spot);
-            }
-            return _pool[index];
+            var spot = new Spot { Number = new Label { pickingMode = PickingMode.Ignore } };
+            spot.Pin = new Button(() => Tap(at));
+            spot.Pin.AddToClassList("card-hotspot__pin");
+            spot.Number.AddToClassList("card-hotspot__number");
+            spot.Pin.Add(spot.Number);
+            spot.Loupe = new Button(() => Tap(at));
+            spot.Loupe.AddToClassList("card-hotspot__loupe");
+            spot.Loupe.AddToClassList("card-tap");
+            spot.LoupeImage = new CardImage("card-hotspot__loupe-picture");
+            spot.LoupeImage.Root.pickingMode = PickingMode.Ignore;
+            spot.LoupeRing = new VisualElement { pickingMode = PickingMode.Ignore };
+            spot.LoupeRing.AddToClassList("card-hotspot__loupe-ring");
+            spot.Loupe.Add(spot.LoupeImage.Root);
+            spot.Loupe.Add(spot.LoupeRing);
+            // - the close-up is placed once its round box has a size
+            spot.Loupe.RegisterCallback<GeometryChangedEvent>(_ => Place());
+            return spot;
+        }
+
+        // Take a shown spot off the picture: its pin, its close-up and the close-up's picture
+        private static void ReleaseSpot(Spot spot)
+        {
+            spot.Pin.RemoveFromHierarchy();
+            spot.Loupe.RemoveFromHierarchy();
+            spot.LoupeImage.Clear(null);
         }
     }
 }

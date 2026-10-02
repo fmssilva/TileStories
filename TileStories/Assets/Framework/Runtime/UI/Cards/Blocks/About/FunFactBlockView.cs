@@ -19,10 +19,9 @@ namespace TileStories
         }
 
         public VisualElement Root { get; }
-        public IReadOnlyList<Fact> Facts => _shown;
+        public IReadOnlyList<Fact> Facts => _facts.Shown;
 
-        private readonly List<Fact> _pool = new();
-        private readonly List<Fact> _shown = new();
+        private readonly ElementPool<Fact> _facts;
         private string _variantClass;
         private bool _flips;
 
@@ -31,6 +30,11 @@ namespace TileStories
             Root = new VisualElement { name = "card-fun-fact" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-fun");
+            _facts = new ElementPool<Fact>(_ => NewFact(), fact =>
+            {
+                fact.Text.Clear();
+                fact.Box.RemoveFromHierarchy();
+            });
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -46,25 +50,19 @@ namespace TileStories
             {
                 var paragraphs = GlossaryMarkup.Paragraphs(read.ItemText(item, BuiltInBlocks.FunFactTextField));
                 if (paragraphs.Count == 0) continue;
-                var fact = Take(_shown.Count);
+                var fact = _facts.Take();
                 fact.Heading.text = heading;
                 fact.Hint.text = hint;
                 fact.Text.Bind(paragraphs, context.Glossary);
                 fact.Box.EnableInClassList("card-tap", _flips);
                 SetRevealed(fact, !_flips);
                 Root.Add(fact.Box);
-                _shown.Add(fact);
             }
         }
 
         public void Unbind()
         {
-            foreach (var fact in _shown)
-            {
-                fact.Text.Clear();
-                fact.Box.RemoveFromHierarchy();
-            }
-            _shown.Clear();
+            _facts.ReleaseAll();
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
         }
@@ -87,21 +85,18 @@ namespace TileStories
             else if (evt.target == fact.Heading) SetRevealed(fact, false);
         }
 
-        private Fact Take(int index)
+        // One fact's small card, its tap wired once (the pool keeps it for every later bind)
+        private Fact NewFact()
         {
-            while (_pool.Count <= index)
-            {
-                var fact = new Fact { Box = new VisualElement(), Heading = new Label(), Hint = new Label(), Text = new CardTextView("card-fun__paragraph") };
-                fact.Box.AddToClassList("card-fun__box");
-                fact.Heading.AddToClassList("card-fun__heading");
-                fact.Hint.AddToClassList("card-fun__hint");
-                fact.Box.Add(fact.Heading);
-                fact.Box.Add(fact.Hint);
-                fact.Box.Add(fact.Text.Root);
-                fact.Box.RegisterCallback<ClickEvent>(evt => OnTap(fact, evt));
-                _pool.Add(fact);
-            }
-            return _pool[index];
+            var fact = new Fact { Box = new VisualElement(), Heading = new Label(), Hint = new Label(), Text = new CardTextView("card-fun__paragraph") };
+            fact.Box.AddToClassList("card-fun__box");
+            fact.Heading.AddToClassList("card-fun__heading");
+            fact.Hint.AddToClassList("card-fun__hint");
+            fact.Box.Add(fact.Heading);
+            fact.Box.Add(fact.Hint);
+            fact.Box.Add(fact.Text.Root);
+            fact.Box.RegisterCallback<ClickEvent>(evt => OnTap(fact, evt));
+            return fact;
         }
     }
 }

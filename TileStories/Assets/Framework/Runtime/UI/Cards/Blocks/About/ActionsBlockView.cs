@@ -21,10 +21,9 @@ namespace TileStories
         }
 
         public VisualElement Root { get; }
-        public IReadOnlyList<Action> Actions => _shown;
+        public IReadOnlyList<Action> Actions => _actions.Shown;
 
-        private readonly List<Action> _pool = new();
-        private readonly List<Action> _shown = new();
+        private readonly ElementPool<Action> _actions;
         private string _variantClass;
         private IBlockHost _host;
 
@@ -33,6 +32,7 @@ namespace TileStories
             Root = new VisualElement { name = "card-actions" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-actions");
+            _actions = new ElementPool<Action>(_ => NewAction(), action => action.Button.RemoveFromHierarchy());
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -47,21 +47,19 @@ namespace TileStories
                 // - a row with no words of its own reads its action's card text: one wording per action, whichever block draws it
                 string defaultKey = ActionsRule.DefaultWordsKey(button.Action);
                 string label = button.Words.Length > 0 ? button.Words : defaultKey != null ? context.Strings?.Get(defaultKey) ?? "" : "";
-                var action = Take(_shown.Count);
+                var action = _actions.Take();
                 action.Kind = button.Action;
                 action.Label.text = label;
                 CardIcons.SetKey(action.Icon, button.Action);
                 // - the pill row wears the card's one pill shape (CardParts.uss), shared with story_chapters' buttons
                 action.Button.EnableInClassList("card-pill", context.Variant == BuiltInBlocks.ActionsPillRow);
                 Root.Add(action.Button);
-                _shown.Add(action);
             }
         }
 
         public void Unbind()
         {
-            foreach (var a in _shown) a.Button.RemoveFromHierarchy();
-            _shown.Clear();
+            _actions.ReleaseAll();
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
             _host = null;
@@ -73,21 +71,18 @@ namespace TileStories
             if (action.Kind == BuiltInBlocks.ActionShowOnWall) _host?.ShowOnWall();
         }
 
-        private Action Take(int index)
+        // One button: its icon and words, its click wired once to whatever action it carries at the time
+        private Action NewAction()
         {
-            while (_pool.Count <= index)
-            {
-                var action = new Action { Icon = CardIcons.Create(), Label = new Label { pickingMode = PickingMode.Ignore } };
-                action.Button = new Button(() => Run(action));
-                action.Button.AddToClassList("card-action");
-                action.Button.AddToClassList("card-tap");
-                action.Icon.AddToClassList("card-action__icon");
-                action.Label.AddToClassList("card-action__label");
-                action.Button.Add(action.Icon);
-                action.Button.Add(action.Label);
-                _pool.Add(action);
-            }
-            return _pool[index];
+            var action = new Action { Icon = CardIcons.Create(), Label = new Label { pickingMode = PickingMode.Ignore } };
+            action.Button = new Button(() => Run(action));
+            action.Button.AddToClassList("card-action");
+            action.Button.AddToClassList("card-tap");
+            action.Icon.AddToClassList("card-action__icon");
+            action.Label.AddToClassList("card-action__label");
+            action.Button.Add(action.Icon);
+            action.Button.Add(action.Label);
+            return action;
         }
     }
 }

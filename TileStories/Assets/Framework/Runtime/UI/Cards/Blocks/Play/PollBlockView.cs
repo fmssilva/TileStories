@@ -29,7 +29,7 @@ namespace TileStories
         public Label Question { get; }
         public VisualElement OptionsColumn { get; }
         public Label Thanks { get; }
-        public IReadOnlyList<OptionRow> Options => _shown;
+        public IReadOnlyList<OptionRow> Options => _rows.Shown;
 
         // The authored row the visitor voted for (-1 = no vote yet)
         public int Voted { get; private set; } = -1;
@@ -37,8 +37,7 @@ namespace TileStories
         // Whether the results bars are drawn (only after a vote, and only when an IPollResults gave numbers)
         public bool ResultsShown { get; private set; }
 
-        private readonly List<OptionRow> _pool = new();
-        private readonly List<OptionRow> _shown = new();
+        private readonly ElementPool<OptionRow> _rows;
         private readonly List<PollRule.Option> _options = new();
         private CardStrings _strings;
         private CardLocalState _state;
@@ -64,6 +63,7 @@ namespace TileStories
             Root.Add(Question);
             Root.Add(OptionsColumn);
             Root.Add(Thanks);
+            _rows = new ElementPool<OptionRow>(_ => NewOptionRow(), row => row.Button.RemoveFromHierarchy());
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -85,13 +85,12 @@ namespace TileStories
             _options.AddRange(PollRule.Options(read));
             foreach (var option in _options)
             {
-                var row = Take(_shown.Count);
+                var row = _rows.Take();
                 row.Row = option.Row;
                 row.Text.text = option.Text;
                 row.Button.tooltip = option.Text;
                 row.Caption.text = _strings?.Get(CardStrings.Keys.PollYourChoice) ?? "";
                 OptionsColumn.Add(row.Button);
-                _shown.Add(row);
             }
             int stored = _state?.PollVote(_poiId, _blockKey) ?? -1;
             // - a vote stored for an option that is no longer shown is no vote
@@ -101,8 +100,7 @@ namespace TileStories
 
         public void Unbind()
         {
-            foreach (var row in _shown) row.Button.RemoveFromHierarchy();
-            _shown.Clear();
+            _rows.ReleaseAll();
             _options.Clear();
             Voted = -1;
             ResultsShown = false;
@@ -136,9 +134,10 @@ namespace TileStories
                 shares = PollRule.Percentages(_options, counts);
             ResultsShown = shares != null;
             string percentFormat = _strings?.Get(CardStrings.Keys.PollPercent) ?? "";
-            for (int i = 0; i < _shown.Count; i++)
+            var shown = _rows.Shown;
+            for (int i = 0; i < shown.Count; i++)
             {
-                var row = _shown[i];
+                var row = shown[i];
                 bool mine = voted && row.Row == Voted;
                 row.Button.EnableInClassList("card-poll__option--chosen", mine);
                 row.Button.EnableInClassList("card-poll__option--other", voted && !mine);
@@ -152,40 +151,36 @@ namespace TileStories
             }
         }
 
-        private OptionRow Take(int index)
+        // One option button: a tap votes for whichever authored row it carries at the time
+        private OptionRow NewOptionRow()
         {
-            while (_pool.Count <= index)
+            var row = new OptionRow
             {
-                var row = new OptionRow
-                {
-                    Button = new Button(),
-                    Fill = new VisualElement { pickingMode = PickingMode.Ignore },
-                    Text = new Label { pickingMode = PickingMode.Ignore },
-                    Mark = CardIcons.CreateVector(CardIcons.Shape.Tick),
-                    Caption = new Label { pickingMode = PickingMode.Ignore },
-                    Percent = new Label { pickingMode = PickingMode.Ignore },
-                };
-                row.Button.AddToClassList("card-poll__option");
-                row.Button.AddToClassList("card-tap");
-                row.Fill.AddToClassList("card-poll__fill");
-                row.Text.AddToClassList("card-poll__option-text");
-                row.Mark.AddToClassList("card-poll__mark");
-                row.Caption.AddToClassList("card-poll__caption");
-                row.Percent.AddToClassList("card-poll__percent");
-                // - the words and "Your choice" stack in one column; the tick and the share sit at the right
-                var words = new VisualElement { pickingMode = PickingMode.Ignore };
-                words.AddToClassList("card-poll__words");
-                words.Add(row.Text);
-                words.Add(row.Caption);
-                row.Button.Add(row.Fill);
-                row.Button.Add(words);
-                row.Button.Add(row.Percent);
-                row.Button.Add(row.Mark);
-                var captured = row;
-                row.Button.clicked += () => Vote(captured.Row);
-                _pool.Add(row);
-            }
-            return _pool[index];
+                Button = new Button(),
+                Fill = new VisualElement { pickingMode = PickingMode.Ignore },
+                Text = new Label { pickingMode = PickingMode.Ignore },
+                Mark = CardIcons.CreateVector(CardIcons.Shape.Tick),
+                Caption = new Label { pickingMode = PickingMode.Ignore },
+                Percent = new Label { pickingMode = PickingMode.Ignore },
+            };
+            row.Button.AddToClassList("card-poll__option");
+            row.Button.AddToClassList("card-tap");
+            row.Fill.AddToClassList("card-poll__fill");
+            row.Text.AddToClassList("card-poll__option-text");
+            row.Mark.AddToClassList("card-poll__mark");
+            row.Caption.AddToClassList("card-poll__caption");
+            row.Percent.AddToClassList("card-poll__percent");
+            // - the words and "Your choice" stack in one column; the tick and the share sit at the right
+            var words = new VisualElement { pickingMode = PickingMode.Ignore };
+            words.AddToClassList("card-poll__words");
+            words.Add(row.Text);
+            words.Add(row.Caption);
+            row.Button.Add(row.Fill);
+            row.Button.Add(words);
+            row.Button.Add(row.Percent);
+            row.Button.Add(row.Mark);
+            row.Button.clicked += () => Vote(row.Row);
+            return row;
         }
     }
 }

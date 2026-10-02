@@ -25,6 +25,23 @@ namespace TileStories.Editor.Tests
         }
 
         [Test]
+        public void Vtt_AFileSavedWithAByteOrderMark_ParsesExactlyLikeOneWithout()
+        {
+            // - many editors save .vtt as UTF-8 with a BOM: the mark sits before "WEBVTT" and must not cost a cue
+            string plain = CardGalleryDefinitions.Captions["short.vtt"];
+            var expected = VttRule.Parse(plain);
+            var withMark = VttRule.Parse((char)0xFEFF + plain);
+            Assert.AreEqual(expected.Count, withMark.Count, "precondition: the gallery file has cues, and the marked copy as many");
+            Assert.Greater(expected.Count, 0);
+            for (int i = 0; i < expected.Count; i++)
+            {
+                Assert.AreEqual(expected[i].Start, withMark[i].Start, "cue " + i + " start");
+                Assert.AreEqual(expected[i].End, withMark[i].End, "cue " + i + " end");
+                Assert.AreEqual(expected[i].Text, withMark[i].Text, "cue " + i + " words");
+            }
+        }
+
+        [Test]
         public void Vtt_TextAt_StartIsInclusive_EndIsExclusive_AndAGapIsEmpty()
         {
             var cues = VttRule.Parse(CardGalleryDefinitions.Captions["short.vtt"]);

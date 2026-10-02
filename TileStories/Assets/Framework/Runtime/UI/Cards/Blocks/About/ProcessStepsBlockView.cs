@@ -19,10 +19,9 @@ namespace TileStories
         }
 
         public VisualElement Root { get; }
-        public IReadOnlyList<Step> Steps => _shown;
+        public IReadOnlyList<Step> Steps => _steps.Shown;
 
-        private readonly List<Step> _pool = new();
-        private readonly List<Step> _shown = new();
+        private readonly ElementPool<Step> _steps;
         private string _variantClass;
 
         public ProcessStepsBlockView()
@@ -30,6 +29,11 @@ namespace TileStories
             Root = new VisualElement { name = "card-steps" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-steps");
+            _steps = new ElementPool<Step>(_ => NewStep(), step =>
+            {
+                step.Text.Clear();
+                step.Row.RemoveFromHierarchy();
+            });
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -42,58 +46,51 @@ namespace TileStories
             foreach (var item in read.Items(BuiltInBlocks.ProcessStepsItemsField))
             {
                 if (!BlockFieldReader.ItemIsComplete(item, rowFields)) continue;
-                var step = Take(_shown.Count);
-                step.Number.text = (_shown.Count + 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
+                var step = _steps.Take();
+                // - the card numbers the shown steps: this one is the last taken
+                step.Number.text = _steps.Shown.Count.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 step.Title.text = read.ItemText(item, BuiltInBlocks.ProcessStepsTitleField);
                 var paragraphs = GlossaryMarkup.Paragraphs(read.ItemText(item, BuiltInBlocks.ProcessStepsTextField));
                 step.Text.Bind(paragraphs, context.Glossary);
                 step.Text.Root.style.display = paragraphs.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 Root.Add(step.Row);
-                _shown.Add(step);
             }
             // - the line joins a step to the NEXT one: the last step has none
-            for (int i = 0; i < _shown.Count; i++)
-                _shown[i].Rail.style.visibility = i < _shown.Count - 1 ? Visibility.Visible : Visibility.Hidden;
+            var shown = _steps.Shown;
+            for (int i = 0; i < shown.Count; i++)
+                shown[i].Rail.style.visibility = i < shown.Count - 1 ? Visibility.Visible : Visibility.Hidden;
         }
 
         public void Unbind()
         {
-            foreach (var step in _shown)
-            {
-                step.Text.Clear();
-                step.Row.RemoveFromHierarchy();
-            }
-            _shown.Clear();
+            _steps.ReleaseAll();
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
         }
 
-        private Step Take(int index)
+        // One step's row: the number in its circle above the rail, then the title and text
+        private static Step NewStep()
         {
-            while (_pool.Count <= index)
+            var step = new Step
             {
-                var step = new Step
-                {
-                    Row = new VisualElement(), Number = new Label(), Rail = new VisualElement(), Title = new Label(),
-                    Text = new CardTextView("card-steps__paragraph"),
-                };
-                step.Row.AddToClassList("card-steps__step");
-                var marker = new VisualElement();
-                marker.AddToClassList("card-steps__marker");
-                step.Number.AddToClassList("card-steps__number");
-                step.Rail.AddToClassList("card-steps__rail");
-                marker.Add(step.Number);
-                marker.Add(step.Rail);
-                var body = new VisualElement();
-                body.AddToClassList("card-steps__body");
-                step.Title.AddToClassList("card-steps__title");
-                body.Add(step.Title);
-                body.Add(step.Text.Root);
-                step.Row.Add(marker);
-                step.Row.Add(body);
-                _pool.Add(step);
-            }
-            return _pool[index];
+                Row = new VisualElement(), Number = new Label(), Rail = new VisualElement(), Title = new Label(),
+                Text = new CardTextView("card-steps__paragraph"),
+            };
+            step.Row.AddToClassList("card-steps__step");
+            var marker = new VisualElement();
+            marker.AddToClassList("card-steps__marker");
+            step.Number.AddToClassList("card-steps__number");
+            step.Rail.AddToClassList("card-steps__rail");
+            marker.Add(step.Number);
+            marker.Add(step.Rail);
+            var body = new VisualElement();
+            body.AddToClassList("card-steps__body");
+            step.Title.AddToClassList("card-steps__title");
+            body.Add(step.Title);
+            body.Add(step.Text.Root);
+            step.Row.Add(marker);
+            step.Row.Add(body);
+            return step;
         }
     }
 }

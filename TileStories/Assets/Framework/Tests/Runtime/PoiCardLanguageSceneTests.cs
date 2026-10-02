@@ -40,8 +40,14 @@ namespace TileStories.Tests
             var chip = Sheet.LanguageButton;
             Assert.AreEqual(DisplayStyle.Flex, chip.resolvedStyle.display, "precondition: the chip shows");
             Assert.IsTrue(Sheet.Layer.worldBound.Contains(chip.worldBound.center), "precondition: the chip is on screen: " + chip.worldBound);
+            // - what a finger there touches is the chip itself, not something over it (seen once, 15.4.2: a tap that never reached the chip)
+            var touched = chip.panel.Pick(chip.worldBound.center);
+            Assert.IsTrue(touched == chip || chip.Contains(touched), "precondition: a tap at the chip's centre lands on the chip, not on '"
+                + touched?.name + "' (" + touched?.GetType().Name + ")");
+            string before = chip.text;
             yield return CardTestInput.Tap(chip.panel, chip.worldBound.center);
             yield return CardTestInput.Settle();
+            Assert.AreNotEqual(before, Sheet.LanguageButton.text, "the tap reached the chip: it now offers the other language");
         }
 
         private IEnumerator ScrollToSources()

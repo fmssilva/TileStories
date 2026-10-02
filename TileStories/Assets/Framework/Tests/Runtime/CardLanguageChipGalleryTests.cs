@@ -12,14 +12,21 @@ using UnityEditor.SceneManagement;
 namespace TileStories.Tests
 {
     // Phase A of the visitor's language choice (_3.1 15.3.2, 40-testing.md 4.4): the language chip beside the X on the real gallery card,
-    // driven by REAL pointer events. The gallery wall offers English + Portuguese; the harness re-shows the entry in the language the chip
-    // names (the wall's card does the same through PoiCardHost, proven in PoiCardLanguageSceneTests). Also the fit: the title wraps before the chip.
+    // driven by REAL pointer events. The gallery wall offers English + Portuguese (three languages in one test); the harness re-shows the
+    // entry in the language the chip names (the wall's card does the same through PoiCardHost, proven in PoiCardLanguageSceneTests). Also
+    // the fit: the title wraps before the chip. Each case proves something different (_3.1 15.4.5): what the chip SAYS for one / two /
+    // three languages is pure logic, tested in EditMode (CardLanguageRuleTests.TheChipLabel_...); the room for the chip is one class on the
+    // sheet, so the title check runs on the long title of three structurally different headers, not on every gallery entry.
     public class CardLanguageChipGalleryTests
     {
         private const string ScenePath = "Assets/Dev/CardGallery/CardGalleryScene.unity";
         private CardGalleryHarness _harness;
 
         private static string[] HeaderEntryNames => CardGalleryDefinitions.All.Where(e => e.IsHeader).Select(e => e.Name).ToArray();
+
+        // The long title (the one that wraps) on a header with its chip row (compact), without it (text_only), and under a picture
+        // (image_parallax: the hero opens the scroll, the title row is pinned above it)
+        private static readonly string[] HeaderStructures = { "header_compact_long_peek", "header_text_only_long_full", "header_image_parallax_long_full" };
 
         private static int IndexOf(string name) => CardGalleryDefinitions.All.ToList().FindIndex(e => e.Name == name);
 
@@ -118,13 +125,36 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator EveryHeaderEntry_TheTitleWrapsBeforeTheChip([ValueSource(nameof(HeaderEntryNames))] string name)
+        public IEnumerator AWallWithThreeLanguages_RealTapsCycleThroughEach_AndBackToTheFirst()
         {
+            _harness.Languages = new[] { "en", "pt", "es" };
+            _harness.Show(IndexOf(HeaderEntryNames[0]));
+            yield return CardTestInput.Settle();
+            Assert.AreEqual("en", _harness.Language, "precondition: the gallery starts in the first language");
+
+            foreach (var (now, offers) in new[] { ("pt", "ES"), ("es", "EN"), ("en", "PT") })
+            {
+                var chip = Sheet.LanguageButton;
+                yield return CardTestInput.Tap(chip.panel, chip.worldBound.center);
+                yield return CardTestInput.Settle();
+                Assert.AreEqual(now, _harness.Language, "a real tap moves to the next language");
+                Assert.AreEqual(offers, Sheet.LanguageButton.text, "and the chip names the one after it");
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator TheTitleWrapsBeforeTheChip_OnEachHeaderStructure([ValueSource(nameof(HeaderStructures))] string name)
+        {
+            Assert.GreaterOrEqual(IndexOf(name), 0, "precondition: the gallery still has the entry " + name);
             _harness.Show(IndexOf(name));
             yield return CardTestInput.Settle();
             var header = (HeaderBlockView)Sheet.Stack.BoundViews[0];
             var title = header.Root.Q<Label>("card-header-title");
             Assert.AreEqual(DisplayStyle.Flex, Sheet.LanguageButton.resolvedStyle.display, "precondition: the chip shows on " + name);
+            // - the title on one line would run past the chip: it really has to wrap here, so "it ends before the chip" proves the room
+            float oneLine = title.MeasureTextSize(title.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined).x;
+            float room = Sheet.LanguageButton.worldBound.xMin - title.worldBound.xMin;
+            Assert.Greater(oneLine, room, "precondition: " + name + "'s title (" + oneLine + " wide on one line) is longer than the room left of the chip (" + room + ")");
             Assert.LessOrEqual(title.worldBound.xMax, Sheet.LanguageButton.worldBound.xMin + 0.5f,
                 name + ": the title wraps before the chip, not under it: " + title.worldBound + " vs " + Sheet.LanguageButton.worldBound);
         }

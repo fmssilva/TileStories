@@ -97,6 +97,9 @@ namespace TileStories
         // Sources (and every other `meta` block) move to the end of the card, keeping their order, whatever order they were authored in
         // (BlockStackBuilder). Off: the authored order. On by default: a card ends with its sources, not with them in the middle
         public bool sources_at_end = true;
+        // The horizontal swipe tracks (timeline, related carousel) show a slice of the next card at rest -- the usual "there is more" cue --
+        // and end on a whole last card (CardTrackRule). Off: whole cards only, at rest and at the end. On by default: an old config loads as on
+        public bool peek_next_card = true;
 
         public const float HalfMaxRatioMin = 0.25f;
         public const float HalfMaxRatioMax = 0.40f;

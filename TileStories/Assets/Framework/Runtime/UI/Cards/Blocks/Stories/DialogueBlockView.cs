@@ -32,8 +32,8 @@ namespace TileStories
         public VisualElement ChoicesColumn { get; }
         public Button Continue { get; }
         public Button Again { get; }
-        public IReadOnlyList<Bubble> Bubbles => _shown;
-        public IReadOnlyList<ChoiceButton> Choices => _choicesShown;
+        public IReadOnlyList<Bubble> Bubbles => _bubbles.Shown;
+        public IReadOnlyList<ChoiceButton> Choices => _choices.Shown;
 
         // How many lines of the block have been said (replies and answers are not counted); view state
         public int Reached { get; private set; }
@@ -45,10 +45,8 @@ namespace TileStories
         public bool AwaitsChoice => _awaiting != null;
 
         private readonly List<DialogueRule.Line> _lines = new();
-        private readonly List<Bubble> _pool = new();
-        private readonly List<Bubble> _shown = new();
-        private readonly List<ChoiceButton> _choicePool = new();
-        private readonly List<ChoiceButton> _choicesShown = new();
+        private readonly ElementPool<Bubble> _bubbles = new(_ => NewBubble(), bubble => bubble.Box.RemoveFromHierarchy());
+        private readonly ElementPool<ChoiceButton> _choices;
         private readonly Label _continueLabel;
         private readonly Label _againLabel;
         private CardStrings _strings;
@@ -60,6 +58,7 @@ namespace TileStories
             Root = new VisualElement { name = "card-dialogue" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-dialogue");
+            _choices = new ElementPool<ChoiceButton>(NewChoice, choice => choice.Button.RemoveFromHierarchy());
             Thread = new VisualElement();
             Thread.AddToClassList("card-dialogue__thread");
             Actions = new VisualElement();
@@ -140,16 +139,14 @@ namespace TileStories
         // What the visitor can do now: pick a reply, continue, start again -- or nothing (a one-line block)
         private void Refresh()
         {
-            foreach (var old in _choicesShown) old.Button.RemoveFromHierarchy();
-            _choicesShown.Clear();
+            _choices.ReleaseAll();
             if (_awaiting != null)
                 for (int i = 0; i < _awaiting.Choices.Count; i++)
                 {
-                    var choice = TakeChoice(i);
+                    var choice = _choices.Take();
                     choice.Label.text = _awaiting.Choices[i].Label;
                     choice.Button.tooltip = _awaiting.Choices[i].Label;
                     ChoicesColumn.Add(choice.Button);
-                    _choicesShown.Add(choice);
                 }
             bool ended = _awaiting == null && Reached >= _lines.Count;
             ChoicesColumn.style.display = _awaiting != null ? DisplayStyle.Flex : DisplayStyle.None;
@@ -167,52 +164,42 @@ namespace TileStories
 
         private void ClearThread()
         {
-            foreach (var bubble in _shown) bubble.Box.RemoveFromHierarchy();
-            _shown.Clear();
-            foreach (var old in _choicesShown) old.Button.RemoveFromHierarchy();
-            _choicesShown.Clear();
+            _bubbles.ReleaseAll();
+            _choices.ReleaseAll();
         }
 
         private void AddBubble(string speaker, string words, bool visitor)
         {
-            var bubble = TakeBubble(_shown.Count);
+            var bubble = _bubbles.Take();
             bubble.Speaker.text = speaker;
             bubble.Speaker.style.display = speaker.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             bubble.Text.text = words;
             bubble.Box.EnableInClassList("card-dialogue__bubble--visitor", visitor);
             Thread.Add(bubble.Box);
-            _shown.Add(bubble);
         }
 
-        private Bubble TakeBubble(int index)
+        // One chat bubble: who speaks over what they say
+        private static Bubble NewBubble()
         {
-            while (_pool.Count <= index)
-            {
-                var bubble = new Bubble { Box = new VisualElement(), Speaker = new Label(), Text = new Label() };
-                bubble.Box.AddToClassList("card-dialogue__bubble");
-                bubble.Speaker.AddToClassList("card-dialogue__speaker");
-                bubble.Text.AddToClassList("card-dialogue__text");
-                bubble.Box.Add(bubble.Speaker);
-                bubble.Box.Add(bubble.Text);
-                _pool.Add(bubble);
-            }
-            return _pool[index];
+            var bubble = new Bubble { Box = new VisualElement(), Speaker = new Label(), Text = new Label() };
+            bubble.Box.AddToClassList("card-dialogue__bubble");
+            bubble.Speaker.AddToClassList("card-dialogue__speaker");
+            bubble.Text.AddToClassList("card-dialogue__text");
+            bubble.Box.Add(bubble.Speaker);
+            bubble.Box.Add(bubble.Text);
+            return bubble;
         }
 
-        private ChoiceButton TakeChoice(int index)
+        // The reply button of slot `slot`: a tap picks that reply of the line waiting for one
+        private ChoiceButton NewChoice(int slot)
         {
-            while (_choicePool.Count <= index)
-            {
-                var choice = new ChoiceButton { Button = new Button(), Label = new Label { pickingMode = PickingMode.Ignore } };
-                choice.Button.AddToClassList("card-dialogue__choice");
-                choice.Button.AddToClassList("card-tap");
-                choice.Label.AddToClassList("card-dialogue__choice-label");
-                choice.Button.Add(choice.Label);
-                int slot = _choicePool.Count;
-                choice.Button.clicked += () => Pick(slot);
-                _choicePool.Add(choice);
-            }
-            return _choicePool[index];
+            var choice = new ChoiceButton { Button = new Button(), Label = new Label { pickingMode = PickingMode.Ignore } };
+            choice.Button.AddToClassList("card-dialogue__choice");
+            choice.Button.AddToClassList("card-tap");
+            choice.Label.AddToClassList("card-dialogue__choice-label");
+            choice.Button.Add(choice.Label);
+            choice.Button.clicked += () => Pick(slot);
+            return choice;
         }
 
         private static (Button, Label) PillButton(string className, System.Action onClick)

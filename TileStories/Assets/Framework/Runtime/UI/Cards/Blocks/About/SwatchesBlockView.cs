@@ -22,10 +22,9 @@ namespace TileStories
         }
 
         public VisualElement Root { get; }
-        public IReadOnlyList<Swatch> Swatches => _shown;
+        public IReadOnlyList<Swatch> Swatches => _swatches.Shown;
 
-        private readonly List<Swatch> _pool = new();
-        private readonly List<Swatch> _shown = new();
+        private readonly ElementPool<Swatch> _swatches;
         private string _variantClass;
 
         public SwatchesBlockView()
@@ -33,6 +32,7 @@ namespace TileStories
             Root = new VisualElement { name = "card-swatches" };
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-swatches");
+            _swatches = new ElementPool<Swatch>(_ => NewSwatch(), swatch => swatch.Cell.RemoveFromHierarchy());
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -46,7 +46,7 @@ namespace TileStories
             foreach (var item in read.Items(BuiltInBlocks.SwatchesItemsField))
             {
                 if (!BlockFieldReader.ItemIsComplete(item, rowFields) || !read.ItemColor(item, BuiltInBlocks.SwatchesColourField, out var color)) continue;
-                var swatch = Take(_shown.Count);
+                var swatch = _swatches.Take();
                 swatch.Color = color;
                 // - content colour from config (the only literal colour a card may show), written inline over the class
                 swatch.Sample.style.backgroundColor = color;
@@ -57,14 +57,12 @@ namespace TileStories
                 swatch.Note.text = note;
                 swatch.Note.style.display = note.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 Root.Add(swatch.Cell);
-                _shown.Add(swatch);
             }
         }
 
         public void Unbind()
         {
-            foreach (var swatch in _shown) swatch.Cell.RemoveFromHierarchy();
-            _shown.Clear();
+            _swatches.ReleaseAll();
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
         }
@@ -76,26 +74,23 @@ namespace TileStories
             return $"#{c.r:X2}{c.g:X2}{c.b:X2}";
         }
 
-        private Swatch Take(int index)
+        // One swatch's cell: the colour sample beside its name, code and note
+        private static Swatch NewSwatch()
         {
-            while (_pool.Count <= index)
-            {
-                var swatch = new Swatch { Cell = new VisualElement(), Sample = new VisualElement(), Name = new Label(), Code = new Label(), Note = new Label() };
-                swatch.Cell.AddToClassList("card-swatches__cell");
-                swatch.Sample.AddToClassList("card-swatches__sample");
-                var words = new VisualElement();
-                words.AddToClassList("card-swatches__words");
-                swatch.Name.AddToClassList("card-swatches__name");
-                swatch.Code.AddToClassList("card-swatches__code");
-                swatch.Note.AddToClassList("card-swatches__note");
-                words.Add(swatch.Name);
-                words.Add(swatch.Code);
-                words.Add(swatch.Note);
-                swatch.Cell.Add(swatch.Sample);
-                swatch.Cell.Add(words);
-                _pool.Add(swatch);
-            }
-            return _pool[index];
+            var swatch = new Swatch { Cell = new VisualElement(), Sample = new VisualElement(), Name = new Label(), Code = new Label(), Note = new Label() };
+            swatch.Cell.AddToClassList("card-swatches__cell");
+            swatch.Sample.AddToClassList("card-swatches__sample");
+            var words = new VisualElement();
+            words.AddToClassList("card-swatches__words");
+            swatch.Name.AddToClassList("card-swatches__name");
+            swatch.Code.AddToClassList("card-swatches__code");
+            swatch.Note.AddToClassList("card-swatches__note");
+            words.Add(swatch.Name);
+            words.Add(swatch.Code);
+            words.Add(swatch.Note);
+            swatch.Cell.Add(swatch.Sample);
+            swatch.Cell.Add(words);
+            return swatch;
         }
     }
 }

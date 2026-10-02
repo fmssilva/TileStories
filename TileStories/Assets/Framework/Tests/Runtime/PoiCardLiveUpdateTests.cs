@@ -126,6 +126,45 @@ namespace TileStories.Tests
             Assert.IsTrue(views.Skip(views.Count - 2).All(v => v is SourcesBlockView), "on again: they close the card again");
         }
 
+        // 15.4.6 on the real LivingRoomScene: The Lamp's related carousel (three written points: more than fit whole) shows a slice of its
+        // third card at rest while Peek Next Card is on (the shipped default); switched off live, its cards are whole, on again, the slice
+        [UnityTest]
+        public IEnumerator PeekNextCard_TheLampsCarouselShowsASliceOfTheNextCard_AndTheContainerOptionIsLive()
+        {
+            Assert.IsTrue(Session.CardSettings.container.peek_next_card, "precondition: the shipped wall never set it, so it reads the default (on)");
+            yield return OpenFull("lamp");
+            var carousel = Sheet.Stack.BoundViews.OfType<RelatedBlockView>().First(r => r.Cards.Count > 0);
+            Sheet.Stack.Scroll.ScrollTo(Sheet.Stack.SlotOf(carousel));
+            yield return CardTestInput.Settle(0.2f);
+            Assert.Greater(carousel.Track.horizontalScroller.highValue, 0f, "precondition: more cards than fit whole");
+            float slice = CardTestInput.TokenPx("--ts-track-peek");
+            float tol = CardGalleryChecks.OnePixel(carousel.Track) * 2f + 0.5f;
+            Assert.AreEqual(slice, CutAtTheRightEdge(carousel), tol, "on: the strip shows a token-wide slice of the next card");
+
+            yield return Push(c => c.card_settings.container.peek_next_card = false);
+            carousel = Sheet.Stack.BoundViews.OfType<RelatedBlockView>().First(r => r.Cards.Count > 0);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(0f, CutAtTheRightEdge(carousel), tol, "off, live: no card is cut, the strip ends on a card");
+            Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the sheet kept its stop");
+
+            yield return Push(c => c.card_settings.container.peek_next_card = true);
+            carousel = Sheet.Stack.BoundViews.OfType<RelatedBlockView>().First(r => r.Cards.Count > 0);
+            yield return CardTestInput.Settle(0.2f);
+            Assert.AreEqual(slice, CutAtTheRightEdge(carousel), tol, "on again: the slice is back");
+        }
+
+        // How much of the card the strip's right edge cuts shows in the strip (0 when the edge falls between cards)
+        private static float CutAtTheRightEdge(RelatedBlockView carousel)
+        {
+            Rect strip = carousel.Track.contentViewport.worldBound;
+            foreach (var card in carousel.Cards)
+            {
+                Rect r = card.Box.worldBound;
+                if (r.xMin < strip.xMax - 1f && r.xMax > strip.xMax + 1f) return strip.xMax - r.xMin;
+            }
+            return 0f;
+        }
+
         [UnityTest]
         public IEnumerator AnotherVariant_IsDrawnOnTheOpenCard()
         {

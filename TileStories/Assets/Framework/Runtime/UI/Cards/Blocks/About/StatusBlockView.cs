@@ -25,13 +25,12 @@ namespace TileStories
         public Label Heading { get; }
         public Label Level { get; }
         public VisualElement ScaleRow { get; }
-        public IReadOnlyList<Step> Steps => _steps;
+        public IReadOnlyList<Step> Steps => _steps.Shown;
         // What the card resolved (for the tests and the scale)
         public CardStatusRule.Status Status { get; private set; }
 
         private static readonly string[] LineStyles = { "solid", "dash_long", "dash_medium", "dash_short", "dotted" };
-        private readonly List<Step> _pool = new();
-        private readonly List<Step> _steps = new();
+        private readonly ElementPool<Step> _steps = new(_ => NewStep(), step => step.Box.RemoveFromHierarchy());
         private string _variantClass;
 
         public StatusBlockView()
@@ -84,21 +83,19 @@ namespace TileStories
             if (!scale) return;
             foreach (var (key, stepStatus) in CardStatusRule.Scale(context.Poi, context.MarkerLook, context.Taxonomy))
             {
-                var step = Take(_steps.Count);
+                var step = _steps.Take();
                 step.Key = key;
                 step.Name.text = stepStatus.LevelName;
                 Paint(step.Ring, stepStatus);
                 bool current = !status.Unknown && key == context.Poi.status_level_key;
                 step.Box.EnableInClassList("card-status__step--current", current);
                 ScaleRow.Add(step.Box);
-                _steps.Add(step);
             }
         }
 
         public void Unbind()
         {
-            foreach (var step in _steps) step.Box.RemoveFromHierarchy();
-            _steps.Clear();
+            _steps.ReleaseAll();
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
         }
@@ -125,20 +122,17 @@ namespace TileStories
                 : string.Format(strings.Get(CardStrings.Keys.StatusPercent), UnityEngine.Mathf.RoundToInt(status.Pct));
         }
 
-        private Step Take(int index)
+        // One step of the scale: a small ring above its condition's name
+        private static Step NewStep()
         {
-            while (_pool.Count <= index)
-            {
-                var step = new Step { Box = new VisualElement(), Ring = new VisualElement(), Name = new Label() };
-                step.Box.AddToClassList("card-status__step");
-                step.Ring.AddToClassList("card-status__ring");
-                step.Ring.AddToClassList("card-status__ring--small");
-                step.Name.AddToClassList("card-status__step-name");
-                step.Box.Add(step.Ring);
-                step.Box.Add(step.Name);
-                _pool.Add(step);
-            }
-            return _pool[index];
+            var step = new Step { Box = new VisualElement(), Ring = new VisualElement(), Name = new Label() };
+            step.Box.AddToClassList("card-status__step");
+            step.Ring.AddToClassList("card-status__ring");
+            step.Ring.AddToClassList("card-status__ring--small");
+            step.Name.AddToClassList("card-status__step-name");
+            step.Box.Add(step.Ring);
+            step.Box.Add(step.Name);
+            return step;
         }
     }
 }

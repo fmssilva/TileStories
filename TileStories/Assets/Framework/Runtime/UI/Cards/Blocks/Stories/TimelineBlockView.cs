@@ -24,12 +24,20 @@ namespace TileStories
         public VisualElement Root { get; }
         // The horizontal look's swipe track (the vertical look lays the events straight into Root)
         public ScrollView Track { get; }
-        public IReadOnlyList<Event> Events => _shown;
+        public IReadOnlyList<Event> Events => _events.Shown;
 
-        private readonly List<Event> _pool = new();
-        private readonly List<Event> _shown = new();
+        private readonly ElementPool<Event> _events = new(_ => NewEvent(), e =>
+        {
+            e.Text.Clear();
+            // - a pooled event may come back in the vertical look: give it its USS width again
+            e.Box.style.width = StyleKeyword.Null;
+            e.Box.RemoveFromHierarchy();
+        });
         private string _variantClass;
         private bool _horizontal;
+        // Peek Next Card (card_settings.container.peek_next_card), read at bind: a live edit rebinds the card
+        private bool _peekNext = true;
+        private readonly List<VisualElement> _cells = new();
 
         public TimelineBlockView()
         {
@@ -56,6 +64,7 @@ namespace TileStories
             Root.AddToClassList(_variantClass);
             bool horizontal = context.Variant == BuiltInBlocks.TimelineHorizontal;
             _horizontal = horizontal;
+            _peekNext = context.Settings?.container?.peek_next_card ?? true;
             var parent = horizontal ? Track.contentContainer : Root;
             if (horizontal) Root.Add(Track);
 
@@ -67,37 +76,28 @@ namespace TileStories
                 var paragraphs = GlossaryMarkup.Paragraphs(read.ItemText(item, BuiltInBlocks.TimelineTextField));
                 Show(parent, read.ItemText(item, BuiltInBlocks.TimelineDateField), read.ItemText(item, BuiltInBlocks.TimelineTitleField), paragraphs, context.Glossary, isNow: false);
             }
-            if (read.Flag(BuiltInBlocks.TimelineHighlightNowField) && _shown.Count > 0)
+            if (read.Flag(BuiltInBlocks.TimelineHighlightNowField) && _events.Shown.Count > 0)
                 Show(parent, context.Strings?.Get(CardStrings.Keys.TimelineNow) ?? "", "", System.Array.Empty<string>(), context.Glossary, isNow: true);
             // - the line runs from each dot to the next one: none after the last
-            for (int i = 0; i < _shown.Count; i++)
-                _shown[i].Rail.style.visibility = i < _shown.Count - 1 ? Visibility.Visible : Visibility.Hidden;
+            for (int i = 0; i < _events.Shown.Count; i++)
+                _events.Shown[i].Rail.style.visibility = i < _events.Shown.Count - 1 ? Visibility.Visible : Visibility.Hidden;
             Track.scrollOffset = UnityEngine.Vector2.zero;
             FitEvents();
         }
 
-        // Stretch the events so a whole number of them fills the swipe strip (CardTrackRule): the strip ends on a card edge at rest and at the
-        // end of the swipe, never on half an event. The narrowest an event may be is its USS min-width (the cell token).
+        // Size the events for the swipe strip (CardTrackFit): whole events only, or -- with Peek Next Card -- whole events and a slice of the
+        // next at rest; the swipe always ends on a whole last event. The narrowest an event may be is its USS min-width (the cell token).
         private void FitEvents()
         {
-            if (!_horizontal || _shown.Count == 0) return;
-            float strip = Track.contentViewport.layout.width;
-            float narrowest = _shown[0].Box.resolvedStyle.minWidth.value;
-            if (float.IsNaN(strip) || strip <= 0f || float.IsNaN(narrowest) || narrowest <= 0f) return;
-            float width = CardTrackRule.CellWidth(strip, narrowest, 0f);
-            foreach (var e in _shown) e.Box.style.width = width;
+            if (!_horizontal) return;
+            _cells.Clear();
+            foreach (var e in _events.Shown) _cells.Add(e.Box);
+            CardTrackFit.Apply(Track, _cells, _peekNext);
         }
 
         public void Unbind()
         {
-            foreach (var e in _shown)
-            {
-                e.Text.Clear();
-                // - a pooled event may come back in the vertical look: give it its USS width again
-                e.Box.style.width = StyleKeyword.Null;
-                e.Box.RemoveFromHierarchy();
-            }
-            _shown.Clear();
+            _events.ReleaseAll();
             _horizontal = false;
             Track.RemoveFromHierarchy();
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
@@ -106,7 +106,7 @@ namespace TileStories
 
         private void Show(VisualElement parent, string date, string title, IReadOnlyList<string> paragraphs, CardGlossary glossary, bool isNow)
         {
-            var e = Take(_shown.Count);
+            var e = _events.Take();
             e.IsNow = isNow;
             e.Box.EnableInClassList("card-timeline__event--now", isNow);
             e.Date.text = date;
@@ -115,37 +115,33 @@ namespace TileStories
             e.Text.Bind(paragraphs, glossary);
             e.Text.Root.style.display = paragraphs.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             parent.Add(e.Box);
-            _shown.Add(e);
         }
 
-        private Event Take(int index)
+        // One event: its dot and rail beside the date, title and text
+        private static Event NewEvent()
         {
-            while (_pool.Count <= index)
+            var e = new Event
             {
-                var e = new Event
-                {
-                    Box = new VisualElement(), Dot = new VisualElement(), Rail = new VisualElement(), Date = new Label(), Title = new Label(),
-                    Text = new CardTextView("card-timeline__paragraph"),
-                };
-                e.Box.AddToClassList("card-timeline__event");
-                var marker = new VisualElement();
-                marker.AddToClassList("card-timeline__marker");
-                e.Dot.AddToClassList("card-timeline__dot");
-                e.Rail.AddToClassList("card-timeline__rail");
-                marker.Add(e.Dot);
-                marker.Add(e.Rail);
-                var body = new VisualElement();
-                body.AddToClassList("card-timeline__body");
-                e.Date.AddToClassList("card-timeline__date");
-                e.Title.AddToClassList("card-timeline__title");
-                body.Add(e.Date);
-                body.Add(e.Title);
-                body.Add(e.Text.Root);
-                e.Box.Add(marker);
-                e.Box.Add(body);
-                _pool.Add(e);
-            }
-            return _pool[index];
+                Box = new VisualElement(), Dot = new VisualElement(), Rail = new VisualElement(), Date = new Label(), Title = new Label(),
+                Text = new CardTextView("card-timeline__paragraph"),
+            };
+            e.Box.AddToClassList("card-timeline__event");
+            var marker = new VisualElement();
+            marker.AddToClassList("card-timeline__marker");
+            e.Dot.AddToClassList("card-timeline__dot");
+            e.Rail.AddToClassList("card-timeline__rail");
+            marker.Add(e.Dot);
+            marker.Add(e.Rail);
+            var body = new VisualElement();
+            body.AddToClassList("card-timeline__body");
+            e.Date.AddToClassList("card-timeline__date");
+            e.Title.AddToClassList("card-timeline__title");
+            body.Add(e.Date);
+            body.Add(e.Title);
+            body.Add(e.Text.Root);
+            e.Box.Add(marker);
+            e.Box.Add(body);
+            return e;
         }
     }
 }

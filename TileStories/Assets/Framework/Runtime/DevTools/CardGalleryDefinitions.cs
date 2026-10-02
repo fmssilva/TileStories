@@ -66,6 +66,10 @@ namespace TileStories
         public const string CategoryKey = "category_1";
         public const string LevelKey = "level_1";
 
+        // The wall change of the "_nopeek" swipe-track entries (_3.1 15.4.6): Peek Next Card off, so the track shows whole cards only (every
+        // other entry keeps the default, on)
+        public static void PeekNextCardOff(WallConfigData wall) => wall.card_settings.container.peek_next_card = false;
+
         public static readonly IReadOnlyList<Entry> All = Build();
 
         private static List<Entry> Build()

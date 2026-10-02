@@ -107,7 +107,7 @@ namespace TileStories
             Frame.style.left = new Length(50, LengthUnit.Percent);
             Frame.style.translate = new Translate(new Length(-50, LengthUnit.Percent), 0);
             root.Add(Frame);
-            Sheet = new PoiCardSheetView(Frame, BlockRegistry.Shared, PoiCardHost.CardStyleSheets(tokens, cardStyle, blockStyles));
+            Sheet = new PoiCardSheetView(Frame, BlockRegistry.Shared, CardStyleSheets.InOrder(tokens, cardStyle, blockStyles));
             // - Phase A checks LAYOUT: the sheet jumps to its stop (no height animation for a measurement to race after a
             //   slow first frame); the motion itself is the real scene's to test (PoiCardSceneTests)
             Sheet.Root.style.transitionDuration = new StyleList<TimeValue>(new System.Collections.Generic.List<TimeValue> { new TimeValue(0f) });
@@ -171,24 +171,13 @@ namespace TileStories
             Sheet.Viewer = () => viewer;
             ArPlacementService.Remove();
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wall.pois);
-            // - the wall's first language, like the wall's card: the shown language is the gallery's own (Language)
-            string fallback = CardLanguageRule.Fallback(settings.languages);
-            var context = new BlockBindContext
+            // - the shown language is the gallery's own (Language); the rest is decided as on the wall's card (CardContextBuilder)
+            var hostParts = new BlockBindContext
             {
-                Poi = poi, Taxonomy = wall, Settings = settings, Language = Language, FallbackLanguage = fallback,
-                Strings = new CardStrings(strings != null ? strings.Entries() : null, StringSources.Entries(), settings.strings, Language, fallback),
-                Glossary = new CardGlossary(settings.glossary, Language, fallback),
-                MarkerLook = MarkerVisualSettings.Resolve(wall, null),
-                Media = Media,
-                State = State,
-                Events = Events,
-                Services = Services,
-                Audio = AudioService,
-                Video = VideoService,
-                Preview = PreviewService,
-                ArPlacement = ArPlacementService,
-                ReduceMotion = settings.container.reduce_motion,
+                MarkerLook = MarkerVisualSettings.Resolve(wall, null), Media = Media, State = State, Events = Events, Services = Services,
+                Audio = AudioService, Video = VideoService, Preview = PreviewService, ArPlacement = ArPlacementService,
             };
+            var context = CardContextBuilder.Build(hostParts, poi, wall, settings, Language, strings != null ? strings.Entries() : null, StringSources.Entries());
             Sheet.Hide();
             Sheet.Show(stack.Entries, context, SheetStopRule.Stop.Peek, settings.container.half_max_ratio);
             Sheet.SetStop(stop);

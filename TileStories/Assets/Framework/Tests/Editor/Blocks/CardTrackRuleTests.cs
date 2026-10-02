@@ -52,6 +52,59 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(108f, CardTrackRule.CellWidth(120f, 140f, 12f), 0.001f, "the gap stays out of the card");
         }
 
+        // ---- Peek Next Card (_3.1 15.4.6): whole cells AND a slice of the next one at rest
+
+        private const float Peek = 32f;
+
+        [Test]
+        public void WithPeek_TheTimelinesPhoneStrip_ShowsTwoWholeEventsAndASliceOfTheThird()
+        {
+            Assert.IsTrue(CardTrackRule.Peeks(Strip, 160f, 0f, Peek, 5), "five events, two fit whole: there is a next one to show");
+            float cell = CardTrackRule.CellWidth(Strip, 160f, 0f, Peek, 5);
+            Assert.AreEqual(163f, cell, 0.001f, "(358 - 32) / 2");
+            Assert.AreEqual(Strip, 2 * cell + Peek, 0.001f, "two whole events and the slice fill the strip exactly");
+            Assert.GreaterOrEqual(cell, 160f, "never narrower than the cell token");
+        }
+
+        [Test]
+        public void WithPeek_TheRelatedCarouselsPhoneStrip_ShowsTwoWholeCardsTheirGapsAndASlice()
+        {
+            float cell = CardTrackRule.CellWidth(Strip, 140f, 12f, Peek, 3);
+            Assert.AreEqual(151f, cell, 0.001f, "(358 - 32) / 2 - 12");
+            Assert.AreEqual(Strip, 2 * (cell + 12f) + Peek, 0.001f, "two cards, the gap after each, and the slice fill the strip");
+        }
+
+        [Test]
+        public void WithPeek_ATrackWhoseCellsAllFitWhole_ShowsNoSlice_ItKeepsTheWholeCellsWidth()
+        {
+            Assert.IsFalse(CardTrackRule.Peeks(Strip, 160f, 0f, Peek, 2), "two events: nothing after them to peek at");
+            Assert.AreEqual(CardTrackRule.CellWidth(Strip, 160f, 0f), CardTrackRule.CellWidth(Strip, 160f, 0f, Peek, 2), 0.001f, "the whole-cells width");
+            Assert.AreEqual(CardTrackRule.CellWidth(Strip, 140f, 12f), CardTrackRule.CellWidth(Strip, 140f, 12f, Peek, 1), 0.001f, "a single card");
+        }
+
+        [Test]
+        public void PeekOff_IsExactlyTheWholeCellsRule()
+        {
+            foreach (float strip in new[] { 300f, 358f, 640f })
+                foreach (int count in new[] { 1, 3, 9 })
+                {
+                    Assert.IsFalse(CardTrackRule.Peeks(strip, 160f, 0f, 0f, count), "no slice asked: none shown");
+                    Assert.AreEqual(CardTrackRule.CellWidth(strip, 160f, 0f), CardTrackRule.CellWidth(strip, 160f, 0f, 0f, count), 0.001f, strip + " / " + count);
+                }
+        }
+
+        [Test]
+        public void WithPeek_OnAnyStrip_TheCellsAndTheSliceFillItExactly_AndNoCellIsNarrowerThanItsMinimum()
+        {
+            foreach (float strip in new[] { 300f, 358f, 420f, 640f, 1000f })
+            {
+                float cell = CardTrackRule.CellWidth(strip, 140f, 12f, Peek, 20);
+                int whole = CardTrackRule.WholeCells(strip - Peek, 140f, 12f);
+                Assert.GreaterOrEqual(cell, 140f - 0.001f, strip + ": not narrower than the token");
+                Assert.AreEqual(strip, whole * (cell + 12f) + Peek, 0.001f, strip + ": " + whole + " cells, their gaps and the slice fill the strip");
+            }
+        }
+
         [Test]
         public void NoSizeYet_KeepsTheMinimum_AndNeverReturnsZeroOrNegative()
         {
