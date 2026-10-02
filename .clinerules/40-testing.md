@@ -91,8 +91,9 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
-**Which tests, when (three levels; measured 2026-10-01: full EditMode ~80-110 s, full PlayMode ~24-25 min, one PlayMode
-fixture 15-60 s).** Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
+**Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
+EditMode ~65-110 s (1587 tests, 2026-10-02); full PlayMode ~31 min (833 tests, 1855 s, 2026-10-02); one PlayMode fixture
+15-60 s. Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
   that exercise the changed code: the fixture(s) of the feature itself plus any fixture that reaches it through a seam
@@ -285,6 +286,15 @@ sent while a PlayMode job was still going cost two Editor restarts.
 - **Serialize.** Edit -> `refresh_unity` -> `run_tests` -> `get_test_job` (with `wait_timeout` 60, repeated) until the job
   says `succeeded` / `failed` -> only then the next edit, refresh, `execute_code` that saves assets, or run. A `get_test_job`
   that timed out means "still running", never "go on".
+- **Wait without burning tokens.** Every poll is a full model turn that re-reads the whole session, so polling a 30 min run
+  every 25-60 s costs dozens of turns for nothing. For any run expected to take over 3 min: (1) say in ONE chat line what runs
+  and its expected time (from RUN TIMES above) and when you will check; (2) wait with ONE Bash call `sleep 540` (timeout
+  600000 ms, the Bash tool's cap) per ~10 min, checking `get_test_job` once after each; (3) from the expected end, poll every
+  ~2 min. No narration between waits. After the run, update RUN TIMES if it moved by more than ~10 %.
+- **Ask the developer ONCE before a run or capture that needs Unity in a given place** (the GATE capture, POI Editor captures, a
+  background run), with the AskUserQuestion tool so the session waits for the answer: what runs, how long, and what to do with
+  Unity (4.2.3 "What the developer can do"); options e.g. "Ready, start" / "Wait". Ordinary runs (Unity may be covered) only
+  get the one chat line above: a blocking question there would stall the block while the developer is away.
 - **Check before every compile.** Read `editor_state`: `tests.is_running` false and `compilation.is_compiling` false. If a job
   is running, wait for it; do not cancel it to go faster (stopping Play Mode aborts the run and loses its results).
 - **Unity preference, set once per machine:** Edit > Preferences > Asset Pipeline > Auto Refresh = "Enabled Outside

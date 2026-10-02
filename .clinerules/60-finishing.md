@@ -100,7 +100,9 @@ The last message of a session, in English, short, in this order (the durable rec
 4. **What I looked at** -- the captures, judged.
 5. **Not verified** -- what was not independently re-verified this session, and why (6.1); never blur "re-ran it" with "the
    plan file said so".
-6. **Commit** -- one short, natural commit message (one line, imperative, ~50-72 characters, no step codes).
+6. **Commit** -- one short, natural commit message (one line, imperative, ~50-72 characters, no step codes). When the developer
+   asks you to commit: `git -c core.autocrlf=true add -A`, then `git commit -m "<that one line>"` -- no body, no `Co-Authored-By`
+   or other trailer (`.claude/settings.json` sets `attribution.commit: false`), never push unless asked.
 
 The learning summaries given along the way (the teaching notes of `__AI_worker.md`) are separate: they explain how and why
 for the developer to learn; this report states what is true now.
