@@ -60,6 +60,46 @@ namespace TileStories.Editor.Tests
                 { Key = "t", Type = BlockFieldType.Toggle, ChoiceDefault = "a" })));
             Assert.IsNull(BlockRegistry.Validate(BuiltInBlocks.Model3D), "the model kind's Fit is a valid Library-default Choice");
             Assert.IsNull(BlockRegistry.Validate(BuiltInBlocks.Header));
+
+            // - a Toggle may take a Library default (off unless the wall says otherwise), but never inside an Items row
+            Assert.IsNull(BlockRegistry.Validate(KindWith(new BlockFieldDefinition { Key = "t", Type = BlockFieldType.Toggle, LibraryDefault = true })));
+            Assert.IsNull(BlockRegistry.Validate(BuiltInBlocks.PlaceInAr), "Keep Model On Switch is a valid Library-default Toggle");
+            StringAssert.Contains("top-level", BlockRegistry.Validate(KindWith(new BlockFieldDefinition
+            {
+                Key = "rows", Type = BlockFieldType.Items,
+                ItemFields = new[] { new BlockFieldDefinition { Key = "t", Type = BlockFieldType.Toggle, LibraryDefault = true } },
+            })), "a row's sub-field cannot take a wall-wide default");
+            StringAssert.Contains("Block Library default", BlockRegistry.Validate(KindWith(new BlockFieldDefinition { Key = "n", Type = BlockFieldType.Number, LibraryDefault = true })));
+        }
+
+        private static readonly BlockFieldDefinition KeepOnSwitch = BuiltInBlocks.PlaceInAr.Field(BuiltInBlocks.PlaceInArKeepOnSwitchField);
+
+        private static BlockFieldReader ToggleOf(bool? stored)
+        {
+            var block = new BlockInstanceData { key = "b", kind = BuiltInBlocks.PlaceInArKind };
+            if (stored.HasValue) block.fields.Add(new BlockFieldValue { key = KeepOnSwitch.Key, flag = stored.Value });
+            return new BlockFieldReader(block, "en", "en");
+        }
+
+        [Test]
+        public void KeepModelOnSwitch_ReadsTheBlocksOwnTick_ThenTheLibrarysDefault_ThenOff_ForBothValuesAtEveryLayer()
+        {
+            var kind = BuiltInBlocks.PlaceInAr;
+            Assert.IsTrue(KeepOnSwitch.LibraryDefault, "precondition: the field has a Block Library row");
+            var wallOn = WallWith(BuiltInBlocks.PlaceInArKind, KeepOnSwitch.Key, BlockLibraryRule.FlagTrue);
+            var wallOff = WallWith(BuiltInBlocks.PlaceInArKind, KeepOnSwitch.Key, BlockLibraryRule.FlagFalse);
+            // - nothing stored by the block: the wall's default; no Library row at all (or no settings): off
+            Assert.IsTrue(BlockLibraryRule.Flag(wallOn, kind, KeepOnSwitch, ToggleOf(null)), "the Library says on");
+            Assert.IsFalse(BlockLibraryRule.Flag(wallOff, kind, KeepOnSwitch, ToggleOf(null)), "the Library says off");
+            Assert.IsFalse(BlockLibraryRule.Flag(new CardSettings(), kind, KeepOnSwitch, ToggleOf(null)), "no Library row: off, the default");
+            Assert.IsFalse(BlockLibraryRule.Flag(null, kind, KeepOnSwitch, ToggleOf(null)), "no card settings at all (the gallery)");
+            // - the block's own tick wins in both directions, an unticked box too
+            Assert.IsTrue(BlockLibraryRule.Flag(wallOff, kind, KeepOnSwitch, ToggleOf(true)), "ticked on the block, off in the Library: on");
+            Assert.IsFalse(BlockLibraryRule.Flag(wallOn, kind, KeepOnSwitch, ToggleOf(false)), "unticked on the block, on in the Library: off");
+            // - a stale or foreign Library value reads as off; another kind's row never reaches this one
+            Assert.IsFalse(BlockLibraryRule.Flag(WallWith(BuiltInBlocks.PlaceInArKind, KeepOnSwitch.Key, "maybe"), kind, KeepOnSwitch, ToggleOf(null)), "an entry that is no true / false");
+            Assert.IsFalse(BlockLibraryRule.Flag(WallWith(BuiltInBlocks.Model3DKind, KeepOnSwitch.Key, BlockLibraryRule.FlagTrue), kind, KeepOnSwitch, ToggleOf(null)), "another kind's default");
+            Assert.IsFalse(BlockLibraryRule.FlagDefault(wallOn, kind, BuiltInBlocks.PlaceInAr.Field(BuiltInBlocks.PlaceInArLabelField)), "a field without a Library default has none");
         }
     }
 }

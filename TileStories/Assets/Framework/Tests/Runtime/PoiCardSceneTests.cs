@@ -548,7 +548,8 @@ namespace TileStories.Tests
                 "hotspot_image", "hotspot_image", "video", "video", "wall_locator", "wall_locator", "today_map", "today_map", "related", "related",
                 "knowledge_check", "knowledge_check", "knowledge_check", "poll", "collect", "feedback", "feedback", "dialogue", "show_on_wall", "show_on_wall",
                 "audio_guide", "audio_guide",
-                "sources", "sources", "actions", "actions", "actions",
+                "actions", "actions", "actions", "sources", "sources",
+                // - the sources were authored before the actions: the card still ends with them (Sources At The End, 15.2.1)
                 // - Tier 5 (10A.2b.3 on): the Lamp's own model_3d, panorama_360 and place_in_ar fixtures, excluded from THIS list on purpose
                 //   (its own name says Tiers 1 to 4) rather than folded in as more rows every time a later tier adds one
             }, ShownKinds().Where(k => builtIn.TryGet(k, out _) && k != BuiltInBlocks.Model3DKind && k != BuiltInBlocks.Panorama360Kind
@@ -576,14 +577,17 @@ namespace TileStories.Tests
             var strings = new CardStrings(Card.StringTable.Entries(), Card.StringSources.Entries(), LiveSettings.strings, "en", "en");
             var stack = Sheet.Stack;
             var views = stack.BoundViews;
-            Assert.AreEqual(lampConfig.card.blocks.Count, views.Count, "precondition: every block shown, in order");
+            // - the card's order, not the authored one: the sources close the card (Sources At The End)
+            var stackOrder = BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Entries;
+            Assert.AreEqual(lampConfig.card.blocks.Count, stackOrder.Count, "precondition: every authored block is on the card");
+            Assert.AreEqual(stackOrder.Count, views.Count, "precondition: every block shown, in the card's order");
             float gap = -1f;
             int headed = 0;
             // - layout snaps each edge to a physical pixel: one screen pixel in panel units is the honest tolerance
             float onePixel = RuntimePanelUtils.ScreenToPanel(stack.Scroll.panel, Vector2.right).x - RuntimePanelUtils.ScreenToPanel(stack.Scroll.panel, Vector2.zero).x;
             for (int i = 1; i < views.Count; i++)
             {
-                var block = lampConfig.card.blocks[i];
+                var block = stackOrder[i].Instance;
                 BlockRegistry.Shared.TryGet(block.kind, out var definition);
                 string authored = new BlockFieldReader(block, "en", "en").Text(BlockKindDefinition.HeadingField);
                 string expected = authored.Length > 0 ? authored : definition.DefaultHeadingKey != null ? strings.Get(definition.DefaultHeadingKey) : "";
@@ -995,6 +999,30 @@ namespace TileStories.Tests
             Assert.AreEqual("lamp", SelectionEventBus.CurrentPoiId, "the point stays selected: its marker stays highlighted on the wall");
             Assert.IsTrue(Marker("lamp").IsVisible);
             yield return Capture("Card_Lamp_ShowOnWall");
+        }
+
+        // 15.2.2 on the real scene: The Lamp's sticky footer carries no words of its own, so it reads the framework's Show On Wall words -- the
+        // same action says the same thing on the footer and on the Show On Wall block, in each language (PT used to read two ways)
+        [UnityTest]
+        public IEnumerator TheLamp_TheStickyFooterAndTheShowOnWallBlock_SayTheSameWords_InEnglishAndInPortuguese()
+        {
+            var lampConfig = Session.SearchPois.First(p => p.id == "lamp");
+            var stickyBlock = lampConfig.card.blocks.First(b => b.kind == BuiltInBlocks.ActionsKind && b.variant == BuiltInBlocks.ActionsStickyCta);
+            var stickyRow = new BlockFieldReader(stickyBlock, null, null).Items(BuiltInBlocks.ActionsItemsField).Single();
+            Assert.AreEqual("", new BlockFieldReader(stickyBlock, null, null).ItemText(stickyRow, BuiltInBlocks.ActionsLabelField), "precondition: the fixture's sticky button has no words of its own");
+
+            foreach (var (language, expected) in new[] { ("en", "Show me where it is"), ("pt", "Mostra-me onde fica") })
+            {
+                SelectionEventBus.Clear();
+                LiveSettings.languages = new System.Collections.Generic.List<string> { language, "en" };
+                yield return OpenFull("lamp");
+                var sticky = Sheet.Stack.BoundViews.OfType<ActionsBlockView>().Last();
+                var wallButton = Sheet.Stack.BoundViews.OfType<ShowOnWallBlockView>().First();
+                Assert.AreEqual(expected, sticky.Actions.Single().Label.text, language + ": the footer's words are the action's own");
+                Assert.AreEqual(expected, wallButton.ButtonLabel.text, language + ": the same words on the Show On Wall block");
+                Assert.AreEqual(Sheet.Stack.Footer, Sheet.Stack.SlotOf(sticky).parent, language + ": and it is still the pinned footer");
+                yield return Capture("Card_Lamp_StickyWording_" + language);
+            }
         }
 
         [UnityTest]

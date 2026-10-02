@@ -111,7 +111,7 @@ namespace TileStories
             Series.style.display = series.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             ItemName.text = CollectRule.ItemName(read, context.Poi, context.Language, context.FallbackLanguage);
             // - the wall's collectable items come from its config: every collect block of every point
-            _items = CollectRule.Items(context.Taxonomy?.pois, context.Taxonomy?.card_settings);
+            _items = CollectRule.Items(context.Taxonomy?.pois, context.Settings);
             Add.tooltip = ItemName.text;
             Refresh();
         }

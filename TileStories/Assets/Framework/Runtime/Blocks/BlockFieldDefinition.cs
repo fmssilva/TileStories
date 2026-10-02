@@ -35,8 +35,9 @@ namespace TileStories
         public IReadOnlyList<string> OptionLabels;
         // Choice only: the option read while the block stores none (null = none: the field reads empty, as before)
         public string ChoiceDefault;
-        // Choice only: a wall may set this field's default for every block of the kind in the Block Library
-        // (card_settings.kinds[].field_defaults); a block's own value still wins (BlockLibraryRule.Choice)
+        // Choice (with a ChoiceDefault) or Toggle only, top level: a wall may set this field's default for every block of the kind in the
+        // Block Library (card_settings.kinds[].field_defaults: an option, or "true" / "false" for a Toggle, which is off otherwise); a block's
+        // own value still wins (BlockLibraryRule.Choice / Flag)
         public bool LibraryDefault;
         // Items only: the sub-fields of one row (never Items themselves)
         public IReadOnlyList<BlockFieldDefinition> ItemFields;

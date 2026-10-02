@@ -14,10 +14,12 @@ namespace TileStories
         public string ScaleMode = ArPlacementRule.ScaleRealSize;
         public float HeightCm;
         public float MarkerMultiple;
+        // Keep Model On Switch: the model stays when another point is selected or the card closes (ArPlacementRule.RemovesOnSelection)
+        public bool KeepOnSwitch;
     }
 
     // The card's ONE AR placement owner (_3.1 step 10B.1), beside Audio / Video / Preview and reached the same way (BlockBindContext.ArPlacement):
-    // ONE model stands in the world at a time; placing another replaces it; Remove (the card's chip, the card closing, the host going away)
+    // ONE model stands in the world at a time; placing another replaces it; Remove (the block's button, the card closing, the host going away)
     // takes it away and leaves nothing behind.
     public interface ICardArPlacement
     {

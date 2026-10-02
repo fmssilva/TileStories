@@ -136,6 +136,15 @@ namespace TileStories
             if (IsOpen) SetStop(SheetStopRule.Stop.Peek);
         }
 
+        // A block asked for the header at the peek: scroll to the top first (a peek over a scrolled stack shows a half-cut line of whatever
+        // block was in view), then lower the card
+        public void ShowHeaderAtPeek()
+        {
+            if (!IsOpen) return;
+            Stack.Scroll.scrollOffset = Vector2.zero;
+            SetStop(SheetStopRule.Stop.Peek);
+        }
+
         // Where the visitor stands in the wall's frame, handed over by the card's owner (the scene's camera through the wall;
         // a gallery's fabricated place); null = none known
         public System.Func<Vector3?> Viewer { get; set; }

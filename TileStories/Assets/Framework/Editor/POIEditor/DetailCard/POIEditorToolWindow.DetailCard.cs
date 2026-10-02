@@ -209,6 +209,7 @@ namespace TileStories.Editor
                 c.audio_when_another_starts = DrawPopupField("Audio Overlap", c.audio_when_another_starts, CardOptions.AudioModes, CardOptions.AudioModeLabels, CardAudioSwitchHelp);
                 c.audio_android_output_poll = DrawToggleField("Android Earbud Check", c.audio_android_output_poll, CardAudioAndroidPollHelp);
                 c.reduce_motion = DrawToggleField("Reduce Motion", c.reduce_motion, CardReduceMotionHelp);
+                c.sources_at_end = DrawToggleField("Sources At The End", c.sources_at_end, CardSourcesAtEndHelp);
             }
 
             DrawDomainTestSubSection(_cardContainerTest, CardSceneTestGuide, CardPlaymodeTestGuide, CardDeviceTestGuide, DrawCardTestRows);
@@ -366,13 +367,25 @@ namespace TileStories.Editor
                     // - the label spans the Kind AND Family columns (a default row has no family of its own): "Default Scale Mode" fits
                     GUILayout.Label(BlockLibraryFieldDefaultPrefix + field.Label, GUILayout.Width(BlockLibraryKindColumnWidth + BlockLibraryFamilyColumnWidth - BlockLibraryFieldDefaultIndent));
                     GUILayout.Space(TableGapBetweenGroups + BlockLibraryEnabledColumnWidth + BlockLibrarySkippedControlMargins);
-                    string current = BlockLibraryRule.ChoiceDefault(_config.card_settings, kind, field);
-                    var options = new List<string>(field.Options);
-                    var labels = new List<string>();
-                    for (int o = 0; o < options.Count; o++) labels.Add(field.OptionLabels != null ? field.OptionLabels[o] : options[o]);
-                    int picked = EditorGUILayout.Popup(options.IndexOf(current), labels.ToArray(), GUILayout.Width(BlockLibraryVariantColumnWidth));
-                    ReportTableCellRect("Block Library default " + kind.Key + "." + field.Key, kindIndex);
-                    if (picked >= 0 && options[picked] != current) SetBlockLibraryFieldDefault(kind.Key, field.Key, options[picked]);
+                    if (field.Type == BlockFieldType.Toggle)
+                    {
+                        // - a Toggle's default is a tick in the Default Variant column's own width
+                        bool ticked = BlockLibraryRule.FlagDefault(_config.card_settings, kind, field);
+                        bool edited = EditorGUILayout.Toggle(ticked, GUILayout.Width(EditorGUIUtility.singleLineHeight));
+                        ReportTableCellRect("Block Library default " + kind.Key + "." + field.Key, kindIndex);
+                        if (edited != ticked) SetBlockLibraryFieldDefault(kind.Key, field.Key, edited ? BlockLibraryRule.FlagTrue : BlockLibraryRule.FlagFalse);
+                        GUILayout.Space(BlockLibraryVariantColumnWidth - EditorGUIUtility.singleLineHeight);
+                    }
+                    else
+                    {
+                        string current = BlockLibraryRule.ChoiceDefault(_config.card_settings, kind, field);
+                        var options = new List<string>(field.Options);
+                        var labels = new List<string>();
+                        for (int o = 0; o < options.Count; o++) labels.Add(field.OptionLabels != null ? field.OptionLabels[o] : options[o]);
+                        int picked = EditorGUILayout.Popup(options.IndexOf(current), labels.ToArray(), GUILayout.Width(BlockLibraryVariantColumnWidth));
+                        ReportTableCellRect("Block Library default " + kind.Key + "." + field.Key, kindIndex);
+                        if (picked >= 0 && options[picked] != current) SetBlockLibraryFieldDefault(kind.Key, field.Key, options[picked]);
+                    }
                     GUILayout.Space(26f + BlockLibraryDetailsToHelpGap);
                     HelpInfoButton.Draw(field.Label, field.Help);
                     GUILayout.FlexibleSpace();

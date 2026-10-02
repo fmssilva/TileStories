@@ -35,7 +35,7 @@ namespace TileStories
         {
             _autoSpin = read.Flag(BuiltInBlocks.Model3DAutoSpinField);
             State = TurntableState.Start;
-            Fit = ModelFitRule.ModeOf(BlockLibraryRule.Choice(Context?.Taxonomy?.card_settings, BuiltInBlocks.Model3D,
+            Fit = ModelFitRule.ModeOf(BlockLibraryRule.Choice(Context?.Settings, BuiltInBlocks.Model3D,
                 BuiltInBlocks.Model3D.Field(BuiltInBlocks.Model3DFitField), read));
         }
 

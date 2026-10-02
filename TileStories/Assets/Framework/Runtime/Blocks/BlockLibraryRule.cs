@@ -44,6 +44,26 @@ namespace TileStories
             return HasOption(field, own) ? own : ChoiceDefault(settings, definition, field);
         }
 
+        // How a Toggle's Library default is written in card_settings.kinds[].field_defaults
+        public const string FlagTrue = "true";
+        public const string FlagFalse = "false";
+
+        // The wall's Block Library default of a LibraryDefault Toggle: ticked only when the kind's row says "true" (no row, no entry: off)
+        public static bool FlagDefault(CardSettings settings, BlockKindDefinition definition, BlockFieldDefinition field)
+        {
+            if (field == null || !field.LibraryDefault || definition == null) return false;
+            var entries = Row(settings, definition.Key)?.field_defaults;
+            if (entries != null)
+                foreach (var entry in entries)
+                    if (entry != null && entry.key == field.Key) return entry.value == FlagTrue;
+            return false;
+        }
+
+        // The ONE read of a Toggle with a Library default: the block's own value once it has stored one (a tick or an unticked box), else
+        // the wall's default
+        public static bool Flag(CardSettings settings, BlockKindDefinition definition, BlockFieldDefinition field, BlockFieldReader read) =>
+            read != null && read.Stored(field.Key) ? read.Flag(field.Key) : FlagDefault(settings, definition, field);
+
         private static bool HasOption(BlockFieldDefinition field, string value)
         {
             if (string.IsNullOrEmpty(value) || field.Options == null) return false;

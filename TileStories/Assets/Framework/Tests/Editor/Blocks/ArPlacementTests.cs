@@ -222,5 +222,60 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(_service.Place(nowhere));
             Assert.IsTrue(_service.IsPlaced("lamp", "block_1"));
         }
+
+        // ---------------- Keep Model On Switch (15.2.4) ----------------
+
+        [Test]
+        public void RemovesOnSelection_IsOneRule_ForBothValuesOfKeepOnSwitch()
+        {
+            // - off (the default): the model goes with the point it was placed for
+            Assert.IsFalse(ArPlacementRule.RemovesOnSelection(null, "painting", keepOnSwitch: false), "nothing placed: nothing to remove");
+            Assert.IsFalse(ArPlacementRule.RemovesOnSelection("lamp", "lamp", keepOnSwitch: false), "the same point shown again (a live edit): it stays");
+            Assert.IsTrue(ArPlacementRule.RemovesOnSelection("lamp", "painting", keepOnSwitch: false), "another point selected: it goes");
+            Assert.IsTrue(ArPlacementRule.RemovesOnSelection("lamp", null, keepOnSwitch: false), "the card closed: it goes");
+            // - on: only Remove, another placement or the session ends it
+            Assert.IsFalse(ArPlacementRule.RemovesOnSelection("lamp", "lamp", keepOnSwitch: true));
+            Assert.IsFalse(ArPlacementRule.RemovesOnSelection("lamp", "painting", keepOnSwitch: true), "another point selected: it stays");
+            Assert.IsFalse(ArPlacementRule.RemovesOnSelection("lamp", null, keepOnSwitch: true), "the card closed: it stays");
+        }
+
+        [Test]
+        public void SelectionChanged_OnTheRealOwner_RemovesThroughTheReleasePath_OrKeeps_AsTheRequestSays_AndNeverLeaksALoad()
+        {
+            // - off: another point takes the model away exactly as Remove does (the instance destroyed, the load given back, one change)
+            Assert.IsTrue(_service.Place(Request("block_1")));
+            int changes = _changes;
+            _service.SelectionChanged("lamp");
+            Assert.IsTrue(_service.IsPlaced("lamp", "block_1"), "the same point: it stays");
+            Assert.AreEqual(changes, _changes, "...and nothing was announced");
+            _service.SelectionChanged("painting");
+            Assert.IsNull(_service.Placed, "another point: the model is gone");
+            Assert.AreEqual(0, _wall.Root.childCount, "nothing stands in the world");
+            Assert.AreEqual(0, _media.HeldCount, "the load was given back: no leak");
+            Assert.AreEqual(changes + 1, _changes, "one change, for the blocks to redraw");
+
+            // - on: it survives another point and the card closing; Remove, then, still takes it away
+            var keep = Request("block_1");
+            keep.KeepOnSwitch = true;
+            Assert.IsTrue(_service.Place(keep));
+            _service.SelectionChanged("painting");
+            _service.SelectionChanged(null);
+            Assert.IsTrue(_service.IsPlaced("lamp", "block_1"), "kept through another point and a closed card");
+            Assert.AreEqual(1, _wall.Root.childCount);
+            Assert.AreEqual(1, _media.HeldCount, "its load is still held, once");
+            // - still ONE model at a time: another placement replaces the kept one
+            Assert.IsTrue(_service.Place(Request("block_2")));
+            Assert.AreEqual(1, _wall.Root.childCount, "one model");
+            Assert.AreEqual(1, _media.HeldCount, "the kept model's load was given back when it was replaced");
+            _service.SelectionChanged("painting");
+            Assert.IsNull(_service.Placed, "the replacement did not ask to be kept: it goes with the switch");
+
+            Assert.IsTrue(_service.Place(keep));
+            _service.Remove();
+            Assert.IsNull(_service.Placed, "Remove takes a kept model away");
+            Assert.AreEqual(0, _media.HeldCount);
+            _service.SelectionChanged("painting");
+            Assert.AreEqual(0, _wall.Root.childCount, "nothing placed: a switch changes nothing");
+        }
     }
 }

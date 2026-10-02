@@ -15,6 +15,10 @@ namespace TileStories
 
         public POIData Poi;
         public WallConfigData Taxonomy;
+        // The wall's card settings as the card runs them NOW (the Block Library's wall-wide defaults, the container). Not Taxonomy.card_settings:
+        // on the running wall the taxonomy is the session's trimmed search copy, which carries no card settings. Null where the caller has none
+        // (every default then reads as the kind's own)
+        public CardSettings Settings;
         public string Variant;
         public string Language;
         public string FallbackLanguage;
@@ -81,6 +85,10 @@ namespace TileStories
         SheetStopRule.Stop Stop { get; }
 
         void ShowOnWall();
+
+        // Scroll the card to its top and lower it to its peek, so what shows is the header and nothing cut off from further down the card
+        // (place_in_ar, once its model stands)
+        void ShowHeaderAtPeek();
 
         // Select another POI of this wall, as a tap on its marker does (SelectionEventBus: the card rebinds to it, the
         // markers, list and zoom-on-select follow)

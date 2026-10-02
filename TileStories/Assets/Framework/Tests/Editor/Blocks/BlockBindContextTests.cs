@@ -16,6 +16,7 @@ namespace TileStories.Editor.Tests
         {
             public SheetStopRule.Stop Stop => SheetStopRule.Stop.Half;
             public void ShowOnWall() { }
+            public void ShowHeaderAtPeek() { }
             public void SelectPoi(string poiId) { }
             public bool TryGetViewer(out UnityEngine.Vector3 wallPosition) { wallPosition = default; return false; }
             public void OpenUrl(string url) { }
@@ -73,6 +74,7 @@ namespace TileStories.Editor.Tests
             {
                 Poi = new POIData(),
                 Taxonomy = new WallConfigData(),
+                Settings = new CardSettings(),
                 Variant = "stack_level_variant",
                 Language = "pt",
                 FallbackLanguage = "en",

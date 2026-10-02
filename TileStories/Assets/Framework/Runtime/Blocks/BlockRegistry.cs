@@ -99,8 +99,8 @@ namespace TileStories
                 if (f.Type == BlockFieldType.Choice && (f.Options == null || f.Options.Count == 0)) return "Choice field '" + f.Key + "' has no options";
                 if (f.ChoiceDefault != null && (f.Type != BlockFieldType.Choice || !Contains(f.Options, f.ChoiceDefault)))
                     return "field '" + f.Key + "' defaults to '" + f.ChoiceDefault + "', which is not one of its Choice options";
-                if (f.LibraryDefault && (f.Type != BlockFieldType.Choice || f.ChoiceDefault == null || !allowItems))
-                    return "field '" + f.Key + "' takes a Block Library default but is not a top-level Choice with a default";
+                if (f.LibraryDefault && (!allowItems || !(f.Type == BlockFieldType.Toggle || (f.Type == BlockFieldType.Choice && f.ChoiceDefault != null))))
+                    return "field '" + f.Key + "' takes a Block Library default but is not a top-level Choice with a default or a top-level Toggle";
                 if (f.Type == BlockFieldType.Choice && f.OptionLabels != null && f.OptionLabels.Count != f.Options.Count)
                     return "Choice field '" + f.Key + "' has " + f.OptionLabels.Count + " labels for " + f.Options.Count + " options";
                 if (f.Type == BlockFieldType.Items)

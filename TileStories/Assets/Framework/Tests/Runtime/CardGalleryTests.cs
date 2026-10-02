@@ -778,7 +778,9 @@ namespace TileStories.Tests
         {
             ActionsBlockView actions = null;
             yield return ShowBlock("actions_circles_partial", v => actions = (ActionsBlockView)v);
-            Assert.AreEqual(1, actions.Actions.Count, "no words, and an action this framework does not know (listen): both left out");
+            Assert.AreEqual(2, actions.Actions.Count, "an action this framework does not know (listen) is left out; the button with no words is NOT: it reads its action's card text");
+            Assert.AreEqual("Show me where it is", actions.Actions[0].Label.text, "the same words the Show On Wall block's button says");
+            Assert.AreEqual("See it on the wall", actions.Actions[1].Label.text);
 
             yield return ShowBlock("actions_circles_long", v => actions = (ActionsBlockView)v);
             Assert.AreEqual(3, actions.Actions.Count);
@@ -2308,11 +2310,12 @@ namespace TileStories.Tests
             SelectionEventBus.ResetState();
         }
 
-        // place_in_ar (_3.1 step 10B.3, Phase A): the three states one block draws -- localised (the button), placed (the Remove chip,
-        // kept while the card rises again), not localised (disabled, and a line why) -- each through REAL taps on the gallery card, with the
-        // SAME ArPlacementService as the wall's over the harness's ManualArWall, and the real Framework model placed in the world.
+        // place_in_ar (_3.1 step 10B.3, Phase A; placed state 15.2.3): the three states one block draws -- localised (the button), placed (the
+        // SAME button reads Remove from room and a line says it is placed, kept while the card rises again), not localised (disabled, and a
+        // line why) -- each through REAL taps on the gallery card, with the SAME ArPlacementService as the wall's over the harness's
+        // ManualArWall, and the real Framework model placed in the world.
         [UnityTest]
-        public IEnumerator PlaceInAr_ARealTapPlacesTheModelAndLowersTheCard_TheRemoveChipTakesItAway_AndNotLocalisedTheButtonIsDisabledWithWhy()
+        public IEnumerator PlaceInAr_ARealTapPlacesTheModelAndLowersTheCard_TheSameButtonRemovesIt_AndNotLocalisedTheButtonIsDisabledWithWhy()
         {
             var placement = _harness.ArPlacementService;
             var wall = _harness.ArWall;
@@ -2322,7 +2325,7 @@ namespace TileStories.Tests
             Assert.AreEqual("See it here in 3D", view.ButtonLabel.text, "the card strings' words");
             Assert.IsTrue(view.Button.enabledInHierarchy, "localised: the button works");
             Assert.IsFalse(CardTestInput.IsShown(view.Note, view.Root), "localised: no line why not");
-            Assert.IsFalse(CardTestInput.IsShown(view.RemoveChip, view.Root), "nothing placed: no Remove chip");
+            Assert.IsFalse(view.IsPlaced, "nothing placed: the button places");
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(view.Button.worldBound.width, view.Button.worldBound.height), "the button is a tap target >= 44 px");
             yield return Render("Card_place_in_ar_localised");
 
@@ -2345,23 +2348,35 @@ namespace TileStories.Tests
             Assert.Less(Vector3.Distance(expected.LocalPosition, placement.Placed.transform.localPosition), 0.001f, "the defaults' pose: 10 cm out, real size");
             Assert.AreEqual(1f, placement.Placed.transform.localScale.x, 0.0001f, "Real Size is the default");
 
-            // - the card rises again: the model stays, the chip shows
+            // - placed: the SAME button now reads Remove from room (the card strings' words) and a line says where the model is
+            Assert.IsTrue(view.IsPlaced);
+            Assert.AreEqual("Remove from room", view.ButtonLabel.text, "placed: the button's words change");
+            Assert.AreEqual("Remove from room", view.Button.tooltip);
+            Assert.IsTrue(CardTestInput.IsShown(view.Note, view.Root), "placed: a line says so");
+            Assert.AreEqual("Placed by the wall", view.Note.text);
+            Assert.AreEqual(0f, _harness.Sheet.Stack.Scroll.scrollOffset.y, 0.5f, "the card was scrolled to its top before it lowered to the peek");
+
+            // - the card rises again: the model stays, the button still removes
             _harness.Sheet.SetStop(SheetStopRule.Stop.Full);
             yield return CardTestInput.Settle();
             Assert.IsTrue(view.IsPlaced, "re-opening the card keeps the model placed");
             Assert.IsNotNull(placement.Placed);
-            Assert.IsTrue(CardTestInput.IsShown(view.RemoveChip, view.Root), "placed: the Remove chip");
-            Assert.AreEqual("Remove", view.RemoveLabel.text);
-            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(view.RemoveChip.worldBound.width, view.RemoveChip.worldBound.height), "the chip is a tap target >= 44 px");
-            Assert.GreaterOrEqual(CardTestInput.Contrast(view.RemoveLabel.resolvedStyle.color, CardTestInput.EffectiveBackground(view.RemoveLabel)),
-                UIAccessibility.MinRatioNormalText, "the chip's words read");
+            Assert.IsTrue(view.Button.enabledInHierarchy, "placed: Remove works");
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(view.Button.worldBound.width, view.Button.worldBound.height), "the button is a tap target >= 44 px in its placed state too");
+            Assert.GreaterOrEqual(CardTestInput.Contrast(view.ButtonLabel.resolvedStyle.color, CardTestInput.EffectiveBackground(view.ButtonLabel)),
+                UIAccessibility.MinRatioNormalText, "the placed button's words read");
+            Assert.GreaterOrEqual(CardTestInput.Contrast(view.Note.resolvedStyle.color, CardTestInput.EffectiveBackground(view.Note)),
+                UIAccessibility.MinRatioNormalText, "the status line reads");
             yield return Render("Card_place_in_ar_placed");
 
-            yield return ScrollAndTap(view.RemoveChip);
+            yield return ScrollAndTap(view.Button);
             yield return CardTestInput.Settle();
-            Assert.IsNull(placement.Placed, "a real tap on Remove took the model away");
+            Assert.IsNull(placement.Placed, "a real tap on the placed button took the model away");
             Assert.AreEqual(0, wall.Root.childCount, "nothing left in the world");
-            Assert.IsFalse(CardTestInput.IsShown(view.RemoveChip, view.Root), "the chip goes with it");
+            Assert.IsFalse(view.IsPlaced, "the first state is back");
+            Assert.AreEqual("See it here in 3D", view.ButtonLabel.text, "...the button places again");
+            Assert.IsFalse(CardTestInput.IsShown(view.Note, view.Root), "...and the status line goes");
+            Assert.AreEqual(SheetStopRule.Stop.Full, _harness.Sheet.Stop, "Remove does not move the card");
 
             // - the wall lost: disabled, a line says why, and a real tap places nothing and leaves the card where it is
             wall.IsLocalised = false;

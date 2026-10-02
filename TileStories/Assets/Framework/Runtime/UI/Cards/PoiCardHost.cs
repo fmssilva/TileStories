@@ -254,6 +254,8 @@ namespace TileStories
             }
 
             _tapOutside.Cancel();
+            // - another point: a model placed for the old one goes unless its block keeps it (Keep Model On Switch); the same point (a live edit) keeps it
+            ArPlacementService?.SelectionChanged(poiId);
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wallSession.SearchPois);
             if (Application.isEditor || Debug.isDebugBuild)
                 foreach (var skipped in stack.Skipped)
@@ -268,7 +270,7 @@ namespace TileStories
             Media.WallDefaults = CardMediaLibraryLookup.WallFrom(settings.default_media_library_resources_path);
             var context = new BlockBindContext
             {
-                Poi = poi, Taxonomy = wallSession.SearchConfig, Language = language, FallbackLanguage = language, Media = Media,
+                Poi = poi, Taxonomy = wallSession.SearchConfig, Settings = settings, Language = language, FallbackLanguage = language, Media = Media,
                 Strings = new CardStrings(strings != null ? strings.Entries() : null, StringSources.Entries(), settings.strings, language, language),
                 MarkerLook = wallSession.MarkerLook,
                 Glossary = new CardGlossary(settings.glossary, language, language),
@@ -303,7 +305,7 @@ namespace TileStories
             AudioCoordinator?.CardClosed();
             VideoService?.CardClosed();
             PreviewService?.ReleaseAll();
-            ArPlacementService?.Remove();
+            ArPlacementService?.SelectionChanged(null);
         }
 
         // The wall's POI set or the card's own settings changed (a live edit, a demo switched on): the open card shows the new data, and the

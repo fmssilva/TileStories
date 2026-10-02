@@ -14,7 +14,8 @@ namespace TileStories
     //   - a second header                             -> skipped (ExtraHeader)
     //   - a variant the kind does not have (or none)  -> kept, with the Block Library's default variant
     // The stack always starts with ONE header: the first authored header (moved to the top), else one made from
-    // the POI's name and summary -- so a POI with no card still gets a card, with zero authoring.
+    // the POI's name and summary -- so a POI with no card still gets a card, with zero authoring. It ends with the
+    // `meta` blocks (Sources) while the container's Sources At The End is on (the default), in their authored order.
     public static class BlockStackBuilder
     {
         public enum SkipReason { UnknownKind, KindDisabled, NotForThisPoint, MissingRequired, NoCompleteRow, InvalidMedia, ExtraHeader }
@@ -108,8 +109,19 @@ namespace TileStories
                 header = new Entry(HeaderFromNameAndSummary(poi, settings), headerKind, BlockLibraryRule.DefaultVariant(settings, headerKind), synthesized: true);
 
             if (header.HasValue) result.Entries.Add(header.Value);
-            result.Entries.AddRange(body);
+            // - the container's Sources At The End (on unless the wall switched it off): the `meta` blocks close the card
+            if (settings?.container?.sources_at_end ?? true) result.Entries.AddRange(MetaLast(body));
+            else result.Entries.AddRange(body);
             return result;
+        }
+
+        // The body with its `meta` blocks (Sources...) after every other block, both groups in their own authored order
+        private static IEnumerable<Entry> MetaLast(List<Entry> body)
+        {
+            foreach (var entry in body)
+                if (entry.Definition.Family != ContentSeenRule.MetaFamily) yield return entry;
+            foreach (var entry in body)
+                if (entry.Definition.Family == ContentSeenRule.MetaFamily) yield return entry;
         }
 
         // The header a POI without an authored one gets: its name as the title, its summary as the subtitle

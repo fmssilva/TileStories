@@ -83,6 +83,50 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(r.Entries[0].Synthesized);
         }
 
+        // The test registry plus two `meta` kinds (Sources and a second one), so the order rule has something to move
+        private static BlockRegistry RegistryWithMeta()
+        {
+            var r = Registry();
+            r.Register(Kind("sources", family: ContentSeenRule.MetaFamily), () => new PlainView());
+            r.Register(Kind("credits", family: ContentSeenRule.MetaFamily), () => new PlainView());
+            return r;
+        }
+
+        private static POIData PoiWithSourcesInTheMiddle() => Poi(Block("block_1", "fun_fact"), Block("block_2", "sources"), Block("block_3", "rich_text", body: "Text"),
+            Block("block_4", "credits"), Block("block_5", "fun_fact"), Block("block_6", BuiltInBlocks.HeaderKind, title: "Castle"));
+
+        [Test]
+        public void SourcesAtTheEnd_IsOnByDefault_AndMovesTheMetaBlocksLast_InTheirAuthoredOrder_AfterTheHeader()
+        {
+            Assert.IsTrue(new CardSettings().container.sources_at_end, "the default of a wall that never set it");
+            var r = BlockStackBuilder.Build(PoiWithSourcesInTheMiddle(), new CardSettings(), RegistryWithMeta());
+            CollectionAssert.AreEqual(new[] { "block_6", "block_1", "block_3", "block_5", "block_2", "block_4" }, Keys(r),
+                "header first, the content in its order, then both meta blocks in the order they were written");
+        }
+
+        [Test]
+        public void SourcesAtTheEnd_Off_KeepsTheAuthoredOrder_AndANullSettingsReadsTheDefault()
+        {
+            var off = new CardSettings();
+            off.container.sources_at_end = false;
+            var r = BlockStackBuilder.Build(PoiWithSourcesInTheMiddle(), off, RegistryWithMeta());
+            CollectionAssert.AreEqual(new[] { "block_6", "block_1", "block_2", "block_3", "block_4", "block_5" }, Keys(r), "authored order, header on top");
+            CollectionAssert.AreEqual(new[] { "block_6", "block_1", "block_3", "block_5", "block_2", "block_4" },
+                Keys(BlockStackBuilder.Build(PoiWithSourcesInTheMiddle(), null, RegistryWithMeta())), "no settings = the default (on)");
+        }
+
+        [Test]
+        public void SourcesAtTheEnd_ACardWithNoMetaBlock_IsUntouched_AndASkippedMetaBlockStaysSkipped()
+        {
+            var plain = Poi(Block("block_1", "fun_fact"), Block("block_2", "rich_text", body: "Text"));
+            CollectionAssert.AreEqual(new[] { "", "block_1", "block_2" }, Keys(BlockStackBuilder.Build(plain, new CardSettings(), RegistryWithMeta())));
+            var off = new CardSettings();
+            off.kinds.Add(new BlockKindSetting { kind = "sources", enabled = false });
+            var r = BlockStackBuilder.Build(PoiWithSourcesInTheMiddle(), off, RegistryWithMeta());
+            CollectionAssert.AreEqual(new[] { "block_6", "block_1", "block_3", "block_5", "block_4" }, Keys(r));
+            Assert.AreEqual(BlockStackBuilder.SkipReason.KindDisabled, r.Skipped.Single().Reason);
+        }
+
         [Test]
         public void ASecondHeader_IsSkipped_WithItsReason()
         {

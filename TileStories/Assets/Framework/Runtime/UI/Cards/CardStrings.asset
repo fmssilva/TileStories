@@ -449,7 +449,8 @@ MonoBehaviour:
       value: "Voc\xEA"
   - key: show_on_wall_button
     where: The button of a Show On Wall block, which lowers the card so the point's
-      marker shows on the wall.
+      marker shows on the wall; also an Actions button of that action with no words
+      of its own.
     text:
     - lang: en
       value: Show me where it is
@@ -601,13 +602,21 @@ MonoBehaviour:
     - lang: pt
       value: Ver aqui em 3D
   - key: place_in_ar_remove
-    where: The chip on a Place In AR block while its model stands in the room; a tap
-      takes the model away.
+    where: The button of a Place In AR block while its model stands in the room; a tap
+      takes the model away and the button goes back to placing it.
     text:
     - lang: en
-      value: Remove
+      value: Remove from room
     - lang: pt
-      value: Remover
+      value: Remover da sala
+  - key: place_in_ar_placed
+    where: The line under a Place In AR block's button while its model stands in the
+      room.
+    text:
+    - lang: en
+      value: Placed by the wall
+    - lang: pt
+      value: "Colocado junto à parede"
   - key: place_in_ar_not_localised
     where: The line under a Place In AR block's button while the wall is not found yet
       (the button is disabled).

@@ -90,6 +90,9 @@ namespace TileStories
         // The wall's default for motion the visitor did not ask for (step 9B): on, a header's video loop shows its poster only. The visitor's
         // own reduce-motion setting (_3.3) will join it; today this is the only switch
         public bool reduce_motion;
+        // Sources (and every other `meta` block) move to the end of the card, keeping their order, whatever order they were authored in
+        // (BlockStackBuilder). Off: the authored order. On by default: a card ends with its sources, not with them in the middle
+        public bool sources_at_end = true;
 
         public const float HalfMaxRatioMin = 0.25f;
         public const float HalfMaxRatioMax = 0.40f;

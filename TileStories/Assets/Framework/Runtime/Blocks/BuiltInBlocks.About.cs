@@ -387,10 +387,15 @@ namespace TileStories
                 new BlockFieldDefinition
                 {
                     Key = ActionsItemsField, Type = BlockFieldType.Items, Label = "Buttons", Required = true,
-                    Help = "One row per button. A row with no words, or with no action picked, is not shown.",
+                    Help = "One row per button. A row with no action picked is not shown.",
                     ItemFields = new[]
                     {
-                        new BlockFieldDefinition { Key = ActionsLabelField, Type = BlockFieldType.LocalizedText, Label = "Words", Help = "What the button says (See it on the wall)." },
+                        new BlockFieldDefinition
+                        {
+                            Key = ActionsLabelField, Type = BlockFieldType.LocalizedText, Label = "Words",
+                            Help = "What the button says (See it on the wall). Empty: the card's own words for the action (Detail Card > Card Texts), " +
+                                   "so the same action reads the same everywhere on the wall.",
+                        },
                         new BlockFieldDefinition
                         {
                             Key = ActionsActionField, Type = BlockFieldType.Choice, Label = "Action", Required = true,

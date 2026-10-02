@@ -135,7 +135,7 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(7 + 7 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 7 wall-level + 7 container + 3 demo card");
+            Assert.AreEqual(7 + 8 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 7 wall-level + 8 container + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1009,6 +1009,26 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(_window.Config.card_settings.container.reduce_motion, "Ctrl+Z");
         }
 
+        // The Card Container's Sources At The End row (15.2.1): ON in the shipped wall (a config written before it has no field and reads
+        // the default), drawing writes nothing, a real click turns it off, Ctrl+Z puts it back
+        [UnityTest]
+        public IEnumerator TheSourcesAtTheEndRow_IsDrawnOn_ARealClickTurnsItOff_AndCtrlZTakesItBack()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Sources At The End");
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.IsTrue(_window.Config.card_settings.container.sources_at_end, "on in the shipped wall: the card ends with its sources");
+
+            _window.Click("Sources At The End");
+            yield return _window.WaitForRepaint();
+            Assert.IsFalse(_window.Config.card_settings.container.sources_at_end, "a real click turned it off");
+            Assert.IsTrue(_window.Unsaved);
+            yield return _window.PressUndo();
+            Assert.IsTrue(_window.Config.card_settings.container.sources_at_end, "Ctrl+Z");
+        }
+
         // The Card Container's audio rows: Keep Audio Playing and the Android earbud check are toggles a real click edits (Ctrl+Z takes it
         // back); Audio Overlap is a popup, edited through the window's history by EveryCardSettingsField_... and read in the capture
         [UnityTest]
@@ -1124,6 +1144,165 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(1, POIEditorToolWindow.CardBlockWarnings(libraryBlock, BuiltInBlocks.Actions, settings, null).Count, "a sticky Block Library default warns too");
             EditorTextChecks.AssertAscii(warning, "the warning");
             foreach (string term in ForbiddenTerms) StringAssert.DoesNotContain(term, warning);
+        }
+
+        // 15.2.2 on the real window: a point that offers one action in three places (a Show On Wall block, an Actions circles block and a sticky
+        // footer with no words of its own) shows ONE warning under each of the three and none under a block that offers nothing repeated; a real
+        // delete of one still leaves two that repeat; a second real delete clears every warning; Ctrl+Z brings the pair back
+        [UnityTest]
+        public IEnumerator TheRepeatedActionWarning_IsDrawnUnderEveryBlockThatOffersTheAction_RealDeletesClearIt_AndCtrlZBringsItBack()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var blocks = config.pois[0].card.blocks;
+            blocks.Add(new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.ShowOnWallKind, display = CardOptions.DisplayInline });
+            var circles = ActionsWithRows(BuiltInBlocks.ActionsCircles, 1);
+            circles.key = "block_2";
+            var sticky = ActionsWithRows(BuiltInBlocks.ActionsStickyCta, 1);
+            sticky.key = "block_3";
+            sticky.fields[0].items[0].fields.RemoveAll(f => f.key == BuiltInBlocks.ActionsLabelField);
+            var unrelated = ActionsWithRows(BuiltInBlocks.ActionsPillRow, 1);
+            unrelated.key = "block_4";
+            unrelated.fields[0].items[0].fields.Find(f => f.key == BuiltInBlocks.ActionsActionField).value = "listen";
+            blocks.AddRange(new[] { circles, sticky, unrelated });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+
+            yield return Redraw();
+            Assert.IsTrue(Drawn("Card block delete#3"), "precondition: all four blocks are drawn");
+            for (int i = 0; i < 3; i++) Assert.IsTrue(Drawn("Card repeated action warning#" + i), "the warning under block " + i);
+            Assert.IsFalse(Drawn("Card repeated action warning#3"), "none under the block that offers nothing repeated");
+            Assert.IsFalse(_window.Unsaved, "drawing the warnings writes nothing");
+
+            _window.Click("Card block delete#2");
+            yield return Redraw();
+            Assert.AreEqual(3, _window.Config.pois[0].card.blocks.Count, "a real click deleted the sticky block");
+            Assert.IsTrue(Drawn("Card repeated action warning#0") && Drawn("Card repeated action warning#1"), "two offers are still a repeat");
+            Assert.IsFalse(Drawn("Card repeated action warning#2"), "the block that offers nothing repeated has none");
+
+            _window.Click("Card block delete#1");
+            yield return Redraw();
+            Assert.IsFalse(Drawn("Card repeated action warning#0") || Drawn("Card repeated action warning#1"), "one offer left: nothing repeats");
+
+            yield return _window.PressUndo();
+            yield return Redraw();
+            Assert.AreEqual(3, _window.Config.pois[0].card.blocks.Count, "Ctrl+Z brought the Actions block back");
+            Assert.IsTrue(Drawn("Card repeated action warning#0") && Drawn("Card repeated action warning#1"), "and the pair's warning with it");
+        }
+
+        // 15.2.4 on the real window, the block's row: Keep Model On Switch is drawn off by default, drawing writes nothing, a real click ticks it
+        // (a stored value of its own), Ctrl+Z takes it back. With the wall's Block Library default ON the same untouched row shows ticked -- a
+        // real click on it unticks it, and the block then STORES false (its own value wins over the wall's default)
+        [UnityTest]
+        public IEnumerator KeepModelOnSwitch_TheBlockRowIsDrawnOff_ARealClickTicksIt_AndUnderALibraryDefaultOnItShowsTicked_ARealClickStoresFalse()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var block = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.PlaceInArKind, display = CardOptions.DisplayInline };
+            config.pois[0].card.blocks.Add(block);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            ((Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor))["poi_1/block_1"] = true;
+            BlockInstanceData Block() => _window.Config.pois[0].card.blocks[0];
+            var field = BuiltInBlocks.PlaceInAr.Field(BuiltInBlocks.PlaceInArKeepOnSwitchField);
+
+            yield return Redraw();
+            Assert.IsTrue(Drawn("Block field keep_on_switch#0"), "the row is on the block");
+            Assert.IsFalse(_window.Unsaved, "drawing it writes nothing");
+            CollectionAssert.IsEmpty(Block().fields, "no value created by drawing");
+            Assert.IsFalse(POIEditorToolWindow.FlagValue(Block(), field.Key), "off by default: the model goes with the point");
+            StringAssert.Contains("Remove From Room", field.Help);
+
+            _window.Click("Block field keep_on_switch#0");
+            yield return _window.WaitForRepaint();
+            Assert.IsTrue(POIEditorToolWindow.FlagValue(Block(), field.Key), "a real click ticks it");
+            Assert.IsTrue(_window.Unsaved);
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(Block().fields, "Ctrl+Z: back to nothing stored");
+
+            // - the wall's Block Library default ON: the untouched row shows what the card will read
+            Pick(() => ((POIEditorToolWindow)_window.Editor).SetBlockLibraryFieldDefault(BuiltInBlocks.PlaceInArKind, field.Key, BlockLibraryRule.FlagTrue));
+            yield return Redraw();
+            Assert.IsTrue(BlockLibraryRule.Flag(_window.Config.card_settings, BuiltInBlocks.PlaceInAr, field, new BlockFieldReader(Block(), null, null)), "precondition: the card reads on");
+            _window.Click("Block field keep_on_switch#0");
+            yield return _window.WaitForRepaint();
+            Assert.IsTrue(new BlockFieldReader(Block(), null, null).Stored(field.Key), "the click stored a value of its own");
+            Assert.IsFalse(POIEditorToolWindow.FlagValue(Block(), field.Key), "the row showed ticked, so the click unticked it");
+            Assert.IsFalse(BlockLibraryRule.Flag(_window.Config.card_settings, BuiltInBlocks.PlaceInAr, field, new BlockFieldReader(Block(), null, null)), "and the block's own off wins over the wall's on");
+        }
+
+        // 15.2.4 on the real window, the Block Library: a Default row under Place In AR with a real tick box -- off in the shipped wall, drawing writes
+        // nothing, a real click writes "true" for the kind, a second one "false", Ctrl+Z walks back to no row at all
+        [UnityTest]
+        public IEnumerator KeepModelOnSwitch_TheBlockLibraryHasADefaultRow_ARealClickWritesTrue_AnotherFalse_AndCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            _window.SetWindowField("_showCardBlockLibrary", true);
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            int at = BlockRegistry.Shared.Ordered.ToList().FindIndex(k => k.Key == BuiltInBlocks.PlaceInArKind);
+            string probe = "Block Library default place_in_ar.keep_on_switch#" + at;
+            var kind = BuiltInBlocks.PlaceInAr;
+            var field = kind.Field(BuiltInBlocks.PlaceInArKeepOnSwitchField);
+            _window.RectOf(probe);
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.IsFalse(BlockLibraryRule.FlagDefault(_window.Config.card_settings, kind, field), "off in the shipped wall");
+            Assert.IsNull(BlockLibraryRule.Row(_window.Config.card_settings, BuiltInBlocks.PlaceInArKind)?.field_defaults.Find(e => e.key == field.Key), "no entry yet");
+
+            // - the row sits far down the table, maybe below the host's real height: scroll it into view like a person, then click
+            yield return _window.ScrollTo(probe);
+            _window.Click(probe);
+            yield return _window.WaitForRepaint();
+            Assert.IsTrue(BlockLibraryRule.FlagDefault(_window.Config.card_settings, kind, field), "a real click ticked it");
+            Assert.AreEqual(BlockLibraryRule.FlagTrue, BlockLibraryRule.Row(_window.Config.card_settings, BuiltInBlocks.PlaceInArKind).field_defaults.Single(e => e.key == field.Key).value);
+            Assert.IsTrue(_window.Unsaved);
+            _window.Click(probe);
+            yield return _window.WaitForRepaint();
+            Assert.IsFalse(BlockLibraryRule.FlagDefault(_window.Config.card_settings, kind, field), "a second click unticked it");
+            Assert.AreEqual(BlockLibraryRule.FlagFalse, BlockLibraryRule.Row(_window.Config.card_settings, BuiltInBlocks.PlaceInArKind).field_defaults.Single(e => e.key == field.Key).value);
+            yield return _window.PressUndo();
+            Assert.IsTrue(BlockLibraryRule.FlagDefault(_window.Config.card_settings, kind, field), "Ctrl+Z: ticked again");
+            yield return _window.PressUndo();
+            Assert.IsNull(BlockLibraryRule.Row(_window.Config.card_settings, BuiltInBlocks.PlaceInArKind), "Ctrl+Z again: no Library row at all");
+            Assert.IsFalse(BlockLibraryRule.FlagDefault(_window.Config.card_settings, kind, field));
+        }
+
+        // 15.2.5 on the real window: a Dialogue line holding a Reply 3 with text while Choice 3 is empty. The warning is drawn under the block and names
+        // the Reply and the Choice to write; REAL typing into that Choice (the field the warning names, drawn because Choices 1 and 2 have words)
+        // clears it, and Ctrl+Z brings it back
+        [UnityTest]
+        public IEnumerator TheDialogueWarning_NamesTheHiddenReplyAndTheChoiceToFill_RealTypingInThatChoiceClearsIt_AndCtrlZBringsItBack()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            BlockItemFieldValue Text(string key, string value) => new() { key = key, text = new List<LocalizedEntry> { new() { lang = "en", value = value } } };
+            var line = new BlockItemData { fields = new List<BlockItemFieldValue>
+            {
+                Text(BuiltInBlocks.DialogueTextField, "Welcome."), Text(DialogueRule.ChoiceField(1), "Hello"), Text(DialogueRule.ChoiceField(2), "Bye"),
+                Text(DialogueRule.ReplyField(3), "Nobody can pick this."),
+            } };
+            var dialogue = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.DialogueKind, display = CardOptions.DisplayInline };
+            dialogue.fields.Add(new BlockFieldValue { key = BuiltInBlocks.DialogueLinesField, items = { line } });
+            config.pois[0].card.blocks.Add(dialogue);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            ((Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor))["poi_1/block_1"] = true;
+
+            yield return Redraw();
+            Assert.IsTrue(Drawn("Card block warning#0"), "the warning is drawn under the dialogue block");
+            Assert.IsTrue(Drawn("Block item lines 0 choice_3 en#0"), "Choice 3, the field the warning names, is drawn (Choice 2 has words)");
+            Assert.IsTrue(Drawn("Block item lines 0 reply_3 en#0"), "and so is the Reply");
+            Assert.IsFalse(_window.Unsaved, "drawing writes nothing");
+            Assert.AreEqual("Line 1: Reply 3 has text but Choice 3 is empty: fill Choice 3 to see it.",
+                POIEditorToolWindow.CardBlockWarnings(_window.Config.pois[0].card.blocks[0], BuiltInBlocks.Dialogue, _window.Config.card_settings, _window.Config.pois[0]).Single());
+
+            yield return _window.ReplaceText("Block item lines 0 choice_3 en#0", "Maybe");
+            yield return _window.ClickAway();
+            yield return Redraw();
+            Assert.IsFalse(Drawn("Card block warning#0"), "the Choice has words: the reply can be picked, no warning");
+            yield return _window.PressUndo();
+            yield return Redraw();
+            Assert.IsTrue(Drawn("Card block warning#0"), "Ctrl+Z: the Choice is empty again and the warning is back");
         }
 
         // ---------------- guards ----------------

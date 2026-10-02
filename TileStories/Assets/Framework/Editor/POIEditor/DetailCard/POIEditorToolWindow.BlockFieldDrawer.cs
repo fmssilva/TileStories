@@ -61,7 +61,9 @@ namespace TileStories.Editor
                         () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value));
                 else if (field.Type == BlockFieldType.Toggle)
                     DrawToggleRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
-                        () => FlagValue(block, field.Key), value => EnsureBlockField(block, field.Key).flag = value);
+                        // - a block that has stored nothing shows what the card will read: the wall's Block Library default
+                        () => field.LibraryDefault ? BlockLibraryRule.Flag(_config.card_settings, definition, field, new BlockFieldReader(block, null, null)) : FlagValue(block, field.Key),
+                        value => EnsureBlockField(block, field.Key).flag = value);
                 else if (field.Type == BlockFieldType.Asset)
                     DrawAssetRow(field, IndentLevel1, "Block field " + field.Key, blockIndex, _config.card_settings?.media_resources_path,
                         _config.card_settings?.default_media_library_resources_path,

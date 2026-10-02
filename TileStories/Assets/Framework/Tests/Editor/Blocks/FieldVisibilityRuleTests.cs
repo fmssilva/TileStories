@@ -74,7 +74,7 @@ namespace TileStories.Editor.Tests
             var kind = BuiltInBlocks.PlaceInAr;
             var block = Block(BuiltInBlocks.PlaceInArKind);
             string[] common = { BlockKindDefinition.HeadingField, BuiltInBlocks.PlaceInArModelField, BuiltInBlocks.PlaceInArAnchorField,
-                BuiltInBlocks.PlaceInArOffsetField, BuiltInBlocks.PlaceInArScaleField, BuiltInBlocks.PlaceInArLabelField };
+                BuiltInBlocks.PlaceInArOffsetField, BuiltInBlocks.PlaceInArScaleField, BuiltInBlocks.PlaceInArKeepOnSwitchField, BuiltInBlocks.PlaceInArLabelField };
 
             CollectionAssert.AreEqual(common, ShownFields(kind, block, null), "no Scale Mode: Real Size (the field's default) needs neither");
 

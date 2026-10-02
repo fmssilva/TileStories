@@ -69,8 +69,9 @@
     padding: 0;
 }
 
-/* ---- place_in_ar (Tier 5, step 10B.2): the accent pill places the model; disabled (the wall not found) it goes quiet and a line says
-   why; while the model stands, a Remove chip under it ---- */
+/* ---- place_in_ar (Tier 5, step 10B.2, placed state 15.2.3): the accent pill places the model; disabled (the wall not found) it goes quiet and
+   a line says why; while the model stands the same button removes it, in the quiet look (the card keeps one accent button on screen), and a
+   line says it is placed ---- */
 
 /* an authored Button Label may be long: the pill shrinks to the card and its words wrap, centred */
 .card-place-in-ar__button {
@@ -110,22 +111,10 @@
     padding: 0;
 }
 
-.card-place-in-ar__remove {
-    flex-direction: row;
-    align-self: flex-start;
-    align-items: center;
-    min-height: var(--ts-touch-target);
-    margin: var(--ts-space-3) 0 0 0;
-    padding: 0 var(--ts-space-3);
-    border-width: 0;
-    border-radius: var(--ts-pill-radius);
+.card-place-in-ar--placed .card-place-in-ar__button {
     background-color: var(--ts-surface-2);
 }
 
-.card-place-in-ar__remove-label {
-    -unity-text-align: middle-left;
-    font-size: var(--ts-size-body);
+.card-place-in-ar--placed .card-place-in-ar__label {
     color: var(--ts-ink);
-    margin: 0;
-    padding: 0;
 }

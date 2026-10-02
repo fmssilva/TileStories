@@ -99,6 +99,33 @@ namespace TileStories.Tests
             Assert.AreEqual(buttons, Sheet.Stack.BoundViews.OfType<ShowOnWallBlockView>().Count());
         }
 
+        // 15.2.1 on the real LivingRoomScene: The Lamp authors its two Sources blocks before its actions and its Tier 5 blocks, yet its card
+        // ends with them while Sources At The End is on (the shipped default); switched off live, they sit where they were written
+        [UnityTest]
+        public IEnumerator SourcesAtTheEnd_TheLampsSourcesCloseTheCard_AndTheContainerOptionIsLive()
+        {
+            var lamp = Session.SearchPois.Single(p => p.id == "lamp");
+            int authoredAt = lamp.card.blocks.FindIndex(b => b.kind == "sources");
+            Assert.Less(authoredAt, lamp.card.blocks.Count - 3, "precondition: the fixture writes the sources in the middle of the card");
+            Assert.IsTrue(Session.CardSettings.container.sources_at_end, "precondition: the shipped wall never set it, so it reads the default (on)");
+
+            yield return OpenFull("lamp");
+            var views = Sheet.Stack.BoundViews.ToList();
+            Assert.AreEqual(2, views.OfType<SourcesBlockView>().Count(), "precondition: both Sources blocks are shown");
+            Assert.IsTrue(views.Skip(views.Count - 2).All(v => v is SourcesBlockView), "the Lamp's two Sources blocks are the last two blocks of the card");
+            Assert.AreEqual(lamp.card.blocks.Count, views.Count, "nothing was dropped by moving them");
+
+            yield return Push(c => c.card_settings.container.sources_at_end = false);
+            views = Sheet.Stack.BoundViews.ToList();
+            Assert.AreEqual(authoredAt, views.FindIndex(v => v is SourcesBlockView), "off: the first Sources block is back where the config wrote it");
+            Assert.IsFalse(views[views.Count - 1] is SourcesBlockView, "off: the card no longer ends with sources");
+            Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the sheet kept its stop");
+
+            yield return Push(c => c.card_settings.container.sources_at_end = true);
+            views = Sheet.Stack.BoundViews.ToList();
+            Assert.IsTrue(views.Skip(views.Count - 2).All(v => v is SourcesBlockView), "on again: they close the card again");
+        }
+
         [UnityTest]
         public IEnumerator AnotherVariant_IsDrawnOnTheOpenCard()
         {

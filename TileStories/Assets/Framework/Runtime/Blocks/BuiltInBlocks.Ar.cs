@@ -39,18 +39,21 @@ namespace TileStories
         public const string PlaceInArHeightField = "height_cm";
         public const string PlaceInArMultipleField = "marker_multiple";
         public const string PlaceInArLabelField = "button_label";
+        public const string PlaceInArKeepOnSwitchField = "keep_on_switch";
 
         // Tier 5 (_3.1 step 10B): one button that places the block's 3D model in the world at this point of the wall (ArPlacementService,
-        // ONE model at a time) and lowers the card to its peek so the visitor sees it; while it stands, a Remove chip on the card takes it away
+        // ONE model at a time) and lowers the card to its peek so the visitor sees it; while it stands, the same button takes it away
         public static readonly BlockKindDefinition PlaceInAr = new()
         {
             Key = PlaceInArKind,
             Family = "ar",
             DisplayName = "Place In AR",
-            Help = "A button that places a 3D model in the room, at this point of the wall, and lowers the card to its peek so the visitor " +
-                   "sees it standing there. One model stands at a time: placing another (from any card) replaces it, and the card's Remove " +
-                   "chip or closing the card takes it away. While the wall is not found yet (the camera has not recognised it), the button " +
-                   "is disabled and a short line says why. The button's words are Detail Card > Card Texts, unless Button Label is set.",
+            Help = "A button that places a 3D model in the room, at this point of the wall, and lowers the card to its peek (scrolled to the " +
+                   "top) so the visitor sees it standing there. While it stands, the same button reads Remove From Room and takes it away, " +
+                   "with a short line saying it is placed. One model stands at a time: placing another (from any card) replaces it, and " +
+                   "closing the card takes it away. While the wall is not found yet (the camera has not recognised it), the button is " +
+                   "disabled and a short line says why. The words of the button and of both lines are Detail Card > Card Texts, unless " +
+                   "Button Label is set (it words the placing state only).",
             Variants = new[] { PlaceInArButton },
             DefaultVariant = PlaceInArButton,
             DisplayModes = new[] { CardOptions.DisplayInline },
@@ -101,6 +104,14 @@ namespace TileStories
                     NumberMin = 0.5f, NumberMax = 20f, NumberDefault = 3f,
                     ShownWhen = FieldShownWhen.Choice(PlaceInArScaleField, ArPlacementRule.ScaleMarkerMultiple),
                     Help = "Scale Mode Marker Multiple only: how many times this point's marker tall the model stands.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = PlaceInArKeepOnSwitchField, Type = BlockFieldType.Toggle, Label = "Keep Model On Switch", LibraryDefault = true,
+                    Help = "Off (the default): when the visitor selects another point, the placed model goes away. On: the model stays in the " +
+                           "room when the visitor selects another point or closes the card, until they tap Remove From Room (on this point's " +
+                           "card), place another model, or the session ends. Still one model at a time. Detail Card > Block Library sets the " +
+                           "wall's default for every Place In AR block; a tick here wins. A change reaches the next model placed.",
                 },
                 new BlockFieldDefinition
                 {

@@ -19,6 +19,11 @@ namespace TileStories
         public const string ScaleHeightCm = "height_cm";
         public const string ScaleMarkerMultiple = "marker_multiple";
 
+        // Whether a placed model goes when the card's selection becomes `selectedPoiId` (null: the card closed). Keep On Switch keeps it through
+        // every change; otherwise it stays only while the point it was placed for stays selected (a live edit shows the same point again)
+        public static bool RemovesOnSelection(string placedPoiId, string selectedPoiId, bool keepOnSwitch) =>
+            !keepOnSwitch && placedPoiId != null && placedPoiId != selectedPoiId;
+
         // A flat model (no height) is measured as this tall, so no scale divides by zero
         public const float MinModelHeightMetres = 0.001f;
         // Below this length a horizontal direction is no direction (a POI facing straight up or down)

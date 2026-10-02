@@ -7,9 +7,9 @@ namespace TileStories
     // framework's actions (BuiltInBlocks.ActionOptions), asked of the card through IBlockHost. Three looks -- circles:
     // a round icon with its label under it; pill_row: icon + label pills in a wrapping row; sticky_cta: ONE call to action
     // (the first button) full width, pinned to the card's footer (BlockKindDefinition.FooterVariants) -- one button is what
-    // fits under the header at every stop; a stack of them would not be sticky at all. An action with no label, or one
-    // this framework does not know (a later tier's), is left out: never a button that does nothing. Icons are the card's
-    // one USS-drawn set (CardIcons), keyed by the action.
+    // fits under the header at every stop; a stack of them would not be sticky at all. A button with no words of its own
+    // reads its action's card text (ActionsRule); an action this framework does not know (a later tier's) is left out:
+    // never a button that does nothing. Icons are the card's one USS-drawn set (CardIcons), keyed by the action.
     public sealed class ActionsBlockView : IBlockView
     {
         public sealed class Action
@@ -42,17 +42,15 @@ namespace TileStories
             _variantClass = "card-actions--" + context.Variant;
             Root.AddToClassList(_variantClass);
             var read = new BlockFieldReader(instance, context.Language, context.FallbackLanguage);
-            bool onlyOne = context.Variant == BuiltInBlocks.ActionsStickyCta;
-            foreach (var item in read.Items(BuiltInBlocks.ActionsItemsField))
+            foreach (var button in ActionsRule.Buttons(read, context.Variant))
             {
-                if (onlyOne && _shown.Count == 1) break;
-                string label = read.ItemText(item, BuiltInBlocks.ActionsLabelField);
-                string kind = read.ItemValue(item, BuiltInBlocks.ActionsActionField);
-                if (label.Length == 0 || !IsKnown(kind)) continue;
+                // - a row with no words of its own reads its action's card text: one wording per action, whichever block draws it
+                string defaultKey = ActionsRule.DefaultWordsKey(button.Action);
+                string label = button.Words.Length > 0 ? button.Words : defaultKey != null ? context.Strings?.Get(defaultKey) ?? "" : "";
                 var action = Take(_shown.Count);
-                action.Kind = kind;
+                action.Kind = button.Action;
                 action.Label.text = label;
-                CardIcons.SetKey(action.Icon, kind);
+                CardIcons.SetKey(action.Icon, button.Action);
                 // - the pill row wears the card's one pill shape (CardParts.uss), shared with story_chapters' buttons
                 action.Button.EnableInClassList("card-pill", context.Variant == BuiltInBlocks.ActionsPillRow);
                 Root.Add(action.Button);
@@ -73,13 +71,6 @@ namespace TileStories
         public void Run(Action action)
         {
             if (action.Kind == BuiltInBlocks.ActionShowOnWall) _host?.ShowOnWall();
-        }
-
-        private static bool IsKnown(string kind)
-        {
-            foreach (string known in BuiltInBlocks.ActionOptions)
-                if (known == kind) return true;
-            return false;
         }
 
         private Action Take(int index)

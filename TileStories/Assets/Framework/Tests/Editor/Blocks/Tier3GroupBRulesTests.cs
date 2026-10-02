@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace TileStories.Editor.Tests
@@ -197,12 +198,34 @@ namespace TileStories.Editor.Tests
                 Row(("line", "Fine.")),
                 Row(("speaker", "Mason"), ("line", " ")),
                 Row(("line", "Also fine."), ("choice_1", "Yes"), ("reply_1", "ok"), ("reply_2", "orphan")));
-            DialogueRule.Problems(Read(block), out var noWords, out var orphans);
+            DialogueRule.Problems(Read(block), out var noWords, out var hidden);
             CollectionAssert.AreEqual(new[] { 2 }, noWords);
-            CollectionAssert.AreEqual(new[] { 3 }, orphans);
-            DialogueRule.Problems(Read(Dialogue(Row(("line", "Only")))), out noWords, out orphans);
+            var orphan = hidden.Single();
+            Assert.AreEqual((3, 2, 2), (orphan.Row, orphan.Slot, orphan.FillSlot), "line 3: Reply 2 has text, Choice 2 is empty and is the Choice to write (Choice 1 has words)");
+            DialogueRule.Problems(Read(Dialogue(Row(("line", "Only")))), out noWords, out hidden);
             CollectionAssert.IsEmpty(noWords);
-            CollectionAssert.IsEmpty(orphans);
+            CollectionAssert.IsEmpty(hidden);
+        }
+
+        [Test]
+        public void Dialogue_Problems_NameEveryHiddenReply_AndTheChoiceTheDeveloperCanActuallySeeToFill()
+        {
+            // - Choice 1 filled, Choice 2 empty with a Reply 2, Choice 3 empty with a Reply 3: each reply named, the Choice to write is the first empty one
+            var block = Dialogue(
+                Row(("line", "A"), ("choice_1", "Yes"), ("reply_2", "second"), ("reply_3", "third")),
+                // - Choice 1 empty (Choices 2 and 3 are then hidden in the Editor): the one to fill is Choice 1, for every reply
+                Row(("line", "B"), ("reply_1", "first"), ("reply_3", "third")));
+            DialogueRule.Problems(Read(block), out _, out var hidden);
+            CollectionAssert.AreEqual(new[] { (1, 2, 2), (1, 3, 2), (2, 1, 1), (2, 3, 1) }, hidden.Select(h => (h.Row, h.Slot, h.FillSlot)).ToList());
+            // - a reply whose Choice HAS words is no problem, and a choice with no reply is none either
+            DialogueRule.Problems(Read(Dialogue(Row(("line", "C"), ("choice_1", "Yes"), ("reply_1", "ok"), ("choice_2", "No")))), out _, out hidden);
+            CollectionAssert.IsEmpty(hidden);
+
+            // - the brief's case, word for word: Choices 1 and 2 filled, a Reply 3 with text and Choice 3 (visible now) empty
+            var warnings = POIEditorToolWindow.CardBlockWarnings(Dialogue(Row(("line", "D"), ("choice_1", "Yes"), ("choice_2", "No"), ("reply_3", "orphan"))),
+                BuiltInBlocks.Dialogue, new CardSettings(), new POIData { id = "p", name = "Tower" });
+            Assert.AreEqual("Line 1: Reply 3 has text but Choice 3 is empty: fill Choice 3 to see it.", warnings.Single());
+            EditorTextChecks.AssertAscii(warnings.Single(), "the dialogue warning");
         }
 
         // ---------------- the builder ----------------
@@ -273,12 +296,13 @@ namespace TileStories.Editor.Tests
             var warnings = POIEditorToolWindow.CardBlockWarnings(dialogue, BuiltInBlocks.Dialogue, settings, poi);
             Assert.AreEqual(2, warnings.Count);
             Assert.AreEqual("Not shown: line 2 (a row with no words in Line).", warnings[0]);
-            StringAssert.Contains("line 3 has no words in its Choice", warnings[1].Replace("A reply in ", ""));
+            // - Choice 1 is empty too, so Choice 2 is a field the Editor hides: the text names Choice 1, the one the developer can see
+            Assert.AreEqual("Line 3: Reply 2 has text but Choice 2 is empty: fill Choice 1 first (Choice 2 shows once the choice before it has words), then Choice 2 to see it.", warnings[1]);
             foreach (string w in warnings) StringAssert.DoesNotContain("block_", w, "rows are named by their place in the table, never an id");
             CollectionAssert.IsEmpty(POIEditorToolWindow.CardBlockWarnings(Dialogue(Row(("line", "Only line."))), BuiltInBlocks.Dialogue, settings, poi));
         }
 
-        // ---------------- a Show On Wall block next to a sticky Show On The Wall button (_3.1 [SHOULD]) ----------------
+        // ---------------- the same action offered more than once (_3.1 audit 15.B) ----------------
 
         private static BlockInstanceData ActionsBlock(string variant, params (string words, string action)[] buttons)
         {
@@ -302,53 +326,123 @@ namespace TileStories.Editor.Tests
             return poi;
         }
 
-        private static List<string> ShowOnWallWarnings(POIData poi, CardSettings settings = null)
+        // The shown stack of a card (BlockStackBuilder), the way the Editor feeds RepeatedActionRule
+        private static List<RepeatedActionRule.Repeat> RepeatsOf(POIData poi, CardSettings settings = null) =>
+            RepeatedActionRule.Find(BlockStackBuilder.Build(poi, settings ?? new CardSettings(), BlockRegistry.Shared,
+                new List<POIData> { poi, new POIData { id = "q", name = "Other" } }).Entries);
+
+        private static BlockInstanceData ShowOnWallBlock(string variant = BuiltInBlocks.ShowOnWallButton) =>
+            new() { key = "block_2", kind = BuiltInBlocks.ShowOnWallKind, variant = variant };
+
+        private static readonly (string, string) See = ("See it on the wall", BuiltInBlocks.ActionShowOnWall);
+
+        [Test]
+        public void ActionsRule_DrawsKnownActionsOnly_TheStickyLookTheFirstOnly_AndARowWithNoWordsStillDraws()
         {
-            var block = poi.card.blocks.First(b => b.kind == BuiltInBlocks.ShowOnWallKind);
-            return POIEditorToolWindow.CardBlockWarnings(block, BuiltInBlocks.ShowOnWall, settings ?? new CardSettings(), poi);
+            var block = ActionsBlock(BuiltInBlocks.ActionsPillRow, ("", BuiltInBlocks.ActionShowOnWall), ("Listen", "listen"), See, ("No action", ""));
+            var pills = ActionsRule.Buttons(Read(block), BuiltInBlocks.ActionsPillRow);
+            CollectionAssert.AreEqual(new[] { 0, 2 }, pills.Select(b => b.Row), "an unknown action and a row with no action are left out; the empty-words row is NOT");
+            Assert.AreEqual("", pills[0].Words, "no words of its own: the view reads the action's card text");
+            Assert.AreEqual("See it on the wall", pills[1].Words);
+            var sticky = ActionsRule.Buttons(Read(block), BuiltInBlocks.ActionsStickyCta);
+            CollectionAssert.AreEqual(new[] { 0 }, sticky.Select(b => b.Row), "sticky: one call to action, the first drawn row");
+            Assert.AreEqual(CardStrings.Keys.ShowOnWallButton, ActionsRule.DefaultWordsKey(BuiltInBlocks.ActionShowOnWall), "the Show On Wall kind's own row");
+            Assert.IsNull(ActionsRule.DefaultWordsKey("listen"));
+            Assert.IsTrue(ActionsRule.IsKnown(BuiltInBlocks.ActionShowOnWall));
+            Assert.IsFalse(ActionsRule.IsKnown("listen"));
         }
 
         [Test]
-        public void ACardWithAShowOnWallBlock_AndAStickyShowOnWallButton_WarnsOnTheBlock_InTheEditorsWords()
+        public void RepeatedActions_AShowOnWallBlockAndAStickyButton_AreTwoOffers_TheStickyOneMarkedPinned()
         {
-            var showOnWall = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.ShowOnWallKind, variant = BuiltInBlocks.ShowOnWallButton };
-            var poi = CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("See it on the wall", BuiltInBlocks.ActionShowOnWall)));
-            var warning = ShowOnWallWarnings(poi).Single();
-            Assert.AreEqual(POIEditorToolWindow.CardShowOnWallRepeatsStickyText, warning);
-            foreach (string word in new[] { "Actions", "Sticky", "Show On Wall" }) StringAssert.Contains(word, warning, "named as the Editor names it");
-            StringAssert.DoesNotContain("block_", warning, "never an id");
-            // - the same card, the with_neighbours look: its button is the same button
-            showOnWall.variant = BuiltInBlocks.ShowOnWallWithNeighbours;
-            Assert.AreEqual(1, ShowOnWallWarnings(poi).Count, "the neighbours look repeats the button too");
-            // - the warning is on the Show On Wall block: the Actions block itself has none of it
-            CollectionAssert.IsEmpty(POIEditorToolWindow.CardBlockWarnings(poi.card.blocks[1], BuiltInBlocks.Actions, new CardSettings(), poi));
+            var sticky = ActionsBlock(BuiltInBlocks.ActionsStickyCta, See);
+            var repeat = RepeatsOf(CardWith(ShowOnWallBlock(), sticky)).Single();
+            Assert.AreEqual(BuiltInBlocks.ActionShowOnWall, repeat.Action);
+            Assert.AreEqual(2, repeat.Offers.Count);
+            Assert.AreEqual(BuiltInBlocks.ShowOnWallKind, repeat.Offers[0].Definition.Key);
+            Assert.IsFalse(repeat.Offers[0].Pinned);
+            Assert.AreSame(sticky, repeat.Offers[1].Block);
+            Assert.IsTrue(repeat.Offers[1].Pinned, "the sticky look is the footer's button");
+            Assert.AreEqual("See it on the wall", repeat.Offers[1].Words);
         }
 
         [Test]
-        public void TheShowOnWallWarning_NeedsTheStickyButtonToReallyBeDrawn_AndSilentOtherwise()
+        public void RepeatedActions_EveryLookCounts_AndSoDoesTheNeighboursLook_ButOnlyWhatTheCardReallyShows()
         {
-            var showOnWall = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.ShowOnWallKind };
-            var see = ("See it on the wall", BuiltInBlocks.ActionShowOnWall);
+            // - pill row, circles and the sticky footer are all buttons on one screen (the old rule warned about the footer only)
+            Assert.AreEqual(2, RepeatsOf(CardWith(ShowOnWallBlock(), ActionsBlock(BuiltInBlocks.ActionsPillRow, See))).Single().Offers.Count);
+            Assert.AreEqual(2, RepeatsOf(CardWith(ShowOnWallBlock(), ActionsBlock(BuiltInBlocks.ActionsCircles, See))).Single().Offers.Count);
+            // - the audit's "four times": circles + pill row + the sticky footer + a Show On Wall block
+            var four = CardWith(ActionsBlock(BuiltInBlocks.ActionsCircles, See), ActionsBlock(BuiltInBlocks.ActionsPillRow, See),
+                ActionsBlock(BuiltInBlocks.ActionsStickyCta, See), ShowOnWallBlock());
+            Assert.AreEqual(4, RepeatsOf(four).Single().Offers.Count);
+            // - the neighbours look shows only while another point is on the wall (RepeatsOf has one)
+            Assert.AreEqual(2, RepeatsOf(CardWith(ShowOnWallBlock(BuiltInBlocks.ShowOnWallWithNeighbours), ActionsBlock(BuiltInBlocks.ActionsStickyCta, See))).Single().Offers.Count);
+            var alone = BlockStackBuilder.Build(CardWith(ShowOnWallBlock(BuiltInBlocks.ShowOnWallWithNeighbours), ActionsBlock(BuiltInBlocks.ActionsStickyCta, See)),
+                new CardSettings(), BlockRegistry.Shared, null);
+            CollectionAssert.IsEmpty(RepeatedActionRule.Find(alone.Entries), "alone on the wall the neighbours block is not on the card: nothing repeats");
+        }
 
-            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall)), "no Actions block at all");
-            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsPillRow, see))), "a pill row is not pinned: two buttons on the card, not a repeat of the pinned one");
-            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsCircles, see))), "circles too");
-            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("", BuiltInBlocks.ActionShowOnWall)))), "a sticky button with no words is not drawn");
-            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("See", "")))), "a sticky button with no action is not drawn");
-            Assert.AreEqual(1, ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("", ""), see))).Count,
-                "rows that are not drawn are skipped: the first DRAWN row is the sticky button");
-
-            // - no look on the block: the Block Library's default decides, exactly as the card does
-            var poi = CardWith(showOnWall, ActionsBlock("", see));
-            CollectionAssert.IsEmpty(ShowOnWallWarnings(poi), "default look is the pill row");
-            var sticky = new CardSettings();
-            sticky.kinds.Add(new BlockKindSetting { kind = BuiltInBlocks.ActionsKind, enabled = true, default_variant = BuiltInBlocks.ActionsStickyCta });
-            Assert.AreEqual(1, ShowOnWallWarnings(poi, sticky).Count, "the Block Library made Sticky the default look");
-
-            // - the Actions kind switched off wall-wide: nothing is pinned, nothing repeats
+        [Test]
+        public void RepeatedActions_NothingRepeats_WhenTheCardOffersEachActionOnce_OrALoneStickyHasTwoRows_OrABlockIsNotShown()
+        {
+            CollectionAssert.IsEmpty(RepeatsOf(CardWith(ShowOnWallBlock())), "one Show On Wall block");
+            CollectionAssert.IsEmpty(RepeatsOf(CardWith(ActionsBlock(BuiltInBlocks.ActionsPillRow, See))), "one Actions button");
+            CollectionAssert.IsEmpty(RepeatsOf(CardWith(ActionsBlock(BuiltInBlocks.ActionsStickyCta, See, See))), "sticky draws its first row only: one button");
+            CollectionAssert.IsEmpty(RepeatsOf(CardWith(ShowOnWallBlock(), ActionsBlock(BuiltInBlocks.ActionsPillRow, ("Listen", "listen")))), "an action this framework does not know is no offer");
             var off = new CardSettings();
             off.kinds.Add(new BlockKindSetting { kind = BuiltInBlocks.ActionsKind, enabled = false });
-            CollectionAssert.IsEmpty(ShowOnWallWarnings(CardWith(showOnWall, ActionsBlock(BuiltInBlocks.ActionsStickyCta, see)), off), "Actions is off in the Block Library");
+            CollectionAssert.IsEmpty(RepeatsOf(CardWith(ShowOnWallBlock(), ActionsBlock(BuiltInBlocks.ActionsStickyCta, See)), off), "Actions is off in the Block Library: it offers nothing");
+            // - two rows of the same action in one pill row repeat inside that one block
+            var twice = ActionsBlock(BuiltInBlocks.ActionsPillRow, See, ("Where?", BuiltInBlocks.ActionShowOnWall));
+            var repeat = RepeatsOf(CardWith(twice)).Single();
+            Assert.AreEqual(2, repeat.Offers.Count);
+            Assert.IsTrue(repeat.Offers.All(o => ReferenceEquals(o.Block, twice)));
+            // - a button with no words is still a button (it reads the action's card text)
+            Assert.AreEqual(2, RepeatsOf(CardWith(ShowOnWallBlock(), ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("", BuiltInBlocks.ActionShowOnWall)))).Single().Offers.Count);
+        }
+
+        [Test]
+        public void TheEditorWarns_OncePerRepeatedAction_UnderEveryBlockThatOffersIt_NamingThemAsTheEditorDoes()
+        {
+            var showOnWall = ShowOnWallBlock();
+            var circles = ActionsBlock(BuiltInBlocks.ActionsCircles, ("On the wall", BuiltInBlocks.ActionShowOnWall));
+            var sticky = ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("", BuiltInBlocks.ActionShowOnWall));
+            var other = ActionsBlock(BuiltInBlocks.ActionsPillRow, ("Listen", "listen"));
+            var repeats = RepeatsOf(CardWith(showOnWall, circles, sticky, other));
+            string text = POIEditorToolWindow.CardRepeatedActionText(repeats.Single());
+            foreach (var involved in new[] { showOnWall, circles, sticky })
+                Assert.AreEqual(text, POIEditorToolWindow.CardRepeatedActionWarnings(involved, repeats).Single(), "the same one warning under each of the three");
+            CollectionAssert.IsEmpty(POIEditorToolWindow.CardRepeatedActionWarnings(other, repeats), "a block that offers nothing repeated has none");
+            StringAssert.Contains("\"Show On The Wall\" 3 times", text, "the action as the Actions block's Action row names it, and how often");
+            StringAssert.Contains("Show On Wall (button)", text);
+            StringAssert.Contains("Actions (circles) saying \"On the wall\"", text);
+            StringAssert.Contains("Actions (sticky_cta, pinned to the footer)", text);
+            StringAssert.DoesNotContain("saying \"\"", text, "a button with no words says nothing about its words");
+            StringAssert.DoesNotContain("block_", text, "blocks are named by kind and look, never by key");
+            EditorTextChecks.AssertAscii(text, "the repeated-action warning");
+            CollectionAssert.IsEmpty(POIEditorToolWindow.CardRepeatedActionWarnings(showOnWall, null), "no repeats computed: no warning");
+        }
+
+        [Test]
+        public void AnActionsButtonWithNoWords_ReadsTheSameCardTextAsTheShowOnWallKind_InEveryLanguageTheTableHas()
+        {
+            var table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Cards/CardStrings.asset");
+            Assert.IsNotNull(table, "precondition: the framework's card texts load");
+            foreach (string lang in new[] { "en", "pt" })
+            {
+                var strings = new CardStrings(table.Entries(), null, null, lang, "en");
+                string expected = strings.Get(CardStrings.Keys.ShowOnWallButton);
+                Assert.IsNotEmpty(expected, lang);
+                var view = new ActionsBlockView();
+                var block = ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("", BuiltInBlocks.ActionShowOnWall));
+                view.Bind(block, new BlockBindContext { Strings = strings, Language = lang, FallbackLanguage = "en", Variant = BuiltInBlocks.ActionsStickyCta });
+                Assert.AreEqual(expected, view.Actions.Single().Label.text, lang + ": the Actions button says what the Show On Wall button says");
+                view.Unbind();
+                var own = ActionsBlock(BuiltInBlocks.ActionsStickyCta, ("Own words", BuiltInBlocks.ActionShowOnWall));
+                view.Bind(own, new BlockBindContext { Strings = strings, Language = lang, FallbackLanguage = "en", Variant = BuiltInBlocks.ActionsStickyCta });
+                Assert.AreEqual("Own words", view.Actions.Single().Label.text, lang + ": words the block carries win");
+            }
         }
     }
 }

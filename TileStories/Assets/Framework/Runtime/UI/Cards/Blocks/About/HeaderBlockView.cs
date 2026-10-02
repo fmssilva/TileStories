@@ -151,7 +151,7 @@ namespace TileStories
                 modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DFallbackField, asset = read.ValidAsset(BuiltInBlocks.HeaderImageField, MediaKind.Image) });
                 modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DAutoSpinField, flag = true });
                 // - the header's own Fit, read against the HEADER's Block Library default (not model_3d's)
-                modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DFitField, value = BlockLibraryRule.Choice(context.Taxonomy?.card_settings,
+                modelInstance.fields.Add(new BlockFieldValue { key = BuiltInBlocks.Model3DFitField, value = BlockLibraryRule.Choice(context.Settings,
                     BuiltInBlocks.Header, BuiltInBlocks.Header.Field(BuiltInBlocks.HeaderModelFitField), read) });
                 ModelView.Bind(modelInstance, context);
                 ModelView.Hint.style.display = DisplayStyle.None; // the hero has no room for a caption line

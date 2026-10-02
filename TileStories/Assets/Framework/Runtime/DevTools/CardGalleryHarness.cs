@@ -168,7 +168,7 @@ namespace TileStories
             var stack = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, wall.pois);
             var context = new BlockBindContext
             {
-                Poi = poi, Taxonomy = wall, Language = Language, FallbackLanguage = Language,
+                Poi = poi, Taxonomy = wall, Settings = settings, Language = Language, FallbackLanguage = Language,
                 Strings = new CardStrings(strings != null ? strings.Entries() : null, StringSources.Entries(), settings.strings, Language, Language),
                 Glossary = new CardGlossary(settings.glossary, Language, Language),
                 MarkerLook = MarkerVisualSettings.Resolve(wall, null),

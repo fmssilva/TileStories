@@ -12,44 +12,47 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: POI Detail Card -- 15.1 audit fixes A + D (field visibility per option, Default Media (i), audio fade-pause)`
+## `And now: POI Detail Card -- 15.2 audit fixes B + C (card order and repeated actions, place_in_ar placed state)`
 
 GATE (mandatory, report each item): take one Unity capture (Game view AND the POI Editor window) and open it; if none works,
 STOP and say so. `git checkout --` `Markers/Fonts/Oswald Bold SDF.asset` if modified. Confirm the tree compiles; if not, STOP.
 
 Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- TODOs and status table
-(14 done; 15.1 now; 15.2-15.4 planned). The audit: proj_guides/_3.1.1_Audit.md -- sections 5 (Editor tab), 11 (fix list, chunks
-15.A and 15.D), and the [9B follow-up] audio item.
-REQUIRED READING (all lines): `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (every row this block
-touches); `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, 4.5; `.clinerules/60-finishing.md` 6.4 (final report).
-Context only: POIEditorToolWindow.BlockFieldDrawer.cs, BlockFieldDefinition.cs, BlockLibraryRule.cs, DetailCard.cs, the audio owner.
-WORKER MODEL: Opus-class (a framework-wide change to how every block row is drawn).
-TEST PLAN: no opening full baseline (the tree is the green commit "Audit the POI card domain, fix the focus-dependent typing
-test, tidy the guides"). Targeted fixtures per sub-step. ONE full EditMode + PlayMode at the end (Unity may be in front).
+(15.1 done; 15.2 now; 15.3, 15.4, 16 planned). The audit: proj_guides/_3.1.1_Audit.md -- section 11 chunks 15.B and 15.C, and
+the product-pass findings they come from.
+REQUIRED READING (all lines): `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines"; `.clinerules/00-process.md`
+"Framework Completeness"; `.clinerules/40-testing.md` 4.2, 4.2.3, 4.2.4b, 4.2.5, 4.5; `.clinerules/60-finishing.md` 6.4.
+Context only: BlockStackBuilder.cs, the Card Content warnings, ArPlacementService / ArPlacementRule, BuiltInBlocks.Ar.cs,
+FieldShownWhen / FieldVisibilityRule (new in 15.1), CardStrings.
+WORKER MODEL: Sonnet-class (follows existing patterns: builder, warnings, an owner's state, CardStrings rows).
+TEST PLAN: no opening full baseline (the tree is the green commit "Hide unused block fields, summarise rows and keep fade-time
+pauses"). Targeted fixtures per sub-step. ONE full EditMode + PlayMode at the end (Unity may be in front; background not due).
 
-15.1.1 -- Field visibility (audit chunk 15.A, items 1-3): `BlockFieldDefinition.ShownWhen` -- a small declarative predicate over the
-  block's own values (field X equals one of [values], or the resolved variant is one of [looks]); one pure rule evaluates it
-  for the drawer. Hidden fields keep their values (never cleared, still saved). Declare it for: place_in_ar (Height for
-  height_cm, Marker Multiple for marker_multiple), knowledge_check (fields per look), dialogue (Choice / Reply n+1 only after n
-  has text), header (each look's own fields, incl. Loop Clip and Model / Fit), video (Chapters per look), and the Block Library's
-  header Default Fit. The Display popup shows only when a kind has 2+ display modes. Tests: pure predicate tests; ONE real-window
-  test (switch Scale Mode and a Knowledge Check look: rows appear / disappear; a hidden value survives a switch back, undo and a
-  Save round trip); DrawingNeverWritesTests, BlockKindRoundTripTests and the every-kind-editable test stay green. Captures of the
-  four rows at 620 pt, answered with the 4.5 design questions.
-15.1.2 -- Collapsed-row summary (15.A item 4): a collapsed Card Content row shows a one-line summary (the heading in the first
-  wall language, else the first text field), clipped with an ellipsis, never wider than the row. Real-window test + capture.
-  -> learning summary + short commit message after each, and go straight on.
-15.1.3 -- Default Media (i) column (15.D item 1): the per-row (i) moves into the section's (i) column (DetailCard.cs ~449-452,
-  the `_5.1` row recipe). A render test measures the (i) x against the section's column at 880 and 620 pt; recapture.
-15.1.4 -- `_5.1` 4.7 (15.D item 2): describe Default Media, the Block Library's field-default rows and the new field visibility.
-15.1.5 -- Audio fade-pause (15.D item 3, [9B follow-up]): a pause (or a video start) asked during an audio switch fade is kept and
-  applied when the fade ends; pure test in the audio owner + one Phase B check that the narration ends paused.
-15.1.6 -- Close: full EditMode + PlayMode green end to end; update _3.1 (row 15.1 with proof, TODOs), 10-structure.md, _5.1.
+15.2.1 -- Meta blocks last (15.B item 1), as a developer OPTION: Card Container toggle "Sources At The End" (default on, (i),
+  undo, live sync). On: BlockStackBuilder moves `meta`-family blocks to the end, keeping their order; off: the authored order.
+  Pure builder test (both values, stable order); Phase B: The Lamp's Sources is the last block with the default.
+15.2.2 -- Repeated actions (15.B items 2-3): generalise the Card Content "same action as the sticky" warning to every repeated
+  action (Actions items, Show On Wall, the sticky footer), one warning per action naming the blocks. One wording per action:
+  an Actions `show_on_wall` item with an empty label reads the same CardStrings row as the show_on_wall kind; empty The Lamp's
+  sticky label so PT reads one way (keep every fixture block). Real-window test for the warning; PT capture at 390 px.
+  -> learning summary + short commit message, and go straight on.
+15.2.3 -- Placed state (15.C items 1-2): once placed, the Place In AR button becomes "Remove from room" (new CardStrings row,
+  EN + PT, proper accents) and a short status line "Placed by the wall" shows (new row); the card scrolls to the top and lowers
+  to the peek. Remove brings back the first state. Phase B with real taps (place, label, peek, remove); captures 390 px EN + PT.
+15.2.4 -- POI switch as a developer OPTION (15.C item 3): Toggle field "Keep Model On Switch" on place_in_ar, default off,
+  with a Block Library default row, (i), undo, live sync. Off: selecting another point removes the model through the owner's
+  release path; on: the model stays until Remove or the session ends (still one placed model at a time, the owner's rule).
+  Pure rule test for both values + Phase B real taps (place, select another POI, assert model gone / kept, no leak).
+15.2.5 -- Dialogue hidden reply (15.1 follow-up): a Reply that has words while its Choice is empty must not warn about a field
+  the developer cannot see: the warning names it ("Reply 3 has text but Choice 3 is empty: fill Choice 3 to see it").
+  Real-window test.
+15.2.6 -- Close: full EditMode + PlayMode green end to end; update _3.1 (row 15.2 with proof, TODOs), 10-structure.md, _5.1.
 
-Rules as before (`.clinerules`; identity fields untouched; Portuguese spelled properly; DevLog for detail logs). OUT OF SCOPE:
-chunks 15.B, 15.C, 15.E, 15.F, duplicate / copy block, _3.2, _3.3. Ideas outside this block -> proj_guides/__mixed_TODOs.md.
-If _3.1 or the audit disagrees with the real code, STOP. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
-Commit only if the developer asks.
+Rules as before (`.clinerules`; identity fields untouched; no literal colours / sizes / visitor strings in card code; Portuguese
+spelled properly; DevLog for detail logs). OUT OF SCOPE: 15.3 (visitor language), 15.4 (code health), duplicate / copy block,
+_3.2, _3.3. Ideas outside this block -> proj_guides/__mixed_TODOs.md. If _3.1 or the audit disagrees with the real code, STOP.
+Finish with the final report of `.clinerules/60-finishing.md` 6.4. Commit only if the developer asks.
+
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`
@@ -162,4 +165,3 @@ Act as a **Senior Staff Engineer** planning and implementing the whole plan, AND
 ### AND SO, YOU NEED TO PRESENT ME A LEARNING SUMMARY ALONG THE WAY, EXAMPLE AFTER EACH FEATURE OR FILE IMPLEMENTATION, OR AFTER EACH TEST IMPLEMENTATION OR RUNNING OR AFTER EACH DEBUG SESSION, ETC. NOT JUST AT THE END OF CHAT. I WANT A LEARNING SUMMARY ALONG THE WAY SO I CAN FOLLOW YOUR ACTION CLOSELY!!!!
 
 
-# ---

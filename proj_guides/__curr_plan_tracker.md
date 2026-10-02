@@ -1,54 +1,50 @@
-# Plan tracker -- POI Card 15.1: audit fixes A + D (started 2026-10-01)
+# Plan tracker -- POI Detail Card 15.2 (audit fixes B + C)
 
-Tree = green commit e1473b3 ("Audit the POI card domain, fix the focus-dependent typing test, tidy the guides") + docs only.
-GATE: TestEvidence/Card/Gate_15_1_GameView.png + TestEvidence/Editor/Gate_15_1_POIEditor.png opened and read (capture window closed,
-0 left), Oswald font unmodified, Editor.log 0 `error CS` / ExitCode 0 (Play Mode was on: stopped first).
-Brief: proj_guides/__AI_worker.md. Audit: _3.1.1_Audit.md sections 5 + 11 (15.A, 15.D). No opening baseline; ONE full run at the end.
+Brief: card order + repeated actions (15.B), place_in_ar placed state (15.C), POI-switch option, dialogue hidden reply.
+Tree trusted: green commit 0699cbc (no opening full baseline). One full EditMode + PlayMode at the end (15.2.6).
+After a compaction: re-read this file and the brief's sub-step list; continue at the first unticked box.
 
-## 15.1.1 Field visibility (15.A items 1-3)
-- [x] Runtime/Blocks/FieldShownWhen.cs: Looks(...) / Choice(key, values...) / Filled(key); BlockFieldDefinition.ShownWhen
-- [x] Runtime/Blocks/FieldVisibilityRule.cs: resolved variant (own else Library default), resolved Choice (own else Library/ChoiceDefault),
-      IsShown(block field), IsShown(item sub-field, row), IsShownInLibrary(field, kind, settings, pois) (default look OR any block's look)
-- [x] Declarations: place_in_ar (height_cm / marker_multiple), knowledge_check (per look), dialogue (choice/reply n+1 after choice n),
-      header (per look; subtitle not compact), video (chapters look)
-- [x] Drawer hook: DrawBlockFields + DrawItemsBlockField (skip hidden); Block Library Default Fit row; Display popup only with 2+ modes
-      (column space reserved)
-- [x] Tests: FieldVisibilityRuleTests (pure + declaration guard); real-window test (Scale Mode + KC look: rows appear/disappear,
-      hidden value survives switch back, Ctrl+Z, Save + LoadConfig under Temp/); DrawingNeverWrites / BlockKindRoundTrip / EveryKind green
-- [x] Captures 620 pt: Place In AR, Knowledge Check (3 looks), Dialogue, Header; 4.5 design questions answered
+## GATE (done 2026-10-02)
+- [x] UnityMCP is the right server (telemetry_status ok)
+- [x] Game view capture opened (TestEvidence/Card/Gate_GameView.png: the room scan) and POI Editor capture opened (TestEvidence/Editor/Gate_PoiEditor.png: the window, nothing else); window closed, 0 left
+- [x] Oswald Bold SDF.asset not modified (git status clean for it)
+- [x] Tree compiles (no error CS after the last reload; TileStories.dll = last green commit's build)
 
-Proof: EditMode full 1538/1538; targeted 49/49 by name (FieldVisibilityRuleTests x11, the real-window test, DrawingNeverWrites x2,
-BlockKindRoundTrip x35, EveryRegisteredKind). Captures 620 pt: CardContent_PlaceInAr_RealSize / KnowledgeCheck_MC_TF / _TF_IC / _IC /
-Dialogue / Dialogue_b / Header_ImageParallax (TestEvidence/Editor). Audit miscounts noted: Image Choice draws 11 (not 10), Model Turntable 3
-(Picture = its fallback).
+## 15.2.1 Sources At The End (container option)
+- [x] CardContainerSettings.sources_at_end = true (initializer = default; old configs load as on)
+- [x] BlockStackBuilder: stable partition, family == ContentSeenRule.MetaFamily last, header stays first; off = authored order
+- [x] Editor: Card Container row "Sources At The End" (+ (i) help const), undo via config history, live via CardSettingsChanged -> Rebind
+- [x] Tests: builder pure (on/off, stable, no meta, two meta, header first); real-window row (default on, click off, Ctrl+Z); PlayMode Phase B (The Lamp's Sources last, live toggle through the session)
+- [x] Capture check; learning summary + commit line
 
-## 15.1.2 Collapsed-row summary (15.A item 4)
-- [x] Summary column (heading in first wall language, else first text), ellipsis fit within the row budget, tooltip = full text
-      (placed AFTER the delete: the existing ItemsRows test pins "a block's delete sits right after its row's cells"; row capped
-      by CardBlockRowWidth = min(view - margin - indent, 800))
-- [x] Real-window test (text, ellipsis, inside the row, none when open) + capture
-Proof: EditMode full 1539/1541 (2 input tests failed once in the run after an orphaned job, Editor focused; pass alone and in fixture
-order 39/39 -- recheck at the full run). New: ABlockSummary_..., FitWithEllipsis_..., ACollapsedBlockRow_... (widest/880/620).
-Captures: CardContent_Summaries_880pt.png, _620pt.png. Lesson: a file save during an EditMode run killed it (orphan, healed 318 s).
+## 15.2.2 Repeated actions, one wording
+- [x] ActionsRule (pure): which Actions rows the look draws (known action; sticky = first only) -- shared by ActionsBlockView and the offers rule
+- [x] ActionsBlockView: empty Words on a known action reads the action's CardStrings row (show_on_wall -> ShowOnWallButton)
+- [x] RepeatedActionRule (pure, Runtime/Blocks): per action, every offer of the SHOWN blocks (Actions rows, Show On Wall kind, sticky footer)
+- [x] Editor: replace HasStickyShowOnWall / CardShowOnWallRepeatsStickyText by one warning per repeated action naming the blocks
+- [x] config.json: The Lamp's sticky label emptied (block_19), every block kept; Actions Words (i) says "empty = the card's own words"
+- [x] Tests: ActionsRule + RepeatedActionRule pure; Tier3GroupBRulesTests:317 updated; gallery "partial" Actions entry updated; real-window warning test; PT capture at 390 px
+- [x] Learning summary + commit line (Editor capture of the warning rows: with the final captures in 15.2.6)
 
-## 15.1.3 Default Media (i) column (15.D item 1)
-- [x] Rows through DrawEditorRow, cells in ONE rect of the title label's width + style (DefaultMediaCellsRect), split in C#;
-      PoiEditorWindowHost.Resize / Width / RootScreen (a fixed spacer was 1.6 pt off: margins of the cells' own styles)
-- [x] Render test: row (i) x == title (i) x at 880 and 620 pt (+-0.5 pt); recapture DetailCard_DefaultMedia_880pt / _620pt.png
-Proof: EditMode full 1542/1542 (Unity in the background).
+## 15.2.3 place_in_ar placed state
+- [x] CardStrings: place_in_ar_remove reworded "Remove from room" / "Remover da sala" (the chip is gone, one row = the button), new place_in_ar_placed "Placed by the wall" / "Colocado junto a parede" (accents), Keys.All + asset rows
+- [x] IBlockHost.ShowHeaderAtPeek (scroll to top + peek) implemented by PoiCardSheetView; StubHost updated
+- [x] PlaceInArBlockView: placed -> button = Remove (enabled even if the wall is lost), status line, no chip; remove -> first state; Ar.uss
+- [x] Tests: gallery test + Phase B real taps (place, label, status, scroll 0, peek, remove); EN + PT captures 390 px
+- [x] Learning summary + commit line
 
-## 15.1.4 _5.1 4.7 (15.D item 2)
-- [x] Default Media, Block Library default rows, field visibility, Display popup + summary; pending list entries updated
-      (header / KC / dialogue / Default Media captures recorded), 4.7 Tests sentence
+## 15.2.4 Keep Model On Switch (option)
+- [x] Toggle field keep_on_switch on place_in_ar, LibraryDefault allowed on Toggle (BlockRegistry, BlockLibraryRule.Flag, Library row drawer)
+- [x] ArPlacementRule.RemovesOnSelection (pure) + ArPlacementService.SelectionChanged; PoiCardHost.Show / Close call it
+- [x] Tests: pure rule both values; registry/library; real-window rows (block + Block Library default, undo); Phase B real taps (place, select another POI, gone / kept, no leak)
+- [x] Learning summary + commit line
 
-## 15.1.5 Audio fade-pause (15.D item 3)
-- [x] CardAudioService: pause during a switch fade kept, new clip starts paused; Resume/Toggle during fade cancels; reset on Stop / new fade
-- [x] Pure tests (CardAudioServiceTests x3) + coordinator test (CardVideoRulesTests, real CardVideoService) + Phase B (PoiCardVideoSceneTests)
-Proof: EditMode full 1546/1546 (+4, the new tests); PlayMode targeted 46/46 (PoiCardVideoScene, PoiCardAudioScene, CardAudioGallery,
-PoiCardRealAudio, CardVideoGallery), the new Phase B test by name.
+## 15.2.5 Dialogue hidden reply
+- [x] DialogueRule.Problems names (row, slot); warning "Reply 3 has text but Choice 3 is empty: fill Choice 3 to see it" (first blocking choice when a lower one is empty too)
+- [x] Real-window test
+- [x] Learning summary + commit line
 
-## 15.1.6 Close
-- [x] Full EditMode + PlayMode green: EditMode 1546/1546, PlayMode 741/741 (1645 s), both with Unity in the background
-- [x] _3.1 (row 15.1 + 4 TODOs closed + section 3 / 8.2 + Design history + flaky note), 10-structure.md (3 new files, 11 entries), _5.1 4.7
-      + pending list, __mixed_TODOs (2 ideas); final report (60-finishing 6.4)
-Not mine, left as Unity wrote them: LivingRoomScene.unity (Test Runner save dropped two stale `_debug: 0` lines), TileStories.slnx (order).
+## 15.2.6 Close
+- [x] Full EditMode + PlayMode green
+- [x] _3.1 row 15.2 + TODOs, 10-structure.md, _5.1; __mixed_TODOs for stray ideas
+- [x] Final report (60-finishing 6.4)

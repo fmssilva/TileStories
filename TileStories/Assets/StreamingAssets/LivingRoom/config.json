@@ -6099,16 +6099,7 @@
                                         "fields": [
                                             {
                                                 "key": "label",
-                                                "text": [
-                                                    {
-                                                        "lang": "en",
-                                                        "value": "Show me where it is"
-                                                    },
-                                                    {
-                                                        "lang": "pt",
-                                                        "value": "Mostrar onde fica"
-                                                    }
-                                                ],
+                                                "text": [],
                                                 "number": 0.0,
                                                 "flag": false,
                                                 "value": "",

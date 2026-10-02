@@ -85,6 +85,14 @@ namespace TileStories
             Changed?.Invoke();
         }
 
+        // The card now shows `poiId` (null: it closed): the placed model goes when ArPlacementRule says so, through the same release path as Remove
+        public void SelectionChanged(string poiId)
+        {
+            if (Current == null || !ArPlacementRule.RemovesOnSelection(Current.Poi?.id, poiId, Current.KeepOnSwitch)) return;
+            DevLog.Detail(LogDomain.Card, "[Card] place_in_ar: " + Current.Poi?.id + " -> " + (poiId ?? "(closed)") + ", the model goes");
+            Remove();
+        }
+
         // Remove and stop listening to the wall (the host going away)
         public void Dispose()
         {

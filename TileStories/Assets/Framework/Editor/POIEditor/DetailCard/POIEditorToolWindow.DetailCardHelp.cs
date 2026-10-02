@@ -5,6 +5,7 @@
 // controls, never a project doc, a code file or one wall's own content (_5.1_Editor_Tab.md, "Domain Manual Tests").
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TileStories.Editor
 {
@@ -64,6 +65,11 @@ namespace TileStories.Editor
             "On: the cards of this wall show still pictures instead of motion the visitor did not ask for -- a header in the Video Loop " +
             "look shows its poster (Picture) and never plays its loop. A video the visitor plays still plays. Off by default. A " +
             "setting the visitor can change themselves is planned; this is the wall's own default.";
+
+        private const string CardSourcesAtEndHelp =
+            "On (the default): a card always ends with its Sources, however the blocks of Card Content are ordered, so the visitor reads " +
+            "the content first and the credits last. Several Sources blocks keep their order. Off: every block stays exactly where Card " +
+            "Content puts it, Sources included.";
 
         private const string BlockLibraryHelp =
             "Every block kind this wall can show, wall-wide. Enabled: off hides every block of that kind on every card (Header " +
@@ -126,7 +132,9 @@ namespace TileStories.Editor
             "- Close it three ways: the X; drag it down below the title; tap empty camera space (only while Tap Outside Closes is on).\n" +
             "- Tap another marker while it is open: the card keeps its height and shows the new point.\n" +
             "- Enable Detail Card off: a tap still selects the marker, no card opens.\n" +
-            "- Languages: put another language first; the card shows that language (a missing text falls back).\n\n" +
+            "- Languages: put another language first; the card shows that language (a missing text falls back).\n" +
+            "- Sources At The End: with a Sources block in the middle of a point's Card Content, the open card shows it last; untick it and " +
+            "the card shows it where Card Content puts it, at once.\n\n" +
             "AUDIO\n" +
             "- Tap the play button of an Audio Guide: the sound starts. Drag its bar to move to any point, tap the speed chip to change the " +
             "speed, tap Captions to show the line of the moment. A Hero Chip under the title does the same from the Peek stop.\n" +
@@ -310,10 +318,30 @@ namespace TileStories.Editor
         internal const string CardCompareWithItselfNote =
             "Compare With is this point itself: the card shows the same condition twice. Pick another point.";
 
-        // A Show On Wall block on a card whose sticky call to action already lowers the card to the wall (_3.1 [SHOULD])
-        internal const string CardShowOnWallRepeatsStickyText =
-            "The Sticky button of this card's Actions block already does what this Show On Wall block does, so the card offers the same " +
-            "button twice. Delete one of the two.";
+        // The card offers one action in more than one place (RepeatedActionRule): the action, how many times, and every offer by what the
+        // Editor shows (the kind, its look, the button's own words), never a block key
+        internal static string CardRepeatedActionText(RepeatedActionRule.Repeat repeat)
+        {
+            var offers = new List<string>();
+            foreach (var offer in repeat.Offers) offers.Add(CardOfferName(offer));
+            return "This card offers \"" + CardActionName(repeat.Action) + "\" " + repeat.Offers.Count + " times: " + string.Join("; ", offers) +
+                   ". Keep the one that suits the card and delete the others.";
+        }
+
+        // One offer as the developer finds it in Card Content: "Actions (sticky_cta, pinned to the footer) saying \"See it\""
+        private static string CardOfferName(RepeatedActionRule.Offer offer)
+        {
+            string name = offer.Definition.DisplayName + " (" + offer.Variant + (offer.Pinned ? ", pinned to the footer" : "") + ")";
+            return offer.Words.Length > 0 ? name + " saying \"" + offer.Words + "\"" : name;
+        }
+
+        // An action as the Actions block's Action row names it
+        private static string CardActionName(string action)
+        {
+            var field = BuiltInBlocks.Actions.Field(BuiltInBlocks.ActionsItemsField)?.ItemFields?.FirstOrDefault(f => f.Key == BuiltInBlocks.ActionsActionField);
+            int at = field?.Options == null ? -1 : field.Options.ToList().IndexOf(action);
+            return at >= 0 && field.OptionLabels != null ? field.OptionLabels[at] : action;
+        }
 
         // A Poll block holds more options with words than it shows
         internal static string CardPollExtraOptionsText(int hidden) =>
@@ -324,10 +352,17 @@ namespace TileStories.Editor
         internal static string CardDialogueEmptyRowsText(IReadOnlyList<int> rows) =>
             "Not shown: " + (rows.Count == 1 ? "line " : "lines ") + string.Join(", ", rows) + " (a row with no words in Line).";
 
-        // A Dialogue block holds a Reply whose Choice has no words, so the reply can never be picked
-        internal static string CardDialogueOrphanReplyText(IReadOnlyList<int> rows) =>
-            "A reply in " + (rows.Count == 1 ? "line " : "lines ") + string.Join(", ", rows) + " has no words in its Choice, so the visitor can never pick it. " +
-            "Write the Choice, or clear the Reply.";
+        // A Dialogue block holds a Reply whose Choice has no words, so the visitor can never pick it: the row (its number in the Lines table), the
+        // reply and the Choice to write. Choice n shows only once Choice n-1 has words, so when an earlier Choice is empty too the text names THAT
+        // Choice first, a field the developer can see
+        internal static string CardDialogueHiddenReplyText(DialogueRule.HiddenReply reply)
+        {
+            string head = "Line " + reply.Row + ": Reply " + reply.Slot + " has text but Choice " + reply.Slot + " is empty: ";
+            return reply.FillSlot == reply.Slot
+                ? head + "fill Choice " + reply.Slot + " to see it."
+                : head + "fill Choice " + reply.FillSlot + " first (Choice " + reply.Slot + " shows once the choice before it has words), then Choice " +
+                  reply.Slot + " to see it.";
+        }
 
         // A block with Show After Reading on is not the last content block of the card
         internal const string CardShowAfterReadingMidCardNote =

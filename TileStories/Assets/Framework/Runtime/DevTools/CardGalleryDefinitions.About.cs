@@ -256,7 +256,7 @@ namespace TileStories
                 ("Find the keep on the panel from the river side", BuiltInBlocks.ActionShowOnWall),
                 ("Where is it?", BuiltInBlocks.ActionShowOnWall),
             };
-            // - a button with no words and one with an action this framework does not know: both left out
+            // - a button with no words (it reads its action's card text) and one with an action this framework does not know (left out)
             var partial = new[] { ("", BuiltInBlocks.ActionShowOnWall), ("Listen", "listen"), ("See it on the wall", BuiltInBlocks.ActionShowOnWall) };
             foreach (var variant in BuiltInBlocks.Actions.Variants)
             {

@@ -52,22 +52,39 @@ namespace TileStories
             return lines;
         }
 
-        // What the block leaves out that the author probably meant to show, by authored row number counted from 1: rows with no
-        // words (`rowsWithoutWords`) and rows holding a reply whose choice has no label (`unlabelledReplyRows`)
-        public static void Problems(BlockFieldReader read, out List<int> rowsWithoutWords, out List<int> unlabelledReplyRows)
+        // A Reply with words whose Choice has none: the visitor can never pick it. `Row` counts from 1, `Slot` is the reply (1..MaxChoices) and
+        // `FillSlot` the Choice the developer must write first: the lowest empty one, because Choice n and Reply n show in the Editor only once
+        // Choice n-1 has words (FieldShownWhen), so the Choice of the reply itself may be a field they cannot see
+        public readonly struct HiddenReply
+        {
+            public readonly int Row;
+            public readonly int Slot;
+            public readonly int FillSlot;
+
+            public HiddenReply(int row, int slot, int fillSlot)
+            {
+                Row = row;
+                Slot = slot;
+                FillSlot = fillSlot;
+            }
+        }
+
+        // What the block leaves out that the author probably meant to show: rows with no words (`rowsWithoutWords`, by authored row number
+        // counted from 1) and every reply with words whose Choice has none (`hiddenReplies`)
+        public static void Problems(BlockFieldReader read, out List<int> rowsWithoutWords, out List<HiddenReply> hiddenReplies)
         {
             rowsWithoutWords = new List<int>();
-            unlabelledReplyRows = new List<int>();
+            hiddenReplies = new List<HiddenReply>();
             var rows = read.Items(BuiltInBlocks.DialogueLinesField);
             for (int row = 0; row < rows.Count; row++)
             {
                 if (read.ItemText(rows[row], BuiltInBlocks.DialogueTextField).Length == 0) rowsWithoutWords.Add(row + 1);
+                int firstEmpty = 0;
+                for (int slot = 1; slot <= MaxChoices && firstEmpty == 0; slot++)
+                    if (read.ItemText(rows[row], ChoiceField(slot)).Length == 0) firstEmpty = slot;
                 for (int slot = 1; slot <= MaxChoices; slot++)
                     if (read.ItemText(rows[row], ChoiceField(slot)).Length == 0 && read.ItemText(rows[row], ReplyField(slot)).Length > 0)
-                    {
-                        unlabelledReplyRows.Add(row + 1);
-                        break;
-                    }
+                        hiddenReplies.Add(new HiddenReply(row + 1, slot, firstEmpty));
             }
         }
     }

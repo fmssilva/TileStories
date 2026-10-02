@@ -43,6 +43,8 @@ namespace TileStories.Editor
 
             var blocks = poi.card?.blocks ?? new List<BlockInstanceData>();
             var built = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, _config.pois);
+            // - once per draw, not per block: the actions this card offers more than once
+            var repeatedActions = RepeatedActionRule.Find(built.Entries);
             int deleteIndex = -1, moveIndex = -1, moveBy = 0;
 
             for (int i = 0; i < blocks.Count; i++)
@@ -123,7 +125,15 @@ namespace TileStories.Editor
                     var missing = MissingGlossaryTerms(block, definition, settings.glossary);
                     if (missing.Count > 0) EditorGUILayout.HelpBox(CardGlossaryMissingText(missing), MessageType.Warning);
                     foreach (string warning in CardBlockWarnings(block, definition, settings, poi))
+                    {
                         EditorGUILayout.HelpBox(warning, MessageType.Warning);
+                        ReportTableCellRect("Card block warning", i);
+                    }
+                    foreach (string warning in CardRepeatedActionWarnings(block, repeatedActions))
+                    {
+                        EditorGUILayout.HelpBox(warning, MessageType.Warning);
+                        ReportTableCellRect("Card repeated action warning", i);
+                    }
                 }
 
                 if (open && definition != null)
@@ -280,9 +290,6 @@ namespace TileStories.Editor
                 if (at >= 0 && !ContentSeenRule.RevealsInView(FamiliesAfter(blocks, at)))
                     warnings.Add(CardShowAfterReadingMidCardNote);
             }
-            // - a Show On Wall block on a card whose pinned (sticky) button already does the same
-            if (definition.Key == BuiltInBlocks.ShowOnWallKind && HasStickyShowOnWall(poi, settings))
-                warnings.Add(CardShowOnWallRepeatsStickyText);
             // - a poll with more options than it shows
             if (definition.Key == BuiltInBlocks.PollKind)
             {
@@ -295,9 +302,10 @@ namespace TileStories.Editor
             // - a dialogue's rows that will not show, and replies nobody can pick
             if (definition.Key == BuiltInBlocks.DialogueKind)
             {
-                DialogueRule.Problems(new BlockFieldReader(block, null, null), out var noWords, out var orphans);
+                DialogueRule.Problems(new BlockFieldReader(block, null, null), out var noWords, out var hiddenReplies);
                 if (noWords.Count > 0) warnings.Add(CardDialogueEmptyRowsText(noWords));
-                if (orphans.Count > 0) warnings.Add(CardDialogueOrphanReplyText(orphans));
+                // - one warning per reply, naming it and the Choice to write
+                foreach (var reply in hiddenReplies) warnings.Add(CardDialogueHiddenReplyText(reply));
             }
             // - a question row the look would leave out (the block still shows its other rows): name the row and the reason
             if (definition.Key == BuiltInBlocks.KnowledgeCheckKind)
@@ -313,29 +321,15 @@ namespace TileStories.Editor
             return warnings;
         }
 
-        // Whether this card pins a Show On The Wall button in its footer: an enabled Actions block whose look is Sticky (its own, else the
-        // Block Library's) and whose FIRST shown button -- the only one the sticky look draws -- is that action
-        private static bool HasStickyShowOnWall(POIData poi, CardSettings settings)
+        // One warning per action this block takes part in offering more than once (RepeatedActionRule over the shown blocks of the card): the
+        // same text under every block that offers it, so whichever one the developer opens says it and names the others
+        internal static List<string> CardRepeatedActionWarnings(BlockInstanceData block, IReadOnlyList<RepeatedActionRule.Repeat> repeats)
         {
-            var blocks = poi?.card?.blocks;
-            if (blocks == null || !BlockLibraryRule.IsEnabled(settings, BuiltInBlocks.ActionsKind)) return false;
-            foreach (var block in blocks)
-            {
-                if (block?.kind != BuiltInBlocks.ActionsKind) continue;
-                string variant = BuiltInBlocks.Actions.HasVariant(block.variant) ? block.variant : BlockLibraryRule.DefaultVariant(settings, BuiltInBlocks.Actions);
-                if (variant != BuiltInBlocks.ActionsStickyCta) continue;
-                var read = new BlockFieldReader(block, null, null);
-                foreach (var row in read.Items(BuiltInBlocks.ActionsItemsField))
-                {
-                    // - a row with no words, or with no known action, is not drawn: the first one that is drawn is the sticky button
-                    if (read.ItemText(row, BuiltInBlocks.ActionsLabelField).Length == 0) continue;
-                    string action = read.ItemValue(row, BuiltInBlocks.ActionsActionField);
-                    if (System.Array.IndexOf(BuiltInBlocks.ActionOptions, action) < 0) continue;
-                    if (action == BuiltInBlocks.ActionShowOnWall) return true;
-                    break;
-                }
-            }
-            return false;
+            var warnings = new List<string>();
+            if (block == null || repeats == null) return warnings;
+            foreach (var repeat in repeats)
+                if (repeat.Offers.Exists(o => ReferenceEquals(o.Block, block))) warnings.Add(CardRepeatedActionText(repeat));
+            return warnings;
         }
 
         // The family of every block written after `blocks[index]` (a kind that is not registered counts as content)
