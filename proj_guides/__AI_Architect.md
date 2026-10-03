@@ -33,6 +33,7 @@ in the brief, not in a guide.
 - Read fully: `.clinerules/00-process.md`, `20-code-quality.md`, `30-ui-content.md`, `40-testing.md`, `60-finishing.md`, and the
   current domain guide (e.g. `proj_guides/_3.1_POI_Card_Blocks.md`: TODOs, status table, the sections the block touched »» IF YOU DON'T HAVE A DOMAIN GUIDE FILE, STOP AND ASK THE USER TO ADD IT).
 - Read `10-structure.md` and `_5.1_Editor_Tab.md` only where the block touched them.
+- In the FIRST session of a new domain, also read `proj_guides/__Architect_Handoff.md` (written at the last domain's close-out).
 
 ## 2. Verify on disk (evidence, not the summary)
 

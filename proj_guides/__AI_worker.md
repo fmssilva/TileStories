@@ -12,44 +12,34 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: POI Detail Card -- 15.4 audit fix F (code and test health) + two 15.3 follow-ups`
 
-GATE (mandatory, report each item): ask me first with AskUserQuestion to keep Unity uncovered; take one Unity capture (Game view
-AND the POI Editor window) and open it; if none works, STOP and say so. `git checkout --` `Markers/Fonts/Oswald Bold SDF.asset`
-if modified. Confirm the tree compiles; if not, STOP.
+## `And now: Domain Review -- POI Detail Card (_3.1), close-out VERIFY (block 16)`
 
-Domain spec (read ALL lines): C:\Users\franc\Desktop\TileStories\proj_guides\_3.1_POI_Card_Blocks.md -- TODOs and status table
-(15.3 done; 15.4 now; 16 planned). The audit: proj_guides/_3.1.1_Audit.md -- sections 7 (code health), 8 (test health) and 11
-chunk 15.F.
-REQUIRED READING (all lines): `.clinerules/20-code-quality.md`; `.clinerules/40-testing.md` 4.2 (incl. RUN TIMES and "Wait
-without burning tokens"), 4.2.3, 4.2.4b, 4.2.5, 4.5; `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section "0. Guidelines" (for
-15.4.6); `.clinerules/60-finishing.md` 6.4.
-WORKER MODEL: Opus-class (refactors of shared ground every card view stands on: the element pools and PoiCardHost).
-TEST PLAN: no opening baseline (the tree is the green commit "Wait for long test runs quietly and drop the commit trailer").
-Sub-steps 15.4.1-15.4.5 change no behaviour: after each, full EditMode + the PlayMode families they touch. Before 15.4.1, save
-the per-test-name list of the last full PlayMode run (or produce it from the first full run you do); the block's ONE full
-PlayMode run at the end must match it name for name (except tests removed on purpose in 15.4.5, listed). That end run is
-the BACKGROUND run (third block since the last one): ask me with AskUserQuestion, start it, I click away after ~5 s, and it
-counts only with `editor_is_focused: false` early and at the end.
+GATE: `git push` if the branch is ahead of origin (report how many commits; about 11 are waiting). Ask me with AskUserQuestion
+to keep Unity uncovered, then take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP.
+`git checkout --` `Markers/Fonts/Oswald Bold SDF.asset` if modified. Confirm the tree compiles; if not, STOP.
 
-15.4.1 -- `ElementPool<T>` replaces the 16 hand-written `Take` pools (one generic, its own pure tests); no view behaves differently.
-15.4.2 -- `PoiCardHost.Show` -> a pure `CardContextBuilder` (EditMode-testable); PoiCardHost under ~250 lines.
-  -> learning summary + short commit message, and go straight on.
-15.4.3 -- Split `DetailCard.cs` into Card Texts / Glossary / Default Media partials, and `CardGalleryTests` / `PoiCardSceneTests`
-  by family (same test names, so the name-for-name check holds; report the run time per family).
-15.4.4 -- `CardViewSourceRulesTests` also scans `Runtime/Blocks/Preview` and `Ar`; prove it is load-bearing with a planted
-  literal that makes it fail, then remove the plant. `VttRule.cs` BOM literal written as its escape.
-15.4.5 -- Test cost: `CardLanguageChipGalleryTests` (72 cases, ~+250 s of PlayMode) cut to the few cases that each prove
-  something different (one / two / three languages, EN and PT, the chip beside the X); the rest move to pure EditMode tests
-  where they test logic. List what you removed and why.
-15.4.6 -- "Peek Next Card" (15.3 follow-up): a Card Container option, default ON, ((i), undo, live sync): at rest the timeline and
-  related strips show a slice of the next card (the usual "there is more" cue); at the END of a swipe the last card is whole
-  (the 15.3 fix kept). OFF = the 15.3 whole-cards behaviour. Phase A gallery entry both ways + captures at 390 px.
-15.4.7 -- Close: the background full PlayMode + full EditMode; update RUN TIMES, _3.1 (row 15.4 with proof), 10-structure.md.
+Run proj_guides/skills/Domain_Review.md in AUDIT mode with:
+- DOMAIN GUIDE: proj_guides/_3.1_POI_Card_Blocks.md (all lines), and the first audit proj_guides/_3.1.1_Audit.md.
+- FOCUS: (1) the fix list is CLOSED: for every item of _3.1.1 section 11 (chunks 15.A-15.F, MUST and SHOULD), show the proof
+  on disk (the code, the test name, the capture) or name what is missing; re-check the option coverage matrix rows those chunks
+  touched (Editor row, (i), default, undo / save, live sync, Phase A, Phase B, capture). (2) TRIAGE every open TODO in
+  _3.1 (and the _3.1 lines in __mixed_TODOs.md): MOVE to `_3.2` navigation, `_3.3` styles, a device / stage-3 list, or DROP
+  with the reason; nothing stays "open" in _3.1 without a destination. Known items to place: the Keep Model On Switch
+  follow-ups (Remove only on the first card), taxonomy translation, the "Placed by the wall" line not visible at peek, the
+  [ship] media licensing, the device checks, the once-seen flakes in section 12. (3) The LATER list of _3.1.1 section 11:
+  each item gets a destination the same way.
+- SKIP: the full option matrix rebuild, the product pass, code health (all done in the first audit and blocks 15.x).
+WORKER MODEL: Sonnet-class (verification and triage; no new code).
+TEST PLAN: no full runs needed (the tree is the green commit "Pool card rows, slim the card host and add Peek Next Card";
+EditMode 1606 / PlayMode 778 in the background). Targeted fixtures only to prove a closed item you doubt.
 
-Rules as before. OUT OF SCOPE: block 16 (domain close-out check), the Keep Model On Switch follow-ups, taxonomy translation, _3.2,
-_3.3. Ideas outside this block -> proj_guides/__mixed_TODOs.md. If _3.1 or the audit disagrees with the real code, STOP.
-Finish with the final report of `.clinerules/60-finishing.md` 6.4. Commit only if the developer asks.
+DELIVER: a new section "12. Close-out verification" at the end of _3.1.1_Audit.md (the fix-list table with proof per item, the
+triage table: TODO -> destination -> reason); move the TODO lines into their destination guides (`_3.2` / `_3.3` "## TODOs",
+or __mixed_TODOs.md for device / stage-3) and remove them from _3.1; set _3.1 status row 16 to done with the proof. Allowed
+fixes: only doc corrections and a missing test for an item you find unproven (name it). Anything bigger -> a finding.
+Finish with the final report of `.clinerules/60-finishing.md` 6.4, plus a 10-line "domain state" summary (what the card domain
+delivers, what moved where, open risks) for the Architect's hand-off. Commit only if the developer asks.
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

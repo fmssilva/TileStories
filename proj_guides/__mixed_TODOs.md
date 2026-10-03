@@ -184,8 +184,7 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
   `KeywordListFieldTypingTests.TypingTwoKeywordsWithACommaBetween_GivesTwoKeywords` ("the click must focus the keyword
   field") in an EditMode run started right after a full PlayMode run; 1207/1207 on the immediate rerun. Suspect: Editor
   window focus still settling after Play Mode exits (real-click tests need a focused window).
-- Commit hygiene: commit after every verified agent session (456 files were uncommitted after the card 6A session);
-  keep `IPCE/` out of TileStories commits (separate repo or .gitignore).
+- Keep `IPCE/` out of TileStories commits (separate repo or .gitignore).
 - Search results rows show "category - level" (`PoiSubtitle`), so a hierarchy level name ("Hub", "Landmark")
   reaches visitors. Level names are authoring vocabulary. Decide in the Select/Filter/Search domain: category
   only, or a per-level "visitor label" field. (The card header gets its own fix in `_3.1` [6C].)
@@ -193,25 +192,16 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
 
 ## From the POI Detail Card 6C + Tier 2 group A session (2026-09-27)
 
-- `Editor.log` is 3.9 GB (`%LOCALAPPDATA%/Unity/Editor/Editor.log`): every compile check greps its tail and a search for an
-  import error from an hour earlier needs the last 400 MB. Unity truncates it on restart; restart the Editor now and then, or
-  add a small Editor-only "compile check" tool that reads only the lines after the last compile start.
 - A reusable Editor capture helper (open the window, scroll to a section, `ReadScreenPixel` cropped to the part of the window
   that is on screen) would save every UI session rebuilding it by hand in `execute_code`; keep it Editor-only, in `Editor/Dev/`.
 - Flaky tests keep appearing "right after leaving Play Mode" (TaxonomyRowIdentityTests x2, KeywordListFieldTypingTests).
   Common suspect: STATIC state that survives between tests -- `SelectionEventBus` (static events + CurrentPoiId),
   `BlockRegistry.Shared`, `EditorNotice` queues. A small shared `[SetUp]/[TearDown]` reset (or a test base class)
   for every static bus would make these deterministic. One focused session, all domains.
-- Interrupted agent sessions leave the tree broken: the card 7A session found the previous (interrupted) run had left
-  code that did not compile and 22 red tests. Commit after every verified session so an interruption costs only
-  the current session.
 - Two notions of "where a POI sits on the wall": `WallAxisRule` (Runtime/POI, principal axis on the floor plane;
   card wall_locator + related) and `MinimapLayout`'s projection (wall x/y vs floor x/z, widest spread). They can
   disagree about left/right. In the minimap domain, consider building the minimap's wall projection on
   `WallAxisRule` so the minimap and the card's strip always agree.
-- Agent session size: two card sessions in a row were interrupted mid-way and left uncommitted, non-compiling
-  work for the next agent. Keep one session = one close-out-able scope (about 4-6 block kinds), and make the
-  first step of every prompt "verify the tree compiles and is committed".
 
 
 ## From the POI Detail Card step 7C + Tier 3 group A session (2026-09-28)
@@ -237,31 +227,14 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
   HEAD (plus the one stylesheet line) and stayed small through every later test run. Suspect: Unity's scene auto-save catching a rig
   populated in the open scene by an EditMode test or the POI Editor's Load & Populate Rig. Worth finding before it lands in a commit: check
   `git diff --stat` on the scene each time, and see whether an EditMode fixture should close or reload the scene it populates.
-- `EditorNotice` does not block the Editor with a native dialog (it queues an in-window popup) and its test switch is
-  `EditorNotice.ShowPopups`; a UnityMCP capture script that loads the wall config should set it false around `LoadConfig`, as the 8B
-  captures did, so nothing floats over the window being captured.
-- Real touches drive UI Toolkit's `ScrollView` even while a child holds the pointer capture; a child that wants to keep vertical
-  scrolling alive should still not capture at touch-down (the card then swallows the finger for its own gestures elsewhere, e.g. inside a
-  horizontal ScrollView). `SwipeGrabRule` is the pattern for the next swipeable block.
-
-## From the Architect review of 8A-fix + 8B (2026-09-28)
-
-- Reviews from the Cowork VM see every CRLF file as modified unless git runs with `-c core.autocrlf=true`; the Windows side is
-  clean. Not a repo problem; the Architect command (`__AI_Architect.md`) says so.
 
 ## From the Architect review of step 11 (2026-09-28)
 
 - Repo hygiene, developer's call (the evidence clean-up of 2026-09-28 left these alone): tracked files `TileStories/Assets.7z` (48 MB
   backup), `TileStories/__orientation_screenshot.png`, `edit_file.py`, `Fundo Desktop.jpg`.
-- Commit scope: `git add TileStories .clinerules proj_guides` instead of `git add .`, so `IPCE/`, `report/` and
-  `flutter_prototypes/` never ride along by accident.
 
 ## From the POI Detail Card evidence clean-up, step 11-fix and step 12 (2026-09-28)
 
-- The Block Library's family order is derived, not chosen: families sort by the order they first appear in the registry (about, stories, visit,
-  meta, media, play, community, ar), so `meta` (Sources) now sits before the picture, play and community kinds. Fine for a first grouping;
-  if the catalog should read differently (Sources last, say), give a family an explicit order (`BlockRegistry.Ordered`) instead of hoping
-  registration order says it.
 - `LivePlayModeConfigPush` applies EVERY domain on the first push of a Play run (a new wall knows nothing of earlier pushes). That is fine as
   long as each applier's runtime seam is idempotent; `WallSession.RebuildDemoField` was not (it cleared the selection even with no demo on, so the
   developer's first edit closed the open card) and was fixed in step 12. Worth one look at the other `Apply...` seams when a domain next needs to
@@ -278,10 +251,6 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
 - `Markers/Fonts/Oswald Bold SDF.asset` changes on test runs (-944 lines: its dynamic glyph table and atlas are rewritten). A
   TextMeshPro font in Dynamic mode saves whatever glyphs a run happened to use. Keep it out of commits (`git checkout -- <file>`)
   and, in the marker domain, make it Static with the needed character set (Latin + Portuguese) or clear dynamic data on build.
-- Two Worker sessions in a row began from an interrupted, uncommitted predecessor (8B earlier, 9A now). Sessions that end with
-  "audit the WIP" cost a whole run. Keep each brief to ONE step, and have the Worker commit-suggest after each Part.
-- The MCP-for-Unity bridge can keep an orphaned test job after Unity is idle; every new run is then refused. `editor_state` +
-  `get_test_job` diagnose it; restarting the Editor clears it. Worth a line in `50-terminal_and_tools.md` if it happens again.
 
 ## From _3.1 9A-fix / 9B (2026-09-29)
 
@@ -292,11 +261,6 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
   or not; only an Editor restart cleared it. Proposed line for `40-testing.md` 4.2.2/4.2.3: identical failures whose message comes
   from Unity's test framework and that include tests unrelated to the change -> one confirming rerun, then ask for an Editor restart;
   do not chase focus (the suites are meant to pass in the background). Also: close stray `*Tests+Host` windows before a baseline run.
-- [tooling] When Claude Code's auto-mode permission check stops answering ("no verdict"), every mutating call (Bash, execute_code,
-  run_tests...) fails and ten in a row end the turn. After two, stop mutating calls and ask the developer (switch permission mode, or
-  wait); reads still work. Proposed for `50-terminal_and_tools.md`.
-  ROOT FIX (2026-09-29): the developer added `.claude/settings.local.json` with `{"permissions":{"allow":["mcp__UnityMCP"]}}` --
-  allowed tools skip the check, so a check outage no longer stops Unity work (file edits and Bash still go through it).
 
 ## From the stability pass (2026-09-29)
 
@@ -337,3 +301,85 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
   In AR: its model's name) -- a small `BlockKindDefinition` hook if the developer finds the blank rows hard to tell apart.
 - [_5.1, Editor] At 620 pt the summary column is about 60 pt (the Kind / Variant / Display columns are fixed): enough to recognise a
   block, the tooltip holds the rest. If narrow windows are common, let the Variant column shrink before the summary does.
+
+## POI Detail Card close-out (2026-10-02, from _3.1 step 16)
+
+Everything the card domain (`_3.1`) still owed that is not navigation (`_3.2`) or style (`_3.3`) lives here, by kind of destination. The reason
+for each is in `_3.1.1_Audit.md` section 12.5.
+
+**Device checks (Tier C / D: a phone, a real wall)**
+- [place_in_ar] Real size (a Real Size arch measures its file's metres with a tape; Height / Marker Multiple against the printed markers),
+  lighting (the placed model uses the scene's lights, not AR light estimation: does it sit in the room?), anchoring drift (it is a child of the
+  wall's frame: does it stay on The Lamp while walking and after a relocalisation?), frame rate with the arch standing, then with the room scan.
+  Proven in Editor Play Mode only (`MockLocalizationProvider`, Tier A).
+- [place_in_ar, Keep Model On Switch] Is it confusing that only the placing point's card offers Remove From Room? If yes: the mini control
+  in `_3.2` (step 6).
+- [panorama gyro] Proven in the Editor with a SIMULATED `AttitudeSensor` only. On a phone: the view turns the right way in portrait, Input
+  System's "Compensate Orientation" matches the screen, Android's RotationVector vs GameRotationVector drift. The Editor path falls back to drag.
+- [show_on_wall] The card drops to peek and relies on the selection keeping the marker lit: is the marker ON SCREEN (does zoom-on-select pan to it)?
+- [Peek Next Card] Do visitors still not swipe the timeline / related tracks? If so add dots like the gallery's (`_3.3`); if the 32-unit slice
+  reads as a broken card on a small phone, tune `--ts-track-peek` (`_3.3`).
+- [Portuguese card] Read the PT card on a phone once (accents, wrapping of the longer words) with the visitor language chip.
+
+**Ship blockers (before any build leaves the lab)**
+- [media licences] The Lamp's two narrations (`CardMedia/audio/*.mp3`), the two photos and the castle video (`CardMedia/video/`) have NO
+  established licence (the media README says so): replace or license them.
+- [room scan] The 15 MB room scan lives in `Apps/LivingRoom/Resources/`, so it ships in every LivingRoom build: fine for the test wall; never
+  copy the pattern to a real wall; drop it when the scan is replaced.
+- [content] The castle clip has dark bars down its sides (baked into the 640x360 source): a cleaner source clip is the fix, not the card.
+
+**Stage 3 (backend, telemetry), Stage 4 (baker), Stage 6 (packaging)**
+- [Stage 3] `ICardEvents` has one implementation, `LogCardEvents`; the telemetry work replaces it (`feedback`, `poll`, `collect` raise events
+  today; a knowledge answer is a natural next one). See also the 7C note above on `PlayerPrefs` and `_7.1`.
+- [Stage 3] Poll results: no backend, so `poll` shows the visitor's own choice. Register the real `IPollResults` in `CardServices`; the view
+  already draws bars from any implementation (proven in Phase A with a stand-in).
+- [Stage 4] `config.json` size: LivingRoom's went from 39 KB to 196 KB because `JsonUtility` writes every unused slot of every
+  `BlockFieldValue`. The baker (or a trimmed writer) is where to fix it; do not hand-roll a serializer mid-domain.
+- [Stage 6] Models load as IMPORTED prefabs from Resources (glTFast's Editor importer). A wall that downloads content needs runtime
+  `GltfImport` from bytes; `IPreviewStage.Load` is the one place that changes.
+
+**Later card features (no domain owns them yet; build when a wall asks)**
+- [panorama] equirect only (2:1, loaded whole): a 16K wall picture needs tiling or a cubemap; and a mip-mapped import or a higher-resolution
+  default (the 2048 x 1024 default shows its pixels at a narrow zoom).
+- [video] landscape full-screen takeover (rotate when the phone turns).
+- [media] a wall media library CREATION flow (a wall authors its own `CardMediaLibrary` today).
+- [Editor] hotspot_image: a click-to-place pin on a picture preview (sliders only today); duplicate block / copy a block from another POI /
+  "insert after this row"; Card Texts grouped by kind with a filter; a block demo mode (a demo point holding one kind in every look, generated
+  from `CardGalleryDefinitions`, with Demo Language and "scroll to block"); a "Half Stop Height" label for Half Height Max; looks with display
+  labels (`OptionLabels` for variants, raw keys today); the Card Container's rows under "Sheet" and "Audio" headers and a "Media" group; a
+  `BlockFieldDrawer` split by type family (510 lines, the largest card file) and `DetailCard.cs` at 307 lines.
+- [options] Tuning controls for constants that live in code: zoom_image's maximum zoom (`ZoomPanRule.MaxScale`), the turntable auto-spin speed,
+  the audio switch fade, Show On Wall's neighbour count, related's automatic count. Decide per field, not wholesale.
+- [kinds] place_in_ar anchor `surface` (a detected plane: device stage); timeline `then_now_pairs`; a person's photo; story chapter pictures;
+  Landscape-aware layouts; the deferred kinds already named in `_3.1` section 6 (`ar_time_travel` `_3.4`, `guide_bubble` / `share_postcard` /
+  `badge` / `wall_hunt` / `visitor_notes` Stage 3, `ai_guide` Stage 7, tiled deep zoom).
+
+**Cross-domain (another domain draws or owns it)**
+- [taxonomy / marker domain] **Category and status names and the marker names of cardless points are English on the Portuguese card**
+  ("Royal Government", "Intact / Partial Damage / Destroyed", "Lamp - Infrastructure" in the related carousel and Show On Wall's neighbour
+  chips): every card string, glossary entry and block field already has en + pt. Fix with per-language taxonomy names in the marker /
+  taxonomy config and a Header title on the unnamed points. Until then a PT wall shows English in those places.
+- [marker domain] The visited state drawn on the marker after the card closes (the card records it, the marker draws it, `_2.2.x`);
+  `with_neighbours` NAMES the nearest points but does not light their markers (the wall highlights the selection only, `_2.6`).
+- [`_2.6` search] Card text in search is out of the card's scope; decide in `_2.6`.
+- [`_5.1`] `SpecificMarker/POIEditorToolWindow.SpecificMarker.cs:197,205` draw non-ASCII arrow glyphs on the move buttons (`.clinerules/20`
+  2.1: ASCII only); use `^` / `v` as the Card Content rows do. (Reported by the step 14 audit as moved here; it was not until step 16.)
+
+**Test infrastructure and fixtures**
+- [flakes, seen once each, kept until one recurs twice in the background] `TaxonomyRowIdentityTests.TypingADuplicateAndABlankCategoryLabel_...`;
+  `DetailCardEditorTabTests.AColourField_RealTypingOfAHexCode_...`; `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` and
+  `DetailCardEditorTabTests.Glossary_RealClicksAndTyping_...` (once, with Unity in front); `LivePlayModeCardTests.TheRealWindow_WhilePlayModeRuns_...`
+  ("Live heading" arrived as "Live he", 2026-10-02, Unity in the background, 5/5 alone after); `PoiCardLanguageSceneTests.ThePick_StaysForAnotherPoint_...`
+  (the chip's click never fired once; its precondition now names what covered the chip). The first five type or drag in the shared
+  `PoiEditorWindowHost`: if one recurs, log `EditorWindow.focusedWindow` AND `GUIUtility.keyboardControl` per key. (The gallery's 1.5 px header flake
+  was fixed at its cause in 6B.) Step 16's own runs: 135 EditMode + 37 PlayMode targeted tests passed first time, Unity in the background.
+- [cost] `CardGalleryTests` spends 463 s of its 887 s in the two generic per-entry checks (270 cases build a sheet, wait frames and write a PNG): write
+  the render only for entries a vision pass needs, or behind a flag.
+- [fixtures, add to The Lamp's sibling POIs, identity fields untouched, when a chunk touches those kinds] the Phase B gaps of `_3.1.1` section 2:
+  Header compact and Fit sphere / at_rest / visible, Status Label, Swatches Show Code, Size Comparison two_euro_coin / sheet_a4, Dialogue Choice 3 /
+  Reply 3, Related same_category, Sources draft, Video / Audio Captions On By Default, Audio Guide speeds off / wide, 3D Model and 360 Panorama Fallback
+  Picture, 3D Model Fit sphere / at_rest, Knowledge Check Option 4 / Pictures 3-4, Place In AR Button Label; plus a Phase B test that a Block Library
+  field default reaches the card (a wall with Default Fit Sphere), the header's Fit reaching its slot, a wall media library fixture, and the Android
+  earbud poll switch (device-only symptom).
+- [watch] The glossary tap uses the Experimental `PointerUpLinkTagEvent` (`CardTextView`), isolated in one file on purpose: check it on every Unity
+  upgrade.
