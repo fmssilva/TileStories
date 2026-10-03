@@ -313,13 +313,16 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   wall's frame: does it stay on The Lamp while walking and after a relocalisation?), frame rate with the arch standing, then with the room scan.
   Proven in Editor Play Mode only (`MockLocalizationProvider`, Tier A).
 - [place_in_ar, Keep Model On Switch] Is it confusing that only the placing point's card offers Remove From Room? If yes: the mini control
-  in `_3.2` (step 6).
+  in `_3.2` (step 9, the placed-model chip).
 - [panorama gyro] Proven in the Editor with a SIMULATED `AttitudeSensor` only. On a phone: the view turns the right way in portrait, Input
   System's "Compensate Orientation" matches the screen, Android's RotationVector vs GameRotationVector drift. The Editor path falls back to drag.
 - [show_on_wall] The card drops to peek and relies on the selection keeping the marker lit: is the marker ON SCREEN (does zoom-on-select pan to it)?
 - [Peek Next Card] Do visitors still not swipe the timeline / related tracks? If so add dots like the gallery's (`_3.3`); if the 32-unit slice
   reads as a broken card on a small phone, tune `--ts-track-peek` (`_3.3`).
 - [Portuguese card] Read the PT card on a phone once (accents, wrapping of the longer words) with the visitor language chip.
+- [_3.2 navigation, once built] With a thumb: the radial arc (step 9) and the edge scrubber (10); the pages layout vs vertical scrolling (14:
+  disorienting?); Android Back steps the card down (4: `Keyboard.escapeKey`); the placed-model chip at peek (9) answers the Keep Model On
+  Switch question above.
 
 **Ship blockers (before any build leaves the lab)**
 - [media licences] The Lamp's two narrations (`CardMedia/audio/*.mp3`), the two photos and the castle video (`CardMedia/video/`) have NO
