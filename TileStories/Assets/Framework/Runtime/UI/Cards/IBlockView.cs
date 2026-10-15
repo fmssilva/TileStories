@@ -103,6 +103,11 @@ namespace TileStories
         // Open the full-screen view: `name` ends the breadcrumb after the card's title, `pageCount` sibling pages starting
         // at `startPage`, each drawn by `drawPage` through the view's own media scope
         void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage);
+
+        // Move the card to another block of this card (_3.2 step 3: the card's NavController, the same jump every navigation element
+        // makes): `blockKey` is the block's instance key, `elementKey` names what asked (the asking block's kind), for the nav_jump event.
+        // A block that is not in the scrolling stack (hidden, pinned, in the footer, not on this card) is not jumped to
+        void ScrollToBlock(string blockKey, string elementKey);
     }
 
     // One block kind's view (_3.1 section 3): built once, then bound and unbound as the visitor switches POIs

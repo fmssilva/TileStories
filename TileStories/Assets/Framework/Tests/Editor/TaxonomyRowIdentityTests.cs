@@ -485,10 +485,8 @@ namespace TileStories.Editor.Tests
             yield return _window.WaitForRepaint();
 
             yield return _window.ReplaceText("Category label#1", " military");
-            // - clear the third: click in, Ctrl+A (ReplaceText with no text), then a real Backspace
+            // - clear the third: click in, Ctrl+A, a real Backspace (ReplaceText with no text)
             yield return _window.ReplaceText("Category label#2", "");
-            _window.Send(Event.KeyboardEvent("backspace"));
-            yield return _window.WaitForRepaint();
             yield return _window.ClickAway();
             Assert.AreEqual(" military", _window.Config.category_styles[1].label, "precondition: the real typing reached the config");
             Assert.AreEqual("", _window.Config.category_styles[2].label);

@@ -122,15 +122,18 @@ namespace TileStories.Editor.Tests
                 "precondition: '" + probeKey + "' is inside the window (" + VisibleHeight + " pt tall), where a click can reach it");
         }
 
-        // Send one event to the host, as a person's input would arrive. A key needs the host to hold keyboard focus (an IMGUI text
-        // field ignores keys otherwise): while Play Mode runs with Unity NOT the active application, Unity can drop
-        // EditorWindow.focusedWindow to null between two keys (_3.1 step 14: "Live heading" arrived as "L" or "Live he"), so
-        // the host takes focus back before every key -- a person typing always has the window focused (40-testing 4.2.3).
+        // Send one event to the host, as a person's input would arrive: a key goes to the focused window (an IMGUI text field
+        // ignores keys otherwise) and a press focuses the window it lands in, so the host takes focus first when it lost it.
+        // That brings the WINDOW back, never a text field's editing session: any focus change ends it, this one included
+        // (ReplaceText says how typing survives that).
         public void Send(Event e)
         {
-            if (e.isKey && EditorWindow.focusedWindow != _host) _host.Focus();
+            if ((e.isKey || e.type == EventType.MouseDown) && !HasFocus) _host.Focus();
             _host.SendEvent(e);
         }
+
+        // Whether the host is the window keys go to now
+        private bool HasFocus => EditorWindow.focusedWindow == _host;
 
         // A real left click at the centre of a probed control (or 4 px inside its left edge, for a text cell)
         public void Click(string probeKey, bool leftEdge = false)
@@ -146,18 +149,39 @@ namespace TileStories.Editor.Tests
             Send(new Event { type = EventType.MouseUp, button = 0, clickCount = 1, mousePosition = local });
         }
 
-        // Click into a text cell, select what it holds (Ctrl+A) and type the text, one real key event per character
+        // The text of the field being edited right now (IMGUI's own editor of it), or null when no field is editing
+        private static readonly FieldInfo ActiveTextEditor = typeof(EditorGUI).GetField("activeEditor", BindingFlags.NonPublic | BindingFlags.Static);
+        private static string EditingText => EditorGUIUtility.editingTextField ? (ActiveTextEditor.GetValue(null) as TextEditor)?.text : null;
+
+        // How many times a click may have to enter a field: each failed entry is one focus loss in the single repaint after a click,
+        // which a background run sees now and then, never five times in a row
+        private const int MaxFieldEntries = 5;
+
+        // Click into a text cell, select what it holds (Ctrl+A) and type the text, one real key event per character; an empty text
+        // is a real Backspace on the selection (the cell cleared).
+        // - SendEvent is synchronous: each key lands in the field the moment it is sent. Unity NOT being the active application
+        //   can take focus from the host BETWEEN editor ticks, and that ENDS the field's editing session (what was typed so far
+        //   is committed, every later key is dropped: "Live heading" arrived as "Live head", 40-testing 4.2.3). So the whole word
+        //   goes out in one tick, once the field is editing AND the host holds focus (Send would otherwise take focus back on the
+        //   first key, which ends the session too): nothing can split the word. A focus loss can only fall in the repaint after
+        //   the click, where nothing was typed yet, so entering again commits no half word and leaves the undo history exactly as
+        //   one person typing one word makes it (one step per editing session, ConfigHistory)
         public IEnumerator ReplaceText(string probeKey, string text)
         {
-            Click(probeKey, leftEdge: true);
-            yield return WaitForRepaint();
-            Assert.IsTrue(EditorGUIUtility.editingTextField, "precondition: the click must start editing '" + probeKey + "'");
-            Send(new Event { type = EventType.KeyDown, keyCode = KeyCode.A, control = true });
-            foreach (char c in text)
+            for (int entry = 1; ; entry++)
             {
-                Send(new Event { type = EventType.KeyDown, character = c, keyCode = KeyCode.None });
+                Click(probeKey, leftEdge: true);
                 yield return WaitForRepaint();
+                if (EditorGUIUtility.editingTextField && HasFocus) break;
+                Assert.Less(entry, MaxFieldEntries, "precondition: the click must start editing '" + probeKey + "' (focus was lost after "
+                    + entry + " clicks in a row)");
             }
+            Send(new Event { type = EventType.KeyDown, keyCode = KeyCode.A, control = true });
+            if (text.Length == 0) Send(Event.KeyboardEvent("backspace"));
+            foreach (char c in text)
+                Send(new Event { type = EventType.KeyDown, character = c, keyCode = KeyCode.None });
+            Assert.AreEqual(text, EditingText, "every typed key must be in '" + probeKey + "' (null = the field stopped editing)");
+            yield return WaitForRepaint();
         }
 
         // A real click on empty window space: the text field loses focus, like a person clicking away

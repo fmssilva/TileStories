@@ -241,6 +241,50 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(CardNavModel.Build(null, BlockRegistry.Shared, null).ShowsNavigation, "no stack at all: an empty model, never a throw");
         }
 
+        // The shared registry's families and kinds, the very same definitions, each drawn by a plain view (what a block draws is beside
+        // the point of a test about which blocks the stack hides)
+        private static BlockRegistry PlainCopyOfTheSharedRegistry()
+        {
+            var plain = new BlockRegistry();
+            foreach (var kind in BlockRegistry.Shared.Ordered)
+            {
+                if (!plain.TryGetFamily(kind.Family, out _) && BlockRegistry.Shared.TryGetFamily(kind.Family, out var family)) plain.RegisterFamily(family);
+                plain.Register(kind, () => new PlainView());
+            }
+            return plain;
+        }
+
+        // _3.2 step 3 (its [step 3] TODO): the REAL stack hides a block on the SAME call the model leaves it out on
+        // (NavOntologyRule.WaitsToBeRevealed) with the SAME predicate (the stack's IsRevealed, which the sheet hands CardNavModel.Build),
+        // so the stack and the navigation can never disagree -- for The Lamp's waiting block, and for it once revealed
+        [Test]
+        public void TheStackAndTheModel_AnswerAWaitingBlockWithOneCall_BeforeAndAfterItsReveal()
+        {
+            var config = ShippedByFamily();
+            var registry = PlainCopyOfTheSharedRegistry();
+            var lamp = config.pois.Single(p => p.id == Lamp);
+            var entries = BlockStackBuilder.Build(lamp, config.card_settings, registry, config.pois).Entries;
+            var gated = entries.Single(e => e.Instance.key == "block_44");
+            var state = new CardLocalState(new MemoryCardStateStore(), config.wall_id);
+            var stack = new BlockStackView(new VisualElement(), new VisualElement(), registry);
+
+            foreach (bool revealed in new[] { false, true })
+            {
+                if (revealed) state.MarkSeen(Lamp, "block_44");
+                stack.Bind(entries, new BlockBindContext { Poi = lamp, Settings = config.card_settings, State = state, Language = "en", FallbackLanguage = "en" });
+                var model = CardNavModel.Build(entries, registry, config.card_settings, stack.IsRevealed);
+                string when = revealed ? "after its reveal" : "before its reveal";
+
+                bool waits = NavOntologyRule.WaitsToBeRevealed(gated, stack.IsRevealed);
+                Assert.AreEqual(!revealed, waits, "precondition, " + when + ": block_44 (Show After Reading) waits exactly until it is revealed");
+                Assert.AreEqual(waits, stack.SlotOfBlock("block_44").style.display.value == DisplayStyle.None, when + ": the stack hides it on that answer");
+                Assert.AreEqual(!waits, AllTargets(model).Contains("block_44"), when + ": the model leaves it out on that same answer");
+                foreach (var entry in entries)
+                    Assert.AreEqual(NavOntologyRule.WaitsToBeRevealed(entry, stack.IsRevealed),
+                        stack.SlotOfBlock(entry.Instance.key).style.display.value == DisplayStyle.None, when + ": every slot, " + entry.Instance.key);
+            }
+        }
+
         // An app registers a family between two built-in ones (Order 35) and a kind in it: it is navigated like any other
         [Test]
         public void AnAppFamilyAndItsKind_GetTheirOwnSection_WhereTheFamilysOrderPutsIt_LabelledByTheAppsKey()

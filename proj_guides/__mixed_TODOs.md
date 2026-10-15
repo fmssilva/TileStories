@@ -281,10 +281,6 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
   every command). Every binary is committed as a normal blob (checked: the 17 MB castle video and the PNGs are raw in HEAD). To
   use LFS: move the macro lines to a root `.gitattributes` (or write `filter=lfs diff=lfs merge=lfs -text` directly), install
   git-lfs, and run `git lfs migrate` if the history should shrink. Developer's decision (needs a remote that supports LFS).
-- **Real-typing EditMode tests depend on Unity's focus.** `LivePlayModeCardTests.TheRealWindow_WhilePlayModeRuns_ATypedText...` loses
-  characters ("Dis" for "Dismiss", "L" for "Live heading") when a full run happens with Unity in the background (seen 9B-fix and again
-  2026-10-01; 5/5 alone with focus). Either give these tests their own category that a background run skips, or have the typing helper
-  wait until each character has landed before the next. Test-infrastructure work, not a card domain change.
 
 ## Process (2026-10-01)
 
@@ -373,8 +369,9 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   `DetailCardEditorTabTests.AColourField_RealTypingOfAHexCode_...`; `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` and
   `DetailCardEditorTabTests.Glossary_RealClicksAndTyping_...` (once, with Unity in front); `LivePlayModeCardTests.TheRealWindow_WhilePlayModeRuns_...`
   ("Live heading" arrived as "Live he", 2026-10-02, Unity in the background, 5/5 alone after); `PoiCardLanguageSceneTests.ThePick_StaysForAnotherPoint_...`
-  (the chip's click never fired once; its precondition now names what covered the chip). The first five type or drag in the shared
-  `PoiEditorWindowHost`: if one recurs, log `EditorWindow.focusedWindow` AND `GUIUtility.keyboardControl` per key. (The gallery's 1.5 px header flake
+  (the chip's click never fired once; its precondition now names what covered the chip). The typing ones share the cause fixed at `_3.2`
+  step 3 (any focus change ends an IMGUI field's editing session; `PoiEditorWindowHost.ReplaceText` now types a word inside one tick,
+  `PoiEditorWindowHostTests`); still watch the slider drag and the chip click. (The gallery's 1.5 px header flake
   was fixed at its cause in 6B.) Step 16's own runs: 135 EditMode + 37 PlayMode targeted tests passed first time, Unity in the background.
 - [cost] `CardGalleryTests` spends 463 s of its 887 s in the two generic per-entry checks (270 cases build a sheet, wait frames and write a PNG): write
   the render only for entries a vision pass needs, or behind a flag.
@@ -397,9 +394,3 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   cursor crossing Unity) reaches the same panel and drags the handle to the edge. Test: run the fixture with Unity in the
   background AND the cursor moved across the Game view during the before_after test; if it reproduces, make the card drags
   immune to real pointer input during a run (the harness is shared ground: a full PlayMode run).
-- [fix, REPRODUCED] `LivePlayModeCardTests.TheRealWindow_WhilePlayModeRuns_ATypedTextANewBlockAndAnotherVariantChangeTheOpenCard_AndUndoBringsEachBack`
-  (EditMode, real-window typing) loses keystrokes when Unity is NOT the active application: "Live heading" arrived as "Live "
-  in a full run, and "Dismiss" as "Dis" when run alone, both with `editor_is_focused: false`; it passes focused (1683/1683 twice,
-  2026-10-15). A `40-testing` 4.2.3 violation (tests never depend on window focus) that only shows when the developer works
-  elsewhere during an EditMode run. Fix the typing helper so each key event reaches the window whatever the focus (it is test
-  infrastructure: plan it with a full run); until then an EditMode run with Unity in the background may show this one failure.

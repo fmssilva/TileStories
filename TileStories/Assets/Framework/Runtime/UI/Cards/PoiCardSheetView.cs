@@ -20,6 +20,8 @@ namespace TileStories
         // The language chip beside the X (15.3.2): shows the code of the language a tap switches to; hidden when the wall offers one language
         public Button LanguageButton { get; }
         public BlockStackView Stack { get; }
+        // Moving inside the card (_3.2 step 3): jumps and the scroll-spy over the card's navigation model, rebuilt on every Show and reveal
+        public NavController Nav { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
 
@@ -41,6 +43,9 @@ namespace TileStories
 
         private static readonly CustomStyleProperty<float> TopGapProperty = new("--ts-sheet-top-gap");
         private static readonly CustomStyleProperty<float> CollapsedHeaderProperty = new("--ts-header-collapsed-max-height");
+        private readonly BlockRegistry _registry;
+        // The shown card's stack entries: what its navigation model is rebuilt from when a waiting block is revealed
+        private IReadOnlyList<BlockStackBuilder.Entry> _entries;
         private float _topGap;
         private float _halfMaxRatio = CardContainerSettings.HalfMaxRatioMax;
         // The language the chip's next tap switches to ("" = the chip is hidden)
@@ -78,7 +83,10 @@ namespace TileStories
             Handle.Add(grabber);
             Root.Add(Handle);
 
+            _registry = registry;
             Stack = new BlockStackView(Root, Root, registry);
+            Nav = new NavController(Stack, () => { if (IsOpen && Stop != SheetStopRule.Stop.Full) SetStop(SheetStopRule.Stop.Full); });
+            Stack.Revealed += BindNav;
 
             // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings
             CloseButton = new Button(() => CloseRequested?.Invoke()) { name = "poi-card-close" };
@@ -126,9 +134,19 @@ namespace TileStories
             // - another card replaces the full-screen view of the old one
             Takeover.Close();
             _context = context;
+            _entries = entries;
             Stack.Bind(entries, context);
+            BindNav();
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
+        }
+
+        // Build the shown card's navigation model -- with the stack's own reveal predicate, so a block the stack hides is never a target --
+        // and hand it to the controller (on Show: a POI switch, a live edit, a language switch; and on a reveal)
+        private void BindNav()
+        {
+            if (_context == null || _entries == null) return;
+            Nav.Bind(CardNavModel.Build(_entries, _registry, _context.Settings, Stack.IsRevealed), _context);
         }
 
         // The chip names the language a tap switches to; with fewer than two languages there is nothing to choose and it is hidden
@@ -147,6 +165,8 @@ namespace TileStories
         {
             Takeover?.Close();
             _context = null;
+            _entries = null;
+            Nav?.Unbind();
             Stack.UnbindAll();
             SetStopState(SheetStopRule.Stop.Dismissed);
             IsDragging = false;
@@ -193,6 +213,12 @@ namespace TileStories
             var viewer = Viewer?.Invoke();
             wallPosition = viewer ?? Vector3.zero;
             return viewer.HasValue;
+        }
+
+        // A block asked to move the card to another of its blocks: the same jump every navigation element makes
+        public void ScrollToBlock(string blockKey, string elementKey)
+        {
+            if (IsOpen) Nav.JumpToBlock(blockKey, elementKey);
         }
 
         // A block asked for the full-screen view: the breadcrumb starts with this card's title
@@ -245,11 +271,22 @@ namespace TileStories
         {
             // - the card's tokens are declared on this root (.ts-card): the stack's header reads its ceiling from here
             if (evt.customStyle.TryGetValue(CollapsedHeaderProperty, out float ceiling)) Stack.CollapsedCeiling = ceiling;
+            // - a jump glides as long as the sheet takes to rise: both are --ts-duration (never read mid-drag, where the drag class zeroes it)
+            if (!IsDragging) Nav.Duration = HeightTransitionSeconds();
             if (evt.customStyle.TryGetValue(TopGapProperty, out float gap) && !Mathf.Approximately(gap, _topGap))
             {
                 _topGap = gap;
                 RecomputeStops();
             }
+        }
+
+        // The sheet's height transition (PoiCard.uss: transition-duration var(--ts-duration)), in seconds. Read from the resolved style:
+        // Unity has no time-typed custom style property, so --ts-duration itself cannot be read as a number
+        private float HeightTransitionSeconds()
+        {
+            foreach (var duration in Root.resolvedStyle.transitionDuration)
+                return duration.unit == TimeUnit.Millisecond ? duration.value / 1000f : duration.value;
+            return 0f;
         }
 
         private void OnPointerDown(PointerDownEvent evt)

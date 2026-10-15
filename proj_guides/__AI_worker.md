@@ -12,80 +12,83 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-
-## `And now: POI Card Navigation (3.2) -- step 2, the nav model and the Format facet`
+## `And now: POI Card Navigation (3.2) -- step 3, the nav controller, scroll-spy and jumps`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity capture
 (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP
-and report. Baseline: the tree is clean on commit "Replace Sources At The End with a Block Order and family table", whose
-full runs were green (EditMode 1620, PlayMode 778) -- run the FULL EditMode suite only and say which commit you trusted.
+and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --` them if TMP
+dirtied them. Baseline: full EditMode on the tree as you find it -- it must be 1683/1683 (commit "Add the card navigation
+model and a Format for every block kind"; its PlayMode rides on 34d04f7's 778). Run it with Unity IN FRONT this once:
+PART 1 is exactly the test that fails unfocused, and you need its red before you fix it.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- start with "## TODOs" (the [step 5] lines are NOT
-yours; read them so you do not build them) and the status table (step 1 done 2026-10-15; step 2 is yours). Sections 2.1,
-2.4, 2.5, 3, 4.1 and 9 are the step; section 4.4's worked example on The Lamp is the number you must reproduce.
-REQUIRED READING (all lines): .clinerules/40-testing.md 4.2 (the full-run cadence CHANGED on 2026-10-15: read it before you
-plan a single run) and 4.2.4b (assert relative order and shape, not hard indices); .clinerules/20-code-quality.md
-(no speculative field -- this step adds data that step 5+ will read, so add ONLY what the model itself reads).
-Context only: _3.1_POI_Card_Blocks.md section 3, .clinerules/10-structure.md (Blocks tree), _5.1_Editor_Tab.md.
-WORKER MODEL: Opus-class -- `CardNavModel` is the one model every element, layout and test of steps 3-18 reads; a wrong
-shape here is paid for sixteen times.
-TEST PLAN: full EditMode at the GATE and at the end (always). NO full PlayMode run this block: it adds a pure model and an
-additive field, touches no scene, no host and no test infrastructure. It closes instead on the full EditMode suite plus
-the targeted PlayMode fixtures that reach the card stack -- PoiCardSceneTests, PoiCardLiveUpdateTests,
-LivingRoomCardSceneTests (add any other fixture a grep for `BlockKindDefinition` / `BlockStackBuilder` finds). It rides on
-the full runs of the commit named above; the next full PlayMode run falls due at step 5 (or sooner if a block touches
-shared ground). Unity may stay in the background for the whole session.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 3] line is yours; the two
+[step 5] lines are NOT) and the status table (steps 1-2 done; step 3 is yours). Sections 4.1, 4.4 and 9 are the step;
+4.2 tells you where the chrome will sit later, so the controller must not assume it.
+REQUIRED READING (all lines): .clinerules/40-testing.md 4.2 (the cadence; this block DOES owe a full PlayMode run), 4.2.3
+(tests never depend on window focus -- PART 1 is a violation of it) and 4.2.4b; _5.1_Editor_Tab.md "PlayMode Live Config"
+(the sheet is rebuilt live and the controller must survive it).
+Context only: _3.1_POI_Card_Blocks.md section 3, .clinerules/10-structure.md.
+WORKER MODEL: Opus-class -- it wires the first stateful owner into the live sheet and touches the shared test harness.
+TEST PLAN: full EditMode at the GATE (Unity in front, see above) and at the end. This block DOES owe a FULL PlayMode run:
+it edits the sheet / stack and the shared test harness, which 4.2 calls shared ground. Take it with Unity in the
+background -- that is now the default, and PART 1 is what makes it trustworthy. It is also the run the next three blocks
+will ride on, so report its counts carefully.
 
-PART 1 -- fixes: none. The two step-1 review findings are tagged [step 5] in the guide; do NOT do them now.
+PART 1 -- the harness fix that the cadence now depends on (do it FIRST, before any new code):
+1. `LivePlayModeCardTests.TheRealWindow_WhilePlayModeRuns_...` loses keystrokes when Unity is not the active application
+   ("Live heading" arrived as "Live ", "Dismiss" as "Dis"); reproduced in `_3.2` step 2 and logged in `__mixed_TODOs.md`
+   "Test harness". The cause is in the SHARED harness, `Tests/Editor/PoiEditorWindowHost.ReplaceText`: it sends one
+   `KeyDown` per character and assumes one repaint delivers one character, which an unfocused Editor does not promise.
+   Fix it in the harness, not in the test, and not by forcing focus. Weigh at least three ways (00-process PLAN MODE) --
+   e.g. read the field back after each character and only advance when it took; type and then poll the probe's value to a
+   bounded timeout with a message that names what arrived; drive the field through the same event path a focused Editor
+   uses -- and say why you picked yours. PROOF: the fixture passes with `editor_is_focused: false` TWICE in a row, and
+   still passes focused. Then re-run every other EditMode fixture that types through this harness (grep `ReplaceText`)
+   unfocused: the harness is shared ground, so a fix there must not quietly change what they assert.
+   Remove the item from `__mixed_TODOs.md` when it is proven; leave the before_after one there (still not reproduced).
 
-PART 2 -- step 2, in this order:
+PART 2 -- step 3:
 
-2.1 The Format facet.
-  WHAT: `BlockKindDefinition.Format`, one of `CardOptions.Formats` = read, look, watch, listen, model, interact (a FIXED
-  list: formats are universal, families are a wall's vocabulary). Every built-in kind declares one; so does the app's
-  size_comparison. `Validate` refuses an unknown or missing format -- a shape check, so it belongs in the static `Validate`,
-  unlike the family check of step 1.
-  HOW: the format of each kind follows `_3.2` 2.4; decide the handful the guide does not name and say which and why in the
-  report. Format labels are `CardStrings` keys like the families' (added now only if the model returns them).
-  TESTS: every registered kind has a valid format (one test over `BlockRegistry.Shared`, the app included); `Validate`
-  refuses an unknown one.
+3.1 `NavController` (Runtime/UI/Cards/Navigation/, one per sheet, owned by the sheet next to the stack).
+  WHAT: `JumpTo(sectionIndex)`, `JumpToBlock(blockKey)`, `Current`, `CurrentChanged`. It owns no element and no element
+  owns it. ACCEPTANCE: a jump puts the target block's slot top at the viewport top within +-1 px, clamped to the scroll
+  range; the spy names the right section at three different offsets.
+  HOW: the arithmetic belongs in the pure `NavScrollRule` (Runtime/Blocks/Navigation/), the controller only applies it --
+  target offset = the slot's `layout.y` clamped to `[0, content - viewport]`, current section = the last whose first
+  target's top is `<= offset + viewport/3`, and the LAST section once the offset is within 1 px of the end (`_3.2` 4.4).
+  `jump_raises_to` (default `full`) raises the sheet BEFORE scrolling; `jump_motion` smooth animates `scrollOffset` over
+  `--ts-duration` through the panel scheduler, instant and reduce-motion set it at once. While a jump animates the spy is
+  FROZEN on the target section, then released -- test that explicitly, it is the flicker the guide warns about.
+  Do NOT use `ScrollView.ScrollTo` (the docs do not say where the child lands, `_3.2` references).
+3.2 `IBlockHost.ScrollToBlock` + the `nav_jump` `CardEvent` (element key, section key) through `ICardEvents`, so the
+  evaluation of `_7.1` can later count which elements visitors use. Find the existing `CardEvent` / `ICardEvents` shape
+  first and follow it; do not invent a second event path.
+3.3 The [step 3] TODO of the guide: `BlockStackView` states the ShowAfterViewed facts inline while `NavOntologyRule`
+  states them too. Make the view call `NavOntologyRule.WaitsToBeRevealed` with the same `Seen` predicate the host hands
+  the model, so the stack and the nav model can never disagree about a hidden block. TEST: one assertion that both
+  answers come from the same call for a waiting block and for a revealed one.
+3.4 The sheet builds the model and the controller in `Show` and rebuilds them on a live edit, a POI switch, a language
+  switch and a reveal. `PoiCardHost` stays a wiring class (it was 266 lines): no decision in it.
+  TESTS: Tier 0 `NavScrollRuleTests` (offsets, the clamp, the spy line at 3 offsets, the end-of-range case, the freeze).
+  Phase B in LivingRoomScene with real input (`CardTestInput`): a jump to a late family lands within +-1 px (assert the
+  slot top against the viewport, RELATIVE, never a pixel constant); a real drag moves the spy to the right section; a
+  live edit rebuilds the model without losing the scroll (the pattern `PoiCardLiveUpdateTests` already proves).
+  VISUALS: none required -- nothing new is drawn yet. If you capture anything, it is for your own check, not the report.
 
-2.2 `CardNavModel` (pure, Runtime/Blocks/Navigation/).
-  WHAT: `Build(stack entries, registry, CardSettings)` -> sections in order, each with its key, label key, count, the kinds
-  in it and the target block keys. Pivot on `group_by` = family (default) or format. The card's elements never compute
-  structure; they read this.
-  HOW: the model carries label key, count, kinds and targets -- NOT icon or colour token (step 6, as at step 1). What counts
-  as a TARGET is `_3.2` 2.5 rule 1 and must be read from the kind definition that already owns it, never from a list of look
-  names: `BlockKindDefinition.IsPinnedTop(variant)`, the footer variants list beside it, and `ShowAfterViewedField` for a
-  block still waiting to be revealed. Prove by grep that you are reusing them and not re-deriving a second answer.
-2.3 `NavOntologyRule` (pure): the collapse rules of `_3.2` 2.5 in their order -- an empty family hidden; fewer targets than
-  `min_blocks` (default 8) means NO navigation at all; a family with one target jumps straight to the block and a kind with
-  one instance skips L3; a bar with more sections than `max_slots` (3..5, default 5) turns its last slot into More.
-  `segmented` / Groups is step 6: leave the hook out until it has a reader.
-2.4 Data: add to `CardNavigationSettings` ONLY the fields 2.2-2.3 read -- `group_by`, `min_blocks`, `max_slots` -- with the
-  defaults of `_3.2` section 3. NO Editor rows this step (they land at steps 5-7 with the elements that make them visible);
-  the round-trip test still walks the new leaves.
-  TESTS (Tier 0, the whole step): The Lamp (62 blocks) reproduces section 4.4's worked example EXACTLY -- 56 targets, 8
-  sections with counts 18 / 14 / 1 / 7 / 3 / 4 / 7 / 2, Listen collapsed to a direct jump, meta absent (InNav off); the
-  small fixtures (Lamp Military 6 targets -> no navigation at all, Lamp Religious -> none); an app family and an app kind
-  appear in their own section; a ShowAfterViewed block is not a target until revealed and the model rebuilt after the reveal
-  gains it; `group_by = format` regroups the same targets with no target lost (assert the multiset of targets is identical);
-  `max_slots` overflow names exactly the overflow sections. Verify the three fixtures exist before you plan on them -- if a
-  name in the guide is not on disk, STOP and report rather than inventing a POI.
-  VISUALS: none. This step renders nothing; do not take card captures.
+3.5 DOCS: `_3.2` status row 3 + proof, and remove its [step 3] TODO line; `10-structure.md` for the new files; the RUN
+  TIMES line of `40-testing.md` 4.2 after the full PlayMode run (it is the record the next three blocks ride on).
 
-2.5 DOCS: `_3.2` status row 2 done + proof; `10-structure.md` for the new files and the `Format` field; no `_5.1` change
-  (no Editor row). RUN TIMES only if you ran a full suite.
-
-Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
-comments, logs and Editor labels (accents only inside the data assets); pure rules stay free of MonoBehaviour and of the
-view layer; no backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: `NavController`, scroll, spy and jumps (step 3); `BlockRef`, `open_block` and Back (step 4); any nav element,
-slot, layout or Editor row; the `navigation` family; family icons and colour tokens; the two [step 5] TODOs.
-Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures and 2.5 is written.
+Rules as before: pure rules hold the arithmetic, the controller applies it, views own nothing; no literal sizes (the spy
+line and the durations come from tokens or named constants with a comment); strict ASCII in code and logs; no
+backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
+OUT OF SCOPE: `BlockRef`, `open_block` and system Back (step 4); every nav element, slot and the chrome rule (step 5+);
+the two [step 5] Editor TODOs; layouts.
+Stop when the full EditMode suite and the FULL PlayMode suite are green with zero failures and 3.5 is written.
 Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
+
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

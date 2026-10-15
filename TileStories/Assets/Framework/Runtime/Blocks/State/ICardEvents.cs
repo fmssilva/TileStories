@@ -42,5 +42,11 @@ namespace TileStories
 
         // A visitor added this point's item to their story (a collect block): raised once per block (Value: "collected")
         public const string Collect = "collect";
+
+        // A visitor jumped inside the open card (_3.2 section 4.4), raised once per jump so the evaluation can count which navigation
+        // elements visitors really use: BlockKey = the block landed on, Variant = the key of the element that asked (a nav element,
+        // or the block kind that asked through IBlockHost.ScrollToBlock), Value = the section's key ("" when the block is no
+        // navigation target)
+        public const string NavJump = "nav_jump";
     }
 }

@@ -65,6 +65,12 @@ namespace TileStories
         public int min_blocks = 8;
         // Bar Slots: how many sections a bar shows before its last slot becomes More (a navigation bar holds 3 to 5)
         public int max_slots = 5;
+        // Follow Scroll: the section a navigation element marks follows what the visitor scrolls through (off: only a jump moves it)
+        public bool follow_scroll = true;
+        // Jump Opens Card To: "full" (the default: a jump first raises the sheet to Full) | "keep" (CardOptions.JumpRaises)
+        public string jump_raises_to = CardOptions.JumpRaisesFull;
+        // Jump Motion: "smooth" (the default: the stack glides over --ts-duration) | "instant" (CardOptions.JumpMotions)
+        public string jump_motion = CardOptions.JumpMotionSmooth;
 
         public const int MinBlocksMin = 2;
         public const int MinBlocksMax = 30;
@@ -268,6 +274,18 @@ namespace TileStories
         public const string GroupByFamily = "family";
         public const string GroupByFormat = "format";
         public static readonly string[] GroupBys = { GroupByFamily, GroupByFormat };
+
+        // Jump Opens Card To (CardNavigationSettings.jump_raises_to, _3.2 section 4.4): a jump first raises the sheet to Full
+        // (Half shows too little to land on), or keeps the stop the visitor left it at
+        public const string JumpRaisesFull = "full";
+        public const string JumpRaisesKeep = "keep";
+        public static readonly string[] JumpRaises = { JumpRaisesFull, JumpRaisesKeep };
+
+        // Jump Motion (CardNavigationSettings.jump_motion): the stack glides to the target over --ts-duration, or is set there
+        // at once (reduce motion always sets it at once)
+        public const string JumpMotionSmooth = "smooth";
+        public const string JumpMotionInstant = "instant";
+        public static readonly string[] JumpMotions = { JumpMotionSmooth, JumpMotionInstant };
 
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";

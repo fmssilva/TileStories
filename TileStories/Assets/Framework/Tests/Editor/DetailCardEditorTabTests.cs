@@ -129,7 +129,14 @@ namespace TileStories.Editor.Tests
                     foreach (var n in typeof(CardNavigationSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
                     {
                         if (n.FieldType == typeof(string))
-                            edits.Add((n.Name, s => n.SetValue(s.navigation, n.Name == "group_by" ? CardOptions.GroupByFormat : CardOptions.BlockOrderByFamily)));
+                            edits.Add((n.Name, s => n.SetValue(s.navigation, n.Name switch
+                            {
+                                "group_by" => CardOptions.GroupByFormat,
+                                "jump_raises_to" => CardOptions.JumpRaisesKeep,
+                                "jump_motion" => CardOptions.JumpMotionInstant,
+                                _ => CardOptions.BlockOrderByFamily,
+                            })));
+                        else if (n.FieldType == typeof(bool)) edits.Add((n.Name, s => n.SetValue(s.navigation, !(bool)n.GetValue(s.navigation))));
                         else if (n.FieldType == typeof(int)) edits.Add((n.Name, s => n.SetValue(s.navigation, (int)n.GetValue(s.navigation) - 1)));
                         else if (n.FieldType == typeof(List<CardFamilySetting>))
                             edits.Add((n.Name, s => s.navigation.families.Add(new CardFamilySetting { family = BuiltInFamilies.Meta, order = 15, at_end = false })));
@@ -145,8 +152,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 5 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 5 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 8 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 8 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {

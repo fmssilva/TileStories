@@ -32,14 +32,24 @@ namespace TileStories
         }
 
         private readonly Dictionary<string, Stack<Slot>> _pool = new();
-        private readonly List<(string Kind, Slot Slot, ScopedMediaSource Media)> _bound = new();
+        private readonly List<(string Kind, string Key, Slot Slot, ScopedMediaSource Media)> _bound = new();
         // The slots of blocks kept hidden until the card was read (ShowAfterViewedField), with what remembers their reveal
         private readonly List<(Slot Slot, string PoiId, string BlockKey)> _waiting = new();
+        // The block keys this binding revealed itself (a card with no CardLocalState still shows them once read)
+        private readonly HashSet<string> _revealedHere = new();
         private CardLocalState _state;
 
         // Whether the visitor has scrolled past the card's content since it was bound (ContentSeenRule): it latches, and a new
         // card starts unseen
         public bool ContentSeen { get; private set; }
+
+        // Whether a block's ShowAfterViewed gate has opened, by its instance key: remembered on this device (CardLocalState.Seen)
+        // or revealed by this binding. The ONE predicate the stack hides a slot on (NavOntologyRule.WaitsToBeRevealed) and the
+        // sheet builds the card's CardNavModel with, so the stack and the navigation can never disagree about a hidden block
+        public System.Func<string, bool> IsRevealed { get; private set; } = _ => false;
+
+        // Raised when blocks that waited for the card to be read were revealed (the navigation has new targets)
+        public event System.Action Revealed;
 
         // How many views were ever built (pooling makes this stop growing once every kind was seen)
         public int CreatedViewCount { get; private set; }
@@ -91,6 +101,14 @@ namespace TileStories
         {
             foreach (var b in _bound)
                 if (b.Slot.View == view) return b.Slot.Root;
+            return null;
+        }
+
+        // The slot of the bound block with this instance key (null when no such block is bound)
+        public VisualElement SlotOfBlock(string blockKey)
+        {
+            foreach (var b in _bound)
+                if (b.Key == blockKey) return b.Slot.Root;
             return null;
         }
 
@@ -153,12 +171,15 @@ namespace TileStories
             float range = Scroll.contentContainer.layout.height - Scroll.contentViewport.layout.height;
             if (!ContentSeenRule.HasSeenAll(Scroll.scrollOffset.y, range, Scroll.contentViewport.layout.height)) return;
             ContentSeen = true;
+            if (_waiting.Count == 0) return;
             foreach (var (slot, poiId, blockKey) in _waiting)
             {
                 slot.Root.style.display = DisplayStyle.Flex;
+                _revealedHere.Add(blockKey);
                 _state?.MarkSeen(poiId, blockKey);
             }
             _waiting.Clear();
+            Revealed?.Invoke();
         }
 
         // Collapse or open the header for the stack's current scroll (HeaderCollapseRule)
@@ -184,6 +205,9 @@ namespace TileStories
             UnbindAll();
             _state = context.State;
             ContentSeen = false;
+            var state = context.State;
+            string poiId = context.Poi?.id;
+            IsRevealed = key => _revealedHere.Contains(key) || (state?.Seen(poiId, key) ?? false);
             foreach (var entry in entries)
             {
                 var slotOf = Take(entry.Definition.Key);
@@ -191,9 +215,9 @@ namespace TileStories
                 var view = slotOf.View;
                 var media = new ScopedMediaSource(context.Media);
                 var read = new BlockFieldReader(entry.Instance, context.Language, context.FallbackLanguage);
-                // - a block that waits for the card to be read stays out of sight (its heading and gap with it) until then
-                bool waits = entry.Definition.ShowAfterViewedField != null && read.Flag(entry.Definition.ShowAfterViewedField)
-                    && !(context.State?.Seen(context.Poi?.id, entry.Instance.key) ?? false);
+                // - a block that waits for the card to be read stays out of sight (its heading and gap with it) until then: the
+                //   same call the card's navigation model asks (NavOntologyRule), so a hidden block is never a nav target
+                bool waits = NavOntologyRule.WaitsToBeRevealed(entry, IsRevealed);
                 slotOf.Root.style.display = waits ? DisplayStyle.None : DisplayStyle.Flex;
                 if (waits) _waiting.Add((slotOf, context.Poi?.id, entry.Instance.key));
                 string heading = read.Text(BlockKindDefinition.HeadingField);
@@ -217,7 +241,7 @@ namespace TileStories
                     //   is exactly between them. Re-inserting an already-attached element just moves it: harmless on every rebind.
                     h.Root.Insert(1, PinnedTop);
                 }
-                _bound.Add((entry.Definition.Key, slotOf, media));
+                _bound.Add((entry.Definition.Key, entry.Instance.key, slotOf, media));
             }
             Scroll.scrollOffset = UnityEngine.Vector2.zero;
             // - a new card starts at the top, header open (the offset may already have been 0: no scroll event then)
@@ -227,7 +251,7 @@ namespace TileStories
         // Unbind every view and put it back in its kind's pool
         public void UnbindAll()
         {
-            foreach (var (kind, slot, media) in _bound)
+            foreach (var (kind, _, slot, media) in _bound)
             {
                 if (slot.View is HeaderBlockView h) h.HeroPart.RemoveFromHierarchy();
                 slot.View.Unbind();
@@ -238,6 +262,7 @@ namespace TileStories
             }
             _bound.Clear();
             _waiting.Clear();
+            _revealedHere.Clear();
         }
 
         private Slot Take(string kind)

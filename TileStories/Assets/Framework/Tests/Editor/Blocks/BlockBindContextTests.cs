@@ -21,6 +21,7 @@ namespace TileStories.Editor.Tests
             public bool TryGetViewer(out UnityEngine.Vector3 wallPosition) { wallPosition = default; return false; }
             public void OpenUrl(string url) { }
             public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage) { }
+            public void ScrollToBlock(string blockKey, string elementKey) { }
         }
 
         private sealed class StubAudio : ICardAudio

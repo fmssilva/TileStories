@@ -94,6 +94,10 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.GroupByFamily, s.navigation.group_by, "sections are families unless the wall says format");
             Assert.AreEqual(8, s.navigation.min_blocks, "a card shows navigation from 8 targets");
             Assert.AreEqual(5, s.navigation.max_slots, "a bar holds 5 slots before More");
+            // - _3.2 step 3: the jump and spy options load on their section 3 defaults
+            Assert.IsTrue(s.navigation.follow_scroll, "the marked section follows the scroll");
+            Assert.AreEqual(CardOptions.JumpRaisesFull, s.navigation.jump_raises_to, "a jump first raises the card to Full");
+            Assert.AreEqual(CardOptions.JumpMotionSmooth, s.navigation.jump_motion, "a jump glides");
             Assert.IsNotNull(loaded.pois[0].card);
             CollectionAssert.IsEmpty(loaded.pois[0].card.blocks, "no blocks = the header-only card");
         }

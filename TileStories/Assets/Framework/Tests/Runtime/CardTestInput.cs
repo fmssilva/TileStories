@@ -150,9 +150,24 @@ namespace TileStories.Tests
             return false;
         }
 
-        private static void Send(IPanel panel, EventType type, Vector2 position)
+        // A finger's drag from panel position `start` by `delta` (panel units), over `frames` frames: touch pointer events, what a
+        // phone sends and what a ScrollView drag-scrolls its content on
+        public static IEnumerator TouchDrag(IPanel panel, Vector2 start, Vector2 delta, int frames = 12)
         {
-            var e = new Event { type = type, mousePosition = position, button = 0, clickCount = 1 };
+            Send(panel, EventType.MouseDown, start, UnityEngine.PointerType.Touch);
+            yield return null;
+            for (int i = 1; i <= frames; i++)
+            {
+                Send(panel, EventType.MouseDrag, start + delta * i / frames, UnityEngine.PointerType.Touch);
+                yield return null;
+            }
+            Send(panel, EventType.MouseUp, start + delta, UnityEngine.PointerType.Touch);
+            yield return null;
+        }
+
+        private static void Send(IPanel panel, EventType type, Vector2 position, UnityEngine.PointerType pointer = UnityEngine.PointerType.Mouse)
+        {
+            var e = new Event { type = type, mousePosition = position, button = 0, clickCount = 1, pointerType = pointer };
             EventBase evt = type switch
             {
                 EventType.MouseDown => PointerDownEvent.GetPooled(e),
