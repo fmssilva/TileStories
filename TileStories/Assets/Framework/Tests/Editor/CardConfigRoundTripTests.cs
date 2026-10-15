@@ -17,7 +17,8 @@ namespace TileStories.Editor.Tests
     {
         private static readonly Type[] CardTypes =
         {
-            typeof(CardSettings), typeof(CardContainerSettings), typeof(BlockKindSetting), typeof(POICardData),
+            typeof(CardSettings), typeof(CardContainerSettings), typeof(CardNavigationSettings), typeof(CardFamilySetting),
+            typeof(BlockKindSetting), typeof(POICardData),
             typeof(BlockInstanceData), typeof(BlockFieldValue), typeof(BlockItemData), typeof(BlockItemFieldValue),
             typeof(LocalizedEntry), typeof(CardStringEntry), typeof(GlossaryEntry), typeof(BlockFieldDefault),
         };
@@ -30,6 +31,7 @@ namespace TileStories.Editor.Tests
             {
                 var t = f.FieldType;
                 if (t == typeof(bool)) f.SetValue(target, !(bool)f.GetValue(target));
+                else if (t == typeof(int)) f.SetValue(target, (int)f.GetValue(target) + 7 + seed);
                 else if (t == typeof(float)) f.SetValue(target, (float)f.GetValue(target) + 0.125f + seed);
                 else if (t == typeof(string)) f.SetValue(target, f.Name + "_" + seed);
                 else if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(List<>))

@@ -10,9 +10,11 @@ namespace TileStories
             "Leave an empty line between paragraphs. Write [[word]] to link a word to its Glossary entry (Detail Card > " +
             "Glossary): the visitor taps it to read the definition. [[shown words|word]] shows other words for the same entry.";
 
-        // Register every built-in kind into `registry`
+        // Register every built-in family and then every built-in kind into `registry`. The families go FIRST:
+        // Register refuses a kind whose family is not registered yet (_3.2 section 2.2).
         public static void Register(BlockRegistry registry)
         {
+            BuiltInFamilies.Register(registry);
             registry.Register(Header, () => new HeaderBlockView());
             registry.Register(Status, () => new StatusBlockView());
             registry.Register(QuickFacts, () => new QuickFactsBlockView());

@@ -66,6 +66,18 @@ namespace TileStories
             }
         }
 
+        // The kind key of each bound block, in stack order (the header first): the stack's own answer to "what is
+        // shown, and in which order", which is what a Block Order test asserts on (_3.2 section 2.3)
+        public IReadOnlyList<string> BoundKinds
+        {
+            get
+            {
+                var kinds = new List<string>(_bound.Count);
+                foreach (var b in _bound) kinds.Add(b.Kind);
+                return kinds;
+            }
+        }
+
         // The heading drawn above a bound view (hidden when it has no text)
         public Label HeadingOf(IBlockView view)
         {

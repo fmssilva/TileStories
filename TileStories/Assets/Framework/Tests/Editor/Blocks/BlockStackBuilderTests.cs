@@ -36,6 +36,8 @@ namespace TileStories.Editor.Tests
         private static BlockRegistry Registry()
         {
             var r = new BlockRegistry();
+            // - the kinds below name built-in families, so those families must be registered first (_3.2 2.2)
+            BuiltInFamilies.Register(r);
             r.Register(Kind(BuiltInBlocks.HeaderKind), () => new PlainView());
             r.Register(Kind("rich_text", requiredBody: true), () => new PlainView());
             r.Register(Kind("fun_fact"), () => new PlainView());
@@ -83,47 +85,107 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(r.Entries[0].Synthesized);
         }
 
-        // The test registry plus two `meta` kinds (Sources and a second one), so the order rule has something to move
+        // The test registry plus two `meta` kinds (Sources and a second one) and one kind of two further families,
+        // so Block Order has something to move AND something to group (_3.2 2.3)
         private static BlockRegistry RegistryWithMeta()
         {
             var r = Registry();
-            r.Register(Kind("sources", family: ContentSeenRule.MetaFamily), () => new PlainView());
-            r.Register(Kind("credits", family: ContentSeenRule.MetaFamily), () => new PlainView());
+            r.Register(Kind("sources", family: BuiltInFamilies.Meta), () => new PlainView());
+            r.Register(Kind("credits", family: BuiltInFamilies.Meta), () => new PlainView());
+            r.Register(Kind("gallery", family: BuiltInFamilies.Media), () => new PlainView());
+            r.Register(Kind("audio_guide", family: BuiltInFamilies.Guides), () => new PlainView());
             return r;
         }
 
-        private static POIData PoiWithSourcesInTheMiddle() => Poi(Block("block_1", "fun_fact"), Block("block_2", "sources"), Block("block_3", "rich_text", body: "Text"),
-            Block("block_4", "credits"), Block("block_5", "fun_fact"), Block("block_6", BuiltInBlocks.HeaderKind, title: "Castle"));
+        // Four families interleaved on purpose, with a `meta` block in the MIDDLE: without that, `authored` and
+        // `end_families_last` would give the same answer and neither test would prove anything.
+        //   block_1 about | block_2 meta | block_3 media | block_4 about | block_5 meta | block_6 guides | block_7 header
+        private static POIData PoiWithFamiliesInterleaved() => Poi(
+            Block("block_1", "fun_fact"), Block("block_2", "sources"), Block("block_3", "gallery"),
+            Block("block_4", "rich_text", body: "Text"), Block("block_5", "credits"), Block("block_6", "audio_guide"),
+            Block("block_7", BuiltInBlocks.HeaderKind, title: "Castle"));
 
-        [Test]
-        public void SourcesAtTheEnd_IsOnByDefault_AndMovesTheMetaBlocksLast_InTheirAuthoredOrder_AfterTheHeader()
+        // The settings of a wall that picked one Block Order and changed nothing else
+        private static CardSettings With(string blockOrder)
         {
-            Assert.IsTrue(new CardSettings().container.sources_at_end, "the default of a wall that never set it");
-            var r = BlockStackBuilder.Build(PoiWithSourcesInTheMiddle(), new CardSettings(), RegistryWithMeta());
-            CollectionAssert.AreEqual(new[] { "block_6", "block_1", "block_3", "block_5", "block_2", "block_4" }, Keys(r),
-                "header first, the content in its order, then both meta blocks in the order they were written");
+            var s = new CardSettings();
+            s.navigation.block_order = blockOrder;
+            return s;
+        }
+
+        // Where `key` sits in the built stack (for relative-order assertions: never a hard index, 40-testing 4.2.4b)
+        private static int At(BlockStackBuilder.Result r, string key)
+        {
+            int i = Keys(r).ToList().IndexOf(key);
+            Assert.GreaterOrEqual(i, 0, "precondition: '" + key + "' is in the stack at all");
+            return i;
         }
 
         [Test]
-        public void SourcesAtTheEnd_Off_KeepsTheAuthoredOrder_AndANullSettingsReadsTheDefault()
+        public void BlockOrder_EndFamiliesLast_IsTheDefault_AndMovesEveryAtTheEndFamilyLast_InItsAuthoredOrder()
         {
-            var off = new CardSettings();
-            off.container.sources_at_end = false;
-            var r = BlockStackBuilder.Build(PoiWithSourcesInTheMiddle(), off, RegistryWithMeta());
-            CollectionAssert.AreEqual(new[] { "block_6", "block_1", "block_2", "block_3", "block_4", "block_5" }, Keys(r), "authored order, header on top");
-            CollectionAssert.AreEqual(new[] { "block_6", "block_1", "block_3", "block_5", "block_2", "block_4" },
-                Keys(BlockStackBuilder.Build(PoiWithSourcesInTheMiddle(), null, RegistryWithMeta())), "no settings = the default (on)");
+            Assert.AreEqual(CardOptions.BlockOrderEndFamiliesLast, new CardSettings().navigation.block_order, "the default of a wall that never set it");
+            var r = BlockStackBuilder.Build(PoiWithFamiliesInterleaved(), new CardSettings(), RegistryWithMeta());
+            CollectionAssert.AreEqual(new[] { "block_7", "block_1", "block_3", "block_4", "block_6", "block_2", "block_5" }, Keys(r),
+                "header first, the content in its authored order, then both meta blocks in the order they were written");
+            CollectionAssert.AreEqual(Keys(r), Keys(BlockStackBuilder.Build(PoiWithFamiliesInterleaved(), null, RegistryWithMeta())),
+                "no settings at all = the same default");
         }
 
         [Test]
-        public void SourcesAtTheEnd_ACardWithNoMetaBlock_IsUntouched_AndASkippedMetaBlockStaysSkipped()
+        public void BlockOrder_Authored_ShowsTheBlocksExactlyWhereCardContentPutsThem_HeaderStillFirst()
+        {
+            var r = BlockStackBuilder.Build(PoiWithFamiliesInterleaved(), With(CardOptions.BlockOrderAuthored), RegistryWithMeta());
+            CollectionAssert.AreEqual(new[] { "block_7", "block_1", "block_2", "block_3", "block_4", "block_5", "block_6" }, Keys(r),
+                "the authored order, with only the header moved to the top");
+        }
+
+        [Test]
+        public void BlockOrder_ByFamily_MakesEachFamilyOneContiguousRun_ByItsRegisteredOrder_AuthoredOrderInside()
+        {
+            var r = BlockStackBuilder.Build(PoiWithFamiliesInterleaved(), With(CardOptions.BlockOrderByFamily), RegistryWithMeta());
+            CollectionAssert.AreEquivalent(new[] { "block_7", "block_1", "block_2", "block_3", "block_4", "block_5", "block_6" }, Keys(r),
+                "only reordered: no block gained or lost");
+
+            // - relative order only (40-testing 4.2.4b): about(10) < media(20) < guides(30) < meta(90)
+            Assert.Less(At(r, "block_1"), At(r, "block_3"), "about before media");
+            Assert.Less(At(r, "block_3"), At(r, "block_6"), "media before guides");
+            Assert.Less(At(r, "block_6"), At(r, "block_2"), "guides before meta");
+            Assert.Less(At(r, "block_1"), At(r, "block_4"), "inside about, the authored order is kept");
+            Assert.Less(At(r, "block_2"), At(r, "block_5"), "inside meta, the authored order is kept");
+            // - each family is ONE run: nothing of another family sits between a family's first and last block
+            Assert.AreEqual(1, At(r, "block_4") - At(r, "block_1"), "the two about blocks are adjacent");
+            Assert.AreEqual(1, At(r, "block_5") - At(r, "block_2"), "the two meta blocks are adjacent");
+            Assert.AreEqual(At(r, "block_7"), 0, "the header still opens the card");
+        }
+
+        [Test]
+        public void BlockOrder_AWallsFamiliesRow_PutsAtTheEndOnASecondFamily_AndEndFamiliesLastObeysIt()
+        {
+            var s = With(CardOptions.BlockOrderEndFamiliesLast);
+            // - At The End is a FAMILY fact, not a Sources special case: media closes the card here too
+            s.navigation.families.Add(new CardFamilySetting { family = BuiltInFamilies.Media, order = 20, at_end = true });
+            var r = BlockStackBuilder.Build(PoiWithFamiliesInterleaved(), s, RegistryWithMeta());
+            CollectionAssert.AreEqual(new[] { "block_7", "block_1", "block_4", "block_6", "block_2", "block_3", "block_5" }, Keys(r),
+                "the kept blocks in authored order, then the At The End ones (meta and now media) in authored order");
+
+            // - and a row can take At The End OFF a family that has it by default
+            var keep = With(CardOptions.BlockOrderEndFamiliesLast);
+            keep.navigation.families.Add(new CardFamilySetting { family = BuiltInFamilies.Meta, order = 90, at_end = false });
+            CollectionAssert.AreEqual(new[] { "block_7", "block_1", "block_2", "block_3", "block_4", "block_5", "block_6" },
+                Keys(BlockStackBuilder.Build(PoiWithFamiliesInterleaved(), keep, RegistryWithMeta())), "nothing is At The End any more");
+        }
+
+        [Test]
+        public void BlockOrder_ACardWithNoAtTheEndBlock_IsUntouched_AndASkippedMetaBlockStaysSkipped()
         {
             var plain = Poi(Block("block_1", "fun_fact"), Block("block_2", "rich_text", body: "Text"));
             CollectionAssert.AreEqual(new[] { "", "block_1", "block_2" }, Keys(BlockStackBuilder.Build(plain, new CardSettings(), RegistryWithMeta())));
             var off = new CardSettings();
             off.kinds.Add(new BlockKindSetting { kind = "sources", enabled = false });
-            var r = BlockStackBuilder.Build(PoiWithSourcesInTheMiddle(), off, RegistryWithMeta());
-            CollectionAssert.AreEqual(new[] { "block_6", "block_1", "block_3", "block_5", "block_4" }, Keys(r));
+            var r = BlockStackBuilder.Build(PoiWithFamiliesInterleaved(), off, RegistryWithMeta());
+            CollectionAssert.AreEqual(new[] { "block_7", "block_1", "block_3", "block_4", "block_6", "block_5" }, Keys(r),
+                "the order runs on what SURVIVED the skip rules");
             Assert.AreEqual(BlockStackBuilder.SkipReason.KindDisabled, r.Skipped.Single().Reason);
         }
 
@@ -195,6 +257,7 @@ namespace TileStories.Editor.Tests
         public void TheRegistry_RefusesABrokenOrDuplicateKind_WithTheReason()
         {
             var r = new BlockRegistry();
+            BuiltInFamilies.Register(r);
             r.Register(Kind("fun_fact"), () => new PlainView());
             Assert.Throws<System.ArgumentException>(() => r.Register(Kind("fun_fact"), () => new PlainView()), "a duplicate key");
 

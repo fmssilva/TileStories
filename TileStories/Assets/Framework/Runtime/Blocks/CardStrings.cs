@@ -152,6 +152,19 @@ namespace TileStories
             // The language chip beside the close button (15.3.2): its tooltip and accessible name
             public const string LanguageSwitch = "language_switch";
 
+            // The words a visitor reads for each family of the card's ontology (_3.2 section 2.2, BuiltInFamilies).
+            // One per registered family: what a navigation element labels its section with. `guides` reads "Listen"
+            // because its only kind is the audio guide, and `meta` reads "Sources" (its own key stays what it is).
+            public const string FamilyAbout = "family_about";
+            public const string FamilyMedia = "family_media";
+            public const string FamilyGuides = "family_guides";
+            public const string FamilyStories = "family_stories";
+            public const string FamilyAr = "family_ar";
+            public const string FamilyPlay = "family_play";
+            public const string FamilyVisit = "family_visit";
+            public const string FamilyCommunity = "family_community";
+            public const string FamilyMeta = "family_meta";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Close, FunFactLabel, FunFactHint, StatusHeading, StatusUnknownMark, StatusUnknown, StatusPercent,
@@ -168,6 +181,7 @@ namespace TileStories
                 MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters, Model3DHint, Model3DLoading,
                 Panorama360DragHint, Panorama360GyroHint, Panorama360Loading, PlaceInArButton, PlaceInArRemove, PlaceInArPlaced, PlaceInArNotLocalised,
                 LanguageSwitch,
+                FamilyAbout, FamilyMedia, FamilyGuides, FamilyStories, FamilyAr, FamilyPlay, FamilyVisit, FamilyCommunity, FamilyMeta,
             };
         }
 

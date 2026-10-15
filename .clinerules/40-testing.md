@@ -92,25 +92,36 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~70-110 s (1606 tests, 95 s, 2026-10-02); full PlayMode ~27 min (778 tests, 1602 s, Unity in the background,
-2026-10-02); one PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
+EditMode ~70-110 s (1620 tests, 71 s, 2026-10-15); full PlayMode ~27-30 min (778 tests, 1769 s, partly in the background,
+2026-10-15); one PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
   that exercise the changed code: the fixture(s) of the feature itself plus any fixture that reaches it through a seam
   (grep `Tests/` for the changed type or method). Pass the class names as a JSON array in `test_names`
   (`["TileStories.Tests.CardVideoGalleryTests", ...]`; a comma-separated string runs 0 tests).
-- **Full PlayMode -- at these points only (it costs ~25 min, so it is planned, not reflexive):**
+- **Full PlayMode -- at these points only (it costs ~30 min of the developer's machine, so it is planned, not reflexive;
+  it does NOT close every block):**
   - the opening baseline, ONLY when the tree differs from the last commit whose full runs were green (a clean tree on a green
     commit needs no second baseline; say which commit you trusted);
-  - ONCE at the end of the block, before its commit message -- not after every numbered sub-step of a block;
-  - at once after a change to shared ground that every fixture stands on -- test infrastructure (`CardTestInput`,
-    `SearchSceneFixture`, the harnesses, `FixedFrameForTheRun`), `WallSession`, `PanelSettings`, the card tokens
-    (`CardTokens.uss`), the sheet / stack;
-  - whenever the Architect's brief asks for one (its TEST PLAN line). Report every full run with its count.
+  - at the end of a block that touched SHARED GROUND -- anything every fixture stands on: test infrastructure
+    (`CardTestInput`, `SearchSceneFixture`, the harnesses, `FixedFrameForTheRun`), `WallSession`, `PanelSettings`, the card
+    tokens (`CardTokens.uss`), the sheet / stack / host, or a registry or pure rule a whole domain reads (`BlockRegistry`,
+    `BlockStackBuilder`, `CardNavModel`);
+  - at the end of the FOURTH block since the last one, whatever those blocks touched -- so a regression is never more than
+    four blocks deep and a bisect never longer than that;
+  - before a domain close-out (`skills/Domain_Review.md`), before a device session or a build, and whenever the Architect's
+    brief asks for one (its TEST PLAN line). Report every full run with its count.
+- **A block that closes WITHOUT a full PlayMode run** closes on the full EditMode suite (always -- it is cheap) plus every
+  PlayMode fixture that reaches the changed code: the feature's own fixtures, plus every fixture that greps for the changed
+  type, method or config key, named one by one in the report. The report also says which full run the block rides on (the
+  commit and its counts) and in how many blocks the next full run falls due.
 - **Background runs** (Unity not in front, 4.2.3) are owed where a TODO or a fixture's subject asks for them (one targeted
-  fixture), plus ONE full background PlayMode run every third block, scheduled by the Architect in the brief's TEST PLAN line.
+  fixture). Every FULL PlayMode run is taken with Unity in the background unless the brief asks for the front: it frees the
+  developer's machine for the half hour and keeps the focus-independence of 4.2.3 continuously proven, which is what the
+  old "one background full run every third block" bought separately.
 
-A targeted run never replaces the step-end full run: a fixture you did not think of is exactly what the full run is for.
+A targeted run replaces the block-end full run only where the rule above allows it. It never replaces the shared-ground run,
+the fourth-block run or a run the brief asks for: a fixture you did not think of is exactly what the full run is for.
 
 **Fallback — batch-mode (only when MCP is unavailable).** In this workspace,
 batch-mode Unity frequently exits with return code 1 and produces no test XML — this

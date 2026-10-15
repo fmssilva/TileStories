@@ -14,8 +14,10 @@ namespace TileStories
     //   - a second header                             -> skipped (ExtraHeader)
     //   - a variant the kind does not have (or none)  -> kept, with the Block Library's default variant
     // The stack always starts with ONE header: the first authored header (moved to the top), else one made from
-    // the POI's name and summary -- so a POI with no card still gets a card, with zero authoring. It ends with the
-    // `meta` blocks (Sources) while the container's Sources At The End is on (the default), in their authored order.
+    // the POI's name and summary -- so a POI with no card still gets a card, with zero authoring. What follows is
+    // ordered by the wall's Block Order (_3.2 section 2.3, Detail Card > Navigation), applied after the skip rules:
+    // authored, end_families_last (the default: the At The End families, Sources among them, close the card) or
+    // by_family (each family one contiguous run, by its effective order).
     public static class BlockStackBuilder
     {
         public enum SkipReason { UnknownKind, KindDisabled, NotForThisPoint, MissingRequired, NoCompleteRow, InvalidMedia, ExtraHeader }
@@ -108,21 +110,66 @@ namespace TileStories
             if (header == null && poi != null && registry.TryGet(BuiltInBlocks.HeaderKind, out var headerKind))
                 header = new Entry(HeaderFromNameAndSummary(poi, settings), headerKind, BlockLibraryRule.DefaultVariant(settings, headerKind), synthesized: true);
 
+            // - the header is the card's identity: it stays first whatever Block Order says (_3.2 2.3)
             if (header.HasValue) result.Entries.Add(header.Value);
-            // - the container's Sources At The End (on unless the wall switched it off): the `meta` blocks close the card
-            if (settings?.container?.sources_at_end ?? true) result.Entries.AddRange(MetaLast(body));
-            else result.Entries.AddRange(body);
+            result.Entries.AddRange(InBlockOrder(body, settings, registry));
             return result;
         }
 
-        // The body with its `meta` blocks (Sources...) after every other block, both groups in their own authored order
-        private static IEnumerable<Entry> MetaLast(List<Entry> body)
+        // The body in the wall's Block Order (_3.2 section 2.3), applied AFTER the skip rules so a skipped block
+        // can never change the order of the ones that stayed:
+        //   authored           -- exactly what Card Content says
+        //   end_families_last  -- authored order, then the blocks of every At The End family (default)
+        //   by_family          -- by the family's effective Order, authored order inside a family
+        // Every pass is a STABLE partition / insertion sort, so blocks of one family keep their authored order.
+        private static List<Entry> InBlockOrder(List<Entry> body, CardSettings settings, BlockRegistry registry)
         {
+            string order = settings?.navigation?.block_order ?? CardOptions.BlockOrderEndFamiliesLast;
+            if (order == CardOptions.BlockOrderAuthored) return body;
+
+            if (order == CardOptions.BlockOrderByFamily)
+            {
+                var byFamily = new List<Entry>(body.Count);
+                foreach (var entry in body)
+                {
+                    int at = byFamily.Count;
+                    int mine = FamilyOrder(entry, settings, registry);
+                    // - walk back only over families that sort AFTER mine: an equal order stops the walk, so
+                    //   same-family blocks (and ties) keep the order Card Content gave them
+                    while (at > 0 && FamilyOrder(byFamily[at - 1], settings, registry) > mine) at--;
+                    byFamily.Insert(at, entry);
+                }
+                return byFamily;
+            }
+
+            // end_families_last: one stable partition on the family's At The End flag
+            var last = new List<Entry>(body.Count);
             foreach (var entry in body)
-                if (entry.Definition.Family != ContentSeenRule.MetaFamily) yield return entry;
+                if (!FamilyIsAtEnd(entry, settings, registry)) last.Add(entry);
             foreach (var entry in body)
-                if (entry.Definition.Family == ContentSeenRule.MetaFamily) yield return entry;
+                if (FamilyIsAtEnd(entry, settings, registry)) last.Add(entry);
+            return last;
         }
+
+        // The family's effective order: the wall's Families row if it has one, else the registered default
+        private static int FamilyOrder(Entry entry, CardSettings settings, BlockRegistry registry)
+        {
+            var row = FamilyRow(entry, settings);
+            if (row != null) return row.order;
+            return registry != null && registry.TryGetFamily(entry.Definition.Family, out var family) ? family.Order : 0;
+        }
+
+        // The family's effective At The End, the same way round
+        private static bool FamilyIsAtEnd(Entry entry, CardSettings settings, BlockRegistry registry)
+        {
+            var row = FamilyRow(entry, settings);
+            if (row != null) return row.at_end;
+            return registry != null && registry.TryGetFamily(entry.Definition.Family, out var family) && family.AtEnd;
+        }
+
+        // This entry's family row in the wall's Families table, or null when the wall never changed that family
+        private static CardFamilySetting FamilyRow(Entry entry, CardSettings settings) =>
+            settings?.navigation?.families?.Find(f => f != null && f.family == entry.Definition.Family);
 
         // The header a POI without an authored one gets: its name as the title, its summary as the subtitle
         public static BlockInstanceData HeaderFromNameAndSummary(POIData poi, CardSettings settings)

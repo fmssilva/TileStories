@@ -3,13 +3,17 @@ using System.Collections.Generic;
 
 namespace TileStories
 {
-    // Every block kind the card can show, with the view that draws it (_3.1 section 3). The extension point:
-    // BuiltInBlocks registers the framework's kinds into Shared, and an app registers its own kinds the same way
-    // (BlockRegistry.Shared.Register) with zero Framework edits. Tests build their own instance.
+    // Every block kind the card can show, with the view that draws it (_3.1 section 3), and every FAMILY those
+    // kinds belong to (_3.2 section 2.2). The extension point: BuiltInBlocks registers the framework's families
+    // and then its kinds into Shared, and an app registers its own the same way (BlockRegistry.Shared.RegisterFamily
+    // / .Register) with zero Framework edits. Tests build their own instance.
+    // Families are registered BEFORE kinds: Register refuses a kind whose family is unknown, so a typo in a
+    // Family string can no longer invent a family that nothing ever navigates to.
     public sealed class BlockRegistry
     {
         private readonly List<BlockKindDefinition> _kinds = new();
         private readonly Dictionary<string, Func<IBlockView>> _views = new();
+        private readonly List<FamilyDefinition> _families = new();
 
         // The app's registry: the framework kinds plus whatever the app registered
         public static BlockRegistry Shared
@@ -29,33 +33,67 @@ namespace TileStories
         // Every registered kind, in registration order (the order the catalog and its tests are written in)
         public IReadOnlyList<BlockKindDefinition> All => _kinds;
 
-        // Every registered kind grouped by family, for a person choosing one (the Editor's Block Library and "+ Add block"): the families in the
-        // order each first appeared, then the kinds of a family in registration order. An app's kind therefore sits with its own family,
-        // not after every built-in kind.
+        // Every registered family, in registration order (BuiltInFamilies first, then whatever an app added).
+        // Their own Order field, not this list's order, is what sorts them -- see Ordered.
+        public IReadOnlyList<FamilyDefinition> Families => _families;
+
+        // Every registered kind grouped by family, for a person choosing one (the Editor's Block Library and "+ Add block"): the families
+        // sorted by their registered Order, then the kinds of a family in registration order. An app's kind therefore sits with its own
+        // family, and an app family with Order 35 really lands between guides (30) and stories (40).
         public IReadOnlyList<BlockKindDefinition> Ordered
         {
             get
             {
-                // - a list, not a dictionary: only a list promises to keep the order the families first appeared in
-                var families = new List<string>();
+                // - a list of the families that actually have a kind here, sorted by their registered Order. A stable insertion sort
+                //   keeps two families that share an Order in registration order, so the result never depends on sort internals.
+                var families = new List<FamilyDefinition>();
                 foreach (var kind in _kinds)
-                    if (!families.Contains(kind.Family)) families.Add(kind.Family);
+                {
+                    if (!TryGetFamily(kind.Family, out var family) || families.Contains(family)) continue;
+                    int at = families.Count;
+                    while (at > 0 && families[at - 1].Order > family.Order) at--;
+                    families.Insert(at, family);
+                }
                 var ordered = new List<BlockKindDefinition>(_kinds.Count);
                 foreach (var family in families)
                     foreach (var kind in _kinds)
-                        if (kind.Family == family) ordered.Add(kind);
+                        if (kind.Family == family.Key) ordered.Add(kind);
                 return ordered;
             }
         }
 
+        // Add a family the kinds may then belong to. A second family with the same key is refused, like a kind:
+        // a silent replace would let an app quietly re-order or re-label a framework family.
+        public void RegisterFamily(FamilyDefinition definition)
+        {
+            if (definition == null) throw new ArgumentNullException(nameof(definition));
+            if (string.IsNullOrWhiteSpace(definition.Key)) throw new ArgumentException("[Blocks] cannot register a family with no key");
+            if (TryGetFamily(definition.Key, out _))
+                throw new ArgumentException("[Blocks] family '" + definition.Key + "' is already registered");
+            _families.Add(definition);
+        }
+
+        public bool TryGetFamily(string key, out FamilyDefinition definition)
+        {
+            definition = null;
+            if (string.IsNullOrEmpty(key)) return false;
+            for (int i = 0; i < _families.Count; i++)
+                if (_families[i].Key == key) { definition = _families[i]; return true; }
+            return false;
+        }
+
         // Add a kind and the factory of its view. A second kind with the same key is refused (a silent
-        // replace would hide a clash between an app kind and a framework kind).
+        // replace would hide a clash between an app kind and a framework kind), and so is a kind whose
+        // family nobody registered -- that used to make a new family silently, out of a typo.
         public void Register(BlockKindDefinition definition, Func<IBlockView> viewFactory)
         {
             string problem = Validate(definition);
             if (problem != null) throw new ArgumentException("[Blocks] cannot register kind '" + definition?.Key + "': " + problem);
             if (viewFactory == null) throw new ArgumentNullException(nameof(viewFactory));
             if (_views.ContainsKey(definition.Key)) throw new ArgumentException("[Blocks] kind '" + definition.Key + "' is already registered");
+            if (!TryGetFamily(definition.Family, out _))
+                throw new ArgumentException("[Blocks] cannot register kind '" + definition.Key + "': its family '" + definition.Family
+                    + "' is not registered. Register the family first (RegisterFamily).");
             _kinds.Add(definition);
             _views[definition.Key] = viewFactory;
         }

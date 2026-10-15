@@ -96,7 +96,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Header = new()
         {
             Key = HeaderKind,
-            Family = "about",
+            Family = BuiltInFamilies.About,
             DisplayName = "Header",
             Help = "The top of the card: the point's title and its category chip, plus an optional subtitle. The chip names the " +
                    "point's category only; Show Level adds its hierarchy level. Compact: title and chip. Text only: with the " +
@@ -196,7 +196,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Status = new()
         {
             Key = StatusKind,
-            Family = "about",
+            Family = BuiltInFamilies.About,
             DisplayName = "Status",
             Help = "The point's condition, drawn the way its marker draws it: the same outline picture in the same colour " +
                    "(Global Scene > Outline and this point's Outline rows decide both). Ring: one outline beside the condition's " +
@@ -221,7 +221,7 @@ namespace TileStories
         public static readonly BlockKindDefinition QuickFacts = new()
         {
             Key = QuickFactsKind,
-            Family = "about",
+            Family = BuiltInFamilies.About,
             DisplayName = "Quick Facts",
             Help = "A few short facts at a glance, each a label and a value (Built: 1147). Chips: small pills that wrap. " +
                    "Grid Hairline: two columns split by thin lines. Big Numbers: the value large with its label under it, best for " +
@@ -248,7 +248,7 @@ namespace TileStories
         public static readonly BlockKindDefinition FunFact = new()
         {
             Key = FunFactKind,
-            Family = "about",
+            Family = BuiltInFamilies.About,
             DisplayName = "Fun Fact",
             Help = "Surprising facts about the point, one small card per fact under the heading of Detail Card > Card Texts. " +
                    "Flip: the fact is hidden until the visitor taps the card (a tap on the heading hides it again). Postcard: " +
@@ -274,7 +274,7 @@ namespace TileStories
         public static readonly BlockKindDefinition PullQuote = new()
         {
             Key = PullQuoteKind,
-            Family = "about",
+            Family = BuiltInFamilies.About,
             DisplayName = "Pull Quote",
             Help = "A quotation set apart from the text: what someone wrote or said about the point, with who and where. " +
                    "Serif: large italic text behind an accent bar, the author and the source under it. Minimal: body-size " +
@@ -306,7 +306,7 @@ namespace TileStories
         public static readonly BlockKindDefinition ProcessSteps = new()
         {
             Key = ProcessStepsKind,
-            Family = "about",
+            Family = BuiltInFamilies.About,
             DisplayName = "Process Steps",
             Help = "How something was made or done, step by step (how the tiles were fired, how the wall was restored). " +
                    "Numbered: each step's number in a circle beside its title and text, the steps joined by a line, in the " +
@@ -333,7 +333,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Swatches = new()
         {
             Key = SwatchesKind,
-            Family = "about",
+            Family = BuiltInFamilies.About,
             DisplayName = "Swatches",
             Help = "The colours of the point itself (the pigments of a tile panel, the paints of a facade), each a sample with " +
                    "its name and an optional note. Grid: the samples in two columns. These colours are content, shown exactly as " +
@@ -372,7 +372,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Actions = new()
         {
             Key = ActionsKind,
-            Family = "about",
+            Family = BuiltInFamilies.About,
             DisplayName = "Actions",
             Help = "Buttons that do something for the visitor, each with your own words and one action. Show On The Wall: " +
                    "lowers the card so the point's marker shows on the wall. Circles: round buttons with the words under them. " +
@@ -411,7 +411,7 @@ namespace TileStories
         public static readonly BlockKindDefinition RichText = new()
         {
             Key = RichTextKind,
-            Family = "about",
+            Family = BuiltInFamilies.About,
             DisplayName = "Rich Text",
             Help = "Paragraphs of text about the point. Plain: paragraphs only. Drop Cap: the first letter raised beside the first " +
                    "paragraph. Lede: a larger first paragraph that sums the point up. Sections: the text as an introduction, then " +

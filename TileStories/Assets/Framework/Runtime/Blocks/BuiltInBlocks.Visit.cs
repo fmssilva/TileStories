@@ -37,7 +37,7 @@ namespace TileStories
         public static readonly BlockKindDefinition WallLocator = new()
         {
             Key = WallLocatorKind,
-            Family = "visit",
+            Family = BuiltInFamilies.Visit,
             DisplayName = "Wall Locator",
             Help = "Where this point is along the wall, worked out from the positions of the wall's points: nothing to write. Strip: " +
                    "the wall as a line with a dot for every point, this one marked, and in the app the visitor's own place (You are " +
@@ -57,7 +57,7 @@ namespace TileStories
         public static readonly BlockKindDefinition TodayMap = new()
         {
             Key = TodayMapKind,
-            Family = "visit",
+            Family = BuiltInFamilies.Visit,
             DisplayName = "Today Map",
             Help = "Where the place the wall shows is in the city today. Static: the map picture, the coordinates under it and a " +
                    "Directions button. Bridge: from the wall to today -- the point as the wall shows it (its header picture and " +
@@ -100,7 +100,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Related = new()
         {
             Key = RelatedKind,
-            Family = "visit",
+            Family = BuiltInFamilies.Visit,
             DisplayName = "Related",
             Help = "Other points worth seeing from here. Carousel: a strip of pictures, a tap opens that point's card. Next Along " +
                    "Wall: one button, the nearest picked point to the right along the wall (wraps to the left at the wall's end). " +
@@ -146,7 +146,7 @@ namespace TileStories
         public static readonly BlockKindDefinition PracticalInfo = new()
         {
             Key = PracticalInfoKind,
-            Family = "visit",
+            Family = BuiltInFamilies.Visit,
             DisplayName = "Practical Info",
             Help = "What a visitor needs to plan a visit to the real place: opening hours, tickets, how to get there, the best " +
                    "light. Rows: one row per item, a small icon beside its label and value, split by thin lines. A row with no " +

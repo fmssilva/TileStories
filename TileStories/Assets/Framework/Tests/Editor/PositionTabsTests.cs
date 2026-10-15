@@ -175,7 +175,7 @@ namespace TileStories.Tests
                 new POIData { id = "c", name = "C" }
             };
 
-            POIEditorToolWindow.ReorderPoi(list, 1, -1);
+            POIEditorToolWindow.ReorderRow(list, 1, -1);
 
             Assert.AreEqual("b", list[0].id, "Moving up should move the selected item earlier in the list.");
             Assert.AreEqual("a", list[1].id, "The previous item should shift down by one.");
@@ -192,7 +192,7 @@ namespace TileStories.Tests
                 new POIData { id = "c", name = "C" }
             };
 
-            POIEditorToolWindow.ReorderPoi(list, 1, 1);
+            POIEditorToolWindow.ReorderRow(list, 1, 1);
 
             Assert.AreEqual("a", list[0].id, "The earlier item should stay first.");
             Assert.AreEqual("c", list[1].id, "Moving down should place the selected item after the next entry.");
@@ -208,8 +208,8 @@ namespace TileStories.Tests
                 new POIData { id = "b", name = "B" }
             };
 
-            POIEditorToolWindow.ReorderPoi(list, 0, -1);
-            POIEditorToolWindow.ReorderPoi(list, 1, 1);
+            POIEditorToolWindow.ReorderRow(list, 0, -1);
+            POIEditorToolWindow.ReorderRow(list, 1, 1);
 
             Assert.AreEqual(new[] { "a", "b" }, new[] { list[0].id, list[1].id }, "Boundary reorder calls must be no-ops.");
         }

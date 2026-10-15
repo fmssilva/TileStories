@@ -209,6 +209,12 @@ namespace TileStories.Editor.Tests
             yield return CardRow("card_settings.media_resources_path", c => c.card_settings.media_resources_path = "LivingRoom/OtherMedia");
             yield return CardRow("card_settings.default_media_library_resources_path", c => c.card_settings.default_media_library_resources_path = "LivingRoom/OtherMediaLibrary");
             yield return CardRow("card_settings.container", c => c.card_settings.container.half_max_ratio = c.card_settings.container.half_max_ratio > 0.3f ? 0.26f : 0.36f);
+            // _3.2 step 1: Block Order and the Families table (a live switch to by_family reorders the open card)
+            yield return CardRow("card_settings.navigation", c =>
+            {
+                c.card_settings.navigation.block_order = CardOptions.BlockOrderByFamily;
+                c.card_settings.navigation.families.Add(new CardFamilySetting { family = BuiltInFamilies.Media, order = 20, at_end = true });
+            });
             yield return CardRow("card_settings.kinds", c => c.card_settings.kinds.Add(new BlockKindSetting { kind = "rich_text", enabled = false }));
             yield return CardRow("card_settings.strings", c => c.card_settings.strings.Add(new CardStringEntry
                 { key = CardStrings.Keys.Close, text = new List<LocalizedEntry> { new() { lang = "en", value = "Dismiss" } } }));

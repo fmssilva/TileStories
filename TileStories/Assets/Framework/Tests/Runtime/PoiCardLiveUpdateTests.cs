@@ -99,31 +99,115 @@ namespace TileStories.Tests
             Assert.AreEqual(buttons, Sheet.Stack.BoundViews.OfType<ShowOnWallBlockView>().Count());
         }
 
-        // 15.2.1 on the real LivingRoomScene: The Lamp authors its two Sources blocks before its actions and its Tier 5 blocks, yet its card
-        // ends with them while Sources At The End is on (the shipped default); switched off live, they sit where they were written
+        // How many contiguous family runs a shown stack has (9 families in 15 runs = several families are split up)
+        private static int RunCount(List<string> families)
+        {
+            int runs = 0;
+            for (int i = 0; i < families.Count; i++)
+                if (i == 0 || families[i] != families[i - 1]) runs++;
+            return runs;
+        }
+
+        // The family of each block the card really bound, in stack order
+        private List<string> ShownFamilies() =>
+            Sheet.Stack.BoundKinds.Select(k => BlockRegistry.Shared.TryGet(k, out var d) ? d.Family : "?").ToList();
+
+        // Where a family's blocks sit in the shown stack
+        private List<int> PositionsOf(string family)
+        {
+            var families = ShownFamilies();
+            return Enumerable.Range(0, families.Count).Where(i => families[i] == family).ToList();
+        }
+
+        // Put the first block that is NOT of `family` at the top of the viewport. That is where the Block Orders really
+        // differ on this wall: the card opens with a long About run in every order, and what FOLLOWS it is Stories when
+        // the blocks keep their authored places and Media when they are grouped by family.
+        // (Two earlier render positions came out pixel-identical -- the top of the card, and the first Media block --
+        // because About opens the card in every order and the first Media block is the same gallery either way.)
+        private IEnumerator ScrollToFirstBlockAfterTheRunOf(string family)
+        {
+            var families = ShownFamilies();
+            int i = families.FindIndex(f => f != family);
+            Assert.GreaterOrEqual(i, 0, "precondition: the card holds a block of another family than '" + family + "'");
+            Assert.AreEqual(family, families[0], "precondition: the card really opens with the '" + family + "' run");
+            var slot = Sheet.Stack.SlotOf(Sheet.Stack.BoundViews[i]);
+            Assert.IsNotNull(slot, "precondition: that block has a slot in the stack");
+            float range = Mathf.Max(0f, Sheet.Stack.Scroll.contentContainer.layout.height - Sheet.Stack.Scroll.contentViewport.layout.height);
+            Assert.Greater(range, 0f, "precondition: the card is taller than its viewport, so there is something to scroll");
+            Sheet.Stack.Scroll.scrollOffset = new Vector2(0f, Mathf.Clamp(slot.layout.y, 0f, range));
+            yield return CardTestInput.Settle();
+        }
+
+        // _3.2 step 1, Phase B on the real LivingRoomScene: The Lamp authors its two Sources blocks before its actions and its Tier 5
+        // blocks, yet its card ends with them under the default Block Order (end_families_last, which is exactly what Sources At The End
+        // used to do). Switched live to `authored` they sit where they were written; switched live to `by_family` every family becomes
+        // ONE contiguous run and Sources still close the card. Relative order only, on real block keys (40-testing 4.2.4b).
         [UnityTest]
-        public IEnumerator SourcesAtTheEnd_TheLampsSourcesCloseTheCard_AndTheContainerOptionIsLive()
+        public IEnumerator BlockOrder_TheLampsCardRendersInAllThreeOrders_AndTheOptionIsLive()
         {
             var lamp = Session.SearchPois.Single(p => p.id == "lamp");
             int authoredAt = lamp.card.blocks.FindIndex(b => b.kind == "sources");
             Assert.Less(authoredAt, lamp.card.blocks.Count - 3, "precondition: the fixture writes the sources in the middle of the card");
-            Assert.IsTrue(Session.CardSettings.container.sources_at_end, "precondition: the shipped wall never set it, so it reads the default (on)");
+            Assert.AreEqual(CardOptions.BlockOrderEndFamiliesLast, Session.CardSettings.navigation.block_order,
+                "precondition: the shipped wall never set it, so it reads the default");
 
             yield return OpenFull("lamp");
             var views = Sheet.Stack.BoundViews.ToList();
             Assert.AreEqual(2, views.OfType<SourcesBlockView>().Count(), "precondition: both Sources blocks are shown");
-            Assert.IsTrue(views.Skip(views.Count - 2).All(v => v is SourcesBlockView), "the Lamp's two Sources blocks are the last two blocks of the card");
-            Assert.AreEqual(lamp.card.blocks.Count, views.Count, "nothing was dropped by moving them");
+            Assert.AreEqual(lamp.card.blocks.Count, views.Count, "nothing was dropped by ordering them");
+            Assert.Greater(ShownFamilies().Distinct().Count(), 3, "precondition: the Lamp's card really spans several families");
 
-            yield return Push(c => c.card_settings.container.sources_at_end = false);
+            // the default behaves exactly as Sources At The End did
+            Assert.IsTrue(views.Skip(views.Count - 2).All(v => v is SourcesBlockView), "default: the two Sources blocks close the card");
+            yield return ScrollToFirstBlockAfterTheRunOf(BuiltInFamilies.About);
+            yield return CardGalleryChecks.Render("Card_BlockOrder_default_390");
+            Sheet.Stack.Scroll.scrollOffset = Vector2.zero;
+            yield return CardTestInput.Settle();
+
+            // authored: every block exactly where Card Content wrote it
+            yield return Push(c => c.card_settings.navigation.block_order = CardOptions.BlockOrderAuthored);
             views = Sheet.Stack.BoundViews.ToList();
-            Assert.AreEqual(authoredAt, views.FindIndex(v => v is SourcesBlockView), "off: the first Sources block is back where the config wrote it");
-            Assert.IsFalse(views[views.Count - 1] is SourcesBlockView, "off: the card no longer ends with sources");
+            Assert.AreEqual(authoredAt, views.FindIndex(v => v is SourcesBlockView), "authored: the first Sources block is back where the config wrote it");
+            Assert.IsFalse(views[views.Count - 1] is SourcesBlockView, "authored: the card no longer ends with sources");
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the sheet kept its stop");
 
-            yield return Push(c => c.card_settings.container.sources_at_end = true);
+            // - precondition for the whole by_family claim: the authored order really DOES scatter a family over several
+            //   runs, so "every family is one contiguous run" below is something the default does not already satisfy
+            yield return Push(c => c.card_settings.navigation.block_order = CardOptions.BlockOrderEndFamiliesLast);
+            var defaultFamilies = ShownFamilies();
+            Assert.Greater(RunCount(defaultFamilies), defaultFamilies.Distinct().Count(),
+                "precondition: under the default a family IS split over several runs -- " + RunCount(defaultFamilies)
+                + " runs for " + defaultFamilies.Distinct().Count() + " families; if these were equal, the card would already "
+                + "be grouped and the by_family assertions below would prove nothing");
+
+            // by_family: one contiguous run per family, in the registered family order, Sources last
+            yield return Push(c => c.card_settings.navigation.block_order = CardOptions.BlockOrderByFamily);
+            var families = ShownFamilies();
+            Assert.AreEqual(lamp.card.blocks.Count, families.Count, "by_family: still every block, only reordered");
+            foreach (string family in families.Distinct())
+            {
+                var at = PositionsOf(family);
+                Assert.AreEqual(at.Count, at[at.Count - 1] - at[0] + 1,
+                    "by_family: '" + family + "' must be ONE contiguous run, but its blocks sit at " + string.Join(", ", at));
+            }
+            Assert.AreEqual(families.Distinct().Count(), RunCount(families),
+                "by_family: exactly one run per family (the default needed " + RunCount(defaultFamilies) + " runs for the same card)");
+
+            // - the runs follow the registered family Order, compared relatively (never a hard index)
+            var orders = families.Distinct().Select(f => BlockRegistry.Shared.TryGetFamily(f, out var d) ? d.Order : int.MaxValue).ToList();
+            CollectionAssert.AreEqual(orders.OrderBy(o => o), orders, "by_family: the runs follow the families' registered Order");
+            Assert.IsTrue(Sheet.Stack.BoundViews.Skip(families.Count - 2).All(v => v is SourcesBlockView),
+                "by_family: Sources is the At The End family, so it still closes the card");
+            yield return ScrollToFirstBlockAfterTheRunOf(BuiltInFamilies.About);
+            yield return CardGalleryChecks.Render("Card_BlockOrder_by_family_390");
+            Sheet.Stack.Scroll.scrollOffset = Vector2.zero;
+            yield return CardTestInput.Settle();
+
+            // back to the default, live
+            yield return Push(c => c.card_settings.navigation.block_order = CardOptions.BlockOrderEndFamiliesLast);
             views = Sheet.Stack.BoundViews.ToList();
-            Assert.IsTrue(views.Skip(views.Count - 2).All(v => v is SourcesBlockView), "on again: they close the card again");
+            Assert.IsTrue(views.Skip(views.Count - 2).All(v => v is SourcesBlockView), "default again: they close the card again");
+            Assert.Greater(views.FindIndex(v => v is SourcesBlockView), authoredAt, "default again: the sources moved back down from where they were written");
         }
 
         // 15.4.6 on the real LivingRoomScene: The Lamp's related carousel (three written points: more than fit whole) shows a slice of its

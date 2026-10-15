@@ -634,3 +634,75 @@ MonoBehaviour:
       value: Language
     - lang: pt
       value: Idioma
+  - key: family_about
+    where: The words a visitor reads for the About family, which holds the description of
+      the point itself, its facts and its quotes. A navigation element shows it as the name of that section.
+    text:
+    - lang: en
+      value: About
+    - lang: pt
+      value: Sobre
+  - key: family_media
+    where: The words a visitor reads for the Media family, which holds pictures, video, 3D
+      models and panoramas. A navigation element shows it as the name of that section.
+    text:
+    - lang: en
+      value: Media
+    - lang: pt
+      value: Média
+  - key: family_guides
+    where: The words a visitor reads for the Guides family. It reads Listen because the
+      family holds the audio guide. A navigation element shows it as the name of that section.
+    text:
+    - lang: en
+      value: Listen
+    - lang: pt
+      value: Ouvir
+  - key: family_stories
+    where: The words a visitor reads for the Stories family, which holds timelines, people,
+      chapters and dialogues. A navigation element shows it as the name of that section.
+    text:
+    - lang: en
+      value: Stories
+    - lang: pt
+      value: Histórias
+  - key: family_ar
+    where: The words a visitor reads for the AR family, whose blocks show something on the
+      real wall or place a model in the room. A navigation element shows it as the name of that section.
+    text:
+    - lang: en
+      value: In AR
+    - lang: pt
+      value: Em RA
+  - key: family_play
+    where: The words a visitor reads for the Play family, which holds questions, polls and
+      collectables. A navigation element shows it as the name of that section.
+    text:
+    - lang: en
+      value: Play
+    - lang: pt
+      value: Jogar
+  - key: family_visit
+    where: The words a visitor reads for the Visit family, which holds opening times, where
+      to find things and nearby points. A navigation element shows it as the name of that section.
+    text:
+    - lang: en
+      value: Visit
+    - lang: pt
+      value: Visitar
+  - key: family_community
+    where: The words a visitor reads for the Community family, which holds what a visitor
+      sends back. A navigation element shows it as the name of that section.
+    text:
+    - lang: en
+      value: Community
+    - lang: pt
+      value: Comunidade
+  - key: family_meta
+    where: The words a visitor reads for the Sources family, which says where the content
+      came from. These blocks close the card, so it is also what a contents list calls its last section.
+    text:
+    - lang: en
+      value: Sources
+    - lang: pt
+      value: Fontes

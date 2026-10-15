@@ -79,9 +79,13 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
   what changed for the project, no step codes or lists ("Add 3D model previews to the POI card", "Fix model framing and
   auto-spin at peek"). In the chat, name the commit by its message, not its hash.
 - **Test plan (you decide it):** every brief carries a `TEST PLAN:` line: whether the opening full baseline is needed (only if
-  the tree moved since the last green commit), that ONE full EditMode + PlayMode run closes the block, any shared-ground change
-  that needs an extra full run, and -- every third block -- one full PlayMode run with Unity in the background
-  (`40-testing.md` 4.2). Count the blocks since the last background full run in your answer.
+  the tree moved since the last green commit), that the FULL EditMode suite closes every block, and whether this block also
+  owes a full PlayMode run (`40-testing.md` 4.2: it does when the block touches shared ground -- test infrastructure,
+  `WallSession`, `PanelSettings`, the tokens, the sheet / stack / host, a registry or a rule a whole domain reads -- or when
+  it is the fourth block since the last full run, or before a close-out, a device session or a build). When it does not, name
+  in the brief the targeted PlayMode fixtures that close it instead, and the full run it rides on. Count the blocks since the
+  last full PlayMode run in your answer, and say which block the next one falls on. Full runs are taken with Unity in the
+  background unless you ask for the front.
 - Session advice: new chat for the Worker by default (a fresh context per block).
 
 ## 5. Plan the next block

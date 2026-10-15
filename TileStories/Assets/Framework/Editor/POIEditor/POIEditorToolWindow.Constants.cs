@@ -239,6 +239,8 @@ namespace TileStories.Editor
         private static readonly Color SpecificMarkerTabColor = new Color(0.00f, 0.78f, 0.38f); // vivid green
         private static readonly Color DetailCardTabColor = new Color(0.90f, 0.55f, 0.10f); // amber (the card's accent)
         private static readonly Color CardContainerSectionColor = new Color(0.95f, 0.65f, 0.20f);
+        // Detail Card > Navigation (_3.2): between Card Container's amber and the Block Library's deeper orange
+        private static readonly Color CardNavigationSectionColor = new Color(0.88f, 0.55f, 0.18f);
         private static readonly Color BlockLibrarySectionColor = new Color(0.80f, 0.45f, 0.15f);
         private static readonly Color CardTextsSectionColor = new Color(0.70f, 0.55f, 0.20f);
         private static readonly Color CardGlossarySectionColor = new Color(0.60f, 0.50f, 0.25f);

@@ -21,9 +21,6 @@ namespace TileStories
             return scrollRange <= EndTolerance || scrollOffset >= scrollRange - EndTolerance;
         }
 
-        // The family whose blocks always close a card (_3.2's ontology: "always last, never in primary nav")
-        public const string MetaFamily = "meta";
-
         // Whether a block that waits for the reading (show_after_viewed) will appear where the visitor is: it is revealed in its own
         // slot once the stack reached its end, so it is only in view when nothing but meta blocks follow it. `familiesAfter`: the
         // family of every block written after it. A block in the middle of the card would appear above the visitor, where nobody
@@ -31,7 +28,8 @@ namespace TileStories
         public static bool RevealsInView(IEnumerable<string> familiesAfter)
         {
             foreach (string family in familiesAfter)
-                if (family != MetaFamily) return false;
+                // - the family whose blocks always close a card (BuiltInFamilies.Meta: AtEnd on, InNav off)
+                if (family != BuiltInFamilies.Meta) return false;
             return true;
         }
     }

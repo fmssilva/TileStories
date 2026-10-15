@@ -125,6 +125,14 @@ namespace TileStories.Editor.Tests
                         else if (d.FieldType == typeof(string)) edits.Add((d.Name, s => d.SetValue(s.demo_card, d.Name == "stop" ? CardOptions.StopFull : "lamp")));
                         else Assert.Fail("no edit for demo card field " + d.Name);
                     }
+                else if (f.FieldType == typeof(CardNavigationSettings))
+                    foreach (var n in typeof(CardNavigationSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        if (n.FieldType == typeof(string)) edits.Add((n.Name, s => n.SetValue(s.navigation, CardOptions.BlockOrderByFamily)));
+                        else if (n.FieldType == typeof(List<CardFamilySetting>))
+                            edits.Add((n.Name, s => s.navigation.families.Add(new CardFamilySetting { family = BuiltInFamilies.Meta, order = 15, at_end = false })));
+                        else Assert.Fail("no edit for navigation field " + n.Name);
+                    }
                 else if (f.FieldType == typeof(CardContainerSettings))
                     foreach (var c in typeof(CardContainerSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
                     {
@@ -135,7 +143,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 9 + 3, edits.Count, "every card_settings field (walked by reflection) has an edit: 8 wall-level + 9 container + 3 demo card");
+            Assert.AreEqual(8 + 8 + 2 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 2 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1009,24 +1018,112 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(_window.Config.card_settings.container.reduce_motion, "Ctrl+Z");
         }
 
-        // The Card Container's Sources At The End row (15.2.1): ON in the shipped wall (a config written before it has no field and reads
-        // the default), drawing writes nothing, a real click turns it off, Ctrl+Z puts it back
+        // ---------------- Detail Card > Navigation (_3.2 step 1) ----------------
+
+        // The Navigation section's Block Order row: the shipped wall never wrote it, so it reads the default; drawing writes
+        // nothing; the popup's value goes through the window's own history (an IMGUI popup opens a native menu no test can
+        // click, so the row's VALUE is driven the way EveryCardSettingsField_... drives every other popup of this tab).
         [UnityTest]
-        public IEnumerator TheSourcesAtTheEndRow_IsDrawnOn_ARealClickTurnsItOff_AndCtrlZTakesItBack()
+        public IEnumerator TheBlockOrderRow_IsDrawnOnItsDefault_AndDrawingWritesNothing()
         {
-            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
             OpenTab("DetailCard");
             yield return _window.WaitForRepaint();
-            _window.RectOf("Sources At The End");
+            // - no RectOf here: DrawPopupField reports no rect on purpose, because an IMGUI popup opens a NATIVE menu that
+            //   no test can click. Its value is driven through the window's history by EveryCardSettingsField_..., like
+            //   Open At and Audio Overlap; what this test pins is that drawing the row changes nothing.
             Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
-            Assert.IsTrue(_window.Config.card_settings.container.sources_at_end, "on in the shipped wall: the card ends with its sources");
+            Assert.AreEqual(CardOptions.BlockOrderEndFamiliesLast, _window.Config.card_settings.navigation.block_order,
+                "the shipped wall never set it, so it reads the default");
+            CollectionAssert.IsEmpty(_window.Config.card_settings.navigation.families,
+                "and no Families row is written just because the section is open");
+            Assert.AreEqual(CardOptions.BlockOrders.Length, CardOptions.BlockOrderLabels.Length, "one label per Block Order option");
+        }
 
-            _window.Click("Sources At The End");
+        // The Families table: one row per registered family, in the registered order, named by the visitor's own word
+        [UnityTest]
+        public IEnumerator TheFamiliesTable_HasARowPerRegisteredFamily_InOrder_NamedByItsVisitorLabelAndItsKey()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
             yield return _window.WaitForRepaint();
-            Assert.IsFalse(_window.Config.card_settings.container.sources_at_end, "a real click turned it off");
+
+            var nav = _window.Config.card_settings.navigation;
+            var families = _window.Editor.FamiliesInEffectiveOrder(nav);
+            CollectionAssert.AreEqual(BlockRegistry.Shared.Families.Select(f => f.Key), families.Select(f => f.Key),
+                "with no wall rows the table shows the registered order");
+            Assert.Greater(families.Count, 5, "precondition: the registry really handed its families over");
+
+            var name = typeof(POIEditorToolWindow).GetMethod("FamilyRowName", Instance);
+            string shown = (string)name.Invoke(_window.Editor, new object[] { families[0] });
+            StringAssert.Contains("About", shown, "the row shows the visitor's own word for the family");
+            StringAssert.Contains("(about)", shown, "and its key beside it, so the developer can match it to a block kind");
+            Assert.IsFalse(_window.Unsaved, "drawing the table writes nothing");
+        }
+
+        // A real click on a family's down arrow swaps it past its neighbour, writes a row for BOTH of them (and for
+        // nobody else), and Ctrl+Z takes it back
+        [UnityTest]
+        public IEnumerator AFamilysReorderArrow_IsARealClick_SwapsItWithItsNeighbour_AndCtrlZTakesItBack()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+
+            var nav = _window.Config.card_settings.navigation;
+            var before = _window.Editor.FamiliesInEffectiveOrder(nav).Select(f => f.Key).ToList();
+            Assert.AreEqual("about", before[0]);
+            Assert.AreEqual("media", before[1], "precondition: media follows about");
+
+            yield return _window.ScrollTo("Family down#0");
+            _window.Click("Family down#0");
+            yield return _window.WaitForRepaint();
+
+            var after = _window.Editor.FamiliesInEffectiveOrder(_window.Config.card_settings.navigation).Select(f => f.Key).ToList();
+            Assert.AreEqual("media", after[0], "a real click moved about down past media");
+            Assert.AreEqual("about", after[1]);
+            CollectionAssert.AreEqual(before.Skip(2), after.Skip(2), "nothing below the two swapped families moved");
             Assert.IsTrue(_window.Unsaved);
+            CollectionAssert.AreEquivalent(new[] { "about", "media" },
+                _window.Config.card_settings.navigation.families.Select(f => f.family),
+                "only the two families the developer really moved got a row");
+
             yield return _window.PressUndo();
-            Assert.IsTrue(_window.Config.card_settings.container.sources_at_end, "Ctrl+Z");
+            CollectionAssert.AreEqual(before,
+                _window.Editor.FamiliesInEffectiveOrder(_window.Config.card_settings.navigation).Select(f => f.Key).ToList(), "Ctrl+Z");
+        }
+
+        // A real click on At The End ticks that family, and the builder really moves its blocks; Ctrl+Z takes it back
+        [UnityTest]
+        public IEnumerator AFamilysAtTheEndToggle_IsARealClick_ReordersTheCard_AndCtrlZTakesItBack()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+
+            var families = _window.Editor.FamiliesInEffectiveOrder(_window.Config.card_settings.navigation);
+            int row = families.FindIndex(f => f.Key == BuiltInFamilies.Media);
+            Assert.GreaterOrEqual(row, 0, "precondition: the media family is in the table");
+            Assert.IsFalse(families[row].AtEnd, "precondition: media does not close the card by default");
+
+            yield return _window.ScrollTo("Family at end#" + row);
+            _window.Click("Family at end#" + row);
+            yield return _window.WaitForRepaint();
+
+            var written = _window.Config.card_settings.navigation.families.Single(f => f.family == BuiltInFamilies.Media);
+            Assert.IsTrue(written.at_end, "a real click ticked At The End for media");
+            Assert.IsTrue(_window.Unsaved);
+
+            // - and the row really changes the card: the Lamp's media blocks move behind its other content
+            var lamp = _window.Config.pois.Single(p => p.id == "lamp");
+            var keys = BlockStackBuilder.Build(lamp, _window.Config.card_settings, BlockRegistry.Shared)
+                .Entries.Select(e => e.Definition.Family).ToList();
+            int lastMedia = keys.LastIndexOf(BuiltInFamilies.Media);
+            int lastAbout = keys.LastIndexOf(BuiltInFamilies.About);
+            Assert.Greater(lastMedia, lastAbout, "with At The End on, the media blocks now sit after the About ones");
+
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.navigation.families, "Ctrl+Z took the whole row back");
         }
 
         // The Card Container's Peek Next Card row (15.4.6): ON in the shipped wall (a config written before it has no field and reads the

@@ -40,7 +40,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Timeline = new()
         {
             Key = TimelineKind,
-            Family = "stories",
+            Family = BuiltInFamilies.Stories,
             DisplayName = "Timeline",
             Help = "What happened to the point, in order: each event a date, a title and an optional text. Vertical: the events " +
                    "down the card on one line, oldest first. Horizontal: the events side by side on a line the visitor swipes " +
@@ -75,7 +75,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Person = new()
         {
             Key = PersonKind,
-            Family = "stories",
+            Family = BuiltInFamilies.Stories,
             DisplayName = "Person",
             Help = "Someone in the point's story (who built it, who lived there, who painted it): a name, their role and a few " +
                    "lines about them, beside the first letter of the name. Row: in line with the rest of the card. Card: set " +
@@ -95,7 +95,7 @@ namespace TileStories
         public static readonly BlockKindDefinition StoryChapters = new()
         {
             Key = StoryChaptersKind,
-            Family = "stories",
+            Family = BuiltInFamilies.Stories,
             DisplayName = "Story Chapters",
             Help = "A longer story told one chapter at a time, so the card stays short. Segmented: a bar of one segment per " +
                    "chapter shows where the visitor is; Previous and Next buttons turn the chapters (their words and the " +
@@ -123,7 +123,7 @@ namespace TileStories
         public static readonly BlockKindDefinition ComparePoints = new()
         {
             Key = ComparePointsKind,
-            Family = "stories",
+            Family = BuiltInFamilies.Stories,
             DisplayName = "Compare Points",
             Help = "This point beside another point of the wall, by their condition: two outlines drawn exactly as their markers " +
                    "draw them, each with the point's title and its condition's name. Rings: the two side by side. With Heading empty " +
@@ -206,7 +206,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Dialogue = new()
         {
             Key = DialogueKind,
-            Family = "stories",
+            Family = BuiltInFamilies.Stories,
             DisplayName = "Dialogue",
             Help = "A short conversation told one line at a time: the first line shows, and each tap on Continue shows the next. A line may " +
                    "offer up to three replies; the visitor picks one, it appears as their own line, and the speaker's answer follows, then " +

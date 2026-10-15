@@ -196,7 +196,7 @@ namespace TileStories.Editor
                     {
                         if (GUI.Button(upRect, "↑", EditorStyles.miniButton))
                         {
-                            DrawConfigMutationScope(() => ReorderPoi(_config.pois, i, -1), true);
+                            DrawConfigMutationScope(() => ReorderRow(_config.pois, i, -1), true);
                         }
                     }
 
@@ -204,7 +204,7 @@ namespace TileStories.Editor
                     {
                         if (GUI.Button(downRect, "↓", EditorStyles.miniButton))
                         {
-                            DrawConfigMutationScope(() => ReorderPoi(_config.pois, i, 1), true);
+                            DrawConfigMutationScope(() => ReorderRow(_config.pois, i, 1), true);
                         }
                     }
 
@@ -277,18 +277,19 @@ namespace TileStories.Editor
             }
         }
 
-        internal static void ReorderPoi(List<POIData> pois, int index, int direction)
+        // Move one row of any ordered list up or down by one (the POI list, the Families table of Detail Card >
+        // Navigation): ONE home for the up / down arrows, so every table reorders the same way. Out-of-range
+        // indexes do nothing, which is what the disabled arrows at the two ends already promise.
+        internal static void ReorderRow<T>(List<T> rows, int index, int direction)
         {
-            if (pois == null || index < 0 || index >= pois.Count)
+            if (rows == null || index < 0 || index >= rows.Count)
                 return;
 
             int targetIndex = index + direction;
-            if (targetIndex < 0 || targetIndex >= pois.Count)
+            if (targetIndex < 0 || targetIndex >= rows.Count)
                 return;
 
-            var temp = pois[index];
-            pois[index] = pois[targetIndex];
-            pois[targetIndex] = temp;
+            (rows[index], rows[targetIndex]) = (rows[targetIndex], rows[index]);
         }
 
         internal static bool RemovePoiAt(List<POIData> pois, IDictionary<string, bool> poiFoldouts, int index)

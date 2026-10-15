@@ -74,11 +74,6 @@ namespace TileStories.Editor
             "look shows its poster (Picture) and never plays its loop. A video the visitor plays still plays. Off by default. A " +
             "setting the visitor can change themselves is planned; this is the wall's own default.";
 
-        private const string CardSourcesAtEndHelp =
-            "On (the default): a card always ends with its Sources, however the blocks of Card Content are ordered, so the visitor reads " +
-            "the content first and the credits last. Several Sources blocks keep their order. Off: every block stays exactly where Card " +
-            "Content puts it, Sources included.";
-
         private const string CardPeekNextHelp =
             "For the cards that slide sideways (a Timeline in its horizontal look, a Related carousel). On (the default): at rest the strip " +
             "shows its whole cards and a slice of the next one at the right edge, the usual sign that there is more to swipe to; at the " +

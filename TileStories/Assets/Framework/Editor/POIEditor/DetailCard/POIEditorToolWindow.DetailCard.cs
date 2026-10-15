@@ -2,9 +2,9 @@
 //
 // Partial: the third tab, "Detail Card" (_3.1_POI_Card_Blocks.md section 8.1). One section per card domain, like
 // Global Scene holds one per marker domain: Card Container (card_settings: the sheet, languages, media folder)
-// and Block Library (card_settings.kinds: every registered block kind, wall-wide) here; Card Texts, Glossary and
-// Default Media in their own partials (CardTexts.cs, CardGlossary.cs, CardDefaultMedia.cs). Navigation (_3.2) and
-// Style & Contrast (_3.3) join later. Texts live in DetailCardHelp.cs; each POI's own blocks are Specific Marker >
+// and Block Library (card_settings.kinds: every registered block kind, wall-wide) here; Navigation, Card Texts,
+// Glossary and Default Media in their own partials (CardNavigation.cs, CardTexts.cs, CardGlossary.cs,
+// CardDefaultMedia.cs). Style & Contrast (_3.3) joins later. Texts live in DetailCardHelp.cs; each POI's own blocks are Specific Marker >
 // Card Content (CardContent.cs).
 
 using System.Collections.Generic;
@@ -45,6 +45,7 @@ namespace TileStories.Editor
             if (_config == null) return;
             _config.card_settings ??= new CardSettings();
             _showCardContainer = DrawFramedFoldout(ref _showCardContainer, DrawCardContainerSection, "Card Container", CardContainerSectionColor);
+            _showCardNavigation = DrawFramedFoldout(ref _showCardNavigation, DrawCardNavigationSection, "Navigation", CardNavigationSectionColor);
             _showCardBlockLibrary = DrawFramedFoldout(ref _showCardBlockLibrary, DrawBlockLibrarySection, "Block Library", BlockLibrarySectionColor);
             _showCardTexts = DrawFramedFoldout(ref _showCardTexts, DrawCardTextsSection, "Card Texts", CardTextsSectionColor);
             _showCardGlossary = DrawFramedFoldout(ref _showCardGlossary, DrawCardGlossarySection, "Glossary", CardGlossarySectionColor);
@@ -71,7 +72,6 @@ namespace TileStories.Editor
                 c.audio_when_another_starts = DrawPopupField("Audio Overlap", c.audio_when_another_starts, CardOptions.AudioModes, CardOptions.AudioModeLabels, CardAudioSwitchHelp);
                 c.audio_android_output_poll = DrawToggleField("Android Earbud Check", c.audio_android_output_poll, CardAudioAndroidPollHelp);
                 c.reduce_motion = DrawToggleField("Reduce Motion", c.reduce_motion, CardReduceMotionHelp);
-                c.sources_at_end = DrawToggleField("Sources At The End", c.sources_at_end, CardSourcesAtEndHelp);
                 c.peek_next_card = DrawToggleField("Peek Next Card", c.peek_next_card, CardPeekNextHelp);
             }
 

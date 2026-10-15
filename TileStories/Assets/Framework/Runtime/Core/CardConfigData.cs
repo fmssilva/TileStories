@@ -27,6 +27,8 @@ namespace TileStories
         // shipped library. Empty = the wall has no override library; every default key resolves from the Framework's.
         public string default_media_library_resources_path = "";
         public CardContainerSettings container = new();
+        // How the card orders its blocks and what each family does there (_3.2 section 3, Detail Card > Navigation)
+        public CardNavigationSettings navigation = new();
         // The Block Library: one row per kind the developer changed. A kind with no row is enabled with
         // its own default variant (BlockLibraryRule), so a new built-in kind needs no config edit.
         public List<BlockKindSetting> kinds = new();
@@ -43,6 +45,31 @@ namespace TileStories
         // "" = the wall's first language, the default. A visitor's own pick on the card wins; release builds ignore it (CardLanguageRule.Shown,
         // CardDemoRule.IsAllowed) and DevFeatureBuildGuard warns when a value other than the default is left in the config
         public string preview_language = "";
+    }
+
+    // Detail Card > Navigation (_3.2 section 3): how a visitor moves inside ONE open card. This step holds the
+    // two rows that order the stack; the nav elements, layouts and their fields land with the code that reads them.
+    [Serializable]
+    public class CardNavigationSettings
+    {
+        // Block Order: "authored" | "end_families_last" (the default) | "by_family" (CardOptions.BlockOrders,
+        // applied by BlockStackBuilder after the skip rules, with the header always first)
+        public string block_order = CardOptions.BlockOrderEndFamiliesLast;
+        // The Families table: ONE row per family the wall actually changed. A family with no row keeps the order
+        // and the At The End of its registered FamilyDefinition, so a new built-in family needs no config edit.
+        public List<CardFamilySetting> families = new();
+    }
+
+    // One Families row: what this wall changed about one registered family
+    [Serializable]
+    public class CardFamilySetting
+    {
+        // The family's key (FamilyDefinition.Key), never its visitor label
+        public string family;
+        // Where the family sits among the others, overriding its registered Order
+        public int order;
+        // Whether this family's blocks close the card, overriding its registered AtEnd
+        public bool at_end;
     }
 
     // The developer-only demo card: which POI's card opens on its own, and at which stop
@@ -94,9 +121,6 @@ namespace TileStories
         // The wall's default for motion the visitor did not ask for (step 9B): on, a header's video loop shows its poster only. The visitor's
         // own reduce-motion setting (_3.3) will join it; today this is the only switch
         public bool reduce_motion;
-        // Sources (and every other `meta` block) move to the end of the card, keeping their order, whatever order they were authored in
-        // (BlockStackBuilder). Off: the authored order. On by default: a card ends with its sources, not with them in the middle
-        public bool sources_at_end = true;
         // The horizontal swipe tracks (timeline, related carousel) show a slice of the next card at rest -- the usual "there is more" cue --
         // and end on a whole last card (CardTrackRule). Off: whole cards only, at rest and at the end. On by default: an old config loads as on
         public bool peek_next_card = true;
@@ -206,6 +230,15 @@ namespace TileStories
         public const string AudioQueue = "queue";
         public static readonly string[] AudioModes = { AudioSwitch, AudioQueue };
         public static readonly string[] AudioModeLabels = { "Switch To The New One", "Queue The New One" };
+
+        // Block Order (CardNavigationSettings.block_order, _3.2 section 2.3), and the Editor's words for them.
+        // It replaces the old container option Sources At The End: end_families_last does what that did, through
+        // the family flag At The End instead of a second switch that only knew about Sources.
+        public const string BlockOrderAuthored = "authored";
+        public const string BlockOrderEndFamiliesLast = "end_families_last";
+        public const string BlockOrderByFamily = "by_family";
+        public static readonly string[] BlockOrders = { BlockOrderAuthored, BlockOrderEndFamiliesLast, BlockOrderByFamily };
+        public static readonly string[] BlockOrderLabels = { "As Authored", "End Families Last", "Grouped By Family" };
 
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";

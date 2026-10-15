@@ -20,7 +20,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Sources = new()
         {
             Key = SourcesKind,
-            Family = "meta",
+            Family = BuiltInFamilies.Meta,
             DisplayName = "Sources",
             Help = "Where this card's content comes from: books, archives, photographs, with their author and licence. " +
                    "List: one row per source. With Confidence: the same, plus a chip that says whether the content " +
