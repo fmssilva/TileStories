@@ -17,6 +17,7 @@ namespace TileStories
         {
             Key = ShowOnWallKind,
             Family = BuiltInFamilies.Ar,
+            Format = CardOptions.FormatModel,
             DisplayName = "Show On Wall",
             Help = "A button that lowers the card to its peek so the visitor can see this point's marker on the wall (the point stays " +
                    "selected: its marker stays lit and the others dim, as after a tap on it). Nothing to write. Button: just the button. " +
@@ -47,6 +48,7 @@ namespace TileStories
         {
             Key = PlaceInArKind,
             Family = BuiltInFamilies.Ar,
+            Format = CardOptions.FormatModel,
             DisplayName = "Place In AR",
             Help = "A button that places a 3D model in the room, at this point of the wall, and lowers the card to its peek (scrolled to the " +
                    "top) so the visitor sees it standing there. While it stands, the same button reads Remove From Room and takes it away, " +

@@ -63,9 +63,10 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
 ## 4. Logistics
 
 - Untracked / generated files: evidence, garbage, or content? You can delete things you are certain are "temp files or garbage"; if in doubt don't delete and ask user to decide.
-- Is the block a coherent checkpoint? Commit it YOURSELF (one-line message, no trailer) only when you are certain: the Worker's
-  last FULL runs (EditMode + PlayMode) are green, no Worker session is running right now (two gits writing one index), and
-  nothing unexpected is in the tree. The developer tracks the WHOLE workspace (IPCE/, report/, flutter_prototypes/ included), so
+- Is the block a coherent checkpoint? Commit it YOURSELF (one-line message, no trailer) only when you are certain: the
+  block's closing runs are green AS ITS TEST PLAN ASKED (the full EditMode suite always; the full PlayMode run when
+  `40-testing.md` 4.2 owes one, else the targeted fixtures the brief named -- and you have judged that list, section 2), no
+  Worker session is running right now (two gits writing one index), and nothing unexpected is in the tree. The developer tracks the WHOLE workspace (IPCE/, report/, flutter_prototypes/ included), so
   stage everything, `git add -A`, except the Oswald font (`git checkout --` it first). Any doubt (a red or unexplained test, a
   running Worker, stray files) -> do NOT commit; give the exact commands, the message and the reason.
 - **How to commit from the Cowork VM:** the shell here is a Linux VM with the workspace mounted (not the developer's Windows
@@ -139,9 +140,10 @@ Architect chat (what is done, what moved to which guide, open risks) and start t
 ```markdown
 ## `And now: <Domain> -- <step ids and names>`
 
-GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree
-compiles; if not, STOP and report. Re-verify the baseline (0 `error CS`,
-EditMode + PlayMode all green) with Unity allowed to be in the background.
+GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
+Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
+SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): TMP dirties their atlases on its own, so `git checkout --` them
+if they are modified, in EVERY block, not only the one that noticed. Re-verify the baseline as the TEST PLAN below says.
 
 Domain spec (read ALL lines): <guide path> -- start with "## TODOs" (<tags>) and the status table (<done>; <planned>).
 REQUIRED READING (all lines): <the exact sections the block touches -- always `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" +

@@ -91,6 +91,7 @@ namespace TileStories
         {
             Key = GalleryKind,
             Family = BuiltInFamilies.Media,
+            Format = CardOptions.FormatLook,
             DisplayName = "Gallery",
             Help = "Several pictures of the point. Carousel: one picture at a time, swiped sideways, with dots. Grid: small " +
                    "pictures two per row. Filmstrip: one large picture, the others as a strip of small ones to pick from. Stack: " +
@@ -121,6 +122,7 @@ namespace TileStories
         {
             Key = BeforeAfterKind,
             Family = BuiltInFamilies.Media,
+            Format = CardOptions.FormatLook,
             DisplayName = "Before and After",
             Help = "Two pictures of the same view laid on each other: the visitor drags the handle sideways to show more of one " +
                    "or the other (Before on the left, After on the right). Use two pictures of the same size and framing.",
@@ -146,6 +148,7 @@ namespace TileStories
         {
             Key = HotspotImageKind,
             Family = BuiltInFamilies.Media,
+            Format = CardOptions.FormatLook,
             DisplayName = "Hotspot Image",
             Help = "One picture with spots on it to explore: a tap on a spot opens its title and text under the picture (a " +
                    "second tap closes it). Numbered: numbered circles on the picture itself. Loupes: small rings on the picture " +
@@ -185,6 +188,7 @@ namespace TileStories
         {
             Key = ZoomImageKind,
             Family = BuiltInFamilies.Media,
+            Format = CardOptions.FormatLook,
             DisplayName = "Zoom Image",
             Help = "One detailed picture the visitor looks into: two fingers pinch to enlarge it (up to four times), one finger " +
                    "moves the enlarged picture, pinching back returns to the whole picture. A large picture (1024 px or more) " +
@@ -204,6 +208,7 @@ namespace TileStories
         {
             Key = VideoKind,
             Family = BuiltInFamilies.Media,
+            Format = CardOptions.FormatWatch,
             DisplayName = "Video",
             Help = "A film the visitor plays on the card. Inline: the poster with a play button, then a bar to drag to any point, the " +
                    "time, a captions switch and a full-screen button. Chapters: the same, plus a button per chapter that jumps to it " +
@@ -276,6 +281,7 @@ namespace TileStories
         {
             Key = Model3DKind,
             Family = BuiltInFamilies.Media,
+            Format = CardOptions.FormatModel,
             DisplayName = "3D Model",
             Help = "A 3D model the visitor turns to look at from every side: a drag rotates it, two fingers pinch to zoom " +
                    "(within limits), and it slowly spins on its own until touched (Auto Spin). The Fallback Picture shows " +
@@ -320,6 +326,7 @@ namespace TileStories
         {
             Key = Panorama360Kind,
             Family = BuiltInFamilies.Media,
+            Format = CardOptions.FormatModel,
             DisplayName = "360 Panorama",
             Help = "A 360 degree picture the visitor looks around in. Drag look: drag to turn the view, pinch to zoom. Gyro look: " +
                    "turn the phone to look around (where the device has no motion sensor, the Editor for one, it falls back to " +

@@ -706,3 +706,45 @@ MonoBehaviour:
       value: Sources
     - lang: pt
       value: Fontes
+  - key: format_read
+    where: The words a visitor reads for the Read format, blocks of text to read (the description, facts, quotes, a timeline). A navigation element shows it as the name of that section when the card is grouped by format.
+    text:
+    - lang: en
+      value: Read
+    - lang: pt
+      value: Ler
+  - key: format_look
+    where: The words a visitor reads for the Look format, blocks whose picture or drawing is the content (galleries, zoomable pictures, maps). A navigation element shows it as the name of that section when the card is grouped by format.
+    text:
+    - lang: en
+      value: Look
+    - lang: pt
+      value: Ver
+  - key: format_watch
+    where: The words a visitor reads for the Watch format, the video blocks. A navigation element shows it as the name of that section when the card is grouped by format.
+    text:
+    - lang: en
+      value: Watch
+    - lang: pt
+      value: Assistir
+  - key: format_listen
+    where: The words a visitor reads for the Listen format, the audio guides. A navigation element shows it as the name of that section when the card is grouped by format.
+    text:
+    - lang: en
+      value: Listen
+    - lang: pt
+      value: Ouvir
+  - key: format_model
+    where: The words a visitor reads for the Immersive format, 3D models, 360 panoramas and what is shown in the room or on the wall. A navigation element shows it as the name of that section when the card is grouped by format.
+    text:
+    - lang: en
+      value: Immersive
+    - lang: pt
+      value: Imersivo
+  - key: format_interact
+    where: The words a visitor reads for the Interact format, blocks where the visitor does something (questions, polls, feedback, buttons). A navigation element shows it as the name of that section when the card is grouped by format.
+    text:
+    - lang: en
+      value: Interact
+    - lang: pt
+      value: Interagir

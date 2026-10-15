@@ -49,7 +49,7 @@ namespace TileStories.Editor.Tests
         {
             BlockKindDefinition KindWith(BlockFieldDefinition field) => new()
             {
-                Key = "k", Family = "about", DisplayName = "K", Variants = new[] { "v" }, DefaultVariant = "v",
+                Key = "k", Family = "about", Format = CardOptions.FormatRead, DisplayName = "K", Variants = new[] { "v" }, DefaultVariant = "v",
                 DisplayModes = new[] { CardOptions.DisplayInline }, Fields = new[] { field },
             };
             StringAssert.Contains("not one of its Choice options", BlockRegistry.Validate(KindWith(new BlockFieldDefinition

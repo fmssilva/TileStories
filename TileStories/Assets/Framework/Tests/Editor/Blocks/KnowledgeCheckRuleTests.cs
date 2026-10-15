@@ -238,7 +238,7 @@ namespace TileStories.Editor.Tests
         {
             BlockKindDefinition Kind(string field, BlockFieldType type) => new()
             {
-                Key = "quiz_like", Family = "play", Variants = new[] { "plain" }, DefaultVariant = "plain", DisplayModes = new[] { CardOptions.DisplayInline },
+                Key = "quiz_like", Family = "play", Format = CardOptions.FormatInteract, Variants = new[] { "plain" }, DefaultVariant = "plain", DisplayModes = new[] { CardOptions.DisplayInline },
                 Fields = new[] { new BlockFieldDefinition { Key = "wait", Type = type } }, ShowAfterViewedField = field,
             };
             Assert.IsNull(BlockRegistry.Validate(Kind("wait", BlockFieldType.Toggle)), "a Toggle of the kind");

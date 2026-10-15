@@ -234,7 +234,7 @@ namespace TileStories.Editor.Tests
         {
             BlockKindDefinition KindWith(params BlockFieldDefinition[] fields) => new()
             {
-                Key = "k", Family = "about", DisplayName = "K", Help = "h", Variants = new[] { "one", "two" }, DefaultVariant = "one",
+                Key = "k", Family = "about", Format = CardOptions.FormatRead, DisplayName = "K", Help = "h", Variants = new[] { "one", "two" }, DefaultVariant = "one",
                 DisplayModes = new[] { CardOptions.DisplayInline }, Fields = fields,
             };
             var mode = new BlockFieldDefinition { Key = "mode", Type = BlockFieldType.Choice, Options = new[] { "a", "b" } };

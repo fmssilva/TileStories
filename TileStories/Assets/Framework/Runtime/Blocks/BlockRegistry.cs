@@ -116,6 +116,10 @@ namespace TileStories
             if (d == null) return "no definition";
             if (string.IsNullOrWhiteSpace(d.Key)) return "no key";
             if (string.IsNullOrWhiteSpace(d.Family)) return "no family";
+            // - a SHAPE check, unlike the family's: the formats are a fixed list every registry shares, so no registry is needed
+            if (string.IsNullOrWhiteSpace(d.Format)) return "no format";
+            if (!Contains(CardOptions.Formats, d.Format))
+                return "its format '" + d.Format + "' is not one of " + string.Join(", ", CardOptions.Formats);
             if (d.Variants == null || d.Variants.Count == 0) return "no variants";
             if (!d.HasVariant(d.DefaultVariant)) return "its default variant '" + d.DefaultVariant + "' is not one of its variants";
             if (d.DisplayModes == null || d.DisplayModes.Count == 0) return "no display modes";

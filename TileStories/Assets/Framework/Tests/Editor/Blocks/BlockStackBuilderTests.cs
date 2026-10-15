@@ -22,6 +22,7 @@ namespace TileStories.Editor.Tests
         {
             Key = key,
             Family = family,
+            Format = CardOptions.FormatRead,
             DisplayName = key,
             Variants = new[] { "plain", "fancy" },
             DefaultVariant = "plain",
@@ -358,6 +359,7 @@ namespace TileStories.Editor.Tests
         {
             Key = "steps",
             Family = "about",
+            Format = CardOptions.FormatRead,
             DisplayName = "Steps",
             Variants = new[] { "plain" },
             DefaultVariant = "plain",

@@ -165,6 +165,15 @@ namespace TileStories
             public const string FamilyCommunity = "family_community";
             public const string FamilyMeta = "family_meta";
 
+            // The words a visitor reads for each format (_3.2 section 2.4, CardOptions.Formats): what a navigation element labels
+            // its section with when the wall groups the card by format (Group By = format) instead of by family
+            public const string FormatRead = "format_read";
+            public const string FormatLook = "format_look";
+            public const string FormatWatch = "format_watch";
+            public const string FormatListen = "format_listen";
+            public const string FormatModel = "format_model";
+            public const string FormatInteract = "format_interact";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Close, FunFactLabel, FunFactHint, StatusHeading, StatusUnknownMark, StatusUnknown, StatusPercent,
@@ -182,6 +191,7 @@ namespace TileStories
                 Panorama360DragHint, Panorama360GyroHint, Panorama360Loading, PlaceInArButton, PlaceInArRemove, PlaceInArPlaced, PlaceInArNotLocalised,
                 LanguageSwitch,
                 FamilyAbout, FamilyMedia, FamilyGuides, FamilyStories, FamilyAr, FamilyPlay, FamilyVisit, FamilyCommunity, FamilyMeta,
+                FormatRead, FormatLook, FormatWatch, FormatListen, FormatModel, FormatInteract,
             };
         }
 

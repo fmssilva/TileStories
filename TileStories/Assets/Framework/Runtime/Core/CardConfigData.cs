@@ -47,8 +47,9 @@ namespace TileStories
         public string preview_language = "";
     }
 
-    // Detail Card > Navigation (_3.2 section 3): how a visitor moves inside ONE open card. This step holds the
-    // two rows that order the stack; the nav elements, layouts and their fields land with the code that reads them.
+    // Detail Card > Navigation (_3.2 section 3): how a visitor moves inside ONE open card. Each field lands with the code
+    // that reads it: the two that order the stack (BlockStackBuilder) and the three the nav model reads (CardNavModel,
+    // NavOntologyRule); the nav elements, layouts and their fields come later, as do the Editor rows of these three (steps 5-7).
     [Serializable]
     public class CardNavigationSettings
     {
@@ -58,6 +59,17 @@ namespace TileStories
         // The Families table: ONE row per family the wall actually changed. A family with no row keeps the order
         // and the At The End of its registered FamilyDefinition, so a new built-in family needs no config edit.
         public List<CardFamilySetting> families = new();
+        // Group By: "family" (the visitor's intent, the default) | "format" (CardOptions.GroupBys) -- what the sections are
+        public string group_by = CardOptions.GroupByFamily;
+        // Show Navigation From: a card with fewer targets than this shows NO navigation element (a short card stays clean)
+        public int min_blocks = 8;
+        // Bar Slots: how many sections a bar shows before its last slot becomes More (a navigation bar holds 3 to 5)
+        public int max_slots = 5;
+
+        public const int MinBlocksMin = 2;
+        public const int MinBlocksMax = 30;
+        public const int MaxSlotsMin = 3;
+        public const int MaxSlotsMax = 5;
     }
 
     // One Families row: what this wall changed about one registered family
@@ -239,6 +251,23 @@ namespace TileStories
         public const string BlockOrderByFamily = "by_family";
         public static readonly string[] BlockOrders = { BlockOrderAuthored, BlockOrderEndFamiliesLast, BlockOrderByFamily };
         public static readonly string[] BlockOrderLabels = { "As Authored", "End Families Last", "Grouped By Family" };
+
+        // A kind's Format (BlockKindDefinition.Format, _3.2 section 2.4): HOW a visitor takes the block in. A FIXED list --
+        // formats are universal, families are a wall's vocabulary -- so an app picks one of these and never adds its own.
+        // model = anything spatial: a 3D model, a 360 panorama, something shown in the room or on the wall (AR).
+        public const string FormatRead = "read";
+        public const string FormatLook = "look";
+        public const string FormatWatch = "watch";
+        public const string FormatListen = "listen";
+        public const string FormatModel = "model";
+        public const string FormatInteract = "interact";
+        public static readonly string[] Formats = { FormatRead, FormatLook, FormatWatch, FormatListen, FormatModel, FormatInteract };
+
+        // Group By (CardNavigationSettings.group_by): what the card's navigation sections are -- the families (the visitor's
+        // intent, the default) or the formats. The same targets either way (CardNavModel)
+        public const string GroupByFamily = "family";
+        public const string GroupByFormat = "format";
+        public static readonly string[] GroupBys = { GroupByFamily, GroupByFormat };
 
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";

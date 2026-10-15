@@ -15,6 +15,7 @@ namespace TileStories
         {
             Key = FeedbackKind,
             Family = BuiltInFamilies.Community,
+            Format = CardOptions.FormatInteract,
             DisplayName = "Feedback",
             Help = "Asks the visitor one question about this card and takes one answer. Thumbs: a thumb up or down. Stars: one to five stars. " +
                    "The vote is kept on the visitor's device (the block then shows it as given, with a thank-you) and reported once as a " +

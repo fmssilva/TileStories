@@ -90,6 +90,10 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(s.container.dismiss_on_tap_outside);
             Assert.IsTrue(s.container.keep_audio_on_close);
             CollectionAssert.IsEmpty(s.kinds, "no Block Library rows = every kind enabled with its default variant");
+            // - _3.2 step 2: the nav model's three fields load on _3.2 section 3's defaults
+            Assert.AreEqual(CardOptions.GroupByFamily, s.navigation.group_by, "sections are families unless the wall says format");
+            Assert.AreEqual(8, s.navigation.min_blocks, "a card shows navigation from 8 targets");
+            Assert.AreEqual(5, s.navigation.max_slots, "a bar holds 5 slots before More");
             Assert.IsNotNull(loaded.pois[0].card);
             CollectionAssert.IsEmpty(loaded.pois[0].card.blocks, "no blocks = the header-only card");
         }

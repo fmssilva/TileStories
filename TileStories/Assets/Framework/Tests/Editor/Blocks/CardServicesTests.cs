@@ -48,7 +48,7 @@ namespace TileStories.Editor.Tests
 
         private static readonly BlockKindDefinition ProbeKind = new()
         {
-            Key = "service_probe", Family = "meta", DisplayName = "Service probe", Help = "test kind",
+            Key = "service_probe", Family = "meta", Format = CardOptions.FormatRead, DisplayName = "Service probe", Help = "test kind",
             Variants = new[] { "plain" }, DefaultVariant = "plain", DisplayModes = new[] { CardOptions.DisplayInline },
         };
 

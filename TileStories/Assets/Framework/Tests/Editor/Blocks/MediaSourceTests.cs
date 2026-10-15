@@ -36,7 +36,7 @@ namespace TileStories.Editor.Tests
 
         private static readonly BlockKindDefinition ImageKind = new()
         {
-            Key = "image_probe", Family = "media", DisplayName = "Image probe", Help = "test kind",
+            Key = "image_probe", Family = "media", Format = CardOptions.FormatLook, DisplayName = "Image probe", Help = "test kind",
             Variants = new[] { "plain" }, DefaultVariant = "plain", DisplayModes = new[] { CardOptions.DisplayInline },
             Fields = new[] { new BlockFieldDefinition { Key = "image", Type = BlockFieldType.Asset, Label = "Image" } },
         };

@@ -386,3 +386,20 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   earbud poll switch (device-only symptom).
 - [watch] The glossary tap uses the Experimental `PointerUpLinkTagEvent` (`CardTextView`), isolated in one file on purpose: check it on every Unity
   upgrade.
+
+## Test harness (2026-10-15, from _3.2 step 2)
+
+- [investigate] `CardGalleryTests.BeforeAfter_ARealDragMovesTheHandle_TheCutFollows_AndTheStackDoesNotScroll` failed ONCE
+  (handle at 1.0, expected 0.8 +- 0.02) in a targeted 449-test PlayMode run with `editor_is_focused: false` while the
+  developer worked in other apps. It passed alone (focused) and in a full CardGalleryTests rerun (327/327; this test ran early,
+  still focused). Not reproduced, so not "flaky" yet. Hypothesis: `CardTestInput.DragFrom` sends synthetic mouse events to the
+  panel over 12 frames while the slider holds pointer capture, and a REAL mouse move over the Game view (the developer's
+  cursor crossing Unity) reaches the same panel and drags the handle to the edge. Test: run the fixture with Unity in the
+  background AND the cursor moved across the Game view during the before_after test; if it reproduces, make the card drags
+  immune to real pointer input during a run (the harness is shared ground: a full PlayMode run).
+- [fix, REPRODUCED] `LivePlayModeCardTests.TheRealWindow_WhilePlayModeRuns_ATypedTextANewBlockAndAnotherVariantChangeTheOpenCard_AndUndoBringsEachBack`
+  (EditMode, real-window typing) loses keystrokes when Unity is NOT the active application: "Live heading" arrived as "Live "
+  in a full run, and "Dismiss" as "Dis" when run alone, both with `editor_is_focused: false`; it passes focused (1683/1683 twice,
+  2026-10-15). A `40-testing` 4.2.3 violation (tests never depend on window focus) that only shows when the developer works
+  elsewhere during an EditMode run. Fix the typing helper so each key event reaches the window whatever the focus (it is test
+  infrastructure: plan it with a full run); until then an EditMode run with Unity in the background may show this one failure.

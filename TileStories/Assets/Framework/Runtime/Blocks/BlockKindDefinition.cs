@@ -11,6 +11,9 @@ namespace TileStories
         public string Key;
         // The ontology family (_3.2): "about", "media", "guides", "stories", "ar", "play", "visit", "community", "meta"
         public string Family;
+        // How a visitor takes the block in (_3.2 section 2.4): one of CardOptions.Formats (read, look, watch, listen, model,
+        // interact). The second axis the card's navigation can group by (group_by = format); required, like Family
+        public string Format;
         // The Editor's name for the kind ("Header")
         public string DisplayName;
         // The Editor (i) text of the kind

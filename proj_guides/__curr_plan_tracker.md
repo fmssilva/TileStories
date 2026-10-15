@@ -1,90 +1,41 @@
-# Current block: _3.2 POI Card Navigation -- step 1 (ontology as data + Block Order)
+# Current plan -- _3.2 POI Card Navigation, step 2 (CardNavModel + NavOntologyRule + Format facet)
 
-Brief: `_3.2` sections 1, 2.2, 2.3, 3 (rows `block_order` + `families`), 4.6, 7, 9.
-Baseline trusted: commit 3599627 for PlayMode (tree code-identical); EditMode re-run green this session.
+Brief: the Architect's "step 2, the nav model and the Format facet" block (2026-10-15).
+Re-read this file and the brief after any compaction.
 
 ## GATE (done)
-- [x] UnityMCP live (`manage_editor telemetry_status` -> success)
-- [x] `git push` -- 3 commits pushed (f0881b1..3197227)
-- [x] Tree compiles, zero `error CS` (`refresh_unity` force + `read_console` errors = 0)
-- [x] Full EditMode baseline GREEN 1606/1606, 65.0 s (first run's 25 failures were poisoned by the
-      domain reload from my own force-compile immediately before it -- 40-testing 4.2.5 serialize rule;
-      re-run on the identical tree is clean)
-- [x] Oswald Bold SDF + Roboto-Bold SDF restored (`git checkout`), `TileStories/` tree clean, AssetDatabase refreshed
-- [x] Captures opened: `TestEvidence/Editor/gate_gameview.png` (Game view, room mesh + painting),
-      `TestEvidence/Editor/gate_poieditor_620.png` (Detail Card tab, Card Container open, 620 pt)
+- [x] git push: 2 commits pushed (3197227..c7d875f; the brief said 1 -- c7d875f is a docs-only commit on top)
+- [x] Captures opened: TestEvidence/Misc/Gate_GameView_nav2.png (LivingRoom scan, Main Camera), TestEvidence/Editor/Gate_PoiEditor_Navigation_nav2.png (Detail Card > Navigation); capture window closed, none left
+- [x] Tree compiles: last two Editor.log builds "Tundra build success" / ExitCode 0; the 12 error CS lines are older (previous block)
+- [x] Baseline full EditMode: 1620/1620, 0 failed, 83 s. Trusted commit 34d04f7 (full runs EditMode 1620 / PlayMode 778)
 
-## PART 1 -- fixes
-None (`_3.1` closed with no open fix-list item).
+## Audit findings
+- Fixtures exist: lamp (62 blocks), lamp_military (6), lamp_religious (1)
+- Lamp worked example (_3.2 4.4) reproduced by hand from config.json: 56 targets, 18/14/1/7/3/4/7/2
+- GUIDE SLIP: Lamp Military has 4 targets, not 5 (guide 4.4) / 6 (brief): block_5 is an audio_guide hero_chip (pinned top, rule 1).
+  Same outcome (< 8 -> no navigation). Assert the rule-derived 4; correct the guide line.
+- "waiting for ShowAfterViewed" is inline in BlockStackView (view, shared ground): the model reuses the SAME primitives
+  (Definition.ShowAfterViewedField + BlockFieldReader.Flag + the seen state as a predicate) -- BlockStackView is NOT touched
+- Mandatory Format breaks 10 fabricated test kinds (+ the app's size_comparison): each gets a Format
 
-## 1.1 Families as data
-- [x] `Runtime/Blocks/Navigation/FamilyDefinition.cs` -- `Key`, `Order`, `LabelKey`, `InNav`, `AtEnd` only
-- [x] `Runtime/Blocks/Navigation/BuiltInFamilies.cs` -- the 9 keys as constants + `Register(BlockRegistry)`
-      (about 10, media 20, guides 30, stories 40, ar 50, play 60, visit 70, community 80, meta 90 AtEnd)
-- [x] `BlockRegistry`: `RegisterFamily`, `Families`, `TryGetFamily`; instance `Register` throws naming an
-      unregistered family; static `Validate(definition)` keeps its exact signature and shape checks
-- [x] `Ordered` sorts by family `Order` (stable; authored kind order inside a family)
-- [x] `BuiltInBlocks.Register` registers families BEFORE kinds
-- [x] every `Family = "..."` literal (9 files + the app's SizeComparisonBlock) and `ContentSeenRule.MetaFamily`
-      read the `BuiltInFamilies` constants
-- [x] the 8 bare `new BlockRegistry()` sites register families (fix the tests, never weaken the check)
-- [x] `CardStrings.Keys` + `All`: 9 `family_*` keys; `CardStrings.asset` rows en + pt WITH accents
-- [x] TESTS: `FamilyRegistryTests`; `BlockRegistryOrderTests` updated; `CardStringsTests` covers the 9 keys
-
-## 1.2 Block Order replaces Sources At The End
-- [x] `CardNavigationSettings` (`block_order` + `families` rows {family, order, at_end}) + `CardSettings.navigation`
-- [x] `CardOptions.BlockOrders` + `BlockOrderLabels`
-- [x] `BlockStackBuilder.Build` applies order AFTER the skip rules, header always first
-- [x] DELETE `container.sources_at_end`, its Editor row and its help -- no shim, no migration key
-- [x] grep-confirm the LivingRoom config never wrote it (no config file changes)
-- [x] TESTS: `BlockStackBuilderTests` (authored / end_families_last / by_family, meta mid-fixture, a wall row
-      putting At The End on a second family; `by_family` asserts ONE contiguous run per family, relative order);
-      `CardConfigRoundTripTests` walks the new leaves (+ an `int` branch in its `Fill` walker)
-
-## 1.3 Editor: Detail Card > Navigation
-- [x] `Editor/POIEditor/DetailCard/POIEditorToolWindow.CardNavigation.cs` -- framed foldout AFTER Card Container,
-      before Block Library, own section colour; rows: Block Order (popup, (i)), Families table
-      (Order + up/down arrows, Family = visitor label + key, At The End toggle, (i)); Test sub-foldout
-- [x] `Editor/POIEditor/DetailCard/POIEditorToolWindow.CardNavigationHelp.cs` -- (i) texts + 3 guides, app-agnostic
-- [x] reuse `DrawPopupField`, `TableRowScope`, `DrawConfigMutationScope` and the ONE reorder helper
-- [x] NO "Preview navigation" (step 17)
-- [x] TESTS: `DetailCardEditorTabTests` (real click on a reorder arrow and on At The End, Ctrl+Z each, save writes
-      them; the `sources_at_end` cases move to Block Order); `LiveSyncFieldMatrixTests` row `card_settings.navigation`;
-      `PoiCardLiveUpdateTests.SourcesAtTheEnd_...` moves to Block Order
-
-## 1.4 Phase B on the real wall
-- [x] LivingRoomScene, The Lamp's card in each of the three orders; `by_family` = one contiguous run per family
-      ending with Sources; `authored` keeps the authored order; the default behaves exactly as Sources At The End did.
-      Assert RELATIVE order of real block keys.
-
-## 1.5 Visuals (opened and judged item by item)
-- [x] POI Editor at 620 pt, Navigation section open (`Editor/1xx_*_620.png` naming)
-- [x] The Lamp's card at 390 px under the default and under `by_family`
-
-## 1.6 Docs
-- [x] `_3.2` status row 1 -> done + proof
-- [x] `_3.1` section 5 drops the `container.sources_at_end` row, points at `_3.2` Block Order
-- [x] `_3.1.1_Audit.md` section 12 matrix row: "replaced by Block Order (`_3.2` step 1)"
-- [x] `_5.1_Editor_Tab.md`: remove Sources At The End from the Card Container row list (file inventory, 714) AND
-      its row detail (4.7); document the new Navigation section in both places
-- [x] `10-structure.md` for every new file
-- [x] `40-testing.md` 4.2 RUN TIMES after the closing full run
-
-## Closing
-- [x] ONE full EditMode + ONE full PlayMode run, zero failures (mandatory: `BlockRegistry` /
-      `BlockStackBuilder` are shared ground). Background full run NOT owed this block.
-
-
-## Result (2026-10-15)
-
-All sub-steps done and verified. Closing runs, zero failures:
-- Full EditMode **1620 / 1620**, 71.4 s (baseline was 1606; +14 tests).
-- Full PlayMode **778 / 778**, 1769 s (29.5 min), partly with Unity in the background.
-
-Captures opened and judged: `TestEvidence/Editor/gate_gameview.png`, `gate_poieditor_620.png`,
-`Editor/160_CardNavigation_620.png`, `Card/Card_BlockOrder_default_390.png`, `Card/Card_BlockOrder_by_family_390.png`.
-
-Two things the captures caught that no test did: the Families table's (i) buttons sat ~70 pt left of the
-Block Order row's until the table moved onto the shared-row recipe, and the first two card renders were
-pixel-identical (the top of the card, then the first Media block) because About opens the card in every
-order -- the renders now sit at the first block AFTER the About run, where the orders really diverge.
+## Steps
+- [x] 1. Format facet
+  - CardOptions: FormatRead/Look/Watch/Listen/Model/Interact + Formats; GroupByFamily/GroupByFormat + GroupBys
+  - BlockKindDefinition.Format; BlockRegistry.Validate: "no format" / unknown format
+  - every built-in kind (33) + SizeComparisonBlock declares one; the 10 fabricated test kinds get one
+  - CardStrings.Keys.Format* (6) + All + CardStrings.asset rows (en + pt + where)
+  - tests: KindFormatTests (every kind of Shared incl. the app has a valid format; Validate refuses unknown + missing; the guide-named ones)
+  - compile + full EditMode
+- [x] 2. Data: CardNavigationSettings.group_by ("family"), min_blocks (8, 2..30), max_slots (5, 3..5) + limit consts
+  - CardConfigRoundTripTests (old config -> defaults), DetailCardEditorTabTests field guard (8+8+5+3 + int/group_by edits)
+- [x] 3. NavOntologyRule (pure, Runtime/Blocks/Navigation/): IsTarget (rule 1), ShowsNavigation (3), DirectTarget (4), SplitBar (5), clamps
+- [x] 4. CardNavModel (pure): Build(entries, registry, settings, isRevealed) -> GroupBy, Sections (key, label key, count, kinds, targets,
+        DirectTarget), TargetCount, ShowsNavigation, BarSections, MoreSections. Sections in stack order of their first target.
+- [x] 5. Tests: NavOntologyRuleTests + CardNavModelTests (Lamp worked example by_family; default order; group_by format multiset;
+        ShowAfterViewed via real CardLocalState; Military 4 -> none; Religious none; app family between guides and stories;
+        min_blocks / max_slots incl. clamps and exact overflow)
+  - compile + full EditMode
+- [x] 6. Grep proof of reuse (IsPinnedTop / IsFooter / ShowAfterViewedField)
+- [x] 7. Targeted PlayMode: PoiCardSceneTests, PoiCardLiveUpdateTests, LivingRoomCardSceneTests + grep hits PoiCardPlaceInArSceneTests,
+        PoiCardAudioSceneTests, PoiCardLanguageSceneTests, SizeComparisonGalleryTests, CardGalleryTests
+- [x] 8. Docs: _3.2 status row 2 + 4.1/4.4 corrections; 10-structure (new files, Format, settings, tests); RUN TIMES if moved; final EditMode

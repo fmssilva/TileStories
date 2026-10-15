@@ -97,6 +97,7 @@ namespace TileStories
         {
             Key = HeaderKind,
             Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatRead,
             DisplayName = "Header",
             Help = "The top of the card: the point's title and its category chip, plus an optional subtitle. The chip names the " +
                    "point's category only; Show Level adds its hierarchy level. Compact: title and chip. Text only: with the " +
@@ -197,6 +198,7 @@ namespace TileStories
         {
             Key = StatusKind,
             Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatLook,
             DisplayName = "Status",
             Help = "The point's condition, drawn the way its marker draws it: the same outline picture in the same colour " +
                    "(Global Scene > Outline and this point's Outline rows decide both). Ring: one outline beside the condition's " +
@@ -222,6 +224,7 @@ namespace TileStories
         {
             Key = QuickFactsKind,
             Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatRead,
             DisplayName = "Quick Facts",
             Help = "A few short facts at a glance, each a label and a value (Built: 1147). Chips: small pills that wrap. " +
                    "Grid Hairline: two columns split by thin lines. Big Numbers: the value large with its label under it, best for " +
@@ -249,6 +252,7 @@ namespace TileStories
         {
             Key = FunFactKind,
             Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatRead,
             DisplayName = "Fun Fact",
             Help = "Surprising facts about the point, one small card per fact under the heading of Detail Card > Card Texts. " +
                    "Flip: the fact is hidden until the visitor taps the card (a tap on the heading hides it again). Postcard: " +
@@ -275,6 +279,7 @@ namespace TileStories
         {
             Key = PullQuoteKind,
             Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatRead,
             DisplayName = "Pull Quote",
             Help = "A quotation set apart from the text: what someone wrote or said about the point, with who and where. " +
                    "Serif: large italic text behind an accent bar, the author and the source under it. Minimal: body-size " +
@@ -307,6 +312,7 @@ namespace TileStories
         {
             Key = ProcessStepsKind,
             Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatRead,
             DisplayName = "Process Steps",
             Help = "How something was made or done, step by step (how the tiles were fired, how the wall was restored). " +
                    "Numbered: each step's number in a circle beside its title and text, the steps joined by a line, in the " +
@@ -334,6 +340,7 @@ namespace TileStories
         {
             Key = SwatchesKind,
             Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatLook,
             DisplayName = "Swatches",
             Help = "The colours of the point itself (the pigments of a tile panel, the paints of a facade), each a sample with " +
                    "its name and an optional note. Grid: the samples in two columns. These colours are content, shown exactly as " +
@@ -373,6 +380,7 @@ namespace TileStories
         {
             Key = ActionsKind,
             Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatInteract,
             DisplayName = "Actions",
             Help = "Buttons that do something for the visitor, each with your own words and one action. Show On The Wall: " +
                    "lowers the card so the point's marker shows on the wall. Circles: round buttons with the words under them. " +
@@ -412,6 +420,7 @@ namespace TileStories
         {
             Key = RichTextKind,
             Family = BuiltInFamilies.About,
+            Format = CardOptions.FormatRead,
             DisplayName = "Rich Text",
             Help = "Paragraphs of text about the point. Plain: paragraphs only. Drop Cap: the first letter raised beside the first " +
                    "paragraph. Lede: a larger first paragraph that sums the point up. Sections: the text as an introduction, then " +
