@@ -129,7 +129,7 @@ namespace TileStories.Editor
                         EditorGUILayout.HelpBox(warning, MessageType.Warning);
                         ReportTableCellRect("Card block warning", i);
                     }
-                    foreach (string warning in CardRepeatedActionWarnings(block, repeatedActions))
+                    foreach (string warning in CardRepeatedActionWarnings(block, repeatedActions, poi, settings.languages))
                     {
                         EditorGUILayout.HelpBox(warning, MessageType.Warning);
                         ReportTableCellRect("Card repeated action warning", i);
@@ -137,7 +137,7 @@ namespace TileStories.Editor
                 }
 
                 if (open && definition != null)
-                    DrawBlockFields(block, definition, i);
+                    DrawBlockFields(block, definition, i, poi, built);
             }
 
             // - applied after the loop: a row is never left half-drawn
@@ -322,13 +322,16 @@ namespace TileStories.Editor
         }
 
         // One warning per action this block takes part in offering more than once (RepeatedActionRule over the shown blocks of the card): the
-        // same text under every block that offers it, so whichever one the developer opens says it and names the others
-        internal static List<string> CardRepeatedActionWarnings(BlockInstanceData block, IReadOnlyList<RepeatedActionRule.Repeat> repeats)
+        // same text under every block that offers it, so whichever one the developer opens says it and names the others (and, for Open
+        // Block, the block of `poi` every offer opens)
+        internal static List<string> CardRepeatedActionWarnings(BlockInstanceData block, IReadOnlyList<RepeatedActionRule.Repeat> repeats,
+            POIData poi = null, List<string> languages = null)
         {
             var warnings = new List<string>();
             if (block == null || repeats == null) return warnings;
             foreach (var repeat in repeats)
-                if (repeat.Offers.Exists(o => ReferenceEquals(o.Block, block))) warnings.Add(CardRepeatedActionText(repeat));
+                if (repeat.Offers.Exists(o => ReferenceEquals(o.Block, block)))
+                    warnings.Add(CardRepeatedActionText(repeat, repeat.Target.Length > 0 ? CardBlockName(poi, repeat.Target, languages) : ""));
             return warnings;
         }
 

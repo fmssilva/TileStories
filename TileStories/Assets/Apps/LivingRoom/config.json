@@ -6094,6 +6094,71 @@
                                                 "asset": ""
                                             }
                                         ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "action",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "open_block",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "target",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "block_55",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Read the sources"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Ler as fontes"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "action",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "open_block",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "target",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "block_15",
+                                                "asset": ""
+                                            }
+                                        ]
                                     }
                                 ]
                             }

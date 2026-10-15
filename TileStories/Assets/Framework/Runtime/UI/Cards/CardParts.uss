@@ -251,6 +251,32 @@
     border-radius: var(--ts-icon-size);
 }
 
+/* open_block: "go to that part of the card" -- a down arrow, the sign of an in-page jump: the frame is its head (a square that shows
+   only its right and bottom sides, turned 45 degrees), bar a its shaft */
+.card-icon--open_block .card-icon__frame,
+.card-icon--open_block .card-icon__bar--a {
+    display: flex;
+}
+
+.card-icon--open_block .card-icon__frame {
+    left: 28%;
+    right: 28%;
+    top: 30%;
+    bottom: 26%;
+    border-top-width: 0;
+    border-left-width: 0;
+    border-radius: 0;
+    rotate: 45deg;
+}
+
+.card-icon--open_block .card-icon__bar--a {
+    left: 50%;
+    top: 8%;
+    height: 72%;
+    width: var(--ts-icon-stroke);
+    translate: -50% 0;
+}
+
 /* ---- the pill button: ONE shape for every block that has one (actions' pill_row, story_chapters' Previous / Next).
    The radius is half the touch-target height (--ts-pill-radius), so short words give a stadium, not an egg ---- */
 

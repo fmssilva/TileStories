@@ -71,6 +71,9 @@ namespace TileStories
         public string jump_raises_to = CardOptions.JumpRaisesFull;
         // Jump Motion: "smooth" (the default: the stack glides over --ts-duration) | "instant" (CardOptions.JumpMotions)
         public string jump_motion = CardOptions.JumpMotionSmooth;
+        // Back Button: "step_down" (the default: each system Back press undoes the innermost thing -- the full view, then one stop down,
+        // then closes the card, NavBackRule) | "none" (Back is left to the app) (CardOptions.BackButtons)
+        public string back_button = CardOptions.BackButtonStepDown;
 
         public const int MinBlocksMin = 2;
         public const int MinBlocksMax = 30;
@@ -286,6 +289,14 @@ namespace TileStories
         public const string JumpMotionSmooth = "smooth";
         public const string JumpMotionInstant = "instant";
         public static readonly string[] JumpMotions = { JumpMotionSmooth, JumpMotionInstant };
+        public static readonly string[] JumpRaiseLabels = { "Full", "Keep Its Stop" };
+        public static readonly string[] JumpMotionLabels = { "Smooth", "Instant" };
+
+        // Back Button (CardNavigationSettings.back_button, _3.2 section 4.5): system Back steps the card down (NavBackRule) or is left to the app
+        public const string BackButtonStepDown = "step_down";
+        public const string BackButtonNone = "none";
+        public static readonly string[] BackButtons = { BackButtonStepDown, BackButtonNone };
+        public static readonly string[] BackButtonLabels = { "Step The Card Down", "Leave It To The App" };
 
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";

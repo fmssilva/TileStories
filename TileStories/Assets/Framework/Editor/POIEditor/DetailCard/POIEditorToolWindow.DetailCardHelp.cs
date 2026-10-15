@@ -337,13 +337,31 @@ namespace TileStories.Editor
 
         // The card offers one action in more than one place (RepeatedActionRule): the action, how many times, and every offer by what the
         // Editor shows (the kind, its look, the button's own words), never a block key
-        internal static string CardRepeatedActionText(RepeatedActionRule.Repeat repeat)
+        internal static string CardRepeatedActionText(RepeatedActionRule.Repeat repeat, string targetName = "")
         {
             var offers = new List<string>();
             foreach (var offer in repeat.Offers) offers.Add(CardOfferName(offer));
-            return "This card offers \"" + CardActionName(repeat.Action) + "\" " + repeat.Offers.Count + " times: " + string.Join("; ", offers) +
+            // - an Open Block repeat is about ONE target (two buttons to different blocks are no repeat): say which
+            string what = "\"" + CardActionName(repeat.Action) + "\"" + (targetName.Length > 0 ? " to " + targetName : "");
+            return "This card offers " + what + " " + repeat.Offers.Count + " times: " + string.Join("; ", offers) +
                    ". Keep the one that suits the card and delete the others.";
         }
+
+        // Why a BlockRef field's pick leads nowhere (BlockRefRule.Check), naming the block it points at as Card Content does
+        internal static string CardBlockRefProblemText(string label, BlockRefRule.Problem problem, string targetName) => problem switch
+        {
+            BlockRefRule.Problem.Blank => label + ": no block is picked, so the card leaves this jump out. Pick the block it should open.",
+            BlockRefRule.Problem.Itself => label + " points at this same block, so the card leaves this jump out. Pick another block.",
+            BlockRefRule.Problem.Missing => label + " points at a block this card no longer has (shown as \"" + BlockRefMissingLabel +
+                "\"), so the card leaves this jump out. Pick another block.",
+            BlockRefRule.Problem.NotShown => label + " points at " + targetName + ", which the card does not show (its own row says why), so the " +
+                "card leaves this jump out. Fix that block or pick another one.",
+            BlockRefRule.Problem.NotInScroll => label + " points at " + targetName + ", which the card shows outside the part that scrolls (the " +
+                "title, or a look pinned under the title or to the bottom), so the card leaves this jump out. Pick a block of the scrolling part.",
+            BlockRefRule.Problem.WaitsForReading => label + " points at " + targetName + ", which waits for Show After Reading: the jump is left " +
+                "out until the visitor has read the card to its end and opens it again.",
+            _ => "",
+        };
 
         // One offer as the developer finds it in Card Content: "Actions (sticky_cta, pinned to the footer) saying \"See it\""
         private static string CardOfferName(RepeatedActionRule.Offer offer)
@@ -417,7 +435,7 @@ namespace TileStories.Editor
             {
                 BlockFieldType.LocalizedText or BlockFieldType.LocalizedLongText => label + " is empty in every language",
                 BlockFieldType.Items => label + " has no rows",
-                BlockFieldType.Choice or BlockFieldType.PoiRef => label + " is not picked",
+                BlockFieldType.Choice or BlockFieldType.PoiRef or BlockFieldType.BlockRef => label + " is not picked",
                 BlockFieldType.Color => label + " is not a colour written as #RRGGBB",
                 BlockFieldType.Time => label + " is not a time written as 1:30",
                 _ => label + " is empty",

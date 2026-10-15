@@ -135,6 +135,11 @@ namespace TileStories
             Takeover.Close();
             _context = context;
             _entries = entries;
+            // - before the stack binds: a block that offers a jump reads where the card can scroll (a block waiting for Show After Reading
+            //   is not there yet -- the same remembered reveal the stack hides it on)
+            var state = context.State;
+            string poiId = context.Poi?.id;
+            context.JumpTargets = BlockRefRule.JumpTargets(entries, key => state?.Seen(poiId, key) ?? false);
             Stack.Bind(entries, context);
             BindNav();
             Root.style.display = DisplayStyle.Flex;
@@ -219,6 +224,21 @@ namespace TileStories
         public void ScrollToBlock(string blockKey, string elementKey)
         {
             if (IsOpen) Nav.JumpToBlock(blockKey, elementKey);
+        }
+
+        // A system Back press (_3.2 section 4.5): undo the innermost thing NavBackRule names -- close the full view, lower the sheet one
+        // stop, or close the card through CloseRequested, exactly as its X does. False when Back is left to the app (Back Button = none,
+        // or no card open)
+        public bool Back()
+        {
+            switch (NavBackRule.Next(_context?.Settings?.navigation, Takeover.IsOpen, Stop))
+            {
+                case NavBackRule.Step.CloseFullView: Takeover.Close(); return true;
+                case NavBackRule.Step.LowerToHalf: SetStop(SheetStopRule.Stop.Half); return true;
+                case NavBackRule.Step.LowerToPeek: SetStop(SheetStopRule.Stop.Peek); return true;
+                case NavBackRule.Step.CloseCard: CloseRequested?.Invoke(); return true;
+                default: return false;
+            }
         }
 
         // A block asked for the full-screen view: the breadcrumb starts with this card's title

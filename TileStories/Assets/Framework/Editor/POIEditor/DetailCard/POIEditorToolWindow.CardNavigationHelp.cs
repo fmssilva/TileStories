@@ -26,6 +26,24 @@ namespace TileStories.Editor
             "A family you never change keeps the order and the tick it comes with, and nothing is written to this wall " +
             "until you really change one, so a family added later needs no edit here.";
 
+        private const string CardJumpRaisesHelp =
+            "What the card does before it moves to a block that a visitor asked for (an Open Block button of an Actions block today; " +
+            "the navigation tabs and bars later). Full (the default): the card first rises to its full height, then moves -- at half " +
+            "height only a few lines show, too little to land on. Keep Its Stop: the card stays as high as the visitor left it and " +
+            "only moves its content, for a wall that wants the camera view to stay in sight.";
+
+        private const string CardJumpMotionHelp =
+            "How the card moves to a block a visitor asked for. Smooth (the default): the content glides there in the same time the " +
+            "card takes to rise, so the visitor sees where they went. Instant: it is there at once. Reduce Motion (Detail Card > Card " +
+            "Container) always makes it instant, whatever this says.";
+
+        private const string CardBackButtonHelp =
+            "What the phone's own Back button does while a card is open (Android; an iPhone has none, so nothing changes there). " +
+            "Step The Card Down (the default): each press undoes the innermost thing -- an open full-screen view closes; else the " +
+            "card goes one height down, full to half to its title; at its title the card closes, as its X does. A visitor who " +
+            "presses Back to leave never loses their place in one go. Leave It To The App: the card ignores Back and the app " +
+            "decides what it does.";
+
         private const string CardNavigationSceneTestGuide =
             "Not possible in Scene test: the card is screen-space UI Toolkit, so it draws only in Play Mode (or in Unity's " +
             "UI Builder for the bare layout); the Scene view has no preview of it to keep in sync. Use How to Playmode Test.";
@@ -34,7 +52,8 @@ namespace TileStories.Editor
             "SETUP\n" +
             "- Save All to JSON, then Copy to StreamingAssets (Play reads that copy).\n" +
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
-            "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back.\n" +
+            "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
+            "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
             "BLOCK ORDER\n" +
@@ -51,7 +70,20 @@ namespace TileStories.Editor
             "family's whole run moves past its neighbour.\n" +
             "- Tick At The End on a family that did not have it: with End Families Last (or Grouped By Family) its blocks " +
             "move to the bottom of the card. Untick it again and they come back.\n" +
-            "- Press Ctrl+Z after each change: the card goes back to what it showed before.\n" +
+            "- Press Ctrl+Z after each change: the card goes back to what it showed before.\n\n" +
+            "JUMPS\n" +
+            "- In Specific Marker > Card Content, give a point's Actions block a row with Action = Open Block and pick a block far down " +
+            "the card in Opens Block (its row must show no warning).\n" +
+            "- Open that point's card at half height and tap the button: with Jump Opens Card To = Full the card first rises to full, " +
+            "then the picked block's top comes to rest at the top of what scrolls.\n" +
+            "- Set Jump Opens Card To = Keep Its Stop and tap again from half height: the card stays at half and only its content moves.\n" +
+            "- Set Jump Motion = Instant: the content is there at once; Smooth: it glides. With Reduce Motion ticked it is always at once.\n" +
+            "- Pick, in Opens Block, the card's title block or a block waiting for Show After Reading: the row warns and the button is gone.\n\n" +
+            "BACK BUTTON\n" +
+            "- In the Game view, Escape stands for the phone's Back button.\n" +
+            "- Open a card, drag it to full, open a picture in its full-screen view. Press Escape four times: the full view closes, " +
+            "the card goes to half, then to its title, then it closes and the marker is no longer selected.\n" +
+            "- Set Back Button = Leave It To The App and press Escape with a card open: nothing happens to the card.\n" +
             "- Test Runner: EditMode and PlayMode, zero failures.";
 
         private const string CardNavigationDeviceTestGuide =
@@ -62,6 +94,9 @@ namespace TileStories.Editor
             "- Only what a device really shows differently: open a long card and scroll it from top to bottom with a thumb. " +
             "With Grouped By Family, check that a visitor can tell where one family ends and the next begins while scrolling " +
             "fast, and that the blocks that close the card still read as the end of it rather than as more content.\n" +
-            "- Nothing else here needs a device: the order itself is the same on every screen.";
+            "- Back Button (Android): open a card, raise it to full, and press the phone's own Back button (or make the Back gesture) " +
+            "once per step: full to half, half to its title, then the card closes. With Leave It To The App, Back does what the app " +
+            "does without a card. An iPhone has no Back button: nothing to check there.\n" +
+            "- Nothing else here needs a device: the order and the jumps are the same on every screen.";
     }
 }

@@ -78,6 +78,7 @@ namespace TileStories
                     return Pick(value.text, null, null).Length > 0;
                 case BlockFieldType.Choice:
                 case BlockFieldType.PoiRef:
+                case BlockFieldType.BlockRef:
                     return !string.IsNullOrWhiteSpace(value.value);
                 case BlockFieldType.Color:
                     return TryParseColor(value.value, out _);
@@ -117,6 +118,7 @@ namespace TileStories
                     return Pick(value.text, null, null).Length > 0;
                 case BlockFieldType.Choice:
                 case BlockFieldType.PoiRef:
+                case BlockFieldType.BlockRef:
                     return !string.IsNullOrWhiteSpace(value.value);
                 case BlockFieldType.Color:
                     return TryParseColor(value.value, out _);

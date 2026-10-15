@@ -1,8 +1,9 @@
 // POIEditorToolWindow.CardNavigation.cs
 //
 // Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open
-// card. This step holds the two rows that order the stack: Block Order and the Families table (Order with reorder
-// arrows, Family, At The End). The nav elements, layouts and presets join this same section at later steps.
+// card. The two rows that order the stack: Block Order and the Families table (Order with reorder arrows, Family,
+// At The End); then how a jump moves the card (Jump Opens Card To, Jump Motion) and what system Back does (Back
+// Button), step 4. The nav elements, layouts and presets join this same section at later steps.
 // Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
 
 using System.Collections.Generic;
@@ -34,6 +35,14 @@ namespace TileStories.Editor
             nav.block_order = DrawPopupField("Block Order", nav.block_order, CardOptions.BlockOrders, CardOptions.BlockOrderLabels, CardBlockOrderHelp);
 
             DrawFamiliesTable(nav);
+            // - a group gap: without it the first row under the table reads as one more family (the 620 pt capture showed it)
+            GUILayout.Space(TableGapBetweenGroups);
+
+            // - section 7's order: the jump rows, then Back (Show Navigation At, Follow Scroll and Hide While Scrolling join between at step 5).
+            //   The first option of each is the default the card reads for an unknown value too, so the row and the card always agree
+            nav.jump_raises_to = DrawPopupField("Jump Opens Card To", nav.jump_raises_to, CardOptions.JumpRaises, CardOptions.JumpRaiseLabels, CardJumpRaisesHelp);
+            nav.jump_motion = DrawPopupField("Jump Motion", nav.jump_motion, CardOptions.JumpMotions, CardOptions.JumpMotionLabels, CardJumpMotionHelp);
+            nav.back_button = DrawPopupField("Back Button", nav.back_button, CardOptions.BackButtons, CardOptions.BackButtonLabels, CardBackButtonHelp);
 
             DrawDomainTestSubSection(_cardNavigationTest, CardNavigationSceneTestGuide, CardNavigationPlaymodeTestGuide, CardNavigationDeviceTestGuide);
         }

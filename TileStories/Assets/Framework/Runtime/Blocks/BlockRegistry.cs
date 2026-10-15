@@ -139,6 +139,9 @@ namespace TileStories
                 if (f == null || string.IsNullOrWhiteSpace(f.Key)) return "a field has no key";
                 if (!keys.Add(f.Key)) return "two fields are keyed '" + f.Key + "'";
                 if (f.Type == BlockFieldType.Choice && (f.Options == null || f.Options.Count == 0)) return "Choice field '" + f.Key + "' has no options";
+                // - a fixed list on any other type would be silently ignored: a PoiRef lists the wall's points, a BlockRef its own card's blocks
+                if (f.Type != BlockFieldType.Choice && (f.Options != null || f.OptionLabels != null))
+                    return f.Type + " field '" + f.Key + "' lists options, but only a Choice field has a fixed list";
                 if (f.ChoiceDefault != null && (f.Type != BlockFieldType.Choice || !Contains(f.Options, f.ChoiceDefault)))
                     return "field '" + f.Key + "' defaults to '" + f.ChoiceDefault + "', which is not one of its Choice options";
                 if (f.LibraryDefault && (!allowItems || !(f.Type == BlockFieldType.Toggle || (f.Type == BlockFieldType.Choice && f.ChoiceDefault != null))))

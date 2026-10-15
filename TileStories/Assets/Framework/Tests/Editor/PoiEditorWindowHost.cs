@@ -41,6 +41,10 @@ namespace TileStories.Editor.Tests
         // Opens the window on this config with one Global Scene section unfolded (e.g. "_showGlobalBadge")
         public PoiEditorWindowHost(WallConfigData config, string sectionFoldoutField)
         {
+            // - read by reflection (EditingText): a Unity version that renames it must fail here, by name, not as a bare
+            //   NullReferenceException in the middle of a typing test
+            Assert.IsNotNull(ActiveTextEditor, "UnityEditor.EditorGUI has no private static field 'activeEditor' in this Unity version: "
+                + "PoiEditorWindowHost reads the text being typed through it; find its new name and update ActiveTextEditor");
             Editor = ScriptableObject.CreateInstance<POIEditorToolWindow>();
             var type = typeof(POIEditorToolWindow);
             type.GetField("_config", Instance).SetValue(Editor, config);

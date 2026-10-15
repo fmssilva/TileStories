@@ -464,6 +464,14 @@ MonoBehaviour:
       value: Also nearby
     - lang: pt
       value: "Tamb\xE9m perto"
+  - key: open_block_button
+    where: An Actions button that opens another block of the same card, when the
+      button has no words of its own and the block it opens has no heading.
+    text:
+    - lang: en
+      value: Go to this part
+    - lang: pt
+      value: Ir para esta parte
   - key: audio_play
     where: The play button's name (its tooltip and accessible name) on an Audio Guide,
       on the small player on the wall and on a Video.

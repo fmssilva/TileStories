@@ -18,9 +18,11 @@ namespace TileStories
         public const string Info = "info";
         public const string Ticket = "ticket";
         public const string Light = "light";
+        // The Open Block action (_3.2 step 4): an arrow down to a line -- "go to that part of this card"
+        public const string OpenBlock = "open_block";
 
         // Every key the set draws
-        public static readonly IReadOnlyList<string> All = new[] { ShowOnWall, Time, Access, Location, Info, Ticket, Light };
+        public static readonly IReadOnlyList<string> All = new[] { ShowOnWall, Time, Access, Location, Info, Ticket, Light, OpenBlock };
 
         // A new icon element (no key yet: SetKey picks the drawing)
         public static VisualElement Create()

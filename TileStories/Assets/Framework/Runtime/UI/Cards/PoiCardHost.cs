@@ -245,10 +245,13 @@ namespace TileStories
         private void ApplyDemo() => _demo.Apply(wallSession.CardSettings, wallSession.SearchPois,
             CardDemoRule.IsAllowed(Application.isEditor, Debug.isDebugBuild), ShownPoiId, Show, Sheet);
 
-        // - every frame the tap-outside path sees the pointer (a press, its release, a waiting close falling due)
+        // - every frame the tap-outside path sees the pointer (a press, its release, a waiting close falling due), and system Back reaches
+        //   the card: Escape is where Android's Back key arrives in a Unity player (the sheet and NavBackRule decide what it does)
         private void Update()
         {
-            if (Sheet != null) _tapOutside.Poll(Pointer.current);
+            if (Sheet == null) return;
+            _tapOutside.Poll(Pointer.current);
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) Sheet.Back();
         }
 
         // A press at `down` released at `up` (screen pixels, times on the Clock): true when a tap on empty camera space closed the card NOW

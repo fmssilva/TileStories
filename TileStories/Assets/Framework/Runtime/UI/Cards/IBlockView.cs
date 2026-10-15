@@ -54,6 +54,9 @@ namespace TileStories
         // in the world at its POI (one model at a time) and whether the wall is localised. Null where the caller has none (the block's
         // button then stays disabled)
         public ICardArPlacement ArPlacement;
+        // The keys of the blocks this card can scroll to (BlockRefRule.JumpTargets over the stack being bound, _3.2 step 4): a block
+        // that offers a jump (an Open Block button) offers it only to one of these. Null where the caller has none: no jump is offered
+        public System.Collections.Generic.ICollection<string> JumpTargets;
         // Show still pictures instead of motion (card_settings.container.reduce_motion today; the visitor's own setting joins it with _3.3):
         // a header loop shows its poster only
         public bool ReduceMotion;

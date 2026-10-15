@@ -4,6 +4,9 @@
 // BlockKindDefinition, so a kind an app registers is edited exactly like a built-in one with no Editor code.
 // One drawer per BlockFieldType; a type gets its drawer with the first kind that uses it (HasBlockFieldDrawer,
 // guarded by DetailCardEditorTabTests). Drawing never writes: a value is created only when the developer types.
+// Split by type family (_3.2 step 4): this file dispatches and draws the text and Items rows and holds the value
+// accessors; the single-value rows are in .Values.cs, the reference popups (PoiRef, BlockRef) in .References.cs,
+// the media rows in .Assets.cs.
 
 using System;
 using System.Collections.Generic;
@@ -15,22 +18,17 @@ namespace TileStories.Editor
     public partial class POIEditorToolWindow
     {
         private const float BlockItemButtonWidth = 22f;
-        private const string BlockChoiceNoneLabel = "(none)";
-        // The empty entry of a Choice that has a default: it says which option the card will use ("Default: Yaw Safe")
-        private const string BlockChoiceDefaultPrefix = "Default: ";
-        private const string BlockPoiMissingLabel = "(missing)";
-        // GUILayout's own gap between two controls on one row (the colour picker and its hex field)
-        private const float BlockRowControlGap = 3f;
 
         // Whether the Editor can draw fields of this type today
         internal static bool HasBlockFieldDrawer(BlockFieldType type) =>
             type == BlockFieldType.LocalizedText || type == BlockFieldType.LocalizedLongText || type == BlockFieldType.Items
             || type == BlockFieldType.Choice || type == BlockFieldType.Color || type == BlockFieldType.Toggle
             || type == BlockFieldType.PoiRef || type == BlockFieldType.Asset || type == BlockFieldType.Number || type == BlockFieldType.Url
-            || type == BlockFieldType.Time;
+            || type == BlockFieldType.Time || type == BlockFieldType.BlockRef;
 
-        // Every field of one block, as its kind defines them
-        private void DrawBlockFields(BlockInstanceData block, BlockKindDefinition definition, int blockIndex)
+        // Every field of one block of `poi`, as its kind defines them. `built`: the POI's card as BlockStackBuilder builds it (a BlockRef
+        // field says where its pick leads from it)
+        private void DrawBlockFields(BlockInstanceData block, BlockKindDefinition definition, int blockIndex, POIData poi, BlockStackBuilder.Result built)
         {
             var languages = _config.card_settings?.languages;
             if (languages == null || languages.Count == 0)
@@ -38,6 +36,7 @@ namespace TileStories.Editor
                 EditorGUILayout.HelpBox(CardNoLanguageNote, MessageType.Warning);
                 return;
             }
+            var card = new BlockRefCard { Poi = poi, Holder = block, Built = built, Languages = languages };
             foreach (var field in definition.Fields)
             {
                 // - a field the block's look or options do not use is not drawn; its value stays (hiding is drawing, never writing)
@@ -48,7 +47,7 @@ namespace TileStories.Editor
                     continue;
                 }
                 if (field.Type == BlockFieldType.Items)
-                    DrawItemsBlockField(block, definition, field, languages, blockIndex);
+                    DrawItemsBlockField(block, definition, field, languages, blockIndex, card);
                 else if (field.Type == BlockFieldType.Choice)
                     DrawChoiceRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
                         () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value),
@@ -58,6 +57,9 @@ namespace TileStories.Editor
                         () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value));
                 else if (field.Type == BlockFieldType.PoiRef)
                     DrawPoiRefRow(field, IndentLevel1, "Block field " + field.Key, blockIndex, _config.pois,
+                        () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value));
+                else if (field.Type == BlockFieldType.BlockRef)
+                    DrawBlockRefRow(field, IndentLevel1, "Block field " + field.Key, blockIndex, card,
                         () => ChoiceValue(block, field.Key), value => SetChoiceValue(block, field.Key, value));
                 else if (field.Type == BlockFieldType.Toggle)
                     DrawToggleRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
@@ -113,7 +115,8 @@ namespace TileStories.Editor
 
         // An Items field (a repeater): its label + (i), then per row a "Row N" line with up / down / delete and the row's
         // own fields, then "+ Add row". The field value is created by the first Add, never by drawing.
-        private void DrawItemsBlockField(BlockInstanceData block, BlockKindDefinition definition, BlockFieldDefinition field, List<string> languages, int blockIndex)
+        private void DrawItemsBlockField(BlockInstanceData block, BlockKindDefinition definition, BlockFieldDefinition field, List<string> languages, int blockIndex,
+            BlockRefCard card)
         {
             DrawEditorRow(out float labelRow, out _, IndentLevel1);
             GUILayout.Label(field.Label + (field.Required ? " (required)" : ""), EditorStyles.miniBoldLabel,
@@ -148,7 +151,7 @@ namespace TileStories.Editor
                 foreach (var sub in field.ItemFields)
                     if (FieldVisibilityRule.IsShown(sub, item, field, block, definition, _config.card_settings))
                         DrawItemSubField(item, sub, languages, probe + i + " " + sub.Key, blockIndex, _config.card_settings?.media_resources_path,
-                            _config.card_settings?.default_media_library_resources_path, _config.pois);
+                            _config.card_settings?.default_media_library_resources_path, _config.pois, card);
             }
 
             DrawEditorRow(out float addRow, out _, IndentLevel1);
@@ -164,7 +167,7 @@ namespace TileStories.Editor
 
         // One sub-field of one Items row
         private void DrawItemSubField(BlockItemData item, BlockFieldDefinition sub, List<string> languages, string probeName, int probeIndex, string mediaFolder,
-            string defaultLibraryPath, List<POIData> pois)
+            string defaultLibraryPath, List<POIData> pois, BlockRefCard card)
         {
             if (sub.Type == BlockFieldType.Asset)
                 DrawAssetRow(sub, IndentLevel2, probeName, probeIndex, mediaFolder, defaultLibraryPath,
@@ -179,6 +182,8 @@ namespace TileStories.Editor
                 DrawNumberRow(sub, IndentLevel2, probeName, probeIndex, () => BlockFieldReader.ItemNumber(item, sub), value => EnsureItemField(item, sub.Key).number = value);
             else if (sub.Type == BlockFieldType.PoiRef)
                 DrawPoiRefRow(sub, IndentLevel2, probeName, probeIndex, pois, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
+            else if (sub.Type == BlockFieldType.BlockRef)
+                DrawBlockRefRow(sub, IndentLevel2, probeName, probeIndex, card, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
             else if (sub.Type == BlockFieldType.Url)
                 DrawUrlRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
             else if (sub.Type == BlockFieldType.Time)
@@ -186,211 +191,6 @@ namespace TileStories.Editor
             else
                 DrawLocalizedRows(sub, languages, IndentLevel2, probeName, probeIndex,
                     lang => ItemLocalizedValue(item, sub.Key, lang), (lang, text) => SetItemLocalizedValue(item, sub.Key, lang, text));
-        }
-
-        // A Choice field: a popup of the definition's option labels (the value stored is the option, never the label). An
-        // optional field offers "(none)"; a value that is no longer an option stays, shown as "<value> (missing)", until
-        // the developer picks another -- drawing never rewrites it.
-        private static void DrawChoiceRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<string> get, Action<string> set,
-            string emptyLabel = null)
-        {
-            var (values, labels) = BlockChoiceOptions(field, get(), emptyLabel);
-            int index = values.IndexOf(get());
-            DrawEditorRow(out float rowWidth, out _, indent);
-            EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
-            int picked = EditorGUILayout.Popup(index, labels.ToArray(), GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
-            ReportTableCellRect(probeName, probeIndex);
-            HelpInfoButton.Draw(field.Label, field.Help);
-            EditorRowEnd();
-            if (picked >= 0 && picked != index) set(values[picked]);
-        }
-
-        // A Color field: the picker + hex pair every colour row of the window uses (DrawColorSwatchAndHex), stored as the
-        // hex text. Text that is not a colour the card accepts (BlockFieldReader.TryParseColor) stays as typed, with a
-        // warning under it -- the card leaves that row out until it is fixed. Drawing never writes.
-        private static void DrawColorRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<string> get, Action<string> set)
-        {
-            string current = get();
-            string edited = current;
-            DrawEditorRow(out float rowWidth, out _, indent);
-            EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
-            DrawColorSwatchAndHex(ref edited, out _, out Rect hexRect);
-            ReportTableCellRect(probeName, probeIndex, hexRect);
-            // - the (i) in the same column as every other row's (i): the value area ends 36 before the row's end (the
-            //   Choice rows' rule); a fixed spacer, since a flexible one runs past the row's width cap
-            GUILayout.Space(Mathf.Max(0f, rowWidth - EditorGUIUtility.labelWidth - 36f - ColorPickerWidth - ColorHexFieldWidth - BlockRowControlGap));
-            HelpInfoButton.Draw(field.Label, field.Help);
-            EditorRowEnd();
-            if (edited != current) set(edited);
-            if (!string.IsNullOrWhiteSpace(get()) && !BlockFieldReader.TryParseColor(get(), out _))
-                EditorGUILayout.HelpBox(CardColorInvalidText(field.Label, get()), MessageType.Warning);
-        }
-
-        // A Url field: one text field (a link is the same in every language), stored as typed. Text the card would not open
-        // (WebLinkRule) stays, with a warning under it -- the card shows no button for it until it is fixed. Drawing never writes.
-        private static void DrawUrlRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<string> get, Action<string> set)
-        {
-            string current = get();
-            DrawEditorRow(out float rowWidth, out _, indent);
-            EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
-            string edited = EditorGUILayout.TextField(current, GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
-            ReportTableCellRect(probeName, probeIndex);
-            HelpInfoButton.Draw(field.Label, field.Help);
-            EditorRowEnd();
-            if (edited != current) set(edited);
-            if (!string.IsNullOrWhiteSpace(get()) && !WebLinkRule.IsOpenable(get()))
-                EditorGUILayout.HelpBox(CardUrlInvalidText(field.Label, get()), MessageType.Warning);
-        }
-
-        // A Time field: one text field (a time is the same in every language), stored as typed. Text that is not a time
-        // (TimeCodeRule) stays, with a warning under it -- the card leaves that row out until it is fixed. Drawing never writes.
-        private static void DrawTimeRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<string> get, Action<string> set)
-        {
-            string current = get();
-            DrawEditorRow(out float rowWidth, out _, indent);
-            EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
-            string edited = EditorGUILayout.TextField(current, GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
-            ReportTableCellRect(probeName, probeIndex);
-            HelpInfoButton.Draw(field.Label, field.Help);
-            EditorRowEnd();
-            if (edited != current) set(edited);
-            if (!string.IsNullOrWhiteSpace(get()) && !TimeCodeRule.IsValid(get()))
-                EditorGUILayout.HelpBox(CardTimeInvalidText(field.Label, get()), MessageType.Warning);
-        }
-
-        // A PoiRef field: a popup of this wall's POIs named as the POI list names them ("3. North tower", never an id). A
-        // stored id no POI has any more stays selected as "(missing)" until the developer picks another -- drawing never
-        // rewrites it (the ReferencePopupOptions rule every reference popup of the window follows).
-        private static void DrawPoiRefRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, List<POIData> pois,
-            Func<string> get, Action<string> set)
-        {
-            var options = PoiRefOptions(pois, get(), !field.Required);
-            DrawEditorRow(out float rowWidth, out _, indent);
-            EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
-            int picked = EditorGUILayout.Popup(options.SelectedIndex, options.Labels, GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
-            ReportTableCellRect(probeName, probeIndex);
-            HelpInfoButton.Draw(field.Label, field.Help);
-            EditorRowEnd();
-            if (picked != options.SelectedIndex) set(options.KeyAt(picked) ?? "");
-        }
-
-        // The options of a PoiRef popup: every POI by its list title, a blank value as "(none)", a stale id as "(missing)"
-        internal static ReferencePopupOptions PoiRefOptions(List<POIData> pois, string current, bool allowNone)
-        {
-            var ids = new List<string>();
-            var titles = new List<string>();
-            for (int i = 0; i < (pois?.Count ?? 0); i++)
-            {
-                ids.Add(pois[i]?.id);
-                titles.Add(EditorNames.Poi(i, pois[i]));
-            }
-            return ReferencePopupOptions.Build(ids, titles, current, allowNone, BlockPoiMissingLabel);
-        }
-
-        // A Toggle field: label + checkbox + (i); the value is created by the first real click, never by drawing
-        private static void DrawToggleRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<bool> get, Action<bool> set)
-        {
-            bool current = get();
-            DrawEditorRow(out float rowWidth, out _, indent);
-            EditorGUILayout.PrefixLabel(field.Label);
-            bool edited = EditorGUILayout.Toggle(current, GUILayout.Width(EditorGUIUtility.singleLineHeight), GUILayout.ExpandWidth(false));
-            ReportTableCellRect(probeName, probeIndex);
-            GUILayout.Space(Mathf.Max(0f, rowWidth - EditorGUIUtility.labelWidth - 36f - EditorGUIUtility.singleLineHeight));
-            HelpInfoButton.Draw(field.Label, field.Help);
-            EditorRowEnd();
-            if (edited != current) set(edited);
-        }
-
-        // An Asset field (a picture, an audio clip, a captions file): an object field that offers only files of the field's media kind, stored as the
-        // path inside the wall's Media Folder (MediaPathRule.StoredPathFor). A file picked from outside that folder is
-        // stored as picked and warned about (the card leaves it out, BlockStackBuilder's InvalidMedia), never silently
-        // refused; a stored path with no file behind it is warned about too. Drawing never writes.
-        private void DrawAssetRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, string mediaFolder, string defaultLibraryPath,
-            Func<string> get, Action<string> set)
-        {
-            string current = get();
-            var shown = MediaAssetFor(current, mediaFolder, field.Media, defaultLibraryPath);
-            DrawEditorRow(out float rowWidth, out _, indent);
-            EditorGUILayout.PrefixLabel(field.Label + (field.Required ? " (required)" : ""));
-            var picked = EditorGUILayout.ObjectField(shown, MediaObjectType(field.Media), false,
-                GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
-            ReportTableCellRect(probeName, probeIndex);
-            HelpInfoButton.Draw(field.Label, field.Help);
-            EditorRowEnd();
-            if (picked != shown) set(picked == null ? "" : MediaPathRule.StoredPathFor(AssetDatabase.GetAssetPath(picked), mediaFolder));
-
-            string stored = get();
-            string defaultKey = MediaPathRule.DefaultKeyOf(stored);
-            DrawEditorRow(out _, out _, indent);
-            if (defaultKey != null)
-            {
-                GUILayout.Label("Default: " + defaultKey, EditorStyles.miniLabel, GUILayout.ExpandWidth(false));
-                // - right after its label, like "Pick default..." (a FlexibleSpace BEFORE it pushed it to the window's edge, far outside the row)
-                if (GUILayout.Button("Clear default", EditorStyles.miniButton, GUILayout.Width(90f))) set("");
-                ReportTableCellRect(probeName + " clear default", probeIndex);
-                GUILayout.FlexibleSpace();
-            }
-            else
-            {
-                if (GUILayout.Button("Pick default...", EditorStyles.miniButton, GUILayout.Width(110f)))
-                    EditorPopup.ShowAt(CreateCardMediaDefaultPickerPopup(field.Media, key => set(MediaPathRule.PathForDefaultKey(key))), GUILayoutUtility.GetLastRect());
-                ReportTableCellRect(probeName + " pick default", probeIndex);
-                GUILayout.FlexibleSpace();
-            }
-            EditorRowEnd();
-
-            var problem = MediaPathRule.Check(stored, field.Media);
-            if (problem == MediaPathProblem.OutsideFolder || problem == MediaPathProblem.WrongType)
-                EditorGUILayout.HelpBox(CardMediaProblemText(field.Label, field.Media, problem), MessageType.Warning);
-            else if (defaultKey != null && MediaAssetFor(stored, mediaFolder, field.Media, defaultLibraryPath) == null)
-                EditorGUILayout.HelpBox(CardUnknownDefaultKeyText(field.Label, defaultKey), MessageType.Warning);
-            else if (problem == MediaPathProblem.None && defaultKey == null && MediaAssetFor(stored, mediaFolder, field.Media, defaultLibraryPath) == null)
-                EditorGUILayout.HelpBox(CardMediaMissingText(field.Label, stored, field.Media), MessageType.Warning);
-        }
-
-        // The asset a stored path names: a "default:<key>" resolves through the wall's own default library (if
-        // configured) then the Framework's; a plain path resolves inside the Media Folder through Resources (what
-        // the app loads), or as a project path as picked (outside the folder: shown so the developer sees what
-        // they chose); else none
-        internal static UnityEngine.Object MediaAssetFor(string stored, string mediaFolder, MediaKind kind = MediaKind.Image, string defaultLibraryPath = null)
-        {
-            if (string.IsNullOrWhiteSpace(stored)) return null;
-            var type = MediaObjectType(kind);
-            if (MediaPathRule.IsDefaultKey(stored))
-                return CardMediaLibraryLookup.Resolve(MediaPathRule.DefaultKeyOf(stored), kind,
-                    CardMediaLibraryLookup.WallFrom(defaultLibraryPath), CardMediaLibraryLookup.Framework);
-            string p = stored.Trim().Replace('\\', '/');
-            if (p.StartsWith("Assets/")) return AssetDatabase.LoadAssetAtPath(p, type);
-            if (!MediaPathRule.IsValid(p, kind)) return null;
-            string folder = (mediaFolder ?? "").Trim().Trim('/');
-            string noExtension = p.Substring(0, p.LastIndexOf('.'));
-            return Resources.Load(folder.Length > 0 ? folder + "/" + noExtension : noExtension, type);
-        }
-
-        // The Unity type an Asset field of this kind holds: a texture (a picture or a panorama), an AudioClip, a TextAsset (a captions file,
-        // made by VttTextImporter), a VideoClip, a GameObject (a model: the prefab glTFast imports a .glb as)
-        internal static System.Type MediaObjectType(MediaKind kind) => kind switch
-        {
-            MediaKind.Audio => typeof(AudioClip),
-            MediaKind.Captions => typeof(TextAsset),
-            MediaKind.Video => typeof(UnityEngine.Video.VideoClip),
-            MediaKind.Model => typeof(GameObject),
-            _ => typeof(Texture2D),
-        };
-
-        // A Number field: a slider over the definition's range, showing its default while nothing is stored; the value is
-        // created by the first real change, never by drawing
-        private static void DrawNumberRow(BlockFieldDefinition field, float indent, string probeName, int probeIndex, Func<float> get, Action<float> set)
-        {
-            float current = get();
-            DrawEditorRow(out float rowWidth, out _, indent);
-            EditorGUILayout.PrefixLabel(field.Label);
-            float edited = EditorGUILayout.Slider(current, field.NumberMin, field.NumberMax,
-                GUILayout.Width(Mathf.Max(40f, rowWidth - EditorGUIUtility.labelWidth - 36f)), GUILayout.ExpandWidth(false));
-            ReportTableCellRect(probeName, probeIndex);
-            HelpInfoButton.Draw(field.Label, field.Help);
-            EditorRowEnd();
-            if (!Mathf.Approximately(edited, current)) set(edited);
         }
 
         internal static string AssetValue(BlockInstanceData block, string key) => block.fields?.Find(f => f != null && f.key == key)?.asset ?? "";
@@ -410,39 +210,6 @@ namespace TileStories.Editor
             var v = item.fields.Find(f => f != null && f.key == key);
             if (v == null) item.fields.Add(v = new BlockItemFieldValue { key = key });
             return v;
-        }
-
-        // The popup of a Choice field: its values and, in the same order, what the Editor shows for them
-        // The empty entry's label of a Choice with a default (null without one: the plain "(none)"), naming the option by its label
-        internal static string BlockChoiceDefaultLabel(BlockFieldDefinition field, string defaultValue)
-        {
-            if (field?.ChoiceDefault == null || field.Options == null) return null;
-            int at = -1;
-            for (int i = 0; i < field.Options.Count; i++) if (field.Options[i] == defaultValue) at = i;
-            if (at < 0) return null;
-            return BlockChoiceDefaultPrefix + (field.OptionLabels != null ? field.OptionLabels[at] : field.Options[at]);
-        }
-
-        internal static (List<string> Values, List<string> Labels) BlockChoiceOptions(BlockFieldDefinition field, string current, string emptyLabel = null)
-        {
-            var values = new List<string>();
-            var labels = new List<string>();
-            if (!field.Required)
-            {
-                values.Add("");
-                labels.Add(emptyLabel ?? BlockChoiceNoneLabel);
-            }
-            for (int i = 0; i < field.Options.Count; i++)
-            {
-                values.Add(field.Options[i]);
-                labels.Add(field.OptionLabels != null ? field.OptionLabels[i] : field.Options[i]);
-            }
-            if (!string.IsNullOrEmpty(current) && !values.Contains(current))
-            {
-                values.Add(current);
-                labels.Add(current + " (missing)");
-            }
-            return (values, labels);
         }
 
         internal static string ChoiceValue(BlockInstanceData block, string key) => block.fields?.Find(f => f != null && f.key == key)?.value ?? "";

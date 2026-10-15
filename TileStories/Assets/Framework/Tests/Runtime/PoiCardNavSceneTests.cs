@@ -14,7 +14,7 @@ namespace TileStories.Tests
     // clamped to the range, Jump Opens Card To / Jump Motion / reduce motion do what they say, the spy is frozen while a jump glides
     // and follows a real finger drag afterwards, the model is rebuilt on a live edit (scroll kept), a reveal and a point switch, a block
     // asking the host jumps through the same controller, and every jump raises one nav_jump event.
-    public class PoiCardNavSceneTests : SearchSceneFixture
+    public partial class PoiCardNavSceneTests : SearchSceneFixture
     {
         // The key a test jump reports as its element (no navigation element exists yet: step 5 adds the first)
         private const string Element = "scene_test_element";

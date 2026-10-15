@@ -1,32 +1,40 @@
-# Current plan -- _3.2 POI Card Navigation, step 3 (NavController, scroll-spy, jumps) + the typing-harness fix
+# Current plan -- _3.2 POI Card Navigation, step 4 (BlockRef, Open Block, system Back)
 
 Brief: proj_guides/__AI_worker.md (2026-10-15). Re-read it and this file after a compaction.
 
 ## GATE (done)
-- [x] git push: 1 commit pushed (c7d875f..7815cf7)
-- [x] captures opened: TestEvidence/Card/Gate_3.2_step3_gameview.png, TestEvidence/Editor/Gate_3.2_step3_poi_editor_navigation.png
-- [x] tree compiles (ExitCode 0, Tundra build success); SDF fonts clean (no diff)
-- [x] EditMode baseline 1683/1683 (76 s, focused)
+- [x] UnityMCP answers (telemetry_status)
+- [x] git push: 1 commit (7815cf7..ddffe39)
+- [x] captures opened: TestEvidence/Gate/gate_3_2_step4_gameview.png, gate_3_2_step4_poieditor.png (Detail Card > Navigation)
+- [x] compile: Editor.log ExitCode 0, no error CS
+- [x] SDF fonts (Oswald Bold, Roboto-Bold): clean, nothing to restore
+- [x] baseline full EditMode 1694/1694 (106 s, background) on ddffe39
 
-## PART 1 -- the typing harness (done)
-- [x] red reproduced unfocused: "Live heading" -> "Live head" (editor_is_focused false early + end)
-- [x] mechanism measured: SendEvent is synchronous; ANY focus change (OS or host.Focus()) ends the IMGUI field's editing session
-- [x] fix: PoiEditorWindowHost.ReplaceText types the word in ONE tick once the field edits and the host holds focus; bounded re-entry
-      before the first key; read-back of EditorGUI.activeEditor; "" = a real Backspace (TaxonomyRowIdentityTests drops its late Backspace)
-- [x] PoiEditorWindowHostTests (FocusThief on EditorApplication.update): theft after the click -> re-entry, one undo step; theft as soon as
-      typing landed -> whole word. Load-bearing: the old per-key loop turns the second red
-- [x] 6 typing fixtures 88/88 focused; background runs 86/86, 5/5, 5/5, 5/5 (focus read false early, Play Focused pulled Unity back)
-- [x] __mixed_TODOs.md: keystroke item removed (and its 2026-10-01 duplicate); before_after kept
+## Decisions
+- BlockRef value = a block key of the SAME POI, stored in `value` (like PoiRef).
+- Pure `BlockRefRule` (Runtime/Blocks): JumpTargets(entries, isRevealed) = keys in the scrolling stack (not the header, not a
+  pinned-top / footer look, not waiting for Show After Reading); Problem(poi, key, built) = None / Missing / NotInScroll / Itself.
+  Reused later by hotspot pins (step 10) and nav_bento tiles (15).
+- `BlockBindContext.JumpTargets` filled by `PoiCardSheetView.Show` (null = the caller has none: no Open Block button drawn).
+- Repeated actions: open_block keyed by action + target -> two Open Block buttons to DIFFERENT blocks = no warning; same block twice = warned.
+- Open Block words: the row's own -> the target's Heading -> card text `open_block_button`.
+- Validate: "Options / OptionLabels only on a Choice field" (refuses a BlockRef with a fixed list); ChoiceDefault / LibraryDefault already refused generically.
+- Back: NavBackRule decides, PoiCardSheetView.Back applies (close -> CloseRequested, like the X), PoiCardHost.Update wires Keyboard.current.escapeKey.
+- Editor popups (three rows + BlockRef) open native menus: driven through the window's write path + Ctrl+Z (documented limit).
 
-## PART 2 -- step 3
-- [x] 3.1a NavScrollRule (Runtime/Blocks/Navigation/, pure) + CardNavigationSettings follow_scroll / jump_raises_to / jump_motion + CardOptions
-- [x] 3.1b NavScrollRuleTests (Tier 0) + guard updates (DetailCardEditorTabTests field walk, CardConfigRoundTripTests defaults)
-- [x] 3.2 CardEventKinds.NavJump; IBlockHost.ScrollToBlock(blockKey, elementKey) (+ StubHost)
-- [x] 3.3 BlockStackView.IsRevealed (one delegate) + WaitsToBeRevealed in Bind + Revealed event + SlotOfBlock; agreement EditMode test
-- [x] 3.1c NavController (Runtime/UI/Cards/Navigation/): Bind/Unbind, JumpTo, JumpToBlock, Current, CurrentChanged, IsJumping, Clock, Duration
-- [x] 3.4 sheet: owns Nav, builds model + controller in Show, rebuilds on Revealed, Duration from its height transition; ScrollToBlock -> Nav
-- [x] full EditMode green (1694/1694, background)
-- [x] Phase B PoiCardNavSceneTests 10/10 (background) -- found: Duration read 0 (no time custom style), clamp at peek, reveal cancelled jump
-- [x] FULL PlayMode (background) 788/788, 2001 s
-- [x] 3.5 docs: _3.2 4.4 + [step 3] TODO removed + row 3 proof, _3.1.1 correction, 10-structure.md, 40-testing RUN TIMES
-- [ ] final report (60-finishing 6.4)
+## Steps
+- [x] 1. Part 1: PoiEditorWindowHost asserts EditorGUI.activeEditor once (constructor); PoiEditorWindowHostTests 2/2
+- [x] 2. BlockRef core: enum, HasContent / HasItemContent, Validate Options check, BlockRefRule + BlockRefRuleTests 6/6
+- [x] 3. Open Block: action + target sub-field + icon + card text; ActionsRule / RepeatedActionRule; context JumpTargets; view Run;
+        Lamp block_18 + two Open Block rows (both config copies, +65 / -0 each); Tier3GroupBRulesTests +3
+- [x] 4. Editor BlockRef row (+ options, warnings); drawer split into BlockFieldDrawer + .Values / .References / .Assets;
+        DetailCardEditorTabTests +2. Full EditMode 1705/1705 (109 s, background)
+- [x] 5. Escape probe: the scene's EventSystem (InputSystemUIInputModule) turns a real Escape into ONE NavigationCancelEvent to
+        the focused search field's text element; the search keeps words, query, results and focus -> no collision (kept as a test)
+- [x] 6. Back: back_button data + options, NavBackRule + NavBackRuleTests 5/5, PoiCardSheetView.Back, PoiCardHost.Update wiring
+- [x] 7. Editor rows + (i) + guides; DetailCardEditorTabTests +1, walker 9 navigation fields, round-trip default. EditMode 1711/1711
+- [x] 8. Phase B PoiCardNavSceneTests 15/15 (+5: probe, Open Block tap, dead target after a live edit, Escape walk, none + live)
+- [x] 9. Captures judged: Editor/170_CardNavigation_JumpBack_620(_b) (gap fix), Editor/171_CardContent_OpenBlock_620_b,
+        Search/Search_Card_OpenBlock_PillRow_Lamp_390 (icon redrawn as a down arrow)
+- [x] 10. Closing: full EditMode 1711/1711 (77 s), FULL PlayMode 793/793 (1854 s); docs _3.2 / _3.1 / _5.1 / 10-structure /
+        __mixed_TODOs / RUN TIMES; final report 6.4

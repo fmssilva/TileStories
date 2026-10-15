@@ -4,7 +4,8 @@ using UnityEngine.UIElements;
 namespace TileStories
 {
     // The actions block (_3.1 Tier 1): buttons that DO something for the visitor, each an authored label and one of the
-    // framework's actions (BuiltInBlocks.ActionOptions), asked of the card through IBlockHost. Three looks -- circles:
+    // framework's actions (BuiltInBlocks.ActionOptions: show on the wall, open another block of this card -- _3.2 step 4),
+    // asked of the card through IBlockHost. Three looks -- circles:
     // a round icon with its label under it; pill_row: icon + label pills in a wrapping row; sticky_cta: ONE call to action
     // (the first button) full width, pinned to the card's footer (BlockKindDefinition.FooterVariants) -- one button is what
     // fits under the header at every stop; a stack of them would not be sticky at all. A button with no words of its own
@@ -18,6 +19,8 @@ namespace TileStories
             public VisualElement Icon;
             public Label Label;
             public string Kind;
+            // Open Block: the key of the block the button moves the card to ("" otherwise)
+            public string Target = "";
         }
 
         public VisualElement Root { get; }
@@ -42,14 +45,14 @@ namespace TileStories
             _variantClass = "card-actions--" + context.Variant;
             Root.AddToClassList(_variantClass);
             var read = new BlockFieldReader(instance, context.Language, context.FallbackLanguage);
-            foreach (var button in ActionsRule.Buttons(read, context.Variant))
+            // - an Open Block row is drawn only when the card can scroll to its target (the sheet's JumpTargets): never a dead button
+            foreach (var button in ActionsRule.Buttons(read, context.Variant, context.JumpTargets))
             {
-                // - a row with no words of its own reads its action's card text: one wording per action, whichever block draws it
-                string defaultKey = ActionsRule.DefaultWordsKey(button.Action);
-                string label = button.Words.Length > 0 ? button.Words : defaultKey != null ? context.Strings?.Get(defaultKey) ?? "" : "";
                 var action = _actions.Take();
                 action.Kind = button.Action;
-                action.Label.text = label;
+                action.Target = button.Target;
+                // - a row with no words of its own reads its action's card text (Open Block: its target's heading first)
+                action.Label.text = ActionsRule.Words(button, context.Poi, context.Language, context.FallbackLanguage, context.Strings);
                 CardIcons.SetKey(action.Icon, button.Action);
                 // - the pill row wears the card's one pill shape (CardParts.uss), shared with story_chapters' buttons
                 action.Button.EnableInClassList("card-pill", context.Variant == BuiltInBlocks.ActionsPillRow);
@@ -65,10 +68,11 @@ namespace TileStories
             _host = null;
         }
 
-        // Do what this button's action says, through the card
+        // Do what this button's action says, through the card (Open Block: the card's one jump, named by this kind for the nav_jump event)
         public void Run(Action action)
         {
             if (action.Kind == BuiltInBlocks.ActionShowOnWall) _host?.ShowOnWall();
+            else if (action.Kind == BuiltInBlocks.ActionOpenBlock) _host?.ScrollToBlock(action.Target, BuiltInBlocks.ActionsKind);
         }
 
         // One button: its icon and words, its click wired once to whatever action it carries at the time

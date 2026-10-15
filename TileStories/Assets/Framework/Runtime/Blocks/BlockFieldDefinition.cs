@@ -16,6 +16,7 @@ namespace TileStories
         Color,              // value: a colour written "#RRGGBB" or "#RGB" (content, e.g. a swatch; BlockFieldReader.TryParseColor)
         Url,                // value: a web link the card may open (http / https: WebLinkRule), one for every language
         Time,               // value: a time in a clip, "1:30" / "90" / "1:02:03" (TimeCodeRule), one for every language
+        BlockRef,           // value: the key of another block of the SAME POI's card (BlockRefRule: does the card scroll to it?)
     }
 
     // One field of a block kind: the schema the view, the Editor drawer and the validator all read
@@ -30,7 +31,8 @@ namespace TileStories
         public bool Required;
         // The Editor (i) text: framework-authored, app-agnostic
         public string Help;
-        // Choice only: the option values (stored in config) and, in the same order, the names the Editor shows
+        // Choice only (BlockRegistry.Validate refuses them on any other type): the option values (stored in config) and, in the same
+        // order, the names the Editor shows
         public IReadOnlyList<string> Options;
         public IReadOnlyList<string> OptionLabels;
         // Choice only: the option read while the block stores none (null = none: the field reads empty, as before)

@@ -98,6 +98,8 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(s.navigation.follow_scroll, "the marked section follows the scroll");
             Assert.AreEqual(CardOptions.JumpRaisesFull, s.navigation.jump_raises_to, "a jump first raises the card to Full");
             Assert.AreEqual(CardOptions.JumpMotionSmooth, s.navigation.jump_motion, "a jump glides");
+            // - _3.2 step 4: an old config steps the card down on Back
+            Assert.AreEqual(CardOptions.BackButtonStepDown, s.navigation.back_button, "Back steps the card down");
             Assert.IsNotNull(loaded.pois[0].card);
             CollectionAssert.IsEmpty(loaded.pois[0].card.blocks, "no blocks = the header-only card");
         }

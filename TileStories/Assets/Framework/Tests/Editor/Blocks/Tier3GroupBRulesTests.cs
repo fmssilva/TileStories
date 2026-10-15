@@ -340,16 +340,111 @@ namespace TileStories.Editor.Tests
         public void ActionsRule_DrawsKnownActionsOnly_TheStickyLookTheFirstOnly_AndARowWithNoWordsStillDraws()
         {
             var block = ActionsBlock(BuiltInBlocks.ActionsPillRow, ("", BuiltInBlocks.ActionShowOnWall), ("Listen", "listen"), See, ("No action", ""));
-            var pills = ActionsRule.Buttons(Read(block), BuiltInBlocks.ActionsPillRow);
+            var pills = ActionsRule.Buttons(Read(block), BuiltInBlocks.ActionsPillRow, null);
             CollectionAssert.AreEqual(new[] { 0, 2 }, pills.Select(b => b.Row), "an unknown action and a row with no action are left out; the empty-words row is NOT");
             Assert.AreEqual("", pills[0].Words, "no words of its own: the view reads the action's card text");
             Assert.AreEqual("See it on the wall", pills[1].Words);
-            var sticky = ActionsRule.Buttons(Read(block), BuiltInBlocks.ActionsStickyCta);
+            var sticky = ActionsRule.Buttons(Read(block), BuiltInBlocks.ActionsStickyCta, null);
             CollectionAssert.AreEqual(new[] { 0 }, sticky.Select(b => b.Row), "sticky: one call to action, the first drawn row");
             Assert.AreEqual(CardStrings.Keys.ShowOnWallButton, ActionsRule.DefaultWordsKey(BuiltInBlocks.ActionShowOnWall), "the Show On Wall kind's own row");
             Assert.IsNull(ActionsRule.DefaultWordsKey("listen"));
             Assert.IsTrue(ActionsRule.IsKnown(BuiltInBlocks.ActionShowOnWall));
             Assert.IsFalse(ActionsRule.IsKnown("listen"));
+        }
+
+        // ---------------- Open Block (_3.2 step 4) ----------------
+
+        // One Actions row that opens `target`, with `words` of its own ("" = none)
+        private static BlockItemData OpenBlockRow(string words, string target)
+        {
+            var row = new BlockItemData();
+            row.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.ActionsLabelField, text = En(words) });
+            row.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.ActionsActionField, value = BuiltInBlocks.ActionOpenBlock });
+            row.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.ActionsTargetField, value = target });
+            return row;
+        }
+
+        private static BlockInstanceData WithRows(BlockInstanceData actions, params BlockItemData[] rows)
+        {
+            actions.fields.Single(f => f.key == BuiltInBlocks.ActionsItemsField).items.AddRange(rows);
+            return actions;
+        }
+
+        // A block of the card an Open Block button may open: a Rich Text with words (shown, in the scroll), its own heading optional
+        private static BlockInstanceData Story(string key, string heading = "")
+        {
+            var block = new BlockInstanceData { key = key, kind = BuiltInBlocks.RichTextKind, variant = BuiltInBlocks.RichTextPlain };
+            block.fields.Add(new BlockFieldValue { key = BuiltInBlocks.RichTextBodyField, text = En("Words.") });
+            if (heading.Length > 0) block.fields.Add(new BlockFieldValue { key = BlockKindDefinition.HeadingField, text = En(heading) });
+            return block;
+        }
+
+        [Test]
+        public void ActionsRule_AnOpenBlockRow_IsDrawnOnlyWhenTheCardCanScrollToItsTarget_AndCarriesThatTarget()
+        {
+            var block = WithRows(ActionsBlock(BuiltInBlocks.ActionsPillRow, See), OpenBlockRow("Listen", "block_7"), OpenBlockRow("Gone", "block_99"),
+                OpenBlockRow("Nothing picked", ""));
+            var targets = new HashSet<string> { "block_7", "block_8" };
+            var pills = ActionsRule.Buttons(Read(block), BuiltInBlocks.ActionsPillRow, targets);
+            CollectionAssert.AreEqual(new[] { 0, 1 }, pills.Select(b => b.Row), "a target the card cannot scroll to and a blank one draw nothing");
+            Assert.AreEqual(BuiltInBlocks.ActionOpenBlock, pills[1].Action);
+            Assert.AreEqual("block_7", pills[1].Target);
+            Assert.AreEqual("", pills[0].Target, "only Open Block carries a target");
+            CollectionAssert.AreEqual(new[] { 0 }, ActionsRule.Buttons(Read(block), BuiltInBlocks.ActionsPillRow, null).Select(b => b.Row),
+                "no jump targets handed over (a gallery, a caller with no card): no Open Block button at all");
+            Assert.IsTrue(ActionsRule.IsKnown(BuiltInBlocks.ActionOpenBlock));
+            Assert.AreEqual(CardStrings.Keys.OpenBlockButton, ActionsRule.DefaultWordsKey(BuiltInBlocks.ActionOpenBlock));
+
+            // - the sticky look's one button is the first DRAWN row: a dead Open Block row before it never takes the footer
+            var sticky = WithRows(ActionsBlock(BuiltInBlocks.ActionsStickyCta), OpenBlockRow("Gone", "block_99"), OpenBlockRow("Listen", "block_7"));
+            var one = ActionsRule.Buttons(Read(sticky), BuiltInBlocks.ActionsStickyCta, targets).Single();
+            Assert.AreEqual(1, one.Row);
+        }
+
+        [Test]
+        public void ActionsRule_AnOpenBlockButtonsWords_AreItsOwn_ElseItsTargetsHeading_ElseTheCardText_InEveryLanguage()
+        {
+            var table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Cards/CardStrings.asset");
+            Assert.IsNotNull(table, "precondition: the framework's card texts load");
+            var poi = CardWith(Story("block_7", "The siege"), Story("block_8"));
+            foreach (string lang in new[] { "en", "pt" })
+            {
+                var strings = new CardStrings(table.Entries(), null, null, lang, "en");
+                string cardText = strings.Get(CardStrings.Keys.OpenBlockButton);
+                Assert.IsNotEmpty(cardText, lang + ": the table has the Open Block words");
+                Assert.AreEqual("Own words", ActionsRule.Words(new ActionsRule.Button(0, BuiltInBlocks.ActionOpenBlock, "Own words", "block_7"), poi, lang, "en", strings));
+                Assert.AreEqual("The siege", ActionsRule.Words(new ActionsRule.Button(0, BuiltInBlocks.ActionOpenBlock, "", "block_7"), poi, lang, "en", strings),
+                    lang + ": no words of its own -> the heading of the block it opens (the fallback language's when it has no " + lang + ")");
+                Assert.AreEqual(cardText, ActionsRule.Words(new ActionsRule.Button(0, BuiltInBlocks.ActionOpenBlock, "", "block_8"), poi, lang, "en", strings),
+                    lang + ": a target with no heading -> the card's own words");
+                Assert.AreEqual(strings.Get(CardStrings.Keys.ShowOnWallButton), ActionsRule.Words(new ActionsRule.Button(0, BuiltInBlocks.ActionShowOnWall, ""), poi, lang, "en", strings),
+                    lang + ": Show On The Wall keeps its one wording");
+            }
+            Assert.AreEqual("", ActionsRule.Words(new ActionsRule.Button(0, "listen", ""), poi, "en", "en", null), "an action with no words of its own and no strings: nothing");
+        }
+
+        [Test]
+        public void RepeatedActions_TwoOpenBlockButtonsToDifferentBlocks_AreNoRepeat_TheSameBlockTwiceIs_AndADeadOneOffersNothing()
+        {
+            var story = Story("block_7", "The siege");
+            var sources = Story("block_8");
+            // - two shortcuts to two different parts of the card: what Open Block is for, so nothing to warn about
+            var two = WithRows(ActionsBlock(BuiltInBlocks.ActionsPillRow), OpenBlockRow("The siege", "block_7"), OpenBlockRow("Sources", "block_8"));
+            CollectionAssert.IsEmpty(RepeatsOf(CardWith(story, sources, two)), "different targets: two different offers");
+
+            // - the same block twice (in two blocks) is the same shortcut twice
+            var circles = WithRows(ActionsBlock(BuiltInBlocks.ActionsCircles), OpenBlockRow("Read it", "block_7"));
+            var repeat = RepeatsOf(CardWith(story, sources, two, circles)).Single();
+            Assert.AreEqual(BuiltInBlocks.ActionOpenBlock, repeat.Action);
+            Assert.AreEqual("block_7", repeat.Target);
+            CollectionAssert.AreEqual(new[] { two, circles }, repeat.Offers.Select(o => o.Block));
+
+            // - a button that the card does not draw (its target is gone) offers nothing
+            var dead = WithRows(ActionsBlock(BuiltInBlocks.ActionsCircles), OpenBlockRow("Read it", "block_99"));
+            CollectionAssert.IsEmpty(RepeatsOf(CardWith(story, sources, two, dead)));
+            // - and a Show On The Wall button is still counted the old way beside them
+            Assert.AreEqual(BuiltInBlocks.ActionShowOnWall, RepeatsOf(CardWith(story, ShowOnWallBlock(), WithRows(ActionsBlock(BuiltInBlocks.ActionsPillRow, See),
+                OpenBlockRow("The siege", "block_7")))).Single().Action);
         }
 
         [Test]

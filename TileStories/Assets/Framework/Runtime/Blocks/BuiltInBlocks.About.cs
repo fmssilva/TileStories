@@ -87,10 +87,13 @@ namespace TileStories
         public const string ActionsItemsField = "actions";
         public const string ActionsLabelField = "label";
         public const string ActionsActionField = "action";
-        // The actions a button can do today. listen (Tier 4 audio), save (Tier 3 local state) and open_block (_3.2
-        // navigation) join this list with their tiers: a button is only offered once it can really do its job.
+        // An Open Block row's target: a block of the same card (BlockRef, shown only for that action)
+        public const string ActionsTargetField = "target";
+        // The actions a button can do today. listen and save join this list with the first element that needs them: a button is
+        // only offered once it can really do its job. open_block (_3.2 step 4) moves the card to another of its blocks.
         public const string ActionShowOnWall = "show_on_wall";
-        public static readonly string[] ActionOptions = { ActionShowOnWall };
+        public const string ActionOpenBlock = "open_block";
+        public static readonly string[] ActionOptions = { ActionShowOnWall, ActionOpenBlock };
 
         // Tier 1: the header; Tier 2 adds the picture looks, Tier 4 the video loop. 3D header variants arrive with Tier 5.
         public static readonly BlockKindDefinition Header = new()
@@ -383,7 +386,8 @@ namespace TileStories
             Format = CardOptions.FormatInteract,
             DisplayName = "Actions",
             Help = "Buttons that do something for the visitor, each with your own words and one action. Show On The Wall: " +
-                   "lowers the card so the point's marker shows on the wall. Circles: round buttons with the words under them. " +
+                   "lowers the card so the point's marker shows on the wall. Open Block: moves the card to another of its blocks (a " +
+                   "shortcut to the audio guide, the sources). Circles: round buttons with the words under them. " +
                    "Pill Row: small pills side by side. Sticky: the FIRST button only, full width and pinned to the bottom of the card, " +
                    "always in reach at Half and Full (one call to action). More actions arrive with the blocks that need them.",
             Variants = new[] { ActionsCircles, ActionsPillRow, ActionsStickyCta },
@@ -402,13 +406,26 @@ namespace TileStories
                         {
                             Key = ActionsLabelField, Type = BlockFieldType.LocalizedText, Label = "Words",
                             Help = "What the button says (See it on the wall). Empty: the card's own words for the action (Detail Card > Card Texts), " +
-                                   "so the same action reads the same everywhere on the wall.",
+                                   "so the same action reads the same everywhere on the wall; an Open Block button with no words says the heading " +
+                                   "of the block it opens instead (and the card's own words when that block has no heading).",
                         },
                         new BlockFieldDefinition
                         {
                             Key = ActionsActionField, Type = BlockFieldType.Choice, Label = "Action", Required = true,
-                            Options = ActionOptions, OptionLabels = new[] { "Show On The Wall" },
-                            Help = "What the button does. Show On The Wall: the card lowers to its title so the marker shows on the wall.",
+                            Options = ActionOptions, OptionLabels = new[] { "Show On The Wall", "Open Block" },
+                            Help = "What the button does. Show On The Wall: the card lowers to its title so the marker shows on the wall. " +
+                                   "Open Block: the card moves to another block of this same card (pick it in Opens Block), the way a tab of the " +
+                                   "card's navigation does -- Detail Card > Navigation > Jump Opens Card To and Jump Motion apply.",
+                        },
+                        new BlockFieldDefinition
+                        {
+                            Key = ActionsTargetField, Type = BlockFieldType.BlockRef, Label = "Opens Block",
+                            ShownWhen = FieldShownWhen.Choice(ActionsActionField, ActionOpenBlock),
+                            Help = "The block of this card the button moves to, named by its kind and its first words. The button is not shown " +
+                                   "while nothing is picked, or when the picked block is not in the part of the card that scrolls: the title " +
+                                   "block, a look pinned under the title or to the bottom, a block the card leaves out, a block that waits for " +
+                                   "Show After Reading (until the visitor has read the card), or a block that was deleted -- the row then says " +
+                                   "which.",
                         },
                     },
                 },

@@ -345,8 +345,8 @@ for each is in `_3.1.1_Audit.md` section 12.5.
 - [Editor] hotspot_image: a click-to-place pin on a picture preview (sliders only today); duplicate block / copy a block from another POI /
   "insert after this row"; Card Texts grouped by kind with a filter; a block demo mode (a demo point holding one kind in every look, generated
   from `CardGalleryDefinitions`, with Demo Language and "scroll to block"); a "Half Stop Height" label for Half Height Max; looks with display
-  labels (`OptionLabels` for variants, raw keys today); the Card Container's rows under "Sheet" and "Audio" headers and a "Media" group; a
-  `BlockFieldDrawer` split by type family (510 lines, the largest card file) and `DetailCard.cs` at 307 lines.
+  labels (`OptionLabels` for variants, raw keys today); the Card Container's rows under "Sheet" and "Audio" headers and a "Media" group;
+  `DetailCard.cs` at 307 lines and `DetailCardHelp.cs` at ~510 (the `BlockFieldDrawer` split by type family was done at `_3.2` step 4).
 - [options] Tuning controls for constants that live in code: zoom_image's maximum zoom (`ZoomPanRule.MaxScale`), the turntable auto-spin speed,
   the audio switch fade, Show On Wall's neighbour count, related's automatic count. Decide per field, not wholesale.
 - [kinds] place_in_ar anchor `surface` (a detected plane: device stage); timeline `then_now_pairs`; a person's photo; story chapter pictures;

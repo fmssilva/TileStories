@@ -134,6 +134,7 @@ namespace TileStories.Editor.Tests
                                 "group_by" => CardOptions.GroupByFormat,
                                 "jump_raises_to" => CardOptions.JumpRaisesKeep,
                                 "jump_motion" => CardOptions.JumpMotionInstant,
+                                "back_button" => CardOptions.BackButtonNone,
                                 _ => CardOptions.BlockOrderByFamily,
                             })));
                         else if (n.FieldType == typeof(bool)) edits.Add((n.Name, s => n.SetValue(s.navigation, !(bool)n.GetValue(s.navigation))));
@@ -152,8 +153,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 8 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 8 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 9 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 9 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -775,6 +776,130 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("poi_9", POIEditorToolWindow.ChoiceValue(_window.Config.pois[0].card.blocks[0], BuiltInBlocks.ComparePointsOtherField), "Ctrl+Z");
         }
 
+        // ---------------- BlockRef fields (_3.2 step 4) ----------------
+
+        // A text block of poi_1's card with `words` (its Card Content summary)
+        private static BlockInstanceData TextBlock(string key, string words)
+        {
+            var block = new BlockInstanceData { key = key, kind = BuiltInBlocks.RichTextKind, variant = BuiltInBlocks.RichTextPlain, display = CardOptions.DisplayInline };
+            POIEditorToolWindow.SetLocalizedValue(block, BuiltInBlocks.RichTextBodyField, "en", words);
+            return block;
+        }
+
+        // An Actions row that opens `target`
+        private static BlockItemData OpenBlockRow(string target)
+        {
+            var row = new BlockItemData();
+            POIEditorToolWindow.SetItemChoiceValue(row, BuiltInBlocks.ActionsActionField, BuiltInBlocks.ActionOpenBlock);
+            POIEditorToolWindow.SetItemChoiceValue(row, BuiltInBlocks.ActionsTargetField, target);
+            return row;
+        }
+
+        private BlockItemData ActionsRowOfPoi1(int row) =>
+            _window.Config.pois[0].card.blocks[1].fields.Single(f => f.key == BuiltInBlocks.ActionsItemsField).items[row];
+
+        // Specific Marker > Card Content: an Open Block row's Opens Block is a popup of the OTHER blocks of the same card named the way
+        // their Card Content rows read; a key no block has any more is kept, shown as "(a deleted block)", and warned under the row by
+        // name, never by key; the popup's write path picks a block (the warning goes, the card draws the button), and Ctrl+Z brings the
+        // deleted pick and its warning back. A Show On The Wall row draws no Opens Block at all.
+        [UnityTest]
+        public IEnumerator ABlockRefField_ListsTheOtherBlocksByName_AStaleKeyIsKeptAndWarned_APickIsUndoable_AndCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var actions = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.ActionsKind, variant = BuiltInBlocks.ActionsPillRow, display = CardOptions.DisplayInline };
+            var showOnWall = new BlockItemData();
+            POIEditorToolWindow.SetItemChoiceValue(showOnWall, BuiltInBlocks.ActionsActionField, BuiltInBlocks.ActionShowOnWall);
+            actions.fields.Add(new BlockFieldValue { key = BuiltInBlocks.ActionsItemsField, items = new List<BlockItemData> { OpenBlockRow("block_9"), showOnWall } });
+            config.pois[0].card.blocks.AddRange(new[] { TextBlock("block_1", "The story of the keep."), actions, TextBlock("block_3", "Second text") });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_2"] = true;
+            yield return Redraw();
+
+            const string target = "Block item actions 0 target#1";
+            _window.RectOf(target);
+            Assert.IsTrue(Drawn("Block item actions 0 target warning#1"), "a deleted pick is warned under its row");
+            Assert.IsFalse(Drawn("Block item actions 1 target#1"), "a Show On The Wall row has no Opens Block");
+            Assert.IsFalse(_window.Unsaved, "drawing the popup writes nothing");
+            Assert.AreEqual("block_9", POIEditorToolWindow.ItemChoiceValue(ActionsRowOfPoi1(0), BuiltInBlocks.ActionsTargetField), "the deleted key is kept, never rewritten by drawing");
+
+            var poi = _window.Config.pois[0];
+            var stale = POIEditorToolWindow.BlockRefOptions(poi, poi.card.blocks[1], "block_9", config.card_settings.languages);
+            CollectionAssert.AreEqual(new[] { "(none)", "1. Rich Text: The story of the keep.", "3. Rich Text: Second text", "(a deleted block)" }, stale.Labels,
+                "the other blocks in Card Content order, by row number, kind and first words; the block itself is not offered; the key never shown");
+            Assert.AreEqual(3, stale.SelectedIndex, "the deleted pick stays selected");
+            Assert.IsFalse(stale.Labels.Any(l => l.Contains("block_")), "no block key in the popup");
+            string warning = POIEditorToolWindow.CardBlockRefProblemText("Opens Block", BlockRefRule.Problem.Missing, "");
+            StringAssert.Contains("(a deleted block)", warning);
+            StringAssert.DoesNotContain("block_", warning);
+
+            // - the popup's write path, inside the window's own mutation scope (a native popup menu cannot be clicked; a real pick runs this setter)
+            Pick(() => POIEditorToolWindow.SetItemChoiceValue(ActionsRowOfPoi1(0), BuiltInBlocks.ActionsTargetField, stale.KeyAt(2)));
+            Assert.AreEqual("block_3", POIEditorToolWindow.ItemChoiceValue(ActionsRowOfPoi1(0), BuiltInBlocks.ActionsTargetField));
+            Assert.IsTrue(_window.Unsaved);
+            yield return Redraw();
+            Assert.IsFalse(Drawn("Block item actions 0 target warning#1"), "a block of the scrolling part: no warning");
+            var built = BlockStackBuilder.Build(poi, _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois);
+            var buttons = ActionsRule.Buttons(new BlockFieldReader(_window.Config.pois[0].card.blocks[1], "en", "en"), BuiltInBlocks.ActionsPillRow,
+                BlockRefRule.JumpTargets(built.Entries, _ => false));
+            Assert.AreEqual("block_3", buttons.Single(b => b.Action == BuiltInBlocks.ActionOpenBlock).Target, "the card now draws the Open Block button");
+
+            yield return _window.PressUndo();
+            Assert.AreEqual("block_9", POIEditorToolWindow.ItemChoiceValue(ActionsRowOfPoi1(0), BuiltInBlocks.ActionsTargetField), "Ctrl+Z");
+            yield return Redraw();
+            _window.RectOf("Block item actions 0 target warning#1");
+        }
+
+        // The warning under a BlockRef names the block it points at the way Card Content does, for every reason the card leaves the jump out,
+        // on The Lamp's own blocks; The Lamp's two shipped Open Block rows lead somewhere and are not warned; and the repeated-action warning
+        // names an Open Block repeat's target
+        [Test]
+        public void TheBlockRefWarnings_NameTheBlockForEveryReason_TheLampsOwnRowsHaveNone_AndAnOpenBlockRepeatNamesItsTarget()
+        {
+            var config = ShippedConfig();
+            var lamp = config.pois.Single(p => p.id == "lamp");
+            var languages = config.card_settings.languages;
+            var built = BlockStackBuilder.Build(lamp, config.card_settings, BlockRegistry.Shared, config.pois);
+            var holder = lamp.card.blocks.Single(b => b.key == "block_18");
+            var label = BuiltInBlocks.Actions.Field(BuiltInBlocks.ActionsItemsField).ItemFields.Single(f => f.Key == BuiltInBlocks.ActionsTargetField).Label;
+
+            foreach (var row in holder.fields.Single(f => f.key == BuiltInBlocks.ActionsItemsField).items.Skip(1))
+                Assert.AreEqual(BlockRefRule.Problem.None, BlockRefRule.Check(POIEditorToolWindow.ItemChoiceValue(row, BuiltInBlocks.ActionsTargetField), holder, lamp, built, _ => false),
+                    "the shipped Open Block rows lead to blocks of the scrolling part");
+
+            string header = POIEditorToolWindow.CardBlockName(lamp, "block_1", languages);
+            StringAssert.StartsWith("1. Header: ", header, "row number, kind, first words");
+            var cases = new[]
+            {
+                (BlockRefRule.Problem.NotInScroll, "block_1"), (BlockRefRule.Problem.NotInScroll, "block_19"),
+                (BlockRefRule.Problem.WaitsForReading, "block_44"), (BlockRefRule.Problem.Itself, "block_18"),
+            };
+            foreach (var (problem, key) in cases)
+            {
+                Assert.AreEqual(problem, BlockRefRule.Check(key, holder, lamp, built, _ => false), key);
+                string text = POIEditorToolWindow.CardBlockRefProblemText(label, problem, POIEditorToolWindow.CardBlockName(lamp, key, languages));
+                StringAssert.StartsWith(label, text, "names the field");
+                if (problem != BlockRefRule.Problem.Itself) StringAssert.Contains(POIEditorToolWindow.CardBlockName(lamp, key, languages), text, "names the block");
+                StringAssert.DoesNotContain("block_", text, key + ": never a key");
+                EditorTextChecks.AssertAscii(text, key);
+            }
+
+            // - a second button to the Listen player, in the circles block: the same shortcut twice
+            var circles = lamp.card.blocks.Single(b => b.key == "block_17");
+            circles.fields.Single(f => f.key == BuiltInBlocks.ActionsItemsField).items.Add(OpenBlockRow("block_55"));
+            var repeats = RepeatedActionRule.Find(BlockStackBuilder.Build(lamp, config.card_settings, BlockRegistry.Shared, config.pois).Entries);
+            var openBlock = repeats.Single(r => r.Action == BuiltInBlocks.ActionOpenBlock);
+            Assert.AreEqual("block_55", openBlock.Target);
+            string repeated = POIEditorToolWindow.CardRepeatedActionWarnings(circles, repeats, lamp, languages)
+                .Single(w => w.Contains("\"Open Block\""));
+            StringAssert.Contains("\"Open Block\" to " + POIEditorToolWindow.CardBlockName(lamp, "block_55", languages) + " 2 times", repeated);
+            StringAssert.DoesNotContain("block_", repeated);
+            Assert.AreEqual(1, POIEditorToolWindow.CardRepeatedActionWarnings(holder, repeats, lamp, languages).Count(w => w.Contains("\"Open Block\"")),
+                "the Sources button of block_18 opens another block: only the Listen shortcut repeats");
+        }
+
         private List<BlockItemData> Swatches() =>
             _window.Config.pois[0].card.blocks[0].fields.Single(f => f.key == BuiltInBlocks.SwatchesItemsField).items;
 
@@ -1047,6 +1172,57 @@ namespace TileStories.Editor.Tests
             CollectionAssert.IsEmpty(_window.Config.card_settings.navigation.families,
                 "and no Families row is written just because the section is open");
             Assert.AreEqual(CardOptions.BlockOrders.Length, CardOptions.BlockOrderLabels.Length, "one label per Block Order option");
+        }
+
+        // Detail Card > Navigation's step 4 rows (Jump Opens Card To, Jump Motion, Back Button), on the real window: drawn on their
+        // defaults (the shipped wall never wrote them) without writing; each popup's write path picks the other option through the
+        // window's own history and a real Ctrl+Z takes exactly that pick back (an IMGUI popup opens a native menu no test can click --
+        // the Block Order row's limit, above); the option lists and their labels line up, and the help texts say what each option does
+        [UnityTest]
+        public IEnumerator TheJumpAndBackRows_AreDrawnOnTheirDefaults_DrawingWritesNothing_AndEachPickIsUndoneByCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            yield return Redraw();
+            Assert.IsFalse(_window.Unsaved, "drawing the three rows writes nothing");
+            var nav = _window.Config.card_settings.navigation;
+            Assert.AreEqual(CardOptions.JumpRaisesFull, nav.jump_raises_to);
+            Assert.AreEqual(CardOptions.JumpMotionSmooth, nav.jump_motion);
+            Assert.AreEqual(CardOptions.BackButtonStepDown, nav.back_button);
+            Assert.AreEqual(CardOptions.JumpRaises.Length, CardOptions.JumpRaiseLabels.Length);
+            Assert.AreEqual(CardOptions.JumpMotions.Length, CardOptions.JumpMotionLabels.Length);
+            Assert.AreEqual(CardOptions.BackButtons.Length, CardOptions.BackButtonLabels.Length);
+            Assert.AreEqual(new CardNavigationSettings().jump_raises_to, CardOptions.JumpRaises[0], "an unknown value draws as option 0, which is the card's own default");
+            Assert.AreEqual(new CardNavigationSettings().jump_motion, CardOptions.JumpMotions[0]);
+            Assert.AreEqual(new CardNavigationSettings().back_button, CardOptions.BackButtons[0]);
+
+            var picks = new (string Name, Action<CardNavigationSettings> Set, Func<CardNavigationSettings, string> Read, string Before, string After)[]
+            {
+                ("Jump Opens Card To", n => n.jump_raises_to = CardOptions.JumpRaisesKeep, n => n.jump_raises_to, CardOptions.JumpRaisesFull, CardOptions.JumpRaisesKeep),
+                ("Jump Motion", n => n.jump_motion = CardOptions.JumpMotionInstant, n => n.jump_motion, CardOptions.JumpMotionSmooth, CardOptions.JumpMotionInstant),
+                ("Back Button", n => n.back_button = CardOptions.BackButtonNone, n => n.back_button, CardOptions.BackButtonStepDown, CardOptions.BackButtonNone),
+            };
+            foreach (var (name, set, read, before, after) in picks)
+            {
+                Pick(() => set(_window.Config.card_settings.navigation));
+                yield return Redraw();
+                Assert.AreEqual(after, read(_window.Config.card_settings.navigation), name + ": the pick is stored");
+                Assert.IsTrue(_window.Unsaved, name);
+                yield return _window.PressUndo();
+                Assert.AreEqual(before, read(_window.Config.card_settings.navigation), name + ": a real Ctrl+Z takes the pick back");
+            }
+
+            var help = typeof(POIEditorToolWindow);
+            foreach (var (field, words) in new[]
+            {
+                ("CardJumpRaisesHelp", new[] { "Full", "Keep Its Stop" }), ("CardJumpMotionHelp", new[] { "Smooth", "Instant", "Reduce Motion" }),
+                ("CardBackButtonHelp", new[] { "Step The Card Down", "Leave It To The App", "iPhone" }),
+            })
+            {
+                string text = (string)help.GetField(field, Static).GetValue(null);
+                foreach (string word in words) StringAssert.Contains(word, text, field + " names " + word);
+                EditorTextChecks.AssertAscii(text, field);
+            }
         }
 
         // The Families table: one row per registered family, in the registered order, named by the visitor's own word

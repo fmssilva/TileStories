@@ -92,8 +92,8 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~75-115 s (1694 tests, 111 s in the background, 2026-10-15); full PlayMode ~30-34 min (788 tests, 2001 s in the
-background, 2026-10-15, _3.2 step 3 -- the run the next three blocks ride on); one PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
+EditMode ~75-115 s (1711 tests, 77 s, 2026-10-15); full PlayMode ~30-34 min (793 tests, 1854 s, started in the background,
+2026-10-15, _3.2 step 4 -- the run the next three blocks ride on); one PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
   that exercise the changed code: the fixture(s) of the feature itself plus any fixture that reaches it through a seam
@@ -105,15 +105,18 @@ background, 2026-10-15, _3.2 step 3 -- the run the next three blocks ride on); o
     commit needs no second baseline; say which commit you trusted);
   - at the end of a block that touched SHARED GROUND -- anything every fixture stands on: test infrastructure
     (`CardTestInput`, `SearchSceneFixture`, the harnesses, `FixedFrameForTheRun`), `WallSession`, `PanelSettings`, the card
-    tokens (`CardTokens.uss`), the sheet / stack / host, or a registry or pure rule a whole domain reads (`BlockRegistry`,
-    `BlockStackBuilder`, `CardNavModel`);
+    tokens (`CardTokens.uss`), the STOPS, LAYOUT or binding lifecycle of the sheet / stack / host, or a registry or pure rule
+    a whole domain reads (`BlockRegistry`, `BlockStackBuilder`, `CardNavModel`). Adding a view inside a slot that already
+    exists, or an input handler beside the ones already there, is NOT that: pay the full run where the CONTAINER changes, not
+    every time something is put in it (`_3.2` steps 1-5 are the worked example);
   - at the end of the FOURTH block since the last one, whatever those blocks touched -- so a regression is never more than
     four blocks deep and a bisect never longer than that;
   - before a domain close-out (`skills/Domain_Review.md`), before a device session or a build, and whenever the Architect's
     brief asks for one (its TEST PLAN line). Report every full run with its count.
 - **A block that closes WITHOUT a full PlayMode run** closes on the full EditMode suite (always -- it is cheap) plus every
   PlayMode fixture that reaches the changed code: the feature's own fixtures, plus every fixture that greps for the changed
-  type, method or config key, named one by one in the report. The report also says which full run the block rides on (the
+  type, method or config key, named one by one in the report. For a change the card alone can feel, that set is every
+  PlayMode fixture whose name holds Card or Poi (about 450 of the 793 tests, ~12 min against ~31) -- still name them. The report also says which full run the block rides on (the
   commit and its counts) and in how many blocks the next full run falls due.
 - **Background runs** (Unity not in front, 4.2.3) are owed where a TODO or a fixture's subject asks for them (one targeted
   fixture). Every FULL PlayMode run is taken with Unity in the background unless the brief asks for the front: it frees the
@@ -233,7 +236,9 @@ application is a broken test, not a flaky one.
   - *POI Editor window captures (the Worker's screenshot of an Editor window):* they read the DESKTOP, so the captured window must
     be visible and not covered on screen (Unity need not be the active app). The developer keeps Unity uncovered on one screen or
     half of it and works in the other half / screen.
-  - *A background run (every third block):* the developer clicks into another app about 5 s after the Worker starts the run.
+  - *A full PlayMode run (every one of them is taken in the background, 4.2):* the developer clicks into another app about
+    5 s after the Worker starts it. A run Unity pulled to the front partway is still green, but it proves nothing about focus:
+    say so in the report instead of calling it a background run.
 - **Pixel and layout assertions never depend on the Editor's window sizes.** Every PlayMode run lays out in ONE frame: 390 x 844,
   the PanelSettings reference resolution (a phone in portrait), pinned for the whole run by an assembly-wide NUnit `[SetUpFixture]`
   (`Tests/Runtime/FixedFrameForTheRun.cs`, and `LivingRoomFixedFrameForTheRun.cs` for the app's PlayMode assembly -- a SetUpFixture
