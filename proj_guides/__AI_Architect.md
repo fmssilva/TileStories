@@ -47,7 +47,10 @@ in the brief, not in a guide.
   never colour alone, nothing clipped at 390 px, headings, Editor rows (headers, (i) column, warnings). Never say "looks good"
   about a picture you did not open.
 - **Tests:** read what the key new tests assert (does a test fail without the fix?). Run tests only if Unity MCP is available
-  and a claim is doubtful.
+  and a claim is doubtful. Judge the SELECTION too, not only the asserts: under the 4.2 cadence most blocks close on targeted
+  fixtures, so check that the Worker's list really covers what the block changed (grep the changed types yourself when the
+  list looks thin) and say in the review whether it was right. The next brief's TEST PLAN is where you correct it -- and a
+  failure that a skipped full run would have caught is the reason to tighten the cadence in `40-testing.md` 4.2.
 - **Docs:** status row + proof, TODOs deleted or added, design history, `10-structure.md`, `_5.1` match the code.
 
 ## 3. Classify findings

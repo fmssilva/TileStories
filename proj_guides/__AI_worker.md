@@ -13,95 +13,76 @@
 So start by reading them all. 
 
 
-## `And now: POI Card Navigation (3.2) -- step 1, the ontology as data and Block Order`
+## `And now: POI Card Navigation (3.2) -- step 2, the nav model and the Format facet`
 
-GATE: `git push` if the branch is ahead of origin (3 commits are waiting; report how many you pushed). Take one Unity capture
-(Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and
-report. Baseline: the code tree is identical to the last green commit 3599632 (the two commits since are doc-only), so run the
-FULL EditMode suite only (~95 s) and trust 3599632 for PlayMode -- say in the report which commit you trusted.
+GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity capture
+(Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP
+and report. Baseline: the tree is clean on commit "Replace Sources At The End with a Block Order and family table", whose
+full runs were green (EditMode 1620, PlayMode 778) -- run the FULL EditMode suite only and say which commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- start with "## TODOs" ([step 1] lines) and the status
-table (nothing done yet; step 1 is yours, steps 2-19 are planned). Sections 1, 2.2, 2.3, 3 (the two rows marked step 1), 4.6,
-7 and 9 are the step.
-REQUIRED READING (all lines): proj_guides/_5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines" (you add a new
-Detail Card section, a table with reorder arrows and its captures); .clinerules/40-testing.md 4.2.3 + 4.5 (Editor tests with
-real clicks, capture checklists) and 4.2.4b (assert relative order, not indices); proj_guides/_3.1_POI_Card_Blocks.md
-section 5 (the `container.sources_at_end` row you delete) and section 8.1 (how the Detail Card tab is built).
-Context only: _3.1.1_Audit.md section 12, .clinerules/10-structure.md (Blocks + POIEditor trees), _3.3_POI_Card_Styles.md.
-WORKER MODEL: Opus-class -- it changes the block registry every card stands on, removes a config field across 6 files, and
-adds a new Editor section with a reorderable table.
-TEST PLAN: no full PlayMode baseline (tree code-identical to green 3599632); ONE full EditMode + full PlayMode run at the END
-of the block. Background full run: NOT required this block (it is the 2nd since the last one) -- the next block owes it.
-`BlockRegistry` and `BlockStackBuilder` are shared ground, so the closing full run is mandatory, not optional.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- start with "## TODOs" (the [step 5] lines are NOT
+yours; read them so you do not build them) and the status table (step 1 done 2026-10-15; step 2 is yours). Sections 2.1,
+2.4, 2.5, 3, 4.1 and 9 are the step; section 4.4's worked example on The Lamp is the number you must reproduce.
+REQUIRED READING (all lines): .clinerules/40-testing.md 4.2 (the full-run cadence CHANGED on 2026-10-15: read it before you
+plan a single run) and 4.2.4b (assert relative order and shape, not hard indices); .clinerules/20-code-quality.md
+(no speculative field -- this step adds data that step 5+ will read, so add ONLY what the model itself reads).
+Context only: _3.1_POI_Card_Blocks.md section 3, .clinerules/10-structure.md (Blocks tree), _5.1_Editor_Tab.md.
+WORKER MODEL: Opus-class -- `CardNavModel` is the one model every element, layout and test of steps 3-18 reads; a wrong
+shape here is paid for sixteen times.
+TEST PLAN: full EditMode at the GATE and at the end (always). NO full PlayMode run this block: it adds a pure model and an
+additive field, touches no scene, no host and no test infrastructure. It closes instead on the full EditMode suite plus
+the targeted PlayMode fixtures that reach the card stack -- PoiCardSceneTests, PoiCardLiveUpdateTests,
+LivingRoomCardSceneTests (add any other fixture a grep for `BlockKindDefinition` / `BlockStackBuilder` finds). It rides on
+the full runs of the commit named above; the next full PlayMode run falls due at step 5 (or sooner if a block touches
+shared ground). Unity may stay in the background for the whole session.
 
-PART 1 -- fixes: none. `_3.1` closed with no open fix-list item.
+PART 1 -- fixes: none. The two step-1 review findings are tagged [step 5] in the guide; do NOT do them now.
 
-PART 2 -- step 1, in this order (commit-sized sub-steps):
+PART 2 -- step 2, in this order:
 
-1.1 Families as data.
-  WHAT: a family is a registered definition, not a string literal. `FamilyDefinition` and `BuiltInFamilies` in
-  Runtime/Blocks/Navigation/; `BlockRegistry.RegisterFamily(def)`, `Families`, `TryGetFamily`. Fields THIS step:
-  `Key`, `Order`, `LabelKey`, `InNav`, `AtEnd` -- NOT `IconKey` / `ColorToken` (no family icons in `CardIcons` and no
-  `--ts-family-*` tokens yet; they land at step 6). The 9 families of `_3.2` section 2.2 with their Order gaps of 10;
-  `navigation` is NOT registered here (step 11 brings it with its first kind).
-  HOW: `BuiltInBlocks.Register` registers the families BEFORE the kinds. The instance `Register(definition, factory)`
-  throws when the kind's family is not registered -- the static `Validate(definition)` keeps its exact signature and its
-  shape checks (8 call sites depend on it). `Ordered` sorts by family `Order` (authored kind order inside a family), so an
-  app family with Order 35 really lands between `guides` and `stories`. `ContentSeenRule.MetaFamily` and the `Family = "..."`
-  literals now read the `BuiltInFamilies` constants -- one home per name.
-  The 8 sites that build a bare `new BlockRegistry()` must register families; fix the tests, never weaken the check.
-  TESTS: `FamilyRegistryTests` (register; a duplicate key refused; a kind with an unregistered family refused with a message
-  that names the family; `Ordered` order; an app family in a gap). `CardStringsTests` covers the 9 new label keys.
-  The labels go in `CardStrings.asset` in en + pt WITH their accents (data, `20-code-quality` 2.1 exception); `guides` reads
-  "Listen / Ouvir" and its key stays `guides`.
+2.1 The Format facet.
+  WHAT: `BlockKindDefinition.Format`, one of `CardOptions.Formats` = read, look, watch, listen, model, interact (a FIXED
+  list: formats are universal, families are a wall's vocabulary). Every built-in kind declares one; so does the app's
+  size_comparison. `Validate` refuses an unknown or missing format -- a shape check, so it belongs in the static `Validate`,
+  unlike the family check of step 1.
+  HOW: the format of each kind follows `_3.2` 2.4; decide the handful the guide does not name and say which and why in the
+  report. Format labels are `CardStrings` keys like the families' (added now only if the model returns them).
+  TESTS: every registered kind has a valid format (one test over `BlockRegistry.Shared`, the app included); `Validate`
+  refuses an unknown one.
 
-1.2 Block Order replaces Sources At The End.
-  WHAT: `CardNavigationSettings` (`CardSettings.navigation`) with `block_order` (default `end_families_last`) and a
-  `families` row list {`family`, `order`, `at_end`} -- one row per family the wall changed, nothing else (`in_nav` and
-  `group` land at steps 5/6 with the code that reads them). `CardOptions.BlockOrders` + labels.
-  HOW: `BlockStackBuilder.Build` applies the three options AFTER the skip rules, header always first (`_3.2` 2.3). The
-  effective order / At The End of a family = the registered default, overridden by the wall's row. `container.sources_at_end`
-  and its Editor row and help are DELETED -- no shim, no migration key (`00-process`). Confirm by grep that the LivingRoom
-  config never wrote it, so no config file changes.
-  TESTS: `BlockStackBuilderTests` -- `authored` / `end_families_last` / `by_family` on a fixture whose `meta` block sits in
-  the middle, plus a wall row that puts At The End on a second family; `by_family` asserts each family is ONE contiguous run
-  (relative order, no hard indices). `CardConfigRoundTripTests` walks the new leaves.
+2.2 `CardNavModel` (pure, Runtime/Blocks/Navigation/).
+  WHAT: `Build(stack entries, registry, CardSettings)` -> sections in order, each with its key, label key, count, the kinds
+  in it and the target block keys. Pivot on `group_by` = family (default) or format. The card's elements never compute
+  structure; they read this.
+  HOW: the model carries label key, count, kinds and targets -- NOT icon or colour token (step 6, as at step 1). What counts
+  as a TARGET is `_3.2` 2.5 rule 1 and must be read from the kind definition that already owns it, never from a list of look
+  names: `BlockKindDefinition.IsPinnedTop(variant)`, the footer variants list beside it, and `ShowAfterViewedField` for a
+  block still waiting to be revealed. Prove by grep that you are reusing them and not re-deriving a second answer.
+2.3 `NavOntologyRule` (pure): the collapse rules of `_3.2` 2.5 in their order -- an empty family hidden; fewer targets than
+  `min_blocks` (default 8) means NO navigation at all; a family with one target jumps straight to the block and a kind with
+  one instance skips L3; a bar with more sections than `max_slots` (3..5, default 5) turns its last slot into More.
+  `segmented` / Groups is step 6: leave the hook out until it has a reader.
+2.4 Data: add to `CardNavigationSettings` ONLY the fields 2.2-2.3 read -- `group_by`, `min_blocks`, `max_slots` -- with the
+  defaults of `_3.2` section 3. NO Editor rows this step (they land at steps 5-7 with the elements that make them visible);
+  the round-trip test still walks the new leaves.
+  TESTS (Tier 0, the whole step): The Lamp (62 blocks) reproduces section 4.4's worked example EXACTLY -- 56 targets, 8
+  sections with counts 18 / 14 / 1 / 7 / 3 / 4 / 7 / 2, Listen collapsed to a direct jump, meta absent (InNav off); the
+  small fixtures (Lamp Military 6 targets -> no navigation at all, Lamp Religious -> none); an app family and an app kind
+  appear in their own section; a ShowAfterViewed block is not a target until revealed and the model rebuilt after the reveal
+  gains it; `group_by = format` regroups the same targets with no target lost (assert the multiset of targets is identical);
+  `max_slots` overflow names exactly the overflow sections. Verify the three fixtures exist before you plan on them -- if a
+  name in the guide is not on disk, STOP and report rather than inventing a POI.
+  VISUALS: none. This step renders nothing; do not take card captures.
 
-1.3 Editor: Detail Card > Navigation.
-  WHAT: a new framed foldout "Navigation", placed AFTER Card Container and before Block Library, with its own section colour.
-  Rows this step: **Block Order** (popup, (i)) and the **Families table** -- Order with up/down reorder arrows, Family (the
-  visitor label plus its key; name things, never bare ids), At The End (toggle), (i). Then the section's Test sub-foldout
-  (Scene / Play Mode / Device guide, app-agnostic wording -- it must not name The Lamp or the LivingRoom wall). "Preview
-  navigation" is step 17: do not add it.
-  HOW: new partial `Editor/POIEditor/DetailCard/POIEditorToolWindow.CardNavigation.cs`; its (i) texts and guides go in a NEW
-  `POIEditorToolWindow.CardNavigationHelp.cs` (DetailCardHelp.cs is already 494 lines). Reuse `DrawPopupField`,
-  `TableRowScope`, `DrawConfigMutationScope` and the POI reorder arrows of `POIEditorToolWindow.SpecificMarker.cs:199-207`
-  (`ReorderPoi`) -- do not write a second reorder helper. Undo / redo / save and live Play Mode sync like every other row.
-  TESTS: `DetailCardEditorTabTests` -- real clicks on the Block Order popup, on a reorder arrow and on At The End, Ctrl+Z
-  restores each, save writes them; the `sources_at_end` cases there move to Block Order. `LiveSyncFieldMatrixTests` and
-  `PoiCardLiveUpdateTests.SourcesAtTheEnd_...` move to Block Order (a live switch to `by_family` reorders the open card).
+2.5 DOCS: `_3.2` status row 2 done + proof; `10-structure.md` for the new files and the `Format` field; no `_5.1` change
+  (no Editor row). RUN TIMES only if you ran a full suite.
 
-1.4 Phase B on the real wall: in LivingRoomScene, The Lamp's card renders in each of the three orders -- `by_family` puts
-  every family in one contiguous run and ends with Sources; `authored` keeps the authored order; the default behaves exactly
-  as Sources At The End did. Assert relative order of real block keys.
-
-1.5 VISUALS: the POI Editor at 620 pt showing the open Navigation section (follow the existing `Editor/1xx_*_620.png`
-  naming), and The Lamp's card at 390 px under the default and under `by_family`. Open every capture and answer an
-  item-by-item checklist (rows aligned, (i) column, arrows at full tap size, nothing clipped, the table readable).
-
-1.6 DOCS: `_3.2` status row 1 -> done + proof; `_3.1` section 5 drops the `container.sources_at_end` row and points at
-  `_3.2` Block Order; `_3.1.1_Audit.md` section 12's matrix row for it gets a "replaced by Block Order (`_3.2` step 1)" note;
-  `_5.1_Editor_Tab.md` -- remove Sources At The End from the Card Container row list (file inventory) and from its row detail,
-  and document the new Navigation section in both places; `10-structure.md` for every new file; the RUN TIMES line of
-  `40-testing.md` 4.2 after the full run.
-
-Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code, comments,
-logs and Editor labels (Portuguese accents only inside the data assets); Editor warnings and popups name things, never ids;
-no backward-compatibility shim for the removed field; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: `CardNavModel`, `NavOntologyRule`, the Format facet (step 2); any nav element, slot or layout; `group_by`,
-`min_blocks`, `max_slots`, `labels` and the other rows of section 3 that belong to steps 5-7; the `navigation` family and nav
-kinds (step 11); family icons and colour tokens (step 6 / `_3.3`).
-Stop when the full EditMode and PlayMode suites are green with zero failures, the captures are judged, and 1.6 is written.
+Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
+comments, logs and Editor labels (accents only inside the data assets); pure rules stay free of MonoBehaviour and of the
+view layer; no backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
+OUT OF SCOPE: `NavController`, scroll, spy and jumps (step 3); `BlockRef`, `open_block` and Back (step 4); any nav element,
+slot, layout or Editor row; the `navigation` family; family icons and colour tokens; the two [step 5] TODOs.
+Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures and 2.5 is written.
 Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.

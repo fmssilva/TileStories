@@ -96,7 +96,13 @@ final report.
 The last message of a session, in English, short, in this order (the durable record is the plan file of 6.2, not this message):
 1. **GATE** -- each item and its result.
 2. **What changed** -- the behaviour a developer / visitor now gets, and the main files.
-3. **Suites** -- full / targeted runs with counts (and which ran with Unity in the background).
+3. **Suites** -- every run with its counts, and WHICH tests ran, so the Architect can judge the choice and not only the
+   result: the full EditMode suite; then either the full PlayMode run, or -- when `40-testing.md` 4.2 lets the block close
+   without one -- the targeted fixtures that closed it instead, named one by one with why each was picked (the feature's
+   own, plus every fixture a grep for the changed type, method or config key turned up). Say which full run the block
+   rides on (its commit and counts), in how many blocks the next full run falls due, and which runs had Unity in the
+   background. If a run of yours found a failure that an earlier block's targeted selection should have caught, say so
+   plainly: that is the one signal that the cadence is too loose, and the Architect decides on it.
 4. **What I looked at** -- the captures, judged.
 5. **Not verified** -- what was not independently re-verified this session, and why (6.1); never blur "re-ran it" with "the
    plan file said so".
