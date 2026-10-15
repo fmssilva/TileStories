@@ -43,3 +43,8 @@ next domain change (it is in git). It tells you where to look, not what to concl
 for `_3.2` (the Architect does it in the chat, or briefs a Worker; decide by its size): ground on what the built card offers now,
 research navigation patterns with citations (thesis-grade), make every layout mode and navigation element a POI Editor option,
 fold in the `_3.2` TODOs above, and rewrite the status table into small blocks. Then the first `_3.2` Worker brief.
+
+DONE 2026-10-03, commit "Re-plan card navigation on the built card": `_3.2` is re-planned on the built card (19 steps, all
+`planned`). The step 1 decisions were pinned on 2026-10-15 ("Pin the step 1 decisions of the card navigation plan"). What is
+left of this hand-off is sections 1-4 (what `_3.1` delivered, where its TODOs went, the open risks); a new Architect chat
+starts at `_3.2` step 1, not at the planning.
