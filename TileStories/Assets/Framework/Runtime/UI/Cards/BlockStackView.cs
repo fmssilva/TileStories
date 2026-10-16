@@ -96,6 +96,15 @@ namespace TileStories
             return null;
         }
 
+        // The words drawn above the bound block with this instance key: its own heading, else its kind's default -- "" when it shows none
+        // or no such block is bound. What a navigation element that names a block (Up next) says, so it reads what the visitor will see
+        public string HeadingOfBlock(string blockKey)
+        {
+            foreach (var b in _bound)
+                if (b.Key == blockKey) return b.Slot.Heading.text ?? "";
+            return "";
+        }
+
         // The slot element holding a bound view and its heading (the block's full footprint in the stack)
         public VisualElement SlotOf(IBlockView view)
         {

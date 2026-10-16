@@ -1503,8 +1503,9 @@ namespace TileStories.Editor.Tests
             Assert.Less(Y("Bottom Bar"), Y("Follow Scroll"));
 
             var (keys, labels) = POIEditorToolWindow.SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
-            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInNavElements.BottomBar }, keys, "None, then the bottom slot's elements");
-            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Bottom Bar" }, labels, "named by their labels, never their keys");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInNavElements.BottomBar, BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp },
+                keys, "None, then the bottom slot's elements: step 7b's three listed from the registry with no edit to the window");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Bottom Bar", "Dock", "Bar With Kinds", "Up Next" }, labels, "named by their labels, never their keys");
 
             // - the pick through the window's history (an IMGUI popup opens a native menu): Bar Slots and Labels appear
             Pick(() => _window.Config.card_settings.navigation.bottom = BuiltInNavElements.BottomBar);
@@ -1551,6 +1552,37 @@ namespace TileStories.Editor.Tests
             foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Bottom))
                 StringAssert.Contains("Bottom Bar = " + element.Label, guide, "the Playmode guide walks " + element.Label);
             StringAssert.Contains("Set Bar Slots to 3, 4 and 5", guide);
+        }
+
+        // The three step 7b bottom elements on the real window: each is listed from the registry (no edit to the window) and the rows follow
+        // their own definitions -- the dock reads Bar Slots but not Labels, bar_sheet both, next_up neither -- with the Top Bar set to None,
+        // so a display row can only come from the bottom element. Each help names its element, ASCII
+        [UnityTest]
+        public IEnumerator TheStep7bBottomElements_ShowOnlyTheBarRowsTheyRead_AndEachHasItsHelp()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            var drawn = new List<(string Title, Rect Rect)>();
+            // - the Top Bar off: Text Tabs reads Show Counts, and the display rows show while EITHER bar reads them
+            Pick(() => _window.Config.card_settings.navigation.top = CardOptions.NavNone);
+            foreach (var (key, readsSlots, readsLabels) in new[]
+                     {
+                         (BuiltInNavElements.Dock, true, false), (BuiltInNavElements.BarSheet, true, true), (BuiltInNavElements.NextUp, false, false),
+                         (BuiltInNavElements.BottomBar, true, true),
+                     })
+            {
+                Pick(() => _window.Config.card_settings.navigation.bottom = key);
+                yield return DrawnInfoTitles(drawn);
+                var titles = drawn.Select(d => d.Title).ToList();
+                CollectionAssert.Contains(titles, "Bottom Bar", key + ": the row is drawn");
+                Assert.AreEqual(readsSlots, titles.Contains("Bar Slots"), key + ": Bar Slots only for a bar of slots");
+                Assert.AreEqual(readsLabels, titles.Contains("Labels"), key + ": Labels only for an element that draws icons and words by it");
+                Assert.IsFalse(titles.Contains("Show Counts"), key + ": none of them shows counts");
+            }
+            string bottomHelp = (string)typeof(POIEditorToolWindow).GetMethod("CardBottomBarHelp", Static).Invoke(null, new object[] { NavElementRegistry.Shared });
+            foreach (string word in new[] { "Dock: ", "Bar With Kinds: ", "Up Next: ", "never grows wider than the screen", "second tap", "says the card is finished" })
+                StringAssert.Contains(word, bottomHelp, "Bottom Bar's (i) says " + word);
+            EditorTextChecks.AssertAscii(bottomHelp, "CardBottomBarHelp");
         }
 
         // The Groups table on the real window, with Top Bar = Segmented. A wall with no rows shows the framework's four by their words and

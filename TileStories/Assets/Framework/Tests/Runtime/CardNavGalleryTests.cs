@@ -35,6 +35,9 @@ namespace TileStories.Tests
             [BuiltInNavElements.Segmented] = SegmentedKeepsItsPromise,
             [BuiltInNavElements.ProgressMap] = ProgressMapKeepsItsPromise,
             [BuiltInNavElements.BottomBar] = BottomBarKeepsItsPromise,
+            [BuiltInNavElements.Dock] = DockKeepsItsPromise,
+            [BuiltInNavElements.BarSheet] = BarSheetKeepsItsPromise,
+            [BuiltInNavElements.NextUp] = NextUpKeepsItsPromise,
         };
 
         // The element an entry's slot holds now, its key and its slot element, and whether the chrome shows it
@@ -393,6 +396,128 @@ namespace TileStories.Tests
             Assert.IsFalse(bar.More.Button.ClassListContains(NavTab.CurrentClass), "More is not marked while the first section is read");
         }
 
+        // dock: the bar's slots as an icon PILL. The section read (the first, at the top of the card) shows icon + word on an outlined plate,
+        // every other slot its icon alone; the pill is centred and inside the card; the bar's underline is gone (the plate and the widening
+        // say "here", never the colour alone); every slot still names itself (tooltip) and is a whole touch target
+        private static void DockKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var sheet = harness.Gallery.Sheet;
+            var dock = (DockNavView)sheet.Slots.BottomView;
+            var model = sheet.Nav.Model;
+            var strings = Strings(harness, entry);
+            float onePixel = CardGalleryChecks.OnePixel(dock.Root);
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            var card = sheet.Root.worldBound;
+            Assert.IsTrue(dock.Root.ClassListContains(DockNavView.DockClass), "the dock's own look");
+            Assert.AreEqual(card.yMax, sheet.Slots.Bottom.worldBound.yMax, onePixel, "it closes the card: in the thumb zone");
+
+            int slots = NavOntologyRule.MaxSlots(ConfigNav(entry));
+            bool overflows = model.Sections.Count > slots;
+            Assert.AreEqual(overflows, dock.HasMore, "More exactly when the sections overflow the slots");
+            int inBar = overflows ? slots - 1 : model.Sections.Count;
+            CollectionAssert.AreEqual(model.Sections.Take(inBar).Select(s => strings.Get(s.LabelKey)), dock.Items.Select(t => t.Label.text),
+                "the first sections, each its word in " + entry.Case.Language);
+            var all = dock.Items.ToList();
+            if (overflows) all.Add(dock.More);
+
+            // - the pill: centred, inside the card, never wider than it
+            var pill = dock.Bar.worldBound;
+            Assert.LessOrEqual(pill.width, card.width + onePixel, "the pill is never wider than the card (" + pill.width.ToString("F1") + " of " + card.width.ToString("F1") + ")");
+            Assert.GreaterOrEqual(pill.xMin, card.xMin - onePixel, "inside the card on the left");
+            Assert.LessOrEqual(pill.xMax, card.xMax + onePixel, "and on the right");
+            Assert.AreEqual(card.center.x, pill.center.x, 2f * onePixel, "centred");
+
+            // - one marked item with its word beside its icon, on a plate with an outline; the rest icon only
+            for (int i = 0; i < all.Count; i++)
+            {
+                var slot = all[i];
+                bool marked = i == 0;
+                string name = slot.Label.text;
+                Assert.AreEqual(marked, CardTestInput.IsShown(slot.Label, sheet.Root), name + ": its word shows only while it is the section read");
+                Assert.IsTrue(CardTestInput.IsShown(slot.Icon, sheet.Root), name + ": its icon always shows");
+                Assert.GreaterOrEqual(slot.Button.layout.width, touch - onePixel, name + ": wide enough to tap");
+                Assert.GreaterOrEqual(slot.Button.layout.height, touch - onePixel, name + ": tall enough to tap");
+                Assert.AreEqual(name, slot.Button.tooltip, name + ": an icon alone still names its slot");
+                Assert.AreEqual(marked, slot.Button.ClassListContains(NavTab.CurrentClass), name + ": marked");
+                Assert.AreEqual(marked ? CardTestInput.TokenPx("--ts-choice-border") : 0f, slot.Button.resolvedStyle.borderTopWidth, 0.01f, name + ": an outline on the marked plate only");
+                if (slot.Underline != null) Assert.AreEqual(DisplayStyle.None, slot.Underline.resolvedStyle.display, name + ": no underline in a pill");
+                if (!marked) Assert.Less(slot.Button.layout.width, all[0].Button.layout.width, name + ": narrower than the marked one, which widened");
+            }
+            var first = all[0];
+            Assert.LessOrEqual(first.Icon.worldBound.xMax, first.Label.worldBound.xMin + 0.5f, "the marked item: its word BESIDE its icon");
+            Assert.AreEqual(FontStyle.Bold, first.Label.resolvedStyle.unityFontStyleAndWeight, "and bold");
+        }
+
+        // bar_sheet: the bar's own promise, then its own: the kinds list starts closed, and the arrow that says "a tap here opens it" is on the
+        // slot being read and no other, up, inside its slot and clear of the icon
+        private static void BarSheetKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            BottomBarKeepsItsPromise(harness, entry);
+            var sheet = harness.Gallery.Sheet;
+            var view = (BarSheetNavView)sheet.Slots.BottomView;
+            var model = sheet.Nav.Model;
+            float onePixel = CardGalleryChecks.OnePixel(view.Root);
+            Assert.IsFalse(view.KindsOpen, "the kinds list starts closed");
+            Assert.AreEqual(DisplayStyle.None, view.KindsList.resolvedStyle.display, "and takes no room");
+            Assert.Greater(model.Sections[0].Kinds.Count, 1, "precondition: the first section of every case holds two kinds or more");
+            Assert.AreEqual(view.Items.Count, view.Arrows.Count, "one arrow per slot");
+            foreach (var (slot, arrow) in view.Arrows)
+            {
+                bool offered = slot.Index == 0;
+                Assert.AreEqual(offered, arrow.resolvedStyle.display == DisplayStyle.Flex, slot.Label.text + ": the arrow only on the slot being read");
+                if (!offered) continue;
+                var box = slot.Button.worldBound;
+                var at = arrow.worldBound;
+                Assert.GreaterOrEqual(at.xMin, box.xMin - onePixel, "the arrow is inside its slot (left)");
+                Assert.LessOrEqual(at.xMax, box.xMax + onePixel, "(right)");
+                Assert.GreaterOrEqual(at.yMin, box.yMin - onePixel, "(top)");
+                Assert.GreaterOrEqual(at.xMin, slot.Icon.worldBound.xMax - onePixel, "clear of the slot's own icon");
+                Assert.AreEqual(180f, arrow.resolvedStyle.rotate.angle.ToDegrees(), 0.5f, "turned up: the list opens above the bar");
+                Assert.AreEqual(CardIcons.OpenBlock, CardIcons.KeyOf(arrow), "the card's one arrow");
+            }
+        }
+
+        // next_up: it names the block AFTER the one read at the top of the card, by the words the stack draws over it, with its place among
+        // all the targets and a Next button; the words on the left, the button in the card's right edge; a touch target tall
+        private static void NextUpKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var sheet = harness.Gallery.Sheet;
+            var view = (NextUpNavView)sheet.Slots.BottomView;
+            var model = sheet.Nav.Model;
+            var strings = Strings(harness, entry);
+            float onePixel = CardGalleryChecks.OnePixel(view.Root);
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            var card = sheet.Root.worldBound;
+            // - the spy line is a third down the viewport, so a short first block is already past it: the block read at the top of the card is
+            //   the first target or one a little further on -- whichever it is, the bar names the one AFTER it
+            int at = model.Targets.ToList().IndexOf(sheet.Nav.CurrentBlock);
+            Assert.GreaterOrEqual(at, 0, "a target is being read at the top of the card");
+            Assert.Less(at, model.TargetCount - 1, "precondition: it is not the last");
+            string next = model.Targets[at + 1];
+            Assert.AreEqual(next, view.NextBlock, "the bar names the target after the one read");
+            Assert.AreEqual(strings.Get(CardStrings.Keys.NavNextUp), view.Caption.text, "Up next, in " + entry.Case.Language);
+            Assert.AreEqual(string.Format(System.Globalization.CultureInfo.InvariantCulture, strings.Get(CardStrings.Keys.NavNextUpPosition), at + 2, model.TargetCount),
+                view.Position.text, "its place among all " + model.TargetCount + " targets");
+            string drawn = sheet.Stack.HeadingOfBlock(next);
+            string expected = drawn.Length > 0 ? drawn : strings.Get(model.KindOf(next).LabelKey);
+            Assert.IsNotEmpty(expected, "precondition: the next block has words to be named by");
+            Assert.AreEqual(expected, view.Heading.text, "the words the stack draws over it (else its kind's)");
+            Assert.AreEqual(strings.Get(CardStrings.Keys.NavNextButton), view.NextLabel.text, "the button in " + entry.Case.Language);
+            Assert.IsTrue(CardTestInput.IsShown(view.Heading, sheet.Root) && CardTestInput.IsShown(view.Next, sheet.Root), "block and button shown");
+
+            Assert.AreEqual(card.yMax, sheet.Slots.Bottom.worldBound.yMax, onePixel, "the bar closes the card: in the thumb zone");
+            Assert.GreaterOrEqual(view.Root.layout.height, touch + 2f * CardTestInput.TokenPx("--ts-space-2") - onePixel, "a whole touch target tall, with its padding");
+            var text = view.Root.Q("nav-next-up-text").worldBound;
+            var button = view.Next.worldBound;
+            Assert.LessOrEqual(text.xMax, button.xMin + onePixel, "the words sit left of the button");
+            Assert.LessOrEqual(button.xMax, card.xMax + onePixel, "the button is inside the card's right edge");
+            Assert.AreEqual(view.Root.worldBound.center.y, button.center.y, 2f * onePixel, "the button centred on the bar");
+            Assert.IsTrue(CardTokenColours.TryResolve(view.Next, "--ts-accent", out Color accent), "precondition: --ts-accent resolves on the card");
+            Assert.AreEqual(accent, view.Next.resolvedStyle.borderTopColor, "Next is outlined in the accent (the sticky CTA above it keeps the fill)");
+            Assert.AreEqual(CardTestInput.TokenPx("--ts-choice-border"), view.Next.resolvedStyle.borderTopWidth, 0.01f, "with the card's choice outline width");
+            Assert.AreNotEqual(accent, view.Next.resolvedStyle.backgroundColor, "and no accent fill: it is the card's second action, not its first");
+        }
+
         // The wall's navigation settings of an entry (what Bar Slots the gallery's wall has)
         private static CardNavigationSettings ConfigNav(CardNavGalleryDefinitions.Entry entry) => CardNavGalleryDefinitions.Wall(entry).card_settings.navigation;
 
@@ -426,6 +551,296 @@ namespace TileStories.Tests
                 Assert.LessOrEqual(row.Icon.worldBound.xMax, row.Label.worldBound.xMin + 0.5f, row.Label.text + ": its icon beside its word");
             }
             yield return CardGalleryChecks.Render("Nav_bottom_bar_" + caseKey + "_more");
+        }
+
+        private IEnumerator ShowEntry(string elementKey, string caseKey)
+        {
+            var all = CardNavGalleryDefinitions.All.ToList();
+            int index = all.FindIndex(e => e.ElementKey == elementKey && e.Case.Key == caseKey);
+            Assert.GreaterOrEqual(index, 0, "precondition: the gallery has " + elementKey + " over " + caseKey);
+            _harness.Show(index);
+            yield return CardTestInput.Settle();
+        }
+
+        private IEnumerator Landed(NavController nav)
+        {
+            for (int frame = 0; frame < 600 && nav.IsJumping; frame++) yield return null;
+            Assert.IsFalse(nav.IsJumping, "the jump came to rest");
+            yield return CardTestInput.Settle(0.3f);
+        }
+
+        // bar_sheet's kinds list OPEN (a second tap on the family being read): above the bar, inside the card, one row per kind of that
+        // family in the model's order -- each a whole touch target, its words whole and readable, its block count beside it; rendered
+        // Nav_bar_sheet_<case>_kinds
+        [UnityTest]
+        public IEnumerator TheBarSheetsKindsList_OpensAboveTheBar_WithAWholeRowPerKind_AndTheirCounts_AndRenders([Values("big", "pt_long", "small")] string caseKey)
+        {
+            yield return ShowEntry(BuiltInNavElements.BarSheet, caseKey);
+            var sheet = _harness.Gallery.Sheet;
+            var view = (BarSheetNavView)sheet.Slots.BottomView;
+            var model = sheet.Nav.Model;
+            Assert.AreEqual(0, sheet.Nav.Current, "precondition: the card is read at its first family");
+            view.Tap(0);
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(view.KindsOpen, "a tap on the family being read opens its kinds");
+            var strings = new CardStrings(_harness.Gallery.StringTable.Entries(), CardStringSources.Shared.Entries(), null, CardNavGalleryDefinitions.Cases.First(c => c.Key == caseKey).Language, "en");
+            var kinds = model.Sections[0].Kinds;
+            Assert.GreaterOrEqual(kinds.Count, 2, "precondition: a list worth opening");
+            float onePixel = CardGalleryChecks.OnePixel(view.Root);
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            Assert.LessOrEqual(view.KindsList.worldBound.yMax, view.Bar.worldBound.yMin + onePixel, "the list sits above the bar");
+            Assert.GreaterOrEqual(view.KindsList.worldBound.yMin, sheet.Root.worldBound.yMin, "inside the card");
+            Assert.AreEqual(sheet.Root.worldBound.yMax, view.Bar.worldBound.yMax, onePixel, "the bar stays at the card's bottom");
+            CollectionAssert.AreEqual(kinds.Select(k => strings.Get(k.LabelKey)), view.KindRows.Select(r => r.Label.text), "one row per kind, in order");
+            CollectionAssert.AreEqual(kinds.Select(k => k.Count.ToString()), view.KindRows.Select(r => r.Count.text), "each with its block count");
+            foreach (var row in view.KindRows)
+            {
+                Assert.GreaterOrEqual(row.Button.layout.height, touch - onePixel, row.Label.text + ": tall enough to tap");
+                Assert.GreaterOrEqual(row.Button.layout.width, touch - onePixel, row.Label.text + ": wide enough to tap");
+                Assert.GreaterOrEqual(row.Button.worldBound.xMin, sheet.Root.worldBound.xMin - onePixel, row.Label.text + ": inside the card");
+                Assert.LessOrEqual(row.Button.worldBound.xMax, sheet.Root.worldBound.xMax + onePixel, row.Label.text + ": inside the card");
+                foreach (var label in new[] { row.Label, row.Count })
+                {
+                    var words = label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+                    Assert.GreaterOrEqual(label.layout.width + 0.5f, words.x, "'" + label.text + "': whole, never cut");
+                    float contrast = CardTestInput.Contrast(label.resolvedStyle.color, CardTestInput.EffectiveBackground(label));
+                    Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioNormalText, "'" + label.text + "' reads at 4.5:1 (" + contrast.ToString("F2") + ")");
+                }
+            }
+            yield return CardGalleryChecks.Render("Nav_bar_sheet_" + caseKey + "_kinds");
+        }
+
+        // next_up at the END of the card: nothing to go to, so the bar says it is finished in the card's language, still shows the card's size,
+        // names no block and has no Next button -- and stays a touch target tall, so it does not shrink under the reader's thumb
+        [UnityTest]
+        public IEnumerator TheUpNextBar_AtTheLastTarget_SaysTheCardIsFinished_WithNoNext_AndKeepsItsHeight_AndRenders([Values("big", "pt_long", "one_family")] string caseKey)
+        {
+            yield return ShowEntry(BuiltInNavElements.NextUp, caseKey);
+            var sheet = _harness.Gallery.Sheet;
+            var view = (NextUpNavView)sheet.Slots.BottomView;
+            var model = sheet.Nav.Model;
+            string language = CardNavGalleryDefinitions.Cases.First(c => c.Key == caseKey).Language;
+            var strings = new CardStrings(_harness.Gallery.StringTable.Entries(), CardStringSources.Shared.Entries(), null, language, "en");
+            Assert.IsFalse(view.Finished, "precondition: not at the end yet");
+            float captionSize = view.Caption.resolvedStyle.fontSize;
+            Assert.IsFalse(view.Root.ClassListContains(NextUpNavView.DoneClass), "precondition: not the finished look yet");
+            string last = model.Targets[model.Targets.Count - 1];
+            Assert.IsTrue(sheet.Nav.JumpToBlock(last, "test"), "precondition: the last target can be jumped to");
+            yield return Landed(sheet.Nav);
+            Assert.AreEqual(last, sheet.Nav.CurrentBlock, "precondition: the reader is at the last target");
+            Assert.IsTrue(view.Finished);
+            Assert.AreEqual(strings.Get(CardStrings.Keys.NavNextUpDone), view.Caption.text, "the bar says the card is finished, in " + language);
+            Assert.AreEqual(string.Format(System.Globalization.CultureInfo.InvariantCulture, strings.Get(CardStrings.Keys.NavNextUpPosition), model.TargetCount, model.TargetCount),
+                view.Position.text, "keeping the card's size");
+            Assert.IsFalse(CardTestInput.IsShown(view.Next, sheet.Root), "no Next button that goes nowhere");
+            Assert.IsFalse(CardTestInput.IsShown(view.Heading, sheet.Root), "no block named");
+            Assert.IsTrue(CardTestInput.IsShown(view.Caption, sheet.Root) && CardTestInput.IsShown(view.Position, sheet.Root), "but the words and the place are there");
+            Assert.IsTrue(view.Root.ClassListContains(NextUpNavView.DoneClass), "the finished look");
+            Assert.Greater(view.Caption.resolvedStyle.fontSize, captionSize, "the finished words are bigger than the small line over a block: they are all the bar has to say");
+            Assert.AreEqual(FontStyle.Bold, view.Caption.resolvedStyle.unityFontStyleAndWeight, "and bold");
+            float onePixel = CardGalleryChecks.OnePixel(view.Root);
+            Assert.GreaterOrEqual(view.Root.layout.height, CardTestInput.TokenPx("--ts-touch-target") + 2f * CardTestInput.TokenPx("--ts-space-2") - onePixel,
+                "still a whole touch target tall (with its padding)");
+            foreach (var label in new[] { view.Caption, view.Position })
+            {
+                var words = label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+                Assert.GreaterOrEqual(label.layout.width + 0.5f, words.x, "'" + label.text + "': whole, never cut");
+                float contrast = CardTestInput.Contrast(label.resolvedStyle.color, CardTestInput.EffectiveBackground(label));
+                Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioNormalText, "'" + label.text + "' reads at 4.5:1 (" + contrast.ToString("F2") + ")");
+            }
+            yield return CardGalleryChecks.Render("Nav_next_up_" + caseKey + "_finished");
+        }
+
+        // A block's top meets the viewport's top (+-1 px), or -- a late block -- the stack sits at the end of its range
+        private static void AssertLanded(PoiCardSheetView sheet, string block, string what)
+        {
+            var scroll = sheet.Stack.Scroll;
+            float onePixel = sheet.Layer.panel.visualTree.layout.height / Screen.height;
+            float range = NavScrollRule.Range(scroll.contentContainer.layout.height, scroll.contentViewport.layout.height);
+            Assert.Greater(range, 100f, "precondition: the stack really scrolls (range " + range.ToString("F0") + ")");
+            var slot = sheet.Stack.SlotOfBlock(block);
+            if (slot.layout.y <= range - onePixel)
+                Assert.AreEqual(0f, slot.worldBound.yMin - scroll.contentViewport.worldBound.yMin, onePixel, what + ": its top meets the viewport's top");
+            else
+                Assert.AreEqual(range, scroll.scrollOffset.y, onePixel, what + ": a late block clamps at the end of the range");
+        }
+
+        // bar_sheet's two taps on the real layout (the tap seam: Phase B does it with a real finger): the first tap on a family that is not
+        // the current one jumps and opens nothing; a second tap on it opens its kinds, one row each with its count; a pick lands that kind's
+        // first block and closes the list; the reader moving on into another family closes an open list; a family with one kind never opens
+        // one; a section read in More's list opens its kinds on a second tap too
+        [UnityTest]
+        public IEnumerator TheBarSheet_FirstTapJumps_SecondTapOnTheCurrentFamilyOpensItsKinds_APickLandsAndCloses_TheSpyLeavingCloses()
+        {
+            yield return ShowEntry(BuiltInNavElements.BarSheet, "big");
+            var sheet = _harness.Gallery.Sheet;
+            var view = (BarSheetNavView)sheet.Slots.BottomView;
+            var nav = sheet.Nav;
+            var model = nav.Model;
+            Assert.AreEqual(0, nav.Current, "precondition: the card opens on its first family");
+
+            // - the first tap on another family: it jumps, opens nothing, and the arrow moves to it
+            view.Tap(1);
+            Assert.IsFalse(view.KindsOpen, "the first tap opens no list, even before the card has landed");
+            yield return Landed(nav);
+            Assert.AreEqual(1, nav.Current, "the card is in the family tapped");
+            Assert.IsFalse(view.KindsOpen, "still no list");
+            AssertLanded(sheet, model.Sections[1].Targets[0], model.Sections[1].Key + "'s first block");
+            Assert.AreEqual(DisplayStyle.Flex, view.Arrows[1].Arrow.resolvedStyle.display, "the arrow moved to the family being read");
+            Assert.AreEqual(DisplayStyle.None, view.Arrows[0].Arrow.resolvedStyle.display, "and left the first");
+
+            // - the second tap on it: its kinds, counts and all
+            view.Tap(1);
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(view.KindsOpen, "a second tap on the family being read opens its kinds");
+            var kinds = model.Sections[1].Kinds;
+            Assert.GreaterOrEqual(kinds.Count, 2, "precondition: Media holds several kinds");
+            CollectionAssert.AreEqual(kinds.Select(k => k.Count.ToString()), view.KindRows.Select(r => r.Count.text), "one row per kind, each with its count");
+            Assert.LessOrEqual(view.KindsList.worldBound.yMax, view.Bar.worldBound.yMin + CardGalleryChecks.OnePixel(view.Root), "above the bar");
+
+            // - a pick lands the kind's first block and closes the list (stays in the same family)
+            int pick = kinds.Count - 1;
+            Assert.AreNotEqual(model.Sections[1].Targets[0], kinds[pick].Targets[0], "precondition: the last kind starts at another block than the family does");
+            view.PickKind(pick);
+            Assert.IsFalse(view.KindsOpen, "a pick closes the list at once");
+            yield return Landed(nav);
+            AssertLanded(sheet, kinds[pick].Targets[0], kinds[pick].Key + "'s first block");
+            Assert.AreEqual(1, nav.Current, "still in the family");
+
+            // - the reader moves into another family while the list is open: it closes (it would name a family nobody is reading)
+            view.Tap(1);
+            Assert.IsTrue(view.KindsOpen, "precondition: open again");
+            nav.JumpTo(3, "test");
+            Assert.IsFalse(view.KindsOpen, "the card moved to another family: the list closes");
+            yield return Landed(nav);
+
+            // - one kind (Listen): nothing to choose, a second tap only jumps again
+            int listen = model.Sections.ToList().FindIndex(s => s.Key == BuiltInFamilies.Guides);
+            Assert.AreEqual(1, model.Sections[listen].Kinds.Count, "precondition: Listen is the one-kind family");
+            view.Tap(listen);
+            yield return Landed(nav);
+            view.Tap(listen);
+            yield return Landed(nav);
+            Assert.IsFalse(view.KindsOpen, "a one-kind family opens no list");
+            Assert.AreEqual(DisplayStyle.None, view.Arrows[listen].Arrow.resolvedStyle.display, "and wears no arrow");
+
+            // - a section read in More's list: its row's first tap jumps, its second opens the kinds (More's list closed meanwhile)
+            int overflow = view.Items.Count;
+            int several = model.Sections.ToList().FindIndex(overflow, s => s.Kinds.Count >= 2);
+            Assert.GreaterOrEqual(several, overflow, "precondition: the overflow holds a family with several kinds");
+            view.OpenMore();
+            view.Tap(several);
+            yield return Landed(nav);
+            Assert.AreEqual(several, nav.Current);
+            Assert.IsFalse(view.MoreOpen, "a tap on a row closes More's list");
+            Assert.IsFalse(view.KindsOpen, "and a first tap opens no kinds");
+            view.OpenMore();
+            view.Tap(several);
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(view.KindsOpen, "the second tap, on the family being read, opens its kinds");
+            Assert.AreEqual(several, view.KindsSection);
+            Assert.IsFalse(view.MoreOpen, "More's list closed");
+        }
+
+        // next_up walks the card on the real layout (the Next seam; Phase B taps the real button): each Next lands the next target, the words
+        // and the number move on, the block named is the one the stack draws words over, and from the last target on the bar is finished
+        [UnityTest]
+        public IEnumerator TheUpNextBar_FollowsTheReader_NextLandsTheNextBlock_AndTheWordsMoveOn_UntilTheCardEnds()
+        {
+            yield return ShowEntry(BuiltInNavElements.NextUp, "big");
+            var sheet = _harness.Gallery.Sheet;
+            var view = (NextUpNavView)sheet.Slots.BottomView;
+            var nav = sheet.Nav;
+            var model = nav.Model;
+            var strings = new CardStrings(_harness.Gallery.StringTable.Entries(), CardStringSources.Shared.Entries(), null, "en", "en");
+            Assert.AreEqual(62, model.TargetCount, "precondition: the big card's 62 targets");
+            // - the spy line is a third down the viewport: a short first block is already past it, so the card is read at target 0 or a little on
+            int at = model.Targets.ToList().IndexOf(nav.CurrentBlock);
+            Assert.That(at, Is.InRange(0, 5), "precondition: a target near the top is being read (" + nav.CurrentBlock + ")");
+
+            // - "read" is the block under the spy line (a third down the viewport): Next lands the next block at the top, and a short landed
+            //   block leaves the block under it already on screen, so the reader's place can move on by more than one -- never back, and the
+            //   bar always names the block after the one the controller says is read now
+            IEnumerator Step(string when)
+            {
+                string next = model.Targets[at + 1];
+                Assert.AreEqual(next, view.NextBlock, when + ": the bar names the block after the one read");
+                Assert.AreEqual((at + 2) + " of 62", view.Position.text, when + ": its place among all the targets");
+                string drawn = sheet.Stack.HeadingOfBlock(next);
+                Assert.AreEqual(drawn.Length > 0 ? drawn : strings.Get(model.KindOf(next).LabelKey), view.Heading.text, when + ": the words over that block");
+                view.GoNext();
+                yield return Landed(nav);
+                AssertLanded(sheet, next, when + ": " + next);
+                int now = model.Targets.ToList().IndexOf(nav.CurrentBlock);
+                Assert.GreaterOrEqual(now, at + 1, when + ": the reader is at the landed block, or one under the spy line a little further on");
+                Assert.LessOrEqual(now, at + 4, when + ": and not far past it (" + nav.CurrentBlock + ")");
+                at = now;
+                if (at < model.TargetCount - 1)
+                    Assert.AreEqual(model.Targets[at + 1], view.NextBlock, when + ": the bar moved on to the block after the one read now");
+            }
+
+            for (int i = 0; i < 6; i++) yield return Step("step " + (i + 1));
+
+            // - near the end: Next until the last target lands, and the bar then says the card is finished
+            Assert.IsTrue(nav.JumpToBlock(model.Targets[model.TargetCount - 6], "test"));
+            yield return Landed(nav);
+            at = model.Targets.ToList().IndexOf(nav.CurrentBlock);
+            Assert.GreaterOrEqual(at, model.TargetCount - 6, "precondition: near the end");
+            int presses = 0;
+            while (!view.Finished && presses++ < 10) yield return Step("near the end, press " + presses);
+            Assert.IsTrue(view.Finished, "the last target ends the bar (after " + presses + " presses)");
+            Assert.AreEqual(model.Targets[model.TargetCount - 1], nav.CurrentBlock, "the card is read at its last target");
+            Assert.IsNull(view.NextBlock);
+            Assert.IsFalse(CardTestInput.IsShown(view.Next, sheet.Root), "no Next that goes nowhere");
+            view.GoNext();
+            yield return CardTestInput.Settle();
+            Assert.AreEqual(model.Targets[model.TargetCount - 1], nav.CurrentBlock, "a Next at the end moves nothing");
+        }
+
+        // The dock's acceptance (_3.2 7b.1): with the Portuguese labels the pill never grows past the card (390 px), whichever section is marked
+        // -- the marked word is whole and shown, and exactly one word shows at a time. Each marked state is rendered once for the widest
+        [UnityTest]
+        public IEnumerator TheDock_NeverGrowsPastTheCard_WhicheverSlotIsMarked_WithThePortugueseLabels()
+        {
+            yield return ShowEntry(BuiltInNavElements.Dock, "pt_long");
+            var sheet = _harness.Gallery.Sheet;
+            var dock = (DockNavView)sheet.Slots.BottomView;
+            var model = sheet.Nav.Model;
+            float onePixel = CardGalleryChecks.OnePixel(dock.Root);
+            var card = sheet.Root.worldBound;
+            Assert.AreEqual(390f, sheet.Layer.panel.visualTree.layout.width, onePixel, "precondition: the run's 390 px frame");
+            var slots = dock.Items.Append(dock.More).ToList();
+            float widest = 0f;
+            string widestWord = "";
+            for (int i = 0; i < model.Sections.Count; i++)
+            {
+                sheet.Nav.JumpTo(i, "test");
+                yield return Landed(sheet.Nav);
+                var marked = slots.Where(s => s.Button.ClassListContains(NavTab.CurrentClass)).ToList();
+                Assert.AreEqual(1, marked.Count, "section " + i + ": exactly one slot marked");
+                var slot = marked[0];
+                // - the dock follows the SPY: after a jump lands, a short block (Listen's player) can already have the next family under the spy
+                //   line, so the marked slot is the one of the section the controller names now (the real-drag check is Phase B's)
+                int read = sheet.Nav.Current;
+                Assert.GreaterOrEqual(read, i, "section " + i + ": the spy names the section jumped to or the next one under its line");
+                Assert.AreEqual(read < dock.Items.Count ? read : dock.Items.Count, slots.IndexOf(slot), "section " + i + ": the slot of the section read, or More for the overflow");
+                var pill = dock.Bar.worldBound;
+                Assert.LessOrEqual(pill.width, card.width + onePixel, slot.Label.text + " marked: the pill fits the card (" + pill.width.ToString("F1") + " of " + card.width.ToString("F1") + ")");
+                Assert.GreaterOrEqual(pill.xMin, card.xMin - onePixel, slot.Label.text + " marked: inside the card (left)");
+                Assert.LessOrEqual(pill.xMax, card.xMax + onePixel, slot.Label.text + " marked: inside the card (right)");
+                Assert.AreEqual(1, slots.Count(s => CardTestInput.IsShown(s.Label, sheet.Root)), slot.Label.text + " marked: it alone says its word");
+                var words = slot.Label.MeasureTextSize(slot.Label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+                Assert.GreaterOrEqual(slot.Label.layout.width + 0.5f, words.x, "'" + slot.Label.text + "': whole, never cut");
+                foreach (var each in slots)
+                    Assert.GreaterOrEqual(each.Button.layout.width, CardTestInput.TokenPx("--ts-touch-target") - onePixel, each.Label.text + ": still a whole touch target wide");
+                if (pill.width > widest)
+                {
+                    widest = pill.width;
+                    widestWord = slot.Label.text;
+                }
+            }
+            Debug.Log("[Card] Dock at 390 px in Portuguese: widest pill " + widest.ToString("F1") + " px (marked '" + widestWord + "')");
+            yield return CardGalleryChecks.Render("Nav_dock_pt_long_widest");
         }
     }
 }

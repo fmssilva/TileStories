@@ -12,74 +12,71 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: POI Card Navigation (3.2) -- step 7a, the bottom slot and the bottom bar`
+## `And now: POI Card Navigation (3.2) -- step 7b, the dock, the bar sheet and Up next`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
 not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Add icon tabs, chips, segments and a progress map to
-the card" (full EditMode 1755/1755) -- run the full EditMode suite and say which commit you trusted.
+them if TMP dirtied them. Baseline: the tree is clean on commit "Add a bottom bar with a More list to the card's bottom
+area" (full EditMode 1769/1769, full PlayMode 868/868 in the background) -- run the full EditMode suite only and say
+which commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 7] lines are yours; the
-one about `progress_map` is DECIDED, build what it says) and the status table (1-6 done; step 7 was split, 7a is yours
-and 7b is the next block). Sections 4.2 (the bottom slot's place), 4.3 (the chrome rule you extend), 5.2 (`bottom_bar`),
-2.5 rule 5 (More) and 9.
-REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines"; .clinerules/40-testing.md
-4.2 (the cadence AND the "a full run confirms, it never discovers" line -- this block owes a full run, so the targeted
-set must be green BEFORE you start it), 4.2.3, 4.4, 4.5; .clinerules/30-ui-content.md.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 8] More-list line is NOT
+yours: read it so you do not build a second dismiss path into these elements) and the status table (1-7a done; 7b is
+yours). Sections 5.2 (the three element rows), 4.2, 4.3 and 9.
+REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines";
+.clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3, 4.4, 4.5; .clinerules/30-ui-content.md
+("progressive disclosure": `bar_sheet`'s second tap is the test case for it).
 Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- a new container in the sheet, where the stops and the chrome floor live.
-TEST PLAN: full EditMode at the GATE and at the end. This block owes the FULL PlayMode run: it adds the BOTTOM
-CONTAINER to the sheet (4.2 shared ground: stops and layout). Order matters -- close on the Card / Poi targeted set
-first (~593 tests, ~12 min) and only start the full run once that is green; the full run confirms, it does not
-discover. Take it in the background and report `editor_is_focused` at the first poll and at the end. 7b and the blocks
-after it ride on this run.
+WORKER MODEL: Sonnet-class -- three elements that follow the pattern 6 and 7a established, in a slot that exists, with
+shared parts (`NavTab`, `NavTint`, `NavItems`, `NavStrip`, `SwipeGrab`) already built. No new owner, no container, no
+new arithmetic. If you find yourself needing a NEW shared part or a change to `CardChromeRule`, STOP and report: that
+means the block was mis-sized, not that you should grow it.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: three views bound inside the bottom slot
+that 7a built -- no container, no stops, no harness, no chrome arithmetic (4.2). It closes on every PlayMode fixture
+whose name holds Card or Poi, plus anything a grep for the types you touch adds (~608 tests, ~30 min at 7a's timing --
+report the real number). Green BEFORE you call the block done. It rides on 7a's full run (868/868); the next full run
+falls due at step 11, or sooner if a block touches a container.
 
-PART 1 -- the two [step 7] findings, before the new work:
-1. `progress_map`'s (i): say that the segments show their relative size only while the families fit the width (about
-   4-5 at 390 px) and that below that every segment is one tap target wide. Wall-author words, no pixel talk in the
-   visitor UI. (The Editor warning that counts them is step 17 -- do not build it now.)
-2. The Half-is-mostly-header TODO is NOT yours: it belongs to the header's owner. Leave it logged.
+PART 1 -- none. The open findings belong to step 8 (the More list and Back) and to the header's owner.
 
-PART 2 -- step 7a:
+PART 2 -- step 7b, the three remaining bottom elements (`_3.2` 5.2):
 
-7a.1 The BOTTOM slot: under the stack, BELOW the sticky CTA footer (`_3.2` 4.2 -- the CTA stays nearest the content,
-  the nav bar sits in the thumb zone). ACCEPTANCE, and the thing most likely to go wrong: THE STOPS MUST NOT MOVE.
-  Measure The Lamp's three stops before your change and after it, with Bottom Bar set and unset, and put the numbers in
-  the report -- 5a's step did exactly this for the top strip (195.00 / 337.60 / 796.00) and that is the standard.
-7a.2 `CardChromeRule` learns the slot: the bottom AREA is now the footer plus the bottom bar. Hide While Scrolling
-  hides them together (they are one area, 4.3); the floor's one-line rule (`MinStackViewportUnderFooter`) now measures
-  the pair. Say what The Lamp at Half does with a bottom bar on -- if the honest answer is "both go", that is the rule
-  working, not a bug; report the number.
-7a.3 `bottom_bar` (B1): up to Bar Slots sections, the last slot becomes More when there are more
-  (`NavOntologyRule.SectionsInBar` has decided this since step 2 -- read it, do not re-derive). More opens the
-  overflow as a small list; when a Menu is set later (step 8) it will open that instead, so leave the seam but build
-  only the list. Reuse `NavItems` / `NavChipRow` / the icon and colour work of step 6; this element must need no new
-  shared part, and if it does, say which and why.
-7a.4 The Bar Slots Editor row (3..5, default 5), with (i), undo, live sync, hidden when no bar element is chosen (the
-  field-visibility pattern the section already uses).
-  TESTS: Tier 0 for More (it lists EXACTLY the overflow sections, in order, for 3, 4 and 5 slots and for a card with
-  fewer sections than slots). Phase A: `bottom_bar` x the four gallery cases through `CardNavGalleryDefinitions`.
-  Phase B in LivingRoomScene with real input: a real tap on a bar item lands its block (relative, +-1 px); a real tap
-  on More lists exactly the overflow; the spy marks the bar item of the section on screen after a real drag; a real
-  drag down hides the footer AND the bar together and a drag up brings both back; nothing at peek.
-  VISUALS: the Lamp at Full with the bar, with More open, and at Half; the Phase A renders; the Editor section with
-  Bar Slots. Judge item by item: 48 px targets, the thumb zone, never colour alone, the PT labels whole at 390 px.
+7b.1 `dock` (B2): an icon pill where the ACTIVE item widens to icon + label and the others stay icons. It hides on
+  scroll down like the rest of the bottom area -- that is `CardChromeRule`'s job and it already does it, so the view
+  must not hide itself. ACCEPTANCE: the widening follows the spy, not the tap, so a real drag through three sections
+  moves it; the pill never grows past 390 px with the Portuguese labels.
+7b.2 `bar_sheet` (B3): the first tap on a family jumps to it; a SECOND tap on the family that is already current opens
+  that family's KINDS with their counts. No long-press -- the guide rejects it (undiscoverable, not single-pointer
+  friendly) and so do we. ACCEPTANCE: tap a non-current family -> jump only, no list; tap the current one -> the kinds
+  open; tap a kind -> it jumps to that block and the list closes. The kind words come from the per-kind CardStrings
+  that step 6 added -- reuse them, do not add a second source.
+7b.3 `next_up` (B4): "Up next: <heading> - 5 of 13" with a Next button, reading the controller's current block
+  (`CurrentBlock`, step 6) against the model's targets in stack order. ACCEPTANCE: the words name the NEXT target after
+  the one being read, the count is that target's position among all targets, Next jumps to it, and at the last target
+  it says the card is finished rather than offering a Next that goes nowhere -- decide the wording, put it in
+  CardStrings in EN and PT, and say what you chose and why.
+  TESTS: Tier 0 for `next_up`'s "which is next and what number is it" (including the last target and a card whose
+  current block is not a target). Phase A: the three elements x the four gallery cases through
+  `CardNavGalleryDefinitions`. Phase B in LivingRoomScene with real input, per element: the dock's active item follows
+  a real drag; `bar_sheet`'s two taps behave differently and the second tap's list is reachable with taps only; Next
+  lands the next block (relative, +-1 px) and the counter moves.
+  VISUALS: each element on the real Lamp at Full in EN and PT, plus the Phase A renders. Judge item by item: 48 px
+  targets, the thumb zone, never colour alone, nothing clipped at 390 px, and for `bar_sheet` that a visitor can tell
+  the two tap outcomes apart (if they cannot, say so -- it is the element's whole idea).
 
-7a.5 DOCS: `_3.2` status row 7a + proof and the (i) TODO removed; `_5.1` for the Bar Slots row; `10-structure.md`;
-  RUN TIMES after the full run.
+7b.4 DOCS: `_3.2` status row 7b + proof; `_5.1` if any Editor row changed (the Bottom Bar popup lists these from the
+  registry, so it should need no edit -- say that you checked); `10-structure.md`.
 
 Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
 comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
 backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: `dock`, `bar_sheet`, `next_up` (7b); the menu overlay (8); floating, edge, in-flow blocks (9-11);
-layouts; presets; the Editor warnings (17).
-Stop when the full EditMode suite is green, the Card / Poi fixtures are green, the FULL PlayMode suite is green with
-zero failures, the captures are judged and 7a.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+OUT OF SCOPE: the menu overlay and the More list's Back behaviour (step 8); floating, edge, in-flow blocks (9-11);
+layouts; presets; Editor warnings (17); any change to `CardChromeRule` or the slots.
+Stop when the full EditMode suite and the Card / Poi fixtures are green with zero failures, the captures are judged and
+7b.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
-
-
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

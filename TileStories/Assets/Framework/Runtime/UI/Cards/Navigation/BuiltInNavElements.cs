@@ -11,6 +11,9 @@ namespace TileStories
         public const string Segmented = "segmented";
         public const string ProgressMap = "progress_map";
         public const string BottomBar = "bottom_bar";
+        public const string Dock = "dock";
+        public const string BarSheet = "bar_sheet";
+        public const string NextUp = "next_up";
 
         public static void Register(NavElementRegistry registry)
         {
@@ -59,6 +62,30 @@ namespace TileStories
                 + "both give way together where a stop leaves too little room to read. Needs two sections, like the tabs.",
                 NavChoice.Sections, readsLabels: true, readsBarSlots: true),
                 () => new BottomBarNavView());
+            registry.Register(new NavElementDefinition(Dock, NavSlotKeys.Bottom, "Dock",
+                "Dock: a pill of icons at the bottom of the card, where a thumb reaches. The section being read widens to its icon and "
+                + "its word while every other slot stays an icon, and the widening follows the card as the visitor reads, not the tap. "
+                + "Bar Slots sets how many slots the pill holds (the last becomes More when the sections overflow, like the Bottom Bar), so "
+                + "it never grows wider than the screen. Labels does not apply. It slides away with the sticky button while the visitor "
+                + "reads down (Hide While Scrolling). Needs two sections, like the tabs.",
+                NavChoice.Sections, readsBarSlots: true),
+                () => new DockNavView());
+            registry.Register(new NavElementDefinition(BarSheet, NavSlotKeys.Bottom, "Bar With Kinds",
+                "Bar With Kinds: the Bottom Bar, with one more level on a second tap. The first tap on a section moves the card there; a "
+                + "second tap on the section already being read opens a small list above the bar with the kinds of block it holds on this "
+                + "card (a gallery, a video, a 3D model...) and how many of each, and a tap on a kind moves the card to it. A small arrow on "
+                + "the section being read says a tap would open that list; a section with one kind has none. The list closes when a kind "
+                + "is picked, when the section is tapped again, when the visitor reads on into another section and when More opens. "
+                + "Labels, Bar Slots and More work as in the Bottom Bar. Needs two sections, like the tabs.",
+                NavChoice.Sections, readsLabels: true, readsBarSlots: true),
+                () => new BarSheetNavView());
+            registry.Register(new NavElementDefinition(NextUp, NavSlotKeys.Bottom, "Up Next",
+                "Up Next: a bar at the bottom of the card that names the block after the one being read -- its heading, and its place among "
+                + "the card's blocks, like 5 of 13 -- beside a Next button that moves the card there. A gentle way through the card for a "
+                + "visitor who just wants to be led. At the last block it says the card is finished and offers no Next. Works on a card "
+                + "with one section too, since it follows blocks, not sections.",
+                NavChoice.Blocks),
+                () => new NextUpNavView());
         }
     }
 }

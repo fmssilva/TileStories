@@ -343,3 +343,147 @@
     width: var(--ts-tab-underline);
     height: auto;
 }
+
+/* ---- the dock (DockNavView: dock, _3.2 section 5.2): the bar as an icon pill. The marked item widens to its icon and its word, every
+   other slot stays an icon -- the widening is the scroll-spy's mark (NavTab.CurrentClass), so the stylesheet alone does it. Scoped to the
+   slot row: More's list rows keep their words. ---- */
+
+.nav-bar--dock {
+    align-items: center;
+}
+
+.nav-bar--dock .nav-bar__more-list {
+    align-self: stretch;
+}
+
+/* the pill is as wide as its items and never wider than the card (a slot shrinks to its touch-target minimum before it overflows) */
+.nav-bar--dock .nav-bar__items {
+    max-width: 100%;
+    margin: var(--ts-space-1) 0 var(--ts-space-2) 0;
+    padding: var(--ts-space-1);
+    border-radius: var(--ts-pill-radius);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface-2);
+}
+
+.nav-bar--dock .nav-bar__items .nav-bar__item {
+    flex-grow: 0;
+    flex-basis: auto;
+    flex-direction: row;
+    padding: 0 var(--ts-space-3);
+    border-radius: var(--ts-pill-radius);
+}
+
+.nav-bar--dock .nav-bar__items .nav-tabs__icon {
+    margin: 0;
+}
+
+/* only the marked item says its word, beside its icon */
+.nav-bar--dock .nav-bar__items .nav-tabs__words {
+    display: none;
+}
+
+.nav-bar--dock .nav-bar__items .nav-tabs__tab--current .nav-tabs__words {
+    display: flex;
+    margin-left: var(--ts-space-2);
+}
+
+/* the marked item: a raised plate with an accent outline AND its word (never the colour alone); no underline in a pill */
+.nav-bar--dock .nav-bar__items .nav-tabs__tab--current {
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-accent);
+    background-color: var(--ts-surface);
+}
+
+.nav-bar--dock .nav-bar__items .nav-tabs__underline {
+    display: none;
+}
+
+/* ---- bar_sheet (BarSheetNavView): the bar's arrow on the slot being read, up -- "a tap here opens a list above". It sits just right
+   of the slot's icon (the icon is centred: half the slot plus a little), at the icon's own height, so it reads as part of it in a wide
+   slot and in a narrow one ---- */
+
+.nav-bar__arrow {
+    position: absolute;
+    top: var(--ts-space-1);
+    left: 50%;
+    margin-left: var(--ts-space-3);
+    rotate: 180deg;
+}
+
+/* ---- next_up (NextUpNavView): "Up next", the next block's heading and its place, beside a Next button ---- */
+
+.nav-next-up {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--ts-space-2) var(--ts-space-4);
+    border-top-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface);
+}
+
+/* a whole touch target tall even at the end of the card (no button), so the bar never shrinks under the reader's thumb */
+.nav-next-up__text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-height: var(--ts-touch-target);
+    justify-content: center;
+    margin-right: var(--ts-space-3);
+}
+
+.nav-next-up__line {
+    flex-direction: row;
+    align-items: center;
+}
+
+.nav-next-up__caption,
+.nav-next-up__position {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-next-up__position {
+    margin-left: var(--ts-space-2);
+}
+
+/* the heading wraps whole (the gallery's check: no word is ever cut) */
+.nav-next-up__heading {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+/* Next is the bar's one action but the card's SECOND: the sticky call to action above it (The Lamp's "Show me where it is") is the accent
+   fill, so Next is an accent outline with ink words -- two filled pills stacked in the thumb zone would compete */
+.nav-next-up__button,
+.nav-next-up__button:hover,
+.nav-next-up__button:active {
+    flex-shrink: 0;
+    margin: 0;
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-accent);
+    background-color: var(--ts-surface-2);
+}
+
+.nav-next-up__button-label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    margin: 0;
+    padding: 0;
+}
+
+/* the end of the card: with no block and no button to look at, the finished words are what the bar is -- body size, full ink, bold */
+.nav-next-up--done .nav-next-up__caption {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}

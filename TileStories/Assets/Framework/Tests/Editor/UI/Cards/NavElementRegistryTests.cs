@@ -84,12 +84,23 @@ namespace TileStories.Editor.Tests
                 Assert.IsInstanceOf<INavElementView>(NavElementRegistry.Shared.CreateView(element.Key), element.Key + " makes its view");
             }
             CollectionAssert.AreEqual(FrameworkTopElements, NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Key), "the six top elements of section 5.1, in its order");
-            CollectionAssert.AreEqual(new[] { BuiltInNavElements.BottomBar }, NavElementRegistry.Shared.OfSlot(NavSlotKeys.Bottom).Select(e => e.Key),
-                "the bottom slot's element of step 7a");
+            CollectionAssert.AreEqual(new[] { BuiltInNavElements.BottomBar, BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp },
+                NavElementRegistry.Shared.OfSlot(NavSlotKeys.Bottom).Select(e => e.Key), "the bottom slot's four elements of section 5.2 (7a's bar, then 7b's), in its order");
             Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.BottomBar, out var bar));
             Assert.AreEqual(NavChoice.Sections, bar.Choice, "a bar moves between sections: rule 2.5.7 applies");
             Assert.IsTrue(bar.ReadsBarSlots && bar.ReadsLabels, "it reads Bar Slots and Labels");
             Assert.IsFalse(bar.ShowsCounts, "a count would crowd a fifth of the screen's width: no Show Counts");
+            // - step 7b: the dock is a bar of slots that ignores Labels (its marked item always shows icon and word); bar_sheet reads both
+            //   (its slots are the bar's); next_up follows BLOCKS, so rule 2.5.7 does not apply and no bar option does
+            Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.Dock, out var dock));
+            Assert.AreEqual(NavChoice.Sections, dock.Choice);
+            Assert.IsTrue(dock.ReadsBarSlots && !dock.ReadsLabels && !dock.ShowsCounts, "the dock reads Bar Slots, not Labels");
+            Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.BarSheet, out var sheet));
+            Assert.AreEqual(NavChoice.Sections, sheet.Choice);
+            Assert.IsTrue(sheet.ReadsBarSlots && sheet.ReadsLabels && !sheet.ShowsCounts, "bar_sheet reads Bar Slots and Labels like the bar");
+            Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.NextUp, out var nextUp));
+            Assert.AreEqual(NavChoice.Blocks, nextUp.Choice, "next_up lists blocks: a one-family card gets it too");
+            Assert.IsFalse(nextUp.ReadsBarSlots || nextUp.ReadsLabels || nextUp.ShowsCounts, "and reads none of the bar's options");
             Assert.IsFalse(NavElementRegistry.Shared.All.Where(e => e.Slot == NavSlotKeys.Top).Any(e => e.ReadsBarSlots), "no top element is a bar of slots");
             Assert.AreEqual(CardOptions.NavNone, new CardNavigationSettings().bottom, "Bottom Bar's default is None");
             Assert.IsNull(NavElementRegistry.Shared.CreateView("no_such_element"));

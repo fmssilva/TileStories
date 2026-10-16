@@ -45,6 +45,7 @@ namespace TileStories
         {
             BuiltInNavElements.TextTabs, BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
             BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap, BuiltInNavElements.BottomBar,
+            BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp,
         };
 
         // The gallery's walls show navigation from 2 targets, so the small cases draw their element too (the default threshold is

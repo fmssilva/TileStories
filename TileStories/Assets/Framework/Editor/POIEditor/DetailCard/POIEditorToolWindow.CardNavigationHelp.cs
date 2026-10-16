@@ -35,7 +35,8 @@ namespace TileStories.Editor
             "The Segmented bar always shows Groups of families, whatever this says.";
 
         private const string CardLabelsHelp =
-            "What each tab of the Top Bar, and each slot of the Bottom Bar, shows. Icon And Text (the default): the family's icon, in " +
+            "What each tab of the Top Bar, and each slot of the Bottom Bar or the Bar With Kinds, shows (the Dock ignores it: its " +
+            "marked slot always shows icon and word, the others icon only). Icon And Text (the default): the family's icon, in " +
             "its colour, above its word -- " +
             "easiest to scan and to read. Icon: the icon alone, for the narrowest bar; its word is still read out by a screen " +
             "reader and shown on a long press. Text: the word alone. A tab with no icon (Group By = Format) always shows its word.";
@@ -45,7 +46,7 @@ namespace TileStories.Editor
             "Off (the default) keeps the bar quiet; on helps a visitor judge where most of a long card is.";
 
         private const string CardBarSlotsHelp =
-            "How many slots the Bottom Bar has, from 3 to 5 (default 5): a bar at the bottom of a phone holds three to five " +
+            "How many slots the Bottom Bar, the Dock and the Bar With Kinds have, from 3 to 5 (default 5): a bar at the bottom of a phone holds three to five " +
             "destinations before its words get too small to read and its slots too narrow for a thumb. A card with more sections " +
             "than slots turns the last slot into More, which lists the sections that did not fit just above the bar. A card with " +
             "fewer sections than slots shows one slot per section and no More.";
@@ -210,7 +211,20 @@ namespace TileStories.Editor
             "- Lower the card to half height on a card with a tall title: if the title, the buttons and the bar would leave less than " +
             "a line of content, the buttons and the bar both give way. That is on purpose: one line of content is the least a height " +
             "keeps. Set Show Navigation At = Full Only: at half height the bar goes and the buttons stay.\n" +
-            "- Lower the card to its title: no bar.\n\n" +
+            "- Lower the card to its title: no bar.\n" +
+            "- Bottom Bar = Dock: a rounded pill of icons sits at the bottom, centred. Only the family you are reading shows its word " +
+            "beside its icon, on an outlined plate. Scroll the card slowly: the word and the plate move from one icon to the next as " +
+            "you cross into each family. Tap an icon: the card moves there. Set Bar Slots to 3: the pill is narrower, never wider than " +
+            "the screen, and the last slot reads More. Labels has no effect on it.\n" +
+            "- Bottom Bar = Bar With Kinds: it looks like the Bottom Bar. Tap a family you are not in: the card moves there and no " +
+            "list opens. Tap the family you are in (underlined, with a small up arrow): a list of its kinds of block opens above the " +
+            "bar, each with how many blocks it has. Tap a kind: the card moves to its first block and the list closes. Tap the family " +
+            "twice more: the list opens, then closes. Scroll into another family while the list is open: it closes. A family with one " +
+            "kind has no arrow, and tapping it again just moves the card there again.\n" +
+            "- Bottom Bar = Up Next: a bar with a small Up next line, the next block's heading, its place on the card (for example 5 of " +
+            "13) and a Next button. Tap Next: the card moves to that block and the bar names the one after it, one number higher. " +
+            "Scroll with your finger instead: the bar follows what you read. Go to the last block: the bar says it is the end and " +
+            "has no Next button. On a card with one family the bar still shows.\n\n" +
             "SHOW NAVIGATION AT AND HIDE WHILE SCROLLING\n" +
             "- Open a long card with a tall title and buttons pinned to its bottom (an Actions block with the sticky_cta look) at half " +
             "height. If the title, the strip and the buttons would leave less than a heading and two lines of content, the strip " +

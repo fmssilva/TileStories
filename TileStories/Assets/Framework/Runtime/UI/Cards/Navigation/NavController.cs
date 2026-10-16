@@ -51,6 +51,9 @@ namespace TileStories
         // Whether a jump is moving the stack now (the spy is frozen meanwhile)
         public bool IsJumping => _jumpBlock != null;
 
+        // The words the stack draws above a block ("" when it draws none): what an element that names a block says (Up next)
+        public string HeadingOf(string blockKey) => _stack.HeadingOfBlock(blockKey);
+
         // How long a smooth jump glides, in seconds: --ts-duration, handed over by the sheet once the card's tokens resolve
         public float Duration { get; internal set; }
 

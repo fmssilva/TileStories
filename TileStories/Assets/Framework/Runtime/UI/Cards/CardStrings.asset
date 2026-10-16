@@ -1023,3 +1023,33 @@ MonoBehaviour:
       value: More
     - lang: pt
       value: Mais
+  - key: nav_next_up
+    where: The small line over the block the Up next bar points at (Bottom Bar = Up Next).
+    text:
+    - lang: en
+      value: Up next
+    - lang: pt
+      value: A seguir
+  - key: nav_next_up_position
+    where: Beside it, which block of the card that is ({0} = its place, {1} = how many blocks
+      the card has).
+    text:
+    - lang: en
+      value: '{0} of {1}'
+    - lang: pt
+      value: '{0} de {1}'
+  - key: nav_next_button
+    where: The button of the Up next bar that moves the card to the block it names.
+    text:
+    - lang: en
+      value: Next
+    - lang: pt
+      value: Seguinte
+  - key: nav_next_up_done
+    where: What the Up next bar says at the card's last block, in place of a block and the Next
+      button.
+    text:
+    - lang: en
+      value: You have reached the end
+    - lang: pt
+      value: Chegou ao fim

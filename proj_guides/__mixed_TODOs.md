@@ -409,6 +409,12 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   instead of 107 in the 5b closing run, in the background; it has waited for the measured rest height since and stayed green unfocused --
   the likely cause, a sheet not yet at rest, was not proven by a measure of the root at the time).
 
+- OPEN (2026-10-16, seen once at _3.2 step 7b): `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` read 3 history steps instead of 2
+  ("a whole drag = one history step") in ONE full EditMode run (Unity focused, 1798 tests, my first run of the block); the same fixture passed
+  alone (3/3) at once and in both later full runs (1795/1795, 1795/1795), and in the baseline (1769/1769, Unity not focused). Not reproduced,
+  so not yet a finding. It is a real-window drag, so a stray real pointer or focus change during the run is the first hypothesis (same family as
+  the 5a "Test harness" notes); if it comes back, reproduce it with the cursor moved across Unity during the run.
+
 ## POI Editor (2026-10-16, from _3.2 step 5a)
 
 - Scene Configuration at a narrow window (450 pt, `TestEvidence/Editor/173_CardNavigation_450_DeviceGuide.png`): "Copy to StreamingAssets" is cut to "py to StreamingAsse" and the window shows a horizontal scrollbar -- the top action rows keep a minimum width the window no longer has. Outside the Navigation section; decide whether the window supports widths under ~500 pt.
