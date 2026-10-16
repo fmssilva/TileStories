@@ -1,0 +1,65 @@
+/* The card's navigation elements (_3.2 section 5), written only with the --ts-* tokens (CardTokens.uss). The slot that holds an
+   element is the container's (PoiCard.uss, .poi-card__nav-top). */
+
+/* ---- text_tabs (TextTabsNavView): a clipped strip, its row of tabs moved sideways by the view ---- */
+
+/* the first word starts where the header's title does (this padding + a tab's own = the header's --ts-space-4) */
+.nav-tabs__viewport {
+    flex-direction: row;
+    overflow: hidden;
+    padding: 0 var(--ts-space-1);
+}
+
+.nav-tabs__row {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+/* a whole tab is the tap target: never smaller than the touch token, never shrunk below its word (the strip scrolls instead) */
+.nav-tabs__tab {
+    flex-shrink: 0;
+    min-height: var(--ts-touch-target);
+    min-width: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-3);
+    justify-content: center;
+    align-items: center;
+    border-width: 0;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.nav-tabs__tab:hover,
+.nav-tabs__tab:active {
+    background-color: var(--ts-clear);
+}
+
+.nav-tabs__label {
+    font-size: var(--ts-size-body);
+    -unity-font-style: normal;
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+}
+
+/* the marked section: an underline AND a bolder, brighter label */
+.nav-tabs__underline {
+    position: absolute;
+    left: var(--ts-space-3);
+    right: var(--ts-space-3);
+    bottom: 0;
+    height: var(--ts-tab-underline);
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-accent);
+    display: none;
+}
+
+.nav-tabs__tab--current .nav-tabs__label {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
+
+.nav-tabs__tab--current .nav-tabs__underline {
+    display: flex;
+}

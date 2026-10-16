@@ -62,9 +62,14 @@ namespace TileStories.Editor
         {
             bool clicked = POIEditorToolWindow.DrawIconButtonLayout(
                 (Texture2D)POIEditorToolWindow.InfoIcon.image, title, size, iconInset: 2f);
+            if (DrawnProbe != null && Event.current.type == EventType.Repaint) DrawnProbe(title, GUILayoutUtility.GetLastRect());
             if (clicked)
                 EditorPopup.ShowAt(new HelpInfoPopup(title, bodyText), GUILayoutUtility.GetLastRect());
         }
+
+        // Test seam: told about every (i) drawn in a Repaint pass, with its title -- so a test can count the (i) of a section. Null in
+        // production (zero cost), like TableCellRectProbe
+        internal static System.Action<string, Rect> DrawnProbe;
 
         // Rect overload -- for a help button embedded INSIDE a wider header cell it shares with a
         // title label (e.g. the last few px of a spanning group title), rather than appended as an

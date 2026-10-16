@@ -87,6 +87,8 @@
     --ts-grabber-width: 40px;
     --ts-grabber-height: 4px;
     --ts-sheet-top-gap: 48;
+    /* Navigation (_3.2): the bar under the section a tab element marks (with the bolder label: never colour alone) */
+    --ts-tab-underline: 3px;
     /* The language chip sits left of the close X (X width + both gaps); with it the header keeps its end clear of the chip (chip right
        offset + chip width + a gap) */
     --ts-language-chip-right: 64px;

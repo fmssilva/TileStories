@@ -135,6 +135,7 @@ namespace TileStories.Editor.Tests
                                 "jump_raises_to" => CardOptions.JumpRaisesKeep,
                                 "jump_motion" => CardOptions.JumpMotionInstant,
                                 "back_button" => CardOptions.BackButtonNone,
+                                "top" => CardOptions.NavNone,
                                 _ => CardOptions.BlockOrderByFamily,
                             })));
                         else if (n.FieldType == typeof(bool)) edits.Add((n.Name, s => n.SetValue(s.navigation, !(bool)n.GetValue(s.navigation))));
@@ -153,8 +154,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 9 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 9 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 10 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 10 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1225,6 +1226,60 @@ namespace TileStories.Editor.Tests
             }
         }
 
+        // Detail Card > Navigation's step 5a rows on the real window. Show Navigation From: drawn on its default 8 without writing, a real
+        // click near the slider's left end lowers it to its minimum, Ctrl+Z takes it back. Top Bar: its choices are None + every element
+        // the registry has for the top slot (an app's own one included, with no edit to the window), named by their labels; the pick goes
+        // through the window's history and Ctrl+Z takes it back; its help lists every element's own words. Both helps are ASCII
+        [UnityTest]
+        public IEnumerator TheShowNavigationFromAndTopBarRows_AreDrawnOnTheirDefaults_TakeARealPick_AndCtrlZTakesItBack()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            yield return Redraw();
+            Assert.IsFalse(_window.Unsaved, "drawing the two rows writes nothing");
+            var nav = _window.Config.card_settings.navigation;
+            Assert.AreEqual(8, nav.min_blocks, "the shipped wall never set Show Navigation From: the default");
+            Assert.AreEqual(BuiltInNavElements.TextTabs, nav.top, "nor Top Bar: Text Tabs");
+
+            // - a real click near the LEFT end of the slider's track (its number box sits after the track)
+            yield return _window.ScrollTo("Show Navigation From");
+            Rect row = _window.RectOf("Show Navigation From");
+            _window.ClickAt(new Vector2(row.x + EditorGUIUtility.labelWidth + 4f, row.center.y));
+            yield return _window.WaitForRepaint();
+            Assert.AreEqual(CardNavigationSettings.MinBlocksMin, _window.Config.card_settings.navigation.min_blocks, "a real click at the track's start: the minimum");
+            Assert.IsTrue(_window.Unsaved);
+            yield return _window.PressUndo();
+            Assert.AreEqual(8, _window.Config.card_settings.navigation.min_blocks, "Ctrl+Z");
+
+            var (keys, labels) = POIEditorToolWindow.TopBarOptions(NavElementRegistry.Shared);
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNone }.Concat(NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Key)), keys);
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel }.Concat(NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Label)), labels,
+                "named by the elements' labels, never their keys");
+            Pick(() => _window.Config.card_settings.navigation.top = CardOptions.NavNone);
+            yield return Redraw();
+            Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.top);
+            Assert.IsTrue(_window.Unsaved);
+            yield return _window.PressUndo();
+            Assert.AreEqual(BuiltInNavElements.TextTabs, _window.Config.card_settings.navigation.top, "Ctrl+Z takes the pick back");
+
+            // - an app's element joins the list with no window edit
+            var registry = new NavElementRegistry();
+            BuiltInNavElements.Register(registry);
+            registry.Register(new NavElementDefinition("app_dots", NavSlotKeys.Top, "App Dots", "App Dots: one dot per section."), () => new TextTabsNavView());
+            var (appKeys, appLabels) = POIEditorToolWindow.TopBarOptions(registry);
+            Assert.AreEqual("app_dots", appKeys.Last());
+            Assert.AreEqual("App Dots", appLabels.Last());
+            var topHelp = typeof(POIEditorToolWindow).GetMethod("CardTopBarHelp", Static);
+            StringAssert.Contains("App Dots: one dot per section.", (string)topHelp.Invoke(null, new object[] { registry }), "the help speaks for the app's element too");
+
+            string shared = (string)topHelp.Invoke(null, new object[] { NavElementRegistry.Shared });
+            foreach (string word in new[] { "None", "Text Tabs", "Show Navigation From" }) StringAssert.Contains(word, shared);
+            EditorTextChecks.AssertAscii(shared, "CardTopBarHelp");
+            string from = (string)typeof(POIEditorToolWindow).GetField("CardShowNavigationFromHelp", Static).GetValue(null);
+            foreach (string word in new[] { "title block", "Show After Reading", "Default 8" }) StringAssert.Contains(word, from);
+            EditorTextChecks.AssertAscii(from, "CardShowNavigationFromHelp");
+        }
+
         // The Families table: one row per registered family, in the registered order, named by the visitor's own word
         [UnityTest]
         public IEnumerator TheFamiliesTable_HasARowPerRegisteredFamily_InOrder_NamedByItsVisitorLabelAndItsKey()
@@ -1244,6 +1299,36 @@ namespace TileStories.Editor.Tests
             StringAssert.Contains("About", shown, "the row shows the visitor's own word for the family");
             StringAssert.Contains("(about)", shown, "and its key beside it, so the developer can match it to a block kind");
             Assert.IsFalse(_window.Unsaved, "drawing the table writes nothing");
+        }
+
+        // The Families table carries ONE (i), on its header row: the nine per-row ones all opened the same help and said nothing about
+        // their own family (_3.2 step 5 review). Counted through the (i) renderer itself, so a per-row (i) drawn any other way still counts
+        [UnityTest]
+        public IEnumerator TheFamiliesTable_HasOneInfoButton_OnItsHeaderRow_AndNoneOnItsRows()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            var drawn = new List<(string Title, Rect Rect)>();
+            HelpInfoButton.DrawnProbe = (title, rect) => drawn.Add((title, rect));
+            try
+            {
+                yield return Redraw();
+            }
+            finally
+            {
+                HelpInfoButton.DrawnProbe = null;
+            }
+            Assert.IsNotEmpty(drawn, "precondition: the Navigation section drew its (i) buttons");
+            var rowName = typeof(POIEditorToolWindow).GetMethod("FamilyRowName", Instance);
+            var familyRows = _window.Editor.FamiliesInEffectiveOrder(_window.Config.card_settings.navigation)
+                .Select(f => (string)rowName.Invoke(_window.Editor, new object[] { f })).ToList();
+            Assert.AreEqual(9, familyRows.Count, "precondition: the table lists the nine registered families");
+            // - one Repaint pass draws each (i) once: the count is per pass
+            Assert.AreEqual(1, drawn.Count(d => d.Title == "Families"), "exactly one (i) for the table");
+            CollectionAssert.IsEmpty(drawn.Where(d => familyRows.Contains(d.Title)).Select(d => d.Title).ToList(), "no (i) on a family's own row");
+            var header = drawn.Single(d => d.Title == "Families");
+            var blockOrder = drawn.Single(d => d.Title == "Block Order");
+            Assert.AreEqual(blockOrder.Rect.xMin, header.Rect.xMin, 0.5f, "the table's (i) sits in the section's (i) column, under Block Order's");
         }
 
         // A real click on a family's down arrow swaps it past its neighbour, writes a row for BOTH of them (and for

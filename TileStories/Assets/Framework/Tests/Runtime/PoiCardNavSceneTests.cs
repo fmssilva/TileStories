@@ -145,8 +145,11 @@ namespace TileStories.Tests
         public IEnumerator AJumpToABlockInTheFinalScreen_IsClampedToTheRange_AndTheSpyNamesTheLastSection()
         {
             yield return Open(Lamp, SheetStopRule.Stop.Full);
-            // - the card's last navigation target (sections come in the order of their FIRST target, so it may belong to any section)
-            string block = Nav.Model.Sections.SelectMany(s => s.Targets).OrderBy(k => Slot(k).layout.y).Last();
+            // - the lowest block of the scroll -- a navigation target or not (the Sources close the card): since the top navigation strip
+            //   (_3.2 step 5a) took its height from the viewport, the last TARGET's top can reach the viewport's top at Full
+            string block = ConfigCopy().pois.Single(p => p.id == Lamp).card.blocks.Select(b => b.key)
+                .Where(k => Slot(k) != null && Slot(k).parent == Scroll.contentContainer && Slot(k).resolvedStyle.display == DisplayStyle.Flex)
+                .OrderBy(k => Slot(k).layout.y).Last();
             Assert.Greater(Slot(block).layout.y, Range + OnePixel, "precondition: the block sits in the final screen (its top cannot reach the viewport's)");
 
             Assert.IsTrue(Nav.JumpToBlock(block, Element));
@@ -163,10 +166,13 @@ namespace TileStories.Tests
             {
                 c.card_settings.navigation.jump_raises_to = CardOptions.JumpRaisesKeep;
                 c.card_settings.navigation.jump_motion = CardOptions.JumpMotionInstant;
+                // - no top strip: at Half The Lamp's header (206 px), the strip (49) and its sticky footer (81) fill the whole 338 px sheet,
+                //   so nothing could land "at Half"; this test is about the controller, the strip has its own (PoiCardTextTabsSceneTests)
+                c.card_settings.navigation.top = CardOptions.NavNone;
             });
             yield return Open(Lamp, SheetStopRule.Stop.Half);
             int index = LatestUnclampedSection();
-            Assert.Greater(index, 0, "precondition: a section lands unclamped at Half");
+            Assert.Greater(index, 0, "precondition: a section lands unclamped at Half (range " + Range + ", viewport " + Scroll.contentViewport.layout.height + ")");
             string block = Nav.Model.Sections[index].Targets[0];
 
             Assert.IsTrue(Nav.JumpTo(index, Element));

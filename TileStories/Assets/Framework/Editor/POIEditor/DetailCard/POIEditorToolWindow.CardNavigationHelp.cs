@@ -26,6 +26,23 @@ namespace TileStories.Editor
             "A family you never change keeps the order and the tick it comes with, and nothing is written to this wall " +
             "until you really change one, so a family added later needs no edit here.";
 
+        private const string CardShowNavigationFromHelp =
+            "How many blocks a card needs before it shows any navigation (the Top Bar). A block counts when a visitor could be taken " +
+            "to it: not the title block, not a block pinned under the title or to the bottom, not a block still waiting for Show After " +
+            "Reading, and not a block of a family that is left out of navigation (the Sources). A shorter card shows no navigation at " +
+            "all and simply scrolls -- a list of shortcuts on a short card only adds length. Default 8.";
+
+        // What Top Bar's (i) says: the slot, None, then every element an app can put there, each in its own words -- read from the
+        // registry, so an element an app registers explains itself here with no edit to this file
+        private static string CardTopBarHelp(NavElementRegistry registry)
+        {
+            var text = new System.Text.StringBuilder(
+                "What the strip under the card's title shows, at half and full height (never while only the title shows). " +
+                "It appears only on cards with at least Show Navigation From blocks. None: no strip, the card only scrolls.");
+            foreach (var element in registry.OfSlot(NavSlotKeys.Top)) text.Append(' ').Append(element.Help);
+            return text.ToString();
+        }
+
         private const string CardJumpRaisesHelp =
             "What the card does before it moves to a block that a visitor asked for (an Open Block button of an Actions block today; " +
             "the navigation tabs and bars later). Full (the default): the card first rises to its full height, then moves -- at half " +
@@ -53,7 +70,8 @@ namespace TileStories.Editor
             "- Save All to JSON, then Copy to StreamingAssets (Play reads that copy).\n" +
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
             "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
-            "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them.\n" +
+            "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
+            "Navigation From and Top Bar: the open card's strip appears, changes or goes at once.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
             "BLOCK ORDER\n" +
@@ -79,6 +97,16 @@ namespace TileStories.Editor
             "- Set Jump Opens Card To = Keep Its Stop and tap again from half height: the card stays at half and only its content moves.\n" +
             "- Set Jump Motion = Instant: the content is there at once; Smooth: it glides. With Reduce Motion ticked it is always at once.\n" +
             "- Pick, in Opens Block, the card's title block or a block waiting for Show After Reading: the row warns and the button is gone.\n\n" +
+            "TOP BAR\n" +
+            "- With Top Bar = Text Tabs, open a card with at least Show Navigation From blocks and raise it to half: a strip of words " +
+            "sits under the title, one per family the card has. Lower the card to its title: the strip is gone.\n" +
+            "- The first word is underlined and bold. Scroll the card with the mouse wheel or a drag: the underline moves to the family " +
+            "you are reading.\n" +
+            "- Click a word: the card rises to full and that family's first block comes to rest at the top of what scrolls; its word " +
+            "is underlined.\n" +
+            "- Drag the strip sideways with the mouse: the words slide and the card does not move. Drag it up or down: the card " +
+            "moves like it does from its title.\n" +
+            "- Raise Show Navigation From above the card's block count: the strip goes. Set Top Bar = None: no strip on any card.\n\n" +
             "BACK BUTTON\n" +
             "- In the Game view, Escape stands for the phone's Back button.\n" +
             "- Open a card, drag it to full, open a picture in its full-screen view. Press Escape four times: the full view closes, " +
@@ -97,6 +125,8 @@ namespace TileStories.Editor
             "- Back Button (Android): open a card, raise it to full, and press the phone's own Back button (or make the Back gesture) " +
             "once per step: full to half, half to its title, then the card closes. With Leave It To The App, Back does what the app " +
             "does without a card. An iPhone has no Back button: nothing to check there.\n" +
+            "- Top Bar: on a card with its strip, swipe the strip sideways with a thumb -- the words slide, the card stays; start a swipe " +
+            "on a word and move up -- the card rises and the word is not tapped; tap each word once -- every tap lands where it should.\n" +
             "- Nothing else here needs a device: the order and the jumps are the same on every screen.";
     }
 }

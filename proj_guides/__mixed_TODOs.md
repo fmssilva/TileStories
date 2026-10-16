@@ -394,3 +394,8 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   cursor crossing Unity) reaches the same panel and drags the handle to the edge. Test: run the fixture with Unity in the
   background AND the cursor moved across the Game view during the before_after test; if it reproduces, make the card drags
   immune to real pointer input during a run (the harness is shared ground: a full PlayMode run).
+
+## POI Editor (2026-10-16, from _3.2 step 5a)
+
+- Scene Configuration at a narrow window (450 pt, `TestEvidence/Editor/173_CardNavigation_450_DeviceGuide.png`): "Copy to StreamingAssets" is cut to "py to StreamingAsse" and the window shows a horizontal scrollbar -- the top action rows keep a minimum width the window no longer has. Outside the Navigation section; decide whether the window supports widths under ~500 pt.
+- "Trying to access the DPI setting of a visual element that is not on a panel" is logged (several lines) when a live card edit rebinds the open card in Play Mode (seen in `PoiCardTextTabsSceneTests` runs, green). Find which element reads a style before it is on the panel; harmless today, but it is log noise in every live-edit test.

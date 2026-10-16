@@ -2,8 +2,9 @@
 //
 // Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open
 // card. The two rows that order the stack: Block Order and the Families table (Order with reorder arrows, Family,
-// At The End); then how a jump moves the card (Jump Opens Card To, Jump Motion) and what system Back does (Back
-// Button), step 4. The nav elements, layouts and presets join this same section at later steps.
+// At The End, one (i) on its header); which cards get navigation and what the top strip shows (Show Navigation From,
+// Top Bar, step 5a); then how a jump moves the card (Jump Opens Card To, Jump Motion) and what system Back does (Back
+// Button), step 4. The other nav elements, layouts and presets join this same section at later steps.
 // Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
 
 using System.Collections.Generic;
@@ -38,13 +39,34 @@ namespace TileStories.Editor
             // - a group gap: without it the first row under the table reads as one more family (the 620 pt capture showed it)
             GUILayout.Space(TableGapBetweenGroups);
 
-            // - section 7's order: the jump rows, then Back (Show Navigation At, Follow Scroll and Hide While Scrolling join between at step 5).
+            // - which cards get navigation, and what the strip under the title shows (Show Navigation At joins between them at step 5b)
+            nav.min_blocks = DrawIntSliderField("Show Navigation From", nav.min_blocks, CardNavigationSettings.MinBlocksMin, CardNavigationSettings.MinBlocksMax,
+                CardShowNavigationFromHelp);
+            var (topKeys, topLabels) = TopBarOptions(NavElementRegistry.Shared);
+            // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped
+            nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
+
+            // - section 7's order: the jump rows, then Back (Show Navigation At, Follow Scroll and Hide While Scrolling join between at step 5b).
             //   The first option of each is the default the card reads for an unknown value too, so the row and the card always agree
             nav.jump_raises_to = DrawPopupField("Jump Opens Card To", nav.jump_raises_to, CardOptions.JumpRaises, CardOptions.JumpRaiseLabels, CardJumpRaisesHelp);
             nav.jump_motion = DrawPopupField("Jump Motion", nav.jump_motion, CardOptions.JumpMotions, CardOptions.JumpMotionLabels, CardJumpMotionHelp);
             nav.back_button = DrawPopupField("Back Button", nav.back_button, CardOptions.BackButtons, CardOptions.BackButtonLabels, CardBackButtonHelp);
 
             DrawDomainTestSubSection(_cardNavigationTest, CardNavigationSceneTestGuide, CardNavigationPlaymodeTestGuide, CardNavigationDeviceTestGuide);
+        }
+
+        // Top Bar's choices: None, then every element registered for the top slot, named by its Editor label -- listed FROM the registry,
+        // so an app's own element is offered here with no edit to the window
+        internal static (List<string> Keys, List<string> Labels) TopBarOptions(NavElementRegistry registry)
+        {
+            var keys = new List<string> { CardOptions.NavNone };
+            var labels = new List<string> { CardOptions.NavNoneLabel };
+            foreach (var element in registry.OfSlot(NavSlotKeys.Top))
+            {
+                keys.Add(element.Key);
+                labels.Add(element.Label);
+            }
+            return (keys, labels);
         }
 
         // A Families row's cells: ONE rect the size and style of a field row's label area (the row less the 36 pt (i)
@@ -54,7 +76,9 @@ namespace TileStories.Editor
         private static Rect FamilyCellsRect(float rowWidth)
         {
             float width = Mathf.Max(40f, rowWidth - 36f);
-            return GUILayoutUtility.GetRect(width, EditorGUIUtility.singleLineHeight, EditorStyles.miniBoldLabel,
+            // - reserved with the popup's style: GUILayout spaces the (i) after it by the style's margin, so the header's (i) lands
+            //   exactly where Block Order's popup puts its own (a label style put it 2 pt further right)
+            return GUILayoutUtility.GetRect(width, EditorGUIUtility.singleLineHeight, EditorStyles.popup,
                 GUILayout.Width(width), GUILayout.Height(EditorGUIUtility.singleLineHeight), GUILayout.ExpandWidth(false));
         }
 
@@ -113,8 +137,7 @@ namespace TileStories.Editor
                 bool ticked = EditorGUI.Toggle(FamilyAtEndRect(cells), atEnd);
                 ReportTableCellRect("Family at end", i, FamilyAtEndRect(cells));
                 if (ticked != atEnd) SetFamilyAtEnd(nav, family.Key, ticked);
-
-                HelpInfoButton.Draw(FamilyRowName(family), CardFamiliesHelp);
+                // - no (i) per row: the header's one says everything a row's would (they all opened CardFamiliesHelp)
                 EditorRowEnd();
             }
 

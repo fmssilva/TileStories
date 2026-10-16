@@ -122,6 +122,8 @@ namespace TileStories.Editor
             DrawEditorRow(out float rowWidth, out _, extraIndentPixels);
             using (new FieldLabelWidthCompensationScope(extraIndentPixels))
                 value = EditorGUILayout.IntSlider(label, value, min, max, GUILayout.Width(FieldWidth(rowWidth, helpText)), GUILayout.ExpandWidth(false));
+            if (FieldRowRectProbe != null && Event.current.type == EventType.Repaint)
+                FieldRowRectProbe(label, GUILayoutUtility.GetLastRect());
             DrawRowHelp(label, helpText);
             EditorRowEnd();
             return value;

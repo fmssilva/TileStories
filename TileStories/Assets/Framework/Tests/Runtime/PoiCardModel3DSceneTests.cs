@@ -186,6 +186,12 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheLamp_InlineRoomScanAutoSpin_TicksOnlyWhileInViewAndAbovePeek()
         {
+            // - no top navigation strip: at Half The Lamp's header (206 px), the strip (49) and its sticky footer (81) fill the whole 338 px
+            //   sheet, so no block could be "in view at half" (_3.2 step 5b, CardChromeRule, decides what Half shows); this test is the
+            //   preview's, the strip has its own (PoiCardTextTabsSceneTests)
+            var copy = ConfigCopy();
+            copy.card_settings.navigation.top = CardOptions.NavNone;
+            Session.ApplyCardSettings(copy);
             SelectionEventBus.Select("lamp");
             yield return CardTestInput.Settle();
             Sheet.SetStop(SheetStopRule.Stop.Half);

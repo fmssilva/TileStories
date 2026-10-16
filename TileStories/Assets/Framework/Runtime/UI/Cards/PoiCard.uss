@@ -228,6 +228,15 @@
     background-color: var(--ts-accent);
 }
 
+/* The top navigation slot (_3.2 step 5a, NavSlots): between the header and the stack, never scrolling; opaque, with a line under it so
+   the blocks scrolling past read as passing under it. Its element's own look is Navigation.uss */
+.poi-card__nav-top {
+    flex-shrink: 0;
+    background-color: var(--ts-surface);
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+}
+
 .poi-card__stack {
     flex-grow: 1;
     flex-shrink: 1;

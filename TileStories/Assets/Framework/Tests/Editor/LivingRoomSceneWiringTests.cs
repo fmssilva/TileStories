@@ -95,8 +95,8 @@ namespace TileStories.Tests
             }
         }
 
-        // Every block stylesheet on disk (CardParts.uss + one per family, _3.1 step 6C) is added by BOTH card hosts -- the
-        // wall's PoiCardHost and the Phase A CardGalleryHarness -- in the same order, CardParts first. A family .uss added
+        // Every block stylesheet on disk (CardParts.uss + one per family, _3.1 step 6C; Navigation.uss, _3.2 step 5a) is added by EVERY card
+        // host -- the wall's PoiCardHost and the Phase A CardGalleryHarness of both gallery scenes -- in the same order, CardParts first. A family .uss added
         // without wiring would leave its blocks unstyled in one scene while the other looked right.
         [Test]
         public void BothCardHosts_AddEveryBlockStylesheet_InTheSameOrder()
@@ -108,7 +108,12 @@ namespace TileStories.Tests
                 .OrderBy(p => p).ToList();
             Assert.GreaterOrEqual(onDisk.Count, 5, "not vacuous: CardParts + the About, Stories, Visit and Meta families");
 
-            foreach (var (path, type) in new[] { (ScenePath, typeof(PoiCardHost)), ("Assets/Dev/CardGallery/CardGalleryScene.unity", typeof(CardGalleryHarness)) })
+            foreach (var (path, type) in new[]
+            {
+                (ScenePath, typeof(PoiCardHost)), ("Assets/Dev/CardGallery/CardGalleryScene.unity", typeof(CardGalleryHarness)),
+                // - the navigation gallery (_3.2 step 5a) runs the same harness over its own list: the same sheets
+                ("Assets/Dev/CardNavGallery/CardNavGalleryScene.unity", typeof(CardGalleryHarness)),
+            })
             {
                 var scene = SceneManager.GetSceneByPath(path);
                 bool openedHere = !scene.isLoaded;

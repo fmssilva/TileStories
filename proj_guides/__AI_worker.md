@@ -13,80 +13,83 @@
 So start by reading them all. 
 
 
+## `And now: POI Card Navigation (3.2) -- step 5a, the nav slots, the element registry and the first tabs`
 
-## `And now: POI Card Navigation (3.2) -- step 4, BlockRef, Open Block and system Back`
+GATE: `git push` if the branch is ahead of origin (2 commits are waiting; report how many you pushed). Take one Unity
+capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
+not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): TMP dirties their
+atlases on its own, so `git checkout --` them if they are modified. Baseline: the tree is clean on commit "Add Open Block
+buttons and system Back to the POI card", whose full runs were green (EditMode 1711 / PlayMode 793) -- run the full
+EditMode suite only and say which commit you trusted.
 
-GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity capture
-(Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP
-and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --` them if TMP
-dirtied them. Baseline: the tree is clean on commit "Add the card's nav controller and fix the editor typing harness",
-whose full runs were green (EditMode 1694 / PlayMode 788, both in the background) -- run the full EditMode suite only and
-say which commit you trusted. Unity may stay in the background throughout, including for the closing runs.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (BOTH [step 5] lines are yours, as
+PART 1) and the status table (steps 1-4 done; step 5 was split: 5a is yours, 5b is the next block). Sections 4.1, 4.2,
+5.1 (the `text_tabs` row), 2.5 and 9 are the step. Section 4.3 is 5b: read it so your slots leave room for it, build
+nothing of it.
+REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines" (two new rows and
+their captures); .clinerules/40-testing.md 4.2 (the cadence -- it was sharpened on 2026-10-15 and this block DOES owe a
+full run), 4.2.3 (focus, and how a run really is "in the background") and 4.4 + 4.5 (Phase A / B and the capture
+checklist -- you are building the Phase A harness this domain will use fifteen more times); .clinerules/30-ui-content.md.
+Context only: _3.3_POI_Card_Styles.md (tokens only -- the look is its domain), _3.1_POI_Card_Blocks.md section 8.4 (the
+existing gallery scene), .clinerules/10-structure.md.
+WORKER MODEL: Opus-class -- it adds a container to the sheet (where the stops live), a registry every later element
+plugs into, and the gallery harness fifteen later elements will reuse.
+TEST PLAN: full EditMode at the GATE and at the end. This block DOES owe the FULL PlayMode run: it adds a CONTAINER to
+the sheet, which 4.2 counts as shared ground (a view put INSIDE an existing slot later does not -- 5b, 6 and 7 ride on
+this run). Take it in the background: start it, then the developer clicks away after ~5 s; report `editor_is_focused` at
+the first poll and at the end, and say plainly if Unity came to the front.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 4] line is yours; the two
-[step 5] lines are NOT) and the status table (steps 1-3 done; step 4 is yours). Sections 3 (the four rows marked step 4),
-4.5 and 7 are the step; 5.5 and 5.6 tell you who else will hold a BlockRef later, so design the field for them too.
-REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines" (you add a field TYPE,
-four rows and a popup to the POI Editor -- this is the file that says how); .clinerules/40-testing.md 4.2 (the cadence:
-this block DOES owe a full PlayMode run, see TEST PLAN), 4.2.3 and 4.5 (captures are judged by you, item by item);
-.clinerules/20-code-quality.md "two UI elements that look identical" (a BlockRef popup is not the PoiRef popup: read it
-before reusing either).
-Context only: _3.1_POI_Card_Blocks.md section 5, .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- a new field TYPE reaches every kind's drawer, and Back touches the card's input at the root.
-TEST PLAN: full EditMode at the GATE and at the end. This block DOES owe the FULL PlayMode run: Back wires input into the
-host, which 4.2 counts as shared ground. Take it in the background. It is deliberate that THIS block pays rather than an
-arbitrary fourth one -- steps 5, 6 and 7 then ride on it, so report its counts carefully for them.
+PART 1 -- the two [step 5] review findings, first:
+1. The Families table draws nine identical (i) buttons, all opening the same `CardFamiliesHelp` (`170_CardNavigation_
+   JumpBack_620_b.png`). Keep ONE on the table's header row and drop the per-row ones. PROOF: the Editor test counts the
+   (i) buttons of the section; recapture.
+2. The Navigation section has never been captured below 620 pt, and the three Test guides were only ever seen collapsed.
+   Capture it at ~450 pt with one guide OPEN, and check item by item that the At The End column does not run under the
+   (i) and that the guide text wraps inside the row.
 
-PART 1 -- fixes (small, do them first):
-1. `PoiEditorWindowHost` reads `EditorGUI.activeEditor` by reflection and uses the result without checking the FieldInfo
-   was found: a Unity version that renames it gives a bare NullReferenceException instead of a readable failure. Assert
-   the field exists once, with a message naming it. Proof: the existing `PoiEditorWindowHostTests` stay green.
+PART 2 -- step 5a:
 
-PART 2 -- step 4:
+5a.1 The slots. A `top` strip in the sheet's Root, between the header (with its PinnedTop part) and the stack's
+  ScrollView -- OUTSIDE the scroll, so a jump needs no offset for it (`_3.2` 4.2). ACCEPTANCE, and the thing most likely
+  to go wrong: the PEEK STOP MUST NOT MOVE. `PoiCardSheetView.RecomputeStops` measures the header's PeekPart; the strip
+  sits after it and is hidden at peek. Assert the three stops of The Lamp against the values the current suite already
+  measures, before and after your change, and say the numbers in the report. Leave the `bottom`, `floating`, `menu` and
+  `edge` slots UNBUILT -- 4.2 names them so you know they are coming, not so you make empty containers now.
+5a.2 `NavElementRegistry` (Runtime/UI/Cards/Navigation/): key, slot, Editor label, (i) help, factory -- the same shape as
+  `BlockRegistry`, including refusing a duplicate key and an unknown slot. `BuiltInNavElements` registers the framework's;
+  an app registers its own for a slot with ZERO Framework edits (prove it with a test that registers an app element, as
+  `FamilyRegistryTests` does for families). `INavElementView`: `Root`, `Bind(CardNavModel, NavController, context)`,
+  `Unbind()`, pooled per key through the existing `ElementPool<T>` -- find it and reuse it, do not write a second pool.
+5a.3 `text_tabs`: the model's sections as text tabs in a horizontal ScrollView, the underline following
+  `NavController.Current`, a tap jumping through the controller. Rules that apply to EVERY element, so get them right
+  once here: targets at least `--ts-touch-target`, nothing clipped at 390 px with the PORTUGUESE labels, never colour
+  alone (the underline plus the label weight), and `SwipeGrabRule` -- the strip never captures the pointer at touch-down,
+  it judges the drag after the slop and claims only clearly sideways moves, so a real finger still scrolls the card
+  through it. That last one is in the guide's TODOs as the pattern for every swipeable element: write it as the shared
+  piece the rails, pager and scrubber will reuse, not inside the tab view.
+5a.4 Editor rows in Detail Card > Navigation: Top Bar (`none` + the registered top elements, listed FROM the registry)
+  and Show Navigation From. Both with (i), default, undo, live sync.
+5a.5 The Phase A harness: ONE entry list (`CardNavGalleryDefinitions`) that both the gallery scene and
+  `CardNavGalleryTests` read, with the four fixture cases of section 9 (62 targets / 9 families, 6 targets / 3 families,
+  1 family, PT long labels). It must be as easy to add the 15 later elements to as adding a row. Renders
+  `TestEvidence/Card/Nav_<key>_<case>.png`.
+  TESTS: Tier 0 for the registry; Phase A as above; Phase B in LivingRoomScene with real input -- a real tap on a tab
+  moves the stack to that section's first block (relative, +-1 px), a real drag moves the underline, a real sideways
+  drag on the strip scrolls the strip and NOT the card, and a card below Show Navigation From shows no strip at all.
+  VISUALS: the four Phase A renders, the Lamp card at 390 px with the strip at Half and at Full, and the two Editor
+  captures of PART 1. Judge every one item by item; say what you checked, not that it looks right.
 
-4.1 The `BlockRef` field type.
-  WHAT: a field whose value is the key of another block ON THE SAME POI. In Specific Marker > Card Content it draws a
-  popup listing this POI's blocks by the one-line summary the Card Content rows already show (`_3.1` 15.1). A block that
-  was deleted later: the row shows a warning that names what is missing and the button is NOT drawn (the visitor never
-  gets a dead jump). ACCEPTANCE: picking a block writes its key; Ctrl+Z restores the previous pick; a stale key warns.
-  HOW: add it to `BlockFieldType` + `BlockFieldDrawer` beside the existing types, and reuse the summary helper rather
-  than re-deriving the words. `BlockRegistry.Validate` must refuse a BlockRef the same way it refuses other broken
-  fields. It is NOT the PoiRef popup and not the (i) popup (20-code-quality): share the mechanism, keep the call sites
-  apart. `BlockFieldDrawer.cs` is 510 lines and `__mixed_TODOs.md` already asks for it to be split -- if your addition
-  pushes it past ~560, split it along the line that TODO names and say so; do not let it drift.
-4.2 The `open_block` action on the `actions` kind: an action whose target is a BlockRef. Tapping it calls
-  `IBlockHost.ScrollToBlock` (built at step 3) -- do not add a second path. The repeated-action warning of `_3.1` 15.2
-  must count it like the others; check what it does with two Open Block buttons pointing at DIFFERENT blocks and decide
-  (a warning there would be wrong) -- say what you decided.
-4.3 System Back (`NavBackRule`, pure): each press undoes the innermost thing in the order of `_3.2` 4.5 -- an open full
-  view closes; else an open menu overlay (none exists yet: leave the branch unbuilt, not stubbed); else the sheet goes
-  one stop down (Full -> Half -> Peek); at Peek it closes through `SelectionEventBus.Clear`, like the X. `back_button =
-  none` leaves Back to the app. The host reads the Input System's `Keyboard.escapeKey` (where Android's Back arrives in
-  a Unity player); the Editor tests press Escape. iOS has no Back: nothing changes there.
-  Verify on the REAL input path that Escape does not collide with anything already listening (search has its own
-  Escape): if it does, STOP and report rather than choosing for the search domain.
-4.4 Editor rows in Detail Card > Navigation, in the order section 7 gives: Jump Opens Card To, Jump Motion, Back Button
-  (and Show Navigation At stays for step 5). Each with its (i), default, undo and live sync, in
-  `POIEditorToolWindow.CardNavigation.cs` with its help in the CardNavigationHelp partial.
-  TESTS: Tier 0 `NavBackRuleTests` (every step of the order, including `none` and the Peek close). Editor:
-  `DetailCardEditorTabTests` -- a real pick in the BlockRef popup's write path, the stale-key warning, a real click on
-  each new row + Ctrl+Z. Phase B in LivingRoomScene with real input: a real tap on an Open Block button scrolls to its
-  block (assert the slot top against the viewport, relative); real Escape presses walk Full -> Half -> Peek -> closed;
-  with Back Button = none nothing happens. Add the Back case to the existing nav fixture rather than a new one if it
-  fits.
-  VISUALS: the POI Editor at 620 pt showing the three new rows AND a Card Content row with a BlockRef field (the popup
-  list itself cannot be captured -- a native IMGUI menu, the documented limit). Judge both item by item.
+5a.6 DOCS: `_3.2` status row 5a + proof and BOTH [step 5] TODO lines removed; `_5.1` for the two rows; `10-structure.md`;
+  RUN TIMES after the full run.
 
-4.5 DOCS: `_3.2` status row 4 + proof and its [step 4] TODO line removed; `_5.1` for the new field type and the three
-  rows (both the file inventory and the row detail); `10-structure.md`; RUN TIMES after the full run.
-
-Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII in code, comments, logs and Editor
-labels; Editor warnings and popups name things, never ids; pure rules hold the decisions, the host only wires; no
+Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
+comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
 backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: every nav element and slot, `CardChromeRule`, Show Navigation At / Hide While Scrolling (step 5); the menu
-overlay (step 8); hotspot pins (step 10); the two [step 5] Editor TODOs; layouts.
+OUT OF SCOPE: `CardChromeRule`, Show Navigation At, Hide While Scrolling and the sticky-footer behaviour (5b); every
+other element and slot (6-11); Labels / Show Counts / Bar Slots / Groups (6-7); layouts; the family icons and colour
+tokens (step 6).
 Stop when the full EditMode suite and the FULL PlayMode suite are green with zero failures, the captures are judged and
-4.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+5a.6 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
 

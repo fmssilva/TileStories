@@ -15,5 +15,9 @@ namespace TileStories
 
         // `travel`: the finger's move from where it went down (panel units, y down)
         public static bool ClaimsPointer(Vector2 travel) => Mathf.Abs(travel.x) > Slop && Mathf.Abs(travel.x) > Mathf.Abs(travel.y);
+
+        // The other axis, for a part of the card that moves the sheet while its own content swipes sideways (the top navigation strip):
+        // past the slop and clearly up or down. A move both rules refuse (an exact diagonal) is nobody's, like a tap's wobble
+        public static bool ClaimsVertical(Vector2 travel) => Mathf.Abs(travel.y) > Slop && Mathf.Abs(travel.y) > Mathf.Abs(travel.x);
     }
 }

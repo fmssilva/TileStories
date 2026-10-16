@@ -50,7 +50,7 @@ namespace TileStories
         // The choice made for the question shown (-1 = not answered yet)
         public int Chosen => Index >= 0 && Index < _chosen.Count ? _chosen[Index] : -1;
         public bool Answered => Chosen >= 0;
-        public bool IsSwiping { get; private set; }
+        public bool IsSwiping => _swipe.IsClaimed;
 
         private readonly List<KnowledgeCheckRule.Question> _questions = new();
         private readonly List<int> _chosen = new();
@@ -65,10 +65,8 @@ namespace TileStories
         private string _variant = "";
         private string _variantClass;
         private bool _swipes;
-        // The finger that went down on the statement card (-1 = none) and where: it is only judged, not captured, until SwipeGrabRule
-        // says the drag is clearly sideways
-        private int _pressedPointer = -1;
-        private Vector2 _swipeStart;
+        // The statement card's swipe: a finger on it is only judged, not captured, until SwipeGrabRule says the drag is clearly sideways
+        private readonly SwipeGrab _swipe;
 
         public KnowledgeCheckBlockView()
         {
@@ -114,12 +112,11 @@ namespace TileStories
             Root.Add(Result);
             Root.Add(Nav);
 
-            Stage.RegisterCallback<PointerDownEvent>(OnPointerDown);
-            Stage.RegisterCallback<PointerMoveEvent>(OnPointerMove);
-            Stage.RegisterCallback<PointerUpEvent>(OnPointerUp);
-            Stage.RegisterCallback<PointerCancelEvent>(_ => EndSwipe());
-            // - the ScrollView taking the finger (a vertical drag) ends any swipe in progress
-            Stage.RegisterCallback<PointerCaptureOutEvent>(_ => EndSwipe());
+            // - only an unanswered true / false statement swipes; a cancelled drag (the ScrollView took the finger) puts it back
+            _swipe = new SwipeGrab(Stage, travel => _swipes && !Answered && _questions.Count > 0 && SwipeGrabRule.ClaimsPointer(travel));
+            _swipe.Moved += OnSwipeMoved;
+            _swipe.Released += OnSwipeReleased;
+            _swipe.Cancelled += EndSwipe;
         }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
@@ -279,55 +276,22 @@ namespace TileStories
         }
 
         // ---- the true / false swipe: the statement card follows a finger that is clearly moving sideways ----
-        // A finger that goes down on the card is NOT captured: until its drag is clearly sideways (SwipeGrabRule) the events stay
-        // with the stack's ScrollView, so a finger that lands on this big card and moves up or down scrolls the stack. Once it is
-        // sideways the card takes the pointer and follows it.
+        // A finger that goes down on the card is NOT captured (SwipeGrab): until its drag is clearly sideways the events stay with the
+        // stack's ScrollView, so a finger that lands on this big card and moves up or down scrolls the stack. Once it is sideways the
+        // card takes the pointer and follows it.
 
-        private void OnPointerDown(PointerDownEvent evt)
-        {
-            if (!_swipes || Answered || _questions.Count == 0) return;
-            if (evt.button != 0 && evt.pointerType == UnityEngine.UIElements.PointerType.mouse) return;
-            _pressedPointer = evt.pointerId;
-            _swipeStart = evt.position;        }
+        // - the card follows the finger sideways (panel coordinates: the card itself moves, so its local position would not change)
+        private void OnSwipeMoved(Vector2 travel) => Stage.style.translate = new Translate(travel.x, 0f);
 
-        private void OnPointerMove(PointerMoveEvent evt)
+        // The finger was lifted: far enough to one side answers (right = True, left = False), else the card goes back
+        private void OnSwipeReleased(Vector2 travel)
         {
-            if (_pressedPointer != evt.pointerId || evt.pressedButtons == 0) return;
-            Vector2 travel = (Vector2)evt.position - _swipeStart;
-            if (!IsSwiping)
-            {
-                if (!SwipeGrabRule.ClaimsPointer(travel)) return;
-                IsSwiping = true;
-                Stage.CapturePointer(evt.pointerId);
-            }
-            if (!Stage.HasPointerCapture(evt.pointerId)) return;
-            // - the card follows the finger sideways (panel coordinates: the card itself moves, so its local position would not change)
-            Stage.style.translate = new Translate(travel.x, 0f);
-            evt.StopPropagation();
-        }
-
-        private void OnPointerUp(PointerUpEvent evt)
-        {
-            if (_pressedPointer != evt.pointerId) return;
-            if (!IsSwiping || !Stage.HasPointerCapture(evt.pointerId))
-            {
-                _pressedPointer = -1;
-                return;
-            }
-            Stage.ReleasePointer(evt.pointerId);
-            Vector2 travel = (Vector2)evt.position - _swipeStart;
             EndSwipe();
             int choice = KnowledgeCheckRule.SwipeChoice(travel, Stage.layout.width);
             if (choice >= 0) Answer(choice);
-            evt.StopPropagation();
         }
 
         // The card comes back to its place
-        private void EndSwipe()
-        {
-            IsSwiping = false;
-            _pressedPointer = -1;
-            Stage.style.translate = StyleKeyword.Null;
-        }
+        private void EndSwipe() => Stage.style.translate = StyleKeyword.Null;
     }
 }

@@ -15,6 +15,9 @@ namespace TileStories
         [SerializeField] private StyleSheet cardStyle;
         [SerializeField] private StyleSheet[] blockStyles;
         [SerializeField] private CardStringTable strings;
+        // Off in a scene where another harness steps its own list over this card (the navigation gallery): this one then shows nothing
+        // by itself and leaves the arrow keys alone
+        [SerializeField] private bool stepsBlockEntries = true;
 
         // The framework string table the gallery card reads (tests resolve default texts through it)
         public CardStringTable StringTable => strings;
@@ -130,7 +133,7 @@ namespace TileStories
                 PreviewService.ReleaseAll();
                 ArPlacementService.Remove();
             };
-            Show(0);
+            if (stepsBlockEntries) Show(0);
         }
 
         private void OnDestroy()
@@ -190,7 +193,7 @@ namespace TileStories
             if (AutoAdvanceAudio && AudioService != null) AdvanceAudio(Time.unscaledDeltaTime);
             if (AutoAdvanceVideo && VideoService != null) AdvanceVideo(Time.unscaledDeltaTime);
             var keyboard = Keyboard.current;
-            if (keyboard == null || Sheet == null) return;
+            if (keyboard == null || Sheet == null || !stepsBlockEntries) return;
             if (keyboard.rightArrowKey.wasPressedThisFrame) Show(Index + 1);
             if (keyboard.leftArrowKey.wasPressedThisFrame) Show(Index - 1);
             if (keyboard.spaceKey.wasPressedThisFrame) Show(Index);

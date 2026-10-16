@@ -22,6 +22,8 @@ namespace TileStories
         public BlockStackView Stack { get; }
         // Moving inside the card (_3.2 step 3): jumps and the scroll-spy over the card's navigation model, rebuilt on every Show and reveal
         public NavController Nav { get; }
+        // The navigation slots (_3.2 step 5a): the top strip between the header and the stack, and the element each one shows
+        public NavSlots Slots { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
 
@@ -60,10 +62,14 @@ namespace TileStories
         private float _lastSampleHeight;
         private float _lastSampleTime;
         private float _velocity;
+        // A vertical drag on the top navigation strip moves the sheet like one on the header (its sideways drags are the strip's own)
+        private readonly SwipeGrab _stripDrag;
+        private float _stripDragStartY;
         // The shown card's media source and texts: what the full-screen view loads through and words its way back with
         private BlockBindContext _context;
 
-        public PoiCardSheetView(VisualElement parent, BlockRegistry registry, IEnumerable<StyleSheet> styleSheets)
+        // `navElements`: the navigation elements the slots can show (null = NavElementRegistry.Shared, the app's)
+        public PoiCardSheetView(VisualElement parent, BlockRegistry registry, IEnumerable<StyleSheet> styleSheets, NavElementRegistry navElements = null)
         {
             Layer = new VisualElement { name = "poi-card-layer", pickingMode = PickingMode.Ignore };
             Layer.AddToClassList("poi-card-layer");
@@ -87,6 +93,7 @@ namespace TileStories
             Stack = new BlockStackView(Root, Root, registry);
             Nav = new NavController(Stack, () => { if (IsOpen && Stop != SheetStopRule.Stop.Full) SetStop(SheetStopRule.Stop.Full); });
             Stack.Revealed += BindNav;
+            Slots = new NavSlots(Root, Stack.Scroll, navElements ?? NavElementRegistry.Shared);
 
             // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings
             CloseButton = new Button(() => CloseRequested?.Invoke()) { name = "poi-card-close" };
@@ -115,6 +122,12 @@ namespace TileStories
                 dragArea.RegisterCallback<PointerMoveEvent>(OnPointerMove);
                 dragArea.RegisterCallback<PointerUpEvent>(OnPointerUp);
             }
+            // - never taken at touch-down: a tap still reaches a tab, a sideways drag the strip; only a clearly vertical one is the sheet's
+            _stripDrag = new SwipeGrab(Slots.Top, SwipeGrabRule.ClaimsVertical);
+            _stripDrag.Claimed += start => { _stripDragStartY = start.y; BeginDrag(start.y); };
+            _stripDrag.Moved += travel => DragTo(_stripDragStartY + travel.y);
+            _stripDrag.Released += _ => EndDrag();
+            _stripDrag.Cancelled += EndDrag;
             Root.RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyle);
             Layer.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Stack.HeaderSlot.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
@@ -152,6 +165,8 @@ namespace TileStories
         {
             if (_context == null || _entries == null) return;
             Nav.Bind(CardNavModel.Build(_entries, _registry, _context.Settings, Stack.IsRevealed), _context);
+            Slots.Bind(Nav.Model, Nav, _context);
+            Slots.ShowAt(Stop);
         }
 
         // The chip names the language a tap switches to; with fewer than two languages there is nothing to choose and it is hidden
@@ -172,6 +187,7 @@ namespace TileStories
             _context = null;
             _entries = null;
             Nav?.Unbind();
+            Slots?.Unbind();
             Stack.UnbindAll();
             SetStopState(SheetStopRule.Stop.Dismissed);
             IsDragging = false;
@@ -262,6 +278,7 @@ namespace TileStories
         {
             if (stop == Stop) return;
             Stop = stop;
+            Slots?.ShowAt(stop);
             StopChanged?.Invoke(stop);
         }
 
@@ -309,26 +326,49 @@ namespace TileStories
             return 0f;
         }
 
+        // The grabber and the header take the finger at touch-down (a drag there can only move the sheet)
         private void OnPointerDown(PointerDownEvent evt)
         {
             if (!IsOpen || evt.button != 0) return;
-            var area = (VisualElement)evt.currentTarget;
-            area.CapturePointer(evt.pointerId);
-            IsDragging = true;
-            Root.AddToClassList("poi-card--dragging");
-            _dragStartPointerY = evt.position.y;
-            _dragStartHeight = TargetHeight;
-            _lastSampleHeight = TargetHeight;
-            _lastSampleTime = Clock();
-            _velocity = 0f;
+            ((VisualElement)evt.currentTarget).CapturePointer(evt.pointerId);
+            BeginDrag(evt.position.y);
             evt.StopPropagation();
         }
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
             if (!IsDragging || !((VisualElement)evt.currentTarget).HasPointerCapture(evt.pointerId)) return;
+            DragTo(evt.position.y);
+            evt.StopPropagation();
+        }
+
+        private void OnPointerUp(PointerUpEvent evt)
+        {
+            var area = (VisualElement)evt.currentTarget;
+            if (!IsDragging || !area.HasPointerCapture(evt.pointerId)) return;
+            area.ReleasePointer(evt.pointerId);
+            EndDrag();
+            evt.StopPropagation();
+        }
+
+        // A drag of the sheet starts with the finger at this panel y (the grabber, the header or the top strip)
+        private void BeginDrag(float pointerY)
+        {
+            if (!IsOpen) return;
+            IsDragging = true;
+            Root.AddToClassList("poi-card--dragging");
+            _dragStartPointerY = pointerY;
+            _dragStartHeight = TargetHeight;
+            _lastSampleHeight = TargetHeight;
+            _lastSampleTime = Clock();
+            _velocity = 0f;
+        }
+
+        private void DragTo(float pointerY)
+        {
+            if (!IsDragging) return;
             // - panel y grows downward: dragging up (smaller y) makes the sheet taller
-            float height = Mathf.Clamp(_dragStartHeight + (_dragStartPointerY - evt.position.y), 0f, Stops.Full);
+            float height = Mathf.Clamp(_dragStartHeight + (_dragStartPointerY - pointerY), 0f, Stops.Full);
             float now = Clock();
             // - several events in one frame have no time between them: keep the last measured speed
             if (now > _lastSampleTime)
@@ -338,20 +378,17 @@ namespace TileStories
                 _lastSampleHeight = height;
             }
             ApplyHeight(height);
-            evt.StopPropagation();
         }
 
-        private void OnPointerUp(PointerUpEvent evt)
+        // The finger let go: snap to the stop the drag and its speed point at, or close
+        private void EndDrag()
         {
-            var area = (VisualElement)evt.currentTarget;
-            if (!IsDragging || !area.HasPointerCapture(evt.pointerId)) return;
-            area.ReleasePointer(evt.pointerId);
+            if (!IsDragging) return;
             IsDragging = false;
             Root.RemoveFromClassList("poi-card--dragging");
             var stop = SheetStopRule.Snap(Stops, TargetHeight, _velocity, Layer.layout.height);
             if (stop == SheetStopRule.Stop.Dismissed) CloseRequested?.Invoke();
             else SetStop(stop);
-            evt.StopPropagation();
         }
     }
 }

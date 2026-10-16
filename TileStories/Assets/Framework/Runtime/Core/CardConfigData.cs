@@ -74,6 +74,9 @@ namespace TileStories
         // Back Button: "step_down" (the default: each system Back press undoes the innermost thing -- the full view, then one stop down,
         // then closes the card, NavBackRule) | "none" (Back is left to the app) (CardOptions.BackButtons)
         public string back_button = CardOptions.BackButtonStepDown;
+        // Top Bar: the element in the strip under the header (a NavElementRegistry key of the top slot, "text_tabs" the default) |
+        // "none" (CardOptions.NavNone). A key nothing registered draws no strip (the Editor shows it as missing)
+        public string top = BuiltInNavElements.TextTabs;
 
         public const int MinBlocksMin = 2;
         public const int MinBlocksMax = 30;
@@ -297,6 +300,10 @@ namespace TileStories
         public const string BackButtonNone = "none";
         public static readonly string[] BackButtons = { BackButtonStepDown, BackButtonNone };
         public static readonly string[] BackButtonLabels = { "Step The Card Down", "Leave It To The App" };
+
+        // A navigation slot with no element in it (CardNavigationSettings.top, _3.2 section 3); never a registered element's key
+        public const string NavNone = "none";
+        public const string NavNoneLabel = "None";
 
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";
