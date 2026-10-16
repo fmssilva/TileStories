@@ -218,6 +218,8 @@ namespace TileStories
             public const string NavGroupWatch = "nav_group_watch";
             public const string NavGroupExplore = "nav_group_explore";
             public const string NavGroupVisit = "nav_group_visit";
+            // The last slot of a navigation bar when the card has more sections than Bar Slots (_3.2 step 7a): it opens the rest
+            public const string NavMore = "nav_more";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -243,6 +245,7 @@ namespace TileStories
                 KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback,
                 KindSources,
                 NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
+                NavMore,
             };
         }
 

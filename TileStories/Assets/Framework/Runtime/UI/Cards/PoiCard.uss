@@ -319,18 +319,32 @@
     margin-bottom: 0;
 }
 
-/* ---- the footer: pinned under the scrolling blocks (sticky actions) ---- */
+/* ---- the bottom area (_3.2 step 7a, PoiCardSheetView.BottomArea): under the scrolling blocks, the footer (sticky actions) and under it
+   the bottom navigation slot -- ONE part of the chrome, which slides as one ---- */
 
-.poi-card__footer {
+.poi-card__bottom {
     flex-shrink: 0;
     transition-property: translate;
     transition-duration: var(--ts-duration);
     transition-timing-function: var(--ts-ease);
 }
 
+.poi-card__footer {
+    flex-shrink: 0;
+}
+
+/* The bottom navigation slot (NavSlots): opaque, with a line above it so the content never reads as running into the bar. Its element's
+   own look is Navigation.uss */
+.poi-card__nav-bottom {
+    flex-shrink: 0;
+    background-color: var(--ts-surface);
+    border-top-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+}
+
 /* The bottom area hidden by CardChromeRule (CardChromeView: at peek, while the reader moves down, where the stop has no room for it):
    out of the flow -- the stack takes its room at once -- and slid below the sheet's bottom edge, which clips it (.poi-card overflow) */
-.poi-card__footer--hidden {
+.poi-card__bottom--hidden {
     position: absolute;
     left: 0;
     right: 0;
@@ -338,7 +352,15 @@
     translate: 0 100%;
 }
 
+/* The bar alone hidden inside a shown area (Show Navigation At = Full Only, at Half): out of the flow but still laid out, like the strip */
+.poi-card__nav-bottom--hidden {
+    position: absolute;
+    left: 0;
+    right: 0;
+    visibility: hidden;
+}
+
 /* Reduce motion: the bottom area jumps */
-.poi-card--chrome-instant .poi-card__footer {
+.poi-card--chrome-instant .poi-card__bottom {
     transition-duration: 0s;
 }

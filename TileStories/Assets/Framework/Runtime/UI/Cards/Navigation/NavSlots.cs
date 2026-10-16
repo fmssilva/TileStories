@@ -1,32 +1,43 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // The navigation slots of the card's sheet (_3.2 section 4.2) and the element each one shows. Today the TOP slot only: a strip in
-    // the sheet's root between the header (with its pinned top part) and the stack's ScrollView -- outside the scroll, so a jump
-    // lands a block at the viewport's top with no offset for it, and under the header's peek part, so it never moves a stop. Which
-    // element a slot holds is NavSlotRule's; WHEN a held element shows (the stop, the scroll, the room) is CardChromeRule's, applied
-    // by the sheet's CardChromeView. The element is made by the NavElementRegistry and pooled per key (ElementPool), so a card switch
+    // The navigation slots of the card's sheet (_3.2 section 4.2) and the element each one shows:
+    //   - TOP: a strip in the sheet's root between the header (with its pinned top part) and the stack's ScrollView -- outside the scroll,
+    //     so a jump lands a block at the viewport's top with no offset for it, and under the header's peek part, so it never moves a stop
+    //   - BOTTOM (step 7a): the last part of the sheet's bottom area, under the sticky CTA footer -- the CTA stays nearest the content, the
+    //     bar sits in the thumb zone. Below the header too, so it never moves a stop either
+    // Which element a slot holds is NavSlotRule's; WHEN a held element shows (the stop, the scroll, the room) is CardChromeRule's, applied
+    // by the sheet's CardChromeView. An element is made by the NavElementRegistry and pooled per key (ElementPool), so a card switch
     // rebinds the same view. The sheet owns one, next to its NavController.
     public sealed class NavSlots
     {
         public VisualElement Top { get; }
-        // The element bound in the top slot now (null = none) and its key
+        public VisualElement Bottom { get; }
+        // The element bound in each slot now (null = none) and its key
         public INavElementView TopView { get; private set; }
         public string TopKey { get; private set; }
+        public INavElementView BottomView { get; private set; }
+        public string BottomKey { get; private set; }
 
         private readonly NavElementRegistry _registry;
         private readonly Dictionary<string, ElementPool<INavElementView>> _pools = new();
 
-        // `sheetRoot`: the sheet's root; `stackScroll`: the stack's ScrollView inside it, which the top slot goes right before
-        public NavSlots(VisualElement sheetRoot, VisualElement stackScroll, NavElementRegistry registry)
+        // `sheetRoot`: the sheet's root; `stackScroll`: the stack's ScrollView inside it, which the top slot goes right before;
+        // `bottomArea`: the sheet's bottom area (the footer first), which the bottom slot closes
+        public NavSlots(VisualElement sheetRoot, VisualElement stackScroll, VisualElement bottomArea, NavElementRegistry registry)
         {
             _registry = registry;
             Top = new VisualElement { name = "poi-card-nav-top" };
             Top.AddToClassList("poi-card__nav-top");
             sheetRoot.Insert(sheetRoot.IndexOf(stackScroll), Top);
             Top.style.display = DisplayStyle.None;
+            Bottom = new VisualElement { name = "poi-card-nav-bottom" };
+            Bottom.AddToClassList("poi-card__nav-bottom");
+            bottomArea.Add(Bottom);
+            Bottom.style.display = DisplayStyle.None;
         }
 
         // Show this card's element in each slot (none when the rule says so), bound to its model and controller
@@ -34,29 +45,43 @@ namespace TileStories
         {
             Unbind();
             if (model == null) return;
-            string key = NavSlotRule.TopElement(context?.Settings?.navigation, model, TopElementOf);
-            if (key == null) return;
-            var view = PoolOf(key).Take();
-            if (view == null) return;
-            view.Bind(model, nav, context);
-            Top.Add(view.Root);
-            TopView = view;
-            TopKey = key;
-            Top.style.display = DisplayStyle.Flex;
+            var settings = context?.Settings?.navigation;
+            var top = BindSlot(Top, NavSlotRule.TopElement(settings, model, ElementOf(NavSlotKeys.Top)), model, nav, context);
+            TopView = top.View;
+            TopKey = top.Key;
+            var bottom = BindSlot(Bottom, NavSlotRule.BottomElement(settings, model, ElementOf(NavSlotKeys.Bottom)), model, nav, context);
+            BottomView = bottom.View;
+            BottomKey = bottom.Key;
         }
 
         // Every slot empty again (the card closed, or is rebinding)
         public void Unbind()
         {
             if (TopKey != null) _pools[TopKey].ReleaseAll();
+            if (BottomKey != null) _pools[BottomKey].ReleaseAll();
             TopView = null;
             TopKey = null;
+            BottomView = null;
+            BottomKey = null;
             Top.style.display = DisplayStyle.None;
+            Bottom.style.display = DisplayStyle.None;
         }
 
-        // The element registered under this key for the top slot, or null
-        private NavElementDefinition TopElementOf(string key) =>
-            _registry.TryGet(key, out var definition) && definition.Slot == NavSlotKeys.Top ? definition : null;
+        // One slot: a view of the element `key` names (null = none), bound and shown in `slot`
+        private (INavElementView View, string Key) BindSlot(VisualElement slot, string key, CardNavModel model, NavController nav, BlockBindContext context)
+        {
+            if (key == null) return (null, null);
+            var view = PoolOf(key).Take();
+            if (view == null) return (null, null);
+            view.Bind(model, nav, context);
+            slot.Add(view.Root);
+            slot.style.display = DisplayStyle.Flex;
+            return (view, key);
+        }
+
+        // The element registered under a key for this slot, or null
+        private Func<string, NavElementDefinition> ElementOf(string slot) => key =>
+            _registry.TryGet(key, out var definition) && definition.Slot == slot ? definition : null;
 
         private ElementPool<INavElementView> PoolOf(string key)
         {

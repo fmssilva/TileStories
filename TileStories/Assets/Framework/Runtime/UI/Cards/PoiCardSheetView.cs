@@ -22,9 +22,13 @@ namespace TileStories
         public BlockStackView Stack { get; }
         // Moving inside the card (_3.2 step 3): jumps and the scroll-spy over the card's navigation model, rebuilt on every Show and reveal
         public NavController Nav { get; }
-        // The navigation slots (_3.2 step 5a): the top strip between the header and the stack, and the element each one shows
+        // The bottom area (_3.2 step 7a): the sticky CTA footer and, under it, the bottom navigation slot -- one part of the chrome, shown,
+        // slid away and given way TOGETHER (CardChromeRule), so it is one element the chrome hides
+        public VisualElement BottomArea { get; }
+        // The navigation slots (_3.2 steps 5a, 7a): the top strip between the header and the stack, the bottom slot under the footer, and
+        // the element each one shows
         public NavSlots Slots { get; }
-        // What of the chrome -- the top strip, the sticky footer -- shows now (_3.2 step 5b, CardChromeRule)
+        // What of the chrome -- the top strip, the bottom area -- shows now (_3.2 step 5b, CardChromeRule)
         public CardChromeView Chrome { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
@@ -95,7 +99,13 @@ namespace TileStories
             Stack = new BlockStackView(Root, Root, registry);
             Nav = new NavController(Stack, () => { if (IsOpen && Stop != SheetStopRule.Stop.Full) SetStop(SheetStopRule.Stop.Full); });
             Stack.Revealed += BindNav;
-            Slots = new NavSlots(Root, Stack.Scroll, navElements ?? NavElementRegistry.Shared);
+            // - the footer moves into the bottom area, which takes its place under the stack: the footer first (the CTA nearest the
+            //   content), the bottom slot after it (NavSlots)
+            BottomArea = new VisualElement { name = "poi-card-bottom" };
+            BottomArea.AddToClassList("poi-card__bottom");
+            Root.Insert(Root.IndexOf(Stack.Footer), BottomArea);
+            BottomArea.Add(Stack.Footer);
+            Slots = new NavSlots(Root, Stack.Scroll, BottomArea, navElements ?? NavElementRegistry.Shared);
             Chrome = new CardChromeView(this);
 
             // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings

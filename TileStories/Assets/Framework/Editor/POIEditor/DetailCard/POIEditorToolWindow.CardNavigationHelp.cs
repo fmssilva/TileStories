@@ -35,13 +35,33 @@ namespace TileStories.Editor
             "The Segmented bar always shows Groups of families, whatever this says.";
 
         private const string CardLabelsHelp =
-            "What each tab of the Top Bar shows. Icon And Text (the default): the family's icon, in its colour, above its word -- " +
+            "What each tab of the Top Bar, and each slot of the Bottom Bar, shows. Icon And Text (the default): the family's icon, in " +
+            "its colour, above its word -- " +
             "easiest to scan and to read. Icon: the icon alone, for the narrowest bar; its word is still read out by a screen " +
             "reader and shown on a long press. Text: the word alone. A tab with no icon (Group By = Format) always shows its word.";
 
         private const string CardShowCountsHelp =
             "Whether each tab, chip or segment of the Top Bar shows how many blocks it leads to, as a small number after its word. " +
             "Off (the default) keeps the bar quiet; on helps a visitor judge where most of a long card is.";
+
+        private const string CardBarSlotsHelp =
+            "How many slots the Bottom Bar has, from 3 to 5 (default 5): a bar at the bottom of a phone holds three to five " +
+            "destinations before its words get too small to read and its slots too narrow for a thumb. A card with more sections " +
+            "than slots turns the last slot into More, which lists the sections that did not fit just above the bar. A card with " +
+            "fewer sections than slots shows one slot per section and no More.";
+
+        // What Bottom Bar's (i) says: the slot, None, then every element an app can put there -- read from the registry, like Top Bar's
+        private static string CardBottomBarHelp(NavElementRegistry registry)
+        {
+            var text = new System.Text.StringBuilder(
+                "What the bar at the bottom of the card shows, under the buttons pinned to the card's bottom (an Actions block with " +
+                "the sticky_cta look), where a thumb reaches. It appears only on cards with at least Show Navigation From blocks, at " +
+                "the heights Show Navigation At allows. The pinned buttons and this bar are one bottom area: they slide away and come " +
+                "back together (Hide While Scrolling), and where a height leaves too little room to read, both give way together. " +
+                "None (the default): no bar. It can be used with a Top Bar or instead of one.");
+            foreach (var element in registry.OfSlot(NavSlotKeys.Bottom)) text.Append(' ').Append(element.Help);
+            return text.ToString();
+        }
 
         private const string CardGroupsHelp =
             "The groups the Segmented Top Bar shows as equal segments that always fit the screen -- three or four work best. " +
@@ -66,7 +86,8 @@ namespace TileStories.Editor
             "The card may also hide the bar BY ITSELF, and that is on purpose, not a fault: at a height where the title, the bar and the " +
             "buttons pinned to the card's bottom (an Actions block with the sticky_cta look) would leave less than a heading and two " +
             "lines of content, the card leaves the bar out first: the bottom buttons are often why the card was opened, and the bar is " +
-            "one drag to full height away. The buttons stay while at least one line of content still shows. The bar comes back " +
+            "one drag to full height away. The buttons stay while at least one line of content still shows; with a Bottom Bar, the " +
+            "buttons and the Bottom Bar are measured together and give way together. The bar comes back " +
             "as soon as there is room: at full height, or once the title shrinks to one line while the visitor reads. Full Only can " +
             "hide the bar more, never bring it back where there is no room.";
 
@@ -79,8 +100,9 @@ namespace TileStories.Editor
             "What the bottom of the card does while the visitor reads. When Scrolling Down (the default): the buttons pinned to the " +
             "card's bottom (an Actions block with the sticky_cta look) slide away once the visitor has scrolled down by about a " +
             "finger's travel, giving their room to the content, and come back as soon as the visitor scrolls up a little, or reaches " +
-            "the top or the end of the card. A tap's small wobble never hides them. The Top Bar always stays: it is the visitor's map " +
-            "of the card. Never: the bottom stays where it is while the visitor reads.";
+            "the top or the end of the card. A tap's small wobble never hides them. A Bottom Bar slides with them: they are one " +
+            "area. The Top Bar always stays: it is the visitor's map of the card. Never: the bottom stays where it is while the " +
+            "visitor reads.";
 
         // What Top Bar's (i) says: the slot, None, then every element an app can put there, each in its own words -- read from the
         // registry, so an element an app registers explains itself here with no edit to this file
@@ -121,7 +143,8 @@ namespace TileStories.Editor
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
             "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
             "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
-            "Navigation From, Show Navigation At, Top Bar and Hide While Scrolling: the open card's strip and bottom buttons " +
+            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Bar Slots and Hide While Scrolling: the open card's strip, " +
+            "bottom bar and bottom buttons " +
             "appear, change or go at once.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
@@ -173,6 +196,21 @@ namespace TileStories.Editor
             "- Top Bar = Progress Map: a thin bar split into pieces, a wide piece for a family with many blocks; the pieces up to the one " +
             "you read are solid, the current one thicker. Tap a piece: the card moves there.\n" +
             "- Tick Show Counts: each tab, chip or segment shows its number of blocks.\n\n" +
+            "BOTTOM BAR\n" +
+            "- Set Top Bar = None and Bottom Bar = Bottom Bar, open a long card with several families and raise it to full: a bar " +
+            "sits at the very bottom, under the card's pinned buttons, one slot per family with its icon and word.\n" +
+            "- With more families than Bar Slots the last slot reads More. Tap it: a list of the families that did not fit opens " +
+            "just above the bar; tap one and the card moves there, the list closes and More is underlined. Tap More twice: the list " +
+            "opens and closes.\n" +
+            "- Set Bar Slots to 3, 4 and 5: the bar holds two, three or four families and More, and More's list holds the rest. " +
+            "Open a card with fewer families than Bar Slots: one slot per family, no More.\n" +
+            "- Tap each slot: the card moves to that family's first block and the slot is underlined; scroll the card: the underline " +
+            "follows the family you read.\n" +
+            "- Scroll down: the pinned buttons and the bar slide away together; scroll up a little: both come back together.\n" +
+            "- Lower the card to half height on a card with a tall title: if the title, the buttons and the bar would leave less than " +
+            "a line of content, the buttons and the bar both give way. That is on purpose: one line of content is the least a height " +
+            "keeps. Set Show Navigation At = Full Only: at half height the bar goes and the buttons stay.\n" +
+            "- Lower the card to its title: no bar.\n\n" +
             "SHOW NAVIGATION AT AND HIDE WHILE SCROLLING\n" +
             "- Open a long card with a tall title and buttons pinned to its bottom (an Actions block with the sticky_cta look) at half " +
             "height. If the title, the strip and the buttons would leave less than a heading and two lines of content, the strip " +
@@ -205,6 +243,8 @@ namespace TileStories.Editor
             "does without a card. An iPhone has no Back button: nothing to check there.\n" +
             "- Top Bar: on a card with its strip, swipe the strip sideways with a thumb -- the words slide, the card stays; start a swipe " +
             "on a word and move up -- the card rises and the word is not tapped; tap each word once -- every tap lands where it should.\n" +
+            "- Bottom Bar: hold the phone in one hand and reach every slot and More with the thumb; open More and pick a family from " +
+            "its list. Check that every word reads whole and that the bar does not sit under the phone's own gesture bar.\n" +
             "- Hide While Scrolling: read a long card at full height with a thumb. The bottom buttons slide away as you read down and " +
             "come back with a small move up; a tap on the content never makes them jump. Check that the half height of a long card " +
             "shows something to read on this phone's screen.\n" +

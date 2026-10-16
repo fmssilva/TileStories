@@ -77,6 +77,9 @@ namespace TileStories
         // Top Bar: the element in the strip under the header (a NavElementRegistry key of the top slot, "text_tabs" the default) |
         // "none" (CardOptions.NavNone). A key nothing registered draws no strip (the Editor shows it as missing)
         public string top = BuiltInNavElements.TextTabs;
+        // Bottom Bar: the element under the stack, BELOW the sticky CTA footer, in the thumb zone (a NavElementRegistry key of the bottom
+        // slot) | "none" (CardOptions.NavNone, the default). The footer and the bar are ONE bottom area for CardChromeRule
+        public string bottom = CardOptions.NavNone;
         // Show Navigation At: "half_and_full" (the default) | "full_only" (CardOptions.ShowNavigationAts) -- the stops the Top Bar shows at,
         // never at peek. CardChromeRule may hide it at a stop with too little room left for the content; this option only hides more
         public string show_at = CardOptions.ShowNavHalfAndFull;

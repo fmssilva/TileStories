@@ -432,6 +432,29 @@
     top: 58%;
 }
 
+/* more: three dots in a row -- "the rest of the list" (a bar's More slot, _3.2 step 7a): the dot in the middle, the two bars drawn as
+   dots of the same size on either side */
+.card-icon--more .card-icon__bar,
+.card-icon--more .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--more .card-icon__bar {
+    top: 50%;
+    width: var(--ts-icon-dot);
+    height: var(--ts-icon-dot);
+    border-radius: var(--ts-icon-dot);
+    translate: -50% -50%;
+}
+
+.card-icon--more .card-icon__bar--a {
+    left: 16%;
+}
+
+.card-icon--more .card-icon__bar--b {
+    left: 84%;
+}
+
 /* ---- the pill button: ONE shape for every block that has one (actions' pill_row, story_chapters' Previous / Next).
    The radius is half the touch-target height (--ts-pill-radius), so short words give a stadium, not an egg ---- */
 

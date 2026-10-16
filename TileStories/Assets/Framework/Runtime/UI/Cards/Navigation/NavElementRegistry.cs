@@ -31,9 +31,11 @@ namespace TileStories
         public bool ReadsLabels { get; }
         // It reads Show Counts (a block count on its items)
         public bool ShowsCounts { get; }
+        // It is a bar of a few slots and reads Bar Slots (its last slot becomes More when the sections do not fit, rule 2.5.5)
+        public bool ReadsBarSlots { get; }
 
         public NavElementDefinition(string key, string slot, string label, string help, NavChoice choice, bool readsLabels = false,
-            bool showsCounts = false)
+            bool showsCounts = false, bool readsBarSlots = false)
         {
             Key = key;
             Slot = slot;
@@ -42,15 +44,19 @@ namespace TileStories
             Choice = choice;
             ReadsLabels = readsLabels;
             ShowsCounts = showsCounts;
+            ReadsBarSlots = readsBarSlots;
         }
     }
 
     // The slots of the sheet a navigation element can sit in (_3.2 section 4.2). Only the BUILT ones are listed: an element for a slot
-    // the sheet does not draw yet would never show, so the registry refuses it (bottom, floating, menu and edge join with their steps)
+    // the sheet does not draw yet would never show, so the registry refuses it (floating, menu and edge join with their steps)
     public static class NavSlotKeys
     {
+        // The strip between the header and the stack
         public const string Top = "top";
-        public static readonly IReadOnlyList<string> Built = new[] { Top };
+        // Under the stack, below the sticky CTA footer: the thumb zone (_3.2 section 4.2, step 7a)
+        public const string Bottom = "bottom";
+        public static readonly IReadOnlyList<string> Built = new[] { Top, Bottom };
     }
 
     // Every navigation element the card can show, with the view that draws it -- the same shape as BlockRegistry: BuiltInNavElements

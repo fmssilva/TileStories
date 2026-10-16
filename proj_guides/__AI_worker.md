@@ -12,83 +12,74 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-
-
-## `And now: POI Card Navigation (3.2) -- step 6, the rest of the top elements`
+## `And now: POI Card Navigation (3.2) -- step 7a, the bottom slot and the bottom bar`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
 not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Give the card's reading space back with a chrome
-floor" (full EditMode 1739/1739; it rides on 5a's PlayMode run) -- run the full EditMode suite and say which commit you
-trusted.
+them if TMP dirtied them. Baseline: the tree is clean on commit "Add icon tabs, chips, segments and a progress map to
+the card" (full EditMode 1755/1755) -- run the full EditMode suite and say which commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the four [step 6] lines are yours;
-the one marked DECIDED is decided -- build it, do not re-open it) and the status table (1-5b done; 6 is yours).
-Sections 5.1 (the five element rows), 2.5 (rules 4-7), 3 (the rows marked step 6) and 9.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 7] lines are yours; the
+one about `progress_map` is DECIDED, build what it says) and the status table (1-6 done; step 7 was split, 7a is yours
+and 7b is the next block). Sections 4.2 (the bottom slot's place), 4.3 (the chrome rule you extend), 5.2 (`bottom_bar`),
+2.5 rule 5 (More) and 9.
 REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines"; .clinerules/40-testing.md
-4.2 (the cadence -- read the "confirms, never discovers" line before you plan a single run), 4.2.3, 4.4 and 4.5;
-.clinerules/30-ui-content.md (never colour alone; one focal point); _3.3_POI_Card_Styles.md sections on the token
-naming (you add the first `--ts-family-*` tokens, so they must be named the way that domain will expect them).
-Context only: .clinerules/10-structure.md, _3.1_POI_Card_Blocks.md section 3.
-WORKER MODEL: Opus-class -- five elements at once, the first icon set the card has needed since step 1, and a visual
-judgement at 390 px in two languages.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: five views bound INSIDE the top slot that
-already exists, no container, no stops, no harness (4.2). It closes on every PlayMode fixture whose name holds Card or
-Poi (~553 tests, ~12 min) -- and that targeted set must be GREEN BEFORE you call the block done; a full run is not due
-until step 8. Unity may be in the background except for the Editor captures.
+4.2 (the cadence AND the "a full run confirms, it never discovers" line -- this block owes a full run, so the targeted
+set must be green BEFORE you start it), 4.2.3, 4.4, 4.5; .clinerules/30-ui-content.md.
+Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
+WORKER MODEL: Opus-class -- a new container in the sheet, where the stops and the chrome floor live.
+TEST PLAN: full EditMode at the GATE and at the end. This block owes the FULL PlayMode run: it adds the BOTTOM
+CONTAINER to the sheet (4.2 shared ground: stops and layout). Order matters -- close on the Card / Poi targeted set
+first (~593 tests, ~12 min) and only start the full run once that is green; the full run confirms, it does not
+discover. Take it in the background and report `editor_is_focused` at the first poll and at the end. 7b and the blocks
+after it ride on this run.
 
-PART 1 -- the four [step 6] findings, before the new elements:
-1. THE FLOOR GIVES WAY FROM THE TOP (the developer's call, `_3.2` 4.3). `CardChromeRule.Decide` drops the bottom area
-   first; swap it so the TOP strip goes first and the bottom area only if the floor is still not met. PROOF: a
-   `CardChromeRuleTests` case on The Lamp's measured numbers, and a Phase B assert that the Lamp at Half now KEEPS its
-   "Show me where it is" footer and loses the strip. Retake `Chrome_Lamp_half_default_390.png` and say what changed.
-2. The Follow Scroll Editor row (the data has existed since step 3; both earlier briefs forgot it). With (i), default,
-   undo, live sync, in the order section 7 gives.
-3. The first block heading sits ~4 px under the strip's hairline (`Nav_text_tabs_two_families.png`). Fix the spacing in
-   the USS, not with a magic margin in C#; recapture.
-4. If the two one-off `PoiCardAudioSceneTests` failures logged in `__mixed_TODOs.md` do not appear in your targeted run,
-   leave them logged -- do not close them on one quiet run.
+PART 1 -- the two [step 7] findings, before the new work:
+1. `progress_map`'s (i): say that the segments show their relative size only while the families fit the width (about
+   4-5 at 390 px) and that below that every segment is one tap target wide. Wall-author words, no pixel talk in the
+   visitor UI. (The Editor warning that counts them is step 17 -- do not build it now.)
+2. The Half-is-mostly-header TODO is NOT yours: it belongs to the header's owner. Leave it logged.
 
-PART 2 -- step 6, the four remaining top elements plus the ontology they need:
+PART 2 -- step 7a:
 
-6.1 Family icons and colour tokens -- the two `FamilyDefinition` fields held back at step 1 because nothing could draw
-  them (`_3.2` 2.2). `IconKey` per family in `CardIcons` (it ships 8 keys today, all drawn from the same four generic
-  parts -- follow that construction, no new picture and no glyph font) and `ColorToken` = `--ts-family-<key>` in the
-  card's tokens. Both are DATA on the definition; an app's own family brings its own. TESTS: every registered family
-  resolves an icon key the set draws and a token the stylesheet defines (one test, so a tenth family cannot be added
-  without them).
-6.2 `icon_tabs` (A2 top row), `icon_tabs_chips` (A2: icon tabs plus, under them, chips of the CURRENT family's kinds
-  that exist on this POI), `kind_chips` (A3: every kind one chip, dotted with its family colour), `segmented` (A4: 3-4
-  Groups that always fit, no scroll), `progress_map` (E2: a thin bar split into family segments sized by target count,
-  tap a segment to jump). Each registers in `NavElementRegistry` for the top slot and reads the model; none computes
-  structure. Reuse: the strip machinery of `text_tabs` (`NavStripRule`, `SwipeGrab`) for anything that scrolls
-  sideways, `NavController` for every jump, rule 2.5.7 for "fewer than two sections".
-6.3 The config rows these need: Group By (family / format -- the model already answers both since step 2), Labels
-  (icon / text / icon_and_text), Show Counts, and the Groups table + the Families table's Group column for `segmented`
-  (defaults in section 3). Editor rows with (i), undo, live sync; Top Bar's popup lists them from the registry, so it
-  must need no edit to show the four new keys -- say in the report that you checked that.
-  TESTS: Tier 0 for the grouping and the segment widths of `progress_map`. Phase A: every new element x the four
-  gallery cases, through the ONE `CardNavGalleryDefinitions` list 5a built -- adding an element should be adding a key
-  and a check; if it is more, say what the harness lacked. Phase B per element: a real tap lands on the right block,
-  the spy marks the right section after a real drag, 48 px targets, nothing clipped at 390 px with the Portuguese
-  labels.
-  VISUALS: the Phase A renders of all five elements (including `text_tabs` recaptured after PART 1.3), plus the Editor
-  section with the new rows and the Groups table. Judge each item by item: tap size, contrast in both themes, never
-  colour alone (a chip's family colour is a dot BESIDE the words, never the only signal), and the PT labels.
+7a.1 The BOTTOM slot: under the stack, BELOW the sticky CTA footer (`_3.2` 4.2 -- the CTA stays nearest the content,
+  the nav bar sits in the thumb zone). ACCEPTANCE, and the thing most likely to go wrong: THE STOPS MUST NOT MOVE.
+  Measure The Lamp's three stops before your change and after it, with Bottom Bar set and unset, and put the numbers in
+  the report -- 5a's step did exactly this for the top strip (195.00 / 337.60 / 796.00) and that is the standard.
+7a.2 `CardChromeRule` learns the slot: the bottom AREA is now the footer plus the bottom bar. Hide While Scrolling
+  hides them together (they are one area, 4.3); the floor's one-line rule (`MinStackViewportUnderFooter`) now measures
+  the pair. Say what The Lamp at Half does with a bottom bar on -- if the honest answer is "both go", that is the rule
+  working, not a bug; report the number.
+7a.3 `bottom_bar` (B1): up to Bar Slots sections, the last slot becomes More when there are more
+  (`NavOntologyRule.SectionsInBar` has decided this since step 2 -- read it, do not re-derive). More opens the
+  overflow as a small list; when a Menu is set later (step 8) it will open that instead, so leave the seam but build
+  only the list. Reuse `NavItems` / `NavChipRow` / the icon and colour work of step 6; this element must need no new
+  shared part, and if it does, say which and why.
+7a.4 The Bar Slots Editor row (3..5, default 5), with (i), undo, live sync, hidden when no bar element is chosen (the
+  field-visibility pattern the section already uses).
+  TESTS: Tier 0 for More (it lists EXACTLY the overflow sections, in order, for 3, 4 and 5 slots and for a card with
+  fewer sections than slots). Phase A: `bottom_bar` x the four gallery cases through `CardNavGalleryDefinitions`.
+  Phase B in LivingRoomScene with real input: a real tap on a bar item lands its block (relative, +-1 px); a real tap
+  on More lists exactly the overflow; the spy marks the bar item of the section on screen after a real drag; a real
+  drag down hides the footer AND the bar together and a drag up brings both back; nothing at peek.
+  VISUALS: the Lamp at Full with the bar, with More open, and at Half; the Phase A renders; the Editor section with
+  Bar Slots. Judge item by item: 48 px targets, the thumb zone, never colour alone, the PT labels whole at 390 px.
 
-6.4 DOCS: `_3.2` status row 6 + proof and the four [step 6] TODO lines removed; `_3.3` gets the `--ts-family-*` tokens
-  recorded where that domain will look for them; `_5.1` for the new rows; `10-structure.md`.
+7a.5 DOCS: `_3.2` status row 7a + proof and the (i) TODO removed; `_5.1` for the Bar Slots row; `10-structure.md`;
+  RUN TIMES after the full run.
 
 Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
-comments, logs and Editor labels (accents only in the data assets); Editor rows and popups name things, never ids; pure
-rules decide, views draw; no backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: the bottom slot and its elements (step 7); the menu overlay (8); floating and the placed-model chip (9);
-the edge scrubber (10); in-flow nav blocks (11); layouts; presets.
-Stop when the full EditMode suite and the Card / Poi PlayMode fixtures are green with zero failures, the captures are
-judged and 6.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
+backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
+OUT OF SCOPE: `dock`, `bar_sheet`, `next_up` (7b); the menu overlay (8); floating, edge, in-flow blocks (9-11);
+layouts; presets; the Editor warnings (17).
+Stop when the full EditMode suite is green, the Card / Poi fixtures are green, the FULL PlayMode suite is green with
+zero failures, the captures are judged and 7a.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
+
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

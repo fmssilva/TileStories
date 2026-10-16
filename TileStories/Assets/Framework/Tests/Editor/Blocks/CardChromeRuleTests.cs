@@ -5,6 +5,8 @@ namespace TileStories.Editor.Tests
     // CardChromeRule (_3.2 step 5b, section 4.3): what chrome the card shows at each stop, how the scroll hides and brings back the bottom
     // area (the two travel thresholds, a turn, the top and the end), and THE FLOOR -- no chrome where it would leave the stack less than a
     // heading and two lines beside the strip, one line beside the footer, the strip giving way first -- at The Lamp's measured numbers and just above them.
+    // Since step 7a the bottom area is a PAIR (the footer and the bottom bar under it): one floor for both, they go and come back together,
+    // and Show Navigation At = Full Only hides the bar alone at Half (it is navigation; the footer is not).
     public class CardChromeRuleTests
     {
         // The Lamp at 390 x 844, measured at step 5b (PoiCardChromeSceneTests measures them again on the real card): the sheet at Half and
@@ -15,13 +17,24 @@ namespace TileStories.Editor.Tests
         private const float LampStrip = 49f;
         private const float LampFooter = 81f;
         private const float LampContent = 13669f;
+        // The bottom bar (bottom_bar at 390 px: icon + word in a touch-target slot, 52 px measured by PoiCardBottomBarSceneTests)
+        private const float LampBar = 52f;
 
         private static CardChromeRule.Input Lamp(SheetStopRule.Stop stop, string showAt = CardOptions.ShowNavHalfAndFull, bool scrollHid = false) => new()
         {
-            Stop = stop, ShowAt = showAt, HasTop = true, HasBottom = true, ScrollHidesBottom = scrollHid,
+            Stop = stop, ShowAt = showAt, HasTop = true, HasFooter = true, ScrollHidesBottom = scrollHid,
             SheetHeight = stop == SheetStopRule.Stop.Full ? LampFull : LampHalf, HeaderHeight = LampHeader,
-            TopHeight = LampStrip, BottomHeight = LampFooter, ContentHeight = LampContent,
+            TopHeight = LampStrip, FooterHeight = LampFooter, ContentHeight = LampContent,
         };
+
+        // The Lamp with a Bottom Bar under its footer
+        private static CardChromeRule.Input LampWithBar(SheetStopRule.Stop stop, string showAt = CardOptions.ShowNavHalfAndFull, bool scrollHid = false)
+        {
+            var input = Lamp(stop, showAt, scrollHid);
+            input.HasBottomNav = true;
+            input.BottomNavHeight = LampBar;
+            return input;
+        }
 
         // A sheet with room for the strip, the footer AND the floor: only the stop and the options decide
         private static CardChromeRule.Input Roomy(SheetStopRule.Stop stop, string showAt)
@@ -65,7 +78,7 @@ namespace TileStories.Editor.Tests
         {
             var input = Roomy(SheetStopRule.Stop.Full, CardOptions.ShowNavHalfAndFull);
             input.HasTop = false;
-            input.HasBottom = false;
+            input.HasFooter = false;
             var chrome = CardChromeRule.Decide(input);
             Assert.IsFalse(chrome.Top);
             Assert.IsFalse(chrome.Bottom);
@@ -118,6 +131,16 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(CardChromeRule.AtEnd(899.5f, 1000f, 100f), "within one pixel of it");
             Assert.IsFalse(CardChromeRule.AtEnd(850f, 1000f, 100f));
             Assert.IsFalse(CardChromeRule.AtEnd(0f, 50f, 100f), "a stack that does not scroll is at its top, never at its end");
+        }
+
+        // A jump moving the stack is not the reader moving: its scroll never hides the bottom area (the bar a visitor just tapped stays)
+        [Test]
+        public void AJumpsScroll_IsNoReading_AndHidesNothing()
+        {
+            Assert.AreEqual(0f, CardChromeRule.ReaderDelta(800f, jumping: true), "a jump's 800 px count for nothing");
+            Assert.AreEqual(800f, CardChromeRule.ReaderDelta(800f, jumping: false), "the reader's own 800 px count");
+            var state = CardChromeRule.Next(default, CardChromeRule.ReaderDelta(800f, true), false, false, CardOptions.HideOnScrollDown);
+            Assert.IsFalse(state.BottomHidden, "after the jump the bottom area still shows");
         }
 
         [Test]
@@ -222,24 +245,121 @@ namespace TileStories.Editor.Tests
         public void AStackShorterThanTheFloor_NeedsOnlyItsOwnHeight_AndAStackNotLaidOutYetTheWholeFloor()
         {
             var input = Lamp(SheetStopRule.Stop.Half);
-            input.HasBottom = false;
+            input.HasFooter = false;
             input.ContentHeight = 40f;
             Assert.IsTrue(CardChromeRule.Decide(input).Top, "57.6 px left after the strip holds the whole 40 px stack");
 
-            input.HasBottom = true;
+            input.HasFooter = true;
             input.ContentHeight = 20f;
             var chrome = CardChromeRule.Decide(input);
             Assert.IsTrue(chrome.Bottom, "a 20 px stack fits the 25.6 px the footer leaves");
             Assert.IsFalse(chrome.Top, "the strip as well would leave none of it");
 
-            input.HasBottom = false;
+            input.HasFooter = false;
             input.ContentHeight = float.NaN;
             Assert.IsFalse(CardChromeRule.Decide(input).Top, "content not measured yet: the full floor");
 
-            input.HasBottom = true;
+            input.HasFooter = true;
             input.SheetHeight = float.NaN;
             var unmeasured = CardChromeRule.Decide(input);
             Assert.IsTrue(unmeasured.Top && unmeasured.Bottom, "a sheet not laid out yet: no floor to apply, the stop decides");
+        }
+
+        // ---------------- the bottom area as a pair (step 7a) ----------------
+
+        // The Lamp at Half with a Bottom Bar: 106.6 px under the header cannot hold footer 81 + bar 52 + one line, so the WHOLE area goes
+        // (never half an area) and so does the strip -- the stack gets every pixel. The rule working, not a bug: Full has room for all
+        [Test]
+        public void TheLampAtHalf_WithABottomBar_GivesTheWholeRoomToTheStack_AndFullShowsEverything()
+        {
+            var input = LampWithBar(SheetStopRule.Stop.Half);
+            float room = LampHalf - LampHeader;
+            Assert.Less(room - LampFooter - LampBar, CardChromeRule.MinStackViewportUnderFooter, "precondition: the pair leaves less than one line");
+            var chrome = CardChromeRule.Decide(input);
+            Assert.IsFalse(chrome.Bottom, "the bottom area gives way as one");
+            Assert.IsFalse(chrome.BottomNav, "the bar with it");
+            Assert.IsFalse(chrome.Top, "and the strip (it gave way first)");
+            Assert.AreEqual(room, CardChromeRule.Viewport(input, chrome), 0.001f, "the stack keeps all 106.6 px");
+
+            var full = LampWithBar(SheetStopRule.Stop.Full);
+            chrome = CardChromeRule.Decide(full);
+            Assert.IsTrue(chrome.Top && chrome.Bottom && chrome.BottomNav, "Full: strip, footer and bar");
+            Assert.AreEqual(LampFull - LampHeader - LampStrip - LampFooter - LampBar, CardChromeRule.Viewport(full, chrome), 0.001f,
+                "the stack keeps what the three leave");
+        }
+
+        // One floor measures the pair, just above and below it: room for footer + bar + one line shows both, half a pixel less shows neither
+        [Test]
+        public void TheFloor_MeasuresTheFooterAndTheBarTogether()
+        {
+            var input = LampWithBar(SheetStopRule.Stop.Half);
+            input.HasTop = false;
+            input.SheetHeight = LampHeader + LampFooter + LampBar + CardChromeRule.MinStackViewportUnderFooter;
+            var chrome = CardChromeRule.Decide(input);
+            Assert.IsTrue(chrome.Bottom && chrome.BottomNav, "room for the pair and one line: both");
+            Assert.AreEqual(CardChromeRule.MinStackViewportUnderFooter, CardChromeRule.Viewport(input, chrome), 0.001f, "exactly one line left");
+            input.SheetHeight -= 0.5f;
+            chrome = CardChromeRule.Decide(input);
+            Assert.IsFalse(chrome.Bottom || chrome.BottomNav, "half a pixel less: neither -- the footer does not stay without its bar");
+
+            // - the strip still needs its own floor beside the whole pair
+            input.HasTop = true;
+            input.SheetHeight = LampHeader + LampStrip + LampFooter + LampBar + CardChromeRule.MinStackViewport;
+            Assert.IsTrue(CardChromeRule.Decide(input).Top, "room for the strip, the pair and the floor");
+            input.SheetHeight -= 0.5f;
+            chrome = CardChromeRule.Decide(input);
+            Assert.IsFalse(chrome.Top, "half a pixel less: the strip gives way first");
+            Assert.IsTrue(chrome.Bottom && chrome.BottomNav, "the pair stays");
+        }
+
+        // A card with a bar and no sticky footer: the area is the bar alone, with the same one-line floor
+        [Test]
+        public void ABarWithNoFooter_IsTheWholeArea()
+        {
+            var input = LampWithBar(SheetStopRule.Stop.Half);
+            input.HasTop = false;
+            input.HasFooter = false;
+            input.SheetHeight = LampHeader + LampBar + CardChromeRule.MinStackViewportUnderFooter;
+            var chrome = CardChromeRule.Decide(input);
+            Assert.IsTrue(chrome.Bottom && chrome.BottomNav, "the bar alone");
+            Assert.AreEqual(LampBar, CardChromeRule.BottomHeight(input, true), 0.001f, "a footer with no block adds nothing");
+            input.SheetHeight -= 1f;
+            Assert.IsFalse(CardChromeRule.Decide(input).Bottom, "one pixel less: it gives way");
+            input.HasBottomNav = false;
+            input.SheetHeight = LampFull;
+            Assert.IsFalse(CardChromeRule.Decide(input).Bottom, "neither part: no area");
+        }
+
+        // Hide While Scrolling slides the PAIR away, and both come back together
+        [Test]
+        public void TheScroll_HidesTheFooterAndTheBarTogether()
+        {
+            var chrome = CardChromeRule.Decide(LampWithBar(SheetStopRule.Stop.Full, scrollHid: true));
+            Assert.IsFalse(chrome.Bottom, "the area slid away");
+            Assert.IsFalse(chrome.BottomNav, "with its bar");
+            Assert.IsTrue(chrome.Top, "the strip stays");
+            Assert.AreEqual(LampFull - LampHeader - LampStrip, CardChromeRule.Viewport(LampWithBar(SheetStopRule.Stop.Full, scrollHid: true), chrome), 0.001f,
+                "both heights went to the stack");
+            chrome = CardChromeRule.Decide(LampWithBar(SheetStopRule.Stop.Full));
+            Assert.IsTrue(chrome.Bottom && chrome.BottomNav, "the scroll gave them back together");
+        }
+
+        // Show Navigation At applies to the NAVIGATION: Full Only hides the bar at Half, the footer (no navigation) stays; nothing at peek
+        [Test]
+        public void ShowNavigationAt_FullOnly_HidesTheBarAtHalf_TheFooterStays()
+        {
+            var input = LampWithBar(SheetStopRule.Stop.Half, CardOptions.ShowNavFullOnly);
+            input.SheetHeight = LampFull;
+            var chrome = CardChromeRule.Decide(input);
+            Assert.IsTrue(chrome.Bottom, "the footer stays at Half");
+            Assert.IsFalse(chrome.BottomNav, "the bar waits for Full");
+            Assert.AreEqual(LampFull - LampHeader - LampFooter, CardChromeRule.Viewport(input, chrome), 0.001f, "the bar takes no room");
+            input.Stop = SheetStopRule.Stop.Full;
+            Assert.IsTrue(CardChromeRule.Decide(input).BottomNav, "Full Only: the bar at Full");
+            input.Stop = SheetStopRule.Stop.Peek;
+            chrome = CardChromeRule.Decide(input);
+            Assert.IsFalse(chrome.Bottom || chrome.BottomNav, "nothing at peek");
+            Assert.IsFalse(new CardChromeRule.Chrome(false, false, true).BottomNav, "a bar is never shown outside a shown area");
         }
     }
 }

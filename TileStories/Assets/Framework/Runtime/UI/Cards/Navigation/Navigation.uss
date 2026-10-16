@@ -294,3 +294,52 @@
     -unity-font-style: bold;
     color: var(--ts-ink);
 }
+
+/* ---- the bottom bar (BottomBarNavView: bottom_bar, _3.2 section 5.2): a few slots sharing the width equally, More last; the More
+   list opens above them, inside the bottom area. Its items are icon tabs (NavTab), so the tab rules above give them their icon, word and
+   underline ---- */
+
+.nav-bar__items {
+    flex-direction: row;
+    padding: 0 var(--ts-space-1);
+}
+
+/* every slot the same share of the bar, and never under the touch token; a word never wraps or gets cut (the test measures it) */
+.nav-bar__item {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-shrink: 1;
+    padding: var(--ts-space-1) var(--ts-space-1) var(--ts-space-2) var(--ts-space-1);
+}
+
+/* the list of the sections More holds: one row per section, the icon beside its word, the whole row the tap target */
+.nav-bar__more-list {
+    padding: var(--ts-space-1) var(--ts-space-2);
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface);
+}
+
+.nav-bar__more-row {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0 var(--ts-space-3);
+}
+
+.nav-bar__more-row .nav-tabs__icon {
+    margin: 0 var(--ts-space-3) 0 0;
+}
+
+.nav-bar__more-row .nav-tabs__label {
+    font-size: var(--ts-size-body);
+}
+
+/* a row's mark is its bolder word and a bar at its start (an underline under a whole-width row would read as a divider) */
+.nav-bar__more-row .nav-tabs__underline {
+    left: 0;
+    right: auto;
+    top: var(--ts-space-2);
+    bottom: var(--ts-space-2);
+    width: var(--ts-tab-underline);
+    height: auto;
+}

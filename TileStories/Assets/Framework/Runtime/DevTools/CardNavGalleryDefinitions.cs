@@ -44,7 +44,7 @@ namespace TileStories
         public static readonly IReadOnlyList<string> ElementKeys = new[]
         {
             BuiltInNavElements.TextTabs, BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
-            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap,
+            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap, BuiltInNavElements.BottomBar,
         };
 
         // The gallery's walls show navigation from 2 targets, so the small cases draw their element too (the default threshold is
@@ -82,11 +82,14 @@ namespace TileStories
 
         public static readonly IReadOnlyList<Entry> All = ElementKeys.SelectMany(key => Cases.Select(c => new Entry(key, c))).ToList();
 
-        // The fabricated wall of an entry: the card gallery's own, with the entry's language offered and navigation from 2 targets
+        // The fabricated wall of an entry: the card gallery's own, with the entry's language offered and navigation from 2 targets. The
+        // element is the wall's pick for ITS slot and the other slot holds nothing, so each render judges one element alone
         public static WallConfigData Wall(Entry entry)
         {
             var wall = CardGalleryDefinitions.Taxonomy();
-            wall.card_settings.navigation.top = entry.ElementKey;
+            bool bottom = NavElementRegistry.Shared.TryGet(entry.ElementKey, out var element) && element.Slot == NavSlotKeys.Bottom;
+            wall.card_settings.navigation.top = bottom ? CardOptions.NavNone : entry.ElementKey;
+            wall.card_settings.navigation.bottom = bottom ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.min_blocks = ShowNavigationFrom;
             if (entry.Case.Language != "en") wall.card_settings.languages = new List<string> { "en", entry.Case.Language };
             return wall;

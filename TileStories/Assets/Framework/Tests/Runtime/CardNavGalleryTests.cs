@@ -14,7 +14,8 @@ namespace TileStories.Tests
 {
     // Phase A of the card's navigation elements (_3.2 section 9, 40-testing.md 4.4): every CardNavGalleryDefinitions entry -- each element
     // over each fixture card (62 targets / 8 + Sources, 6 / 3, one family, the big card in Portuguese) -- on the real sheet in the
-    // isolated gallery scene (Assets/Dev/CardNavGallery). Every element, whatever it is: it is the wall's pick in the top slot, it builds
+    // isolated gallery scene (Assets/Dev/CardNavGallery). Every element, whatever it is: it is the wall's pick in its own slot (top or
+    // bottom), it builds
     // over the card's real model, it lies inside the card at 390 px, every button in it is at least the touch token both ways, no word in
     // it is cut, every word reads at 4.5:1; then the element's own promise (ElementChecks) and a render Nav_<key>_<case>.png.
     public class CardNavGalleryTests
@@ -33,7 +34,21 @@ namespace TileStories.Tests
             [BuiltInNavElements.KindChips] = KindChipsKeepTheirPromise,
             [BuiltInNavElements.Segmented] = SegmentedKeepsItsPromise,
             [BuiltInNavElements.ProgressMap] = ProgressMapKeepsItsPromise,
+            [BuiltInNavElements.BottomBar] = BottomBarKeepsItsPromise,
         };
+
+        // The element an entry's slot holds now, its key and its slot element, and whether the chrome shows it
+        private static bool IsBottom(CardNavGalleryDefinitions.Entry entry) =>
+            NavElementRegistry.Shared.TryGet(entry.ElementKey, out var d) && d.Slot == NavSlotKeys.Bottom;
+
+        private static INavElementView ViewOf(PoiCardSheetView sheet, CardNavGalleryDefinitions.Entry entry) =>
+            IsBottom(entry) ? sheet.Slots.BottomView : sheet.Slots.TopView;
+
+        private static string KeyOf(PoiCardSheetView sheet, CardNavGalleryDefinitions.Entry entry) =>
+            IsBottom(entry) ? sheet.Slots.BottomKey : sheet.Slots.TopKey;
+
+        private static bool ChromeShows(PoiCardSheetView sheet, CardNavGalleryDefinitions.Entry entry) =>
+            IsBottom(entry) ? sheet.Chrome.BottomNavShown : sheet.Chrome.TopShown;
 
         [UnitySetUp]
         public IEnumerator SetUp()
@@ -100,15 +115,16 @@ namespace TileStories.Tests
             if (!NavSlotRule.OffersAChoice(definition, sheet.Nav.Model))
             {
                 Assert.IsTrue(sheet.Nav.Model.ShowsNavigation, "precondition: the card has enough targets for navigation");
-                Assert.IsNull(sheet.Slots.TopView, "one section: no " + entry.ElementKey);
-                Assert.IsFalse(sheet.Chrome.TopShown, "and nothing shown in the top slot");
+                Assert.IsNull(ViewOf(sheet, entry), "one section: no " + entry.ElementKey);
+                Assert.IsFalse(ChromeShows(sheet, entry), "and nothing shown in its slot");
                 yield return CardGalleryChecks.Render(name);
                 yield break;
             }
-            Assert.AreEqual(entry.ElementKey, sheet.Slots.TopKey, "the slot shows the wall's pick");
-            var root = sheet.Slots.TopView.Root;
+            Assert.AreEqual(entry.ElementKey, KeyOf(sheet, entry), "the slot shows the wall's pick");
+            Assert.IsNull(IsBottom(entry) ? sheet.Slots.TopView : sheet.Slots.BottomView, "and the other slot nothing: one element judged alone");
+            var root = ViewOf(sheet, entry).Root;
             Assert.IsTrue(CardTestInput.IsShown(root, sheet.Root), "shown at Full");
-            Assert.IsTrue(sheet.Chrome.TopShown, "and the chrome shows its slot");
+            Assert.IsTrue(ChromeShows(sheet, entry), "and the chrome shows its slot");
 
             // - inside the card at the phone width
             float onePixel = CardGalleryChecks.OnePixel(root);
@@ -117,9 +133,10 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(root.worldBound.xMin, card.xMin - onePixel, "the element starts inside the card");
             Assert.LessOrEqual(root.worldBound.xMax, card.xMax + onePixel, "and ends inside it");
 
-            // - every target at least the touch token, every word whole and readable
+            // - every target a visitor can tap at least the touch token (a closed list's rows take no room: the bottom bar's More list is
+            //   judged open by its own test), every word whole and readable
             float touch = CardTestInput.TokenPx("--ts-touch-target");
-            var buttons = root.Query<Button>().ToList();
+            var buttons = root.Query<Button>().ToList().Where(b => CardTestInput.IsShown(b, sheet.Root)).ToList();
             Assert.IsNotEmpty(buttons, "the element offers something to tap");
             foreach (var button in buttons)
             {
@@ -325,6 +342,90 @@ namespace TileStories.Tests
             if (view.Segments.Count > 1) Assert.AreEqual(thin, view.Segments[1].Bar.layout.height, onePixel, "than the others");
             Assert.AreEqual(view.Strip.Row.layout.width > view.Strip.VisibleWidth + onePixel, expected.Sum() > view.Strip.VisibleWidth + onePixel,
                 "the bar scrolls exactly when its minimums are wider than the card");
+        }
+
+        // bottom_bar: at the very bottom of the card, Bar Slots - 1 sections and More when the card has more sections than the 5 slots
+        // (else one slot per section and no More), each slot an icon tab -- its family's icon in its colour above its word -- sharing the
+        // bar's width equally; the first section marked (underline AND bold); More's list closed, holding exactly the overflow
+        private static void BottomBarKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var sheet = harness.Gallery.Sheet;
+            var bar = (BottomBarNavView)sheet.Slots.BottomView;
+            var model = sheet.Nav.Model;
+            var strings = Strings(harness, entry);
+            float onePixel = CardGalleryChecks.OnePixel(bar.Root);
+            Assert.AreEqual(sheet.Root.worldBound.yMax, sheet.Slots.Bottom.worldBound.yMax, onePixel, "the bar closes the card: in the thumb zone");
+            Assert.LessOrEqual(sheet.Stack.Scroll.worldBound.yMax, sheet.BottomArea.worldBound.yMin + onePixel, "under the stack");
+
+            int slots = NavOntologyRule.MaxSlots(ConfigNav(entry));
+            bool overflows = model.Sections.Count > slots;
+            Assert.AreEqual(overflows, entry.Case.Key == "big" || entry.Case.Key == "pt_long", "only the eight-section cards overflow 5 slots");
+            int inBar = overflows ? slots - 1 : model.Sections.Count;
+            CollectionAssert.AreEqual(model.Sections.Take(inBar).Select(s => strings.Get(s.LabelKey)), bar.Items.Select(t => t.Label.text),
+                "the first sections, each its word in " + entry.Case.Language);
+            Assert.AreEqual(overflows, bar.HasMore, "More exactly when the sections overflow");
+            var slotsShown = bar.Items.Select(t => t.Button).ToList();
+            if (overflows)
+            {
+                slotsShown.Add(bar.More.Button);
+                Assert.AreEqual(strings.Get(CardStrings.Keys.NavMore), bar.More.Label.text, "More says its word in " + entry.Case.Language);
+                CollectionAssert.AreEqual(model.Sections.Skip(inBar).Select(s => strings.Get(s.LabelKey)), bar.MoreRows.Select(r => r.Label.text),
+                    "More holds exactly the rest, in order");
+            }
+            Assert.IsFalse(bar.MoreOpen, "the list starts closed");
+            Assert.AreEqual(DisplayStyle.None, bar.MoreList.resolvedStyle.display, "and takes no room");
+            float width = slotsShown[0].layout.width;
+            foreach (var button in slotsShown)
+                Assert.AreEqual(width, button.layout.width, onePixel, button.name + ": every slot the same share of the bar");
+            Assert.AreEqual(bar.Bar.contentRect.width, width * slotsShown.Count, onePixel * slotsShown.Count, "the slots fill the bar");
+            foreach (var tab in bar.Items)
+            {
+                var section = model.Sections[tab.Index];
+                Assert.AreEqual(section.IconKey, CardIcons.KeyOf(tab.Icon), tab.Label.text + ": its family's icon");
+                Assert.LessOrEqual(tab.Icon.worldBound.yMax, tab.Label.worldBound.yMin + 0.5f, tab.Label.text + ": the icon above the word");
+                var frame = tab.Icon.Q(className: "card-icon__frame");
+                if (frame.resolvedStyle.display == DisplayStyle.Flex)
+                    AssertFamilyPaint(frame.resolvedStyle.borderTopColor, section.ColorToken, tab.Button, tab.Label.text + "'s icon");
+                bool marked = tab.Index == 0;
+                Assert.AreEqual(marked, tab.Underline.resolvedStyle.display == DisplayStyle.Flex, tab.Label.text + ": underline");
+                Assert.AreEqual(marked ? FontStyle.Bold : FontStyle.Normal, tab.Label.resolvedStyle.unityFontStyleAndWeight, tab.Label.text + ": weight");
+            }
+            Assert.IsFalse(bar.More.Button.ClassListContains(NavTab.CurrentClass), "More is not marked while the first section is read");
+        }
+
+        // The wall's navigation settings of an entry (what Bar Slots the gallery's wall has)
+        private static CardNavigationSettings ConfigNav(CardNavGalleryDefinitions.Entry entry) => CardNavGalleryDefinitions.Wall(entry).card_settings.navigation;
+
+        // The bottom bar's More list OPEN on the eight-section cards (English and Portuguese): above the bar, inside the card, one row per
+        // overflow section -- each a whole touch target, its word whole -- and the bar still under it; rendered Nav_bottom_bar_<case>_more
+        [UnityTest]
+        public IEnumerator TheBottomBarsMoreList_OpensAboveTheBar_WithAWholeRowPerOverflowSection_AndRenders([Values("big", "pt_long")] string caseKey)
+        {
+            var all = CardNavGalleryDefinitions.All.ToList();
+            int index = all.FindIndex(e => e.ElementKey == BuiltInNavElements.BottomBar && e.Case.Key == caseKey);
+            _harness.Show(index);
+            yield return CardTestInput.Settle();
+            var sheet = _harness.Gallery.Sheet;
+            var bar = (BottomBarNavView)sheet.Slots.BottomView;
+            Assert.IsTrue(bar.HasMore, "precondition: the eight sections overflow the bar");
+            bar.OpenMore();
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(bar.MoreOpen);
+            float onePixel = CardGalleryChecks.OnePixel(bar.Root);
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            Assert.LessOrEqual(bar.MoreList.worldBound.yMax, bar.Bar.worldBound.yMin + onePixel, "the list sits above the bar");
+            Assert.GreaterOrEqual(bar.MoreList.worldBound.yMin, sheet.Root.worldBound.yMin, "inside the card");
+            Assert.AreEqual(sheet.Root.worldBound.yMax, bar.Bar.worldBound.yMax, onePixel, "the bar stays at the card's bottom");
+            Assert.AreEqual(sheet.Nav.Model.MoreSections.Count, bar.MoreRows.Count, "one row per overflow section");
+            foreach (var row in bar.MoreRows)
+            {
+                Assert.GreaterOrEqual(row.Button.layout.height, touch - onePixel, row.Label.text + ": tall enough to tap");
+                Assert.GreaterOrEqual(row.Button.layout.width, touch - onePixel, row.Label.text + ": wide enough to tap");
+                var words = row.Label.MeasureTextSize(row.Label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+                Assert.GreaterOrEqual(row.Label.layout.width + 0.5f, words.x, "'" + row.Label.text + "': whole");
+                Assert.LessOrEqual(row.Icon.worldBound.xMax, row.Label.worldBound.xMin + 0.5f, row.Label.text + ": its icon beside its word");
+            }
+            yield return CardGalleryChecks.Render("Nav_bottom_bar_" + caseKey + "_more");
         }
     }
 }

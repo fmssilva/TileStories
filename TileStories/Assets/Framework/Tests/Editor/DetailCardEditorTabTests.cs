@@ -136,6 +136,7 @@ namespace TileStories.Editor.Tests
                                 "jump_motion" => CardOptions.JumpMotionInstant,
                                 "back_button" => CardOptions.BackButtonNone,
                                 "top" => CardOptions.NavNone,
+                                "bottom" => BuiltInNavElements.BottomBar,
                                 "show_at" => CardOptions.ShowNavFullOnly,
                                 "hide_on_scroll" => CardOptions.HideOnScrollNever,
                                 "labels" => CardOptions.LabelsIcon,
@@ -162,8 +163,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 15 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 15 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 16 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 16 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1259,7 +1260,7 @@ namespace TileStories.Editor.Tests
             yield return _window.PressUndo();
             Assert.AreEqual(8, _window.Config.card_settings.navigation.min_blocks, "Ctrl+Z");
 
-            var (keys, labels) = POIEditorToolWindow.TopBarOptions(NavElementRegistry.Shared);
+            var (keys, labels) = POIEditorToolWindow.SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Top);
             CollectionAssert.AreEqual(new[] { CardOptions.NavNone }.Concat(NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Key)), keys);
             CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel }.Concat(NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Label)), labels,
                 "named by the elements' labels, never their keys");
@@ -1274,7 +1275,7 @@ namespace TileStories.Editor.Tests
             var registry = new NavElementRegistry();
             BuiltInNavElements.Register(registry);
             registry.Register(new NavElementDefinition("app_dots", NavSlotKeys.Top, "App Dots", "App Dots: one dot per section.", NavChoice.Sections), () => new TextTabsNavView());
-            var (appKeys, appLabels) = POIEditorToolWindow.TopBarOptions(registry);
+            var (appKeys, appLabels) = POIEditorToolWindow.SlotOptions(registry, NavSlotKeys.Top);
             Assert.AreEqual("app_dots", appKeys.Last());
             Assert.AreEqual("App Dots", appLabels.Last());
             var topHelp = typeof(POIEditorToolWindow).GetMethod("CardTopBarHelp", Static);
@@ -1475,6 +1476,81 @@ namespace TileStories.Editor.Tests
             string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
             foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top))
                 StringAssert.Contains("Top Bar = " + element.Label, guide, "the Playmode guide walks " + element.Label);
+        }
+
+        // Detail Card > Navigation's step 7a rows on the real window. Bottom Bar is drawn on its default, None, under Top Bar and listed
+        // from the registry (None, then the bottom slot's elements by their labels); Bar Slots shows only for a Bottom Bar element that is a
+        // bar of slots, under the display options and before Follow Scroll, and keeps its value while hidden. A real click at the start of
+        // Bar Slots' track picks the minimum, 3; each change is undone by a real Ctrl+Z. With the bar, Labels shows even under Text Tabs (the
+        // bar draws icons). Both helps and the Playmode guide say what a wall author needs, in ASCII
+        [UnityTest]
+        public IEnumerator TheBottomBarAndBarSlotsRows_ShowBarSlotsOnlyForABar_KeepItsValueHidden_AndEachChangeIsUndoneByCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            var nav = _window.Config.card_settings.navigation;
+            Assert.AreEqual(CardOptions.NavNone, nav.bottom, "the shipped wall never set Bottom Bar: None");
+            Assert.AreEqual(5, nav.max_slots, "nor Bar Slots: 5");
+            var titles = drawn.Select(d => d.Title).ToList();
+            CollectionAssert.Contains(titles, "Bottom Bar", "the row is drawn on its default");
+            CollectionAssert.DoesNotContain(titles, "Bar Slots", "no bar: no Bar Slots");
+            CollectionAssert.DoesNotContain(titles, "Labels", "Text Tabs and no bar: no Labels");
+            float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
+            Assert.Less(Y("Top Bar"), Y("Bottom Bar"), "Bottom Bar under Top Bar (section 7's order)");
+            Assert.Less(Y("Bottom Bar"), Y("Follow Scroll"));
+
+            var (keys, labels) = POIEditorToolWindow.SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInNavElements.BottomBar }, keys, "None, then the bottom slot's elements");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Bottom Bar" }, labels, "named by their labels, never their keys");
+
+            // - the pick through the window's history (an IMGUI popup opens a native menu): Bar Slots and Labels appear
+            Pick(() => _window.Config.card_settings.navigation.bottom = BuiltInNavElements.BottomBar);
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsTrue(_window.Unsaved);
+            titles = drawn.Select(d => d.Title).ToList();
+            CollectionAssert.Contains(titles, "Bar Slots", "a bar of slots: Bar Slots");
+            CollectionAssert.Contains(titles, "Labels", "the bar draws icons: Labels, whatever the Top Bar");
+            Assert.Less(Y("Bottom Bar"), Y("Labels"));
+            Assert.Less(Y("Show Counts"), Y("Bar Slots"), "Bar Slots after the display options (section 7's order)");
+            Assert.Less(Y("Bar Slots"), Y("Follow Scroll"));
+
+            // - a real click near the LEFT end of Bar Slots' track: the minimum, 3; Ctrl+Z gives 5 back
+            yield return _window.ScrollTo("Bar Slots");
+            Rect row = _window.RectOf("Bar Slots");
+            _window.ClickAt(new Vector2(row.x + EditorGUIUtility.labelWidth + 4f, row.center.y));
+            yield return _window.WaitForRepaint();
+            Assert.AreEqual(CardNavigationSettings.MaxSlotsMin, _window.Config.card_settings.navigation.max_slots, "a real click at the track's start: 3 slots");
+            yield return _window.PressUndo();
+            Assert.AreEqual(5, _window.Config.card_settings.navigation.max_slots, "Ctrl+Z");
+
+            // - a hidden row keeps its value: 4 slots, then Bottom Bar back to None
+            Pick(() => _window.Config.card_settings.navigation.max_slots = 4);
+            Pick(() => _window.Config.card_settings.navigation.bottom = CardOptions.NavNone);
+            yield return DrawnInfoTitles(drawn);
+            CollectionAssert.DoesNotContain(drawn.Select(d => d.Title).ToList(), "Bar Slots", "None: Bar Slots hidden");
+            Assert.AreEqual(4, _window.Config.card_settings.navigation.max_slots, "the hidden row kept its value");
+            yield return _window.PressUndo();
+            Assert.AreEqual(BuiltInNavElements.BottomBar, _window.Config.card_settings.navigation.bottom, "Ctrl+Z brings the bar back");
+            yield return _window.PressUndo();
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.bottom, "and the first pick is undone too");
+
+            var help = typeof(POIEditorToolWindow);
+            string bottomHelp = (string)help.GetMethod("CardBottomBarHelp", Static).Invoke(null, new object[] { NavElementRegistry.Shared });
+            foreach (string word in new[] { "None (the default)", "Show Navigation From", "Hide While Scrolling", "give way together", "Bottom Bar: ", "More" })
+                StringAssert.Contains(word, bottomHelp, "CardBottomBarHelp says " + word);
+            EditorTextChecks.AssertAscii(bottomHelp, "CardBottomBarHelp");
+            string slotsHelp = (string)help.GetField("CardBarSlotsHelp", Static).GetValue(null);
+            foreach (string word in new[] { "from 3 to 5", "default 5", "More", "fewer sections than slots" })
+                StringAssert.Contains(word, slotsHelp, "CardBarSlotsHelp says " + word);
+            EditorTextChecks.AssertAscii(slotsHelp, "CardBarSlotsHelp");
+            string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
+            foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Bottom))
+                StringAssert.Contains("Bottom Bar = " + element.Label, guide, "the Playmode guide walks " + element.Label);
+            StringAssert.Contains("Set Bar Slots to 3, 4 and 5", guide);
         }
 
         // The Groups table on the real window, with Top Bar = Segmented. A wall with no rows shows the framework's four by their words and

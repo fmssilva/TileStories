@@ -19,6 +19,8 @@ namespace TileStories.Tests
         private ScrollView Scroll => Sheet.Stack.Scroll;
         private VisualElement Strip => Sheet.Slots.Top;
         private VisualElement Footer => Sheet.Stack.Footer;
+        // The part that slides and gives way: the bottom area the footer sits in (step 7a), with the bottom bar when there is one
+        private VisualElement Bottom => Sheet.BottomArea;
         private CardChromeView Chrome => Sheet.Chrome;
 
         // One screen pixel in panel units: the run's pinned frame decides it, so it is measured, not assumed
@@ -116,7 +118,7 @@ namespace TileStories.Tests
             Assert.IsFalse(Chrome.TopShown, "the strip gives way first at Half");
             Assert.IsTrue(Chrome.BottomShown, "the footer stays");
             Assert.IsFalse(InTheCard(Strip), "the strip takes no place in the card");
-            Assert.IsTrue(InTheCard(Footer), "the footer does");
+            Assert.IsTrue(InTheCard(Bottom), "the footer does");
             Assert.IsTrue(FooterOnScreen, "inside the card's visible bottom edge: " + Footer.worldBound + " in " + Sheet.Root.worldBound);
             var button = Footer.Q<Button>();
             Assert.IsNotNull(button, "the footer holds its button");
@@ -168,7 +170,7 @@ namespace TileStories.Tests
             Assert.IsFalse(Chrome.TopShown, "no strip at peek");
             Assert.IsFalse(Chrome.BottomShown, "no footer at peek");
             Assert.IsFalse(InTheCard(Strip));
-            Assert.IsFalse(InTheCard(Footer));
+            Assert.IsFalse(InTheCard(Bottom));
             Assert.IsTrue(FooterBelowTheCard, "the footer is below the card's edge");
         }
 
@@ -238,8 +240,8 @@ namespace TileStories.Tests
             yield return Push(c => c.card_settings.container.reduce_motion = true);
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             Assert.IsTrue(Sheet.Root.ClassListContains(CardChromeView.InstantClass), "the card says instant");
-            foreach (var duration in Footer.resolvedStyle.transitionDuration)
-                Assert.AreEqual(0f, duration.value, "no slide on the footer");
+            foreach (var duration in Bottom.resolvedStyle.transitionDuration)
+                Assert.AreEqual(0f, duration.value, "no slide on the bottom area (the footer in it)");
         }
     }
 }

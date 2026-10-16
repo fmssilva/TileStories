@@ -4,7 +4,8 @@
 // card. The two rows that order the stack: Block Order and the Families table (Order with reorder arrows, Family,
 // At The End, Group, one (i) on its header); Group By; which cards get navigation, at which heights and what the top strip
 // shows (Show Navigation From, Top Bar: step 5a; Show Navigation At: 5b; Labels, Show Counts: step 6, each only for an element
-// that reads it), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
+// that reads it), what the bar under the stack shows (Bottom Bar and its Bar Slots, step 7a, Bar Slots only for an element that is a
+// bar), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
 // the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4; the Groups table last (step 6,
 // only for the Segmented bar, POIEditorToolWindow.CardNavigationGroups.cs). The other nav elements, layouts and presets join
 // this same section at later steps. Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
@@ -40,6 +41,10 @@ namespace TileStories.Editor
             // - which of the wall's options the Top Bar's element reads: a row (or column) it ignores is hidden and keeps its value
             //   (_3.2 section 3). Read from the element's own definition, so an app's element needs no edit here
             NavElementRegistry.Shared.TryGet(nav.top, out var topElement);
+            NavElementRegistry.Shared.TryGet(nav.bottom, out var bottomElement);
+            // - an element counts only in its own slot: a hand-edited key of the other slot draws nothing there
+            if (topElement != null && topElement.Slot != NavSlotKeys.Top) topElement = null;
+            if (bottomElement != null && bottomElement.Slot != NavSlotKeys.Bottom) bottomElement = null;
             bool usesGroups = topElement != null && topElement.Choice == NavChoice.Groups;
 
             DrawFamiliesTable(nav, usesGroups);
@@ -51,13 +56,19 @@ namespace TileStories.Editor
             nav.min_blocks = DrawIntSliderField("Show Navigation From", nav.min_blocks, CardNavigationSettings.MinBlocksMin, CardNavigationSettings.MinBlocksMax,
                 CardShowNavigationFromHelp);
             nav.show_at = DrawPopupField("Show Navigation At", nav.show_at, CardOptions.ShowNavigationAts, CardOptions.ShowNavigationAtLabels, CardShowNavigationAtHelp);
-            var (topKeys, topLabels) = TopBarOptions(NavElementRegistry.Shared);
+            var (topKeys, topLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Top);
             // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped
             nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
-            if (topElement != null && topElement.ReadsLabels)
+            var (bottomKeys, bottomLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
+            nav.bottom = DrawReferencePopupField("Bottom Bar", nav.bottom, bottomKeys, bottomLabels, allowNone: false, CardBottomBarHelp(NavElementRegistry.Shared));
+            // - a display option shows while EITHER bar reads it: both bars follow the same wall setting
+            if (topElement != null && topElement.ReadsLabels || bottomElement != null && bottomElement.ReadsLabels)
                 nav.labels = DrawPopupField("Labels", nav.labels, CardOptions.Labels, CardOptions.LabelsLabels, CardLabelsHelp);
-            if (topElement != null && topElement.ShowsCounts)
+            if (topElement != null && topElement.ShowsCounts || bottomElement != null && bottomElement.ShowsCounts)
                 nav.show_counts = DrawToggleField("Show Counts", nav.show_counts, CardShowCountsHelp);
+            if (bottomElement != null && bottomElement.ReadsBarSlots)
+                nav.max_slots = DrawIntSliderField("Bar Slots", nav.max_slots, CardNavigationSettings.MaxSlotsMin, CardNavigationSettings.MaxSlotsMax,
+                    CardBarSlotsHelp);
             nav.follow_scroll = DrawToggleField("Follow Scroll", nav.follow_scroll, CardFollowScrollHelp);
             nav.hide_on_scroll = DrawPopupField("Hide While Scrolling", nav.hide_on_scroll, CardOptions.HideOnScrolls, CardOptions.HideOnScrollLabels,
                 CardHideWhileScrollingHelp);
@@ -78,13 +89,13 @@ namespace TileStories.Editor
             DrawDomainTestSubSection(_cardNavigationTest, CardNavigationSceneTestGuide, CardNavigationPlaymodeTestGuide, CardNavigationDeviceTestGuide);
         }
 
-        // Top Bar's choices: None, then every element registered for the top slot, named by its Editor label -- listed FROM the registry,
-        // so an app's own element is offered here with no edit to the window
-        internal static (List<string> Keys, List<string> Labels) TopBarOptions(NavElementRegistry registry)
+        // A slot's choices (Top Bar, Bottom Bar): None, then every element registered for that slot, named by its Editor label -- listed
+        // FROM the registry, so an app's own element is offered here with no edit to the window
+        internal static (List<string> Keys, List<string> Labels) SlotOptions(NavElementRegistry registry, string slot)
         {
             var keys = new List<string> { CardOptions.NavNone };
             var labels = new List<string> { CardOptions.NavNoneLabel };
-            foreach (var element in registry.OfSlot(NavSlotKeys.Top))
+            foreach (var element in registry.OfSlot(slot))
             {
                 keys.Add(element.Key);
                 labels.Add(element.Label);

@@ -3,7 +3,7 @@ using System;
 namespace TileStories
 {
     // Which navigation element a slot of the card holds (_3.2 sections 3 and 4.2). Pure: the sheet's NavSlots only applies what it says.
-    //   - the wall's choice for the slot (Top Bar), "none" or blank = nothing; a key no element of that slot is registered under =
+    //   - the wall's choice for the slot (Top Bar, Bottom Bar), "none" or blank = nothing; a key no element of that slot is registered under =
     //     nothing (the Editor names it missing), never a guess at another element
     //   - a card below Show Navigation From holds no element at all (the model's ShowsNavigation, rule 3 of 2.5)
     //   - an element is not drawn where what it chooses between has fewer than two options (rule 7 of 2.5): sections for tabs, groups
@@ -13,12 +13,20 @@ namespace TileStories
     {
         // The key of the element the top slot holds for this card, or null for none. `topElement`: the definition registered under a
         // key for the TOP slot, null when there is none (NavElementRegistry)
-        public static string TopElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> topElement)
+        public static string TopElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> topElement) =>
+            Element((nav ?? new CardNavigationSettings()).top, model, topElement);
+
+        // The key of the element the bottom slot holds for this card, or null for none. `bottomElement`: the definition registered under
+        // a key for the BOTTOM slot, null when there is none
+        public static string BottomElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> bottomElement) =>
+            Element((nav ?? new CardNavigationSettings()).bottom, model, bottomElement);
+
+        // One slot's answer: the wall's pick for it, when the card shows navigation, the slot has such an element and it has a choice here
+        private static string Element(string key, CardNavModel model, Func<string, NavElementDefinition> elementOfSlot)
         {
             if (model == null || !model.ShowsNavigation) return null;
-            string key = (nav ?? new CardNavigationSettings()).top;
             if (string.IsNullOrWhiteSpace(key) || key == CardOptions.NavNone) return null;
-            var element = topElement?.Invoke(key);
+            var element = elementOfSlot?.Invoke(key);
             if (element == null) return null;
             return OffersAChoice(element, model) ? key : null;
         }

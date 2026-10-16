@@ -10,6 +10,7 @@ namespace TileStories
         public const string KindChips = "kind_chips";
         public const string Segmented = "segmented";
         public const string ProgressMap = "progress_map";
+        public const string BottomBar = "bottom_bar";
 
         public static void Register(NavElementRegistry registry)
         {
@@ -45,9 +46,19 @@ namespace TileStories
             registry.Register(new NavElementDefinition(ProgressMap, NavSlotKeys.Top, "Progress Map",
                 "Progress Map: a thin bar split into one piece per section, each as wide as its share of the card's blocks, with the "
                 + "family's icon above it. The pieces up to the one being read are solid, so it also shows how far the visitor got. Takes "
-                + "the least height of all; a tap on a piece moves the card there.",
+                + "the least height of all; a tap on a piece moves the card there. The pieces show their share only while the "
+                + "card's families fit the screen side by side (about 4 or 5 on a phone): every piece stays one finger wide so it can "
+                + "be tapped, so with more families most pieces are that same width and the bar scrolls sideways.",
                 NavChoice.Sections),
                 () => new ProgressMapNavView());
+            registry.Register(new NavElementDefinition(BottomBar, NavSlotKeys.Bottom, "Bottom Bar",
+                "Bottom Bar: a bar at the bottom of the card, under its sticky button, where a thumb reaches: one slot per section (its "
+                + "icon above its word; Labels picks icon, word or both), as many as Bar Slots. A card with more sections than that turns "
+                + "the last slot into More, which lists the rest just above the bar. The section being read is underlined and bold (More "
+                + "for one in its list). The bar slides away with the sticky button while the visitor reads down (Hide While Scrolling) and "
+                + "both give way together where a stop leaves too little room to read. Needs two sections, like the tabs.",
+                NavChoice.Sections, readsLabels: true, readsBarSlots: true),
+                () => new BottomBarNavView());
         }
     }
 }
