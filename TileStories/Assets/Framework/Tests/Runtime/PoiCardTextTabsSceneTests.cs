@@ -12,7 +12,8 @@ namespace TileStories.Tests
     // card and real input: the strip sits between the header and the stack, outside the scroll, and never moves the sheet's stops; a
     // real tap on a tab lands that section's first block at the viewport's top; a real drag of the stack moves the underline; a real
     // sideways drag scrolls the strip and not the card, an up / down one moves the sheet; a card below Show Navigation From has no
-    // strip; Top Bar and Show Navigation From are live.
+    // strip; Top Bar and Show Navigation From are live. Since step 5b the strip shows where CardChromeRule allows it: at The Lamp's Half
+    // (open header) the floor hides it, so the strip's own tests act at Full; PoiCardChromeSceneTests owns what shows at which stop.
     public partial class PoiCardTextTabsSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";
@@ -86,6 +87,10 @@ namespace TileStories.Tests
 
         private static bool IsShown(VisualElement e) => e.resolvedStyle.display == DisplayStyle.Flex;
 
+        // A part of the chrome takes its place in the card: in the flow and visible (CardChromeView hides it out of the flow, not with display)
+        private static bool InTheCard(VisualElement e) =>
+            IsShown(e) && e.resolvedStyle.visibility == Visibility.Visible && e.resolvedStyle.position == Position.Relative;
+
         // The section the reader is in, read from the screen (each section's first slot against a third of the viewport)
         private int SectionUnderTheSpyLine()
         {
@@ -135,7 +140,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheLampsStops_AreTheHeadersPeekPart_AndTheStripMovesNone()
         {
-            yield return Open(Lamp, SheetStopRule.Stop.Half);
+            yield return Open(Lamp, SheetStopRule.Stop.Full);
             Assert.IsNotNull(Tabs, "precondition: the Lamp's card (56 targets) shows the default Top Bar, Text Tabs");
             var withStrip = Sheet.Stops;
             Assert.Greater(withStrip.Peek, 0f, "precondition: the peek was measured");
@@ -145,13 +150,13 @@ namespace TileStories.Tests
                 CardTestInput.TokenPx("--ts-sheet-top-gap"));
             Assert.AreEqual(expected.Half, withStrip.Half, 0.01f, "half comes from the peek and the Half Height Max");
             Assert.AreEqual(expected.Full, withStrip.Full, 0.01f, "full leaves the top gap");
-            Assert.IsTrue(IsShown(Sheet.Slots.Top), "the strip shows at Half");
+            Assert.IsTrue(InTheCard(Sheet.Slots.Top), "the strip shows at Full");
             Assert.GreaterOrEqual(Sheet.Slots.Top.worldBound.yMin, Sheet.Stack.PeekPart.worldBound.yMax - 0.5f, "and sits under the header's peek part");
             Assert.LessOrEqual(Sheet.Slots.Top.worldBound.yMax, Scroll.worldBound.yMin + 0.5f, "above the stack, outside its scroll");
 
             Sheet.SetStop(SheetStopRule.Stop.Peek);
             yield return CardTestInput.Settle();
-            Assert.IsFalse(IsShown(Sheet.Slots.Top), "never at peek");
+            Assert.IsFalse(InTheCard(Sheet.Slots.Top), "never at peek");
             Assert.AreEqual(withStrip.Peek, Sheet.Stops.Peek, 0.01f, "the peek did not move when the strip went");
 
             yield return Push(c => c.card_settings.navigation.top = CardOptions.NavNone);
@@ -170,11 +175,12 @@ namespace TileStories.Tests
         // The composition, from the selection a marker tap makes (MarkerSelectable -> SelectionEventBus.Select; the marker's own tap is
         // SearchSceneTests'): the REAL host opens the card, every tab -- each brought into view by a real sideways drag when the strip hides
         // it -- is tapped by a real finger, and its section's first block lands at the viewport's top (+-1 px; the range end for a late
-        // section), the card raised to Full, that tab marked, one nav_jump naming text_tabs
+        // section), that tab marked, one nav_jump naming text_tabs. At Full: the strip's stop on The Lamp (the raise from a lower stop is
+        // PoiCardNavSceneTests')
         [UnityTest]
         public IEnumerator ARealTapOnEveryTab_LandsItsSectionsFirstBlockAtTheViewportTop_AndMarksIt()
         {
-            yield return Open(Lamp, SheetStopRule.Stop.Half);
+            yield return Open(Lamp, SheetStopRule.Stop.Full);
             Assert.AreEqual(Lamp, Card.ShownPoiId, "the real host shows The Lamp's card");
             Assert.IsNotNull(Tabs, "precondition: the strip is there");
             Assert.AreEqual(Nav.Model.Sections.Count, Tabs.Tabs.Count, "one tab per section of the model");
@@ -191,7 +197,7 @@ namespace TileStories.Tests
                 var section = Nav.Model.Sections[i];
                 var slot = Sheet.Stack.SlotOfBlock(section.Targets[0]);
                 float top = slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin;
-                Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, section.Key + ": the jump raised the card to Full");
+                Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, section.Key + ": the card stays at Full");
                 if (slot.layout.y <= Range - OnePixel)
                     Assert.AreEqual(0f, top, OnePixel, section.Key + ": its first block's top meets the viewport's top");
                 else
@@ -200,8 +206,6 @@ namespace TileStories.Tests
                 Assert.AreEqual(BuiltInNavElements.TextTabs, NavJumps.Last().Variant, "the event names the element");
                 Assert.AreEqual(section.Key, NavJumps.Last().Value);
                 if (slot.layout.y <= Range - OnePixel) AssertMarked(i, section.Key);
-                Sheet.SetStop(SheetStopRule.Stop.Half);
-                yield return CardTestInput.Settle();
             }
         }
 
@@ -236,7 +240,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator ARealSidewaysDragOnTheStrip_ScrollsTheStrip_AndNotTheCard()
         {
-            yield return Open(Lamp, SheetStopRule.Stop.Half);
+            yield return Open(Lamp, SheetStopRule.Stop.Full);
             float max = NavStripRule.MaxOffset(Tabs.Row.layout.width, Tabs.Viewport.contentRect.width);
             Assert.Greater(max, 100f, "precondition: the strip is wider than the screen (" + Tabs.Row.layout.width + " in " + Tabs.Viewport.contentRect.width + ")");
             Assert.AreEqual(0f, Tabs.Offset, "precondition: the strip starts at its start");
@@ -247,7 +251,7 @@ namespace TileStories.Tests
             yield return CardTestInput.TouchDrag(Sheet.Root.panel, start, new Vector2(-100f, 6f));
             yield return CardTestInput.Settle(0.3f);
             Assert.AreEqual(100f, Tabs.Offset, OnePixel, "the strip followed the finger's 100 sideways");
-            Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "the card stayed at Half");
+            Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the card stayed at Full");
             Assert.AreEqual(height, Sheet.TargetHeight, 0.01f, "the sheet did not move");
             Assert.AreEqual(stack, Scroll.scrollOffset.y, 0.01f, "the stack did not scroll");
             Assert.AreEqual(jumps, NavJumps.Count, "no tab was clicked by the drag");
@@ -263,16 +267,17 @@ namespace TileStories.Tests
             Assert.AreEqual(jumps, NavJumps.Count, "still no jump");
         }
 
-        // An up drag that starts on a tab moves the sheet like one on the header: Half -> Full, no jump
+        // A down drag that starts on a tab moves the sheet like one on the header: Full -> Half, no jump (the strip shows at The Lamp's
+        // Full; the up drag from Half is the same claim the other way, and the Lamp's Half has no strip since step 5b)
         [UnityTest]
-        public IEnumerator AnUpDragOnTheStrip_RaisesTheSheet_LikeTheHeader()
+        public IEnumerator ADownDragOnTheStrip_LowersTheSheet_LikeTheHeader()
         {
-            yield return Open(Lamp, SheetStopRule.Stop.Half);
+            yield return Open(Lamp, SheetStopRule.Stop.Full);
             int jumps = NavJumps.Count;
             float offset = Tabs.Offset;
-            yield return CardTestInput.Drag(Tabs.Tabs[0].Button, -(Sheet.Stops.Full - Sheet.Stops.Half), slowSheet: Sheet);
+            yield return CardTestInput.Drag(Tabs.Tabs[0].Button, Sheet.Stops.Full - Sheet.Stops.Half, slowSheet: Sheet);
             yield return CardTestInput.Settle();
-            Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the up drag raised the card");
+            Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "the down drag lowered the card");
             Assert.AreEqual(jumps, NavJumps.Count, "and was no tap on the tab it started on");
             Assert.AreEqual(offset, Tabs.Offset, 0.01f, "the strip did not scroll");
         }
@@ -291,13 +296,13 @@ namespace TileStories.Tests
                 Sheet.SetStop(stop);
                 yield return CardTestInput.Settle();
                 Assert.IsNull(Sheet.Slots.TopView, stop + ": no element");
-                Assert.IsFalse(IsShown(Sheet.Slots.Top), stop + ": nothing shown");
+                Assert.IsFalse(InTheCard(Sheet.Slots.Top), stop + ": nothing shown");
             }
 
             yield return Push(c => c.card_settings.navigation.min_blocks = 2);
             Assert.IsNotNull(Tabs, "Show Navigation From 2: the short card has its strip");
             Assert.AreEqual(Nav.Model.Sections.Count, Tabs.Tabs.Count);
-            Assert.IsTrue(IsShown(Sheet.Slots.Top));
+            Assert.IsTrue(InTheCard(Sheet.Slots.Top));
             var labels = Tabs.Tabs.Select(t => t.Label.text).ToList();
             var strings = new CardStrings(Card.StringTable.Entries(), CardStringSources.Shared.Entries(), ConfigCopy().card_settings.strings, "en", "en");
             CollectionAssert.AreEqual(Nav.Model.Sections.Select(s => strings.Get(s.LabelKey)).ToList(), labels, "each tab says its section's word");
@@ -306,37 +311,33 @@ namespace TileStories.Tests
             Assert.IsNotNull(Tabs);
             yield return Push(c => c.card_settings.navigation.top = CardOptions.NavNone);
             Assert.IsNull(Sheet.Slots.TopView, "Top Bar None on the running wall: the strip is gone");
-            Assert.IsFalse(IsShown(Sheet.Slots.Top));
+            Assert.IsFalse(InTheCard(Sheet.Slots.Top));
             yield return Push(c => c.card_settings.navigation.top = BuiltInNavElements.TextTabs);
             Assert.IsNotNull(Tabs, "and back");
         }
 
         // ---------------- the look at the phone width ----------------
 
-        // The Lamp at 390 px with the strip, at Half and at Full: rendered for the vision pass, and checked here -- every tab at least the
-        // touch token in both directions, its word whole inside it, the strip inside the card
+        // The Lamp at 390 px with the strip at Full (its Half shows content only since step 5b: Chrome_Lamp_half_default_390.png,
+        // PoiCardChromeSceneTests): rendered for the vision pass, and checked here -- every tab at least the touch token in both
+        // directions, its word whole inside it, the strip inside the card
         [UnityTest]
-        public IEnumerator TheLampsStrip_AtHalfAndFull_HasWholeWordsAndFullSizeTargets_AndIsRendered()
+        public IEnumerator TheLampsStrip_AtFull_HasWholeWordsAndFullSizeTargets_AndIsRendered()
         {
             float touch = CardTestInput.TokenPx("--ts-touch-target");
-            yield return Open(Lamp, SheetStopRule.Stop.Half);
-            foreach (var (stop, name) in new[] { (SheetStopRule.Stop.Half, "half"), (SheetStopRule.Stop.Full, "full") })
+            yield return Open(Lamp, SheetStopRule.Stop.Full);
+            Assert.IsTrue(InTheCard(Sheet.Slots.Top), "precondition: the strip shows at Full");
+            var card = Sheet.Root.worldBound;
+            Assert.GreaterOrEqual(Tabs.Viewport.worldBound.xMin, card.xMin - 0.5f, "full: the strip starts inside the card");
+            Assert.LessOrEqual(Tabs.Viewport.worldBound.xMax, card.xMax + 0.5f, "full: and ends inside it");
+            foreach (var tab in Tabs.Tabs)
             {
-                // - one card, two stops (selecting the same point again would clear it)
-                Sheet.SetStop(stop);
-                yield return CardTestInput.Settle();
-                var card = Sheet.Root.worldBound;
-                Assert.GreaterOrEqual(Tabs.Viewport.worldBound.xMin, card.xMin - 0.5f, name + ": the strip starts inside the card");
-                Assert.LessOrEqual(Tabs.Viewport.worldBound.xMax, card.xMax + 0.5f, name + ": and ends inside it");
-                foreach (var tab in Tabs.Tabs)
-                {
-                    Assert.GreaterOrEqual(tab.Button.layout.height, touch - OnePixel, name + " " + tab.Label.text + ": tall enough to tap");
-                    Assert.GreaterOrEqual(tab.Button.layout.width, touch - OnePixel, name + " " + tab.Label.text + ": wide enough to tap");
-                    var words = tab.Label.MeasureTextSize(tab.Label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
-                    Assert.GreaterOrEqual(tab.Label.layout.width + 0.5f, words.x, name + " " + tab.Label.text + ": the whole word fits (never clipped)");
-                }
-                yield return CardGalleryChecks.Render("Nav_Lamp_text_tabs_" + name + "_390");
+                Assert.GreaterOrEqual(tab.Button.layout.height, touch - OnePixel, tab.Label.text + ": tall enough to tap");
+                Assert.GreaterOrEqual(tab.Button.layout.width, touch - OnePixel, tab.Label.text + ": wide enough to tap");
+                var words = tab.Label.MeasureTextSize(tab.Label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+                Assert.GreaterOrEqual(tab.Label.layout.width + 0.5f, words.x, tab.Label.text + ": the whole word fits (never clipped)");
             }
+            yield return CardGalleryChecks.Render("Nav_Lamp_text_tabs_full_390");
         }
     }
 }

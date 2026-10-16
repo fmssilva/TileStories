@@ -4,7 +4,8 @@ using System.Collections.Generic;
 namespace TileStories
 {
     // One navigation element a wall may put in a slot of the card (_3.2 section 4.1): its key (what card_settings.navigation stores),
-    // the slot it lives in, and the words the POI Editor shows for it (a label and its (i) help: Editor words, ASCII)
+    // the slot it lives in, the words the POI Editor shows for it (a label and its (i) help: Editor words, ASCII), and what it moves
+    // between
     public sealed class NavElementDefinition
     {
         public string Key { get; }
@@ -12,13 +13,17 @@ namespace TileStories
         public string Slot { get; }
         public string Label { get; }
         public string Help { get; }
+        // The element moves between the card's SECTIONS (tabs, a bar): rule 2.5.7 does not draw it for fewer than two. False for one
+        // that lists kinds or blocks (kind chips, a contents list), which is useful on a one-family card too
+        public bool BetweenSections { get; }
 
-        public NavElementDefinition(string key, string slot, string label, string help)
+        public NavElementDefinition(string key, string slot, string label, string help, bool betweenSections)
         {
             Key = key;
             Slot = slot;
             Label = label;
             Help = help;
+            BetweenSections = betweenSections;
         }
     }
 

@@ -237,6 +237,15 @@
     border-color: var(--ts-line);
 }
 
+/* The strip hidden by CardChromeRule (CardChromeView): out of the flow, so the stack gets its room, but still laid out, so its height
+   stays known for the next decision */
+.poi-card__nav-top--hidden {
+    position: absolute;
+    left: 0;
+    right: 0;
+    visibility: hidden;
+}
+
 .poi-card__stack {
     flex-grow: 1;
     flex-shrink: 1;
@@ -307,4 +316,22 @@
 
 .poi-card__footer {
     flex-shrink: 0;
+    transition-property: translate;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: var(--ts-ease);
+}
+
+/* The bottom area hidden by CardChromeRule (CardChromeView: at peek, while the reader moves down, where the stop has no room for it):
+   out of the flow -- the stack takes its room at once -- and slid below the sheet's bottom edge, which clips it (.poi-card overflow) */
+.poi-card__footer--hidden {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    translate: 0 100%;
+}
+
+/* Reduce motion: the bottom area jumps */
+.poi-card--chrome-instant .poi-card__footer {
+    transition-duration: 0s;
 }

@@ -50,7 +50,8 @@ namespace TileStories
         // Phase B's to prove, on the real wall)
         public const int ShowNavigationFrom = 2;
 
-        // _3.2 section 9's four fixture cases
+        // _3.2 section 9's four fixture cases, and the one-family card with a second family (rule 2.5.7: an element between sections is
+        // drawn from two sections, so one_family shows no strip and two_families does)
         public static readonly IReadOnlyList<Case> Cases = new[]
         {
             // - The Lamp's size: 62 targets over the eight families that navigate, and a Sources block (the ninth family, never a target)
@@ -58,10 +59,14 @@ namespace TileStories
             // - a short card: 6 targets in 3 families
             new Case("small", "en", ("rich_text_plain_short", 2), ("quick_facts_chips_short", 1), ("gallery_carousel_short", 2), ("timeline_vertical_short", 1)),
             // - one family only: one section
-            new Case("one_family", "en", ("rich_text_plain_short", 3), ("pull_quote_serif_short", 1), ("process_steps_numbered_short", 1)),
+            new Case("one_family", "en", OneFamily),
             // - the big card in Portuguese: the longest section words (Historias, Comunidade...) at the phone width
             Big("pt_long", "pt"),
+            // - the same one-family card and one Media block: two sections
+            new Case("two_families", "en", OneFamily.Append(("gallery_carousel_short", 1)).ToArray()),
         };
+
+        private static (string, int)[] OneFamily => new[] { ("rich_text_plain_short", 3), ("pull_quote_serif_short", 1), ("process_steps_numbered_short", 1) };
 
         private static Case Big(string key, string language) => new(key, language,
             ("rich_text_plain_short", 8), ("quick_facts_chips_short", 4), ("fun_fact_flip_short", 3), ("pull_quote_serif_short", 3), ("process_steps_numbered_short", 2),

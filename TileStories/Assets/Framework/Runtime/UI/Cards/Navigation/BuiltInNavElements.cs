@@ -11,7 +11,8 @@ namespace TileStories
             registry.Register(new NavElementDefinition(TextTabs, NavSlotKeys.Top, "Text Tabs",
                 "Text Tabs: one word per section of the card (a family: About, Media, Stories...) in a strip under the header. The "
                 + "section being read is underlined and bold; a tap moves the card to that section's first block. A strip wider than the "
-                + "screen scrolls sideways with a finger."),
+                + "screen scrolls sideways with a finger. A card with one section gets no strip: one tab is not a choice.",
+                betweenSections: true),
                 () => new TextTabsNavView());
         }
     }

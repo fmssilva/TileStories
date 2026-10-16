@@ -77,6 +77,12 @@ namespace TileStories
         // Top Bar: the element in the strip under the header (a NavElementRegistry key of the top slot, "text_tabs" the default) |
         // "none" (CardOptions.NavNone). A key nothing registered draws no strip (the Editor shows it as missing)
         public string top = BuiltInNavElements.TextTabs;
+        // Show Navigation At: "half_and_full" (the default) | "full_only" (CardOptions.ShowNavigationAts) -- the stops the Top Bar shows at,
+        // never at peek. CardChromeRule may hide it at a stop with too little room left for the content; this option only hides more
+        public string show_at = CardOptions.ShowNavHalfAndFull;
+        // Hide While Scrolling: "down" (the default: the bottom area -- the sticky CTA footer -- slides away while the content moves down and
+        // comes back on a move up or at the top / end) | "never" (CardOptions.HideOnScrolls). The Top Bar always stays: it is the map
+        public string hide_on_scroll = CardOptions.HideOnScrollDown;
 
         public const int MinBlocksMin = 2;
         public const int MinBlocksMax = 30;
@@ -304,6 +310,19 @@ namespace TileStories
         // A navigation slot with no element in it (CardNavigationSettings.top, _3.2 section 3); never a registered element's key
         public const string NavNone = "none";
         public const string NavNoneLabel = "None";
+
+        // Show Navigation At (CardNavigationSettings.show_at, _3.2 section 4.3): the stops the Top Bar may show at (never at peek)
+        public const string ShowNavHalfAndFull = "half_and_full";
+        public const string ShowNavFullOnly = "full_only";
+        public static readonly string[] ShowNavigationAts = { ShowNavHalfAndFull, ShowNavFullOnly };
+        public static readonly string[] ShowNavigationAtLabels = { "Half And Full", "Full Only" };
+
+        // Hide While Scrolling (CardNavigationSettings.hide_on_scroll, _3.2 section 4.3): the bottom area slides away while the content
+        // moves down, or never
+        public const string HideOnScrollDown = "down";
+        public const string HideOnScrollNever = "never";
+        public static readonly string[] HideOnScrolls = { HideOnScrollDown, HideOnScrollNever };
+        public static readonly string[] HideOnScrollLabels = { "When Scrolling Down", "Never" };
 
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";

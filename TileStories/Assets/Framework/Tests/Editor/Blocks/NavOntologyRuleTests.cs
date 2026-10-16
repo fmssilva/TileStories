@@ -124,5 +124,26 @@ namespace TileStories.Editor.Tests
         {
             Assert.AreEqual(inBar, NavOntologyRule.SectionsInBar(sections, slots));
         }
+
+        // Rule 7: an element between sections needs at least two of them -- one tab is not a choice
+        [TestCase(0, false)]
+        [TestCase(1, false)]
+        [TestCase(2, true)]
+        [TestCase(8, true)]
+        public void OffersASectionChoice_FromTwoSections(int sections, bool offers)
+        {
+            Assert.AreEqual(offers, NavOntologyRule.OffersASectionChoice(sections));
+        }
+
+        // Rule 7 belongs to the ELEMENTS that move between sections, not to the card: a one-family card with enough targets still SHOWS
+        // navigation, so an element that lists blocks (a contents list, step 11) keeps working on it. ShowsNavigation reads the targets
+        // only -- the same answer for one section as for eight
+        [Test]
+        public void ShowsNavigation_DoesNotReadRule7_AOneFamilyCardStillShowsNavigation()
+        {
+            var settings = new CardNavigationSettings { min_blocks = 3 };
+            Assert.IsTrue(NavOntologyRule.ShowsNavigation(5, settings), "five targets in ONE section: navigation is shown");
+            Assert.IsFalse(NavOntologyRule.OffersASectionChoice(1), "while an element between sections has nothing to choose from");
+        }
     }
 }

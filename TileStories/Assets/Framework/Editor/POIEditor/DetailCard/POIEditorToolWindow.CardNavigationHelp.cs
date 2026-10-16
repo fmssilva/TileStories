@@ -32,13 +32,29 @@ namespace TileStories.Editor
             "Reading, and not a block of a family that is left out of navigation (the Sources). A shorter card shows no navigation at " +
             "all and simply scrolls -- a list of shortcuts on a short card only adds length. Default 8.";
 
+        private const string CardShowNavigationAtHelp =
+            "At which heights of the card the Top Bar may show; never while only the card's title shows. Half And Full (the default): " +
+            "at half and at full height. Full Only: at full height only, so half height keeps all its room for the content. " +
+            "The card may also hide the bar BY ITSELF, and that is on purpose, not a fault: at a height where the title, the bar and the " +
+            "buttons pinned to the card's bottom (an Actions block with the sticky_cta look) would leave less than a heading and two " +
+            "lines of content, the card shows the content instead -- the bottom buttons give way first, then the bar. The bar comes back " +
+            "as soon as there is room: at full height, or once the title shrinks to one line while the visitor reads. Full Only can " +
+            "hide the bar more, never bring it back where there is no room.";
+
+        private const string CardHideWhileScrollingHelp =
+            "What the bottom of the card does while the visitor reads. When Scrolling Down (the default): the buttons pinned to the " +
+            "card's bottom (an Actions block with the sticky_cta look) slide away once the visitor has scrolled down by about a " +
+            "finger's travel, giving their room to the content, and come back as soon as the visitor scrolls up a little, or reaches " +
+            "the top or the end of the card. A tap's small wobble never hides them. The Top Bar always stays: it is the visitor's map " +
+            "of the card. Never: the bottom stays where it is while the visitor reads.";
+
         // What Top Bar's (i) says: the slot, None, then every element an app can put there, each in its own words -- read from the
         // registry, so an element an app registers explains itself here with no edit to this file
         private static string CardTopBarHelp(NavElementRegistry registry)
         {
             var text = new System.Text.StringBuilder(
-                "What the strip under the card's title shows, at half and full height (never while only the title shows). " +
-                "It appears only on cards with at least Show Navigation From blocks. None: no strip, the card only scrolls.");
+                "What the strip under the card's title shows, at the heights Show Navigation At allows (never while only the title " +
+                "shows). It appears only on cards with at least Show Navigation From blocks. None: no strip, the card only scrolls.");
             foreach (var element in registry.OfSlot(NavSlotKeys.Top)) text.Append(' ').Append(element.Help);
             return text.ToString();
         }
@@ -71,7 +87,8 @@ namespace TileStories.Editor
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
             "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
             "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
-            "Navigation From and Top Bar: the open card's strip appears, changes or goes at once.\n" +
+            "Navigation From, Show Navigation At, Top Bar and Hide While Scrolling: the open card's strip and bottom buttons " +
+            "appear, change or go at once.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
             "BLOCK ORDER\n" +
@@ -98,8 +115,9 @@ namespace TileStories.Editor
             "- Set Jump Motion = Instant: the content is there at once; Smooth: it glides. With Reduce Motion ticked it is always at once.\n" +
             "- Pick, in Opens Block, the card's title block or a block waiting for Show After Reading: the row warns and the button is gone.\n\n" +
             "TOP BAR\n" +
-            "- With Top Bar = Text Tabs, open a card with at least Show Navigation From blocks and raise it to half: a strip of words " +
+            "- With Top Bar = Text Tabs, open a card with at least Show Navigation From blocks and raise it to full: a strip of words " +
             "sits under the title, one per family the card has. Lower the card to its title: the strip is gone.\n" +
+            "- Open a card whose blocks all belong to one family: no strip at any height (one tab is not a choice).\n" +
             "- The first word is underlined and bold. Scroll the card with the mouse wheel or a drag: the underline moves to the family " +
             "you are reading.\n" +
             "- Click a word: the card rises to full and that family's first block comes to rest at the top of what scrolls; its word " +
@@ -107,6 +125,18 @@ namespace TileStories.Editor
             "- Drag the strip sideways with the mouse: the words slide and the card does not move. Drag it up or down: the card " +
             "moves like it does from its title.\n" +
             "- Raise Show Navigation From above the card's block count: the strip goes. Set Top Bar = None: no strip on any card.\n\n" +
+            "SHOW NAVIGATION AT AND HIDE WHILE SCROLLING\n" +
+            "- Open a long card with a tall title and buttons pinned to its bottom (an Actions block with the sticky_cta look) at half " +
+            "height. If the title, the strip and the buttons would leave less than a heading and two lines of content, the card " +
+            "shows content only, with no strip and no buttons: that is on purpose. Scroll the content a little: the title shrinks " +
+            "to one line and the strip (and, with room, the buttons) come back.\n" +
+            "- Raise the card to full: the strip and the buttons show. With Hide While Scrolling = When Scrolling Down, scroll down: " +
+            "the buttons slide away and the content takes their room; scroll up a little: they come back. At the very end of the " +
+            "card they are there too. The strip never moves.\n" +
+            "- Set Hide While Scrolling = Never and scroll down again: the buttons stay.\n" +
+            "- Set Show Navigation At = Full Only: at half height the strip never shows, even with the title shrunk; at full height " +
+            "it does. Set it back to Half And Full: the strip shows at half height again wherever there is room.\n" +
+            "- Lower the card to its title: neither the strip nor the buttons show.\n\n" +
             "BACK BUTTON\n" +
             "- In the Game view, Escape stands for the phone's Back button.\n" +
             "- Open a card, drag it to full, open a picture in its full-screen view. Press Escape four times: the full view closes, " +
@@ -127,6 +157,9 @@ namespace TileStories.Editor
             "does without a card. An iPhone has no Back button: nothing to check there.\n" +
             "- Top Bar: on a card with its strip, swipe the strip sideways with a thumb -- the words slide, the card stays; start a swipe " +
             "on a word and move up -- the card rises and the word is not tapped; tap each word once -- every tap lands where it should.\n" +
+            "- Hide While Scrolling: read a long card at full height with a thumb. The bottom buttons slide away as you read down and " +
+            "come back with a small move up; a tap on the content never makes them jump. Check that the half height of a long card " +
+            "shows something to read on this phone's screen.\n" +
             "- Nothing else here needs a device: the order and the jumps are the same on every screen.";
     }
 }

@@ -13,83 +13,78 @@
 So start by reading them all. 
 
 
-## `And now: POI Card Navigation (3.2) -- step 5a, the nav slots, the element registry and the first tabs`
+## `And now: POI Card Navigation (3.2) -- step 5b, CardChromeRule and the two regressions of 5a`
 
-GATE: `git push` if the branch is ahead of origin (2 commits are waiting; report how many you pushed). Take one Unity
+GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
-not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): TMP dirties their
-atlases on its own, so `git checkout --` them if they are modified. Baseline: the tree is clean on commit "Add Open Block
-buttons and system Back to the POI card", whose full runs were green (EditMode 1711 / PlayMode 793) -- run the full
-EditMode suite only and say which commit you trusted.
+not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
+them if TMP dirtied them. Baseline: the tree is clean on commit "Add the card's top navigation strip with text tabs",
+whose full EditMode was 1720/1720 and whose full PlayMode was 802 of 805 -- the THREE failures are this block's PART 1,
+so start by reproducing them, not by trusting this line. Run the full EditMode suite and the three failing fixtures.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (BOTH [step 5] lines are yours, as
-PART 1) and the status table (steps 1-4 done; step 5 was split: 5a is yours, 5b is the next block). Sections 4.1, 4.2,
-5.1 (the `text_tabs` row), 2.5 and 9 are the step. Section 4.3 is 5b: read it so your slots leave room for it, build
-nothing of it.
-REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines" (two new rows and
-their captures); .clinerules/40-testing.md 4.2 (the cadence -- it was sharpened on 2026-10-15 and this block DOES owe a
-full run), 4.2.3 (focus, and how a run really is "in the background") and 4.4 + 4.5 (Phase A / B and the capture
-checklist -- you are building the Phase A harness this domain will use fifteen more times); .clinerules/30-ui-content.md.
-Context only: _3.3_POI_Card_Styles.md (tokens only -- the look is its domain), _3.1_POI_Card_Blocks.md section 8.4 (the
-existing gallery scene), .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- it adds a container to the sheet (where the stops live), a registry every later element
-plugs into, and the gallery harness fifteen later elements will reuse.
-TEST PLAN: full EditMode at the GATE and at the end. This block DOES owe the FULL PlayMode run: it adds a CONTAINER to
-the sheet, which 4.2 counts as shared ground (a view put INSIDE an existing slot later does not -- 5b, 6 and 7 ride on
-this run). Take it in the background: start it, then the developer clicks away after ~5 s; report `editor_is_focused` at
-the first poll and at the end, and say plainly if Unity came to the front.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the two lines marked "DECIDED at the
+5a review" are yours and they are decided: build what they say, do not re-open them) and the status table (1-5a done;
+5b is yours). Sections 4.3, 2.5 (rule 7 is new), 3 (the Show Navigation At and Hide While Scrolling rows) and 9.
+REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines"; .clinerules/40-testing.md
+4.2 (the cadence: this block does NOT owe a full PlayMode run -- see TEST PLAN), 4.2.3 and 4.5; .clinerules/30-ui-content.md
+("progressive disclosure", "every screen has one clear focal point" -- this block is about giving reading space back).
+Context only: _3.3_POI_Card_Styles.md (tokens), .clinerules/10-structure.md.
+WORKER MODEL: Opus-class -- it decides what the card shows at every stop, and it must undo a shipped regression without
+re-breaking the stops 5a measured.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: this block adds a pure rule and changes what
+an EXISTING slot shows -- no container, no stops, no harness (4.2, sharpened 2026-10-15). It closes on every PlayMode
+fixture whose name holds Card or Poi (~450 tests, ~12 min) -- that set must include the three that failed at 5a. It
+rides on 5a's run; the next full run falls due at step 8. Unity may stay in the background.
 
-PART 1 -- the two [step 5] review findings, first:
-1. The Families table draws nine identical (i) buttons, all opening the same `CardFamiliesHelp` (`170_CardNavigation_
-   JumpBack_620_b.png`). Keep ONE on the table's header row and drop the per-row ones. PROOF: the Editor test counts the
-   (i) buttons of the section; recapture.
-2. The Navigation section has never been captured below 620 pt, and the three Test guides were only ever seen collapsed.
-   Capture it at ~450 pt with one guide OPEN, and check item by item that the At The End column does not run under the
-   (i) and that the guide text wraps inside the row.
+PART 1 -- the three failures of 5a, reproduced BEFORE anything is fixed (so you know the fix is what cleared them):
+1. `PoiCardModel3DSceneTests.TheLamp_InlineRoomScanAutoSpin...`, `PoiCardNavSceneTests.KeepAndInstant_...` and the
+   host-jump test were each made to run with `navigation.top = NavNone` at 5a because the strip left no viewport at Half.
+   Run them on the DEFAULT config first and record what they report. They go back to the default at 5b.4 and that is the
+   proof the regression is gone -- do not add a new test in place of this.
 
-PART 2 -- step 5a:
+PART 2 -- step 5b:
 
-5a.1 The slots. A `top` strip in the sheet's Root, between the header (with its PinnedTop part) and the stack's
-  ScrollView -- OUTSIDE the scroll, so a jump needs no offset for it (`_3.2` 4.2). ACCEPTANCE, and the thing most likely
-  to go wrong: the PEEK STOP MUST NOT MOVE. `PoiCardSheetView.RecomputeStops` measures the header's PeekPart; the strip
-  sits after it and is hidden at peek. Assert the three stops of The Lamp against the values the current suite already
-  measures, before and after your change, and say the numbers in the report. Leave the `bottom`, `floating`, `menu` and
-  `edge` slots UNBUILT -- 4.2 names them so you know they are coming, not so you make empty containers now.
-5a.2 `NavElementRegistry` (Runtime/UI/Cards/Navigation/): key, slot, Editor label, (i) help, factory -- the same shape as
-  `BlockRegistry`, including refusing a duplicate key and an unknown slot. `BuiltInNavElements` registers the framework's;
-  an app registers its own for a slot with ZERO Framework edits (prove it with a test that registers an app element, as
-  `FamilyRegistryTests` does for families). `INavElementView`: `Root`, `Bind(CardNavModel, NavController, context)`,
-  `Unbind()`, pooled per key through the existing `ElementPool<T>` -- find it and reuse it, do not write a second pool.
-5a.3 `text_tabs`: the model's sections as text tabs in a horizontal ScrollView, the underline following
-  `NavController.Current`, a tap jumping through the controller. Rules that apply to EVERY element, so get them right
-  once here: targets at least `--ts-touch-target`, nothing clipped at 390 px with the PORTUGUESE labels, never colour
-  alone (the underline plus the label weight), and `SwipeGrabRule` -- the strip never captures the pointer at touch-down,
-  it judges the drag after the slop and claims only clearly sideways moves, so a real finger still scrolls the card
-  through it. That last one is in the guide's TODOs as the pattern for every swipeable element: write it as the shared
-  piece the rails, pager and scrubber will reuse, not inside the tab view.
-5a.4 Editor rows in Detail Card > Navigation: Top Bar (`none` + the registered top elements, listed FROM the registry)
-  and Show Navigation From. Both with (i), default, undo, live sync.
-5a.5 The Phase A harness: ONE entry list (`CardNavGalleryDefinitions`) that both the gallery scene and
-  `CardNavGalleryTests` read, with the four fixture cases of section 9 (62 targets / 9 families, 6 targets / 3 families,
-  1 family, PT long labels). It must be as easy to add the 15 later elements to as adding a row. Renders
-  `TestEvidence/Card/Nav_<key>_<case>.png`.
-  TESTS: Tier 0 for the registry; Phase A as above; Phase B in LivingRoomScene with real input -- a real tap on a tab
-  moves the stack to that section's first block (relative, +-1 px), a real drag moves the underline, a real sideways
-  drag on the strip scrolls the strip and NOT the card, and a card below Show Navigation From shows no strip at all.
-  VISUALS: the four Phase A renders, the Lamp card at 390 px with the strip at Half and at Full, and the two Editor
-  captures of PART 1. Judge every one item by item; say what you checked, not that it looks right.
+5b.1 `CardChromeRule` (pure, Runtime/Blocks/Navigation/). Inputs: the stop, the last scroll delta, at-top / at-end,
+  `show_at`, `hide_on_scroll`, whether the model has navigation, and the measured heights (sheet, header, chrome, content).
+  Outputs: is the top strip shown, is the bottom area (sticky CTA footer + a future bottom nav) shown.
+  WHAT, from `_3.2` 4.3: nothing at peek; `full_only` hides at half; `down` hides the BOTTOM area once the content moved
+  down by more than HideAfterTravel (24 px: about a finger's travel, so a tap's wobble never hides it) and shows it again
+  on an upward move over ShowAfterTravel (8 px) or at the top / end of the stack. The top strip stays -- it is the map.
+5b.2 THE FLOOR (the decided TODO): a slot's chrome is not shown at a stop where showing it would leave the stack's
+  viewport under a minimum. ONE named constant with its reason in the comment -- enough for a heading and a line or two of
+  its block. Measure it on The Lamp at 390 x 844 and say the number you chose and what it buys (Half today: header 206 +
+  strip 49 + footer 81 = 336 of 338). The floor is the rule's, not the strip's: the bottom bar of step 7 must get it for
+  free. The wall's Show Navigation At sits ON TOP of the floor -- it can hide more, never less.
+5b.3 Rule 2.5.7 (the other decided TODO): a named predicate in `NavOntologyRule` -- an element that navigates BETWEEN
+  sections is not drawn with fewer than two sections. `text_tabs` reads it. `ShowsNavigation` does NOT change: an element
+  that lists blocks (`nav_contents`, step 11) must still work on a one-family card, and a test says so in words.
+5b.4 Put the three PART 1 tests back on the default config, delete the "Top Bar = None" lines and their comments, and let
+  them prove the fix.
+5b.5 Editor rows: Show Navigation At and Hide While Scrolling, in Detail Card > Navigation, with (i), default, undo and
+  live sync. The (i) of Show Navigation At says what the floor does, in a wall author's words -- that the card may hide
+  the strip by itself when a stop has no room, so nobody files it as a bug.
+  TESTS: Tier 0 `CardChromeRuleTests` (every stop, both options, the two travel thresholds, the floor at the Lamp's
+  numbers and just above them). Phase B in LivingRoomScene with real input: at Half the Lamp shows reading space again
+  with the DEFAULT settings; a real drag down hides the bottom area and a drag up brings it back; nothing shows at peek;
+  the measured content share at Full rises while scrolling down, compared with the same card at Hide While Scrolling =
+  never (relative, not a pixel constant). Phase A: the one-family gallery case renders NO strip; the same card with a
+  second family does.
+  VISUALS: the Lamp at Half with the default settings (the picture that must no longer look like
+  `Nav_Lamp_text_tabs_half_390.png`), at Full scrolled down with the footer hidden, and the Editor section with the two
+  new rows. Judge each item by item and say what changed against the 5a capture.
 
-5a.6 DOCS: `_3.2` status row 5a + proof and BOTH [step 5] TODO lines removed; `_5.1` for the two rows; `10-structure.md`;
-  RUN TIMES after the full run.
+5b.6 DOCS: `_3.2` status row 5b + proof, and the two DECIDED TODO lines removed; `_5.1` for the two rows;
+  `10-structure.md`; RUN TIMES only if you ran a full suite. If the two unreproduced `PoiCardNavSceneTests` failures do
+  NOT come back once the Model 3D test is green, say so and close them in `__mixed_TODOs.md`; if they do come back, STOP
+  and report -- they are then a real fault, not a cascade.
 
-Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
-comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
-backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: `CardChromeRule`, Show Navigation At, Hide While Scrolling and the sticky-footer behaviour (5b); every
-other element and slot (6-11); Labels / Show Counts / Bar Slots / Groups (6-7); layouts; the family icons and colour
-tokens (step 6).
-Stop when the full EditMode suite and the FULL PlayMode suite are green with zero failures, the captures are judged and
-5a.6 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+Rules as before: no literal colours, sizes or visitor strings in C# (tokens, or a named constant with its reason);
+strict ASCII in code, comments, logs and Editor labels; Editor rows name things, never ids; pure rules decide, views
+draw; no backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
+OUT OF SCOPE: every other element and slot (6-11); Labels / Show Counts / Bar Slots / Groups; the family icons and colour
+tokens (step 6); layouts; the bottom slot itself (step 7 builds it -- 5b only makes the rule ready for it).
+Stop when the full EditMode suite and the named Card / Poi PlayMode fixtures are green with zero failures, the captures
+are judged and 5b.6 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
 

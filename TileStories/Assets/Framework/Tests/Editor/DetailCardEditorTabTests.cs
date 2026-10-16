@@ -136,6 +136,8 @@ namespace TileStories.Editor.Tests
                                 "jump_motion" => CardOptions.JumpMotionInstant,
                                 "back_button" => CardOptions.BackButtonNone,
                                 "top" => CardOptions.NavNone,
+                                "show_at" => CardOptions.ShowNavFullOnly,
+                                "hide_on_scroll" => CardOptions.HideOnScrollNever,
                                 _ => CardOptions.BlockOrderByFamily,
                             })));
                         else if (n.FieldType == typeof(bool)) edits.Add((n.Name, s => n.SetValue(s.navigation, !(bool)n.GetValue(s.navigation))));
@@ -154,8 +156,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 10 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 10 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 12 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 12 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1265,7 +1267,7 @@ namespace TileStories.Editor.Tests
             // - an app's element joins the list with no window edit
             var registry = new NavElementRegistry();
             BuiltInNavElements.Register(registry);
-            registry.Register(new NavElementDefinition("app_dots", NavSlotKeys.Top, "App Dots", "App Dots: one dot per section."), () => new TextTabsNavView());
+            registry.Register(new NavElementDefinition("app_dots", NavSlotKeys.Top, "App Dots", "App Dots: one dot per section.", betweenSections: true), () => new TextTabsNavView());
             var (appKeys, appLabels) = POIEditorToolWindow.TopBarOptions(registry);
             Assert.AreEqual("app_dots", appKeys.Last());
             Assert.AreEqual("App Dots", appLabels.Last());
@@ -1278,6 +1280,57 @@ namespace TileStories.Editor.Tests
             string from = (string)typeof(POIEditorToolWindow).GetField("CardShowNavigationFromHelp", Static).GetValue(null);
             foreach (string word in new[] { "title block", "Show After Reading", "Default 8" }) StringAssert.Contains(word, from);
             EditorTextChecks.AssertAscii(from, "CardShowNavigationFromHelp");
+        }
+
+        // Detail Card > Navigation's step 5b rows on the real window: Show Navigation At and Hide While Scrolling are drawn on their
+        // defaults without writing (option 0 is the card's own default, so an unknown value draws as what the card does); each pick goes
+        // through the window's history and a real Ctrl+Z takes it back; Show Navigation At's (i) tells a wall author the card may hide the
+        // bar by itself where a height has no room (so nobody files it as a bug), Hide While Scrolling's that the Top Bar stays; ASCII
+        [UnityTest]
+        public IEnumerator TheShowNavigationAtAndHideWhileScrollingRows_AreDrawnOnTheirDefaults_AndEachPickIsUndoneByCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            yield return Redraw();
+            Assert.IsFalse(_window.Unsaved, "drawing the two rows writes nothing");
+            var nav = _window.Config.card_settings.navigation;
+            Assert.AreEqual(CardOptions.ShowNavHalfAndFull, nav.show_at, "the shipped wall never set Show Navigation At: the default");
+            Assert.AreEqual(CardOptions.HideOnScrollDown, nav.hide_on_scroll, "nor Hide While Scrolling");
+            Assert.AreEqual(CardOptions.ShowNavigationAts.Length, CardOptions.ShowNavigationAtLabels.Length);
+            Assert.AreEqual(CardOptions.HideOnScrolls.Length, CardOptions.HideOnScrollLabels.Length);
+            Assert.AreEqual(new CardNavigationSettings().show_at, CardOptions.ShowNavigationAts[0], "an unknown value draws as option 0, the card's own default");
+            Assert.AreEqual(new CardNavigationSettings().hide_on_scroll, CardOptions.HideOnScrolls[0]);
+
+            var picks = new (string Name, Action<CardNavigationSettings> Set, Func<CardNavigationSettings, string> Read, string Before, string After)[]
+            {
+                ("Show Navigation At", n => n.show_at = CardOptions.ShowNavFullOnly, n => n.show_at, CardOptions.ShowNavHalfAndFull, CardOptions.ShowNavFullOnly),
+                ("Hide While Scrolling", n => n.hide_on_scroll = CardOptions.HideOnScrollNever, n => n.hide_on_scroll, CardOptions.HideOnScrollDown, CardOptions.HideOnScrollNever),
+            };
+            foreach (var (name, set, read, before, after) in picks)
+            {
+                Pick(() => set(_window.Config.card_settings.navigation));
+                yield return Redraw();
+                Assert.AreEqual(after, read(_window.Config.card_settings.navigation), name + ": the pick is stored");
+                Assert.IsTrue(_window.Unsaved, name);
+                yield return _window.PressUndo();
+                Assert.AreEqual(before, read(_window.Config.card_settings.navigation), name + ": a real Ctrl+Z takes the pick back");
+            }
+
+            var help = typeof(POIEditorToolWindow);
+            foreach (var (field, words) in new[]
+            {
+                ("CardShowNavigationAtHelp", new[] { "Half And Full", "Full Only", "BY ITSELF", "on purpose, not a fault", "a heading and two lines", "comes back" }),
+                ("CardHideWhileScrollingHelp", new[] { "When Scrolling Down", "Never", "scrolls up a little", "the end of the card", "The Top Bar always stays" }),
+            })
+            {
+                string text = (string)help.GetField(field, Static).GetValue(null);
+                foreach (string word in words) StringAssert.Contains(word, text, field + " says " + word);
+                EditorTextChecks.AssertAscii(text, field);
+            }
+            string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
+            foreach (string label in CardOptions.ShowNavigationAtLabels.Concat(CardOptions.HideOnScrollLabels))
+                StringAssert.Contains(label, guide, "the Playmode guide names " + label);
+            EditorTextChecks.AssertAscii(guide, "CardNavigationPlaymodeTestGuide");
         }
 
         // The Families table: one row per registered family, in the registered order, named by the visitor's own word

@@ -100,6 +100,9 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.JumpMotionSmooth, s.navigation.jump_motion, "a jump glides");
             // - _3.2 step 4: an old config steps the card down on Back
             Assert.AreEqual(CardOptions.BackButtonStepDown, s.navigation.back_button, "Back steps the card down");
+            // - _3.2 step 5b: the chrome options load on their section 3 defaults
+            Assert.AreEqual(CardOptions.ShowNavHalfAndFull, s.navigation.show_at, "the strip may show at Half and Full");
+            Assert.AreEqual(CardOptions.HideOnScrollDown, s.navigation.hide_on_scroll, "the bottom area hides while the reader moves down");
             Assert.IsNotNull(loaded.pois[0].card);
             CollectionAssert.IsEmpty(loaded.pois[0].card.blocks, "no blocks = the header-only card");
         }

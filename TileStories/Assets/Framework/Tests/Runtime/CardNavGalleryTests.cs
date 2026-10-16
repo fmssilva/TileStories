@@ -59,14 +59,14 @@ namespace TileStories.Tests
         }
 
         // The list is what section 9 asks: every element over the four fixture cases, the big ones holding exactly 62 targets in eight
-        // families and a Sources block, the small one 6 in 3, one with a single family
+        // families and a Sources block, the small one 6 in 3, one with a single family -- and that card with a second family (rule 2.5.7)
         [Test]
-        public void TheList_IsEveryElementOverTheFourFixtureCases()
+        public void TheList_IsEveryElementOverTheFiveFixtureCases()
         {
-            CollectionAssert.AreEquivalent(new[] { "big", "small", "one_family", "pt_long" }, CardNavGalleryDefinitions.Cases.Select(c => c.Key));
-            Assert.AreEqual(CardNavGalleryDefinitions.ElementKeys.Count * 4, CardNavGalleryDefinitions.All.Count);
+            CollectionAssert.AreEquivalent(new[] { "big", "small", "one_family", "pt_long", "two_families" }, CardNavGalleryDefinitions.Cases.Select(c => c.Key));
+            Assert.AreEqual(CardNavGalleryDefinitions.ElementKeys.Count * 5, CardNavGalleryDefinitions.All.Count);
             CollectionAssert.IsSubsetOf(CardNavGalleryDefinitions.ElementKeys, NavElementRegistry.Shared.All.Select(e => e.Key), "every listed element is registered");
-            foreach (var (key, targets, sections) in new[] { ("big", 62, 8), ("small", 6, 3), ("one_family", 5, 1), ("pt_long", 62, 8) })
+            foreach (var (key, targets, sections) in new[] { ("big", 62, 8), ("small", 6, 3), ("one_family", 5, 1), ("pt_long", 62, 8), ("two_families", 6, 2) })
             {
                 var entry = CardNavGalleryDefinitions.All.First(e => e.Case.Key == key);
                 var wall = CardNavGalleryDefinitions.Wall(entry);
@@ -90,9 +90,20 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             var sheet = _harness.Gallery.Sheet;
             Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop, "rests at Full");
+            // - rule 2.5.7: an element between sections is not drawn for one -- the slot is empty and the card shows content only
+            NavElementRegistry.Shared.TryGet(entry.ElementKey, out var definition);
+            if (definition.BetweenSections && !NavOntologyRule.OffersASectionChoice(sheet.Nav.Model.Sections.Count))
+            {
+                Assert.IsTrue(sheet.Nav.Model.ShowsNavigation, "precondition: the card has enough targets for navigation");
+                Assert.IsNull(sheet.Slots.TopView, "one section: no " + entry.ElementKey);
+                Assert.IsFalse(sheet.Chrome.TopShown, "and nothing shown in the top slot");
+                yield return CardGalleryChecks.Render(name);
+                yield break;
+            }
             Assert.AreEqual(entry.ElementKey, sheet.Slots.TopKey, "the slot shows the wall's pick");
             var root = sheet.Slots.TopView.Root;
             Assert.IsTrue(CardTestInput.IsShown(root, sheet.Root), "shown at Full");
+            Assert.IsTrue(sheet.Chrome.TopShown, "and the chrome shows its slot");
 
             // - inside the card at the phone width
             float onePixel = CardGalleryChecks.OnePixel(root);
@@ -121,6 +132,32 @@ namespace TileStories.Tests
             Assert.IsTrue(ElementChecks.ContainsKey(entry.ElementKey), "an element of the list has its own check: " + entry.ElementKey);
             ElementChecks[entry.ElementKey](_harness, entry);
             yield return CardGalleryChecks.Render(name);
+        }
+
+        // Rule 2.5.7 on the gallery's own cards, side by side: the one-family card renders NO strip, and the same card with a second family
+        // does -- one tab per section, two tabs
+        [UnityTest]
+        public IEnumerator TheOneFamilyCase_RendersNoStrip_AndTheSameCardWithASecondFamilyDoes()
+        {
+            var all = CardNavGalleryDefinitions.All.ToList();
+            int one = all.FindIndex(e => e.ElementKey == BuiltInNavElements.TextTabs && e.Case.Key == "one_family");
+            int two = all.FindIndex(e => e.ElementKey == BuiltInNavElements.TextTabs && e.Case.Key == "two_families");
+            var sheet = _harness.Gallery.Sheet;
+
+            _harness.Show(one);
+            yield return CardTestInput.Settle();
+            Assert.AreEqual(1, sheet.Nav.Model.Sections.Count, "precondition: one section");
+            Assert.IsTrue(sheet.Nav.Model.ShowsNavigation, "the card shows navigation (5 targets, from 2)");
+            Assert.IsNull(sheet.Slots.TopView, "but no strip: one tab is not a choice");
+            Assert.AreEqual(DisplayStyle.None, sheet.Slots.Top.resolvedStyle.display, "the slot takes no room");
+
+            _harness.Show(two);
+            yield return CardTestInput.Settle();
+            Assert.AreEqual(2, sheet.Nav.Model.Sections.Count, "precondition: the second family is a second section");
+            var tabs = sheet.Slots.TopView as TextTabsNavView;
+            Assert.IsNotNull(tabs, "two sections: the strip");
+            Assert.AreEqual(2, tabs.Tabs.Count, "with two tabs");
+            Assert.IsTrue(sheet.Chrome.TopShown && sheet.Slots.Top.resolvedStyle.visibility == Visibility.Visible, "shown at Full");
         }
 
         // text_tabs: a tab per section in the model's order, each saying its section's word in the card's language, the first one marked

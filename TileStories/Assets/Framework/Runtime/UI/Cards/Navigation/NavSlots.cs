@@ -6,8 +6,9 @@ namespace TileStories
     // The navigation slots of the card's sheet (_3.2 section 4.2) and the element each one shows. Today the TOP slot only: a strip in
     // the sheet's root between the header (with its pinned top part) and the stack's ScrollView -- outside the scroll, so a jump
     // lands a block at the viewport's top with no offset for it, and under the header's peek part, so it never moves a stop. Which
-    // element shows, and when, is NavSlotRule's; the element is made by the NavElementRegistry and pooled per key (ElementPool), so a
-    // card switch rebinds the same view. The sheet owns one, next to its NavController.
+    // element a slot holds is NavSlotRule's; WHEN a held element shows (the stop, the scroll, the room) is CardChromeRule's, applied
+    // by the sheet's CardChromeView. The element is made by the NavElementRegistry and pooled per key (ElementPool), so a card switch
+    // rebinds the same view. The sheet owns one, next to its NavController.
     public sealed class NavSlots
     {
         public VisualElement Top { get; }
@@ -33,7 +34,7 @@ namespace TileStories
         {
             Unbind();
             if (model == null) return;
-            string key = NavSlotRule.TopElement(context?.Settings?.navigation, model.ShowsNavigation, IsTopElement);
+            string key = NavSlotRule.TopElement(context?.Settings?.navigation, model, TopElementOf);
             if (key == null) return;
             var view = PoolOf(key).Take();
             if (view == null) return;
@@ -41,6 +42,7 @@ namespace TileStories
             Top.Add(view.Root);
             TopView = view;
             TopKey = key;
+            Top.style.display = DisplayStyle.Flex;
         }
 
         // Every slot empty again (the card closed, or is rebinding)
@@ -52,11 +54,9 @@ namespace TileStories
             Top.style.display = DisplayStyle.None;
         }
 
-        // The sheet came to (or is dragged from) this stop: a slot with an element shows only where NavSlotRule allows it
-        public void ShowAt(SheetStopRule.Stop stop) =>
-            Top.style.display = TopView != null && NavSlotRule.ShownAt(stop) ? DisplayStyle.Flex : DisplayStyle.None;
-
-        private bool IsTopElement(string key) => _registry.TryGet(key, out var definition) && definition.Slot == NavSlotKeys.Top;
+        // The element registered under this key for the top slot, or null
+        private NavElementDefinition TopElementOf(string key) =>
+            _registry.TryGet(key, out var definition) && definition.Slot == NavSlotKeys.Top ? definition : null;
 
         private ElementPool<INavElementView> PoolOf(string key)
         {

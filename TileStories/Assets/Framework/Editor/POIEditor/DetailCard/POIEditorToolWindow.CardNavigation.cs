@@ -2,9 +2,10 @@
 //
 // Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open
 // card. The two rows that order the stack: Block Order and the Families table (Order with reorder arrows, Family,
-// At The End, one (i) on its header); which cards get navigation and what the top strip shows (Show Navigation From,
-// Top Bar, step 5a); then how a jump moves the card (Jump Opens Card To, Jump Motion) and what system Back does (Back
-// Button), step 4. The other nav elements, layouts and presets join this same section at later steps.
+// At The End, one (i) on its header); which cards get navigation, at which heights and what the top strip shows (Show
+// Navigation From, Top Bar: step 5a; Show Navigation At: 5b), what hides while the visitor reads (Hide While Scrolling, 5b);
+// then how a jump moves the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4. The
+// other nav elements, layouts and presets join this same section at later steps.
 // Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
 
 using System.Collections.Generic;
@@ -39,14 +40,18 @@ namespace TileStories.Editor
             // - a group gap: without it the first row under the table reads as one more family (the 620 pt capture showed it)
             GUILayout.Space(TableGapBetweenGroups);
 
-            // - which cards get navigation, and what the strip under the title shows (Show Navigation At joins between them at step 5b)
+            // - which cards get navigation, at which heights, and what the strip under the title shows
             nav.min_blocks = DrawIntSliderField("Show Navigation From", nav.min_blocks, CardNavigationSettings.MinBlocksMin, CardNavigationSettings.MinBlocksMax,
                 CardShowNavigationFromHelp);
+            nav.show_at = DrawPopupField("Show Navigation At", nav.show_at, CardOptions.ShowNavigationAts, CardOptions.ShowNavigationAtLabels, CardShowNavigationAtHelp);
             var (topKeys, topLabels) = TopBarOptions(NavElementRegistry.Shared);
             // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped
             nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
+            // - section 7's order puts Follow Scroll before it (its row is still to come; its data has been read since step 3)
+            nav.hide_on_scroll = DrawPopupField("Hide While Scrolling", nav.hide_on_scroll, CardOptions.HideOnScrolls, CardOptions.HideOnScrollLabels,
+                CardHideWhileScrollingHelp);
 
-            // - section 7's order: the jump rows, then Back (Show Navigation At, Follow Scroll and Hide While Scrolling join between at step 5b).
+            // - section 7's order: the jump rows, then Back.
             //   The first option of each is the default the card reads for an unknown value too, so the row and the card always agree
             nav.jump_raises_to = DrawPopupField("Jump Opens Card To", nav.jump_raises_to, CardOptions.JumpRaises, CardOptions.JumpRaiseLabels, CardJumpRaisesHelp);
             nav.jump_motion = DrawPopupField("Jump Motion", nav.jump_motion, CardOptions.JumpMotions, CardOptions.JumpMotionLabels, CardJumpMotionHelp);

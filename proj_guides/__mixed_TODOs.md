@@ -395,6 +395,18 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   background AND the cursor moved across the Game view during the before_after test; if it reproduces, make the card drags
   immune to real pointer input during a run (the harness is shared ground: a full PlayMode run).
 
+- CLOSED (2026-10-16, _3.2 step 5b): the two `PoiCardNavSceneTests` failures of 5a's full PlayMode run (`ABlockAsksTheHost_ToScrollToABlock_...`,
+  `ARealFingerDrag_MovesTheSpy_...`), which ran right after the failing Model 3D test and never reproduced alone, were a cascade of the 0 px
+  Half: with `CardChromeRule`'s floor the Model 3D test is green on the DEFAULT config, and both stayed green in the 5b closing run of every
+  Card / Poi fixture (553 tests, Unity in the background, the same fixture order as the full run).
+- OPEN (2026-10-16, seen once at _3.2 step 5b): `PoiCardAudioSceneTests.ALiveEditOfTheBlockWhilePlaying_...` ("the audio never noticed:
+  Idle") and `ALiveEditOfTheClipWhilePlaying_...` ("Expected Pause, was Play") failed in ONE background run of the audio + chrome fixtures;
+  green in the closing run before it, alone focused (11/11) and alone in the background (11/11). Both tap the hero chip right after
+  `OpenFull`, whose wait is a fixed 0.45 s of real time; in the background a frame can carry a whole stale layout. If it comes back, make
+  `OpenFull` wait for the sheet's rest height as `PoiCardChromeSceneTests.Rested` does (one of its tests read the Half viewport as 62 px
+  instead of 107 in the 5b closing run, in the background; it has waited for the measured rest height since and stayed green unfocused --
+  the likely cause, a sheet not yet at rest, was not proven by a measure of the root at the time).
+
 ## POI Editor (2026-10-16, from _3.2 step 5a)
 
 - Scene Configuration at a narrow window (450 pt, `TestEvidence/Editor/173_CardNavigation_450_DeviceGuide.png`): "Copy to StreamingAssets" is cut to "py to StreamingAsse" and the window shows a horizontal scrollbar -- the top action rows keep a minimum width the window no longer has. Outside the Navigation section; decide whether the window supports widths under ~500 pt.

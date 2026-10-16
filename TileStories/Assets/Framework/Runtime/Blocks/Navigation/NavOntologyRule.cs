@@ -11,6 +11,9 @@ namespace TileStories
     //   3. fewer targets than Show Navigation From (min_blocks) -> the card shows NO navigation element, scroll only
     //   4. a section with one target jumps straight to that block (L2 skipped); a kind with one instance skips L3
     //   5. a bar with more sections than Bar Slots (max_slots) turns its last slot into More, which lists the rest
+    //   7. an element that navigates BETWEEN sections (tabs, bars, segments, the family chips) is not drawn with fewer than two: one tab
+    //      is not a choice. It is the element's rule, not the model's -- an element that lists BLOCKS (a contents list) still works on
+    //      a one-family card, so ShowsNavigation does not read it (rule 6, segmented's Groups, lands with that element at step 6)
     // Every answer about a block comes from its kind's own definition (IsPinnedTop, IsFooter, ShowAfterViewedField) and its
     // registered family (InNav) -- the same members BlockStackView places the block by -- never from a list of look names.
     public static class NavOntologyRule
@@ -60,6 +63,12 @@ namespace TileStories
         // Rule 5: how many sections a bar of `maxSlots` shows by themselves. All of them when they fit; else one slot fewer,
         // because the last slot is More
         public static int SectionsInBar(int sectionCount, int maxSlots) => sectionCount <= maxSlots ? sectionCount : maxSlots - 1;
+
+        // Rule 7: the fewest sections an element that moves BETWEEN them is drawn for -- with one there is nothing to choose
+        public const int MinSectionsToChooseFrom = 2;
+
+        // Rule 7: does a card of `sectionCount` sections offer a choice an element between sections can draw?
+        public static bool OffersASectionChoice(int sectionCount) => sectionCount >= MinSectionsToChooseFrom;
 
         private static int Clamp(int value, int min, int max) => value < min ? min : value > max ? max : value;
     }

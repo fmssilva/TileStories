@@ -166,9 +166,6 @@ namespace TileStories.Tests
             {
                 c.card_settings.navigation.jump_raises_to = CardOptions.JumpRaisesKeep;
                 c.card_settings.navigation.jump_motion = CardOptions.JumpMotionInstant;
-                // - no top strip: at Half The Lamp's header (206 px), the strip (49) and its sticky footer (81) fill the whole 338 px sheet,
-                //   so nothing could land "at Half"; this test is about the controller, the strip has its own (PoiCardTextTabsSceneTests)
-                c.card_settings.navigation.top = CardOptions.NavNone;
             });
             yield return Open(Lamp, SheetStopRule.Stop.Half);
             int index = LatestUnclampedSection();

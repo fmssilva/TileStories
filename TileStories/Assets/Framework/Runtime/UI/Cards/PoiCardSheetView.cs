@@ -24,6 +24,8 @@ namespace TileStories
         public NavController Nav { get; }
         // The navigation slots (_3.2 step 5a): the top strip between the header and the stack, and the element each one shows
         public NavSlots Slots { get; }
+        // What of the chrome -- the top strip, the sticky footer -- shows now (_3.2 step 5b, CardChromeRule)
+        public CardChromeView Chrome { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
 
@@ -94,6 +96,7 @@ namespace TileStories
             Nav = new NavController(Stack, () => { if (IsOpen && Stop != SheetStopRule.Stop.Full) SetStop(SheetStopRule.Stop.Full); });
             Stack.Revealed += BindNav;
             Slots = new NavSlots(Root, Stack.Scroll, navElements ?? NavElementRegistry.Shared);
+            Chrome = new CardChromeView(this);
 
             // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings
             CloseButton = new Button(() => CloseRequested?.Invoke()) { name = "poi-card-close" };
@@ -166,7 +169,7 @@ namespace TileStories
             if (_context == null || _entries == null) return;
             Nav.Bind(CardNavModel.Build(_entries, _registry, _context.Settings, Stack.IsRevealed), _context);
             Slots.Bind(Nav.Model, Nav, _context);
-            Slots.ShowAt(Stop);
+            Chrome.Bind(_context.Settings?.navigation, _context.ReduceMotion);
         }
 
         // The chip names the language a tap switches to; with fewer than two languages there is nothing to choose and it is hidden
@@ -188,6 +191,7 @@ namespace TileStories
             _entries = null;
             Nav?.Unbind();
             Slots?.Unbind();
+            Chrome?.Unbind();
             Stack.UnbindAll();
             SetStopState(SheetStopRule.Stop.Dismissed);
             IsDragging = false;
@@ -278,7 +282,7 @@ namespace TileStories
         {
             if (stop == Stop) return;
             Stop = stop;
-            Slots?.ShowAt(stop);
+            Chrome?.Apply();
             StopChanged?.Invoke(stop);
         }
 
@@ -296,6 +300,8 @@ namespace TileStories
                 : peekPart.worldBound.yMax + peekPart.resolvedStyle.marginBottom - Root.worldBound.yMin;
             Stops = SheetStopRule.Compute(available, peek, _halfMaxRatio, _topGap);
             if (IsOpen && !IsDragging) ApplyHeight(Stops.HeightOf(Stop));
+            // - the chrome's room is the stop's height: new stops can give it room, or take it
+            Chrome?.Apply();
         }
 
         private void ApplyHeight(float height)
