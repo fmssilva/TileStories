@@ -81,7 +81,9 @@ namespace TileStories.Tests
         private IEnumerator DragStack(float dy)
         {
             var viewport = Scroll.contentViewport.worldBound;
-            float startY = dy < 0f ? viewport.yMax - 20f : viewport.yMin + 20f;
+            // - 20 px in from the edge the finger moves away from, or the middle of a viewport shorter than that (Half with its footer)
+            float inset = Mathf.Min(20f, viewport.height * 0.5f);
+            float startY = dy < 0f ? viewport.yMax - inset : viewport.yMin + inset;
             yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(viewport.center.x, startY), new Vector2(0f, dy));
             yield return CardTestInput.Settle(0.6f);
         }
@@ -97,27 +99,30 @@ namespace TileStories.Tests
 
         // ---------------- Half: the reading space is back ----------------
 
-        // The Lamp at Half with the DEFAULT settings: header + strip + sticky footer do not fit with any content (step 5a: 0 px), so the
-        // floor hides both -- the stack's viewport is the whole room under the header, more than a heading and two lines
+        // The Lamp at Half with the DEFAULT settings: header + strip + sticky footer do not fit with any content (step 5a: 0 px). The
+        // strip gives way first (the map is one drag to Full away) and the footer stays -- its "Show me where it is" button is often why
+        // the card was opened -- over a stack of at least one line (the developer's call at the 5b review, built at step 6)
         [UnityTest]
-        public IEnumerator TheLampAtHalf_WithTheDefaults_GivesTheStackItsReadingSpaceBack()
+        public IEnumerator TheLampAtHalf_WithTheDefaults_KeepsItsFooter_AndTheStripGivesWay()
         {
             AssertTheDefaults();
             yield return Open(Lamp, SheetStopRule.Stop.Half);
             Assert.IsNotNull(Sheet.Slots.TopView, "precondition: the card holds its strip (56 targets, 8 sections)");
             Assert.Greater(Footer.childCount, 0, "precondition: the card has a sticky footer");
             float strip = Strip.layout.height, footer = Footer.layout.height, room = Room;
-            Debug.Log("[Card] Lamp chrome at Half: room " + room.ToString("F1") + " (sheet " + Sheet.Stops.Half.ToString("F1") + " - header "
-                + HeaderBottom.ToString("F1") + "), strip " + strip.ToString("F1") + ", footer " + footer.ToString("F1") + ", viewport " + Viewport.ToString("F1"));
-            Assert.Less(room - strip, CardChromeRule.MinStackViewport, "precondition: the strip alone would leave less than the floor");
+            Assert.Less(room - strip - footer, CardChromeRule.MinStackViewport, "precondition: strip + footer leave less than the floor: " + Parts());
+            Assert.GreaterOrEqual(room - footer, CardChromeRule.MinStackViewportUnderFooter, "precondition: the footer alone leaves one line: " + Parts());
 
-            Assert.IsFalse(Chrome.TopShown, "the floor hides the strip at Half");
-            Assert.IsFalse(Chrome.BottomShown, "and the footer first");
+            Assert.IsFalse(Chrome.TopShown, "the strip gives way first at Half");
+            Assert.IsTrue(Chrome.BottomShown, "the footer stays");
             Assert.IsFalse(InTheCard(Strip), "the strip takes no place in the card");
-            Assert.IsFalse(InTheCard(Footer), "nor does the footer");
-            Assert.IsTrue(FooterBelowTheCard, "the footer slid below the card's edge: " + Footer.worldBound + " under " + Sheet.Root.worldBound);
-            Assert.GreaterOrEqual(Viewport, CardChromeRule.MinStackViewport, "the stack has at least a heading and two lines: " + Parts());
-            Assert.AreEqual(room, Viewport, OnePixel, "in fact the whole room under the header: " + Parts());
+            Assert.IsTrue(InTheCard(Footer), "the footer does");
+            Assert.IsTrue(FooterOnScreen, "inside the card's visible bottom edge: " + Footer.worldBound + " in " + Sheet.Root.worldBound);
+            var button = Footer.Q<Button>();
+            Assert.IsNotNull(button, "the footer holds its button");
+            Assert.IsTrue(button.worldBound.yMax <= Sheet.Root.worldBound.yMax + OnePixel, "the whole button is on screen: " + button.worldBound);
+            Assert.AreEqual(room - footer, Viewport, OnePixel, "the stack keeps the room the footer leaves: " + Parts());
+            Assert.GreaterOrEqual(Viewport, CardChromeRule.MinStackViewportUnderFooter - OnePixel, "at least one line: " + Parts());
             // - and something to read there, really drawn: the first block (or the header's picture) is inside the viewport
             var first = Scroll.contentContainer[0];
             Assert.IsTrue(first.worldBound.Overlaps(Scroll.contentViewport.worldBound), "the stack's first element is in view at Half");
@@ -133,7 +138,7 @@ namespace TileStories.Tests
             yield return Open(Lamp, SheetStopRule.Stop.Half);
             Assert.IsFalse(Chrome.TopShown, "precondition: no strip at Half with the header open");
             yield return DragStack(-60f);
-            Assert.IsTrue(Sheet.Stack.HeaderCollapsed, "precondition: reading collapsed the header");
+            Assert.IsTrue(Sheet.Stack.HeaderCollapsed, "precondition: reading collapsed the header (offset " + Scroll.scrollOffset.y + "): " + Parts());
             Assert.GreaterOrEqual(Room - Strip.layout.height, CardChromeRule.MinStackViewport, "precondition: the collapsed header leaves room for strip + floor");
             Assert.IsTrue(Chrome.TopShown, "the strip is back at Half");
             Assert.IsTrue(InTheCard(Strip), "and takes its place in the card");

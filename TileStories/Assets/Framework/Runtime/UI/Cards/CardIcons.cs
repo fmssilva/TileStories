@@ -20,9 +20,20 @@ namespace TileStories
         public const string Light = "light";
         // The Open Block action (_3.2 step 4): an arrow down to a line -- "go to that part of this card"
         public const string OpenBlock = "open_block";
+        // The families' icons (_3.2 step 6, FamilyDefinition.IconKey; about, ar and visit reuse info, show_on_wall and location):
+        // a framed picture with a sun, headphones, an open book, a die, a person, a page of text
+        public const string Picture = "picture";
+        public const string Listen = "listen";
+        public const string Book = "book";
+        public const string Play = "play";
+        public const string People = "people";
+        public const string Sources = "sources";
 
         // Every key the set draws
-        public static readonly IReadOnlyList<string> All = new[] { ShowOnWall, Time, Access, Location, Info, Ticket, Light, OpenBlock };
+        public static readonly IReadOnlyList<string> All = new[]
+        {
+            ShowOnWall, Time, Access, Location, Info, Ticket, Light, OpenBlock, Picture, Listen, Book, Play, People, Sources,
+        };
 
         // A new icon element (no key yet: SetKey picks the drawing)
         public static VisualElement Create()
@@ -54,6 +65,23 @@ namespace TileStories
             foreach (string known in All)
                 if (icon.ClassListContains("card-icon--" + known)) return known;
             return null;
+        }
+
+        // Paint an icon made by Create in `colour` instead of the accent (a family's colour, read from its token by CardTokenColours):
+        // the frame's lines and the bars and the dot. Null puts the stylesheet's accent back
+        public static void Tint(VisualElement icon, Color? colour)
+        {
+            foreach (var part in icon.Query(className: "card-icon__frame").ToList())
+            {
+                var border = colour.HasValue ? new StyleColor(colour.Value) : new StyleColor(StyleKeyword.Null);
+                part.style.borderTopColor = border;
+                part.style.borderRightColor = border;
+                part.style.borderBottomColor = border;
+                part.style.borderLeftColor = border;
+            }
+            foreach (string fill in new[] { "card-icon__bar", "card-icon__dot" })
+                foreach (var part in icon.Query(className: fill).ToList())
+                    part.style.backgroundColor = colour.HasValue ? new StyleColor(colour.Value) : new StyleColor(StyleKeyword.Null);
         }
 
         // ---- vector glyphs (8A-fix): shapes USS borders cannot draw, painted with Painter2D ----

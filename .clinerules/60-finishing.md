@@ -102,7 +102,9 @@ The last message of a session, in English, short, in this order (the durable rec
    own, plus every fixture a grep for the changed type, method or config key turned up). Say which full run the block
    rides on (its commit and counts), in how many blocks the next full run falls due, and which runs had Unity in the
    background. If a run of yours found a failure that an earlier block's targeted selection should have caught, say so
-   plainly: that is the one signal that the cadence is too loose, and the Architect decides on it.
+   plainly: that is the one signal that the cadence is too loose, and the Architect decides on it. **A failure your own change
+   caused is the headline of the report, not a footnote in a test's configuration:** say what it means for a visitor ("the
+   shipped default leaves the card with no content at Half"), then what you did about it.
 4. **What I looked at** -- the captures, judged.
 5. **Not verified** -- what was not independently re-verified this session, and why (6.1); never blur "re-ran it" with "the
    plan file said so".

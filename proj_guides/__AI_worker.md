@@ -13,78 +13,80 @@
 So start by reading them all. 
 
 
-## `And now: POI Card Navigation (3.2) -- step 5b, CardChromeRule and the two regressions of 5a`
+
+## `And now: POI Card Navigation (3.2) -- step 6, the rest of the top elements`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
 not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Add the card's top navigation strip with text tabs",
-whose full EditMode was 1720/1720 and whose full PlayMode was 802 of 805 -- the THREE failures are this block's PART 1,
-so start by reproducing them, not by trusting this line. Run the full EditMode suite and the three failing fixtures.
+them if TMP dirtied them. Baseline: the tree is clean on commit "Give the card's reading space back with a chrome
+floor" (full EditMode 1739/1739; it rides on 5a's PlayMode run) -- run the full EditMode suite and say which commit you
+trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the two lines marked "DECIDED at the
-5a review" are yours and they are decided: build what they say, do not re-open them) and the status table (1-5a done;
-5b is yours). Sections 4.3, 2.5 (rule 7 is new), 3 (the Show Navigation At and Hide While Scrolling rows) and 9.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the four [step 6] lines are yours;
+the one marked DECIDED is decided -- build it, do not re-open it) and the status table (1-5b done; 6 is yours).
+Sections 5.1 (the five element rows), 2.5 (rules 4-7), 3 (the rows marked step 6) and 9.
 REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines"; .clinerules/40-testing.md
-4.2 (the cadence: this block does NOT owe a full PlayMode run -- see TEST PLAN), 4.2.3 and 4.5; .clinerules/30-ui-content.md
-("progressive disclosure", "every screen has one clear focal point" -- this block is about giving reading space back).
-Context only: _3.3_POI_Card_Styles.md (tokens), .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- it decides what the card shows at every stop, and it must undo a shipped regression without
-re-breaking the stops 5a measured.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: this block adds a pure rule and changes what
-an EXISTING slot shows -- no container, no stops, no harness (4.2, sharpened 2026-10-15). It closes on every PlayMode
-fixture whose name holds Card or Poi (~450 tests, ~12 min) -- that set must include the three that failed at 5a. It
-rides on 5a's run; the next full run falls due at step 8. Unity may stay in the background.
+4.2 (the cadence -- read the "confirms, never discovers" line before you plan a single run), 4.2.3, 4.4 and 4.5;
+.clinerules/30-ui-content.md (never colour alone; one focal point); _3.3_POI_Card_Styles.md sections on the token
+naming (you add the first `--ts-family-*` tokens, so they must be named the way that domain will expect them).
+Context only: .clinerules/10-structure.md, _3.1_POI_Card_Blocks.md section 3.
+WORKER MODEL: Opus-class -- five elements at once, the first icon set the card has needed since step 1, and a visual
+judgement at 390 px in two languages.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: five views bound INSIDE the top slot that
+already exists, no container, no stops, no harness (4.2). It closes on every PlayMode fixture whose name holds Card or
+Poi (~553 tests, ~12 min) -- and that targeted set must be GREEN BEFORE you call the block done; a full run is not due
+until step 8. Unity may be in the background except for the Editor captures.
 
-PART 1 -- the three failures of 5a, reproduced BEFORE anything is fixed (so you know the fix is what cleared them):
-1. `PoiCardModel3DSceneTests.TheLamp_InlineRoomScanAutoSpin...`, `PoiCardNavSceneTests.KeepAndInstant_...` and the
-   host-jump test were each made to run with `navigation.top = NavNone` at 5a because the strip left no viewport at Half.
-   Run them on the DEFAULT config first and record what they report. They go back to the default at 5b.4 and that is the
-   proof the regression is gone -- do not add a new test in place of this.
+PART 1 -- the four [step 6] findings, before the new elements:
+1. THE FLOOR GIVES WAY FROM THE TOP (the developer's call, `_3.2` 4.3). `CardChromeRule.Decide` drops the bottom area
+   first; swap it so the TOP strip goes first and the bottom area only if the floor is still not met. PROOF: a
+   `CardChromeRuleTests` case on The Lamp's measured numbers, and a Phase B assert that the Lamp at Half now KEEPS its
+   "Show me where it is" footer and loses the strip. Retake `Chrome_Lamp_half_default_390.png` and say what changed.
+2. The Follow Scroll Editor row (the data has existed since step 3; both earlier briefs forgot it). With (i), default,
+   undo, live sync, in the order section 7 gives.
+3. The first block heading sits ~4 px under the strip's hairline (`Nav_text_tabs_two_families.png`). Fix the spacing in
+   the USS, not with a magic margin in C#; recapture.
+4. If the two one-off `PoiCardAudioSceneTests` failures logged in `__mixed_TODOs.md` do not appear in your targeted run,
+   leave them logged -- do not close them on one quiet run.
 
-PART 2 -- step 5b:
+PART 2 -- step 6, the four remaining top elements plus the ontology they need:
 
-5b.1 `CardChromeRule` (pure, Runtime/Blocks/Navigation/). Inputs: the stop, the last scroll delta, at-top / at-end,
-  `show_at`, `hide_on_scroll`, whether the model has navigation, and the measured heights (sheet, header, chrome, content).
-  Outputs: is the top strip shown, is the bottom area (sticky CTA footer + a future bottom nav) shown.
-  WHAT, from `_3.2` 4.3: nothing at peek; `full_only` hides at half; `down` hides the BOTTOM area once the content moved
-  down by more than HideAfterTravel (24 px: about a finger's travel, so a tap's wobble never hides it) and shows it again
-  on an upward move over ShowAfterTravel (8 px) or at the top / end of the stack. The top strip stays -- it is the map.
-5b.2 THE FLOOR (the decided TODO): a slot's chrome is not shown at a stop where showing it would leave the stack's
-  viewport under a minimum. ONE named constant with its reason in the comment -- enough for a heading and a line or two of
-  its block. Measure it on The Lamp at 390 x 844 and say the number you chose and what it buys (Half today: header 206 +
-  strip 49 + footer 81 = 336 of 338). The floor is the rule's, not the strip's: the bottom bar of step 7 must get it for
-  free. The wall's Show Navigation At sits ON TOP of the floor -- it can hide more, never less.
-5b.3 Rule 2.5.7 (the other decided TODO): a named predicate in `NavOntologyRule` -- an element that navigates BETWEEN
-  sections is not drawn with fewer than two sections. `text_tabs` reads it. `ShowsNavigation` does NOT change: an element
-  that lists blocks (`nav_contents`, step 11) must still work on a one-family card, and a test says so in words.
-5b.4 Put the three PART 1 tests back on the default config, delete the "Top Bar = None" lines and their comments, and let
-  them prove the fix.
-5b.5 Editor rows: Show Navigation At and Hide While Scrolling, in Detail Card > Navigation, with (i), default, undo and
-  live sync. The (i) of Show Navigation At says what the floor does, in a wall author's words -- that the card may hide
-  the strip by itself when a stop has no room, so nobody files it as a bug.
-  TESTS: Tier 0 `CardChromeRuleTests` (every stop, both options, the two travel thresholds, the floor at the Lamp's
-  numbers and just above them). Phase B in LivingRoomScene with real input: at Half the Lamp shows reading space again
-  with the DEFAULT settings; a real drag down hides the bottom area and a drag up brings it back; nothing shows at peek;
-  the measured content share at Full rises while scrolling down, compared with the same card at Hide While Scrolling =
-  never (relative, not a pixel constant). Phase A: the one-family gallery case renders NO strip; the same card with a
-  second family does.
-  VISUALS: the Lamp at Half with the default settings (the picture that must no longer look like
-  `Nav_Lamp_text_tabs_half_390.png`), at Full scrolled down with the footer hidden, and the Editor section with the two
-  new rows. Judge each item by item and say what changed against the 5a capture.
+6.1 Family icons and colour tokens -- the two `FamilyDefinition` fields held back at step 1 because nothing could draw
+  them (`_3.2` 2.2). `IconKey` per family in `CardIcons` (it ships 8 keys today, all drawn from the same four generic
+  parts -- follow that construction, no new picture and no glyph font) and `ColorToken` = `--ts-family-<key>` in the
+  card's tokens. Both are DATA on the definition; an app's own family brings its own. TESTS: every registered family
+  resolves an icon key the set draws and a token the stylesheet defines (one test, so a tenth family cannot be added
+  without them).
+6.2 `icon_tabs` (A2 top row), `icon_tabs_chips` (A2: icon tabs plus, under them, chips of the CURRENT family's kinds
+  that exist on this POI), `kind_chips` (A3: every kind one chip, dotted with its family colour), `segmented` (A4: 3-4
+  Groups that always fit, no scroll), `progress_map` (E2: a thin bar split into family segments sized by target count,
+  tap a segment to jump). Each registers in `NavElementRegistry` for the top slot and reads the model; none computes
+  structure. Reuse: the strip machinery of `text_tabs` (`NavStripRule`, `SwipeGrab`) for anything that scrolls
+  sideways, `NavController` for every jump, rule 2.5.7 for "fewer than two sections".
+6.3 The config rows these need: Group By (family / format -- the model already answers both since step 2), Labels
+  (icon / text / icon_and_text), Show Counts, and the Groups table + the Families table's Group column for `segmented`
+  (defaults in section 3). Editor rows with (i), undo, live sync; Top Bar's popup lists them from the registry, so it
+  must need no edit to show the four new keys -- say in the report that you checked that.
+  TESTS: Tier 0 for the grouping and the segment widths of `progress_map`. Phase A: every new element x the four
+  gallery cases, through the ONE `CardNavGalleryDefinitions` list 5a built -- adding an element should be adding a key
+  and a check; if it is more, say what the harness lacked. Phase B per element: a real tap lands on the right block,
+  the spy marks the right section after a real drag, 48 px targets, nothing clipped at 390 px with the Portuguese
+  labels.
+  VISUALS: the Phase A renders of all five elements (including `text_tabs` recaptured after PART 1.3), plus the Editor
+  section with the new rows and the Groups table. Judge each item by item: tap size, contrast in both themes, never
+  colour alone (a chip's family colour is a dot BESIDE the words, never the only signal), and the PT labels.
 
-5b.6 DOCS: `_3.2` status row 5b + proof, and the two DECIDED TODO lines removed; `_5.1` for the two rows;
-  `10-structure.md`; RUN TIMES only if you ran a full suite. If the two unreproduced `PoiCardNavSceneTests` failures do
-  NOT come back once the Model 3D test is green, say so and close them in `__mixed_TODOs.md`; if they do come back, STOP
-  and report -- they are then a real fault, not a cascade.
+6.4 DOCS: `_3.2` status row 6 + proof and the four [step 6] TODO lines removed; `_3.3` gets the `--ts-family-*` tokens
+  recorded where that domain will look for them; `_5.1` for the new rows; `10-structure.md`.
 
-Rules as before: no literal colours, sizes or visitor strings in C# (tokens, or a named constant with its reason);
-strict ASCII in code, comments, logs and Editor labels; Editor rows name things, never ids; pure rules decide, views
-draw; no backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: every other element and slot (6-11); Labels / Show Counts / Bar Slots / Groups; the family icons and colour
-tokens (step 6); layouts; the bottom slot itself (step 7 builds it -- 5b only makes the rule ready for it).
-Stop when the full EditMode suite and the named Card / Poi PlayMode fixtures are green with zero failures, the captures
-are judged and 5b.6 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
+comments, logs and Editor labels (accents only in the data assets); Editor rows and popups name things, never ids; pure
+rules decide, views draw; no backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
+OUT OF SCOPE: the bottom slot and its elements (step 7); the menu overlay (8); floating and the placed-model chip (9);
+the edge scrubber (10); in-flow nav blocks (11); layouts; presets.
+Stop when the full EditMode suite and the Card / Poi PlayMode fixtures are green with zero failures, the captures are
+judged and 6.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
 

@@ -70,6 +70,10 @@ namespace TileStories
         // Rule 7: does a card of `sectionCount` sections offer a choice an element between sections can draw?
         public static bool OffersASectionChoice(int sectionCount) => sectionCount >= MinSectionsToChooseFrom;
 
+        // Rule 7 one level down: a row of a section's KINDS (icon_tabs_chips' chips) is drawn only where the section has two or more --
+        // one chip would only repeat the tab above it
+        public static bool OffersAKindChoice(int kindCount) => kindCount >= MinSectionsToChooseFrom;
+
         private static int Clamp(int value, int min, int max) => value < min ? min : value > max ? max : value;
     }
 }

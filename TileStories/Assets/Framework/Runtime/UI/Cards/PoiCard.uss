@@ -246,6 +246,13 @@
     visibility: hidden;
 }
 
+/* Under a shown strip the first block keeps a gap below the hairline (without it its heading sat ~4 px under the line, _3.2 step 6).
+   The gap scrolls with the content, so a block a jump lands on sits flush like any block scrolled to the top; CardChromeView sets
+   the class and reads the blocks' height without it */
+.poi-card--nav-top-shown .poi-card__stack .unity-scroll-view__content-container {
+    padding-top: var(--ts-space-3);
+}
+
 .poi-card__stack {
     flex-grow: 1;
     flex-shrink: 1;

@@ -2,11 +2,12 @@
 //
 // Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open
 // card. The two rows that order the stack: Block Order and the Families table (Order with reorder arrows, Family,
-// At The End, one (i) on its header); which cards get navigation, at which heights and what the top strip shows (Show
-// Navigation From, Top Bar: step 5a; Show Navigation At: 5b), what hides while the visitor reads (Hide While Scrolling, 5b);
-// then how a jump moves the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4. The
-// other nav elements, layouts and presets join this same section at later steps.
-// Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
+// At The End, Group, one (i) on its header); Group By; which cards get navigation, at which heights and what the top strip
+// shows (Show Navigation From, Top Bar: step 5a; Show Navigation At: 5b; Labels, Show Counts: step 6, each only for an element
+// that reads it), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
+// the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4; the Groups table last (step 6,
+// only for the Segmented bar, POIEditorToolWindow.CardNavigationGroups.cs). The other nav elements, layouts and presets join
+// this same section at later steps. Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
 
 using System.Collections.Generic;
 using UnityEditor;
@@ -36,10 +37,16 @@ namespace TileStories.Editor
 
             nav.block_order = DrawPopupField("Block Order", nav.block_order, CardOptions.BlockOrders, CardOptions.BlockOrderLabels, CardBlockOrderHelp);
 
-            DrawFamiliesTable(nav);
+            // - which of the wall's options the Top Bar's element reads: a row (or column) it ignores is hidden and keeps its value
+            //   (_3.2 section 3). Read from the element's own definition, so an app's element needs no edit here
+            NavElementRegistry.Shared.TryGet(nav.top, out var topElement);
+            bool usesGroups = topElement != null && topElement.Choice == NavChoice.Groups;
+
+            DrawFamiliesTable(nav, usesGroups);
             // - a group gap: without it the first row under the table reads as one more family (the 620 pt capture showed it)
             GUILayout.Space(TableGapBetweenGroups);
 
+            nav.group_by = DrawPopupField("Group By", nav.group_by, CardOptions.GroupBys, CardOptions.GroupByLabels, CardGroupByHelp);
             // - which cards get navigation, at which heights, and what the strip under the title shows
             nav.min_blocks = DrawIntSliderField("Show Navigation From", nav.min_blocks, CardNavigationSettings.MinBlocksMin, CardNavigationSettings.MinBlocksMax,
                 CardShowNavigationFromHelp);
@@ -47,7 +54,11 @@ namespace TileStories.Editor
             var (topKeys, topLabels) = TopBarOptions(NavElementRegistry.Shared);
             // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped
             nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
-            // - section 7's order puts Follow Scroll before it (its row is still to come; its data has been read since step 3)
+            if (topElement != null && topElement.ReadsLabels)
+                nav.labels = DrawPopupField("Labels", nav.labels, CardOptions.Labels, CardOptions.LabelsLabels, CardLabelsHelp);
+            if (topElement != null && topElement.ShowsCounts)
+                nav.show_counts = DrawToggleField("Show Counts", nav.show_counts, CardShowCountsHelp);
+            nav.follow_scroll = DrawToggleField("Follow Scroll", nav.follow_scroll, CardFollowScrollHelp);
             nav.hide_on_scroll = DrawPopupField("Hide While Scrolling", nav.hide_on_scroll, CardOptions.HideOnScrolls, CardOptions.HideOnScrollLabels,
                 CardHideWhileScrollingHelp);
 
@@ -56,6 +67,13 @@ namespace TileStories.Editor
             nav.jump_raises_to = DrawPopupField("Jump Opens Card To", nav.jump_raises_to, CardOptions.JumpRaises, CardOptions.JumpRaiseLabels, CardJumpRaisesHelp);
             nav.jump_motion = DrawPopupField("Jump Motion", nav.jump_motion, CardOptions.JumpMotions, CardOptions.JumpMotionLabels, CardJumpMotionHelp);
             nav.back_button = DrawPopupField("Back Button", nav.back_button, CardOptions.BackButtons, CardOptions.BackButtonLabels, CardBackButtonHelp);
+
+            // - section 7 puts the Groups table last: it only matters to the Segmented Top Bar
+            if (usesGroups)
+            {
+                GUILayout.Space(TableGapBetweenGroups);
+                DrawGroupsTable(nav);
+            }
 
             DrawDomainTestSubSection(_cardNavigationTest, CardNavigationSceneTestGuide, CardNavigationPlaymodeTestGuide, CardNavigationDeviceTestGuide);
         }
@@ -106,8 +124,8 @@ namespace TileStories.Editor
         }
 
         // One row per registered family, in the order Grouped By Family uses: the arrows that move it, its visitor
-        // label with its key, and whether its blocks close the card.
-        private void DrawFamiliesTable(CardNavigationSettings nav)
+        // label with its key, whether its blocks close the card, and -- with a Top Bar that shows Groups -- the group it joins.
+        private void DrawFamiliesTable(CardNavigationSettings nav, bool showGroup)
         {
             DrawEditorRow(out float headerRow, out _);
             Rect header = FamilyCellsRect(headerRow);
@@ -115,9 +133,11 @@ namespace TileStories.Editor
             GUI.Label(FamilyNameRect(header), "Family", EditorStyles.miniBoldLabel);
             // - the header word is wider than its checkbox column, so it is drawn from the column's left edge
             GUI.Label(new Rect(FamilyAtEndRect(header).x, header.y, 70f, header.height), "At The End", EditorStyles.miniBoldLabel);
+            if (showGroup) GUI.Label(FamilyGroupRect(header, headerRow: true), "Group", EditorStyles.miniBoldLabel);
             HelpInfoButton.Draw("Families", CardFamiliesHelp);
             EditorRowEnd();
 
+            var (groupKeys, groupNames) = showGroup ? GroupChoices(nav) : (null, null);
             var families = FamiliesInEffectiveOrder(nav);
             // - never move a row inside the loop: the move is applied after it, like every other table of this window
             int moveAt = -1, moveBy = 0;
@@ -142,6 +162,8 @@ namespace TileStories.Editor
                 bool ticked = EditorGUI.Toggle(FamilyAtEndRect(cells), atEnd);
                 ReportTableCellRect("Family at end", i, FamilyAtEndRect(cells));
                 if (ticked != atEnd) SetFamilyAtEnd(nav, family.Key, ticked);
+                // - a family left out of navigation (the Sources) is in no segment whatever it picks: no Group to pick
+                if (showGroup && family.InNav) DrawFamilyGroupCell(nav, family, FamilyGroupRect(cells, headerRow: false), i, groupKeys, groupNames);
                 // - no (i) per row: the header's one says everything a row's would (they all opened CardFamiliesHelp)
                 EditorRowEnd();
             }
@@ -168,6 +190,14 @@ namespace TileStories.Editor
         // The words the table shows for a family: its visitor label in the wall's first language, then its key
         private string FamilyRowName(FamilyDefinition family)
         {
+            string words = FamilyWords(family);
+            return string.IsNullOrWhiteSpace(words) ? family.Key : words + " (" + family.Key + ")";
+        }
+
+        // A family's visitor label in the wall's first language (the wall's own wording first), "" when no table names it -- what a
+        // message names a family by
+        private string FamilyWords(FamilyDefinition family)
+        {
             var table = FrameworkCardStrings();
             var languages = _config.card_settings?.languages;
             string language = languages != null && languages.Count > 0 ? languages[0] : "en";
@@ -180,7 +210,7 @@ namespace TileStories.Editor
                 if (string.IsNullOrWhiteSpace(label)) label = CardStrings.Find(entries, family.LabelKey, language);
                 if (string.IsNullOrWhiteSpace(label)) label = CardStrings.Find(entries, family.LabelKey, "en");
             }
-            return string.IsNullOrWhiteSpace(label) ? family.Key : label + " (" + family.Key + ")";
+            return label ?? "";
         }
 
         internal static int EffectiveFamilyOrder(CardNavigationSettings nav, FamilyDefinition family) =>
@@ -224,6 +254,17 @@ namespace TileStories.Editor
                 at_end = family != null && family.AtEnd,
             });
             return row;
+        }
+
+        // The Group cell starts after the "At The End" header WORD (wider than its checkbox: measured, the 620 pt capture showed the two
+        // headers run together). A family row has no (i) of its own, so its popup may also use the row's free (i) column; the header row
+        // keeps that column for the table's (i)
+        private static Rect FamilyGroupRect(Rect cells, bool headerRow)
+        {
+            float atEndWord = EditorStyles.miniBoldLabel.CalcSize(new GUIContent("At The End")).x;
+            float x = FamilyAtEndRect(cells).x + atEndWord + FamilyCellGap;
+            float end = headerRow ? cells.xMax : cells.xMax + 36f - FamilyCellGap;
+            return new Rect(x, cells.y, Mathf.Max(0f, end - x), cells.height);
         }
     }
 }

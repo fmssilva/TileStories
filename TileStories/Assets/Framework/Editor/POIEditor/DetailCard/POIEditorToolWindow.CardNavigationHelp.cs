@@ -23,8 +23,36 @@ namespace TileStories.Editor
             "looking ('what do I want?'), not a file type, and every block kind belongs to one. " +
             "Order: the up and down arrows move a family past its neighbour. At The End: the family's blocks close the " +
             "card instead of staying where they were written -- this is what End Families Last moves. " +
-            "A family you never change keeps the order and the tick it comes with, and nothing is written to this wall " +
+            "Group (only with the Segmented Top Bar): the group of the Groups table whose segment leads to this family's blocks; " +
+            "(no group) leaves them out of the segments. " +
+            "A family you never change keeps the order, the tick and the group it comes with, and nothing is written to this wall " +
             "until you really change one, so a family added later needs no edit here.";
+
+        private const string CardGroupByHelp =
+            "What the Top Bar's tabs (and its progress pieces) stand for. Family (the default): the visitor's reason for looking -- " +
+            "About, Media, Stories... -- each with its icon and colour. Format: how a block is taken in -- Read, Look, Watch, Listen, " +
+            "Immersive, Interact -- the same blocks sorted another way; a format has no icon, so its tab always shows its word. " +
+            "The Segmented bar always shows Groups of families, whatever this says.";
+
+        private const string CardLabelsHelp =
+            "What each tab of the Top Bar shows. Icon And Text (the default): the family's icon, in its colour, above its word -- " +
+            "easiest to scan and to read. Icon: the icon alone, for the narrowest bar; its word is still read out by a screen " +
+            "reader and shown on a long press. Text: the word alone. A tab with no icon (Group By = Format) always shows its word.";
+
+        private const string CardShowCountsHelp =
+            "Whether each tab, chip or segment of the Top Bar shows how many blocks it leads to, as a small number after its word. " +
+            "Off (the default) keeps the bar quiet; on helps a visitor judge where most of a long card is.";
+
+        private const string CardGroupsHelp =
+            "The groups the Segmented Top Bar shows as equal segments that always fit the screen -- three or four work best. " +
+            "Each family joins one in the Families table's Group column. A wall with no groups of its own gets four framework " +
+            "default suggestions (Discover, Watch, Explore, Visit), which you may rename or delete; the first edit here writes them " +
+            "to this wall. A group with no block on a card is left out of that card, and a card whose blocks all fall in one group " +
+            "gets no segments.";
+
+        private const string CardGroupNameHelp =
+            "What a visitor reads on this group's segment, in each language of the wall. Keep it to one short word: four of them " +
+            "share the screen's width.";
 
         private const string CardShowNavigationFromHelp =
             "How many blocks a card needs before it shows any navigation (the Top Bar). A block counts when a visitor could be taken " +
@@ -37,9 +65,15 @@ namespace TileStories.Editor
             "at half and at full height. Full Only: at full height only, so half height keeps all its room for the content. " +
             "The card may also hide the bar BY ITSELF, and that is on purpose, not a fault: at a height where the title, the bar and the " +
             "buttons pinned to the card's bottom (an Actions block with the sticky_cta look) would leave less than a heading and two " +
-            "lines of content, the card shows the content instead -- the bottom buttons give way first, then the bar. The bar comes back " +
+            "lines of content, the card leaves the bar out first: the bottom buttons are often why the card was opened, and the bar is " +
+            "one drag to full height away. The buttons stay while at least one line of content still shows. The bar comes back " +
             "as soon as there is room: at full height, or once the title shrinks to one line while the visitor reads. Full Only can " +
             "hide the bar more, never bring it back where there is no room.";
+
+        private const string CardFollowScrollHelp =
+            "Whether the Top Bar marks the part of the card the visitor is reading. On (the default): as the visitor scrolls, the mark " +
+            "moves to the family (or group, or kind) whose blocks are in view, and the strip slides to keep it visible. Off: the mark " +
+            "moves only when the visitor taps an item, so the bar reads as a fixed menu rather than a map of where they are.";
 
         private const string CardHideWhileScrollingHelp =
             "What the bottom of the card does while the visitor reads. When Scrolling Down (the default): the buttons pinned to the " +
@@ -124,12 +158,26 @@ namespace TileStories.Editor
             "is underlined.\n" +
             "- Drag the strip sideways with the mouse: the words slide and the card does not move. Drag it up or down: the card " +
             "moves like it does from its title.\n" +
-            "- Raise Show Navigation From above the card's block count: the strip goes. Set Top Bar = None: no strip on any card.\n\n" +
+            "- Raise Show Navigation From above the card's block count: the strip goes. Set Top Bar = None: no strip on any card.\n" +
+            "- Untick Follow Scroll and scroll the card: the mark stays where it was; tap a word: it moves there. Tick it again: the " +
+            "mark follows the scroll.\n" +
+            "- Top Bar = Icon Tabs: every tab shows its family's icon in the family's colour above its word. Set Labels = Icon: the words " +
+            "go, the icons stay; Labels = Text: the icons go. Set Group By = Format: the tabs become Read, Look, Watch... with words only.\n" +
+            "- Top Bar = Icon Tabs With Chips: under the tabs, a chip per kind of block of the marked family; scroll into another family " +
+            "and the chips change; a family with one kind shows an empty row. Tap a chip: the card moves to that kind's first block.\n" +
+            "- Top Bar = Kind Chips: one chip per kind of the whole card, a coloured dot beside each word; the chip of the block you read " +
+            "is outlined and bold. Open a card with one family only: the chips still show.\n" +
+            "- Top Bar = Segmented: three or four equal segments fill the strip with no sideways scroll; the one you read is filled. In the " +
+            "Groups table rename a group: the segment's word changes at once. In the Families table pick another Group for a family: its " +
+            "blocks now light up that segment. Put every family in one group: the segments go (one segment is not a choice).\n" +
+            "- Top Bar = Progress Map: a thin bar split into pieces, a wide piece for a family with many blocks; the pieces up to the one " +
+            "you read are solid, the current one thicker. Tap a piece: the card moves there.\n" +
+            "- Tick Show Counts: each tab, chip or segment shows its number of blocks.\n\n" +
             "SHOW NAVIGATION AT AND HIDE WHILE SCROLLING\n" +
             "- Open a long card with a tall title and buttons pinned to its bottom (an Actions block with the sticky_cta look) at half " +
-            "height. If the title, the strip and the buttons would leave less than a heading and two lines of content, the card " +
-            "shows content only, with no strip and no buttons: that is on purpose. Scroll the content a little: the title shrinks " +
-            "to one line and the strip (and, with room, the buttons) come back.\n" +
+            "height. If the title, the strip and the buttons would leave less than a heading and two lines of content, the strip " +
+            "is left out and the buttons stay over at least one line of content: that is on purpose. Scroll the content a little: " +
+            "the title shrinks to one line and the strip comes back where there is room.\n" +
             "- Raise the card to full: the strip and the buttons show. With Hide While Scrolling = When Scrolling Down, scroll down: " +
             "the buttons slide away and the content takes their room; scroll up a little: they come back. At the very end of the " +
             "card they are there too. The strip never moves.\n" +

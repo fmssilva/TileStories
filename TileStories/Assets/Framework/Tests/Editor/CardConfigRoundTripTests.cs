@@ -103,6 +103,14 @@ namespace TileStories.Editor.Tests
             // - _3.2 step 5b: the chrome options load on their section 3 defaults
             Assert.AreEqual(CardOptions.ShowNavHalfAndFull, s.navigation.show_at, "the strip may show at Half and Full");
             Assert.AreEqual(CardOptions.HideOnScrollDown, s.navigation.hide_on_scroll, "the bottom area hides while the reader moves down");
+            // - _3.2 step 6: the top elements' options load on their section 3 defaults; no Groups rows = the framework's four
+            Assert.AreEqual(CardOptions.LabelsIconAndText, s.navigation.labels, "icon tabs show icon and words");
+            Assert.IsFalse(s.navigation.show_counts, "no block counts");
+            CollectionAssert.IsEmpty(s.navigation.groups, "no Groups rows written");
+            CollectionAssert.AreEqual(NavGroupRule.DefaultKeys, NavGroupRule.Groups(s.navigation).Select(g => g.Key), "so the four defaults apply");
+            var family = JsonUtility.FromJson<CardFamilySetting>("{\"family\":\"about\",\"order\":10,\"at_end\":false}");
+            Assert.AreEqual("", family.group, "a Families row written before step 6 has no group: its family's default");
+            Assert.AreEqual(NavGroupRule.Discover, NavGroupRule.GroupOf(BuiltInFamilies.About, new CardNavigationSettings { families = { family } }));
             Assert.IsNotNull(loaded.pois[0].card);
             CollectionAssert.IsEmpty(loaded.pois[0].card.blocks, "no blocks = the header-only card");
         }

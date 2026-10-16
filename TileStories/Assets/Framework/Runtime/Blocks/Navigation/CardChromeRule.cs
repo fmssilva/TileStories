@@ -9,8 +9,9 @@ namespace TileStories
     //   2. the scroll: Hide While Scrolling = down slides the bottom area away once the reader moved down by more than HideAfterTravel,
     //      and brings it back after ShowAfterTravel up, or at the top / end of the stack. The top strip stays: it is the map (NN/g
     //      sticky headers), the bottom is the "partially persistent" part that costs reading space on every screen
-    //   3. THE FLOOR: a slot's chrome is not shown at a stop where it would leave the stack's viewport under MinStackViewport. The
-    //      bottom area gives way first, then the top strip. The wall's options sit on top of it: they hide more, never less
+    //   3. THE FLOOR: the top strip is not shown where it would leave the stack's viewport under MinStackViewport (with the bottom area
+    //      shown too) -- it gives way FIRST: the map is one drag to Full away. The bottom area then needs only one line of content
+    //      (MinStackViewportUnderFooter): the sticky CTA outlasts the strip. The wall's options sit on top: they hide more, never less
     public static class CardChromeRule
     {
         // How far the reader must move down before the bottom area slides away (panel units): about a finger's travel, so the
@@ -24,6 +25,11 @@ namespace TileStories
         // its block. Measured on The Lamp at 390 x 844 (_3.2 step 5b): heading 22 + its gap 8 + two body lines of 20 = 70, on the
         // 8 px grid. Below it a stop shows chrome and no content -- the 0 px Half of step 5a
         public const float MinStackViewport = 72f;
+
+        // The least of the stack the BOTTOM area must leave (panel units): one body line (20) on the 8 px grid. The sticky CTA is the
+        // one irreversible action the card offers and often why it was opened, so it outlasts the strip (the developer's call at the
+        // 5b review): The Lamp's Half keeps its button over 25.6 px of content. Below one line it gives way too -- never a 0 px stack
+        public const float MinStackViewportUnderFooter = 24f;
 
         // The scroll's memory: how far the reader moved in the current direction (+ down the card, - up), and whether that hid the
         // bottom area
@@ -87,7 +93,8 @@ namespace TileStories
             return new ScrollState(travel, hidden);
         }
 
-        // What shows now: the stop's chrome, less what the scroll hid, less what the floor cannot afford (bottom first)
+        // What shows now: the stop's chrome, less what the scroll hid, less what the floor cannot afford -- the strip first (it needs
+        // MinStackViewport beside everything else shown), then the bottom area (it needs only MinStackViewportUnderFooter)
         public static Chrome Decide(Input input)
         {
             bool top = input.HasTop && TopShownAt(input.Stop, input.ShowAt);
@@ -95,9 +102,8 @@ namespace TileStories
             float room = input.SheetHeight - input.HeaderHeight;
             // - not laid out yet: no floor to apply, the next measure decides
             if (float.IsNaN(room)) return new Chrome(top, bottom);
-            float need = Need(input.ContentHeight);
-            if (bottom && room - (top ? input.TopHeight : 0f) - input.BottomHeight < need) bottom = false;
-            if (top && room - input.TopHeight < need) top = false;
+            if (top && room - input.TopHeight - (bottom ? input.BottomHeight : 0f) < Need(input.ContentHeight, MinStackViewport)) top = false;
+            if (bottom && room - input.BottomHeight < Need(input.ContentHeight, MinStackViewportUnderFooter)) bottom = false;
             return new Chrome(top, bottom);
         }
 
@@ -122,8 +128,8 @@ namespace TileStories
         }
 
         // A stack shorter than the floor needs only its own height; one not measured yet, the whole floor
-        private static float Need(float contentHeight) =>
-            float.IsNaN(contentHeight) || contentHeight < 0f ? MinStackViewport : Mathf.Min(MinStackViewport, contentHeight);
+        private static float Need(float contentHeight, float floor) =>
+            float.IsNaN(contentHeight) || contentHeight < 0f ? floor : Mathf.Min(floor, contentHeight);
 
         private static bool IsAboveTheTitle(SheetStopRule.Stop stop) => stop == SheetStopRule.Stop.Half || stop == SheetStopRule.Stop.Full;
     }

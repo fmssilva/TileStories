@@ -14,6 +14,9 @@ namespace TileStories
         // How a visitor takes the block in (_3.2 section 2.4): one of CardOptions.Formats (read, look, watch, listen, model,
         // interact). The second axis the card's navigation can group by (group_by = format); required, like Family
         public string Format;
+        // The words a visitor reads for the kind (_3.2 step 6): a CardStrings key -- the framework's table for a built-in kind, the app's own
+        // table for an app kind -- so a chip of the card's navigation names it in the visitor's language. Never the Editor's DisplayName
+        public string LabelKey;
         // The Editor's name for the kind ("Header")
         public string DisplayName;
         // The Editor (i) text of the kind

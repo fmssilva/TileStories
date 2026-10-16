@@ -20,12 +20,14 @@ namespace TileStories
         private readonly BlockStackView _stack;
         private readonly Action _raiseToFull;
         private readonly List<float> _sectionTops = new();
+        private readonly List<float> _targetTops = new();
         private BlockBindContext _context;
         private string _currentKey;
 
-        // The running jump (null block = none): where it goes, the section it freezes the spy on, where and when it started
+        // The running jump (null block = none): where it goes, the section and the target it freezes the spy on, where and when it started
         private string _jumpBlock;
         private int _jumpSection = -1;
+        private int _jumpTarget = -1;
         private float _jumpFrom;
         private float _jumpStartTime;
         private float _jumpDuration;
@@ -39,6 +41,12 @@ namespace TileStories
         public int Current { get; private set; } = -1;
         public CardNavModel.Section CurrentSection => Model != null && Current >= 0 && Current < Model.Sections.Count ? Model.Sections[Current] : null;
         public event Action<int> CurrentChanged;
+
+        // The target block the reader is at (a key of Model.Targets; null with none): the same spy line over every target's top, frozen
+        // on the jump's block while a jump glides. What an element that marks a KIND or a GROUP follows (kind chips, segmented): the
+        // model says which kind and group a target is in. CurrentBlockChanged says when it moves
+        public string CurrentBlock { get; private set; }
+        public event Action<string> CurrentBlockChanged;
 
         // Whether a jump is moving the stack now (the spy is frozen meanwhile)
         public bool IsJumping => _jumpBlock != null;
@@ -71,7 +79,9 @@ namespace TileStories
         public void Bind(CardNavModel model, BlockBindContext context)
         {
             if (!ReferenceEquals(context, _context)) EndJump();
-            string kept = context?.Poi?.id == _context?.Poi?.id ? _currentKey : null;
+            bool samePoint = context?.Poi?.id == _context?.Poi?.id;
+            string kept = samePoint ? _currentKey : null;
+            string keptBlockKey = samePoint ? CurrentBlock : null;
             Model = model;
             _context = context;
             var jumpSlot = IsJumping ? ScrollingSlot(_jumpBlock) : null;
@@ -81,16 +91,21 @@ namespace TileStories
                 //   model (indices may have moved)
                 int section = SectionOfBlock(_jumpBlock);
                 _jumpSection = section >= 0 ? section : SectionAtOffset(Landing(jumpSlot));
+                _jumpTarget = TargetFrozenFor(_jumpBlock, jumpSlot);
                 _jumpFrom = Scroll.scrollOffset.y;
                 _jumpStartTime = Clock();
                 _lastLanding = float.NaN;
                 SetCurrent(_jumpSection);
+                SetCurrentBlock(_jumpTarget);
                 return;
             }
             EndJump();
             int keptIndex = IndexOfSection(kept);
             int start = keptIndex >= 0 ? keptIndex : Model.Sections.Count > 0 ? 0 : -1;
-            SetCurrent(NavScrollRule.Spy(NavScrollRule.FollowsScroll(Settings), -1, MeasuredSection(), start));
+            bool follows = NavScrollRule.FollowsScroll(Settings);
+            SetCurrent(NavScrollRule.Spy(follows, -1, MeasuredSection(), start));
+            int keptBlock = keptBlockKey != null ? IndexOfTarget(keptBlockKey) : -1;
+            SetCurrentBlock(NavScrollRule.Spy(follows, -1, MeasuredTarget(), keptBlock >= 0 ? keptBlock : Model.Targets.Count > 0 ? 0 : -1));
         }
 
         // The card closed: nothing to drive
@@ -100,6 +115,7 @@ namespace TileStories
             Model = null;
             _context = null;
             SetCurrent(-1);
+            SetCurrentBlock(-1);
         }
 
         // Jump to a section (its index in Model.Sections) as `elementKey` asked: to the section's first target. False when there is none
@@ -131,7 +147,9 @@ namespace TileStories
             _lastLanding = float.NaN;
             // - frozen on the jump's section; a block of no section freezes on what the spy will name where it lands
             _jumpSection = sectionIndex >= 0 ? sectionIndex : SectionAtOffset(Landing(ScrollingSlot(blockKey)));
+            _jumpTarget = TargetFrozenFor(blockKey, ScrollingSlot(blockKey));
             SetCurrent(_jumpSection);
+            SetCurrentBlock(_jumpTarget);
             Report(blockKey, sectionKey, elementKey);
             // - the first step runs now (an instant jump is done by it); a glide goes on every panel update until it lands
             Step();
@@ -165,6 +183,7 @@ namespace TileStories
             if (!IsJumping) return;
             _jumpBlock = null;
             _jumpSection = -1;
+            _jumpTarget = -1;
             _glide?.Pause();
             _glide = null;
             UpdateSpy();
@@ -179,11 +198,51 @@ namespace TileStories
         private void UpdateSpy()
         {
             if (Model == null) return;
-            SetCurrent(NavScrollRule.Spy(NavScrollRule.FollowsScroll(Settings), _jumpSection, MeasuredSection(), Current));
+            bool follows = NavScrollRule.FollowsScroll(Settings);
+            SetCurrent(NavScrollRule.Spy(follows, _jumpSection, MeasuredSection(), Current));
+            SetCurrentBlock(NavScrollRule.Spy(follows, _jumpTarget, MeasuredTarget(), IndexOfTarget(CurrentBlock)));
         }
 
         // The section the scroll shows now (NavScrollRule's spy line)
         private int MeasuredSection() => SectionAtOffset(Scroll.scrollOffset.y);
+
+        // The target the scroll shows now: the same spy line over every target's own top
+        private int MeasuredTarget() => TargetAtOffset(Scroll.scrollOffset.y);
+
+        private int TargetAtOffset(float offset)
+        {
+            _targetTops.Clear();
+            foreach (string target in Model.Targets)
+            {
+                float top = ScrollingSlot(target)?.layout.y ?? float.NaN;
+                _targetTops.Add(float.IsNaN(top) ? float.PositiveInfinity : top);
+            }
+            return NavScrollRule.CurrentSection(_targetTops, offset, Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+        }
+
+        // The target a jump freezes the block spy on: the block itself, or -- for a block that is no target (sources) -- the one the spy
+        // will name where it lands
+        private int TargetFrozenFor(string blockKey, VisualElement slot)
+        {
+            int index = IndexOfTarget(blockKey);
+            return index >= 0 || slot == null ? index : TargetAtOffset(Landing(slot));
+        }
+
+        private int IndexOfTarget(string blockKey)
+        {
+            if (blockKey == null || Model == null) return -1;
+            for (int i = 0; i < Model.Targets.Count; i++)
+                if (Model.Targets[i] == blockKey) return i;
+            return -1;
+        }
+
+        private void SetCurrentBlock(int index)
+        {
+            string key = Model != null && index >= 0 && index < Model.Targets.Count ? Model.Targets[index] : null;
+            if (key == CurrentBlock) return;
+            CurrentBlock = key;
+            CurrentBlockChanged?.Invoke(key);
+        }
 
         private int SectionAtOffset(float offset)
         {

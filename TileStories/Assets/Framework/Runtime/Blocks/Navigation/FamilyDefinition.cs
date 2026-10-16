@@ -5,8 +5,7 @@ namespace TileStories
     // BlockRegistry.RegisterFamily takes one, and registering a kind whose family is not registered throws, so a
     // typo can no longer invent a family. An app registers its own family exactly like a kind, with zero
     // Framework edits; its label key goes in the app's own string table (CardStringSources).
-    // Fields land with the code that reads them (20-code-quality, no speculative field): IconKey and ColorToken
-    // join at _3.2 step 6, with the family icons CardIcons still lacks and the --ts-family-* tokens.
+    // IconKey and ColorToken joined at _3.2 step 6 with the elements that draw them (icon tabs, the progress map, the kind chips' dots).
     public sealed class FamilyDefinition
     {
         // What a kind's Family says and what a wall's Families row points at (data identity: never renamed)
@@ -17,6 +16,12 @@ namespace TileStories
         // The words a visitor reads for this family: a CardStrings key, so it is localized and a wall can reword
         // it in Card Texts. Empty for a family that is never shown as a navigation target.
         public string LabelKey;
+        // The family's icon: one of CardIcons.All (a line icon drawn by the card's stylesheet, no picture). An app family picks one too
+        public string IconKey;
+        // The family's colour, as the name of a card token ("--ts-family-about", CardTokens.uss): a view reads it from the card's resolved
+        // style, so the value stays in the stylesheet. An app family names a token its own stylesheet defines. Never shown alone: an icon
+        // or the family's words always travel with it (30-ui-content)
+        public string ColorToken;
         // Whether the family is offered as a navigation target at all (a nav block is never a nav target)
         public bool InNav = true;
         // Whether the family's blocks close the card, whatever order they were authored in (meta: Sources).

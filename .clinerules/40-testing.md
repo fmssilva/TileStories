@@ -92,7 +92,7 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~75-115 s (1720 tests, 74 s, 2026-10-16); full PlayMode ~30-34 min (805 tests, 2032 s, wholly in the background,
+EditMode ~75-115 s (1755 tests, 88 s, 2026-10-16); full PlayMode ~30-34 min (805 tests, 2032 s, wholly in the background,
 2026-10-16, _3.2 step 5a: 802 passed, 3 failed -- one fixed and green in its targeted runs, two that did not reproduce alone, focused
 or in the background; the developer closed the block on it, the next full run in 4-5 blocks); one PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
@@ -123,6 +123,11 @@ or in the background; the developer closed the block on it, the next full run in
   fixture). Every FULL PlayMode run is taken with Unity in the background unless the brief asks for the front: it frees the
   developer's machine for the half hour and keeps the focus-independence of 4.2.3 continuously proven, which is what the
   old "one background full run every third block" bought separately.
+
+- **A full PlayMode run confirms, it never discovers.** Before starting one, the block must already be green on its own
+  targeted set (the fixtures the brief named, plus what a grep for the changed types finds). A full run started on a block
+  that was never run against its own card fixtures spends half an hour finding what twelve minutes would have found, and it
+  ends the block red (2026-10-15, `_3.2` step 5a). If the targeted set is red, fix it and re-run it -- then start the full run.
 
 A targeted run replaces the block-end full run only where the rule above allows it. It never replaces the shared-ground run,
 the fourth-block run or a run the brief asks for: a fixture you did not think of is exactly what the full run is for.

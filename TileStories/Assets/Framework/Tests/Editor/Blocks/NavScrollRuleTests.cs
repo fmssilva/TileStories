@@ -99,8 +99,12 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(NavScrollRule.JumpDone(0.25f, glide, settle, landed: false), "its time is up but the stack is not on its landing yet (the sheet grows)");
             Assert.IsTrue(NavScrollRule.JumpDone(0.25f, glide, settle, landed: true));
             Assert.IsTrue(NavScrollRule.JumpDone(glide + settle, glide, settle, landed: false), "the settle window is bounded");
-            Assert.IsTrue(NavScrollRule.JumpDone(0f, 0f, settle, landed: true), "an instant jump that already sits on its landing is over at once");
-            Assert.IsFalse(NavScrollRule.JumpDone(0f, 0f, settle, landed: false), "an instant jump the ScrollView clamped short (a sheet still at peek) holds on");
+            Assert.IsFalse(NavScrollRule.JumpDone(0f, 0f, settle, landed: true),
+                "an instant jump sitting on its landing still holds it: the card reacts to its scroll over the next frames");
+            Assert.IsFalse(NavScrollRule.JumpDone(settle - 0.01f, 0f, settle, landed: true), "for one motion length");
+            Assert.IsTrue(NavScrollRule.JumpDone(settle, 0f, settle, landed: true), "then it is over once it rests");
+            Assert.IsFalse(NavScrollRule.JumpDone(settle, 0f, settle, landed: false), "an instant jump the ScrollView clamped short (a sheet still at peek) holds on");
+            Assert.IsTrue(NavScrollRule.JumpDone(2f * settle, 0f, settle, landed: false), "for one more motion length at most");
         }
 
         [Test]

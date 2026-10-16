@@ -1,7 +1,8 @@
 /* The card's navigation elements (_3.2 section 5), written only with the --ts-* tokens (CardTokens.uss). The slot that holds an
-   element is the container's (PoiCard.uss, .poi-card__nav-top). */
+   element is the container's (PoiCard.uss, .poi-card__nav-top). A family's colour is not written here: it is data (FamilyDefinition
+   .ColorToken), read by the views through CardTokenColours and painted on the icon, the dot or the bar -- never on its own. */
 
-/* ---- text_tabs (TextTabsNavView): a clipped strip, its row of tabs moved sideways by the view ---- */
+/* ---- the tabs (TabsNavView: text_tabs, icon_tabs): a clipped strip, its row of tabs moved sideways by the view ---- */
 
 /* the first word starts where the header's title does (this padding + a tab's own = the header's --ts-space-4) */
 .nav-tabs__viewport {
@@ -34,6 +35,21 @@
     background-color: var(--ts-clear);
 }
 
+/* an icon tab: the family's icon above its word, the pair centred in the tab */
+.nav-tabs__tab--icon {
+    flex-direction: column;
+    padding: var(--ts-space-1) var(--ts-space-3) var(--ts-space-2) var(--ts-space-3);
+}
+
+.nav-tabs__icon {
+    margin-bottom: var(--ts-space-1);
+}
+
+.nav-tabs__words {
+    flex-direction: row;
+    align-items: center;
+}
+
 .nav-tabs__label {
     font-size: var(--ts-size-body);
     -unity-font-style: normal;
@@ -41,6 +57,10 @@
     white-space: nowrap;
     margin: 0;
     padding: 0;
+}
+
+.nav-tabs__tab--icon .nav-tabs__label {
+    font-size: var(--ts-size-caption);
 }
 
 /* the marked section: an underline AND a bolder, brighter label */
@@ -62,4 +82,215 @@
 
 .nav-tabs__tab--current .nav-tabs__underline {
     display: flex;
+}
+
+/* Show Counts: an item's block count, after its words, quieter than them */
+.nav-item__count {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0 0 0 var(--ts-space-1);
+    padding: 0;
+}
+
+/* ---- the chips (NavChipRow: kind_chips, icon_tabs_chips' row): a strip of pills, each in a full-size tap target ---- */
+
+.nav-chips__viewport {
+    flex-direction: row;
+    overflow: hidden;
+    padding: 0 var(--ts-space-2);
+}
+
+.nav-chips__row {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.nav-chip {
+    flex-shrink: 0;
+    min-height: var(--ts-touch-target);
+    min-width: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-1);
+    justify-content: center;
+    align-items: center;
+    border-width: 0;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.nav-chip:hover,
+.nav-chip:active {
+    background-color: var(--ts-clear);
+}
+
+.nav-chip__pill {
+    flex-direction: row;
+    align-items: center;
+    height: var(--ts-chip-height);
+    padding: 0 var(--ts-space-3);
+    border-radius: var(--ts-chip-radius);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    background-color: var(--ts-surface-2);
+}
+
+/* the family's colour, as a dot BESIDE the words (painted by the view; ink-3 until the token resolves) */
+.nav-chip__dot {
+    width: var(--ts-dot-size);
+    height: var(--ts-dot-size);
+    border-radius: var(--ts-dot-size);
+    margin-right: var(--ts-space-2);
+    background-color: var(--ts-ink-3);
+}
+
+.nav-chip__label {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+}
+
+/* the chip of the kind being read: an accent outline AND bolder words */
+.nav-chip--current .nav-chip__pill {
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-accent);
+}
+
+.nav-chip--current .nav-chip__label {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
+
+/* icon_tabs_chips: the chip row sits right under the tabs */
+.nav-tabs-chips .nav-chips__viewport {
+    padding-bottom: var(--ts-space-1);
+}
+
+/* ---- segmented (SegmentedNavView): equal segments on one track, always fitting the strip ---- */
+
+.nav-segmented {
+    padding: var(--ts-space-1) var(--ts-space-4) var(--ts-space-2) var(--ts-space-4);
+}
+
+.nav-segmented__track {
+    flex-direction: row;
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface-2);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    overflow: hidden;
+}
+
+/* equal shares of the track (basis 0), a whole tap target tall; a long word wraps inside its segment, never cut */
+.nav-segment {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    flex-direction: row;
+    min-height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-1);
+    justify-content: center;
+    align-items: center;
+    border-width: 0;
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-clear);
+}
+
+.nav-segment:hover,
+.nav-segment:active {
+    background-color: var(--ts-clear);
+}
+
+.nav-segment__label {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    flex-shrink: 1;
+    margin: 0;
+    padding: 0;
+}
+
+/* the group being read: filled with the accent AND bolder words (dark on the accent, like every accent fill) */
+.nav-segment--current,
+.nav-segment--current:hover,
+.nav-segment--current:active {
+    background-color: var(--ts-accent);
+}
+
+.nav-segment--current .nav-segment__label,
+.nav-segment--current .nav-item__count {
+    -unity-font-style: bold;
+    color: var(--ts-on-accent);
+}
+
+/* ---- progress_map (ProgressMapNavView): one piece of a thin bar per section, its icon above it ---- */
+
+.nav-progress__viewport {
+    flex-direction: row;
+    overflow: hidden;
+    padding: 0 var(--ts-space-1);
+}
+
+.nav-progress__row {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+/* the view sets each piece's width (ProgressMapRule); the touch token is its least, both ways */
+.nav-progress__segment {
+    flex-shrink: 0;
+    flex-direction: column;
+    min-height: var(--ts-touch-target);
+    min-width: var(--ts-touch-target);
+    margin: 0;
+    padding: var(--ts-space-1) var(--ts-rail-width) var(--ts-space-2) var(--ts-rail-width);
+    justify-content: flex-end;
+    align-items: center;
+    border-width: 0;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.nav-progress__segment:hover,
+.nav-progress__segment:active {
+    background-color: var(--ts-clear);
+}
+
+.nav-progress__icon {
+    margin-bottom: var(--ts-space-1);
+}
+
+.nav-progress__label {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+/* the piece of bar: as wide as its segment, faint until the visitor has read that far (painted in the family's colour) */
+.nav-progress__bar {
+    align-self: stretch;
+    height: var(--ts-segment-height);
+    border-radius: var(--ts-segment-height);
+    background-color: var(--ts-ink-3);
+    opacity: var(--ts-ahead-opacity);
+}
+
+.nav-progress__segment--passed .nav-progress__bar {
+    opacity: 1;
+}
+
+/* the section being read: a thicker piece AND bolder words */
+.nav-progress__segment--current .nav-progress__bar {
+    height: var(--ts-progress-height);
+}
+
+.nav-progress__segment--current .nav-progress__label {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
 }

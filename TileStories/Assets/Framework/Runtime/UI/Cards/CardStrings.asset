@@ -756,3 +756,262 @@ MonoBehaviour:
       value: Interact
     - lang: pt
       value: Interagir
+  - key: kind_header
+    where: The name of the title block at the top of the card as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Title
+    - lang: pt
+      value: Título
+  - key: kind_status
+    where: The name of the block showing the state the point is in as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Condition
+    - lang: pt
+      value: Estado
+  - key: kind_quick_facts
+    where: The name of the short facts block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Quick facts
+    - lang: pt
+      value: Factos rápidos
+  - key: kind_rich_text
+    where: The name of a block of written text as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Text
+    - lang: pt
+      value: Texto
+  - key: kind_fun_fact
+    where: The name of the fun fact block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Fun fact
+    - lang: pt
+      value: Curiosidade
+  - key: kind_pull_quote
+    where: The name of a quotation block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Quote
+    - lang: pt
+      value: Citação
+  - key: kind_process_steps
+    where: The name of the numbered steps of how something was made or done as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Steps
+    - lang: pt
+      value: Passos
+  - key: kind_swatches
+    where: The name of the colour samples block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Colours
+    - lang: pt
+      value: Cores
+  - key: kind_actions
+    where: The name of the block of buttons as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Actions
+    - lang: pt
+      value: Ações
+  - key: kind_gallery
+    where: The name of the gallery of pictures as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Gallery
+    - lang: pt
+      value: Galeria
+  - key: kind_before_after
+    where: The name of the before / after comparison picture as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Before and after
+    - lang: pt
+      value: Antes e depois
+  - key: kind_zoom_image
+    where: The name of the picture a visitor can zoom into as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Detail
+    - lang: pt
+      value: Detalhe
+  - key: kind_hotspot_image
+    where: The name of the picture with numbered spots to tap as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Hotspots
+    - lang: pt
+      value: Destaques
+  - key: kind_video
+    where: The name of a video block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Video
+    - lang: pt
+      value: Vídeo
+  - key: kind_model_3d
+    where: The name of a 3D model to turn as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: 3D model
+    - lang: pt
+      value: Modelo 3D
+  - key: kind_panorama_360
+    where: The name of a 360 panorama as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: 360 view
+    - lang: pt
+      value: Vista 360
+  - key: kind_audio_guide
+    where: The name of the audio guide player as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Audio guide
+    - lang: pt
+      value: Audioguia
+  - key: kind_timeline
+    where: The name of the timeline of dates as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Timeline
+    - lang: pt
+      value: Cronologia
+  - key: kind_person
+    where: The name of the block about a person as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: People
+    - lang: pt
+      value: Pessoas
+  - key: kind_story_chapters
+    where: The name of the story told in chapters as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Chapters
+    - lang: pt
+      value: Capítulos
+  - key: kind_compare_points
+    where: The name of the comparison with another point as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Compare
+    - lang: pt
+      value: Comparar
+  - key: kind_dialogue
+    where: The name of the conversation block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Dialogue
+    - lang: pt
+      value: Diálogo
+  - key: kind_show_on_wall
+    where: The name of the button that shows the point on the wall as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: On the wall
+    - lang: pt
+      value: Na parede
+  - key: kind_place_in_ar
+    where: The name of the button that places a model in the room as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Place in AR
+    - lang: pt
+      value: Colocar em RA
+  - key: kind_knowledge_check
+    where: The name of the questions block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Quiz
+    - lang: pt
+      value: Questionário
+  - key: kind_poll
+    where: The name of the poll block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Poll
+    - lang: pt
+      value: Sondagem
+  - key: kind_collect
+    where: The name of the block that adds the point to the visitor's collection as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Collect
+    - lang: pt
+      value: Colecionar
+  - key: kind_practical_info
+    where: The name of the practical information rows as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Practical info
+    - lang: pt
+      value: Informações práticas
+  - key: kind_wall_locator
+    where: The name of the strip showing where the point is on the wall as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Where it is
+    - lang: pt
+      value: Onde fica
+  - key: kind_today_map
+    where: The name of the map of the place today as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Map today
+    - lang: pt
+      value: Mapa atual
+  - key: kind_related
+    where: The name of the other points to see next as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Related
+    - lang: pt
+      value: Relacionados
+  - key: kind_feedback
+    where: The name of the feedback block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Feedback
+    - lang: pt
+      value: Opinião
+  - key: kind_sources
+    where: The name of the sources block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Sources
+    - lang: pt
+      value: Fontes
+  - key: nav_group_discover
+    where: The name of the default navigation group that joins the About and Stories families. A segment of the Segmented navigation shows it.
+    text:
+    - lang: en
+      value: Discover
+    - lang: pt
+      value: Descobrir
+  - key: nav_group_watch
+    where: The name of the default navigation group that joins the Media and Listen families. A segment of the Segmented navigation shows it.
+    text:
+    - lang: en
+      value: Watch
+    - lang: pt
+      value: Ver
+  - key: nav_group_explore
+    where: The name of the default navigation group that joins the In AR and Play families. A segment of the Segmented navigation shows it.
+    text:
+    - lang: en
+      value: Explore
+    - lang: pt
+      value: Explorar
+  - key: nav_group_visit
+    where: The name of the default navigation group that joins the Visit and Community families. A segment of the Segmented navigation shows it.
+    text:
+    - lang: en
+      value: Visit
+    - lang: pt
+      value: Visitar

@@ -138,12 +138,18 @@ namespace TileStories.Editor.Tests
                                 "top" => CardOptions.NavNone,
                                 "show_at" => CardOptions.ShowNavFullOnly,
                                 "hide_on_scroll" => CardOptions.HideOnScrollNever,
+                                "labels" => CardOptions.LabelsIcon,
                                 _ => CardOptions.BlockOrderByFamily,
                             })));
                         else if (n.FieldType == typeof(bool)) edits.Add((n.Name, s => n.SetValue(s.navigation, !(bool)n.GetValue(s.navigation))));
                         else if (n.FieldType == typeof(int)) edits.Add((n.Name, s => n.SetValue(s.navigation, (int)n.GetValue(s.navigation) - 1)));
                         else if (n.FieldType == typeof(List<CardFamilySetting>))
-                            edits.Add((n.Name, s => s.navigation.families.Add(new CardFamilySetting { family = BuiltInFamilies.Meta, order = 15, at_end = false })));
+                            edits.Add((n.Name, s => s.navigation.families.Add(new CardFamilySetting { family = BuiltInFamilies.Meta, order = 15, at_end = false, group = "group_5" })));
+                        else if (n.FieldType == typeof(List<CardNavGroup>))
+                            edits.Add((n.Name, s => s.navigation.groups.Add(new CardNavGroup
+                            {
+                                key = "group_5", label = new List<LocalizedEntry> { new() { lang = "en", value = "Read" }, new() { lang = "pt", value = "Ler" } },
+                            })));
                         else Assert.Fail("no edit for navigation field " + n.Name);
                     }
                 else if (f.FieldType == typeof(CardContainerSettings))
@@ -156,8 +162,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 12 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 12 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 15 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 15 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1267,7 +1273,7 @@ namespace TileStories.Editor.Tests
             // - an app's element joins the list with no window edit
             var registry = new NavElementRegistry();
             BuiltInNavElements.Register(registry);
-            registry.Register(new NavElementDefinition("app_dots", NavSlotKeys.Top, "App Dots", "App Dots: one dot per section.", betweenSections: true), () => new TextTabsNavView());
+            registry.Register(new NavElementDefinition("app_dots", NavSlotKeys.Top, "App Dots", "App Dots: one dot per section.", NavChoice.Sections), () => new TextTabsNavView());
             var (appKeys, appLabels) = POIEditorToolWindow.TopBarOptions(registry);
             Assert.AreEqual("app_dots", appKeys.Last());
             Assert.AreEqual("App Dots", appLabels.Last());
@@ -1331,6 +1337,215 @@ namespace TileStories.Editor.Tests
             foreach (string label in CardOptions.ShowNavigationAtLabels.Concat(CardOptions.HideOnScrollLabels))
                 StringAssert.Contains(label, guide, "the Playmode guide names " + label);
             EditorTextChecks.AssertAscii(guide, "CardNavigationPlaymodeTestGuide");
+        }
+
+        // Detail Card > Navigation's Follow Scroll row (its data has been read since step 3; the row arrived at step 6), on the real
+        // window: drawn ticked (the default) without writing, a real click on its checkbox unticks it, Ctrl+Z ticks it again; it sits
+        // between Top Bar and Hide While Scrolling (section 7's order); its (i) says what each state does, in ASCII
+        [UnityTest]
+        public IEnumerator TheFollowScrollRow_IsARealToggle_BetweenTopBarAndHideWhileScrolling_AndCtrlZTakesItBack()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            yield return Redraw();
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.IsTrue(_window.Config.card_settings.navigation.follow_scroll, "the shipped wall never set it: on");
+
+            yield return _window.ScrollTo("Follow Scroll");
+            _window.Click("Follow Scroll");
+            yield return _window.WaitForRepaint();
+            Assert.IsFalse(_window.Config.card_settings.navigation.follow_scroll, "a real click on the checkbox unticks it");
+            Assert.IsTrue(_window.Unsaved);
+            yield return _window.PressUndo();
+            Assert.IsTrue(_window.Config.card_settings.navigation.follow_scroll, "Ctrl+Z ticks it again");
+
+            // - the rows' order, read from the (i) each row draws in its own line (popup rows report no rect of their own)
+            var drawn = new List<(string Title, Rect Rect)>();
+            HelpInfoButton.DrawnProbe = (title, rect) => drawn.Add((title, rect));
+            try
+            {
+                yield return Redraw();
+            }
+            finally
+            {
+                HelpInfoButton.DrawnProbe = null;
+            }
+            float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
+            Assert.Less(Y("Top Bar"), Y("Follow Scroll"), "under Top Bar");
+            Assert.Less(Y("Follow Scroll"), Y("Hide While Scrolling"), "above Hide While Scrolling");
+
+            string help = (string)typeof(POIEditorToolWindow).GetField("CardFollowScrollHelp", Static).GetValue(null);
+            foreach (string word in new[] { "On (the default)", "Off", "scrolls", "taps" }) StringAssert.Contains(word, help);
+            EditorTextChecks.AssertAscii(help, "CardFollowScrollHelp");
+        }
+
+        // The (i) titles one Repaint of the Navigation section draws, top to bottom (each row draws its (i) on its own line)
+        private IEnumerator DrawnInfoTitles(List<(string Title, Rect Rect)> into)
+        {
+            into.Clear();
+            HelpInfoButton.DrawnProbe = (title, rect) => into.Add((title, rect));
+            try
+            {
+                yield return Redraw();
+            }
+            finally
+            {
+                HelpInfoButton.DrawnProbe = null;
+            }
+        }
+
+        // Detail Card > Navigation's step 6 rows on the real window. Group By always; Labels only for a Top Bar element that draws icons;
+        // Show Counts only for one that shows counts; the Groups table (and the Families table's Group column) only for Segmented -- read
+        // from the element's own definition, so an app's element needs no window edit. A hidden row keeps its value. Each pick goes
+        // through the window's history and a real Ctrl+Z takes it back; Show Counts is a real click; every help is ASCII and names its options
+        [UnityTest]
+        public IEnumerator TheStep6Rows_ShowOnlyForATopBarThatReadsThem_KeepTheirValueHidden_AndEachPickIsUndoneByCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            var nav = _window.Config.card_settings.navigation;
+            Assert.AreEqual(BuiltInNavElements.TextTabs, nav.top, "precondition: the default Top Bar");
+            var titles = drawn.Select(d => d.Title).ToList();
+            CollectionAssert.Contains(titles, "Group By");
+            CollectionAssert.Contains(titles, "Show Counts", "Text Tabs show counts");
+            CollectionAssert.DoesNotContain(titles, "Labels", "Text Tabs draw no icons: no Labels row");
+            CollectionAssert.DoesNotContain(titles, "Groups", "nor the Groups table");
+            float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
+            Assert.Less(Y("Families"), Y("Group By"), "Group By follows the Families table (section 7's order)");
+            Assert.Less(Y("Group By"), Y("Show Navigation From"));
+            Assert.Less(Y("Top Bar"), Y("Show Counts"));
+            Assert.Less(Y("Show Counts"), Y("Follow Scroll"));
+
+            // - Show Counts: a real click on its checkbox, Ctrl+Z
+            yield return _window.ScrollTo("Show Counts");
+            _window.Click("Show Counts");
+            yield return _window.WaitForRepaint();
+            Assert.IsTrue(_window.Config.card_settings.navigation.show_counts, "a real click ticks Show Counts");
+            yield return _window.PressUndo();
+            Assert.IsFalse(_window.Config.card_settings.navigation.show_counts, "Ctrl+Z");
+
+            // - Group By: the pick through the window's history (an IMGUI popup opens a native menu), Ctrl+Z
+            Pick(() => _window.Config.card_settings.navigation.group_by = CardOptions.GroupByFormat);
+            yield return Redraw();
+            Assert.AreEqual(CardOptions.GroupByFormat, _window.Config.card_settings.navigation.group_by);
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.GroupByFamily, _window.Config.card_settings.navigation.group_by, "Ctrl+Z");
+
+            // - Icon Tabs: Labels appears; its pick and Ctrl+Z
+            Pick(() => _window.Config.card_settings.navigation.top = BuiltInNavElements.IconTabs);
+            yield return DrawnInfoTitles(drawn);
+            Assert.Less(drawn.Single(d => d.Title == "Top Bar").Rect.y, drawn.Single(d => d.Title == "Labels").Rect.y, "Icon Tabs: Labels, under Top Bar");
+            Pick(() => _window.Config.card_settings.navigation.labels = CardOptions.LabelsIcon);
+            yield return Redraw();
+            Assert.AreEqual(CardOptions.LabelsIcon, _window.Config.card_settings.navigation.labels);
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.LabelsIconAndText, _window.Config.card_settings.navigation.labels, "Ctrl+Z");
+
+            // - Segmented: the Groups table and the Group column; Labels hidden -- and a hidden row keeps its value
+            Pick(() => _window.Config.card_settings.navigation.labels = CardOptions.LabelsText);
+            Pick(() => _window.Config.card_settings.navigation.top = BuiltInNavElements.Segmented);
+            yield return DrawnInfoTitles(drawn);
+            titles = drawn.Select(d => d.Title).ToList();
+            CollectionAssert.Contains(titles, "Groups", "Segmented: the Groups table");
+            CollectionAssert.DoesNotContain(titles, "Labels", "Segmented draws no icons");
+            Assert.Greater(drawn.Single(d => d.Title == "Groups").Rect.y, drawn.Single(d => d.Title == "Back Button").Rect.y, "the Groups table comes last");
+            Assert.AreEqual(CardOptions.LabelsText, _window.Config.card_settings.navigation.labels, "the hidden Labels row kept its value");
+            var groupCell = _window.RectOf("Family group#0");
+            Assert.GreaterOrEqual(groupCell.width, 60f, "the Families table shows its Group column, wide enough for a group's word");
+            // - the 620 pt capture caught the "At The End" header word running into "Group": the column starts after that word
+            float atEndWord = EditorStyles.miniBoldLabel.CalcSize(new GUIContent("At The End")).x;
+            Assert.GreaterOrEqual(groupCell.xMin, _window.RectOf("Family at end#0").xMin + atEndWord, "Group starts after the At The End header word");
+
+            var help = typeof(POIEditorToolWindow);
+            foreach (var (field, words) in new[]
+            {
+                ("CardGroupByHelp", new[] { "Family", "Format", "Segmented" }), ("CardLabelsHelp", new[] { "Icon And Text", "Icon", "Text", "screen reader" }),
+                ("CardShowCountsHelp", new[] { "Off (the default)" }), ("CardGroupsHelp", new[] { "Group column", "framework default suggestions", "one group" }),
+                ("CardGroupNameHelp", new[] { "one short word" }), ("CardFamiliesHelp", new[] { "Group", "(no group)" }),
+            })
+            {
+                string text = (string)help.GetField(field, Static).GetValue(null);
+                foreach (string word in words) StringAssert.Contains(word, text, field + " says " + word);
+                EditorTextChecks.AssertAscii(text, field);
+            }
+            foreach (string label in CardOptions.LabelsLabels.Concat(CardOptions.GroupByLabels)) EditorTextChecks.AssertAscii(label, label);
+            string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
+            foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top))
+                StringAssert.Contains("Top Bar = " + element.Label, guide, "the Playmode guide walks " + element.Label);
+        }
+
+        // The Groups table on the real window, with Top Bar = Segmented. A wall with no rows shows the framework's four by their words and
+        // writes nothing; REAL typing in a name cell writes all four (their words copied in) with the typed name, and one Ctrl+Z takes the
+        // whole write back; "+ Add group" and a row's trash are real clicks, each undone by Ctrl+Z; picking a family's Group moves its blocks
+        // into that group on the card's model, "(no group)" leaves it in none and the table warns -- naming the family by its word
+        [UnityTest]
+        public IEnumerator TheGroupsTable_ShowsTheDefaults_RealTypingWritesThem_AddAndDeleteAreRealClicks_AndAFamilysGroupReachesTheModel()
+        {
+            var config = ShippedConfig();
+            config.card_settings.navigation.top = BuiltInNavElements.Segmented;
+            _window = new PoiEditorWindowHost(config, "_showCardNavigation");
+            OpenTab("DetailCard");
+            yield return Redraw();
+            Assert.IsFalse(_window.Unsaved, "drawing the Groups table writes nothing");
+            var nav = _window.Config.card_settings.navigation;
+            CollectionAssert.IsEmpty(nav.groups, "precondition: the shipped wall has no Groups rows");
+            var (keys, names) = _window.Editor.GroupChoices(nav);
+            CollectionAssert.AreEqual(NavGroupRule.DefaultKeys.Append(CardOptions.NavNone), keys);
+            CollectionAssert.AreEqual(new[] { "Discover", "Watch", "Explore", "Visit", "(no group)" }, names, "named by their words, never their keys");
+
+            // - real typing: the four defaults are written, with the typed name
+            yield return _window.ScrollTo("Group name pt#1");
+            yield return _window.ReplaceText("Group name pt#1", "Ver e ouvir");
+            nav = _window.Config.card_settings.navigation;
+            CollectionAssert.AreEqual(NavGroupRule.DefaultKeys, nav.groups.Select(g => g.key), "the first edit writes the four rows");
+            Assert.AreEqual("Ver e ouvir", nav.groups[1].label.Single(l => l.lang == "pt").value, "with the typed name");
+            Assert.AreEqual("Watch", nav.groups[1].label.Single(l => l.lang == "en").value, "and the words it showed copied in");
+            Assert.AreEqual("Descobrir", nav.groups[0].label.Single(l => l.lang == "pt").value);
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.navigation.groups, "one Ctrl+Z takes the whole write back");
+
+            // - + Add group: a real click, a fresh generated key
+            yield return _window.ScrollTo("Group add#0");
+            _window.Click("Group add#0");
+            yield return _window.WaitForRepaint();
+            nav = _window.Config.card_settings.navigation;
+            CollectionAssert.AreEqual(NavGroupRule.DefaultKeys.Append("group_5"), nav.groups.Select(g => g.key), "the four, then group_5");
+            yield return Redraw();
+            StringAssert.Contains("Group 5 has no name in en", string.Join("|", _window.Editor.GroupWarnings(nav, "en")), "a group with no name is warned about");
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.navigation.groups, "Ctrl+Z");
+
+            // - a row's trash: a real click deletes it (Watch); Media and Listen are then in no group, and the warning names them by word
+            yield return _window.ScrollTo("Group delete#1");
+            _window.Click("Group delete#1");
+            yield return _window.WaitForRepaint();
+            nav = _window.Config.card_settings.navigation;
+            CollectionAssert.AreEqual(new[] { NavGroupRule.Discover, NavGroupRule.Explore, NavGroupRule.Visit }, nav.groups.Select(g => g.key), "Watch deleted");
+            string warning = string.Join("|", _window.Editor.GroupWarnings(nav, "en"));
+            StringAssert.Contains("In no group: Media, Listen", warning, "named by their words");
+            StringAssert.DoesNotContain("(media)", warning, "never by their keys");
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.navigation.groups, "Ctrl+Z");
+
+            // - a family's Group (the popup's pick through the history): its blocks move into that group on the card's model
+            Pick(() => POIEditorToolWindow.SetFamilyGroup(_window.Config.card_settings.navigation, BuiltInFamilies.Media, NavGroupRule.Discover));
+            yield return Redraw();
+            var settings = _window.Config.card_settings;
+            var lamp = _window.Config.pois.Single(p => p.id == "lamp");
+            var model = CardNavModel.Build(BlockStackBuilder.Build(lamp, settings, BlockRegistry.Shared, _window.Config.pois).Entries, BlockRegistry.Shared, settings);
+            string mediaBlock = model.Sections.Single(s => s.Key == BuiltInFamilies.Media).Targets[0];
+            Assert.AreEqual(NavGroupRule.Discover, model.Groups[model.GroupOf(mediaBlock)].Key, "a Media block now lights Discover");
+            Assert.AreEqual(1, settings.navigation.families.Count, "only Media got a row");
+            Pick(() => POIEditorToolWindow.SetFamilyGroup(_window.Config.card_settings.navigation, BuiltInFamilies.Media, CardOptions.NavNone));
+            yield return Redraw();
+            Assert.IsNull(NavGroupRule.GroupOf(BuiltInFamilies.Media, _window.Config.card_settings.navigation), "(no group): in none");
+            StringAssert.Contains("In no group: Media.", string.Join("|", _window.Editor.GroupWarnings(_window.Config.card_settings.navigation, "en")));
+            yield return _window.PressUndo();
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.navigation.families, "two Ctrl+Z: back to no row");
         }
 
         // The Families table: one row per registered family, in the registered order, named by the visitor's own word

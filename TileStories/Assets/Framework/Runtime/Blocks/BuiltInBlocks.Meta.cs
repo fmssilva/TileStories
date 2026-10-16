@@ -22,6 +22,7 @@ namespace TileStories
             Key = SourcesKind,
             Family = BuiltInFamilies.Meta,
             Format = CardOptions.FormatRead,
+            LabelKey = CardStrings.Keys.KindSources,
             DisplayName = "Sources",
             Help = "Where this card's content comes from: books, archives, photographs, with their author and licence. " +
                    "List: one row per source. With Confidence: the same, plus a chip that says whether the content " +

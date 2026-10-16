@@ -109,7 +109,7 @@ namespace TileStories.Tests
             foreach (var tab in Tabs.Tabs)
             {
                 bool marked = tab.Index == index;
-                Assert.AreEqual(marked, tab.Button.ClassListContains(TextTabsNavView.CurrentClass), when + ": tab " + tab.Index + " class");
+                Assert.AreEqual(marked, tab.Button.ClassListContains(NavTab.CurrentClass), when + ": tab " + tab.Index + " class");
                 Assert.AreEqual(marked, IsShown(tab.Underline), when + ": tab " + tab.Index + " underline");
                 Assert.AreEqual(marked ? FontStyle.Bold : FontStyle.Normal, tab.Label.resolvedStyle.unityFontStyleAndWeight,
                     when + ": tab " + tab.Index + " weight (never colour alone)");
@@ -117,7 +117,7 @@ namespace TileStories.Tests
         }
 
         // A tab wholly inside the strip's visible part, after a real sideways drag when it is not
-        private IEnumerator BringIntoView(TextTabsNavView.Tab tab)
+        private IEnumerator BringIntoView(NavTab tab)
         {
             var visible = Tabs.Viewport.worldBound;
             var rect = tab.Button.worldBound;

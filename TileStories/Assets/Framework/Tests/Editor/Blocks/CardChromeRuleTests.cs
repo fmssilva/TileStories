@@ -4,7 +4,7 @@ namespace TileStories.Editor.Tests
 {
     // CardChromeRule (_3.2 step 5b, section 4.3): what chrome the card shows at each stop, how the scroll hides and brings back the bottom
     // area (the two travel thresholds, a turn, the top and the end), and THE FLOOR -- no chrome where it would leave the stack less than a
-    // heading and two lines, the bottom area giving way first -- at The Lamp's measured numbers and just above them.
+    // heading and two lines beside the strip, one line beside the footer, the strip giving way first -- at The Lamp's measured numbers and just above them.
     public class CardChromeRuleTests
     {
         // The Lamp at 390 x 844, measured at step 5b (PoiCardChromeSceneTests measures them again on the real card): the sheet at Half and
@@ -142,52 +142,68 @@ namespace TileStories.Editor.Tests
         // ---------------- the floor ----------------
 
         [Test]
-        public void TheFloor_AtTheLampsHalf_ShowsNoChrome_AndGivesTheStackItsWholeRoom()
+        public void TheFloor_AtTheLampsHalf_KeepsTheFooter_AndTheStripGivesWayFirst()
         {
             Assert.AreEqual(72f, CardChromeRule.MinStackViewport);
+            Assert.AreEqual(24f, CardChromeRule.MinStackViewportUnderFooter);
             var input = Lamp(SheetStopRule.Stop.Half);
             Assert.Less(LampHalf - LampHeader - LampStrip - LampFooter, 0f, "precondition: strip + footer do not even fit (the 0 px Half of 5a)");
-            Assert.Less(LampHalf - LampHeader - LampStrip, CardChromeRule.MinStackViewport, "precondition: the strip alone leaves less than the floor");
+            Assert.GreaterOrEqual(LampHalf - LampHeader - LampFooter, CardChromeRule.MinStackViewportUnderFooter,
+                "precondition: the footer alone leaves one line (25.6 px)");
             var chrome = CardChromeRule.Decide(input);
-            Assert.IsFalse(chrome.Bottom, "the footer gives way first");
-            Assert.IsFalse(chrome.Top, "then the strip");
-            Assert.AreEqual(LampHalf - LampHeader, CardChromeRule.Viewport(input, chrome), 0.001f, "the stack gets the whole 106.6 px");
+            Assert.IsFalse(chrome.Top, "the strip gives way first");
+            Assert.IsTrue(chrome.Bottom, "the footer stays: its button is why the card was opened");
+            Assert.AreEqual(LampHalf - LampHeader - LampFooter, CardChromeRule.Viewport(input, chrome), 0.001f, "the stack keeps 25.6 px");
 
             var full = CardChromeRule.Decide(Lamp(SheetStopRule.Stop.Full));
             Assert.IsTrue(full.Top && full.Bottom, "Full has room for both");
         }
 
         [Test]
-        public void TheFloor_JustAboveTheLampsNumbers_ShowsTheStripFirst_ThenTheFooterToo()
+        public void TheFloor_AroundTheLampsNumbers_KeepsTheFooterFirst_ThenTheStripToo()
         {
             var input = Lamp(SheetStopRule.Stop.Half);
             float floor = CardChromeRule.MinStackViewport;
+            float line = CardChromeRule.MinStackViewportUnderFooter;
 
-            input.SheetHeight = LampHeader + LampStrip + floor - 0.5f;
+            input.SheetHeight = LampHeader + LampFooter + line - 0.5f;
             var chrome = CardChromeRule.Decide(input);
-            Assert.IsFalse(chrome.Top || chrome.Bottom, "half a pixel short of strip + floor: neither");
+            Assert.IsFalse(chrome.Top || chrome.Bottom, "half a pixel short of footer + one line: neither");
 
-            input.SheetHeight = LampHeader + LampStrip + floor;
+            input.SheetHeight = LampHeader + LampFooter + line;
             chrome = CardChromeRule.Decide(input);
-            Assert.IsTrue(chrome.Top, "room for the strip and the floor: the strip");
-            Assert.IsFalse(chrome.Bottom, "but not the footer as well");
-            Assert.AreEqual(floor, CardChromeRule.Viewport(input, chrome), 0.001f, "the stack keeps exactly the floor");
+            Assert.IsTrue(chrome.Bottom, "room for the footer and one line: the footer");
+            Assert.IsFalse(chrome.Top, "but not the strip as well");
+            Assert.AreEqual(line, CardChromeRule.Viewport(input, chrome), 0.001f, "the stack keeps exactly one line");
 
             input.SheetHeight = LampHeader + LampStrip + LampFooter + floor - 0.5f;
-            Assert.IsFalse(CardChromeRule.Decide(input).Bottom, "half a pixel short of both: still no footer");
+            Assert.IsFalse(CardChromeRule.Decide(input).Top, "half a pixel short of both and the floor: still no strip");
             input.SheetHeight = LampHeader + LampStrip + LampFooter + floor;
             chrome = CardChromeRule.Decide(input);
             Assert.IsTrue(chrome.Top && chrome.Bottom, "room for both and the floor: both");
         }
 
         [Test]
-        public void TheFloor_IsTheSameForTheBottomArea_WithNoStrip()
+        public void TheStrip_WithTheFooterScrolledAway_NeedsTheFloorBesideItselfOnly()
+        {
+            // - the footer slid away while reading: the strip comes back as soon as it alone leaves the floor
+            var input = Lamp(SheetStopRule.Stop.Half, scrollHid: true);
+            input.SheetHeight = LampHeader + LampStrip + CardChromeRule.MinStackViewport;
+            var chrome = CardChromeRule.Decide(input);
+            Assert.IsTrue(chrome.Top, "room for the strip and the floor");
+            Assert.IsFalse(chrome.Bottom, "the scroll hid the footer");
+            input.SheetHeight -= 1f;
+            Assert.IsFalse(CardChromeRule.Decide(input).Top, "one pixel less: the strip gives way");
+        }
+
+        [Test]
+        public void TheFloor_ForTheBottomArea_WithNoStrip_IsOneLine()
         {
             // - the bottom bar of step 7 gets the floor for free: it is measured as the bottom area, whatever fills it
             var input = Lamp(SheetStopRule.Stop.Half);
             input.HasTop = false;
-            input.SheetHeight = LampHeader + LampFooter + CardChromeRule.MinStackViewport;
-            Assert.IsTrue(CardChromeRule.Decide(input).Bottom, "room for the footer and the floor");
+            input.SheetHeight = LampHeader + LampFooter + CardChromeRule.MinStackViewportUnderFooter;
+            Assert.IsTrue(CardChromeRule.Decide(input).Bottom, "room for the footer and one line");
             input.SheetHeight -= 1f;
             Assert.IsFalse(CardChromeRule.Decide(input).Bottom, "one pixel less: the footer gives way");
         }
@@ -206,14 +222,21 @@ namespace TileStories.Editor.Tests
         public void AStackShorterThanTheFloor_NeedsOnlyItsOwnHeight_AndAStackNotLaidOutYetTheWholeFloor()
         {
             var input = Lamp(SheetStopRule.Stop.Half);
+            input.HasBottom = false;
             input.ContentHeight = 40f;
-            var chrome = CardChromeRule.Decide(input);
-            Assert.IsTrue(chrome.Top, "57.6 px left after the strip holds the whole 40 px stack");
-            Assert.IsFalse(chrome.Bottom, "the footer as well would leave none of it");
+            Assert.IsTrue(CardChromeRule.Decide(input).Top, "57.6 px left after the strip holds the whole 40 px stack");
 
+            input.HasBottom = true;
+            input.ContentHeight = 20f;
+            var chrome = CardChromeRule.Decide(input);
+            Assert.IsTrue(chrome.Bottom, "a 20 px stack fits the 25.6 px the footer leaves");
+            Assert.IsFalse(chrome.Top, "the strip as well would leave none of it");
+
+            input.HasBottom = false;
             input.ContentHeight = float.NaN;
             Assert.IsFalse(CardChromeRule.Decide(input).Top, "content not measured yet: the full floor");
 
+            input.HasBottom = true;
             input.SheetHeight = float.NaN;
             var unmeasured = CardChromeRule.Decide(input);
             Assert.IsTrue(unmeasured.Top && unmeasured.Bottom, "a sheet not laid out yet: no floor to apply, the stop decides");

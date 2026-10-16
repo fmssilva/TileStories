@@ -80,6 +80,7 @@ namespace TileStories
             Key = KnowledgeCheckKind,
             Family = BuiltInFamilies.Play,
             Format = CardOptions.FormatInteract,
+            LabelKey = CardStrings.Keys.KindKnowledgeCheck,
             DisplayName = "Knowledge Check",
             Help = "A question the visitor answers, with no score and no penalty. A right answer shows a confirmation and the explanation; a wrong one " +
                    "a gentle \"Actually...\" and the same explanation, with the right answer marked. The answer is kept on the visitor's device, so " +
@@ -133,6 +134,7 @@ namespace TileStories
             Key = PollKind,
             Family = BuiltInFamilies.Play,
             Format = CardOptions.FormatInteract,
+            LabelKey = CardStrings.Keys.KindPoll,
             DisplayName = "Poll",
             Help = "Asks the visitor a question with two to six options and takes one vote. The vote is kept on the visitor's device and " +
                    "reported once as a poll event; the block then shows the option the visitor picked (Your choice) and a thank-you. " +
@@ -170,6 +172,7 @@ namespace TileStories
             Key = CollectKind,
             Family = BuiltInFamilies.Play,
             Format = CardOptions.FormatInteract,
+            LabelKey = CardStrings.Keys.KindCollect,
             DisplayName = "Collect",
             Help = "This point's collectable item, like a stamp: the visitor taps Add to my story and the item is kept on their device, " +
                    "with a count of how many of this wall's items they have (3 of 12). The total is counted from the collect blocks " +

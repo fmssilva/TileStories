@@ -28,6 +28,11 @@ namespace TileStories.Tests
         private static readonly Dictionary<string, System.Action<CardNavGalleryHarness, CardNavGalleryDefinitions.Entry>> ElementChecks = new()
         {
             [BuiltInNavElements.TextTabs] = TextTabsKeepTheirPromise,
+            [BuiltInNavElements.IconTabs] = IconTabsKeepTheirPromise,
+            [BuiltInNavElements.IconTabsChips] = IconTabsChipsKeepTheirPromise,
+            [BuiltInNavElements.KindChips] = KindChipsKeepTheirPromise,
+            [BuiltInNavElements.Segmented] = SegmentedKeepsItsPromise,
+            [BuiltInNavElements.ProgressMap] = ProgressMapKeepsItsPromise,
         };
 
         [UnitySetUp]
@@ -92,7 +97,7 @@ namespace TileStories.Tests
             Assert.AreEqual(SheetStopRule.Stop.Full, sheet.Stop, "rests at Full");
             // - rule 2.5.7: an element between sections is not drawn for one -- the slot is empty and the card shows content only
             NavElementRegistry.Shared.TryGet(entry.ElementKey, out var definition);
-            if (definition.BetweenSections && !NavOntologyRule.OffersASectionChoice(sheet.Nav.Model.Sections.Count))
+            if (!NavSlotRule.OffersAChoice(definition, sheet.Nav.Model))
             {
                 Assert.IsTrue(sheet.Nav.Model.ShowsNavigation, "precondition: the card has enough targets for navigation");
                 Assert.IsNull(sheet.Slots.TopView, "one section: no " + entry.ElementKey);
@@ -121,10 +126,15 @@ namespace TileStories.Tests
                 Assert.GreaterOrEqual(button.layout.height, touch - onePixel, button.name + ": tall enough to tap");
                 Assert.GreaterOrEqual(button.layout.width, touch - onePixel, button.name + ": wide enough to tap");
             }
-            foreach (var label in root.Query<Label>().ToList().Where(l => l.text.Length > 0))
+            // - only words a visitor sees (Labels = icon hides a tab's words; a progress piece with an icon hides its words): a label that
+            //   wraps (a segment) must fit its LONGEST word, one that does not, its whole text
+            foreach (var label in root.Query<Label>().ToList().Where(l => l.text.Length > 0 && CardTestInput.IsShown(l, sheet.Root)))
             {
-                var words = label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
-                Assert.GreaterOrEqual(label.layout.width + 0.5f, words.x, "'" + label.text + "': the whole word fits, never cut");
+                bool wraps = label.resolvedStyle.whiteSpace == WhiteSpace.Normal;
+                string widest = wraps ? label.text.Split(' ').OrderByDescending(w => label.MeasureTextSize(w, 0, VisualElement.MeasureMode.Undefined, 0,
+                    VisualElement.MeasureMode.Undefined).x).First() : label.text;
+                var words = label.MeasureTextSize(widest, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+                Assert.GreaterOrEqual(label.layout.width + 0.5f, words.x, "'" + widest + "': the whole word fits, never cut");
                 float contrast = CardTestInput.Contrast(label.resolvedStyle.color, CardTestInput.EffectiveBackground(label));
                 Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioNormalText, "'" + label.text + "' reads at 4.5:1 (" + contrast.ToString("F2") + ")");
             }
@@ -181,6 +191,140 @@ namespace TileStories.Tests
             // - the strip scrolls when its words are wider than the card, and then only it does
             bool scrolls = NavStripRule.MaxOffset(tabs.Row.layout.width, tabs.Viewport.contentRect.width) > 0f;
             Assert.AreEqual(scrolls, entry.Case.Key == "big" || entry.Case.Key == "pt_long", "only the eight-section cards are wider than the card");
+        }
+
+        // The card's words as the gallery entry reads them
+        private static CardStrings Strings(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry) =>
+            new(harness.Gallery.StringTable.Entries(), CardStringSources.Shared.Entries(), null, entry.Case.Language, "en");
+
+        // A family colour painted on a part: exactly its token's value on this card, and at least 3:1 on the strip behind it (a
+        // non-text mark, WCAG 1.4.11) -- the icon or the words beside it always name the family too
+        private static void AssertFamilyPaint(Color painted, string token, VisualElement on, string what)
+        {
+            Assert.IsTrue(CardTokenColours.TryResolve(on, token, out Color expected), what + ": " + token + " resolves on the card");
+            Assert.AreEqual(expected, painted, what + ": painted in " + token);
+            float contrast = CardTestInput.Contrast(painted, CardTestInput.EffectiveBackground(on.parent));
+            Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioLargeTextOrUIComponent, what + " reads at 3:1 (" + contrast.ToString("F2") + ")");
+        }
+
+        // icon_tabs: the text tabs' promise, and each tab wears its family's icon in its family's colour above its word (Labels' default)
+        private static void IconTabsKeepTheirPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry) =>
+            AssertIconTabs((IconTabsNavView)harness.Gallery.Sheet.Slots.TopView, harness, entry);
+
+        private static void AssertIconTabs(TabsNavView tabs, CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var model = harness.Gallery.Sheet.Nav.Model;
+            var strings = Strings(harness, entry);
+            Assert.AreEqual(model.Sections.Count, tabs.Tabs.Count, "one tab per section");
+            Assert.AreEqual(0, tabs.CurrentIndex, "the first section is marked");
+            foreach (var tab in tabs.Tabs)
+            {
+                var section = model.Sections[tab.Index];
+                Assert.AreEqual(strings.Get(section.LabelKey), tab.Label.text, "its section's word, in " + entry.Case.Language);
+                Assert.IsNotNull(tab.Icon, "an icon tab");
+                Assert.AreEqual(section.IconKey, CardIcons.KeyOf(tab.Icon), tab.Label.text + ": its family's icon");
+                Assert.AreEqual(DisplayStyle.Flex, tab.Icon.resolvedStyle.display, tab.Label.text + ": shown (Icon And Text)");
+                Assert.AreEqual(DisplayStyle.Flex, tab.Label.resolvedStyle.display, tab.Label.text + ": and its word");
+                Assert.LessOrEqual(tab.Icon.worldBound.yMax, tab.Label.worldBound.yMin + 0.5f, tab.Label.text + ": the icon above the word");
+                var frame = tab.Icon.Q(className: "card-icon__frame");
+                AssertFamilyPaint(frame.resolvedStyle.borderTopColor, section.ColorToken, tab.Button, tab.Label.text + "'s icon");
+                bool marked = tab.Index == 0;
+                Assert.AreEqual(marked, tab.Underline.resolvedStyle.display == DisplayStyle.Flex, tab.Label.text + ": underline");
+                Assert.AreEqual(marked ? FontStyle.Bold : FontStyle.Normal, tab.Label.resolvedStyle.unityFontStyleAndWeight, tab.Label.text + ": weight");
+            }
+        }
+
+        // icon_tabs_chips: the icon tabs, and under them the chips of the marked section's kinds when it has two or more -- each chip its
+        // kind's word, its family's colour as a dot BESIDE the word; the row keeps its place on every card with such a section
+        private static void IconTabsChipsKeepTheirPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var view = (IconTabsChipsNavView)harness.Gallery.Sheet.Slots.TopView;
+            AssertIconTabs(view.Tabs, harness, entry);
+            var model = harness.Gallery.Sheet.Nav.Model;
+            var first = model.Sections[0];
+            Assert.Greater(first.Kinds.Count, 1, "precondition: the first section of every case holds two kinds or more");
+            Assert.AreEqual(0, view.ChipsSection, "the chips show the marked section's kinds");
+            Assert.LessOrEqual(view.Tabs.Root.worldBound.yMax, view.Chips.Root.worldBound.yMin + 0.5f, "the chips sit under the tabs");
+            AssertChips(view.Chips, first.Kinds, harness, entry);
+        }
+
+        // kind_chips: one chip per kind of the card, in the sections' order, the first block's kind marked
+        private static void KindChipsKeepTheirPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var model = harness.Gallery.Sheet.Nav.Model;
+            AssertChips(((KindChipsNavView)harness.Gallery.Sheet.Slots.TopView).Row, model.Sections.SelectMany(s => s.Kinds).ToList(), harness, entry);
+        }
+
+        private static void AssertChips(NavChipRow row, IReadOnlyList<CardNavModel.Kind> kinds, CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var strings = Strings(harness, entry);
+            var nav = harness.Gallery.Sheet.Nav;
+            CollectionAssert.AreEqual(kinds.Select(k => k.Key), row.Chips.Select(c => c.Kind.Key), "one chip per kind, in order");
+            foreach (var chip in row.Chips)
+            {
+                Assert.AreEqual(strings.Get(chip.Kind.LabelKey), chip.Label.text, chip.Kind.Key + ": its kind's word, in " + entry.Case.Language);
+                Assert.LessOrEqual(chip.Dot.worldBound.xMax, chip.Label.worldBound.xMin + 0.5f, chip.Kind.Key + ": the dot sits BESIDE the word");
+                AssertFamilyPaint(chip.Dot.resolvedStyle.backgroundColor, chip.Kind.ColorToken, chip.Dot, chip.Kind.Key + "'s dot");
+                bool marked = chip.Kind == nav.Model.KindOf(nav.CurrentBlock);
+                Assert.AreEqual(marked, chip.Button.ClassListContains(NavChip.CurrentClass), chip.Kind.Key + ": marked only when its kind is read");
+                Assert.AreEqual(marked ? FontStyle.Bold : FontStyle.Normal, chip.Label.resolvedStyle.unityFontStyleAndWeight, chip.Kind.Key + ": weight");
+            }
+            // - the spy line (a third down the viewport) names a block at once: short first blocks may already be past it
+            Assert.IsNotNull(nav.CurrentBlock, "a block is being read at the top of the card");
+            Assert.AreEqual(nav.Model.Sections[0], nav.Model.Sections[nav.Model.SectionOf(nav.CurrentBlock)], "a block of the first section");
+            Assert.AreEqual(1, row.Chips.Count(c => c.Button.ClassListContains(NavChip.CurrentClass)), "exactly one chip marked");
+        }
+
+        // segmented: one segment per group with a target, equal, inside the track with no scroll; the first group marked (filled + bold)
+        private static void SegmentedKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var view = (SegmentedNavView)harness.Gallery.Sheet.Slots.TopView;
+            var model = harness.Gallery.Sheet.Nav.Model;
+            var strings = Strings(harness, entry);
+            Assert.GreaterOrEqual(model.Groups.Count, 2, "precondition: drawn only with two groups");
+            CollectionAssert.AreEqual(model.Groups.Select(g => NavGroupRule.Words(g.Definition, strings)), view.Segments.Select(s => s.Label.text),
+                "each segment says its group's word, in " + entry.Case.Language);
+            float onePixel = CardGalleryChecks.OnePixel(view.Root);
+            var track = view.Track.worldBound;
+            float width = view.Segments[0].Button.layout.width;
+            foreach (var segment in view.Segments)
+            {
+                Assert.AreEqual(width, segment.Button.layout.width, onePixel, segment.Label.text + ": equal segments");
+                Assert.GreaterOrEqual(segment.Button.worldBound.xMin, track.xMin - onePixel, segment.Label.text + ": inside the track");
+                Assert.LessOrEqual(segment.Button.worldBound.xMax, track.xMax + onePixel, segment.Label.text + ": inside the track (no scroll)");
+                bool marked = segment.Index == 0;
+                Assert.AreEqual(marked, segment.Button.ClassListContains(SegmentedNavView.CurrentClass), segment.Label.text + ": marked");
+                Assert.AreEqual(marked ? FontStyle.Bold : FontStyle.Normal, segment.Label.resolvedStyle.unityFontStyleAndWeight, segment.Label.text + ": weight");
+            }
+        }
+
+        // progress_map: a piece per section, as wide as ProgressMapRule says (and so never under the touch token), each with its family's
+        // icon over its family-coloured piece of bar; the first section current (thicker, solid) and the rest faint
+        private static void ProgressMapKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var view = (ProgressMapNavView)harness.Gallery.Sheet.Slots.TopView;
+            var model = harness.Gallery.Sheet.Nav.Model;
+            float onePixel = CardGalleryChecks.OnePixel(view.Root);
+            Assert.AreEqual(model.Sections.Count, view.Segments.Count, "one piece per section");
+            Assert.AreEqual(model.Sections.Count, view.Widths.Count, "the rule shared the strip");
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            var expected = ProgressMapRule.Widths(model.Sections.Select(s => s.Count).ToList(), Enumerable.Repeat(touch, model.Sections.Count).ToList(),
+                view.Strip.VisibleWidth);
+            foreach (var segment in view.Segments)
+            {
+                var section = model.Sections[segment.Index];
+                Assert.AreEqual(expected[segment.Index], segment.Button.layout.width, onePixel, section.Key + ": the rule's width for " + section.Count + " targets");
+                Assert.AreEqual(section.IconKey, CardIcons.KeyOf(segment.Icon), section.Key + ": its family's icon");
+                AssertFamilyPaint(segment.Bar.resolvedStyle.backgroundColor, section.ColorToken, segment.Button, section.Key + "'s piece");
+                bool current = segment.Index == 0;
+                Assert.AreEqual(current, segment.Button.ClassListContains(ProgressMapNavView.CurrentClass), section.Key + ": current");
+                Assert.AreEqual(current ? 1f : CardTestInput.TokenPx("--ts-ahead-opacity"), segment.Bar.resolvedStyle.opacity, 0.01f, section.Key + ": solid up to the one read");
+            }
+            float thin = CardTestInput.TokenPx("--ts-segment-height"), thick = CardTestInput.TokenPx("--ts-progress-height");
+            Assert.AreEqual(thick, view.Segments[0].Bar.layout.height, onePixel, "the current piece is thicker");
+            if (view.Segments.Count > 1) Assert.AreEqual(thin, view.Segments[1].Bar.layout.height, onePixel, "than the others");
+            Assert.AreEqual(view.Strip.Row.layout.width > view.Strip.VisibleWidth + onePixel, expected.Sum() > view.Strip.VisibleWidth + onePixel,
+                "the bar scrolls exactly when its minimums are wider than the card");
         }
     }
 }

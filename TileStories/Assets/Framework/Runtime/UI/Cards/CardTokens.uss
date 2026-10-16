@@ -36,7 +36,9 @@
     --ts-status-3: rgb(210, 85, 63);
     --ts-status-4: rgb(142, 142, 142);
 
-    /* Family colours (_3.2 navigation) */
+    /* Family colours (_3.2 navigation: FamilyDefinition.ColorToken, one per registered family, read by name through
+       CardTokenColours; each at least 3:1 on --ts-surface, and never shown without the family's icon or words) */
+    --ts-family-meta: rgb(196, 186, 168);
     --ts-family-about: rgb(245, 158, 11);
     --ts-family-media: rgb(127, 179, 213);
     --ts-family-guides: rgb(163, 197, 133);
@@ -89,6 +91,12 @@
     --ts-sheet-top-gap: 48;
     /* Navigation (_3.2): the bar under the section a tab element marks (with the bolder label: never colour alone) */
     --ts-tab-underline: 3px;
+    /* A navigation chip's pill (kind_chips, icon_tabs_chips: the button around it is the whole --ts-touch-target) and its radius, half
+       its height, so it stays a stadium */
+    --ts-chip-height: 32px;
+    --ts-chip-radius: 16px;
+    /* What a part not reached yet fades to (the progress map's pieces ahead of the one being read) */
+    --ts-ahead-opacity: 0.35;
     /* The language chip sits left of the close X (X width + both gaps); with it the header keeps its end clear of the chip (chip right
        offset + chip width + a gap) */
     --ts-language-chip-right: 64px;

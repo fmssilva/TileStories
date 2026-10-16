@@ -16,6 +16,8 @@ namespace TileStories
         public const string BottomHiddenClass = "poi-card__footer--hidden";
         // Reduce motion: the bottom area jumps instead of sliding
         public const string InstantClass = "poi-card--chrome-instant";
+        // On the sheet while the top strip shows: the stack's first block keeps a gap under the strip's hairline (PoiCard.uss)
+        public const string TopShownClass = "poi-card--nav-top-shown";
 
         // What the last decision showed
         public bool TopShown { get; private set; }
@@ -73,12 +75,14 @@ namespace TileStories
                 HeaderHeight = header.layout.yMax + header.resolvedStyle.marginBottom,
                 TopHeight = _sheet.Slots.Top.layout.height,
                 BottomHeight = stack.Footer.layout.height,
-                ContentHeight = stack.Scroll.contentContainer.layout.height,
+                // - the blocks' own height: the gap under a shown strip is the chrome's, so showing it cannot change this decision
+                ContentHeight = stack.Scroll.contentContainer.layout.height - stack.Scroll.contentContainer.resolvedStyle.paddingTop,
             };
             var chrome = CardChromeRule.Decide(input);
             TopShown = chrome.Top;
             BottomShown = chrome.Bottom;
             _sheet.Slots.Top.EnableInClassList(TopHiddenClass, !chrome.Top);
+            _sheet.Root.EnableInClassList(TopShownClass, chrome.Top);
             stack.Footer.EnableInClassList(BottomHiddenClass, !chrome.Bottom);
         }
 

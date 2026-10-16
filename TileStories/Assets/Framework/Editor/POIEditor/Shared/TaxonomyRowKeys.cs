@@ -35,6 +35,8 @@ namespace TileStories.Editor
         public const string FieldPrefix = "field_";
         // Not a taxonomy table, same identity rule: a POI's card blocks (_3.1 section 5.2, never shown, never reused)
         public const string BlockPrefix = "block_";
+        // Not a taxonomy table either: a wall's navigation Groups (_3.2 section 3), which a Families row points at by key
+        public const string GroupPrefix = "group_";
 
         // Give every row of every table a key of its own: a blank key, or one an earlier row already has (only a
         // hand-edited file gets there -- "+ Add" never repeats one), gets NextFree. The FIRST row keeps a shared key,

@@ -176,6 +176,49 @@ namespace TileStories
             public const string FormatModel = "format_model";
             public const string FormatInteract = "format_interact";
 
+            // The words a visitor reads for each block KIND (BlockKindDefinition.LabelKey, _3.2 step 6): what a chip of the kind_chips
+            // and icon_tabs_chips elements says. One per framework kind; an app kind names a row of its own table
+            public const string KindHeader = "kind_header";
+            public const string KindStatus = "kind_status";
+            public const string KindQuickFacts = "kind_quick_facts";
+            public const string KindRichText = "kind_rich_text";
+            public const string KindFunFact = "kind_fun_fact";
+            public const string KindPullQuote = "kind_pull_quote";
+            public const string KindProcessSteps = "kind_process_steps";
+            public const string KindSwatches = "kind_swatches";
+            public const string KindActions = "kind_actions";
+            public const string KindGallery = "kind_gallery";
+            public const string KindBeforeAfter = "kind_before_after";
+            public const string KindZoomImage = "kind_zoom_image";
+            public const string KindHotspotImage = "kind_hotspot_image";
+            public const string KindVideo = "kind_video";
+            public const string KindModel3D = "kind_model_3d";
+            public const string KindPanorama360 = "kind_panorama_360";
+            public const string KindAudioGuide = "kind_audio_guide";
+            public const string KindTimeline = "kind_timeline";
+            public const string KindPerson = "kind_person";
+            public const string KindStoryChapters = "kind_story_chapters";
+            public const string KindComparePoints = "kind_compare_points";
+            public const string KindDialogue = "kind_dialogue";
+            public const string KindShowOnWall = "kind_show_on_wall";
+            public const string KindPlaceInAr = "kind_place_in_ar";
+            public const string KindKnowledgeCheck = "kind_knowledge_check";
+            public const string KindPoll = "kind_poll";
+            public const string KindCollect = "kind_collect";
+            public const string KindPracticalInfo = "kind_practical_info";
+            public const string KindWallLocator = "kind_wall_locator";
+            public const string KindTodayMap = "kind_today_map";
+            public const string KindRelated = "kind_related";
+            public const string KindFeedback = "kind_feedback";
+            public const string KindSources = "kind_sources";
+
+            // The words a visitor reads for each of the framework's default navigation Groups (_3.2 section 3, the segmented element): a
+            // wall's own Groups row reads its own label first; these name the four rows a wall gets with no Groups of its own
+            public const string NavGroupDiscover = "nav_group_discover";
+            public const string NavGroupWatch = "nav_group_watch";
+            public const string NavGroupExplore = "nav_group_explore";
+            public const string NavGroupVisit = "nav_group_visit";
+
             public static readonly IReadOnlyList<string> All = new[]
             {
                 Close, FunFactLabel, FunFactHint, StatusHeading, StatusUnknownMark, StatusUnknown, StatusPercent,
@@ -194,6 +237,12 @@ namespace TileStories
                 LanguageSwitch,
                 FamilyAbout, FamilyMedia, FamilyGuides, FamilyStories, FamilyAr, FamilyPlay, FamilyVisit, FamilyCommunity, FamilyMeta,
                 FormatRead, FormatLook, FormatWatch, FormatListen, FormatModel, FormatInteract,
+                KindHeader, KindStatus, KindQuickFacts, KindRichText, KindFunFact, KindPullQuote, KindProcessSteps, KindSwatches,
+                KindActions, KindGallery, KindBeforeAfter, KindZoomImage, KindHotspotImage, KindVideo, KindModel3D, KindPanorama360,
+                KindAudioGuide, KindTimeline, KindPerson, KindStoryChapters, KindComparePoints, KindDialogue, KindShowOnWall, KindPlaceInAr,
+                KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback,
+                KindSources,
+                NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
             };
         }
 
@@ -213,6 +262,10 @@ namespace TileStories
             _language = language;
             _fallback = fallbackLanguage;
         }
+
+        // The visitor's language and the one read when a text has none in it: what a wall's own per-language words are picked by
+        public string Language => _language;
+        public string FallbackLanguage => _fallback;
 
         public string Get(string key) => In(key, _language) ?? In(key, _fallback) ?? InAnyLanguage(key) ?? key;
 

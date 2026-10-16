@@ -3,9 +3,22 @@ using System.Collections.Generic;
 
 namespace TileStories
 {
+    // What a navigation element's items choose between (rule 2.5.7): an element is not drawn where that choice has fewer than two
+    // options -- one tab is not a choice -- unless it lists kinds or blocks, which is useful on a one-family card too
+    public enum NavChoice
+    {
+        // the card's sections (families, or formats): tabs, a bar, a progress map
+        Sections,
+        // the wall's Groups (families merged, rule 2.5.6): the segmented element
+        Groups,
+        // kinds or blocks (kind chips, a contents list): rule 2.5.7 does not apply
+        Blocks,
+    }
+
     // One navigation element a wall may put in a slot of the card (_3.2 section 4.1): its key (what card_settings.navigation stores),
-    // the slot it lives in, the words the POI Editor shows for it (a label and its (i) help: Editor words, ASCII), and what it moves
-    // between
+    // the slot it lives in, the words the POI Editor shows for it (a label and its (i) help: Editor words, ASCII), what it moves
+    // between, and which of the wall's display options it reads -- so the Editor shows a row only where it changes something, for an
+    // app's element too, with no edit to the window
     public sealed class NavElementDefinition
     {
         public string Key { get; }
@@ -13,17 +26,22 @@ namespace TileStories
         public string Slot { get; }
         public string Label { get; }
         public string Help { get; }
-        // The element moves between the card's SECTIONS (tabs, a bar): rule 2.5.7 does not draw it for fewer than two. False for one
-        // that lists kinds or blocks (kind chips, a contents list), which is useful on a one-family card too
-        public bool BetweenSections { get; }
+        public NavChoice Choice { get; }
+        // It draws icons and reads Labels (icon / text / icon and text)
+        public bool ReadsLabels { get; }
+        // It reads Show Counts (a block count on its items)
+        public bool ShowsCounts { get; }
 
-        public NavElementDefinition(string key, string slot, string label, string help, bool betweenSections)
+        public NavElementDefinition(string key, string slot, string label, string help, NavChoice choice, bool readsLabels = false,
+            bool showsCounts = false)
         {
             Key = key;
             Slot = slot;
             Label = label;
             Help = help;
-            BetweenSections = betweenSections;
+            Choice = choice;
+            ReadsLabels = readsLabels;
+            ShowsCounts = showsCounts;
         }
     }
 

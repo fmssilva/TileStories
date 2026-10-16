@@ -183,7 +183,9 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
   undo state between tests; investigate in a taxonomy session. Same pattern seen 2026-09-27 on
   `KeywordListFieldTypingTests.TypingTwoKeywordsWithACommaBetween_GivesTwoKeywords` ("the click must focus the keyword
   field") in an EditMode run started right after a full PlayMode run; 1207/1207 on the immediate rerun. Suspect: Editor
-  window focus still settling after Play Mode exits (real-click tests need a focused window).
+  window focus still settling after Play Mode exits (real-click tests need a focused window). Seen again 2026-10-16 (`_3.2` step 6):
+  the same precondition failed in a full EditMode run started seconds after the agent CLOSED its POI Editor capture utility window
+  (focus moved), 1754/1755; passed alone at once. So the trigger is any recent focus change, not only Play Mode exiting.
 - Keep `IPCE/` out of TileStories commits (separate repo or .gitignore).
 - Search results rows show "category - level" (`PoiSubtitle`), so a hierarchy level name ("Hub", "Landmark")
   reaches visitors. Level names are authoring vocabulary. Decide in the Select/Filter/Search domain: category
@@ -410,4 +412,7 @@ for each is in `_3.1.1_Audit.md` section 12.5.
 ## POI Editor (2026-10-16, from _3.2 step 5a)
 
 - Scene Configuration at a narrow window (450 pt, `TestEvidence/Editor/173_CardNavigation_450_DeviceGuide.png`): "Copy to StreamingAssets" is cut to "py to StreamingAsse" and the window shows a horizontal scrollbar -- the top action rows keep a minimum width the window no longer has. Outside the Navigation section; decide whether the window supports widths under ~500 pt.
+- (2026-10-16, _3.2 step 6) The progress map at 390 px with eight families: the 48 px touch minimum holds seven pieces at 48 and gives
+  About 54, so "sized by target count" barely shows on The Lamp (it does on shorter cards: 190 / 125 / 62 px for 3 / 2 / 1 targets). A
+  device check should say whether visitors read it as a map at all with eight pieces; if not, the wall can pick another Top Bar (no code).
 - "Trying to access the DPI setting of a visual element that is not on a panel" is logged (several lines) when a live card edit rebinds the open card in Play Mode (seen in `PoiCardTextTabsSceneTests` runs, green). Find which element reads a style before it is on the panel; harmless today, but it is log noise in every live-edit test.

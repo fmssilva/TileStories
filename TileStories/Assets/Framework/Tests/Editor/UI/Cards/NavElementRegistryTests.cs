@@ -39,15 +39,15 @@ namespace TileStories.Editor.Tests
 
         private const string AppKey = "app_dots";
         // - it lists BLOCKS, one dot each (not sections): rule 2.5.7 leaves it on a one-family card
-        private static NavElementDefinition AppDots(string slot = NavSlotKeys.Top) => new(AppKey, slot, "App Dots", "One dot per block.", betweenSections: false);
+        private static NavElementDefinition AppDots(string slot = NavSlotKeys.Top) => new(AppKey, slot, "App Dots", "One dot per block.", NavChoice.Blocks);
 
         [Test]
         public void TheRegistry_RefusesANullOrBlankElement_TheWordNone_ASecondOfTheSameKey_AnUnbuiltSlot_AndNoFactory()
         {
             var registry = new NavElementRegistry();
             Assert.Throws<ArgumentNullException>(() => registry.Register(null, () => new AppDotsView()));
-            Assert.Throws<ArgumentException>(() => registry.Register(new NavElementDefinition(" ", NavSlotKeys.Top, "x", "x", true), () => new AppDotsView()));
-            Assert.Throws<ArgumentException>(() => registry.Register(new NavElementDefinition(CardOptions.NavNone, NavSlotKeys.Top, "x", "x", true), () => new AppDotsView()),
+            Assert.Throws<ArgumentException>(() => registry.Register(new NavElementDefinition(" ", NavSlotKeys.Top, "x", "x", NavChoice.Sections), () => new AppDotsView()));
+            Assert.Throws<ArgumentException>(() => registry.Register(new NavElementDefinition(CardOptions.NavNone, NavSlotKeys.Top, "x", "x", NavChoice.Sections), () => new AppDotsView()),
                 "'none' is what a wall stores for no element: no element may be called that");
             var unbuilt = Assert.Throws<ArgumentException>(() => registry.Register(AppDots("bottom"), () => new AppDotsView()));
             StringAssert.Contains("'bottom'", unbuilt.Message, "the refusal names the slot");
@@ -61,12 +61,19 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(1, registry.All.Count);
         }
 
+        // Section 5.1's top elements, in its order
+        private static readonly string[] FrameworkTopElements =
+        {
+            BuiltInNavElements.TextTabs, BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
+            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap,
+        };
+
         [Test]
         public void TheFrameworksElements_AreRegisteredInShared_ForTheirSlot_WithEditorWordsInAscii()
         {
             Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.TextTabs, out var tabs), "text_tabs is a framework element");
             Assert.AreEqual(NavSlotKeys.Top, tabs.Slot);
-            Assert.IsTrue(tabs.BetweenSections, "text tabs move between sections: rule 2.5.7 applies to them");
+            Assert.AreEqual(NavChoice.Sections, tabs.Choice, "text tabs move between sections: rule 2.5.7 applies to them");
             Assert.AreEqual(new CardNavigationSettings().top, BuiltInNavElements.TextTabs, "Top Bar's default is the registered text_tabs");
             foreach (var element in NavElementRegistry.Shared.All)
             {
@@ -75,7 +82,7 @@ namespace TileStories.Editor.Tests
                 EditorTextChecks.AssertAscii(element.Label + element.Help, element.Key);
                 Assert.IsInstanceOf<INavElementView>(NavElementRegistry.Shared.CreateView(element.Key), element.Key + " makes its view");
             }
-            CollectionAssert.AreEqual(new[] { BuiltInNavElements.TextTabs }, NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Key));
+            CollectionAssert.AreEqual(FrameworkTopElements, NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Key), "the six top elements of section 5.1, in its order");
             Assert.IsNull(NavElementRegistry.Shared.CreateView("no_such_element"));
         }
 
@@ -89,7 +96,7 @@ namespace TileStories.Editor.Tests
             BuiltInNavElements.Register(registry);
             var made = new List<AppDotsView>();
             registry.Register(AppDots(), () => { var v = new AppDotsView(); made.Add(v); return v; });
-            CollectionAssert.AreEqual(new[] { BuiltInNavElements.TextTabs, AppKey }, registry.OfSlot(NavSlotKeys.Top).Select(e => e.Key),
+            CollectionAssert.AreEqual(FrameworkTopElements.Append(AppKey), registry.OfSlot(NavSlotKeys.Top).Select(e => e.Key),
                 "listed after the framework's, in registration order");
 
             var sheet = new PoiCardSheetView(new VisualElement(), BlockRegistry.Shared, Array.Empty<StyleSheet>(), registry);
@@ -160,7 +167,7 @@ namespace TileStories.Editor.Tests
         [Test]
         public void NavSlotRule_PicksTheWallsElement_OnlyWhenTheCardShowsNavigation_ItIsATopElement_AndRule7Allows()
         {
-            var tabs = new NavElementDefinition(BuiltInNavElements.TextTabs, NavSlotKeys.Top, "Text Tabs", "x", betweenSections: true);
+            var tabs = new NavElementDefinition(BuiltInNavElements.TextTabs, NavSlotKeys.Top, "Text Tabs", "x", NavChoice.Sections);
             Func<string, NavElementDefinition> top = key => key == BuiltInNavElements.TextTabs ? tabs : key == AppKey ? AppDots() : null;
             var wall = new WallConfigData { card_settings = new CardSettings() };
             wall.card_settings.navigation.min_blocks = 3;

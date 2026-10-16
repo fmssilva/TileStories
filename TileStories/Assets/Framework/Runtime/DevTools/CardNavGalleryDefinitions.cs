@@ -43,7 +43,8 @@ namespace TileStories
         // The elements the gallery shows: one row per element, every case drawn for each
         public static readonly IReadOnlyList<string> ElementKeys = new[]
         {
-            BuiltInNavElements.TextTabs,
+            BuiltInNavElements.TextTabs, BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
+            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap,
         };
 
         // The gallery's walls show navigation from 2 targets, so the small cases draw their element too (the default threshold is

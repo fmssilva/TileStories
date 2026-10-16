@@ -277,6 +277,161 @@
     translate: -50% 0;
 }
 
+/* ---- the families' icons (_3.2 step 6, FamilyDefinition.IconKey): the same four parts. about, ar and visit reuse info,
+   show_on_wall and location. A navigation element paints them in the family's colour (CardIcons.Tint) ---- */
+
+/* picture (media): a framed picture -- a box, a sun (the dot) top right, a mountain (the two bars as a peak) inside */
+.card-icon--picture .card-icon__frame,
+.card-icon--picture .card-icon__bar,
+.card-icon--picture .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--picture .card-icon__frame {
+    top: 10%;
+    bottom: 10%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--picture .card-icon__bar--a,
+.card-icon--picture .card-icon__bar--b {
+    top: 62%;
+    width: 40%;
+    height: var(--ts-icon-stroke);
+}
+
+.card-icon--picture .card-icon__bar--a {
+    left: 12%;
+    rotate: -45deg;
+}
+
+.card-icon--picture .card-icon__bar--b {
+    left: 38%;
+    rotate: 45deg;
+}
+
+.card-icon--picture .card-icon__dot {
+    left: 72%;
+    top: 34%;
+}
+
+/* listen (guides): headphones -- the frame is the band (a ring open at the bottom), the two bars the ear cups */
+.card-icon--listen .card-icon__frame,
+.card-icon--listen .card-icon__bar {
+    display: flex;
+}
+
+.card-icon--listen .card-icon__frame {
+    left: 8%;
+    right: 8%;
+    top: 6%;
+    bottom: 34%;
+    border-bottom-width: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.card-icon--listen .card-icon__bar--a,
+.card-icon--listen .card-icon__bar--b {
+    top: 52%;
+    width: 24%;
+    height: 40%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--listen .card-icon__bar--a {
+    left: 4%;
+}
+
+.card-icon--listen .card-icon__bar--b {
+    right: 4%;
+}
+
+/* book (stories): an open book -- a wide box with its spine (bar a) down the middle */
+.card-icon--book .card-icon__frame,
+.card-icon--book .card-icon__bar--a {
+    display: flex;
+}
+
+.card-icon--book .card-icon__frame {
+    top: 16%;
+    bottom: 16%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--book .card-icon__bar--a {
+    left: 50%;
+    top: 16%;
+    bottom: 16%;
+    width: var(--ts-icon-stroke);
+    translate: -50% 0;
+}
+
+/* play (play): a die -- a rounded square with one pip */
+.card-icon--play .card-icon__frame,
+.card-icon--play .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--play .card-icon__frame {
+    left: 10%;
+    right: 10%;
+    top: 10%;
+    bottom: 10%;
+    border-radius: var(--ts-radius-s);
+}
+
+/* people (community): a person -- the dot is the head, the frame the shoulders (a ring cut to its top half) */
+.card-icon--people .card-icon__frame,
+.card-icon--people .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--people .card-icon__dot {
+    top: 28%;
+    width: 36%;
+    height: 36%;
+    border-radius: var(--ts-icon-size);
+}
+
+.card-icon--people .card-icon__frame {
+    left: 8%;
+    right: 8%;
+    top: 62%;
+    bottom: 0;
+    border-bottom-width: 0;
+    border-radius: var(--ts-icon-size) var(--ts-icon-size) 0 0;
+}
+
+/* sources (meta): a page of text -- a tall box with two lines on it */
+.card-icon--sources .card-icon__frame,
+.card-icon--sources .card-icon__bar {
+    display: flex;
+}
+
+.card-icon--sources .card-icon__frame {
+    left: 18%;
+    right: 18%;
+    top: 4%;
+    bottom: 4%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--sources .card-icon__bar--a,
+.card-icon--sources .card-icon__bar--b {
+    left: 32%;
+    right: 32%;
+    height: var(--ts-icon-stroke);
+}
+
+.card-icon--sources .card-icon__bar--a {
+    top: 36%;
+}
+
+.card-icon--sources .card-icon__bar--b {
+    top: 58%;
+}
+
 /* ---- the pill button: ONE shape for every block that has one (actions' pill_row, story_chapters' Previous / Next).
    The radius is half the touch-target height (--ts-pill-radius), so short words give a stadium, not an egg ---- */
 

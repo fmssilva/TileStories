@@ -24,7 +24,10 @@ namespace TileStories.LivingRoom
             public const string ObjectSmartphone = "living_room_object_smartphone";
             public const string ObjectSheetA4 = "living_room_object_sheet_a4";
 
-            public static readonly IReadOnlyList<string> All = new[] { ObjectCreditCard, ObjectTwoEuroCoin, ObjectSmartphone, ObjectSheetA4 };
+            // The name of the app's own block kind (BlockKindDefinition.LabelKey): what a kind chip of the card's navigation says
+            public const string KindSizeComparison = "living_room_kind_size_comparison";
+
+            public static readonly IReadOnlyList<string> All = new[] { ObjectCreditCard, ObjectTwoEuroCoin, ObjectSmartphone, ObjectSheetA4, KindSizeComparison };
         }
     }
 }

@@ -176,7 +176,9 @@ namespace TileStories.Tests
             Assert.AreEqual(Slot(block).layout.y, Scroll.scrollOffset.y, OnePixel, "instant: the offset is set at once, no frame in between");
             yield return Landed();
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "Jump Opens Card To = keep: the card stays at Half");
-            Assert.AreEqual(0f, TopInViewport(block), OnePixel, "and the block's top meets the viewport's top at Half");
+            Assert.AreEqual(0f, TopInViewport(block), OnePixel, "and the block's top meets the viewport's top at Half (offset " + Scroll.scrollOffset.y
+                + ", slot y " + Slot(block).layout.y + ", viewport " + Scroll.contentViewport.layout + ", content pad " + Scroll.contentContainer.resolvedStyle.paddingTop
+                + ", strip " + Sheet.Chrome.TopShown + ", footer " + Sheet.Chrome.BottomShown + ", header collapsed " + Sheet.Stack.HeaderCollapsed + ")");
         }
 
         [UnityTest]

@@ -39,6 +39,7 @@ namespace TileStories
             Key = WallLocatorKind,
             Family = BuiltInFamilies.Visit,
             Format = CardOptions.FormatLook,
+            LabelKey = CardStrings.Keys.KindWallLocator,
             DisplayName = "Wall Locator",
             Help = "Where this point is along the wall, worked out from the positions of the wall's points: nothing to write. Strip: " +
                    "the wall as a line with a dot for every point, this one marked, and in the app the visitor's own place (You are " +
@@ -60,6 +61,7 @@ namespace TileStories
             Key = TodayMapKind,
             Family = BuiltInFamilies.Visit,
             Format = CardOptions.FormatLook,
+            LabelKey = CardStrings.Keys.KindTodayMap,
             DisplayName = "Today Map",
             Help = "Where the place the wall shows is in the city today. Static: the map picture, the coordinates under it and a " +
                    "Directions button. Bridge: from the wall to today -- the point as the wall shows it (its header picture and " +
@@ -104,6 +106,7 @@ namespace TileStories
             Key = RelatedKind,
             Family = BuiltInFamilies.Visit,
             Format = CardOptions.FormatInteract,
+            LabelKey = CardStrings.Keys.KindRelated,
             DisplayName = "Related",
             Help = "Other points worth seeing from here. Carousel: a strip of pictures, a tap opens that point's card. Next Along " +
                    "Wall: one button, the nearest picked point to the right along the wall (wraps to the left at the wall's end). " +
@@ -151,6 +154,7 @@ namespace TileStories
             Key = PracticalInfoKind,
             Family = BuiltInFamilies.Visit,
             Format = CardOptions.FormatRead,
+            LabelKey = CardStrings.Keys.KindPracticalInfo,
             DisplayName = "Practical Info",
             Help = "What a visitor needs to plan a visit to the real place: opening hours, tickets, how to get there, the best " +
                    "light. Rows: one row per item, a small icon beside its label and value, split by thin lines. A row with no " +

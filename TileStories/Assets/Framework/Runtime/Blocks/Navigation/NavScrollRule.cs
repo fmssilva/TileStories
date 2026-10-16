@@ -66,11 +66,16 @@ namespace TileStories
         // sheet may still be growing to Full, which moves the clamp)
         public static float Glide(float start, float target, float progress) => start + (target - start) * progress;
 
-        // Whether a jump is over: its glide's time is up and the stack rests on a landing that held still for a frame -- or, after the
-        // glide, a settle window has passed. Even an instant jump holds its landing: the sheet raised to Full grows over the card's
-        // motion length (`settle`), and until it has, the ScrollView can clamp the offset short of the landing (at peek, to 0)
-        public static bool JumpDone(float elapsed, float glide, float settle, bool landed) =>
-            elapsed >= glide && (landed || elapsed >= glide + settle);
+        // Whether a jump is over. Every jump holds its landing for at least one motion length (`settle`), the glide included: the card
+        // reacts to the scroll it made over the next frames -- the sheet raised to Full grows, the header collapses, the strip comes back
+        // and the footer slides away (_3.2 step 6: an instant jump at Half ended before that and its block landed 60 px low) -- and until
+        // then the ScrollView can also clamp the offset short of the landing (at peek, to 0). After that it ends once the stack rests on a
+        // landing that held still for a frame, and one motion length later whatever happens
+        public static bool JumpDone(float elapsed, float glide, float settle, bool landed)
+        {
+            float hold = Mathf.Max(glide, settle);
+            return elapsed >= hold && (landed || elapsed >= hold + settle);
+        }
 
         // Jump Opens Card To: anything but "keep" raises the sheet to Full first (the default; an unknown value too)
         public static bool RaisesToFull(CardNavigationSettings settings) => settings?.jump_raises_to != CardOptions.JumpRaisesKeep;

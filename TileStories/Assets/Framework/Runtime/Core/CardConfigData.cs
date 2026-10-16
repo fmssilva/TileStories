@@ -83,6 +83,14 @@ namespace TileStories
         // Hide While Scrolling: "down" (the default: the bottom area -- the sticky CTA footer -- slides away while the content moves down and
         // comes back on a move up or at the top / end) | "never" (CardOptions.HideOnScrolls). The Top Bar always stays: it is the map
         public string hide_on_scroll = CardOptions.HideOnScrollDown;
+        // Labels: what an icon-capable element's items show -- "icon_and_text" (the default) | "icon" | "text" (CardOptions.Labels). A
+        // section with no icon (a format) always shows its words (NavLabelRule)
+        public string labels = CardOptions.LabelsIconAndText;
+        // Show Counts: an item shows how many blocks it leads to
+        public bool show_counts = false;
+        // The Groups table (the segmented element, _3.2 section 3): the wall's own groups, in order. Empty = the framework's four
+        // (NavGroupRule.Defaults: Discover, Watch, Explore, Visit); a family joins one through its Families row's Group
+        public List<CardNavGroup> groups = new();
 
         public const int MinBlocksMin = 2;
         public const int MinBlocksMax = 30;
@@ -100,6 +108,17 @@ namespace TileStories
         public int order;
         // Whether this family's blocks close the card, overriding its registered AtEnd
         public bool at_end;
+        // The Groups row this family joins (its key); blank = the framework's default group for it (NavGroupRule.DefaultGroupOf)
+        public string group = "";
+    }
+
+    // One row of the Groups table: a generated key (what a Families row points at, never shown) and the visitor's words per language.
+    // A default row's words may stay empty: the framework's own word for its key is read then (CardStrings nav_group_<key>)
+    [Serializable]
+    public class CardNavGroup
+    {
+        public string key;
+        public List<LocalizedEntry> label = new();
     }
 
     // The developer-only demo card: which POI's card opens on its own, and at which stop
@@ -323,6 +342,16 @@ namespace TileStories
         public const string HideOnScrollNever = "never";
         public static readonly string[] HideOnScrolls = { HideOnScrollDown, HideOnScrollNever };
         public static readonly string[] HideOnScrollLabels = { "When Scrolling Down", "Never" };
+
+        // Labels (CardNavigationSettings.labels, _3.2 section 3): what the items of an icon-capable navigation element show
+        public const string LabelsIconAndText = "icon_and_text";
+        public const string LabelsIcon = "icon";
+        public const string LabelsText = "text";
+        public static readonly string[] Labels = { LabelsIconAndText, LabelsIcon, LabelsText };
+        public static readonly string[] LabelsLabels = { "Icon And Text", "Icon", "Text" };
+
+        // Group By's Editor words (GroupBys above)
+        public static readonly string[] GroupByLabels = { "Family", "Format" };
 
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";

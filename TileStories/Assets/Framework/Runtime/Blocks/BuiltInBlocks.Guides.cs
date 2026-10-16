@@ -21,6 +21,7 @@ namespace TileStories
             Key = AudioGuideKind,
             Family = BuiltInFamilies.Guides,
             Format = CardOptions.FormatListen,
+            LabelKey = CardStrings.Keys.KindAudioGuide,
             DisplayName = "Audio Guide",
             Help = "A recording the visitor listens to. Player: a play / pause button, a bar to drag to any point, the time, a speed chip and " +
                    "a captions switch with the caption line of the moment. Hero Chip: a small play / pause chip with the progress, pinned " +

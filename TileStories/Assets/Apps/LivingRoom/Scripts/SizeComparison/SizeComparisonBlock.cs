@@ -22,6 +22,7 @@ namespace TileStories.LivingRoom
             Key = Kind,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatLook,
+            LabelKey = LivingRoomCardTexts.Keys.KindSizeComparison,
             DisplayName = "Size Comparison",
             Help = "How big the point really is: it is drawn next to a familiar object, both to the same scale, so the visitor can judge its " +
                    "size at a glance. Pick the Object, set the point's real Width and Height in centimetres, and write a short Caption that " +

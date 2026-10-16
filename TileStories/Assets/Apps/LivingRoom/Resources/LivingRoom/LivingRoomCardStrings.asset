@@ -45,3 +45,10 @@ MonoBehaviour:
       value: A4 sheet
     - lang: pt
       value: Folha A4
+  - key: living_room_kind_size_comparison
+    where: The name of the Size Comparison block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
+    text:
+    - lang: en
+      value: Size
+    - lang: pt
+      value: Tamanho
