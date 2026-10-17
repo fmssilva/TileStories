@@ -32,6 +32,11 @@ namespace TileStories
         public CardChromeView Chrome { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
+        // What is open over the card -- the wall's Menu on a scrim, a bar's More or kinds list -- and when it closes (_3.2 step 8): a layer
+        // between the sheet and the full view
+        public CardMenuOverlay Overlay { get; }
+        // The header's menu button (_3.2 step 8): beside the language chip, drawn only while the card has a Menu element; opens it
+        public Button MenuButton { get; }
 
         // Raised when the visitor closes the card (the X, or a drag / swipe below peek)
         public event Action CloseRequested;
@@ -125,8 +130,17 @@ namespace TileStories
             LanguageButton.AddToClassList("poi-card__language");
             Root.Add(LanguageButton);
 
+            // - no glyph text: three bars drawn by the icon set; its name (tooltip) comes from CardStrings
+            MenuButton = new Button(() => Overlay.OpenMenu()) { name = "poi-card-menu-button" };
+            MenuButton.AddToClassList("poi-card__menu-button");
+            var menuIcon = CardIcons.Create();
+            CardIcons.SetKey(menuIcon, CardIcons.Menu);
+            MenuButton.Add(menuIcon);
+            Root.Add(MenuButton);
+
             Layer.Add(Root);
             Takeover = new TakeoverView(Layer);
+            Overlay = new CardMenuOverlay(this);
             parent.Add(Layer);
 
             foreach (var dragArea in new[] { Handle, Stack.HeaderSlot })
@@ -157,8 +171,10 @@ namespace TileStories
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
             ShowLanguageChip(context);
             context.Host ??= this;
-            // - another card replaces the full-screen view of the old one
+            // - another card replaces the full-screen view of the old one, and whatever was open over it
             Takeover.Close();
+            Overlay.Close();
+            context.Overlay = Overlay;
             _context = context;
             _entries = entries;
             // - before the stack binds: a block that offers a jump reads where the card can scroll (a block waiting for Show After Reading
@@ -177,9 +193,21 @@ namespace TileStories
         private void BindNav()
         {
             if (_context == null || _entries == null) return;
+            // - a reveal rebinds every element: a menu or list open over the old ones closes with them
+            Overlay.Close();
             Nav.Bind(CardNavModel.Build(_entries, _registry, _context.Settings, Stack.IsRevealed), _context);
             Slots.Bind(Nav.Model, Nav, _context);
+            ShowMenuButton();
             Chrome.Bind(_context.Settings?.navigation, _context.ReduceMotion);
+        }
+
+        // The header's menu button exists only while the card has a Menu element; its name is the menu's (CardStrings)
+        private void ShowMenuButton()
+        {
+            bool shown = Slots.MenuView != null;
+            MenuButton.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
+            MenuButton.tooltip = _context?.Strings?.Get(CardStrings.Keys.NavMenu) ?? "";
+            Root.EnableInClassList("poi-card--has-menu", shown);
         }
 
         // The chip names the language a tap switches to; with fewer than two languages there is nothing to choose and it is hidden
@@ -197,10 +225,12 @@ namespace TileStories
         public void Hide()
         {
             Takeover?.Close();
+            Overlay?.Close();
             _context = null;
             _entries = null;
             Nav?.Unbind();
             Slots?.Unbind();
+            if (MenuButton != null) ShowMenuButton();
             Chrome?.Unbind();
             Stack.UnbindAll();
             SetStopState(SheetStopRule.Stop.Dismissed);
@@ -256,14 +286,15 @@ namespace TileStories
             if (IsOpen) Nav.JumpToBlock(blockKey, elementKey);
         }
 
-        // A system Back press (_3.2 section 4.5): undo the innermost thing NavBackRule names -- close the full view, lower the sheet one
-        // stop, or close the card through CloseRequested, exactly as its X does. False when Back is left to the app (Back Button = none,
-        // or no card open)
+        // A system Back press (_3.2 section 4.5): undo the innermost thing NavBackRule names -- close the full view, close what is open over
+        // the card, lower the sheet one stop, or close the card through CloseRequested, exactly as its X does. False when Back is left to
+        // the app (Back Button = none, or no card open)
         public bool Back()
         {
-            switch (NavBackRule.Next(_context?.Settings?.navigation, Takeover.IsOpen, Stop))
+            switch (NavBackRule.Next(_context?.Settings?.navigation, Takeover.IsOpen, Overlay.IsOpen, Stop))
             {
                 case NavBackRule.Step.CloseFullView: Takeover.Close(); return true;
+                case NavBackRule.Step.CloseOverlay: Overlay.Close(); return true;
                 case NavBackRule.Step.LowerToHalf: SetStop(SheetStopRule.Stop.Half); return true;
                 case NavBackRule.Step.LowerToPeek: SetStop(SheetStopRule.Stop.Peek); return true;
                 case NavBackRule.Step.CloseCard: CloseRequested?.Invoke(); return true;
@@ -277,6 +308,8 @@ namespace TileStories
             if (!IsOpen || _context == null) return;
             string title = Stack.BoundViews.Count > 0 && Stack.BoundViews[0] is HeaderBlockView header ? header.TitleText : "";
             string crumb = title.Length > 0 && !string.IsNullOrEmpty(name) ? title + " > " + name : title + name;
+            // - never stacked: the full view replaces what was open over the card
+            Overlay.Close();
             Takeover.Open(crumb, pageCount, startPage, _context.Media, drawPage, _context.Strings);
         }
 

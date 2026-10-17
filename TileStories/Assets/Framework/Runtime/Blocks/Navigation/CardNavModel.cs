@@ -102,6 +102,9 @@ namespace TileStories
 
         // Where each target sits: its section, its kind inside it, its group (-1 = none)
         private readonly Dictionary<string, (int Section, int Kind, int Group)> _place;
+        // The same card on the other axis (By): built on first ask, from the same entries, by the same Build
+        private Func<string, CardNavModel> _buildOn;
+        private CardNavModel _pivot;
 
         private CardNavModel(string groupBy, List<Section> sections, List<Group> groups, List<string> targets,
             Dictionary<string, (int, int, int)> place, CardNavigationSettings settings)
@@ -127,13 +130,32 @@ namespace TileStories
         // The index in Groups of the group a target belongs to, -1 for none (no target, or its family is in no group of this wall)
         public int GroupOf(string blockKey) => blockKey != null && _place.TryGetValue(blockKey, out var at) ? at.Group : -1;
 
+        // The same card's map with its sections on `groupBy` (CardOptions.GroupByFamily / GroupByFormat): this model on its own axis, else
+        // the pivot -- the SAME targets regrouped by Build itself, so an element that switches axis (grid_overlay's Purpose / Format, step 8)
+        // never regroups blocks on its own. Everything but the sections (targets, groups, ShowsNavigation, bar / More) is the same card's
+        public CardNavModel By(string groupBy)
+        {
+            string axis = groupBy == CardOptions.GroupByFormat ? CardOptions.GroupByFormat : CardOptions.GroupByFamily;
+            if (axis == GroupBy) return this;
+            if (_pivot == null)
+            {
+                _pivot = _buildOn(axis);
+                _pivot._pivot = this;
+            }
+            return _pivot;
+        }
+
         // The model of the card these stack entries make. `isRevealed` says whether a block's ShowAfterViewed gate has opened
         // (the host passes CardLocalState.Seen for this POI); null = none has, so every such block is still waiting.
         public static CardNavModel Build(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockRegistry registry, CardSettings settings,
-            Func<string, bool> isRevealed = null)
+            Func<string, bool> isRevealed = null) =>
+            Build(entries, registry, settings, isRevealed, NavOntologyRule.GroupBy(settings?.navigation));
+
+        // The model with its sections on `groupBy`, whatever the wall's Group By says (By's pivot)
+        private static CardNavModel Build(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockRegistry registry, CardSettings settings,
+            Func<string, bool> isRevealed, string groupBy)
         {
             var nav = settings?.navigation;
-            string groupBy = NavOntologyRule.GroupBy(nav);
             var order = new List<string>();
             var targetsOf = new Dictionary<string, List<string>>();
             var kindsOf = new Dictionary<string, List<BlockKindDefinition>>();
@@ -207,7 +229,10 @@ namespace TileStories
                 }
                 groups.Add(new Group(definitions[key], groupTargets[key]));
             }
-            return new CardNavModel(groupBy, sections, groups, targets, place, nav);
+            return new CardNavModel(groupBy, sections, groups, targets, place, nav)
+            {
+                _buildOn = axis => Build(entries, registry, settings, isRevealed, axis),
+            };
         }
 
         // The CardStrings key a section is labelled with: the registered family's own, or the format's

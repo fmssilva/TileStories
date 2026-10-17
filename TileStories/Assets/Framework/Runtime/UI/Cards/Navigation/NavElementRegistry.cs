@@ -56,7 +56,10 @@ namespace TileStories
         public const string Top = "top";
         // Under the stack, below the sticky CTA footer: the thumb zone (_3.2 section 4.2, step 7a)
         public const string Bottom = "bottom";
-        public static readonly IReadOnlyList<string> Built = new[] { Top, Bottom };
+        // The card layer over the sheet, below the full view: opened by the header's menu button (and by a bar's More), drawn on a scrim by
+        // the card's overlay owner, CardMenuOverlay (_3.2 section 5.3, step 8)
+        public const string Menu = "menu";
+        public static readonly IReadOnlyList<string> Built = new[] { Top, Bottom, Menu };
     }
 
     // Every navigation element the card can show, with the view that draws it -- the same shape as BlockRegistry: BuiltInNavElements

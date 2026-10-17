@@ -5,7 +5,7 @@
 // At The End, Group, one (i) on its header); Group By; which cards get navigation, at which heights and what the top strip
 // shows (Show Navigation From, Top Bar: step 5a; Show Navigation At: 5b; Labels, Show Counts: step 6, each only for an element
 // that reads it), what the bar under the stack shows (Bottom Bar and its Bar Slots, step 7a, Bar Slots only for an element that is a
-// bar), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
+// bar), what the header's menu button opens over the card (Menu, step 8), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
 // the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4; the Groups table last (step 6,
 // only for the Segmented bar, POIEditorToolWindow.CardNavigationGroups.cs). The other nav elements, layouts and presets join
 // this same section at later steps. Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
@@ -61,6 +61,9 @@ namespace TileStories.Editor
             nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
             var (bottomKeys, bottomLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
             nav.bottom = DrawReferencePopupField("Bottom Bar", nav.bottom, bottomKeys, bottomLabels, allowNone: false, CardBottomBarHelp(NavElementRegistry.Shared));
+            // - section 7's order: the Menu right after the two bars (its button sits in the header; a bar's More opens it)
+            var (menuKeys, menuLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Menu);
+            nav.menu = DrawReferencePopupField("Menu", nav.menu, menuKeys, menuLabels, allowNone: false, CardMenuHelp(NavElementRegistry.Shared));
             // - a display option shows while EITHER bar reads it: both bars follow the same wall setting
             if (topElement != null && topElement.ReadsLabels || bottomElement != null && bottomElement.ReadsLabels)
                 nav.labels = DrawPopupField("Labels", nav.labels, CardOptions.Labels, CardOptions.LabelsLabels, CardLabelsHelp);

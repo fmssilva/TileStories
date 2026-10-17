@@ -51,7 +51,8 @@ namespace TileStories.Editor.Tests
                 "'none' is what a wall stores for no element: no element may be called that");
             var unbuilt = Assert.Throws<ArgumentException>(() => registry.Register(AppDots("floating"), () => new AppDotsView()));
             StringAssert.Contains("'floating'", unbuilt.Message, "the refusal names the slot");
-            CollectionAssert.AreEqual(new[] { NavSlotKeys.Top, NavSlotKeys.Bottom }, NavSlotKeys.Built, "the slots the sheet draws today (step 7a: the bottom)");
+            CollectionAssert.AreEqual(new[] { NavSlotKeys.Top, NavSlotKeys.Bottom, NavSlotKeys.Menu }, NavSlotKeys.Built,
+                "the slots the sheet draws today (step 7a: the bottom; step 8: the menu)");
             Assert.Throws<ArgumentException>(() => registry.Register(AppDots(null), () => new AppDotsView()));
             Assert.Throws<ArgumentNullException>(() => registry.Register(AppDots(), null));
             CollectionAssert.IsEmpty(registry.All, "nothing refused was kept");

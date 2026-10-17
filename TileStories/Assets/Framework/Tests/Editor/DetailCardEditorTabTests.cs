@@ -137,6 +137,7 @@ namespace TileStories.Editor.Tests
                                 "back_button" => CardOptions.BackButtonNone,
                                 "top" => CardOptions.NavNone,
                                 "bottom" => BuiltInNavElements.BottomBar,
+                                "menu" => BuiltInNavElements.DrawerTree,
                                 "show_at" => CardOptions.ShowNavFullOnly,
                                 "hide_on_scroll" => CardOptions.HideOnScrollNever,
                                 "labels" => CardOptions.LabelsIcon,
@@ -163,8 +164,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 16 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 16 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 17 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 17 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1476,6 +1477,50 @@ namespace TileStories.Editor.Tests
             string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
             foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top))
                 StringAssert.Contains("Top Bar = " + element.Label, guide, "the Playmode guide walks " + element.Label);
+        }
+
+        // Detail Card > Navigation's step 8 row on the real window. Menu is drawn on its default, None (never a default: a menu hides the map
+        // behind a button), right under Bottom Bar (section 7's order) and listed from the registry -- None, then the menu slot's elements by
+        // their labels. A pick is an undo step; Ctrl+Z (real) brings None back. Its (i) says the default, that it is never a card's only
+        // navigation, what closes it and that a bar's More opens it; the Playmode guide walks both menus. All ASCII
+        [UnityTest]
+        public IEnumerator TheMenuRow_IsDrawnOnNone_UnderBottomBar_ListsTheMenuElements_AndAPickIsUndoneByCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.menu, "the shipped wall never set Menu: None");
+            Assert.AreEqual(CardOptions.NavNone, new CardNavigationSettings().menu, "and None is the framework's default");
+            var titles = drawn.Select(d => d.Title).ToList();
+            CollectionAssert.Contains(titles, "Menu", "the row is drawn on its default");
+            float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
+            Assert.Less(Y("Bottom Bar"), Y("Menu"), "Menu under Bottom Bar (section 7's order)");
+            Assert.Less(Y("Menu"), Y("Follow Scroll"));
+
+            var (keys, labels) = POIEditorToolWindow.SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Menu);
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInNavElements.DrawerTree, BuiltInNavElements.GridOverlay }, keys,
+                "None, then the menu slot's elements, listed from the registry");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Drawer", "Big Tiles" }, labels, "named by their labels, never their keys");
+
+            // - the pick through the window's history (an IMGUI popup opens a native menu), then a real Ctrl+Z
+            Pick(() => _window.Config.card_settings.navigation.menu = BuiltInNavElements.GridOverlay);
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsTrue(_window.Unsaved, "a pick is an edit");
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Menu", "the row stays where it was");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.menu, "Ctrl+Z brings None back");
+
+            var help = typeof(POIEditorToolWindow);
+            string menuHelp = (string)help.GetMethod("CardMenuHelp", Static).Invoke(null, new object[] { NavElementRegistry.Shared });
+            foreach (string word in new[] { "None (the default)", "menu button", "never a card's only navigation", "Back", "More", "Drawer: ", "Big Tiles: " })
+                StringAssert.Contains(word, menuHelp, "CardMenuHelp says " + word);
+            EditorTextChecks.AssertAscii(menuHelp, "CardMenuHelp");
+            string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
+            foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Menu))
+                StringAssert.Contains("Menu = " + element.Label, guide, "the Playmode guide walks " + element.Label);
+            EditorTextChecks.AssertAscii(guide, "CardNavigationPlaymodeTestGuide");
         }
 
         // Detail Card > Navigation's step 7a rows on the real window. Bottom Bar is drawn on its default, None, under Top Bar and listed

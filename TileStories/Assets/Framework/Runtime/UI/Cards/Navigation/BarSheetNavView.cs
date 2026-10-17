@@ -12,12 +12,16 @@ namespace TileStories
     // asks for more. So that a visitor can tell the two taps apart, the current slot wears a small up arrow while a tap on it would open a
     // list (a family with two kinds or more), and the list reuses More's list look: it is plainly "a list above the bar".
     // A thin subclass of the bar (slots, More, mark and jumps are the bar's own); what it adds is the tap decision and the kinds list. The
-    // list closes on a pick, on the arrow's own slot again, when More opens, when the spy leaves its family (it would name a family nobody
-    // is reading) and on every rebind. Back and a scroll away from it are the menu overlay's (step 8), like More's list.
+    // list is a client of the card's overlay owner (CardMenuOverlay, step 8), like More's: it closes on Back, on a jump (a pick in it
+    // included), on a scroll, when More or a menu opens and on every rebind -- the owner's one rule. Its own dismiss path is only the
+    // opener's toggle: the arrow's slot tapped again. (Until step 8 it also closed when the spy left its family; a spy moves only by a scroll
+    // or a jump, which close it now, so that second rule went.)
     public sealed class BarSheetNavView : BottomBarNavView
     {
         // On the root while the kinds list is open
         public const string KindsOpenClass = "nav-bar--kinds-open";
+        // What the overlay owner knows the kinds list as while it is open
+        public const string KindsListKey = "kinds_list";
 
         // The kinds list, above the slots (and More's list)
         public VisualElement KindsList { get; }
@@ -42,7 +46,7 @@ namespace TileStories
             Root.Insert(Root.IndexOf(Bar), KindsList);
             _kindRows = new ElementPool<NavTab>(index => KindRow(NavTab.Create("nav-bar-sheet-kind-", index, false, () => PickKind(index))),
                 tab => tab.Button.RemoveFromHierarchy());
-            SetKindsOpen(false, -1);
+            ShowKinds(false, -1);
         }
 
         public override void Bind(CardNavModel model, NavController nav, BlockBindContext context)
@@ -63,7 +67,7 @@ namespace TileStories
 
         public override void Unbind()
         {
-            SetKindsOpen(false, -1);
+            CloseKinds();
             _kindRows.ReleaseAll();
             foreach (var (_, arrow) in _arrows) arrow.RemoveFromHierarchy();
             _arrows.Clear();
@@ -72,10 +76,10 @@ namespace TileStories
             base.Unbind();
         }
 
-        // More opening closes the kinds: one list above the bar at a time
+        // More opening closes the kinds: one list over the card at a time (the overlay owner does it when there is one)
         public override void OpenMore()
         {
-            SetKindsOpen(false, -1);
+            CloseKinds();
             base.OpenMore();
         }
 
@@ -85,26 +89,27 @@ namespace TileStories
             if (_model != null && section >= 0 && section < _model.Sections.Count
                 && BarSheetRule.OpensKinds(section, CurrentIndex, _model.Sections[section].Kinds.Count))
             {
-                if (KindsOpen && KindsSection == section) SetKindsOpen(false, -1);
+                if (KindsOpen && KindsSection == section) CloseKinds();
                 else OpenKinds(section);
                 return;
             }
-            SetKindsOpen(false, -1);
+            CloseKinds();
             JumpTo(section);
         }
 
-        // The spy moved: the arrow follows the current slot, and a list open for a family nobody reads any more closes
+        // The spy moved: the arrow follows the current slot
         protected override void OnCurrentChanged(int index)
         {
             base.OnCurrentChanged(index);
-            if (KindsOpen && index != KindsSection) SetKindsOpen(false, -1);
             ShowArrows(index);
         }
 
-        // List this section's kinds above the bar, each with its block count
+        // List this section's kinds above the bar, each with its block count, as the one thing open over the card
         private void OpenKinds(int section)
         {
+            // - whatever is open closes BEFORE the new list shows: the owner runs the old list's close as it opens the new one
             CloseMore();
+            CloseKinds();
             _kindRows.ReleaseAll();
             foreach (var kind in _model.Sections[section].Kinds)
             {
@@ -115,7 +120,8 @@ namespace TileStories
                 NavCount.Set(row.Count, true, kind.Count);
                 KindsList.Add(row.Button);
             }
-            SetKindsOpen(true, section);
+            ShowKinds(true, section);
+            Overlay?.Open(KindsListKey, null, () => ShowKinds(false, -1));
         }
 
         // A tap on a kind's row (its place in the open list): jump to the kind's first block and close the list
@@ -125,11 +131,18 @@ namespace TileStories
             var kinds = _model.Sections[KindsSection].Kinds;
             if (index < 0 || index >= kinds.Count) return;
             string block = kinds[index].Targets[0];
-            SetKindsOpen(false, -1);
+            CloseKinds();
             Nav?.JumpToBlock(block, ElementKey);
         }
 
-        private void SetKindsOpen(bool open, int section)
+        // Close the kinds list, through the overlay owner when it is the one open there
+        private void CloseKinds()
+        {
+            if (Overlay != null && Overlay.OpenKey == KindsListKey) Overlay.Close();
+            else ShowKinds(false, -1);
+        }
+
+        private void ShowKinds(bool open, int section)
         {
             KindsOpen = open;
             KindsSection = open ? section : -1;

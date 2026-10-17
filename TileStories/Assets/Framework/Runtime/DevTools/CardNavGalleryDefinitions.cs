@@ -46,6 +46,7 @@ namespace TileStories
             BuiltInNavElements.TextTabs, BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
             BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap, BuiltInNavElements.BottomBar,
             BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp,
+            BuiltInNavElements.DrawerTree, BuiltInNavElements.GridOverlay,
         };
 
         // The gallery's walls show navigation from 2 targets, so the small cases draw their element too (the default threshold is
@@ -83,14 +84,22 @@ namespace TileStories
 
         public static readonly IReadOnlyList<Entry> All = ElementKeys.SelectMany(key => Cases.Select(c => new Entry(key, c))).ToList();
 
+        // The slot an entry's element is registered for (top when the registry does not know it)
+        public static string SlotOf(Entry entry) =>
+            NavElementRegistry.Shared.TryGet(entry.ElementKey, out var element) ? element.Slot : NavSlotKeys.Top;
+
+        // A menu element (step 8): judged OPEN over the card, the way the header's menu button shows it
+        public static bool IsMenu(Entry entry) => SlotOf(entry) == NavSlotKeys.Menu;
+
         // The fabricated wall of an entry: the card gallery's own, with the entry's language offered and navigation from 2 targets. The
-        // element is the wall's pick for ITS slot and the other slot holds nothing, so each render judges one element alone
+        // element is the wall's pick for ITS slot and every other slot holds nothing, so each render judges one element alone
         public static WallConfigData Wall(Entry entry)
         {
             var wall = CardGalleryDefinitions.Taxonomy();
-            bool bottom = NavElementRegistry.Shared.TryGet(entry.ElementKey, out var element) && element.Slot == NavSlotKeys.Bottom;
-            wall.card_settings.navigation.top = bottom ? CardOptions.NavNone : entry.ElementKey;
-            wall.card_settings.navigation.bottom = bottom ? entry.ElementKey : CardOptions.NavNone;
+            string slot = SlotOf(entry);
+            wall.card_settings.navigation.top = slot == NavSlotKeys.Top ? entry.ElementKey : CardOptions.NavNone;
+            wall.card_settings.navigation.bottom = slot == NavSlotKeys.Bottom ? entry.ElementKey : CardOptions.NavNone;
+            wall.card_settings.navigation.menu = slot == NavSlotKeys.Menu ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.min_blocks = ShowNavigationFrom;
             if (entry.Case.Language != "en") wall.card_settings.languages = new List<string> { "en", entry.Case.Language };
             return wall;

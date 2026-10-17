@@ -9,6 +9,8 @@ namespace TileStories
     //     so a jump lands a block at the viewport's top with no offset for it, and under the header's peek part, so it never moves a stop
     //   - BOTTOM (step 7a): the last part of the sheet's bottom area, under the sticky CTA footer -- the CTA stays nearest the content, the
     //     bar sits in the thumb zone. Below the header too, so it never moves a stop either
+    //   - MENU (step 8): no place in the sheet -- the element is bound here like the others and the card's overlay owner (CardMenuOverlay)
+    //     draws it over the card, on a scrim, when the header's menu button (or a bar's More) opens it
     // Which element a slot holds is NavSlotRule's; WHEN a held element shows (the stop, the scroll, the room) is CardChromeRule's, applied
     // by the sheet's CardChromeView. An element is made by the NavElementRegistry and pooled per key (ElementPool), so a card switch
     // rebinds the same view. The sheet owns one, next to its NavController.
@@ -21,6 +23,10 @@ namespace TileStories
         public string TopKey { get; private set; }
         public INavElementView BottomView { get; private set; }
         public string BottomKey { get; private set; }
+        // The MENU element (step 8): bound like the others, but never parented here -- the card's overlay owner (CardMenuOverlay) draws its
+        // root on the scrim while it is open, and the header's menu button exists only while one is bound
+        public INavElementView MenuView { get; private set; }
+        public string MenuKey { get; private set; }
 
         private readonly NavElementRegistry _registry;
         private readonly Dictionary<string, ElementPool<INavElementView>> _pools = new();
@@ -52,6 +58,13 @@ namespace TileStories
             var bottom = BindSlot(Bottom, NavSlotRule.BottomElement(settings, model, ElementOf(NavSlotKeys.Bottom)), model, nav, context);
             BottomView = bottom.View;
             BottomKey = bottom.Key;
+            string menuKey = NavSlotRule.MenuElement(settings, model, ElementOf(NavSlotKeys.Menu));
+            if (menuKey != null && PoolOf(menuKey).Take() is { } menu)
+            {
+                menu.Bind(model, nav, context);
+                MenuView = menu;
+                MenuKey = menuKey;
+            }
         }
 
         // Every slot empty again (the card closed, or is rebinding)
@@ -59,10 +72,13 @@ namespace TileStories
         {
             if (TopKey != null) _pools[TopKey].ReleaseAll();
             if (BottomKey != null) _pools[BottomKey].ReleaseAll();
+            if (MenuKey != null) _pools[MenuKey].ReleaseAll();
             TopView = null;
             TopKey = null;
             BottomView = null;
             BottomKey = null;
+            MenuView = null;
+            MenuKey = null;
             Top.style.display = DisplayStyle.None;
             Bottom.style.display = DisplayStyle.None;
         }

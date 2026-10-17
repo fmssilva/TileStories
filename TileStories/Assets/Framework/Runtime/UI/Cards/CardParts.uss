@@ -455,6 +455,35 @@
     left: 84%;
 }
 
+/* menu (the header's menu button, _3.2 step 8): three bars one above the other -- the two bars and the dot stretched into the middle one */
+.card-icon--menu .card-icon__bar,
+.card-icon--menu .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--menu .card-icon__bar,
+.card-icon--menu .card-icon__dot {
+    left: 10%;
+    right: 10%;
+    width: auto;
+    height: var(--ts-icon-stroke);
+    border-radius: var(--ts-icon-stroke);
+    background-color: var(--ts-ink);
+    translate: 0 -50%;
+}
+
+.card-icon--menu .card-icon__bar--a {
+    top: 22%;
+}
+
+.card-icon--menu .card-icon__dot {
+    top: 50%;
+}
+
+.card-icon--menu .card-icon__bar--b {
+    top: 78%;
+}
+
 /* ---- the pill button: ONE shape for every block that has one (actions' pill_row, story_chapters' Previous / Next).
    The radius is half the touch-target height (--ts-pill-radius), so short words give a stadium, not an egg ---- */
 

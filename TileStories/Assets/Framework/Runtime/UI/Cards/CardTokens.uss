@@ -10,7 +10,9 @@
     --ts-bg: rgb(26, 21, 16);
     --ts-surface: rgb(35, 28, 21);
     --ts-surface-2: rgb(48, 39, 30);
-    --ts-scrim: rgba(0, 0, 0, 0.5);
+    /* The scrim under a menu over the card (_3.2 step 8). The project renders in LINEAR colour, so an alpha blends in linear light: 0.5
+       left the card's text behind at 181 of 247 (measured), still competing with the menu; 0.7 recedes it to a frame (about 144) */
+    --ts-scrim: rgba(0, 0, 0, 0.7);
     --ts-hero-fade: rgba(26, 21, 16, 0.9);
 
     /* Text */
@@ -101,6 +103,21 @@
        offset + chip width + a gap) */
     --ts-language-chip-right: 64px;
     --ts-header-end-with-language: 120px;
+    /* The menu button (_3.2 step 8) sits left of the X, or left of the language chip when there is one (one more button width + gap);
+       the header keeps its end clear of it the same way */
+    --ts-menu-button-right: 64px;
+    --ts-menu-button-right-with-language: 120px;
+    --ts-header-end-with-menu: 120px;
+    --ts-header-end-with-language-and-menu: 176px;
+    /* The menus over the card (_3.2 step 8). The drawer takes most of a phone's width and never more than a comfortable reading column
+       (so on a tablet it stays a drawer); a kind's line starts under its section's words (row padding + icon + its gap). The grid's tiles
+       are two touch targets tall: big thumbs, a kiosk's size */
+    --ts-drawer-width: 85%;
+    --ts-drawer-max-width: 360px;
+    --ts-drawer-kind-indent: 46px;
+    --ts-grid-tile-height: 96px;
+    /* The grid's panel is as tall as its tiles, never taller than this share of the screen (it keeps the scrim above it to tap) */
+    --ts-grid-max-height: 88%;
 
     /* Line icons drawn in USS (the close X): their length and stroke */
     --ts-icon-size: 18px;

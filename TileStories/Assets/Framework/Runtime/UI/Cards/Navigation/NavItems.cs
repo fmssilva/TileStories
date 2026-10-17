@@ -102,6 +102,42 @@ namespace TileStories
         }
     }
 
+    // The top of a menu over the card (drawer_tree, grid_overlay; _3.2 step 8): its title and a visible close X -- a menu on a scrim keeps a
+    // way out the visitor can see, not only Back and the scrim (NN/g bottom sheets, Laubheimer 2023). The X is the card's own (two crossed
+    // bars, PoiCard.uss), named by CardStrings' Close
+    public sealed class NavMenuHeader
+    {
+        public readonly VisualElement Root;
+        public readonly Label Title;
+        public readonly Button Close;
+
+        public NavMenuHeader(string namePrefix, Action close)
+        {
+            Root = new VisualElement { name = namePrefix + "-header" };
+            Root.AddToClassList("nav-menu__header");
+            Title = new Label { name = namePrefix + "-title", pickingMode = PickingMode.Ignore };
+            Title.AddToClassList("nav-menu__title");
+            Close = new Button(close) { name = namePrefix + "-close" };
+            Close.AddToClassList("nav-menu__close");
+            foreach (string bar in new[] { "poi-card__close-bar--a", "poi-card__close-bar--b" })
+            {
+                var stroke = new VisualElement { pickingMode = PickingMode.Ignore };
+                stroke.AddToClassList("poi-card__close-bar");
+                stroke.AddToClassList(bar);
+                Close.Add(stroke);
+            }
+            Root.Add(Title);
+            Root.Add(Close);
+        }
+
+        // The menu's title and the X's name, in the card's language
+        public void Words(CardStrings strings)
+        {
+            Title.text = strings?.Get(CardStrings.Keys.NavMenu) ?? "";
+            Close.tooltip = strings?.Get(CardStrings.Keys.Close) ?? "";
+        }
+    }
+
     // The block count an item shows with Show Counts on (a number: no visitor words)
     public static class NavCount
     {
@@ -138,9 +174,11 @@ namespace TileStories
 
         public void Clear() => _parts.Clear();
 
-        // An icon made by CardIcons.Create, in the token's colour (null token = the stylesheet's own)
+        // An icon made by CardIcons.Create, in the token's colour (null token = the stylesheet's own). Painting an icon again replaces its
+        // colour (a bar's More slot takes the colour of the section it stands for, and back)
         public void Icon(VisualElement icon, string token)
         {
+            _parts.RemoveAll(part => part.Target == icon);
             _parts.Add((icon, token, Paint.Icon));
             Apply();
         }

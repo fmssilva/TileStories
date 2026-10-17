@@ -71,8 +71,8 @@ namespace TileStories
         public string jump_raises_to = CardOptions.JumpRaisesFull;
         // Jump Motion: "smooth" (the default: the stack glides over --ts-duration) | "instant" (CardOptions.JumpMotions)
         public string jump_motion = CardOptions.JumpMotionSmooth;
-        // Back Button: "step_down" (the default: each system Back press undoes the innermost thing -- the full view, then one stop down,
-        // then closes the card, NavBackRule) | "none" (Back is left to the app) (CardOptions.BackButtons)
+        // Back Button: "step_down" (the default: each system Back press undoes the innermost thing -- the full view, then an open menu or
+        // list over the card, then one stop down, then closes the card, NavBackRule) | "none" (Back is left to the app) (CardOptions.BackButtons)
         public string back_button = CardOptions.BackButtonStepDown;
         // Top Bar: the element in the strip under the header (a NavElementRegistry key of the top slot, "text_tabs" the default) |
         // "none" (CardOptions.NavNone). A key nothing registered draws no strip (the Editor shows it as missing)
@@ -80,6 +80,10 @@ namespace TileStories
         // Bottom Bar: the element under the stack, BELOW the sticky CTA footer, in the thumb zone (a NavElementRegistry key of the bottom
         // slot) | "none" (CardOptions.NavNone, the default). The footer and the bar are ONE bottom area for CardChromeRule
         public string bottom = CardOptions.NavNone;
+        // Menu: the element the header's menu button opens over the card, on a scrim (a NavElementRegistry key of the menu slot: drawer_tree,
+        // grid_overlay) | "none" (CardOptions.NavNone, the default: a menu hides the map behind a button, so it is never the only way in).
+        // When set, a bar's More slot opens it instead of its small list
+        public string menu = CardOptions.NavNone;
         // Show Navigation At: "half_and_full" (the default) | "full_only" (CardOptions.ShowNavigationAts) -- the stops the Top Bar shows at,
         // never at peek. CardChromeRule may hide it at a stop with too little room left for the content; this option only hides more
         public string show_at = CardOptions.ShowNavHalfAndFull;

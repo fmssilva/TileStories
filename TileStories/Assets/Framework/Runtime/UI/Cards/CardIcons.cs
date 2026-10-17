@@ -30,11 +30,13 @@ namespace TileStories
         public const string Sources = "sources";
         // A bar's More slot (_3.2 step 7a): three dots in a row
         public const string More = "more";
+        // The header's menu button (_3.2 step 8): three bars, one above the other
+        public const string Menu = "menu";
 
         // Every key the set draws
         public static readonly IReadOnlyList<string> All = new[]
         {
-            ShowOnWall, Time, Access, Location, Info, Ticket, Light, OpenBlock, Picture, Listen, Book, Play, People, Sources, More,
+            ShowOnWall, Time, Access, Location, Info, Ticket, Light, OpenBlock, Picture, Listen, Book, Play, People, Sources, More, Menu,
         };
 
         // A new icon element (no key yet: SetKey picks the drawing)

@@ -27,6 +27,8 @@ namespace TileStories
             Gallery.EnsureBuilt();
             Gallery.Language = entry.Case.Language;
             Gallery.ShowPoi(CardNavGalleryDefinitions.Poi(entry), CardNavGalleryDefinitions.Wall(entry), null, SheetStopRule.Stop.Full);
+            // - a menu is judged open: it is what the header's menu button shows over the card (a card with no choice offers no button)
+            if (CardNavGalleryDefinitions.IsMenu(entry)) Gallery.Sheet.Overlay.OpenMenu();
         }
 
         private void Update()

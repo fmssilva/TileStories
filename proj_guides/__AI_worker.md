@@ -12,71 +12,77 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: POI Card Navigation (3.2) -- step 7b, the dock, the bar sheet and Up next`
+
+## `And now: POI Card Navigation (3.2) -- step 8, the menu overlay owner, the drawer and the grid`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
 not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Add a bottom bar with a More list to the card's bottom
-area" (full EditMode 1769/1769, full PlayMode 868/868 in the background) -- run the full EditMode suite only and say
-which commit you trusted.
+them if TMP dirtied them. Baseline: the tree is clean on commit "Add dock, bar sheet and Up next to the card's bottom
+area" (full EditMode 1795/1795; it rides on 7a's full PlayMode 868/868) -- run the full EditMode suite and say which
+commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 8] More-list line is NOT
-yours: read it so you do not build a second dismiss path into these elements) and the status table (1-7a done; 7b is
-yours). Sections 5.2 (the three element rows), 4.2, 4.3 and 9.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (BOTH [step 8] lines are yours and
+both are DECIDED: build what they say) and the status table (1-7b done; 8 is yours). Sections 5.3 (the two elements and
+the overlay owner's rules), 4.2 (where the menu layer sits), 4.5 (`NavBackRule`'s order -- you add a branch to it) and 9.
 REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines";
-.clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3, 4.4, 4.5; .clinerules/30-ui-content.md
-("progressive disclosure": `bar_sheet`'s second tap is the test case for it).
-Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Sonnet-class -- three elements that follow the pattern 6 and 7a established, in a slot that exists, with
-shared parts (`NavTab`, `NavTint`, `NavItems`, `NavStrip`, `SwipeGrab`) already built. No new owner, no container, no
-new arithmetic. If you find yourself needing a NEW shared part or a change to `CardChromeRule`, STOP and report: that
-means the block was mis-sized, not that you should grow it.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: three views bound inside the bottom slot
-that 7a built -- no container, no stops, no harness, no chrome arithmetic (4.2). It closes on every PlayMode fixture
-whose name holds Card or Poi, plus anything a grep for the types you touch adds (~608 tests, ~30 min at 7a's timing --
-report the real number). Green BEFORE you call the block done. It rides on 7a's full run (868/868); the next full run
-falls due at step 11, or sooner if a block touches a container.
+.clinerules/40-testing.md 4.2 (this block OWES a full run -- and read the "a full run confirms, it never discovers"
+line: the targeted set goes green first), 4.2.3, 4.4, 4.5; .clinerules/30-ui-content.md.
+Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md, _3.1_POI_Card_Blocks.md (the takeover owner, whose
+layer yours sits under).
+WORKER MODEL: Opus-class -- a new layer on the card with its own lifecycle, and a change to the Back order that every
+later overlay inherits.
+TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: a new LAYER on the card and
+a new branch in the system-Back order (4.2 shared ground). Close the Card / Poi targeted set (~640 tests) GREEN FIRST,
+then start the full run, in the background, and report `editor_is_focused` at the first poll and at the end. Steps 9-11
+ride on it.
 
-PART 1 -- none. The open findings belong to step 8 (the More list and Back) and to the header's owner.
+PART 1 -- the two decided findings, which your own work makes cheap:
+1. The More list (7a) and the kinds list (7b) are the only things on the card Back cannot dismiss, and a scroll or a
+   jump leaves them open. Build the overlay owner FIRST, then make both lists its clients: they join `NavBackRule`'s
+   order where the menu overlay sits (after the full view, before the sheet goes down) and they close on a jump and on
+   a scroll. One owner, one order, no second dismiss path -- if a list needs its own rule, say why.
+2. A bar reading a section that lives in More marks "More". While the current section is in the overflow, the More slot
+   shows THAT section's icon and word and still opens the list. Test: a card whose current section is the 7th of 8
+   marks the 7th's word in the slot, and tapping the slot still opens the list.
 
-PART 2 -- step 7b, the three remaining bottom elements (`_3.2` 5.2):
+PART 2 -- step 8:
 
-7b.1 `dock` (B2): an icon pill where the ACTIVE item widens to icon + label and the others stay icons. It hides on
-  scroll down like the rest of the bottom area -- that is `CardChromeRule`'s job and it already does it, so the view
-  must not hide itself. ACCEPTANCE: the widening follows the spy, not the tap, so a real drag through three sections
-  moves it; the pill never grows past 390 px with the Portuguese labels.
-7b.2 `bar_sheet` (B3): the first tap on a family jumps to it; a SECOND tap on the family that is already current opens
-  that family's KINDS with their counts. No long-press -- the guide rejects it (undiscoverable, not single-pointer
-  friendly) and so do we. ACCEPTANCE: tap a non-current family -> jump only, no list; tap the current one -> the kinds
-  open; tap a kind -> it jumps to that block and the list closes. The kind words come from the per-kind CardStrings
-  that step 6 added -- reuse them, do not add a second source.
-7b.3 `next_up` (B4): "Up next: <heading> - 5 of 13" with a Next button, reading the controller's current block
-  (`CurrentBlock`, step 6) against the model's targets in stack order. ACCEPTANCE: the words name the NEXT target after
-  the one being read, the count is that target's position among all targets, Next jumps to it, and at the last target
-  it says the card is finished rather than offering a Next that goes nowhere -- decide the wording, put it in
-  CardStrings in EN and PT, and say what you chose and why.
-  TESTS: Tier 0 for `next_up`'s "which is next and what number is it" (including the last target and a card whose
-  current block is not a target). Phase A: the three elements x the four gallery cases through
-  `CardNavGalleryDefinitions`. Phase B in LivingRoomScene with real input, per element: the dock's active item follows
-  a real drag; `bar_sheet`'s two taps behave differently and the second tap's list is reachable with taps only; Next
-  lands the next block (relative, +-1 px) and the counter moves.
-  VISUALS: each element on the real Lamp at Full in EN and PT, plus the Phase A renders. Judge item by item: 48 px
-  targets, the thumb zone, never colour alone, nothing clipped at 390 px, and for `bar_sheet` that a visitor can tell
-  the two tap outcomes apart (if they cannot, say so -- it is the element's whole idea).
+8.1 The overlay owner (the `menu` slot of `_3.2` 4.2: the card layer over the sheet, BELOW `TakeoverView`). ONE overlay
+  at a time, a scrim, closes on Back, on a scrim tap, and after a jump; never stacked over another sheet (NN/g bottom
+  sheets, Laubheimer 2023 -- the guide's references). It owns the More and kinds lists of PART 1 too. The header gains
+  a menu button that opens the chosen `menu` element; it is drawn only when one is set.
+  ACCEPTANCE: with an overlay open, Back closes the overlay and NOT the sheet; a second Back then lowers the sheet.
+  The stops do not move (measure them, as every block since 5a has: 195.00 / 337.60 / 796.00).
+8.2 `drawer_tree` (C3): the whole ontology as an outline with counts -- families, their kinds under them, from the
+  header's menu button. The guide calls it the least discoverable and most complete element and says it is NEVER a
+  default: keep `menu`'s default at `none` and say so in its (i).
+8.3 `grid_overlay` (C4): big family tiles with counts and a Purpose / Format switch (the model has answered both axes
+  since step 2 -- read `group_by`, do not re-derive). Kiosk-like, big thumbs.
+8.4 The Menu Editor row (`none`, `drawer_tree`, `grid_overlay`), with (i), undo, live sync; and the seam 7a left open:
+  when a Menu is set, a bar's More slot opens THAT menu instead of its small list. Prove both paths.
+  TESTS: Tier 0 for the overlay owner's state (one at a time; what Back does at each layer, including with a takeover
+  open). Phase A: both elements x the four gallery cases. Phase B in LivingRoomScene with real input: the menu button
+  opens the drawer, a real tap on a leaf jumps and the overlay closes; a real tap on the scrim closes it and the card
+  keeps its scroll; real Escape closes the overlay, then lowers the sheet; with Menu set, More opens the menu.
+  VISUALS: the drawer and the grid open on the real Lamp at 390 px in EN and PT, the scrim's contrast against the card
+  behind it, and the header with its menu button. Judge item by item: 48 px targets, nothing clipped, the overlay
+  readable over the card, never colour alone.
 
-7b.4 DOCS: `_3.2` status row 7b + proof; `_5.1` if any Editor row changed (the Bottom Bar popup lists these from the
-  registry, so it should need no edit -- say that you checked); `10-structure.md`.
+8.5 DOCS: `_3.2` status row 8 + proof and BOTH [step 8] TODO lines removed; `_5.1` for the Menu row and the header
+  button; `10-structure.md`; RUN TIMES after the full run.
 
 Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
 comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
 backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: the menu overlay and the More list's Back behaviour (step 8); floating, edge, in-flow blocks (9-11);
-layouts; presets; Editor warnings (17); any change to `CardChromeRule` or the slots.
-Stop when the full EditMode suite and the Card / Poi fixtures are green with zero failures, the captures are judged and
-7b.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+OUT OF SCOPE: floating elements and the placed-model chip (9); the edge scrubber (10); in-flow nav blocks (11);
+`find_block` (18); layouts; presets; Editor warnings (17).
+Stop when the full EditMode suite is green, the Card / Poi fixtures are green, the FULL PlayMode suite is green with
+zero failures, the captures are judged and 8.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
+
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

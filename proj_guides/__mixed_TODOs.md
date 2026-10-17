@@ -415,6 +415,14 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   so not yet a finding. It is a real-window drag, so a stray real pointer or focus change during the run is the first hypothesis (same family as
   the 5a "Test harness" notes); if it comes back, reproduce it with the cursor moved across Unity during the run.
 
+- OPEN (2026-10-17, seen once at _3.2 step 8): **the Editor crashed while IDLE, out of memory, from a native audio assertion flood.** After a full
+  EditMode run had ended (21:16) and the gallery scene reloaded, the line `Access version should be odd when acquiring lock` (native,
+  `audio::DualThreadManager::ControlUpdate` from `AudioManager::Update`) was logged about 83 million times in ~4 h; the console's buffer ran out
+  of memory at 02:40 (crash log 4.4 GB, deleted with the developer's OK). No managed code in the stack; the flood started next to a licensing
+  token refresh, with no test running. If it comes back: note what audio device changed (headphones, sleep / wake), check whether a PlayMode
+  run with real audio (`PoiCardRealAudioTests`) ran just before, and whether Edit > Project Settings > Audio > Disable Unity Audio while idle
+  stops it. Not a code finding today: Unity 6000.3.19f1 engine side.
+
 ## POI Editor (2026-10-16, from _3.2 step 5a)
 
 - Scene Configuration at a narrow window (450 pt, `TestEvidence/Editor/173_CardNavigation_450_DeviceGuide.png`): "Copy to StreamingAssets" is cut to "py to StreamingAsse" and the window shows a horizontal scrollbar -- the top action rows keep a minimum width the window no longer has. Outside the Navigation section; decide whether the window supports widths under ~500 pt.

@@ -38,20 +38,44 @@ namespace TileStories.Tests
             [BuiltInNavElements.Dock] = DockKeepsItsPromise,
             [BuiltInNavElements.BarSheet] = BarSheetKeepsItsPromise,
             [BuiltInNavElements.NextUp] = NextUpKeepsItsPromise,
+            [BuiltInNavElements.DrawerTree] = DrawerTreeKeepsItsPromise,
+            [BuiltInNavElements.GridOverlay] = GridOverlayKeepsItsPromise,
         };
 
-        // The element an entry's slot holds now, its key and its slot element, and whether the chrome shows it
-        private static bool IsBottom(CardNavGalleryDefinitions.Entry entry) =>
-            NavElementRegistry.Shared.TryGet(entry.ElementKey, out var d) && d.Slot == NavSlotKeys.Bottom;
-
+        // The element an entry's slot holds now, its key and its slot element, and whether the card shows it (the chrome for a bar; the
+        // overlay owner, open with it as its modal menu, for a menu -- the harness opens it)
         private static INavElementView ViewOf(PoiCardSheetView sheet, CardNavGalleryDefinitions.Entry entry) =>
-            IsBottom(entry) ? sheet.Slots.BottomView : sheet.Slots.TopView;
+            CardNavGalleryDefinitions.SlotOf(entry) switch
+            {
+                NavSlotKeys.Bottom => sheet.Slots.BottomView,
+                NavSlotKeys.Menu => sheet.Slots.MenuView,
+                _ => sheet.Slots.TopView,
+            };
 
         private static string KeyOf(PoiCardSheetView sheet, CardNavGalleryDefinitions.Entry entry) =>
-            IsBottom(entry) ? sheet.Slots.BottomKey : sheet.Slots.TopKey;
+            CardNavGalleryDefinitions.SlotOf(entry) switch
+            {
+                NavSlotKeys.Bottom => sheet.Slots.BottomKey,
+                NavSlotKeys.Menu => sheet.Slots.MenuKey,
+                _ => sheet.Slots.TopKey,
+            };
 
         private static bool ChromeShows(PoiCardSheetView sheet, CardNavGalleryDefinitions.Entry entry) =>
-            IsBottom(entry) ? sheet.Chrome.BottomNavShown : sheet.Chrome.TopShown;
+            CardNavGalleryDefinitions.SlotOf(entry) switch
+            {
+                NavSlotKeys.Bottom => sheet.Chrome.BottomNavShown,
+                NavSlotKeys.Menu => sheet.Overlay.IsModal && sheet.Overlay.OpenKey == entry.ElementKey,
+                _ => sheet.Chrome.TopShown,
+            };
+
+        // Every slot but the entry's holds nothing: one element judged alone
+        private static IEnumerable<INavElementView> OtherSlots(PoiCardSheetView sheet, CardNavGalleryDefinitions.Entry entry)
+        {
+            string slot = CardNavGalleryDefinitions.SlotOf(entry);
+            if (slot != NavSlotKeys.Top) yield return sheet.Slots.TopView;
+            if (slot != NavSlotKeys.Bottom) yield return sheet.Slots.BottomView;
+            if (slot != NavSlotKeys.Menu) yield return sheet.Slots.MenuView;
+        }
 
         [UnitySetUp]
         public IEnumerator SetUp()
@@ -124,9 +148,11 @@ namespace TileStories.Tests
                 yield break;
             }
             Assert.AreEqual(entry.ElementKey, KeyOf(sheet, entry), "the slot shows the wall's pick");
-            Assert.IsNull(IsBottom(entry) ? sheet.Slots.TopView : sheet.Slots.BottomView, "and the other slot nothing: one element judged alone");
+            foreach (var other in OtherSlots(sheet, entry)) Assert.IsNull(other, "and every other slot nothing: one element judged alone");
             var root = ViewOf(sheet, entry).Root;
-            Assert.IsTrue(CardTestInput.IsShown(root, sheet.Root), "shown at Full");
+            // - the card LAYER holds the sheet and the menu layer over it: what is shown is judged up to it
+            var layer = sheet.Layer;
+            Assert.IsTrue(CardTestInput.IsShown(root, layer), "shown at Full");
             Assert.IsTrue(ChromeShows(sheet, entry), "and the chrome shows its slot");
 
             // - inside the card at the phone width
@@ -139,7 +165,7 @@ namespace TileStories.Tests
             // - every target a visitor can tap at least the touch token (a closed list's rows take no room: the bottom bar's More list is
             //   judged open by its own test), every word whole and readable
             float touch = CardTestInput.TokenPx("--ts-touch-target");
-            var buttons = root.Query<Button>().ToList().Where(b => CardTestInput.IsShown(b, sheet.Root)).ToList();
+            var buttons = root.Query<Button>().ToList().Where(b => CardTestInput.IsShown(b, layer)).ToList();
             Assert.IsNotEmpty(buttons, "the element offers something to tap");
             foreach (var button in buttons)
             {
@@ -148,7 +174,7 @@ namespace TileStories.Tests
             }
             // - only words a visitor sees (Labels = icon hides a tab's words; a progress piece with an icon hides its words): a label that
             //   wraps (a segment) must fit its LONGEST word, one that does not, its whole text
-            foreach (var label in root.Query<Label>().ToList().Where(l => l.text.Length > 0 && CardTestInput.IsShown(l, sheet.Root)))
+            foreach (var label in root.Query<Label>().ToList().Where(l => l.text.Length > 0 && CardTestInput.IsShown(l, layer)))
             {
                 bool wraps = label.resolvedStyle.whiteSpace == WhiteSpace.Normal;
                 string widest = wraps ? label.text.Split(' ').OrderByDescending(w => label.MeasureTextSize(w, 0, VisualElement.MeasureMode.Undefined, 0,
@@ -707,11 +733,12 @@ namespace TileStories.Tests
             AssertLanded(sheet, kinds[pick].Targets[0], kinds[pick].Key + "'s first block");
             Assert.AreEqual(1, nav.Current, "still in the family");
 
-            // - the reader moves into another family while the list is open: it closes (it would name a family nobody is reading)
+            // - another element jumps while the list is open: the card's overlay owner closes it (step 8: every jump closes what is open)
             view.Tap(1);
             Assert.IsTrue(view.KindsOpen, "precondition: open again");
             nav.JumpTo(3, "test");
-            Assert.IsFalse(view.KindsOpen, "the card moved to another family: the list closes");
+            Assert.IsFalse(view.KindsOpen, "a jump from anywhere closes the list");
+            Assert.IsFalse(sheet.Overlay.IsOpen, "through the owner");
             yield return Landed(nav);
 
             // - one kind (Listen): nothing to choose, a second tap only jumps again
@@ -841,6 +868,75 @@ namespace TileStories.Tests
             }
             Debug.Log("[Card] Dock at 390 px in Portuguese: widest pill " + widest.ToString("F1") + " px (marked '" + widestWord + "')");
             yield return CardGalleryChecks.Render("Nav_dock_pt_long_widest");
+        }
+
+        // A menu's scrim (step 8): over the WHOLE card layer, painted in exactly --ts-scrim (read from the stylesheet, never retyped)
+        private static void AssertTheScrim(PoiCardSheetView sheet)
+        {
+            var scrim = sheet.Overlay.Scrim;
+            Assert.AreEqual(DisplayStyle.Flex, scrim.resolvedStyle.display, "the scrim is over the card");
+            Assert.AreEqual(sheet.Layer.worldBound.width, scrim.worldBound.width, 0.5f, "as wide as the card layer");
+            Assert.AreEqual(sheet.Layer.worldBound.height, scrim.worldBound.height, 0.5f, "as tall");
+            Assert.IsTrue(CardTokenColours.TryResolve(scrim, "--ts-scrim", out Color token), "--ts-scrim resolves on the menu layer");
+            Assert.AreEqual(token, scrim.resolvedStyle.backgroundColor, "painted in --ts-scrim");
+            Assert.Greater(token.a, 0f, "a scrim that darkens");
+        }
+
+        // drawer_tree (step 8): opened by the header's menu button over a scrim, a drawer from the left inside the card; one line per section
+        // with its words in the card's language and its count, the kinds of every section with a choice under it (each indented past its
+        // section's words), the section being read marked, a title and a visible close
+        private static void DrawerTreeKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var sheet = harness.Gallery.Sheet;
+            var drawer = (DrawerTreeNavView)sheet.Slots.MenuView;
+            var model = sheet.Nav.Model;
+            var strings = Strings(harness, entry);
+            Assert.IsTrue(CardTestInput.IsShown(sheet.MenuButton, sheet.Root), "the header shows the menu button");
+            AssertTheScrim(sheet);
+            Assert.AreEqual(model.Sections.Count, drawer.SectionRows.Count, "one line per section");
+            for (int i = 0; i < model.Sections.Count; i++)
+            {
+                Assert.AreEqual(strings.Get(model.Sections[i].LabelKey), drawer.SectionRows[i].Label.text, "its words, in " + entry.Case.Language);
+                Assert.AreEqual(model.Sections[i].Count.ToString(), drawer.SectionRows[i].Count.text, "its count");
+            }
+            int withKinds = model.Sections.Count(sec => sec.Kinds.Count >= 2);
+            Assert.AreEqual(model.Sections.Where(sec => sec.Kinds.Count >= 2).Sum(sec => sec.Kinds.Count), drawer.KindRows.Count,
+                "every kind of every section with a choice of kinds (" + withKinds + " sections)");
+            foreach (var (row, section, _) in drawer.KindRows)
+                Assert.Greater(row.Label.worldBound.xMin, drawer.SectionRows[section].Label.worldBound.xMin - 0.5f, row.Label.text + ": indented under its section's words");
+            Assert.IsTrue(drawer.SectionRows[0].Button.ClassListContains(NavTab.CurrentClass), "the first section is the one being read");
+            Assert.AreEqual(FontStyle.Bold, drawer.SectionRows[0].Label.resolvedStyle.unityFontStyleAndWeight, "marked by weight too, not colour alone");
+            Assert.AreEqual(strings.Get(CardStrings.Keys.NavMenu), drawer.Header.Title.text, "its title");
+            Assert.IsTrue(CardTestInput.IsShown(drawer.Header.Close, sheet.Layer), "a visible close");
+            Assert.Less(drawer.Root.worldBound.width, sheet.Layer.worldBound.width, "a drawer: the card shows beside it");
+        }
+
+        // grid_overlay (step 8): big tiles over a scrim, inside the card, two to a row, one per section with its words and count, each at
+        // least two touch targets tall; the Purpose / Format switch on the wall's axis; the Format side lists the model's formats
+        private static void GridOverlayKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var sheet = harness.Gallery.Sheet;
+            var grid = (GridOverlayNavView)sheet.Slots.MenuView;
+            var model = sheet.Nav.Model;
+            var strings = Strings(harness, entry);
+            Assert.IsTrue(CardTestInput.IsShown(sheet.MenuButton, sheet.Root), "the header shows the menu button");
+            AssertTheScrim(sheet);
+            Assert.AreEqual(model.Sections.Count, grid.Tiles.Count, "a tile per section");
+            float tile = CardTestInput.TokenPx("--ts-grid-tile-height");
+            foreach (var t in grid.Tiles)
+            {
+                Assert.AreEqual(strings.Get(model.Sections[t.Index].LabelKey), t.Label.text, "its words, in " + entry.Case.Language);
+                Assert.GreaterOrEqual(t.Button.layout.height, tile - 0.5f, t.Label.text + ": a big thumb target");
+            }
+            if (grid.Tiles.Count >= 2)
+                Assert.AreEqual(grid.Tiles[0].Button.worldBound.yMin, grid.Tiles[1].Button.worldBound.yMin, 0.5f, "two tiles to a row");
+            Assert.IsTrue(grid.ByPurpose.ClassListContains(GridOverlayNavView.OptionCurrentClass), "it opens on the wall's axis, Purpose");
+            Assert.AreEqual(strings.Get(CardStrings.Keys.NavMenuByPurpose), grid.ByPurpose.text);
+            Assert.AreEqual(strings.Get(CardStrings.Keys.NavMenuByFormat), grid.ByFormat.text);
+            grid.ShowAxis(CardOptions.GroupByFormat);
+            CollectionAssert.AreEqual(model.By(CardOptions.GroupByFormat).Sections.Select(sec => strings.Get(sec.LabelKey)), grid.Tiles.Select(t => t.Label.text),
+                "the Format side: the model's formats");
+            grid.ShowAxis(CardOptions.GroupByFamily);
         }
     }
 }

@@ -1053,3 +1053,34 @@ MonoBehaviour:
       value: You have reached the end
     - lang: pt
       value: Chegou ao fim
+  - key: nav_menu
+    where: The name of the menu button in the card's header and the title of the menu it opens over the card
+      (the outline of the card's sections, or the big tiles).
+    text:
+    - lang: en
+      value: Contents
+    - lang: pt
+      value: "\xCDndice"
+  - key: nav_menu_by_purpose
+    where: One side of the switch on the menu of big tiles; it shows the card's sections by what the visitor
+      wants from them (About, Media, Stories...).
+    text:
+    - lang: en
+      value: By purpose
+    - lang: pt
+      value: Por objetivo
+  - key: nav_menu_by_format
+    where: The other side of the switch on the menu of big tiles; it shows the card's sections by how they are
+      taken in (Read, Look, Watch, Listen...).
+    text:
+    - lang: en
+      value: By format
+    - lang: pt
+      value: Por formato
+  - key: nav_menu_all
+    where: The way back from one section's kinds of block to all the sections, on the menu of big tiles.
+    text:
+    - lang: en
+      value: All sections
+    - lang: pt
+      value: "Todas as sec\xE7\xF5es"

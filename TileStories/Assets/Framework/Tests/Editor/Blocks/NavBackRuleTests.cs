@@ -13,16 +13,16 @@ namespace TileStories.Editor.Tests
         [Test]
         public void StepDown_WithNoFullView_LowersOneStopPerPress_AndClosesAtPeek()
         {
-            Assert.AreEqual(NavBackRule.Step.LowerToHalf, NavBackRule.Next(StepDown, false, SheetStopRule.Stop.Full));
-            Assert.AreEqual(NavBackRule.Step.LowerToPeek, NavBackRule.Next(StepDown, false, SheetStopRule.Stop.Half));
-            Assert.AreEqual(NavBackRule.Step.CloseCard, NavBackRule.Next(StepDown, false, SheetStopRule.Stop.Peek), "at Peek Back closes, like the X");
+            Assert.AreEqual(NavBackRule.Step.LowerToHalf, NavBackRule.Next(StepDown, false, false, SheetStopRule.Stop.Full));
+            Assert.AreEqual(NavBackRule.Step.LowerToPeek, NavBackRule.Next(StepDown, false, false, SheetStopRule.Stop.Half));
+            Assert.AreEqual(NavBackRule.Step.CloseCard, NavBackRule.Next(StepDown, false, false, SheetStopRule.Stop.Peek), "at Peek Back closes, like the X");
         }
 
         [Test]
         public void AnOpenFullView_ClosesFirst_AtEveryStop()
         {
             foreach (var stop in new[] { SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half, SheetStopRule.Stop.Full })
-                Assert.AreEqual(NavBackRule.Step.CloseFullView, NavBackRule.Next(StepDown, true, stop), stop + ": the innermost thing is the full view");
+                Assert.AreEqual(NavBackRule.Step.CloseFullView, NavBackRule.Next(StepDown, true, false, stop), stop + ": the innermost thing is the full view");
         }
 
         [Test]
@@ -34,7 +34,7 @@ namespace TileStories.Editor.Tests
             var walked = new System.Collections.Generic.List<NavBackRule.Step>();
             for (int press = 0; press < 6 && stop != SheetStopRule.Stop.Dismissed; press++)
             {
-                var step = NavBackRule.Next(StepDown, fullView, stop);
+                var step = NavBackRule.Next(StepDown, fullView, false, stop);
                 walked.Add(step);
                 if (step == NavBackRule.Step.CloseFullView) fullView = false;
                 else if (step == NavBackRule.Step.LowerToHalf) stop = SheetStopRule.Stop.Half;
@@ -42,7 +42,46 @@ namespace TileStories.Editor.Tests
                 else if (step == NavBackRule.Step.CloseCard) stop = SheetStopRule.Stop.Dismissed;
             }
             CollectionAssert.AreEqual(new[] { NavBackRule.Step.CloseFullView, NavBackRule.Step.LowerToHalf, NavBackRule.Step.LowerToPeek, NavBackRule.Step.CloseCard }, walked);
-            Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(StepDown, false, stop), "a fifth press: no card left, Back is the app's");
+            Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(StepDown, false, false, stop), "a fifth press: no card left, Back is the app's");
+        }
+
+        // Step 8: an open menu or list over the card (CardMenuOverlay) closes after the full view and BEFORE the sheet moves, at every stop
+        [Test]
+        public void AnOpenOverlay_ClosesBeforeTheSheetMoves_AtEveryStop_AndAFullViewStillGoesFirst()
+        {
+            foreach (var stop in new[] { SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half, SheetStopRule.Stop.Full })
+            {
+                Assert.AreEqual(NavBackRule.Step.CloseOverlay, NavBackRule.Next(StepDown, false, true, stop), stop + ": the overlay, not the sheet");
+                Assert.AreEqual(NavBackRule.Step.CloseFullView, NavBackRule.Next(StepDown, true, true, stop),
+                    stop + ": a full view open over an overlay is the innermost thing");
+                Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(None, false, true, stop), stop + ": Back Button = none leaves it to the app");
+            }
+            Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(StepDown, false, true, SheetStopRule.Stop.Dismissed), "no card: the app's");
+        }
+
+        // The acceptance walk of step 8: an overlay over a Full card -- the first Back closes the overlay and the card stays at Full; the
+        // second lowers the sheet; then Peek, then closed. With a full view open over the overlay too, one press more, the full view first
+        [Test]
+        public void TheWholeOrder_FromAFullViewOverAnOverlayOverAFullCard_TakesFivePresses()
+        {
+            bool fullView = true, overlay = true;
+            var stop = SheetStopRule.Stop.Full;
+            var walked = new System.Collections.Generic.List<NavBackRule.Step>();
+            for (int press = 0; press < 8 && stop != SheetStopRule.Stop.Dismissed; press++)
+            {
+                var step = NavBackRule.Next(StepDown, fullView, overlay, stop);
+                walked.Add(step);
+                if (step == NavBackRule.Step.CloseFullView) fullView = false;
+                else if (step == NavBackRule.Step.CloseOverlay) overlay = false;
+                else if (step == NavBackRule.Step.LowerToHalf) stop = SheetStopRule.Stop.Half;
+                else if (step == NavBackRule.Step.LowerToPeek) stop = SheetStopRule.Stop.Peek;
+                else if (step == NavBackRule.Step.CloseCard) stop = SheetStopRule.Stop.Dismissed;
+            }
+            CollectionAssert.AreEqual(new[]
+            {
+                NavBackRule.Step.CloseFullView, NavBackRule.Step.CloseOverlay, NavBackRule.Step.LowerToHalf, NavBackRule.Step.LowerToPeek,
+                NavBackRule.Step.CloseCard,
+            }, walked);
         }
 
         [Test]
@@ -50,8 +89,8 @@ namespace TileStories.Editor.Tests
         {
             foreach (var stop in new[] { SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half, SheetStopRule.Stop.Full })
             {
-                Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(None, false, stop), stop.ToString());
-                Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(None, true, stop), stop + " with the full view open");
+                Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(None, false, false, stop), stop.ToString());
+                Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(None, true, false, stop), stop + " with the full view open");
             }
             Assert.IsFalse(NavBackRule.StepsDown(None));
         }
@@ -62,9 +101,9 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.BackButtonStepDown, new CardNavigationSettings().back_button, "the default");
             Assert.IsTrue(NavBackRule.StepsDown(new CardNavigationSettings { back_button = "typo" }), "an unknown value reads as the default");
             Assert.IsTrue(NavBackRule.StepsDown(null), "no settings (a caller with none): the default");
-            Assert.AreEqual(NavBackRule.Step.LowerToHalf, NavBackRule.Next(null, false, SheetStopRule.Stop.Full));
-            Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(StepDown, false, SheetStopRule.Stop.Dismissed), "no card: Back is the app's");
-            Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(StepDown, true, SheetStopRule.Stop.Dismissed));
+            Assert.AreEqual(NavBackRule.Step.LowerToHalf, NavBackRule.Next(null, false, false, SheetStopRule.Stop.Full));
+            Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(StepDown, false, false, SheetStopRule.Stop.Dismissed), "no card: Back is the app's");
+            Assert.AreEqual(NavBackRule.Step.LeaveToApp, NavBackRule.Next(StepDown, true, false, SheetStopRule.Stop.Dismissed));
             CollectionAssert.AreEqual(new[] { CardOptions.BackButtonStepDown, CardOptions.BackButtonNone }, CardOptions.BackButtons);
             Assert.AreEqual(CardOptions.BackButtons.Length, CardOptions.BackButtonLabels.Length, "one label per option");
         }

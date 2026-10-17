@@ -21,6 +21,11 @@ namespace TileStories
         public static string BottomElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> bottomElement) =>
             Element((nav ?? new CardNavigationSettings()).bottom, model, bottomElement);
 
+        // The key of the Menu element this card offers (the header's menu button, and what a bar's More opens), or null for none. `menuElement`:
+        // the definition registered under a key for the MENU slot, null when there is none
+        public static string MenuElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> menuElement) =>
+            Element((nav ?? new CardNavigationSettings()).menu, model, menuElement);
+
         // One slot's answer: the wall's pick for it, when the card shows navigation, the slot has such an element and it has a choice here
         private static string Element(string key, CardNavModel model, Func<string, NavElementDefinition> elementOfSlot)
         {

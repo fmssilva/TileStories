@@ -88,6 +88,36 @@
     padding-right: var(--ts-header-end-with-language);
 }
 
+/* The menu button (_3.2 step 8): the same round button as the X, left of it -- or left of the language chip -- with three bars; it is
+   there only while the card has a Menu */
+.poi-card__menu-button {
+    position: absolute;
+    top: var(--ts-space-2);
+    right: var(--ts-menu-button-right);
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-line);
+    border-width: var(--ts-line-width);
+    border-radius: var(--ts-touch-target);
+}
+
+.poi-card--has-language .poi-card__menu-button {
+    right: var(--ts-menu-button-right-with-language);
+}
+
+.poi-card--has-menu .poi-card__header {
+    padding-right: var(--ts-header-end-with-menu);
+}
+
+.poi-card--has-menu.poi-card--has-language .poi-card__header {
+    padding-right: var(--ts-header-end-with-language-and-menu);
+}
+
 /* The X: two bars crossed at the button's centre (no text glyph, so no visitor string) */
 .poi-card__close-bar {
     position: absolute;

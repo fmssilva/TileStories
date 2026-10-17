@@ -64,6 +64,19 @@ namespace TileStories.Editor
             return text.ToString();
         }
 
+        private static string CardMenuHelp(NavElementRegistry registry)
+        {
+            var text = new System.Text.StringBuilder(
+                "What opens over the card from a menu button in its header (three bars, beside the close button), on a darkened card " +
+                "behind it. It appears only on cards with at least Show Navigation From blocks. One menu or list is open at a time, and it " +
+                "closes when the visitor picks a place, taps the close button or the darkened card, scrolls the card, or presses Back " +
+                "(Back closes the menu first; the next Back lowers the card). With a Bottom Bar whose sections do not all fit, its More " +
+                "slot opens this menu instead of its small list. None (the default): no menu button. A menu hides the card's map behind " +
+                "a button, so it is never a card's only navigation: use it beside a Top Bar or a Bottom Bar.");
+            foreach (var element in registry.OfSlot(NavSlotKeys.Menu)) text.Append(' ').Append(element.Help);
+            return text.ToString();
+        }
+
         private const string CardGroupsHelp =
             "The groups the Segmented Top Bar shows as equal segments that always fit the screen -- three or four work best. " +
             "Each family joins one in the Families table's Group column. A wall with no groups of its own gets four framework " +
@@ -129,7 +142,8 @@ namespace TileStories.Editor
 
         private const string CardBackButtonHelp =
             "What the phone's own Back button does while a card is open (Android; an iPhone has none, so nothing changes there). " +
-            "Step The Card Down (the default): each press undoes the innermost thing -- an open full-screen view closes; else the " +
+            "Step The Card Down (the default): each press undoes the innermost thing -- an open full-screen view closes; else an " +
+            "open menu or list over the card closes (the card stays where it is); else the " +
             "card goes one height down, full to half to its title; at its title the card closes, as its X does. A visitor who " +
             "presses Back to leave never loses their place in one go. Leave It To The App: the card ignores Back and the app " +
             "decides what it does.";
@@ -144,8 +158,8 @@ namespace TileStories.Editor
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
             "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
             "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
-            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Bar Slots and Hide While Scrolling: the open card's strip, " +
-            "bottom bar and bottom buttons " +
+            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Menu, Bar Slots and Hide While Scrolling: the open card's strip, " +
+            "bottom bar, menu button and bottom buttons " +
             "appear, change or go at once.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
@@ -201,8 +215,10 @@ namespace TileStories.Editor
             "- Set Top Bar = None and Bottom Bar = Bottom Bar, open a long card with several families and raise it to full: a bar " +
             "sits at the very bottom, under the card's pinned buttons, one slot per family with its icon and word.\n" +
             "- With more families than Bar Slots the last slot reads More. Tap it: a list of the families that did not fit opens " +
-            "just above the bar; tap one and the card moves there, the list closes and More is underlined. Tap More twice: the list " +
-            "opens and closes.\n" +
+            "just above the bar; tap one and the card moves there, the list closes and the last slot now shows THAT family's icon " +
+            "and word, underlined, with a small up arrow. Tap it: the list opens again. Tap More twice: the list opens and closes.\n" +
+            "- Open the list and scroll the card, or press Escape: the list closes (Escape closes only the list; the card stays at its " +
+            "height). Open it and tap a word of the Top Bar: the card moves and the list closes.\n" +
             "- Set Bar Slots to 3, 4 and 5: the bar holds two, three or four families and More, and More's list holds the rest. " +
             "Open a card with fewer families than Bar Slots: one slot per family, no More.\n" +
             "- Tap each slot: the card moves to that family's first block and the slot is underlined; scroll the card: the underline " +
@@ -219,12 +235,26 @@ namespace TileStories.Editor
             "- Bottom Bar = Bar With Kinds: it looks like the Bottom Bar. Tap a family you are not in: the card moves there and no " +
             "list opens. Tap the family you are in (underlined, with a small up arrow): a list of its kinds of block opens above the " +
             "bar, each with how many blocks it has. Tap a kind: the card moves to its first block and the list closes. Tap the family " +
-            "twice more: the list opens, then closes. Scroll into another family while the list is open: it closes. A family with one " +
-            "kind has no arrow, and tapping it again just moves the card there again.\n" +
+            "twice more: the list opens, then closes. Scroll the card, or press Escape, while the list is open: it closes. A family " +
+            "with one kind has no arrow, and tapping it again just moves the card there again.\n" +
             "- Bottom Bar = Up Next: a bar with a small Up next line, the next block's heading, its place on the card (for example 5 of " +
             "13) and a Next button. Tap Next: the card moves to that block and the bar names the one after it, one number higher. " +
             "Scroll with your finger instead: the bar follows what you read. Go to the last block: the bar says it is the end and " +
             "has no Next button. On a card with one family the bar still shows.\n\n" +
+            "MENU\n" +
+            "- Set Menu = Drawer and open a card with at least Show Navigation From blocks: a round button with three bars sits in the " +
+            "title row, left of the close button (and of the language button when there is one). Set Menu = None: it goes.\n" +
+            "- Click it: the card darkens and a drawer opens on the left with a title and an X, and under them every " +
+            "family with its number of blocks, and under each family with several kinds of block, those kinds with theirs. The family " +
+            "and the kind you are reading are bold with a bar at their start.\n" +
+            "- Click a kind: the drawer closes and that kind's first block comes to rest at the top of what scrolls. Open it again and " +
+            "click the darkened card beside the drawer: it closes and the card has not moved. Open it and press Escape: it closes and " +
+            "the card stays at its height; Escape again lowers the card.\n" +
+            "- Set Menu = Big Tiles: the button opens a panel of big tiles, two to a row, one per family with its icon and count, under a " +
+            "switch By Purpose / By Format that starts on Group By. Click By Format: the tiles become Read, Look, Watch... Click a tile " +
+            "with several kinds: its kinds replace the tiles, with All Sections to go back; click a kind: the panel closes and the card " +
+            "moves there. A tile with one kind moves the card at once.\n" +
+            "- With Bottom Bar = Bottom Bar and more families than Bar Slots, tap More: the menu opens instead of the small list.\n\n" +
             "SHOW NAVIGATION AT AND HIDE WHILE SCROLLING\n" +
             "- Open a long card with a tall title and buttons pinned to its bottom (an Actions block with the sticky_cta look) at half " +
             "height. If the title, the strip and the buttons would leave less than a heading and two lines of content, the strip " +
@@ -241,6 +271,8 @@ namespace TileStories.Editor
             "- In the Game view, Escape stands for the phone's Back button.\n" +
             "- Open a card, drag it to full, open a picture in its full-screen view. Press Escape four times: the full view closes, " +
             "the card goes to half, then to its title, then it closes and the marker is no longer selected.\n" +
+            "- With a Menu set, open the card at full and open the menu. Press Escape: the menu closes and the card stays at full; the " +
+            "next Escape lowers it to half. The same with a Bottom Bar's More list or a Bar With Kinds' list open.\n" +
             "- Set Back Button = Leave It To The App and press Escape with a card open: nothing happens to the card.\n" +
             "- Test Runner: EditMode and PlayMode, zero failures.";
 
@@ -254,7 +286,11 @@ namespace TileStories.Editor
             "fast, and that the blocks that close the card still read as the end of it rather than as more content.\n" +
             "- Back Button (Android): open a card, raise it to full, and press the phone's own Back button (or make the Back gesture) " +
             "once per step: full to half, half to its title, then the card closes. With Leave It To The App, Back does what the app " +
-            "does without a card. An iPhone has no Back button: nothing to check there.\n" +
+            "does without a card. With a Menu set, open it and press Back: the menu closes first and the card stays. An iPhone has no " +
+            "Back button: nothing to check there.\n" +
+            "- Menu: reach the menu button in the title row with the hand that holds the phone, open the menu and pick a line or a tile " +
+            "with a thumb; tap the darkened card beside it to close it. Check the card behind stays readable as a frame and the words of " +
+            "every line and tile read whole.\n" +
             "- Top Bar: on a card with its strip, swipe the strip sideways with a thumb -- the words slide, the card stays; start a swipe " +
             "on a word and move up -- the card rises and the word is not tapped; tap each word once -- every tap lands where it should.\n" +
             "- Bottom Bar: hold the phone in one hand and reach every slot and More with the thumb; open More and pick a family from " +

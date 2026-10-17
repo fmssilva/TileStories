@@ -487,3 +487,263 @@
     -unity-font-style: bold;
     color: var(--ts-ink);
 }
+
+/* ---- the menu overlay (CardMenuOverlay, _3.2 section 5.3): a layer over the sheet, under the full view. A MENU draws its panel on a scrim
+   over the whole card (a tap on the scrim closes it); a bar's More / kinds list is anchored in place and needs no layer at all ---- */
+
+.card-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.card-menu__scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--ts-scrim);
+}
+
+.card-menu__panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+/* ---- a menu's top (NavMenuHeader): its title and a visible close X, the card's own round button ---- */
+
+.nav-menu__header {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    padding: var(--ts-space-2) var(--ts-space-2) var(--ts-space-2) var(--ts-space-4);
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+}
+
+.nav-menu__title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+}
+
+.nav-menu__close {
+    flex-shrink: 0;
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-line);
+    border-width: var(--ts-line-width);
+    border-radius: var(--ts-touch-target);
+}
+
+/* ---- drawer_tree (DrawerTreeNavView): a drawer from the left over the scrim, the card's outline in it ---- */
+
+.nav-drawer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--ts-drawer-width);
+    max-width: var(--ts-drawer-max-width);
+    background-color: var(--ts-surface);
+    border-right-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-top-right-radius: var(--ts-radius-l);
+    border-bottom-right-radius: var(--ts-radius-l);
+    overflow: hidden;
+}
+
+.nav-drawer__list {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+/* a whole line is the tap target: as wide as the drawer, one touch target tall */
+.nav-drawer__row {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 var(--ts-space-4);
+}
+
+.nav-drawer__row .nav-tabs__icon {
+    margin: 0 var(--ts-space-3) 0 0;
+}
+
+.nav-drawer__section .nav-tabs__label {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+}
+
+/* a kind sits under its section's words, quieter */
+.nav-drawer__kind {
+    padding-left: var(--ts-drawer-kind-indent);
+}
+
+.nav-drawer__kind .nav-tabs__label {
+    font-size: var(--ts-size-caption);
+}
+
+/* a line's mark is its bolder word and a bar at its start (an underline under a whole-width line would read as a divider) */
+.nav-drawer__row .nav-tabs__underline {
+    left: 0;
+    right: auto;
+    top: var(--ts-space-2);
+    bottom: var(--ts-space-2);
+    width: var(--ts-tab-underline);
+    height: auto;
+}
+
+/* ---- grid_overlay (GridOverlayNavView): a panel inset over the scrim (never a second sheet), big tiles two to a row. As tall as its
+   tiles (capped by the screen, then its tiles scroll), resting low where the thumb that opened it already is ---- */
+
+.nav-grid {
+    position: absolute;
+    left: var(--ts-space-4);
+    right: var(--ts-space-4);
+    bottom: var(--ts-space-6);
+    max-height: var(--ts-grid-max-height);
+    background-color: var(--ts-surface);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-l);
+    overflow: hidden;
+}
+
+/* the Purpose / Format switch: two equal options, the one shown filled AND bold */
+.nav-grid__switch {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin: var(--ts-space-3) var(--ts-space-4) 0 var(--ts-space-4);
+    padding: var(--ts-space-1);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface-2);
+}
+
+.nav-grid__option {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-2);
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    border-width: 0;
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-clear);
+}
+
+.nav-grid__option--current {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    background-color: var(--ts-surface);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-accent);
+}
+
+/* in place, one section's kinds: the way back to every section and the section's words */
+.nav-grid__back {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin: var(--ts-space-2) var(--ts-space-4) 0 var(--ts-space-2);
+}
+
+.nav-grid__all {
+    flex-direction: row;
+    align-items: center;
+    min-height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-2);
+    font-size: var(--ts-size-body);
+    color: var(--ts-accent-text);
+    border-width: 0;
+    background-color: var(--ts-clear);
+}
+
+/* the down arrow turned to point back */
+.nav-grid__all-icon {
+    rotate: 90deg;
+    margin-right: var(--ts-space-1);
+}
+
+.nav-grid__open-title {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    -unity-text-align: middle-right;
+}
+
+.nav-grid__scroll {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.nav-grid__tiles {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: var(--ts-space-3) var(--ts-space-3) var(--ts-space-4) var(--ts-space-3);
+}
+
+/* a tile: half the row less its margins, two touch targets tall; icon over words over count, centred */
+.nav-grid__tile {
+    width: 46%;
+    flex-grow: 1;
+    min-height: var(--ts-grid-tile-height);
+    margin: var(--ts-space-1);
+    padding: var(--ts-space-2);
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ts-surface-2);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+}
+
+.nav-grid__icon {
+    scale: 1.5 1.5;
+    margin-bottom: var(--ts-space-3);
+}
+
+.nav-grid__label {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.nav-grid__count {
+    margin: var(--ts-space-1) 0 0 0;
+}
+
+/* the tile being read: an accent outline AND bolder words, never colour alone */
+.nav-grid__tile--current {
+    border-width: var(--ts-choice-border);
+    border-color: var(--ts-accent);
+}
+
+.nav-grid__tile--current .nav-grid__label {
+    -unity-font-style: bold;
+}

@@ -57,6 +57,9 @@ namespace TileStories
         // The keys of the blocks this card can scroll to (BlockRefRule.JumpTargets over the stack being bound, _3.2 step 4): a block
         // that offers a jump (an Open Block button) offers it only to one of these. Null where the caller has none: no jump is offered
         public System.Collections.Generic.ICollection<string> JumpTargets;
+        // The card's ONE overlay owner (_3.2 step 8): what a navigation element opens its menu or list through, so one thing at a time is
+        // open over the card and it closes on Back, a jump, a scroll. Null where the caller has none: an element then shows its list in place
+        public CardMenuOverlay Overlay;
         // Show still pictures instead of motion (card_settings.container.reduce_motion today; the visitor's own setting joins it with _3.3):
         // a header loop shows its poster only
         public bool ReduceMotion;

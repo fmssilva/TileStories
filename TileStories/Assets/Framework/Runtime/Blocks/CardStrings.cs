@@ -225,6 +225,12 @@ namespace TileStories
             public const string NavNextUpPosition = "nav_next_up_position";
             public const string NavNextButton = "nav_next_button";
             public const string NavNextUpDone = "nav_next_up_done";
+            // The card's Menu (_3.2 step 8): the header button's name and the menu's title; the grid's Purpose / Format switch and its way
+            // back from one section's kinds to every section
+            public const string NavMenu = "nav_menu";
+            public const string NavMenuByPurpose = "nav_menu_by_purpose";
+            public const string NavMenuByFormat = "nav_menu_by_format";
+            public const string NavMenuAll = "nav_menu_all";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -251,6 +257,7 @@ namespace TileStories
                 KindSources,
                 NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
                 NavMore, NavNextUp, NavNextUpPosition, NavNextButton, NavNextUpDone,
+                NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,
             };
         }
 

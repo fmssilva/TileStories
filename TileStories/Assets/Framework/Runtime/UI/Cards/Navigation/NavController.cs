@@ -51,6 +51,9 @@ namespace TileStories
         // Whether a jump is moving the stack now (the spy is frozen meanwhile)
         public bool IsJumping => _jumpBlock != null;
 
+        // Raised as every jump starts, whoever asked for it: what closes an open menu or list over the card (CardMenuOverlay)
+        public event Action Jumped;
+
         // The words the stack draws above a block ("" when it draws none): what an element that names a block says (Up next)
         public string HeadingOf(string blockKey) => _stack.HeadingOfBlock(blockKey);
 
@@ -154,6 +157,7 @@ namespace TileStories
             SetCurrent(_jumpSection);
             SetCurrentBlock(_jumpTarget);
             Report(blockKey, sectionKey, elementKey);
+            Jumped?.Invoke();
             // - the first step runs now (an instant jump is done by it); a glide goes on every panel update until it lands
             Step();
             if (IsJumping) _glide = Scroll.schedule.Execute(Step).Every(0);

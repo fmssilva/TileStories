@@ -178,6 +178,40 @@ namespace TileStories.Editor.Tests
                 "a value that is not exactly 'format' falls back to the family default");
         }
 
+        // Step 8 (grid_overlay's Purpose / Format switch): CardNavModel.By answers the OTHER axis from the same model -- exactly what a model
+        // built on that axis says (the same sections in the same order, the same kinds and targets), never a regrouping of its own; its own
+        // axis is itself, the pivot is built once and leads back, and anything that is not exactly "format" reads as the families
+        [Test]
+        public void By_TheOtherAxis_IsExactlyTheModelBuiltOnIt_OnceAndBack()
+        {
+            var config = ShippedByFamily();
+            var byFamily = Model(config, Lamp);
+            config.card_settings.navigation.group_by = CardOptions.GroupByFormat;
+            var built = Model(config, Lamp);
+            Assert.AreEqual(6, built.Sections.Count, "precondition (not vacuous): six formats on The Lamp");
+
+            var pivot = byFamily.By(CardOptions.GroupByFormat);
+            Assert.AreEqual(CardOptions.GroupByFormat, pivot.GroupBy);
+            CollectionAssert.AreEqual(Keys(built.Sections), Keys(pivot.Sections), "the same sections, in the same order");
+            for (int i = 0; i < built.Sections.Count; i++)
+            {
+                CollectionAssert.AreEqual(built.Sections[i].Targets, pivot.Sections[i].Targets, built.Sections[i].Key + ": the same targets");
+                CollectionAssert.AreEqual(built.Sections[i].Kinds.Select(k => k.Key), pivot.Sections[i].Kinds.Select(k => k.Key), built.Sections[i].Key + ": the same kinds");
+                Assert.AreEqual(built.Sections[i].LabelKey, pivot.Sections[i].LabelKey);
+            }
+            CollectionAssert.AreEqual(byFamily.Targets, pivot.Targets, "the card's targets do not change with the axis");
+            Assert.AreEqual(byFamily.ShowsNavigation, pivot.ShowsNavigation);
+            foreach (string target in pivot.Targets)
+                Assert.AreEqual(pivot.Sections[pivot.SectionOf(target)].Key, built.Sections[built.SectionOf(target)].Key, target + ": in the same format");
+
+            Assert.AreSame(byFamily, byFamily.By(CardOptions.GroupByFamily), "its own axis is itself");
+            Assert.AreSame(pivot, byFamily.By(CardOptions.GroupByFormat), "the pivot is built once");
+            Assert.AreSame(byFamily, pivot.By(CardOptions.GroupByFamily), "and leads back to the model it came from");
+            Assert.AreSame(byFamily, byFamily.By("Format"), "anything but exactly 'format' reads as the families");
+            CollectionAssert.AreEqual(Keys(byFamily.Sections), Keys(built.By(CardOptions.GroupByFamily).Sections),
+                "and a wall Grouped By Format pivots to the same families");
+        }
+
         // The reveal comes from the card's real local state, scoped to this point: rebuilt after it, the model gains the block
         [Test]
         public void AShowAfterReadingBlock_IsNoTargetUntilRevealed_AndTheModelRebuiltAfterTheRevealGainsIt()

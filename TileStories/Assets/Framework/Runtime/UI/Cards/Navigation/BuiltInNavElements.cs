@@ -14,6 +14,8 @@ namespace TileStories
         public const string Dock = "dock";
         public const string BarSheet = "bar_sheet";
         public const string NextUp = "next_up";
+        public const string DrawerTree = "drawer_tree";
+        public const string GridOverlay = "grid_overlay";
 
         public static void Register(NavElementRegistry registry)
         {
@@ -86,6 +88,22 @@ namespace TileStories
                 + "with one section too, since it follows blocks, not sections.",
                 NavChoice.Blocks),
                 () => new NextUpNavView());
+            registry.Register(new NavElementDefinition(DrawerTree, NavSlotKeys.Menu, "Drawer",
+                "Drawer: the whole card as an outline in a drawer from the side -- every section with how many blocks it holds, and under "
+                + "each the kinds of block it has on this card (a gallery, a video, a 3D model...) with theirs. A tap on a line moves the card "
+                + "there and closes the drawer. It is the most complete map of a card and the hardest to find, since it waits behind the "
+                + "menu button in the card's header: give the card a Top Bar or a Bottom Bar as well, never a Drawer alone. Works on a "
+                + "card with one section too, since it lists kinds.",
+                NavChoice.Blocks),
+                () => new DrawerTreeNavView());
+            registry.Register(new NavElementDefinition(GridOverlay, NavSlotKeys.Menu, "Big Tiles",
+                "Big Tiles: big tiles over the card, two to a row, one per section with its icon and how many blocks it holds -- easy to hit "
+                + "with a thumb, like a kiosk. A switch on top shows the sections by purpose (About, Media...) or by format (Read, Watch, "
+                + "Listen...); it starts on Group By. A tile with several kinds of block shows them as tiles in its place, with a way back to "
+                + "all sections; any other tile moves the card there and closes the tiles. Opened by the menu button in the card's header. "
+                + "Needs two sections, like the tabs.",
+                NavChoice.Sections),
+                () => new GridOverlayNavView());
         }
     }
 }
