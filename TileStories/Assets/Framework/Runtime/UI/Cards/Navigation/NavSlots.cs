@@ -11,6 +11,8 @@ namespace TileStories
     //     bar sits in the thumb zone. Below the header too, so it never moves a stop either
     //   - MENU (step 8): no place in the sheet -- the element is bound here like the others and the card's overlay owner (CardMenuOverlay)
     //     draws it over the card, on a scrim, when the header's menu button (or a bar's More) opens it
+    //   - FLOATING (step 9): the right end of the card's FloatingSlot, a row in the card layer just above the sheet's top-right edge at every
+    //     stop (outside the sheet, which clips): it costs no reading space, so the chrome never hides it
     // Which element a slot holds is NavSlotRule's; WHEN a held element shows (the stop, the scroll, the room) is CardChromeRule's, applied
     // by the sheet's CardChromeView. An element is made by the NavElementRegistry and pooled per key (ElementPool), so a card switch
     // rebinds the same view. The sheet owns one, next to its NavController.
@@ -27,15 +29,20 @@ namespace TileStories
         // root on the scrim while it is open, and the header's menu button exists only while one is bound
         public INavElementView MenuView { get; private set; }
         public string MenuKey { get; private set; }
+        // The FLOATING element (step 9), drawn in the floating slot's element host
+        public VisualElement Floating { get; }
+        public INavElementView FloatingView { get; private set; }
+        public string FloatingKey { get; private set; }
 
         private readonly NavElementRegistry _registry;
         private readonly Dictionary<string, ElementPool<INavElementView>> _pools = new();
 
         // `sheetRoot`: the sheet's root; `stackScroll`: the stack's ScrollView inside it, which the top slot goes right before;
-        // `bottomArea`: the sheet's bottom area (the footer first), which the bottom slot closes
-        public NavSlots(VisualElement sheetRoot, VisualElement stackScroll, VisualElement bottomArea, NavElementRegistry registry)
+        // `bottomArea`: the sheet's bottom area (the footer first), which the bottom slot closes; `floating`: the floating slot's element host
+        public NavSlots(VisualElement sheetRoot, VisualElement stackScroll, VisualElement bottomArea, VisualElement floating, NavElementRegistry registry)
         {
             _registry = registry;
+            Floating = floating;
             Top = new VisualElement { name = "poi-card-nav-top" };
             Top.AddToClassList("poi-card__nav-top");
             sheetRoot.Insert(sheetRoot.IndexOf(stackScroll), Top);
@@ -58,6 +65,9 @@ namespace TileStories
             var bottom = BindSlot(Bottom, NavSlotRule.BottomElement(settings, model, ElementOf(NavSlotKeys.Bottom)), model, nav, context);
             BottomView = bottom.View;
             BottomKey = bottom.Key;
+            var floating = BindSlot(Floating, NavSlotRule.FloatingElement(settings, model, ElementOf(NavSlotKeys.Floating)), model, nav, context);
+            FloatingView = floating.View;
+            FloatingKey = floating.Key;
             string menuKey = NavSlotRule.MenuElement(settings, model, ElementOf(NavSlotKeys.Menu));
             if (menuKey != null && PoolOf(menuKey).Take() is { } menu)
             {
@@ -73,14 +83,18 @@ namespace TileStories
             if (TopKey != null) _pools[TopKey].ReleaseAll();
             if (BottomKey != null) _pools[BottomKey].ReleaseAll();
             if (MenuKey != null) _pools[MenuKey].ReleaseAll();
+            if (FloatingKey != null) _pools[FloatingKey].ReleaseAll();
             TopView = null;
             TopKey = null;
             BottomView = null;
             BottomKey = null;
             MenuView = null;
             MenuKey = null;
+            FloatingView = null;
+            FloatingKey = null;
             Top.style.display = DisplayStyle.None;
             Bottom.style.display = DisplayStyle.None;
+            Floating.style.display = DisplayStyle.None;
         }
 
         // One slot: a view of the element `key` names (null = none), bound and shown in `slot`

@@ -49,10 +49,11 @@ namespace TileStories.Editor.Tests
             Assert.Throws<ArgumentException>(() => registry.Register(new NavElementDefinition(" ", NavSlotKeys.Top, "x", "x", NavChoice.Sections), () => new AppDotsView()));
             Assert.Throws<ArgumentException>(() => registry.Register(new NavElementDefinition(CardOptions.NavNone, NavSlotKeys.Top, "x", "x", NavChoice.Sections), () => new AppDotsView()),
                 "'none' is what a wall stores for no element: no element may be called that");
-            var unbuilt = Assert.Throws<ArgumentException>(() => registry.Register(AppDots("floating"), () => new AppDotsView()));
-            StringAssert.Contains("'floating'", unbuilt.Message, "the refusal names the slot");
-            CollectionAssert.AreEqual(new[] { NavSlotKeys.Top, NavSlotKeys.Bottom, NavSlotKeys.Menu }, NavSlotKeys.Built,
-                "the slots the sheet draws today (step 7a: the bottom; step 8: the menu)");
+            // - the edge slot (the scrubber over the stack's right edge) is the next to be built, at step 10
+            var unbuilt = Assert.Throws<ArgumentException>(() => registry.Register(AppDots("edge"), () => new AppDotsView()));
+            StringAssert.Contains("'edge'", unbuilt.Message, "the refusal names the slot");
+            CollectionAssert.AreEqual(new[] { NavSlotKeys.Top, NavSlotKeys.Bottom, NavSlotKeys.Menu, NavSlotKeys.Floating }, NavSlotKeys.Built,
+                "the slots the sheet draws today (step 7a: the bottom; step 8: the menu; step 9: the floating row)");
             Assert.Throws<ArgumentException>(() => registry.Register(AppDots(null), () => new AppDotsView()));
             Assert.Throws<ArgumentNullException>(() => registry.Register(AppDots(), null));
             CollectionAssert.IsEmpty(registry.All, "nothing refused was kept");

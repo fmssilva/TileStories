@@ -26,6 +26,11 @@ namespace TileStories
         public static string MenuElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> menuElement) =>
             Element((nav ?? new CardNavigationSettings()).menu, model, menuElement);
 
+        // The key of the Floating Button element this card offers (the round button above the sheet's top-right edge), or null for none.
+        // `floatingElement`: the definition registered under a key for the FLOATING slot, null when there is none
+        public static string FloatingElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> floatingElement) =>
+            Element((nav ?? new CardNavigationSettings()).floating, model, floatingElement);
+
         // One slot's answer: the wall's pick for it, when the card shows navigation, the slot has such an element and it has a choice here
         private static string Element(string key, CardNavModel model, Func<string, NavElementDefinition> elementOfSlot)
         {

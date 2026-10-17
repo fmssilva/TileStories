@@ -5,8 +5,10 @@
 // At The End, Group, one (i) on its header); Group By; which cards get navigation, at which heights and what the top strip
 // shows (Show Navigation From, Top Bar: step 5a; Show Navigation At: 5b; Labels, Show Counts: step 6, each only for an element
 // that reads it), what the bar under the stack shows (Bottom Bar and its Bar Slots, step 7a, Bar Slots only for an element that is a
-// bar), what the header's menu button opens over the card (Menu, step 8), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
-// the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4; the Groups table last (step 6,
+// bar), what the header's menu button opens over the card (Menu, step 8), the round button above the card's top-right edge (Floating
+// Button, step 9; Bar Slots for the Radial too), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
+// the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4; what tells the visitor a model placed in the room
+// stands (Placed Model Control, step 9); the Groups table last (step 6,
 // only for the Segmented bar, POIEditorToolWindow.CardNavigationGroups.cs). The other nav elements, layouts and presets join
 // this same section at later steps. Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
 
@@ -42,9 +44,11 @@ namespace TileStories.Editor
             //   (_3.2 section 3). Read from the element's own definition, so an app's element needs no edit here
             NavElementRegistry.Shared.TryGet(nav.top, out var topElement);
             NavElementRegistry.Shared.TryGet(nav.bottom, out var bottomElement);
+            NavElementRegistry.Shared.TryGet(nav.floating, out var floatingElement);
             // - an element counts only in its own slot: a hand-edited key of the other slot draws nothing there
             if (topElement != null && topElement.Slot != NavSlotKeys.Top) topElement = null;
             if (bottomElement != null && bottomElement.Slot != NavSlotKeys.Bottom) bottomElement = null;
+            if (floatingElement != null && floatingElement.Slot != NavSlotKeys.Floating) floatingElement = null;
             bool usesGroups = topElement != null && topElement.Choice == NavChoice.Groups;
 
             DrawFamiliesTable(nav, usesGroups);
@@ -64,12 +68,17 @@ namespace TileStories.Editor
             // - section 7's order: the Menu right after the two bars (its button sits in the header; a bar's More opens it)
             var (menuKeys, menuLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Menu);
             nav.menu = DrawReferencePopupField("Menu", nav.menu, menuKeys, menuLabels, allowNone: false, CardMenuHelp(NavElementRegistry.Shared));
+            // - section 7's order: the Floating Button after the Menu (the round button above the card's top-right edge, step 9)
+            var (floatingKeys, floatingLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Floating);
+            nav.floating = DrawReferencePopupField("Floating Button", nav.floating, floatingKeys, floatingLabels, allowNone: false,
+                CardFloatingButtonHelp(NavElementRegistry.Shared));
             // - a display option shows while EITHER bar reads it: both bars follow the same wall setting
             if (topElement != null && topElement.ReadsLabels || bottomElement != null && bottomElement.ReadsLabels)
                 nav.labels = DrawPopupField("Labels", nav.labels, CardOptions.Labels, CardOptions.LabelsLabels, CardLabelsHelp);
             if (topElement != null && topElement.ShowsCounts || bottomElement != null && bottomElement.ShowsCounts)
                 nav.show_counts = DrawToggleField("Show Counts", nav.show_counts, CardShowCountsHelp);
-            if (bottomElement != null && bottomElement.ReadsBarSlots)
+            // - a bar's slots, or the radial's arc (its items cap at Bar Slots like a bar's)
+            if (bottomElement != null && bottomElement.ReadsBarSlots || floatingElement != null && floatingElement.ReadsBarSlots)
                 nav.max_slots = DrawIntSliderField("Bar Slots", nav.max_slots, CardNavigationSettings.MaxSlotsMin, CardNavigationSettings.MaxSlotsMax,
                     CardBarSlotsHelp);
             nav.follow_scroll = DrawToggleField("Follow Scroll", nav.follow_scroll, CardFollowScrollHelp);
@@ -81,6 +90,9 @@ namespace TileStories.Editor
             nav.jump_raises_to = DrawPopupField("Jump Opens Card To", nav.jump_raises_to, CardOptions.JumpRaises, CardOptions.JumpRaiseLabels, CardJumpRaisesHelp);
             nav.jump_motion = DrawPopupField("Jump Motion", nav.jump_motion, CardOptions.JumpMotions, CardOptions.JumpMotionLabels, CardJumpMotionHelp);
             nav.back_button = DrawPopupField("Back Button", nav.back_button, CardOptions.BackButtons, CardOptions.BackButtonLabels, CardBackButtonHelp);
+            // - section 7's order: what tells the visitor a placed model stands, after Back (step 9)
+            nav.placed_model_control = DrawPopupField("Placed Model Control", nav.placed_model_control, CardOptions.PlacedModelControls,
+                CardOptions.PlacedModelControlLabels, CardPlacedModelControlHelp);
 
             // - section 7 puts the Groups table last: it only matters to the Segmented Top Bar
             if (usesGroups)

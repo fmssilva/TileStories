@@ -49,7 +49,8 @@ namespace TileStories.Editor
             "How many slots the Bottom Bar, the Dock and the Bar With Kinds have, from 3 to 5 (default 5): a bar at the bottom of a phone holds three to five " +
             "destinations before its words get too small to read and its slots too narrow for a thumb. A card with more sections " +
             "than slots turns the last slot into More, which lists the sections that did not fit just above the bar. A card with " +
-            "fewer sections than slots shows one slot per section and no More.";
+            "fewer sections than slots shows one slot per section and no More. The Radial Floating Button holds the same number of " +
+            "items on its arc, its last one More the same way: fewer, wider items are easier to hit with a slide.";
 
         // What Bottom Bar's (i) says: the slot, None, then every element an app can put there -- read from the registry, like Top Bar's
         private static string CardBottomBarHelp(NavElementRegistry registry)
@@ -76,6 +77,27 @@ namespace TileStories.Editor
             foreach (var element in registry.OfSlot(NavSlotKeys.Menu)) text.Append(' ').Append(element.Help);
             return text.ToString();
         }
+
+        // What Floating Button's (i) says: the slot, None, then every element an app can put there -- read from the registry
+        private static string CardFloatingButtonHelp(NavElementRegistry registry)
+        {
+            var text = new System.Text.StringBuilder(
+                "One round button that floats just above the card's top-right edge, at every height of the card, and opens the card's " +
+                "sections. It costs no reading space and needs no bar, so it suits a card read over the camera view. It appears only on " +
+                "cards with at least Show Navigation From blocks. What it opens closes when the visitor picks a section, taps the button " +
+                "again, presses Back, taps the card or the camera view beside it; a Menu opened over the card covers it. None (the " +
+                "default): no button.");
+            foreach (var element in registry.OfSlot(NavSlotKeys.Floating)) text.Append(' ').Append(element.Help);
+            return text.ToString();
+        }
+
+        private const string CardPlacedModelControlHelp =
+            "What tells a visitor that a model placed in the room with a Place In AR block is standing there. Chip (the default): while " +
+            "a model stands, a small chip floats above the card's top-right edge at every height of the card -- even when the card is " +
+            "lowered to its title, where the block's own line is out of sight. On the card of the point that placed the model it reads " +
+            "Placed by the wall with a Remove button that takes the model away. On another point's card (when Keep Model On Switch " +
+            "kept the model) it names that point instead and offers no Remove: only the card that placed the model does, and a tap on " +
+            "the chip opens that card. None: no chip; the Place In AR block's own button and line still say it.";
 
         private const string CardGroupsHelp =
             "The groups the Segmented Top Bar shows as equal segments that always fit the screen -- three or four work best. " +
@@ -158,8 +180,8 @@ namespace TileStories.Editor
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
             "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
             "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
-            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Menu, Bar Slots and Hide While Scrolling: the open card's strip, " +
-            "bottom bar, menu button and bottom buttons " +
+            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Menu, Floating Button, Bar Slots, Placed Model Control and Hide " +
+            "While Scrolling: the open card's strip, bottom bar, menu button, floating button, placed-model chip and bottom buttons " +
             "appear, change or go at once.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
@@ -255,6 +277,26 @@ namespace TileStories.Editor
             "with several kinds: its kinds replace the tiles, with All Sections to go back; click a kind: the panel closes and the card " +
             "moves there. A tile with one kind moves the card at once.\n" +
             "- With Bottom Bar = Bottom Bar and more families than Bar Slots, tap More: the menu opens instead of the small list.\n\n" +
+            "FLOATING BUTTON\n" +
+            "- Set Floating Button = Dial and open a card with at least Show Navigation From blocks at its title height: a round button " +
+            "sits just above the card's top-right edge. Raise the card to half and to full: the button follows the card's edge, and at " +
+            "full it rests at the very top of the screen.\n" +
+            "- Click it: a column of buttons opens, one per family with its icon and word, upward over the camera view (downward over " +
+            "the card when the card is at full). Click a family: the column closes and the card moves there. Open it again and click " +
+            "the button (now an X), press Escape, or click the camera view beside it: the column closes and the card stays.\n" +
+            "- Set Floating Button = Radial: click the button, the families open on an arc around it, the last one More when there " +
+            "are more families than Bar Slots; click one: the card moves there. Click More: the arc shows the families that did not " +
+            "fit (with a Menu set, the menu opens instead).\n" +
+            "- With the Radial, press the button, slide towards a family and let go: the card moves to the family the slide pointed " +
+            "at, which is marked while you slide. Slide away from the arc, or let go on the button: nothing is picked.\n" +
+            "- Set Menu = Drawer and open the menu: it covers the floating button. Set Floating Button = None: the button goes.\n\n" +
+            "PLACED MODEL CONTROL\n" +
+            "- Open a card with a Place In AR block and place its model: the card lowers to its title and a chip above its top-right " +
+            "edge reads Placed by the wall with a Remove button. Raise the card: the chip follows it. Click Remove: the model goes and " +
+            "so does the chip.\n" +
+            "- With Keep Model On Switch on for that block, place the model and click another point's marker: the chip names the first " +
+            "point and has no Remove; click the chip: the first point's card opens, with Remove.\n" +
+            "- Set Placed Model Control = None: no chip; the block's own button still reads Remove from room.\n\n" +
             "SHOW NAVIGATION AT AND HIDE WHILE SCROLLING\n" +
             "- Open a long card with a tall title and buttons pinned to its bottom (an Actions block with the sticky_cta look) at half " +
             "height. If the title, the strip and the buttons would leave less than a heading and two lines of content, the strip " +
@@ -295,6 +337,13 @@ namespace TileStories.Editor
             "on a word and move up -- the card rises and the word is not tapped; tap each word once -- every tap lands where it should.\n" +
             "- Bottom Bar: hold the phone in one hand and reach every slot and More with the thumb; open More and pick a family from " +
             "its list. Check that every word reads whole and that the bar does not sit under the phone's own gesture bar.\n" +
+            "- Floating Button: hold the phone in one hand at the card's title and half heights and reach the button with that thumb. " +
+            "With the Radial, press, slide towards each family on the arc and let go -- every family reachable with the same thumb, " +
+            "none under the thumb's own shadow -- then open it with a tap and tap each family. With the Dial, open it and reach the " +
+            "far end of its column.\n" +
+            "- Placed Model Control: place a model at a real wall and lower the card to its title. Read the chip over the camera image " +
+            "against a bright patch of the wall (a white tile, a window) and against a dark one: its words and its edge stay readable " +
+            "on both, and Remove reaches with a thumb.\n" +
             "- Hide While Scrolling: read a long card at full height with a thumb. The bottom buttons slide away as you read down and " +
             "come back with a small move up; a tap on the content never makes them jump. Check that the half height of a long card " +
             "shows something to read on this phone's screen.\n" +

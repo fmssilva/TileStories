@@ -40,6 +40,8 @@ namespace TileStories.Tests
             [BuiltInNavElements.NextUp] = NextUpKeepsItsPromise,
             [BuiltInNavElements.DrawerTree] = DrawerTreeKeepsItsPromise,
             [BuiltInNavElements.GridOverlay] = GridOverlayKeepsItsPromise,
+            [BuiltInNavElements.FabDial] = FloatingButtonKeepsItsPromise,
+            [BuiltInNavElements.FabRadial] = FloatingButtonKeepsItsPromise,
         };
 
         // The element an entry's slot holds now, its key and its slot element, and whether the card shows it (the chrome for a bar; the
@@ -49,6 +51,7 @@ namespace TileStories.Tests
             {
                 NavSlotKeys.Bottom => sheet.Slots.BottomView,
                 NavSlotKeys.Menu => sheet.Slots.MenuView,
+                NavSlotKeys.Floating => sheet.Slots.FloatingView,
                 _ => sheet.Slots.TopView,
             };
 
@@ -57,6 +60,7 @@ namespace TileStories.Tests
             {
                 NavSlotKeys.Bottom => sheet.Slots.BottomKey,
                 NavSlotKeys.Menu => sheet.Slots.MenuKey,
+                NavSlotKeys.Floating => sheet.Slots.FloatingKey,
                 _ => sheet.Slots.TopKey,
             };
 
@@ -65,6 +69,7 @@ namespace TileStories.Tests
             {
                 NavSlotKeys.Bottom => sheet.Chrome.BottomNavShown,
                 NavSlotKeys.Menu => sheet.Overlay.IsModal && sheet.Overlay.OpenKey == entry.ElementKey,
+                NavSlotKeys.Floating => sheet.Floating.IsShown,
                 _ => sheet.Chrome.TopShown,
             };
 
@@ -75,6 +80,7 @@ namespace TileStories.Tests
             if (slot != NavSlotKeys.Top) yield return sheet.Slots.TopView;
             if (slot != NavSlotKeys.Bottom) yield return sheet.Slots.BottomView;
             if (slot != NavSlotKeys.Menu) yield return sheet.Slots.MenuView;
+            if (slot != NavSlotKeys.Floating) yield return sheet.Slots.FloatingView;
         }
 
         [UnitySetUp]
@@ -909,6 +915,126 @@ namespace TileStories.Tests
             Assert.AreEqual(strings.Get(CardStrings.Keys.NavMenu), drawer.Header.Title.text, "its title");
             Assert.IsTrue(CardTestInput.IsShown(drawer.Header.Close, sheet.Layer), "a visible close");
             Assert.Less(drawer.Root.worldBound.width, sheet.Layer.worldBound.width, "a drawer: the card shows beside it");
+        }
+
+        // fab_dial and fab_radial CLOSED (step 9, section 5.4): zero chrome until needed -- the round button alone, a touch target both ways,
+        // in the floating slot right above the sheet's top edge (at Full the slot rests in the sheet's top gap, never off the screen), its
+        // right edge where the card's content ends, its name the card's word for the sections; nothing else of it shows
+        private static void FloatingButtonKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var sheet = harness.Gallery.Sheet;
+            var view = sheet.Slots.FloatingView;
+            var fab = view is FabDialNavView dial ? dial.Fab : ((FabRadialNavView)view).Fab;
+            float onePixel = CardGalleryChecks.OnePixel(fab.Root);
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            Assert.IsFalse(fab.IsOpen, "closed: the sections icon, not the X");
+            Assert.AreEqual(touch, fab.Button.layout.width, onePixel, "the button is one touch target wide");
+            Assert.AreEqual(touch, fab.Button.layout.height, onePixel, "and tall");
+            var slot = sheet.Floating.Root.worldBound;
+            Assert.AreEqual(sheet.Root.worldBound.yMin, slot.yMax, onePixel, "at Full the slot rests flush on the sheet's top edge");
+            Assert.GreaterOrEqual(slot.yMin, sheet.Layer.worldBound.yMin - onePixel, "inside the card layer, never off the screen");
+            Assert.AreEqual(sheet.Layer.worldBound.xMax - CardTestInput.TokenPx("--ts-space-4"), fab.Root.worldBound.xMax, onePixel,
+                "its right edge where the card's content ends");
+            Assert.AreEqual(Strings(harness, entry).Get(CardStrings.Keys.NavFab), fab.Button.tooltip, "its name: the card's word for the sections");
+            var shown = fab.Root.Query<Button>().ToList().Where(b => CardTestInput.IsShown(b, sheet.Layer)).ToList();
+            CollectionAssert.AreEqual(new[] { fab.Button }, shown, "closed: the button alone, zero chrome until needed");
+        }
+
+        // The floating button OPEN, opened by a real tap on it (step 9): every one of its items inside the card layer, a whole touch target,
+        // its words whole and in the case's language, never two overlapping; the dial lists every section with its icon beside its word, the
+        // radial holds Bar Slots items (More last when the sections overflow) on its arc; rendered Nav_<key>_<case>_open
+        [UnityTest]
+        public IEnumerator TheFloatingButton_ARealTapOpensIt_EveryItemWholeInsideTheLayerAndApart_AndRenders(
+            [Values(BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial)] string key, [Values("big", "small", "pt_long", "two_families")] string caseKey)
+        {
+            yield return ShowEntry(key, caseKey);
+            var entry = CardNavGalleryDefinitions.All.First(e => e.ElementKey == key && e.Case.Key == caseKey);
+            var sheet = _harness.Gallery.Sheet;
+            var model = sheet.Nav.Model;
+            var strings = Strings(_harness, entry);
+            var view = sheet.Slots.FloatingView;
+            var fab = view is FabDialNavView d ? d.Fab : ((FabRadialNavView)view).Fab;
+            yield return CardTestInput.Tap(fab.Button.panel, fab.Button.worldBound.center);
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(fab.IsOpen, "a real tap opened it (the button shows the X)");
+            Assert.AreEqual(key == BuiltInNavElements.FabDial ? FabDialNavView.ListKey : FabRadialNavView.ArcKey, sheet.Overlay.OpenKey,
+                "the one thing open over the card");
+
+            float onePixel = CardGalleryChecks.OnePixel(fab.Root);
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            var layer = sheet.Layer.worldBound;
+            var items = new List<(Button Button, Label Label)>();
+            if (view is FabDialNavView dial)
+            {
+                Assert.AreEqual(FabFanRule.Direction.Down, dial.Direction, "at Full the button rests at the top: the column opens down over the card");
+                Assert.AreEqual(model.Sections.Count, dial.Items.Count, "a pill per section");
+                for (int i = 0; i < dial.Items.Count; i++)
+                {
+                    var item = dial.Items[i];
+                    Assert.AreEqual(strings.Get(model.Sections[i].LabelKey), item.Label.text, "its words, in " + entry.Case.Language);
+                    Assert.LessOrEqual(item.Icon.worldBound.xMax, item.Label.worldBound.xMin + 0.5f, item.Label.text + ": its icon beside its word");
+                    items.Add((item.Button, item.Label));
+                }
+                Assert.GreaterOrEqual(dial.List.worldBound.yMin, fab.Root.worldBound.yMax - onePixel, "under the button");
+            }
+            else
+            {
+                var radial = (FabRadialNavView)view;
+                // - a page holds what Bar Slots allows and the room fits (at Full, in the screen's corner, fewer), More last while sections are left
+                Assert.LessOrEqual(radial.Capacity, NavOntologyRule.MaxSlots(ConfigNav(entry)), "never more than Bar Slots");
+                int shown = NavOntologyRule.SectionsInBar(model.Sections.Count, radial.Capacity);
+                Assert.AreEqual(shown + (shown < model.Sections.Count ? 1 : 0), radial.Items.Count, "a page of the arc: rule 2.5.5 over its capacity");
+                Assert.IsTrue(radial.Layout.Fits, "the arc fits the layer (" + radial.Capacity + " items at radius " + radial.Layout.Radius + ")");
+                foreach (var item in radial.Items)
+                {
+                    string words = item.Section >= 0 ? strings.Get(model.Sections[item.Section].LabelKey) : strings.Get(CardStrings.Keys.NavMore);
+                    Assert.AreEqual(words, item.Label.text, "its words, in " + entry.Case.Language);
+                    Assert.LessOrEqual(item.Button.worldBound.center.x, fab.Root.worldBound.center.x + onePixel, item.Label.text + ": its centre left of the button's (the arc's half-plane)");
+                    items.Add((item.Button, item.Label));
+                }
+            }
+            for (int i = 0; i < items.Count; i++)
+            {
+                var (button, label) = items[i];
+                Assert.IsTrue(CardTestInput.IsShown(button, sheet.Layer), label.text + ": shown");
+                Assert.GreaterOrEqual(button.layout.height, touch - onePixel, label.text + ": tall enough to tap");
+                Assert.GreaterOrEqual(button.layout.width, touch - onePixel, label.text + ": wide enough to tap");
+                Assert.IsTrue(layer.Contains(button.worldBound.min) && layer.Contains(button.worldBound.max - Vector2.one * onePixel),
+                    label.text + ": whole inside the card layer " + button.worldBound + " in " + layer);
+                var size = label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+                Assert.GreaterOrEqual(label.layout.width + 0.5f, size.x, "'" + label.text + "': whole, never cut");
+                float contrast = CardTestInput.Contrast(label.resolvedStyle.color, CardTestInput.EffectiveBackground(label));
+                Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioNormalText, "'" + label.text + "' reads at 4.5:1 (" + contrast.ToString("F2") + ")");
+                for (int j = i + 1; j < items.Count; j++)
+                {
+                    var a = items[i].Button.worldBound;
+                    var b = items[j].Button.worldBound;
+                    var shrunk = new Rect(a.x + onePixel, a.y + onePixel, a.width - 2 * onePixel, a.height - 2 * onePixel);
+                    Assert.IsFalse(shrunk.Overlaps(b), label.text + " and " + items[j].Label.text + ": never overlapping " + a + " / " + b);
+                }
+            }
+            yield return CardGalleryChecks.Render("Nav_" + key + "_" + caseKey + "_open");
+
+            // - the radial's next page: More turns the arc to the next sections (rendered too)
+            if (view is FabRadialNavView arc && arc.Items.Last().Section < 0)
+            {
+                var more = arc.Items.Last();
+                int next = arc.Items.Count - 1;
+                yield return CardTestInput.Tap(more.Button.panel, more.Button.worldBound.center);
+                yield return CardTestInput.Settle();
+                Assert.IsTrue(arc.ShowsMore, "a real tap on More shows the next page");
+                Assert.AreEqual(next, arc.PageStart, "starting with the first section the last page did not show");
+                int onPage = NavOntologyRule.SectionsInBar(model.Sections.Count - next, arc.Capacity);
+                CollectionAssert.AreEqual(model.Sections.Skip(next).Take(onPage).Select(sec => strings.Get(sec.LabelKey)),
+                    arc.Items.Where(i => i.Section >= 0).Select(i => i.Label.text), "exactly the next sections, in order");
+                Assert.IsTrue(arc.Layout.Fits, "the next page fits too");
+                yield return CardGalleryChecks.Render("Nav_" + key + "_" + caseKey + "_more");
+            }
+
+            yield return CardTestInput.Tap(fab.Button.panel, fab.Button.worldBound.center);
+            yield return CardTestInput.Settle();
+            Assert.IsFalse(fab.IsOpen, "a real tap on its X closes it");
+            Assert.IsFalse(sheet.Overlay.IsOpen);
         }
 
         // grid_overlay (step 8): big tiles over a scrim, inside the card, two to a row, one per section with its words and count, each at

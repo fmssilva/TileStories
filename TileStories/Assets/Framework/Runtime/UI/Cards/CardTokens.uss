@@ -224,6 +224,20 @@
        the edge, a 60 px strip) so it never covers them -- and how wide it grows */
     --ts-mini-bottom: 88px;
     --ts-mini-max-width: 480px;
+    /* The floating slot above the sheet's top-right edge (_3.2 step 9, FloatingSlot): its gap above the sheet (read by C# as a plain number,
+       panel units), and the edge of what floats over the camera image -- the FAB, the dial's and the arc's items, the placed-model chip: a
+       light line round a dark surface, so it reads over a bright frame (the dark surface) AND a dark one (the light line) */
+    --ts-float-gap: 8;
+    --ts-float-edge-width: 2px;
+    /* the dial's list (fab_dial): never wider than this */
+    --ts-dial-max-width: 280px;
+    /* the radial's arc (fab_radial, RadialMenuRule; plain numbers read by C#): one item's size -- its round button and its word under it,
+       wide enough for the longest family word (Portuguese "Comunidade"), so two neighbours never overlap -- the smallest arc, and the dead
+       zone a slide must leave before its direction counts (the button's own radius: the finger has left the button) */
+    --ts-radial-item-width: 96;
+    --ts-radial-item-height: 76;
+    --ts-radial-min-radius: 96;
+    --ts-radial-dead-zone: 24;
     /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
     --ts-clear: rgba(0, 0, 0, 0);
 }

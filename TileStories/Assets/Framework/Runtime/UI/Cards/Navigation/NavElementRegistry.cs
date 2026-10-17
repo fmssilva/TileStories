@@ -59,7 +59,10 @@ namespace TileStories
         // The card layer over the sheet, below the full view: opened by the header's menu button (and by a bar's More), drawn on a scrim by
         // the card's overlay owner, CardMenuOverlay (_3.2 section 5.3, step 8)
         public const string Menu = "menu";
-        public static readonly IReadOnlyList<string> Built = new[] { Top, Bottom, Menu };
+        // A row just above the sheet's top-right edge, at every stop, in the card layer under the menu layer (the card's FloatingSlot, beside
+        // the placed-model chip): one round button that opens the sections (_3.2 section 5.4, step 9)
+        public const string Floating = "floating";
+        public static readonly IReadOnlyList<string> Built = new[] { Top, Bottom, Menu, Floating };
     }
 
     // Every navigation element the card can show, with the view that draws it -- the same shape as BlockRegistry: BuiltInNavElements

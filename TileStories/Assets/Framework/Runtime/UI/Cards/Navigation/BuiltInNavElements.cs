@@ -16,6 +16,8 @@ namespace TileStories
         public const string NextUp = "next_up";
         public const string DrawerTree = "drawer_tree";
         public const string GridOverlay = "grid_overlay";
+        public const string FabDial = "fab_dial";
+        public const string FabRadial = "fab_radial";
 
         public static void Register(NavElementRegistry registry)
         {
@@ -104,6 +106,23 @@ namespace TileStories
                 + "Needs two sections, like the tabs.",
                 NavChoice.Sections),
                 () => new GridOverlayNavView());
+            registry.Register(new NavElementDefinition(FabDial, NavSlotKeys.Floating, "Dial",
+                "Dial: one round button just above the card's top-right edge, at every height of the card, that takes no reading space "
+                + "until it is needed. A tap opens the card's sections as a column of labelled buttons (each family's icon and its word); a "
+                + "tap on one moves the card there. The column opens upward over the camera view when it fits, else downward over the card "
+                + "(when the card is fully open the button rests at the top of the screen). It closes with a pick, a second tap on the button, "
+                + "Back, or a touch on the card. Needs two sections, like the tabs.",
+                NavChoice.Sections),
+                () => new FabDialNavView());
+            registry.Register(new NavElementDefinition(FabRadial, NavSlotKeys.Floating, "Radial",
+                "Radial: one round button just above the card's top-right edge whose sections open on an arc around it. Press it, slide "
+                + "towards a section and let go: the section the slide points at is picked -- fast once learned. A plain tap opens the arc "
+                + "with every section tappable instead, so a visitor who cannot drag is never left out. The arc holds as many sections as Bar "
+                + "Slots (fewer when the card is fully open: the button then rests in the screen's top corner); with more, the last item is "
+                + "More, which opens the Menu when the card has one, else shows the next sections on the arc. "
+                + "Letting go away from the arc picks nothing. Needs two sections, like the tabs.",
+                NavChoice.Sections, readsBarSlots: true),
+                () => new FabRadialNavView());
         }
     }
 }

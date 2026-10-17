@@ -1,46 +1,58 @@
-# Plan tracker -- _3.2 step 8: menu overlay owner, drawer_tree, grid_overlay (+ the two DECIDED TODOs)
+# Plan tracker -- _3.2 step 9: the floating slot, fab_dial, fab_radial and the placed-model chip (+ the two AR TODOs)
 
-Brief: proj_guides/__AI_worker.md + the step 8 brief. Spec: _3.2 sections 4.2, 4.5, 5.3, 9; TODOs [step 8] x2.
+Brief: proj_guides/__AI_worker.md + the step 9 brief. Spec: _3.2 sections 4.2, 5.4, 9; TODOs [step 9] x2 (from _3.1's close-out).
 
 ## GATE (done)
-- [x] UnityMCP answers (telemetry_status)
-- [x] git push: 1 commit (4133349..c22876b)
-- [x] captures opened: TestEvidence/Gate/gate_3_2_step8_game_view.png, gate_3_2_step8_poi_editor.png (Detail Card > Navigation)
-- [x] compile: zero error CS since the last build (ExitCode 0); SDF fonts clean
-- [x] baseline full EditMode 1795/1795 (139 s) on clean c22876b (rides on 7a's full PlayMode 868/868)
+- [x] UnityMCP answers (telemetry_status, one instance TileStories@d41388e4a2b2ebd4)
+- [x] git push: 1 commit (c22876b..3de449c)
+- [x] captures opened: TestEvidence/Gate/gate_3_2_step9_game_view.png (LivingRoomScene camera), gate_3_2_step9_poi_editor.png
+      (Detail Card > Navigation, capture window closed, 0 left)
+- [x] compile: Editor.log 0 `error CS`, ExitCode 0; both SDF fonts clean (no git change)
+- [x] baseline full EditMode 1813/1813 (86 s, background) on clean 3de449c (rides on step 8's full PlayMode 921/921)
 
 ## Design (decided)
-- Owner `CardMenuOverlay` (Runtime/UI/Cards/Navigation), sheet-owned, a layer inserted in the sheet's Layer BEFORE the takeover root.
-  API: Open(key, panel or null, onClosed), Close(), IsOpen, OpenKey, OpenMenu() (the bound Menu element). Panel = modal (scrim + panel);
-  null = anchored client (More list, kinds list: drawn in place, no scrim). One at a time (an Open closes the previous).
-  Closes on: Back (NavBackRule branch), scrim tap, NavController.Jumped, a touch / wheel on the stack (TrickleDown), a stop change,
-  every Show / Hide, a takeover opening.
-- Elements reach it through BlockBindContext.Overlay (the card's ONE overlay owner).
-- NavBackRule.Next(settings, fullViewOpen, overlayOpen, stop): full view -> overlay -> lower -> close.
-- NavSlotKeys.Menu built; NavSlotRule.MenuElement; NavSlots binds the menu view (not parented; the owner hosts it when open).
-- Header menu button on the sheet root (beside language chip + X), shown only with a bound Menu; tokens for its place.
-- CardNavModel.By(groupBy): itself or the lazily built pivot (grid's Purpose / Format switch).
-- More slot shows the current overflow section's icon + word + the up arrow; still opens the list / the Menu.
-- bar_sheet: the "spy left the family" close removed (jump + scroll closes cover it).
+- WHERE: the floating slot is a LAYER in the card layer (the sheet clips its children): `FloatingSlot` (Runtime/UI/Cards/Navigation),
+  sheet-owned, inserted right BEFORE CardMenuOverlay.Root -> order: sheet, floating, menu overlay, full view (an open drawer covers it).
+  A row, right-aligned: [placed-model chip][FAB]. It follows the sheet's top edge on the sheet root's GeometryChangedEvent (every frame of
+  the height transition and of a drag) through pure `FloatingSlotRule.Bottom` (sheet top + gap, clamped so the slot never leaves the
+  layer: at Full it rests in the 48 px top gap). Hidden while no card is open or nothing is in it. The chrome floor does not apply.
+- Elements: NavSlotKeys.Floating built; NavSlotRule.FloatingElement; NavSlots binds the FAB into FloatingSlot.Elements.
+  - `fab_dial` (FabDialNavView, "Dial", NavChoice.Sections): a round FAB (dark surface disc + light edge + accent icon, X while open);
+    a tap opens a column of labelled pills (family icon in its colour + words), one per section, up when it fits above, else down over
+    the card (pure FabFanRule; a list longer than both sides scrolls); a pill = NavController.JumpTo. An overlay ANCHORED client (Back,
+    a jump, a scroll, a stop change close it; the FAB again toggles).
+  - `fab_radial` (FabRadialNavView, "Radial", NavChoice.Sections, ReadsBarSlots): items = BarSections + More (rule 2.5.5, like the
+    bar) on an arc in the left half-plane laid out by pure `RadialMenuRule.Layout` (first R that keeps every item inside the layer and
+    neighbours a footprint apart); press-slide-release through SwipeGrab (claims any direction past the slop) -> ItemAt(travel) on
+    release; a plain TAP opens the arc, a tap on an item picks (WCAG 2.5.7). More: opens the Menu when set, else re-fans the arc with
+    MoreSections. Overlay anchored client too.
+- The chip: `PlacedModelChipView` (Runtime/UI/Cards, beside MiniPlayerView) -- holds no state, draws the ONE ICardArPlacement through pure
+  `PlacedModelChipRule` (Hidden / ThisCard: "Placed by the wall" + Remove / OtherCard: "<name> is placed by the wall", a tap opens that
+  point's card, no Remove); bound by FloatingSlot with the card's BlockBindContext (ArPlacement, Poi, Strings, Settings, Host),
+  released on Unbind (Hide) by unsubscribing from the owner's Changed. Dark surface + light edge: legible over a bright AND a dark frame.
+- Tap on empty camera space while something is open over the card closes THAT first (PoiCardSheetView.TapOutside: overlay, else close),
+  the order Back already has.
+- Data: navigation.floating ("none") + navigation.placed_model_control ("chip"); CardOptions.PlacedModelControls / labels.
+- Strings (CardStrings.asset en + pt): nav_fab (Sections / Seccoes with accent), placed_model_remove (Remove / Remover),
+  placed_model_other ({0} is placed by the wall / {0} esta junto a parede, accents).
+- Tokens: --ts-float-gap (number), --ts-float-edge-width, --ts-radial-footprint, --ts-radial-min-radius (number tokens read in C#).
 
 ## Steps
-- [x] 1. PART 1 owner + clients: CardMenuOverlay, NavController.Jumped, BlockBindContext.Overlay, NavBackRule branch, sheet wiring
-      (Back, stop change, Show/Hide, takeover), More + kinds lists through the owner. Tests: NavBackRuleTests (+overlay), CardMenuOverlayTests
-      (EditMode, real sheet: one at a time, every close trigger, Back at each layer incl. takeover), view tests updated.
-- [x] 2. PART 1.2 (code done; its real-tap test is in Phase B) More marks the overflow section (icon + word + arrow). Tests: EditMode view test (7th of 8), gallery asserts updated.
-- [x] 3. 8.1 menu slot + header button + data `menu` (default none) + CardStrings rows + menu icon + USS (scrim, panel).
-- [x] 4. 8.2 drawer_tree view (outline families -> kinds with counts, mark, close X, scroll).
-- [x] 5. 8.3 grid_overlay view (tiles, Purpose / Format switch on CardNavModel.By, kinds in place) + CardNavModel.By + its Tier 0.
-- [x] 6. 8.4 More opens the Menu when set; Editor Menu row (i) / undo / live; DetailCardEditorTabTests + walker + round trip.
-- [x] 7. Phase A: gallery entries drawer_tree / grid_overlay x cases (menu opened), CardNavGalleryTests; renders judged.
-- [x] 8. Phase B PoiCardMenuSceneTests (real input): stops 195.00 / 337.60 / 796.00 with Menu set; menu button -> drawer -> leaf tap
-      jumps + closes; scrim tap closes + scroll kept; Escape closes overlay then lowers; More opens the Menu; More list: Escape closes it
-      not the sheet, a drag closes it, a jump closes it; kinds list: Escape; 7th of 8 marks the slot + opens; grid switch + tiles.
-- [x] 9. Visuals: drawer + grid on The Lamp at 390 EN / PT, scrim contrast, header with menu button; Editor Menu row capture.
-- [x] 10. Full EditMode; Card / Poi targeted set green; FULL PlayMode in the background (editor_is_focused at first poll and end).
-- [x] 11. Docs: _3.2 (status row 8 + proof, both [step 8] TODOs removed, 4.2 / 4.5 / 5.2 / 5.3 / 7 built notes), _5.1 (Menu row,
-      header button), 10-structure.md, 40-testing RUN TIMES; final report (60-finishing 6.4).
-
-## Progress notes
-- Steps 1, 3-6 code + EditMode: targeted 146/146 (CardMenuOverlayTests 14, NavBackRuleTests +2, CardNavModelTests By, DetailCardEditorTabTests Menu row + walker 17, round trip).
-- Closing: full EditMode 1813/1813; Card / Poi 28 fixtures 661/661 (1723 s); FULL PlayMode 921/921 (2108 s, partly background). Unity crashed once while idle (native audio assert flood -> OOM), logged in __mixed_TODOs.
+- [x] 9.0 Tier 0 pure rules + EditMode tests: FloatingSlotRule, FabFanRule, RadialMenuRule (layout + ItemAt incl. edges / outside / dead
+      zone), PlacedModelChipRule; data fields + CardOptions; round trip defaults
+- [x] 9.1 FloatingSlot layer + NavSlotKeys.Floating + NavSlotRule.FloatingElement + NavSlots + chip view + strings + tokens + USS;
+      EditMode: layer order (sheet < floating < overlay < takeover), chip states with a real ArPlacementService over ManualArWall
+- [x] 9.2 fab_dial view + registration; 9.3 fab_radial view + registration (+ TapOutside closes the overlay first)
+- [x] 9.4 Editor rows Floating Button (under Menu) + Placed Model Control (under Back Button), (i), guides, Bar Slots for the radial;
+      DetailCardEditorTabTests + walker 17 -> 19
+- [x] Phase A: CardNavGalleryDefinitions + fab_dial, fab_radial (x 5 cases, closed + open renders); CardNavGalleryTests checks
+- [x] Phase B: PoiCardFloatingSceneTests (LivingRoomScene, real input): stops unchanged; the slot rests above the sheet at peek / half /
+      full; a real press-slide-release picks the item the angle points at; a real tap opens the arc, a second tap picks; the dial's items
+      jump; tap outside closes the dial first; an open drawer covers the slot; chip inside the VISIBLE rect at peek with a model standing
+      (EN + PT), at half and full; Remove removes it and the chip goes; another card: no Remove, a tap opens the first card; control none
+      hides it (live); chip over a bright and a dark frame
+- [x] Captures judged: both FABs open / closed on the real Lamp at 390 px EN + PT; chip at peek / half / full; Editor section
+- [x] Closing: full EditMode; Card / Poi PlayMode fixtures + ArPlacement greps (CardGalleryTests, PoiCardPlaceInArSceneTests,
+      PoiCardSceneTests) + the new fixture -- zero failures
+- [x] 9.5 docs: _3.2 row 9 + proof, both [step 9] TODOs removed, 4.2 / 5.4 / 7 "Built at step 9"; _5.1 4.7 rows; 10-structure;
+      __mixed_TODOs device list (radial with a thumb, chip over the camera)

@@ -47,6 +47,7 @@ namespace TileStories
             BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap, BuiltInNavElements.BottomBar,
             BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp,
             BuiltInNavElements.DrawerTree, BuiltInNavElements.GridOverlay,
+            BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial,
         };
 
         // The gallery's walls show navigation from 2 targets, so the small cases draw their element too (the default threshold is
@@ -100,6 +101,7 @@ namespace TileStories
             wall.card_settings.navigation.top = slot == NavSlotKeys.Top ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.bottom = slot == NavSlotKeys.Bottom ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.menu = slot == NavSlotKeys.Menu ? entry.ElementKey : CardOptions.NavNone;
+            wall.card_settings.navigation.floating = slot == NavSlotKeys.Floating ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.min_blocks = ShowNavigationFrom;
             if (entry.Case.Language != "en") wall.card_settings.languages = new List<string> { "en", entry.Case.Language };
             return wall;

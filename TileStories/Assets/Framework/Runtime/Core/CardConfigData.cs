@@ -84,6 +84,12 @@ namespace TileStories
         // grid_overlay) | "none" (CardOptions.NavNone, the default: a menu hides the map behind a button, so it is never the only way in).
         // When set, a bar's More slot opens it instead of its small list
         public string menu = CardOptions.NavNone;
+        // Floating Button: the element in the card's floating slot, just above the sheet's top-right edge at every stop (a NavElementRegistry
+        // key of the floating slot: fab_dial, fab_radial) | "none" (CardOptions.NavNone, the default)
+        public string floating = CardOptions.NavNone;
+        // Placed Model Control: "chip" (the default: while a model placed with place_in_ar stands, a chip above the sheet says so at every
+        // stop, with a Remove on the card that placed it) | "none" (CardOptions.PlacedModelControls, PlacedModelChipRule)
+        public string placed_model_control = CardOptions.PlacedModelChip;
         // Show Navigation At: "half_and_full" (the default) | "full_only" (CardOptions.ShowNavigationAts) -- the stops the Top Bar shows at,
         // never at peek. CardChromeRule may hide it at a stop with too little room left for the content; this option only hides more
         public string show_at = CardOptions.ShowNavHalfAndFull;
@@ -101,6 +107,7 @@ namespace TileStories
 
         public const int MinBlocksMin = 2;
         public const int MinBlocksMax = 30;
+        // Bar Slots also caps fab_radial's arc (its last item becomes More, like a bar's)
         public const int MaxSlotsMin = 3;
         public const int MaxSlotsMax = 5;
     }
@@ -336,6 +343,13 @@ namespace TileStories
         // A navigation slot with no element in it (CardNavigationSettings.top, _3.2 section 3); never a registered element's key
         public const string NavNone = "none";
         public const string NavNoneLabel = "None";
+
+        // Placed Model Control (CardNavigationSettings.placed_model_control, _3.2 section 5.4): the chip above the sheet while a placed model
+        // stands, or nothing. The first option is the default the card reads for an unknown value too
+        public const string PlacedModelChip = "chip";
+        public const string PlacedModelNone = "none";
+        public static readonly string[] PlacedModelControls = { PlacedModelChip, PlacedModelNone };
+        public static readonly string[] PlacedModelControlLabels = { "Chip", "None" };
 
         // Show Navigation At (CardNavigationSettings.show_at, _3.2 section 4.3): the stops the Top Bar may show at (never at peek)
         public const string ShowNavHalfAndFull = "half_and_full";

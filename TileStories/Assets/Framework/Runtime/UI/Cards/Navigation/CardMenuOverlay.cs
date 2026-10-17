@@ -34,6 +34,8 @@ namespace TileStories
 
         // Raised after anything closed, whichever way (a test watches it; nothing in the card needs it)
         public event Action Closed;
+        // Raised after anything opened or closed (the floating slot dims the card while its own element is open)
+        public event Action Changed;
 
         private readonly PoiCardSheetView _sheet;
         private Action _onClose;
@@ -89,6 +91,7 @@ namespace TileStories
                 Root.style.display = DisplayStyle.Flex;
             }
             Root.EnableInClassList(ModalClass, IsModal);
+            Changed?.Invoke();
         }
 
         // Close whatever is open (nothing open: nothing happens)
@@ -105,6 +108,7 @@ namespace TileStories
             Root.style.display = DisplayStyle.None;
             onClose?.Invoke();
             Closed?.Invoke();
+            Changed?.Invoke();
         }
 
         // Close `key` if it is what is open (an element closing its own list through its toggle)

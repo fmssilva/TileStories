@@ -13,75 +13,75 @@
 So start by reading them all. 
 
 
-## `And now: POI Card Navigation (3.2) -- step 8, the menu overlay owner, the drawer and the grid`
+
+## `And now: POI Card Navigation (3.2) -- step 9, the floating slot, the two FABs and the placed-model chip`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
 not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Add dock, bar sheet and Up next to the card's bottom
-area" (full EditMode 1795/1795; it rides on 7a's full PlayMode 868/868) -- run the full EditMode suite and say which
-commit you trusted.
+them if TMP dirtied them. Baseline: the tree is clean on commit "Add a menu overlay with drawer and big tiles to the
+card" (full EditMode 1813/1813, full PlayMode 921/921) -- run the full EditMode suite and say which commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (BOTH [step 8] lines are yours and
-both are DECIDED: build what they say) and the status table (1-7b done; 8 is yours). Sections 5.3 (the two elements and
-the overlay owner's rules), 4.2 (where the menu layer sits), 4.5 (`NavBackRule`'s order -- you add a branch to it) and 9.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (BOTH [step 9] lines are yours; they
+are the two AR debts `_3.1` left) and the status table (1-8 done; 9 is yours). Sections 5.4 (the three floating
+elements), 4.2 (where the floating slot sits) and 9.
 REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines";
-.clinerules/40-testing.md 4.2 (this block OWES a full run -- and read the "a full run confirms, it never discovers"
-line: the targeted set goes green first), 4.2.3, 4.4, 4.5; .clinerules/30-ui-content.md.
-Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md, _3.1_POI_Card_Blocks.md (the takeover owner, whose
-layer yours sits under).
-WORKER MODEL: Opus-class -- a new layer on the card with its own lifecycle, and a change to the Back order that every
-later overlay inherits.
-TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: a new LAYER on the card and
-a new branch in the system-Back order (4.2 shared ground). Close the Card / Poi targeted set (~640 tests) GREEN FIRST,
-then start the full run, in the background, and report `editor_is_focused` at the first poll and at the end. Steps 9-11
-ride on it.
+.clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3, 4.4, 4.5;
+.clinerules/30-ui-content.md; and `_3.1_POI_Card_Blocks.md` on `place_in_ar` / `ArPlacementService` and the audio
+`MiniPlayerView` -- the chip mirrors that mini-player, so read how it is owned and released before writing a second one.
+Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
+WORKER MODEL: Opus-class -- the radial menu is the only element of this domain with real gesture maths, and the chip
+touches the AR placement owner.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: the floating slot is a sibling layer of the
+menu layer step 8 built -- it does not change the sheet's stops, its layout or its binding lifecycle (4.2). It closes on
+every PlayMode fixture whose name holds Card or Poi PLUS every fixture a grep for `ArPlacementService` / `place_in_ar`
+finds (name them; `PoiCardPlaceInArSceneTests` is certainly one). Green before you call the block done. It rides on
+step 8's full run (921/921); the next full run falls due at step 12, or sooner if a block changes a container.
 
-PART 1 -- the two decided findings, which your own work makes cheap:
-1. The More list (7a) and the kinds list (7b) are the only things on the card Back cannot dismiss, and a scroll or a
-   jump leaves them open. Build the overlay owner FIRST, then make both lists its clients: they join `NavBackRule`'s
-   order where the menu overlay sits (after the full view, before the sheet goes down) and they close on a jump and on
-   a scroll. One owner, one order, no second dismiss path -- if a list needs its own rule, say why.
-2. A bar reading a section that lives in More marks "More". While the current section is in the overflow, the More slot
-   shows THAT section's icon and word and still opens the list. Test: a card whose current section is the 7th of 8
-   marks the 7th's word in the slot, and tapping the slot still opens the list.
+PART 1 -- the two AR debts, which this block exists to close (`_3.2` TODOs, from `_3.1`'s close-out):
+1. A visitor gets NO word that a model is standing in the room while the card is at peek. The chip (5.4) floats above
+   the sheet AT EVERY STOP. Its test asserts the chip is inside the VISIBLE RECT at peek -- not merely "not hidden",
+   which is what `TheLamp_Placed_...` asserts today and why the gap survived `_3.1`.
+2. Keep Model On Switch: only the FIRST card offers Remove. The chip is that mini control: while a model stands
+   (`ArPlacementService`), it reads "Placed by the wall - Remove" and the Remove is offered on the card that placed it;
+   on another POI's card the chip says the model is placed and does not offer Remove. Mirror `MiniPlayerView`: one
+   owner, one chip, released the same way.
 
-PART 2 -- step 8:
+PART 2 -- step 9:
 
-8.1 The overlay owner (the `menu` slot of `_3.2` 4.2: the card layer over the sheet, BELOW `TakeoverView`). ONE overlay
-  at a time, a scrim, closes on Back, on a scrim tap, and after a jump; never stacked over another sheet (NN/g bottom
-  sheets, Laubheimer 2023 -- the guide's references). It owns the More and kinds lists of PART 1 too. The header gains
-  a menu button that opens the chosen `menu` element; it is drawn only when one is set.
-  ACCEPTANCE: with an overlay open, Back closes the overlay and NOT the sheet; a second Back then lowers the sheet.
-  The stops do not move (measure them, as every block since 5a has: 195.00 / 337.60 / 796.00).
-8.2 `drawer_tree` (C3): the whole ontology as an outline with counts -- families, their kinds under them, from the
-  header's menu button. The guide calls it the least discoverable and most complete element and says it is NEVER a
-  default: keep `menu`'s default at `none` and say so in its (i).
-8.3 `grid_overlay` (C4): big family tiles with counts and a Purpose / Format switch (the model has answered both axes
-  since step 2 -- read `group_by`, do not re-derive). Kiosk-like, big thumbs.
-8.4 The Menu Editor row (`none`, `drawer_tree`, `grid_overlay`), with (i), undo, live sync; and the seam 7a left open:
-  when a Menu is set, a bar's More slot opens THAT menu instead of its small list. Prove both paths.
-  TESTS: Tier 0 for the overlay owner's state (one at a time; what Back does at each layer, including with a takeover
-  open). Phase A: both elements x the four gallery cases. Phase B in LivingRoomScene with real input: the menu button
-  opens the drawer, a real tap on a leaf jumps and the overlay closes; a real tap on the scrim closes it and the card
-  keeps its scroll; real Escape closes the overlay, then lowers the sheet; with Menu set, More opens the menu.
-  VISUALS: the drawer and the grid open on the real Lamp at 390 px in EN and PT, the scrim's contrast against the card
-  behind it, and the header with its menu button. Judge item by item: 48 px targets, nothing clipped, the overlay
-  readable over the card, never colour alone.
+9.1 The `floating` slot: the card layer, above the sheet's top-right edge, visible at EVERY stop (`_3.2` 4.2) -- unlike
+  the top and bottom slots, the chrome floor does not apply to it (it costs no reading space). It sits under the menu
+  layer step 8 built, so an open drawer covers it; say that you checked that order on a real card.
+9.2 `fab_dial` (C1): one button that fans out labelled family shortcuts. Zero chrome until needed.
+9.3 `fab_radial` (C2): press-slide-release along an arc, AND a plain TAP opens the arc with every item tappable. The
+  tap path is not a nicety: it is how the element meets WCAG 2.2 SC 2.5.7 (dragging movements), and the guide cites
+  Callahan 1988 / Kurtenbach & Buxton 1994 for why the gesture is worth having at all. Both paths get a Phase B test
+  with real input; `SwipeGrab` is the one way a part takes a finger -- reuse it, do not write a second grab.
+9.4 The Editor rows: Floating Button (`none`, `fab_dial`, `fab_radial`) and Placed Model Control (`none`, `chip`,
+  default `chip`), with (i), undo, live sync.
+  TESTS: Tier 0 for the arc's geometry (which item a release angle picks, including the edges and a release outside
+  the arc) and for the chip's state (placed / not placed, this card or another). Phase A: both FABs x the gallery
+  cases, open and closed. Phase B in LivingRoomScene with real input: a real press-slide-release picks the item the
+  angle points at; a real TAP opens the arc and a second tap picks; the dial's items jump; the chip is inside the
+  visible rect AT PEEK with a model standing; Remove really removes it and the chip goes.
+  VISUALS: both FABs open and closed on the real Lamp at 390 px in EN and PT, the chip at peek / half / full, and the
+  Editor section with the two rows. Judge item by item: 48 px targets, the arc's items reachable with one thumb,
+  nothing clipped, never colour alone, and the chip legible over the camera image (it floats over AR, not over the
+  card's own background -- check it against a bright frame, not only a dark one).
 
-8.5 DOCS: `_3.2` status row 8 + proof and BOTH [step 8] TODO lines removed; `_5.1` for the Menu row and the header
-  button; `10-structure.md`; RUN TIMES after the full run.
+9.5 DOCS: `_3.2` status row 9 + proof and BOTH [step 9] TODO lines removed; `_5.1` for the two rows;
+  `10-structure.md`; the device list in `__mixed_TODOs.md` gains the radial-with-a-thumb and chip-over-camera checks if
+  they are not already there.
 
 Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
 comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
 backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: floating elements and the placed-model chip (9); the edge scrubber (10); in-flow nav blocks (11);
-`find_block` (18); layouts; presets; Editor warnings (17).
-Stop when the full EditMode suite is green, the Card / Poi fixtures are green, the FULL PlayMode suite is green with
-zero failures, the captures are judged and 8.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+OUT OF SCOPE: the edge scrubber (10); in-flow nav blocks (11); layouts; presets; Editor warnings (17); any change to
+the chrome floor or the slots of 5a-7a.
+Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are
+judged and 9.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
-
 
 
 

@@ -29,6 +29,9 @@ namespace TileStories
         // Whether this block of this POI is the one placed now
         bool IsPlaced(string poiId, string blockKey);
 
+        // The point whose model stands now (null: nothing stands) -- what the card's placed-model chip names (_3.2 step 9)
+        POIData PlacedPoi { get; }
+
         // Something changed: a model placed or removed, the wall localised or lost
         event Action Changed;
 

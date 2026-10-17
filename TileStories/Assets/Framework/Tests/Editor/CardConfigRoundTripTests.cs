@@ -98,6 +98,9 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.NavNone, s.navigation.bottom, "no bottom bar unless the wall picks one");
             // - _3.2 step 8: an old config has no Menu (never a default)
             Assert.AreEqual(CardOptions.NavNone, s.navigation.menu, "no menu button unless the wall picks one");
+            // - _3.2 step 9: an old config has no Floating Button, and a placed model gets its chip
+            Assert.AreEqual(CardOptions.NavNone, s.navigation.floating, "no floating button unless the wall picks one");
+            Assert.AreEqual(CardOptions.PlacedModelChip, s.navigation.placed_model_control, "a placed model says so above the card");
             // - _3.2 step 3: the jump and spy options load on their section 3 defaults
             Assert.IsTrue(s.navigation.follow_scroll, "the marked section follows the scroll");
             Assert.AreEqual(CardOptions.JumpRaisesFull, s.navigation.jump_raises_to, "a jump first raises the card to Full");

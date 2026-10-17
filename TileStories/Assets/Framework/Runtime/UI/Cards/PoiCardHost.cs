@@ -129,7 +129,7 @@ namespace TileStories
             Sheet.StopChanged += stop => { if (searchUI != null) searchUI.SetTopCoveredByCard(SheetStopRule.CoversScreenTop(stop)); };
             Sheet.Layer.RegisterCallback<GeometryChangedEvent>(_ => SafeAreaHelper.ApplyAsOffsets(Sheet.Layer));
             _tapOutside = new CardTapOutside(() => Clock(), () => wallSession != null ? wallSession.CardSettings : null,
-                () => wallSession != null ? wallSession.ZoomSettings : null, () => Sheet != null && Sheet.IsOpen, SelectionEventBus.Clear);
+                () => wallSession != null ? wallSession.ZoomSettings : null, () => Sheet != null && Sheet.IsOpen, () => Sheet.TapOutside());
             _owners = CardOwners.ForWall(gameObject, wallSession, Sheet.Layer, () => Media, () => Clock(), () => Sheet != null && Sheet.IsOpen, OpenAudiosCard);
         }
 

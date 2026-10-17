@@ -231,6 +231,12 @@ namespace TileStories
             public const string NavMenuByPurpose = "nav_menu_by_purpose";
             public const string NavMenuByFormat = "nav_menu_by_format";
             public const string NavMenuAll = "nav_menu_all";
+            // The card's floating slot (_3.2 step 9): the round button that opens the sections (fab_dial, fab_radial); the placed-model chip's
+            // Remove on the card that placed the model, and its words on another point's card ({0} = that point's name; "Placed by the wall"
+            // on the placing card is place_in_ar_placed)
+            public const string NavFab = "nav_fab";
+            public const string PlacedModelRemove = "placed_model_remove";
+            public const string PlacedModelOther = "placed_model_other";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -258,6 +264,7 @@ namespace TileStories
                 NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
                 NavMore, NavNextUp, NavNextUpPosition, NavNextButton, NavNextUpDone,
                 NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,
+                NavFab, PlacedModelRemove, PlacedModelOther,
             };
         }
 

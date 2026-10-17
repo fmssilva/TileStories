@@ -138,6 +138,8 @@ namespace TileStories.Editor.Tests
                                 "top" => CardOptions.NavNone,
                                 "bottom" => BuiltInNavElements.BottomBar,
                                 "menu" => BuiltInNavElements.DrawerTree,
+                                "floating" => BuiltInNavElements.FabRadial,
+                                "placed_model_control" => CardOptions.PlacedModelNone,
                                 "show_at" => CardOptions.ShowNavFullOnly,
                                 "hide_on_scroll" => CardOptions.HideOnScrollNever,
                                 "labels" => CardOptions.LabelsIcon,
@@ -164,8 +166,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 17 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 17 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 19 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 19 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1521,6 +1523,77 @@ namespace TileStories.Editor.Tests
             foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Menu))
                 StringAssert.Contains("Menu = " + element.Label, guide, "the Playmode guide walks " + element.Label);
             EditorTextChecks.AssertAscii(guide, "CardNavigationPlaymodeTestGuide");
+        }
+
+        // Detail Card > Navigation's step 9 rows on the real window. Floating Button is drawn on its default, None, right under Menu (section 7's
+        // order), listed from the registry -- None, then the floating slot's elements by their labels; Placed Model Control is drawn on its
+        // default, Chip, under Back Button. The Radial shows Bar Slots (its arc caps like a bar), the Dial does not, and Bar Slots keeps its
+        // value while hidden. Each pick is an undo step and a real Ctrl+Z brings the default back. Both helps say the default and what each
+        // option does, and the Playmode and Device guides walk both rows; all ASCII
+        [UnityTest]
+        public IEnumerator TheFloatingButtonAndPlacedModelControlRows_AreDrawnOnTheirDefaults_InSectionSevensOrder_AndEachPickIsUndoneByCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            var nav = _window.Config.card_settings.navigation;
+            Assert.AreEqual(CardOptions.NavNone, nav.floating, "the shipped wall never set Floating Button: None");
+            Assert.AreEqual(CardOptions.PlacedModelChip, nav.placed_model_control, "nor Placed Model Control: the Chip");
+            var titles = drawn.Select(d => d.Title).ToList();
+            CollectionAssert.Contains(titles, "Floating Button", "drawn on its default");
+            CollectionAssert.Contains(titles, "Placed Model Control", "drawn on its default");
+            CollectionAssert.DoesNotContain(titles, "Bar Slots", "no bar and no Radial: no Bar Slots");
+            float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
+            Assert.Less(Y("Menu"), Y("Floating Button"), "Floating Button right under Menu (section 7's order)");
+            Assert.Less(Y("Floating Button"), Y("Follow Scroll"));
+            Assert.Less(Y("Back Button"), Y("Placed Model Control"), "Placed Model Control under Back Button");
+
+            var (keys, labels) = POIEditorToolWindow.SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Floating);
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial }, keys,
+                "None, then the floating slot's elements, listed from the registry");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Dial", "Radial" }, labels, "named by their labels, never their keys");
+
+            // - the picks through the window's history (an IMGUI popup opens a native menu), each undone by a real Ctrl+Z
+            Pick(() => _window.Config.card_settings.navigation.floating = BuiltInNavElements.FabDial);
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsTrue(_window.Unsaved, "a pick is an edit");
+            CollectionAssert.DoesNotContain(drawn.Select(d => d.Title).ToList(), "Bar Slots", "the Dial lists every section: no Bar Slots");
+            Pick(() => _window.Config.card_settings.navigation.floating = BuiltInNavElements.FabRadial);
+            yield return DrawnInfoTitles(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Bar Slots", "the Radial's arc caps at Bar Slots: the row shows");
+            yield return _window.PressUndo();
+            Assert.AreEqual(BuiltInNavElements.FabDial, _window.Config.card_settings.navigation.floating, "Ctrl+Z: back to the Dial");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.floating, "Ctrl+Z again: None");
+            Assert.AreEqual(5, _window.Config.card_settings.navigation.max_slots, "Bar Slots kept its value while hidden");
+
+            Pick(() => _window.Config.card_settings.navigation.placed_model_control = CardOptions.PlacedModelNone);
+            yield return DrawnInfoTitles(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Placed Model Control", "the row stays on None");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.PlacedModelChip, _window.Config.card_settings.navigation.placed_model_control, "Ctrl+Z brings the Chip back");
+            CollectionAssert.AreEqual(new[] { "Chip", "None" }, CardOptions.PlacedModelControlLabels, "the popup's words: the default first");
+
+            var help = typeof(POIEditorToolWindow);
+            string floatingHelp = (string)help.GetMethod("CardFloatingButtonHelp", Static).Invoke(null, new object[] { NavElementRegistry.Shared });
+            foreach (string word in new[] { "None (the default)", "top-right edge", "every height", "Back", "Dial: ", "Radial: ", "slide", "tap" })
+                StringAssert.Contains(word, floatingHelp, "CardFloatingButtonHelp says " + word);
+            EditorTextChecks.AssertAscii(floatingHelp, "CardFloatingButtonHelp");
+            string chipHelp = (string)help.GetField("CardPlacedModelControlHelp", Static).GetValue(null);
+            foreach (string word in new[] { "Chip (the default)", "Placed by the wall", "Remove", "Keep Model On Switch", "None: " })
+                StringAssert.Contains(word, chipHelp, "CardPlacedModelControlHelp says " + word);
+            EditorTextChecks.AssertAscii(chipHelp, "CardPlacedModelControlHelp");
+            string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
+            foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Floating))
+                StringAssert.Contains("Floating Button = " + element.Label, guide, "the Playmode guide walks " + element.Label);
+            StringAssert.Contains("Placed Model Control = None", guide, "and the chip's option");
+            string device = (string)help.GetField("CardNavigationDeviceTestGuide", Static).GetValue(null);
+            StringAssert.Contains("Radial", device, "the device guide has the radial with a thumb");
+            StringAssert.Contains("bright patch", device, "and the chip over a bright frame");
+            EditorTextChecks.AssertAscii(guide, "CardNavigationPlaymodeTestGuide");
+            EditorTextChecks.AssertAscii(device, "CardNavigationDeviceTestGuide");
         }
 
         // Detail Card > Navigation's step 7a rows on the real window. Bottom Bar is drawn on its default, None, under Top Bar and listed

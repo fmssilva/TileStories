@@ -310,8 +310,8 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   lighting (the placed model uses the scene's lights, not AR light estimation: does it sit in the room?), anchoring drift (it is a child of the
   wall's frame: does it stay on The Lamp while walking and after a relocalisation?), frame rate with the arch standing, then with the room scan.
   Proven in Editor Play Mode only (`MockLocalizationProvider`, Tier A).
-- [place_in_ar, Keep Model On Switch] Is it confusing that only the placing point's card offers Remove From Room? If yes: the mini control
-  in `_3.2` (step 9, the placed-model chip).
+- [place_in_ar, Keep Model On Switch] Is it confusing that only the placing point's card offers Remove From Room? Built since `_3.2` step 9:
+  the placed-model chip names the point on another card and a tap on it opens the placing card (with Remove) -- check a visitor finds that.
 - [panorama gyro] Proven in the Editor with a SIMULATED `AttitudeSensor` only. On a phone: the view turns the right way in portrait, Input
   System's "Compensate Orientation" matches the screen, Android's RotationVector vs GameRotationVector drift. The Editor path falls back to drag.
 - [show_on_wall] The card drops to peek and relies on the selection keeping the marker lit: is the marker ON SCREEN (does zoom-on-select pan to it)?
@@ -321,6 +321,12 @@ for each is in `_3.1.1_Audit.md` section 12.5.
 - [_3.2 navigation, once built] With a thumb: the radial arc (step 9) and the edge scrubber (10); the pages layout vs vertical scrolling (14:
   disorienting?); Android Back steps the card down (4: `Keyboard.escapeKey`); the placed-model chip at peek (9) answers the Keep Model On
   Switch question above.
+- [_3.2 step 9, radial with a thumb] One-handed, the card at its title and half heights: press the Radial, slide to each family and let go
+  -- every family reachable by the same thumb, none under the thumb's own shadow, the 45-degree sectors wide enough not to miss (at Full the
+  button rests in the screen's top corner: is it worth reaching there at all, or should a wall pair the Radial with Show Navigation At?).
+- [_3.2 step 9, chip over the camera] Place a model at a real wall and lower the card to its title: read the chip (and the floating button)
+  over the live camera against a bright patch (a white tile, a window, sunlight) AND a dark one. Proven in the Editor over a white, a black
+  and the room-scan frame (`PoiCardFloatingSceneTests`): the dark surface >= 3:1 on white, the light 2 px edge >= 3:1 on black.
 
 **Ship blockers (before any build leaves the lab)**
 - [media licences] The Lamp's two narrations (`CardMedia/audio/*.mp3`), the two photos and the castle video (`CardMedia/video/`) have NO
@@ -422,6 +428,17 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   token refresh, with no test running. If it comes back: note what audio device changed (headphones, sleep / wake), check whether a PlayMode
   run with real audio (`PoiCardRealAudioTests`) ran just before, and whether Edit > Project Settings > Audio > Disable Unity Audio while idle
   stops it. Not a code finding today: Unity 6000.3.19f1 engine side.
+
+## A placed model with NO card open (2026-10-17, from the _3.2 step 9 review)
+
+- `_3.2` step 9 closed both AR debts: the placed-model chip now floats above the sheet at every stop, PEEK included, and
+  offers Remove on the card that placed the model (`Search_Floating_Lamp_chip_peek_en.png` and the three bright / dark frames).
+  What it cannot cover, because the chip is a CARD element: a visitor who CLOSES the card leaves the model standing in the room
+  with nothing on screen that says so and no way to take it back. Keep Model On Switch makes that easy to reach.
+  Not `_3.2`'s to answer -- that domain is "inside ONE open card" (section 1) -- so it belongs to the app shell: either the
+  placement owner keeps a control of its own outside the card (like the audio mini-player, which outlives the card), or
+  closing the card removes the model. Decide it with the AR / Stage 3 work, and look at the audio mini-player first: it already
+  solved the same shape of problem.
 
 ## POI Editor (2026-10-16, from _3.2 step 5a)
 

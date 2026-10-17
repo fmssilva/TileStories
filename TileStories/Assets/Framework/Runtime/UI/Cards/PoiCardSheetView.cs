@@ -37,6 +37,9 @@ namespace TileStories
         public CardMenuOverlay Overlay { get; }
         // The header's menu button (_3.2 step 8): beside the language chip, drawn only while the card has a Menu element; opens it
         public Button MenuButton { get; }
+        // The row just above the sheet's top-right edge at every stop (_3.2 step 9): the placed-model chip and the Floating Button element;
+        // a layer between the sheet and the menu layer
+        public FloatingSlot Floating { get; }
 
         // Raised when the visitor closes the card (the X, or a drag / swipe below peek)
         public event Action CloseRequested;
@@ -110,7 +113,9 @@ namespace TileStories
             BottomArea.AddToClassList("poi-card__bottom");
             Root.Insert(Root.IndexOf(Stack.Footer), BottomArea);
             BottomArea.Add(Stack.Footer);
-            Slots = new NavSlots(Root, Stack.Scroll, BottomArea, navElements ?? NavElementRegistry.Shared);
+            // - the floating slot is a layer of its own (the sheet clips what it holds); its element host is the floating slot's
+            Floating = new FloatingSlot(this);
+            Slots = new NavSlots(Root, Stack.Scroll, BottomArea, Floating.Elements, navElements ?? NavElementRegistry.Shared);
             Chrome = new CardChromeView(this);
 
             // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings
@@ -141,6 +146,8 @@ namespace TileStories
             Layer.Add(Root);
             Takeover = new TakeoverView(Layer);
             Overlay = new CardMenuOverlay(this);
+            // - over the sheet, under the menu layer (an open drawer covers it) and the full view
+            Floating.InsertUnder(Overlay);
             parent.Add(Layer);
 
             foreach (var dragArea in new[] { Handle, Stack.HeaderSlot })
@@ -186,6 +193,7 @@ namespace TileStories
             BindNav();
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
+            Floating.Bind(context);
         }
 
         // Build the shown card's navigation model -- with the stack's own reveal predicate, so a block the stack hides is never a target --
@@ -197,6 +205,7 @@ namespace TileStories
             Overlay.Close();
             Nav.Bind(CardNavModel.Build(_entries, _registry, _context.Settings, Stack.IsRevealed), _context);
             Slots.Bind(Nav.Model, Nav, _context);
+            Floating.Refresh();
             ShowMenuButton();
             Chrome.Bind(_context.Settings?.navigation, _context.ReduceMotion);
         }
@@ -230,6 +239,7 @@ namespace TileStories
             _entries = null;
             Nav?.Unbind();
             Slots?.Unbind();
+            Floating?.Unbind();
             if (MenuButton != null) ShowMenuButton();
             Chrome?.Unbind();
             Stack.UnbindAll();
@@ -302,6 +312,14 @@ namespace TileStories
             }
         }
 
+        // A tap on empty camera space (CardTapOutside): what is open over the card closes first -- the dial's list, the radial's arc, a bar's
+        // list, a menu -- the way a tap outside closes a popover and the order Back keeps; with nothing open the card closes, as its X does
+        public void TapOutside()
+        {
+            if (Overlay.IsOpen) Overlay.Close();
+            else CloseRequested?.Invoke();
+        }
+
         // A block asked for the full-screen view: the breadcrumb starts with this card's title
         public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage)
         {
@@ -326,6 +344,7 @@ namespace TileStories
             if (stop == Stop) return;
             Stop = stop;
             Chrome?.Apply();
+            Floating?.Refresh();
             StopChanged?.Invoke(stop);
         }
 

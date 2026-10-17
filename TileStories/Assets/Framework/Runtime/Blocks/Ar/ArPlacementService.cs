@@ -32,6 +32,8 @@ namespace TileStories
         public bool IsPlaced(string poiId, string blockKey) =>
             Placed != null && Current != null && Current.Poi?.id == poiId && Current.BlockKey == blockKey;
 
+        public POIData PlacedPoi => Placed != null ? Current?.Poi : null;
+
         public bool Place(ArPlacementRequest request)
         {
             if (!CanPlace || request?.Poi == null || string.IsNullOrEmpty(request.ModelPath)) return false;

@@ -251,6 +251,84 @@
     background-color: var(--ts-ink-3);
 }
 
+/* The floating slot (FloatingSlot, _3.2 step 9): a row in the card layer just above the sheet's top-right edge at every stop -- the
+   placed-model chip, then the Floating Button element at the right end. Its bottom is set by the view (FloatingSlotRule) */
+.poi-card-floating {
+    position: absolute;
+    left: var(--ts-space-4);
+    right: var(--ts-space-4);
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.poi-card-floating__element {
+    flex-shrink: 0;
+    margin-left: var(--ts-space-2);
+}
+
+/* The placed-model chip (PlacedModelChipView): a dark pill with a light edge (it floats over the camera image, bright or dark) -- its words,
+   and on the card that placed the model an outlined Remove. Its words wrap to a second line rather than being cut */
+.poi-card-chip {
+    flex-shrink: 1;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 var(--ts-space-1);
+    border-width: var(--ts-float-edge-width);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface);
+}
+
+.poi-card-chip__words {
+    flex-shrink: 1;
+    min-width: 0;
+    min-height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-2);
+    align-items: flex-start;
+    justify-content: center;
+    border-width: 0;
+    background-color: var(--ts-clear);
+}
+
+.poi-card-chip__text {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+/* on another point's card the words open the card that placed the model: they read as a link (accent words) */
+.poi-card-chip__words--link .poi-card-chip__text {
+    color: var(--ts-accent-text);
+}
+
+.poi-card-chip__remove {
+    flex-shrink: 0;
+    min-width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0 var(--ts-space-3);
+    align-items: center;
+    justify-content: center;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-clear);
+}
+
+.poi-card-chip__remove-label {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    margin: 0;
+    padding: 0;
+}
+
 .poi-card-mini__fill {
     width: 0;
     height: var(--ts-audio-track);

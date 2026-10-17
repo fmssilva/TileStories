@@ -1084,3 +1084,27 @@ MonoBehaviour:
       value: All sections
     - lang: pt
       value: "Todas as sec\xE7\xF5es"
+  - key: nav_fab
+    where: The name of the round floating button above the card's top-right edge that opens the card's sections
+      (as a list, or on an arc around it).
+    text:
+    - lang: en
+      value: Sections
+    - lang: pt
+      value: "Sec\xE7\xF5es"
+  - key: placed_model_remove
+    where: The button on the small chip above the card while a model placed in the room stands, on the card of the
+      point that placed it; it takes the model away.
+    text:
+    - lang: en
+      value: Remove
+    - lang: pt
+      value: Remover
+  - key: placed_model_other
+    where: The small chip above another point's card while a model placed in the room stands; {0} is the name of
+      the point whose model it is. A tap opens that point's card.
+    text:
+    - lang: en
+      value: "{0} is placed by the wall"
+    - lang: pt
+      value: "{0} est\xE1 junto \xE0 parede"

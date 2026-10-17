@@ -747,3 +747,157 @@
 .nav-grid__tile--current .nav-grid__label {
     -unity-font-style: bold;
 }
+
+/* ---- the Floating Button elements (_3.2 section 5.4, step 9): fab_dial and fab_radial in the card's floating slot ---- */
+
+/* the area round the button (NavFab.Root): what the list or the arc hangs on; the button is a dark disc with a light edge (it floats over
+   the camera image, bright or dark) and the sections icon in the accent colour, the card's X while what it opened is open */
+.nav-fab {
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+}
+
+.nav-fab__button {
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-width: var(--ts-float-edge-width);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-touch-target);
+    background-color: var(--ts-surface);
+}
+
+.nav-fab__close-bar {
+    display: none;
+}
+
+.nav-fab--open .nav-fab__close-bar {
+    display: flex;
+}
+
+.nav-fab--open .nav-fab__icon {
+    display: none;
+}
+
+/* fab_dial: the column of labelled pills, right-aligned to the button, above it (up) or under it (down); FabDialNavView sets its
+   max-height to the room on that side, past which it scrolls */
+.nav-dial__list {
+    position: absolute;
+    right: 0;
+    max-width: var(--ts-dial-max-width);
+    margin: var(--ts-space-2) 0;
+}
+
+.nav-dial__list--up {
+    bottom: 100%;
+}
+
+.nav-dial__list--down {
+    top: 100%;
+}
+
+.nav-dial__list .unity-scroll-view__content-container {
+    align-items: flex-end;
+}
+
+/* a pill: the family's icon beside its words on the floating surface, its own edge */
+.nav-dial__item {
+    flex-direction: row;
+    justify-content: flex-start;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0 var(--ts-space-4) 0 var(--ts-space-3);
+    border-width: var(--ts-float-edge-width);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface);
+}
+
+.nav-dial__item .nav-tabs__icon {
+    margin: 0 var(--ts-space-2) 0 0;
+}
+
+.nav-dial__item .nav-tabs__label {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+}
+
+/* the section being read: a bar at the pill's start AND bolder words (never colour alone) */
+.nav-dial__item .nav-tabs__underline {
+    left: var(--ts-space-1);
+    right: auto;
+    top: var(--ts-space-3);
+    bottom: var(--ts-space-3);
+    width: var(--ts-tab-underline);
+    height: auto;
+}
+
+/* fab_radial: the arc's origin is the button's centre; each item (FabRadialNavView sets its size to --ts-radial-item-width / -height and
+   its place on the arc) is a round button with the family's icon and its words under it, on their own backing so they read over the camera */
+.nav-radial__arc {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+}
+
+.nav-radial__item {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-width: 0;
+    background-color: var(--ts-clear);
+}
+
+.nav-radial__item:hover,
+.nav-radial__item:active {
+    background-color: var(--ts-clear);
+}
+
+.nav-radial__disc {
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    align-items: center;
+    justify-content: center;
+    border-width: var(--ts-float-edge-width);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-touch-target);
+    background-color: var(--ts-surface);
+}
+
+/* never wider than its item: a word longer than the footprint shows as cut (and fails its whole-word check), it never spills past the
+   item onto a neighbour or off the screen */
+.nav-radial__label {
+    max-width: 100%;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0 var(--ts-space-1);
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink);
+    white-space: nowrap;
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-surface);
+}
+
+/* the item a sliding finger points at: a thicker edge in the accent AND bolder words */
+.nav-radial__item--pointed .nav-radial__disc {
+    border-width: var(--ts-tab-underline);
+    border-color: var(--ts-accent);
+}
+
+.nav-radial__item--pointed .nav-radial__label {
+    -unity-font-style: bold;
+}
+
+/* the section being read: an accent edge AND bolder words */
+.nav-radial__item.nav-tabs__tab--current .nav-radial__disc {
+    border-color: var(--ts-accent);
+}
+
+.nav-radial__item.nav-tabs__tab--current .nav-radial__label {
+    -unity-font-style: bold;
+}
