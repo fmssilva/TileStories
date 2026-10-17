@@ -31,6 +31,11 @@ namespace TileStories
         public static string FloatingElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> floatingElement) =>
             Element((nav ?? new CardNavigationSettings()).floating, model, floatingElement);
 
+        // The key of the Edge element this card offers (family dots down the right edge of the stack's viewport), or null for none.
+        // `edgeElement`: the definition registered under a key for the EDGE slot, null when there is none
+        public static string EdgeElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> edgeElement) =>
+            Element((nav ?? new CardNavigationSettings()).edge, model, edgeElement);
+
         // One slot's answer: the wall's pick for it, when the card shows navigation, the slot has such an element and it has a choice here
         private static string Element(string key, CardNavModel model, Func<string, NavElementDefinition> elementOfSlot)
         {

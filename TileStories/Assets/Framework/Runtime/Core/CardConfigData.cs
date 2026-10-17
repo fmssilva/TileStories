@@ -87,6 +87,9 @@ namespace TileStories
         // Floating Button: the element in the card's floating slot, just above the sheet's top-right edge at every stop (a NavElementRegistry
         // key of the floating slot: fab_dial, fab_radial) | "none" (CardOptions.NavNone, the default)
         public string floating = CardOptions.NavNone;
+        // Edge: the element down the right edge of the stack's viewport (a NavElementRegistry key of the edge slot: edge_scrubber) | "none"
+        // (CardOptions.NavNone, the default). It sits over the content, so it is opt-in
+        public string edge = CardOptions.NavNone;
         // Placed Model Control: "chip" (the default: while a model placed with place_in_ar stands, a chip above the sheet says so at every
         // stop, with a Remove on the card that placed it) | "none" (CardOptions.PlacedModelControls, PlacedModelChipRule)
         public string placed_model_control = CardOptions.PlacedModelChip;

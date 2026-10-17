@@ -165,6 +165,12 @@ namespace TileStories.Tests
             yield return null;
         }
 
+        // A finger put down, moved and lifted BY HAND, one event each, for a test that must look at the card while the finger is still down
+        // (TouchDrag does the whole motion in one go): the same touch events TouchDrag sends
+        public static void TouchDown(IPanel panel, Vector2 position) => Send(panel, EventType.MouseDown, position, UnityEngine.PointerType.Touch);
+        public static void TouchMove(IPanel panel, Vector2 position) => Send(panel, EventType.MouseDrag, position, UnityEngine.PointerType.Touch);
+        public static void TouchUp(IPanel panel, Vector2 position) => Send(panel, EventType.MouseUp, position, UnityEngine.PointerType.Touch);
+
         private static void Send(IPanel panel, EventType type, Vector2 position, UnityEngine.PointerType pointer = UnityEngine.PointerType.Mouse)
         {
             var e = new Event { type = type, mousePosition = position, button = 0, clickCount = 1, pointerType = pointer };

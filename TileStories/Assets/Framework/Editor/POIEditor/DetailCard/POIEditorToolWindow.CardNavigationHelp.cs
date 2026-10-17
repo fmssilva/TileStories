@@ -91,6 +91,19 @@ namespace TileStories.Editor
             return text.ToString();
         }
 
+        // What Edge's (i) says: the slot, None, then every element an app can put there -- read from the registry
+        private static string CardEdgeHelp(NavElementRegistry registry)
+        {
+            var text = new System.Text.StringBuilder(
+                "What is drawn down the right edge of the card's content, over it. It appears only on cards with at least Show Navigation " +
+                "From blocks, and only where the content area is tall enough for every one of its tap targets: so it is absent when the " +
+                "card is low (at its title height, or at half height under a tall title) and on a card with more sections than fit. It " +
+                "lies over the right edge of any block that reaches it, so it is not on by default; use it beside, not instead of, a bar " +
+                "when a card must be navigable at every height. None (the default): nothing on the edge.");
+            foreach (var element in registry.OfSlot(NavSlotKeys.Edge)) text.Append(' ').Append(element.Help);
+            return text.ToString();
+        }
+
         private const string CardPlacedModelControlHelp =
             "What tells a visitor that a model placed in the room with a Place In AR block is standing there. Chip (the default): while " +
             "a model stands, a small chip floats above the card's top-right edge at every height of the card -- even when the card is " +
@@ -180,8 +193,8 @@ namespace TileStories.Editor
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
             "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
             "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
-            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Menu, Floating Button, Bar Slots, Placed Model Control and Hide " +
-            "While Scrolling: the open card's strip, bottom bar, menu button, floating button, placed-model chip and bottom buttons " +
+            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Menu, Floating Button, Edge, Bar Slots, Placed Model Control and Hide " +
+            "While Scrolling: the open card's strip, bottom bar, menu button, floating button, edge dots, placed-model chip and bottom buttons " +
             "appear, change or go at once.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
@@ -207,7 +220,12 @@ namespace TileStories.Editor
             "then the picked block's top comes to rest at the top of what scrolls.\n" +
             "- Set Jump Opens Card To = Keep Its Stop and tap again from half height: the card stays at half and only its content moves.\n" +
             "- Set Jump Motion = Instant: the content is there at once; Smooth: it glides. With Reduce Motion ticked it is always at once.\n" +
-            "- Pick, in Opens Block, the card's title block or a block waiting for Show After Reading: the row warns and the button is gone.\n\n" +
+            "- Pick, in Opens Block, the card's title block or a block waiting for Show After Reading: the row warns and the button is gone.\n" +
+            "- In Specific Marker > Card Content, open a Hotspot Image block and pick a block far down the card in a spot's Opens Block (its " +
+            "row shows no warning; left empty it shows none either). Open the card at full and tap that spot's pin (or its round close-up " +
+            "with the Loupes look): the card moves to the picked block and the spot's text does not open; the pin wears a small arrow. A " +
+            "spot with nothing picked still opens its text. Pick the card's title block in it: the row warns, the pin loses its arrow " +
+            "and opens its text again.\n\n" +
             "TOP BAR\n" +
             "- With Top Bar = Text Tabs, open a card with at least Show Navigation From blocks and raise it to full: a strip of words " +
             "sits under the title, one per family the card has. Lower the card to its title: the strip is gone.\n" +
@@ -290,6 +308,19 @@ namespace TileStories.Editor
             "- With the Radial, press the button, slide towards a family and let go: the card moves to the family the slide pointed " +
             "at, which is marked while you slide. Slide away from the arc, or let go on the button: nothing is picked.\n" +
             "- Set Menu = Drawer and open the menu: it covers the floating button. Set Floating Button = None: the button goes.\n\n" +
+            "EDGE\n" +
+            "- Set Edge = Scrubber and open a card with at least Show Navigation From blocks and several families, then raise it to full: " +
+            "a column of small dots sits down the right edge of the content, one per family in the family's colour, the family you read " +
+            "a larger dot with an orange edge. At the card's title height there is no column; at half height there is one only when the " +
+            "content area is tall enough for every dot (about 48 points each).\n" +
+            "- Press on the dots and drag up or down: the dot under the finger is marked and a label beside it names its family. Let go: " +
+            "the card moves to that family's first block. Drag past the first or last dot by more than one dot's height and let go: nothing " +
+            "happens and the label goes.\n" +
+            "- Without any drag, tap each dot in turn: every family is reached with a single tap.\n" +
+            "- Start a drag on the content away from the dots: the card scrolls as usual and the dots follow what you read. Scroll a " +
+            "card with a full-width picture or a filmstrip at its right edge: the dots lie over that edge, and a drag that starts " +
+            "on them is the scrubber's, not the picture's.\n" +
+            "- Set Edge = None: the dots go.\n\n" +
             "PLACED MODEL CONTROL\n" +
             "- Open a card with a Place In AR block and place its model: the card lowers to its title and a chip above its top-right " +
             "edge reads Placed by the wall with a Remove button. Raise the card: the chip follows it. Click Remove: the model goes and " +
@@ -341,6 +372,9 @@ namespace TileStories.Editor
             "With the Radial, press, slide towards each family on the arc and let go -- every family reachable with the same thumb, " +
             "none under the thumb's own shadow -- then open it with a tap and tap each family. With the Dial, open it and reach the " +
             "far end of its column.\n" +
+            "- Edge: hold the phone in one hand and reach every dot with the thumb of that hand by dragging along the column and, " +
+            "separately, by tapping; check the label beside the dot under the thumb reads whole and is not hidden by the thumb, and that " +
+            "a swipe on a filmstrip or a picture at the right edge of a block is not taken by the dots when it starts beside them.\n" +
             "- Placed Model Control: place a model at a real wall and lower the card to its title. Read the chip over the camera image " +
             "against a bright patch of the wall (a white tile, a window) and against a dark one: its words and its edge stay readable " +
             "on both, and Remove reaches with a thumb.\n" +

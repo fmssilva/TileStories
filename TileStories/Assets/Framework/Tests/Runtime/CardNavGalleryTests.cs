@@ -42,6 +42,7 @@ namespace TileStories.Tests
             [BuiltInNavElements.GridOverlay] = GridOverlayKeepsItsPromise,
             [BuiltInNavElements.FabDial] = FloatingButtonKeepsItsPromise,
             [BuiltInNavElements.FabRadial] = FloatingButtonKeepsItsPromise,
+            [BuiltInNavElements.EdgeScrubber] = EdgeScrubberKeepsItsPromise,
         };
 
         // The element an entry's slot holds now, its key and its slot element, and whether the card shows it (the chrome for a bar; the
@@ -52,6 +53,7 @@ namespace TileStories.Tests
                 NavSlotKeys.Bottom => sheet.Slots.BottomView,
                 NavSlotKeys.Menu => sheet.Slots.MenuView,
                 NavSlotKeys.Floating => sheet.Slots.FloatingView,
+                NavSlotKeys.Edge => sheet.Slots.EdgeView,
                 _ => sheet.Slots.TopView,
             };
 
@@ -61,6 +63,7 @@ namespace TileStories.Tests
                 NavSlotKeys.Bottom => sheet.Slots.BottomKey,
                 NavSlotKeys.Menu => sheet.Slots.MenuKey,
                 NavSlotKeys.Floating => sheet.Slots.FloatingKey,
+                NavSlotKeys.Edge => sheet.Slots.EdgeKey,
                 _ => sheet.Slots.TopKey,
             };
 
@@ -70,6 +73,7 @@ namespace TileStories.Tests
                 NavSlotKeys.Bottom => sheet.Chrome.BottomNavShown,
                 NavSlotKeys.Menu => sheet.Overlay.IsModal && sheet.Overlay.OpenKey == entry.ElementKey,
                 NavSlotKeys.Floating => sheet.Floating.IsShown,
+                NavSlotKeys.Edge => sheet.Slots.EdgeView is EdgeScrubberNavView edge && edge.IsShown,
                 _ => sheet.Chrome.TopShown,
             };
 
@@ -81,6 +85,7 @@ namespace TileStories.Tests
             if (slot != NavSlotKeys.Bottom) yield return sheet.Slots.BottomView;
             if (slot != NavSlotKeys.Menu) yield return sheet.Slots.MenuView;
             if (slot != NavSlotKeys.Floating) yield return sheet.Slots.FloatingView;
+            if (slot != NavSlotKeys.Edge) yield return sheet.Slots.EdgeView;
         }
 
         [UnitySetUp]
@@ -920,6 +925,85 @@ namespace TileStories.Tests
         // fab_dial and fab_radial CLOSED (step 9, section 5.4): zero chrome until needed -- the round button alone, a touch target both ways,
         // in the floating slot right above the sheet's top edge (at Full the slot rests in the sheet's top gap, never off the screen), its
         // right edge where the card's content ends, its name the card's word for the sections; nothing else of it shows
+        // edge_scrubber (step 10): its host IS the stack's viewport, flush on its right edge; one dot per section in the model's order, each in a
+        // full touch-token target that tiles the centred column with no gap, the family's colour on a dark disc (>= 3:1 over a white frame
+        // by the disc, >= 3:1 over a black one by its light edge); the section read marked by a LARGER disc with an accent edge, and no word
+        // or bubble at rest; a finger beside the column or above / below it meets the content, never the element
+        private static void EdgeScrubberKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var sheet = harness.Gallery.Sheet;
+            var view = (EdgeScrubberNavView)sheet.Slots.EdgeView;
+            var model = sheet.Nav.Model;
+            var strings = Strings(harness, entry);
+            float onePixel = CardGalleryChecks.OnePixel(view.Root);
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            var viewport = sheet.Stack.Scroll.contentViewport;
+
+            // - the host lies over the viewport itself, flush on its right edge, one touch target wide
+            Assert.AreSame(viewport, sheet.Slots.Edge.parent, "the host is a child of the stack's viewport");
+            Assert.AreEqual(viewport.worldBound.yMin, sheet.Slots.Edge.worldBound.yMin, onePixel, "from the viewport's top");
+            Assert.AreEqual(viewport.worldBound.yMax, sheet.Slots.Edge.worldBound.yMax, onePixel, "to its bottom");
+            Assert.AreEqual(viewport.worldBound.xMax, sheet.Slots.Edge.worldBound.xMax, onePixel, "flush on its right edge");
+            Assert.AreEqual(touch, sheet.Slots.Edge.worldBound.width, onePixel, "one touch target wide");
+
+            // - one dot per section, a full touch target each, tiling a column centred in the viewport
+            Assert.IsTrue(view.IsShown, "the viewport holds every target: " + model.Sections.Count + " x " + touch + " in " + viewport.layout.height);
+            Assert.AreEqual(model.Sections.Count, view.Items.Count, "one dot per section");
+            var expected = EdgeScrubberRule.Layout(model.Sections.Count, viewport.layout.height, touch);
+            Assert.AreEqual(expected.Top, view.Column.layout.y, onePixel, "the column is centred in the viewport");
+            Assert.AreEqual(expected.Height, view.Column.layout.height, onePixel, "and holds every target");
+            for (int i = 0; i < view.Items.Count; i++)
+            {
+                var item = view.Items[i];
+                var section = model.Sections[i];
+                Assert.AreEqual(touch, item.Button.layout.width, onePixel, item.Words + ": the tap target is as wide as the touch token");
+                Assert.AreEqual(touch, item.Button.layout.height, onePixel, item.Words + ": and as tall");
+                Assert.AreEqual(view.Column.worldBound.yMin + i * touch, item.Button.worldBound.yMin, onePixel, item.Words + ": the targets tile, no gap");
+                Assert.AreEqual(strings.Get(section.LabelKey), item.Words, item.Words + ": its section's word, in " + entry.Case.Language);
+                Assert.AreEqual(item.Words, item.Button.tooltip, item.Words + ": the dot is named for a long press");
+                AssertFamilyPaint(item.Fill.resolvedStyle.backgroundColor, section.ColorToken, item.Fill, item.Words + "'s dot");
+                // - the dot is drawn well inside its target (small to look at, whole to tap)
+                Assert.Less(item.Disc.layout.width, touch - onePixel, item.Words + ": the disc is smaller than its target");
+                var centre = item.Button.worldBound.center;
+                Assert.IsTrue(item.Button.worldBound.Contains(item.Disc.worldBound.center), item.Words + ": the disc sits in its target");
+                // - a finger on the dot meets the dot's own target, nothing over it
+                var picked = sheet.Layer.panel.Pick(centre);
+                Assert.IsTrue(picked == item.Button || (picked != null && item.Button.Contains(picked)), item.Words + ": the topmost thing at its centre is its own target");
+            }
+            Assert.AreEqual(view.Items[0].Button.worldBound.yMin, view.Column.worldBound.yMin, onePixel, "the first target starts the column");
+
+            // - contrast of a dot against a light and a dark block behind it (non-text, WCAG 1.4.11): the dark disc over white, its light edge over black
+            var disc = view.Items[1].Disc;
+            Assert.GreaterOrEqual(UIAccessibility.ContrastRatio(disc.resolvedStyle.backgroundColor, Color.white), UIAccessibility.MinRatioLargeTextOrUIComponent,
+                "the dark disc reads over a white block");
+            var edge = disc.resolvedStyle.borderTopColor;
+            Assert.GreaterOrEqual(UIAccessibility.ContrastRatio(new Color(edge.r * edge.a, edge.g * edge.a, edge.b * edge.a, 1f), Color.black), UIAccessibility.MinRatioLargeTextOrUIComponent,
+                "its light edge reads over a black block");
+
+            // - the section read is marked twice: a larger disc AND a larger colour disc with an accent edge; no other dot, no bubble at rest
+            var first = view.Items[0];
+            Assert.IsTrue(first.Button.ClassListContains(EdgeScrubberNavView.CurrentClass), "the first section is the one read at the top");
+            for (int i = 1; i < view.Items.Count; i++)
+                Assert.IsFalse(view.Items[i].Button.ClassListContains(EdgeScrubberNavView.CurrentClass), view.Items[i].Words + ": not the one read");
+            Assert.Greater(first.Disc.layout.width, view.Items[1].Disc.layout.width, "the current disc is larger");
+            Assert.Greater(first.Fill.layout.width, view.Items[1].Fill.layout.width, "and so is its colour");
+            Assert.AreNotEqual(view.Items[1].Disc.resolvedStyle.borderTopColor, first.Disc.resolvedStyle.borderTopColor, "with an edge of its own");
+            Assert.IsTrue(CardTokenColours.TryResolve(first.Button, "--ts-accent", out Color accent), "the accent resolves on the card");
+            Assert.AreEqual(accent, first.Disc.resolvedStyle.borderTopColor, "the accent edge");
+            Assert.IsFalse(view.Bubble.ClassListContains(EdgeScrubberNavView.BubbleShownClass), "no bubble at rest");
+            Assert.AreEqual(DisplayStyle.None, view.Bubble.resolvedStyle.display, "and it takes no room");
+            Assert.AreEqual(-1, view.Pointed, "no finger on a dot");
+
+            // - a finger beside the column or above / below it meets the content under it, never the element: the card still scrolls there
+            float x = view.Items[0].Button.worldBound.center.x;
+            Assert.IsFalse(view.Root.Contains(sheet.Layer.panel.Pick(new Vector2(viewport.worldBound.xMax - touch - 4f, view.Column.worldBound.center.y))),
+                "left of the column: the content");
+            if (view.Column.worldBound.yMin - viewport.worldBound.yMin > 8f)
+                Assert.IsFalse(view.Root.Contains(sheet.Layer.panel.Pick(new Vector2(x, view.Column.worldBound.yMin - 4f))), "above the column: the content");
+            if (viewport.worldBound.yMax - view.Column.worldBound.yMax > 8f)
+                Assert.IsFalse(view.Root.Contains(sheet.Layer.panel.Pick(new Vector2(x, view.Column.worldBound.yMax + 4f))), "below the column: the content");
+        }
+
         private static void FloatingButtonKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
         {
             var sheet = harness.Gallery.Sheet;

@@ -38,6 +38,8 @@ namespace TileStories
         public const string HotspotYField = "y";
         public const string HotspotTitleField = "title";
         public const string HotspotTextField = "text";
+        // A spot's optional jump: a block of the same card the pin moves the card to instead of opening its own text (BlockRef, step 10)
+        public const string HotspotOpensBlockField = "opens_block";
 
         public const string VideoKind = "video";
         public const string VideoInline = "inline";
@@ -181,6 +183,16 @@ namespace TileStories
                         },
                         new BlockFieldDefinition { Key = HotspotTitleField, Type = BlockFieldType.LocalizedText, Label = "Title", Required = true, Help = "The spot's name (The coat of arms)." },
                         new BlockFieldDefinition { Key = HotspotTextField, Type = BlockFieldType.LocalizedLongText, Label = "Text", Help = "What the visitor reads when they tap the spot. May stay empty. " + LongTextHelp },
+                        new BlockFieldDefinition
+                        {
+                            Key = HotspotOpensBlockField, Type = BlockFieldType.BlockRef, Label = "Opens Block", BlankIsFine = true,
+                            Help = "Optional. A block of this card the spot moves the card to when tapped, instead of opening its title and text -- " +
+                                   "the way a tab of the card's navigation does (Detail Card > Navigation > Jump Opens Card To and Jump Motion apply). " +
+                                   "A spot that opens a block shows a small arrow. Leave it empty for a normal spot. The spot keeps opening its own " +
+                                   "text when the picked block is not in the part of the card that scrolls (the title block, a look pinned under the " +
+                                   "title or to the bottom, a block the card leaves out, a block that waits for Show After Reading until the visitor " +
+                                   "has read the card) or was deleted -- the row then says which.",
+                        },
                     },
                 },
             },

@@ -175,6 +175,9 @@
     --ts-hotspot-mark-radius: 8px;
     --ts-loupe-size: 72px;
     --ts-loupe-radius: 36px;
+    /* the arrow badge a spot that opens a block wears (step 10): a dark disc with a light edge over the picture, its radius half its size */
+    --ts-hotspot-jump: 20px;
+    --ts-hotspot-jump-radius: 10px;
     /* wall_locator (Visit.uss): the strip's height, a POI's dot, this POI's dot, the visitor's ring, a neighbour's chevron */
     --ts-locator-height: 24px;
     --ts-locator-dot: 8px;
@@ -238,6 +241,13 @@
     --ts-radial-item-height: 76;
     --ts-radial-min-radius: 96;
     --ts-radial-dead-zone: 24;
+    /* the edge scrubber's dots (edge_scrubber, step 10): each dot sits in a --ts-touch-target square (its tap target, tiling the column)
+       and is a small dark disc with a light edge (it floats over the content, light or dark) holding a disc of its family's colour; the
+       family being read is a larger disc with an accent edge AND a larger colour disc -- never colour alone */
+    --ts-edge-disc: 24px;
+    --ts-edge-fill: 12px;
+    --ts-edge-disc-current: 32px;
+    --ts-edge-fill-current: 18px;
     /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
     --ts-clear: rgba(0, 0, 0, 0);
 }

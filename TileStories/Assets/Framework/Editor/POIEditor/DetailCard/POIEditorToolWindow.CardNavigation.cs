@@ -6,7 +6,7 @@
 // shows (Show Navigation From, Top Bar: step 5a; Show Navigation At: 5b; Labels, Show Counts: step 6, each only for an element
 // that reads it), what the bar under the stack shows (Bottom Bar and its Bar Slots, step 7a, Bar Slots only for an element that is a
 // bar), what the header's menu button opens over the card (Menu, step 8), the round button above the card's top-right edge (Floating
-// Button, step 9; Bar Slots for the Radial too), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
+// Button, step 9; Bar Slots for the Radial too), the dots down the right edge of the content (Edge, step 10), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
 // the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4; what tells the visitor a model placed in the room
 // stands (Placed Model Control, step 9); the Groups table last (step 6,
 // only for the Segmented bar, POIEditorToolWindow.CardNavigationGroups.cs). The other nav elements, layouts and presets join
@@ -72,6 +72,9 @@ namespace TileStories.Editor
             var (floatingKeys, floatingLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Floating);
             nav.floating = DrawReferencePopupField("Floating Button", nav.floating, floatingKeys, floatingLabels, allowNone: false,
                 CardFloatingButtonHelp(NavElementRegistry.Shared));
+            // - section 7's order: the Edge after the Floating Button (the dots down the right edge of the content, step 10)
+            var (edgeKeys, edgeLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Edge);
+            nav.edge = DrawReferencePopupField("Edge", nav.edge, edgeKeys, edgeLabels, allowNone: false, CardEdgeHelp(NavElementRegistry.Shared));
             // - a display option shows while EITHER bar reads it: both bars follow the same wall setting
             if (topElement != null && topElement.ReadsLabels || bottomElement != null && bottomElement.ReadsLabels)
                 nav.labels = DrawPopupField("Labels", nav.labels, CardOptions.Labels, CardOptions.LabelsLabels, CardLabelsHelp);

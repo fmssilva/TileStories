@@ -146,6 +146,7 @@ namespace TileStories
                     return "field '" + f.Key + "' defaults to '" + f.ChoiceDefault + "', which is not one of its Choice options";
                 if (f.LibraryDefault && (!allowItems || !(f.Type == BlockFieldType.Toggle || (f.Type == BlockFieldType.Choice && f.ChoiceDefault != null))))
                     return "field '" + f.Key + "' takes a Block Library default but is not a top-level Choice with a default or a top-level Toggle";
+                if (f.BlankIsFine && f.Type != BlockFieldType.BlockRef) return f.Type + " field '" + f.Key + "' says a blank pick is fine, but only a BlockRef field can be left unpicked";
                 if (f.Type == BlockFieldType.Choice && f.OptionLabels != null && f.OptionLabels.Count != f.Options.Count)
                     return "Choice field '" + f.Key + "' has " + f.OptionLabels.Count + " labels for " + f.Options.Count + " options";
                 if (f.Type == BlockFieldType.Items)

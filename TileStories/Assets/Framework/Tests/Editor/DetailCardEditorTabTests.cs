@@ -139,6 +139,7 @@ namespace TileStories.Editor.Tests
                                 "bottom" => BuiltInNavElements.BottomBar,
                                 "menu" => BuiltInNavElements.DrawerTree,
                                 "floating" => BuiltInNavElements.FabRadial,
+                                "edge" => BuiltInNavElements.EdgeScrubber,
                                 "placed_model_control" => CardOptions.PlacedModelNone,
                                 "show_at" => CardOptions.ShowNavFullOnly,
                                 "hide_on_scroll" => CardOptions.HideOnScrollNever,
@@ -166,8 +167,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 19 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 19 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 20 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 20 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1594,6 +1595,106 @@ namespace TileStories.Editor.Tests
             StringAssert.Contains("bright patch", device, "and the chip over a bright frame");
             EditorTextChecks.AssertAscii(guide, "CardNavigationPlaymodeTestGuide");
             EditorTextChecks.AssertAscii(device, "CardNavigationDeviceTestGuide");
+        }
+
+        // Detail Card > Navigation's step 10 row on the real window. Edge is drawn on its default, None, right under Floating Button (section
+        // 7's order), listed from the registry -- None, then the edge slot's elements by their labels; the pick is an undo step and a real
+        // Ctrl+Z brings None back. Its (i) says the default, where the dots sit and when they are absent, and the Playmode and Device
+        // guides walk the scrubber; all ASCII
+        [UnityTest]
+        public IEnumerator TheEdgeRow_IsDrawnOnItsDefault_UnderFloatingButton_ListsTheRegistrysElements_AndAPickIsUndoneByCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.edge, "the shipped wall never set Edge: None");
+            var titles = drawn.Select(d => d.Title).ToList();
+            CollectionAssert.Contains(titles, "Edge", "drawn on its default");
+            float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
+            Assert.Less(Y("Floating Button"), Y("Edge"), "Edge right under Floating Button (section 7's order)");
+            Assert.Less(Y("Edge"), Y("Follow Scroll"));
+
+            var (keys, labels) = POIEditorToolWindow.SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Edge);
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInNavElements.EdgeScrubber }, keys, "None, then the edge slot's elements, from the registry");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Scrubber" }, labels, "named by their labels, never their keys");
+
+            Pick(() => _window.Config.card_settings.navigation.edge = BuiltInNavElements.EdgeScrubber);
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsTrue(_window.Unsaved, "a pick is an edit");
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Edge", "the row stays on the Scrubber");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.edge, "Ctrl+Z brings None back");
+
+            var help = typeof(POIEditorToolWindow);
+            string edgeHelp = (string)help.GetMethod("CardEdgeHelp", Static).Invoke(null, new object[] { NavElementRegistry.Shared });
+            foreach (string word in new[] { "None (the default)", "right edge", "tap targets", "absent", "Scrubber: ", "tap target", "drag" })
+                StringAssert.Contains(word, edgeHelp, "CardEdgeHelp says " + word);
+            EditorTextChecks.AssertAscii(edgeHelp, "CardEdgeHelp");
+            string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
+            foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Edge))
+                StringAssert.Contains("Edge = " + element.Label, guide, "the Playmode guide walks " + element.Label);
+            StringAssert.Contains("Opens Block", guide, "and the hotspot spot's jump");
+            string device = (string)help.GetField("CardNavigationDeviceTestGuide", Static).GetValue(null);
+            StringAssert.Contains("Edge:", device, "the device guide has the scrubber with a thumb");
+            EditorTextChecks.AssertAscii(guide, "CardNavigationPlaymodeTestGuide");
+            EditorTextChecks.AssertAscii(device, "CardNavigationDeviceTestGuide");
+        }
+
+        // Specific Marker > Card Content (step 10): a hotspot spot's Opens Block is the SAME popup as an Open Block action's (the BlockRef
+        // drawer, no second picker) but OPTIONAL: a spot with nothing picked draws no warning (it is the normal spot), a stale pick is
+        // kept and warned by name like the action's, a pick is undoable with Ctrl+Z and the card's rule says whether it jumps
+        [UnityTest]
+        public IEnumerator AHotspotSpotsOpensBlock_IsOptional_BlankIsNotWarned_AStaleKeyIs_AndAPickIsUndoneByCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var hotspot = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.HotspotImageKind, variant = BuiltInBlocks.HotspotNumbered, display = CardOptions.DisplayInline };
+            var blank = new BlockItemData();
+            var staleRow = new BlockItemData();
+            POIEditorToolWindow.SetItemChoiceValue(staleRow, BuiltInBlocks.HotspotOpensBlockField, "block_9");
+            // - read from the window's config each time: a Ctrl+Z puts back a COPY of the config, so a row held from before is a stale object
+            BlockItemData SpotRow(int row) =>
+                _window.Config.pois[0].card.blocks[1].fields.Single(f => f.key == BuiltInBlocks.HotspotItemsField).items[row];
+            hotspot.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HotspotItemsField, items = new List<BlockItemData> { blank, staleRow } });
+            config.pois[0].card.blocks.AddRange(new[] { TextBlock("block_1", "The story of the keep."), hotspot, TextBlock("block_3", "Second text") });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_2"] = true;
+            yield return Redraw();
+
+            // - the row is drawn for EVERY spot (blank or not), as the same popup an Open Block action uses
+            _window.RectOf("Block item spots 0 opens_block#1");
+            _window.RectOf("Block item spots 1 opens_block#1");
+            Assert.IsFalse(Drawn("Block item spots 0 opens_block warning#1"), "nothing picked is the normal spot: no warning");
+            Assert.IsTrue(Drawn("Block item spots 1 opens_block warning#1"), "a deleted pick is warned under its row, like an Open Block action's");
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            Assert.AreEqual("block_9", POIEditorToolWindow.ItemChoiceValue(SpotRow(1), BuiltInBlocks.HotspotOpensBlockField), "the deleted key is kept, never rewritten by drawing");
+
+            var poi = _window.Config.pois[0];
+            var options = POIEditorToolWindow.BlockRefOptions(poi, poi.card.blocks[1], "block_9", config.card_settings.languages);
+            CollectionAssert.AreEqual(new[] { "(none)", "1. Rich Text: The story of the keep.", "3. Rich Text: Second text", "(a deleted block)" }, options.Labels,
+                "the same popup as an Open Block action's: the other blocks by row number, kind and first words");
+
+            // - a blank row still reports its problem to the RULE (nothing picked leads nowhere); only the Editor row is quiet about it
+            var built = BlockStackBuilder.Build(poi, _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois);
+            Assert.AreEqual(BlockRefRule.Problem.Blank, BlockRefRule.Check("", poi.card.blocks[1], poi, built, _ => false));
+
+            // - a pick through the window's mutation scope: the warning goes, the pin now jumps; Ctrl+Z brings the stale key and its warning back
+            Pick(() => POIEditorToolWindow.SetItemChoiceValue(SpotRow(1), BuiltInBlocks.HotspotOpensBlockField, options.KeyAt(2)));
+            Assert.IsTrue(_window.Unsaved);
+            yield return Redraw();
+            Assert.IsFalse(Drawn("Block item spots 1 opens_block warning#1"), "a block of the scrolling part: no warning");
+            built = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois);
+            var read = new BlockFieldReader(_window.Config.pois[0].card.blocks[1], "en", "en");
+            string stored = read.ItemValue(read.Items(BuiltInBlocks.HotspotItemsField)[1], BuiltInBlocks.HotspotOpensBlockField);
+            Assert.AreEqual("block_3", HotspotPinRule.JumpTarget(stored, BlockRefRule.JumpTargets(built.Entries, _ => false)), "the card now draws that pin as a jump");
+            yield return _window.PressUndo();
+            Assert.AreEqual("block_9", POIEditorToolWindow.ItemChoiceValue(SpotRow(1), BuiltInBlocks.HotspotOpensBlockField), "Ctrl+Z");
+            yield return Redraw();
+            _window.RectOf("Block item spots 1 opens_block warning#1");
         }
 
         // Detail Card > Navigation's step 7a rows on the real window. Bottom Bar is drawn on its default, None, under Top Bar and listed

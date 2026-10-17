@@ -13,76 +13,75 @@
 So start by reading them all. 
 
 
-
-## `And now: POI Card Navigation (3.2) -- step 9, the floating slot, the two FABs and the placed-model chip`
+## `And now: POI Card Navigation (3.2) -- step 10, the edge scrubber and hotspot pins that open a block`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
 not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Add a menu overlay with drawer and big tiles to the
-card" (full EditMode 1813/1813, full PlayMode 921/921) -- run the full EditMode suite and say which commit you trusted.
+them if TMP dirtied them. Baseline: the tree is clean on commit "Add floating dial, radial and placed-model chip to the
+card" (full EditMode 1829/1829; it rides on step 8's full PlayMode 921/921) -- run the full EditMode suite and say
+which commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (BOTH [step 9] lines are yours; they
-are the two AR debts `_3.1` left) and the status table (1-8 done; 9 is yours). Sections 5.4 (the three floating
-elements), 4.2 (where the floating slot sits) and 9.
-REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines";
-.clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3, 4.4, 4.5;
-.clinerules/30-ui-content.md; and `_3.1_POI_Card_Blocks.md` on `place_in_ar` / `ArPlacementService` and the audio
-`MiniPlayerView` -- the chip mirrors that mini-player, so read how it is owned and released before writing a second one.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (no [step 10] line is open; read the
+`SwipeGrabRule` pattern line, it is the law for the scrubber's drag) and the status table (1-9 done; 10 is yours).
+Sections 5.5 (both pieces), 4.2 (the `edge` slot) and 9.
+REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines" (the hotspot pin gains
+an Editor field); .clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3, 4.4, 4.5;
+.clinerules/30-ui-content.md; and `_3.1_POI_Card_Blocks.md` on `hotspot_image` -- you are adding a field to a BUILT kind,
+so read how its items and its pins work before touching them.
 Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- the radial menu is the only element of this domain with real gesture maths, and the chip
-touches the AR placement owner.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: the floating slot is a sibling layer of the
-menu layer step 8 built -- it does not change the sheet's stops, its layout or its binding lifecycle (4.2). It closes on
-every PlayMode fixture whose name holds Card or Poi PLUS every fixture a grep for `ArPlacementService` / `place_in_ar`
-finds (name them; `PoiCardPlaceInArSceneTests` is certainly one). Green before you call the block done. It rides on
-step 8's full run (921/921); the next full run falls due at step 12, or sooner if a block changes a container.
+WORKER MODEL: Sonnet-class -- both pieces follow patterns that already exist (`SwipeGrab` and the radial's geometry for
+the drag, `BlockRef` from step 4 for the pins, the registry and the gallery harness for the element). No new owner and
+no new arithmetic family. If you find yourself needing a NEW shared part, a change to `CardChromeRule`, or a second
+grab, STOP and report: that means I mis-sized the block, not that you should grow it.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: the `edge` slot is absolute over the stack's
+viewport and changes no stop, no layout flow and no harness (4.2) -- the same reasoning step 9's floating slot used. It
+closes on every PlayMode fixture whose name holds Card or Poi, plus anything a grep for `hotspot` / `BlockRef` /
+`HotspotImage` adds (name them). Green before you call the block done. It rides on step 8's full run; the next full run
+falls due at step 12.
 
-PART 1 -- the two AR debts, which this block exists to close (`_3.2` TODOs, from `_3.1`'s close-out):
-1. A visitor gets NO word that a model is standing in the room while the card is at peek. The chip (5.4) floats above
-   the sheet AT EVERY STOP. Its test asserts the chip is inside the VISIBLE RECT at peek -- not merely "not hidden",
-   which is what `TheLamp_Placed_...` asserts today and why the gap survived `_3.1`.
-2. Keep Model On Switch: only the FIRST card offers Remove. The chip is that mini control: while a model stands
-   (`ArPlacementService`), it reads "Placed by the wall - Remove" and the Remove is offered on the card that placed it;
-   on another POI's card the chip says the model is placed and does not offer Remove. Mirror `MiniPlayerView`: one
-   owner, one chip, released the same way.
+PART 1 -- none open for this step.
 
-PART 2 -- step 9:
+PART 2 -- step 10:
 
-9.1 The `floating` slot: the card layer, above the sheet's top-right edge, visible at EVERY stop (`_3.2` 4.2) -- unlike
-  the top and bottom slots, the chrome floor does not apply to it (it costs no reading space). It sits under the menu
-  layer step 8 built, so an open drawer covers it; say that you checked that order on a real card.
-9.2 `fab_dial` (C1): one button that fans out labelled family shortcuts. Zero chrome until needed.
-9.3 `fab_radial` (C2): press-slide-release along an arc, AND a plain TAP opens the arc with every item tappable. The
-  tap path is not a nicety: it is how the element meets WCAG 2.2 SC 2.5.7 (dragging movements), and the guide cites
-  Callahan 1988 / Kurtenbach & Buxton 1994 for why the gesture is worth having at all. Both paths get a Phase B test
-  with real input; `SwipeGrab` is the one way a part takes a finger -- reuse it, do not write a second grab.
-9.4 The Editor rows: Floating Button (`none`, `fab_dial`, `fab_radial`) and Placed Model Control (`none`, `chip`,
-  default `chip`), with (i), undo, live sync.
-  TESTS: Tier 0 for the arc's geometry (which item a release angle picks, including the edges and a release outside
-  the arc) and for the chip's state (placed / not placed, this card or another). Phase A: both FABs x the gallery
-  cases, open and closed. Phase B in LivingRoomScene with real input: a real press-slide-release picks the item the
-  angle points at; a real TAP opens the arc and a second tap picks; the dial's items jump; the chip is inside the
-  visible rect AT PEEK with a model standing; Remove really removes it and the chip goes.
-  VISUALS: both FABs open and closed on the real Lamp at 390 px in EN and PT, the chip at peek / half / full, and the
-  Editor section with the two rows. Judge item by item: 48 px targets, the arc's items reachable with one thumb,
-  nothing clipped, never colour alone, and the chip legible over the camera image (it floats over AR, not over the
-  card's own background -- check it against a bright frame, not only a dark one).
+10.1 `edge_scrubber` (E1, the `edge` slot): family dots down the right edge of the stack's viewport. A drag moves
+  through them with a label bubble naming the family under the thumb; a release jumps there. ACCEPTANCE, and the whole
+  point of the element: EVERY family must also be reachable by a plain TAP on its dot (WCAG 2.2 SC 2.5.7 -- the same
+  single-pointer requirement the radial met at step 9; the guide names it). The drag goes through `SwipeGrab` -- it
+  never captures at touch-down and judges the drag once past the slop, so a real finger can still scroll the card past
+  the scrubber. Dots are small, so the TAP target is not the dot: give each dot a transparent target of at least the
+  touch token and say how wide you made it.
+  The scrubber sits over the stack's viewport: check what it does to a block that reaches the right edge (a full-width
+  picture, the gallery's filmstrip) and say what you found -- if it covers content, that is a finding, not a detail.
+10.2 Hotspot pins that open a block (E4): `hotspot_image`'s items gain an optional "Opens Block" (`BlockRef`, built at
+  step 4 -- reuse the field type and its drawer, do not add a second picker). Tapping such a pin jumps to that block
+  through `IBlockHost.ScrollToBlock`. `BlockRefRule` already says when a pick leads nowhere and why: a pin whose target
+  is not reachable keeps its existing behaviour (it opens its own popup) and does NOT draw a dead jump. The Editor shows
+  the same stale-pick warning the Open Block action shows.
+  The guide chose this over a new `nav_hotspots` kind on purpose: reuse the built kind. Do not add a kind.
+  TESTS: Tier 0 for the scrubber (which family a y position picks, the edges of the track, a release outside it) and
+  for the pin's reachable / not-reachable decision. Phase A: the scrubber x the four gallery cases through
+  `CardNavGalleryDefinitions`. Phase B in LivingRoomScene with real input: a real drag down the edge moves the bubble
+  and the release lands the family's first block (relative, +-1 px); a real TAP on a dot reaches EVERY family, with no
+  drag at all; a real tap on a hotspot pin with Opens Block set jumps to its block; a pin without it still opens its
+  popup.
+  VISUALS: the scrubber at rest and mid-drag on the real Lamp at 390 px in EN and PT (the bubble's words must be whole),
+  the scrubber over a full-width picture block, and the Editor's hotspot item row with its Opens Block field. Judge
+  item by item: tap targets, contrast of the dots against both a light and a dark block behind them, never colour alone
+  (a dot is colour -- so the current family needs a second signal: size, ring, or the bubble), nothing clipped.
 
-9.5 DOCS: `_3.2` status row 9 + proof and BOTH [step 9] TODO lines removed; `_5.1` for the two rows;
-  `10-structure.md`; the device list in `__mixed_TODOs.md` gains the radial-with-a-thumb and chip-over-camera checks if
-  they are not already there.
+10.3 DOCS: `_3.2` status row 10 + proof; `_5.1` for the hotspot item field; `10-structure.md`.
 
 Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
 comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
-backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: the edge scrubber (10); in-flow nav blocks (11); layouts; presets; Editor warnings (17); any change to
-the chrome floor or the slots of 5a-7a.
-Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are
-judged and 9.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+backward-compatibility shim; real fixtures only -- never change a POI's identity fields (adding an Opens Block value to
+an existing hotspot item is content, not identity: allowed, and say which fixture you touched).
+OUT OF SCOPE: in-flow nav blocks (11); the generic teaser and full view (12); layouts (13-15); presets (17); Editor
+warnings (17); `find_block` (18); any change to the chrome floor, the slots of 5a-7a or the floating layer.
+Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are judged
+and 10.3 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
-
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

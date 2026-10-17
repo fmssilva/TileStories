@@ -130,6 +130,27 @@ namespace TileStories.Editor.Tests
                 new BlockFieldDefinition { Key = "target", Type = BlockFieldType.BlockRef, LibraryDefault = true })));
         }
 
+        // BlankIsFine (step 10: a hotspot spot's optional Opens Block) belongs to a BlockRef, top level or in a row, and to nothing else
+        [Test]
+        public void Validate_AcceptsBlankIsFineOnABlockRef_AndRefusesItOnAnyOtherType()
+        {
+            Assert.IsNull(BlockRegistry.Validate(KindWith(new BlockFieldDefinition { Key = "target", Type = BlockFieldType.BlockRef, BlankIsFine = true })));
+            Assert.IsNull(BlockRegistry.Validate(KindWith(new BlockFieldDefinition
+            {
+                Key = "rows", Type = BlockFieldType.Items,
+                ItemFields = new[] { new BlockFieldDefinition { Key = "target", Type = BlockFieldType.BlockRef, BlankIsFine = true } },
+            })), "inside a row, where a hotspot spot has it");
+            StringAssert.Contains("a blank pick is fine", BlockRegistry.Validate(KindWith(
+                new BlockFieldDefinition { Key = "words", Type = BlockFieldType.LocalizedText, BlankIsFine = true })));
+            StringAssert.Contains("a blank pick is fine", BlockRegistry.Validate(KindWith(
+                new BlockFieldDefinition { Key = "who", Type = BlockFieldType.PoiRef, BlankIsFine = true })), "a PoiRef is not a BlockRef");
+            var opens = BuiltInBlocks.HotspotImage.Field(BuiltInBlocks.HotspotItemsField).ItemFields.Single(f => f.Key == BuiltInBlocks.HotspotOpensBlockField);
+            Assert.AreEqual(BlockFieldType.BlockRef, opens.Type, "the spot's jump reuses the BlockRef type and its drawer");
+            Assert.IsTrue(opens.BlankIsFine, "optional: a spot with nothing picked is the normal spot");
+            Assert.IsFalse(opens.Required, "and never required: a spot with no pick is still shown");
+            Assert.AreEqual("Opens Block", opens.Label, "the same Editor words as an Open Block action's field");
+        }
+
         [Test]
         public void EveryRegisteredKind_StillPassesValidate()
         {

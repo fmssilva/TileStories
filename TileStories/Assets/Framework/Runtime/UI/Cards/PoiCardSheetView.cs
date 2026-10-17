@@ -25,8 +25,8 @@ namespace TileStories
         // The bottom area (_3.2 step 7a): the sticky CTA footer and, under it, the bottom navigation slot -- one part of the chrome, shown,
         // slid away and given way TOGETHER (CardChromeRule), so it is one element the chrome hides
         public VisualElement BottomArea { get; }
-        // The navigation slots (_3.2 steps 5a, 7a): the top strip between the header and the stack, the bottom slot under the footer, and
-        // the element each one shows
+        // The navigation slots (_3.2 steps 5a, 7a, 10): the top strip between the header and the stack, the bottom slot under the footer, the
+        // edge host over the stack viewport's right edge, and the element each one shows
         public NavSlots Slots { get; }
         // What of the chrome -- the top strip, the bottom area -- shows now (_3.2 step 5b, CardChromeRule)
         public CardChromeView Chrome { get; }

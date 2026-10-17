@@ -18,6 +18,7 @@ namespace TileStories
         public const string GridOverlay = "grid_overlay";
         public const string FabDial = "fab_dial";
         public const string FabRadial = "fab_radial";
+        public const string EdgeScrubber = "edge_scrubber";
 
         public static void Register(NavElementRegistry registry)
         {
@@ -123,6 +124,17 @@ namespace TileStories
                 + "Letting go away from the arc picks nothing. Needs two sections, like the tabs.",
                 NavChoice.Sections, readsBarSlots: true),
                 () => new FabRadialNavView());
+            registry.Register(new NavElementDefinition(EdgeScrubber, NavSlotKeys.Edge, "Scrubber",
+                "Scrubber: a column of small dots down the right edge of the card's content, one per section, each in the family's colour; "
+                + "the section being read is a larger dot with an accent edge. Drag a finger along the dots and a label names the section under "
+                + "it; let go and the card moves to that section's first block (letting go well past the first or last dot picks nothing). "
+                + "Every dot is also a full-size tap target, so a visitor who cannot drag reaches any section with one tap. It lies over the "
+                + "content, over the right edge of any block that reaches it (a full-width picture, a filmstrip): a finger that starts on the "
+                + "dots is the scrubber's, one that starts anywhere else scrolls the card. It is drawn only where the content area is tall "
+                + "enough for every dot's full tap target (about 48 points each), so it is absent when the card is low and on a card with "
+                + "many sections. Needs two sections, like the tabs.",
+                NavChoice.Sections),
+                () => new EdgeScrubberNavView());
         }
     }
 }

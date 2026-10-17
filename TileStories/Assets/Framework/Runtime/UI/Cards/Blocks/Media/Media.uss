@@ -475,6 +475,28 @@
     border-color: var(--ts-accent);
 }
 
+/* a spot that opens a block (HotspotPinRule) wears an arrow badge at the corner of its tap area (pin) or close-up (loupe): the open_block
+   icon on the floating surface's dark disc and light edge, so it reads over a bright or a dark picture and is no colour-only cue */
+.card-hotspot__jump {
+    display: none;
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: var(--ts-hotspot-jump);
+    height: var(--ts-hotspot-jump);
+    align-items: center;
+    justify-content: center;
+    border-width: var(--ts-float-edge-width);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-hotspot-jump-radius);
+    background-color: var(--ts-surface);
+}
+
+.card-hotspot__pin--jumps .card-hotspot__jump,
+.card-hotspot__loupe--jumps .card-hotspot__jump {
+    display: flex;
+}
+
 /* loupes: the spot on the picture is only a small bare ring (the loupe under the picture is what the visitor taps) */
 .card-hotspot--loupes .card-hotspot__number {
     width: var(--ts-hotspot-mark);

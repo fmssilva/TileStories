@@ -450,6 +450,16 @@
     border-color: var(--ts-line);
 }
 
+/* The edge slot's host (NavSlots, step 10): INSIDE the stack's viewport, absolute over its right edge, one touch target wide -- so its box
+   is exactly what the visitor can scroll and it takes no room in the flow. It never takes a finger itself (NavSlots), its element does */
+.poi-card__nav-edge {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: var(--ts-touch-target);
+}
+
 /* The bottom area hidden by CardChromeRule (CardChromeView: at peek, while the reader moves down, where the stop has no room for it):
    out of the flow -- the stack takes its room at once -- and slid below the sheet's bottom edge, which clips it (.poi-card overflow) */
 .poi-card__bottom--hidden {

@@ -78,6 +78,8 @@ namespace TileStories.Editor
             string stored = get();
             var problem = BlockRefRule.Check(stored, card.Holder, card.Poi, card.Built, _ => false);
             if (problem == BlockRefRule.Problem.None) return;
+            // - an optional pick (a hotspot spot's Opens Block): nothing picked is the normal spot, not a dead jump to warn about
+            if (problem == BlockRefRule.Problem.Blank && field.BlankIsFine) return;
             EditorGUILayout.HelpBox(CardBlockRefProblemText(field.Label, problem, CardBlockName(card.Poi, stored, card.Languages)), MessageType.Warning);
             ReportTableCellRect(probeName + " warning", probeIndex);
         }

@@ -49,11 +49,11 @@ namespace TileStories.Editor.Tests
             Assert.Throws<ArgumentException>(() => registry.Register(new NavElementDefinition(" ", NavSlotKeys.Top, "x", "x", NavChoice.Sections), () => new AppDotsView()));
             Assert.Throws<ArgumentException>(() => registry.Register(new NavElementDefinition(CardOptions.NavNone, NavSlotKeys.Top, "x", "x", NavChoice.Sections), () => new AppDotsView()),
                 "'none' is what a wall stores for no element: no element may be called that");
-            // - the edge slot (the scrubber over the stack's right edge) is the next to be built, at step 10
-            var unbuilt = Assert.Throws<ArgumentException>(() => registry.Register(AppDots("edge"), () => new AppDotsView()));
-            StringAssert.Contains("'edge'", unbuilt.Message, "the refusal names the slot");
-            CollectionAssert.AreEqual(new[] { NavSlotKeys.Top, NavSlotKeys.Bottom, NavSlotKeys.Menu, NavSlotKeys.Floating }, NavSlotKeys.Built,
-                "the slots the sheet draws today (step 7a: the bottom; step 8: the menu; step 9: the floating row)");
+            // - the in-flow nav blocks (step 11) are kinds, not a slot of the sheet: no element is registered for one
+            var unbuilt = Assert.Throws<ArgumentException>(() => registry.Register(AppDots("in_flow"), () => new AppDotsView()));
+            StringAssert.Contains("'in_flow'", unbuilt.Message, "the refusal names the slot");
+            CollectionAssert.AreEqual(new[] { NavSlotKeys.Top, NavSlotKeys.Bottom, NavSlotKeys.Menu, NavSlotKeys.Floating, NavSlotKeys.Edge }, NavSlotKeys.Built,
+                "the slots the sheet draws today (step 7a: the bottom; step 8: the menu; step 9: the floating row; step 10: the edge host)");
             Assert.Throws<ArgumentException>(() => registry.Register(AppDots(null), () => new AppDotsView()));
             Assert.Throws<ArgumentNullException>(() => registry.Register(AppDots(), null));
             CollectionAssert.IsEmpty(registry.All, "nothing refused was kept");

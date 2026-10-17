@@ -3817,6 +3817,14 @@
                                                 "flag": false,
                                                 "value": "",
                                                 "asset": ""
+                                            },
+                                            {
+                                                "key": "opens_block",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "block_2",
+                                                "asset": ""
                                             }
                                         ]
                                     },
@@ -4114,6 +4122,14 @@
                                                 "number": 0.0,
                                                 "flag": false,
                                                 "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "opens_block",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "block_33",
                                                 "asset": ""
                                             }
                                         ]

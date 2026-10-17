@@ -901,3 +901,105 @@
 .nav-radial__item.nav-tabs__tab--current .nav-radial__label {
     -unity-font-style: bold;
 }
+
+/* ---- the Edge element (_3.2 section 5.5, step 10): edge_scrubber -- family dots down the right edge of the stack's viewport ---- */
+
+/* the element fills the edge host (the viewport's full height, one touch target wide) and takes no finger itself; only the dots do.
+   Too short a viewport for every dot's full target: hidden -- invisible AND not pickable, but still laid out so the target can be measured */
+.nav-edge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.nav-edge--hidden {
+    visibility: hidden;
+}
+
+/* the column of dots: EdgeScrubberRule puts its top and height; the targets tile it with no gap */
+.nav-edge__column {
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+/* a dot's tap target: the whole touch-token square, transparent; the dot is what is drawn inside it */
+.nav-edge__item {
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ts-clear);
+}
+
+.nav-edge__item:hover,
+.nav-edge__item:active {
+    background-color: var(--ts-clear);
+}
+
+/* the dot: a dark disc with a light edge (it floats over a block, light or dark) holding the family's colour */
+.nav-edge__disc {
+    width: var(--ts-edge-disc);
+    height: var(--ts-edge-disc);
+    align-items: center;
+    justify-content: center;
+    border-width: var(--ts-float-edge-width);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-touch-target);
+    background-color: var(--ts-surface);
+}
+
+.nav-edge__fill {
+    width: var(--ts-edge-fill);
+    height: var(--ts-edge-fill);
+    border-radius: var(--ts-touch-target);
+}
+
+/* the family being read, and the one a finger is on: a LARGER disc with an accent edge AND a larger colour disc (never colour alone) */
+.nav-edge__item--current .nav-edge__disc,
+.nav-edge__item--pointed .nav-edge__disc {
+    width: var(--ts-edge-disc-current);
+    height: var(--ts-edge-disc-current);
+    border-width: var(--ts-tab-underline);
+    border-color: var(--ts-accent);
+}
+
+.nav-edge__item--current .nav-edge__fill,
+.nav-edge__item--pointed .nav-edge__fill {
+    width: var(--ts-edge-fill-current);
+    height: var(--ts-edge-fill-current);
+}
+
+/* the label bubble beside the dot under the thumb (EdgeScrubberNavView puts its top at that dot's centre): the family's words on the
+   floating surface, to the left of the edge so the thumb never covers it */
+.nav-edge__bubble {
+    display: none;
+    position: absolute;
+    right: 100%;
+    margin-right: var(--ts-space-2);
+    translate: 0 -50%;
+    padding: var(--ts-space-1) var(--ts-space-3);
+    border-width: var(--ts-float-edge-width);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-surface);
+    flex-direction: row;
+    align-items: center;
+}
+
+.nav-edge__bubble--shown {
+    display: flex;
+}
+
+.nav-edge__label {
+    margin: 0;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: nowrap;
+}

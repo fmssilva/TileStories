@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -13,6 +13,9 @@ namespace TileStories
     //   numbered -- numbered circles on the picture are the spots
     //   loupes   -- small rings mark the spots on the picture; under it a row of round close-ups (SpotlightCropRule, the
     //               header spotlight's crop rule), one per spot, is what the visitor taps
+    // A spot may also carry an Opens Block (step 10, HotspotPinRule): when the card can scroll to that block the tap moves the card there
+    // (IBlockHost.ScrollToBlock) instead of opening the spot's text, and the pin / the loupe wears a small arrow so the jump is not
+    // told by colour alone; any other spot opens its text as before.
     // Only classes here; Media.uss draws it.
     public sealed class HotspotImageBlockView : IBlockView
     {
@@ -29,7 +32,13 @@ namespace TileStories
             public Button Loupe;
             public CardImage LoupeImage;
             public VisualElement LoupeRing;
+            // The block a tap moves the card to ("" = the spot opens its own text)
+            public string Jump = "";
         }
+
+        // Classes of a spot that jumps: its pin / loupe, and the arrow badge inside it
+        public const string PinJumpsClass = "card-hotspot__pin--jumps";
+        public const string LoupeJumpsClass = "card-hotspot__loupe--jumps";
 
         // How many times a loupe enlarges the picture around its spot
         public const float LoupeZoom = 3f;
@@ -52,6 +61,7 @@ namespace TileStories
         private string _variantClass;
         private bool _loupes;
         private BlockBindContext _context;
+        private IBlockHost _host;
 
         public HotspotImageBlockView()
         {
@@ -92,6 +102,7 @@ namespace TileStories
         {
             Unbind();
             _context = context;
+            _host = context.Host;
             _loupes = context.Variant == BuiltInBlocks.HotspotLoupes;
             _variantClass = "card-hotspot--" + context.Variant;
             Root.AddToClassList(_variantClass);
@@ -117,6 +128,10 @@ namespace TileStories
                 // - loupes: the mark on the picture is a bare ring (the close-up under the picture is what is tapped)
                 spot.Number.text = _loupes ? "" : spot.Index;
                 spot.Pin.tooltip = spot.Title;
+                // - an Opens Block the card can scroll to: this spot moves the card; any other pick keeps the spot's own text
+                spot.Jump = HotspotPinRule.JumpTarget(read.ItemValue(item, BuiltInBlocks.HotspotOpensBlockField), context.JumpTargets);
+                spot.Pin.EnableInClassList(PinJumpsClass, spot.Jump.Length > 0);
+                spot.Loupe.EnableInClassList(LoupeJumpsClass, spot.Jump.Length > 0);
                 spot.Pin.EnableInClassList("card-tap", !_loupes);
                 spot.Pin.pickingMode = _loupes ? PickingMode.Ignore : PickingMode.Position;
                 Frame.Add(spot.Pin);
@@ -142,12 +157,22 @@ namespace TileStories
             DetailText.Clear();
             OpenIndex = -1;
             _context = null;
+            _host = null;
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
         }
 
-        // Open spot `index`'s text under the picture (-1, or the open spot again: close it)
-        public void Tap(int index) => Open(index == OpenIndex ? -1 : index);
+        // A tap on spot `index`: a spot that opens a block moves the card there (the card's one jump, named by this kind for the nav_jump
+        // event); any other opens its text under the picture (the open spot again, or -1: close it)
+        public void Tap(int index)
+        {
+            if (index >= 0 && index < _spots.Shown.Count && _spots.Shown[index].Jump.Length > 0)
+            {
+                _host?.ScrollToBlock(_spots.Shown[index].Jump, BuiltInBlocks.HotspotImageKind);
+                return;
+            }
+            Open(index == OpenIndex ? -1 : index);
+        }
 
         private void Open(int index)
         {
@@ -213,6 +238,7 @@ namespace TileStories
             spot.Pin.AddToClassList("card-hotspot__pin");
             spot.Number.AddToClassList("card-hotspot__number");
             spot.Pin.Add(spot.Number);
+            spot.Pin.Add(NewJumpBadge());
             spot.Loupe = new Button(() => Tap(at));
             spot.Loupe.AddToClassList("card-hotspot__loupe");
             spot.Loupe.AddToClassList("card-tap");
@@ -222,14 +248,29 @@ namespace TileStories
             spot.LoupeRing.AddToClassList("card-hotspot__loupe-ring");
             spot.Loupe.Add(spot.LoupeImage.Root);
             spot.Loupe.Add(spot.LoupeRing);
+            spot.Loupe.Add(NewJumpBadge());
             // - the close-up is placed once its round box has a size
             spot.Loupe.RegisterCallback<GeometryChangedEvent>(_ => Place());
             return spot;
         }
 
+        // The arrow a spot that opens a block wears: the card's open_block icon on a dark disc with a light edge (it sits over a picture,
+        // bright or dark); Media.uss shows it only on a pin / loupe that jumps
+        private static VisualElement NewJumpBadge()
+        {
+            var badge = new VisualElement { pickingMode = PickingMode.Ignore };
+            badge.AddToClassList("card-hotspot__jump");
+            var icon = CardIcons.Create();
+            icon.pickingMode = PickingMode.Ignore;
+            CardIcons.SetKey(icon, CardIcons.OpenBlock);
+            badge.Add(icon);
+            return badge;
+        }
+
         // Take a shown spot off the picture: its pin, its close-up and the close-up's picture
         private static void ReleaseSpot(Spot spot)
         {
+            spot.Jump = "";
             spot.Pin.RemoveFromHierarchy();
             spot.Loupe.RemoveFromHierarchy();
             spot.LoupeImage.Clear(null);

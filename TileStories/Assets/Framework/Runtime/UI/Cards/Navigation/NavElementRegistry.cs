@@ -62,7 +62,9 @@ namespace TileStories
         // A row just above the sheet's top-right edge, at every stop, in the card layer under the menu layer (the card's FloatingSlot, beside
         // the placed-model chip): one round button that opens the sections (_3.2 section 5.4, step 9)
         public const string Floating = "floating";
-        public static readonly IReadOnlyList<string> Built = new[] { Top, Bottom, Menu, Floating };
+        // Absolute over the stack's viewport, down its right edge: family dots to drag along or tap (_3.2 section 5.5, step 10)
+        public const string Edge = "edge";
+        public static readonly IReadOnlyList<string> Built = new[] { Top, Bottom, Menu, Floating, Edge };
     }
 
     // Every navigation element the card can show, with the view that draws it -- the same shape as BlockRegistry: BuiltInNavElements

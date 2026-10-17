@@ -52,5 +52,8 @@ namespace TileStories
         // When the Editor draws this field (null = always): e.g. a field only one look uses. A hidden field keeps its value
         // (FieldVisibilityRule; BlockRegistry.Validate checks the looks and fields it names)
         public FieldShownWhen ShownWhen;
+        // BlockRef only: leaving it unpicked is a normal state (the holder then just has no jump -- a hotspot pin keeps its own popup), so
+        // the Editor does not warn about a blank pick; a pick that leads nowhere still gets its warning (BlockRefRule.Check)
+        public bool BlankIsFine;
     }
 }
