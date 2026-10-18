@@ -6,7 +6,8 @@
 // shows (Show Navigation From, Top Bar: step 5a; Show Navigation At: 5b; Labels, Show Counts: step 6, each only for an element
 // that reads it), what the bar under the stack shows (Bottom Bar and its Bar Slots, step 7a, Bar Slots only for an element that is a
 // bar), what the header's menu button opens over the card (Menu, step 8), the round button above the card's top-right edge (Floating
-// Button, step 9; Bar Slots for the Radial too), the dots down the right edge of the content (Edge, step 10), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
+// Button, step 9; Bar Slots for the Radial too), the dots down the right edge of the content (Edge, step 10), the nav block every long card
+// gets after its header (Auto Nav Block, step 11a), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
 // the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4; what tells the visitor a model placed in the room
 // stands (Placed Model Control, step 9); the Groups table last (step 6,
 // only for the Segmented bar, POIEditorToolWindow.CardNavigationGroups.cs). The other nav elements, layouts and presets join
@@ -75,6 +76,11 @@ namespace TileStories.Editor
             // - section 7's order: the Edge after the Floating Button (the dots down the right edge of the content, step 10)
             var (edgeKeys, edgeLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Edge);
             nav.edge = DrawReferencePopupField("Edge", nav.edge, edgeKeys, edgeLabels, allowNone: false, CardEdgeHelp(NavElementRegistry.Shared));
+            // - section 7's order: Auto Nav Block after the Edge (a nav block put after the header of every long card, step 11a). Its choices
+            //   are the registered kinds of the navigation family, so a nav block an app (or a later step) registers is listed with no edit here
+            var (autoKeys, autoLabels) = AutoNavBlockOptions(BlockRegistry.Shared);
+            nav.auto_nav_block = DrawReferencePopupField("Auto Nav Block", nav.auto_nav_block, autoKeys, autoLabels, allowNone: false,
+                CardAutoNavBlockHelp(BlockRegistry.Shared));
             // - a display option shows while EITHER bar reads it: both bars follow the same wall setting
             if (topElement != null && topElement.ReadsLabels || bottomElement != null && bottomElement.ReadsLabels)
                 nav.labels = DrawPopupField("Labels", nav.labels, CardOptions.Labels, CardOptions.LabelsLabels, CardLabelsHelp);
@@ -117,6 +123,20 @@ namespace TileStories.Editor
             {
                 keys.Add(element.Key);
                 labels.Add(element.Label);
+            }
+            return (keys, labels);
+        }
+
+        // Auto Nav Block's choices: None, then every registered kind of the navigation family, named by its Editor name (the Block Library's)
+        internal static (List<string> Keys, List<string> Labels) AutoNavBlockOptions(BlockRegistry registry)
+        {
+            var keys = new List<string> { CardOptions.NavNone };
+            var labels = new List<string> { CardOptions.NavNoneLabel };
+            foreach (var kind in registry.Ordered)
+            {
+                if (kind.Family != BuiltInFamilies.Navigation) continue;
+                keys.Add(kind.Key);
+                labels.Add(kind.DisplayName);
             }
             return (keys, labels);
         }

@@ -1,33 +1,25 @@
-# Plan tracker -- _3.2 step 10: edge_scrubber + hotspot pins that open a block
+# Plan tracker -- _3.2 step 11a (navigation family, nav_icon_grid, Auto Nav Block)
 
-Re-read this after a compaction. Brief: the pasted step 10 brief (10.1 scrubber, 10.2 pins, 10.3 docs). Tick as you go.
+GATE (done): pushed 1 (dad3d37..04f92db); Game view + POI Editor captured (`TestEvidence/Gate/gate_3_2_step11a_gameview.png`,
+`TestEvidence/Editor/230_CardNavigation_Edge_620.png`); compile ExitCode 0; SDF fonts clean; EditMode 1839/1839 (63 s) on clean 04f92db.
+PART 1 (done): Edge row judged at 620 pt -- no finding.
 
-## GATE (done 2026-10-17)
-- [x] UnityMCP answered (telemetry_status true)
-- [x] `git push`: 1 commit pushed (3de449c..dad3d37)
-- [x] Game view + POI Editor captures opened (`TestEvidence/Gate/gate_3_2_step10_*.png`), no window left
-- [x] Tree compiled (0 error CS), both SDF fonts clean (git status clean)
-- [x] EditMode baseline 1829/1829 (61 s) on clean dad3d37
+Decisions: BlockBindContext.Nav + NavController.Bound (the grid draws on the model the sheet binds AFTER the stack); inserted key
+`auto:nav_icon_grid` (authored keys are generated block_N, never a ':'); threshold counts targets with nothing revealed (the stack never
+changes on a reveal); "authors its own" = a navigation-family entry in the stack; kind off in the Block Library / none / unknown /
+non-navigation key -> nothing; family icon `grid` + `--ts-family-navigation` + `family_navigation` words (the Editor names it);
+nav_icon_grid = format interact, look `tiles`, NavTab tiles, styles in Navigation.uss, hidden below 2 sections (rule 2.5.7);
+Editor options listed from the registry (navigation-family kinds).
 
-## Design (decided)
-- Edge slot host = a child of `Stack.Scroll.contentViewport` (absolute, top/bottom/right 0): its box IS the viewport, no geometry code, no new owner.
-- `EdgeScrubberRule` (pure): Fits / Track / IndexAt. Dots tile at the touch-token pitch (48 px), centred. Not Fits -> rail not drawn. Release > 1 pitch past an end picks nothing.
-- `EdgeScrubberNavView`: column of 48 x 48 transparent buttons + dot inside, dark capsule; current = bigger dot + accent ring; bubble beside the dot under the thumb; SwipeGrab (ClaimsVertical) on the column; tap = button click = JumpTo(i, "edge_scrubber").
-- `HotspotPinRule.JumpTarget(stored, jumpTargets)` pure. Pin with reachable target jumps via Host.ScrollToBlock + shows the open_block arrow; else opens its popup.
-- Editor: `DrawBlockRefRow` gets a "blank is fine" flag for the optional field.
-- Fixture content: lamp block_35 spot 0 -> block_2; block_36 spot 1 -> block_33 (both config.json copies).
+- [x] S1 family (85, InNav off) + grid icon + token + CardStrings rows + BuiltInBlocks.Navigation (nav_icon_grid) + NavIconGridBlockView
+      + BlockBindContext.Nav + NavController.Bound; FamilyRegistryTests updated; compile + EditMode
+- [x] S2 CardNavigationSettings.auto_nav_block + BlockStackBuilder.InsertAutoNavBlock; AutoNavBlockTests (Tier 0, every branch)
+- [x] S3 Editor row Auto Nav Block (after Edge) + (i) + guides; DetailCardEditorTabTests (real click, Ctrl+Z, walker), Block Library +
+      Add block; round trip / live sync rows
+- [x] S4 Phase A: nav_icon_grid in CardNavGalleryDefinitions x 5 cases + CardNavGalleryTests checks + renders judged
+- [x] S5 Phase B: PoiCardNavBlockSceneTests (Lamp yes / Military no, real tile taps land +-1 px, spy + scroll unaffected, stops)
+- [x] S6 captures judged (Lamp EN + PT DONE: Search_NavIconGrid_Lamp_full_{en,pt}.png; Editor rows pending: Unity was covered, the first try caught another app and was deleted): Lamp grid 390 EN + PT, Block Library row, Auto Nav Block row
+- [x] S7 docs: _3.2 status + TODO, _3.1 kinds/families, _5.1, 10-structure, RUN TIMES
+- [x] S8 full EditMode; Card / Poi targeted set green; FULL PlayMode in the background (editor_is_focused first / last poll)
 
-## Steps
-- [x] 1 Pure rules + tests: EdgeScrubberRule, HotspotPinRule (+ Tier 0 tests)
-- [x] 2 Config + slot plumbing: CardNavigationSettings.edge, NavSlotKeys.Edge, NavSlotRule.EdgeElement, NavSlots host, registry key, sheet hookup
-- [x] 3 EdgeScrubberNavView + tokens + USS
-- [x] 4 Hotspot opens_block field + view + Editor drawer flag + fixture content
-- [x] 5 Editor: Edge row (+ (i), guides), walker 20, round trip, registry tests
-- [x] 6 Phase A: gallery key + CardNavGalleryTests edge slot + element check
-- [x] 7 Phase B: PoiCardEdgeSceneTests (+ hotspot pin tests)
-- [x] 8 Captures judged (Lamp rest + mid-drag EN/PT, over full-width picture, filmstrip finding, Editor hotspot row, Edge row)
-- [x] 9 Docs: _3.2 row 10 + 5.5 + 4.2, _5.1 hotspot field, 10-structure.md, _3.1 hotspot line, __mixed_TODOs if any
-- [x] 10 Closing: full EditMode + targeted PlayMode (every Card/Poi fixture + hotspot/BlockRef/HotspotImage greps); final report 60-finishing 6.4
-
-## Findings log
-(fill in as found)
+CLOSED: EditMode 1856/1856 (66 s); Card / Poi 32 fixtures 742/742 (2454 s); FULL PlayMode 978/978 (2892 s, unfocused at first poll, focused at the end).

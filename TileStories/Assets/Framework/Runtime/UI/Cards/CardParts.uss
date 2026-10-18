@@ -484,6 +484,34 @@
     top: 78%;
 }
 
+/* grid (the navigation family, _3.2 step 11a): a box split in four -- the frame as the box, bar a down its middle, bar b across it */
+.card-icon--grid .card-icon__frame,
+.card-icon--grid .card-icon__bar {
+    display: flex;
+}
+
+.card-icon--grid .card-icon__frame {
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--grid .card-icon__bar--a {
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: var(--ts-icon-stroke);
+    height: auto;
+    translate: -50% 0;
+}
+
+.card-icon--grid .card-icon__bar--b {
+    top: 50%;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: var(--ts-icon-stroke);
+    translate: 0 -50%;
+}
+
 /* ---- the pill button: ONE shape for every block that has one (actions' pill_row, story_chapters' Previous / Next).
    The radius is half the touch-target height (--ts-pill-radius), so short words give a stadium, not an egg ---- */
 

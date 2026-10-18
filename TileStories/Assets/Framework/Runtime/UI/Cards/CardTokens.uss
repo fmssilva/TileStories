@@ -49,6 +49,7 @@
     --ts-family-play: rgb(242, 197, 124);
     --ts-family-visit: rgb(176, 168, 224);
     --ts-family-community: rgb(232, 168, 124);
+    --ts-family-navigation: rgb(196, 214, 120);
 
     /* Type */
     --ts-size-body: 16px;

@@ -54,6 +54,10 @@ namespace TileStories
         // Raised as every jump starts, whoever asked for it: what closes an open menu or list over the card (CardMenuOverlay)
         public event Action Jumped;
 
+        // Raised at the end of every Bind, with the new Model in place: what a nav BLOCK in the stack draws on (the stack binds before the
+        // model exists), and again on a reveal, which rebuilds the model without rebinding the blocks
+        public event Action Bound;
+
         // The words the stack draws above a block ("" when it draws none): what an element that names a block says (Up next)
         public string HeadingOf(string blockKey) => _stack.HeadingOfBlock(blockKey);
 
@@ -103,6 +107,7 @@ namespace TileStories
                 _lastLanding = float.NaN;
                 SetCurrent(_jumpSection);
                 SetCurrentBlock(_jumpTarget);
+                Bound?.Invoke();
                 return;
             }
             EndJump();
@@ -112,6 +117,7 @@ namespace TileStories
             SetCurrent(NavScrollRule.Spy(follows, -1, MeasuredSection(), start));
             int keptBlock = keptBlockKey != null ? IndexOfTarget(keptBlockKey) : -1;
             SetCurrentBlock(NavScrollRule.Spy(follows, -1, MeasuredTarget(), keptBlock >= 0 ? keptBlock : Model.Targets.Count > 0 ? 0 : -1));
+            Bound?.Invoke();
         }
 
         // The card closed: nothing to drive

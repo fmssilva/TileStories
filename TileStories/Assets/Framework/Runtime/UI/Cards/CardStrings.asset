@@ -706,6 +706,14 @@ MonoBehaviour:
       value: Community
     - lang: pt
       value: Comunidade
+  - key: family_navigation
+    where: The name of the Navigation family, which holds the blocks that move the visitor inside
+      the card (an icon grid of its sections). It is never a section of the card's own navigation.
+    text:
+    - lang: en
+      value: Navigation
+    - lang: pt
+      value: Navegação
   - key: family_meta
     where: The words a visitor reads for the Sources family, which says where the content
       came from. These blocks close the card, so it is also what a contents list calls its last section.
@@ -980,6 +988,13 @@ MonoBehaviour:
       value: Feedback
     - lang: pt
       value: Opinião
+  - key: kind_nav_icon_grid
+    where: The name of the icon grid block (a grid of the card's sections) as one kind of block.
+    text:
+    - lang: en
+      value: Sections grid
+    - lang: pt
+      value: Grelha de secções
   - key: kind_sources
     where: The name of the sources block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
     text:

@@ -9,6 +9,8 @@ namespace TileStories
     // CardNavGalleryTests (to assert) read, so the two cannot drift apart. To add an element: add its key to ElementKeys (one row);
     // to add a case: add one row to Cases. A case's card is made of real gallery blocks (CardGalleryDefinitions' self-contained
     // entries), copied as often as the case asks, each copy its own block, so the element runs over a real stack.
+    // The in-flow nav BLOCKS (_3.2 section 5.6: nav_icon_grid) are rows of BlockKinds: their wall sets Auto Nav Block to the kind and
+    // every slot to none, so the block reaches the card through the real BlockStackBuilder step, right after the header.
     public static class CardNavGalleryDefinitions
     {
         // One fixture card: which gallery block, how many copies of it (in this order, after the header)
@@ -31,11 +33,14 @@ namespace TileStories
             public readonly string Name;
             public readonly string ElementKey;
             public readonly Case Case;
+            // True for a nav block kind (BlockKinds), drawn in the stack's flow instead of a slot
+            public readonly bool IsBlock;
 
-            public Entry(string elementKey, Case fixtureCase)
+            public Entry(string elementKey, Case fixtureCase, bool isBlock = false)
             {
                 ElementKey = elementKey;
                 Case = fixtureCase;
+                IsBlock = isBlock;
                 Name = "Nav_" + elementKey + "_" + fixtureCase.Key;
             }
         }
@@ -50,6 +55,12 @@ namespace TileStories
             BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial,
             BuiltInNavElements.EdgeScrubber,
         };
+
+        // The nav block kinds the gallery shows (_3.2 section 5.6), every case drawn for each, the same way
+        public static readonly IReadOnlyList<string> BlockKinds = new[] { BuiltInBlocks.NavIconGridKind };
+
+        // What SlotOf says for a nav block: no slot, the stack's own flow
+        public const string InFlow = "in_flow";
 
         // The gallery's walls show navigation from 2 targets, so the small cases draw their element too (the default threshold is
         // Phase B's to prove, on the real wall)
@@ -84,17 +95,20 @@ namespace TileStories
             ("feedback_thumbs_short", 3),
             ("sources_list_short", 1));
 
-        public static readonly IReadOnlyList<Entry> All = ElementKeys.SelectMany(key => Cases.Select(c => new Entry(key, c))).ToList();
+        // Every element over every case, then every nav block over every case
+        public static readonly IReadOnlyList<Entry> All = ElementKeys.SelectMany(key => Cases.Select(c => new Entry(key, c)))
+            .Concat(BlockKinds.SelectMany(key => Cases.Select(c => new Entry(key, c, isBlock: true)))).ToList();
 
-        // The slot an entry's element is registered for (top when the registry does not know it)
+        // The slot an entry's element is registered for (top when the registry does not know it; InFlow for a nav block)
         public static string SlotOf(Entry entry) =>
-            NavElementRegistry.Shared.TryGet(entry.ElementKey, out var element) ? element.Slot : NavSlotKeys.Top;
+            entry.IsBlock ? InFlow : NavElementRegistry.Shared.TryGet(entry.ElementKey, out var element) ? element.Slot : NavSlotKeys.Top;
 
         // A menu element (step 8): judged OPEN over the card, the way the header's menu button shows it
         public static bool IsMenu(Entry entry) => SlotOf(entry) == NavSlotKeys.Menu;
 
         // The fabricated wall of an entry: the card gallery's own, with the entry's language offered and navigation from 2 targets. The
-        // element is the wall's pick for ITS slot and every other slot holds nothing, so each render judges one element alone
+        // element is the wall's pick for ITS slot and every other slot holds nothing, so each render judges one element alone; a nav block
+        // is the wall's Auto Nav Block with every slot empty
         public static WallConfigData Wall(Entry entry)
         {
             var wall = CardGalleryDefinitions.Taxonomy();
@@ -104,6 +118,8 @@ namespace TileStories
             wall.card_settings.navigation.menu = slot == NavSlotKeys.Menu ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.floating = slot == NavSlotKeys.Floating ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.edge = slot == NavSlotKeys.Edge ? entry.ElementKey : CardOptions.NavNone;
+            // - a nav block comes in through Auto Nav Block (the builder's own step), every slot empty
+            wall.card_settings.navigation.auto_nav_block = entry.IsBlock ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.min_blocks = ShowNavigationFrom;
             if (entry.Case.Language != "en") wall.card_settings.languages = new List<string> { "en", entry.Case.Language };
             return wall;

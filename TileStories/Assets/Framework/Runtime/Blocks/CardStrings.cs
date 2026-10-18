@@ -166,6 +166,7 @@ namespace TileStories
             public const string FamilyVisit = "family_visit";
             public const string FamilyCommunity = "family_community";
             public const string FamilyMeta = "family_meta";
+            public const string FamilyNavigation = "family_navigation";
 
             // The words a visitor reads for each format (_3.2 section 2.4, CardOptions.Formats): what a navigation element labels
             // its section with when the wall groups the card by format (Group By = format) instead of by family
@@ -210,6 +211,7 @@ namespace TileStories
             public const string KindTodayMap = "kind_today_map";
             public const string KindRelated = "kind_related";
             public const string KindFeedback = "kind_feedback";
+            public const string KindNavIconGrid = "kind_nav_icon_grid";
             public const string KindSources = "kind_sources";
 
             // The words a visitor reads for each of the framework's default navigation Groups (_3.2 section 3, the segmented element): a
@@ -254,12 +256,12 @@ namespace TileStories
                 MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters, Model3DHint, Model3DLoading,
                 Panorama360DragHint, Panorama360GyroHint, Panorama360Loading, PlaceInArButton, PlaceInArRemove, PlaceInArPlaced, PlaceInArNotLocalised,
                 LanguageSwitch,
-                FamilyAbout, FamilyMedia, FamilyGuides, FamilyStories, FamilyAr, FamilyPlay, FamilyVisit, FamilyCommunity, FamilyMeta,
+                FamilyAbout, FamilyMedia, FamilyGuides, FamilyStories, FamilyAr, FamilyPlay, FamilyVisit, FamilyCommunity, FamilyNavigation, FamilyMeta,
                 FormatRead, FormatLook, FormatWatch, FormatListen, FormatModel, FormatInteract,
                 KindHeader, KindStatus, KindQuickFacts, KindRichText, KindFunFact, KindPullQuote, KindProcessSteps, KindSwatches,
                 KindActions, KindGallery, KindBeforeAfter, KindZoomImage, KindHotspotImage, KindVideo, KindModel3D, KindPanorama360,
                 KindAudioGuide, KindTimeline, KindPerson, KindStoryChapters, KindComparePoints, KindDialogue, KindShowOnWall, KindPlaceInAr,
-                KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback,
+                KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback, KindNavIconGrid,
                 KindSources,
                 NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
                 NavMore, NavNextUp, NavNextUpPosition, NavNextButton, NavNextUpDone,

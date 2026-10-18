@@ -13,73 +13,74 @@
 So start by reading them all. 
 
 
-## `And now: POI Card Navigation (3.2) -- step 10, the edge scrubber and hotspot pins that open a block`
+## `And now: POI Card Navigation (3.2) -- step 11a, the navigation family, the icon grid and Auto Nav Block`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
 not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Add floating dial, radial and placed-model chip to the
-card" (full EditMode 1829/1829; it rides on step 8's full PlayMode 921/921) -- run the full EditMode suite and say
-which commit you trusted.
+them if TMP dirtied them. Baseline: the tree is clean on commit "Add edge scrubber and hotspot pins that open a block"
+(full EditMode 1839/1839; it rides on step 8's full PlayMode 921/921) -- run the full EditMode suite and say which
+commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (no [step 10] line is open; read the
-`SwipeGrabRule` pattern line, it is the law for the scrubber's drag) and the status table (1-9 done; 10 is yours).
-Sections 5.5 (both pieces), 4.2 (the `edge` slot) and 9.
-REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines" (the hotspot pin gains
-an Editor field); .clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3, 4.4, 4.5;
-.clinerules/30-ui-content.md; and `_3.1_POI_Card_Blocks.md` on `hotspot_image` -- you are adding a field to a BUILT kind,
-so read how its items and its pins work before touching them.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 11a] line is yours; the
+[step 12] expandable line is NOT) and the status table (1-10 done; step 11 was split, 11a is yours, 11b is next).
+Sections 5.6 (the in-flow blocks), 2.2 (the `navigation` family row, held back since step 1 on purpose), 3 (the Auto
+Nav Block row) and 9.
+REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` section 3 and the kind-registration rules -- THIS BLOCK ADDS A
+BLOCK KIND, not a nav element, so it goes through `BlockRegistry`, the Block Library and Card Content like any other
+kind; _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines"; .clinerules/40-testing.md 4.2 (this block
+OWES a full run -- and the targeted set goes green FIRST), 4.2.3, 4.4, 4.5; .clinerules/20-code-quality.md.
 Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Sonnet-class -- both pieces follow patterns that already exist (`SwipeGrab` and the radial's geometry for
-the drag, `BlockRef` from step 4 for the pins, the registry and the gallery harness for the element). No new owner and
-no new arithmetic family. If you find yourself needing a NEW shared part, a change to `CardChromeRule`, or a second
-grab, STOP and report: that means I mis-sized the block, not that you should grow it.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: the `edge` slot is absolute over the stack's
-viewport and changes no stop, no layout flow and no harness (4.2) -- the same reasoning step 9's floating slot used. It
-closes on every PlayMode fixture whose name holds Card or Poi, plus anything a grep for `hotspot` / `BlockRef` /
-`HotspotImage` adds (name them). Green before you call the block done. It rides on step 8's full run; the next full run
-falls due at step 12.
+WORKER MODEL: Opus-class -- it changes `BlockStackBuilder`, which every card in the project is built by, and it
+registers the family that step 1 deliberately left out.
+TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: `BlockStackBuilder` is a
+rule the whole domain reads (4.2 shared ground), and Auto Nav Block changes what EVERY card contains. Close the Card /
+Poi targeted set green FIRST (~707 tests), then start the full run, in the background; report `editor_is_focused` at
+the first poll and at the end. 11b and the blocks after it ride on it.
 
-PART 1 -- none open for this step.
+PART 1 -- the one evidence gap step 10 left:
+1. Capture the Navigation section of the Editor with the Edge row in it, at 620 pt, and judge it item by item like
+   every other row capture (`_5.1` section 0). No code change expected -- if the capture shows one, that is a finding.
 
-PART 2 -- step 10:
+PART 2 -- step 11a:
 
-10.1 `edge_scrubber` (E1, the `edge` slot): family dots down the right edge of the stack's viewport. A drag moves
-  through them with a label bubble naming the family under the thumb; a release jumps there. ACCEPTANCE, and the whole
-  point of the element: EVERY family must also be reachable by a plain TAP on its dot (WCAG 2.2 SC 2.5.7 -- the same
-  single-pointer requirement the radial met at step 9; the guide names it). The drag goes through `SwipeGrab` -- it
-  never captures at touch-down and judges the drag once past the slop, so a real finger can still scroll the card past
-  the scrubber. Dots are small, so the TAP target is not the dot: give each dot a transparent target of at least the
-  touch token and say how wide you made it.
-  The scrubber sits over the stack's viewport: check what it does to a block that reaches the right edge (a full-width
-  picture, the gallery's filmstrip) and say what you found -- if it covers content, that is a finding, not a detail.
-10.2 Hotspot pins that open a block (E4): `hotspot_image`'s items gain an optional "Opens Block" (`BlockRef`, built at
-  step 4 -- reuse the field type and its drawer, do not add a second picker). Tapping such a pin jumps to that block
-  through `IBlockHost.ScrollToBlock`. `BlockRefRule` already says when a pick leads nowhere and why: a pin whose target
-  is not reachable keeps its existing behaviour (it opens its own popup) and does NOT draw a dead jump. The Editor shows
-  the same stale-pick warning the Open Block action shows.
-  The guide chose this over a new `nav_hotspots` kind on purpose: reuse the built kind. Do not add a kind.
-  TESTS: Tier 0 for the scrubber (which family a y position picks, the edges of the track, a release outside it) and
-  for the pin's reachable / not-reachable decision. Phase A: the scrubber x the four gallery cases through
-  `CardNavGalleryDefinitions`. Phase B in LivingRoomScene with real input: a real drag down the edge moves the bubble
-  and the release lands the family's first block (relative, +-1 px); a real TAP on a dot reaches EVERY family, with no
-  drag at all; a real tap on a hotspot pin with Opens Block set jumps to its block; a pin without it still opens its
-  popup.
-  VISUALS: the scrubber at rest and mid-drag on the real Lamp at 390 px in EN and PT (the bubble's words must be whole),
-  the scrubber over a full-width picture block, and the Editor's hotspot item row with its Opens Block field. Judge
-  item by item: tap targets, contrast of the dots against both a light and a dark block behind them, never colour alone
-  (a dot is colour -- so the current family needs a second signal: size, ring, or the bubble), nothing clipped.
+11a.1 The `navigation` family, registered at last (`_3.2` 2.2 says step 11, with its first kind, and why: a family
+  with no kinds would have been a speculative row). Order 85, `InNav = false` -- a nav block is never a nav TARGET, so
+  it must not appear as a section in any element. Prove that with a test on a card that holds one: the model's section
+  count does not change.
+11a.2 Kind `nav_icon_grid` (D1): the POI's families as a grid of icon + word + count, drawn after the header; a tap
+  jumps through `NavController`. It is a BLOCK, so it needs everything a kind needs -- a `BlockKindDefinition` with its
+  Format, its looks, its help, a row in the Block Library, a place in "+ Add block" under Navigation, and the family
+  icons and colour tokens step 6 built. Reuse the item parts the elements already share (`NavItems`, `NavTab`,
+  `NavTint`); if a grid needs a new shared part, say which and why.
+11a.3 **Auto Nav Block** (the row in section 3): when a wall sets it, a card with at least Show Navigation From targets
+  gets that nav block inserted after its header -- UNLESS the POI already authors a nav block of its own, in which case
+  nothing is inserted. Default `none`.
+  HOW, and this is the risk of the block: the insertion belongs in `BlockStackBuilder`, after the skip rules and the
+  Block Order, as its own small step with its own name -- not threaded through the existing passes. An inserted block
+  has no authored key: give it one that cannot collide with an authored key and say what you chose, because `BlockRef`,
+  the spy, the seen state and `CardLocalState` all key off it.
+  ACCEPTANCE: the stack of every card that does NOT meet the condition is byte-for-byte what it was before this block
+  (assert that on The Lamp and on the two small fixtures); a card that does meet it gains exactly one block, in second
+  place; a POI that authors its own nav block gains none.
+11a.4 The Auto Nav Block Editor row (`none`, `nav_icon_grid`; `nav_contents` joins at 11b), with (i), undo, live sync.
+  TESTS: Tier 0 on the insertion rule (every branch above, including the "already authored" one and a card exactly at
+  the threshold). Phase A: `nav_icon_grid` x the four gallery cases. Phase B in LivingRoomScene with real input: a real
+  tap on a grid tile lands its family's first block; the auto block appears on The Lamp and not on Lamp Military; the
+  spy and the scroll are unaffected by the inserted block.
+  VISUALS: the grid on the real Lamp at 390 px in EN and PT, the Block Library row, and the Auto Nav Block row.
 
-10.3 DOCS: `_3.2` status row 10 + proof; `_5.1` for the hotspot item field; `10-structure.md`.
+11a.5 DOCS: `_3.2` status row 11a + proof and the [step 11a] TODO removed; `_3.1` wherever it lists the kinds or the
+  families (a new kind and a new family are facts that file states); `_5.1`; `10-structure.md`; RUN TIMES after the
+  full run.
 
 Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
 comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
-backward-compatibility shim; real fixtures only -- never change a POI's identity fields (adding an Opens Block value to
-an existing hotspot item is content, not identity: allowed, and say which fixture you touched).
-OUT OF SCOPE: in-flow nav blocks (11); the generic teaser and full view (12); layouts (13-15); presets (17); Editor
-warnings (17); `find_block` (18); any change to the chrome floor, the slots of 5a-7a or the floating layer.
-Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are judged
-and 10.3 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
+OUT OF SCOPE: `nav_contents`, Reading Time and the seen ticks (11b); `nav_rails` and `nav_bento` (15); the generic
+teaser and full view (12); layouts; presets; Editor warnings (17).
+Stop when the full EditMode suite is green, the Card / Poi fixtures are green, the FULL PlayMode suite is green with
+zero failures, the captures are judged and 11a.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
 

@@ -420,6 +420,11 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   alone (3/3) at once and in both later full runs (1795/1795, 1795/1795), and in the baseline (1769/1769, Unity not focused). Not reproduced,
   so not yet a finding. It is a real-window drag, so a stray real pointer or focus change during the run is the first hypothesis (same family as
   the 5a "Test harness" notes); if it comes back, reproduce it with the cursor moved across Unity during the run.
+  SEEN AGAIN (2026-10-17, _3.2 step 11a): the same 3-for-2 in one full EditMode run (1856, Unity focused, right after two POI Editor capture
+  windows had been opened and closed), green alone (3/3) and in the next full run (1856/1856). Twice now, both times in the first full run after
+  something else drove the Editor's windows -- reproduce it by opening and closing a utility window just before the run. In the same block one
+  unfocused full run also had `KeywordListFieldTypingTests.TypingTwoKeywordsWithACommaBetween_GivesTwoKeywords` miss its focus precondition
+  (green alone, unfocused), the step 6 note's pattern.
 
 - OPEN (2026-10-17, seen once at _3.2 step 8): **the Editor crashed while IDLE, out of memory, from a native audio assertion flood.** After a full
   EditMode run had ended (21:16) and the gallery scene reloaded, the line `Access version should be odd when acquiring lock` (native,

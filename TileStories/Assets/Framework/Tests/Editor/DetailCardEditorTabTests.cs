@@ -140,6 +140,7 @@ namespace TileStories.Editor.Tests
                                 "menu" => BuiltInNavElements.DrawerTree,
                                 "floating" => BuiltInNavElements.FabRadial,
                                 "edge" => BuiltInNavElements.EdgeScrubber,
+                                "auto_nav_block" => BuiltInBlocks.NavIconGridKind,
                                 "placed_model_control" => CardOptions.PlacedModelNone,
                                 "show_at" => CardOptions.ShowNavFullOnly,
                                 "hide_on_scroll" => CardOptions.HideOnScrollNever,
@@ -167,8 +168,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 20 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 20 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 21 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 21 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1642,6 +1643,92 @@ namespace TileStories.Editor.Tests
             EditorTextChecks.AssertAscii(device, "CardNavigationDeviceTestGuide");
         }
 
+        // Detail Card > Navigation's step 11a row on the real window. Auto Nav Block is drawn on its default, None, right under Edge (section
+        // 7's order), listed from the BLOCK registry -- None, then every kind of the navigation family by its Editor name; the pick is an
+        // undo step and a real Ctrl+Z brings None back. Its (i) says the rule (Show Navigation From, a point's own nav block wins, the Block
+        // Library switch) and each nav kind's own help; the Playmode and Device guides walk it; all ASCII
+        [UnityTest]
+        public IEnumerator TheAutoNavBlockRow_IsDrawnOnItsDefault_UnderEdge_ListsTheNavigationKinds_AndAPickIsUndoneByCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.auto_nav_block, "the shipped wall never set it: None");
+            float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
+            Assert.Less(Y("Edge"), Y("Auto Nav Block"), "Auto Nav Block right under Edge (section 7's order)");
+            Assert.Less(Y("Auto Nav Block"), Y("Follow Scroll"));
+
+            var (keys, labels) = POIEditorToolWindow.AutoNavBlockOptions(BlockRegistry.Shared);
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInBlocks.NavIconGridKind }, keys, "None, then the navigation family's kinds, from the registry");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Icon Grid" }, labels, "named by their Editor names, never their keys");
+
+            Pick(() => _window.Config.card_settings.navigation.auto_nav_block = BuiltInBlocks.NavIconGridKind);
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsTrue(_window.Unsaved, "a pick is an edit");
+            var lamp = _window.Config.pois.Single(p => p.id == "lamp");
+            Assert.AreEqual(BuiltInBlocks.NavIconGridKind,
+                BlockStackBuilder.Build(lamp, _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois).Entries[1].Instance.kind,
+                "the window's config now gives The Lamp its grid in second place");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.auto_nav_block, "Ctrl+Z brings None back");
+
+            var help = typeof(POIEditorToolWindow);
+            string autoHelp = (string)help.GetMethod("CardAutoNavBlockHelp", Static).Invoke(null, new object[] { BlockRegistry.Shared });
+            foreach (string word in new[] { "None (the default)", "Show Navigation From", "of its own", "Block Library", "Icon Grid: " })
+                StringAssert.Contains(word, autoHelp, "CardAutoNavBlockHelp says " + word);
+            EditorTextChecks.AssertAscii(autoHelp, "CardAutoNavBlockHelp");
+            string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
+            StringAssert.Contains("Auto Nav Block = Icon Grid", guide, "the Playmode guide walks the grid");
+            StringAssert.Contains("Auto Nav Block = None", guide);
+            string device = (string)help.GetField("CardNavigationDeviceTestGuide", Static).GetValue(null);
+            StringAssert.Contains("Auto Nav Block:", device, "the device guide reads the grid at the phone's width");
+        }
+
+        // The nav_icon_grid KIND goes through the Editor like any other kind: a Block Library row under its family (a real click on its
+        // Enabled box makes its row, Ctrl+Z takes it back) and a "+ Add block" entry under navigation (a real click adds it to a point, and
+        // with no field to fill the builder shows it)
+        [UnityTest]
+        public IEnumerator TheIconGridKind_HasABlockLibraryRow_AndPlusAddBlockAddsIt_WithRealClicks()
+        {
+            _window = new PoiEditorWindowHost(TwoPoiConfig(), "_showCardBlockLibrary");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            var ordered = BlockRegistry.Shared.Ordered.ToList();
+            int row = ordered.FindIndex(k => k.Key == BuiltInBlocks.NavIconGridKind);
+            Assert.GreaterOrEqual(row, 0, "the kind is in the registry the window reads");
+            Assert.AreEqual(BuiltInFamilies.Navigation, ordered[row].Family);
+            Assert.AreEqual(BuiltInFamilies.Meta, ordered[row + 1].Family, "the Block Library lists it between community and the Sources (Order 85)");
+            yield return _window.ScrollTo("Block Library enabled#" + row);
+            _window.Click("Block Library enabled#" + row);
+            yield return _window.WaitForRepaint();
+            var setting = _window.Config.card_settings.kinds.Single();
+            Assert.AreEqual(BuiltInBlocks.NavIconGridKind, setting.kind, "a real click on its Enabled box made ITS row");
+            Assert.IsFalse(setting.enabled);
+            yield return _window.PressUndo();
+            CollectionAssert.IsEmpty(_window.Config.card_settings.kinds, "Ctrl+Z takes it back");
+
+            OpenTab("SpecificMarker");
+            _window.SetWindowField("_showPoiCardContent", true);
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_poiFoldouts", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(_window.Editor);
+            foldouts[_window.Config.pois[0].id] = true;
+            typeof(POIEditorToolWindow).GetField("_newCardBlockKindIndex", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(_window.Editor, row);
+            yield return _window.WaitForRepaint();
+            yield return _window.ScrollTo("Card add block#0");
+            int before = _window.Config.pois[0].card.blocks.Count;
+            _window.Click("Card add block#0");
+            yield return _window.WaitForRepaint();
+            var added = _window.Config.pois[0].card.blocks.Last();
+            Assert.AreEqual(before + 1, _window.Config.pois[0].card.blocks.Count);
+            Assert.AreEqual(BuiltInBlocks.NavIconGridKind, added.kind, "a real click on + Add block added the grid");
+            StringAssert.StartsWith(TaxonomyRowKeys.BlockPrefix, added.key, "an authored key: block_N");
+            var built = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois);
+            Assert.IsTrue(built.Entries.Any(e => e.Instance == added), "no field to fill: the card shows it");
+            yield return _window.PressUndo();
+            Assert.AreEqual(before, _window.Config.pois[0].card.blocks.Count, "Ctrl+Z takes it back");
+        }
+
         // Specific Marker > Card Content (step 10): a hotspot spot's Opens Block is the SAME popup as an Open Block action's (the BlockRef
         // drawer, no second picker) but OPTIONAL: a spot with nothing picked draws no warning (it is the normal spot), a stale pick is
         // kept and warned by name like the action's, a pick is undoable with Ctrl+Z and the card's rule says whether it jumps
@@ -1917,7 +2004,7 @@ namespace TileStories.Editor.Tests
             var rowName = typeof(POIEditorToolWindow).GetMethod("FamilyRowName", Instance);
             var familyRows = _window.Editor.FamiliesInEffectiveOrder(_window.Config.card_settings.navigation)
                 .Select(f => (string)rowName.Invoke(_window.Editor, new object[] { f })).ToList();
-            Assert.AreEqual(9, familyRows.Count, "precondition: the table lists the nine registered families");
+            Assert.AreEqual(10, familyRows.Count, "precondition: the table lists the ten registered families");
             // - one Repaint pass draws each (i) once: the count is per pass
             Assert.AreEqual(1, drawn.Count(d => d.Title == "Families"), "exactly one (i) for the table");
             CollectionAssert.IsEmpty(drawn.Where(d => familyRows.Contains(d.Title)).Select(d => d.Title).ToList(), "no (i) on a family's own row");

@@ -1003,3 +1003,39 @@
     color: var(--ts-ink);
     white-space: nowrap;
 }
+
+/* ---- the icon grid nav BLOCK (nav_icon_grid, _3.2 step 11a): the card's sections as tiles in the flow, three to a row, a short last row
+   centred; each tile is a NavTab (icon over words + count), a plate in a full touch target. It marks nothing (it is a map of the card, at
+   its top), so the tab's underline never shows ---- */
+
+.nav-icon-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-icon-grid__tile {
+    width: 30%;
+    flex-shrink: 0;
+    /* one touch target is enough: the icon and one line of words fill it (two, the menu's big tiles, left the plates mostly empty) */
+    min-height: var(--ts-touch-target);
+    margin: var(--ts-space-1);
+    padding: var(--ts-space-2);
+    background-color: var(--ts-surface-2);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+}
+
+.nav-icon-grid__tile:hover,
+.nav-icon-grid__tile:active {
+    background-color: var(--ts-surface-2);
+}
+
+.nav-icon-grid__tile .nav-tabs__label {
+    color: var(--ts-ink);
+}
+
+.nav-icon-grid__tile .nav-tabs__underline {
+    display: none;
+}

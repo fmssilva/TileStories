@@ -92,8 +92,8 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~70-140 s (1839 tests, 67 s, 2026-10-17, _3.2 step 10); full PlayMode ~35-41 min (921 tests, 2108 s, partly in the background,
-2026-10-17, _3.2 step 8: 921/921); the Card / Poi targeted set (30 fixtures, 707 tests) ~29-33 min (1847 s, 2026-10-17, _3.2 step 10); one
+EditMode ~70-140 s (1856 tests, 66 s, 2026-10-17, _3.2 step 11a); full PlayMode ~40-50 min (978 tests, 2892 s, partly in the background,
+2026-10-17, _3.2 step 11a: 978/978); the Card / Poi targeted set (32 fixtures, 742 tests) ~35-42 min (2454 s, 2026-10-17, _3.2 step 11a); one
 PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures

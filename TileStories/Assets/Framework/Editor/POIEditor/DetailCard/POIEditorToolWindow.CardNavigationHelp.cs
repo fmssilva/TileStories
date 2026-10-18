@@ -104,6 +104,20 @@ namespace TileStories.Editor
             return text.ToString();
         }
 
+        // What Auto Nav Block's (i) says: the rule, None, then every nav block an app can pick -- read from the registry
+        private static string CardAutoNavBlockHelp(BlockRegistry registry)
+        {
+            var text = new System.Text.StringBuilder(
+                "A navigation block the card puts right after its title block, on every card with at least Show Navigation From blocks -- " +
+                "so a long card opens with a map of itself, with no block to add point by point. A point that already has a navigation " +
+                "block of its own in Specific Marker > Card Content keeps its own and gets no second one; a shorter card gets none. The " +
+                "block is not listed in Card Content (it belongs to no point) and switching its kind off in the Block Library leaves it " +
+                "out everywhere. None (the default): no card gets one.");
+            foreach (var kind in registry.Ordered)
+                if (kind.Family == BuiltInFamilies.Navigation) text.Append(' ').Append(kind.DisplayName).Append(": ").Append(kind.Help);
+            return text.ToString();
+        }
+
         private const string CardPlacedModelControlHelp =
             "What tells a visitor that a model placed in the room with a Place In AR block is standing there. Chip (the default): while " +
             "a model stands, a small chip floats above the card's top-right edge at every height of the card -- even when the card is " +
@@ -193,8 +207,8 @@ namespace TileStories.Editor
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
             "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
             "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
-            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Menu, Floating Button, Edge, Bar Slots, Placed Model Control and Hide " +
-            "While Scrolling: the open card's strip, bottom bar, menu button, floating button, edge dots, placed-model chip and bottom buttons " +
+            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Menu, Floating Button, Edge, Auto Nav Block, Bar Slots, Placed Model Control and Hide " +
+            "While Scrolling: the open card's strip, bottom bar, menu button, floating button, edge dots, grid, placed-model chip and bottom buttons " +
             "appear, change or go at once.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
@@ -321,6 +335,16 @@ namespace TileStories.Editor
             "card with a full-width picture or a filmstrip at its right edge: the dots lie over that edge, and a drag that starts " +
             "on them is the scrubber's, not the picture's.\n" +
             "- Set Edge = None: the dots go.\n\n" +
+            "AUTO NAV BLOCK\n" +
+            "- Set Auto Nav Block = Icon Grid and open a card with at least Show Navigation From blocks: right under the title, before " +
+            "its first block, a grid of tiles, one per family of the card (with Group By = Format, one per format), each its icon, its " +
+            "word and how many blocks it holds. The tabs, bars and menus list no tile for it: it is no family of the card's own.\n" +
+            "- Tap a tile: the card rises to full and that family's first block comes to rest at the top of what scrolls.\n" +
+            "- Open a card with fewer blocks than Show Navigation From: no grid. Lower Show Navigation From to its block count: the grid " +
+            "appears; one more than its count: it goes.\n" +
+            "- In Specific Marker > Card Content add an Icon Grid block to a long point's card (+ Add block, navigation): the card shows " +
+            "that one where Card Content puts it, never a second one. Untick Icon Grid in Detail Card > Block Library: no grid on any card.\n" +
+            "- Set Auto Nav Block = None: the grid goes from every card that did not author its own.\n\n" +
             "PLACED MODEL CONTROL\n" +
             "- Open a card with a Place In AR block and place its model: the card lowers to its title and a chip above its top-right " +
             "edge reads Placed by the wall with a Remove button. Raise the card: the chip follows it. Click Remove: the model goes and " +
@@ -375,6 +399,8 @@ namespace TileStories.Editor
             "- Edge: hold the phone in one hand and reach every dot with the thumb of that hand by dragging along the column and, " +
             "separately, by tapping; check the label beside the dot under the thumb reads whole and is not hidden by the thumb, and that " +
             "a swipe on a filmstrip or a picture at the right edge of a block is not taken by the dots when it starts beside them.\n" +
+            "- Auto Nav Block: open a long card and read its grid of tiles at the phone's real width: every word whole, every tile tapped " +
+            "once with a thumb lands its family.\n" +
             "- Placed Model Control: place a model at a real wall and lower the card to its title. Read the chip over the camera image " +
             "against a bright patch of the wall (a white tile, a window) and against a dark one: its words and its edge stay readable " +
             "on both, and Remove reaches with a thumb.\n" +

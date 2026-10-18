@@ -182,6 +182,8 @@ namespace TileStories
             Takeover.Close();
             Overlay.Close();
             context.Overlay = Overlay;
+            // - a nav block in the stack (the icon grid) draws from the controller once BindNav below has given it this card's model
+            context.Nav = Nav;
             _context = context;
             _entries = entries;
             // - before the stack binds: a block that offers a jump reads where the card can scroll (a block waiting for Show After Reading

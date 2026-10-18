@@ -23,7 +23,7 @@ namespace TileStories.Tests
         private const string ScenePath = "Assets/Dev/CardNavGallery/CardNavGalleryScene.unity";
         private CardNavGalleryHarness _harness;
 
-        private static string[] EntryNames => CardNavGalleryDefinitions.All.Select(e => e.Name).ToArray();
+        private static string[] EntryNames => CardNavGalleryDefinitions.All.Where(e => !e.IsBlock).Select(e => e.Name).ToArray();
 
         // What each element promises beyond the shared checks, by key: adding an element = a row in the definitions + its check here
         private static readonly Dictionary<string, System.Action<CardNavGalleryHarness, CardNavGalleryDefinitions.Entry>> ElementChecks = new()
@@ -122,7 +122,8 @@ namespace TileStories.Tests
         public void TheList_IsEveryElementOverTheFiveFixtureCases()
         {
             CollectionAssert.AreEquivalent(new[] { "big", "small", "one_family", "pt_long", "two_families" }, CardNavGalleryDefinitions.Cases.Select(c => c.Key));
-            Assert.AreEqual(CardNavGalleryDefinitions.ElementKeys.Count * 5, CardNavGalleryDefinitions.All.Count);
+            Assert.AreEqual((CardNavGalleryDefinitions.ElementKeys.Count + CardNavGalleryDefinitions.BlockKinds.Count) * 5, CardNavGalleryDefinitions.All.Count);
+            CollectionAssert.Contains(CardNavGalleryDefinitions.BlockKinds, BuiltInBlocks.NavIconGridKind, "the nav blocks are in the list too (step 11a)");
             CollectionAssert.IsSubsetOf(CardNavGalleryDefinitions.ElementKeys, NavElementRegistry.Shared.All.Select(e => e.Key), "every listed element is registered");
             foreach (var (key, targets, sections) in new[] { ("big", 62, 8), ("small", 6, 3), ("one_family", 5, 1), ("pt_long", 62, 8), ("two_families", 6, 2) })
             {
@@ -199,6 +200,89 @@ namespace TileStories.Tests
             Assert.IsTrue(ElementChecks.ContainsKey(entry.ElementKey), "an element of the list has its own check: " + entry.ElementKey);
             ElementChecks[entry.ElementKey](_harness, entry);
             yield return CardGalleryChecks.Render(name);
+        }
+
+        // The in-flow nav blocks (_3.2 section 5.6, step 11a) over every case: the wall's Auto Nav Block puts the block right after the
+        // header (the builder's step, not the harness), no slot holds anything, and the grid is the model's sections -- one tile per section in
+        // its order, each its section's words, its family's icon in the family's colour above them, its block count; every tile a full touch
+        // target, every word whole and at 4.5:1, the grid inside the card at 390 px; one section draws no tile (rule 2.5.7). A REAL tap (panel
+        // events) on every tile lands its section's first block with one nav_jump named nav_icon_grid; rendered Nav_nav_icon_grid_<case>
+        private static string[] BlockEntryNames => CardNavGalleryDefinitions.All.Where(e => e.IsBlock).Select(e => e.Name).ToArray();
+
+        [UnityTest]
+        public IEnumerator EveryNavBlockEntry_IsRightAfterTheHeader_OneTilePerSection_WholeAndTappable_ARealTapLandsIt_AndRenders(
+            [ValueSource(nameof(BlockEntryNames))] string name)
+        {
+            int index = CardNavGalleryDefinitions.All.ToList().FindIndex(e => e.Name == name);
+            var entry = CardNavGalleryDefinitions.All[index];
+            _harness.Show(index);
+            yield return CardTestInput.Settle();
+            var sheet = _harness.Gallery.Sheet;
+            var model = sheet.Nav.Model;
+            string autoKey = BlockStackBuilder.AutoNavBlockKey(entry.ElementKey);
+            Assert.IsTrue(model.ShowsNavigation, "precondition: the gallery's card has Show Navigation From targets");
+            Assert.IsNull(sheet.Slots.TopView, "no element in any slot: the block judged alone");
+            Assert.IsNull(sheet.Slots.BottomView);
+            CollectionAssert.DoesNotContain(model.Targets, autoKey, "the grid is no target of the card's own navigation");
+
+            var slot = sheet.Stack.SlotOfBlock(autoKey);
+            Assert.IsNotNull(slot, "Auto Nav Block put the grid in the stack");
+            var content = sheet.Stack.Scroll.contentContainer;
+            Assert.AreEqual(0, content.IndexOf(slot), "the first block of the scroll: right after the (pinned) header");
+            var grid = slot.Q<VisualElement>("card-nav-icon-grid");
+            Assert.IsNotNull(grid);
+            var tiles = grid.Query<Button>(className: "nav-icon-grid__tile").ToList().Where(b => b.resolvedStyle.display == DisplayStyle.Flex && b.parent == grid).ToList();
+
+            if (!NavOntologyRule.OffersASectionChoice(model.Sections.Count))
+            {
+                Assert.AreEqual(DisplayStyle.None, grid.resolvedStyle.display, "one section: no grid (rule 2.5.7)");
+                yield return CardGalleryChecks.Render(name);
+                yield break;
+            }
+            Assert.AreEqual(model.Sections.Count, tiles.Count, "one tile per section");
+            var layer = sheet.Layer;
+            float onePixel = CardGalleryChecks.OnePixel(grid);
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            var card = sheet.Root.worldBound;
+            Assert.GreaterOrEqual(grid.worldBound.xMin, card.xMin - onePixel, "the grid starts inside the card");
+            Assert.LessOrEqual(grid.worldBound.xMax, card.xMax + onePixel, "and ends inside it");
+            var strings = Strings(_harness, entry);
+            for (int i = 0; i < tiles.Count; i++)
+            {
+                var section = model.Sections[i];
+                var tile = tiles[i];
+                var label = tile.Q<Label>(className: "nav-tabs__label");
+                var count = tile.Q<Label>(className: "nav-item__count");
+                Assert.AreEqual(strings.Get(section.LabelKey), label.text, "tile " + i + ": its section's words in " + entry.Case.Language);
+                Assert.AreEqual(section.Count.ToString(), count.text, label.text + ": its block count");
+                Assert.IsTrue(CardTestInput.IsShown(tile, layer), label.text + ": shown at Full");
+                Assert.GreaterOrEqual(tile.layout.height, touch - onePixel, label.text + ": tall enough to tap");
+                Assert.GreaterOrEqual(tile.layout.width, touch - onePixel, label.text + ": wide enough to tap");
+                var icon = tile.Q<VisualElement>(className: "card-icon");
+                Assert.AreEqual(section.IconKey, CardIcons.KeyOf(icon), label.text + ": its family's icon");
+                Assert.LessOrEqual(icon.worldBound.yMax, label.worldBound.yMin + 0.5f, label.text + ": the icon above the words");
+                AssertFamilyPaint(icon.Q(className: "card-icon__frame").resolvedStyle.borderTopColor, section.ColorToken, tile, label.text + "'s icon");
+                foreach (var words in new[] { label, count })
+                {
+                    var size = words.MeasureTextSize(words.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+                    Assert.GreaterOrEqual(words.layout.width + 0.5f, size.x, "'" + words.text + "': whole, never cut");
+                    float contrast = CardTestInput.Contrast(words.resolvedStyle.color, CardTestInput.EffectiveBackground(words));
+                    Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioNormalText, "'" + words.text + "' reads at 4.5:1 (" + contrast.ToString("F2") + ")");
+                }
+                Assert.LessOrEqual(tile.worldBound.xMax, grid.worldBound.xMax + onePixel, label.text + ": inside the grid");
+            }
+            yield return CardGalleryChecks.Render(name);
+
+            // - a real tap on every tile, the last first (the card is at its top, so every tap MOVES it): its section's first block lands
+            for (int i = tiles.Count - 1; i >= 0; i--)
+            {
+                sheet.Stack.Scroll.scrollOffset = Vector2.zero;
+                yield return CardTestInput.Settle();
+                var center = tiles[i].worldBound.center;
+                yield return CardTestInput.Tap(sheet.Root.panel, center);
+                yield return Landed(sheet.Nav);
+                AssertLanded(sheet, model.Sections[i].Targets[0], model.Sections[i].Key + "'s first block, from its tile");
+            }
         }
 
         // Rule 2.5.7 on the gallery's own cards, side by side: the one-family card renders NO strip, and the same card with a second family

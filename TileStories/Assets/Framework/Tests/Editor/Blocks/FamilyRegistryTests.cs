@@ -80,22 +80,21 @@ namespace TileStories.Editor.Tests
         }
 
         [Test]
-        public void TheBuiltInFamilies_AreTheNineOfTheCanvas_InOrderWithGapsOfTen_AndOnlyMetaClosesTheCard()
+        public void TheBuiltInFamilies_AreTheTenOfTheCanvas_InOrder_OnlyMetaClosesTheCard_AndNavigationIsNoTarget()
         {
             var registry = new BlockRegistry();
             BuiltInFamilies.Register(registry);
 
             CollectionAssert.AreEqual(
-                new[] { "about", "media", "guides", "stories", "ar", "play", "visit", "community", "meta" },
-                registry.Families.Select(f => f.Key), "the nine families that have kinds today, in canvas order");
-            CollectionAssert.AreEqual(new[] { 10, 20, 30, 40, 50, 60, 70, 80, 90 }, registry.Families.Select(f => f.Order),
-                "gaps of ten, so an app can slot its own family between any two");
-            Assert.IsFalse(registry.TryGetFamily("navigation", out _), "the navigation family arrives with its first kind, at step 11");
+                new[] { "about", "media", "guides", "stories", "ar", "play", "visit", "community", "navigation", "meta" },
+                registry.Families.Select(f => f.Key), "the ten families that have kinds today, in canvas order");
+            CollectionAssert.AreEqual(new[] { 10, 20, 30, 40, 50, 60, 70, 80, 85, 90 }, registry.Families.Select(f => f.Order),
+                "gaps of ten, so an app can slot its own family between any two; navigation (step 11a) at 85, between community and meta");
 
             CollectionAssert.AreEqual(new[] { "meta" }, registry.Families.Where(f => f.AtEnd).Select(f => f.Key),
                 "only the credits close the card");
-            CollectionAssert.AreEqual(new[] { "meta" }, registry.Families.Where(f => !f.InNav).Select(f => f.Key),
-                "and only the credits are no navigation target");
+            CollectionAssert.AreEqual(new[] { "navigation", "meta" }, registry.Families.Where(f => !f.InNav).Select(f => f.Key),
+                "the credits and the nav blocks are no navigation target: a nav block never becomes a section of any element");
             foreach (var family in registry.Families)
                 Assert.IsTrue(CardStrings.Keys.All.Contains(family.LabelKey), family.Key + " labels itself with a known card text key");
         }

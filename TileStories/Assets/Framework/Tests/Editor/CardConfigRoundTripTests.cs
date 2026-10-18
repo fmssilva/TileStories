@@ -102,6 +102,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.NavNone, s.navigation.floating, "no floating button unless the wall picks one");
             // - _3.2 step 10: an old config has no Edge element (it lies over the content, so it is opt-in)
             Assert.AreEqual(CardOptions.NavNone, s.navigation.edge, "no edge element unless the wall picks one");
+            Assert.AreEqual(CardOptions.NavNone, s.navigation.auto_nav_block, "no nav block is added to any card unless the wall picks one");
             Assert.AreEqual(CardOptions.PlacedModelChip, s.navigation.placed_model_control, "a placed model says so above the card");
             // - _3.2 step 3: the jump and spy options load on their section 3 defaults
             Assert.IsTrue(s.navigation.follow_scroll, "the marked section follows the scroll");

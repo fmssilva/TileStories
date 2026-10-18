@@ -83,7 +83,7 @@ namespace TileStories.Editor.Tests
         {
             var registry = new BlockRegistry();
             BuiltInBlocks.Register(registry);
-            CollectionAssert.AreEqual(new[] { "about", "media", "guides", "stories", "ar", "play", "visit", "community", "meta" },
+            CollectionAssert.AreEqual(new[] { "about", "media", "guides", "stories", "ar", "play", "visit", "community", "navigation", "meta" },
                 registry.Ordered.Select(k => k.Family).Distinct(), "the canvas order of _3.2 section 2.2");
             var families = registry.Ordered.Select(k => k.Family).ToList();
             var seen = new System.Collections.Generic.List<string>();

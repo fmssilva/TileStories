@@ -60,6 +60,10 @@ namespace TileStories
         // The card's ONE overlay owner (_3.2 step 8): what a navigation element opens its menu or list through, so one thing at a time is
         // open over the card and it closes on Back, a jump, a scroll. Null where the caller has none: an element then shows its list in place
         public CardMenuOverlay Overlay;
+        // The card's ONE navigation controller (_3.2 step 11a): what a nav block (the icon grid) draws the card's sections from and jumps
+        // through, like the elements do. Its model is bound AFTER the stack (the model is built from the shown stack), so a block draws on
+        // NavController.Bound, never at its own Bind. Null where the caller has none: a nav block then draws nothing
+        public NavController Nav;
         // Show still pictures instead of motion (card_settings.container.reduce_motion today; the visitor's own setting joins it with _3.3):
         // a header loop shows its poster only
         public bool ReduceMotion;

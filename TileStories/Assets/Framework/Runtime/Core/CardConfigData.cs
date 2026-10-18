@@ -90,6 +90,10 @@ namespace TileStories
         // Edge: the element down the right edge of the stack's viewport (a NavElementRegistry key of the edge slot: edge_scrubber) | "none"
         // (CardOptions.NavNone, the default). It sits over the content, so it is opt-in
         public string edge = CardOptions.NavNone;
+        // Auto Nav Block: a nav block (a registered kind of the `navigation` family: nav_icon_grid) put right after the header of every card
+        // with at least Show Navigation From targets -- unless the point already shows a nav block of its own | "none" (CardOptions.NavNone,
+        // the default). Inserted by BlockStackBuilder.InsertAutoNavBlock, after the skip rules and the Block Order
+        public string auto_nav_block = CardOptions.NavNone;
         // Placed Model Control: "chip" (the default: while a model placed with place_in_ar stands, a chip above the sheet says so at every
         // stop, with a Remove on the card that placed it) | "none" (CardOptions.PlacedModelControls, PlacedModelChipRule)
         public string placed_model_control = CardOptions.PlacedModelChip;

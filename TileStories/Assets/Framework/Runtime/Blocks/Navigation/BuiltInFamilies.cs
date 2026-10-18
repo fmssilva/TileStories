@@ -9,8 +9,8 @@ namespace TileStories
     // so a visitor reads them in their language and a wall can reword them in Card Texts. IconKey names a CardIcons
     // drawing and ColorToken a CardTokens.uss token (_3.2 step 6): the values stay in the stylesheet.
     //
-    // The `navigation` family is NOT here: it arrives at _3.2 step 11 with its first kind (a nav block is never
-    // a nav target, so registering it before anything uses it would be a family with no kinds.)
+    // The `navigation` family (order 85, _3.2 step 11a) arrived with its first kind, nav_icon_grid: its blocks move the visitor inside
+    // the card, so it is never a navigation target itself (In Nav off) -- no tab, bar or menu ever lists a nav block.
     public static class BuiltInFamilies
     {
         public const string About = "about";
@@ -21,6 +21,7 @@ namespace TileStories
         public const string Play = "play";
         public const string Visit = "visit";
         public const string Community = "community";
+        public const string Navigation = "navigation";
         public const string Meta = "meta";
 
         // Register every built-in family into `registry`, before its kinds
@@ -36,6 +37,10 @@ namespace TileStories
             registry.RegisterFamily(Family(Play, 60, CardStrings.Keys.FamilyPlay, CardIcons.Play));
             registry.RegisterFamily(Family(Visit, 70, CardStrings.Keys.FamilyVisit, CardIcons.Location));
             registry.RegisterFamily(Family(Community, 80, CardStrings.Keys.FamilyCommunity, CardIcons.People));
+            // - the nav blocks (an icon grid, a contents list): in the card's flow, never a target of its navigation
+            var navigation = Family(Navigation, 85, CardStrings.Keys.FamilyNavigation, CardIcons.Grid);
+            navigation.InNav = false;
+            registry.RegisterFamily(navigation);
             // - the credits close the card and are no navigation target: the two flags that make Sources last
             var meta = Family(Meta, 90, CardStrings.Keys.FamilyMeta, CardIcons.Sources);
             meta.InNav = false;
