@@ -57,7 +57,11 @@ namespace TileStories
         };
 
         // The nav block kinds the gallery shows (_3.2 section 5.6), every case drawn for each, the same way
-        public static readonly IReadOnlyList<string> BlockKinds = new[] { BuiltInBlocks.NavIconGridKind };
+        public static readonly IReadOnlyList<string> BlockKinds = new[] { BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind };
+
+        // The Reading Time a contents entry's card gives the FIRST copy of each gallery block that carries the field (_3.2 step 11b), so its
+        // list shows typed minutes beside the rows with none and the audio clip's own length
+        public const int ContentsMinutes = 4;
 
         // What SlotOf says for a nav block: no slot, the stack's own flow
         public const string InFlow = "in_flow";
@@ -143,6 +147,9 @@ namespace TileStories
                 {
                     var copy = JsonUtility.FromJson<BlockInstanceData>(JsonUtility.ToJson(source));
                     copy.key = "block_" + (poi.card.blocks.Count + 1);
+                    bool carries = BlockRegistry.Shared.TryGet(copy.kind, out var kind) && kind.Field(BlockKindDefinition.MinutesField) != null;
+                    if (entry.ElementKey == BuiltInBlocks.NavContentsKind && i == 0 && carries)
+                        copy.fields.Add(new BlockFieldValue { key = BlockKindDefinition.MinutesField, number = ContentsMinutes });
                     poi.card.blocks.Add(copy);
                 }
             }

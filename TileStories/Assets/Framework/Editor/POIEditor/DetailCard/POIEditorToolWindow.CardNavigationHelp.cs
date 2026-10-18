@@ -112,7 +112,9 @@ namespace TileStories.Editor
                 "so a long card opens with a map of itself, with no block to add point by point. A point that already has a navigation " +
                 "block of its own in Specific Marker > Card Content keeps its own and gets no second one; a shorter card gets none. The " +
                 "block is not listed in Card Content (it belongs to no point) and switching its kind off in the Block Library leaves it " +
-                "out everywhere. None (the default): no card gets one.");
+                "out everywhere. None (the default): no card gets one. The choices differ in what they show: Icon Grid is a quick " +
+                "map of the card's sections, one tile each -- good for a visitor who scans and jumps; Contents lists every block with " +
+                "its minutes and ticks what was already read -- good for a long card read in several visits.");
             foreach (var kind in registry.Ordered)
                 if (kind.Family == BuiltInFamilies.Navigation) text.Append(' ').Append(kind.DisplayName).Append(": ").Append(kind.Help);
             return text.ToString();
@@ -344,7 +346,18 @@ namespace TileStories.Editor
             "appears; one more than its count: it goes.\n" +
             "- In Specific Marker > Card Content add an Icon Grid block to a long point's card (+ Add block, navigation): the card shows " +
             "that one where Card Content puts it, never a second one. Untick Icon Grid in Detail Card > Block Library: no grid on any card.\n" +
-            "- Set Auto Nav Block = None: the grid goes from every card that did not author its own.\n\n" +
+            "- Set Auto Nav Block = None: the grid goes from every card that did not author its own.\n" +
+            "- Set Auto Nav Block = Contents and open the same long card: right under the title, a list -- each family's name with its " +
+            "icon, and under it one row per block: an empty ring, the block's heading in bold, and its minutes on the right (the block's " +
+            "Reading Time in Specific Marker > Card Content; an audio or video block shows its clip's own length; a block with no time " +
+            "shows none).\n" +
+            "- Raise the card to full and scroll slowly down past three blocks: as each block's top passes about a third of the way " +
+            "down the content, its row's ring fills with a tick and its heading turns regular. A row you never scrolled to stays empty " +
+            "and bold. Tap a row: the card moves to that block, and only that block is ticked, not the ones it flew past.\n" +
+            "- Close the card and open it again: the ticks are still there. Detail Card > Card Container > Test > Reset Saved Card State, " +
+            "then close and reopen the card: every row is empty again; the notice counts the ticks it cleared.\n" +
+            "- Give a block a Reading Time of 3 in Card Content: its row reads 3 min at once. Set it back to 0: the time goes.\n" +
+            "- Open a card whose blocks all belong to one family: Contents still shows its rows (it lists blocks, not families).\n\n" +
             "PLACED MODEL CONTROL\n" +
             "- Open a card with a Place In AR block and place its model: the card lowers to its title and a chip above its top-right " +
             "edge reads Placed by the wall with a Remove button. Raise the card: the chip follows it. Click Remove: the model goes and " +
@@ -400,7 +413,9 @@ namespace TileStories.Editor
             "separately, by tapping; check the label beside the dot under the thumb reads whole and is not hidden by the thumb, and that " +
             "a swipe on a filmstrip or a picture at the right edge of a block is not taken by the dots when it starts beside them.\n" +
             "- Auto Nav Block: open a long card and read its grid of tiles at the phone's real width: every word whole, every tile tapped " +
-            "once with a thumb lands its family.\n" +
+            "once with a thumb lands its family. With Contents: read each row's words at the phone's width, tap a row with a thumb, " +
+            "and check a ticked row is told apart from an unticked one outdoors in bright light (the filled ring and the lighter " +
+            "heading, not only the tick).\n" +
             "- Placed Model Control: place a model at a real wall and lower the card to its title. Read the chip over the camera image " +
             "against a bright patch of the wall (a white tile, a window) and against a dark one: its words and its edge stay readable " +
             "on both, and Remove reaches with a thumb.\n" +

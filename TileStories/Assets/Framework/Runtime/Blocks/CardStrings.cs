@@ -212,6 +212,7 @@ namespace TileStories
             public const string KindRelated = "kind_related";
             public const string KindFeedback = "kind_feedback";
             public const string KindNavIconGrid = "kind_nav_icon_grid";
+            public const string KindNavContents = "kind_nav_contents";
             public const string KindSources = "kind_sources";
 
             // The words a visitor reads for each of the framework's default navigation Groups (_3.2 section 3, the segmented element): a
@@ -239,6 +240,10 @@ namespace TileStories
             public const string NavFab = "nav_fab";
             public const string PlacedModelRemove = "placed_model_remove";
             public const string PlacedModelOther = "placed_model_other";
+            // The contents list (nav_contents, _3.2 step 11b): a row's time ("{0} min", {0} = whole minutes) and what a row the visitor has had
+            // in view is called beside its tick (its accessible name and tooltip: the tick is never the only signal)
+            public const string NavContentsMinutes = "nav_contents_minutes";
+            public const string NavContentsRead = "nav_contents_read";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -262,11 +267,12 @@ namespace TileStories
                 KindActions, KindGallery, KindBeforeAfter, KindZoomImage, KindHotspotImage, KindVideo, KindModel3D, KindPanorama360,
                 KindAudioGuide, KindTimeline, KindPerson, KindStoryChapters, KindComparePoints, KindDialogue, KindShowOnWall, KindPlaceInAr,
                 KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback, KindNavIconGrid,
-                KindSources,
+                KindNavContents, KindSources,
                 NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
                 NavMore, NavNextUp, NavNextUpPosition, NavNextButton, NavNextUpDone,
                 NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,
                 NavFab, PlacedModelRemove, PlacedModelOther,
+                NavContentsMinutes, NavContentsRead,
             };
         }
 

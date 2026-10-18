@@ -61,6 +61,16 @@ namespace TileStories
         // The words the stack draws above a block ("" when it draws none): what an element that names a block says (Up next)
         public string HeadingOf(string blockKey) => _stack.HeadingOfBlock(blockKey);
 
+        // The stack entry of a shown block (its kind, instance and look): what a block that lists the card's blocks reads (nav_contents)
+        public bool TryGetEntry(string blockKey, out BlockStackBuilder.Entry entry) => _stack.TryGetEntryOfBlock(blockKey, out entry);
+
+        // Raised ONCE per binding for each target the visitor has had in view (NavScrollRule.HasViewed: on screen with its top past the spy
+        // line), measured on every scroll and size change -- never while a jump glides (the spy is frozen then, and the blocks a glide flies
+        // past were never read). A reveal re-binds the same context and keeps what was raised; a new binding starts again. What the
+        // contents list's ticks follow (nav_contents); the controller remembers nothing beyond this binding
+        public event Action<string> TargetViewed;
+        private readonly HashSet<string> _viewed = new();
+
         // How long a smooth jump glides, in seconds: --ts-duration, handed over by the sheet once the card's tokens resolve
         public float Duration { get; internal set; }
 
@@ -88,7 +98,11 @@ namespace TileStories
         // has it; another point starts at its first
         public void Bind(CardNavModel model, BlockBindContext context)
         {
-            if (!ReferenceEquals(context, _context)) EndJump();
+            if (!ReferenceEquals(context, _context))
+            {
+                EndJump();
+                _viewed.Clear();
+            }
             bool samePoint = context?.Poi?.id == _context?.Poi?.id;
             string kept = samePoint ? _currentKey : null;
             string keptBlockKey = samePoint ? CurrentBlock : null;
@@ -126,6 +140,7 @@ namespace TileStories
             EndJump();
             Model = null;
             _context = null;
+            _viewed.Clear();
             SetCurrent(-1);
             SetCurrentBlock(-1);
         }
@@ -214,6 +229,27 @@ namespace TileStories
             bool follows = NavScrollRule.FollowsScroll(Settings);
             SetCurrent(NavScrollRule.Spy(follows, _jumpSection, MeasuredSection(), Current));
             SetCurrentBlock(NavScrollRule.Spy(follows, _jumpTarget, MeasuredTarget(), IndexOfTarget(CurrentBlock)));
+            if (!IsJumping) RaiseViewed();
+        }
+
+        // Every target now on screen with its top past the spy line, not raised yet in this binding (Follow Scroll changes only what an
+        // element marks, never what was read)
+        private void RaiseViewed()
+        {
+            if (TargetViewed == null) return;
+            float offset = Scroll.scrollOffset.y;
+            float content = Scroll.contentContainer.layout.height;
+            float viewport = Scroll.contentViewport.layout.height;
+            foreach (string target in Model.Targets)
+            {
+                if (_viewed.Contains(target)) continue;
+                var slot = ScrollingSlot(target);
+                if (slot == null) continue;
+                float top = slot.layout.y;
+                if (!NavScrollRule.HasViewed(top, top + slot.layout.height, offset, content, viewport)) continue;
+                _viewed.Add(target);
+                TargetViewed?.Invoke(target);
+            }
         }
 
         // The section the scroll shows now (NavScrollRule's spy line)

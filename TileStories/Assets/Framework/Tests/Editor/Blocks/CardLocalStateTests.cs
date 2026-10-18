@@ -180,6 +180,83 @@ namespace TileStories.Editor.Tests
             finally { PlayerPrefs.DeleteKey(key); }
         }
 
+        // ---------------- viewed (the contents list's tick, _3.2 step 11b) ----------------
+
+        [Test]
+        public void Viewed_IsScopedByWallPoiAndBlock_AndIsNotASeenOrAnAnswer()
+        {
+            var store = new MemoryCardStateStore();
+            var state = new CardLocalState(store, "living_room");
+            Assert.IsFalse(state.Viewed("lamp", "block_2"), "never in view yet");
+            state.MarkViewed("lamp", "block_2");
+            Assert.IsTrue(state.Viewed("lamp", "block_2"));
+            // - risk (a) of the brief: the key holds the wall, so a visitor who walks to another wall arrives with no tick
+            Assert.IsFalse(new CardLocalState(store, "chafariz").Viewed("lamp", "block_2"), "another wall on the same device: no tick");
+            Assert.IsFalse(state.Viewed("lamp_military", "block_2"), "another POI");
+            Assert.IsFalse(state.Viewed("lamp", "block_3"), "another block");
+            Assert.IsFalse(state.Seen("lamp", "block_2"), "in view is not 'revealed'");
+            state.MarkSeen("lamp", "block_4");
+            Assert.IsFalse(state.Viewed("lamp", "block_4"), "a revealed block is not ticked by that alone");
+            StringAssert.Contains("living_room", state.KeyOf("lamp", "block_2", CardLocalState.ViewedSlot), "the wall is a part of the key");
+        }
+
+        [Test]
+        public void MarkViewedTwice_WritesOnce_AndCountViewedCountsOnlyTheViewedEntries()
+        {
+            var store = new MemoryCardStateStore();
+            var state = new CardLocalState(store, "w");
+            Assert.AreEqual(0, state.CountViewed(), "nothing saved");
+            state.MarkViewed("p", "b1");
+            int afterOne = store.Count;
+            state.MarkViewed("p", "b1");
+            Assert.AreEqual(afterOne, store.Count, "a second mark writes nothing");
+            state.MarkViewed("p", "b2");
+            state.SetAnswer("p", "b3", 0, 1);
+            state.MarkSeen("p", "b4");
+            state.SetLanguage("pt");
+            Assert.AreEqual(2, state.CountViewed(), "two viewed blocks, whatever else is saved");
+            Assert.AreEqual(0, new CardLocalState(store, "other").CountViewed(), "another wall's count is its own");
+            Assert.AreEqual(5, state.ResetAll(), "the reset clears the viewed slot with everything else: 2 viewed + answer + seen + language");
+            Assert.AreEqual(0, state.CountViewed());
+            Assert.IsFalse(state.Viewed("p", "b1"));
+        }
+
+        [Test]
+        public void OnPlayerPrefs_AViewedTick_SurvivesARestart_UnderAColonKey_AndTheResetRemovesIt()
+        {
+            // - risk (b) of the brief: an Auto Nav Block's key is "auto:<kind>" -- a colon in a PlayerPrefs key (the registry on Windows,
+            //   an XML attribute on Android); it must read back exactly and be found by the reset
+            string wall = "test_wall_" + Guid.NewGuid().ToString("N");
+            string autoKey = BlockStackBuilder.AutoNavBlockKey("nav_contents");
+            StringAssert.Contains(":", autoKey, "precondition: the auto key holds its colon");
+            var first = new CardLocalState(new PlayerPrefsCardStateStore(), wall);
+            string viewedKey = first.KeyOf("lamp", autoKey, CardLocalState.ViewedSlot);
+            string blockKey = first.KeyOf("lamp", "block_2", CardLocalState.ViewedSlot);
+            try
+            {
+                first.MarkViewed("lamp", autoKey);
+                first.MarkViewed("lamp", "block_2");
+                PlayerPrefs.Save();
+                Assert.IsTrue(PlayerPrefs.HasKey(viewedKey), "written to PlayerPrefs itself, colon and all: " + viewedKey);
+                Assert.AreEqual("1", PlayerPrefs.GetString(viewedKey, ""), "read back exactly");
+
+                var restarted = new CardLocalState(new PlayerPrefsCardStateStore(), wall);
+                Assert.IsTrue(restarted.Viewed("lamp", autoKey), "a new instance (the app restarted) still has the colon key's tick");
+                Assert.IsTrue(restarted.Viewed("lamp", "block_2"));
+                Assert.AreEqual(2, restarted.CountViewed());
+                Assert.AreEqual(2, restarted.ResetAll(), "the reset walks the index and finds the colon key too");
+                Assert.IsFalse(PlayerPrefs.HasKey(viewedKey));
+                Assert.IsFalse(PlayerPrefs.HasKey(blockKey));
+                Assert.IsFalse(first.Viewed("lamp", autoKey));
+            }
+            finally
+            {
+                first.ResetAll();
+                PlayerPrefs.DeleteKey(viewedKey);
+                PlayerPrefs.DeleteKey(blockKey);
+            }
+        }
+
         // ---------------- content seen ----------------
 
         [Test]

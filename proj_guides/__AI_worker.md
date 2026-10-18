@@ -13,77 +13,79 @@
 So start by reading them all. 
 
 
-## `And now: POI Card Navigation (3.2) -- step 11a, the navigation family, the icon grid and Auto Nav Block`
+
+## `And now: POI Card Navigation (3.2) -- step 11b, the contents block with reading times and seen ticks`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
 not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Add edge scrubber and hotspot pins that open a block"
-(full EditMode 1839/1839; it rides on step 8's full PlayMode 921/921) -- run the full EditMode suite and say which
-commit you trusted.
+them if TMP dirtied them. Baseline: the tree is clean on commit "Add an icon grid nav block and an Auto Nav Block
+option" (full EditMode 1856/1856, full PlayMode 978/978) -- run the full EditMode suite and say which commit you
+trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 11a] line is yours; the
-[step 12] expandable line is NOT) and the status table (1-10 done; step 11 was split, 11a is yours, 11b is next).
-Sections 5.6 (the in-flow blocks), 2.2 (the `navigation` family row, held back since step 1 on purpose), 3 (the Auto
-Nav Block row) and 9.
-REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` section 3 and the kind-registration rules -- THIS BLOCK ADDS A
-BLOCK KIND, not a nav element, so it goes through `BlockRegistry`, the Block Library and Card Content like any other
-kind; _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines"; .clinerules/40-testing.md 4.2 (this block
-OWES a full run -- and the targeted set goes green FIRST), 4.2.3, 4.4, 4.5; .clinerules/20-code-quality.md.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (none is yours) and the status
+table (1-11a done; 11b is yours). Sections 5.6 (`nav_contents`), 3 (the `minutes` common field and Auto Nav Block),
+4.4 (the spy line -- the seen tick uses the SAME line, not a second one) and 9.
+REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` on `CardLocalState` and on the common fields -- you add a slot
+to saved state and a field every kind can carry, so read how both are owned before adding to them; _5.1_Editor_Tab.md
+"HOW TO USE THIS FILE" + section "0. Guidelines" (the Reading Time field and the Test row that resets saved state);
+.clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3, 4.4, 4.5.
 Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- it changes `BlockStackBuilder`, which every card in the project is built by, and it
-registers the family that step 1 deliberately left out.
-TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: `BlockStackBuilder` is a
-rule the whole domain reads (4.2 shared ground), and Auto Nav Block changes what EVERY card contains. Close the Card /
-Poi targeted set green FIRST (~707 tests), then start the full run, in the background; report `editor_is_focused` at
-the first poll and at the end. 11b and the blocks after it ride on it.
+WORKER MODEL: Opus-class -- it writes PERSISTED state for the first time in this domain, and a wrong key or a missed
+reset follows a visitor between walls.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: one new kind plus an additive slot in saved
+state -- no container, no stops, no harness (4.2). It closes on every PlayMode fixture whose name holds Card or Poi,
+PLUS every fixture a grep for `CardLocalState` finds (name them: the knowledge check and the content-seen tests are
+likely). Green before you call the block done. It rides on 11a's full run (978/978); the next full run falls due at
+step 14 -- and sooner than that, because the layouts of 13-15 will each change a container.
 
-PART 1 -- the one evidence gap step 10 left:
-1. Capture the Navigation section of the Editor with the Edge row in it, at 620 pt, and judge it item by item like
-   every other row capture (`_5.1` section 0). No code change expected -- if the capture shows one, that is a finding.
+PART 1 -- none open.
 
-PART 2 -- step 11a:
+PART 2 -- step 11b:
 
-11a.1 The `navigation` family, registered at last (`_3.2` 2.2 says step 11, with its first kind, and why: a family
-  with no kinds would have been a speculative row). Order 85, `InNav = false` -- a nav block is never a nav TARGET, so
-  it must not appear as a section in any element. Prove that with a test on a card that holds one: the model's section
-  count does not change.
-11a.2 Kind `nav_icon_grid` (D1): the POI's families as a grid of icon + word + count, drawn after the header; a tap
-  jumps through `NavController`. It is a BLOCK, so it needs everything a kind needs -- a `BlockKindDefinition` with its
-  Format, its looks, its help, a row in the Block Library, a place in "+ Add block" under Navigation, and the family
-  icons and colour tokens step 6 built. Reuse the item parts the elements already share (`NavItems`, `NavTab`,
-  `NavTint`); if a grid needs a new shared part, say which and why.
-11a.3 **Auto Nav Block** (the row in section 3): when a wall sets it, a card with at least Show Navigation From targets
-  gets that nav block inserted after its header -- UNLESS the POI already authors a nav block of its own, in which case
-  nothing is inserted. Default `none`.
-  HOW, and this is the risk of the block: the insertion belongs in `BlockStackBuilder`, after the skip rules and the
-  Block Order, as its own small step with its own name -- not threaded through the existing passes. An inserted block
-  has no authored key: give it one that cannot collide with an authored key and say what you chose, because `BlockRef`,
-  the spy, the seen state and `CardLocalState` all key off it.
-  ACCEPTANCE: the stack of every card that does NOT meet the condition is byte-for-byte what it was before this block
-  (assert that on The Lamp and on the two small fixtures); a card that does meet it gains exactly one block, in second
-  place; a POI that authors its own nav block gains none.
-11a.4 The Auto Nav Block Editor row (`none`, `nav_icon_grid`; `nav_contents` joins at 11b), with (i), undo, live sync.
-  TESTS: Tier 0 on the insertion rule (every branch above, including the "already authored" one and a card exactly at
-  the threshold). Phase A: `nav_icon_grid` x the four gallery cases. Phase B in LivingRoomScene with real input: a real
-  tap on a grid tile lands its family's first block; the auto block appears on The Lamp and not on Lamp Military; the
-  spy and the scroll are unaffected by the inserted block.
-  VISUALS: the grid on the real Lamp at 390 px in EN and PT, the Block Library row, and the Auto Nav Block row.
+11b.1 The `minutes` common field (Editor label "Reading Time"), optional, per block instance (`_3.2` section 3). Audio
+  and video do NOT carry it: they read their clip's length instead, so the contents list shows a time for them without
+  anyone typing one. Say in the report which kinds end up with the field and which read a clip.
+11b.2 Kind `nav_contents` (D2): a contents list at L3 -- one row per TARGET block (not per section): its heading, its
+  minutes (the field, or the clip's length), and a seen tick. Rows grouped by section, in the stack's order. A tap
+  jumps to the block. It is a BLOCK, like the icon grid: Block Library row, "+ Add block" under Navigation, and it
+  joins the Auto Nav Block popup with no window edit (11a listed that popup from the registry -- say that you checked).
+  A one-family card is still useful here, so rule 2.5.7 does NOT apply to it (it lists blocks, not sections) -- there
+  is a test from 5b that says so in words; make sure it still holds.
+11b.3 The seen tick. A block counts as seen once the SPY LINE has passed its top -- the same line `NavScrollRule`
+  already uses, never a second definition. It is remembered per wall / POI / block in `CardLocalState` (a new `Viewed`
+  slot).
+  THE RISKS, and why this block is Opus: (a) the key must include the wall, so a visitor who walks to another wall does
+  not arrive with ticks; (b) the auto-inserted block's key is `auto:nav_icon_grid` / `auto:nav_contents` -- stable, but
+  check it round-trips through PlayerPrefs with its colon; (c) the Editor's "Reset Saved Card State" row must clear the
+  new slot too, and its notice counts what it cleared -- extend it and prove it with the existing real-click test;
+  (d) a release build must behave the same as the Editor here (no dev-only path).
+  ACCEPTANCE: a tick appears after the block was in view, SURVIVES closing and reopening the card, and is gone after a
+  reset. A block never seen has no tick.
+11b.4 Auto Nav Block gains `nav_contents` as a choice; its (i) says what each of the two offers in a wall author's
+  words.
+  TESTS: Tier 0 for the minutes source (field, clip, neither) and for the seen decision at the spy line (just above,
+  just below, at the end of the stack). Phase A: `nav_contents` x the four gallery cases, with and without ticks.
+  Phase B in LivingRoomScene with real input: a real drag past three blocks ticks exactly those three; the ticks are
+  still there after the card is closed and reopened; Reset Saved Card State clears them; a tap on a row lands its
+  block (relative, +-1 px).
+  VISUALS: the contents block on the real Lamp at 390 px in EN and PT, with some rows ticked and some not (the tick
+  must not be the only signal that a row was read -- check contrast and say what the second signal is), the Editor's
+  Reading Time field, and the Auto Nav Block popup with both choices.
 
-11a.5 DOCS: `_3.2` status row 11a + proof and the [step 11a] TODO removed; `_3.1` wherever it lists the kinds or the
-  families (a new kind and a new family are facts that file states); `_5.1`; `10-structure.md`; RUN TIMES after the
-  full run.
+11b.5 DOCS: `_3.2` status row 11b + proof; `_3.1` wherever it states what `CardLocalState` holds and what the common
+  fields are -- those are facts that file states and they are now wrong; `_5.1` for the Reading Time field and the
+  reset row's notice; `10-structure.md`.
 
 Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
 comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
 backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: `nav_contents`, Reading Time and the seen ticks (11b); `nav_rails` and `nav_bento` (15); the generic
-teaser and full view (12); layouts; presets; Editor warnings (17).
-Stop when the full EditMode suite is green, the Card / Poi fixtures are green, the FULL PlayMode suite is green with
-zero failures, the captures are judged and 11a.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+OUT OF SCOPE: `nav_rails` and `nav_bento` (15); the generic teaser and full view (12); layouts (13-15); presets (17);
+`find_block` (18); any change to the slots, the chrome floor or `BlockStackBuilder`'s insertion rule.
+Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are
+judged and 11b.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
-
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

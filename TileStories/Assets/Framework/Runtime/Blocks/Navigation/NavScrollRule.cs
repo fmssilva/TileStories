@@ -40,13 +40,38 @@ namespace TileStories
         public static int CurrentSection(IReadOnlyList<float> sectionTops, float offset, float contentHeight, float viewportHeight)
         {
             if (sectionTops == null || sectionTops.Count == 0) return -1;
-            float range = Range(contentHeight, viewportHeight);
-            if (range > 0f && offset >= range - EndTolerance) return sectionTops.Count - 1;
-            float spyLine = offset + viewportHeight * SpyLineFraction;
+            if (IsAtEnd(offset, contentHeight, viewportHeight)) return sectionTops.Count - 1;
+            float spyLine = SpyLine(offset, viewportHeight);
             int current = 0;
             for (int i = 1; i < sectionTops.Count; i++)
                 if (sectionTops[i] <= spyLine) current = i;
             return current;
+        }
+
+        // Whether a block counts as SEEN at `offset` (_3.2 step 11b, the contents list's tick): it is on screen and the spy line has passed
+        // its top -- the very line CurrentSection reads, so the tick and the marked section can never disagree. Where the line can never
+        // pass the lower blocks, every block on screen counts: at the end of the range (the same rule that names the last section there) and
+        // on a stack that does not scroll at all (all of it is in view -- ContentSeenRule's "all of it fits"). On screen matters: after a
+        // jump the blocks above the landing have their tops above the line too, yet the visitor never saw them. No viewport (the peek stop)
+        // or no layout: never
+        public static bool HasViewed(float blockTop, float blockBottom, float offset, float contentHeight, float viewportHeight)
+        {
+            if (float.IsNaN(blockTop) || float.IsNaN(blockBottom) || float.IsNaN(contentHeight) || float.IsNaN(viewportHeight) || viewportHeight <= 0f)
+                return false;
+            bool onScreen = blockBottom > offset && blockTop < offset + viewportHeight;
+            if (!onScreen) return false;
+            bool lineCannotReach = IsAtEnd(offset, contentHeight, viewportHeight) || Range(contentHeight, viewportHeight) <= 0f;
+            return lineCannotReach || blockTop <= SpyLine(offset, viewportHeight);
+        }
+
+        // Where the spy line sits in the content at `offset`
+        private static float SpyLine(float offset, float viewportHeight) => offset + viewportHeight * SpyLineFraction;
+
+        // Whether the stack rests at the end of what it can scroll (a stack that does not scroll is read from its top, never "at its end")
+        private static bool IsAtEnd(float offset, float contentHeight, float viewportHeight)
+        {
+            float range = Range(contentHeight, viewportHeight);
+            return range > 0f && offset >= range - EndTolerance;
         }
 
         // What the spy names now: a running jump's section while it glides (frozen); else what the scroll shows -- unless the

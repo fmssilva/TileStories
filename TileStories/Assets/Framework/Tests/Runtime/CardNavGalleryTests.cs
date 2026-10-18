@@ -207,7 +207,8 @@ namespace TileStories.Tests
         // its order, each its section's words, its family's icon in the family's colour above them, its block count; every tile a full touch
         // target, every word whole and at 4.5:1, the grid inside the card at 390 px; one section draws no tile (rule 2.5.7). A REAL tap (panel
         // events) on every tile lands its section's first block with one nav_jump named nav_icon_grid; rendered Nav_nav_icon_grid_<case>
-        private static string[] BlockEntryNames => CardNavGalleryDefinitions.All.Where(e => e.IsBlock).Select(e => e.Name).ToArray();
+        private static string[] BlockEntryNames => CardNavGalleryDefinitions.All
+            .Where(e => e.IsBlock && e.ElementKey == BuiltInBlocks.NavIconGridKind).Select(e => e.Name).ToArray();
 
         [UnityTest]
         public IEnumerator EveryNavBlockEntry_IsRightAfterTheHeader_OneTilePerSection_WholeAndTappable_ARealTapLandsIt_AndRenders(
@@ -283,6 +284,167 @@ namespace TileStories.Tests
                 yield return Landed(sheet.Nav);
                 AssertLanded(sheet, model.Sections[i].Targets[0], model.Sections[i].Key + "'s first block, from its tile");
             }
+        }
+
+        // The contents nav block (_3.2 section 5.6 D2, step 11b) over every case, WITHOUT and WITH ticks: Auto Nav Block puts it right after the
+        // header; under one title per section (its words, its family's icon) one row per TARGET in the model's order -- rule 2.5.7 does not
+        // apply, so one_family keeps its rows --; a row's heading is the block's own (else its kind's words), its minutes ReadingTimeRule's
+        // answer for its block and loaded clip (the typed Reading Time and the audio guide's clip both show in the big cases); every row a
+        // full touch target inside the card, every word at 4.5:1. No row is ticked on a fresh state at the card's top; with half the targets
+        // remembered as viewed exactly those rows are read -- marked twice (the marker filled in the accent, the heading no longer bold) and
+        // still at 4.5:1. A REAL tap on a row lands its block (+-1 px) with one nav_jump nav_contents and ticks it, while the rows of the
+        // blocks the jump flew past stay unticked. Rendered Nav_nav_contents_<case>.png and _ticked.png
+        private static string[] ContentsEntryNames => CardNavGalleryDefinitions.All
+            .Where(e => e.IsBlock && e.ElementKey == BuiltInBlocks.NavContentsKind).Select(e => e.Name).ToArray();
+
+        [UnityTest]
+        public IEnumerator EveryContentsEntry_ListsEachTargetUnderItsSection_WithItsMinutes_TicksOnlyWhatWasViewed_AndARealTapLandsIt(
+            [ValueSource(nameof(ContentsEntryNames))] string name)
+        {
+            int index = CardNavGalleryDefinitions.All.ToList().FindIndex(e => e.Name == name);
+            var entry = CardNavGalleryDefinitions.All[index];
+            _harness.Gallery.State.ResetAll();
+            var events = new RecordingCardEvents();
+            _harness.Gallery.Events = events;
+            _harness.Show(index);
+            yield return CardTestInput.Settle();
+            var sheet = _harness.Gallery.Sheet;
+            var model = sheet.Nav.Model;
+            string poi = entry.Name;
+            string autoKey = BlockStackBuilder.AutoNavBlockKey(entry.ElementKey);
+            var slot = sheet.Stack.SlotOfBlock(autoKey);
+            Assert.IsNotNull(slot, "Auto Nav Block put the contents in the stack");
+            Assert.AreEqual(0, sheet.Stack.Scroll.contentContainer.IndexOf(slot), "the first block of the scroll: right after the header");
+            CollectionAssert.DoesNotContain(model.Targets, autoKey, "the contents block is no target of its own list");
+            var view = sheet.Stack.BoundViews.OfType<NavContentsBlockView>().Single();
+            Assert.AreEqual(DisplayStyle.Flex, view.Root.resolvedStyle.display, "shown, whatever the number of sections (it lists blocks)");
+
+            // - the structure: a title per section, a row per target, both in the model's order
+            Assert.AreEqual(model.Sections.Count, view.Sections.Count, "one title per section");
+            CollectionAssert.AreEqual(model.Sections.SelectMany(s => s.Targets).ToList(), view.Rows.Select(r => r.BlockKey).ToList(),
+                "one row per target, under its section, in the stack's order");
+            var strings = Strings(_harness, entry);
+            var children = view.Root.Children().ToList();
+            int rowAt = 0;
+            for (int s = 0; s < model.Sections.Count; s++)
+            {
+                var title = view.Sections[s];
+                Assert.AreEqual(strings.Get(model.Sections[s].LabelKey), title.Words.text, "section " + s + ": its words in " + entry.Case.Language);
+                Assert.AreEqual(model.Sections[s].IconKey, CardIcons.KeyOf(title.Icon), title.Words.text + ": its family's icon");
+                int titleAt = children.IndexOf(title.Root);
+                for (int r = 0; r < model.Sections[s].Count; r++, rowAt++)
+                    Assert.AreEqual(titleAt + 1 + r, children.IndexOf(view.Rows[rowAt].Button), title.Words.text + ": its rows right under it");
+            }
+
+            // - every row: heading, minutes from the one rule and the loaded clip, a touch target inside the card, words at 4.5:1
+            float onePixel = CardGalleryChecks.OnePixel(view.Root);
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            var card = sheet.Root.worldBound;
+            int typed = 0, clips = 0;
+            foreach (var row in view.Rows)
+            {
+                Assert.IsTrue(sheet.Nav.TryGetEntry(row.BlockKey, out var target), row.BlockKey + " is a shown block");
+                string heading = sheet.Stack.HeadingOfBlock(row.BlockKey);
+                string expectedHeading = heading.Length > 0 ? heading : strings.Get(target.Definition.LabelKey);
+                Assert.AreEqual(expectedHeading, row.Heading.text, row.BlockKey + ": its heading, else its kind's words");
+                var clipField = ReadingTimeRule.ClipField(target.Definition);
+                float seconds = 0f;
+                if (clipField != null)
+                {
+                    string path = new BlockFieldReader(target.Instance, entry.Case.Language, "en").ValidAsset(clipField.Key, clipField.Media);
+                    var clip = _harness.Gallery.Media.Load<AudioClip>(path);
+                    seconds = clip != null ? clip.length : 0f;
+                    _harness.Gallery.Media.Release(path);
+                }
+                int minutes = ReadingTimeRule.Minutes(target.Definition, target.Instance, seconds);
+                string expectedMinutes = minutes > 0 ? string.Format(System.Globalization.CultureInfo.InvariantCulture, strings.Get(CardStrings.Keys.NavContentsMinutes), minutes) : "";
+                Assert.AreEqual(expectedMinutes, minutes > 0 ? row.Minutes.text : "", row.Heading.text + ": its minutes");
+                Assert.AreEqual(minutes > 0 ? DisplayStyle.Flex : DisplayStyle.None, row.Minutes.resolvedStyle.display, row.Heading.text + ": a time only when there is one");
+                if (minutes > 0 && clipField != null) clips++;
+                else if (minutes > 0) typed++;
+                Assert.GreaterOrEqual(row.Button.layout.height, touch - onePixel, row.Heading.text + ": a full touch target tall");
+                Assert.GreaterOrEqual(row.Button.worldBound.xMin, card.xMin - onePixel, row.Heading.text + ": inside the card");
+                Assert.LessOrEqual(row.Button.worldBound.xMax, card.xMax + onePixel);
+                Assert.IsFalse(row.IsRead, row.Heading.text + ": a fresh state at the card's top ticks nothing");
+                AssertReadable(row.Heading);
+                if (minutes > 0) AssertReadable(row.Minutes);
+            }
+            if (entry.Case.Key == "big" || entry.Case.Key == "pt_long")
+            {
+                Assert.Greater(typed, 0, "the big card shows typed Reading Times");
+                Assert.AreEqual(1, clips, "and its one audio guide's clip length");
+            }
+            yield return CardGalleryChecks.Render(name);
+
+            // - WITH ticks: every other target remembered as viewed -> exactly those rows read, marked twice, still readable
+            var ticked = model.Targets.Where((key, i) => i % 2 == 0).ToList();
+            foreach (string key in ticked) _harness.Gallery.State.MarkViewed(poi, key);
+            _harness.Show(index);
+            yield return CardTestInput.Settle();
+            view = sheet.Stack.BoundViews.OfType<NavContentsBlockView>().Single();
+            Assert.AreEqual(0f, sheet.Stack.Scroll.scrollOffset.y, "precondition: the card is at its top, no target in view");
+            Assert.IsTrue(CardTokenColours.TryResolve(view.Root, "--ts-accent", out Color accent), "--ts-accent resolves on the card");
+            foreach (var row in view.Rows)
+            {
+                bool read = ticked.Contains(row.BlockKey);
+                Assert.AreEqual(read, row.IsRead, row.Heading.text + (read ? ": remembered, ticked" : ": never viewed, no tick"));
+                Assert.AreEqual(read ? Visibility.Visible : Visibility.Hidden, row.Tick.resolvedStyle.visibility, row.Heading.text + ": the tick");
+                // - the second signal: the marker's fill and the heading's weight, never the tick alone
+                Assert.AreEqual(read, row.Marker.resolvedStyle.backgroundColor == accent, row.Heading.text + ": the marker fills only when read");
+                Assert.AreEqual(read ? FontStyle.Normal : FontStyle.Bold, row.Heading.resolvedStyle.unityFontStyleAndWeight, row.Heading.text + ": bold until read");
+                AssertReadable(row.Heading);
+                if (read)
+                {
+                    float markerContrast = CardTestInput.Contrast(row.Marker.resolvedStyle.backgroundColor, CardTestInput.EffectiveBackground(row.Button));
+                    Assert.GreaterOrEqual(markerContrast, UIAccessibility.MinRatioLargeTextOrUIComponent, "the filled marker reads at 3:1 (" + markerContrast.ToString("F2") + ")");
+                }
+            }
+            yield return CardGalleryChecks.Render(name + "_ticked");
+
+            // - a real tap on the LAST row lands its block and ticks it; the blocks the jump flew past stay unticked
+            _harness.Gallery.State.ResetAll();
+            _harness.Show(index);
+            yield return CardTestInput.Settle();
+            view = sheet.Stack.BoundViews.OfType<NavContentsBlockView>().Single();
+            var last = view.Rows[view.Rows.Count - 1];
+            var scroll = sheet.Stack.Scroll;
+            float range = NavScrollRule.Range(scroll.contentContainer.layout.height, scroll.contentViewport.layout.height);
+            if (entry.Case.Key == "big" || entry.Case.Key == "pt_long") Assert.Greater(range, 100f, "precondition: the big card really scrolls");
+            // - a card too short to move proves nothing about a landing
+            if (range <= 100f) yield break;
+            // - bring the last row to the middle of the viewport (the list is long), then tap it
+            float rowTop = last.Button.worldBound.yMin - scroll.contentContainer.worldBound.yMin;
+            scroll.scrollOffset = new Vector2(0f, Mathf.Max(0f, rowTop - scroll.contentViewport.layout.height * 0.5f));
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(CardTestInput.IsShown(last.Button, sheet.Layer), "precondition: the last row is on screen before the tap");
+            events.Raised.Clear();
+            yield return CardTestInput.Tap(sheet.Root.panel, last.Button.worldBound.center);
+            yield return Landed(sheet.Nav);
+            AssertLanded(sheet, last.BlockKey, last.Heading.text + ", from its row");
+            var jump = events.Raised.Single(e => e.Kind == CardEventKinds.NavJump);
+            Assert.AreEqual(NavContentsBlockView.ElementKey, jump.Variant);
+            Assert.AreEqual(last.BlockKey, jump.BlockKey);
+            Assert.IsTrue(last.IsRead, "the landed block is in view: its row ticks");
+            Assert.IsTrue(_harness.Gallery.State.Viewed(poi, last.BlockKey), "and it is remembered");
+            float offset = scroll.scrollOffset.y;
+            foreach (var row in view.Rows)
+            {
+                var rowSlot = sheet.Stack.SlotOfBlock(row.BlockKey);
+                if (rowSlot.layout.yMax <= offset)
+                    Assert.IsFalse(row.IsRead, row.Heading.text + ": flown past by the jump, never on screen -- no tick");
+            }
+        }
+
+        private sealed class RecordingCardEvents : ICardEvents
+        {
+            public readonly List<CardEvent> Raised = new();
+            public void Raise(CardEvent cardEvent) => Raised.Add(cardEvent);
+        }
+
+        private static void AssertReadable(Label words)
+        {
+            float contrast = CardTestInput.Contrast(words.resolvedStyle.color, CardTestInput.EffectiveBackground(words));
+            Assert.GreaterOrEqual(contrast, UIAccessibility.MinRatioNormalText, "'" + words.text + "' reads at 4.5:1 (" + contrast.ToString("F2") + ")");
         }
 
         // Rule 2.5.7 on the gallery's own cards, side by side: the one-family card renders NO strip, and the same card with a second family

@@ -995,6 +995,13 @@ MonoBehaviour:
       value: Sections grid
     - lang: pt
       value: Grelha de secções
+  - key: kind_nav_contents
+    where: The name of the contents block (a list of the card's blocks with their minutes and a tick once read) as one kind of block.
+    text:
+    - lang: en
+      value: Contents
+    - lang: pt
+      value: "\xCDndice"
   - key: kind_sources
     where: The name of the sources block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
     text:
@@ -1123,3 +1130,18 @@ MonoBehaviour:
       value: "{0} is placed by the wall"
     - lang: pt
       value: "{0} est\xE1 junto \xE0 parede"
+  - key: nav_contents_minutes
+    where: Beside a row of the contents block, how long that block takes ({0} = whole minutes).
+    text:
+    - lang: en
+      value: "{0} min"
+    - lang: pt
+      value: "{0} min"
+  - key: nav_contents_read
+    where: What a row of the contents block is called once the visitor has had that block in view (read out with its tick, never shown
+      alone).
+    text:
+    - lang: en
+      value: Read
+    - lang: pt
+      value: Lido

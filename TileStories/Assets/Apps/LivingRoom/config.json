@@ -877,6 +877,15 @@
                         "display": "inline",
                         "fields": [
                             {
+                                "key": "minutes",
+                                "text": [],
+                                "number": 3.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
                                 "key": "heading",
                                 "text": [
                                     {
@@ -1008,6 +1017,15 @@
                         "variant": "sections",
                         "display": "inline",
                         "fields": [
+                            {
+                                "key": "minutes",
+                                "text": [],
+                                "number": 4.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
                             {
                                 "key": "heading",
                                 "text": [
@@ -1808,6 +1826,15 @@
                         "display": "inline",
                         "fields": [
                             {
+                                "key": "minutes",
+                                "text": [],
+                                "number": 2.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
                                 "key": "heading",
                                 "text": [
                                     {
@@ -2420,6 +2447,15 @@
                         "variant": "segmented",
                         "display": "inline",
                         "fields": [
+                            {
+                                "key": "minutes",
+                                "text": [],
+                                "number": 5.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
                             {
                                 "key": "heading",
                                 "text": [

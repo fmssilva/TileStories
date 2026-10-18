@@ -73,6 +73,55 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(-1, NavScrollRule.CurrentSection(null, 0f, Content, Viewport));
         }
 
+        // The contents list's tick (_3.2 step 11b): a block is seen once the SAME spy line passed its top while it is on screen. Every
+        // number comes from the rule's own constants and this fixture's stack (3000 seen through 600, range 2400)
+        [Test]
+        public void ABlockIsViewed_OnceTheSpyLinePassedItsTop_JustAboveYes_JustBelowNo()
+        {
+            const float offset = 1000f, height = 150f;
+            float line = SpyLineAt(offset);
+            Assert.IsTrue(NavScrollRule.HasViewed(line - 1f, line - 1f + height, offset, Content, Viewport), "its top one unit above the line");
+            Assert.IsTrue(NavScrollRule.HasViewed(line, line + height, offset, Content, Viewport), "its top exactly on the line");
+            Assert.IsFalse(NavScrollRule.HasViewed(line + 1f, line + 1f + height, offset, Content, Viewport),
+                "its top one unit below the line: on screen, but not read yet");
+            Assert.IsTrue(NavScrollRule.HasViewed(offset - 100f, offset + 20f, offset, Content, Viewport),
+                "a tall block whose top went off the top while its end still shows: the line passed it");
+        }
+
+        [Test]
+        public void ABlockOffScreen_IsNeverViewed_EvenWithItsTopAboveTheLine()
+        {
+            // - after a jump that lands at 1000 the blocks above have tops above the line, but they were flown past, never on screen
+            const float offset = 1000f;
+            Assert.IsFalse(NavScrollRule.HasViewed(700f, 1000f, offset, Content, Viewport), "it ends exactly at the viewport's top");
+            Assert.IsFalse(NavScrollRule.HasViewed(200f, 400f, offset, Content, Viewport), "far above");
+            Assert.IsFalse(NavScrollRule.HasViewed(offset + Viewport, offset + Viewport + 100f, offset, Content, Viewport), "below the viewport");
+        }
+
+        [Test]
+        public void AtTheEndOfTheStack_EveryBlockOnScreenIsViewed_AndOnAStackThatDoesNotScroll()
+        {
+            float range = NavScrollRule.Range(Content, Viewport);
+            float lowTop = Content - 120f;
+            Assert.Greater(lowTop, SpyLineAt(range), "precondition: the last block's top stays under the line even at the end");
+            Assert.IsTrue(NavScrollRule.HasViewed(lowTop, Content, range, Content, Viewport), "at the end: the line can go no further, it counts");
+            Assert.IsTrue(NavScrollRule.HasViewed(lowTop, Content, range - NavScrollRule.EndTolerance, Content, Viewport), "within the end tolerance");
+            Assert.IsFalse(NavScrollRule.HasViewed(lowTop, Content, range - NavScrollRule.EndTolerance - 1f, Content, Viewport),
+                "further from the end: back to the line's answer");
+            Assert.IsTrue(NavScrollRule.HasViewed(450f, 520f, 0f, 520f, Viewport),
+                "a stack that does not scroll is all in view: its lowest block counts although it sits under the line");
+        }
+
+        [Test]
+        public void NoViewportOrNoLayout_ViewsNothing()
+        {
+            Assert.IsFalse(NavScrollRule.HasViewed(0f, 100f, 0f, Content, 0f), "the peek stop: no viewport, nothing is visible");
+            Assert.IsFalse(NavScrollRule.HasViewed(float.NaN, 100f, 0f, Content, Viewport), "a slot not laid out yet");
+            Assert.IsFalse(NavScrollRule.HasViewed(0f, float.NaN, 0f, Content, Viewport));
+            Assert.IsFalse(NavScrollRule.HasViewed(0f, 100f, 0f, float.NaN, Viewport), "no content height yet");
+            Assert.IsFalse(NavScrollRule.HasViewed(0f, 100f, 0f, Content, float.NaN));
+        }
+
         [Test]
         public void WhileAJumpGlides_TheSpyIsFrozenOnItsSection_ThenReleased()
         {

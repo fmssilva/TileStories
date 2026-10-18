@@ -127,6 +127,17 @@ namespace TileStories
             if (fieldProblem != null) return fieldProblem;
             if (d.ShowAfterViewedField != null && d.Field(d.ShowAfterViewedField)?.Type != BlockFieldType.Toggle)
                 return "its show-after-viewed field '" + d.ShowAfterViewedField + "' is not one of its Toggle fields";
+            // - a common key is the card's, even on a kind that does not carry that common field (a clip kind and 'minutes'): a kind's
+            //   own field under it would read as Reading Time to every other reader
+            for (int i = d.CommonFieldsOf().Count; i < d.Fields.Count; i++)
+                if (Contains(BlockKindDefinition.CommonFieldKeys, d.Fields[i].Key))
+                    return "its own field '" + d.Fields[i].Key + "' takes a key every kind shares";
+            if (d.ClipLengthField != null)
+            {
+                var clip = d.Field(d.ClipLengthField);
+                if (clip == null || clip.Type != BlockFieldType.Asset || (clip.Media != MediaKind.Audio && clip.Media != MediaKind.Video))
+                    return "its clip length field '" + d.ClipLengthField + "' is not one of its audio or video Asset fields";
+            }
             return null;
         }
 

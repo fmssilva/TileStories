@@ -117,6 +117,8 @@ namespace TileStories
             Variants = new[] { HeaderCompact, HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable },
             DefaultVariant = HeaderTextOnly,
             DisplayModes = new[] { CardOptions.DisplayInline },
+            // - the title block is never a navigation target, so never a row of a contents list: no Reading Time
+            OffersReadingTime = false,
             Fields = new[]
             {
                 new BlockFieldDefinition

@@ -1,25 +1,30 @@
-# Plan tracker -- _3.2 step 11a (navigation family, nav_icon_grid, Auto Nav Block)
+# Plan tracker -- _3.2 step 11b (nav_contents, Reading Time, seen ticks in CardLocalState)
 
-GATE (done): pushed 1 (dad3d37..04f92db); Game view + POI Editor captured (`TestEvidence/Gate/gate_3_2_step11a_gameview.png`,
-`TestEvidence/Editor/230_CardNavigation_Edge_620.png`); compile ExitCode 0; SDF fonts clean; EditMode 1839/1839 (63 s) on clean 04f92db.
-PART 1 (done): Edge row judged at 620 pt -- no finding.
+GATE (done): pushed 1 (04f92db..2578283); Game view + POI Editor captured and opened (`TestEvidence/Gate/gate_3_2_step11b_gameview.png`,
+`gate_3_2_step11b_poieditor.png`, capture window closed); compile 0 error CS / ExitCode 0; SDF fonts clean; EditMode 1856/1856 (63 s) on clean 2578283.
+PART 1: none open.
 
-Decisions: BlockBindContext.Nav + NavController.Bound (the grid draws on the model the sheet binds AFTER the stack); inserted key
-`auto:nav_icon_grid` (authored keys are generated block_N, never a ':'); threshold counts targets with nothing revealed (the stack never
-changes on a reveal); "authors its own" = a navigation-family entry in the stack; kind off in the Block Library / none / unknown /
-non-navigation key -> nothing; family icon `grid` + `--ts-family-navigation` + `family_navigation` words (the Editor names it);
-nav_icon_grid = format interact, look `tiles`, NavTab tiles, styles in Navigation.uss, hidden below 2 sections (rule 2.5.7);
-Editor options listed from the registry (navigation-family kinds).
+## Steps
 
-- [x] S1 family (85, InNav off) + grid icon + token + CardStrings rows + BuiltInBlocks.Navigation (nav_icon_grid) + NavIconGridBlockView
-      + BlockBindContext.Nav + NavController.Bound; FamilyRegistryTests updated; compile + EditMode
-- [x] S2 CardNavigationSettings.auto_nav_block + BlockStackBuilder.InsertAutoNavBlock; AutoNavBlockTests (Tier 0, every branch)
-- [x] S3 Editor row Auto Nav Block (after Edge) + (i) + guides; DetailCardEditorTabTests (real click, Ctrl+Z, walker), Block Library +
-      Add block; round trip / live sync rows
-- [x] S4 Phase A: nav_icon_grid in CardNavGalleryDefinitions x 5 cases + CardNavGalleryTests checks + renders judged
-- [x] S5 Phase B: PoiCardNavBlockSceneTests (Lamp yes / Military no, real tile taps land +-1 px, spy + scroll unaffected, stops)
-- [x] S6 captures judged (Lamp EN + PT DONE: Search_NavIconGrid_Lamp_full_{en,pt}.png; Editor rows pending: Unity was covered, the first try caught another app and was deleted): Lamp grid 390 EN + PT, Block Library row, Auto Nav Block row
-- [x] S7 docs: _3.2 status + TODO, _3.1 kinds/families, _5.1, 10-structure, RUN TIMES
-- [x] S8 full EditMode; Card / Poi targeted set green; FULL PlayMode in the background (editor_is_focused first / last poll)
-
-CLOSED: EditMode 1856/1856 (66 s); Card / Poi 32 fixtures 742/742 (2454 s); FULL PlayMode 978/978 (2892 s, unfocused at first poll, focused at the end).
+- [x] 1. Reading Time (11b.1): `BlockKindDefinition` -- `minutes` common field (Number 0..60, default 0 = none), lazy Fields,
+  `ClipLengthField` (audio_guide, video: no field, read the clip), `OffersReadingTime` false on header + navigation kinds;
+  `BlockRegistry.Validate` refuses a ClipLengthField that is not an Audio / Video Asset field; pure `ReadingTimeRule`
+  (field -> clip rounded up -> none). Tests: `ReadingTimeRuleTests`, registry validation, field lists per kind.
+- [x] 2. Seen state (11b.3 data): `CardLocalState.Viewed` / `MarkViewed` / `CountViewed`; `NavScrollRule.HasViewed` (the spy line +
+  on screen; the end rule shared with CurrentSection); `NavController.TargetViewed` (once per binding, never while jumping) +
+  `EntryOf` via `BlockStackView.EntryOfBlock`. Tests: `CardLocalStateTests` (+ auto: key through real PlayerPrefs, per wall),
+  `NavScrollRuleTests` (just above / below / end / off screen / no viewport).
+- [x] 3. Kind `nav_contents` + `NavContentsBlockView` (11b.2): rows per target grouped by section, minutes, tick + second signal,
+  tap = JumpToBlock; CardStrings (kind_nav_contents, nav_contents_minutes, nav_contents_read) en + pt; Navigation.uss tokens.
+- [x] 4. Editor (11b.1, 11b.3c, 11b.4): Reading Time row on Card Content (generic drawer), reset notice counts the read blocks,
+  Auto Nav Block (i) compares both kinds, guides (Playmode + Device). Tests: `DetailCardEditorTabTests` (Reading Time real click +
+  Ctrl+Z, absent on audio / video / header; reset real click clears viewed incl. the auto: key + notice text; Auto Nav lists both;
+  + Add block > navigation > Contents).
+- [x] 5. Fixtures: The Lamp block_2 / 5 / 22 / 26 minutes (both config copies, content only).
+- [x] 6. Phase A: `CardNavGalleryDefinitions` + nav_contents (4 cases, with / without ticks); `CardNavGalleryTests`.
+- [x] 7. Phase B: `PoiCardNavContentsSceneTests` on LivingRoomScene (real drag ticks exactly three, survives reopen, reset clears,
+  row tap lands +-1 px, no tick at peek, Auto Nav nav_contents).
+- [x] 8. Captures: Lamp contents EN / PT 390 px with ticks, Editor Reading Time row, Auto Nav popup with both.
+- [x] 9. Closing: full EditMode; PlayMode Card / Poi fixtures + CardLocalState greps (named).
+- [x] 10. Docs (11b.5): `_3.2` status + 5.6 + section 3 + 7; `_3.1` CardLocalState + common fields; `_5.1` Reading Time + reset
+  notice; `10-structure.md`; `40-testing.md` RUN TIMES if moved; `__mixed_TODOs.md` ideas.

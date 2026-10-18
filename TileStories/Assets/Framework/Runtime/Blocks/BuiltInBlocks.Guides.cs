@@ -33,6 +33,8 @@ namespace TileStories
             DefaultVariant = AudioGuidePlayer,
             DisplayModes = new[] { CardOptions.DisplayInline },
             PinnedTopVariants = new[] { AudioGuideHeroChip },
+            // - a contents list shows the recording's own length: no Reading Time to type
+            ClipLengthField = AudioGuideClipField,
             Fields = new[]
             {
                 new BlockFieldDefinition

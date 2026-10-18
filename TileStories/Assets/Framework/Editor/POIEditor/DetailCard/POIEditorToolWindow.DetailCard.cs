@@ -154,15 +154,25 @@ namespace TileStories.Editor
             EditorRowEnd();
         }
 
-        // Forget every answer, vote and revealed question this wall's cards stored on this computer (CardLocalState.ResetAll over
-        // the same PlayerPrefs the app uses) and say how many entries went. Never touches the config.
+        // Forget every answer, vote, revealed question and contents tick this wall's cards stored on this computer (CardLocalState.ResetAll
+        // over the same PlayerPrefs the app uses) and say how many entries went, the ticks named apart. Never touches the config.
         internal int ResetSavedCardState()
         {
-            int removed = new CardLocalState(new PlayerPrefsCardStateStore(), _config?.wall_id).ResetAll();
-            EditorNotice.Queue("Saved card state cleared", removed == 0
-                ? "Nothing was saved for this wall on this computer."
-                : removed + (removed == 1 ? " saved entry" : " saved entries") + " (answers, votes, revealed questions) cleared for this wall on this computer.");
+            var state = new CardLocalState(new PlayerPrefsCardStateStore(), _config?.wall_id);
+            int ticks = state.CountViewed();
+            int removed = state.ResetAll();
+            EditorNotice.Queue("Saved card state cleared", CardStateResetMessage(removed, ticks));
             return removed;
+        }
+
+        // The reset notice's words: how many entries went and, of them, how many were contents ticks (blocks a visitor had in view)
+        internal static string CardStateResetMessage(int removed, int ticks)
+        {
+            if (removed == 0) return "Nothing was saved for this wall on this computer.";
+            string entries = removed + (removed == 1 ? " saved entry" : " saved entries");
+            string tickWords = ticks + (ticks == 1 ? " block" : " blocks") + " ticked as read in a Contents block";
+            return entries + " cleared for this wall on this computer: answers, votes, revealed questions, the picked language and " +
+                   tickWords + ".";
         }
 
         // Languages: one comma-separated list (the first is the fallback); written only when the text changes

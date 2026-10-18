@@ -1039,3 +1039,100 @@
 .nav-icon-grid__tile .nav-tabs__underline {
     display: none;
 }
+
+/* ---- the contents nav BLOCK (nav_contents, _3.2 step 11b): under each section's name (icon + words) a row per block -- a marker, the
+   block's heading, its minutes. A READ row is marked twice, never by the tick alone: the marker fills (an empty ring -> a filled accent
+   disc holding the tick) and the heading drops from bold to regular, like a read message in an inbox. Both headings stay --ts-ink (no
+   fading: a read row must stay as readable as an unread one) ---- */
+
+.nav-contents {
+    flex-direction: column;
+}
+
+.nav-contents__section {
+    flex-direction: row;
+    align-items: center;
+    margin: var(--ts-space-3) 0 var(--ts-space-1) 0;
+}
+
+.nav-contents__section-icon {
+    margin: 0 var(--ts-space-2) 0 0;
+}
+
+.nav-contents__section-words {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-ink-2);
+}
+
+.nav-contents__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    min-height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.nav-contents__row:hover,
+.nav-contents__row:active {
+    background-color: var(--ts-clear);
+}
+
+/* the marker: an empty ring until the block was read */
+.nav-contents__marker {
+    width: var(--ts-space-5);
+    height: var(--ts-space-5);
+    flex-shrink: 0;
+    margin: 0 var(--ts-space-3) 0 0;
+    border-width: var(--ts-icon-stroke);
+    border-color: var(--ts-ink-3);
+    border-radius: var(--ts-radius-round);
+    background-color: var(--ts-clear);
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-contents__tick {
+    width: var(--ts-space-4);
+    height: var(--ts-space-4);
+    color: var(--ts-on-accent);
+}
+
+.nav-contents__row--read .nav-contents__marker {
+    border-color: var(--ts-accent);
+    background-color: var(--ts-accent);
+}
+
+.nav-contents__heading {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin: 0;
+    padding: var(--ts-space-2) 0;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: middle-left;
+}
+
+.nav-contents__row--read .nav-contents__heading {
+    -unity-font-style: normal;
+}
+
+.nav-contents__minutes {
+    flex-shrink: 0;
+    margin: 0 0 0 var(--ts-space-3);
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+}

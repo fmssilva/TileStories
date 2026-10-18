@@ -434,6 +434,16 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   run with real audio (`PoiCardRealAudioTests`) ran just before, and whether Edit > Project Settings > Audio > Disable Unity Audio while idle
   stops it. Not a code finding today: Unity 6000.3.19f1 engine side.
 
+- OPEN (2026-10-18, seen at _3.2 step 11b): **a real touch drag moves the card's stack about 1.7 times the finger's travel.** A slow
+  `CardTestInput` touch stroke of 345 panel px (30 moves, then held still 10 or 60 frames) moved The Lamp's stack 579 px, and a longer hold
+  overshot MORE, so it is not a fling. `PoiCardNavContentsSceneTests` now drags in short strokes until the spy line passes its block (a reader's
+  way, robust to any gain). Find where the gain comes from (ScrollView touch scroll vs the panel's scale: the run's 390 x 844 frame in a
+  differently sized Game view, `PanelSettings` scale with screen size) and whether a device shows it; any test that expects a drag of N px to
+  scroll N px is measuring the harness, not the card.
+
+## The contents list on a long card (2026-10-18, from _3.2 step 11b)
+
+
 ## A placed model with NO card open (2026-10-17, from the _3.2 step 9 review)
 
 - `_3.2` step 9 closed both AR debts: the placed-model chip now floats above the sheet at every stop, PEEK included, and

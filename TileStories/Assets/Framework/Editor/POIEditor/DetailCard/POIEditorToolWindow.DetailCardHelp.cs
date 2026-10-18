@@ -165,15 +165,16 @@ namespace TileStories.Editor
             "the explanation and marks the right choice. Close the card and open it again: the answer is still there and cannot be changed.\n" +
             "- Show After Reading on: the question stays hidden until you have scrolled to the end of the card (or all of it fits on the screen).\n" +
             "- Give a Feedback block a thumb or stars: it shows the vote with a thank-you, once.\n" +
-            "- Reset Saved Card State (above) forgets every saved answer, vote and revealed question of this wall on this computer: close " +
-            "and reopen the card afterwards to answer again.\n" +
+            "- Reset Saved Card State (above) forgets every saved answer, vote, revealed question and Contents tick of this wall on this " +
+            "computer: close and reopen the card afterwards to answer again and to see every Contents row unticked.\n" +
             "- Test Runner: EditMode + PlayMode, zero failures.";
 
         private const string CardStateResetHelp =
             "The card remembers on this device what a visitor did: the answer to each Knowledge Check question, the vote of each " +
-            "Feedback block and the questions that were revealed after reading. This clears all of it for this wall, on this " +
-            "computer only, so a question can be answered again. It never changes the config. Close and reopen a card that is open " +
-            "in Play Mode to see the cleared state.";
+            "Feedback block, the questions that were revealed after reading, the language picked on the card and the blocks a " +
+            "Contents block ticked as read. This clears all of it for this wall, on this computer only, so a question can be answered " +
+            "again and every Contents row starts unticked; the notice says how many entries went and how many of them were ticks. " +
+            "It never changes the config. Close and reopen a card that is open in Play Mode to see the cleared state.";
 
         // Why one question row of a Knowledge Check is not shown for the look it will be drawn in
         internal static string CardQuestionProblemText(int rowNumber, KnowledgeCheckRule.Problem problem, string variant)

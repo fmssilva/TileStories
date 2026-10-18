@@ -24,15 +24,27 @@ namespace TileStories
         public IReadOnlyList<string> Variants;
         // Used when an instance names no variant or one this kind does not have
         public string DefaultVariant;
-        // Every field of the kind: the common ones every kind has (CommonFields: the heading), then the kind's own. A kind
-        // sets only its own; one that declares a common key itself is refused by BlockRegistry.Validate (two fields, one key).
+        // Every field of the kind: the common ones it carries (CommonFieldsOf: the heading, and Reading Time unless the kind reads a
+        // clip or is never a contents row), then the kind's own. A kind sets only its own; one that declares a common key itself is
+        // refused by BlockRegistry.Validate (two fields, one key).
         public IReadOnlyList<BlockFieldDefinition> Fields
         {
-            get => _fields ??= WithCommonFields(null);
+            // - merged on the first read, not in the setter: an object initializer may set ClipLengthField / OffersReadingTime AFTER
+            //   Fields, and the common list depends on them
+            get => _fields ??= WithCommonFields(_ownFields);
             // - a plain set, not init: Unity's class library has no IsExternalInit, so C# 9 init accessors do not compile
-            set => _fields = WithCommonFields(value);
+            set { _ownFields = value; _fields = null; }
         }
+        private IReadOnlyList<BlockFieldDefinition> _ownFields;
         private IReadOnlyList<BlockFieldDefinition> _fields;
+
+        // The key of one of the kind's Asset fields holding an audio or video clip (null = none): the clip's own length is the block's
+        // reading time, so the kind carries no Reading Time field (audio_guide, video). BlockRegistry.Validate checks it names such a field
+        public string ClipLengthField;
+
+        // Whether the kind carries the Reading Time field (on unless the kind says otherwise): off for a kind that is never a row of a
+        // contents list -- the header (never a navigation target) and the navigation blocks themselves
+        public bool OffersReadingTime = true;
 
         public IReadOnlyList<string> DisplayModes;
         // The CardStrings key of the heading shown when an instance's own heading is empty (null: no heading then), e.g.
@@ -60,20 +72,36 @@ namespace TileStories
         // The key of the common heading field: a short title above the block, drawn by BlockStackView for every kind
         public const string HeadingField = "heading";
 
-        // The fields every kind has, before its own (_3.1 step 6C). Drawn by the stack, not by each view: one look, one gap.
-        public static readonly IReadOnlyList<BlockFieldDefinition> CommonFields = new[]
+        // The key of the common Reading Time field (_3.2 step 11b): the minutes a contents list (nav_contents) shows beside the block
+        public const string MinutesField = "minutes";
+
+        // The heading every kind has (_3.1 step 6C). Drawn by the stack, not by each view: one look, one gap.
+        public static readonly BlockFieldDefinition HeadingDefinition = new()
         {
-            new BlockFieldDefinition
-            {
-                Key = HeadingField, Type = BlockFieldType.LocalizedText, Label = "Heading",
-                Help = "A short title the card shows above this block (Before the earthquake, How it was made). Empty: no title -- or, " +
-                       "for a kind that has one, its own default title (Detail Card > Card Texts).",
-            },
+            Key = HeadingField, Type = BlockFieldType.LocalizedText, Label = "Heading",
+            Help = "A short title the card shows above this block (Before the earthquake, How it was made). Empty: no title -- or, " +
+                   "for a kind that has one, its own default title (Detail Card > Card Texts).",
         };
 
-        private static IReadOnlyList<BlockFieldDefinition> WithCommonFields(IReadOnlyList<BlockFieldDefinition> own)
+        // Reading Time, optional, per block (_3.2 step 11b): whole minutes, 0 = not given (the contents list then shows no time). Read by
+        // ReadingTimeRule; a kind that reads a clip's length (ClipLengthField) or is never a contents row (OffersReadingTime off) has none
+        public static readonly BlockFieldDefinition MinutesDefinition = new()
         {
-            var all = new List<BlockFieldDefinition>(CommonFields);
+            Key = MinutesField, Type = BlockFieldType.Number, Label = "Reading Time", NumberMin = 0f, NumberMax = 60f, NumberDefault = 0f,
+            Help = "About how many minutes this block takes to read or to do, shown beside it in a contents list (the Contents block). " +
+                   "0 (the default): no time is shown for it. Audio and video blocks need none: the list shows their clip's own length.",
+        };
+
+        // The common fields this kind carries, before its own: the heading always, Reading Time unless it reads a clip or is never a row
+        public IReadOnlyList<BlockFieldDefinition> CommonFieldsOf() =>
+            OffersReadingTime && ClipLengthField == null ? new[] { HeadingDefinition, MinutesDefinition } : new[] { HeadingDefinition };
+
+        // Every common key any kind may carry: what BlockRegistry.Validate refuses as a kind's own field key
+        public static readonly IReadOnlyList<string> CommonFieldKeys = new[] { HeadingField, MinutesField };
+
+        private IReadOnlyList<BlockFieldDefinition> WithCommonFields(IReadOnlyList<BlockFieldDefinition> own)
+        {
+            var all = new List<BlockFieldDefinition>(CommonFieldsOf());
             if (own != null) all.AddRange(own);
             return all;
         }

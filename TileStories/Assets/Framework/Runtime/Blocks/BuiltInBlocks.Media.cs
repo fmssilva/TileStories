@@ -235,6 +235,8 @@ namespace TileStories
             Variants = new[] { VideoInline, VideoChapters },
             DefaultVariant = VideoInline,
             DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayTakeover },
+            // - a contents list shows the film's own length: no Reading Time to type
+            ClipLengthField = VideoClipField,
             Fields = new[]
             {
                 new BlockFieldDefinition

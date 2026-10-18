@@ -32,7 +32,7 @@ namespace TileStories
         }
 
         private readonly Dictionary<string, Stack<Slot>> _pool = new();
-        private readonly List<(string Kind, string Key, Slot Slot, ScopedMediaSource Media)> _bound = new();
+        private readonly List<(string Kind, string Key, Slot Slot, ScopedMediaSource Media, BlockStackBuilder.Entry Entry)> _bound = new();
         // The slots of blocks kept hidden until the card was read (ShowAfterViewedField), with what remembers their reveal
         private readonly List<(Slot Slot, string PoiId, string BlockKey)> _waiting = new();
         // The block keys this binding revealed itself (a card with no CardLocalState still shows them once read)
@@ -103,6 +103,16 @@ namespace TileStories
             foreach (var b in _bound)
                 if (b.Key == blockKey) return b.Slot.Heading.text ?? "";
             return "";
+        }
+
+        // The stack entry (kind, instance, look) of the bound block with this instance key; false when no such block is bound: what a block
+        // that lists OTHER blocks of the card reads them from (nav_contents' Reading Time, its clip lengths)
+        public bool TryGetEntryOfBlock(string blockKey, out BlockStackBuilder.Entry entry)
+        {
+            foreach (var b in _bound)
+                if (b.Key == blockKey) { entry = b.Entry; return true; }
+            entry = default;
+            return false;
         }
 
         // The slot element holding a bound view and its heading (the block's full footprint in the stack)
@@ -250,7 +260,7 @@ namespace TileStories
                     //   is exactly between them. Re-inserting an already-attached element just moves it: harmless on every rebind.
                     h.Root.Insert(1, PinnedTop);
                 }
-                _bound.Add((entry.Definition.Key, entry.Instance.key, slotOf, media));
+                _bound.Add((entry.Definition.Key, entry.Instance.key, slotOf, media, entry));
             }
             Scroll.scrollOffset = UnityEngine.Vector2.zero;
             // - a new card starts at the top, header open (the offset may already have been 0: no scroll event then)
@@ -260,7 +270,7 @@ namespace TileStories
         // Unbind every view and put it back in its kind's pool
         public void UnbindAll()
         {
-            foreach (var (kind, _, slot, media) in _bound)
+            foreach (var (kind, _, slot, media, _) in _bound)
             {
                 if (slot.View is HeaderBlockView h) h.HeroPart.RemoveFromHierarchy();
                 slot.View.Unbind();

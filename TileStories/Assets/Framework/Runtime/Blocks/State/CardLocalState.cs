@@ -3,7 +3,8 @@ using System.Globalization;
 namespace TileStories
 {
     // The ONE store of what a visitor did on the cards, on this device (_3.1 step 8A): the answer chosen for a knowledge
-    // question, the vote given to a feedback block, that a gated block was revealed ("seen"). Plain C# over an
+    // question, the vote given to a feedback block, that a gated block was revealed ("seen"), that a block was in view
+    // ("viewed": a contents list's tick, _3.2 step 11b). Plain C# over an
     // ICardStateStore, so every rule is a test with `new`; the app's store is PlayerPrefsCardStateStore.
     //
     // A key names its place: wall + POI + block key + what it is, e.g. ts.card.living_room.lamp.block_44.answer-0 -- so two
@@ -66,6 +67,30 @@ namespace TileStories
 
         // Remember that the block was revealed, so it shows at once the next time
         public void MarkSeen(string poiId, string blockKey) => WriteInt(KeyOf(poiId, blockKey, "seen"), 1);
+
+        // The slot of a block the visitor has had in view (the contents list's tick, _3.2 step 11b)
+        public const string ViewedSlot = "viewed";
+
+        // Whether the visitor has had the block in view on this wall's card (a nav_contents row shows its tick)
+        public bool Viewed(string poiId, string blockKey) => ReadInt(KeyOf(poiId, blockKey, ViewedSlot)) == 1;
+
+        // Remember that the block was in view, so its tick is there the next time the card opens; a second call writes nothing
+        public void MarkViewed(string poiId, string blockKey)
+        {
+            if (Viewed(poiId, blockKey)) return;
+            WriteInt(KeyOf(poiId, blockKey, ViewedSlot), 1);
+        }
+
+        // How many blocks this wall's cards remember as viewed: what the POI Editor's reset names in its notice
+        public int CountViewed()
+        {
+            if (!_store.TryGet(IndexKey, out string index)) return 0;
+            int count = 0;
+            string suffix = "." + ViewedSlot;
+            foreach (string key in index.Split(IndexSeparator))
+                if (key.EndsWith(suffix, System.StringComparison.Ordinal) && _store.TryGet(key, out _)) count++;
+            return count;
+        }
 
         // The language the visitor picked on this wall's cards ("" = never picked: the wall's first language shows). One choice for the
         // whole wall, not per point, so it is keyed by the wall alone

@@ -93,7 +93,7 @@ failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
 EditMode ~70-140 s (1856 tests, 66 s, 2026-10-17, _3.2 step 11a); full PlayMode ~40-50 min (978 tests, 2892 s, partly in the background,
-2026-10-17, _3.2 step 11a: 978/978); the Card / Poi targeted set (32 fixtures, 742 tests) ~35-42 min (2454 s, 2026-10-17, _3.2 step 11a); one
+2026-10-17, _3.2 step 11a: 978/978); the Card / Poi targeted set (33 fixtures, 754 tests) ~35-42 min (2290 s, 2026-10-18, _3.2 step 11b); one
 PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures

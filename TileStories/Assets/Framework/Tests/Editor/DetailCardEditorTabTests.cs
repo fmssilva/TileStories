@@ -1660,9 +1660,11 @@ namespace TileStories.Editor.Tests
             Assert.Less(Y("Edge"), Y("Auto Nav Block"), "Auto Nav Block right under Edge (section 7's order)");
             Assert.Less(Y("Auto Nav Block"), Y("Follow Scroll"));
 
+            // - step 11b: Contents joined the list with NO edit to the window -- the row reads the registry's navigation family
             var (keys, labels) = POIEditorToolWindow.AutoNavBlockOptions(BlockRegistry.Shared);
-            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInBlocks.NavIconGridKind }, keys, "None, then the navigation family's kinds, from the registry");
-            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Icon Grid" }, labels, "named by their Editor names, never their keys");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind }, keys,
+                "None, then the navigation family's kinds, from the registry");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Icon Grid", "Contents" }, labels, "named by their Editor names, never their keys");
 
             Pick(() => _window.Config.card_settings.navigation.auto_nav_block = BuiltInBlocks.NavIconGridKind);
             yield return DrawnInfoTitles(drawn);
@@ -1676,35 +1678,47 @@ namespace TileStories.Editor.Tests
 
             var help = typeof(POIEditorToolWindow);
             string autoHelp = (string)help.GetMethod("CardAutoNavBlockHelp", Static).Invoke(null, new object[] { BlockRegistry.Shared });
-            foreach (string word in new[] { "None (the default)", "Show Navigation From", "of its own", "Block Library", "Icon Grid: " })
+            foreach (string word in new[] { "None (the default)", "Show Navigation From", "of its own", "Block Library", "Icon Grid: ", "Contents: " })
                 StringAssert.Contains(word, autoHelp, "CardAutoNavBlockHelp says " + word);
             EditorTextChecks.AssertAscii(autoHelp, "CardAutoNavBlockHelp");
             string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
             StringAssert.Contains("Auto Nav Block = Icon Grid", guide, "the Playmode guide walks the grid");
             StringAssert.Contains("Auto Nav Block = None", guide);
+            StringAssert.Contains("Auto Nav Block = Contents", guide, "the Playmode guide walks the contents list and its ticks");
+            StringAssert.Contains("Reset Saved Card State", guide, "...and how the ticks are cleared");
+            StringAssert.Contains("Icon Grid is a quick map", autoHelp, "the (i) says what each of the two offers");
             string device = (string)help.GetField("CardNavigationDeviceTestGuide", Static).GetValue(null);
             StringAssert.Contains("Auto Nav Block:", device, "the device guide reads the grid at the phone's width");
         }
 
-        // The nav_icon_grid KIND goes through the Editor like any other kind: a Block Library row under its family (a real click on its
-        // Enabled box makes its row, Ctrl+Z takes it back) and a "+ Add block" entry under navigation (a real click adds it to a point, and
-        // with no field to fill the builder shows it)
+        // A nav KIND goes through the Editor like any other kind: a Block Library row under its family (a real click on its Enabled box
+        // makes its row, Ctrl+Z takes it back) and a "+ Add block" entry under navigation (a real click adds it to a point, and with no
+        // field to fill the builder shows it). Both kinds of the family, each with its own real clicks
         [UnityTest]
-        public IEnumerator TheIconGridKind_HasABlockLibraryRow_AndPlusAddBlockAddsIt_WithRealClicks()
+        public IEnumerator TheIconGridKind_HasABlockLibraryRow_AndPlusAddBlockAddsIt_WithRealClicks() =>
+            NavKindHasABlockLibraryRowAndPlusAddBlock(BuiltInBlocks.NavIconGridKind);
+
+        [UnityTest]
+        public IEnumerator TheContentsKind_HasABlockLibraryRow_AndPlusAddBlockAddsIt_WithRealClicks() =>
+            NavKindHasABlockLibraryRowAndPlusAddBlock(BuiltInBlocks.NavContentsKind);
+
+        private IEnumerator NavKindHasABlockLibraryRowAndPlusAddBlock(string kind)
         {
             _window = new PoiEditorWindowHost(TwoPoiConfig(), "_showCardBlockLibrary");
             OpenTab("DetailCard");
             yield return _window.WaitForRepaint();
             var ordered = BlockRegistry.Shared.Ordered.ToList();
-            int row = ordered.FindIndex(k => k.Key == BuiltInBlocks.NavIconGridKind);
+            int row = ordered.FindIndex(k => k.Key == kind);
             Assert.GreaterOrEqual(row, 0, "the kind is in the registry the window reads");
             Assert.AreEqual(BuiltInFamilies.Navigation, ordered[row].Family);
-            Assert.AreEqual(BuiltInFamilies.Meta, ordered[row + 1].Family, "the Block Library lists it between community and the Sources (Order 85)");
+            int afterFamily = ordered.FindIndex(row, k => k.Family != BuiltInFamilies.Navigation);
+            Assert.AreEqual(BuiltInFamilies.Meta, ordered[afterFamily].Family, "the Block Library lists the navigation run between community and the Sources (Order 85)");
+            Assert.AreEqual(BuiltInFamilies.Community, ordered[ordered.FindIndex(k => k.Family == BuiltInFamilies.Navigation) - 1].Family);
             yield return _window.ScrollTo("Block Library enabled#" + row);
             _window.Click("Block Library enabled#" + row);
             yield return _window.WaitForRepaint();
             var setting = _window.Config.card_settings.kinds.Single();
-            Assert.AreEqual(BuiltInBlocks.NavIconGridKind, setting.kind, "a real click on its Enabled box made ITS row");
+            Assert.AreEqual(kind, setting.kind, "a real click on its Enabled box made ITS row");
             Assert.IsFalse(setting.enabled);
             yield return _window.PressUndo();
             CollectionAssert.IsEmpty(_window.Config.card_settings.kinds, "Ctrl+Z takes it back");
@@ -1721,7 +1735,7 @@ namespace TileStories.Editor.Tests
             yield return _window.WaitForRepaint();
             var added = _window.Config.pois[0].card.blocks.Last();
             Assert.AreEqual(before + 1, _window.Config.pois[0].card.blocks.Count);
-            Assert.AreEqual(BuiltInBlocks.NavIconGridKind, added.kind, "a real click on + Add block added the grid");
+            Assert.AreEqual(kind, added.kind, "a real click on + Add block added the kind");
             StringAssert.StartsWith(TaxonomyRowKeys.BlockPrefix, added.key, "an authored key: block_N");
             var built = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois);
             Assert.IsTrue(built.Entries.Any(e => e.Instance == added), "no field to fill: the card shows it");
@@ -2193,6 +2207,51 @@ namespace TileStories.Editor.Tests
             Assert.IsNull(Spot().fields.Find(f => f.key == across.Key), "one Ctrl+Z: back to the default, nothing stored");
         }
 
+        // Specific Marker > Card Content (_3.2 step 11b): Reading Time is drawn on a text block right under its Heading (the generic Number
+        // drawer, no new drawer), on its default 0 with nothing stored; a real click near the right end of its track writes whole minutes the
+        // contents list reads, and one Ctrl+Z takes them back. An audio and a video block draw NO Reading Time row (their clip's length is
+        // their time), and neither does the header
+        [UnityTest]
+        public IEnumerator TheReadingTimeRow_IsOnATextBlock_NotOnAudioVideoOrTheHeader_AndARealClickIsUndoneByCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var audio = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.AudioGuideKind, variant = BuiltInBlocks.AudioGuidePlayer, display = CardOptions.DisplayInline };
+            var video = new BlockInstanceData { key = "block_3", kind = BuiltInBlocks.VideoKind, variant = BuiltInBlocks.VideoInline, display = CardOptions.DisplayInline };
+            var header = new BlockInstanceData { key = "block_4", kind = BuiltInBlocks.HeaderKind, variant = BuiltInBlocks.HeaderTextOnly, display = CardOptions.DisplayInline };
+            config.pois[0].card.blocks.AddRange(new[] { TextBlock("block_1", "The story of the keep."), audio, video, header });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foreach (string key in new[] { "block_1", "block_2", "block_3", "block_4" }) foldouts["poi_1/" + key] = true;
+            yield return Redraw();
+            Assert.IsTrue(Drawn("Block field minutes#0"), "the text block draws Reading Time");
+            Assert.Less(_window.RectOf("Block field heading en#0").y, _window.RectOf("Block field minutes#0").y, "right under its Heading");
+            Assert.IsTrue(Drawn("Block field clip#1"), "precondition: the audio block is open (its Clip row is drawn)");
+            Assert.IsFalse(Drawn("Block field minutes#1"), "an audio block reads its clip: no Reading Time row");
+            Assert.IsTrue(Drawn("Block field clip#2"), "precondition: the video block is open");
+            Assert.IsFalse(Drawn("Block field minutes#2"), "a video block neither");
+            Assert.IsFalse(Drawn("Block field minutes#3"), "nor the header");
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            BlockInstanceData Text() => _window.Config.pois[0].card.blocks[0];
+            Assert.IsNull(Text().fields.Find(f => f.key == BlockKindDefinition.MinutesField), "no Reading Time stored yet: 0, no time shown");
+
+            // - a real click near the RIGHT end of the track (the number box sits after it): close to the 60-minute maximum
+            Rect row = _window.RectOf("Block field minutes#0");
+            _window.ClickAt(new Vector2(row.xMax - EditorGUIUtility.fieldWidth - 12f, row.center.y));
+            yield return _window.WaitForRepaint();
+            var stored = Text().fields.Find(f => f.key == BlockKindDefinition.MinutesField);
+            Assert.IsNotNull(stored, "a real click wrote Reading Time");
+            int minutes = ReadingTimeRule.Minutes(BuiltInBlocks.RichText, Text(), 0f);
+            Assert.Greater(minutes, 45, "near the track's right end: most of an hour, in whole minutes for the contents list");
+            Assert.LessOrEqual(minutes, (int)BlockKindDefinition.MinutesDefinition.NumberMax);
+            Assert.IsTrue(_window.Unsaved);
+
+            yield return _window.PressUndo();
+            Assert.IsNull(Text().fields.Find(f => f.key == BlockKindDefinition.MinutesField), "one Ctrl+Z: nothing stored again");
+            Assert.AreEqual(0, ReadingTimeRule.Minutes(BuiltInBlocks.RichText, Text(), 0f));
+        }
+
         [Test]
         public void AStickyActionsBlockWithSeveralButtons_WarnsThatOnlyTheFirstShows_WhateverSetsTheLook()
         {
@@ -2567,7 +2626,11 @@ namespace TileStories.Editor.Tests
                 mine.SetAnswer("poi_1", "block_1", 0, 2);
                 mine.SetVote("poi_1", "block_2", 5);
                 mine.MarkSeen("poi_1", "block_3");
+                // - step 11b: the contents ticks, one under an Auto Nav Block's colon key
+                mine.MarkViewed("poi_1", "block_4");
+                mine.MarkViewed("poi_1", BlockStackBuilder.AutoNavBlockKey(BuiltInBlocks.NavContentsKind));
                 theirs.SetAnswer("poi_1", "block_1", 0, 1);
+                theirs.MarkViewed("poi_1", "block_4");
                 var config = TwoPoiConfig();
                 config.wall_id = wall;
                 _window = new PoiEditorWindowHost(config, "_showCardContainer");
@@ -2581,7 +2644,11 @@ namespace TileStories.Editor.Tests
                 Assert.AreEqual(-1, mine.Answer("poi_1", "block_1", 0), "the answer is forgotten");
                 Assert.AreEqual(-1, mine.Vote("poi_1", "block_2"), "the vote too");
                 Assert.IsFalse(mine.Seen("poi_1", "block_3"), "and the revealed question");
+                Assert.IsFalse(mine.Viewed("poi_1", "block_4"), "and the contents tick");
+                Assert.IsFalse(mine.Viewed("poi_1", BlockStackBuilder.AutoNavBlockKey(BuiltInBlocks.NavContentsKind)), "the colon key's tick too");
+                Assert.AreEqual(0, mine.CountViewed(), "no tick of this wall is left");
                 Assert.AreEqual(1, theirs.Answer("poi_1", "block_1", 0), "another wall's saved state is untouched");
+                Assert.IsTrue(theirs.Viewed("poi_1", "block_4"), "another wall keeps its ticks");
                 Assert.IsFalse(_window.Unsaved, "a reset never changes the config");
                 Assert.AreEqual(wall, _window.Config.wall_id);
 
@@ -2614,6 +2681,20 @@ namespace TileStories.Editor.Tests
                     state.SetAnswer("poi_1", "block_1", 0, 1);
                     state.SetAnswer("poi_1", "block_1", 1, 2);
                     Assert.AreEqual(2, (int)reset.Invoke(window, null), "two saved answers cleared");
+                    StringAssert.Contains("2 saved entries", EditorNotice.PendingMessage);
+                    StringAssert.Contains("0 blocks ticked as read", EditorNotice.PendingMessage, "no tick among them");
+                    // - step 11b: the notice counts the ticks it cleared, apart from the rest
+                    state.SetAnswer("poi_1", "block_1", 0, 1);
+                    state.MarkViewed("poi_1", "block_2");
+                    state.MarkViewed("poi_1", "block_3");
+                    state.MarkViewed("poi_1", BlockStackBuilder.AutoNavBlockKey(BuiltInBlocks.NavContentsKind));
+                    Assert.AreEqual(4, (int)reset.Invoke(window, null), "an answer and three ticks cleared");
+                    StringAssert.Contains("4 saved entries", EditorNotice.PendingMessage);
+                    StringAssert.Contains("3 blocks ticked as read in a Contents block", EditorNotice.PendingMessage);
+                    Assert.AreEqual("Nothing was saved for this wall on this computer.", POIEditorToolWindow.CardStateResetMessage(0, 0));
+                    StringAssert.Contains("1 saved entry cleared", POIEditorToolWindow.CardStateResetMessage(1, 1));
+                    StringAssert.Contains("1 block ticked", POIEditorToolWindow.CardStateResetMessage(1, 1));
+                    EditorTextChecks.AssertAscii(POIEditorToolWindow.CardStateResetMessage(4, 3), "the reset notice");
                 }
                 finally { UnityEngine.Object.DestroyImmediate(window); }
             }
