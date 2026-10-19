@@ -91,7 +91,7 @@ namespace TileStories
                    "while at least one question is complete for the chosen look.",
             Variants = new[] { KnowledgeCheckMultipleChoice, KnowledgeCheckTrueFalseSwipe, KnowledgeCheckImageChoice },
             DefaultVariant = KnowledgeCheckMultipleChoice,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             DefaultHeadingKey = CardStrings.Keys.KnowledgeCheckHeading,
             ShowAfterViewedField = KnowledgeCheckShowAfterViewedField,
             ShowsFor = (_, block, variant, _) => KnowledgeCheckRule.Questions(block, variant).Count > 0,
@@ -144,7 +144,7 @@ namespace TileStories
                    "so settle the rows before the card goes live.",
             Variants = new[] { PollBars },
             DefaultVariant = PollBars,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             ShowsFor = (_, block, _, _) => PollRule.CanShow(new BlockFieldReader(block, null, null)),
             NotShownForPoiNote = "it needs a question and at least two options that have words.",
             Fields = new[]
@@ -181,7 +181,7 @@ namespace TileStories
                    "and the count line are Detail Card > Card Texts.",
             Variants = new[] { CollectAddToStory },
             DefaultVariant = CollectAddToStory,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             DefaultHeadingKey = CardStrings.Keys.CollectHeading,
             Fields = new[]
             {

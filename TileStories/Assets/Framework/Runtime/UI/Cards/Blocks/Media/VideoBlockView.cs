@@ -12,7 +12,10 @@ namespace TileStories
     // Full screen is the card's TakeoverView (IBlockHost.OpenTakeover) with a second panel over the SAME playback: nothing restarts, and Back
     // returns to the card at the stop and scroll it had. The clip is loaded through the block's own scope only for its length; the owner
     // loads its own through the card's source when it plays. Only classes here; Media.uss holds every size and colour.
-    public sealed class VideoBlockView : IBlockView
+    // Bound as the block's second view in the card's full view (BlockBindContext.FullView, _3.2 step 12) it is the whole player with no full
+    // screen of its own to offer (it is full screen already). Closing its compact row pauses the visitor's video it was showing
+    // (ICollapsibleBlockView): nothing would be left on the card to watch or stop it.
+    public sealed class VideoBlockView : IBlockView, ICollapsibleBlockView
     {
         public VisualElement Root { get; }
         public VideoPanel Panel { get; }
@@ -72,7 +75,8 @@ namespace TileStories
             Unbind();
             _context = context;
             Variant = context.Variant;
-            Display = BlockDisplayRule.Resolve(BuiltInBlocks.Video, instance?.display);
+            // - in the full view the player is drawn whole whatever the block's display (a teaser there would open a second full screen)
+            Display = context.FullView ? CardOptions.DisplayInline : BlockDisplayRule.Resolve(BuiltInBlocks.Video, instance?.display);
             var read = new BlockFieldReader(instance, context.Language, context.FallbackLanguage);
 
             _title = read.Text(BuiltInBlocks.VideoTitleField);
@@ -90,6 +94,8 @@ namespace TileStories
             _captionsOn = read.Flag(BuiltInBlocks.VideoCaptionsOnField);
             _chapters = Variant == BuiltInBlocks.VideoChapters ? ChaptersOf(read, _clipLength) : System.Array.Empty<ChapterRule.Chapter>();
 
+            // - in the full view the panel takes the page's height, as the teaser's own full-screen panel does
+            Panel.Root.EnableInClassList("card-video--full", context.FullView);
             bool teaser = Display == CardOptions.DisplayTakeover;
             Root.EnableInClassList("card-video-block--takeover", teaser);
             Panel.Root.style.display = teaser ? DisplayStyle.None : DisplayStyle.Flex;
@@ -104,7 +110,15 @@ namespace TileStories
                 TeaserButton.tooltip = context.Strings?.Get(CardStrings.Keys.VideoFullScreen) ?? "";
                 TeaserButton.SetEnabled(_clipLength > 0f);
             }
-            else Panel.Bind(_track, context.Video, context.Media, _posterPath, _clipLength, _cues, _captionsOn, _chapters, context.Strings, true);
+            else Panel.Bind(_track, context.Video, context.Media, _posterPath, _clipLength, _cues, _captionsOn, _chapters, context.Strings, !context.FullView);
+        }
+
+        // Its compact row closes: the visitor's video it was showing pauses (a header loop is not the visitor's, and another block's video is
+        // not this one's to stop)
+        public void Collapsing()
+        {
+            var video = _context?.Video;
+            if (video != null && _track != null && video.IsCurrent(_track) && !video.PlayingLoop && video.State == CardVideoState.Playing) video.Pause();
         }
 
         public void Unbind()

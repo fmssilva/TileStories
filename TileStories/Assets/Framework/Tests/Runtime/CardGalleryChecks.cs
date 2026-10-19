@@ -152,5 +152,57 @@ namespace TileStories.Tests
             Assert.AreEqual(CardTestInput.TokenPx("--ts-block-gap"), slot.resolvedStyle.marginBottom, OnePixel(slot) + 0.01f, entry.Name + ": the gap under it is the token (snapped to a screen pixel)");
             Assert.AreEqual(slot.worldBound.yMax, view.Root.worldBound.yMax, OnePixel(slot) + 0.01f, entry.Name + ": the block ends where its slot ends");
         }
+
+        // _3.2 step 12: `entry`'s block shown Display Expandable on the gallery card, compact and then opened by a real tap, for ANY kind (the
+        // framework walks its whole catalogue with it, an app its own kind). Compact: ONE tappable line (a whole touch target) with words
+        // that sit inside the card and read (4.5:1), its format, the family icon, the chevron, and NO view bound and no file held; a real tap
+        // binds the kind's own view in the row's slot and shows the full-view button; a second real tap closes it and gives every file back.
+        // Renders <render>_compact.png and <render>_expanded.png
+        public static IEnumerator AssertCompactAndExpanded(CardGalleryHarness harness, CardGalleryDefinitions.Entry entry, string render)
+        {
+            var block = JsonUtility.FromJson<BlockInstanceData>(JsonUtility.ToJson(entry.Block));
+            if (string.IsNullOrEmpty(block.key)) block.key = "block_2";
+            block.display = CardOptions.DisplayExpandable;
+            ShowEntry(harness, new CardGalleryDefinitions.Entry(entry.Kind, entry.Variant, entry.Content, block, entry.Setup, entry.WallSetup, entry.Viewer));
+            yield return CardTestInput.Settle();
+            var stack = harness.Sheet.Stack;
+            string key = block.key;
+            var row = stack.CompactRowOf(key);
+            Assert.IsNotNull(row, entry.Kind + ": drawn as a compact row (was it skipped? " + string.Join(", ", stack.BoundKinds) + ")");
+            Assert.IsNull(stack.ViewOfBlock(key), entry.Kind + ": a closed row binds no view");
+            Assert.AreEqual(0, stack.HeldMediaOf(key), entry.Kind + ": and holds no file");
+            Assert.AreEqual(1, stack.BoundViews.Count, entry.Kind + ": the header's is the only view on the card");
+
+            Rect card = harness.Sheet.Root.worldBound;
+            Assert.Greater(row.Words.text.Length, 0, entry.Kind + ": the row has words");
+            Assert.Greater(row.Meta.text.Length, 0, entry.Kind + ": and its kind of content");
+            Assert.AreEqual(DisplayStyle.Flex, row.Icon.resolvedStyle.display, entry.Kind + ": the family icon");
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(row.Toggle.worldBound.width, row.Toggle.worldBound.height),
+                entry.Kind + ": the line is a whole touch target (" + row.Toggle.worldBound.size + ")");
+            Assert.GreaterOrEqual(row.Words.worldBound.xMin, card.xMin - 0.5f, entry.Kind + ": its words start inside the card");
+            Assert.LessOrEqual(row.Words.worldBound.xMax, row.Chevron.worldBound.xMin + 0.5f, entry.Kind + ": and end before the chevron");
+            Assert.LessOrEqual(row.Chevron.worldBound.xMax, card.xMax + 0.5f, entry.Kind + ": the chevron inside the card");
+            foreach (var label in new[] { row.Words, row.Meta })
+                Assert.GreaterOrEqual(CardTestInput.Contrast(label.resolvedStyle.color, CardTestInput.EffectiveBackground(label)), UIAccessibility.MinRatioNormalText,
+                    entry.Kind + " '" + label.text + "' reads");
+            yield return Render(render + "_compact");
+
+            yield return CardTestInput.TapInView(stack.Scroll, row.Toggle);
+            yield return CardTestInput.Settle(0.2f);
+            var view = stack.ViewOfBlock(key);
+            Assert.IsNotNull(view, entry.Kind + ": a real tap opened it");
+            Assert.AreEqual(BlockRegistry.Shared.CreateView(entry.Kind).GetType(), view.GetType(), entry.Kind + ": its own view");
+            Assert.AreSame(stack.SlotOfBlock(key), view.Root.parent, entry.Kind + ": under its row, in the same slot");
+            Assert.IsTrue(row.IsExpanded, entry.Kind + ": the row shows it open");
+            Assert.AreEqual(DisplayStyle.Flex, row.FullView.resolvedStyle.display, entry.Kind + ": with its full-view button");
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(row.FullView.worldBound.width, row.FullView.worldBound.height), entry.Kind + ": a whole touch target");
+            stack.Scroll.ScrollTo(stack.SlotOfBlock(key));
+            yield return CardTestInput.Settle(0.2f);
+            yield return Render(render + "_expanded");
+
+            yield return CardTestInput.TapInView(stack.Scroll, row.Toggle);
+            Assert.IsNull(stack.ViewOfBlock(key), entry.Kind + ": a second real tap closed it");
+            Assert.AreEqual(0, stack.HeldMediaOf(key), entry.Kind + ": every file given back");
+        }
     }
 }

@@ -92,8 +92,8 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~70-140 s (1856 tests, 66 s, 2026-10-17, _3.2 step 11a); full PlayMode ~40-50 min (978 tests, 2892 s, partly in the background,
-2026-10-17, _3.2 step 11a: 978/978); the Card / Poi targeted set (33 fixtures, 754 tests) ~35-42 min (2290 s, 2026-10-18, _3.2 step 11b); one
+EditMode ~70-140 s (1889 tests, 72 s, 2026-10-19, _3.2 step 12); full PlayMode ~45-55 min (1032 tests, 2972 s, partly in the background,
+2026-10-19, _3.2 step 12: 1031/1032); the Card / Poi targeted set (36 fixtures, 825 tests) ~45-50 min (2971 s, 2026-10-19, _3.2 step 12); one
 PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
@@ -222,6 +222,10 @@ application is a broken test, not a flaky one.
   (an unfocused Game view) AND `backgroundBehavior = IgnoreFocus` (Unity not the active application: the default switches the
   device off and every finger reads "no touch"). `PoiCardTapZoomTests.AddFinger` is the reference; the second fixture that needs it
   moves it into one shared test helper instead of copying it.
+- **A real drag's distance is not the stack's distance.** A `CardTestInput` touch stroke moves the card's stack by more than
+  the finger travels (measured 1.7x at `_3.2` step 11b, and more the longer the hold is held). Assert what the drag ACHIEVED --
+  the spy moved to that section, the block is in view, the chrome hid -- never "N px of finger scrolled N px". A test written
+  the other way is measuring the harness, not the card.
 - **A failure that goes away on rerun is investigated, not dismissed.** Before calling a failure "focus" or "flaky", reproduce it
   on purpose (e.g. run the fixture with Unity in the background). If it reproduces, fix the harness; "passed on the second run" is
   not a finish.

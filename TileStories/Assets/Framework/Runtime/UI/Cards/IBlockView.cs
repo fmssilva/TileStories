@@ -67,6 +67,10 @@ namespace TileStories
         // Show still pictures instead of motion (card_settings.container.reduce_motion today; the visitor's own setting joins it with _3.3):
         // a header loop shows its poster only
         public bool ReduceMotion;
+        // This binding is the block's SECOND view, drawn in the full view over the card while its card view may still be bound (_3.2 step 12,
+        // BlockFullView). A view whose owner is keyed by the block (a 3D / 360 preview slot) asks for a slot of its own, and a view that offers
+        // its own full screen (a video) does not offer it again from there. Every other view binds exactly as on the card
+        public bool FullView;
 
         // The registered service of type T, or null when there is none: a kind that needs a service treats null as "nothing to show"
         public T Service<T>() where T : class => Services?.Get<T>();
@@ -118,6 +122,18 @@ namespace TileStories
         // makes): `blockKey` is the block's instance key, `elementKey` names what asked (the asking block's kind), for the nav_jump event.
         // A block that is not in the scrolling stack (hidden, pinned, in the footer, not on this card) is not jumped to
         void ScrollToBlock(string blockKey, string elementKey);
+
+        // Show a block of this card in the full view over it (_3.2 step 12): a second view of its kind, bound through the full view's own media
+        // scope; the card's own view of it stays bound. A block that is not on this card is not opened
+        void OpenFullView(string blockKey);
+    }
+
+    // A block view that keeps something going for the card through an owner -- a video it started -- and lets it go when its compact row is
+    // closed (_3.2 step 12, BlockStackView.Collapse): nothing would be left on screen to show it or stop it. Called right before Unbind, and
+    // only on a collapse: a rebind or the full view closing keeps the playback (the owner serves the same video to the view that comes back)
+    public interface ICollapsibleBlockView
+    {
+        void Collapsing();
     }
 
     // One block kind's view (_3.1 section 3): built once, then bound and unbound as the visitor switches POIs

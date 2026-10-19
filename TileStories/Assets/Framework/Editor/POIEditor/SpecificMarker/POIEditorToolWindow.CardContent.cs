@@ -86,8 +86,9 @@ namespace TileStories.Editor
                         if (CardBlockOffersDisplayChoice(definition))
                         {
                             var modes = new List<string>(definition.DisplayModes);
-                            int modeIndex = modes.IndexOf(block.display);
-                            int pickedMode = EditorGUILayout.Popup(modeIndex, modes.ToArray(), GUILayout.Width(CardBlockDisplayColumnWidth));
+                            // - an unknown or missing display reads as the kind's first, as the card shows it (BlockDisplayRule)
+                            int modeIndex = modes.IndexOf(BlockDisplayRule.Resolve(definition, block.display));
+                            int pickedMode = EditorGUILayout.Popup(modeIndex, modes.ConvertAll(CardBlockDisplayLabel).ToArray(), GUILayout.Width(CardBlockDisplayColumnWidth));
                             ReportTableCellRect("Card block display", i);
                             if (pickedMode >= 0 && pickedMode != modeIndex) block.display = modes[pickedMode];
                         }
@@ -108,7 +109,7 @@ namespace TileStories.Editor
                     Rect summaryRect = GUILayoutUtility.GetRect(0f, EditorGUIUtility.singleLineHeight, EditorStyles.miniLabel, GUILayout.ExpandWidth(true));
                     if (!open && definition != null && Event.current.type == EventType.Repaint)
                     {
-                        string summary = CardBlockSummary(block, definition, settings.languages);
+                        string summary = BlockSummaryRule.FirstWords(block, definition, FirstLanguageOf(settings.languages), FirstLanguageOf(settings.languages));
                         string shown = FitWithEllipsis(summary, summaryRect.width, EditorStyles.miniLabel);
                         GUI.Label(summaryRect, new GUIContent(shown, summary), EditorStyles.miniLabel);
                         if (shown.Length > 0) ReportTableCellRect("Card block summary", i, summaryRect);
@@ -151,51 +152,27 @@ namespace TileStories.Editor
             DrawCardAddBlockRow(poi);
         }
 
+        // A display's name in the Display popup (never its id): Inline, Expandable, Takeover
+        internal static string CardBlockDisplayLabel(string display)
+        {
+            switch (display)
+            {
+                case CardOptions.DisplayInline: return "Inline";
+                case CardOptions.DisplayExpandable: return "Expandable";
+                case CardOptions.DisplayTakeover: return "Takeover";
+                default: return display;
+            }
+        }
+
         // Whether a block row offers the Display popup: only a kind with two displays or more has something to choose
         internal static bool CardBlockOffersDisplayChoice(BlockKindDefinition definition) => definition?.DisplayModes != null && definition.DisplayModes.Count > 1;
+
+        // The wall's first language (null with none): what a Card Content row's one-line summary is read in (BlockSummaryRule)
+        internal static string FirstLanguageOf(List<string> languages) => languages != null && languages.Count > 0 ? languages[0] : null;
 
         // A block row's width after its indent: the window's width less the scrollbar margin, never more than CardBlockRowMaxWidth.
         // From the view width and the indent only, so the Layout and Repaint passes agree (_5.1 "Rows")
         internal static float CardBlockRowWidth(float viewWidth, float indent) => Mathf.Max(0f, Mathf.Min(viewWidth - AddButtonRowRightMargin - indent, CardBlockRowMaxWidth));
-
-        // What a collapsed block row says about its block, in one line: its Heading in the wall's first language, else the first words it
-        // holds (a text field in the kind's order, an Items field's first row included) -- each read in the first language, else any
-        // language that has words. Glossary marks read as their shown words. "" for a block with no words at all.
-        internal static string CardBlockSummary(BlockInstanceData block, BlockKindDefinition definition, List<string> languages)
-        {
-            string first = languages != null && languages.Count > 0 ? languages[0] : null;
-            var read = new BlockFieldReader(block, first, first);
-            foreach (var field in definition.Fields)
-            {
-                if (IsTextField(field))
-                {
-                    string text = OneLine(read.Text(field.Key));
-                    if (text.Length > 0) return text;
-                }
-                else if (field.Type == BlockFieldType.Items && field.ItemFields != null)
-                {
-                    var rows = read.Items(field.Key);
-                    if (rows.Count == 0) continue;
-                    foreach (var sub in field.ItemFields)
-                    {
-                        if (!IsTextField(sub)) continue;
-                        string text = OneLine(read.ItemText(rows[0], sub.Key));
-                        if (text.Length > 0) return text;
-                    }
-                }
-            }
-            return "";
-        }
-
-        private static bool IsTextField(BlockFieldDefinition field) => field.Type == BlockFieldType.LocalizedText || field.Type == BlockFieldType.LocalizedLongText;
-
-        // A text as one line: glossary marks as their words, line breaks and runs of spaces as one space
-        private static string OneLine(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text)) return "";
-            var words = GlossaryMarkup.PlainText(text).Split((char[])null, System.StringSplitOptions.RemoveEmptyEntries);
-            return string.Join(" ", words);
-        }
 
         // `text` cut so it fits `width` in `style`, ending in "..." when cut ("" when not even that fits)
         internal static string FitWithEllipsis(string text, float width, GUIStyle style)

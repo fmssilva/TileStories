@@ -305,7 +305,9 @@ namespace TileStories.Tests
             _harness.ShowPoi(CardGalleryDefinitions.GatedKnowledgePoi(longText: false), CardGalleryDefinitions.Taxonomy(), null, SheetStopRule.Stop.Peek);
             yield return CardTestInput.Settle();
             stack = _harness.Sheet.Stack;
-            Assert.IsFalse(stack.ContentSeen, "peek: the content is not on screen");
+            Assert.IsFalse(stack.ContentSeen, "peek: the content is not on screen (viewport " + stack.Scroll.contentViewport.layout.height + ", content "
+                + stack.Scroll.contentContainer.layout.height + ", offset " + stack.Scroll.scrollOffset.y + ", sheet " + _harness.Sheet.Root.layout.height
+                + " at " + _harness.Sheet.Stop + ")");
             Assert.AreEqual(DisplayStyle.None, stack.SlotOf(stack.BoundViews.OfType<KnowledgeCheckBlockView>().Single()).resolvedStyle.display);
         }
 

@@ -32,6 +32,8 @@ namespace TileStories
         public CardChromeView Chrome { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
+        // Any block of the card in that full view (_3.2 step 12): a second view of its kind, while the card's own stays bound
+        public BlockFullView FullView { get; }
         // What is open over the card -- the wall's Menu on a scrim, a bar's More or kinds list -- and when it closes (_3.2 step 8): a layer
         // between the sheet and the full view
         public CardMenuOverlay Overlay { get; }
@@ -145,6 +147,10 @@ namespace TileStories
 
             Layer.Add(Root);
             Takeover = new TakeoverView(Layer);
+            FullView = new BlockFullView(Takeover, Stack.Views);
+            // - a jump moves the card under the full view: the visitor would see nothing of it, so the full view closes (an Open Block
+            //   button or a hotspot pin used inside it lands on the card)
+            Nav.Jumped += Takeover.Close;
             Overlay = new CardMenuOverlay(this);
             // - over the sheet, under the menu layer (an open drawer covers it) and the full view
             Floating.InsertUnder(Overlay);
@@ -178,7 +184,10 @@ namespace TileStories
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
             ShowLanguageChip(context);
             context.Host ??= this;
-            // - another card replaces the full-screen view of the old one, and whatever was open over it
+            // - a block in the full view stays there over a rebind of the SAME point (a live edit, a language switch): it is drawn again
+            //   from the new stack once the card is bound. Another point replaces the full-screen view of the old one
+            string reopen = FullView.IsOpen && context.Poi?.id != null && context.Poi?.id == _context?.Poi?.id ? FullView.BlockKey : null;
+            // - and whatever was open over the old card closes
             Takeover.Close();
             Overlay.Close();
             context.Overlay = Overlay;
@@ -191,11 +200,15 @@ namespace TileStories
             var state = context.State;
             string poiId = context.Poi?.id;
             context.JumpTargets = BlockRefRule.JumpTargets(entries, key => state?.Seen(poiId, key) ?? false);
+            // - until BindNav below, the controller's model is the replaced card's: a nav block bound now waits for it
+            Nav.Rebinding();
             Stack.Bind(entries, context);
             BindNav();
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
             Floating.Bind(context);
+            // - a block the rebind dropped (a live edit deleted it) is not reopened: OpenFullView finds no entry
+            if (reopen != null) OpenFullView(reopen);
         }
 
         // Build the shown card's navigation model -- with the stack's own reveal predicate, so a block the stack hides is never a target --
@@ -254,7 +267,10 @@ namespace TileStories
         // A block asked to see the POI on the wall: lower the card to peek (the selection and its marker stay)
         public void ShowOnWall()
         {
-            if (IsOpen) SetStop(SheetStopRule.Stop.Peek);
+            if (!IsOpen) return;
+            // - the wall is what the visitor asked to see: a full view over the card would hide it (a block asking from the full view)
+            Takeover.Close();
+            SetStop(SheetStopRule.Stop.Peek);
         }
 
         // A block asked for the header at the peek: scroll to the top first (a peek over a scrolled stack shows a half-cut line of whatever
@@ -262,6 +278,8 @@ namespace TileStories
         public void ShowHeaderAtPeek()
         {
             if (!IsOpen) return;
+            // - a model placed from the full view stands in the room: the full view goes, or it would cover what was just placed
+            Takeover.Close();
             Stack.Scroll.scrollOffset = Vector2.zero;
             SetStop(SheetStopRule.Stop.Peek);
         }
@@ -331,6 +349,17 @@ namespace TileStories
             // - never stacked: the full view replaces what was open over the card
             Overlay.Close();
             Takeover.Open(crumb, pageCount, startPage, _context.Media, drawPage, _context.Strings);
+        }
+
+        // A block asked for its full view (an open compact row's button; later a bento tile): the breadcrumb ends with the words its compact
+        // row shows (heading, else first words, else its kind's words), the page holds a second view of its kind. A key that is not on this
+        // card opens nothing
+        public void OpenFullView(string blockKey)
+        {
+            if (!IsOpen || _context == null || !Stack.TryGetEntryOfBlock(blockKey, out var entry)) return;
+            System.Func<string, string> words = _context.Strings != null ? _context.Strings.Get : null;
+            string name = CompactRowRule.Of(entry, _registry, _context.Language, _context.FallbackLanguage, words).Words;
+            OpenTakeover(name, 1, 0, FullView.PageFor(entry, _context));
         }
 
         // Rest at `stop` (Dismissed hides)

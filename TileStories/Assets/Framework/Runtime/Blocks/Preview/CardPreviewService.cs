@@ -46,6 +46,9 @@ namespace TileStories
 
         public event Action Changed;
 
+        // The keys of the slots held now: what a test asserts a block bound twice (the card and the full view, _3.2 step 12) holds and gives back
+        public IReadOnlyCollection<string> HeldKeys => _slots.Keys;
+
         public ICardPreviewSlot Request(string key, MediaKind kind, string path)
         {
             if (string.IsNullOrWhiteSpace(key)) return null;

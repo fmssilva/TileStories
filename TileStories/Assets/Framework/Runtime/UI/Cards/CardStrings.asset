@@ -1131,7 +1131,7 @@ MonoBehaviour:
     - lang: pt
       value: "{0} est\xE1 junto \xE0 parede"
   - key: nav_contents_minutes
-    where: Beside a row of the contents block, how long that block takes ({0} = whole minutes).
+    where: Beside a row of the contents block and on a compact row, how long that block takes ({0} = whole minutes).
     text:
     - lang: en
       value: "{0} min"
@@ -1145,3 +1145,32 @@ MonoBehaviour:
       value: Read
     - lang: pt
       value: Lido
+  - key: compact_meta
+    where: The second line of a block shown as a compact row (display Expandable), when it gives its minutes ({0} = the block's format,
+      e.g. Read; {1} = its time, e.g. 3 min).
+    text:
+    - lang: en
+      value: "{0} \xB7 {1}"
+    - lang: pt
+      value: "{0} \xB7 {1}"
+  - key: compact_open
+    where: The name of a collapsed compact row (its tooltip and accessible name, before the block's words) -- a tap opens the block in place.
+    text:
+    - lang: en
+      value: Open
+    - lang: pt
+      value: Abrir
+  - key: compact_close
+    where: The name of an open compact row (its tooltip and accessible name, before the block's words) -- a tap closes the block again.
+    text:
+    - lang: en
+      value: Close
+    - lang: pt
+      value: Fechar
+  - key: full_view_open
+    where: The name of the button on an open compact row that shows the block in the full view over the card (tooltip and accessible name).
+    text:
+    - lang: en
+      value: Open in full view
+    - lang: pt
+      value: "Abrir em ecr\xE3 inteiro"

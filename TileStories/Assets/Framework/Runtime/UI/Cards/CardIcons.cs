@@ -93,7 +93,7 @@ namespace TileStories
         // ---- vector glyphs (8A-fix): shapes USS borders cannot draw, painted with Painter2D ----
 
         // The shapes a VectorGlyph draws
-        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown, Play, Pause, Stop, FullScreen }
+        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown, Play, Pause, Stop, FullScreen, Chevron }
 
         // One outline of a shape, in 0..1 units of the glyph's square. `Points` are joined in order; a `Closed` outline can be filled.
         public readonly struct Outline
@@ -109,7 +109,7 @@ namespace TileStories
         }
 
         // The line width of a shape as a share of the glyph's side: a stroke that scales with the glyph, so it needs no token
-        public static float StrokeUnits(Shape shape) => shape == Shape.Tick || shape == Shape.Cross || shape == Shape.FullScreen ? 0.13f : 0.07f;
+        public static float StrokeUnits(Shape shape) => shape == Shape.Tick || shape == Shape.Cross || shape == Shape.FullScreen || shape == Shape.Chevron ? 0.13f : 0.07f;
 
         // The outlines of `shape` in 0..1 units (pure, so a test can check every point stays inside the glyph)
         public static IReadOnlyList<Outline> OutlinesOf(Shape shape)
@@ -147,6 +147,9 @@ namespace TileStories
                         new Outline(new[] { new Vector2(0.86f, 0.60f), new Vector2(0.86f, 0.86f), new Vector2(0.60f, 0.86f) }, false),
                         new Outline(new[] { new Vector2(0.40f, 0.86f), new Vector2(0.14f, 0.86f), new Vector2(0.14f, 0.60f) }, false),
                     };
+                case Shape.Chevron:
+                    // - an open "v" pointing down: "there is more below, tap to open" (a compact row turns it over once open)
+                    return new[] { new Outline(new[] { new Vector2(0.18f, 0.36f), new Vector2(0.50f, 0.68f), new Vector2(0.82f, 0.36f) }, false) };
                 case Shape.ThumbUp:
                     return ThumbOutlines(false);
                 default:

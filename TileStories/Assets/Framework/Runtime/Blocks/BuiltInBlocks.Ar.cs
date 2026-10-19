@@ -27,7 +27,7 @@ namespace TileStories
                    "while at least one other point is on the wall.",
             Variants = new[] { ShowOnWallButton, ShowOnWallWithNeighbours },
             DefaultVariant = ShowOnWallButton,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             ShowsFor = (poi, _, variant, wallPois) => variant != ShowOnWallWithNeighbours || RelatedPoisRule.Pick(poi, RelatedPoisRule.SourceNearest, null, wallPois).Count > 0,
             NotShownForPoiNote = "the With Neighbours look needs at least one other point on this wall.",
         };
@@ -60,7 +60,7 @@ namespace TileStories
                    "Button Label is set (it words the placing state only).",
             Variants = new[] { PlaceInArButton },
             DefaultVariant = PlaceInArButton,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition

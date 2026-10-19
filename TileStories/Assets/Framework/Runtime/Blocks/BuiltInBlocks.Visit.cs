@@ -48,7 +48,7 @@ namespace TileStories
                    "only while this point and at least one other point are on this wall.",
             Variants = new[] { WallLocatorStrip, WallLocatorNeighbours },
             DefaultVariant = WallLocatorStrip,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             DefaultHeadingKey = CardStrings.Keys.WallLocatorHeading,
             ShowsFor = (poi, block, _, wallPois) => poi != null && WallAxisRule.Places(wallPois) is var places
                                                  && places.IndexOf(poi.id) >= 0 && places.Pois.Count >= 2,
@@ -71,7 +71,7 @@ namespace TileStories
                    "with its Card Texts wording (Where it is today). The button's words are Detail Card > Card Texts.",
             Variants = new[] { TodayMapStatic, TodayMapBridge },
             DefaultVariant = TodayMapStatic,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             DefaultHeadingKey = CardStrings.Keys.TodayMapHeading,
             Fields = new[]
             {
@@ -115,7 +115,7 @@ namespace TileStories
                    "Card Texts wording (Related). Shown only while at least one point can be picked.",
             Variants = new[] { RelatedCarousel, RelatedNextAlongWall },
             DefaultVariant = RelatedCarousel,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             DefaultHeadingKey = CardStrings.Keys.RelatedHeading,
             ShowsFor = (poi, block, _, wallPois) => poi != null && RelatedPoisRule.Of(poi, block, wallPois).Count > 0,
             NotShownForPoiNote = "no other point could be picked for it (Manual names none still on this wall; Same Category / " +
@@ -161,7 +161,7 @@ namespace TileStories
                    "label is not shown.",
             Variants = new[] { PracticalInfoRows },
             DefaultVariant = PracticalInfoRows,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition

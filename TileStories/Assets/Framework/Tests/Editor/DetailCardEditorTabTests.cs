@@ -541,36 +541,52 @@ namespace TileStories.Editor.Tests
             finally { Directory.Delete(dir, true); }
         }
 
-        // ---------------- collapsed-row summary (_3.1 step 15.1) ----------------
+        // ---------------- the Display popup (_3.2 step 12: Expandable for every kind) ----------------
+
+        // Card Content on The Lamp in the real window: every block row but the Header's draws the Display popup (the header keeps the column's
+        // place, empty); the popup names its options; a pick of Expandable is an edit the card's builder draws as a compact row, Ctrl+Z
+        // undoes it; the (i) explains the three displays in ASCII
+        [UnityTest]
+        public IEnumerator TheDisplayPopup_IsOnEveryRowButTheHeaders_NamesItsOptions_AndExpandableIsUndoneByCtrlZ()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardContainer");
+            OpenPoiCardContent("lamp");
+            yield return Redraw();
+            var blocks = _window.Config.pois.Single(p => p.id == "lamp").card.blocks;
+            Assert.AreEqual(BuiltInBlocks.HeaderKind, blocks[0].kind, "precondition: The Lamp's first row is its header");
+            Assert.IsFalse(Drawn("Card block display#0"), "the header has one display: no popup");
+            for (int i = 1; i < blocks.Count; i++)
+                Assert.IsTrue(Drawn("Card block display#" + i), blocks[i].key + " (" + blocks[i].kind + "): its row offers Expandable");
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+
+            var story = blocks.Single(b => b.key == "block_2");
+            Assert.AreEqual(CardOptions.DisplayInline, story.display, "precondition: the shipped story is inline");
+            Pick(() => _window.Config.pois.Single(p => p.id == "lamp").card.blocks.Single(b => b.key == "block_2").display = CardOptions.DisplayExpandable);
+            yield return Redraw();
+            Assert.IsTrue(_window.Unsaved, "a pick is an edit");
+            var lamp = _window.Config.pois.Single(p => p.id == "lamp");
+            var entry = BlockStackBuilder.Build(lamp, _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois).Entries.Single(e => e.Instance.key == "block_2");
+            Assert.IsTrue(BlockDisplayRule.ShowsCompact(entry), "the card now draws The story as a compact row");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.DisplayInline, _window.Config.pois.Single(p => p.id == "lamp").card.blocks.Single(b => b.key == "block_2").display,
+                "Ctrl+Z brings Inline back");
+
+            string help = (string)typeof(POIEditorToolWindow).GetField("CardContentHelp", Static).GetValue(null);
+            foreach (string word in new[] { "Inline shows", "Expandable shows", "full view", "nothing of it", "Takeover (Video, 3D Model, 360 Panorama)" })
+                StringAssert.Contains(word, help, "the Card Content (i) says " + word);
+            EditorTextChecks.AssertAscii(help, "CardContentHelp");
+            string guide = (string)typeof(POIEditorToolWindow).GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
+            StringAssert.Contains("EXPANDABLE BLOCKS AND THE FULL VIEW", guide, "the Playmode guide walks a row, its opening and the full view");
+            StringAssert.Contains("Display = Expandable", guide);
+            string device = (string)typeof(POIEditorToolWindow).GetField("CardNavigationDeviceTestGuide", Static).GetValue(null);
+            StringAssert.Contains("- Expandable:", device, "the device guide reads the lines at the phone's width");
+            EditorTextChecks.AssertAscii(guide + device, "the navigation test guides");
+        }
+
+        // ---------------- collapsed-row summary (_3.1 step 15.1; its words: BlockSummaryRule, CompactRowRuleTests) ----------------
 
         private static BlockFieldValue Text(string key, params (string lang, string value)[] texts) =>
             new() { key = key, text = texts.Select(t => new LocalizedEntry { lang = t.lang, value = t.value }).ToList() };
-
-        [Test]
-        public void ABlockSummary_IsItsHeadingInTheFirstLanguage_ElseItsFirstWords_OnOneLine()
-        {
-            var languages = new List<string> { "en", "pt" };
-            var headed = new BlockInstanceData { kind = BuiltInBlocks.RichTextKind };
-            headed.fields.Add(Text(BlockKindDefinition.HeadingField, ("pt", "Antes da reconstrução"), ("en", "Before the earthquake")));
-            headed.fields.Add(Text(BuiltInBlocks.RichTextBodyField, ("en", "The tiles were made in Lisbon.")));
-            Assert.AreEqual("Before the earthquake", POIEditorToolWindow.CardBlockSummary(headed, BuiltInBlocks.RichText, languages), "the heading, in the first language");
-            Assert.AreEqual("Antes da reconstrução", POIEditorToolWindow.CardBlockSummary(headed, BuiltInBlocks.RichText, new List<string> { "pt", "en" }),
-                "the wall's FIRST language decides, with its real letters");
-
-            var body = new BlockInstanceData { kind = BuiltInBlocks.RichTextKind };
-            body.fields.Add(Text(BuiltInBlocks.RichTextBodyField, ("en", "The [[azulejo|azulejos]] were\nmade   in Lisbon.\n\nSecond paragraph.")));
-            Assert.AreEqual("The azulejo were made in Lisbon. Second paragraph.", POIEditorToolWindow.CardBlockSummary(body, BuiltInBlocks.RichText, languages),
-                "no heading: its first words, the glossary mark as the visitor reads it, on one line");
-
-            var facts = new BlockInstanceData { kind = BuiltInBlocks.QuickFactsKind };
-            var row = new BlockItemData();
-            row.fields.Add(new BlockItemFieldValue { key = BuiltInBlocks.QuickFactsLabelField, text = new List<LocalizedEntry> { new() { lang = "en", value = "Built" } } });
-            facts.fields.Add(new BlockFieldValue { key = BuiltInBlocks.QuickFactsItemsField, items = { row } });
-            Assert.AreEqual("Built", POIEditorToolWindow.CardBlockSummary(facts, BuiltInBlocks.QuickFacts, languages), "words only in rows: the first row's");
-
-            Assert.AreEqual("", POIEditorToolWindow.CardBlockSummary(new BlockInstanceData { kind = BuiltInBlocks.ShowOnWallKind }, BuiltInBlocks.ShowOnWall, languages),
-                "a block with no words says nothing");
-        }
 
         [Test]
         public void FitWithEllipsis_KeepsWhatFits_CutsTheRestWithThreeDots_AndNeverExceedsTheWidth()
@@ -613,6 +629,7 @@ namespace TileStories.Editor.Tests
             float rightMargin = (float)typeof(POIEditorToolWindow).GetField("AddButtonRowRightMargin", Static).GetRawConstantValue();
             float rowMax = (float)typeof(POIEditorToolWindow).GetField("CardBlockRowMaxWidth", Static).GetRawConstantValue();
             var style = EditorStyles.miniLabel;
+            string first = POIEditorToolWindow.FirstLanguageOf(config.card_settings.languages);
 
             // - the widest the screen lets the host be (the OS clamps it), then the default and the narrow window
             foreach (float width in new[] { _window.Width, 880f, 620f })
@@ -625,9 +642,9 @@ namespace TileStories.Editor.Tests
                 Assert.LessOrEqual(summary.xMax - up.xMin, rowMax + 0.5f, width + " pt: never wider than the row's cap");
                 Assert.GreaterOrEqual(summary.xMin, delete.xMax, width + " pt: the summary comes after the delete, which keeps its place beside the cells");
                 Assert.Greater(summary.width, style.CalcSize(new GUIContent("...")).x, width + " pt: precondition: the summary column has room for something");
-                Assert.AreEqual("Tiles", POIEditorToolWindow.FitWithEllipsis(POIEditorToolWindow.CardBlockSummary(shortOne, BuiltInBlocks.RichText, config.card_settings.languages),
+                Assert.AreEqual("Tiles", POIEditorToolWindow.FitWithEllipsis(BlockSummaryRule.FirstWords(shortOne, BuiltInBlocks.RichText, first, first),
                     _window.RectOf("Card block summary#0").width, style), width + " pt: a short heading whole");
-                string drawn = POIEditorToolWindow.FitWithEllipsis(POIEditorToolWindow.CardBlockSummary(longOne, BuiltInBlocks.RichText, config.card_settings.languages), summary.width, style);
+                string drawn = POIEditorToolWindow.FitWithEllipsis(BlockSummaryRule.FirstWords(longOne, BuiltInBlocks.RichText, first, first), summary.width, style);
                 StringAssert.EndsWith("...", drawn, width + " pt: the long text is cut");
                 Assert.LessOrEqual(style.CalcSize(new GUIContent(drawn)).x, summary.width, width + " pt: and fits its column");
             }

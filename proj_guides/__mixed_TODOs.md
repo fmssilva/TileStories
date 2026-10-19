@@ -276,6 +276,23 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
   parsers read `\` as `/`). The user-scoped entry (`http://127.0.0.1:8080/mcp`) points at the same server. Cosmetic; tidy it with
   VS Code closed if it ever matters.
 
+## The two SDF fonts dirty themselves on every Unity launch (2026-10-19, diagnosed at the _3.2 step 12 review)
+
+- Every block since `_3.1` has spent a GATE step on `git checkout --` for `Oswald Bold SDF.asset` and `Roboto-Bold SDF.asset`.
+  CAUSE, read off the assets: both have `m_AtlasPopulationMode: 1` (DYNAMIC). A dynamic TMP font asset renders each new
+  character into its atlas and writes the glyph back INTO THE ASSET, so any Editor session that draws a character the atlas
+  does not hold yet dirties the file. `m_ClearDynamicDataOnBuild: 1` is already set, so builds are clean -- this is Editor
+  churn only, and it is noise, not damage (the last committed change to either file is e5c0f85).
+- FIX (one small block, `_3.2` step 13 PART 1): set both to STATIC after generating an atlas that holds every character the
+  project renders -- Latin plus the Portuguese accents of `CardStrings.asset`, the wall's `config.json` content and the
+  marker labels. Then TMP has nothing to add and nothing to write.
+  The risk of Static is a missing glyph in a language added later, so it comes with its own guard: a test that walks every
+  visitor-facing string the project ships (framework table, app table, the wall config) and asserts each character is in the
+  font's character table. That test is worth more than the churn it removes -- it also catches a missing accent the day
+  someone types one.
+  If Static turns out to drop a glyph the project needs and the set cannot be extended cleanly, revert to Dynamic, say so
+  here, and keep the GATE step.
+
 ## Repo (2026-09-30)
 
 - **Git LFS is not in effect.** The `[attr]lfs` macro is defined in `TileStories/.gitattributes`, but git allows macro
@@ -440,6 +457,24 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   way, robust to any gain). Find where the gain comes from (ScrollView touch scroll vs the panel's scale: the run's 390 x 844 frame in a
   differently sized Game view, `PanelSettings` scale with screen size) and whether a device shows it; any test that expects a drag of N px to
   scroll N px is measuring the harness, not the card.
+
+- OPEN (2026-10-19, seen at _3.2 step 12): **a tap right after a long `ScrollTo` can be lost.** `CardTestInput.TapInView` waits 0.15 s of real
+  time after `ScrollTo`; a long scroll collapses the header and the content keeps moving for some frames, so on a slow frame the scroll was not
+  applied yet (the target at y 10584, the viewport at 328) or the row moved between finger-down and finger-up and the click was lost. Seen
+  twice in one `PoiCardExpandableSceneTests` run (green alone and in three later runs; the developer was resizing the Unity window at the time,
+  a second plausible cause). That fixture now taps through its own `InViewAndStill` (scroll until in view AND the same rect for three frames).
+  If another fixture loses a tap after a scroll, move that precondition into `TapInView` itself (shared ground: a full PlayMode run).
+
+- OPEN (2026-10-19, seen at _3.2 step 12; CHECK AT THE NEXT FULL RUN): **"Layout update is struggling to process current layout" during
+  `PoiCardBottomElementsSceneTests.ARealDragToTheEnd_FinishesTheBar_AndBackUpItNamesABlockAgain_InPortuguese`.** Unity logs it (2-3 times,
+  PanelRootElement 390 x 844) as the next_up bar is dragged to The Lamp's end -- where the end-of-card reveal grows the content, the chrome
+  brings the bottom area back at the end and Next Up switches to its finished words, all applied from geometry callbacks: a loop between
+  them is the likely cause. Seen in BOTH long runs of step 12 (the Card / Poi targeted set, ~test 600 of 825, and the full run, ~600 of 1032),
+  never in isolation: alone twice, its fixture with PoiCardBottomBarSceneTests 16/16, in the reveal-path set 153/153. Step 12's code is not on
+  that path (no expandable block, no full view; its one style set from a geometry callback is on the full view's own scroll, never on a
+  panel there); that it predates step 12 is NOT proved (11a's full run and 11b's targeted set did not show it; the base-commit run was not
+  allowed). The developer's call: logged, and the next full run decides -- if it shows again, find the loop (which callback dirties layout
+  more than once per frame at the end of the card) and fix it there.
 
 ## The contents list on a long card (2026-10-18, from _3.2 step 11b)
 

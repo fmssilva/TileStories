@@ -244,6 +244,12 @@ namespace TileStories
             // in view is called beside its tick (its accessible name and tooltip: the tick is never the only signal)
             public const string NavContentsMinutes = "nav_contents_minutes";
             public const string NavContentsRead = "nav_contents_read";
+            // The generic compact row (_3.2 step 12, display Expandable): its second line "{0} - {1}" (format, time), the row's name while
+            // collapsed / open, and the open row's full-view button
+            public const string CompactMeta = "compact_meta";
+            public const string CompactOpen = "compact_open";
+            public const string CompactClose = "compact_close";
+            public const string FullViewOpen = "full_view_open";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -273,6 +279,7 @@ namespace TileStories
                 NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,
                 NavFab, PlacedModelRemove, PlacedModelOther,
                 NavContentsMinutes, NavContentsRead,
+                CompactMeta, CompactOpen, CompactClose, FullViewOpen,
             };
         }
 

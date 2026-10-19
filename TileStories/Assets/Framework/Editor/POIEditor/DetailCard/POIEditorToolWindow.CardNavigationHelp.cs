@@ -383,7 +383,16 @@ namespace TileStories.Editor
             "the card goes to half, then to its title, then it closes and the marker is no longer selected.\n" +
             "- With a Menu set, open the card at full and open the menu. Press Escape: the menu closes and the card stays at full; the " +
             "next Escape lowers it to half. The same with a Bottom Bar's More list or a Bar With Kinds' list open.\n" +
-            "- Set Back Button = Leave It To The App and press Escape with a card open: nothing happens to the card.\n" +
+            "- Set Back Button = Leave It To The App and press Escape with a card open: nothing happens to the card.\n\n" +
+            "EXPANDABLE BLOCKS AND THE FULL VIEW\n" +
+            "- In Specific Marker > Card Content, set Display = Expandable on a few blocks of a long card (a text, a gallery, a video, a " +
+            "3D model). Open the card: each of them is one line -- its icon, its heading (or its first words), its kind of content " +
+            "and its minutes -- and its pictures, sound or model are not loaded yet.\n" +
+            "- Tap a line: the block opens under it, the arrow turns over and a full-view button shows at its end. Tap the line again: " +
+            "it closes; a video playing in it pauses.\n" +
+            "- Open a line and tap its full-view button: the block fills the screen, the card's title and the block's words above it. " +
+            "Play the video or turn the model there, press Escape: the card shows the same video at the same moment, and its own " +
+            "player and model still answer. Switch the language or change a field while the full view is open: it stays, redrawn.\n" +
             "- Test Runner: EditMode and PlayMode, zero failures.";
 
         private const string CardNavigationDeviceTestGuide =
@@ -412,6 +421,9 @@ namespace TileStories.Editor
             "- Edge: hold the phone in one hand and reach every dot with the thumb of that hand by dragging along the column and, " +
             "separately, by tapping; check the label beside the dot under the thumb reads whole and is not hidden by the thumb, and that " +
             "a swipe on a filmstrip or a picture at the right edge of a block is not taken by the dots when it starts beside them.\n" +
+            "- Expandable: on a card with expandable blocks, tap each line with a thumb (the whole line opens it) and the full-view " +
+            "button of an open one; read every line's words whole at the phone's width, and check its icon and its kind of content " +
+            "do not crowd the words.\n" +
             "- Auto Nav Block: open a long card and read its grid of tiles at the phone's real width: every word whole, every tile tapped " +
             "once with a thumb lands its family. With Contents: read each row's words at the phone's width, tap a row with a thumb, " +
             "and check a ticked row is told apart from an unticked one outdoors in bright light (the filled ring and the lighter " +

@@ -35,6 +35,9 @@ namespace TileStories
         // The page drawn full screen while the takeover is open (null otherwise; VideoBlockView.FullScreenPanel's own shape)
         protected PreviewBlockView FullScreen { get; private set; }
 
+        // The class that makes the stage take all the page's height (Media.uss): the teaser's own full-screen page is built with it, the
+        // block's second view in the card's full view wears it while bound there
+        public const string FullClass = "card-preview--full";
         // A second preview slot's key never collides with the block's own resting one (BindFullScreen)
         private const string TakeoverKeySuffix = "::takeover";
         // How often a view that moves on its own asks for a new frame: smooth enough to read as motion, cheap enough to leave running
@@ -44,6 +47,8 @@ namespace TileStories
 
         private BlockBindContext _context;
         private BlockInstanceData _instance;
+        // Built as the teaser's full-screen page (FullClass for its whole life)
+        private readonly bool _bornFull;
         private ICardPreviewSlot _slot;
         private string _previewKey = "";
         private bool _teaser;
@@ -64,6 +69,7 @@ namespace TileStories
             Root.AddToClassList("card-preview");
             Root.AddToClassList(kindClass);
             if (modifierClass != null) Root.AddToClassList(modifierClass);
+            _bornFull = modifierClass == FullClass;
 
             Frame = new VisualElement { name = "card-preview-frame" };
             Frame.AddToClassList("card-preview__frame");
@@ -146,9 +152,17 @@ namespace TileStories
         // Put the hint's words in (a look can change them while bound)
         protected void RefreshHint() => Hint.text = _teaser ? "" : HintText(_context?.Strings) ?? "";
 
-        // Display Inline or Takeover, resolved from the instance: the card's own resting slot either way
+        // Display Inline or Takeover, resolved from the instance: the card's own resting slot either way. Bound as the block's SECOND view in the
+        // card's full view (BlockBindContext.FullView, _3.2 step 12) it is the full interactive view on its own second slot, exactly the
+        // teaser's own full-screen page: the slot is keyed by the block, so sharing the card's would let this view release it under the card
         public void Bind(BlockInstanceData instance, BlockBindContext context)
         {
+            Root.EnableInClassList(FullClass, _bornFull || context.FullView);
+            if (context.FullView)
+            {
+                BindFullScreen(instance, context);
+                return;
+            }
             Display = BlockDisplayRule.Resolve(Kind, instance?.display);
             _fullScreen = false;
             BindCore(instance, context, instance?.key ?? "", showTeaser: Display == CardOptions.DisplayTakeover);

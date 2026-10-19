@@ -116,6 +116,7 @@ namespace TileStories
                    "always shows only the title, whatever the look.",
             Variants = new[] { HeaderCompact, HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable },
             DefaultVariant = HeaderTextOnly,
+            // - the card's pinned title: never a compact row (_3.2 step 12), whatever a block below it shows as
             DisplayModes = new[] { CardOptions.DisplayInline },
             // - the title block is never a navigation target, so never a row of a contents list: no Reading Time
             OffersReadingTime = false,
@@ -213,7 +214,7 @@ namespace TileStories
                    "shows a question mark. A point without a status never shows this block.",
             Variants = new[] { StatusRing, StatusScale },
             DefaultVariant = StatusRing,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             ShowsFor = (poi, _, _, _) => poi != null && poi.has_status,
             NotShownForPoiNote = "this point has no status (Specific Marker > Outline > Has status is off).",
             Fields = new[]
@@ -239,7 +240,7 @@ namespace TileStories
                    "numbers and dates. A row with nothing in it is not shown.",
             Variants = new[] { QuickFactsChips, QuickFactsGrid, QuickFactsBigNumbers },
             DefaultVariant = QuickFactsGrid,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -268,7 +269,7 @@ namespace TileStories
                    "the fact shown at once on a tilted postcard. " + LongTextHelp,
             Variants = new[] { FunFactFlip, FunFactPostcard },
             DefaultVariant = FunFactFlip,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -296,7 +297,7 @@ namespace TileStories
                    "italic text with the author and the source on one line. Author and Source may stay empty.",
             Variants = new[] { PullQuoteSerif, PullQuoteMinimal },
             DefaultVariant = PullQuoteSerif,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -330,7 +331,7 @@ namespace TileStories
                    "order of the rows. A row with no title is not shown. " + LongTextHelp,
             Variants = new[] { ProcessStepsNumbered },
             DefaultVariant = ProcessStepsNumbered,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -360,7 +361,7 @@ namespace TileStories
                    "#RRGGBB, is not shown.",
             Variants = new[] { SwatchesGrid },
             DefaultVariant = SwatchesGrid,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -402,7 +403,7 @@ namespace TileStories
                    "always in reach at Half and Full (one call to action). More actions arrive with the blocks that need them.",
             Variants = new[] { ActionsCircles, ActionsPillRow, ActionsStickyCta },
             DefaultVariant = ActionsPillRow,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             FooterVariants = new[] { ActionsStickyCta },
             Fields = new[]
             {
@@ -455,7 +456,7 @@ namespace TileStories
                    "one heading and its paragraphs per Sections row. " + LongTextHelp,
             Variants = new[] { RichTextPlain, RichTextDropCap, RichTextLede, RichTextSections },
             DefaultVariant = RichTextPlain,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition

@@ -30,7 +30,7 @@ namespace TileStories
                    "Card Texts wording (Sources); the chip words are Card Texts too.",
             Variants = new[] { SourcesList, SourcesWithConfidence },
             DefaultVariant = SourcesList,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             DefaultHeadingKey = CardStrings.Keys.SourcesHeading,
             Fields = new[]
             {

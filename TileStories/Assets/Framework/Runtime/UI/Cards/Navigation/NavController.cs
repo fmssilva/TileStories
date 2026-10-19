@@ -37,6 +37,15 @@ namespace TileStories
         // The map of the card bound now (null while the card is closed)
         public CardNavModel Model { get; private set; }
 
+        // Whether Model is the map of the card shown NOW: false from the moment the sheet starts binding a card again (Rebinding) until Bind
+        // hands over that card's model. What a nav block opened later (an expandable row, _3.2 step 12) draws at once by; one bound with the
+        // stack waits for Bound instead (the stack binds before the model exists, and Model is still the previous card's then)
+        public bool HasCurrentModel => Model != null && !_rebinding;
+        private bool _rebinding;
+
+        // The sheet starts binding a card (a Show): Model belongs to the card being replaced until Bind
+        public void Rebinding() => _rebinding = true;
+
         // The index in Model.Sections of the section the reader is in (-1 with no section); CurrentChanged says when it moves
         public int Current { get; private set; } = -1;
         public CardNavModel.Section CurrentSection => Model != null && Current >= 0 && Current < Model.Sections.Count ? Model.Sections[Current] : null;
@@ -108,6 +117,7 @@ namespace TileStories
             string keptBlockKey = samePoint ? CurrentBlock : null;
             Model = model;
             _context = context;
+            _rebinding = false;
             var jumpSlot = IsJumping ? ScrollingSlot(_jumpBlock) : null;
             if (jumpSlot != null)
             {
@@ -140,6 +150,7 @@ namespace TileStories
             EndJump();
             Model = null;
             _context = null;
+            _rebinding = false;
             _viewed.Clear();
             SetCurrent(-1);
             SetCurrentBlock(-1);

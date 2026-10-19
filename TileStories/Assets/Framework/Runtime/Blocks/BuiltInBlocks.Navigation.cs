@@ -23,7 +23,7 @@ namespace TileStories
                    "it after the header by hand, or let Detail Card > Navigation > Auto Nav Block add it to every card with enough blocks.",
             Variants = new[] { NavIconGridTiles },
             DefaultVariant = NavIconGridTiles,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             // - a nav block is never a row of a contents list (its family is out of navigation): no Reading Time
             OffersReadingTime = false,
         };
@@ -48,7 +48,7 @@ namespace TileStories
                    "this computer.",
             Variants = new[] { NavContentsList },
             DefaultVariant = NavContentsList,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             // - it lists the card's rows; it is none of them itself
             OffersReadingTime = false,
         };

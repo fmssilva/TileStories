@@ -95,6 +95,8 @@ namespace TileStories
             if (_nav == null) return;
             _nav.Bound += Draw;
             _nav.TargetViewed += OnViewed;
+            // - bound later than the stack (an expandable row opened): the controller holds this card's model already
+            if (_nav.HasCurrentModel) Draw();
         }
 
         public void Unbind()

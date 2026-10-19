@@ -13,79 +13,75 @@
 So start by reading them all. 
 
 
-
-## `And now: POI Card Navigation (3.2) -- step 11b, the contents block with reading times and seen ticks`
+## `And now: POI Card Navigation (3.2) -- step 12, the compact row, expandable blocks and the full view`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
 not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Add an icon grid nav block and an Auto Nav Block
-option" (full EditMode 1856/1856, full PlayMode 978/978) -- run the full EditMode suite and say which commit you
-trusted.
+them if TMP dirtied them. Baseline: the tree is clean on commit "Add Reading Time, seen ticks and the contents nav
+block" (full EditMode 1874/1874; it rides on 11a's full PlayMode 978/978) -- run the full EditMode suite and say which
+commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (none is yours) and the status
-table (1-11a done; 11b is yours). Sections 5.6 (`nav_contents`), 3 (the `minutes` common field and Auto Nav Block),
-4.4 (the spy line -- the seen tick uses the SAME line, not a second one) and 9.
-REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` on `CardLocalState` and on the common fields -- you add a slot
-to saved state and a field every kind can carry, so read how both are owned before adding to them; _5.1_Editor_Tab.md
-"HOW TO USE THIS FILE" + section "0. Guidelines" (the Reading Time field and the Test row that resets saved state);
-.clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3, 4.4, 4.5.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 12] expandable line is
+yours; the [step 13] contents-collapse line is NOT, and it is already decided -- read it so your mechanism can serve it
+one step later) and the status table (1-11b done; 12 is yours). Sections 6.2 (the whole step), 6.1 (which layouts need
+it) and 9.
+REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` on `display` modes, on the TAKEOVER view and on the four media
+OWNERS (audio, video, preview, AR) -- this step binds a SECOND view of a kind while the first still exists, so read how
+each owner is taken and released before you write a line; _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0.
+Guidelines"; .clinerules/40-testing.md 4.2 (this block OWES a full run -- targeted set green FIRST), 4.2.3 (including
+the new drag-distance line, if the developer confirmed it), 4.4, 4.5; .clinerules/20-code-quality.md.
 Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- it writes PERSISTED state for the first time in this domain, and a wrong key or a missed
-reset follows a visitor between walls.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: one new kind plus an additive slot in saved
-state -- no container, no stops, no harness (4.2). It closes on every PlayMode fixture whose name holds Card or Poi,
-PLUS every fixture a grep for `CardLocalState` finds (name them: the knowledge check and the content-seen tests are
-likely). Green before you call the block done. It rides on 11a's full run (978/978); the next full run falls due at
-step 14 -- and sooner than that, because the layouts of 13-15 will each change a container.
+WORKER MODEL: Opus-class -- a second live view of the same block, with four media owners to hand over and give back.
+This is the block where a leak shows up three steps later if it is done loosely.
+TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: it changes the stack's
+BINDING LIFECYCLE (a kind bound twice, media handed over) -- 4.2 shared ground, and the one thing most likely to break
+fixtures far from this step. Close the Card / Poi targeted set green FIRST (~754 tests), then the full run, in the
+background; report `editor_is_focused` at the first poll and at the end. Steps 13-15 ride on it.
 
-PART 1 -- none open.
+PART 1 -- none open for this step.
 
-PART 2 -- step 11b:
+PART 2 -- step 12 (`_3.2` 6.2):
 
-11b.1 The `minutes` common field (Editor label "Reading Time"), optional, per block instance (`_3.2` section 3). Audio
-  and video do NOT carry it: they read their clip's length instead, so the contents list shows a time for them without
-  anyone typing one. Say in the report which kinds end up with the field and which read a clip.
-11b.2 Kind `nav_contents` (D2): a contents list at L3 -- one row per TARGET block (not per section): its heading, its
-  minutes (the field, or the clip's length), and a seen tick. Rows grouped by section, in the stack's order. A tap
-  jumps to the block. It is a BLOCK, like the icon grid: Block Library row, "+ Add block" under Navigation, and it
-  joins the Auto Nav Block popup with no window edit (11a listed that popup from the registry -- say that you checked).
-  A one-family card is still useful here, so rule 2.5.7 does NOT apply to it (it lists blocks, not sections) -- there
-  is a test from 5b that says so in words; make sure it still holds.
-11b.3 The seen tick. A block counts as seen once the SPY LINE has passed its top -- the same line `NavScrollRule`
-  already uses, never a second definition. It is remembered per wall / POI / block in `CardLocalState` (a new `Viewed`
-  slot).
-  THE RISKS, and why this block is Opus: (a) the key must include the wall, so a visitor who walks to another wall does
-  not arrive with ticks; (b) the auto-inserted block's key is `auto:nav_icon_grid` / `auto:nav_contents` -- stable, but
-  check it round-trips through PlayerPrefs with its colon; (c) the Editor's "Reset Saved Card State" row must clear the
-  new slot too, and its notice counts what it cleared -- extend it and prove it with the existing real-click test;
-  (d) a release build must behave the same as the Editor here (no dev-only path).
-  ACCEPTANCE: a tick appears after the block was in view, SURVIVES closing and reopening the card, and is gone after a
-  reset. A block never seen has no tick.
-11b.4 Auto Nav Block gains `nav_contents` as a choice; its (i) says what each of the two offers in a wall author's
+12.1 The COMPACT ROW: one look that works for every kind -- the family icon, the heading (or, with none, the block's
+  first words), the format and the minutes. The "first words" summary already exists: the Editor's Card Content rows
+  have shown it since `_3.1` 15.1. If its pure part lives in the Editor assembly, MOVE it to Runtime and have both read
+  the one copy -- do not write a second summariser (`20-code-quality`, "prove it isn't already built").
+12.2 `expandable`, a per-instance `display` for EVERY kind (today: `inline`, `takeover`): the slot shows the compact
+  row, and the real view is bound ONLY on expand and unbound -- media released -- on collapse. Every kind lists it in
+  its `DisplayModes`.
+  ACCEPTANCE, and the point of the whole step: a card of 60 expandable rows holds NO media until something is expanded.
+  Prove it by counting what is bound, not by inspection.
+12.3 OPEN IN FULL VIEW for any block: any kind can be drawn into `TakeoverView` by binding a SECOND pooled view of its
+  kind into the page, through the takeover's media scope.
+  THE RISK: audio, video, preview and AR each serve ONE block at a time. The step is not done until you have PROVEN, with
+  a test per owner, that a block bound twice (card + full view) hands its owner over and gets it back -- open the full
+  view, use the owner there, close it, and the card's own view works again. A leak here is silent and costs a later
+  domain days.
+  Reduce motion, the language switch and a live edit must all survive an open full view; say which you checked.
+  TESTS: Tier 0 for the compact row's words (heading, fallback to first words, format, minutes, each language). Phase A:
+  EVERY kind compact AND expanded (the gallery already walks every kind -- extend that walk rather than listing kinds by
+  hand, so kind 35 is covered the day it is added). Phase B in LivingRoomScene with real input: a real tap expands a row
+  and binds its view; a real tap collapses it and the media is released (assert the owner, not the pixels); a block
+  opened in the full view plays there and the card's copy works again after closing.
+  VISUALS: a card of compact rows at 390 px, one expanded, and the same block in the full view, EN and PT. Judge item by
+  item: the compact row reads as one tappable line, the heading is not clipped, the icon and format do not crowd the
   words.
-  TESTS: Tier 0 for the minutes source (field, clip, neither) and for the seen decision at the spy line (just above,
-  just below, at the end of the stack). Phase A: `nav_contents` x the four gallery cases, with and without ticks.
-  Phase B in LivingRoomScene with real input: a real drag past three blocks ticks exactly those three; the ticks are
-  still there after the card is closed and reopened; Reset Saved Card State clears them; a tap on a row lands its
-  block (relative, +-1 px).
-  VISUALS: the contents block on the real Lamp at 390 px in EN and PT, with some rows ticked and some not (the tick
-  must not be the only signal that a row was read -- check contrast and say what the second signal is), the Editor's
-  Reading Time field, and the Auto Nav Block popup with both choices.
 
-11b.5 DOCS: `_3.2` status row 11b + proof; `_3.1` wherever it states what `CardLocalState` holds and what the common
-  fields are -- those are facts that file states and they are now wrong; `_5.1` for the Reading Time field and the
-  reset row's notice; `10-structure.md`.
+12.4 DOCS: `_3.2` status row 12 + proof and the [step 12] TODO removed; `_3.1` wherever it lists the display modes or
+  says what the takeover can hold -- those facts change; `_5.1` if the Editor's display popup gains the option (it
+  should, for every kind); `10-structure.md`; RUN TIMES after the full run.
 
 Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
 comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
 backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: `nav_rails` and `nav_bento` (15); the generic teaser and full view (12); layouts (13-15); presets (17);
-`find_block` (18); any change to the slots, the chrome floor or `BlockStackBuilder`'s insertion rule.
-Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are
-judged and 11b.5 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+OUT OF SCOPE: the layouts themselves (13-15); the contents-collapse decision (13, it uses YOUR mechanism); `nav_rails`
+and `nav_bento` (15); presets (17); `find_block` (18).
+Stop when the full EditMode suite is green, the Card / Poi fixtures are green, the FULL PlayMode suite is green with
+zero failures, the captures are judged and 12.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
+
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
 ## `STEP 1 - PLAN`

@@ -89,13 +89,15 @@ namespace TileStories.Editor
             "This point's Detail Card, top to bottom. The card always starts with a Header: with none here, it shows this " +
             "point's name as the title and its Summary as the subtitle. Add a block with Add Block; reorder with the arrows; open " +
             "a row to write its texts, one per language of Detail Card > Card Container > Languages. A row that would not show " +
-            "says why under it.";
+            "says why under it. Display (every block but the Header): Inline shows the whole block in the card. Expandable shows " +
+            "one line instead -- its icon, its Heading (else its first words), its kind of content and its Reading Time -- and the " +
+            "block opens in place when the visitor taps it, with a button there that shows it in the full view; nothing of it " +
+            "(pictures, sound, a 3D model) is loaded until it is opened, so a long card stays light. A look the card pins under " +
+            "the title or in the footer is always shown whole. Takeover (Video, 3D Model, 360 Panorama) shows a teaser that " +
+            "opens straight to the full screen.";
 
         private const string CardContentVariantHelp =
             "The look of this block. Block Library default: the Default Variant of Detail Card > Block Library.";
-
-        private const string CardContentDisplayHelp =
-            "How the block sits on the card. Inline: the whole block in the card.";
 
         private const string CardContentOffNote =
             "The Detail Card is off for this wall (Detail Card > Card Container > Enable Detail Card): this content is kept but not shown.";

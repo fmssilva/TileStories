@@ -36,9 +36,12 @@ namespace TileStories
             Unbind();
             _strings = context.Strings;
             _nav = context.Nav;
-            // - nothing to draw yet: the sheet binds the controller to THIS card's model right after the stack (Bound)
+            // - bound with the stack: nothing to draw yet, the sheet binds the controller to THIS card's model right after it (Bound). Bound
+            //   later -- an expandable row opened -- the model is this card's already: draw at once
             Root.style.display = DisplayStyle.None;
-            if (_nav != null) _nav.Bound += Draw;
+            if (_nav == null) return;
+            _nav.Bound += Draw;
+            if (_nav.HasCurrentModel) Draw();
         }
 
         public void Unbind()

@@ -12,5 +12,15 @@ namespace TileStories
                 if (modes[i] == display) return display;
             return modes[0];
         }
+
+        // Whether the stack draws this block as a COMPACT ROW that binds its real view only when opened (_3.2 step 12, display Expandable):
+        // its resolved display is expandable AND it sits in what scrolls. A look the card pins under the header or in the footer (the audio
+        // hero chip, the sticky call to action) stays where its look puts it, drawn whole: a row there would hide the very thing it is for
+        public static bool ShowsCompact(BlockStackBuilder.Entry entry)
+        {
+            var kind = entry.Definition;
+            if (kind == null || Resolve(kind, entry.Instance?.display) != CardOptions.DisplayExpandable) return false;
+            return !kind.IsPinnedTop(entry.Variant) && !kind.IsFooter(entry.Variant);
+        }
     }
 }

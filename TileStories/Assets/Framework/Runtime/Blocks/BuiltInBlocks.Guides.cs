@@ -31,7 +31,7 @@ namespace TileStories
                    "is set in Card Container > Audio Overlap.",
             Variants = new[] { AudioGuidePlayer, AudioGuideHeroChip },
             DefaultVariant = AudioGuidePlayer,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             PinnedTopVariants = new[] { AudioGuideHeroChip },
             // - a contents list shows the recording's own length: no Reading Time to type
             ClipLengthField = AudioGuideClipField,

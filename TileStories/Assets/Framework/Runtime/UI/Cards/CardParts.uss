@@ -524,3 +524,127 @@
     padding: 0 var(--ts-space-4);
     border-radius: var(--ts-pill-radius);
 }
+
+/* The generic COMPACT ROW (_3.2 step 12, CompactRowView): a block shown Expandable is one tappable line -- the family icon in its colour,
+   the words over the format and minutes, a chevron -- and, open, a full-view button at its end. The slot's own heading steps aside: the
+   row's words ARE the heading. Opened, the block's real view follows under the row inside the same slot. */
+.card-block-slot--compact > .card-block-heading {
+    display: none;
+}
+
+.card-compact {
+    flex-direction: row;
+    align-items: stretch;
+    margin: 0 var(--ts-space-4);
+    border-width: 0;
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+}
+
+.card-compact--expanded {
+    margin-bottom: var(--ts-space-3);
+}
+
+.card-compact__toggle {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: var(--ts-touch-target);
+    margin: 0;
+    padding: var(--ts-space-2) 0;
+    border-width: 0;
+    border-radius: 0;
+    background-color: var(--ts-clear);
+}
+
+.card-compact__toggle:hover,
+.card-compact__toggle:active,
+.card-compact__full-view:hover,
+.card-compact__full-view:active {
+    background-color: var(--ts-clear);
+}
+
+.card-compact__icon {
+    margin: 0 var(--ts-space-3) 0 0;
+}
+
+.card-compact__texts {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.card-compact__words {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: middle-left;
+}
+
+/* a paragraph's first words are a teaser: one line, cut with an ellipsis (a heading is shown whole) */
+.card-compact__words--teaser {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-compact__meta {
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    -unity-text-align: middle-left;
+}
+
+.card-compact__chevron {
+    flex-shrink: 0;
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    margin: 0 0 0 var(--ts-space-3);
+    color: var(--ts-ink-2);
+}
+
+.card-compact--expanded .card-compact__chevron {
+    rotate: 180deg;
+}
+
+.card-compact__full-view {
+    flex-shrink: 0;
+    width: var(--ts-touch-target);
+    min-height: var(--ts-touch-target);
+    margin: 0 0 0 var(--ts-space-2);
+    padding: 0;
+    border-width: 0;
+    border-radius: var(--ts-radius-round);
+    background-color: var(--ts-clear);
+    align-items: center;
+    justify-content: center;
+}
+
+.card-compact__full-view-glyph {
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    color: var(--ts-accent-text);
+}
+
+/* The full view of ANY block (_3.2 step 12, BlockFullView): the takeover's page scrolls, and the block's view grows to the page's height,
+   so a video or a 3D / 360 stage (their --full classes) fills it and a long text reads to its end */
+.card-full-view {
+    flex-grow: 1;
+}
+
+/* its content is at least the viewport's height (set from the measured viewport, BlockFullView) */
+.card-full-view > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    flex-grow: 1;
+}
+
+.card-full-view__block {
+    flex-grow: 1;
+}

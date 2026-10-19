@@ -111,12 +111,12 @@ namespace TileStories.Editor
         }
 
         // "<row number>. <kind>: <first words>" -- the row number, the kind and the one-line summary its Card Content row shows
-        // (CardBlockSummary), the words cut to BlockRefSummaryMaxChars; just "<row number>. <kind>" for a block with no words
+        // (BlockSummaryRule), the words cut to BlockRefSummaryMaxChars; just "<row number>. <kind>" for a block with no words
         private static string CardBlockName(int index, BlockInstanceData block, List<string> languages)
         {
             bool known = BlockRegistry.Shared.TryGet(block.kind, out var definition);
             string name = (index + 1) + ". " + (known ? definition.DisplayName : block.kind + " (unknown)");
-            string summary = known ? CardBlockSummary(block, definition, languages) : "";
+            string summary = known ? BlockSummaryRule.FirstWords(block, definition, FirstLanguageOf(languages), FirstLanguageOf(languages)) : "";
             if (summary.Length > BlockRefSummaryMaxChars) summary = summary.Substring(0, BlockRefSummaryMaxChars).TrimEnd() + CardBlockSummaryEllipsis;
             return summary.Length > 0 ? name + ": " + summary : name;
         }

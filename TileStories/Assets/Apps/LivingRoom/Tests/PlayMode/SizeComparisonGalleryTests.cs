@@ -161,6 +161,16 @@ namespace TileStories.LivingRoom.Tests
             yield return CardGalleryChecks.Render("Card_" + EntryOf(c).Name);
         }
 
+        // _3.2 step 12: the app's kind is a compact row and opens with a real tap like every framework kind -- the same shared check, no copy
+        [UnityTest]
+        public IEnumerator TheKind_IsACompactRow_ThatARealTapOpensAndCloses()
+        {
+            var c = CaseOf(ServiceCaseNames.First());
+            _harness.Services = c.Service ? CardServices.Shared : new CardServices();
+            CollectionAssert.Contains(SizeComparisonBlock.Definition.DisplayModes, CardOptions.DisplayExpandable, "the app's kind offers Expandable");
+            yield return CardGalleryChecks.AssertCompactAndExpanded(_harness, EntryOf(c), "Card_Expandable_" + SizeComparisonBlock.Kind);
+        }
+
         [UnityTest]
         public IEnumerator EveryEntry_DrawsBothShapesAtOneScale_OnOneGroundLine_AsLargeAsTheStageAllows([ValueSource(nameof(ServiceCaseNames))] string content)
         {

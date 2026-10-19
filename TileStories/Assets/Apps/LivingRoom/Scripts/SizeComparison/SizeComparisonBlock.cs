@@ -29,7 +29,7 @@ namespace TileStories.LivingRoom
                    "says the comparison in words. The block is not shown while the Width or the Height is 0.",
             Variants = new[] { SideBySide },
             DefaultVariant = SideBySide,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition

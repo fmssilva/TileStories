@@ -28,6 +28,8 @@ namespace TileStories
         public int HeldMedia => _media?.HeldCount ?? 0;
 
         private readonly List<Button> _chips = new();
+        // What the open page asked to run when it leaves the screen (WhenPageLeaves), run before its files are given back
+        private readonly List<System.Action> _leaving = new();
         private ScopedMediaSource _media;
         private TakeoverPageDrawer _draw;
 
@@ -92,6 +94,7 @@ namespace TileStories
         {
             if (!IsOpen) return;
             PageIndex = UnityEngine.Mathf.Clamp(page, 0, PageCount - 1);
+            LeavePage();
             _media.ReleaseAll();
             Page.Clear();
             _draw(this, Page, _media, PageIndex);
@@ -105,11 +108,28 @@ namespace TileStories
             if (IsOpen && page >= 0 && page < PageCount) ShowPage(page);
         }
 
+        // The page being drawn asks for `release` to run when it leaves the screen -- another page shown, or the view closed -- BEFORE the
+        // view's media scope gives its files back (a block view unbinds first, as the stack does). Explicit, not DetachFromPanelEvent: that
+        // never fires for a page that was never on a panel (Edit Mode), and its order against the release is not the view's to decide
+        public void WhenPageLeaves(System.Action release)
+        {
+            if (IsOpen && release != null) _leaving.Add(release);
+        }
+
+        private void LeavePage()
+        {
+            // - a copy: a release that closes or reopens the view adds to a fresh list
+            var leaving = _leaving.ToArray();
+            _leaving.Clear();
+            foreach (var release in leaving) release();
+        }
+
         // Back to the card: every file of the view given back, the card as it was
         public void Close()
         {
             if (!IsOpen) return;
             IsOpen = false;
+            LeavePage();
             _media.ReleaseAll();
             Page.Clear();
             foreach (var chip in _chips) chip.RemoveFromHierarchy();

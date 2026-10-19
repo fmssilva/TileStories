@@ -22,6 +22,7 @@ namespace TileStories.Editor.Tests
             public void OpenUrl(string url) { }
             public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage) { }
             public void ScrollToBlock(string blockKey, string elementKey) { }
+            public void OpenFullView(string blockKey) { }
         }
 
         private sealed class StubAudio : ICardAudio

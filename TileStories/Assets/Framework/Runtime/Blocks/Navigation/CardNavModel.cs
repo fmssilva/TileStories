@@ -239,7 +239,14 @@ namespace TileStories
         private static string LabelKeyOf(string key, string groupBy, BlockRegistry registry)
         {
             if (groupBy == CardOptions.GroupByFamily) return registry.TryGetFamily(key, out var family) ? family.LabelKey : null;
-            switch (key)
+            return FormatLabelKey(key);
+        }
+
+        // The CardStrings key a format (CardOptions.Formats) is named by, null for an unknown one: the ONE mapping, read by the format
+        // sections here and by the compact row (CompactRowRule)
+        public static string FormatLabelKey(string format)
+        {
+            switch (format)
             {
                 case CardOptions.FormatRead: return CardStrings.Keys.FormatRead;
                 case CardOptions.FormatLook: return CardStrings.Keys.FormatLook;

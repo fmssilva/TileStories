@@ -24,7 +24,7 @@ namespace TileStories
                    "(Detail Card > Card Texts); the thank-you and the button words are Card Texts too.",
             Variants = new[] { FeedbackThumbs, FeedbackStars },
             DefaultVariant = FeedbackThumbs,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition

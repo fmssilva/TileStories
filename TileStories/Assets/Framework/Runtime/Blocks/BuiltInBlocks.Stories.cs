@@ -50,7 +50,7 @@ namespace TileStories
                    "Texts). A row with no date or no title is not shown. " + LongTextHelp,
             Variants = new[] { TimelineVertical, TimelineHorizontal },
             DefaultVariant = TimelineVertical,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -86,7 +86,7 @@ namespace TileStories
                    "apart on its own panel, the name larger. Role and Text may stay empty. " + LongTextHelp,
             Variants = new[] { PersonRow, PersonCard },
             DefaultVariant = PersonRow,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition { Key = PersonNameField, Type = BlockFieldType.LocalizedText, Label = "Name", Required = true, Help = "The person's name as the visitor should read it (King Manuel I)." },
@@ -109,7 +109,7 @@ namespace TileStories
                    "with no title or no text is not shown. " + LongTextHelp,
             Variants = new[] { StoryChaptersSegmented },
             DefaultVariant = StoryChaptersSegmented,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -139,7 +139,7 @@ namespace TileStories
                    "and the other point is on the wall.",
             Variants = new[] { ComparePointsRings },
             DefaultVariant = ComparePointsRings,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             DefaultHeadingKey = CardStrings.Keys.CompareHeading,
             ShowsFor = (poi, block, _, wallPois) => poi != null && poi.has_status && OtherPoi(block, wallPois) is { has_status: true },
             NotShownForPoiNote = "this point or the point it is compared with has no status (Specific Marker > Outline > Has status), " +
@@ -225,7 +225,7 @@ namespace TileStories
                    "is not shown.",
             Variants = new[] { DialogueChoices },
             DefaultVariant = DialogueChoices,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition

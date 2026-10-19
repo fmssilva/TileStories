@@ -103,7 +103,7 @@ namespace TileStories
                    "Media Folder) is not shown.",
             Variants = new[] { GalleryCarousel, GalleryGrid, GalleryFilmstrip, GalleryStack },
             DefaultVariant = GalleryCarousel,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -132,7 +132,7 @@ namespace TileStories
                    "or the other (Before on the left, After on the right). Use two pictures of the same size and framing.",
             Variants = new[] { BeforeAfterSlider },
             DefaultVariant = BeforeAfterSlider,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition { Key = BeforeAfterBeforeField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Before", Required = true, Help = "The earlier picture, on the left of the handle. " + PictureHelp },
@@ -160,7 +160,7 @@ namespace TileStories
                    "and, under it, a row of round close-ups of each spot to tap. A spot with no title is not shown.",
             Variants = new[] { HotspotNumbered, HotspotLoupes },
             DefaultVariant = HotspotNumbered,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition { Key = HotspotImageField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Picture", Required = true, Help = PictureHelp },
@@ -211,7 +211,7 @@ namespace TileStories
                    "keeps its detail when enlarged.",
             Variants = new[] { ZoomImagePinch },
             DefaultVariant = ZoomImagePinch,
-            DisplayModes = new[] { CardOptions.DisplayInline },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             Fields = new[]
             {
                 new BlockFieldDefinition { Key = ZoomImageImageField, Type = BlockFieldType.Asset, Media = MediaKind.Image, Label = "Picture", Required = true, Help = PictureHelp },
@@ -234,7 +234,7 @@ namespace TileStories
                    "video pauses the card's audio guide, and starting the audio pauses the video. Closing the card stops the video.",
             Variants = new[] { VideoInline, VideoChapters },
             DefaultVariant = VideoInline,
-            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayTakeover },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable, CardOptions.DisplayTakeover },
             // - a contents list shows the film's own length: no Reading Time to type
             ClipLengthField = VideoClipField,
             Fields = new[]
@@ -310,7 +310,7 @@ namespace TileStories
                    "be turned and zoomed. Back returns to the card where it was.",
             Variants = new[] { Model3DTurntable },
             DefaultVariant = Model3DTurntable,
-            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayTakeover },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable, CardOptions.DisplayTakeover },
             Fields = new[]
             {
                 new BlockFieldDefinition
@@ -356,7 +356,7 @@ namespace TileStories
                    "open-full-screen button); a tap opens the panorama full screen. Back returns to the card where it was.",
             Variants = new[] { Panorama360Drag, Panorama360Gyro },
             DefaultVariant = Panorama360Drag,
-            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayTakeover },
+            DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable, CardOptions.DisplayTakeover },
             Fields = new[]
             {
                 new BlockFieldDefinition

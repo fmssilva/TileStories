@@ -221,10 +221,13 @@ namespace TileStories.Editor.Tests
         [Test]
         public void TheDisplayPopup_IsOfferedOnlyByKindsWithTwoDisplaysOrMore()
         {
+            // - since _3.2 step 12 every kind but the header offers Expandable beside Inline, so every block row but the header's has the popup
             var offering = BlockRegistry.Shared.All.Where(POIEditorToolWindow.CardBlockOffersDisplayChoice).Select(k => k.Key).ToList();
-            CollectionAssert.AreEquivalent(new[] { BuiltInBlocks.VideoKind, BuiltInBlocks.Model3DKind, BuiltInBlocks.Panorama360Kind }, offering,
-                "the three teaser kinds (inline / takeover); every other kind has inline only");
-            Assert.IsFalse(POIEditorToolWindow.CardBlockOffersDisplayChoice(BuiltInBlocks.Header));
+            var expected = BlockRegistry.Shared.All.Where(k => k.Key != BuiltInBlocks.HeaderKind).Select(k => k.Key).ToList();
+            CollectionAssert.AreEquivalent(expected, offering, "every kind but the header (inline / expandable, + takeover on the teaser kinds)");
+            Assert.IsFalse(POIEditorToolWindow.CardBlockOffersDisplayChoice(BuiltInBlocks.Header), "the pinned title has one display");
+            CollectionAssert.AreEqual(new[] { "Inline", "Expandable", "Takeover" },
+                BuiltInBlocks.Video.DisplayModes.Select(POIEditorToolWindow.CardBlockDisplayLabel), "the popup names its options, never their ids");
         }
 
         // ---------------- the declarations are checked ----------------
