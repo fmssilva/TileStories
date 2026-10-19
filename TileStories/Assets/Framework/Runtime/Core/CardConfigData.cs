@@ -111,6 +111,11 @@ namespace TileStories
         // The Groups table (the segmented element, _3.2 section 3): the wall's own groups, in order. Empty = the framework's four
         // (NavGroupRule.Defaults: Discover, Watch, Explore, Visit); a family joins one through its Families row's Group
         public List<CardNavGroup> groups = new();
+        // Layout: how the card arranges its blocks (CardLayoutRule) -- "scroll" (the default: one scroll) | "accordion" (every navigation target
+        // a compact row that opens in place) | "tabs" (one section shown at a time) (CardOptions.Layouts)
+        public string layout = CardOptions.LayoutScroll;
+        // Open One At A Time (accordion only): opening a row closes the others
+        public bool accordion_one_open = false;
 
         public const int MinBlocksMin = 2;
         public const int MinBlocksMax = 30;
@@ -377,6 +382,14 @@ namespace TileStories
         public const string LabelsText = "text";
         public static readonly string[] Labels = { LabelsIconAndText, LabelsIcon, LabelsText };
         public static readonly string[] LabelsLabels = { "Icon And Text", "Icon", "Text" };
+
+        // Layout (CardNavigationSettings.layout, _3.2 section 6.1): how the card arranges its blocks, and the Editor's words for them. Pages and
+        // bento join with their own steps (14, 15)
+        public const string LayoutScroll = "scroll";
+        public const string LayoutAccordion = "accordion";
+        public const string LayoutTabs = "tabs";
+        public static readonly string[] Layouts = { LayoutScroll, LayoutAccordion, LayoutTabs };
+        public static readonly string[] LayoutLabels = { "Scroll", "Accordion", "Tabs" };
 
         // Group By's Editor words (GroupBys above)
         public static readonly string[] GroupByLabels = { "Family", "Format" };

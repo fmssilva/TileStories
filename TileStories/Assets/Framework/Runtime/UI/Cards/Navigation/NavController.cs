@@ -80,6 +80,10 @@ namespace TileStories
         public event Action<string> TargetViewed;
         private readonly HashSet<string> _viewed = new();
 
+        // The card's layout (_3.2 step 13), handed over by the sheet: asked before every jump where to go (tabs shows the block's section, a
+        // closed row opens) and what the spy names (tabs: the section shown). Null = the plain scroll
+        internal CardLayoutView Layout { get; set; }
+
         // How long a smooth jump glides, in seconds: --ts-duration, handed over by the sheet once the card's tokens resolve
         public float Duration { get; internal set; }
 
@@ -175,6 +179,8 @@ namespace TileStories
 
         private bool Jump(string blockKey, int sectionIndex, string sectionKey, string elementKey)
         {
+            // - the layout first (CardLayoutRule): a block in a section tabs does not show is set aside, a closed row shows only its line
+            Layout?.PrepareJump(blockKey, sectionIndex);
             if (ScrollingSlot(blockKey) == null) return false;
             EndJump();
             if (NavScrollRule.RaisesToFull(Settings)) _raiseToFull?.Invoke();
@@ -254,17 +260,20 @@ namespace TileStories
             foreach (string target in Model.Targets)
             {
                 if (_viewed.Contains(target)) continue;
-                var slot = ScrollingSlot(target);
-                if (slot == null) continue;
-                float top = slot.layout.y;
-                if (!NavScrollRule.HasViewed(top, top + slot.layout.height, offset, content, viewport)) continue;
+                if (ScrollingSlot(target) == null || !_stack.TryGetReadablePart(target, out bool shown, out float top, out float bottom)) continue;
+                // - a closed row shows none of its block: never seen, however far the stack scrolled (the rule says so)
+                if (!NavScrollRule.HasViewed(shown, top, bottom, offset, content, viewport)) continue;
                 _viewed.Add(target);
                 TargetViewed?.Invoke(target);
             }
         }
 
-        // The section the scroll shows now (NavScrollRule's spy line)
-        private int MeasuredSection() => SectionAtOffset(Scroll.scrollOffset.y);
+        // The section the scroll shows now (NavScrollRule's spy line) -- in tabs, the section shown (the scroll never leaves it)
+        private int MeasuredSection()
+        {
+            int measured = SectionAtOffset(Scroll.scrollOffset.y);
+            return Layout != null ? Layout.SpySection(measured) : measured;
+        }
 
         // The target the scroll shows now: the same spy line over every target's own top
         private int MeasuredTarget() => TargetAtOffset(Scroll.scrollOffset.y);

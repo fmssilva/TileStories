@@ -13,72 +13,81 @@
 So start by reading them all. 
 
 
-## `And now: POI Card Navigation (3.2) -- step 12, the compact row, expandable blocks and the full view`
+## `And now: POI Card Navigation (3.2) -- step 13, the accordion and tabs layouts`
 
 GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if
-not, STOP and report. Check the two SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `git checkout --`
-them if TMP dirtied them. Baseline: the tree is clean on commit "Add Reading Time, seen ticks and the contents nav
-block" (full EditMode 1874/1874; it rides on 11a's full PlayMode 978/978) -- run the full EditMode suite and say which
-commit you trusted.
+not, STOP and report. Check the two SDF fonts and `git checkout --` them if TMP dirtied them -- for the LAST time, if
+PART 1.1 works. Baseline: the tree is clean on commit "Add expandable compact rows and a full view for any block" (full
+EditMode 1889/1889, full PlayMode 1031 of 1032) -- run the full EditMode suite and say which commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 12] expandable line is
-yours; the [step 13] contents-collapse line is NOT, and it is already decided -- read it so your mechanism can serve it
-one step later) and the status table (1-11b done; 12 is yours). Sections 6.2 (the whole step), 6.1 (which layouts need
-it) and 9.
-REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` on `display` modes, on the TAKEOVER view and on the four media
-OWNERS (audio, video, preview, AR) -- this step binds a SECOND view of a kind while the first still exists, so read how
-each owner is taken and released before you write a line; _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0.
-Guidelines"; .clinerules/40-testing.md 4.2 (this block OWES a full run -- targeted set green FIRST), 4.2.3 (including
-the new drag-distance line, if the developer confirmed it), 4.4, 4.5; .clinerules/20-code-quality.md.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (FOUR lines are yours and all four
+are DECIDED: the contents collapse, the double full-screen button, the "seen" of a closed row, plus whatever remains of
+step 13 proper) and the status table (1-12 done; 13 is yours). Sections 6.1 (the two layouts), 6.2 (the mechanism you
+reuse), 4.4 and 9.
+REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` on the sheet, the stack and the takeover; _5.1_Editor_Tab.md
+"HOW TO USE THIS FILE" + section "0. Guidelines"; .clinerules/40-testing.md 4.2 (this block OWES a full run), 4.2.3
+(including the drag-distance line), 4.4, 4.5; .clinerules/30-ui-content.md (progressive disclosure -- it is why the
+contents block collapses).
 Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- a second live view of the same block, with four media owners to hand over and give back.
-This is the block where a leak shows up three steps later if it is done loosely.
-TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: it changes the stack's
-BINDING LIFECYCLE (a kind bound twice, media handed over) -- 4.2 shared ground, and the one thing most likely to break
-fixtures far from this step. Close the Card / Poi targeted set green FIRST (~754 tests), then the full run, in the
-background; report `editor_is_focused` at the first poll and at the end. Steps 13-15 ride on it.
+WORKER MODEL: Opus-class -- a layout moves the same bound slots between containers, and the accordion is where a
+mis-bound view leaks media.
+TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: a layout changes the
+stack's CONTAINER (4.2 shared ground). Close the Card / Poi targeted set green FIRST (~825 tests), then the full run,
+in the background; report `editor_is_focused` at both ends. AND: `PoiCardBottomElementsSceneTests.ARealDragToTheEnd_`
+failed with "Layout update is struggling" in both of step 12's long runs. If it fails again in yours, STOP and
+investigate it -- a third sighting is no longer an intermittent. If it passes, say so and close it in
+`__mixed_TODOs.md`.
 
-PART 1 -- none open for this step.
+PART 1 -- four decided fixes, before the layouts:
+1.1 THE SDF FONTS, for good (`__mixed_TODOs.md`, "The two SDF fonts dirty themselves on every Unity launch"): both are
+  `m_AtlasPopulationMode: 1` (Dynamic), so TMP writes new glyphs back into the asset and every Editor session dirties
+  them. Set both to STATIC with an atlas holding every character the project renders, and add the guard the note
+  describes: a test that walks every visitor-facing string the project ships (the framework table, the app table, the
+  wall's `config.json`) and asserts each character is in the font's character table. PROOF: open and close Unity, run a
+  suite that draws Portuguese, and show `git status` clean on both fonts. If Static drops a glyph that cannot be added
+  cleanly, revert to Dynamic, write why in the note, and move on -- do not fight it for an hour.
+1.2 One full-screen control per row: the compact row's button is not drawn when the bound view offers its own; the KIND
+  declares that, not a list of kind keys in the row. Test: an open video row has exactly one, an open text row has
+  exactly one.
+1.3 A closed row is never "seen": an expandable row counts as read only once it has been OPENED and its content passed
+  the spy line. Put it in the rule the contents list, the accordion and the bento tiles will all read -- not in the
+  contents view.
+1.4 `nav_contents` collapses: section titles collapse, a contents block the CARD inserted opens collapsed, one a POI
+  authored follows the wall. It is a per-block Choice field ("Rows": Sections first (default) / Every block). Use the
+  accordion's mechanism from PART 2 -- that is why this waited for this block.
 
-PART 2 -- step 12 (`_3.2` 6.2):
+PART 2 -- step 13, the two layouts (`_3.2` 6.1):
+2.1 `accordion`: every target becomes a compact row that expands in place -- step 12's mechanism, now as a whole-card
+  layout. NN/g mobile accordions (Budiu 2015, in the guide's references): no auto-scroll on expand, the open row's
+  header stays reachable, and Back collapses it (so `NavBackRule` gains the branch its comment has promised since step
+  4 -- between the overlay and the sheet going down). The wall's Open One At A Time decides whether expanding one
+  closes the others.
+2.2 `tabs`: one section visible at a time, the others `display: none`. If neither a top nor a bottom element is set,
+  `text_tabs` is used and the Editor WARNS (section 6.1). The guide's caution goes in the (i): avoid tabs when visitors
+  must compare across them (Sunwall 2024).
+2.3 The Layout and Open One At A Time Editor rows, with (i), undo, live sync.
+  THE RULE THAT MUST NOT BREAK (6.1): a layout only moves the SAME bound slots between containers -- a kind's view
+  never learns which layout it is in. If you find yourself passing a layout into a view, stop and re-read 6.1.
+  `NavController.JumpTo` asks the layout where to go (scroll -> offset, tabs -> show section, accordion -> expand +
+  offset).
+  TESTS: Tier 0 for the jump-per-layout decision and for Open One At A Time. Phase B on The Lamp with real input: in
+  accordion, one row open as configured, a jump opens the right row, Back collapses it; in tabs, a jump shows the right
+  section and the spy follows; media is released when a row collapses or a tab hides its section (assert the owner).
+  Phase A: both layouts over the gallery cases.
+  VISUALS: The Lamp in each layout at 390 px, EN and PT, plus a collapsed and an expanded `nav_contents`. Judge item by
+  item.
 
-12.1 The COMPACT ROW: one look that works for every kind -- the family icon, the heading (or, with none, the block's
-  first words), the format and the minutes. The "first words" summary already exists: the Editor's Card Content rows
-  have shown it since `_3.1` 15.1. If its pure part lives in the Editor assembly, MOVE it to Runtime and have both read
-  the one copy -- do not write a second summariser (`20-code-quality`, "prove it isn't already built").
-12.2 `expandable`, a per-instance `display` for EVERY kind (today: `inline`, `takeover`): the slot shows the compact
-  row, and the real view is bound ONLY on expand and unbound -- media released -- on collapse. Every kind lists it in
-  its `DisplayModes`.
-  ACCEPTANCE, and the point of the whole step: a card of 60 expandable rows holds NO media until something is expanded.
-  Prove it by counting what is bound, not by inspection.
-12.3 OPEN IN FULL VIEW for any block: any kind can be drawn into `TakeoverView` by binding a SECOND pooled view of its
-  kind into the page, through the takeover's media scope.
-  THE RISK: audio, video, preview and AR each serve ONE block at a time. The step is not done until you have PROVEN, with
-  a test per owner, that a block bound twice (card + full view) hands its owner over and gets it back -- open the full
-  view, use the owner there, close it, and the card's own view works again. A leak here is silent and costs a later
-  domain days.
-  Reduce motion, the language switch and a live edit must all survive an open full view; say which you checked.
-  TESTS: Tier 0 for the compact row's words (heading, fallback to first words, format, minutes, each language). Phase A:
-  EVERY kind compact AND expanded (the gallery already walks every kind -- extend that walk rather than listing kinds by
-  hand, so kind 35 is covered the day it is added). Phase B in LivingRoomScene with real input: a real tap expands a row
-  and binds its view; a real tap collapses it and the media is released (assert the owner, not the pixels); a block
-  opened in the full view plays there and the card's copy works again after closing.
-  VISUALS: a card of compact rows at 390 px, one expanded, and the same block in the full view, EN and PT. Judge item by
-  item: the compact row reads as one tappable line, the heading is not clipped, the icon and format do not crowd the
-  words.
+2.4 DOCS: `_3.2` status row 13 + proof and the four TODO lines removed; `_3.1` wherever the display modes or the Back
+  order are stated; `_5.1`; `10-structure.md`; RUN TIMES; and the font note in `__mixed_TODOs.md` closed or updated.
 
-12.4 DOCS: `_3.2` status row 12 + proof and the [step 12] TODO removed; `_3.1` wherever it lists the display modes or
-  says what the takeover can hold -- those facts change; `_5.1` if the Editor's display popup gains the option (it
-  should, for every kind); `10-structure.md`; RUN TIMES after the full run.
-
-Rules as before: no literal colours, sizes or visitor strings in C# (tokens + `CardStrings`); strict ASCII in code,
-comments, logs and Editor labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no
-backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: the layouts themselves (13-15); the contents-collapse decision (13, it uses YOUR mechanism); `nav_rails`
-and `nav_bento` (15); presets (17); `find_block` (18).
+Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII in code, comments, logs and Editor
+labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no backward-compatibility shim;
+real fixtures only -- never change a POI's identity fields.
+OUT OF SCOPE: `pages` (14); `bento`, `nav_rails` (15); the breadcrumb (16); presets (17); `find_block` (18).
 Stop when the full EditMode suite is green, the Card / Poi fixtures are green, the FULL PlayMode suite is green with
-zero failures, the captures are judged and 12.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+zero failures (or the one layout-struggling failure is INVESTIGATED, not re-logged), the captures are judged and 2.4 is
+written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
 

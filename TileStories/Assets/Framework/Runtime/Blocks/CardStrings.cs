@@ -244,6 +244,9 @@ namespace TileStories
             // in view is called beside its tick (its accessible name and tooltip: the tick is never the only signal)
             public const string NavContentsMinutes = "nav_contents_minutes";
             public const string NavContentsRead = "nav_contents_read";
+            // A section title of the contents list when its rows collapse under it (_3.2 step 13, Rows = Sections First): how many of its
+            // blocks were read ("{0} of {1} read")
+            public const string NavContentsSectionRead = "nav_contents_section_read";
             // The generic compact row (_3.2 step 12, display Expandable): its second line "{0} - {1}" (format, time), the row's name while
             // collapsed / open, and the open row's full-view button
             public const string CompactMeta = "compact_meta";
@@ -278,7 +281,7 @@ namespace TileStories
                 NavMore, NavNextUp, NavNextUpPosition, NavNextButton, NavNextUpDone,
                 NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,
                 NavFab, PlacedModelRemove, PlacedModelOther,
-                NavContentsMinutes, NavContentsRead,
+                NavContentsMinutes, NavContentsRead, NavContentsSectionRead,
                 CompactMeta, CompactOpen, CompactClose, FullViewOpen,
             };
         }

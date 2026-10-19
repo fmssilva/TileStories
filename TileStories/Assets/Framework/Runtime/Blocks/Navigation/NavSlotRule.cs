@@ -12,9 +12,10 @@ namespace TileStories
     public static class NavSlotRule
     {
         // The key of the element the top slot holds for this card, or null for none. `topElement`: the definition registered under a
-        // key for the TOP slot, null when there is none (NavElementRegistry)
+        // key for the TOP slot, null when there is none (NavElementRegistry). The wall's Top Bar, except a tabs card with neither bar, which
+        // gets Text Tabs (CardLayoutRule.TopElement: a tabs card always has a way between its sections)
         public static string TopElement(CardNavigationSettings nav, CardNavModel model, Func<string, NavElementDefinition> topElement) =>
-            Element((nav ?? new CardNavigationSettings()).top, model, topElement);
+            Element(CardLayoutRule.TopElement(nav), model, topElement);
 
         // The key of the element the bottom slot holds for this card, or null for none. `bottomElement`: the definition registered under
         // a key for the BOTTOM slot, null when there is none

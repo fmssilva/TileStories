@@ -171,6 +171,18 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
         }
 
+        // A real tap on a section's folding title (Rows = Sections First), brought on screen first: its rows open, or fold away
+        private IEnumerator TapSectionTitle(string sectionKey)
+        {
+            var title = View.Sections.Single(t => t.SectionKey == sectionKey);
+            var line = title.Header.Toggle;
+            float top = line.worldBound.yMin - Scroll.contentContainer.worldBound.yMin;
+            Scroll.scrollOffset = new Vector2(0f, Mathf.Max(0f, top - Viewport * 0.5f));
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsTrue(Scroll.contentViewport.worldBound.Contains(line.worldBound.center), "precondition: " + sectionKey + "'s title is on screen");
+            yield return TouchTap(line.worldBound.center);
+        }
+
         // ---------------- the tests ----------------
 
         [UnityTest]
@@ -236,6 +248,65 @@ namespace TileStories.Tests
             Assert.AreEqual("", Row("block_13").Minutes.text);
         }
 
+        // A real drag in short strokes until `reached` holds (what the drag ACHIEVED is asserted, never the finger's distance: 40-testing 4.2.3)
+        private IEnumerator DragUntil(System.Func<bool> reached, string what)
+        {
+            for (int stroke = 0; stroke < 40 && !reached(); stroke++)
+                yield return SlowDragUp(Viewport * 0.15f);
+            Assert.IsTrue(reached(), "the real drag reached: " + what);
+        }
+
+        [UnityTest]
+        public IEnumerator AClosedRowScrolledPast_IsNeverTicked_AnOpenedOne_IsOnceItsContentPassesTheLine()
+        {
+            // - three of The Lamp's texts as compact rows (Display Expandable), the contents list on: one push through the live seam
+            var copy = ConfigCopy();
+            copy.card_settings.navigation.auto_nav_block = BuiltInBlocks.NavContentsKind;
+            var rows = new[] { "block_2", "block_3", "block_4" };
+            foreach (var block in copy.pois.Single(p => p.id == Lamp).card.blocks)
+                if (rows.Contains(block.key)) block.display = CardOptions.DisplayExpandable;
+            Session.ApplyCardSettings(copy);
+            yield return CardTestInput.Settle(0.3f);
+            yield return Open(Lamp, SheetStopRule.Stop.Full);
+            foreach (string row in rows) Assert.IsNotNull(Sheet.Stack.CompactRowOf(row), "precondition: " + row + " is a closed compact row");
+            const string Whole = "block_8";
+            Assert.Less(TopOf(Whole), TopOf("block_2"), "precondition: a block drawn whole comes before the rows (the drag's control)");
+
+            // - setup: the header collapsed (the viewport at its reading size), the line just above the whole block
+            Scroll.scrollOffset = new Vector2(0f, 200f);
+            yield return CardTestInput.Settle(0.5f);
+            float spy = Viewport * NavScrollRule.SpyLineFraction;
+            Scroll.scrollOffset = new Vector2(0f, TopOf(Whole) - spy - 10f);
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsEmpty(Ticked.Intersect(rows.Append(Whole)), "precondition: none of them read yet");
+
+            // - a real finger carries the line past every row: the whole block ticks, no closed row does
+            float LineNow() => Scroll.scrollOffset.y + Viewport * NavScrollRule.SpyLineFraction;
+            var lastRow = Sheet.Stack.SlotOfBlock("block_4");
+            yield return DragUntil(() => LineNow() > lastRow.layout.yMax + 4f, "the spy line past the last row");
+            CollectionAssert.Contains(Ticked, Whole, "the whole block the line passed is read (the drag counts at all)");
+            foreach (string row in rows) CollectionAssert.DoesNotContain(Ticked, row, row + ": closed, it showed none of its block -- never read");
+            Assert.IsFalse(_state.Viewed(Lamp, "block_3"), "and nothing was remembered for it");
+
+            // - a real tap opens the middle row: its content comes into the card under its line
+            var row3 = Sheet.Stack.CompactRowOf("block_3");
+            Scroll.ScrollTo(row3.Toggle);
+            yield return CardTestInput.Settle(0.5f);
+            Assert.IsTrue(Scroll.contentViewport.worldBound.Contains(row3.Toggle.worldBound.center), "precondition: the row's line is in view");
+            yield return CardTestInput.Tap(row3.Toggle.panel, row3.Toggle.worldBound.center);
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsTrue(Sheet.Stack.IsExpanded("block_3"), "the real tap opened it");
+            var content = Sheet.Stack.ViewOfBlock("block_3").Root;
+            float contentTop = Sheet.Stack.SlotOfBlock("block_3").layout.y + content.layout.y;
+            if (contentTop > LineNow()) CollectionAssert.DoesNotContain(Ticked, "block_3", "open, its content still under the line: not read yet");
+            yield return DragUntil(() => LineNow() > Sheet.Stack.SlotOfBlock("block_3").layout.y + content.layout.y + 4f, "the line past the opened content's top");
+            yield return CardTestInput.Settle(0.3f);
+            CollectionAssert.Contains(Ticked, "block_3", "opened and its content passed the line: read");
+            Assert.IsTrue(_state.Viewed(Lamp, "block_3"), "and remembered");
+            CollectionAssert.DoesNotContain(Ticked, "block_2", "the rows left closed stay unread");
+            CollectionAssert.DoesNotContain(Ticked, "block_4");
+        }
+
         [UnityTest]
         public IEnumerator ARealDragPastThreeBlocks_TicksExactlyThose_TheyStayAfterCloseAndReopen_AndTheResetClearsThem()
         {
@@ -292,7 +363,11 @@ namespace TileStories.Tests
                 _state.ResetAll();
                 yield return CloseAndReopen(Lamp, SheetStopRule.Stop.Full);
                 var row = View.Rows[pick];
-                // - bring the row on screen inside the (long) list, then tap it for real
+                // - the card's own contents block opens folded: a real tap on the row's section title opens its rows first
+                Assert.IsFalse(View.IsSectionOpen(row.SectionKey), "precondition: " + row.SectionKey + " starts folded");
+                yield return TapSectionTitle(row.SectionKey);
+                Assert.IsTrue(View.IsSectionOpen(row.SectionKey), "the real tap on its title opened " + row.SectionKey);
+                // - bring the row on screen inside the list, then tap it for real
                 float rowTop = row.Button.worldBound.yMin - Scroll.contentContainer.worldBound.yMin;
                 Scroll.scrollOffset = new Vector2(0f, Mathf.Max(0f, rowTop - Viewport * 0.5f));
                 yield return CardTestInput.Settle(0.3f);
@@ -315,6 +390,49 @@ namespace TileStories.Tests
                     Assert.LessOrEqual(slot.layout.y, offset + Viewport, block + ": on screen");
                 }
             }
+        }
+
+        // Rows (_3.2 step 13): the card's own block opens folded; a real tap on a title opens its rows, another folds them; a tick counts in
+        // its title; a contents block a POI authors with Rows = Every Block shows every row at once (pushed live, never saved)
+        [UnityTest]
+        public IEnumerator TheCardsOwnListOpensFolded_ARealTapOpensAndFoldsASection_AndAnAuthoredEveryBlockListShowsEveryRow()
+        {
+            yield return UseAuto(BuiltInBlocks.NavContentsKind);
+            yield return Open(Lamp, SheetStopRule.Stop.Full);
+            Assert.IsTrue(View.SectionsFirst, "the card's own block: sections first");
+            foreach (var section in Model.Sections) Assert.IsFalse(View.IsSectionOpen(section.Key), section.Key + " folded");
+            var stories = Model.Sections.Single(sc => sc.Key == BuiltInFamilies.Stories);
+            yield return TapSectionTitle(stories.Key);
+            Assert.IsTrue(View.IsSectionOpen(stories.Key), "a real tap opened Stories");
+            foreach (var row in View.Rows)
+                Assert.AreEqual(row.SectionKey == stories.Key ? DisplayStyle.Flex : DisplayStyle.None, row.Button.resolvedStyle.display,
+                    row.BlockKey + ": only Stories' rows show");
+            Assert.IsTrue(View.Sections.Single(t => t.SectionKey == stories.Key).Header.IsExpanded, "its line shows it is open");
+            // - a tick counts in its folded title
+            _state.MarkViewed(Lamp, stories.Targets[0]);
+            var title = View.Sections.Single(t => t.SectionKey == BuiltInFamilies.About);
+            string before = title.Header.Meta.text;
+            yield return CloseAndReopen(Lamp, SheetStopRule.Stop.Full);
+            StringAssert.StartsWith("1 ", View.Sections.Single(t => t.SectionKey == stories.Key).Header.Meta.text, "Stories counts the block read");
+            Assert.AreEqual(before, View.Sections.Single(t => t.SectionKey == BuiltInFamilies.About).Header.Meta.text, "About read none");
+            yield return TapSectionTitle(stories.Key);
+            yield return TapSectionTitle(stories.Key);
+            Assert.IsFalse(View.IsSectionOpen(stories.Key), "a second real tap folded it again");
+
+            // - an authored Contents block with Rows = Every Block: every row at once, plain titles
+            var copy = ConfigCopy();
+            copy.card_settings.navigation.auto_nav_block = CardOptions.NavNone;
+            var blocks = copy.pois.Single(p => p.id == Lamp).card.blocks;
+            blocks.Insert(1, new BlockInstanceData
+            {
+                key = "block_900", kind = BuiltInBlocks.NavContentsKind, variant = BuiltInBlocks.NavContentsList,
+                fields = new List<BlockFieldValue> { new() { key = BuiltInBlocks.NavContentsRowsField, value = BuiltInBlocks.NavContentsEveryBlock } },
+            });
+            Session.ApplyCardSettings(copy);
+            yield return CardTestInput.Settle(0.3f);
+            Assert.IsFalse(View.SectionsFirst, "the authored block's own Rows: Every Block");
+            foreach (var row in View.Rows) Assert.AreEqual(DisplayStyle.Flex, row.Button.resolvedStyle.display, row.BlockKey + " shows");
+            foreach (var t in View.Sections) Assert.AreEqual(DisplayStyle.None, t.Header.Root.resolvedStyle.display, "plain titles, no folding line");
         }
 
         [UnityTest]
@@ -345,6 +463,38 @@ namespace TileStories.Tests
             var card = Sheet.Root.worldBound;
             for (int s = 0; s < View.Sections.Count; s++)
                 Assert.AreEqual(words.Get(Model.Sections[s].LabelKey), View.Sections[s].Words.text, "section " + s + " in " + language);
+
+            // - folded (the card's own block): one line per section, its words and how many of its blocks were read
+            Assert.IsTrue(View.SectionsFirst, "precondition: the card's own contents block lists its sections first");
+            for (int s = 0; s < View.Sections.Count; s++)
+            {
+                var title = View.Sections[s];
+                var section = Model.Sections[s];
+                int readHere = section.Targets.Count(read.Contains);
+                Assert.AreEqual(words.Get(section.LabelKey), title.Header.Words.text, section.Key + ": its folding line names it");
+                Assert.AreEqual(string.Format(CultureInfo.InvariantCulture, words.Get(CardStrings.Keys.NavContentsSectionRead), readHere, section.Targets.Count),
+                    title.Header.Meta.text, section.Key + ": how many of its blocks were read, in " + language);
+                Assert.GreaterOrEqual(title.Header.Toggle.layout.height, CardTestInput.TokenPx("--ts-touch-target") - OnePixel, section.Key + ": a whole line to tap");
+                Assert.LessOrEqual(title.Header.Words.worldBound.xMax, title.Header.Chevron.worldBound.xMin + 0.5f, section.Key + ": the words end before the chevron");
+            }
+            foreach (var row in View.Rows) Assert.AreEqual(DisplayStyle.None, row.Button.resolvedStyle.display, row.Heading.text + ": folded away");
+            float folded = Sheet.Stack.SlotOfBlock(AutoKey).layout.height;
+            Scroll.scrollOffset = new Vector2(0f, Sheet.Stack.SlotOfBlock(AutoKey).layout.y);
+            yield return CardTestInput.Settle(0.3f);
+            yield return Capture("NavContents_Lamp_folded_" + language);
+
+            // - every section opened by a real tap on its title: the rows of step 11b, whole
+            foreach (var section in Model.Sections) yield return TapSectionTitle(section.Key);
+            foreach (var section in Model.Sections) Assert.IsTrue(View.IsSectionOpen(section.Key), section.Key + " opened");
+            // - a folding line spans exactly its rows (found by the first capture: the compact row's own side margin doubled the list's)
+            foreach (var t in View.Sections)
+            {
+                var firstRow = View.Rows.First(r => r.SectionKey == t.SectionKey).Button.worldBound;
+                Assert.AreEqual(firstRow.xMin, t.Header.Root.worldBound.xMin, OnePixel, t.SectionKey + ": its line starts where its rows start");
+                Assert.AreEqual(firstRow.xMax, t.Header.Root.worldBound.xMax, OnePixel, t.SectionKey + ": and ends where they end");
+            }
+            Assert.Greater(Sheet.Stack.SlotOfBlock(AutoKey).layout.height, folded * 3f,
+                "the opened list is many times the folded one (folded " + folded.ToString("F0") + " px)");
             foreach (var row in View.Rows)
             {
                 Assert.GreaterOrEqual(row.Button.layout.height, CardTestInput.TokenPx("--ts-touch-target") - OnePixel, row.Heading.text + ": a full touch target");

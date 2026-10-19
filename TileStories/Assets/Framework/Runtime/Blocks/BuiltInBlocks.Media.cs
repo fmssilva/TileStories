@@ -237,6 +237,8 @@ namespace TileStories
             DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable, CardOptions.DisplayTakeover },
             // - a contents list shows the film's own length: no Reading Time to type
             ClipLengthField = VideoClipField,
+            // - the player has its own full-screen button: an open compact row of it draws none beside it
+            OffersOwnFullView = true,
             Fields = new[]
             {
                 new BlockFieldDefinition

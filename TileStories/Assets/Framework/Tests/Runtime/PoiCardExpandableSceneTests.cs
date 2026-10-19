@@ -138,6 +138,17 @@ namespace TileStories.Tests
             Assert.AreEqual(key, Sheet.FullView.BlockKey);
         }
 
+        // The full view of a block whose row draws no full-view button (a video: its player offers its own full screen, step 13): asked
+        // through the host seam a bento tile and the breadcrumb use (IBlockHost.OpenFullView)
+        private IEnumerator OpenFullViewThroughTheHost(string key)
+        {
+            Assert.AreEqual(DisplayStyle.None, Stack.CompactRowOf(key).FullView.resolvedStyle.display, "precondition: the row offers no button of its own");
+            Sheet.OpenFullView(key);
+            yield return null;
+            Assert.IsTrue(Sheet.FullView.IsOpen, "the host opened the full view");
+            Assert.AreEqual(key, Sheet.FullView.BlockKey);
+        }
+
         // A real tap on something in the full view (it is not in the card's scroll)
         private static IEnumerator Tap(VisualElement e)
         {
@@ -205,6 +216,50 @@ namespace TileStories.Tests
             Assert.AreEqual(files, Card.Media.LoadedCount, "the card holds exactly what it held before the row opened");
         }
 
+        // ---------------- one full-screen control per open row (_3.2 step 13, 1.2) ----------------
+
+        // The buttons in a block's slot that show a full-screen glyph and are really drawn (laid out, every ancestor displayed)
+        private int VisibleFullScreenControls(string key)
+        {
+            var slot = Stack.SlotOfBlock(key);
+            Assert.IsNotNull(slot, "precondition: " + key + " sits in the stack");
+            return slot.Query<Button>().ToList().Count(b =>
+                b.Query<CardIcons.VectorGlyph>().ToList().Any(g => g.Kind == CardIcons.Shape.FullScreen)
+                && b.resolvedStyle.display == DisplayStyle.Flex && b.worldBound.width > 0f
+                && AllAncestorsShown(b, slot));
+        }
+
+        private static bool AllAncestorsShown(VisualElement e, VisualElement upTo)
+        {
+            for (var p = e; p != null && p != upTo.parent; p = p.parent)
+                if (p.resolvedStyle.display == DisplayStyle.None || p.resolvedStyle.visibility == Visibility.Hidden) return false;
+            return true;
+        }
+
+        [UnityTest]
+        public IEnumerator AnOpenVideoRow_AndAnOpenTextRow_EachOfferExactlyOneFullScreenControl()
+        {
+            yield return Expandable("block_56", "block_2");
+            yield return OpenFull(Lamp);
+            yield return TapRow("block_56");
+            yield return TapRow("block_2");
+            yield return null;
+            Assert.IsTrue(Stack.IsExpanded("block_56") && Stack.IsExpanded("block_2"), "precondition: real taps opened both rows");
+            var video = Stack.ViewOfBlock("block_56") as VideoBlockView;
+            Assert.IsNotNull(video, "precondition: the video's own view is bound under its row");
+            yield return WaitFor(() => video.Panel.FullScreenButton.resolvedStyle.display == DisplayStyle.Flex, "the player's full-screen button (its clip loaded)");
+
+            Assert.AreEqual(1, VisibleFullScreenControls("block_56"), "an open video row: the player's own button, not the row's beside it");
+            Assert.AreEqual(DisplayStyle.None, Stack.CompactRowOf("block_56").FullView.resolvedStyle.display, "the row's button is the one left out");
+            Assert.AreEqual(1, VisibleFullScreenControls("block_2"), "an open text row: the row's own full-view button");
+            Assert.AreEqual(DisplayStyle.Flex, Stack.CompactRowOf("block_2").FullView.resolvedStyle.display);
+
+            // - the one that remains really works: the player's button opens its full screen
+            yield return TapInStack(video.Panel.FullScreenButton);
+            Assert.IsTrue(Sheet.Takeover.IsOpen, "a real tap on the player's button opened the full screen");
+            yield return TapBack();
+        }
+
         // ---------------- one owner at a time: handed over to the full view and back ----------------
 
         [UnityTest]
@@ -242,7 +297,7 @@ namespace TileStories.Tests
             yield return OpenFull(Lamp);
             yield return TapRow("block_56");
             var cards = (VideoBlockView)Stack.ViewOfBlock("block_56");
-            yield return TapFullView("block_56");
+            yield return OpenFullViewThroughTheHost("block_56");
             var full = (VideoBlockView)Sheet.FullView.View;
             Assert.AreNotSame(cards, full);
             Assert.AreEqual(DisplayStyle.None, full.Panel.FullScreenButton.style.display.value, "no full screen to open from the full view");
@@ -337,7 +392,7 @@ namespace TileStories.Tests
             yield return Expandable("block_56");
             yield return OpenFull(Lamp);
             yield return TapRow("block_56");
-            yield return TapFullView("block_56");
+            yield return OpenFullViewThroughTheHost("block_56");
             yield return Tap(((VideoBlockView)Sheet.FullView.View).Panel.PlayOverlay);
             Advance(2f);
             Assert.AreEqual(CardVideoState.Playing, _video.State, "precondition: playing in the full view");

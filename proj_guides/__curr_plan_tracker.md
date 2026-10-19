@@ -1,50 +1,30 @@
-# Plan tracker -- _3.2 step 12 (compact row, expandable for every kind, open in full view)
+# Plan tracker -- _3.2 step 13 (accordion and tabs layouts) + PART 1 (fonts, one full-screen control, closed row never seen, contents collapse)
 
-GATE (done): pushed 1 (2578283..9941a73); Game view + POI Editor (Detail Card > Navigation) captured and opened
-(`TestEvidence/Gate/gate_3_2_step12_{gameview,poieditor}.png`, capture window closed, none left); 0 error CS; SDF fonts clean;
-EditMode 1874/1874 (75 s, focused) on clean 9941a73. Rides on 11a's full PlayMode 978/978.
-PART 1: none open.
+GATE (done): UnityMCP answered (telemetry_status); pushed 1 (9941a73..7862029); Game view + POI Editor (Detail Card > Navigation)
+captured and opened (`TestEvidence/Gate/gate_3_2_step13_{gameview,poieditor}.png`, capture window closed, none left); 0 error CS;
+SDF fonts clean; EditMode 1889/1889 (85 s, background) on clean 7862029. Rides on step 12's full PlayMode 1031/1032.
 
-Decisions (autonomous): header excluded from expandable (pinned title); pinned-top / footer looks draw inline whatever their display
-(`BlockDisplayRule.ShowsCompact`); compact row never loads media (clip kinds show format only); words = heading -> default heading ->
-first words (BlockSummaryRule, moved from Editor) -> kind words; collapse pauses the block's playing visitor video
-(ICollapsibleBlockView), audio plays on; full view = second pooled view, `BlockBindContext.FullView` (preview own slot, video no
-full-screen offer); same-POI rebind reopens the full view and keeps expanded rows; peek / show-on-wall / jump close the full view;
-expanded row header holds the full-view button; Editor Display popup names its options, every kind but header.
+Decisions (autonomous): pure CardLayoutRule + sheet-owned CardLayoutView (stack gets generic compact predicate / park / open order);
+tabs park (unbind) hidden sections; NavController calls Layout.PrepareJump before its slot check; HasViewed gets contentShown + the
+content box; Back collapses the most recently opened compact row (any layout); accordion rows start closed; blocks of no section show
+on every tab; tabs in effect only with navigation shown and >= 2 sections; CurrentSection at the end = last laid-out target;
+video OffersOwnFullView; nav_contents Rows (sections_first default, LibraryDefault; synthesized = sections_first) via AccordionRule.
 
-## 12.1 Compact row words
-- [x] `BlockSummaryRule` (Runtime/Blocks) = the Editor's CardBlockSummary/OneLine moved; Editor + BlockRef drawer call it; tests moved
-- [x] `CardNavModel.FormatLabelKey` public (the one format -> words mapping)
-- [x] `CompactRowRule` (Runtime/Blocks/Navigation): heading / format key / minutes / icon + colour token
-- [x] Tier 0 `CompactRowRuleTests` (+ summary tests) EN / PT / fallback; EditMode green
+## PART 1
+- [x] 1.1 Fonts: generate Static atlases (ASCII + PT + every shipped char); `ShippedTextGlyphTests`; proof after a Unity relaunch
+- [x] 1.2 `OffersOwnFullView` (video); CompactRowView hides its button; Phase B: one control per open video / text row
+- [x] 1.3 `NavScrollRule.HasViewed(contentShown, ...)`; controller measures the open row's view box; Tier 0 + Phase B (closed row never ticks)
+- [x] 1.4 `AccordionRule`; nav_contents Rows field + collapsible section titles (CompactRowView); strings en + pt; Tier 0 + Phase B
 
-## 12.2 Expandable
-- [x] `expandable` in DisplayModes of every kind but header (+ app size_comparison); `BlockDisplayRule.ShowsCompact`
-- [x] `BlockViewPool` extracted; BlockStackView uses it (frames pooled apart)
-- [x] `CompactRowView` (the slot logic stayed in the stack: no ExpandableSlot class); stack Expand / Collapse / IsExpanded / counts; expanded kept on same-POI rebind
-- [x] `ICollapsibleBlockView` (video pauses its visitor video)
-- [x] CardStrings rows (en + pt), USS tokens/classes
-- [x] Editor: named Display popup on every kind but header, help, guides; Editor test (real click + Ctrl+Z)
-- [x] EditMode: every kind lists expandable; ShowsCompact; stack acceptance (The Lamp all expandable: 0 views / 0 media in the scroll)
-
-## 12.3 Full view
-- [x] `TakeoverView.WhenPageLeaves` (run before the scope is released)
-- [x] `BlockBindContext.FullView`; PreviewBlockView / VideoBlockView read it
-- [x] `BlockFullView` (sheet-owned) + `IBlockHost.OpenFullView` (all implementers)
-- [x] Sheet: reopen on same-POI Show; close on ShowHeaderAtPeek / ShowOnWall / Nav.Jumped
-- [x] EditMode tests: leave hook order, full view binds a second pooled view, closes and returns it
-
-## Tests (PlayMode)
-- [x] Phase A `CardGalleryTests.Expandable`: every registered kind (not header) compact + expanded, real taps, renders
-- [x] Phase B `PoiCardExpandableSceneTests`: real tap expand / collapse (owner asserts), Lamp all-expandable counts, audio / video /
-      preview / AR hand-over and back, language switch / live edit / reduce motion with an open full view, POI switch closes
-- [x] Captures 390 EN + PT: compact rows, one expanded, the full view
-- [x] Editor capture: Card Content Display popup (`Editor/250_CardContent_Display_620.png`)
+## PART 2
+- [x] 2.0 Data: `layout`, `accordion_one_open`, CardOptions Layouts + labels; round trip
+- [x] 2.1 `CardLayoutRule` (Effective, ShowsCompact, JumpPlan, SpySection, TopElement fallback, RowsToClose) + Tier 0
+- [x] 2.2 Stack: compact predicate from the rule, Park/Unpark (ShowOnly), open order, collapse keeps the line in view
+- [x] 2.3 `CardLayoutView` + NavController.PrepareJump + spy; NavBackRule.CollapseRow; NavSlotRule tabs fallback; CurrentSection end fix
+- [x] 2.4 Editor: Layout row + tabs warning, Open One At A Time; (i), guides; Editor test (real click, Ctrl+Z, walker)
+- [x] 2.5 Phase B `PoiCardLayoutSceneTests` (accordion / tabs, owners); Phase A gallery cases
+- [x] 2.6 Captures: Lamp accordion + tabs 390 EN + PT, nav_contents folded + opened, Editor rows 260 / 261
 
 ## Close
-- [x] Full EditMode 1889/1889; Card / Poi targeted 823/825 -> fixed + reveal-path set 153/153; FULL PlayMode 1031/1032 (layout-struggling intermittent, passes alone: logged OPEN on the developer's call)
-- [x] Docs: _3.2 row 12 + proof + TODO removed (+ step-13 note: seen tick on collapsed rows); _3.1 5.4 / takeover; _5.1; 10-structure; RUN TIMES
-
-Notes: full EditMode 1889/1889 (77 s); Phase B fixture 7/7 (green after the InViewAndStill precondition); preview mutation
-proved load-bearing (branch removed -> 4 slots instead of 5, red; restored). Findings logged: two full-screen buttons on an open video row
-(_3.2 TODO), a collapsed row counts as seen (_3.2 TODO step 13), lost tap after a long ScrollTo (__mixed_TODOs Test harness).
+- [x] Full EditMode 1903/1903; Card / Poi 814/815 -> fixed, 59/59; FULL PlayMode 1051/1051 (focused); struggling test passed, closed
+- [x] Docs: _3.2 row 13 + TODOs; _3.1; _5.1; 10-structure; RUN TIMES; __mixed_TODOs font + layout notes closed

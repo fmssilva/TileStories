@@ -30,6 +30,11 @@ namespace TileStories
 
         public const string NavContentsKind = "nav_contents";
         public const string NavContentsList = "list";
+        // Rows (_3.2 step 13): the section titles first, each opening its rows (the default: a long card's contents never shows every row at
+        // once), or every row under its title as before
+        public const string NavContentsRowsField = "rows";
+        public const string NavContentsSectionsFirst = "sections_first";
+        public const string NavContentsEveryBlock = "every_block";
 
         // _3.2 D2: the card's contents -- one row per block it can take the visitor to, grouped under its section in the card's order, with
         // the block's minutes and a tick once the visitor has had it in view (remembered on the device); a tap moves the card to that block
@@ -51,6 +56,21 @@ namespace TileStories
             DisplayModes = new[] { CardOptions.DisplayInline, CardOptions.DisplayExpandable },
             // - it lists the card's rows; it is none of them itself
             OffersReadingTime = false,
+            Fields = new[]
+            {
+                new BlockFieldDefinition
+                {
+                    Key = NavContentsRowsField, Type = BlockFieldType.Choice, Label = "Rows",
+                    Options = new[] { NavContentsSectionsFirst, NavContentsEveryBlock },
+                    OptionLabels = new[] { "Sections First", "Every Block" },
+                    ChoiceDefault = NavContentsSectionsFirst,
+                    LibraryDefault = true,
+                    Help = "Sections First (the default): the list shows each section's name with how many of its blocks were read; a tap on a " +
+                           "name opens its rows under it, and another tap folds them away -- a long card's contents stays short until the " +
+                           "visitor asks for more. Every Block: every row shows under its section's name at once. A Contents block the card " +
+                           "puts in by itself (Detail Card > Navigation > Auto Nav Block) always opens with its sections folded.",
+                },
+            },
         };
     }
 }

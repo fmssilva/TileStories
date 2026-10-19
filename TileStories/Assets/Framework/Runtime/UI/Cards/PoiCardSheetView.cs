@@ -30,6 +30,9 @@ namespace TileStories
         public NavSlots Slots { get; }
         // What of the chrome -- the top strip, the bottom area -- shows now (_3.2 step 5b, CardChromeRule)
         public CardChromeView Chrome { get; }
+        // How the card arranges its blocks (_3.2 step 13, CardLayoutRule): the accordion's one-at-a-time rows, the tabs' shown section; the
+        // controller asks it before every jump
+        public CardLayoutView Layout { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
         // Any block of the card in that full view (_3.2 step 12): a second view of its kind, while the card's own stays bound
@@ -108,6 +111,8 @@ namespace TileStories
             _registry = registry;
             Stack = new BlockStackView(Root, Root, registry);
             Nav = new NavController(Stack, () => { if (IsOpen && Stop != SheetStopRule.Stop.Full) SetStop(SheetStopRule.Stop.Full); });
+            Layout = new CardLayoutView(Stack);
+            Nav.Layout = Layout;
             Stack.Revealed += BindNav;
             // - the footer moves into the bottom area, which takes its place under the stack: the footer first (the CTA nearest the
             //   content), the bottom slot after it (NavSlots)
@@ -202,7 +207,12 @@ namespace TileStories
             context.JumpTargets = BlockRefRule.JumpTargets(entries, key => state?.Seen(poiId, key) ?? false);
             // - until BindNav below, the controller's model is the replaced card's: a nav block bound now waits for it
             Nav.Rebinding();
-            Stack.Bind(entries, context);
+            // - the tabs layout binds only the section it shows: the card's map, built from these entries with the reveal the stack starts
+            //   from (the device's remembered one), says which blocks start set aside
+            var parked = CardLayoutRule.Layout(context.Settings?.navigation) == CardOptions.LayoutTabs
+                ? Layout.ParkedAtBind(CardNavModel.Build(entries, _registry, context.Settings, key => state?.Seen(poiId, key) ?? false), context)
+                : null;
+            Stack.Bind(entries, context, parked);
             BindNav();
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
@@ -218,7 +228,10 @@ namespace TileStories
             if (_context == null || _entries == null) return;
             // - a reveal rebinds every element: a menu or list open over the old ones closes with them
             Overlay.Close();
-            Nav.Bind(CardNavModel.Build(_entries, _registry, _context.Settings, Stack.IsRevealed), _context);
+            var model = CardNavModel.Build(_entries, _registry, _context.Settings, Stack.IsRevealed);
+            // - the layout first: the controller's spy reads the section tabs shows
+            Layout.Bind(model, _context);
+            Nav.Bind(model, _context);
             Slots.Bind(Nav.Model, Nav, _context);
             Floating.Refresh();
             ShowMenuButton();
@@ -253,6 +266,7 @@ namespace TileStories
             _context = null;
             _entries = null;
             Nav?.Unbind();
+            Layout?.Unbind();
             Slots?.Unbind();
             Floating?.Unbind();
             if (MenuButton != null) ShowMenuButton();
@@ -321,10 +335,11 @@ namespace TileStories
         // the app (Back Button = none, or no card open)
         public bool Back()
         {
-            switch (NavBackRule.Next(_context?.Settings?.navigation, Takeover.IsOpen, Overlay.IsOpen, Stop))
+            switch (NavBackRule.Next(_context?.Settings?.navigation, Takeover.IsOpen, Overlay.IsOpen, Stack.OpenRows.Count > 0, Stop))
             {
                 case NavBackRule.Step.CloseFullView: Takeover.Close(); return true;
                 case NavBackRule.Step.CloseOverlay: Overlay.Close(); return true;
+                case NavBackRule.Step.CollapseRow: Stack.Collapse(AccordionRule.ClosedByBack(Stack.OpenRows)); return true;
                 case NavBackRule.Step.LowerToHalf: SetStop(SheetStopRule.Stop.Half); return true;
                 case NavBackRule.Step.LowerToPeek: SetStop(SheetStopRule.Stop.Peek); return true;
                 case NavBackRule.Step.CloseCard: CloseRequested?.Invoke(); return true;

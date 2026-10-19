@@ -80,11 +80,11 @@ namespace TileStories.Editor.Tests
         {
             const float offset = 1000f, height = 150f;
             float line = SpyLineAt(offset);
-            Assert.IsTrue(NavScrollRule.HasViewed(line - 1f, line - 1f + height, offset, Content, Viewport), "its top one unit above the line");
-            Assert.IsTrue(NavScrollRule.HasViewed(line, line + height, offset, Content, Viewport), "its top exactly on the line");
-            Assert.IsFalse(NavScrollRule.HasViewed(line + 1f, line + 1f + height, offset, Content, Viewport),
+            Assert.IsTrue(NavScrollRule.HasViewed(true, line - 1f, line - 1f + height, offset, Content, Viewport), "its top one unit above the line");
+            Assert.IsTrue(NavScrollRule.HasViewed(true, line, line + height, offset, Content, Viewport), "its top exactly on the line");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, line + 1f, line + 1f + height, offset, Content, Viewport),
                 "its top one unit below the line: on screen, but not read yet");
-            Assert.IsTrue(NavScrollRule.HasViewed(offset - 100f, offset + 20f, offset, Content, Viewport),
+            Assert.IsTrue(NavScrollRule.HasViewed(true, offset - 100f, offset + 20f, offset, Content, Viewport),
                 "a tall block whose top went off the top while its end still shows: the line passed it");
         }
 
@@ -93,9 +93,9 @@ namespace TileStories.Editor.Tests
         {
             // - after a jump that lands at 1000 the blocks above have tops above the line, but they were flown past, never on screen
             const float offset = 1000f;
-            Assert.IsFalse(NavScrollRule.HasViewed(700f, 1000f, offset, Content, Viewport), "it ends exactly at the viewport's top");
-            Assert.IsFalse(NavScrollRule.HasViewed(200f, 400f, offset, Content, Viewport), "far above");
-            Assert.IsFalse(NavScrollRule.HasViewed(offset + Viewport, offset + Viewport + 100f, offset, Content, Viewport), "below the viewport");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, 700f, 1000f, offset, Content, Viewport), "it ends exactly at the viewport's top");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, 200f, 400f, offset, Content, Viewport), "far above");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, offset + Viewport, offset + Viewport + 100f, offset, Content, Viewport), "below the viewport");
         }
 
         [Test]
@@ -104,22 +104,42 @@ namespace TileStories.Editor.Tests
             float range = NavScrollRule.Range(Content, Viewport);
             float lowTop = Content - 120f;
             Assert.Greater(lowTop, SpyLineAt(range), "precondition: the last block's top stays under the line even at the end");
-            Assert.IsTrue(NavScrollRule.HasViewed(lowTop, Content, range, Content, Viewport), "at the end: the line can go no further, it counts");
-            Assert.IsTrue(NavScrollRule.HasViewed(lowTop, Content, range - NavScrollRule.EndTolerance, Content, Viewport), "within the end tolerance");
-            Assert.IsFalse(NavScrollRule.HasViewed(lowTop, Content, range - NavScrollRule.EndTolerance - 1f, Content, Viewport),
+            Assert.IsTrue(NavScrollRule.HasViewed(true, lowTop, Content, range, Content, Viewport), "at the end: the line can go no further, it counts");
+            Assert.IsTrue(NavScrollRule.HasViewed(true, lowTop, Content, range - NavScrollRule.EndTolerance, Content, Viewport), "within the end tolerance");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, lowTop, Content, range - NavScrollRule.EndTolerance - 1f, Content, Viewport),
                 "further from the end: back to the line's answer");
-            Assert.IsTrue(NavScrollRule.HasViewed(450f, 520f, 0f, 520f, Viewport),
+            Assert.IsTrue(NavScrollRule.HasViewed(true, 450f, 520f, 0f, 520f, Viewport),
                 "a stack that does not scroll is all in view: its lowest block counts although it sits under the line");
+        }
+
+        [Test]
+        public void AClosedRow_IsNeverViewed_WhereverTheStackIs_AndAnOpenRowIsMeasuredByItsContent()
+        {
+            float offset = 600f;
+            float line = SpyLineAt(offset);
+            // - a closed compact row whose line sits right in the middle of the screen, past the spy line: it shows none of its block
+            Assert.IsFalse(NavScrollRule.HasViewed(false, line - 40f, line + 20f, offset, Content, Viewport), "closed, on screen, past the line");
+            float range = NavScrollRule.Range(Content, Viewport);
+            Assert.IsFalse(NavScrollRule.HasViewed(false, Content - 60f, Content, range, Content, Viewport), "closed, at the end of the stack");
+            Assert.IsFalse(NavScrollRule.HasViewed(false, 450f, 520f, 0f, 520f, Viewport), "closed, on a stack that does not scroll");
+            // - open: its content (under the line of the row) is what counts -- a header past the line with its content still below is not read
+            float rowTop = line - 40f;
+            float contentTop = rowTop + 56f;
+            Assert.Greater(contentTop, line, "precondition: the row's line is past the spy line, its content is not");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, contentTop, contentTop + 300f, offset, Content, Viewport),
+                "open, its content still under the line: not read yet");
+            Assert.IsTrue(NavScrollRule.HasViewed(true, contentTop, contentTop + 300f, contentTop - Viewport * NavScrollRule.SpyLineFraction, Content, Viewport),
+                "open, its content's top reaches the line: read");
         }
 
         [Test]
         public void NoViewportOrNoLayout_ViewsNothing()
         {
-            Assert.IsFalse(NavScrollRule.HasViewed(0f, 100f, 0f, Content, 0f), "the peek stop: no viewport, nothing is visible");
-            Assert.IsFalse(NavScrollRule.HasViewed(float.NaN, 100f, 0f, Content, Viewport), "a slot not laid out yet");
-            Assert.IsFalse(NavScrollRule.HasViewed(0f, float.NaN, 0f, Content, Viewport));
-            Assert.IsFalse(NavScrollRule.HasViewed(0f, 100f, 0f, float.NaN, Viewport), "no content height yet");
-            Assert.IsFalse(NavScrollRule.HasViewed(0f, 100f, 0f, Content, float.NaN));
+            Assert.IsFalse(NavScrollRule.HasViewed(true, 0f, 100f, 0f, Content, 0f), "the peek stop: no viewport, nothing is visible");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, float.NaN, 100f, 0f, Content, Viewport), "a slot not laid out yet");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, 0f, float.NaN, 0f, Content, Viewport));
+            Assert.IsFalse(NavScrollRule.HasViewed(true, 0f, 100f, 0f, float.NaN, Viewport), "no content height yet");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, 0f, 100f, 0f, Content, float.NaN));
         }
 
         [Test]

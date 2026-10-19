@@ -36,11 +36,18 @@ namespace TileStories
 
         // The section the reader is in at `offset`, from the tops of each section's first target (in the stack's order, as
         // CardNavModel gives them); -1 with no section. Before the first section's top reaches the line the first section is
-        // named (an element always marks one), and a stack that does not scroll is read from its top, never "at its end".
+        // named (an element always marks one), and a stack that does not scroll is read from its top, never "at its end". A top that
+        // is not laid out (infinite or NaN: a block out of sight -- tabs sets other sections aside) has reached no line, and at the end the
+        // LAST LAID-OUT one is named, never one the visitor cannot see
         public static int CurrentSection(IReadOnlyList<float> sectionTops, float offset, float contentHeight, float viewportHeight)
         {
             if (sectionTops == null || sectionTops.Count == 0) return -1;
-            if (IsAtEnd(offset, contentHeight, viewportHeight)) return sectionTops.Count - 1;
+            if (IsAtEnd(offset, contentHeight, viewportHeight))
+            {
+                for (int i = sectionTops.Count - 1; i >= 0; i--)
+                    if (!float.IsInfinity(sectionTops[i]) && !float.IsNaN(sectionTops[i])) return i;
+                return 0;
+            }
             float spyLine = SpyLine(offset, viewportHeight);
             int current = 0;
             for (int i = 1; i < sectionTops.Count; i++)
@@ -53,9 +60,14 @@ namespace TileStories
         // pass the lower blocks, every block on screen counts: at the end of the range (the same rule that names the last section there) and
         // on a stack that does not scroll at all (all of it is in view -- ContentSeenRule's "all of it fits"). On screen matters: after a
         // jump the blocks above the landing have their tops above the line too, yet the visitor never saw them. No viewport (the peek stop)
-        // or no layout: never
-        public static bool HasViewed(float blockTop, float blockBottom, float offset, float contentHeight, float viewportHeight)
+        // or no layout: never.
+        // What is measured is the block's CONTENT, not its place (_3.2 step 13): `contentShown` false -- a closed compact row (an expandable
+        // block, an accordion row; a bento tile at step 15) shows none of the block, so it is never seen however far the stack scrolled; an
+        // open row is measured by its opened content (`contentTop` / `contentBottom`), not by its one-line header
+        public static bool HasViewed(bool contentShown, float contentTop, float contentBottom, float offset, float contentHeight, float viewportHeight)
         {
+            if (!contentShown) return false;
+            float blockTop = contentTop, blockBottom = contentBottom;
             if (float.IsNaN(blockTop) || float.IsNaN(blockBottom) || float.IsNaN(contentHeight) || float.IsNaN(viewportHeight) || viewportHeight <= 0f)
                 return false;
             bool onScreen = blockBottom > offset && blockTop < offset + viewportHeight;

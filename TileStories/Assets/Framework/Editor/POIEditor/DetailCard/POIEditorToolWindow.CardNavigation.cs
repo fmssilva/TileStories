@@ -1,7 +1,8 @@
 // POIEditorToolWindow.CardNavigation.cs
 //
 // Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open
-// card. The two rows that order the stack: Block Order and the Families table (Order with reorder arrows, Family,
+// card. First the Layout (Scroll, Accordion, Tabs: step 13, with a warning for Tabs with no bar to switch sections; its Open One At A
+// Time row, accordion only, comes after Placed Model Control). The two rows that order the stack: Block Order and the Families table (Order with reorder arrows, Family,
 // At The End, Group, one (i) on its header); Group By; which cards get navigation, at which heights and what the top strip
 // shows (Show Navigation From, Top Bar: step 5a; Show Navigation At: 5b; Labels, Show Counts: step 6, each only for an element
 // that reads it), what the bar under the stack shows (Bottom Bar and its Bar Slots, step 7a, Bar Slots only for an element that is a
@@ -38,6 +39,11 @@ namespace TileStories.Editor
         private void DrawCardNavigationSection()
         {
             var nav = _config.card_settings.navigation ??= new CardNavigationSettings();
+
+            // - section 7's order: the Layout first -- it decides what most rows below mean (step 13). A layout of a later step reads as Scroll
+            nav.layout = DrawPopupField("Layout", nav.layout, CardOptions.Layouts, CardOptions.LayoutLabels, CardLayoutHelp);
+            if (CardLayoutRule.TabsWithoutAnElement(nav))
+                EditorGUILayout.HelpBox(CardTabsWithoutABarWarning, MessageType.Warning);
 
             nav.block_order = DrawPopupField("Block Order", nav.block_order, CardOptions.BlockOrders, CardOptions.BlockOrderLabels, CardBlockOrderHelp);
 
@@ -102,6 +108,9 @@ namespace TileStories.Editor
             // - section 7's order: what tells the visitor a placed model stands, after Back (step 9)
             nav.placed_model_control = DrawPopupField("Placed Model Control", nav.placed_model_control, CardOptions.PlacedModelControls,
                 CardOptions.PlacedModelControlLabels, CardPlacedModelControlHelp);
+            // - section 7's order: Open One At A Time after Placed Model Control, an accordion option (hidden elsewhere, keeping its value)
+            if (CardLayoutRule.Layout(nav) == CardOptions.LayoutAccordion)
+                nav.accordion_one_open = DrawToggleField("Open One At A Time", nav.accordion_one_open, CardOpenOneAtATimeHelp);
 
             // - section 7 puts the Groups table last: it only matters to the Segmented Top Bar
             if (usesGroups)

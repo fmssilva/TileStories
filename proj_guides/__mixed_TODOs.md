@@ -253,6 +253,7 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
 - `Markers/Fonts/Oswald Bold SDF.asset` changes on test runs (-944 lines: its dynamic glyph table and atlas are rewritten). A
   TextMeshPro font in Dynamic mode saves whatever glyphs a run happened to use. Keep it out of commits (`git checkout -- <file>`)
   and, in the marker domain, make it Static with the needed character set (Latin + Portuguese) or clear dynamic data on build.
+  CLOSED 2026-10-19 (_3.2 step 13): both fonts Static, see "The two SDF fonts dirty themselves on every Unity launch" below.
 
 ## From _3.1 9A-fix / 9B (2026-09-29)
 
@@ -276,22 +277,17 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
   parsers read `\` as `/`). The user-scoped entry (`http://127.0.0.1:8080/mcp`) points at the same server. Cosmetic; tidy it with
   VS Code closed if it ever matters.
 
-## The two SDF fonts dirty themselves on every Unity launch (2026-10-19, diagnosed at the _3.2 step 12 review)
+## The two SDF fonts dirty themselves on every Unity launch (CLOSED 2026-10-19, _3.2 step 13)
 
-- Every block since `_3.1` has spent a GATE step on `git checkout --` for `Oswald Bold SDF.asset` and `Roboto-Bold SDF.asset`.
-  CAUSE, read off the assets: both have `m_AtlasPopulationMode: 1` (DYNAMIC). A dynamic TMP font asset renders each new
-  character into its atlas and writes the glyph back INTO THE ASSET, so any Editor session that draws a character the atlas
-  does not hold yet dirties the file. `m_ClearDynamicDataOnBuild: 1` is already set, so builds are clean -- this is Editor
-  churn only, and it is noise, not damage (the last committed change to either file is e5c0f85).
-- FIX (one small block, `_3.2` step 13 PART 1): set both to STATIC after generating an atlas that holds every character the
-  project renders -- Latin plus the Portuguese accents of `CardStrings.asset`, the wall's `config.json` content and the
-  marker labels. Then TMP has nothing to add and nothing to write.
-  The risk of Static is a missing glyph in a language added later, so it comes with its own guard: a test that walks every
-  visitor-facing string the project ships (framework table, app table, the wall config) and asserts each character is in the
-  font's character table. That test is worth more than the churn it removes -- it also catches a missing accent the day
-  someone types one.
-  If Static turns out to drop a glyph the project needs and the set cannot be extended cleanly, revert to Dynamic, say so
-  here, and keep the GATE step.
+- Both `Oswald Bold SDF.asset` and `Roboto-Bold SDF.asset` are STATIC now (`m_AtlasPopulationMode: 0`), each with the same 122 characters in
+  one 1024 atlas: printable ASCII, the Portuguese letters (upper and lower case), and every character of `CardStrings.asset`, the app's
+  `LivingRoomCardStrings.asset` and the wall's `config.json` (only the middle dot was beyond the base set). Rebuilt once with
+  `TMP_FontAsset.ClearFontAssetData` + `TryAddCharacters` (nothing missing from either .ttf) + Static; no glyph dropped.
+- Guard: `ShippedTextGlyphTests` (EditMode) asserts both are Static and hold every shipped character, naming the character and its source
+  when one is missing; it was red before the rebuild (Dynamic) and green after. A new language or accent: run it, then add the characters
+  with the same two calls (the test's `ShippedCharacters()` is the set).
+- Proof: the developer closed and reopened Unity; both files kept their SHA-1 through the launch and a Portuguese PlayMode run
+  (`PoiCardPortugueseTests` + `MarkerGalleryTests`, 14/14). The GATE step "git checkout -- the fonts" is no longer needed.
 
 ## Repo (2026-09-30)
 
@@ -465,7 +461,10 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   a second plausible cause). That fixture now taps through its own `InViewAndStill` (scroll until in view AND the same rect for three frames).
   If another fixture loses a tap after a scroll, move that precondition into `TapInView` itself (shared ground: a full PlayMode run).
 
-- OPEN (2026-10-19, seen at _3.2 step 12; CHECK AT THE NEXT FULL RUN): **"Layout update is struggling to process current layout" during
+- CLOSED (2026-10-19, _3.2 step 13: did not come back -- the Card / Poi targeted set 815 and the FULL PlayMode run 1051/1051 both passed
+  `ARealDragToTheEnd_...` (25.6 s in the full run) and neither Editor log nor the results hold one "Layout update is struggling" line;
+  no loop was found because none showed: if it is seen again, start from the geometry callbacks named below). Was:
+  **"Layout update is struggling to process current layout" during
   `PoiCardBottomElementsSceneTests.ARealDragToTheEnd_FinishesTheBar_AndBackUpItNamesABlockAgain_InPortuguese`.** Unity logs it (2-3 times,
   PanelRootElement 390 x 844) as the next_up bar is dragged to The Lamp's end -- where the end-of-card reveal grows the content, the chrome
   brings the bottom area back at the end and Next Up switches to its finished words, all applied from geometry callbacks: a loop between

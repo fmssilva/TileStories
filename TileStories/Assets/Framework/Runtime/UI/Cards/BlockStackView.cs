@@ -17,6 +17,9 @@ namespace TileStories
     // CompactRowRule's words) and holds NO view and no media: its real view is taken from the pool and bound only when the row is opened
     // (Expand), and unbound -- its scope released -- when it is closed again (Collapse). Rows left open survive a rebind of the same
     // point (a live edit, a language switch); another point, or the card closing, starts every row closed.
+    // The card's LAYOUT (_3.2 step 13, CardLayoutRule) only moves these same slots: the accordion makes every navigation target a compact
+    // row (Bind), the tabs layout sets the sections not shown aside (SetParked: out of sight and unbound, so they hold no media). A view never
+    // learns which layout it is in.
     public sealed class BlockStackView
     {
         public VisualElement HeaderSlot { get; }
@@ -50,18 +53,24 @@ namespace TileStories
             public ScopedMediaSource Media;
             public BlockStackBuilder.Entry Entry;
             public bool Compact;
+            // In the scroll (not the header, a pinned-top or a footer look): only these a layout may set aside
+            public bool InScroll;
+            // Kept out of sight until the card was read (ShowAfterViewedField)
+            public bool Waits;
+            // Set aside by the layout (tabs: a section not shown): out of sight AND unbound -- it holds no view and no media
+            public bool Parked;
         }
 
         private readonly Stack<Slot> _slots = new();
         private readonly Stack<Slot> _compactSlots = new();
         private readonly List<Bound> _bound = new();
-        // The slots of blocks kept hidden until the card was read (ShowAfterViewedField), with what remembers their reveal
-        private readonly List<(Slot Slot, string PoiId, string BlockKey)> _waiting = new();
         // The block keys this binding revealed itself (a card with no CardLocalState still shows them once read)
         private readonly HashSet<string> _revealedHere = new();
-        // The compact rows open now, and the point they belong to (kept across a rebind of that same point)
-        private readonly HashSet<string> _expanded = new();
+        // The compact rows open now IN THE ORDER THEY WERE OPENED (Back closes the last, AccordionRule), and the point they belong to (kept
+        // across a rebind of that same point)
+        private readonly List<string> _open = new();
         private string _expandedPoi;
+        private string _poiId;
         private CardLocalState _state;
         // The stack's own context: what an expandable block's view is bound with when it is opened
         private BlockBindContext _context;
@@ -155,6 +164,27 @@ namespace TileStories
         // The slot of the block with this instance key (null when no such block is bound): its compact row's too
         public VisualElement SlotOfBlock(string blockKey) => BoundOf(blockKey)?.Slot.Root;
 
+        // What of this block the visitor can read now, in the stack's content coordinates: a block drawn whole -- its whole slot; an open
+        // compact row -- the view bound under its line (the line alone says nothing of the block); a closed row -- nothing (`shown` false).
+        // False when no such block is bound. What NavScrollRule.HasViewed measures (the stack measures, the rule decides)
+        public bool TryGetReadablePart(string blockKey, out bool shown, out float top, out float bottom)
+        {
+            var b = BoundOf(blockKey);
+            shown = false;
+            top = bottom = float.NaN;
+            if (b == null) return false;
+            var slot = b.Slot.Root.layout;
+            if (!b.Compact) { shown = true; top = slot.y; bottom = slot.yMax; return true; }
+            // - a closed row: its line's real box, with nothing of the block shown -- the RULE says that is never seen, not a missing measure
+            if (b.View == null) { top = slot.y; bottom = slot.yMax; return true; }
+            // - the view is the slot's child: its box is relative to the slot
+            var view = b.View.Root.layout;
+            shown = true;
+            top = slot.y + view.y;
+            bottom = slot.y + view.yMax;
+            return true;
+        }
+
         // The view bound for this block now (null for a closed compact row, or no such block)
         public IBlockView ViewOfBlock(string blockKey) => BoundOf(blockKey)?.View;
 
@@ -169,6 +199,12 @@ namespace TileStories
         }
 
         public bool IsExpanded(string blockKey) => BoundOf(blockKey) is { Compact: true, View: not null };
+
+        // The compact rows open now, the one opened first first (what Back and Open One At A Time read, AccordionRule)
+        public IReadOnlyList<string> OpenRows => _open;
+
+        // Whether the layout has set this block aside now (tabs: its section is not shown)
+        public bool IsParked(string blockKey) => BoundOf(blockKey)?.Parked ?? false;
 
         // The bound header view (null when the header is another view type, or nothing is bound)
         public HeaderBlockView HeaderView => _bound.Count > 0 ? _bound[0].View as HeaderBlockView : null;
@@ -234,15 +270,17 @@ namespace TileStories
             if (_context?.Host != null && !SheetStopRule.RevealsBlocks(_context.Host.Stop)) return;
             if (!ContentSeenRule.HasSeenAll(Scroll.scrollOffset.y, range, Scroll.contentViewport.layout.height)) return;
             ContentSeen = true;
-            if (_waiting.Count == 0) return;
-            foreach (var (slot, poiId, blockKey) in _waiting)
+            bool revealed = false;
+            foreach (var b in _bound)
             {
-                slot.Root.style.display = DisplayStyle.Flex;
-                _revealedHere.Add(blockKey);
-                _state?.MarkSeen(poiId, blockKey);
+                if (!b.Waits) continue;
+                b.Waits = false;
+                ApplyDisplay(b);
+                _revealedHere.Add(b.Key);
+                _state?.MarkSeen(_poiId, b.Key);
+                revealed = true;
             }
-            _waiting.Clear();
-            Revealed?.Invoke();
+            if (revealed) Revealed?.Invoke();
         }
 
         // Collapse or open the header for the stack's current scroll (HeaderCollapseRule)
@@ -262,30 +300,37 @@ namespace TileStories
             HeaderSlot.EnableInClassList(CollapsedHeaderClass, collapsed);
         }
 
-        // Show these entries (BlockStackBuilder's output), each bound with `context` and its own variant -- an expandable one as its compact
-        // row, opened again if it was open on this same point before the rebind
-        public void Bind(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockBindContext context)
+        // Show these entries (BlockStackBuilder's output), each bound with `context` and its own variant -- a compact one (its own display, or
+        // the card's accordion layout: CardLayoutRule.ShowsCompact) as its compact row, opened again if it was open on this same point before
+        // the rebind. `parked` (null = none): the blocks the layout sets aside from the start (tabs: the sections not shown), bound with no
+        // view -- the layout gives them their views when it shows them (SetParked)
+        public void Bind(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockBindContext context, System.Func<string, bool> parked = null)
         {
             string poiId = context.Poi?.id;
-            var reopen = poiId != null && poiId == _expandedPoi ? new HashSet<string>(_expanded) : null;
+            var reopen = poiId != null && poiId == _expandedPoi ? new List<string>(_open) : null;
             UnbindAll();
             _context = context;
             _expandedPoi = poiId;
+            _poiId = poiId;
             _state = context.State;
             ContentSeen = false;
             var state = context.State;
             IsRevealed = key => _revealedHere.Contains(key) || (state?.Seen(poiId, key) ?? false);
+            var navigation = context.Settings?.navigation;
             foreach (var entry in entries)
             {
                 bool header = _bound.Count == 0 && entry.Definition.Key == BuiltInBlocks.HeaderKind;
-                bool compact = !header && BlockDisplayRule.ShowsCompact(entry);
-                var b = compact ? BindCompact(entry, context) : BindView(entry, context);
+                bool inScroll = !header && !entry.Definition.IsPinnedTop(entry.Variant) && !entry.Definition.IsFooter(entry.Variant);
+                bool compact = inScroll && CardLayoutRule.ShowsCompact(navigation, entry, _registry);
+                bool parks = inScroll && (parked?.Invoke(entry.Instance.key) ?? false);
+                var b = compact ? BindCompact(entry, context) : parks ? BindParked(entry) : BindView(entry, context);
                 if (b == null) continue;
+                b.InScroll = inScroll;
+                b.Parked = parks;
                 // - a block that waits for the card to be read stays out of sight (its heading and gap with it) until then: the
                 //   same call the card's navigation model asks (NavOntologyRule), so a hidden block is never a nav target
-                bool waits = NavOntologyRule.WaitsToBeRevealed(entry, IsRevealed);
-                b.Slot.Root.style.display = waits ? DisplayStyle.None : DisplayStyle.Flex;
-                if (waits) _waiting.Add((b.Slot, poiId, entry.Instance.key));
+                b.Waits = NavOntologyRule.WaitsToBeRevealed(entry, IsRevealed);
+                ApplyDisplay(b);
                 b.Slot.Heading.text = HeadingWords(entry, context);
                 b.Slot.Heading.EnableInClassList("card-block-heading--empty", b.Slot.Heading.text.Length == 0);
                 var parent = header ? HeaderSlot
@@ -303,12 +348,18 @@ namespace TileStories
                     h.Root.Insert(1, PinnedTop);
                 }
                 _bound.Add(b);
-                if (compact && reopen != null && reopen.Contains(b.Key)) Expand(b.Key);
             }
+            // - rows open before the rebind open again, in the order they were opened (Back keeps closing the last one first)
+            if (reopen != null)
+                foreach (string key in reopen) Expand(key);
             Scroll.scrollOffset = UnityEngine.Vector2.zero;
             // - a new card starts at the top, header open (the offset may already have been 0: no scroll event then)
             SetHeaderCollapsed(false);
         }
+
+        // A block is out of sight while it waits for the card to be read or the layout has set it aside
+        private static void ApplyDisplay(Bound b) =>
+            b.Slot.Root.style.display = b.Waits || b.Parked ? DisplayStyle.None : DisplayStyle.Flex;
 
         // The words the stack draws over a block: its own heading, else its kind's default heading
         private static string HeadingWords(BlockStackBuilder.Entry entry, BlockBindContext context)
@@ -322,14 +373,32 @@ namespace TileStories
         // A block drawn whole: a slot with its heading and a view from the pool, bound through its own media scope
         private Bound BindView(BlockStackBuilder.Entry entry, BlockBindContext context)
         {
-            var view = Views.Take(entry.Definition.Key);
-            if (view == null) return null;
+            var b = BindParked(entry);
+            if (AttachView(b, context)) return b;
+            // - a kind with no view: nothing is drawn, the slot goes back to its pool
+            b.Slot.Key = null;
+            _slots.Push(b.Slot);
+            return null;
+        }
+
+        // A block drawn whole, with its slot only: no view, no media (a block the layout set aside, or one about to get its view)
+        private Bound BindParked(BlockStackBuilder.Entry entry)
+        {
             var slot = TakeSlot(compact: false);
-            var media = new ScopedMediaSource(context.Media);
-            view.Bind(entry.Instance, context.ForBlock(media, entry.Variant));
-            slot.Root.Add(view.Root);
             slot.Key = entry.Instance.key;
-            return new Bound { Kind = entry.Definition.Key, Key = entry.Instance.key, Slot = slot, View = view, Media = media, Entry = entry };
+            return new Bound { Kind = entry.Definition.Key, Key = entry.Instance.key, Slot = slot, Entry = entry };
+        }
+
+        // Give a whole block its view from the pool, bound under its heading through a scope of its own. False when the kind has no view
+        private bool AttachView(Bound b, BlockBindContext context)
+        {
+            var view = Views.Take(b.Kind);
+            if (view == null) return false;
+            b.Media = new ScopedMediaSource(context.Media);
+            view.Bind(b.Entry.Instance, context.ForBlock(b.Media, b.Entry.Variant));
+            b.Slot.Root.Add(view.Root);
+            b.View = view;
+            return true;
         }
 
         // A block drawn as its compact row: no view, no media until it is opened
@@ -339,16 +408,18 @@ namespace TileStories
             slot.Key = entry.Instance.key;
             slot.Row.SetExpanded(false);
             System.Func<string, string> words = context.Strings != null ? context.Strings.Get : null;
-            slot.Row.Show(CompactRowRule.Of(entry, _registry, context.Language, context.FallbackLanguage, words), context.Strings);
+            slot.Row.Show(CompactRowRule.Of(entry, _registry, context.Language, context.FallbackLanguage, words), context.Strings,
+                offersFullView: !entry.Definition.OffersOwnFullView);
             return new Bound { Kind = entry.Definition.Key, Key = entry.Instance.key, Slot = slot, Entry = entry, Compact = true };
         }
 
-        // Open a compact row: its block's real view is taken from the pool and bound under it, through a media scope of its own. False when
-        // the block is no compact row, already open, or not bound
+        // Open a compact row: its block's real view is taken from the pool and bound under it, through a media scope of its own. Nothing
+        // scrolls (NN/g mobile accordions: an open row never moves the page). False when the block is no compact row, already open, set
+        // aside by the layout, or not bound
         public bool Expand(string blockKey)
         {
             var b = BoundOf(blockKey);
-            if (b == null || !b.Compact || b.View != null || _context == null) return false;
+            if (b == null || !b.Compact || b.View != null || b.Parked || _context == null) return false;
             var view = Views.Take(b.Kind);
             if (view == null) return false;
             b.Media = new ScopedMediaSource(_context.Media);
@@ -356,23 +427,68 @@ namespace TileStories
             b.View = view;
             b.Slot.Root.Add(view.Root);
             b.Slot.Row.SetExpanded(true);
-            _expanded.Add(blockKey);
+            _open.Add(blockKey);
             ExpandedChanged?.Invoke(blockKey);
             return true;
         }
 
         // Close an open compact row: a view that keeps something going for the card (a playing video) lets it go first, then the view is
-        // unbound, its media scope released and the view given back to the pool -- the row holds nothing again. False when it was not open
-        public bool Collapse(string blockKey)
+        // unbound, its media scope released and the view given back to the pool -- the row holds nothing again. A row whose line had
+        // scrolled above the viewport brings that line back to the top (AccordionRule). False when it was not open
+        public bool Collapse(string blockKey) => CollapseRow(blockKey, OffsetAfter.OwnRow, null);
+
+        // Close an open row FOR another one being opened (Open One At A Time): the opened row keeps its place on screen
+        public bool CollapseFor(string blockKey, string openedKey) => CollapseRow(blockKey, OffsetAfter.KeepOpened, openedKey);
+
+        private enum OffsetAfter { OwnRow, KeepOpened, Unchanged }
+
+        private bool CollapseRow(string blockKey, OffsetAfter offsetAfter, string openedKey)
         {
             var b = BoundOf(blockKey);
             if (b == null || !b.Compact || b.View == null) return false;
+            float rowTop = b.Slot.Root.layout.y;
+            float removed = b.View.Root.layout.height;
             (b.View as ICollapsibleBlockView)?.Collapsing();
             ReleaseView(b);
             b.Slot.Row.SetExpanded(false);
-            _expanded.Remove(blockKey);
+            _open.Remove(blockKey);
+            float now = Scroll.scrollOffset.y;
+            float offset = offsetAfter switch
+            {
+                OffsetAfter.OwnRow => AccordionRule.OffsetAfterCollapse(now, rowTop),
+                OffsetAfter.KeepOpened => AccordionRule.OffsetAfterClosingFor(now, rowTop, removed, BoundOf(openedKey)?.Slot.Root.layout.y ?? float.NaN),
+                _ => now,
+            };
+            if (!offset.Equals(now)) Scroll.scrollOffset = new UnityEngine.Vector2(Scroll.scrollOffset.x, offset);
             ExpandedChanged?.Invoke(blockKey);
             return true;
+        }
+
+        // The layout sets blocks of the scroll aside or brings them back (tabs: the sections not shown). A block set aside goes out of
+        // sight AND gives its view back -- an open row closes, a playing video lets go first (ICollapsibleBlockView), every file is released
+        // -- so a hidden section holds no media; one brought back gets a view again. The header, a pinned-top and a footer look never move
+        public void SetParked(System.Func<string, bool> parked)
+        {
+            if (_context == null) return;
+            foreach (var b in _bound)
+            {
+                if (!b.InScroll) continue;
+                bool parks = parked?.Invoke(b.Key) ?? false;
+                if (parks == b.Parked) continue;
+                if (parks)
+                {
+                    // - it leaves the screen: no offset to keep for it
+                    if (b.Compact) CollapseRow(b.Key, OffsetAfter.Unchanged, null);
+                    else if (b.View != null)
+                    {
+                        (b.View as ICollapsibleBlockView)?.Collapsing();
+                        ReleaseView(b);
+                    }
+                }
+                b.Parked = parks;
+                if (!parks && !b.Compact) AttachView(b, _context);
+                ApplyDisplay(b);
+            }
         }
 
         // Unbind every view and put it back in its kind's pool
@@ -387,9 +503,8 @@ namespace TileStories
                 (b.Compact ? _compactSlots : _slots).Push(b.Slot);
             }
             _bound.Clear();
-            _waiting.Clear();
             _revealedHere.Clear();
-            _expanded.Clear();
+            _open.Clear();
             _context = null;
         }
 

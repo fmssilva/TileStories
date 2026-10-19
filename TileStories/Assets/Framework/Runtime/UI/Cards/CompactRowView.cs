@@ -5,7 +5,7 @@ namespace TileStories
     // The generic COMPACT ROW (_3.2 section 6.2, step 12): one look for every kind, drawn by the stack for a block whose display is Expandable
     // (BlockDisplayRule.ShowsCompact). One tappable line -- the family icon in its colour, the block's words (CompactRowRule) and under them
     // its format and minutes, a chevron -- that opens the block in place; open, the chevron turns over and a full-view button joins it at the
-    // end. It draws only what CompactRowRule says and loads nothing: the stack binds the block's real view under it when it is opened.
+    // end (none for a kind whose own view offers a full screen: BlockKindDefinition.OffersOwnFullView). It draws only what CompactRowRule says and loads nothing: the stack binds the block's real view under it when it is opened.
     // Only classes here; CardParts.uss holds every size and colour.
     public sealed class CompactRowView
     {
@@ -31,6 +31,7 @@ namespace TileStories
         private readonly NavTint _tint;
         private string _open = "";
         private string _close = "";
+        private bool _offersFullView = true;
 
         public CompactRowView()
         {
@@ -68,9 +69,11 @@ namespace TileStories
             _tint = new NavTint(Root);
         }
 
-        // Draw `row` (CompactRowRule) with the card's words for opening / closing it and for the full view
-        public void Show(CompactRowRule.Row row, CardStrings strings)
+        // Draw `row` (CompactRowRule) with the card's words for opening / closing it and for the full view. `offersFullView` false: the block's
+        // own view, once open, already offers a full screen (BlockKindDefinition.OffersOwnFullView), so the row draws no second button
+        public void Show(CompactRowRule.Row row, CardStrings strings, bool offersFullView = true)
         {
+            _offersFullView = offersFullView;
             Words.text = row.Words;
             Words.EnableInClassList("card-compact__words--teaser", row.FromFirstWords);
             Meta.text = row.Meta;
@@ -90,7 +93,7 @@ namespace TileStories
         {
             IsExpanded = expanded;
             Root.EnableInClassList(ExpandedClass, expanded);
-            FullView.style.display = expanded ? DisplayStyle.Flex : DisplayStyle.None;
+            FullView.style.display = expanded && _offersFullView ? DisplayStyle.Flex : DisplayStyle.None;
             string action = expanded ? _close : _open;
             Toggle.tooltip = action.Length > 0 ? action + " - " + Words.text : Words.text;
         }

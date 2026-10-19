@@ -145,6 +145,7 @@ namespace TileStories.Editor.Tests
                                 "show_at" => CardOptions.ShowNavFullOnly,
                                 "hide_on_scroll" => CardOptions.HideOnScrollNever,
                                 "labels" => CardOptions.LabelsIcon,
+                                "layout" => CardOptions.LayoutAccordion,
                                 _ => CardOptions.BlockOrderByFamily,
                             })));
                         else if (n.FieldType == typeof(bool)) edits.Add((n.Name, s => n.SetValue(s.navigation, !(bool)n.GetValue(s.navigation))));
@@ -168,8 +169,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 21 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 21 navigation + 3 demo card");
+            Assert.AreEqual(8 + 8 + 23 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 23 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -1542,6 +1543,79 @@ namespace TileStories.Editor.Tests
             foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Menu))
                 StringAssert.Contains("Menu = " + element.Label, guide, "the Playmode guide walks " + element.Label);
             EditorTextChecks.AssertAscii(guide, "CardNavigationPlaymodeTestGuide");
+        }
+
+        // Detail Card > Navigation's step 13 rows on the real window. Layout is drawn FIRST (section 7's order), on its default, Scroll, named
+        // Scroll / Accordion / Tabs; Open One At A Time shows only for the Accordion, after Placed Model Control, and keeps its value while
+        // hidden; Tabs with both bars None shows its warning under Layout, a Top Bar takes it away. Each pick is an undo step and a real Ctrl+Z
+        // brings the value back. The helps say what each option does and the guide's caution about tabs; the guides walk the layouts; ASCII
+        [UnityTest]
+        public IEnumerator TheLayoutAndOpenOneAtATimeRows_AreDrawnWhereSectionSevenSays_TheTabsWarningShowsWithNoBar_AndCtrlZUndoesEachPick()
+        {
+            _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
+            OpenTab("DetailCard");
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            var nav = _window.Config.card_settings.navigation;
+            Assert.AreEqual(CardOptions.LayoutScroll, nav.layout, "the shipped wall never set Layout: Scroll");
+            var titles = drawn.Select(d => d.Title).ToList();
+            Assert.AreEqual("Layout", titles.First(), "Layout is the section's first row");
+            CollectionAssert.DoesNotContain(titles, "Open One At A Time", "Scroll: no accordion option");
+            CollectionAssert.AreEqual(new[] { "Scroll", "Accordion", "Tabs" }, CardOptions.LayoutLabels, "named, never the stored words");
+            CollectionAssert.AreEqual(new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs }, CardOptions.Layouts);
+            float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
+            Assert.Less(Y("Layout"), Y("Block Order"), "Layout above Block Order");
+
+            Pick(() => _window.Config.card_settings.navigation.layout = CardOptions.LayoutAccordion);
+            yield return DrawnInfoTitles(drawn);
+            Assert.IsTrue(_window.Unsaved, "a pick is an edit");
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Open One At A Time", "the Accordion shows its option");
+            Assert.Less(Y("Placed Model Control"), Y("Open One At A Time"), "after Placed Model Control (section 7's order)");
+            Pick(() => _window.Config.card_settings.navigation.accordion_one_open = true);
+            Pick(() => _window.Config.card_settings.navigation.layout = CardOptions.LayoutTabs);
+            yield return DrawnInfoTitles(drawn);
+            CollectionAssert.DoesNotContain(drawn.Select(d => d.Title).ToList(), "Open One At A Time", "Tabs: hidden again");
+            Assert.IsTrue(_window.Config.card_settings.navigation.accordion_one_open, "and it kept its value while hidden");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.LayoutAccordion, _window.Config.card_settings.navigation.layout, "Ctrl+Z: back to the Accordion");
+            yield return _window.PressUndo();
+            Assert.IsFalse(_window.Config.card_settings.navigation.accordion_one_open, "Ctrl+Z again: Open One At A Time off");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.LayoutScroll, _window.Config.card_settings.navigation.layout, "Ctrl+Z again: Scroll");
+
+            // - the warning: Tabs with neither bar (the Top Bar the shipped wall uses is Text Tabs, so set it None first)
+            var help = typeof(POIEditorToolWindow);
+            string warning = (string)help.GetField("CardTabsWithoutABarWarning", Static).GetValue(null);
+            Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(_window.Config.card_settings.navigation), "precondition: no warning on the shipped wall");
+            Pick(() =>
+            {
+                _window.Config.card_settings.navigation.top = CardOptions.NavNone;
+                _window.Config.card_settings.navigation.layout = CardOptions.LayoutTabs;
+            });
+            Assert.IsTrue(CardLayoutRule.TabsWithoutAnElement(_window.Config.card_settings.navigation), "Tabs with both bars None");
+            yield return DrawnInfoTitles(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Layout", "the row stays");
+            foreach (string word in new[] { "Top Bar", "Bottom Bar", "None", "Text Tabs" })
+                StringAssert.Contains(word, warning, "the warning names " + word);
+            yield return _window.PressUndo();
+            Assert.AreEqual(BuiltInNavElements.TextTabs, _window.Config.card_settings.navigation.top, "Ctrl+Z: the Top Bar back");
+
+            string layoutHelp = (string)help.GetField("CardLayoutHelp", Static).GetValue(null);
+            foreach (string word in new[] { "Scroll (the default)", "Accordion: ", "Tabs: ", "compare", "Back", "Open One At A Time", "Show Navigation From" })
+                StringAssert.Contains(word, layoutHelp, "CardLayoutHelp says " + word);
+            string oneHelp = (string)help.GetField("CardOpenOneAtATimeHelp", Static).GetValue(null);
+            foreach (string word in new[] { "Accordion only", "Unticked (the default)", "keeps its place" })
+                StringAssert.Contains(word, oneHelp, "CardOpenOneAtATimeHelp says " + word);
+            string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
+            foreach (string label in CardOptions.LayoutLabels)
+                StringAssert.Contains("Layout = " + label, guide, "the Playmode guide walks " + label);
+            StringAssert.Contains("Open One At A Time", guide);
+            string device = (string)help.GetField("CardNavigationDeviceTestGuide", Static).GetValue(null);
+            StringAssert.Contains("Layout: ", device);
+            foreach (var (name, text) in new[] { ("CardLayoutHelp", layoutHelp), ("CardOpenOneAtATimeHelp", oneHelp), ("CardTabsWithoutABarWarning", warning),
+                         ("CardNavigationPlaymodeTestGuide", guide), ("CardNavigationDeviceTestGuide", device) })
+                EditorTextChecks.AssertAscii(text, name);
         }
 
         // Detail Card > Navigation's step 9 rows on the real window. Floating Button is drawn on its default, None, right under Menu (section 7's

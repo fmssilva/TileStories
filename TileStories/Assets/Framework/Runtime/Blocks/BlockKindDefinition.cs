@@ -46,6 +46,10 @@ namespace TileStories
         // contents list -- the header (never a navigation target) and the navigation blocks themselves
         public bool OffersReadingTime = true;
 
+        // Whether the kind's own view already offers its way into a full-screen view (a video player's full-screen button): its compact row,
+        // open, then draws no full-view button of its own -- one control per job, never two identical ones a few lines apart (_3.2 step 13)
+        public bool OffersOwnFullView;
+
         public IReadOnlyList<string> DisplayModes;
         // The CardStrings key of the heading shown when an instance's own heading is empty (null: no heading then), e.g.
         // compare_points' "Side by side"

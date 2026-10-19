@@ -23,7 +23,7 @@ namespace TileStories.Tests
         private const string ScenePath = "Assets/Dev/CardNavGallery/CardNavGalleryScene.unity";
         private CardNavGalleryHarness _harness;
 
-        private static string[] EntryNames => CardNavGalleryDefinitions.All.Where(e => !e.IsBlock).Select(e => e.Name).ToArray();
+        private static string[] EntryNames => CardNavGalleryDefinitions.All.Where(e => !e.IsBlock && e.Layout == null).Select(e => e.Name).ToArray();
 
         // What each element promises beyond the shared checks, by key: adding an element = a row in the definitions + its check here
         private static readonly Dictionary<string, System.Action<CardNavGalleryHarness, CardNavGalleryDefinitions.Entry>> ElementChecks = new()
@@ -122,8 +122,11 @@ namespace TileStories.Tests
         public void TheList_IsEveryElementOverTheFiveFixtureCases()
         {
             CollectionAssert.AreEquivalent(new[] { "big", "small", "one_family", "pt_long", "two_families" }, CardNavGalleryDefinitions.Cases.Select(c => c.Key));
-            Assert.AreEqual((CardNavGalleryDefinitions.ElementKeys.Count + CardNavGalleryDefinitions.BlockKinds.Count) * 5, CardNavGalleryDefinitions.All.Count);
+            Assert.AreEqual((CardNavGalleryDefinitions.ElementKeys.Count + CardNavGalleryDefinitions.BlockKinds.Count + CardNavGalleryDefinitions.Layouts.Count) * 5,
+                CardNavGalleryDefinitions.All.Count, "every element, nav block and layout over the five cases");
             CollectionAssert.Contains(CardNavGalleryDefinitions.BlockKinds, BuiltInBlocks.NavIconGridKind, "the nav blocks are in the list too (step 11a)");
+            CollectionAssert.AreEquivalent(new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs }, CardNavGalleryDefinitions.Layouts,
+                "and the layouts built (step 13)");
             CollectionAssert.IsSubsetOf(CardNavGalleryDefinitions.ElementKeys, NavElementRegistry.Shared.All.Select(e => e.Key), "every listed element is registered");
             foreach (var (key, targets, sections) in new[] { ("big", 62, 8), ("small", 6, 3), ("one_family", 5, 1), ("pt_long", 62, 8), ("two_families", 6, 2) })
             {
@@ -294,6 +297,29 @@ namespace TileStories.Tests
         // remembered as viewed exactly those rows are read -- marked twice (the marker filled in the accent, the heading no longer bold) and
         // still at 4.5:1. A REAL tap on a row lands its block (+-1 px) with one nav_jump nav_contents and ticks it, while the rows of the
         // blocks the jump flew past stay unticked. Rendered Nav_nav_contents_<case>.png and _ticked.png
+        // The targets in view at the card's top with their top past the spy line (NavScrollRule.HasViewed at offset 0): what a fresh card
+        // ticks by itself, measured on the stack as it is NOW (a folded contents list leaves the first blocks of a short card there)
+        private static HashSet<string> InViewAtTheTop(PoiCardSheetView sheet, IEnumerable<string> targets)
+        {
+            var scroll = sheet.Stack.Scroll;
+            var found = new HashSet<string>();
+            foreach (string key in targets)
+            {
+                var slot = sheet.Stack.SlotOfBlock(key);
+                if (slot != null && NavScrollRule.HasViewed(true, slot.layout.y, slot.layout.yMax, 0f, scroll.contentContainer.layout.height,
+                        scroll.contentViewport.layout.height)) found.Add(key);
+            }
+            return found;
+        }
+
+        // Open every folded section of a contents list (Rows = Sections First), then let the layout settle
+        private static IEnumerator OpenEverySection(NavContentsBlockView view)
+        {
+            foreach (var t in view.Sections)
+                if (!view.IsSectionOpen(t.SectionKey)) view.ToggleSection(t.SectionKey);
+            yield return CardTestInput.Settle();
+        }
+
         private static string[] ContentsEntryNames => CardNavGalleryDefinitions.All
             .Where(e => e.IsBlock && e.ElementKey == BuiltInBlocks.NavContentsKind).Select(e => e.Name).ToArray();
 
@@ -318,6 +344,23 @@ namespace TileStories.Tests
             CollectionAssert.DoesNotContain(model.Targets, autoKey, "the contents block is no target of its own list");
             var view = sheet.Stack.BoundViews.OfType<NavContentsBlockView>().Single();
             Assert.AreEqual(DisplayStyle.Flex, view.Root.resolvedStyle.display, "shown, whatever the number of sections (it lists blocks)");
+
+            // - folded first (step 13: the card's own contents block lists its sections first): a whole line per section, no row shows
+            Assert.IsTrue(view.SectionsFirst, "the card's own contents block opens with its sections folded");
+            foreach (var t in view.Sections)
+            {
+                Assert.AreEqual(DisplayStyle.Flex, t.Header.Root.resolvedStyle.display, t.SectionKey + ": its folding line");
+                Assert.GreaterOrEqual(t.Header.Toggle.layout.height, CardTestInput.TokenPx("--ts-touch-target") - CardGalleryChecks.OnePixel(view.Root),
+                    t.SectionKey + ": a whole line to tap");
+                AssertReadable(t.Header.Words);
+                AssertReadable(t.Header.Meta);
+            }
+            foreach (var row in view.Rows) Assert.AreEqual(DisplayStyle.None, row.Button.resolvedStyle.display, row.BlockKey + ": folded away");
+            // - a folded list is short: on a short card the first blocks sit in view at the top, past the spy line, and ARE seen
+            var atTop = InViewAtTheTop(sheet, model.Targets);
+            yield return CardGalleryChecks.Render(name + "_folded");
+            // - then every section opened (the view's own toggle, what a real tap on a title calls: PoiCardNavContentsSceneTests taps it)
+            yield return OpenEverySection(view);
 
             // - the structure: a title per section, a row per target, both in the model's order
             Assert.AreEqual(model.Sections.Count, view.Sections.Count, "one title per section");
@@ -365,7 +408,7 @@ namespace TileStories.Tests
                 Assert.GreaterOrEqual(row.Button.layout.height, touch - onePixel, row.Heading.text + ": a full touch target tall");
                 Assert.GreaterOrEqual(row.Button.worldBound.xMin, card.xMin - onePixel, row.Heading.text + ": inside the card");
                 Assert.LessOrEqual(row.Button.worldBound.xMax, card.xMax + onePixel);
-                Assert.IsFalse(row.IsRead, row.Heading.text + ": a fresh state at the card's top ticks nothing");
+                Assert.AreEqual(atTop.Contains(row.BlockKey), row.IsRead, row.Heading.text + ": a fresh state ticks only what is in view at the card's top");
                 AssertReadable(row.Heading);
                 if (minutes > 0) AssertReadable(row.Minutes);
             }
@@ -382,11 +425,13 @@ namespace TileStories.Tests
             _harness.Show(index);
             yield return CardTestInput.Settle();
             view = sheet.Stack.BoundViews.OfType<NavContentsBlockView>().Single();
-            Assert.AreEqual(0f, sheet.Stack.Scroll.scrollOffset.y, "precondition: the card is at its top, no target in view");
+            atTop = InViewAtTheTop(sheet, model.Targets);
+            yield return OpenEverySection(view);
+            Assert.AreEqual(0f, sheet.Stack.Scroll.scrollOffset.y, "precondition: the card is at its top");
             Assert.IsTrue(CardTokenColours.TryResolve(view.Root, "--ts-accent", out Color accent), "--ts-accent resolves on the card");
             foreach (var row in view.Rows)
             {
-                bool read = ticked.Contains(row.BlockKey);
+                bool read = ticked.Contains(row.BlockKey) || atTop.Contains(row.BlockKey);
                 Assert.AreEqual(read, row.IsRead, row.Heading.text + (read ? ": remembered, ticked" : ": never viewed, no tick"));
                 Assert.AreEqual(read ? Visibility.Visible : Visibility.Hidden, row.Tick.resolvedStyle.visibility, row.Heading.text + ": the tick");
                 // - the second signal: the marker's fill and the heading's weight, never the tick alone
@@ -406,6 +451,8 @@ namespace TileStories.Tests
             _harness.Show(index);
             yield return CardTestInput.Settle();
             view = sheet.Stack.BoundViews.OfType<NavContentsBlockView>().Single();
+            atTop = InViewAtTheTop(sheet, model.Targets);
+            yield return OpenEverySection(view);
             var last = view.Rows[view.Rows.Count - 1];
             var scroll = sheet.Stack.Scroll;
             float range = NavScrollRule.Range(scroll.contentContainer.layout.height, scroll.contentViewport.layout.height);
@@ -430,7 +477,7 @@ namespace TileStories.Tests
             foreach (var row in view.Rows)
             {
                 var rowSlot = sheet.Stack.SlotOfBlock(row.BlockKey);
-                if (rowSlot.layout.yMax <= offset)
+                if (rowSlot.layout.yMax <= offset && !atTop.Contains(row.BlockKey))
                     Assert.IsFalse(row.IsRead, row.Heading.text + ": flown past by the jump, never on screen -- no tick");
             }
         }
@@ -439,6 +486,89 @@ namespace TileStories.Tests
         {
             public readonly List<CardEvent> Raised = new();
             public void Raise(CardEvent cardEvent) => Raised.Add(cardEvent);
+        }
+
+        // The card LAYOUTS (_3.2 section 6.1, step 13) over every case of the one list, at 390 px, with real taps:
+        //   - accordion: every target is a compact row with no view and no file -- a whole line to tap, its words before the chevron, at
+        //     4.5:1 -- and a real tap on the first row opens it in place (its view bound under the line)
+        //   - tabs: drawn in tabs only where the case has two sections or more (one_family scrolls); then only the first section's blocks
+        //     show, the others are set aside (no view, no file), and a real tap on the second tab shows the second section, spy and mark on it
+        // Rendered Nav_layout_<layout>_<case>.png (and _open / _second)
+        private static string[] LayoutEntryNames => CardNavGalleryDefinitions.All.Where(e => e.Layout != null).Select(e => e.Name).ToArray();
+
+        [UnityTest]
+        public IEnumerator EveryLayoutEntry_ArrangesTheSameBlocks_RowsThatOpenInPlace_OrOneSectionAtATime_WithRealTaps(
+            [ValueSource(nameof(LayoutEntryNames))] string name)
+        {
+            int index = CardNavGalleryDefinitions.All.ToList().FindIndex(e => e.Name == name);
+            var entry = CardNavGalleryDefinitions.All[index];
+            _harness.Show(index);
+            yield return CardTestInput.Settle();
+            var sheet = _harness.Gallery.Sheet;
+            sheet.SetStop(SheetStopRule.Stop.Full);
+            yield return CardTestInput.Settle();
+            var model = sheet.Nav.Model;
+            var stack = sheet.Stack;
+            Assert.Greater(model.TargetCount, 0, "precondition: the case has targets");
+            float onePixel = CardGalleryChecks.OnePixel(stack.Scroll);
+
+            if (entry.Layout == CardOptions.LayoutAccordion)
+            {
+                Assert.AreEqual(CardOptions.LayoutAccordion, sheet.Layout.Effective);
+                foreach (string key in model.Targets)
+                {
+                    var row = stack.CompactRowOf(key);
+                    Assert.IsNotNull(row, key + ": a row");
+                    Assert.IsNull(stack.ViewOfBlock(key), key + ": no view");
+                    Assert.AreEqual(0, stack.HeldMediaOf(key), key + ": no file");
+                    Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(row.Toggle.layout.width, row.Toggle.layout.height), key + ": a whole line to tap");
+                    Assert.LessOrEqual(row.Words.worldBound.xMax, row.Chevron.worldBound.xMin + onePixel, key + ": its words end before the chevron");
+                    AssertReadable(row.Words);
+                }
+                yield return CardGalleryChecks.Render(name);
+                var first = stack.CompactRowOf(model.Targets[0]);
+                Assert.IsTrue(stack.Scroll.contentViewport.worldBound.Contains(first.Toggle.worldBound.center), "precondition: the first row is on screen");
+                yield return CardTestInput.Tap(sheet.Root.panel, first.Toggle.worldBound.center);
+                yield return CardTestInput.Settle();
+                Assert.IsTrue(stack.IsExpanded(model.Targets[0]), "a real tap opened the first row in place");
+                Assert.IsNotNull(stack.ViewOfBlock(model.Targets[0]), "its view bound under the line");
+                yield return CardGalleryChecks.Render(name + "_open");
+                yield break;
+            }
+
+            // - tabs
+            bool switches = model.ShowsNavigation && model.Sections.Count >= 2;
+            Assert.AreEqual(switches ? CardOptions.LayoutTabs : CardOptions.LayoutScroll, sheet.Layout.Effective,
+                entry.Case.Key + ": tabs only with sections to switch between (" + model.Sections.Count + ")");
+            if (!switches)
+            {
+                foreach (string key in model.Targets) Assert.IsFalse(stack.IsParked(key), key + ": a card that scrolls sets nothing aside");
+                yield return CardGalleryChecks.Render(name);
+                yield break;
+            }
+            void AssertShown(int shown, string when)
+            {
+                for (int i = 0; i < model.Sections.Count; i++)
+                    foreach (string key in model.Sections[i].Targets)
+                    {
+                        Assert.AreEqual(i != shown, stack.IsParked(key), when + ": " + key + " set aside or not");
+                        Assert.AreEqual(i == shown, stack.ViewOfBlock(key) != null, when + ": " + key + " has a view only while its section shows");
+                        if (i != shown) Assert.AreEqual(0, stack.HeldMediaOf(key), when + ": " + key + " holds no file while put away");
+                    }
+            }
+            AssertShown(0, "opened");
+            var tabs = sheet.Slots.TopView as TextTabsNavView;
+            Assert.IsNotNull(tabs, "precondition: Text Tabs at the top");
+            yield return CardGalleryChecks.Render(name);
+            var second = tabs.Tabs.Single(t => t.Index == 1);
+            Assert.IsTrue(tabs.Viewport.worldBound.Contains(second.Button.worldBound.center), "precondition: the second tab is inside the strip");
+            yield return CardTestInput.Tap(sheet.Root.panel, second.Button.worldBound.center);
+            yield return Landed(sheet.Nav);
+            Assert.AreEqual(1, sheet.Layout.ShownSection, "a real tap on the second tab shows the second section");
+            AssertShown(1, "after the tap");
+            Assert.AreEqual(1, sheet.Nav.Current, "the spy names it");
+            Assert.AreEqual(1, tabs.CurrentIndex, "and its tab is marked");
+            yield return CardGalleryChecks.Render(name + "_second");
         }
 
         private static void AssertReadable(Label words)

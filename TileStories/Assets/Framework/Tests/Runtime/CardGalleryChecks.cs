@@ -194,8 +194,13 @@ namespace TileStories.Tests
             Assert.AreEqual(BlockRegistry.Shared.CreateView(entry.Kind).GetType(), view.GetType(), entry.Kind + ": its own view");
             Assert.AreSame(stack.SlotOfBlock(key), view.Root.parent, entry.Kind + ": under its row, in the same slot");
             Assert.IsTrue(row.IsExpanded, entry.Kind + ": the row shows it open");
-            Assert.AreEqual(DisplayStyle.Flex, row.FullView.resolvedStyle.display, entry.Kind + ": with its full-view button");
-            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(row.FullView.worldBound.width, row.FullView.worldBound.height), entry.Kind + ": a whole touch target");
+            // - one full-screen control per job (_3.2 step 13): a kind whose own view offers a full screen (video) gets no row button beside it
+            BlockRegistry.Shared.TryGet(entry.Kind, out var kind);
+            bool ownFullView = kind?.OffersOwnFullView ?? false;
+            Assert.AreEqual(ownFullView ? DisplayStyle.None : DisplayStyle.Flex, row.FullView.resolvedStyle.display,
+                entry.Kind + (ownFullView ? ": no row full-view button, its own view offers one" : ": with its full-view button"));
+            if (!ownFullView)
+                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(row.FullView.worldBound.width, row.FullView.worldBound.height), entry.Kind + ": a whole touch target");
             stack.Scroll.ScrollTo(stack.SlotOfBlock(key));
             yield return CardTestInput.Settle(0.2f);
             yield return Render(render + "_expanded");

@@ -11,6 +11,8 @@ namespace TileStories
     // entries), copied as often as the case asks, each copy its own block, so the element runs over a real stack.
     // The in-flow nav BLOCKS (_3.2 section 5.6: nav_icon_grid) are rows of BlockKinds: their wall sets Auto Nav Block to the kind and
     // every slot to none, so the block reaches the card through the real BlockStackBuilder step, right after the header.
+    // The card LAYOUTS (_3.2 section 6.1, step 13: accordion, tabs) are rows of Layouts: their wall sets the layout with Text Tabs at the
+    // top (what tabs switches sections with, and a jump for the accordion), every other slot empty.
     public static class CardNavGalleryDefinitions
     {
         // One fixture card: which gallery block, how many copies of it (in this order, after the header)
@@ -35,13 +37,16 @@ namespace TileStories
             public readonly Case Case;
             // True for a nav block kind (BlockKinds), drawn in the stack's flow instead of a slot
             public readonly bool IsBlock;
+            // The card layout the entry judges (Layouts), null for an element or a nav block entry
+            public readonly string Layout;
 
-            public Entry(string elementKey, Case fixtureCase, bool isBlock = false)
+            public Entry(string elementKey, Case fixtureCase, bool isBlock = false, string layout = null)
             {
                 ElementKey = elementKey;
                 Case = fixtureCase;
                 IsBlock = isBlock;
-                Name = "Nav_" + elementKey + "_" + fixtureCase.Key;
+                Layout = layout;
+                Name = layout != null ? "Nav_layout_" + layout + "_" + fixtureCase.Key : "Nav_" + elementKey + "_" + fixtureCase.Key;
             }
         }
 
@@ -58,6 +63,9 @@ namespace TileStories
 
         // The nav block kinds the gallery shows (_3.2 section 5.6), every case drawn for each, the same way
         public static readonly IReadOnlyList<string> BlockKinds = new[] { BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind };
+
+        // The card layouts the gallery shows (_3.2 section 6.1), every case drawn for each, with Text Tabs at the top
+        public static readonly IReadOnlyList<string> Layouts = new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs };
 
         // The Reading Time a contents entry's card gives the FIRST copy of each gallery block that carries the field (_3.2 step 11b), so its
         // list shows typed minutes beside the rows with none and the audio clip's own length
@@ -99,9 +107,10 @@ namespace TileStories
             ("feedback_thumbs_short", 3),
             ("sources_list_short", 1));
 
-        // Every element over every case, then every nav block over every case
+        // Every element over every case, then every nav block over every case, then every layout over every case
         public static readonly IReadOnlyList<Entry> All = ElementKeys.SelectMany(key => Cases.Select(c => new Entry(key, c)))
-            .Concat(BlockKinds.SelectMany(key => Cases.Select(c => new Entry(key, c, isBlock: true)))).ToList();
+            .Concat(BlockKinds.SelectMany(key => Cases.Select(c => new Entry(key, c, isBlock: true))))
+            .Concat(Layouts.SelectMany(layout => Cases.Select(c => new Entry(BuiltInNavElements.TextTabs, c, layout: layout)))).ToList();
 
         // The slot an entry's element is registered for (top when the registry does not know it; InFlow for a nav block)
         public static string SlotOf(Entry entry) =>
@@ -125,6 +134,7 @@ namespace TileStories
             // - a nav block comes in through Auto Nav Block (the builder's own step), every slot empty
             wall.card_settings.navigation.auto_nav_block = entry.IsBlock ? entry.ElementKey : CardOptions.NavNone;
             wall.card_settings.navigation.min_blocks = ShowNavigationFrom;
+            if (entry.Layout != null) wall.card_settings.navigation.layout = entry.Layout;
             if (entry.Case.Language != "en") wall.card_settings.languages = new List<string> { "en", entry.Case.Language };
             return wall;
         }

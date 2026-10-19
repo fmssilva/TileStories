@@ -1067,6 +1067,14 @@
     color: var(--ts-ink-2);
 }
 
+/* Rows = Sections First (_3.2 step 13): the title is the card's compact row (CardParts.uss card-compact*), the whole width of the list */
+.nav-contents__section-header {
+    flex-grow: 1;
+    /* - the compact row's own side margin is for a bare stack slot; the contents block already has its edges (its rows start there) */
+    margin-left: 0;
+    margin-right: 0;
+}
+
 .nav-contents__row {
     flex-direction: row;
     align-items: center;

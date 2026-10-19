@@ -1145,6 +1145,14 @@ MonoBehaviour:
       value: Read
     - lang: pt
       value: Lido
+  - key: nav_contents_section_read
+    where: A section title of the contents block while its rows are folded under it (Rows = Sections First), beside its name ({0} = how
+      many of its blocks the visitor has had in view, {1} = how many blocks it lists).
+    text:
+    - lang: en
+      value: "{0} of {1} read"
+    - lang: pt
+      value: "{0} de {1} lidos"
   - key: compact_meta
     where: The second line of a block shown as a compact row (display Expandable), when it gives its minutes ({0} = the block's format,
       e.g. Read; {1} = its time, e.g. 3 min).

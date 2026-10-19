@@ -191,10 +191,30 @@ namespace TileStories.Editor
             "card takes to rise, so the visitor sees where they went. Instant: it is there at once. Reduce Motion (Detail Card > Card " +
             "Container) always makes it instant, whatever this says.";
 
+        private const string CardLayoutHelp =
+            "How the card arranges its blocks. Scroll (the default): every block one after the other, in one scroll. Accordion: every " +
+            "block the navigation can lead to is one line (its icon, its heading or first words, its kind of content and minutes); a " +
+            "tap opens it in place and the page does not move, another tap folds it, and Back folds the line opened last. Nothing " +
+            "of a folded line is loaded, so a long card opens light. Suits a card visitors skim to pick one or two things (Open One " +
+            "At A Time keeps it to one). Tabs: one section of the card at a time -- the Top Bar or the Bottom Bar switches between " +
+            "them, and the other sections are put away (nothing of them is loaded). The sources and nav blocks show with every " +
+            "section. Avoid Tabs when visitors must compare things that sit in different sections: they cannot see both at once. " +
+            "A card with fewer blocks than Show Navigation From, or with one section, always scrolls.";
+
+        private const string CardTabsWithoutABarWarning =
+            "Tabs needs a way to switch sections, and Top Bar and Bottom Bar are both None: the card uses Text Tabs at the top. " +
+            "Pick a Top Bar or a Bottom Bar to choose another.";
+
+        private const string CardOpenOneAtATimeHelp =
+            "Accordion only. Ticked: opening a line folds the line that was open, so the card never holds more than one open block " +
+            "-- the line you tapped keeps its place on the screen. Unticked (the default): lines open and fold independently, for a " +
+            "visitor who wants two blocks open side by side in the scroll.";
+
         private const string CardBackButtonHelp =
             "What the phone's own Back button does while a card is open (Android; an iPhone has none, so nothing changes there). " +
             "Step The Card Down (the default): each press undoes the innermost thing -- an open full-screen view closes; else an " +
-            "open menu or list over the card closes (the card stays where it is); else the " +
+            "open menu or list over the card closes (the card stays where it is); else an open line of an accordion or of an " +
+            "Expandable block folds, the one opened last first; else the " +
             "card goes one height down, full to half to its title; at its title the card closes, as its X does. A visitor who " +
             "presses Back to leave never loses their place in one go. Leave It To The App: the card ignores Back and the app " +
             "decides what it does.";
@@ -209,11 +229,26 @@ namespace TileStories.Editor
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
             "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
             "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
-            "Navigation From, Show Navigation At, Top Bar, Bottom Bar, Menu, Floating Button, Edge, Auto Nav Block, Bar Slots, Placed Model Control and Hide " +
+            "Navigation From, Show Navigation At, Layout, Open One At A Time, Top Bar, Bottom Bar, Menu, Floating Button, Edge, Auto Nav Block, Bar Slots, " +
+            "Placed Model Control and Hide " +
             "While Scrolling: the open card's strip, bottom bar, menu button, floating button, edge dots, grid, placed-model chip and bottom buttons " +
             "appear, change or go at once.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
+            "LAYOUT\n" +
+            "- Set Layout = Accordion and open a long card at full: every block is one line (its icon, its heading or first words, its " +
+            "kind of content and minutes); the title, a block pinned under it and the bottom buttons stay as they were.\n" +
+            "- Tap a line: the block opens right under it and the card does not move. Tap it again: it folds. Open two lines, press " +
+            "Escape: the one opened last folds, then the other, then the card lowers to half.\n" +
+            "- Open a line, scroll down until its line is above the top, fold it with Escape: its line comes back to the top.\n" +
+            "- Tick Open One At A Time: open a line, then another: the first folds, and the line you tapped stays where it was.\n" +
+            "- With a Top Bar, tap a word: the card moves to that family's first line and opens it.\n" +
+            "- Set Layout = Tabs: the card shows one family at a time; tap another word of the Top Bar (or a slot of the Bottom Bar): " +
+            "only that family's blocks show, the word is underlined, and scrolling inside it never moves the underline. The sources at " +
+            "the end show with every family. A video playing in one family stops when you switch to another.\n" +
+            "- Set Top Bar and Bottom Bar to None with Tabs: a warning shows under Layout and the card uses Text Tabs.\n" +
+            "- Open a card with fewer blocks than Show Navigation From, or with one family: it scrolls as with Scroll.\n" +
+            "- Set Layout = Scroll: every block is back, whole, in one scroll.\n\n" +
             "BLOCK ORDER\n" +
             "- Open that point's card and drag it up to full.\n" +
             "- Set Block Order to As Authored: every block sits where Card Content lists it, top to bottom. Compare the card " +
@@ -347,13 +382,19 @@ namespace TileStories.Editor
             "- In Specific Marker > Card Content add an Icon Grid block to a long point's card (+ Add block, navigation): the card shows " +
             "that one where Card Content puts it, never a second one. Untick Icon Grid in Detail Card > Block Library: no grid on any card.\n" +
             "- Set Auto Nav Block = None: the grid goes from every card that did not author its own.\n" +
-            "- Set Auto Nav Block = Contents and open the same long card: right under the title, a list -- each family's name with its " +
-            "icon, and under it one row per block: an empty ring, the block's heading in bold, and its minutes on the right (the block's " +
-            "Reading Time in Specific Marker > Card Content; an audio or video block shows its clip's own length; a block with no time " +
-            "shows none).\n" +
+            "- Set Auto Nav Block = Contents and open the same long card: right under the title, a list of the card's families, each a " +
+            "line with its icon, its name and how many of its blocks were read (for example 0 of 18 read) -- folded. Tap a family: under " +
+            "it one row per block: an empty ring, the block's heading in bold, and its minutes on the right (the block's Reading Time in " +
+            "Specific Marker > Card Content; an audio or video block shows its clip's own length; a block with no time shows none). Tap " +
+            "the family again: its rows fold away.\n" +
+            "- Add a Contents block to a point's card yourself (+ Add block, navigation) and set its Rows = Every Block: every row shows " +
+            "at once under plain family names. Its Block Library row sets the default Rows for every Contents block a point authors; the " +
+            "one Auto Nav Block puts in always starts folded.\n" +
             "- Raise the card to full and scroll slowly down past three blocks: as each block's top passes about a third of the way " +
-            "down the content, its row's ring fills with a tick and its heading turns regular. A row you never scrolled to stays empty " +
-            "and bold. Tap a row: the card moves to that block, and only that block is ticked, not the ones it flew past.\n" +
+            "down the content, its row's ring fills with a tick, its heading turns regular and its family counts one more read. A row " +
+            "you never scrolled to stays empty and bold. Tap a row: the card moves to that block, and only that block is ticked, not " +
+            "the ones it flew past. A block shown as one folded line (Expandable, or the Accordion layout) is never ticked by " +
+            "scrolling past it: open it, and it ticks once its content passes that third.\n" +
             "- Close the card and open it again: the ticks are still there. Detail Card > Card Container > Test > Reset Saved Card State, " +
             "then close and reopen the card: every row is empty again; the notice counts the ticks it cleared.\n" +
             "- Give a block a Reading Time of 3 in Card Content: its row reads 3 min at once. Set it back to 0: the time goes.\n" +
@@ -383,13 +424,16 @@ namespace TileStories.Editor
             "the card goes to half, then to its title, then it closes and the marker is no longer selected.\n" +
             "- With a Menu set, open the card at full and open the menu. Press Escape: the menu closes and the card stays at full; the " +
             "next Escape lowers it to half. The same with a Bottom Bar's More list or a Bar With Kinds' list open.\n" +
+            "- Open a folded line (an Expandable block, or any line with Layout = Accordion) and press Escape: the line folds and the " +
+            "card stays; the next Escape lowers it.\n" +
             "- Set Back Button = Leave It To The App and press Escape with a card open: nothing happens to the card.\n\n" +
             "EXPANDABLE BLOCKS AND THE FULL VIEW\n" +
             "- In Specific Marker > Card Content, set Display = Expandable on a few blocks of a long card (a text, a gallery, a video, a " +
             "3D model). Open the card: each of them is one line -- its icon, its heading (or its first words), its kind of content " +
             "and its minutes -- and its pictures, sound or model are not loaded yet.\n" +
             "- Tap a line: the block opens under it, the arrow turns over and a full-view button shows at its end. Tap the line again: " +
-            "it closes; a video playing in it pauses.\n" +
+            "it closes; a video playing in it pauses. An open video line has no full-view button of its own: the player's full-screen " +
+            "button is the one way in.\n" +
             "- Open a line and tap its full-view button: the block fills the screen, the card's title and the block's words above it. " +
             "Play the video or turn the model there, press Escape: the card shows the same video at the same moment, and its own " +
             "player and model still answer. Switch the language or change a field while the full view is open: it stays, redrawn.\n" +
@@ -421,6 +465,8 @@ namespace TileStories.Editor
             "- Edge: hold the phone in one hand and reach every dot with the thumb of that hand by dragging along the column and, " +
             "separately, by tapping; check the label beside the dot under the thumb reads whole and is not hidden by the thumb, and that " +
             "a swipe on a filmstrip or a picture at the right edge of a block is not taken by the dots when it starts beside them.\n" +
+            "- Layout: with Accordion, open and fold lines with a thumb while scrolling, and check an open line never jumps the page; " +
+            "with Tabs, switch sections with a thumb and check visitors can still tell which section they are in after scrolling.\n" +
             "- Expandable: on a card with expandable blocks, tap each line with a thumb (the whole line opens it) and the full-view " +
             "button of an open one; read every line's words whole at the phone's width, and check its icon and its kind of content " +
             "do not crowd the words.\n" +
