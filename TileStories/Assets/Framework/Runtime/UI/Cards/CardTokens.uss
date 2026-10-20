@@ -190,6 +190,10 @@
     /* related (Visit.uss): a carousel card's width and picture height */
     --ts-related-card: 140px;
     --ts-related-picture: 96px;
+    /* nav_rails and nav_bento (Navigation.uss, _3.2 step 15a): a rail card's narrowest width (CardTrackFit stretches the cards to a whole
+       number across the strip) and a bento tile's picture height */
+    --ts-rail-card: 140px;
+    --ts-bento-picture: 120px;
     /* The swipe tracks (timeline, related) with Peek Next Card: the slice of the next card shown at rest, read as a plain number (panel
        units, no "px": a CustomStyleProperty<float> does not parse a dimension) by CardTrackFit on this card root, like --ts-sheet-top-gap;
        small enough that two whole cards still fit the phone strip beside it */

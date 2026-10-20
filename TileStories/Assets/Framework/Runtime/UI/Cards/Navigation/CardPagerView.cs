@@ -19,9 +19,13 @@ namespace TileStories
         // On the sheet while the card is drawn as pages: PoiCard.uss insets the stack's content by --ts-page-peek for the cue
         public const string PagedClass = "poi-card--paged";
         public const string SettlingClass = "card-pager--settling";
+        // On a cue while it lists its page's blocks (a drag is claimed): its title moves to the top
+        public const string TeaserClass = "card-pager__peek--teaser";
 
         // The next page's cue at the right edge (shown while there is a next page)
         public VisualElement Peek => _next.Root;
+        // The compact rows the next page's cue lists now: empty at rest, the page's blocks while a drag is claimed until the turn is done
+        public System.Collections.Generic.IReadOnlyList<CompactRowView> NextRows => _next.Rows.Shown;
         // The previous page's cue: on screen only while a drag pulls it in from the left
         public VisualElement PeekBack => _back.Root;
         public Label PeekWords => _next.Words;
@@ -44,13 +48,18 @@ namespace TileStories
         private bool _reduceMotion;
         private IVisualElementScheduledItem _settle;
 
-        // One page's cue: a panel the size of a page holding its family icon and words, laid beside the shown page
+        // One page's cue: a panel the size of a page holding its family icon and words, laid beside the shown page; while a drag is claimed
+        // it also lists the page's blocks as compact rows (the arriving page is never blank under the finger)
         private sealed class Cue
         {
             public readonly VisualElement Root;
             public readonly VisualElement Icon;
             public readonly Label Words;
             public readonly NavTint Tint;
+            public readonly ElementPool<CompactRowView> Rows;
+            // The section this cue names (-1: none, the cue is hidden)
+            public int Section = -1;
+            private readonly VisualElement _list;
 
             public Cue(string name, string sideClass)
             {
@@ -67,7 +76,40 @@ namespace TileStories
                 row.Add(Icon);
                 row.Add(Words);
                 Root.Add(row);
+                _list = new VisualElement { pickingMode = PickingMode.Ignore };
+                _list.AddToClassList("card-pager__peek-list");
+                Root.Add(_list);
                 Tint = new NavTint(Root);
+                Rows = new ElementPool<CompactRowView>(_ => NewLine(), line => line.Root.RemoveFromHierarchy());
+            }
+
+            // A row of the teaser: the card's compact row, drawn only -- no tap, no full-view button
+            private CompactRowView NewLine()
+            {
+                var line = new CompactRowView();
+                line.Root.pickingMode = PickingMode.Ignore;
+                line.Toggle.pickingMode = PickingMode.Ignore;
+                line.Root.AddToClassList("card-pager__peek-line");
+                return line;
+            }
+
+            // List `targets` as compact rows under the title (the cue's own look moves its title to the top)
+            public void ShowRows(System.Collections.Generic.IReadOnlyList<string> targets, System.Func<string, CompactRowRule.Row> rowOf, CardStrings strings)
+            {
+                ClearRows();
+                Root.AddToClassList(TeaserClass);
+                foreach (string target in targets)
+                {
+                    var line = Rows.Take();
+                    _list.Add(line.Root);
+                    line.Show(rowOf(target), strings, offersFullView: false);
+                }
+            }
+
+            public void ClearRows()
+            {
+                Rows.ReleaseAll();
+                Root.RemoveFromClassList(TeaserClass);
             }
         }
 
@@ -88,7 +130,11 @@ namespace TileStories
             scroll.RegisterCallback<GeometryChangedEvent>(_ => Place());
             scroll.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => Place());
             _grab = new SwipeGrab(scroll.contentViewport, travel => IsOn && SwipeGrabRule.ClaimsPointer(travel), leavesToParts: true);
-            _grab.Claimed += _ => StopSettling();
+            _grab.Claimed += _ =>
+            {
+                StopSettling();
+                ShowTeasers();
+            };
             _grab.Moved += travel => DragTo(travel.x);
             _grab.Released += Release;
             _grab.Cancelled += () => SettleTo(0f, -1);
@@ -146,8 +192,25 @@ namespace TileStories
             Place();
         }
 
+        // A finger claimed the page: each cue lists its page's blocks as the card's compact rows -- words only, no view bound and no file
+        // loaded (the real views bind at the turn, one page at a time: a second bound page would need a second stack and would keep a
+        // page left from letting its media go)
+        private void ShowTeasers()
+        {
+            foreach (var cue in new[] { _next, _back })
+                if (cue.Section >= 0 && cue.Section < (_model?.Sections.Count ?? 0)) cue.ShowRows(_model.Sections[cue.Section].Targets, _nav.RowOf, _strings);
+        }
+
+        private void ClearTeasers()
+        {
+            _next.ClearRows();
+            _back.ClearRows();
+        }
+
         private void Fill(Cue cue, int section)
         {
+            cue.ClearRows();
+            cue.Section = section;
             cue.Root.style.display = section >= 0 ? DisplayStyle.Flex : DisplayStyle.None;
             if (section < 0) return;
             var s = _model.Sections[section];
@@ -221,6 +284,8 @@ namespace TileStories
             _settle = null;
             _sheetRoot.RemoveFromClassList(SettlingClass);
             Offset = 0f;
+            // - the real views bind with the turn (the layout shows the section): the teaser has done its job
+            ClearTeasers();
             if (landing >= 0) _nav.JumpTo(landing, SwipeKey, landsAtOnce: true);
             Place();
         }

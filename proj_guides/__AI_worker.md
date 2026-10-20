@@ -12,76 +12,72 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: POI Card Navigation (3.2) -- step 14, the pages layout and its family pager`
 
-GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
+## `And now: POI Card Navigation (3.2) -- step 15a, the rails and bento nav blocks`
+
+GATE: `git push` if the branch is ahead of origin (2 commits are waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles;
-if not, STOP and report. The SDF fonts should no longer need restoring (step 13 made them Static): if `git status`
-shows either of them modified, that is a FINDING -- say so and check whether `ShippedTextGlyphTests` is still green,
-rather than quietly running `git checkout`. Baseline: the tree is clean on commit "Add accordion and tabs card layouts
-and make the marker fonts static" (full EditMode 1903/1903, full PlayMode 1051/1051) -- run the full EditMode suite and
-say which commit you trusted.
+if not, STOP and report. The SDF fonts are Static since step 13: if either shows as modified, that is a FINDING -- say
+so and check `ShippedTextGlyphTests`, do not quietly `git checkout`. Baseline: the tree is clean on commit "Rescope the
+in-card find to facets and split the bento step" (docs only, on top of full EditMode 1909/1909 and full PlayMode 1075
+of 1076) -- run the full EditMode suite and say which commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (BOTH [step 14] lines are yours:
-Show After Reading in tabs, and the story_chapters Previous / Next revisit) and the status table (1-13 done; 14 is
-yours). Sections 6.1 (the `pages` row and its cautions), 5.1, 4.4 and 9.
-REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines";
-.clinerules/40-testing.md 4.2 (this block OWES a full run), 4.2.3 (including the drag-distance line -- a pager is all
-drags), 4.4, 4.5; .clinerules/30-ui-content.md; `_3.1_POI_Card_Blocks.md` on `story_chapters` (the second TODO is its
-behaviour, so read how it is built before judging it).
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 15a] mid-swipe line is
+yours) and the status table (1-14 done; step 15 was split, 15a is yours, 15b is the bento LAYOUT and is next).
+Sections 5.6 (both kinds), 6.2 (the full view a bento tile opens) and 9.
+REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` on `CardTrackRule` / `CardTrackFit` and Peek Next Card -- the
+rails ARE that mechanism, so read it before writing a second one; _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section
+"0. Guidelines"; .clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3 (the drag-distance
+line: rails are all drags), 4.4, 4.5.
 Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- a second scroll axis over a vertical card is the easiest thing in this domain to get
-subtly wrong, and `ContentSeenRule` now has to answer for three layouts.
-TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: `pages` changes the
-stack's container (4.2). Close the Card / Poi targeted set green FIRST, then the full run, in the background -- and
-this time try to KEEP it there: report `editor_is_focused` at the first poll and at the end, and if Unity comes to the
-front say when. Step 15 rides on this run.
+WORKER MODEL: Sonnet-class -- two in-flow kinds on patterns that exist (`CardTrackRule` for the rails, `BlockRef` and
+the full view for the tiles, the nav block shape from 11a/11b). No new owner, no container, no new arithmetic. If you
+need a NEW shared part, a change to `CardChromeRule`, the slots or `BlockStackBuilder`, STOP and report: that means I
+mis-sized the block.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: two kinds bound in the ordinary stack, no
+container and no stops (4.2). It closes on every PlayMode fixture whose name holds Card, Poi or SizeComparison, plus
+anything a grep for `CardTrackRule` / `CardTrackFit` / `BlockRef` adds (name them). Green before you call the block
+done. It rides on step 14's full run (1075/1076); 15b owes the next one, because the bento LAYOUT changes a container.
 
-PART 1 -- the two decided TODOs:
-1.1 Show After Reading across the layouts. `ContentSeenRule` reads the stack's END, which in Tabs means the end of
-  whatever short section is shown -- so a visitor who reaches the bottom of a two-block tab has "read the card" and the
-  waiting question appears early. Pages has the identical question. Decide it ONCE, in the rule the three layouts
-  share, not per layout: the card is read when the visitor has reached the end of ALL of its targets, however the
-  layout shows them (scroll: the end of the stack; tabs: every section seen to its end; pages: every page). Reuse the
-  per-block seen state step 13 already stores -- do not add a second memory of what was read. Test: in each of the
-  three layouts, reading one short section does NOT reveal the question, and reading all of them does.
-1.2 `story_chapters` Previous / Next move with the chapter's text length (the device-check TODO, to revisit now that
-  pages exists). Look at it on the real card, decide whether a visitor notices, and either fix it (pin the buttons by
-  laying every chapter out to find the tallest) or write in the guide why it is left as it is. A measurement and a
-  decision, not a maybe.
+PART 1 -- the step 14 finding:
+1.1 In `Nav_Lamp_pages_midswipe_pt_390.png` the arriving page holds only its title where its first block should be,
+  with ~190 px of it on screen. MEASURE what is bound on the neighbouring page and WHEN (settle, or before the swipe
+  can reveal it), and say which of the two it is. If content binds on settle, every swipe shows a blank page sliding
+  in and it must bind before it can be seen -- the 32 px peek already requires that much. Recapture the mid-swipe
+  render either way, and say what changed.
 
-PART 2 -- step 14, the `pages` layout (`_3.2` 6.1):
-2.1 One section per horizontal page, vertical scroll inside a page, the NEXT page peeking at the edge as the cue.
-  A `family_pager` header with chevrons names the section and moves between pages.
-  THE RULE THAT MUST NOT BREAK: a vertical drag inside a page NEVER turns the page, and a horizontal drag never
-  scrolls the page. That is `SwipeGrab`'s job (it judges the drag once, past the slop) plus `SwipePageRule` for the
-  page decision -- and it is the single most likely defect of this block, so give it its own Phase B test with real
-  input at three angles: clearly vertical, clearly horizontal, and a diagonal that must resolve one way and stay
-  resolved.
-  The guide is deliberate that this layout is OFFERED and NEVER the default (Paul 2023, scrolljacking: changing scroll
-  direction disorients). Keep `layout`'s default as it is, and say the caution in the (i) in a wall author's words.
-2.2 Hidden pages release their views, exactly as hidden tabs do since step 13 (the same parking) -- assert the owner,
-  not the pixels, for a video on a page the visitor left.
-2.3 `NavController.JumpTo` asks the layout: pages -> page index. The spy names the section of the page in view.
-  TESTS: Tier 0 for the page decision (which page a swipe lands on, a swipe that does not pass the threshold, the
-  first and last pages) and for the shared "read the card" rule of 1.1. Phase B on The Lamp with real input: the three
-  drag angles above; chevrons move the page; the spy follows; a jump from a tab or a bar lands the right page; media
-  released on leaving a page. Phase A: the layout over the gallery cases.
-  VISUALS: The Lamp in pages at 390 px, EN and PT -- a page at rest with the next one peeking, mid-swipe, and the
-  pager header. Judge item by item: the peek is visible enough to read as a cue, the chevrons are 48 px, the section
-  name is whole in Portuguese, nothing clipped.
+PART 2 -- step 15a, the two kinds (`_3.2` 5.6):
+2.1 `nav_rails` (D3): one horizontal rail per family, a card per block in it. Reuse `CardTrackRule` / `CardTrackFit`
+  and the Peek Next Card behaviour the card already has -- the half-cut next card IS the cue, and the wall's Peek Next
+  Card setting governs it here too. NN/g carousels (Budiu 2018, in the references): the last item must be reachable in
+  3-4 swipes, so say how many The Lamp's longest family takes and, if it is more, what you did. Every rail follows
+  `SwipeGrab`: a sideways drag moves the rail, a vertical one moves the card.
+2.2 `nav_bento` (D4): curated tiles, each a `BlockRef` (step 4's field and drawer -- reuse them) with optional words
+  and an optional picture. A tap jumps to the block, or opens it in the FULL VIEW (step 12) when the tile says so.
+  `BlockRefRule` already decides when a pick leads nowhere: a tile whose target is unreachable is not drawn, and the
+  Editor shows the same stale-pick warning the Open Block action shows.
+2.3 Both join the Auto Nav Block popup only if they make sense there -- decide and say which, rather than adding both
+  because the popup reads the registry.
+  TESTS: Tier 0 for the rails' fit (how many cards per width, where the cut falls) reusing the track rule's own tests
+  where they already answer, and for the bento tile's reachable / not-reachable decision. Phase A: both kinds x the
+  gallery cases through `CardNavGalleryDefinitions`. Phase B in LivingRoomScene with real input: a real sideways drag
+  moves a rail and does NOT scroll the card; a real vertical drag on a rail scrolls the card; a tap on a rail card
+  jumps to its block; a tap on a bento tile jumps, and a tile set to the full view opens it and gives its media back
+  on close (assert the owner, as step 12 does).
+  VISUALS: both kinds on the real Lamp at 390 px in EN and PT, a rail at rest showing its cut next card, and a bento
+  tile with a picture. Judge item by item: 48 px targets, the cut card reads as a cue, Portuguese words whole, nothing
+  clipped.
 
-2.4 DOCS: `_3.2` status row 14 + proof and BOTH [step 14] TODO lines removed (or the story_chapters one rewritten as
-  the decision you took); `_3.1` if `story_chapters` or `ContentSeenRule` changed -- those are its facts; `_5.1`;
-  `10-structure.md`; RUN TIMES.
+2.4 DOCS: `_3.2` status row 15a + proof and the [step 15a] TODO closed; `_3.1` if the track rule's facts changed;
+  `_5.1` for any new Editor field; `10-structure.md`.
 
 Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII in code, comments, logs and Editor
 labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no block view may learn which
-layout it is in (`_3.2` 6.1 -- step 13 kept that at zero, keep it there and say you grepped); no backward-compatibility
-shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: `bento`, `nav_rails`, `nav_bento` (15); the breadcrumb (16); presets (17); `find_block` (18).
-Stop when the full EditMode suite is green, the Card / Poi fixtures are green, the FULL PlayMode suite is green with
-zero failures, the captures are judged and 2.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+layout it is in (grep it and say so); no backward-compatibility shim; real fixtures only -- never change a POI's
+identity fields (adding a bento block or a tile to a fixture is content: allowed, say which you touched).
+OUT OF SCOPE: the `bento` LAYOUT (15b); the breadcrumb (16); presets and Editor warnings (17); the facets (18).
+Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are
+judged and 2.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
 

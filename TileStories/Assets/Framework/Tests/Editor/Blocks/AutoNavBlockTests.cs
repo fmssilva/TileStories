@@ -130,6 +130,40 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(Stack(config, Lamp).Any(e => e.Definition.Family == BuiltInFamilies.Navigation), "a kind off in the Block Library: no grid at all");
         }
 
+        // _3.2 step 15a: the rails need no authored data (they are the card's own sections), so Auto Nav Block puts them in like the grid --
+        // second place in every Block Order, every other entry identical -- while the bento (tiles an author fills in) would be an empty block
+        // the builder skips: the card never puts it in, and the kind says why (a Required field), not a list of keys
+        [TestCase("authored")]
+        [TestCase("end_families_last")]
+        [TestCase("by_family")]
+        public void TheRails_AreInsertedInSecondPlace_LikeTheGrid_InEveryBlockOrder_AndTheOtherEntriesAreUntouched(string order)
+        {
+            string railsKey = BlockStackBuilder.AutoNavBlockKey(BuiltInBlocks.NavRailsKind);
+            var without = Stack(WithAuto(CardOptions.NavNone, blockOrder: order), Lamp);
+            var with = Stack(WithAuto(BuiltInBlocks.NavRailsKind, blockOrder: order), Lamp);
+            Assert.AreEqual(without.Count + 1, with.Count, order + ": one block more");
+            Assert.AreEqual(railsKey, with[1].Instance.key, order + ": in second place, after the header");
+            Assert.IsTrue(with[1].Synthesized, "synthesized: in no config");
+            CollectionAssert.AreEqual(Print(without), Print(with.Where(e => e.Instance.key != railsKey)), order + ": every other entry identical");
+        }
+
+        [Test]
+        public void TheBento_IsNeverInsertedByTheCard_BecauseItsTilesAreRequired_AndTheKindsTellWhy()
+        {
+            Assert.IsTrue(BlockRegistry.Shared.TryGet(BuiltInBlocks.NavBentoKind, out var bento), "precondition: the framework registers nav_bento");
+            Assert.IsTrue(bento.NeedsAuthoredContent, "Highlights has a Required Tiles field");
+            foreach (string kind in new[] { BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind, BuiltInBlocks.NavRailsKind })
+            {
+                Assert.IsTrue(BlockRegistry.Shared.TryGet(kind, out var definition), kind + " is registered");
+                Assert.IsFalse(definition.NeedsAuthoredContent, kind + " is drawn from the card's own sections: nothing to author");
+            }
+            // - the property is the field's, never a list: every registered kind says it exactly when one of its fields is Required
+            foreach (var kind in BlockRegistry.Shared.Ordered)
+                Assert.AreEqual(kind.Fields.Any(f => f.Required), kind.NeedsAuthoredContent, kind.Key);
+            CollectionAssert.AreEqual(Print(Stack(WithAuto(CardOptions.NavNone), Lamp)), Print(Stack(WithAuto(BuiltInBlocks.NavBentoKind), Lamp)),
+                "the wall names Highlights: the card inserts nothing, byte for byte the stack it had");
+        }
+
         [TestCase("")]
         [TestCase("not_a_kind")]
         [TestCase(BuiltInBlocks.RichTextKind)]

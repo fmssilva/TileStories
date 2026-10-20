@@ -18,7 +18,7 @@ namespace TileStories.Tests
     // bottom), it builds
     // over the card's real model, it lies inside the card at 390 px, every button in it is at least the touch token both ways, no word in
     // it is cut, every word reads at 4.5:1; then the element's own promise (ElementChecks) and a render Nav_<key>_<case>.png.
-    public class CardNavGalleryTests
+    public partial class CardNavGalleryTests
     {
         private const string ScenePath = "Assets/Dev/CardNavGallery/CardNavGalleryScene.unity";
         private CardNavGalleryHarness _harness;

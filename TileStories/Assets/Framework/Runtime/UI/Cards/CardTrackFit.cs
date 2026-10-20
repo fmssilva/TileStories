@@ -11,15 +11,20 @@ namespace TileStories
         private static readonly CustomStyleProperty<float> PeekToken = new("--ts-track-peek");
 
         // Size `cells` for `track`'s strip as it is laid out now (nothing happens before it has a size: the cell token's width shows)
-        public static void Apply(ScrollView track, IReadOnlyList<VisualElement> cells, bool peekNext)
+        public static void Apply(ScrollView track, IReadOnlyList<VisualElement> cells, bool peekNext) => Apply(track.contentViewport, cells, peekNext);
+
+        // The same for a strip that is a plain clipped viewport (NavStrip, the rails of nav_rails: a ScrollView would take a mostly vertical
+        // drag) -- the width the cells may fill is the viewport's content width. Returns the cell width it set (0 when it set none)
+        public static float Apply(VisualElement viewport, IReadOnlyList<VisualElement> cells, bool peekNext)
         {
-            if (cells.Count == 0) return;
-            float strip = track.contentViewport.layout.width;
+            if (cells.Count == 0) return 0f;
+            float strip = viewport.contentRect.width;
             var style = cells[0].resolvedStyle;
             float narrowest = style.minWidth.value, gap = style.marginRight;
-            if (float.IsNaN(strip) || strip <= 0f || float.IsNaN(narrowest) || narrowest <= 0f) return;
-            float width = CardTrackRule.CellWidth(strip, narrowest, gap, PeekOf(track, peekNext), cells.Count);
+            if (float.IsNaN(strip) || strip <= 0f || float.IsNaN(narrowest) || narrowest <= 0f) return 0f;
+            float width = CardTrackRule.CellWidth(strip, narrowest, gap, PeekOf(viewport, peekNext), cells.Count);
             foreach (var cell in cells) cell.style.width = width;
+            return width;
         }
 
         // The slice of the next cell `track` shows at rest: the --ts-track-peek token while the option is on, else none. Read on the card's

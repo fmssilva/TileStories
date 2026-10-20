@@ -73,6 +73,11 @@ namespace TileStories
         // The stack entry of a shown block (its kind, instance and look): what a block that lists the card's blocks reads (nav_contents)
         public bool TryGetEntry(string blockKey, out BlockStackBuilder.Entry entry) => _stack.TryGetEntryOfBlock(blockKey, out entry);
 
+        // What the compact row says about a block of the card in the card's language (words, family icon, format and minutes): what a part
+        // that names other blocks draws -- the pages' arriving cue, a rail's card, a bento tile
+        public CompactRowRule.Row RowOf(string blockKey) =>
+            _stack.RowOfBlock(blockKey, _context?.Language, _context?.FallbackLanguage, _context?.Strings != null ? _context.Strings.Get : null);
+
         // Raised ONCE per binding for each target the visitor has had in view (NavScrollRule.HasViewed: on screen with its top past the spy
         // line), measured on every scroll and size change -- never while a jump glides (the spy is frozen then, and the blocks a glide flies
         // past were never read). A reveal re-binds the same context and keeps what was raised; a new binding starts again. What the

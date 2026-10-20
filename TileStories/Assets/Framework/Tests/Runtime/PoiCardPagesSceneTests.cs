@@ -562,6 +562,69 @@ namespace TileStories.Tests
             Assert.AreEqual(BuiltInNavElements.TextTabs, Sheet.Slots.TopKey, "and the Top Bar the wall picked is back");
         }
 
+        // ---------------- the arriving page (_3.2 step 15a, Part 1: the step 14 mid-swipe finding) ----------------
+
+        // MEASURED, not assumed: while a sideways drag holds the page half way, the neighbouring page has NO view bound (its blocks bind at the
+        // turn, one page at a time, which is how a page left lets its media go), so the cue that slides in used to be its title alone. It now
+        // lists the page's blocks as the card's compact rows -- words read from data, no view, no file -- from the moment the drag is claimed
+        // until the turn is done
+        [UnityTest]
+        public IEnumerator TheArrivingPage_BindsNothingMidSwipe_ButListsItsBlocksAsCompactRows_UntilTheTurn()
+        {
+            yield return UsePages();
+            yield return OpenFull(Lamp);
+            Nav.JumpTo(0, "test", landsAtOnce: true);
+            yield return Rested();
+            var arriving = Nav.Model.Sections[1];
+            Assert.Greater(arriving.Targets.Count, 1, "precondition: the arriving page has several blocks (" + arriving.Key + ")");
+            Assert.IsEmpty(Pager.NextRows, "at rest the cue lists nothing: no cost before a finger is down");
+            int held = Stack.HeldMedia;
+
+            var panel = Sheet.Root.panel;
+            var start = EdgePoint();
+            CardTestInput.TouchDown(panel, start);
+            yield return null;
+            foreach (var step in Line(Vector2.zero, new Vector2(-Pager.PageWidth * 0.45f, 0f), 8))
+            {
+                CardTestInput.TouchMove(panel, start + step);
+                yield return null;
+            }
+            yield return null;
+            Assert.Less(Pager.Offset, -Pager.PageWidth * 0.3f, "precondition: the page is held half way (" + Pager.Offset + ")");
+
+            // - what is bound on the neighbouring page: nothing
+            foreach (string key in arriving.Targets)
+            {
+                Assert.IsTrue(Stack.IsParked(key), key + ": the arriving page is still set aside mid-swipe");
+                Assert.IsNull(Stack.ViewOfBlock(key), key + ": and has no view bound mid-swipe");
+            }
+            Assert.AreEqual(held, Stack.HeldMedia, "no file was loaded for it");
+
+            // - what the cue shows instead of a title alone: one compact row per block, in the card's words, drawn inside the cue
+            Assert.AreEqual(arriving.Targets.Count, Pager.NextRows.Count, "a row per block of the arriving page");
+            for (int i = 0; i < arriving.Targets.Count; i++)
+            {
+                Assert.AreEqual(Nav.RowOf(arriving.Targets[i]).Words, Pager.NextRows[i].Words.text, "row " + i + " says what the card's compact row says");
+                Assert.IsNotEmpty(Pager.NextRows[i].Words.text, "row " + i + " has words");
+            }
+            var cue = Pager.Peek.worldBound;
+            // - the WHOLE scroll slides with the finger, so its viewport is no frame of reference: the visible area is the sheet's
+            var visible = Sheet.Root.worldBound;
+            var first = Pager.NextRows[0].Words.worldBound;
+            Assert.GreaterOrEqual(first.yMin, cue.yMin, "the first row is inside the cue's top");
+            Assert.Less(first.yMax, cue.yMax, "and above its bottom");
+            Assert.Greater(first.xMin, cue.xMin, "and inside it from the left");
+            Assert.Less(first.xMin, visible.xMax - OnePixel, "and starts on screen, beside the page being left (" + first.xMin + " of " + visible.xMax + ")");
+            Assert.AreSame(Pager.Peek, Pager.NextRows[0].Root.parent.parent, "the rows sit in the cue's list");
+
+            // - the turn: the real views bind, the teaser is gone
+            CardTestInput.TouchUp(panel, start + new Vector2(-Pager.PageWidth * 0.45f, 0f));
+            yield return Rested();
+            Assert.AreEqual(1, Page, "the page turned");
+            Assert.IsEmpty(Pager.NextRows, "the teaser is cleared once the turn is done");
+            AssertShowsOnly(1, "after the turn");
+        }
+
         // ---------------- what it looks like ----------------
 
         [UnityTest]

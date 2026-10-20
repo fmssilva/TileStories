@@ -50,6 +50,8 @@ namespace TileStories
             registry.Register(AudioGuide, () => new AudioGuideBlockView());
             registry.Register(NavIconGrid, () => new NavIconGridBlockView());
             registry.Register(NavContents, () => new NavContentsBlockView());
+            registry.Register(NavRails, () => new NavRailsBlockView());
+            registry.Register(NavBento, () => new NavBentoBlockView());
         }
     }
 }

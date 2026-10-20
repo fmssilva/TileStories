@@ -1775,9 +1775,11 @@ namespace TileStories.Editor.Tests
 
             // - step 11b: Contents joined the list with NO edit to the window -- the row reads the registry's navigation family
             var (keys, labels) = POIEditorToolWindow.AutoNavBlockOptions(BlockRegistry.Shared);
-            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind }, keys,
-                "None, then the navigation family's kinds, from the registry");
-            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Icon Grid", "Contents" }, labels, "named by their Editor names, never their keys");
+            // - step 15a: Rails joined too; Highlights (nav_bento, tiles an author fills in) is NOT offered -- the card could only insert it empty
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind, BuiltInBlocks.NavRailsKind }, keys,
+                "None, then the navigation family's kinds the card can put in by itself, from the registry");
+            CollectionAssert.AreEqual(new[] { CardOptions.NavNoneLabel, "Icon Grid", "Contents", "Rails" }, labels, "named by their Editor names, never their keys");
+            CollectionAssert.DoesNotContain(keys, BuiltInBlocks.NavBentoKind, "Highlights needs authored tiles: never offered");
 
             Pick(() => _window.Config.card_settings.navigation.auto_nav_block = BuiltInBlocks.NavIconGridKind);
             yield return DrawnInfoTitles(drawn);
@@ -1791,8 +1793,9 @@ namespace TileStories.Editor.Tests
 
             var help = typeof(POIEditorToolWindow);
             string autoHelp = (string)help.GetMethod("CardAutoNavBlockHelp", Static).Invoke(null, new object[] { BlockRegistry.Shared });
-            foreach (string word in new[] { "None (the default)", "Show Navigation From", "of its own", "Block Library", "Icon Grid: ", "Contents: " })
+            foreach (string word in new[] { "None (the default)", "Show Navigation From", "of its own", "Block Library", "Icon Grid: ", "Contents: ", "Rails: ", "Highlights" })
                 StringAssert.Contains(word, autoHelp, "CardAutoNavBlockHelp says " + word);
+            StringAssert.DoesNotContain("Highlights: ", autoHelp, "...but lists no help of Highlights as a choice: it is not one");
             EditorTextChecks.AssertAscii(autoHelp, "CardAutoNavBlockHelp");
             string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
             StringAssert.Contains("Auto Nav Block = Icon Grid", guide, "the Playmode guide walks the grid");
@@ -1815,7 +1818,17 @@ namespace TileStories.Editor.Tests
         public IEnumerator TheContentsKind_HasABlockLibraryRow_AndPlusAddBlockAddsIt_WithRealClicks() =>
             NavKindHasABlockLibraryRowAndPlusAddBlock(BuiltInBlocks.NavContentsKind);
 
-        private IEnumerator NavKindHasABlockLibraryRowAndPlusAddBlock(string kind)
+        [UnityTest]
+        public IEnumerator TheRailsKind_HasABlockLibraryRow_AndPlusAddBlockAddsIt_WithRealClicks() =>
+            NavKindHasABlockLibraryRowAndPlusAddBlock(BuiltInBlocks.NavRailsKind);
+
+        // Highlights has a Required Tiles field: "+ Add block" adds it empty (Ctrl+Z takes it back) and the card shows nothing of it until an
+        // author fills a tile in -- which is also why Auto Nav Block never offers it
+        [UnityTest]
+        public IEnumerator TheBentoKind_HasABlockLibraryRow_AndPlusAddBlockAddsIt_ButTheCardShowsNothingUntilATileIsFilled() =>
+            NavKindHasABlockLibraryRowAndPlusAddBlock(BuiltInBlocks.NavBentoKind, shownWithNoField: false);
+
+        private IEnumerator NavKindHasABlockLibraryRowAndPlusAddBlock(string kind, bool shownWithNoField = true)
         {
             _window = new PoiEditorWindowHost(TwoPoiConfig(), "_showCardBlockLibrary");
             OpenTab("DetailCard");
@@ -1851,7 +1864,8 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(kind, added.kind, "a real click on + Add block added the kind");
             StringAssert.StartsWith(TaxonomyRowKeys.BlockPrefix, added.key, "an authored key: block_N");
             var built = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois);
-            Assert.IsTrue(built.Entries.Any(e => e.Instance == added), "no field to fill: the card shows it");
+            Assert.AreEqual(shownWithNoField, built.Entries.Any(e => e.Instance == added),
+                shownWithNoField ? "no field to fill: the card shows it" : "a Required field is empty: the card leaves the block out");
             yield return _window.PressUndo();
             Assert.AreEqual(before, _window.Config.pois[0].card.blocks.Count, "Ctrl+Z takes it back");
         }
@@ -1909,6 +1923,64 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("block_9", POIEditorToolWindow.ItemChoiceValue(SpotRow(1), BuiltInBlocks.HotspotOpensBlockField), "Ctrl+Z");
             yield return Redraw();
             _window.RectOf("Block item spots 1 opens_block warning#1");
+        }
+
+        // Specific Marker > Card Content (step 15a): a Highlights tile's Block is the SAME popup as an Open Block action's and a hotspot's, with
+        // the SAME warnings by name -- but REQUIRED: a tile with nothing picked is warned too (the card draws no such tile), a deleted block
+        // is kept and warned, a real block draws none; the tile's picture and On Tap rows are the generic Asset and Choice rows, and each
+        // pick is one undo step. The card's own rule (BentoTileRule over JumpTargets) agrees tile by tile with what the Editor says
+        [UnityTest]
+        public IEnumerator ABentoTilesBlock_IsRequired_BlankAndDeletedPicksAreWarnedByName_ARealBlockIsNot_AndAPickIsUndoneByCtrlZ()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var bento = new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.NavBentoKind, variant = BuiltInBlocks.NavBentoTiles, display = CardOptions.DisplayInline };
+            var blank = new BlockItemData();
+            var staleRow = new BlockItemData();
+            POIEditorToolWindow.SetItemChoiceValue(staleRow, BuiltInBlocks.NavBentoTargetField, "block_9");
+            var goodRow = new BlockItemData();
+            POIEditorToolWindow.SetItemChoiceValue(goodRow, BuiltInBlocks.NavBentoTargetField, "block_3");
+            POIEditorToolWindow.SetItemChoiceValue(goodRow, BuiltInBlocks.NavBentoOpensField, BuiltInBlocks.NavBentoOpensFullView);
+            BlockItemData TileRow(int row) =>
+                _window.Config.pois[0].card.blocks[1].fields.Single(f => f.key == BuiltInBlocks.NavBentoTilesField).items[row];
+            bento.fields.Add(new BlockFieldValue { key = BuiltInBlocks.NavBentoTilesField, items = new List<BlockItemData> { blank, staleRow, goodRow } });
+            config.pois[0].card.blocks.AddRange(new[] { TextBlock("block_1", "The story of the keep."), bento, TextBlock("block_3", "Second text") });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_2"] = true;
+            yield return Redraw();
+
+            foreach (string sub in new[] { "target", "opens" })
+                _window.RectOf("Block item tiles 2 " + sub + "#1");
+            Assert.IsTrue(Drawn("Block item tiles 0 target warning#1"), "a tile with no block picked is warned: the block is Required here (a hotspot's is optional)");
+            Assert.IsTrue(Drawn("Block item tiles 1 target warning#1"), "a deleted pick is warned under its row, like an Open Block action's");
+            Assert.IsFalse(Drawn("Block item tiles 2 target warning#1"), "a block of the scrolling part: no warning");
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            Assert.AreEqual("block_9", POIEditorToolWindow.ItemChoiceValue(TileRow(1), BuiltInBlocks.NavBentoTargetField), "the deleted key is kept, never rewritten by drawing");
+
+            // - the card's rule agrees with the Editor, tile by tile: only the good row is a tile
+            var poi = _window.Config.pois[0];
+            var built = BlockStackBuilder.Build(poi, _window.Config.card_settings, BlockRegistry.Shared, _window.Config.pois);
+            var jump = BlockRefRule.JumpTargets(built.Entries, _ => false);
+            var read = new BlockFieldReader(poi.card.blocks[1], "en", "en");
+            var rows = read.Items(BuiltInBlocks.NavBentoTilesField).Select(item => new BentoTileRule.Tile(read.ItemValue(item, BuiltInBlocks.NavBentoTargetField),
+                "", "", BentoTileRule.OpensOf(read.ItemValue(item, BuiltInBlocks.NavBentoOpensField)))).ToList();
+            var tiles = BentoTileRule.Tiles(rows, "block_2", jump);
+            Assert.AreEqual(1, tiles.Count, "one tile is drawn of three rows");
+            Assert.AreEqual("block_3", tiles[0].Target);
+            Assert.AreEqual(BentoTileRule.Opens.FullView, tiles[0].Opens, "its On Tap is stored and read");
+
+            // - a pick through the window's mutation scope: the warning goes; Ctrl+Z brings the blank and its warning back
+            var options = POIEditorToolWindow.BlockRefOptions(poi, poi.card.blocks[1], "", config.card_settings.languages);
+            Pick(() => POIEditorToolWindow.SetItemChoiceValue(TileRow(0), BuiltInBlocks.NavBentoTargetField, options.KeyAt(1)));
+            Assert.IsTrue(_window.Unsaved);
+            yield return Redraw();
+            Assert.IsFalse(Drawn("Block item tiles 0 target warning#1"), "a block of the scrolling part: no warning");
+            yield return _window.PressUndo();
+            Assert.AreEqual("", POIEditorToolWindow.ItemChoiceValue(TileRow(0), BuiltInBlocks.NavBentoTargetField), "Ctrl+Z");
+            yield return Redraw();
+            _window.RectOf("Block item tiles 0 target warning#1");
         }
 
         // Detail Card > Navigation's step 7a rows on the real window. Bottom Bar is drawn on its default, None, under Top Bar and listed

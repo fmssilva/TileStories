@@ -161,6 +161,12 @@ namespace TileStories
             return b != null;
         }
 
+        // What the compact row says about this block (CompactRowRule over its entry, read from data only -- no view, no file), whether or not
+        // the stack draws it as a row, a set-aside block of another page included: what a part that names OTHER blocks draws (the pages'
+        // arriving cue, a rail's card, a bento tile). An empty row when no such block is bound
+        public CompactRowRule.Row RowOfBlock(string blockKey, string language, string fallback, System.Func<string, string> words) =>
+            CompactRowRule.Of(TryGetEntryOfBlock(blockKey, out var entry) ? entry : default, _registry, language, fallback, words);
+
         // The slot element holding a bound view and its heading (the block's full footprint in the stack)
         public VisualElement SlotOf(IBlockView view) => BoundOf(view)?.Slot.Root;
 

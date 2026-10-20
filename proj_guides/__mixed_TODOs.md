@@ -330,6 +330,11 @@ for each is in `_3.1.1_Audit.md` section 12.5.
 - [show_on_wall] The card drops to peek and relies on the selection keeping the marker lit: is the marker ON SCREEN (does zoom-on-select pan to it)?
 - [Peek Next Card] Do visitors still not swipe the timeline / related tracks? If so add dots like the gallery's (`_3.3`); if the 32-unit slice
   reads as a broken card on a small phone, tune `--ts-track-peek` (`_3.3`).
+- [nav_rails / nav_bento, `_3.2` step 15a] With a real thumb: does a rail's sideways swipe feel like one viewport (the swipe `NavRailRule` counts:
+  the strip follows the finger 1:1, no fling), or does a visitor expect it to coast -- if so the rail needs a fling, and the 3-4 swipes count
+  changes; does a thumb that starts a vertical scroll ON a rail ever move it by mistake (Phase B proves the rule with a 90 degree stroke, not a
+  tilted one); does a visitor find the "All 18" card; and do the bento's full-view tiles read as "opens over the card" from the glyph alone. Also
+  how the pages layout's arriving page reads on a real swipe: its words as compact rows, then the real blocks at the turn.
 - [Portuguese card] Read the PT card on a phone once (accents, wrapping of the longer words) with the visitor language chip.
 - [_3.2 navigation, once built] With a thumb: the radial arc (step 9) and the edge scrubber (10); the pages layout vs vertical scrolling (14:
   disorienting?); Android Back steps the card down (4: `Keyboard.escapeKey`); the placed-model chip at peek (9) answers the Keep Model On
@@ -468,6 +473,14 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   twice in one `PoiCardExpandableSceneTests` run (green alone and in three later runs; the developer was resizing the Unity window at the time,
   a second plausible cause). That fixture now taps through its own `InViewAndStill` (scroll until in view AND the same rect for three frames).
   If another fixture loses a tap after a scroll, move that precondition into `TapInView` itself (shared ground: a full PlayMode run).
+
+- OPEN AGAIN (2026-10-20, seen at _3.2 step 15a, the entry below): the Card / Poi targeted set (865 tests, 37 fixtures, ~test 612) failed
+  `PoiCardBottomElementsSceneTests.ARealDragToTheEnd_...` with six "Layout update is struggling" lines (PanelRootElement 390 x 844, Unity in the
+  background); the same fixture passed 16/16 in the next run (595 tests with the galleries) and the step 15a block's own views are not bound
+  there (no rails, no bento, no pages: the block added a `CardPagerView` cue list that is empty at rest, a USS file with more rules and
+  two `CardTrackFit` / `BlockStackView` / `NavController` seams that run only where a rail or tile asks). Not proved either way that 15a did not
+  make it likelier: the next full run decides; if it shows again start from the geometry callbacks named below (`CardChromeView`, the end-of-card
+  reveal, Next Up's finished words), and add a `LogAssert` count so a "struggling" line fails the SETUP of the next test, not a bystander's.
 
 - CLOSED (2026-10-19, _3.2 step 13: did not come back -- the Card / Poi targeted set 815 and the FULL PlayMode run 1051/1051 both passed
   `ARealDragToTheEnd_...` (25.6 s in the full run) and neither Editor log nor the results hold one "Layout update is struggling" line;

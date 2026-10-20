@@ -76,7 +76,10 @@ namespace TileStories.Editor.Tests
                 if (carries) Assert.AreSame(BlockKindDefinition.MinutesDefinition, kind.Fields[1], kind.Key + ": Reading Time right after the heading");
             }
             CollectionAssert.AreEquivalent(new[] { BuiltInBlocks.AudioGuideKind, BuiltInBlocks.VideoKind }, clips, "the kinds that read a clip");
-            CollectionAssert.AreEquivalent(new[] { BuiltInBlocks.HeaderKind, BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind }, none,
+            CollectionAssert.AreEquivalent(new[]
+            {
+                BuiltInBlocks.HeaderKind, BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind, BuiltInBlocks.NavRailsKind, BuiltInBlocks.NavBentoKind,
+            }, none,
                 "the kinds that are never a row of a contents list");
         }
 

@@ -29,6 +29,8 @@ namespace TileStories.Editor.Tests
 
         // A row's colour: both written forms the Editor accepts
         private static string ColourOf(int row) => row == 0 ? "#1F3F8F" : "#abc";
+        // A row's block pick (a BlockRef): a key of the card, whichever -- the round trip stores and reads it, it does not walk it
+        private static string BlockOf(int row) => "block_" + (row + 2);
         // A row's time: minutes:seconds, then plain seconds (TimeCodeRule reads both)
         private static string TimeOf(int row) => row == 0 ? "1:30" : "95";
 
@@ -63,6 +65,7 @@ namespace TileStories.Editor.Tests
                             else if (sub.Type == BlockFieldType.Toggle) s.flag = row == 0;
                             else if (sub.Type == BlockFieldType.Asset) s.asset = "folder/" + sub.Key + row + AssetExtension(sub);
                             else if (sub.Type == BlockFieldType.PoiRef) s.value = "poi_" + (row + 2);
+                            else if (sub.Type == BlockFieldType.BlockRef) s.value = BlockOf(row);
                             else if (sub.Type == BlockFieldType.Url) s.value = "https://example.org/" + sub.Key + row;
                             else if (sub.Type == BlockFieldType.Time) s.value = TimeOf(row);
                             else s.text = Languages.Select(l => new LocalizedEntry { lang = l, value = TextOf(sub.Key + row, l) }).ToList();
@@ -156,6 +159,8 @@ namespace TileStories.Editor.Tests
                                 Assert.AreEqual("folder/" + sub.Key + row + AssetExtension(sub), read.ItemValidAsset(items[row], sub.Key, sub.Media), where + " row " + row + ": a path the rule accepts");
                             else if (sub.Type == BlockFieldType.PoiRef)
                                 Assert.AreEqual("poi_" + (row + 2), read.ItemValue(items[row], sub.Key), where + " row " + row);
+                            else if (sub.Type == BlockFieldType.BlockRef)
+                                Assert.AreEqual(BlockOf(row), read.ItemValue(items[row], sub.Key), where + " row " + row);
                             else if (sub.Type == BlockFieldType.Url)
                                 Assert.AreEqual("https://example.org/" + sub.Key + row, read.ItemValue(items[row], sub.Key), where + " row " + row);
                             else if (sub.Type == BlockFieldType.Time)

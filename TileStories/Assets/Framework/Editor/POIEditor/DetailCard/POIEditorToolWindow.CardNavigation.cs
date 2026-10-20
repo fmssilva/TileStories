@@ -139,14 +139,15 @@ namespace TileStories.Editor
             return (keys, labels);
         }
 
-        // Auto Nav Block's choices: None, then every registered kind of the navigation family, named by its Editor name (the Block Library's)
+        // Auto Nav Block's choices: None, then every registered kind of the navigation family the card can put in by itself (not one whose
+        // content an author must fill in: Highlights), named by its Editor name (the Block Library's)
         internal static (List<string> Keys, List<string> Labels) AutoNavBlockOptions(BlockRegistry registry)
         {
             var keys = new List<string> { CardOptions.NavNone };
             var labels = new List<string> { CardOptions.NavNoneLabel };
             foreach (var kind in registry.Ordered)
             {
-                if (kind.Family != BuiltInFamilies.Navigation) continue;
+                if (kind.Family != BuiltInFamilies.Navigation || kind.NeedsAuthoredContent) continue;
                 keys.Add(kind.Key);
                 labels.Add(kind.DisplayName);
             }

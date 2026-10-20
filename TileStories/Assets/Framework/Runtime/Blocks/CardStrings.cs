@@ -213,6 +213,8 @@ namespace TileStories
             public const string KindFeedback = "kind_feedback";
             public const string KindNavIconGrid = "kind_nav_icon_grid";
             public const string KindNavContents = "kind_nav_contents";
+            public const string KindNavRails = "kind_nav_rails";
+            public const string KindNavBento = "kind_nav_bento";
             public const string KindSources = "kind_sources";
 
             // The words a visitor reads for each of the framework's default navigation Groups (_3.2 section 3, the segmented element): a
@@ -257,6 +259,9 @@ namespace TileStories
             public const string NavPagerPosition = "nav_pager_position";
             public const string NavPagerPrevious = "nav_pager_previous";
             public const string NavPagerNext = "nav_pager_next";
+            // The last card of a rail that holds fewer cards than its section has blocks (nav_rails, _3.2 step 15a): "All {0}" ({0} = how many
+            // blocks the section holds); a tap moves the card to the section
+            public const string NavRailsAll = "nav_rails_all";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -280,7 +285,7 @@ namespace TileStories
                 KindActions, KindGallery, KindBeforeAfter, KindZoomImage, KindHotspotImage, KindVideo, KindModel3D, KindPanorama360,
                 KindAudioGuide, KindTimeline, KindPerson, KindStoryChapters, KindComparePoints, KindDialogue, KindShowOnWall, KindPlaceInAr,
                 KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback, KindNavIconGrid,
-                KindNavContents, KindSources,
+                KindNavContents, KindNavRails, KindNavBento, KindSources,
                 NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
                 NavMore, NavNextUp, NavNextUpPosition, NavNextButton, NavNextUpDone,
                 NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,
@@ -288,6 +293,7 @@ namespace TileStories
                 NavContentsMinutes, NavContentsRead, NavContentsSectionRead,
                 CompactMeta, CompactOpen, CompactClose, FullViewOpen,
                 NavPagerPosition, NavPagerPrevious, NavPagerNext,
+                NavRailsAll,
             };
         }
 

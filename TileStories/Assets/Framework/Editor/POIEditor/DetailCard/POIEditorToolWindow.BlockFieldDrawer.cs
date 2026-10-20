@@ -173,7 +173,9 @@ namespace TileStories.Editor
                 DrawAssetRow(sub, IndentLevel2, probeName, probeIndex, mediaFolder, defaultLibraryPath,
                     () => ItemAssetValue(item, sub.Key), value => EnsureItemField(item, sub.Key).asset = value);
             else if (sub.Type == BlockFieldType.Choice)
-                DrawChoiceRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
+                // - an empty row reads as the field's default (a tile's On Tap moves the card): the popup says so instead of "(none)"
+                DrawChoiceRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value),
+                    BlockChoiceDefaultLabel(sub, sub.ChoiceDefault));
             else if (sub.Type == BlockFieldType.Color)
                 DrawColorRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value));
             else if (sub.Type == BlockFieldType.Toggle)

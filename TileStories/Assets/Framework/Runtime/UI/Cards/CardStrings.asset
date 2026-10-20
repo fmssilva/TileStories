@@ -1002,6 +1002,20 @@ MonoBehaviour:
       value: Contents
     - lang: pt
       value: "\xCDndice"
+  - key: kind_nav_rails
+    where: The name of the rails block (a row of cards per section) as one kind of block.
+    text:
+    - lang: en
+      value: Browse
+    - lang: pt
+      value: Explorar
+  - key: kind_nav_bento
+    where: The name of the highlights block (a few big tiles the author picked) as one kind of block.
+    text:
+    - lang: en
+      value: Highlights
+    - lang: pt
+      value: Destaques
   - key: kind_sources
     where: The name of the sources block as one kind of block. A chip of the Kind Chips or Icon Tabs With Chips navigation shows it.
     text:
@@ -1204,3 +1218,10 @@ MonoBehaviour:
       value: Next section
     - lang: pt
       value: "Sec\xE7\xE3o seguinte"
+  - key: nav_rails_all
+    where: The last card of a row of the rails block when the section holds more blocks than the row shows ({0} = how many blocks the section holds); a tap moves the card to the section.
+    text:
+    - lang: en
+      value: All {0}
+    - lang: pt
+      value: Todos {0}

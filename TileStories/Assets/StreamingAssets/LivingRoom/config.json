@@ -6979,7 +6979,347 @@
             "has_custom_symbol": false,
             "custom_symbol_key": "",
             "card": {
-                "blocks": []
+                "blocks": [
+                    {
+                        "key": "block_6",
+                        "kind": "nav_bento",
+                        "variant": "tiles",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Start here"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Comece aqui"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "tiles",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "target",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "block_2",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "words",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The houses"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As casas"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "picture",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "castle_then.png"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "target",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "block_4",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "words",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Watch the film"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Ver o filme"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "picture",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "photos/castelo_s_jorge_2.jpg"
+                                            },
+                                            {
+                                                "key": "opens",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "full_view",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "target",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "block_5",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "opens",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "full_view",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "target",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "block_3",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_2",
+                        "kind": "rich_text",
+                        "variant": "plain",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The houses on the slope"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "As casas da encosta"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "body",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Below the walls the town climbs the slope in steps: small houses with tiled roofs, each one a little higher than the last."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Por baixo das muralhas, a cidade sobe a encosta em degraus: casas pequenas de telhado de telha, cada uma um pouco mais alta do que a anterior."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_3",
+                        "kind": "fun_fact",
+                        "variant": "flip",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Some of the houses still use the original water cistern in the cellar."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Algumas casas ainda usam a cisterna original da cave."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_4",
+                        "kind": "video",
+                        "variant": "inline",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "On film"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Em vídeo"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "clip",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "video/castelo_s_jorge_video.mp4",
+                                "items": []
+                            },
+                            {
+                                "key": "poster",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "photos/castelo_s_jorge_2.jpg",
+                                "items": []
+                            },
+                            {
+                                "key": "captions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "audio/castelo_s_jorge_guide_pt.vtt",
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The castle on film"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O castelo em vídeo"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_5",
+                        "kind": "model_3d",
+                        "variant": "turntable",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "model",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:azulejo_arch",
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The stone arch"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "O arco de pedra"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

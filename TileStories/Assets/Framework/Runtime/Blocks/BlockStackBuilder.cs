@@ -136,6 +136,8 @@ namespace TileStories
             string kind = settings?.navigation?.auto_nav_block;
             if (string.IsNullOrEmpty(kind) || kind == CardOptions.NavNone || entries.Count == 0) return;
             if (registry == null || !registry.TryGet(kind, out var definition) || definition.Family != BuiltInFamilies.Navigation) return;
+            // - a kind that needs authored content (nav_bento's tiles) would be an empty block here: the card never puts it in by itself
+            if (definition.NeedsAuthoredContent) return;
             if (!BlockLibraryRule.IsEnabled(settings, definition.Key)) return;
             int targets = 0;
             foreach (var entry in entries)

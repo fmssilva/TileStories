@@ -1267,3 +1267,191 @@
     margin: 0 var(--ts-space-2);
     padding: 0;
 }
+
+/* while a drag is claimed the cue lists its page's blocks as the card's compact rows (CardPagerView.ShowTeasers): the title goes to the
+   top and the rows fill under it, clipped by the cue; none of it takes a finger */
+.card-pager__peek--teaser {
+    justify-content: flex-start;
+    overflow: hidden;
+    padding-top: var(--ts-space-3);
+}
+
+.card-pager__peek-list {
+    align-self: stretch;
+    margin-top: var(--ts-space-2);
+}
+
+/* ---- nav_rails (NavRailsBlockView, step 15a): a row of cards per section, a NavStrip each (the viewport clips, the row slides). The card
+   token is the NARROWEST a card may be: CardTrackFit stretches the cards so a whole number of them fills the strip, plus the slice of the
+   next one with Peek Next Card; this width is what shows until the strip has a size ---- */
+
+.nav-rails__rail {
+    margin-top: var(--ts-space-3);
+}
+
+.nav-rails__title {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--ts-space-2);
+}
+
+.nav-rails__title-words {
+    margin: 0 var(--ts-space-2);
+    padding: 0;
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: nowrap;
+}
+
+/* the viewport lays its one child out sideways and clips it; the row never shrinks, so it is as wide as its cards and the strip moves it */
+.nav-rails__viewport {
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.nav-rails__row {
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: stretch;
+}
+
+.nav-rails__card {
+    width: var(--ts-rail-card);
+    min-width: var(--ts-rail-card);
+    min-height: var(--ts-touch-target);
+    flex-shrink: 0;
+    margin: 0 var(--ts-space-3) 0 0;
+    padding: var(--ts-space-3);
+    align-items: flex-start;
+    justify-content: flex-start;
+    background-color: var(--ts-surface-2);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+}
+
+.nav-rails__card:hover,
+.nav-rails__card:active {
+    background-color: var(--ts-surface-2);
+}
+
+.nav-rails__card-icon {
+    margin-bottom: var(--ts-space-2);
+}
+
+.nav-rails__card-words {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: upper-left;
+}
+
+.nav-rails__card-meta {
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    -unity-text-align: upper-left;
+}
+
+/* the card that closes a long row: its words centred, the way an action reads */
+.nav-rails__card--all {
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-rails__card--all .nav-rails__card-words {
+    color: var(--ts-accent);
+    -unity-text-align: middle-center;
+}
+
+/* ---- nav_bento (NavBentoBlockView, step 15a): big tiles two to a row, the first and a lonely last one spanning the row
+   (BentoTileRule.Wide); a tile with a picture shows it over its words ---- */
+
+.nav-bento {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.nav-bento__cell {
+    width: 50%;
+    padding: var(--ts-space-1);
+}
+
+.nav-bento__cell--wide {
+    width: 100%;
+}
+
+.nav-bento__tile {
+    flex-grow: 1;
+    min-height: var(--ts-grid-tile-height);
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    align-items: stretch;
+    justify-content: space-between;
+    background-color: var(--ts-surface-2);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+}
+
+/* a tile with no picture: the block's family icon at its top, the words at its bottom (so a tile beside a picture tile is no empty box) */
+.nav-bento__icon {
+    align-self: flex-start;
+    margin: var(--ts-space-3) var(--ts-space-3) 0 var(--ts-space-3);
+}
+
+.nav-bento__tile:hover,
+.nav-bento__tile:active {
+    background-color: var(--ts-surface-2);
+}
+
+.nav-bento__picture {
+    height: var(--ts-bento-picture);
+    margin: 0;
+}
+
+.nav-bento__body {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--ts-space-3);
+}
+
+.nav-bento__texts {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.nav-bento__words {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: normal;
+    -unity-text-align: upper-left;
+}
+
+.nav-bento__meta {
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    -unity-text-align: upper-left;
+}
+
+/* a tile that opens the block in the full view shows the full-screen glyph at its end: the one cue before the tap */
+.nav-bento__full-view-glyph {
+    flex-shrink: 0;
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    margin-left: var(--ts-space-2);
+    color: var(--ts-accent-text);
+}

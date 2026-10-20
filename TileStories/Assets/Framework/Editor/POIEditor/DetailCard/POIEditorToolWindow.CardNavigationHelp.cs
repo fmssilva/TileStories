@@ -114,9 +114,11 @@ namespace TileStories.Editor
                 "block is not listed in Card Content (it belongs to no point) and switching its kind off in the Block Library leaves it " +
                 "out everywhere. None (the default): no card gets one. The choices differ in what they show: Icon Grid is a quick " +
                 "map of the card's sections, one tile each -- good for a visitor who scans and jumps; Contents lists every block with " +
-                "its minutes and ticks what was already read -- good for a long card read in several visits.");
+                "its minutes and ticks what was already read -- good for a long card read in several visits; Rails shows a swipeable row of " +
+                "cards for each section -- good for a visitor who browses. Highlights (a few tiles an author picks) is not offered here: its " +
+                "tiles are authored point by point in Card Content, and a card that adds one by itself would have none to show.");
             foreach (var kind in registry.Ordered)
-                if (kind.Family == BuiltInFamilies.Navigation) text.Append(' ').Append(kind.DisplayName).Append(": ").Append(kind.Help);
+                if (kind.Family == BuiltInFamilies.Navigation && !kind.NeedsAuthoredContent) text.Append(' ').Append(kind.DisplayName).Append(": ").Append(kind.Help);
             return text.ToString();
         }
 
