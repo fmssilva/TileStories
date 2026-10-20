@@ -10,6 +10,7 @@ namespace TileStories
         public const string KindChips = "kind_chips";
         public const string Segmented = "segmented";
         public const string ProgressMap = "progress_map";
+        public const string FamilyPager = "family_pager";
         public const string BottomBar = "bottom_bar";
         public const string Dock = "dock";
         public const string BarSheet = "bar_sheet";
@@ -59,6 +60,13 @@ namespace TileStories
                 + "be tapped, so with more families most pieces are that same width and the bar scrolls sideways.",
                 NavChoice.Sections),
                 () => new ProgressMapNavView());
+            registry.Register(new NavElementDefinition(FamilyPager, NavSlotKeys.Top, "Family Pager",
+                "Family Pager: the section being read, named between two arrows -- its family's icon, its word and its place (2 of 8). An "
+                + "arrow moves the card to the section before or after it; the first and last sections offer no arrow on their open side. "
+                + "The Pages layout always uses it as its header (the arrows are the way between pages without a swipe); any other layout "
+                + "can pick it too. Needs two sections, like Text Tabs.",
+                NavChoice.Sections),
+                () => new FamilyPagerNavView());
             registry.Register(new NavElementDefinition(BottomBar, NavSlotKeys.Bottom, "Bottom Bar",
                 "Bottom Bar: a bar at the bottom of the card, under its sticky button, where a thumb reaches: one slot per section (its "
                 + "icon above its word; Labels picks icon, word or both), as many as Bar Slots. A card with more sections than that turns "

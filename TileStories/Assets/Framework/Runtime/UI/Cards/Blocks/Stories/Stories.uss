@@ -207,6 +207,21 @@
     padding: 0;
 }
 
+/* every chapter side by side in a clipped row, each as wide as the block: the row is as tall as the tallest chapter, so Previous / Next
+   never move as the chapters turn (_3.2 step 14); the view slides the row to the chapter shown */
+.card-story__chapters {
+    overflow: hidden;
+}
+
+.card-story__track {
+    flex-direction: row;
+}
+
+.card-story__chapter {
+    width: 100%;
+    flex-shrink: 0;
+}
+
 .card-story__title {
     font-size: var(--ts-size-heading);
     -unity-font-style: bold;

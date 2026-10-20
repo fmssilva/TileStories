@@ -361,6 +361,19 @@
     padding-top: var(--ts-space-3);
 }
 
+/* The pages layout (CardPagerView, step 14): the page is inset by the peek, where the next page's cue shows; while a released page slides
+   to its place (or back), the scroll and its cues glide over --ts-duration (CardPagerView turns the page when the slide is over) */
+.poi-card--paged .poi-card__stack .unity-scroll-view__content-container {
+    padding-right: var(--ts-page-peek);
+}
+
+.card-pager--settling .poi-card__stack,
+.card-pager--settling .card-pager__peek {
+    transition-property: translate, left;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: ease-in-out;
+}
+
 .poi-card__stack {
     flex-grow: 1;
     flex-shrink: 1;

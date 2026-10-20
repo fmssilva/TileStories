@@ -34,6 +34,7 @@ namespace TileStories.Tests
             [BuiltInNavElements.KindChips] = KindChipsKeepTheirPromise,
             [BuiltInNavElements.Segmented] = SegmentedKeepsItsPromise,
             [BuiltInNavElements.ProgressMap] = ProgressMapKeepsItsPromise,
+            [BuiltInNavElements.FamilyPager] = FamilyPagerKeepsItsPromise,
             [BuiltInNavElements.BottomBar] = BottomBarKeepsItsPromise,
             [BuiltInNavElements.Dock] = DockKeepsItsPromise,
             [BuiltInNavElements.BarSheet] = BarSheetKeepsItsPromise,
@@ -125,8 +126,8 @@ namespace TileStories.Tests
             Assert.AreEqual((CardNavGalleryDefinitions.ElementKeys.Count + CardNavGalleryDefinitions.BlockKinds.Count + CardNavGalleryDefinitions.Layouts.Count) * 5,
                 CardNavGalleryDefinitions.All.Count, "every element, nav block and layout over the five cases");
             CollectionAssert.Contains(CardNavGalleryDefinitions.BlockKinds, BuiltInBlocks.NavIconGridKind, "the nav blocks are in the list too (step 11a)");
-            CollectionAssert.AreEquivalent(new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs }, CardNavGalleryDefinitions.Layouts,
-                "and the layouts built (step 13)");
+            CollectionAssert.AreEquivalent(new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages }, CardNavGalleryDefinitions.Layouts,
+                "and the layouts built (steps 13-14)");
             CollectionAssert.IsSubsetOf(CardNavGalleryDefinitions.ElementKeys, NavElementRegistry.Shared.All.Select(e => e.Key), "every listed element is registered");
             foreach (var (key, targets, sections) in new[] { ("big", 62, 8), ("small", 6, 3), ("one_family", 5, 1), ("pt_long", 62, 8), ("two_families", 6, 2) })
             {
@@ -491,8 +492,9 @@ namespace TileStories.Tests
         // The card LAYOUTS (_3.2 section 6.1, step 13) over every case of the one list, at 390 px, with real taps:
         //   - accordion: every target is a compact row with no view and no file -- a whole line to tap, its words before the chevron, at
         //     4.5:1 -- and a real tap on the first row opens it in place (its view bound under the line)
-        //   - tabs: drawn in tabs only where the case has two sections or more (one_family scrolls); then only the first section's blocks
-        //     show, the others are set aside (no view, no file), and a real tap on the second tab shows the second section, spy and mark on it
+        //   - tabs and pages: drawn so only where the case has two sections or more (one_family scrolls); then only the first section's blocks
+        //     show, the others are set aside (no view, no file), and a real tap on the second tab (pages: the Family Pager's right chevron)
+        //     shows the second section, spy and mark on it; pages also peek the next page at the edge
         // Rendered Nav_layout_<layout>_<case>.png (and _open / _second)
         private static string[] LayoutEntryNames => CardNavGalleryDefinitions.All.Where(e => e.Layout != null).Select(e => e.Name).ToArray();
 
@@ -536,10 +538,10 @@ namespace TileStories.Tests
                 yield break;
             }
 
-            // - tabs
+            // - tabs and pages
             bool switches = model.ShowsNavigation && model.Sections.Count >= 2;
-            Assert.AreEqual(switches ? CardOptions.LayoutTabs : CardOptions.LayoutScroll, sheet.Layout.Effective,
-                entry.Case.Key + ": tabs only with sections to switch between (" + model.Sections.Count + ")");
+            Assert.AreEqual(switches ? entry.Layout : CardOptions.LayoutScroll, sheet.Layout.Effective,
+                entry.Case.Key + ": " + entry.Layout + " only with sections to switch between (" + model.Sections.Count + ")");
             if (!switches)
             {
                 foreach (string key in model.Targets) Assert.IsFalse(stack.IsParked(key), key + ": a card that scrolls sets nothing aside");
@@ -557,6 +559,28 @@ namespace TileStories.Tests
                     }
             }
             AssertShown(0, "opened");
+            if (entry.Layout == CardOptions.LayoutPages)
+            {
+                var pager = sheet.Slots.TopView as FamilyPagerNavView;
+                Assert.IsNotNull(pager, "pages: the Family Pager at the top");
+                Assert.IsTrue(sheet.Pager.IsOn, "the pages are on");
+                Assert.AreEqual(DisplayStyle.Flex, sheet.Pager.Peek.resolvedStyle.display, "the next page peeks");
+                Assert.AreEqual(CardTestInput.TokenPx("--ts-page-peek"), stack.Scroll.contentViewport.worldBound.xMax - sheet.Pager.Peek.worldBound.xMin, onePixel,
+                    "a peek's width of it at the edge (page " + sheet.Pager.PageWidth + ", viewport " + stack.Scroll.contentViewport.worldBound
+                    + ", inset " + stack.Scroll.contentContainer.resolvedStyle.paddingRight + ", peek " + sheet.Pager.Peek.worldBound
+                    + ", paged " + sheet.Root.ClassListContains(CardPagerView.PagedClass) + ")");
+                AssertReadable(sheet.Pager.PeekWords);
+                yield return CardGalleryChecks.Render(name);
+                yield return CardTestInput.Tap(sheet.Root.panel, pager.Next.worldBound.center);
+                yield return Landed(sheet.Nav);
+                yield return CardTestInput.Settle(0.3f);
+                Assert.AreEqual(1, sheet.Layout.ShownSection, "a real tap on the right chevron turns to the second page");
+                AssertShown(1, "after the chevron");
+                Assert.AreEqual(1, sheet.Nav.Current, "the spy names it");
+                Assert.AreEqual(1, pager.CurrentIndex, "and the pager too");
+                yield return CardGalleryChecks.Render(name + "_second");
+                yield break;
+            }
             var tabs = sheet.Slots.TopView as TextTabsNavView;
             Assert.IsNotNull(tabs, "precondition: Text Tabs at the top");
             yield return CardGalleryChecks.Render(name);
@@ -758,6 +782,29 @@ namespace TileStories.Tests
             if (view.Segments.Count > 1) Assert.AreEqual(thin, view.Segments[1].Bar.layout.height, onePixel, "than the others");
             Assert.AreEqual(view.Strip.Row.layout.width > view.Strip.VisibleWidth + onePixel, expected.Sum() > view.Strip.VisibleWidth + onePixel,
                 "the bar scrolls exactly when its minimums are wider than the card");
+        }
+
+        // family_pager: the first section named between two chevrons -- its family's icon, its words whole and readable, "1 of N" -- no chevron
+        // back from the first, one on (a whole touch target) when there is a second section
+        private static void FamilyPagerKeepsItsPromise(CardNavGalleryHarness harness, CardNavGalleryDefinitions.Entry entry)
+        {
+            var view = (FamilyPagerNavView)harness.Gallery.Sheet.Slots.TopView;
+            var model = harness.Gallery.Sheet.Nav.Model;
+            var strings = new CardStrings(harness.Gallery.StringTable.Entries(), CardStringSources.Shared.Entries(), null, entry.Case.Language, "en");
+            var first = model.Sections[0];
+            Assert.AreEqual(0, view.CurrentIndex, "the pager names the first section");
+            Assert.AreEqual(strings.Get(first.LabelKey), view.Words.text, "in the visitor's words");
+            Assert.AreEqual(first.IconKey, CardIcons.KeyOf(view.Icon), "with its family's icon");
+            Assert.AreEqual(string.Format(System.Globalization.CultureInfo.InvariantCulture, strings.Get(CardStrings.Keys.NavPagerPosition), 1, model.Sections.Count),
+                view.Position.text, "and its place");
+            AssertReadable(view.Words);
+            AssertReadable(view.Position);
+            Assert.AreEqual(Visibility.Hidden, view.Previous.resolvedStyle.visibility, "no way back from the first section");
+            Assert.AreEqual(model.Sections.Count > 1 ? Visibility.Visible : Visibility.Hidden, view.Next.resolvedStyle.visibility, "a way on when there is a second");
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            Assert.IsTrue(view.Next.layout.width >= touch - 0.5f && view.Next.layout.height >= touch - 0.5f, "a chevron is a whole touch target");
+            Assert.GreaterOrEqual(view.Words.worldBound.xMin, view.Previous.worldBound.xMax - 0.5f, "the words start after the left chevron");
+            Assert.LessOrEqual(view.Words.worldBound.xMax, view.Next.worldBound.xMin + 0.5f, "and end before the right one");
         }
 
         // bottom_bar: at the very bottom of the card, Bar Slots - 1 sections and More when the card has more sections than the 5 slots

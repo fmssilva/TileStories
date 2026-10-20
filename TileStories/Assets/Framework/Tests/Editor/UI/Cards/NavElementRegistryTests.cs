@@ -64,11 +64,11 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(1, registry.All.Count);
         }
 
-        // Section 5.1's top elements, in its order
+        // Section 5.1's top elements, in its order, then the pages layout's header (section 6.1, step 14) -- a Top Bar any layout may pick
         private static readonly string[] FrameworkTopElements =
         {
             BuiltInNavElements.TextTabs, BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
-            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap,
+            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap, BuiltInNavElements.FamilyPager,
         };
 
         [Test]
@@ -85,7 +85,7 @@ namespace TileStories.Editor.Tests
                 EditorTextChecks.AssertAscii(element.Label + element.Help, element.Key);
                 Assert.IsInstanceOf<INavElementView>(NavElementRegistry.Shared.CreateView(element.Key), element.Key + " makes its view");
             }
-            CollectionAssert.AreEqual(FrameworkTopElements, NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Key), "the six top elements of section 5.1, in its order");
+            CollectionAssert.AreEqual(FrameworkTopElements, NavElementRegistry.Shared.OfSlot(NavSlotKeys.Top).Select(e => e.Key), "the six top elements of section 5.1, in its order, then the Family Pager");
             CollectionAssert.AreEqual(new[] { BuiltInNavElements.BottomBar, BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp },
                 NavElementRegistry.Shared.OfSlot(NavSlotKeys.Bottom).Select(e => e.Key), "the bottom slot's four elements of section 5.2 (7a's bar, then 7b's), in its order");
             Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.BottomBar, out var bar));

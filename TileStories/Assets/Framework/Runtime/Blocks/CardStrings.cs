@@ -253,6 +253,10 @@ namespace TileStories
             public const string CompactOpen = "compact_open";
             public const string CompactClose = "compact_close";
             public const string FullViewOpen = "full_view_open";
+            // The Family Pager (_3.2 step 14, the pages layout's header): "{0} of {1}" (the section's place, how many) and its two chevrons' names
+            public const string NavPagerPosition = "nav_pager_position";
+            public const string NavPagerPrevious = "nav_pager_previous";
+            public const string NavPagerNext = "nav_pager_next";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -283,6 +287,7 @@ namespace TileStories
                 NavFab, PlacedModelRemove, PlacedModelOther,
                 NavContentsMinutes, NavContentsRead, NavContentsSectionRead,
                 CompactMeta, CompactOpen, CompactClose, FullViewOpen,
+                NavPagerPosition, NavPagerPrevious, NavPagerNext,
             };
         }
 

@@ -49,7 +49,8 @@ namespace TileStories.Editor
 
             // - which of the wall's options the Top Bar's element reads: a row (or column) it ignores is hidden and keeps its value
             //   (_3.2 section 3). Read from the element's own definition, so an app's element needs no edit here
-            NavElementRegistry.Shared.TryGet(nav.top, out var topElement);
+            //   The top element is the one the card really draws (CardLayoutRule.TopElement: Pages always uses the Family Pager)
+            NavElementRegistry.Shared.TryGet(CardLayoutRule.TopElement(nav), out var topElement);
             NavElementRegistry.Shared.TryGet(nav.bottom, out var bottomElement);
             NavElementRegistry.Shared.TryGet(nav.floating, out var floatingElement);
             // - an element counts only in its own slot: a hand-edited key of the other slot draws nothing there
@@ -68,8 +69,10 @@ namespace TileStories.Editor
                 CardShowNavigationFromHelp);
             nav.show_at = DrawPopupField("Show Navigation At", nav.show_at, CardOptions.ShowNavigationAts, CardOptions.ShowNavigationAtLabels, CardShowNavigationAtHelp);
             var (topKeys, topLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Top);
-            // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped
-            nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
+            // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped.
+            //   Hidden for Pages (it always uses the Family Pager), keeping its value for the day the wall picks another layout
+            if (CardLayoutRule.Layout(nav) != CardOptions.LayoutPages)
+                nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
             var (bottomKeys, bottomLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
             nav.bottom = DrawReferencePopupField("Bottom Bar", nav.bottom, bottomKeys, bottomLabels, allowNone: false, CardBottomBarHelp(NavElementRegistry.Shared));
             // - section 7's order: the Menu right after the two bars (its button sits in the header; a bar's More opens it)

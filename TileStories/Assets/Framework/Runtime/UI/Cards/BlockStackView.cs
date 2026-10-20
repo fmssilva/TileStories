@@ -75,9 +75,12 @@ namespace TileStories
         // The stack's own context: what an expandable block's view is bound with when it is opened
         private BlockBindContext _context;
 
-        // Whether the visitor has scrolled past the card's content since it was bound (ContentSeenRule): it latches, and a new
-        // card starts unseen
+        // Whether the visitor has read the card since it was bound (ContentSeenRule.HasReadCard): it latches, and a new card starts unseen
         public bool ContentSeen { get; private set; }
+
+        // The card's sections as its reading sees them (_3.2 step 14), handed over by the sheet from its layout: a section set aside (tabs,
+        // pages) counts only once it was read to its end. Null = every block is in this one scroll
+        internal System.Func<IEnumerable<ContentSeenRule.Section>> Reading { get; set; }
 
         // Whether a block's ShowAfterViewed gate has opened, by its instance key: remembered on this device (CardLocalState.Seen)
         // or revealed by this binding. The ONE predicate the stack hides a slot on (NavOntologyRule.WaitsToBeRevealed) and the
@@ -268,7 +271,9 @@ namespace TileStories
             //   viewport -- right after a rebind at peek one layout pass measured a 56 px viewport over not-yet-laid-out content (0 px), which
             //   read as "everything fits, seen" and latched (found at _3.2 step 12 by CardGalleryTests' show-after-reading test)
             if (_context?.Host != null && !SheetStopRule.RevealsBlocks(_context.Host.Stop)) return;
-            if (!ContentSeenRule.HasSeenAll(Scroll.scrollOffset.y, range, Scroll.contentViewport.layout.height)) return;
+            bool atItsEnd = ContentSeenRule.HasSeenAll(Scroll.scrollOffset.y, range, Scroll.contentViewport.layout.height);
+            // - the end of what the stack shows is the end of the card only when no section is set aside unread (tabs, pages)
+            if (!ContentSeenRule.HasReadCard(atItsEnd, Reading?.Invoke())) return;
             ContentSeen = true;
             bool revealed = false;
             foreach (var b in _bound)

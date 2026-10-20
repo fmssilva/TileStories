@@ -1182,3 +1182,25 @@ MonoBehaviour:
       value: Open in full view
     - lang: pt
       value: "Abrir em ecr\xE3 inteiro"
+  - key: nav_pager_position
+    where: The Family Pager, the pages layout's header, under the name of the section shown ({0} = its place, {1} = how many sections
+      the card has).
+    text:
+    - lang: en
+      value: '{0} of {1}'
+    - lang: pt
+      value: '{0} de {1}'
+  - key: nav_pager_previous
+    where: 'The Family Pager''s left chevron (its name and tooltip): it moves the card to the section before the one shown.'
+    text:
+    - lang: en
+      value: Previous section
+    - lang: pt
+      value: "Sec\xE7\xE3o anterior"
+  - key: nav_pager_next
+    where: 'The Family Pager''s right chevron (its name and tooltip): it moves the card to the section after the one shown.'
+    text:
+    - lang: en
+      value: Next section
+    - lang: pt
+      value: "Sec\xE7\xE3o seguinte"

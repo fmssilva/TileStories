@@ -1144,3 +1144,126 @@
     color: var(--ts-ink-2);
     white-space: nowrap;
 }
+
+/* ---- family_pager (FamilyPagerNavView, step 14): the section being read between two chevrons -- the pages layout's header ---- */
+
+.nav-pager {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 var(--ts-space-1);
+}
+
+/* each chevron is a whole touch target; hidden (not removed) at the first / last section, so the name never shifts */
+.nav-pager__chevron {
+    flex-shrink: 0;
+    width: var(--ts-touch-target);
+    height: var(--ts-touch-target);
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: var(--ts-radius-round);
+    align-items: center;
+    justify-content: center;
+    background-color: var(--ts-clear);
+}
+
+.nav-pager__chevron:hover,
+.nav-pager__chevron:active {
+    background-color: var(--ts-surface-2);
+}
+
+.nav-pager__glyph {
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    color: var(--ts-ink);
+}
+
+/* the shared chevron points down: turned to point back and on */
+.nav-pager__chevron--previous .nav-pager__glyph {
+    rotate: 90deg;
+}
+
+.nav-pager__chevron--next .nav-pager__glyph {
+    rotate: -90deg;
+}
+
+.nav-pager__middle {
+    flex-grow: 1;
+    flex-shrink: 1;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ts-space-1) 0;
+}
+
+.nav-pager__name {
+    flex-direction: row;
+    align-items: center;
+}
+
+.nav-pager__icon {
+    margin-right: var(--ts-space-2);
+}
+
+.nav-pager__words {
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-pager__position {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- the pages layout's cues (CardPagerView, step 14): a page-wide panel beside the shown page, its family icon and words; at rest only
+   --ts-page-peek of the NEXT one shows at the viewport's right edge. They lie over the stack's box (CardPagerView sets top, height, left
+   and width, the sheet clips them); they never take a finger ---- */
+
+.card-pager__peek {
+    position: absolute;
+    justify-content: center;
+    background-color: var(--ts-surface-2);
+    border-color: var(--ts-line);
+}
+
+.card-pager__peek--next {
+    border-left-width: var(--ts-line-width);
+    border-top-left-radius: var(--ts-radius-m);
+    border-bottom-left-radius: var(--ts-radius-m);
+}
+
+.card-pager__peek--back {
+    align-items: flex-end;
+    border-right-width: var(--ts-line-width);
+    border-top-right-radius: var(--ts-radius-m);
+    border-bottom-right-radius: var(--ts-radius-m);
+}
+
+.card-pager__peek-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 var(--ts-space-2);
+}
+
+/* the back cue shows its words first, its icon nearest the page it comes back to */
+.card-pager__peek--back .card-pager__peek-row {
+    flex-direction: row-reverse;
+}
+
+.card-pager__peek-icon {
+    flex-shrink: 0;
+}
+
+.card-pager__peek-words {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: nowrap;
+    margin: 0 var(--ts-space-2);
+    padding: 0;
+}

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace TileStories
 {
-    // The card's LAYOUT applied to its stack (_3.2 section 6.1, step 13): sheet-owned beside NavController, which asks it before every jump.
-    // CardLayoutRule decides; this class only moves the SAME bound slots -- the tabs layout sets the sections not shown aside
+    // The card's LAYOUT applied to its stack (_3.2 section 6.1, steps 13-14): sheet-owned beside NavController, which asks it before every
+    // jump. CardLayoutRule decides; this class only moves the SAME bound slots -- tabs and pages set the sections not shown aside
     // (BlockStackView.SetParked: unbound, so a hidden section holds no media), the accordion closes the other rows when Open One At A Time
     // is on (the accordion's rows themselves are the stack's: CardLayoutRule.ShowsCompact). A kind's view never learns the layout.
-    //   - tabs: one section shown; a jump first shows the section of its block; the scroll-spy names the shown section; a rebind of the
-    //     same point keeps the section shown, another point starts at its first
+    //   - tabs / pages: one section shown (pages: one page; CardPagerView turns them sideways); a jump first shows the section of its
+    //     block; the scroll-spy names the shown section; a rebind of the same point keeps the section shown, another point starts at its first
     //   - any layout: a jump to a block drawn as a closed row opens that row first
     public sealed class CardLayoutView
     {
@@ -35,7 +35,7 @@ namespace TileStories
         // the stack will start from, so the first frame already holds only the shown section's views
         public Func<string, bool> ParkedAtBind(CardNavModel model, BlockBindContext context)
         {
-            if (CardLayoutRule.Effective(context?.Settings?.navigation, model) != CardOptions.LayoutTabs) return null;
+            if (!CardLayoutRule.ParksSections(CardLayoutRule.Effective(context?.Settings?.navigation, model))) return null;
             int shown = SectionToShow(model, context?.Poi?.id);
             return key => !CardLayoutRule.ShowsWith(SectionOf(model, key), shown);
         }
@@ -49,7 +49,7 @@ namespace TileStories
             _settings = context?.Settings?.navigation;
             _poi = poi;
             Effective = CardLayoutRule.Effective(_settings, model);
-            if (Effective == CardOptions.LayoutTabs && shown >= 0) Show(shown);
+            if (CardLayoutRule.ParksSections(Effective) && shown >= 0) Show(shown);
             else
             {
                 ShownSection = -1;
@@ -90,6 +90,31 @@ namespace TileStories
 
         // The section the scroll-spy names, from what it measured
         public int SpySection(int measured) => CardLayoutRule.SpySection(Effective, ShownSection, measured);
+
+        // Each section as the card's reading sees it (ContentSeenRule.HasReadCard): shown now, or set aside -- and then read to its end when
+        // its last target showing content was viewed earlier in this binding (`viewed`: the controller's memory, NavController.HasViewed)
+        public IEnumerable<ContentSeenRule.Section> Reading(Func<string, bool> viewed)
+        {
+            if (_model == null) yield break;
+            var seen = new List<bool>();
+            var closedRow = new List<bool>();
+            foreach (var section in _model.Sections)
+            {
+                if (!_stack.IsParked(section.Targets[0]))
+                {
+                    yield return new ContentSeenRule.Section(shownNow: true, readToItsEnd: false);
+                    continue;
+                }
+                seen.Clear();
+                closedRow.Clear();
+                foreach (string target in section.Targets)
+                {
+                    seen.Add(viewed(target));
+                    closedRow.Add(_stack.CompactRowOf(target) != null && !_stack.IsExpanded(target));
+                }
+                yield return new ContentSeenRule.Section(shownNow: false, ContentSeenRule.ReadToItsEnd(seen, closedRow));
+            }
+        }
 
         // A row opened: with Open One At A Time the others close for it (the opened row keeps its place on screen)
         private void OnExpandedChanged(string key)

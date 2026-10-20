@@ -35,6 +35,44 @@ namespace TileStories.Tests
             Assert.AreEqual("Aberto", info.Rows[0].Label.text);
         }
 
+        // _3.2 step 14 (the story_chapters TODO): Previous / Next stay where they are as the chapters turn -- a visitor tapping Next again and
+        // again keeps a finger in one place. Measured on The Lamp's real chapters at 390 px, in English and Portuguese, from the block's own
+        // top (the scroll never enters the number); the message lists every chapter's place
+        [UnityTest]
+        public IEnumerator TheStorysPreviousAndNext_StayInOnePlace_AsARealTapTurnsEveryChapter_InEnglishAndPortuguese()
+        {
+            foreach (string language in new[] { "en", "pt" })
+            {
+                SelectionEventBus.Clear();
+                LiveSettings.languages = language == "pt" ? new System.Collections.Generic.List<string> { "pt", "en" } : new System.Collections.Generic.List<string> { "en", "pt" };
+                yield return OpenFull("lamp");
+                var story = Sheet.Stack.BoundViews.OfType<StoryChaptersBlockView>().Single();
+                Assert.GreaterOrEqual(story.Count, 3, "precondition: The Lamp's story has three chapters");
+                Sheet.Stack.Scroll.ScrollTo(story.Root);
+                yield return CardTestInput.Settle(0.3f);
+                var places = new System.Collections.Generic.List<float>();
+                for (int chapter = 0; chapter < story.Count; chapter++)
+                {
+                    if (chapter > 0)
+                    {
+                        if (!Sheet.Stack.Scroll.contentViewport.worldBound.Contains(story.Next.worldBound.center))
+                        {
+                            Sheet.Stack.Scroll.ScrollTo(story.Next);
+                            yield return CardTestInput.Settle(0.2f);
+                        }
+                        yield return CardTestInput.Tap(story.Next.panel, story.Next.worldBound.center);
+                        yield return CardTestInput.Settle(0.1f);
+                    }
+                    Assert.AreEqual(chapter, story.Index, language + ": a real tap on Next turned to chapter " + (chapter + 1));
+                    places.Add(story.Next.worldBound.yMin - story.Root.worldBound.yMin);
+                }
+                string measured = language + " Next's top from the block's top, chapter by chapter: " + string.Join(", ", places.Select(p => p.ToString("0.0")));
+                Debug.Log("[Card] " + measured);
+                foreach (float place in places)
+                    Assert.AreEqual(places[0], place, 0.5f, measured);
+            }
+        }
+
         [UnityTest]
         public IEnumerator TheCompareBlock_WearsTheLampsAndLampMilitarysOwnMarkerRings()
         {

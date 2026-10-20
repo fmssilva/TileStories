@@ -5,7 +5,9 @@ namespace TileStories
 {
     // The story_chapters block (_3.1 Tier 1 group B): a story told one chapter at a time. segmented: a bar of one segment per
     // chapter (the ones read so far filled), "Chapter 2 of 3" (CardStrings), the chapter's title and text (a CardTextView),
-    // then Previous / Next buttons. Which chapter shows is VIEW state: every bind starts at the first chapter and nothing is
+    // then Previous / Next buttons. Every chapter is laid out side by side in a clipped row (only the one shown is visible), so the block is as
+    // tall as its TALLEST chapter and Previous / Next never move as the chapters turn: a finger that taps Next again and again stays in one
+    // place (_3.2 step 14). Which chapter shows is VIEW state: every bind starts at the first chapter and nothing is
     // stored (_3.1: CardLocalState is for answers and collections, not for where a reader is). A row with no title or text
     // is left out (ItemIsComplete); a single chapter needs no buttons. Only classes here; Stories.uss draws it.
     public sealed class StoryChaptersBlockView : IBlockView
@@ -13,8 +15,12 @@ namespace TileStories
         public VisualElement Root { get; }
         public VisualElement Progress { get; }
         public Label Counter { get; }
-        public Label Title { get; }
-        public CardTextView Body { get; }
+        // The words of the chapter shown: its title and its text
+        public Label Title => _pages.Shown[Index].Title;
+        public CardTextView Body => _pages.Shown[Index].Body;
+        // The clipped row of every chapter, side by side; it slides to the chapter shown
+        public VisualElement Chapters { get; }
+        public VisualElement Track { get; }
         public VisualElement Nav { get; }
         public Button Previous { get; }
         public Button Next { get; }
@@ -24,6 +30,27 @@ namespace TileStories
         public int Count => _chapters.Count;
 
         private readonly List<(string Title, IReadOnlyList<string> Body)> _chapters = new();
+        // One chapter in the row: its title and its text
+        private sealed class ChapterPage
+        {
+            public readonly VisualElement Root = new();
+            public readonly Label Title = new();
+            public readonly CardTextView Body = new("card-story__paragraph");
+
+            public ChapterPage()
+            {
+                Root.AddToClassList("card-story__chapter");
+                Title.AddToClassList("card-story__title");
+                Root.Add(Title);
+                Root.Add(Body.Root);
+            }
+        }
+
+        private readonly ElementPool<ChapterPage> _pages = new(_ => new ChapterPage(), page =>
+        {
+            page.Body.Clear();
+            page.Root.RemoveFromHierarchy();
+        });
         private readonly ElementPool<VisualElement> _segments = new(_ => NewSegment(), segment => segment.RemoveFromHierarchy());
         private readonly Label _previousLabel;
         private readonly Label _nextLabel;
@@ -40,9 +67,11 @@ namespace TileStories
             Progress.AddToClassList("card-story__progress");
             Counter = new Label();
             Counter.AddToClassList("card-story__counter");
-            Title = new Label();
-            Title.AddToClassList("card-story__title");
-            Body = new CardTextView("card-story__paragraph");
+            Chapters = new VisualElement();
+            Chapters.AddToClassList("card-story__chapters");
+            Track = new VisualElement();
+            Track.AddToClassList("card-story__track");
+            Chapters.Add(Track);
             Nav = new VisualElement();
             Nav.AddToClassList("card-story__nav");
             (Previous, _previousLabel) = NavButton("card-story__previous", () => Show(Index - 1));
@@ -51,8 +80,7 @@ namespace TileStories
             Nav.Add(Next);
             Root.Add(Progress);
             Root.Add(Counter);
-            Root.Add(Title);
-            Root.Add(Body.Root);
+            Root.Add(Chapters);
             Root.Add(Nav);
         }
 
@@ -69,7 +97,14 @@ namespace TileStories
                 if (BlockFieldReader.ItemIsComplete(item, rowFields))
                     _chapters.Add((read.ItemText(item, BuiltInBlocks.StoryChaptersTitleField),
                         GlossaryMarkup.Paragraphs(read.ItemText(item, BuiltInBlocks.StoryChaptersBodyField))));
-            for (int i = 0; i < _chapters.Count; i++) Progress.Add(_segments.Take());
+            for (int i = 0; i < _chapters.Count; i++)
+            {
+                Progress.Add(_segments.Take());
+                var page = _pages.Take();
+                page.Title.text = _chapters[i].Title;
+                page.Body.Bind(_chapters[i].Body, _glossary);
+                Track.Add(page.Root);
+            }
             _previousLabel.text = _strings?.Get(CardStrings.Keys.StoryPrevious) ?? "";
             _nextLabel.text = _strings?.Get(CardStrings.Keys.StoryNext) ?? "";
             Nav.style.display = _chapters.Count > 1 ? DisplayStyle.Flex : DisplayStyle.None;
@@ -79,9 +114,10 @@ namespace TileStories
         public void Unbind()
         {
             _segments.ReleaseAll();
+            _pages.ReleaseAll();
             _chapters.Clear();
-            Body.Clear();
             Index = 0;
+            Track.style.translate = StyleKeyword.Null;
             if (_variantClass != null) Root.RemoveFromClassList(_variantClass);
             _variantClass = null;
         }
@@ -91,9 +127,11 @@ namespace TileStories
         {
             if (_chapters.Count == 0) return;
             Index = System.Math.Clamp(index, 0, _chapters.Count - 1);
-            var (title, body) = _chapters[Index];
-            Title.text = title;
-            Body.Bind(body, _glossary);
+            // - the row slides to the chapter shown; the others stay laid out (their height keeps the buttons in place) but out of sight and
+            //   out of reach of a tap
+            Track.style.translate = new Translate(Length.Percent(-100f * Index), 0f);
+            var pages = _pages.Shown;
+            for (int i = 0; i < pages.Count; i++) pages[i].Root.style.visibility = i == Index ? Visibility.Visible : Visibility.Hidden;
             string format = _strings?.Get(CardStrings.Keys.StoryChapterOf) ?? "";
             Counter.text = string.Format(System.Globalization.CultureInfo.InvariantCulture, format, Index + 1, _chapters.Count);
             var segments = _segments.Shown;

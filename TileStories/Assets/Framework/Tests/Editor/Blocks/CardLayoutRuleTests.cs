@@ -38,10 +38,47 @@ namespace TileStories.Editor.Tests
         {
             Assert.AreEqual(CardOptions.LayoutScroll, new CardNavigationSettings().layout, "the shipped default");
             Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(null));
-            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(Nav("pages")), "a later step's layout reads as scroll until it is built");
+            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(Nav("bento")), "a later step's layout reads as scroll until it is built");
             Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(Nav("")));
             Assert.AreEqual(CardOptions.LayoutAccordion, CardLayoutRule.Layout(Nav(CardOptions.LayoutAccordion)));
             Assert.AreEqual(CardOptions.LayoutTabs, CardLayoutRule.Layout(Nav(CardOptions.LayoutTabs)));
+            Assert.AreEqual(CardOptions.LayoutPages, CardLayoutRule.Layout(Nav(CardOptions.LayoutPages)));
+            // - offered, never the default (Paul 2023, scrolljacking: changing the scroll direction disorients)
+            Assert.AreNotEqual(CardOptions.LayoutPages, new CardNavigationSettings().layout);
+            CollectionAssert.AreEqual(new[] { "scroll", "accordion", "tabs", "pages" }, CardOptions.Layouts, "the Editor's order: Scroll first");
+            Assert.AreEqual("Pages", CardOptions.LayoutLabels[System.Array.IndexOf(CardOptions.Layouts, CardOptions.LayoutPages)]);
+        }
+
+        // Pages are tabs turned sideways: the same "sections to switch between" rule on the shipped wall, the same parking, the shown section
+        // as the spy, a jump showing its section first -- and the Family Pager in the top slot whatever the Top Bar says (its chevrons are
+        // the way between pages without a swipe)
+        [Test]
+        public void Pages_LikeTabs_NeedSectionsToSwitchBetween_ParkTheOthers_AndAlwaysUseTheFamilyPager()
+        {
+            var config = Shipped();
+            config.card_settings.navigation.layout = CardOptions.LayoutPages;
+            var nav = config.card_settings.navigation;
+            Assert.AreEqual(CardOptions.LayoutPages, CardLayoutRule.Effective(nav, Model(config, Lamp)), "The Lamp: 8 sections");
+            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Effective(nav, Model(config, LampMilitary)), "Military: under Show Navigation From");
+            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Effective(nav, Model(config, LampReligious)), "Religious: the header alone");
+
+            Assert.IsTrue(CardLayoutRule.ParksSections(CardOptions.LayoutPages));
+            Assert.IsTrue(CardLayoutRule.ParksSections(CardOptions.LayoutTabs));
+            Assert.IsFalse(CardLayoutRule.ParksSections(CardOptions.LayoutScroll));
+            Assert.IsFalse(CardLayoutRule.ParksSections(CardOptions.LayoutAccordion));
+            Assert.IsTrue(CardLayoutRule.TurnsPages(CardOptions.LayoutPages));
+            Assert.IsFalse(CardLayoutRule.TurnsPages(CardOptions.LayoutTabs), "tabs park sections but never turn sideways");
+            Assert.IsTrue(CardLayoutRule.ShowsSectionBeforeJump(CardOptions.LayoutPages), "a jump turns to its block's page first");
+            Assert.AreEqual(2, CardLayoutRule.SpySection(CardOptions.LayoutPages, 2, 6), "the page shown, whatever the scroll measured");
+
+            string none = CardOptions.NavNone;
+            foreach (var (top, bottom) in new[] { (none, none), ("text_tabs", none), ("icon_tabs", "bottom_bar"), (none, "bottom_bar") })
+                Assert.AreEqual(BuiltInNavElements.FamilyPager, CardLayoutRule.TopElement(Nav(CardOptions.LayoutPages, top: top, bottom: bottom)),
+                    "pages with Top Bar " + top + " / Bottom Bar " + bottom);
+            Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(Nav(CardOptions.LayoutPages, top: none, bottom: none)), "no Tabs warning for pages");
+            // - through the slot rule the card draws: The Lamp in pages holds the Family Pager, a REGISTERED top element
+            Assert.AreEqual(BuiltInNavElements.FamilyPager, NavSlotRule.TopElement(nav, Model(config, Lamp),
+                key => NavElementRegistry.Shared.TryGet(key, out var d) && d.Slot == NavSlotKeys.Top ? d : null));
         }
 
         // Tabs needs something to switch between: The Lamp (56 targets, 8 sections) is drawn in tabs; Lamp - Military (4 targets, under Show

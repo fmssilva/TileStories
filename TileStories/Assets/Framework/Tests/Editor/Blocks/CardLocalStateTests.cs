@@ -275,5 +275,37 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(ContentSeenRule.HasSeenAll(0f, float.NaN, 300f));
             Assert.IsFalse(ContentSeenRule.HasSeenAll(0f, 0f, float.NaN));
         }
+
+        // _3.2 step 14: ONE reading rule for every layout. Scroll / accordion show every section in one scroll (all shown now); tabs and
+        // pages show one section and set the others aside, which then count only once each was read to its end
+        [Test]
+        public void TheCard_IsRead_WhenTheShownPartIsAtItsEnd_AndEverySectionSetAsideWasReadToItsEnd()
+        {
+            var shown = new ContentSeenRule.Section(shownNow: true, readToItsEnd: false);
+            var asideRead = new ContentSeenRule.Section(shownNow: false, readToItsEnd: true);
+            var asideUnread = new ContentSeenRule.Section(shownNow: false, readToItsEnd: false);
+
+            // - scroll: every section in the one scroll, so the stack's end is the card's end (unchanged)
+            Assert.IsTrue(ContentSeenRule.HasReadCard(true, new[] { shown, shown, shown }), "scroll at its end");
+            Assert.IsFalse(ContentSeenRule.HasReadCard(false, new[] { shown, shown, shown }), "scroll half way");
+            Assert.IsTrue(ContentSeenRule.HasReadCard(true, null), "no layout bound: the stack's end decides");
+            // - tabs / pages: a short section at its end is not the card
+            Assert.IsFalse(ContentSeenRule.HasReadCard(true, new[] { asideUnread, shown, asideUnread }), "one short section read, two left");
+            Assert.IsFalse(ContentSeenRule.HasReadCard(true, new[] { asideRead, shown, asideUnread }), "one section left");
+            Assert.IsTrue(ContentSeenRule.HasReadCard(true, new[] { asideRead, shown, asideRead }), "the last one read to its end");
+            Assert.IsFalse(ContentSeenRule.HasReadCard(false, new[] { asideRead, shown, asideRead }), "every other read, the shown one not at its end");
+        }
+
+        [Test]
+        public void ASection_IsReadToItsEnd_WhenItsLastTargetShowingContentWasViewed()
+        {
+            Assert.IsTrue(ContentSeenRule.ReadToItsEnd(new[] { false, false, true }, new[] { false, false, false }),
+                "the last block viewed: the reader reached the end (blocks above flown past still count)");
+            Assert.IsFalse(ContentSeenRule.ReadToItsEnd(new[] { true, true, false }, new[] { false, false, false }), "stopped before the last block");
+            Assert.IsTrue(ContentSeenRule.ReadToItsEnd(new[] { false, true, false }, new[] { false, false, true }),
+                "a closed row last shows nothing: the block before it decides");
+            Assert.IsFalse(ContentSeenRule.ReadToItsEnd(new[] { true, false, false }, new[] { false, false, true }), "...and it was not viewed");
+            Assert.IsTrue(ContentSeenRule.ReadToItsEnd(new[] { false, false }, new[] { true, true }), "only closed rows: nothing to read");
+        }
     }
 }

@@ -76,9 +76,13 @@ namespace TileStories
         // Raised ONCE per binding for each target the visitor has had in view (NavScrollRule.HasViewed: on screen with its top past the spy
         // line), measured on every scroll and size change -- never while a jump glides (the spy is frozen then, and the blocks a glide flies
         // past were never read). A reveal re-binds the same context and keeps what was raised; a new binding starts again. What the
-        // contents list's ticks follow (nav_contents); the controller remembers nothing beyond this binding
+        // contents list's ticks follow (nav_contents) and what the card's reading asks of a section set aside (HasViewed, ContentSeenRule); the
+        // controller remembers nothing beyond this binding
         public event Action<string> TargetViewed;
         private readonly HashSet<string> _viewed = new();
+
+        // Whether this target was in view earlier in this binding (TargetViewed raised for it)
+        public bool HasViewed(string blockKey) => blockKey != null && _viewed.Contains(blockKey);
 
         // The card's layout (_3.2 step 13), handed over by the sheet: asked before every jump where to go (tabs shows the block's section, a
         // closed row opens) and what the spy names (tabs: the section shown). Null = the plain scroll
@@ -160,12 +164,14 @@ namespace TileStories
             SetCurrentBlock(-1);
         }
 
-        // Jump to a section (its index in Model.Sections) as `elementKey` asked: to the section's first target. False when there is none
-        public bool JumpTo(int sectionIndex, string elementKey)
+        // Jump to a section (its index in Model.Sections) as `elementKey` asked: to the section's first target. False when there is none.
+        // `landsAtOnce`: the jump sets its landing with no glide whatever Jump Motion says -- a page turned by a swipe has already moved
+        // (CardPagerView), a glide down the new page after it would be a second motion
+        public bool JumpTo(int sectionIndex, string elementKey, bool landsAtOnce = false)
         {
             if (Model == null || sectionIndex < 0 || sectionIndex >= Model.Sections.Count) return false;
             var section = Model.Sections[sectionIndex];
-            return Jump(section.Targets[0], sectionIndex, section.Key, elementKey);
+            return Jump(section.Targets[0], sectionIndex, section.Key, elementKey, landsAtOnce);
         }
 
         // Jump to one block of this card (its instance key) as `elementKey` asked. A block that is no navigation target (sources) can
@@ -177,7 +183,7 @@ namespace TileStories
             return Jump(blockKey, section, section >= 0 ? Model.Sections[section].Key : "", elementKey);
         }
 
-        private bool Jump(string blockKey, int sectionIndex, string sectionKey, string elementKey)
+        private bool Jump(string blockKey, int sectionIndex, string sectionKey, string elementKey, bool landsAtOnce = false)
         {
             // - the layout first (CardLayoutRule): a block in a section tabs does not show is set aside, a closed row shows only its line
             Layout?.PrepareJump(blockKey, sectionIndex);
@@ -187,7 +193,7 @@ namespace TileStories
             _jumpBlock = blockKey;
             _jumpFrom = Scroll.scrollOffset.y;
             _jumpStartTime = Clock();
-            _jumpDuration = NavScrollRule.IsInstant(Settings, _context?.ReduceMotion ?? false) ? 0f : Duration;
+            _jumpDuration = landsAtOnce || NavScrollRule.IsInstant(Settings, _context?.ReduceMotion ?? false) ? 0f : Duration;
             _lastLanding = float.NaN;
             // - frozen on the jump's section; a block of no section freezes on what the spy will name where it lands
             _jumpSection = sectionIndex >= 0 ? sectionIndex : SectionAtOffset(Landing(ScrollingSlot(blockKey)));
@@ -250,10 +256,9 @@ namespace TileStories
         }
 
         // Every target now on screen with its top past the spy line, not raised yet in this binding (Follow Scroll changes only what an
-        // element marks, never what was read)
+        // element marks, never what was read). Kept with no listener too: the card's reading asks it (HasViewed)
         private void RaiseViewed()
         {
-            if (TargetViewed == null) return;
             float offset = Scroll.scrollOffset.y;
             float content = Scroll.contentContainer.layout.height;
             float viewport = Scroll.contentViewport.layout.height;

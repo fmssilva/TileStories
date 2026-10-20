@@ -242,6 +242,10 @@
     --ts-radial-item-height: 76;
     --ts-radial-min-radius: 96;
     --ts-radial-dead-zone: 24;
+    /* the pages layout (step 14): how much of the NEXT page shows at the right edge of a page at rest -- the cue that the card turns
+       sideways (a carousel's half-cut item); wide enough for its family icon (--ts-icon-size) with a margin either side. CardPagerView
+       reads it back from the stack's content inset, so it lives only here */
+    --ts-page-peek: 32px;
     /* the edge scrubber's dots (edge_scrubber, step 10): each dot sits in a --ts-touch-target square (its tap target, tiling the column)
        and is a small dark disc with a light edge (it floats over the content, light or dark) holding a disc of its family's colour; the
        family being read is a larger disc with an accent edge AND a larger colour disc -- never colour alone */

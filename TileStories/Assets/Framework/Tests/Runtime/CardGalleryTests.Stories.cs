@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -159,6 +160,36 @@ namespace TileStories.Tests
             Assert.AreEqual(1, story.Count, "no title or no text: left out");
             Assert.AreEqual("Chapter 1 of 1", story.Counter.text);
             Assert.IsFalse(CardTestInput.IsShown(story.Nav, story.Root), "one chapter: no buttons");
+        }
+
+        // _3.2 step 14 (the story_chapters TODO): chapters of very different lengths (the long case: a two-paragraph chapter under a two-line
+        // title, then one-line chapters) -- Previous / Next stay where they are, so a finger that never moves turns every chapter. The
+        // block is as tall as its tallest chapter; a shorter one leaves room under its words. Measured from the block's own top
+        [UnityTest]
+        public IEnumerator StoryChapters_NextStaysInOnePlace_AFingerThatNeverMovesTurnsEveryChapter()
+        {
+            StoryChaptersBlockView story = null;
+            yield return ShowBlock("story_chapters_segmented_long", v => story = (StoryChaptersBlockView)v);
+            Assert.AreEqual(4, story.Count, "precondition: the long case's four chapters");
+            var finger = story.Next.worldBound.center;
+            var places = new List<float>();
+            for (int chapter = 0; chapter < story.Count; chapter++)
+            {
+                places.Add(story.Next.worldBound.yMin - story.Root.worldBound.yMin);
+                if (chapter == story.Count - 1) break;
+                yield return CardTestInput.Tap(story.Next.panel, finger);
+                yield return CardTestInput.Settle(0.1f);
+                Assert.AreEqual(chapter + 1, story.Index, "the same finger, never moved, turned to chapter " + (chapter + 2));
+            }
+            string measured = "Next's top from the block's top, chapter by chapter: " + string.Join(", ", places.Select(p => p.ToString("0.0")));
+            Debug.Log("[Card] long case: " + measured);
+            foreach (float place in places)
+                Assert.AreEqual(places[0], place, OnePixel(story.Next), measured);
+            // - every chapter's words are drawn whole inside the block, the shown one only (the others take no tap)
+            Assert.AreEqual(Visibility.Visible, story.Title.resolvedStyle.visibility, "the chapter shown is visible");
+            StringAssert.StartsWith("Today", story.Title.text);
+            Assert.LessOrEqual(story.Title.worldBound.yMax, story.Nav.worldBound.yMin + 0.5f, "its words above the buttons");
+            yield return Render("Card_story_chapters_last");
         }
 
         // _3.1 step 6C: "Next" rendered as an egg (a short word in a round-cornered box). Previous / Next now wear the ONE

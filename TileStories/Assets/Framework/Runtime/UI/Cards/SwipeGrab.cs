@@ -26,16 +26,27 @@ namespace TileStories
         // The claimed drag ended without a release (the pointer was cancelled or taken by another element)
         public event Action Cancelled;
 
+        // Every grab's area wears this class: an area that leaves fingers to the parts inside it (the card's pages) knows another
+        // swipeable part by it
+        public const string AreaClass = "ts-swipe-area";
+
         private readonly Func<Vector2, bool> _claims;
-        // The finger that went down here (-1 = none) and where
+        // Whether a finger that went down on a part that drags by itself is left to that part (SwipeGrabRule.LeavesToPart)
+        private readonly bool _leavesToParts;
+        // The finger that went down here (-1 = none), where, and whether it has moved since (a capture before any move = taken at touch-down)
         private int _pointer = -1;
         private Vector2 _start;
+        private bool _movedSinceDown;
 
-        // `claims`: whether a drag that travelled this far is this element's (SwipeGrabRule.ClaimsPointer for a sideways element)
-        public SwipeGrab(VisualElement area, Func<Vector2, bool> claims)
+        // `claims`: whether a drag that travelled this far is this element's (SwipeGrabRule.ClaimsPointer for a sideways element).
+        // `leavesToParts`: for an area that holds whole blocks (the card's pages), a finger that went down on a part that drags by itself (a
+        // sideways strip, another swipeable part, a stage or slider that took it at touch-down) is never this area's
+        public SwipeGrab(VisualElement area, Func<Vector2, bool> claims, bool leavesToParts = false)
         {
             Area = area ?? throw new ArgumentNullException(nameof(area));
             _claims = claims ?? throw new ArgumentNullException(nameof(claims));
+            _leavesToParts = leavesToParts;
+            area.AddToClassList(AreaClass);
             // - an event aimed at an element INSIDE the area is heard on its way down to it: a Button under the finger stops the press
             //   from bubbling up (its Clickable takes it), so an area that holds buttons only hears the finger before they do. Nested
             //   areas judge outside-in (the sheet's strip area, then the strip's own row): the first to claim captures and stops the
@@ -63,6 +74,13 @@ namespace TileStories
         private void OnSomeoneCaptured(PointerCaptureEvent evt)
         {
             if (evt.pointerId != _pointer || evt.target == Area || evt.target is not VisualElement child) return;
+            // - a part that took the finger at touch-down to drag it keeps it (not a button: it only wants the tap). That includes a ScrollView
+            //   stopping its fling: it captures its content at the touch that stops it, and UI Toolkit then hands that finger's moves to it alone
+            if (_leavesToParts && !_movedSinceDown && SwipeGrabRule.LeavesToPart(false, false, child is not Button))
+            {
+                Forget();
+                return;
+            }
             StopFollowing();
             _capturedChild = child;
             child.RegisterCallback<PointerMoveEvent>(OnPointerMove);
@@ -88,14 +106,30 @@ namespace TileStories
         {
             // - only the main mouse button drags (a touch has no buttons to tell apart)
             if (evt.pointerType == UnityEngine.UIElements.PointerType.mouse && evt.button != 0) return;
+            if (_leavesToParts && StartsOnAPartThatDrags(evt.target as VisualElement)) return;
             _pointer = evt.pointerId;
             _start = evt.position;
+            _movedSinceDown = false;
             IsClaimed = false;
+        }
+
+        // Whether the press landed inside a part (between it and this area) that drags sideways by itself: a sideways ScrollView, or another
+        // grab's area
+        private bool StartsOnAPartThatDrags(VisualElement target)
+        {
+            bool sidewaysScroll = false, otherArea = false;
+            for (var e = target; e != null && e != Area; e = e.parent)
+            {
+                if (e is ScrollView scroll && scroll.mode != ScrollViewMode.Vertical) sidewaysScroll = true;
+                if (e.ClassListContains(AreaClass)) otherArea = true;
+            }
+            return SwipeGrabRule.LeavesToPart(sidewaysScroll, otherArea, false);
         }
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
             if (_pointer != evt.pointerId) return;
+            _movedSinceDown = true;
             // - a finger lifted where this element never heard it (outside the panel): forget it
             if (evt.pressedButtons == 0)
             {

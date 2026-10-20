@@ -6,7 +6,8 @@ using UnityEngine;
 namespace TileStories.Editor.Tests
 {
     // The pure rules of step 8A-fix (_3.1): the swipe's grab rule, the vector glyphs' outlines, and the show-after-reading placement
-    // rule with the Editor warning that uses it.
+    // rule with the Editor warning that uses it; and the card's pages (_3.2 step 14): which page a swipe lands on, how a drag follows the
+    // finger, and which drags a paged area leaves to the parts inside it.
     public class CardGlyphAndReadingRulesTests
     {
         // ---------------- SwipeGrabRule ----------------
@@ -22,6 +23,52 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(SwipeGrabRule.ClaimsPointer(new Vector2(40f, 40f)), "as far down as across: not clearly sideways");
             Assert.IsFalse(SwipeGrabRule.ClaimsPointer(new Vector2(30f, -60f)), "mostly up: the stack's to scroll");
             Assert.IsTrue(SwipeGrabRule.ClaimsPointer(new Vector2(41f, 40f)), "just more across than down");
+        }
+
+        // _3.2 step 14: an area holding whole blocks (the card's pages) leaves a finger to a part that drags by itself; a button is no such part
+        [Test]
+        public void APagedArea_LeavesAFingerToAPartThatDragsByItself_NeverToAButton()
+        {
+            Assert.IsFalse(SwipeGrabRule.LeavesToPart(false, false, false), "a press on plain content (or a button): the page's");
+            Assert.IsTrue(SwipeGrabRule.LeavesToPart(true, false, false), "inside a filmstrip that scrolls sideways");
+            Assert.IsTrue(SwipeGrabRule.LeavesToPart(false, true, false), "inside another swipeable part (the true / false card)");
+            Assert.IsTrue(SwipeGrabRule.LeavesToPart(false, false, true), "taken at touch-down by a stage, a slider, a scrubber");
+        }
+
+        // ---------------- SwipePageRule (the card's pages, _3.2 step 14) ----------------
+
+        // The page a released swipe lands on, at 358 px pages (a 390 px phone less the 32 px peek; the threshold is a share of the width)
+        [Test]
+        public void ASwipe_TurnsOnePageInItsDirection_OnlyPastTheThreshold_AndNeverPastTheFirstOrLast()
+        {
+            const float width = 358f;
+            float threshold = SwipePageRule.MinTravelShare * width;
+            // - half a pixel either side of the threshold (exactly on it is a float's last bit, not a behaviour)
+            Assert.AreEqual(1, SwipePageRule.Direction(new Vector2(-threshold - 0.5f, 0f), width), "left just past the threshold: the next page");
+            Assert.AreEqual(0, SwipePageRule.Direction(new Vector2(-threshold + 0.5f, 0f), width), "a hair short of it: no turn");
+            Assert.AreEqual(-1, SwipePageRule.Direction(new Vector2(threshold + 20f, 0f), width), "right: the previous page");
+            Assert.AreEqual(0, SwipePageRule.Direction(new Vector2(-threshold - 20f, threshold), width), "not clearly sideways: no turn");
+
+            Assert.AreEqual(3, SwipePageRule.Landing(2, 8, 1), "the next page");
+            Assert.AreEqual(1, SwipePageRule.Landing(2, 8, -1), "the previous page");
+            Assert.AreEqual(2, SwipePageRule.Landing(2, 8, 0), "a swipe that did not pass the threshold stays");
+            Assert.AreEqual(0, SwipePageRule.Landing(0, 8, -1), "the first page: nothing before it");
+            Assert.AreEqual(7, SwipePageRule.Landing(7, 8, 1), "the last page: no wrap to the first");
+            Assert.AreEqual(1, SwipePageRule.Landing(0, 8, 5), "one page per swipe, however hard");
+            Assert.AreEqual(-1, SwipePageRule.Landing(0, 0, 1), "no pages at all");
+        }
+
+        [Test]
+        public void WhileDragging_ThePageFollowsTheFinger_WithResistanceTowardsAPageThatDoesNotExist()
+        {
+            Assert.AreEqual(-120f, SwipePageRule.DragOffset(-120f, hasPrevious: true, hasNext: true), "towards the next page: all the way");
+            Assert.AreEqual(80f, SwipePageRule.DragOffset(80f, hasPrevious: true, hasNext: true), "towards the previous page: all the way");
+            Assert.AreEqual(80f * SwipePageRule.EdgeResistance, SwipePageRule.DragOffset(80f, hasPrevious: false, hasNext: true), 1e-4f,
+                "right on the first page: a fraction");
+            Assert.AreEqual(-120f * SwipePageRule.EdgeResistance, SwipePageRule.DragOffset(-120f, hasPrevious: true, hasNext: false), 1e-4f,
+                "left on the last page: a fraction");
+            Assert.AreEqual(-120f, SwipePageRule.DragOffset(-120f, hasPrevious: false, hasNext: true), "left on the first page: all the way");
+            Assert.AreEqual(0f, SwipePageRule.DragOffset(0f, hasPrevious: false, hasNext: false));
         }
 
         // ---------------- CardIcons vector glyphs ----------------

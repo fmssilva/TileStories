@@ -199,6 +199,12 @@ namespace TileStories.Editor
             "At A Time keeps it to one). Tabs: one section of the card at a time -- the Top Bar or the Bottom Bar switches between " +
             "them, and the other sections are put away (nothing of them is loaded). The sources and nav blocks show with every " +
             "section. Avoid Tabs when visitors must compare things that sit in different sections: they cannot see both at once. " +
+            "Pages: each section is a page the visitor turns sideways -- a swipe, or the arrows of the Family Pager, which takes the " +
+            "place of the Top Bar and names the page -- and scrolls up and down inside; the edge of the next page shows at the right " +
+            "as the cue. Only a clearly sideways swipe turns a page, so reading down never does by accident, and like Tabs the pages " +
+            "put away are not loaded. Offer it for a short card read section by section, like a story, and never as a wall's only " +
+            "layout: a visitor who has always scrolled down can be lost when a card suddenly turns sideways, and may not notice " +
+            "there are more pages. " +
             "A card with fewer blocks than Show Navigation From, or with one section, always scrolls.";
 
         private const string CardTabsWithoutABarWarning =
@@ -247,6 +253,13 @@ namespace TileStories.Editor
             "only that family's blocks show, the word is underlined, and scrolling inside it never moves the underline. The sources at " +
             "the end show with every family. A video playing in one family stops when you switch to another.\n" +
             "- Set Top Bar and Bottom Bar to None with Tabs: a warning shows under Layout and the card uses Text Tabs.\n" +
+            "- Set Layout = Pages (the Top Bar row goes: Pages always uses the Family Pager): the strip under the title names one family " +
+            "between two arrows with its place (1 of 8), the card shows that family alone, and the edge of the next family's page shows " +
+            "at the right with its icon. Drag the content up and down: it scrolls and never turns. Drag it sideways past about a fifth " +
+            "of its width and let go: the page slides away and the next family's starts at its first block; a shorter drag slides back. " +
+            "A diagonal drag keeps doing what it started as. The first page has no left arrow, the last no right arrow and no edge at " +
+            "the right. Tap an arrow: the card moves one family. A video playing on a page stops when you turn the page. Swipe a " +
+            "filmstrip or turn a 3D model inside a page: the strip or the model moves, the page does not.\n" +
             "- Open a card with fewer blocks than Show Navigation From, or with one family: it scrolls as with Scroll.\n" +
             "- Set Layout = Scroll: every block is back, whole, in one scroll.\n\n" +
             "BLOCK ORDER\n" +
@@ -301,6 +314,9 @@ namespace TileStories.Editor
             "blocks now light up that segment. Put every family in one group: the segments go (one segment is not a choice).\n" +
             "- Top Bar = Progress Map: a thin bar split into pieces, a wide piece for a family with many blocks; the pieces up to the one " +
             "you read are solid, the current one thicker. Tap a piece: the card moves there.\n" +
+            "- Top Bar = Family Pager: one family is named between two arrows, with its icon and its place (2 of 8); scroll the card: the " +
+            "name follows the family you read. Tap an arrow: the card moves to the family before or after; the first family has no left " +
+            "arrow, the last no right one. The Pages layout always uses it.\n" +
             "- Tick Show Counts: each tab, chip or segment shows its number of blocks.\n\n" +
             "BOTTOM BAR\n" +
             "- Set Top Bar = None and Bottom Bar = Bottom Bar, open a long card with several families and raise it to full: a bar " +
@@ -466,7 +482,9 @@ namespace TileStories.Editor
             "separately, by tapping; check the label beside the dot under the thumb reads whole and is not hidden by the thumb, and that " +
             "a swipe on a filmstrip or a picture at the right edge of a block is not taken by the dots when it starts beside them.\n" +
             "- Layout: with Accordion, open and fold lines with a thumb while scrolling, and check an open line never jumps the page; " +
-            "with Tabs, switch sections with a thumb and check visitors can still tell which section they are in after scrolling.\n" +
+            "with Tabs, switch sections with a thumb and check visitors can still tell which section they are in after scrolling; " +
+            "with Pages, read a page down with a thumb and turn pages with the same thumb, and check a scroll never turns a page by " +
+            "accident and the next page's edge is noticed outdoors.\n" +
             "- Expandable: on a card with expandable blocks, tap each line with a thumb (the whole line opens it) and the full-view " +
             "button of an open one; read every line's words whole at the phone's width, and check its icon and its kind of content " +
             "do not crowd the words.\n" +

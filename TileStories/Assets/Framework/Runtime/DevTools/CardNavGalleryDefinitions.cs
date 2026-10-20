@@ -54,7 +54,7 @@ namespace TileStories
         public static readonly IReadOnlyList<string> ElementKeys = new[]
         {
             BuiltInNavElements.TextTabs, BuiltInNavElements.IconTabs, BuiltInNavElements.IconTabsChips, BuiltInNavElements.KindChips,
-            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap, BuiltInNavElements.BottomBar,
+            BuiltInNavElements.Segmented, BuiltInNavElements.ProgressMap, BuiltInNavElements.FamilyPager, BuiltInNavElements.BottomBar,
             BuiltInNavElements.Dock, BuiltInNavElements.BarSheet, BuiltInNavElements.NextUp,
             BuiltInNavElements.DrawerTree, BuiltInNavElements.GridOverlay,
             BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial,
@@ -64,8 +64,8 @@ namespace TileStories
         // The nav block kinds the gallery shows (_3.2 section 5.6), every case drawn for each, the same way
         public static readonly IReadOnlyList<string> BlockKinds = new[] { BuiltInBlocks.NavIconGridKind, BuiltInBlocks.NavContentsKind };
 
-        // The card layouts the gallery shows (_3.2 section 6.1), every case drawn for each, with Text Tabs at the top
-        public static readonly IReadOnlyList<string> Layouts = new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs };
+        // The card layouts the gallery shows (_3.2 section 6.1), every case drawn for each, with Text Tabs at the top (pages: the Family Pager)
+        public static readonly IReadOnlyList<string> Layouts = new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages };
 
         // The Reading Time a contents entry's card gives the FIRST copy of each gallery block that carries the field (_3.2 step 11b), so its
         // list shows typed minutes beside the rows with none and the audio clip's own length

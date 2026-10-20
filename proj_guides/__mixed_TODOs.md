@@ -437,7 +437,15 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   windows had been opened and closed), green alone (3/3) and in the next full run (1856/1856). Twice now, both times in the first full run after
   something else drove the Editor's windows -- reproduce it by opening and closing a utility window just before the run. In the same block one
   unfocused full run also had `KeywordListFieldTypingTests.TypingTwoKeywordsWithACommaBetween_GivesTwoKeywords` miss its focus precondition
-  (green alone, unfocused), the step 6 note's pattern.
+  (green alone, unfocused), the step 6 note's pattern. SEEN AGAIN (2026-10-19, _3.2 step 14): `KeywordListFieldTypingTests.TypingTwoKeywords...`
+  missed its focus precondition in a full EditMode run started ~3 minutes after a POI Editor capture window was opened and closed (Unity
+  focused); green alone at once. Same trigger: a utility window driven just before the run.
+
+- OPEN (2026-10-19, seen once at _3.2 step 14): `PoiCardNavSceneTests.AJumpToABlockInTheFinalScreen_...` failed its PRECONDITION in the full
+  PlayMode run (wholly in the background): the lowest block's top 13205 vs the range 13337 -- the Sources slot read 132 px taller than the
+  viewport, i.e. the viewport was measured before the sheet reached its Full height. Green in the targeted run before it and alone after it
+  (18/18, background). Fix when it recurs: the fixture's `Open` waits for the sheet's measured rest height (as
+  `PoiCardChromeSceneTests.TheLampAtHalf_...` does since step 5b) before the test reads the range.
 
 - OPEN (2026-10-17, seen once at _3.2 step 8): **the Editor crashed while IDLE, out of memory, from a native audio assertion flood.** After a full
   EditMode run had ended (21:16) and the gallery scene reloaded, the line `Access version should be odd when acquiring lock` (native,

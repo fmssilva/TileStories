@@ -33,6 +33,8 @@ namespace TileStories
         // How the card arranges its blocks (_3.2 step 13, CardLayoutRule): the accordion's one-at-a-time rows, the tabs' shown section; the
         // controller asks it before every jump
         public CardLayoutView Layout { get; }
+        // The pages layout's sideways turn (_3.2 step 14): the next page's peek, the slide with the finger, the turn
+        public CardPagerView Pager { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
         // Any block of the card in that full view (_3.2 step 12): a second view of its kind, while the card's own stays bound
@@ -113,6 +115,8 @@ namespace TileStories
             Nav = new NavController(Stack, () => { if (IsOpen && Stop != SheetStopRule.Stop.Full) SetStop(SheetStopRule.Stop.Full); });
             Layout = new CardLayoutView(Stack);
             Nav.Layout = Layout;
+            // - the card is read once the shown part is at its end AND every section the layout set aside was read to its end before
+            Stack.Reading = () => Layout.Reading(Nav.HasViewed);
             Stack.Revealed += BindNav;
             // - the footer moves into the bottom area, which takes its place under the stack: the footer first (the CTA nearest the
             //   content), the bottom slot after it (NavSlots)
@@ -124,6 +128,7 @@ namespace TileStories
             Floating = new FloatingSlot(this);
             Slots = new NavSlots(Root, Stack.Scroll, BottomArea, Floating.Elements, navElements ?? NavElementRegistry.Shared);
             Chrome = new CardChromeView(this);
+            Pager = new CardPagerView(Root, Stack.Scroll, Layout, Nav);
 
             // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings
             CloseButton = new Button(() => CloseRequested?.Invoke()) { name = "poi-card-close" };
@@ -207,9 +212,9 @@ namespace TileStories
             context.JumpTargets = BlockRefRule.JumpTargets(entries, key => state?.Seen(poiId, key) ?? false);
             // - until BindNav below, the controller's model is the replaced card's: a nav block bound now waits for it
             Nav.Rebinding();
-            // - the tabs layout binds only the section it shows: the card's map, built from these entries with the reveal the stack starts
+            // - tabs and pages bind only the section they show: the card's map, built from these entries with the reveal the stack starts
             //   from (the device's remembered one), says which blocks start set aside
-            var parked = CardLayoutRule.Layout(context.Settings?.navigation) == CardOptions.LayoutTabs
+            var parked = CardLayoutRule.ParksSections(CardLayoutRule.Layout(context.Settings?.navigation))
                 ? Layout.ParkedAtBind(CardNavModel.Build(entries, _registry, context.Settings, key => state?.Seen(poiId, key) ?? false), context)
                 : null;
             Stack.Bind(entries, context, parked);
@@ -231,6 +236,7 @@ namespace TileStories
             var model = CardNavModel.Build(_entries, _registry, _context.Settings, Stack.IsRevealed);
             // - the layout first: the controller's spy reads the section tabs shows
             Layout.Bind(model, _context);
+            Pager.Bind(model, _context);
             Nav.Bind(model, _context);
             Slots.Bind(Nav.Model, Nav, _context);
             Floating.Refresh();
@@ -267,6 +273,7 @@ namespace TileStories
             _entries = null;
             Nav?.Unbind();
             Layout?.Unbind();
+            Pager?.Unbind();
             Slots?.Unbind();
             Floating?.Unbind();
             if (MenuButton != null) ShowMenuButton();

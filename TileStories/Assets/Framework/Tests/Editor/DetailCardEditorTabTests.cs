@@ -1546,9 +1546,10 @@ namespace TileStories.Editor.Tests
         }
 
         // Detail Card > Navigation's step 13 rows on the real window. Layout is drawn FIRST (section 7's order), on its default, Scroll, named
-        // Scroll / Accordion / Tabs; Open One At A Time shows only for the Accordion, after Placed Model Control, and keeps its value while
-        // hidden; Tabs with both bars None shows its warning under Layout, a Top Bar takes it away. Each pick is an undo step and a real Ctrl+Z
-        // brings the value back. The helps say what each option does and the guide's caution about tabs; the guides walk the layouts; ASCII
+        // Scroll / Accordion / Tabs / Pages; Open One At A Time shows only for the Accordion, after Placed Model Control, and keeps its value
+        // while hidden; Tabs with both bars None shows its warning under Layout, a Top Bar takes it away; Pages hides Top Bar (step 14), which
+        // keeps its value. Each pick is an undo step and a real Ctrl+Z brings the value back. The helps say what each option does and the
+        // guide's cautions about tabs and pages; the guides walk the layouts; ASCII
         [UnityTest]
         public IEnumerator TheLayoutAndOpenOneAtATimeRows_AreDrawnWhereSectionSevenSays_TheTabsWarningShowsWithNoBar_AndCtrlZUndoesEachPick()
         {
@@ -1562,8 +1563,9 @@ namespace TileStories.Editor.Tests
             var titles = drawn.Select(d => d.Title).ToList();
             Assert.AreEqual("Layout", titles.First(), "Layout is the section's first row");
             CollectionAssert.DoesNotContain(titles, "Open One At A Time", "Scroll: no accordion option");
-            CollectionAssert.AreEqual(new[] { "Scroll", "Accordion", "Tabs" }, CardOptions.LayoutLabels, "named, never the stored words");
-            CollectionAssert.AreEqual(new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs }, CardOptions.Layouts);
+            CollectionAssert.AreEqual(new[] { "Scroll", "Accordion", "Tabs", "Pages" }, CardOptions.LayoutLabels, "named, never the stored words");
+            CollectionAssert.AreEqual(new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages },
+                CardOptions.Layouts);
             float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
             Assert.Less(Y("Layout"), Y("Block Order"), "Layout above Block Order");
 
@@ -1601,8 +1603,27 @@ namespace TileStories.Editor.Tests
             yield return _window.PressUndo();
             Assert.AreEqual(BuiltInNavElements.TextTabs, _window.Config.card_settings.navigation.top, "Ctrl+Z: the Top Bar back");
 
+            // - Pages (step 14): the Top Bar row goes (Pages always uses the Family Pager) and keeps its value; the rows a top element reads
+            //   follow the element the card really draws; no Tabs warning; Ctrl+Z brings Scroll back with the row
+            Assert.AreEqual(CardOptions.LayoutScroll, _window.Config.card_settings.navigation.layout, "precondition: Scroll");
+            yield return DrawnInfoTitles(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Top Bar", "precondition: Scroll draws Top Bar");
+            Pick(() => _window.Config.card_settings.navigation.layout = CardOptions.LayoutPages);
+            yield return DrawnInfoTitles(drawn);
+            var pagesTitles = drawn.Select(d => d.Title).ToList();
+            CollectionAssert.DoesNotContain(pagesTitles, "Top Bar", "Pages: the Top Bar row goes");
+            CollectionAssert.Contains(pagesTitles, "Bottom Bar", "a Bottom Bar still has its row: it moves between pages too");
+            Assert.AreEqual(BuiltInNavElements.TextTabs, _window.Config.card_settings.navigation.top, "and Top Bar kept its value while hidden");
+            Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(_window.Config.card_settings.navigation), "no Tabs warning for Pages");
+            CollectionAssert.DoesNotContain(pagesTitles, "Show Counts", "the Family Pager shows no counts, so the row it ignores is hidden");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.LayoutScroll, _window.Config.card_settings.navigation.layout, "Ctrl+Z: Scroll again");
+            yield return DrawnInfoTitles(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Top Bar", "and the Top Bar row is back");
+
             string layoutHelp = (string)help.GetField("CardLayoutHelp", Static).GetValue(null);
-            foreach (string word in new[] { "Scroll (the default)", "Accordion: ", "Tabs: ", "compare", "Back", "Open One At A Time", "Show Navigation From" })
+            foreach (string word in new[] { "Scroll (the default)", "Accordion: ", "Tabs: ", "compare", "Back", "Open One At A Time", "Show Navigation From",
+                         "Pages: ", "sideways", "Family Pager", "never as a wall's only", "lost" })
                 StringAssert.Contains(word, layoutHelp, "CardLayoutHelp says " + word);
             string oneHelp = (string)help.GetField("CardOpenOneAtATimeHelp", Static).GetValue(null);
             foreach (string word in new[] { "Accordion only", "Unticked (the default)", "keeps its place" })
@@ -1613,6 +1634,7 @@ namespace TileStories.Editor.Tests
             StringAssert.Contains("Open One At A Time", guide);
             string device = (string)help.GetField("CardNavigationDeviceTestGuide", Static).GetValue(null);
             StringAssert.Contains("Layout: ", device);
+            StringAssert.Contains("with Pages", device, "the Device guide turns pages with a thumb");
             foreach (var (name, text) in new[] { ("CardLayoutHelp", layoutHelp), ("CardOpenOneAtATimeHelp", oneHelp), ("CardTabsWithoutABarWarning", warning),
                          ("CardNavigationPlaymodeTestGuide", guide), ("CardNavigationDeviceTestGuide", device) })
                 EditorTextChecks.AssertAscii(text, name);

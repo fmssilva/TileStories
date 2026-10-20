@@ -90,7 +90,9 @@ namespace TileStories.Tests
             int texts = 0;
             foreach (var label in view.Root.Query<Label>().ToList())
             {
-                if (string.IsNullOrEmpty(label.text) || !CardTestInput.IsShown(label, view.Root)) continue;
+                // - a label nobody can see is not judged: out of the layout (display none) or laid out but invisible (the story chapters not shown,
+                //   kept beside the shown one for their height, _3.2 step 14)
+                if (string.IsNullOrEmpty(label.text) || !CardTestInput.IsShown(label, view.Root) || label.resolvedStyle.visibility == Visibility.Hidden) continue;
                 texts++;
                 string what = name + " '" + label.text.Substring(0, System.Math.Min(24, label.text.Length)) + "'";
                 // - a label in a horizontal swipe track may lie beyond the card's edge until swiped to: it must fit the

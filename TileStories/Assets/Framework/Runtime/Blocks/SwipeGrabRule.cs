@@ -19,5 +19,12 @@ namespace TileStories
         // The other axis, for a part of the card that moves the sheet while its own content swipes sideways (the top navigation strip):
         // past the slop and clearly up or down. A move both rules refuse (an exact diagonal) is nobody's, like a tap's wobble
         public static bool ClaimsVertical(Vector2 travel) => Mathf.Abs(travel.y) > Slop && Mathf.Abs(travel.y) > Mathf.Abs(travel.x);
+
+        // Whether an area that holds whole blocks (the card's pages) leaves a finger to the part it went down on (_3.2 step 14): a part that
+        // drags by itself keeps its drags -- a strip that scrolls sideways (a gallery's filmstrip), another swipeable part (the true / false
+        // card), or one that took the finger at touch-down to drag it (a 3D stage, a before / after slider, an audio scrubber). A BUTTON also
+        // takes the finger at touch-down, but only to be tapped: a drag that starts on it is still the area's
+        public static bool LeavesToPart(bool startsInSidewaysScroll, bool startsInAnotherSwipeArea, bool takenAtTouchDownByANonButton) =>
+            startsInSidewaysScroll || startsInAnotherSwipeArea || takenAtTouchDownByANonButton;
     }
 }
