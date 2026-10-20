@@ -94,14 +94,7 @@ namespace TileStories.Editor
             demo.enabled = DrawToggleField("Show demo card", demo.enabled, CardDemoShowHelp, IndentLevel1);
             if (demo.enabled)
             {
-                var pois = _config.pois ?? new List<POIData>();
-                var ids = new List<string>();
-                var titles = new List<string>();
-                for (int i = 0; i < pois.Count; i++)
-                {
-                    ids.Add(pois[i]?.id);
-                    titles.Add(EditorNames.Poi(i, pois[i]));
-                }
+                DemoPointChoices(out var ids, out var titles);
                 string poi = DrawReferencePopupField("Demo Point", demo.poi_id, ids, titles, allowNone: true, CardDemoPoiHelp, IndentLevel1 * 2);
                 if (poi != demo.poi_id) SetCardDemoPoi(poi);
                 string stop = DrawPopupField("Demo Stop", demo.stop, CardOptions.DemoStops, CardDemoStopLabels, CardDemoStopHelp, IndentLevel1 * 2);

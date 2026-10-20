@@ -360,6 +360,37 @@
     -unity-font-style: bold;
 }
 
+/* a chip that shows its block's KIND icon instead of a number (_3.2 step 17a): the icon centred in the touch target; the page being read adds
+   its words (that block's heading) after the icon, one line, cut with an ellipsis past --ts-chip-words-max. On the filled chip the icon and
+   the words are drawn in the on-accent colour: the icon's own accent colour would vanish on the accent fill */
+.card-takeover__chip--icon {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--ts-space-3);
+}
+
+.card-takeover__chip-words {
+    margin: 0 0 0 var(--ts-space-2);
+    padding: 0;
+    max-width: var(--ts-chip-words-max);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-on-accent);
+}
+
+.card-takeover__chip--current .card-icon__frame {
+    border-color: var(--ts-on-accent);
+}
+
+.card-takeover__chip--current .card-icon__bar,
+.card-takeover__chip--current .card-icon__dot {
+    background-color: var(--ts-on-accent);
+}
+
 /* the lightbox page's picture: a ZoomPanSurface filling the page (swipe to turn, pinch to look closer) */
 .card-gallery__full {
     flex-grow: 1;

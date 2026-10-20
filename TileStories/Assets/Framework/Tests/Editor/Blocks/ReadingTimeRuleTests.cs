@@ -100,7 +100,7 @@ namespace TileStories.Editor.Tests
             // - ClipLengthField set AFTER Fields in the initializer: the merge happens on the first read, so it still has no Reading Time
             var kind = new BlockKindDefinition
             {
-                Key = "app_clip", Family = BuiltInFamilies.Media, Format = CardOptions.FormatListen, Variants = new[] { "a" }, DefaultVariant = "a",
+                Key = "app_clip", Family = BuiltInFamilies.Media, Format = CardOptions.FormatListen, IconKey = CardIcons.Listen, Variants = new[] { "a" }, DefaultVariant = "a",
                 DisplayModes = new[] { CardOptions.DisplayInline },
                 Fields = new[] { new BlockFieldDefinition { Key = "clip", Type = BlockFieldType.Asset, Media = MediaKind.Audio, Label = "Clip" } },
                 ClipLengthField = "clip",
@@ -114,7 +114,7 @@ namespace TileStories.Editor.Tests
 
         private static BlockKindDefinition AppKind(string clipField, params BlockFieldDefinition[] own) => new()
         {
-            Key = "app_kind", Family = BuiltInFamilies.About, Format = CardOptions.FormatRead, Variants = new[] { "a" }, DefaultVariant = "a",
+            Key = "app_kind", Family = BuiltInFamilies.About, Format = CardOptions.FormatRead, IconKey = CardIcons.Info, Variants = new[] { "a" }, DefaultVariant = "a",
             DisplayModes = new[] { CardOptions.DisplayInline }, Fields = own, ClipLengthField = clipField,
         };
 

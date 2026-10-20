@@ -23,8 +23,13 @@ namespace TileStories
         // What a tap on the breadcrumb's section reports as its element (nav_jump's Variant)
         public const string CrumbElementKey = "breadcrumb";
         public const string CurrentChipClass = "card-takeover__chip--current";
+        // A chip that shows its page's icon (and, while it is the page being read, its name) instead of a page number
+        public const string IconChipClass = "card-takeover__chip--icon";
 
         public VisualElement Root { get; }
+        // The icon and the words inside chip `page` (null before the chip exists): what a test reads to know what a chip says
+        public VisualElement ChipIcon(int page) => page >= 0 && page < _chipIcons.Count ? _chipIcons[page] : null;
+        public Label ChipWords(int page) => page >= 0 && page < _chipWords.Count ? _chipWords[page] : null;
         public Button Back { get; }
         // The breadcrumb: its row, the card's title, the section pill (hidden for a page of no section) and the page's name
         public VisualElement Crumb { get; }
@@ -62,6 +67,9 @@ namespace TileStories
         public event Action SectionTapped;
 
         private readonly List<Button> _chips = new();
+        // Per chip: the kind's icon and the words of the page being read (_3.2 step 17a); a page with no icon keeps its number as its text
+        private readonly List<VisualElement> _chipIcons = new();
+        private readonly List<Label> _chipWords = new();
         private readonly NavStrip _chipStrip;
         private readonly VisualElement _firstArrow;
         private readonly VisualElement _secondArrow;
@@ -139,9 +147,11 @@ namespace TileStories
         }
 
         // Open over the card: the breadcrumb starts with `title` and ends with `nameOfPage(page)` for the page shown; `pageCount` pages (a chip
-        // each when more than one, named by its page), at `start`. No section until ShowSection names one
+        // each when more than one, named by its page), at `start`. No section until ShowSection names one. `iconOfPage` (optional) gives a
+        // CardIcons key per page: such a chip shows that icon instead of a number, and the chip of the page being read adds the page's name
+        // beside it (a block's siblings: its kind's icon says what each one is); null or a null key keeps the page number
         public void Open(string title, Func<int, string> nameOfPage, int pageCount, int start, IMediaSource cardMedia, TakeoverPageDrawer draw,
-            CardStrings strings)
+            CardStrings strings, Func<int, string> iconOfPage = null)
         {
             Close();
             if (pageCount <= 0 || draw == null) return;
@@ -159,10 +169,26 @@ namespace TileStories
                     int page = i;
                     var chip = new Button(() => ShowPage(page));
                     chip.AddToClassList("card-takeover__chip");
+                    var icon = CardIcons.Create();
+                    icon.AddToClassList("card-takeover__chip-icon");
+                    var words = new Label { pickingMode = PickingMode.Ignore };
+                    words.AddToClassList("card-takeover__chip-words");
+                    chip.Add(icon);
+                    chip.Add(words);
                     _chips.Add(chip);
+                    _chipIcons.Add(icon);
+                    _chipWords.Add(words);
                 }
-                // - a page number, not a word: nothing to translate; the page's own name is its tooltip (and accessible name)
-                _chips[i].text = (i + 1).ToString();
+                string iconKey = iconOfPage?.Invoke(i);
+                bool hasIcon = !string.IsNullOrEmpty(iconKey);
+                // - an icon (the page's kind) when the opener gave one, else a page number: nothing to translate either way; the page's own
+                //   name is the chip's tooltip (and accessible name), whatever it shows
+                _chips[i].text = hasIcon ? "" : (i + 1).ToString();
+                _chips[i].EnableInClassList(IconChipClass, hasIcon);
+                CardIcons.SetKey(_chipIcons[i], hasIcon ? iconKey : null);
+                _chipIcons[i].style.display = hasIcon ? DisplayStyle.Flex : DisplayStyle.None;
+                _chipWords[i].text = hasIcon ? NameOf(i) : "";
+                _chipWords[i].style.display = DisplayStyle.None;
                 _chips[i].tooltip = NameOf(i);
                 Chips.Add(_chips[i]);
             }
@@ -207,7 +233,12 @@ namespace TileStories
             CrumbName.text = NameOf(PageIndex);
             ShowArrows();
             _draw(this, Page, _media, PageIndex);
-            for (int i = 0; i < PageCount; i++) _chips[i].EnableInClassList(CurrentChipClass, i == PageIndex);
+            for (int i = 0; i < PageCount; i++)
+            {
+                _chips[i].EnableInClassList(CurrentChipClass, i == PageIndex);
+                // - the page being read says what it is (its name beside its icon); the others stay icons, so seven fit a phone's width
+                if (_chips[i].ClassListContains(IconChipClass)) _chipWords[i].style.display = i == PageIndex ? DisplayStyle.Flex : DisplayStyle.None;
+            }
             if (PageCount > 1) _chipStrip.ShowCentred(_chips[PageIndex]);
         }
 

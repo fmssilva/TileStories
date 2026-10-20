@@ -88,7 +88,7 @@ namespace TileStories.Editor.Tests
             BuiltInBlocks.Register(registry);
             registry.Register(new BlockKindDefinition
             {
-                Key = "app_still", Family = BuiltInFamilies.Media, Format = CardOptions.FormatLook, DisplayName = "App still",
+                Key = "app_still", Family = BuiltInFamilies.Media, Format = CardOptions.FormatLook, IconKey = CardIcons.Picture, DisplayName = "App still",
                 Variants = new[] { "plain" }, DefaultVariant = "plain", DisplayModes = new[] { CardOptions.DisplayInline },
             }, () => new PlainView());
             var config = Shipped();

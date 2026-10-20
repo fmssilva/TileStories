@@ -78,6 +78,7 @@ namespace TileStories
         public static readonly BlockKindDefinition KnowledgeCheck = new()
         {
             Key = KnowledgeCheckKind,
+            IconKey = CardIcons.Play,
             Family = BuiltInFamilies.Play,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindKnowledgeCheck,
@@ -132,6 +133,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Poll = new()
         {
             Key = PollKind,
+            IconKey = CardIcons.Chart,
             Family = BuiltInFamilies.Play,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindPoll,
@@ -170,6 +172,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Collect = new()
         {
             Key = CollectKind,
+            IconKey = CardIcons.Ticket,
             Family = BuiltInFamilies.Play,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindCollect,

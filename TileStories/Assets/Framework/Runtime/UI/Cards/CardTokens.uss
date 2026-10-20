@@ -98,6 +98,9 @@
        its height, so it stays a stadium */
     --ts-chip-height: 32px;
     --ts-chip-radius: 16px;
+    /* The words the full view's chip of the page being read shows beside its icon (that block's heading), cut with an ellipsis past this
+       width: the other chips stay icons, so the one that says what it is never pushes the strip off the screen (_3.2 step 17a) */
+    --ts-chip-words-max: 220px;
     /* What a part not reached yet fades to (the progress map's pieces ahead of the one being read) */
     --ts-ahead-opacity: 0.35;
     /* The language chip sits left of the close X (X width + both gaps); with it the header keeps its end clear of the chip (chip right

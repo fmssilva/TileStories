@@ -37,6 +37,7 @@ namespace TileStories
         public static readonly BlockKindDefinition WallLocator = new()
         {
             Key = WallLocatorKind,
+            IconKey = CardIcons.Location,
             Family = BuiltInFamilies.Visit,
             Format = CardOptions.FormatLook,
             LabelKey = CardStrings.Keys.KindWallLocator,
@@ -59,6 +60,7 @@ namespace TileStories
         public static readonly BlockKindDefinition TodayMap = new()
         {
             Key = TodayMapKind,
+            IconKey = CardIcons.Time,
             Family = BuiltInFamilies.Visit,
             Format = CardOptions.FormatLook,
             LabelKey = CardStrings.Keys.KindTodayMap,
@@ -104,6 +106,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Related = new()
         {
             Key = RelatedKind,
+            IconKey = CardIcons.Grid,
             Family = BuiltInFamilies.Visit,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindRelated,
@@ -152,6 +155,7 @@ namespace TileStories
         public static readonly BlockKindDefinition PracticalInfo = new()
         {
             Key = PracticalInfoKind,
+            IconKey = CardIcons.Info,
             Family = BuiltInFamilies.Visit,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindPracticalInfo,

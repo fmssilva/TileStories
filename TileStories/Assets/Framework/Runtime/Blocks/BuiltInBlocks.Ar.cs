@@ -16,6 +16,7 @@ namespace TileStories
         public static readonly BlockKindDefinition ShowOnWall = new()
         {
             Key = ShowOnWallKind,
+            IconKey = CardIcons.ShowOnWall,
             Family = BuiltInFamilies.Ar,
             Format = CardOptions.FormatModel,
             LabelKey = CardStrings.Keys.KindShowOnWall,
@@ -48,6 +49,7 @@ namespace TileStories
         public static readonly BlockKindDefinition PlaceInAr = new()
         {
             Key = PlaceInArKind,
+            IconKey = CardIcons.Cube,
             Family = BuiltInFamilies.Ar,
             Format = CardOptions.FormatModel,
             LabelKey = CardStrings.Keys.KindPlaceInAr,

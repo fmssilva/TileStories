@@ -10,7 +10,7 @@ namespace TileStories.Editor.Tests
     {
         private static BlockKindDefinition Kind(string key, string family) => new()
         {
-            Key = key, Family = family, Format = CardOptions.FormatRead, DisplayName = key, Variants = new[] { "one" }, DefaultVariant = "one",
+            Key = key, Family = family, Format = CardOptions.FormatRead, IconKey = CardIcons.Info, DisplayName = key, Variants = new[] { "one" }, DefaultVariant = "one",
             DisplayModes = new[] { CardOptions.DisplayInline }, Fields = new BlockFieldDefinition[0],
         };
 

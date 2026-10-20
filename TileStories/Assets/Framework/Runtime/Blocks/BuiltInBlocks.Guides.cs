@@ -19,6 +19,7 @@ namespace TileStories
         public static readonly BlockKindDefinition AudioGuide = new()
         {
             Key = AudioGuideKind,
+            IconKey = CardIcons.Listen,
             Family = BuiltInFamilies.Guides,
             Format = CardOptions.FormatListen,
             LabelKey = CardStrings.Keys.KindAudioGuide,

@@ -120,6 +120,10 @@ namespace TileStories
             if (string.IsNullOrWhiteSpace(d.Format)) return "no format";
             if (!Contains(CardOptions.Formats, d.Format))
                 return "its format '" + d.Format + "' is not one of " + string.Join(", ", CardOptions.Formats);
+            // - the icon set is one list every registry shares, so a SHAPE check too: a typo would draw an empty chip
+            if (string.IsNullOrWhiteSpace(d.IconKey)) return "no icon";
+            if (!Contains(CardIcons.All, d.IconKey))
+                return "its icon '" + d.IconKey + "' is not one of the card's icons (CardIcons.All)";
             if (d.Variants == null || d.Variants.Count == 0) return "no variants";
             if (!d.HasVariant(d.DefaultVariant)) return "its default variant '" + d.DefaultVariant + "' is not one of its variants";
             if (d.DisplayModes == null || d.DisplayModes.Count == 0) return "no display modes";

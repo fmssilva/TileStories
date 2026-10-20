@@ -22,6 +22,7 @@ namespace TileStories.LivingRoom
             Key = Kind,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatLook,
+            IconKey = CardIcons.Split,
             LabelKey = LivingRoomCardTexts.Keys.KindSizeComparison,
             DisplayName = "Size Comparison",
             Help = "How big the point really is: it is drawn next to a familiar object, both to the same scale, so the visitor can judge its " +

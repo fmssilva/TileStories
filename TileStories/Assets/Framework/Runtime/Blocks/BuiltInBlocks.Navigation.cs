@@ -13,6 +13,7 @@ namespace TileStories
         public static readonly BlockKindDefinition NavIconGrid = new()
         {
             Key = NavIconGridKind,
+            IconKey = CardIcons.Grid,
             Family = BuiltInFamilies.Navigation,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindNavIconGrid,
@@ -41,6 +42,7 @@ namespace TileStories
         public static readonly BlockKindDefinition NavContents = new()
         {
             Key = NavContentsKind,
+            IconKey = CardIcons.Sources,
             Family = BuiltInFamilies.Navigation,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindNavContents,
@@ -82,6 +84,7 @@ namespace TileStories
         public static readonly BlockKindDefinition NavRails = new()
         {
             Key = NavRailsKind,
+            IconKey = CardIcons.More,
             Family = BuiltInFamilies.Navigation,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindNavRails,
@@ -124,6 +127,7 @@ namespace TileStories
         public static readonly BlockKindDefinition NavBento = new()
         {
             Key = NavBentoKind,
+            IconKey = CardIcons.Grid,
             Family = BuiltInFamilies.Navigation,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindNavBento,

@@ -97,7 +97,7 @@ namespace TileStories.Editor.Tests
 
         private static BlockKindDefinition KindWith(params BlockFieldDefinition[] fields) => new()
         {
-            Key = "k", Family = BuiltInFamilies.About, Format = CardOptions.FormatRead, DisplayName = "K",
+            Key = "k", Family = BuiltInFamilies.About, Format = CardOptions.FormatRead, IconKey = CardIcons.Info, DisplayName = "K",
             Variants = new[] { "v" }, DefaultVariant = "v", DisplayModes = new[] { CardOptions.DisplayInline }, Fields = fields,
         };
 

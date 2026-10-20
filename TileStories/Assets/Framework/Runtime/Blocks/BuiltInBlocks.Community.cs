@@ -14,6 +14,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Feedback = new()
         {
             Key = FeedbackKind,
+            IconKey = CardIcons.Chat,
             Family = BuiltInFamilies.Community,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindFeedback,

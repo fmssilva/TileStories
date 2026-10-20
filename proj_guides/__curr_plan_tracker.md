@@ -1,25 +1,31 @@
-# Plan tracker -- _3.2 step 16 (full-view breadcrumb + sibling swipe) + the three decided 15b findings
+# Plan tracker -- _3.2 step 17a (navigation presets, the Editor's owed warnings, the sibling chips)
 
-GATE (done): UnityMCP answered (telemetry_status); 1 commit pushed (7abf8e2..1193ec4); captures `TestEvidence/Gate/gate_3_2_step16_{gameview,poieditor}.png`
-opened (window closed, 0 left); tree compiled (6 old `error CS` lines precede the last two builds, ExitCode 0); SDF fonts unmodified (git clean);
-EditMode baseline 1938/1938 (95 s, unfocused) on clean 1193ec4 (trusted).
+GATE (done): UnityMCP answered (telemetry_status, TileStories@d41388e4a2b2ebd4); 2 commits pushed (1193ec4..50c6723); captures
+`TestEvidence/Gate/gate_3_2_step17a_{game,editor}.png` opened (Editor window closed, 0 left); tree compiled (Library dll 13:35, no error CS in the console);
+SDF fonts clean (git); EditMode baseline 1946/1946 (101.9 s) on clean 50c6723 (trusted).
 
-Decisions: siblings = the block's model SECTION's targets whose kind lists Expandable (= family under the default Group By), stack order, none for
-a non-target or a section of one; the full view of a block opens ALL its siblings as the takeover's pages (ShowPage already hands media over in the
-right order); the crumb = title > section pill (tappable, 48 px, JumpTo(section, "breadcrumb") -- the one jump path) > name; chips one clipped line
-(NavStrip), current = bold + ring; a TURN pauses the leaving view (Collapsing), closing keeps step 12's rule; Back closes (the card never moved).
-Teaser takeovers a block opens itself (lightbox, video / 3D takeover display) keep "title > name" (IBlockHost.OpenTakeover has no block key: logged).
+## Finding (STOP item, asked at the end of the other work)
+1.1 sibling chips: the guide says "each chip carries its KIND's icon (the set exists since step 6)". The set holds FAMILY icons (CardIcons: info,
+picture, listen, book, show_on_wall, play, location, people, grid, sources + utility ones); a block KIND has none. Siblings of one section share a
+family, so a family icon cannot tell a gallery from a 360 panorama. Ask the developer which way before touching TakeoverView.
 
-- [x] P1.1 CardLayoutRule.LayoutPicksTheTopBar (pages + bento) read by TopElement AND the Editor's Top Bar row; tests: CardLayoutRuleTests,
-      DetailCardEditorTabTests (Bento hides the row, value kept, Ctrl+Z), BentoLayoutSheetTests + PoiCardBentoLayoutSceneTests rewritten; (i) + guides
-- [x] P1.2 BentoLayoutRule caps a row at its tallest tile's content (contentHeight delegate), RoomLeft; CardBentoView measures; tests:
-      BentoLayoutRuleTests (+cap), CardNavGalleryTests bento promise (small case: room under the last tile, every row as tall as its content)
-- [x] P1.3 PoiCardLayoutSceneTests tabs: track read before; owner holds the ONE paused clip; mutation (Collapsing -> Stop) red, restored
-- [x] P2.1 FullViewSiblingRule (pure) + FullViewSiblingRuleTests (Lamp, app kind w/o Expandable, group_by format, family of one)
-- [x] P2.2 TakeoverView crumb row + CrumbText + ShowSection + SectionTapped + chips strip; BlockFullView PagesFor + SwipeGrab + turn pauses;
-      sheet OpenFullView siblings + crumb jump; Media.uss; Crumb.text readers -> CrumbText; EditMode FullViewSiblingsSheetTests
-- [x] P2.3 Phase A CardNavGalleryTests full-view crumb + chips over the 5 cases (renders)
-- [x] P2.4 Phase B PoiCardFullViewSiblingsSceneTests (real swipe, real chip tap, Back at the block, video owner, preview owner, family pill, Listen)
-- [x] P3 captures judged: Card/FullView_Lamp_media_{en,pt}_390.png, Card/FullView_Lamp_listen_en_390.png, Nav_full_view_<case>, Nav_Lamp_bento_{en,pt}_390.png
-- [x] P4 docs: _3.2 (status 16, TODOs removed, 5.7 built, 6.1 bento, 7), _3.1 TakeoverView breadcrumb, _5.1 Top Bar row, 10-structure, __mixed_TODOs
-- [x] P5 full EditMode + PlayMode fixtures named Card / Poi / SizeComparison + grep TakeoverView / BlockFullView; zero failures
+## Decisions (autonomous)
+- Presets = `NavigationPresets` in the EDITOR assembly (data table of section 8 + Apply + Matching); no runtime type. Phase B through the Editor-assembly
+  `LivePlayModeCardTests` family (real window while Play Mode runs), the live-sync path every row uses.
+- Apply = ONE `ApplyPopupEdit` (one mutation scope = one history step = one Ctrl+Z). No confirmation: it is undoable.
+- Preset row at the END of the section (section 7's order), button shows the matching preset or "Custom"; picker = `EditorPopupContent` (working popup).
+- Warnings = pure `NavigationWarningRule` (Editor): counts come from the REAL `CardNavModel` of the busiest card; thresholds 5 (progress map) / 13 (bento);
+  Bar Slots warns only while raising it can still help (slots < min(sections, 3..5 max)); "more than two bars" = effective top + bottom + edge.
+- One `DrawNavigationWarning` reports to a null-in-production probe so tests prove drawn / not drawn; the existing Tabs warning moves onto it.
+- Preview Navigation = toggle + point popup over the demo card's own fields (`demo_card.enabled / poi_id`); turning it on from there sets the stop to Full.
+
+## Steps
+- [x] GATE
+- [ ] A. `NavigationPresets` + tests (EditMode, pure: table, keys registered, reflection walk, Matching)
+- [ ] B. `NavigationPresetPickerPopup` + Preset row + (i) + guide lines; Editor tests on the REAL window (click, walk, one Ctrl+Z)
+- [ ] C. `NavigationWarningRule` + the three new warnings + bento + progress_map; drawn / not drawn tests
+- [ ] D. Test > Preview Navigation rows + tests
+- [ ] E. Phase B live (LivePlayModeCardTests): a preset applied live changes the open card
+- [ ] F. Captures: Navigation at 620 pt (preset row, each warning), judged
+- [ ] G. 1.1 chips (after the developer's answer) + recapture FullView_Lamp_media_{en,pt}_390
+- [ ] H. Docs: _3.2 row 17a + 3 TODO lines out, _5.1, 10-structure.md; full EditMode + Card/Poi/SizeComparison PlayMode fixtures

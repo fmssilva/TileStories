@@ -40,6 +40,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Timeline = new()
         {
             Key = TimelineKind,
+            IconKey = CardIcons.Timeline,
             Family = BuiltInFamilies.Stories,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindTimeline,
@@ -77,6 +78,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Person = new()
         {
             Key = PersonKind,
+            IconKey = CardIcons.People,
             Family = BuiltInFamilies.Stories,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindPerson,
@@ -99,6 +101,7 @@ namespace TileStories
         public static readonly BlockKindDefinition StoryChapters = new()
         {
             Key = StoryChaptersKind,
+            IconKey = CardIcons.Book,
             Family = BuiltInFamilies.Stories,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindStoryChapters,
@@ -129,6 +132,7 @@ namespace TileStories
         public static readonly BlockKindDefinition ComparePoints = new()
         {
             Key = ComparePointsKind,
+            IconKey = CardIcons.Split,
             Family = BuiltInFamilies.Stories,
             Format = CardOptions.FormatLook,
             LabelKey = CardStrings.Keys.KindComparePoints,
@@ -214,6 +218,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Dialogue = new()
         {
             Key = DialogueKind,
+            IconKey = CardIcons.Chat,
             Family = BuiltInFamilies.Stories,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindDialogue,

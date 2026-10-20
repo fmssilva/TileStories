@@ -99,6 +99,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Header = new()
         {
             Key = HeaderKind,
+            IconKey = CardIcons.Info,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindHeader,
@@ -204,6 +205,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Status = new()
         {
             Key = StatusKind,
+            IconKey = CardIcons.ShowOnWall,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatLook,
             LabelKey = CardStrings.Keys.KindStatus,
@@ -231,6 +233,7 @@ namespace TileStories
         public static readonly BlockKindDefinition QuickFacts = new()
         {
             Key = QuickFactsKind,
+            IconKey = CardIcons.Info,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindQuickFacts,
@@ -260,6 +263,7 @@ namespace TileStories
         public static readonly BlockKindDefinition FunFact = new()
         {
             Key = FunFactKind,
+            IconKey = CardIcons.Light,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindFunFact,
@@ -288,6 +292,7 @@ namespace TileStories
         public static readonly BlockKindDefinition PullQuote = new()
         {
             Key = PullQuoteKind,
+            IconKey = CardIcons.Chat,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindPullQuote,
@@ -322,6 +327,7 @@ namespace TileStories
         public static readonly BlockKindDefinition ProcessSteps = new()
         {
             Key = ProcessStepsKind,
+            IconKey = CardIcons.Time,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindProcessSteps,
@@ -351,6 +357,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Swatches = new()
         {
             Key = SwatchesKind,
+            IconKey = CardIcons.Grid,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatLook,
             LabelKey = CardStrings.Keys.KindSwatches,
@@ -392,6 +399,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Actions = new()
         {
             Key = ActionsKind,
+            IconKey = CardIcons.Ticket,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatInteract,
             LabelKey = CardStrings.Keys.KindActions,
@@ -447,6 +455,7 @@ namespace TileStories
         public static readonly BlockKindDefinition RichText = new()
         {
             Key = RichTextKind,
+            IconKey = CardIcons.Sources,
             Family = BuiltInFamilies.About,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindRichText,

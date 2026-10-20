@@ -144,5 +144,84 @@ namespace TileStories.Editor.Tests
             Assert.AreNotEqual(context.Strings.Get(media2.LabelKey), pt.Strings.Get(media2.LabelKey), "precondition: the words differ (Media / its Portuguese word, with its accent)");
             sheet.Hide();
         }
+
+        // The block's own heading in `language`, "" when it authors none (the chip's accessible name is that heading where there is one)
+        private static string AuthoredHeading(BlockInstanceData block, string language)
+        {
+            var field = block.fields.Find(f => f.key == BlockKindDefinition.HeadingField);
+            var entry = field?.text.Find(t => t.lang == language);
+            return entry?.value ?? "";
+        }
+
+        // _3.2 step 17a: a sibling chip carries its block's KIND icon instead of its number, the chip of the page being read adds that block's
+        // words after its icon, every other chip stays an icon; each chip is named for a screen reader by its block's heading, in both languages
+        [TestCase("en")]
+        [TestCase("pt")]
+        public void TheSiblingChips_CarryTheirKindsIcon_TheCurrentOneSaysWhatItIs_AndEveryOneIsNamedByItsBlocksHeading(string language)
+        {
+            var wall = Shipped();
+            var media = new ResourcesMediaSource(wall.card_settings.media_resources_path);
+            var sheet = Sheet();
+            ShowCard(sheet, wall, media, language);
+            var poi = wall.pois.Single(p => p.id == Lamp);
+            var siblings = FullViewSiblingRule.Siblings(sheet.Nav.Model, BlockRegistry.Shared, "block_58").ToList();
+            sheet.OpenFullView("block_58");
+            var takeover = sheet.Takeover;
+            int at = siblings.IndexOf("block_58");
+            int withHeading = 0;
+            var icons = new System.Collections.Generic.List<string>();
+            for (int i = 0; i < siblings.Count; i++)
+            {
+                var block = poi.card.blocks.Single(b => b.key == siblings[i]);
+                BlockRegistry.Shared.TryGet(block.kind, out var kind);
+                string when = language + " chip " + i + " (" + block.kind + ")";
+                Assert.AreEqual(kind.IconKey, CardIcons.KeyOf(takeover.ChipIcon(i)), when + ": its block's KIND icon");
+                icons.Add(kind.IconKey);
+                Assert.AreEqual(DisplayStyle.Flex, takeover.ChipIcon(i).style.display.value, when + ": the icon is drawn");
+                Assert.IsTrue(takeover.Chips[i].ClassListContains(TakeoverView.IconChipClass), when + ": an icon chip");
+                Assert.AreEqual("", ((Button)takeover.Chips[i]).text, when + ": no number on it any more");
+                // - the accessible name: the block's own heading where it has one, else the words its row shows
+                string heading = AuthoredHeading(block, language);
+                if (heading.Length > 0)
+                {
+                    Assert.AreEqual(heading, takeover.Chips[i].tooltip, when + ": named by its block's heading in " + language);
+                    withHeading++;
+                }
+                Assert.AreEqual(sheet.Nav.RowOf(siblings[i]).Words, takeover.Chips[i].tooltip, when + ": and always by the words its row shows");
+                // - only the page being read says its words
+                bool current = i == at;
+                Assert.AreEqual(current ? DisplayStyle.Flex : DisplayStyle.None, takeover.ChipWords(i).style.display.value, when + ": words only on the current chip");
+                if (current) Assert.AreEqual(takeover.Chips[i].tooltip, takeover.ChipWords(i).text, when + ": the current chip reads its block's words");
+            }
+            Assert.Greater(withHeading, 3, "precondition: several Media blocks of The Lamp author a heading in " + language);
+            Assert.Greater(icons.Distinct().Count(), 3, "the 14 Media blocks show several different icons, not one");
+
+            // - a turn moves the words with the page; a chip tap goes to its page and the words follow
+            takeover.Turn(+1);
+            Assert.AreEqual(DisplayStyle.None, takeover.ChipWords(at).style.display.value, "the chip left shows an icon again");
+            Assert.AreEqual(DisplayStyle.Flex, takeover.ChipWords(at + 1).style.display.value, "the chip arrived at says its words");
+            Assert.AreEqual(sheet.Nav.RowOf(siblings[at + 1]).Words, takeover.ChipWords(at + 1).text);
+            sheet.Hide();
+        }
+
+        // A takeover that is not a sibling set (the gallery's lightbox: pictures, not blocks of different kinds) keeps its page numbers
+        [Test]
+        public void ALightboxOfPictures_KeepsItsPageNumbers_NoIconsNoWords()
+        {
+            var wall = Shipped();
+            var sheet = Sheet();
+            ShowCard(sheet, wall, new ResourcesMediaSource(wall.card_settings.media_resources_path));
+            sheet.OpenTakeover("Gallery", 3, 1, (view, container, media, page) => { });
+            var takeover = sheet.Takeover;
+            Assert.AreEqual(3, takeover.Chips.childCount);
+            for (int i = 0; i < 3; i++)
+            {
+                Assert.AreEqual((i + 1).ToString(), ((Button)takeover.Chips[i]).text, "chip " + i + " is its number");
+                Assert.IsFalse(takeover.Chips[i].ClassListContains(TakeoverView.IconChipClass));
+                Assert.AreEqual(DisplayStyle.None, takeover.ChipIcon(i).style.display.value, "no icon");
+                Assert.AreEqual(DisplayStyle.None, takeover.ChipWords(i).style.display.value, "no words");
+            }
+            sheet.Hide();
+        }
     }
 }

@@ -40,10 +40,25 @@ namespace TileStories.Editor
         {
             var nav = _config.card_settings.navigation ??= new CardNavigationSettings();
 
+            // - the busiest card of the wall, built only when a warning below needs it (a card's map costs a stack build per point)
+            bool busiestKnown = false;
+            NavigationWarningRule.BusiestCard busiest = default;
+            int BusiestSections()
+            {
+                if (!busiestKnown)
+                {
+                    busiest = NavigationWarningRule.BusiestOf(_config.card_settings, _config.pois, NavigationRegistry);
+                    busiestKnown = true;
+                }
+                return busiest.Sections;
+            }
+
             // - section 7's order: the Layout first -- it decides what most rows below mean (step 13). A layout of a later step reads as Scroll
             nav.layout = DrawPopupField("Layout", nav.layout, CardOptions.Layouts, CardOptions.LayoutLabels, CardLayoutHelp);
             if (CardLayoutRule.TabsWithoutAnElement(nav))
-                EditorGUILayout.HelpBox(CardTabsWithoutABarWarning, MessageType.Warning);
+                DrawNavigationMessage(CardTabsWithoutABarWarning, MessageType.Warning);
+            if (NavigationWarningRule.BentoOutgrown(nav, BusiestSections))
+                DrawNavigationMessage(CardBentoWarning(NavigationCardName(busiest.PoiIndex), busiest.Sections), MessageType.Warning);
 
             nav.block_order = DrawPopupField("Block Order", nav.block_order, CardOptions.BlockOrders, CardOptions.BlockOrderLabels, CardBlockOrderHelp);
 
@@ -73,7 +88,11 @@ namespace TileStories.Editor
             //   Hidden where the layout picks the top bar itself (Pages: the Family Pager; Bento: none, the tiles are the map), keeping its
             //   value for the day the wall picks another layout -- the card's own rule, so the row and the card agree
             if (!CardLayoutRule.LayoutPicksTheTopBar(nav))
+            {
                 nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
+                if (NavigationWarningRule.ProgressMapOutgrown(nav, BusiestSections))
+                    DrawNavigationMessage(CardProgressMapWarning(NavigationCardName(busiest.PoiIndex), busiest.Sections), MessageType.Warning);
+            }
             var (bottomKeys, bottomLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
             nav.bottom = DrawReferencePopupField("Bottom Bar", nav.bottom, bottomKeys, bottomLabels, allowNone: false, CardBottomBarHelp(NavElementRegistry.Shared));
             // - section 7's order: the Menu right after the two bars (its button sits in the header; a bar's More opens it)
@@ -86,6 +105,9 @@ namespace TileStories.Editor
             // - section 7's order: the Edge after the Floating Button (the dots down the right edge of the content, step 10)
             var (edgeKeys, edgeLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Edge);
             nav.edge = DrawReferencePopupField("Edge", nav.edge, edgeKeys, edgeLabels, allowNone: false, CardEdgeHelp(NavElementRegistry.Shared));
+            // - the third bar: the Edge is the last of the three rows, so the warning sits under it
+            if (NavigationWarningRule.MoreThanTwoBars(nav))
+                DrawNavigationMessage(CardMoreThanTwoBarsWarning, MessageType.Warning);
             // - section 7's order: Auto Nav Block after the Edge (a nav block put after the header of every long card, step 11a). Its choices
             //   are the registered kinds of the navigation family, so a nav block an app (or a later step) registers is listed with no edit here
             var (autoKeys, autoLabels) = AutoNavBlockOptions(BlockRegistry.Shared);
@@ -98,8 +120,12 @@ namespace TileStories.Editor
                 nav.show_counts = DrawToggleField("Show Counts", nav.show_counts, CardShowCountsHelp);
             // - a bar's slots, or the radial's arc (its items cap at Bar Slots like a bar's)
             if (bottomElement != null && bottomElement.ReadsBarSlots || floatingElement != null && floatingElement.ReadsBarSlots)
+            {
                 nav.max_slots = DrawIntSliderField("Bar Slots", nav.max_slots, CardNavigationSettings.MaxSlotsMin, CardNavigationSettings.MaxSlotsMax,
                     CardBarSlotsHelp);
+                if (NavigationWarningRule.BarSlotsBelowTheSections(nav, true, BusiestSections))
+                    DrawNavigationMessage(CardBarSlotsWarning(NavOntologyRule.MaxSlots(nav), NavigationCardName(busiest.PoiIndex), busiest.Sections), MessageType.Warning);
+            }
             nav.follow_scroll = DrawToggleField("Follow Scroll", nav.follow_scroll, CardFollowScrollHelp);
             nav.hide_on_scroll = DrawPopupField("Hide While Scrolling", nav.hide_on_scroll, CardOptions.HideOnScrolls, CardOptions.HideOnScrollLabels,
                 CardHideWhileScrollingHelp);
@@ -123,7 +149,12 @@ namespace TileStories.Editor
                 DrawGroupsTable(nav);
             }
 
-            DrawDomainTestSubSection(_cardNavigationTest, CardNavigationSceneTestGuide, CardNavigationPlaymodeTestGuide, CardNavigationDeviceTestGuide);
+            // - the presets last of the rows (section 7's order): a shortcut that writes seven of the rows above, so the section reads first
+            GUILayout.Space(TableGapBetweenGroups);
+            DrawNavigationPresetRow(nav);
+
+            DrawDomainTestSubSection(_cardNavigationTest, CardNavigationSceneTestGuide, CardNavigationPlaymodeTestGuide, CardNavigationDeviceTestGuide,
+                DrawNavigationPreviewRows);
         }
 
         // A slot's choices (Top Bar, Bottom Bar): None, then every element registered for that slot, named by its Editor label -- listed

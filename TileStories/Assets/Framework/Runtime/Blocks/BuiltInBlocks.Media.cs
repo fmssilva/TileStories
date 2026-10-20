@@ -92,6 +92,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Gallery = new()
         {
             Key = GalleryKind,
+            IconKey = CardIcons.Picture,
             Family = BuiltInFamilies.Media,
             Format = CardOptions.FormatLook,
             LabelKey = CardStrings.Keys.KindGallery,
@@ -124,6 +125,7 @@ namespace TileStories
         public static readonly BlockKindDefinition BeforeAfter = new()
         {
             Key = BeforeAfterKind,
+            IconKey = CardIcons.Split,
             Family = BuiltInFamilies.Media,
             Format = CardOptions.FormatLook,
             LabelKey = CardStrings.Keys.KindBeforeAfter,
@@ -151,6 +153,7 @@ namespace TileStories
         public static readonly BlockKindDefinition HotspotImage = new()
         {
             Key = HotspotImageKind,
+            IconKey = CardIcons.Location,
             Family = BuiltInFamilies.Media,
             Format = CardOptions.FormatLook,
             LabelKey = CardStrings.Keys.KindHotspotImage,
@@ -202,6 +205,7 @@ namespace TileStories
         public static readonly BlockKindDefinition ZoomImage = new()
         {
             Key = ZoomImageKind,
+            IconKey = CardIcons.Zoom,
             Family = BuiltInFamilies.Media,
             Format = CardOptions.FormatLook,
             LabelKey = CardStrings.Keys.KindZoomImage,
@@ -223,6 +227,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Video = new()
         {
             Key = VideoKind,
+            IconKey = CardIcons.Video,
             Family = BuiltInFamilies.Media,
             Format = CardOptions.FormatWatch,
             LabelKey = CardStrings.Keys.KindVideo,
@@ -301,6 +306,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Model3D = new()
         {
             Key = Model3DKind,
+            IconKey = CardIcons.Cube,
             Family = BuiltInFamilies.Media,
             Format = CardOptions.FormatModel,
             LabelKey = CardStrings.Keys.KindModel3D,
@@ -347,6 +353,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Panorama360 = new()
         {
             Key = Panorama360Kind,
+            IconKey = CardIcons.Panorama,
             Family = BuiltInFamilies.Media,
             Format = CardOptions.FormatModel,
             LabelKey = CardStrings.Keys.KindPanorama360,

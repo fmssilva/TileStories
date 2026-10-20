@@ -20,6 +20,7 @@ namespace TileStories
         public static readonly BlockKindDefinition Sources = new()
         {
             Key = SourcesKind,
+            IconKey = CardIcons.Sources,
             Family = BuiltInFamilies.Meta,
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindSources,

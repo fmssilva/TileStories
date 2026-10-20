@@ -512,6 +512,205 @@
     translate: 0 -50%;
 }
 
+/* ---- the kinds' icons (_3.2 step 17a, BlockKindDefinition.IconKey): what a sibling chip of the full view shows. The same four parts.
+   A kind whose meaning one of the icons above already draws (picture, listen, book, info...) reuses it ---- */
+
+/* split (before / after, a comparison): a square box cut in two, the right half carrying a line */
+.card-icon--split .card-icon__frame,
+.card-icon--split .card-icon__bar {
+    display: flex;
+}
+
+.card-icon--split .card-icon__frame {
+    top: 10%;
+    bottom: 10%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--split .card-icon__bar--a {
+    left: 50%;
+    top: 10%;
+    bottom: 10%;
+    width: var(--ts-icon-stroke);
+    translate: -50% 0;
+}
+
+.card-icon--split .card-icon__bar--b {
+    left: 60%;
+    right: 20%;
+    top: 50%;
+    height: var(--ts-icon-stroke);
+    translate: 0 -50%;
+}
+
+/* zoom (a picture to look closer at): a magnifier -- a ring up and to the left, its handle (bar a) running out of the lower right */
+.card-icon--zoom .card-icon__frame,
+.card-icon--zoom .card-icon__bar--a {
+    display: flex;
+}
+
+.card-icon--zoom .card-icon__frame {
+    right: 26%;
+    bottom: 26%;
+}
+
+.card-icon--zoom .card-icon__bar--a {
+    left: 62%;
+    top: 82%;
+    width: 38%;
+    height: var(--ts-icon-stroke);
+    translate: 0 -50%;
+    rotate: 45deg;
+}
+
+/* cube (a 3D model): a box seen corner-on -- a square turned to a diamond with its seam (bar a) down from the middle */
+.card-icon--cube .card-icon__frame,
+.card-icon--cube .card-icon__bar--a {
+    display: flex;
+}
+
+.card-icon--cube .card-icon__frame {
+    left: 17%;
+    right: 17%;
+    top: 17%;
+    bottom: 17%;
+    border-radius: var(--ts-icon-stroke);
+    rotate: 45deg;
+}
+
+.card-icon--cube .card-icon__bar--a {
+    left: 50%;
+    top: 50%;
+    bottom: 6%;
+    width: var(--ts-icon-stroke);
+    translate: -50% 0;
+}
+
+/* panorama (a 360 view): a wide, flat strip -- a box, its horizon (bar a) across it and a sun (the dot) over the right */
+.card-icon--panorama .card-icon__frame,
+.card-icon--panorama .card-icon__bar--a,
+.card-icon--panorama .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--panorama .card-icon__frame {
+    top: 28%;
+    bottom: 28%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--panorama .card-icon__bar--a {
+    left: 12%;
+    right: 12%;
+    top: 60%;
+    height: var(--ts-icon-stroke);
+}
+
+.card-icon--panorama .card-icon__dot {
+    left: 70%;
+    top: 44%;
+}
+
+/* video: a screen -- a wide box with a round button (the dot, a little larger than the others) in the middle */
+.card-icon--video .card-icon__frame,
+.card-icon--video .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--video .card-icon__frame {
+    top: 18%;
+    bottom: 18%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--video .card-icon__dot {
+    width: 24%;
+    height: 24%;
+    border-radius: var(--ts-icon-size);
+}
+
+/* timeline: a line with one milestone standing on it -- bar a the line, bar b the stem, the dot its head */
+.card-icon--timeline .card-icon__bar,
+.card-icon--timeline .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--timeline .card-icon__bar--a {
+    left: 6%;
+    right: 6%;
+    top: 68%;
+    height: var(--ts-icon-stroke);
+}
+
+.card-icon--timeline .card-icon__bar--b {
+    left: 50%;
+    top: 34%;
+    height: 34%;
+    width: var(--ts-icon-stroke);
+    translate: -50% 0;
+}
+
+.card-icon--timeline .card-icon__dot {
+    top: 28%;
+}
+
+/* chat (a dialogue, a quote, feedback): a speech bubble -- a box with a line of words (bar b) and a tail (bar a) at its lower left */
+.card-icon--chat .card-icon__frame,
+.card-icon--chat .card-icon__bar {
+    display: flex;
+}
+
+.card-icon--chat .card-icon__frame {
+    top: 12%;
+    bottom: 32%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--chat .card-icon__bar--a {
+    left: 20%;
+    top: 78%;
+    width: 24%;
+    height: var(--ts-icon-stroke);
+    rotate: 55deg;
+}
+
+.card-icon--chat .card-icon__bar--b {
+    left: 24%;
+    right: 40%;
+    top: 36%;
+    height: var(--ts-icon-stroke);
+}
+
+/* chart (a poll): three upright bars of different heights -- bar a, the dot stretched into the middle one, bar b */
+.card-icon--chart .card-icon__bar,
+.card-icon--chart .card-icon__dot {
+    display: flex;
+}
+
+.card-icon--chart .card-icon__bar,
+.card-icon--chart .card-icon__dot {
+    width: 18%;
+    bottom: 8%;
+    border-radius: var(--ts-icon-stroke);
+}
+
+.card-icon--chart .card-icon__bar--a {
+    left: 14%;
+    top: 38%;
+}
+
+.card-icon--chart .card-icon__dot {
+    left: 50%;
+    top: 14%;
+    height: auto;
+    translate: -50% 0;
+}
+
+.card-icon--chart .card-icon__bar--b {
+    left: 68%;
+    top: 58%;
+}
+
 /* ---- the pill button: ONE shape for every block that has one (actions' pill_row, story_chapters' Previous / Next).
    The radius is half the touch-target height (--ts-pill-radius), so short words give a stadium, not an egg ---- */
 

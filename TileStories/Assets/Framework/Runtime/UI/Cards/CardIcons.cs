@@ -34,11 +34,24 @@ namespace TileStories
         public const string Menu = "menu";
         // The navigation family (_3.2 step 11a): a box split in four -- the nav blocks' grid of the card's sections
         public const string Grid = "grid";
+        // The kinds' icons (_3.2 step 17a, BlockKindDefinition.IconKey): what a sibling chip of the full view shows, so a visitor tells a 360
+        // panorama from a gallery without opening either. A kind with no drawing of its own among the ones above gets one here:
+        // a box split in two (before / after, a comparison), a magnifier, a cube (a 3D model), a wide strip (a panorama), a screen
+        // (a video), a line with a milestone (a timeline), a speech bubble (a dialogue, a quote, feedback), upright bars (a poll)
+        public const string Split = "split";
+        public const string Zoom = "zoom";
+        public const string Cube = "cube";
+        public const string Panorama = "panorama";
+        public const string Video = "video";
+        public const string Timeline = "timeline";
+        public const string Chat = "chat";
+        public const string Chart = "chart";
 
         // Every key the set draws
         public static readonly IReadOnlyList<string> All = new[]
         {
             ShowOnWall, Time, Access, Location, Info, Ticket, Light, OpenBlock, Picture, Listen, Book, Play, People, Sources, More, Menu, Grid,
+            Split, Zoom, Cube, Panorama, Video, Timeline, Chat, Chart,
         };
 
         // A new icon element (no key yet: SetKey picks the drawing)

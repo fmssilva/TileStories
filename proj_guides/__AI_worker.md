@@ -13,73 +13,73 @@
 So start by reading them all. 
 
 
-## `And now: POI Card Navigation (3.2) -- step 16, the full-view breadcrumb and sibling swipe`
+## `And now: POI Card Navigation (3.2) -- step 17a, the navigation presets and the Editor's owed warnings`
 
-GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
+GATE: `git push` if the branch is ahead of origin (2 commits are waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles;
 if not, STOP and report. The SDF fonts are Static since step 13: a modified font is a FINDING, not a `git checkout`.
-Baseline: the tree is clean on commit "Add the bento layout with section tiles and a full-view section" (full EditMode
-1938/1938, full PlayMode 1113/1113 wholly in the background) -- run the full EditMode suite and say which commit you
+Baseline: the tree is clean on commit "Plan a Card Starter and split the presets step" (docs only, on top of full
+EditMode 1946/1946; it rides on 15b's full PlayMode 1113/1113) -- run the full EditMode suite and say which commit you
 trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the THREE [step 16] lines are
-yours and all three are DECIDED) and the status table (1-15b done; 16 is yours). Sections 5.7 (the breadcrumb and F4),
-6.2 (the full view you extend) and 9.
-REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` on `TakeoverView` and its breadcrumb -- you are changing what
-it says and adding movement inside it, so read how it is built and who owns its pages; _5.1_Editor_Tab.md "HOW TO USE
-THIS FILE" + section "0. Guidelines"; .clinerules/40-testing.md 4.2 (no full run this block -- see TEST PLAN), 4.2.3
-(the drag-distance line: sibling swipe is a drag), 4.4, 4.5.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 17] lines are yours:
+the `progress_map` warning, the bento warning from 15b, and the sibling chips) and the status table (1-16 done; step
+17 was split, 17a is yours, 17b is the Card Starter and comes next). Sections 8 (the preset table), 8.1 and 8.2 (read
+8.2 so you leave the seam for 17b, and build none of it), 7 (the Editor's row order and its warnings) and 9.
+REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines" AND its rules on
+warnings and popups -- this block is almost entirely Editor work; .clinerules/40-testing.md 4.2 (no full run this
+block), 4.2.3, 4.5; .clinerules/30-ui-content.md.
 Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Opus-class -- it moves between two blocks' media inside one open full view, which is where step 12's
-owner handover gets its hardest test.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: it changes what the full view shows and how
-it moves, not a container, not the stops, not the harness (4.2). It closes on every PlayMode fixture whose name holds
-Card, Poi or SizeComparison, plus anything a grep for `TakeoverView` / `BlockFullView` adds (name them). Green before
-you call the block done. It rides on 15b's full run (1113/1113); the next full run falls due at step 19's close-out, or
-sooner if a block touches a container.
+WORKER MODEL: Sonnet-class -- Editor rows, a popup that writes data, warnings with conditions, and one view change
+(the chips). No new owner, no container, no runtime rule beyond the chips' labels. STOP and report if you find
+yourself changing `CardChromeRule`, a slot, or the layouts.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run (Editor work plus one view's labels). It
+closes on every PlayMode fixture whose name holds Card, Poi or SizeComparison, plus anything a grep for the changed
+types adds. Green before you call the block done. It rides on 15b's full run (1113/1113); the next full run is step
+19's close-out.
+ONE WATCH ITEM: `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` has now been red once in three separate
+blocks, always green alone. If it goes red in your runs, STOP and investigate it -- what makes a slider drag three
+undo steps -- and report what you find even if you cannot fix it. This block is the right one to catch it: it is all
+Editor rows and undo.
 
-PART 1 -- the three decided findings, first:
-1.1 Under Bento the top slot is NOT drawn, and the Editor hides the Top Bar row keeping its value -- exactly as step 14
-  already does under Pages (reuse that, do not write a second visibility rule). The tiles are the map; an inert strip
-  repeating them is not a choice a wall should make by accident. Recapture `Nav_Lamp_bento_{en,pt}_390.png`.
-1.2 A bento tile never grows past what its content needs plus its padding; the room left over stays empty at the BOTTOM
-  of the card instead of being shared out. Test: the gallery's 3-section case leaves empty space under the last tile and
-  every tile is as tall as its content.
-1.3 The always-true check in `PoiCardLayoutSceneTests` (tabs): make it assert what it meant to, and prove it by breaking
-  the behaviour it guards and watching it go red.
+PART 1 -- the three owed findings:
+1.1 The sibling chips carry their KIND's icon instead of a number (the icon set exists since step 6); the current chip
+  shows the icon plus its heading, elided. Test: a chip's accessible name is its block's heading in both languages,
+  and the current chip's words are whole at 390 px. Recapture `FullView_Lamp_media_{en,pt}_390.png`.
+1.2 The `progress_map` Editor warning (owed since step 6): it names the family count past which the pieces stop
+  showing their share (about 4-5 at 390 px). Wall-author words; no pixel talk.
+1.3 The bento Editor warning (owed since 15b): it names the section count past which the tiles stop filling the card
+  (about 13 at Full, 17 with the header collapsed).
 
-PART 2 -- step 16 (`_3.2` 5.7):
-2.1 The breadcrumb up the ontology. Today it reads "<card title> > <name>"; it becomes "<card title> > <family> > <name>"
-  ("Castle > Media > 360"), so a visitor in the full view knows where they are in the card's own structure. The family
-  comes from the model, not from a string in the view.
-2.2 Sibling swipe (F4): inside the full view, a swipe -- and tappable chips -- move across the SIBLING blocks of the same
-  family that support the full view, without returning to the card. `SwipeGrab` is the one way a part takes a finger;
-  the chips are the single-pointer path (WCAG 2.5.7), as the radial and the scrubber already do.
-  THE RISK, and why this is Opus: moving from sibling to sibling hands one media owner from one block to the next inside
-  one open view. Prove it per owner, as step 12 did: open a video in the full view, swipe to the next video of the family,
-  and assert the owner followed and the first released. Do the same for the preview owner.
-  Back returns to the CARD, never to the previous sibling (NN/g subnavigation, Budiu 2017 -- sequential levels disorient
-  when Back is ambiguous). That is in the guide; keep it and test it.
-2.3 The breadcrumb's family segment is tappable: it closes the full view and jumps to that family on the card. One path
-  for every jump -- reuse what 15b built, do not add a second.
-  TESTS: Tier 0 for which siblings a block has (same family, supports the full view, in the stack's order; a family of
-  one has none, and the chips are then not drawn). Phase B in LivingRoomScene with real input: a real swipe moves to the
-  next sibling and the breadcrumb follows; a real tap on a chip does the same; Back returns to the card at the block the
-  visitor came from; the owner handover above. Phase A: the breadcrumb and chips over the gallery cases.
-  VISUALS: the full view of a Media block with the breadcrumb and the chips, EN and PT, at 390 px, plus the same with a
-  family of one (no chips). Judge item by item: the breadcrumb is whole and not clipped in Portuguese, the chips are 48 px,
-  the current sibling is marked by more than colour.
+PART 2 -- step 17a:
+2.1 The Preset popup in Detail Card > Navigation. A preset is DATA (section 8's table): nine named sets, each writing
+  ONLY its own fields and leaving every other field alone. ACCEPTANCE, and the thing to prove hardest: applying a
+  preset writes exactly the fields the table lists and nothing else (walk the whole `navigation` object by reflection
+  before and after), and ONE Ctrl+Z restores all of them together -- one preset is one undo step, not nine.
+  Order the list with the strongest first: Long read, Rich point, One hand, Over the camera, then the rest under a
+  separator. Each row says in a few words who it suits.
+2.2 The remaining Editor warnings of section 7, each with its condition, each Editor-only with no visitor effect:
+  "more than two bars" (top + bottom + edge on: little reading space at Full), "tabs layout without a top or bottom
+  element", "Bar Slots below the families shown". Prove each appears on its condition AND is absent otherwise -- a
+  warning that is always there is noise.
+2.3 Test > Preview navigation: a row in the section's Test sub-foldout that opens the existing demo card (`_3.1` 8.4)
+  on the chosen point, so a developer can flip presets and watch. Reuse the demo card's plumbing; add no second path.
+  TESTS: Editor tests on the REAL window: a real click on each preset writes its fields and only those (reflection
+  walk), one Ctrl+Z restores, the help texts are ASCII and app-agnostic, each warning's condition. Phase B: a preset
+  applied live changes the open card (the live-sync path every row of this section already uses).
+  VISUALS: the Navigation section at 620 pt with the preset row and each warning showing, and the chips recaptured.
+  Judge item by item.
 
-2.4 DOCS: `_3.2` status row 16 + proof and the three [step 16] TODO lines removed; `_3.1` wherever it states what the
-  breadcrumb says; `_5.1` if any Editor row changed (1.1 changes the Top Bar row's visibility); `10-structure.md`.
+2.4 DOCS: `_3.2` status row 17a + proof and the three TODO lines removed; `_5.1` for the preset row, the warnings and
+  the Test row; `10-structure.md`.
 
 Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII in code, comments, logs and Editor
-labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no block view may learn which
-layout it is in (grep and say the count); no backward-compatibility shim; real fixtures only -- never change a POI's
-identity fields.
-OUT OF SCOPE: presets, the demo point and the Editor warnings (17); the facets (18); the domain review (19).
-Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are judged
-and 2.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+labels; Editor rows, popups and WARNINGS name things, never ids; a preset only writes fields -- it never computes
+anything at runtime; no backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
+OUT OF SCOPE: the Card Starter and the demo point (17b -- read section 8.2, build none of it); the facets (18); the
+domain review (19); any change to the shipped framework default.
+Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are
+judged and 2.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
 

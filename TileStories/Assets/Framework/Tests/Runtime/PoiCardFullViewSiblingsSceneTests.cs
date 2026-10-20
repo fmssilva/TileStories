@@ -270,6 +270,56 @@ namespace TileStories.Tests
                 "Media's first block at the top of the card");
         }
 
+        // _3.2 step 17a: every icon of the card's set at three times its size, once on the surface of an unread chip and once on the accent fill of
+        // the chip being read -- a contact sheet for the eye (the new kind icons: do they draw, do they read, do they survive the on-accent colour)
+        [UnityTest]
+        public IEnumerator TheCardsIcons_RenderAsOneSheet_OnAnUnreadChipAndOnTheChipBeingRead()
+        {
+            var sheet = new VisualElement { name = "icon-contact-sheet" };
+            sheet.AddToClassList("ts-card");
+            sheet.AddToClassList("ts-theme-default");
+            sheet.AddToClassList("card-takeover");
+            sheet.style.position = Position.Absolute;
+            sheet.style.left = sheet.style.top = sheet.style.right = sheet.style.bottom = 0f;
+            sheet.style.flexDirection = FlexDirection.Row;
+            sheet.style.flexWrap = Wrap.Wrap;
+            sheet.style.alignContent = Align.FlexStart;
+            sheet.style.paddingTop = 40f;
+            Sheet.Layer.Add(sheet);
+            try
+            {
+                foreach (bool current in new[] { false, true })
+                    foreach (string key in CardIcons.All)
+                    {
+                        var cell = new VisualElement();
+                        cell.style.width = 54f;
+                        cell.style.alignItems = Align.Center;
+                        cell.style.marginBottom = 8f;
+                        var chip = new VisualElement();
+                        chip.AddToClassList("card-takeover__chip");
+                        chip.AddToClassList(TakeoverView.IconChipClass);
+                        if (current) chip.AddToClassList(TakeoverView.CurrentChipClass);
+                        chip.style.width = chip.style.height = 46f;
+                        var icon = CardIcons.Create();
+                        CardIcons.SetKey(icon, key);
+                        icon.style.scale = new Scale(new Vector3(1.6f, 1.6f, 1f));
+                        chip.Add(icon);
+                        var label = new Label(key) { pickingMode = PickingMode.Ignore };
+                        label.style.fontSize = 9f;
+                        label.style.color = Color.white;
+                        cell.Add(chip);
+                        cell.Add(label);
+                        sheet.Add(cell);
+                    }
+                yield return CardTestInput.Settle(0.3f);
+                yield return CardGalleryChecks.Render("Card_icons_sheet_390");
+            }
+            finally
+            {
+                sheet.RemoveFromHierarchy();
+            }
+        }
+
         [UnityTest]
         public IEnumerator AFamilyOfOne_DrawsNoChips_AndARealSwipeThereTurnsNothing_AndTheMediaFullViewRendersInBothLanguages()
         {
@@ -286,6 +336,27 @@ namespace TileStories.Tests
                 foreach (int i in new[] { at - 1, at, at + 1 })
                     Assert.IsTrue(strip.Contains(Takeover.Chips[i].worldBound.center), language + ": chip " + i + " in view around the current " + at
                         + " (" + Takeover.Chips[i].worldBound + " in " + strip + ")");
+                // - _3.2 step 17a: a chip is its block's KIND icon, not a number; the one being read says what it is, its words WHOLE at 390 px
+                //   (no ellipsis for The Lamp's headings), and every chip is still a whole touch target. Named by the block's words for a reader
+                var siblingKeys = Siblings("block_58");
+                for (int i = 0; i < Takeover.PageCount; i++)
+                {
+                    var chip = Takeover.Chips[i];
+                    Assert.IsTrue(Sheet.Stack.TryGetEntryOfBlock(siblingKeys[i], out var entry), "precondition: the sibling is on the card");
+                    BlockRegistry.Shared.TryGet(entry.Instance.kind, out var kind);
+                    Assert.AreEqual(kind.IconKey, CardIcons.KeyOf(Takeover.ChipIcon(i)), language + ": chip " + i + " wears its kind's icon");
+                    Assert.AreEqual(Nav.RowOf(siblingKeys[i]).Words, chip.tooltip, language + ": chip " + i + " is named by its block's words");
+                    Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(chip.worldBound.width, chip.worldBound.height),
+                        language + ": chip " + i + " is a whole touch target (" + chip.worldBound.size + ")");
+                }
+                var words = Takeover.ChipWords(at);
+                Assert.AreEqual(DisplayStyle.Flex, words.resolvedStyle.display, language + ": the chip being read shows its words");
+                Assert.AreEqual(Nav.RowOf(siblingKeys[at]).Words, words.text);
+                float natural = words.MeasureTextSize(words.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined).x;
+                Assert.LessOrEqual(natural, words.layout.width + 1f, language + ": the current chip's words are whole, cut by no ellipsis (" + natural
+                    + " px of text in a " + words.layout.width + " px label)");
+                Assert.IsTrue(strip.Contains(Takeover.Chips[at].worldBound.min) && strip.Contains(Takeover.Chips[at].worldBound.max),
+                    language + ": the whole current chip is inside the strip at 390 px (" + Takeover.Chips[at].worldBound + " in " + strip + ")");
                 yield return CardGalleryChecks.Render("FullView_Lamp_media_" + language + "_390");
                 Assert.IsTrue(Sheet.Back());
                 yield return CardTestInput.Settle(0.2f);

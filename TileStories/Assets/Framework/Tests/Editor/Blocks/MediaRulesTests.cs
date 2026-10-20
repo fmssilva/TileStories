@@ -115,6 +115,7 @@ namespace TileStories.Editor.Tests
             Key = "picture",
             Family = "media",
             Format = CardOptions.FormatLook,
+            IconKey = CardIcons.Info,
             DisplayName = "Picture",
             Variants = new[] { "plain" },
             DefaultVariant = "plain",

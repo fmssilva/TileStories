@@ -386,14 +386,14 @@ namespace TileStories
             OpenPages(_ => name, pageCount, startPage, drawPage);
 
         // The full-screen view with a name per page; no section in the breadcrumb until ShowCrumbSection names one
-        private void OpenPages(Func<int, string> nameOfPage, int pageCount, int startPage, TakeoverPageDrawer drawPage)
+        private void OpenPages(Func<int, string> nameOfPage, int pageCount, int startPage, TakeoverPageDrawer drawPage, Func<int, string> iconOfPage = null)
         {
             if (!IsOpen || _context == null) return;
             string title = Stack.BoundViews.Count > 0 && Stack.BoundViews[0] is HeaderBlockView header ? header.TitleText : "";
             // - never stacked: the full view replaces what was open over the card
             Overlay.Close();
             _crumbSection = -1;
-            Takeover.Open(title, nameOfPage, pageCount, startPage, _context.Media, drawPage, _context.Strings);
+            Takeover.Open(title, nameOfPage, pageCount, startPage, _context.Media, drawPage, _context.Strings, iconOfPage);
         }
 
         // A block asked for its full view (an open compact row's button, a bento tile): the page holds a second view of its kind, one page per
@@ -410,8 +410,9 @@ namespace TileStories
             int start = Mathf.Max(0, pages.FindIndex(p => p.Instance.key == blockKey));
             Func<string, string> words = _context.Strings != null ? _context.Strings.Get : null;
             string language = _context.Language, fallback = _context.FallbackLanguage;
+            // - a page with siblings: each chip carries its block's KIND icon (a page alone has no chips to tell apart: its number stays)
             OpenPages(page => CompactRowRule.Of(pages[page], _registry, language, fallback, words).Words, pages.Count, start,
-                FullView.PagesFor(pages, _context));
+                FullView.PagesFor(pages, _context), page => pages[page].Definition?.IconKey);
             ShowCrumbSection(FullViewSiblingRule.SectionOf(Nav.Model, blockKey));
         }
 

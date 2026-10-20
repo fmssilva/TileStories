@@ -236,6 +236,52 @@ namespace TileStories.Editor
             "presses Back to leave never loses their place in one go. Leave It To The App: the card ignores Back and the app " +
             "decides what it does.";
 
+        private const string CardPresetHelp =
+            "A starting point for how a card is navigated. Pick one and it sets seven rows together -- Layout, Top Bar, Bottom Bar, " +
+            "Floating Button, Menu, Edge and Auto Nav Block -- and nothing else: every other row keeps what you set. The button shows " +
+            "the preset those seven rows hold now, or Custom once you change one of them yourself. One Ctrl+Z puts all seven back. " +
+            "Long read is what a wall that never touched these rows already has. The first four are the strongest starting points; each " +
+            "line says who it suits. A preset is only a shortcut: afterwards every row is yours to change, and the wall keeps the seven " +
+            "values, never the preset's name.";
+
+        // The Progress Map's warning: names the busiest card by its list title and the section count where its pieces stop showing a share
+        internal static string CardProgressMapWarning(string cardName, int sections) =>
+            "The Progress Map gives each section a piece as wide as its share of the card's blocks. The busiest card of this wall (" +
+            cardName + ") has " + sections + " sections, and past " + NavigationWarningRule.ProgressMapSectionsThatFit +
+            " the pieces stop showing their share: each stays one finger wide and the bar scrolls sideways. " +
+            "Pick another Top Bar, or keep this wall's cards to fewer families.";
+
+        // The bento's warning: the section count where its tiles stop filling the card
+        internal static string CardBentoWarning(string cardName, int sections) =>
+            "Bento shows the sections as tiles that fill the card while there are about " + NavigationWarningRule.BentoSectionsThatFill +
+            " or fewer (about " + NavigationWarningRule.BentoSectionsThatFillWithTheTitleFolded + " once the card's title has folded away). " +
+            "The busiest card of this wall (" + cardName + ") has " + sections + " sections: past that every tile keeps its smallest size and the " +
+            "visitor scrolls the tiles, so the sizes show only inside a row. Pick another Layout, or keep this wall's cards to fewer sections.";
+
+        internal const string CardMoreThanTwoBarsWarning =
+            "Top Bar, Bottom Bar and Edge are all on: three bars leave little room to read at full height. " +
+            "Set one of them to None (the Edge also lies over the content).";
+
+        // The Bar Slots warning: the busiest card has more sections than the slots, and the row could still be raised
+        internal static string CardBarSlotsWarning(int slots, string cardName, int sections) =>
+            "Bar Slots is " + slots + ", but the busiest card of this wall (" + cardName + ") has " + sections + " sections: the last slot " +
+            "becomes More and the rest wait behind it. Raise Bar Slots (up to " + CardNavigationSettings.MaxSlotsMax + ") to show more sections at once.";
+
+        private const string CardPreviewNavigationHelp =
+            "Developer-only. Opens the demo card on the point below, at full height, so you can pick a preset or change a row here and " +
+            "watch the card follow in Play Mode. It is the same switch as Show demo card in Detail Card > Card Container > Test: the two " +
+            "turn on and off together. Off by default; a release build ignores it. To turn it off, untick it here (or there), then Save " +
+            "All to JSON and Copy to StreamingAssets before a normal build.";
+
+        private const string CardPreviewPointHelp =
+            "The point whose card opens (the same choice as Demo Point in Card Container > Test). Pick one with a long card: a card with " +
+            "fewer blocks than Show Navigation From only scrolls, so there is nothing of this section to see on it.";
+
+        // The note under Preview Point when the picked card shows no navigation at all
+        internal static string CardPreviewNoNavigationNote(string cardName, int minBlocks) =>
+            "The card of " + cardName + " shows no navigation: it has fewer blocks than Show Navigation From (" + minBlocks +
+            "), so it only scrolls. Pick a point with a longer card, or lower Show Navigation From.";
+
         private const string CardNavigationSceneTestGuide =
             "Not possible in Scene test: the card is screen-space UI Toolkit, so it draws only in Play Mode (or in Unity's " +
             "UI Builder for the bare layout); the Scene view has no preview of it to keep in sync. Use How to Playmode Test.";
@@ -474,6 +520,33 @@ namespace TileStories.Editor
             "- Open a line and tap its full-view button: the block fills the screen, the card's title and the block's words above it. " +
             "Play the video or turn the model there, press Escape: the card shows the same video at the same moment, and its own " +
             "player and model still answer. Switch the language or change a field while the full view is open: it stays, redrawn.\n" +
+            "PRESETS\n" +
+            "- Under the last row of Navigation, the Preset button reads Long read (or Custom): the preset the seven rows hold now. Click " +
+            "it: a list opens with Long read, Rich point, One hand and Over the camera first, then a line, then the rest, each with who it " +
+            "suits; the one in use is marked.\n" +
+            "- Pick Rich point: Layout, Top Bar, Bottom Bar, Floating Button, Menu, Edge and Auto Nav Block change together and the open " +
+            "card follows at once. Every other row (Block Order, Show Navigation From, Bar Slots, Follow Scroll...) keeps what it had. " +
+            "Press Ctrl+Z once: all seven rows are back.\n" +
+            "- Pick each of the others in turn and read the open card: One hand puts a bar at the bottom and a menu button in the title " +
+            "row; Over the camera has one round button and no bar; Deep dive adds kind chips, edge dots and a contents list; Guided a " +
+            "progress map, an Up Next bar and a contents list; Story turns the card into pages; Quick glance folds every block into a " +
+            "line; Overview shows the sections as tiles.\n" +
+            "- Change one of the seven rows yourself: the button reads Custom. Change it back: the preset's name returns.\n\n" +
+            "WARNINGS\n" +
+            "- Top Bar, Bottom Bar and Edge all on (pick Deep dive, then set Bottom Bar to a bar): a warning shows under Edge. Set one " +
+            "of the three to None: it goes. Two bars never warn.\n" +
+            "- Top Bar = Progress Map, on a wall whose busiest card has more sections than the warning names: it shows under Top Bar and " +
+            "says which card and how many. Another Top Bar: it goes.\n" +
+            "- Layout = Bento, on a wall whose busiest card has more sections than the warning names: it shows under Layout. Another " +
+            "Layout: it goes.\n" +
+            "- A Bottom Bar (or the Radial) with Bar Slots below the sections of the busiest card: a warning shows under Bar Slots. Raise " +
+            "Bar Slots to its top, or to the sections of that card: it goes.\n" +
+            "- Layout = Tabs with Top Bar and Bottom Bar None: a warning shows under Layout. A warning is only for you: no visitor ever " +
+            "sees one, and none changes the card.\n\n" +
+            "PREVIEW NAVIGATION\n" +
+            "- In this section's Test, tick Preview Navigation and pick a point with a long card in Preview Point, then press Play: that " +
+            "card opens by itself at full height. Pick presets above and watch the card follow. A point whose card is too short for " +
+            "navigation shows a note under Preview Point. Untick it when you are done.\n" +
             "- Test Runner: EditMode and PlayMode, zero failures.";
 
         private const string CardNavigationDeviceTestGuide =
@@ -520,6 +593,9 @@ namespace TileStories.Editor
             "- Hide While Scrolling: read a long card at full height with a thumb. The bottom buttons slide away as you read down and " +
             "come back with a small move up; a tap on the content never makes them jump. Check that the half height of a long card " +
             "shows something to read on this phone's screen.\n" +
+            "- Presets: pick One hand and Over the camera, then hold the phone in one hand and reach the bar, the menu button and the round " +
+            "button with that thumb; pick Quick glance and Story and use them while walking, as a visitor would. Untick Preview " +
+            "Navigation before a normal build.\n" +
             "- Nothing else here needs a device: the order and the jumps are the same on every screen.";
     }
 }

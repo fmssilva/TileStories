@@ -328,7 +328,7 @@ namespace TileStories.Editor.Tests
             registry.RegisterFamily(new FamilyDefinition { Key = "workshop", Order = 35, LabelKey = "app_family_workshop" });
             registry.Register(new BlockKindDefinition
             {
-                Key = "workshop_note", Family = "workshop", Format = CardOptions.FormatRead, DisplayName = "Workshop note",
+                Key = "workshop_note", Family = "workshop", Format = CardOptions.FormatRead, IconKey = CardIcons.Book, DisplayName = "Workshop note",
                 Variants = new[] { "plain" }, DefaultVariant = "plain", DisplayModes = new[] { CardOptions.DisplayInline },
             }, () => new PlainView());
 

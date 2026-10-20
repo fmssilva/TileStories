@@ -51,6 +51,15 @@ namespace TileStories.Editor
                 key => ApplyPopupEdit(() => assignKey(key)), IsStillEditing(_config));
         }
 
+        // _3.2 step 17a: the navigation preset picker. A pick applies the whole preset inside ONE mutation scope -- one history step,
+        // so one Ctrl+Z puts all seven rows back together
+        private NavigationPresetPickerPopup CreateNavigationPresetPickerPopup()
+        {
+            return new NavigationPresetPickerPopup(NavigationPresets.All, () => NavigationPresets.Matching(_config?.card_settings?.navigation),
+                preset => ApplyPopupEdit(() => NavigationPresets.Apply(_config.card_settings.navigation ??= new CardNavigationSettings(), preset)),
+                IsStillEditing(_config));
+        }
+
         // Same rule for a free-text note popup (one undo step per keystroke: its field lives in another window, see ActiveEditGesture)
         private EntryDetailsPopup CreateDetailsPopup(string title, Func<string> get, Action<string> set)
         {
