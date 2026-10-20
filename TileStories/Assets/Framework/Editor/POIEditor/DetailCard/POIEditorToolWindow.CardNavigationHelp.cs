@@ -207,6 +207,13 @@ namespace TileStories.Editor
             "put away are not loaded. Offer it for a short card read section by section, like a story, and never as a wall's only " +
             "layout: a visitor who has always scrolled down can be lost when a card suddenly turns sideways, and may not notice " +
             "there are more pages. " +
+            "Bento: the card opens on its sections as tiles -- each with its icon, its name and how many blocks it holds -- the " +
+            "section with the most blocks the largest, the others sized by their blocks; a tap opens that section over the card, its " +
+            "blocks one under the other, and Back returns to the tiles. Nothing of a section is loaded until it is opened. Suits a " +
+            "point visitors explore by topic rather than read from top to bottom. On a phone the tiles fill the card while it has " +
+            "about 13 sections or fewer; with more, every tile keeps its smallest size and the visitor scrolls the tiles. A tile is " +
+            "never smaller than a finger and its name, so a section of one or two blocks beside a large one shows the sizes only " +
+            "roughly. At Half the tiles are at their smallest and the card scrolls. " +
             "A card with fewer blocks than Show Navigation From, or with one section, always scrolls.";
 
         private const string CardTabsWithoutABarWarning =
@@ -262,6 +269,14 @@ namespace TileStories.Editor
             "A diagonal drag keeps doing what it started as. The first page has no left arrow, the last no right arrow and no edge at " +
             "the right. Tap an arrow: the card moves one family. A video playing on a page stops when you turn the page. Swipe a " +
             "filmstrip or turn a 3D model inside a page: the strip or the model moves, the page does not.\n" +
+            "- Set Layout = Bento and open a long card at full: its families are tiles filling the card, the family with the most " +
+            "blocks a full-width tile at its place with a large count, the others two to a row, a family left alone spanning its row; " +
+            "each tile shows its icon, its name and its number of blocks. The sources stay under the tiles.\n" +
+            "- Tap a tile: that family opens over the card, its blocks one under the other with their headings, and the title bar ends " +
+            "with the family's name. Press Escape (or Back): the tiles again, the card where it was; press it again: the card lowers. A " +
+            "video playing there stops when it closes.\n" +
+            "- With a Menu set, open it and pick a family: the menu closes and the family opens -- never two layers over the card. " +
+            "With a Top Bar, nothing is underlined on the tiles; a word opens its family and is underlined while it is open.\n" +
             "- Open a card with fewer blocks than Show Navigation From, or with one family: it scrolls as with Scroll.\n" +
             "- Set Layout = Scroll: every block is back, whole, in one scroll.\n\n" +
             "BLOCK ORDER\n" +
@@ -486,7 +501,8 @@ namespace TileStories.Editor
             "- Layout: with Accordion, open and fold lines with a thumb while scrolling, and check an open line never jumps the page; " +
             "with Tabs, switch sections with a thumb and check visitors can still tell which section they are in after scrolling; " +
             "with Pages, read a page down with a thumb and turn pages with the same thumb, and check a scroll never turns a page by " +
-            "accident and the next page's edge is noticed outdoors.\n" +
+            "accident and the next page's edge is noticed outdoors; with Bento, read every tile's name and count outdoors at the " +
+            "phone's width, tap the smallest tile with a thumb, and check the largest tile is what the eye goes to first.\n" +
             "- Expandable: on a card with expandable blocks, tap each line with a thumb (the whole line opens it) and the full-view " +
             "button of an open one; read every line's words whole at the phone's width, and check its icon and its kind of content " +
             "do not crowd the words.\n" +

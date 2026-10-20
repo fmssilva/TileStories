@@ -73,7 +73,8 @@ namespace TileStories
         public const string BentoKey = "block_900";
 
         // The card layouts the gallery shows (_3.2 section 6.1), every case drawn for each, with Text Tabs at the top (pages: the Family Pager)
-        public static readonly IReadOnlyList<string> Layouts = new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages };
+        public static readonly IReadOnlyList<string> Layouts = new[]
+            { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages, CardOptions.LayoutBento };
 
         // The Reading Time a contents entry's card gives the FIRST copy of each gallery block that carries the field (_3.2 step 11b), so its
         // list shows typed minutes beside the rows with none and the audio clip's own length

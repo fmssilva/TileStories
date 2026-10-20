@@ -294,6 +294,9 @@ namespace TileStories
             if (revealed) Revealed?.Invoke();
         }
 
+        // Ask the card's reading again when something outside the stack's scroll was read (a section of the full view, bento)
+        internal void ReadAgain() => UpdateContentSeen();
+
         // Collapse or open the header for the stack's current scroll (HeaderCollapseRule)
         private void UpdateHeaderCollapse()
         {

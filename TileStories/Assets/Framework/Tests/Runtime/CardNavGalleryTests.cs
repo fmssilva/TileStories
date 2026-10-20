@@ -126,7 +126,8 @@ namespace TileStories.Tests
             Assert.AreEqual((CardNavGalleryDefinitions.ElementKeys.Count + CardNavGalleryDefinitions.BlockKinds.Count + CardNavGalleryDefinitions.Layouts.Count) * 5,
                 CardNavGalleryDefinitions.All.Count, "every element, nav block and layout over the five cases");
             CollectionAssert.Contains(CardNavGalleryDefinitions.BlockKinds, BuiltInBlocks.NavIconGridKind, "the nav blocks are in the list too (step 11a)");
-            CollectionAssert.AreEquivalent(new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages }, CardNavGalleryDefinitions.Layouts,
+            CollectionAssert.AreEquivalent(new[] { CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages, CardOptions.LayoutBento },
+                CardNavGalleryDefinitions.Layouts,
                 "and the layouts built (steps 13-14)");
             CollectionAssert.IsSubsetOf(CardNavGalleryDefinitions.ElementKeys, NavElementRegistry.Shared.All.Select(e => e.Key), "every listed element is registered");
             foreach (var (key, targets, sections) in new[] { ("big", 62, 8), ("small", 6, 3), ("one_family", 5, 1), ("pt_long", 62, 8), ("two_families", 6, 2) })
@@ -495,6 +496,9 @@ namespace TileStories.Tests
         //   - tabs and pages: drawn so only where the case has two sections or more (one_family scrolls); then only the first section's blocks
         //     show, the others are set aside (no view, no file), and a real tap on the second tab (pages: the Family Pager's right chevron)
         //     shows the second section, spy and mark on it; pages also peek the next page at the edge
+        //   - bento (step 15b): every section set aside (no view, no file), a tile per section placed exactly where BentoLayoutRule says for the
+        //     measured room, each a whole touch target with its words whole at 4.5:1, the lead the largest; a real tap on the second tile opens
+        //     that section in the full view (its blocks bound there, the spy on it), Back returns to the tiles
         // Rendered Nav_layout_<layout>_<case>.png (and _open / _second)
         private static string[] LayoutEntryNames => CardNavGalleryDefinitions.All.Where(e => e.Layout != null).Select(e => e.Name).ToArray();
 
@@ -548,6 +552,11 @@ namespace TileStories.Tests
                 yield return CardGalleryChecks.Render(name);
                 yield break;
             }
+            if (entry.Layout == CardOptions.LayoutBento)
+            {
+                yield return BentoKeepsItsPromise(sheet, model, name, onePixel);
+                yield break;
+            }
             void AssertShown(int shown, string when)
             {
                 for (int i = 0; i < model.Sections.Count; i++)
@@ -593,6 +602,73 @@ namespace TileStories.Tests
             Assert.AreEqual(1, sheet.Nav.Current, "the spy names it");
             Assert.AreEqual(1, tabs.CurrentIndex, "and its tab is marked");
             yield return CardGalleryChecks.Render(name + "_second");
+        }
+
+        // Bento's promise on one case (the layout is already Effective: the case has sections to switch between)
+        private static IEnumerator BentoKeepsItsPromise(PoiCardSheetView sheet, CardNavModel model, string name, float onePixel)
+        {
+            var stack = sheet.Stack;
+            var bento = sheet.Bento;
+            Assert.IsTrue(bento.IsOn, "the tiles are drawn");
+            foreach (string key in model.Targets)
+            {
+                Assert.IsTrue(stack.IsParked(key), key + ": set aside");
+                Assert.IsNull(stack.ViewOfBlock(key), key + ": no view");
+                Assert.AreEqual(0, stack.HeldMediaOf(key), key + ": no file");
+            }
+            Assert.AreEqual(model.Sections.Count, bento.Tiles.Count, "a tile per section");
+            var placed = bento.Placed;
+            Assert.IsNotNull(placed, "the tiles were placed");
+            var host = bento.Host.worldBound;
+            float viewport = stack.Scroll.contentViewport.layout.height;
+            if (placed.Fills) Assert.AreEqual(viewport, host.height, onePixel, "filling the room the visitor sees (" + viewport + ")");
+            else Assert.Greater(host.height, viewport, "the tiles at their minimum: taller than the room, the overview scrolls");
+            float touch = CardTestInput.TokenPx("--ts-touch-target");
+            int lead = BentoLayoutRule.Lead(model.Sections.Select(s => s.Count).ToArray());
+            foreach (var tile in bento.Tiles)
+            {
+                var drawn = tile.Button.worldBound;
+                var rule = placed.Tiles[tile.Index];
+                Assert.AreEqual(rule.X, drawn.xMin - host.xMin, onePixel, tile.Words.text + ": drawn where the rule says (x)");
+                Assert.AreEqual(rule.Y, drawn.yMin - host.yMin, onePixel, tile.Words.text + ": (y)");
+                Assert.AreEqual(rule.Width, drawn.width, onePixel, tile.Words.text + ": (width)");
+                Assert.AreEqual(rule.Height, drawn.height, onePixel, tile.Words.text + ": (height)");
+                Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(drawn.width, drawn.height), tile.Words.text + ": a whole touch target");
+                Assert.GreaterOrEqual(System.Math.Min(drawn.width, drawn.height), touch - onePixel);
+                var words = tile.Words.MeasureTextSize(tile.Words.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+                Assert.LessOrEqual(words.x, tile.Words.layout.width + 0.5f, "'" + tile.Words.text + "': the whole word fits");
+                Assert.LessOrEqual(tile.Words.worldBound.xMax, drawn.xMax + onePixel, "'" + tile.Words.text + "': inside its tile");
+                AssertReadable(tile.Words);
+                AssertReadable(tile.Count);
+                Assert.AreEqual(model.Sections[tile.Index].Count.ToString(), tile.Count.text, tile.Words.text + ": its count");
+                foreach (var line in tile.ShownLines)
+                {
+                    Assert.LessOrEqual(line.worldBound.yMax, tile.Count.worldBound.yMin + onePixel, "'" + line.text + "': a name above the count");
+                    Assert.LessOrEqual(line.worldBound.xMax, drawn.xMax + onePixel, "'" + line.text + "': inside its tile");
+                }
+                Assert.LessOrEqual(tile.Count.worldBound.yMax, drawn.yMax + onePixel, tile.Words.text + ": the count whole inside its tile");
+                if (tile.Index != lead)
+                    Assert.Greater(bento.Tiles[lead].Button.worldBound.width * bento.Tiles[lead].Button.worldBound.height, drawn.width * drawn.height - onePixel,
+                        "the lead is the largest tile (" + tile.Words.text + ")");
+            }
+            yield return CardGalleryChecks.Render(name);
+
+            var second = bento.Tiles[1];
+            stack.Scroll.ScrollTo(second.Button);
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(stack.Scroll.contentViewport.worldBound.Contains(second.Button.worldBound.center), "precondition: the second tile is on screen");
+            yield return CardTestInput.Tap(sheet.Root.panel, second.Button.worldBound.center);
+            yield return CardTestInput.Settle();
+            Assert.IsTrue(sheet.FullView.IsOpen, "a real tap on the second tile opened its section in the full view");
+            Assert.AreEqual(model.Sections[1].Key, sheet.FullView.SectionKey);
+            CollectionAssert.AreEqual(model.Sections[1].Targets, sheet.FullView.SectionBlocks.ToList(), "its blocks, in order");
+            Assert.AreEqual(1, sheet.Nav.Current, "the spy names it");
+            yield return CardGalleryChecks.Render(name + "_open");
+            Assert.IsTrue(sheet.Back());
+            yield return CardTestInput.Settle();
+            Assert.IsFalse(sheet.FullView.IsOpen, "Back: the tiles again");
+            Assert.AreEqual(-1, sheet.Nav.Current, "no section on the overview");
+            Assert.AreEqual(0, sheet.Takeover.HeldMedia, "the page holds nothing");
         }
 
         private static void AssertReadable(Label words)

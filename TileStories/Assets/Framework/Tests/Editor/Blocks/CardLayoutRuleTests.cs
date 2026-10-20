@@ -38,14 +38,16 @@ namespace TileStories.Editor.Tests
         {
             Assert.AreEqual(CardOptions.LayoutScroll, new CardNavigationSettings().layout, "the shipped default");
             Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(null));
-            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(Nav("bento")), "a later step's layout reads as scroll until it is built");
+            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(Nav("mosaic")), "a layout the framework does not have reads as scroll");
             Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Layout(Nav("")));
             Assert.AreEqual(CardOptions.LayoutAccordion, CardLayoutRule.Layout(Nav(CardOptions.LayoutAccordion)));
             Assert.AreEqual(CardOptions.LayoutTabs, CardLayoutRule.Layout(Nav(CardOptions.LayoutTabs)));
             Assert.AreEqual(CardOptions.LayoutPages, CardLayoutRule.Layout(Nav(CardOptions.LayoutPages)));
+            Assert.AreEqual(CardOptions.LayoutBento, CardLayoutRule.Layout(Nav(CardOptions.LayoutBento)));
             // - offered, never the default (Paul 2023, scrolljacking: changing the scroll direction disorients)
             Assert.AreNotEqual(CardOptions.LayoutPages, new CardNavigationSettings().layout);
-            CollectionAssert.AreEqual(new[] { "scroll", "accordion", "tabs", "pages" }, CardOptions.Layouts, "the Editor's order: Scroll first");
+            CollectionAssert.AreEqual(new[] { "scroll", "accordion", "tabs", "pages", "bento" }, CardOptions.Layouts, "the Editor's order: Scroll first");
+            Assert.AreEqual("Bento", CardOptions.LayoutLabels[System.Array.IndexOf(CardOptions.Layouts, CardOptions.LayoutBento)]);
             Assert.AreEqual("Pages", CardOptions.LayoutLabels[System.Array.IndexOf(CardOptions.Layouts, CardOptions.LayoutPages)]);
         }
 
@@ -140,6 +142,50 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(CardLayoutRule.ShowsSectionBeforeJump(CardOptions.LayoutAccordion));
             Assert.IsTrue(CardLayoutRule.OpensRowBeforeJump(true), "a closed row opens: the visitor jumped there to see the block");
             Assert.IsFalse(CardLayoutRule.OpensRowBeforeJump(false), "a block drawn whole, or a row already open: just the scroll");
+        }
+
+        // Bento (step 15b): like tabs it needs sections to switch between and sets them aside -- ALL of them, its tiles stand for them; a jump
+        // to a block of a section opens that section in the full view (never a scroll, never a section shown in the stack), a block of no
+        // section scrolls the overview; the spy names the section open in the full view and NONE on the overview; the Top Bar stays the wall's
+        [Test]
+        public void Bento_NeedsSectionsToSwitchBetween_SetsEverySectionAside_AndAJumpOpensItsSectionInTheFullView()
+        {
+            var config = Shipped();
+            config.card_settings.navigation.layout = CardOptions.LayoutBento;
+            var nav = config.card_settings.navigation;
+            var lamp = Model(config, Lamp);
+            Assert.AreEqual(CardOptions.LayoutBento, CardLayoutRule.Effective(nav, lamp), "The Lamp: 8 sections");
+            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Effective(nav, Model(config, LampMilitary)), "Military: under Show Navigation From");
+            Assert.AreEqual(CardOptions.LayoutScroll, CardLayoutRule.Effective(nav, Model(config, LampReligious)), "Religious: the header alone");
+
+            Assert.IsTrue(CardLayoutRule.ParksSections(CardOptions.LayoutBento), "its blocks are set aside");
+            Assert.IsTrue(CardLayoutRule.OpensSectionsInFullView(CardOptions.LayoutBento));
+            foreach (string other in new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages })
+            {
+                Assert.IsFalse(CardLayoutRule.OpensSectionsInFullView(other), other);
+                Assert.IsFalse(CardLayoutRule.JumpOpensSection(other, 2), other + ": a jump scrolls");
+            }
+            Assert.AreEqual(-1, CardLayoutRule.FirstShown(CardOptions.LayoutBento, lamp.Sections.Count), "no section shown in the stack: every block is set aside");
+            Assert.AreEqual(0, CardLayoutRule.FirstShown(CardOptions.LayoutTabs, lamp.Sections.Count), "tabs open on the first");
+            // - with no section shown, ShowsWith keeps exactly the blocks of no section (the sources) on the overview
+            for (int i = 0; i < lamp.Sections.Count; i++)
+                Assert.IsFalse(CardLayoutRule.ShowsWith(i, CardLayoutRule.FirstShown(CardOptions.LayoutBento, lamp.Sections.Count)), "section " + i + " set aside");
+            Assert.IsTrue(CardLayoutRule.ShowsWith(-1, -1), "a block of no section stays");
+
+            Assert.IsTrue(CardLayoutRule.JumpOpensSection(CardOptions.LayoutBento, 0), "a block of a section: its section opens in the full view");
+            Assert.IsFalse(CardLayoutRule.JumpOpensSection(CardOptions.LayoutBento, -1), "the sources (no section): the overview scrolls to them");
+            Assert.IsFalse(CardLayoutRule.ShowsSectionBeforeJump(CardOptions.LayoutBento), "never a section shown in the stack");
+            Assert.IsFalse(CardLayoutRule.OpensRowBeforeJump(false));
+
+            Assert.AreEqual(-1, CardLayoutRule.SpySection(CardOptions.LayoutBento, -1, 5), "the overview: no section, whatever the scroll measured");
+            Assert.AreEqual(3, CardLayoutRule.SpySection(CardOptions.LayoutBento, 3, 5), "the section open in the full view");
+            Assert.IsNull(CardLayoutRule.SpyBlock(CardOptions.LayoutBento, null, "block_9"), "the overview: no block");
+            Assert.AreEqual("block_20", CardLayoutRule.SpyBlock(CardOptions.LayoutBento, "block_20", "block_9"), "the block the full view opened at");
+            Assert.AreEqual("block_9", CardLayoutRule.SpyBlock(CardOptions.LayoutTabs, "block_20", "block_9"), "elsewhere what was measured");
+
+            Assert.AreEqual(nav.top, CardLayoutRule.TopElement(nav), "the wall's Top Bar is kept (it marks the open section, nothing on the overview)");
+            Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(Nav(CardOptions.LayoutBento, top: CardOptions.NavNone, bottom: CardOptions.NavNone)),
+                "no element needed: the tiles are the way between sections");
         }
 
         [Test]

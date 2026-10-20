@@ -35,6 +35,8 @@ namespace TileStories
         public CardLayoutView Layout { get; }
         // The pages layout's sideways turn (_3.2 step 14): the next page's peek, the slide with the finger, the turn
         public CardPagerView Pager { get; }
+        // The bento layout's overview (_3.2 step 15b): the sections as tiles where the blocks were; a tile opens its section in the full view
+        public CardBentoView Bento { get; }
         // The full-screen view over the card (a gallery's lightbox), above the sheet in the same layer
         public TakeoverView Takeover { get; }
         // Any block of the card in that full view (_3.2 step 12): a second view of its kind, while the card's own stays bound
@@ -129,6 +131,7 @@ namespace TileStories
             Slots = new NavSlots(Root, Stack.Scroll, BottomArea, Floating.Elements, navElements ?? NavElementRegistry.Shared);
             Chrome = new CardChromeView(this);
             Pager = new CardPagerView(Root, Stack.Scroll, Layout, Nav);
+            Bento = new CardBentoView(Stack, Layout, Nav);
 
             // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings
             CloseButton = new Button(() => CloseRequested?.Invoke()) { name = "poi-card-close" };
@@ -158,6 +161,15 @@ namespace TileStories
             Layer.Add(Root);
             Takeover = new TakeoverView(Layer);
             FullView = new BlockFullView(Takeover, Stack.Views);
+            // - bento: a jump opens its section in the full view; what the visitor reads there counts as read, and closing it is the overview
+            //   again (the reading asked again: the card may now have been read to its end)
+            Layout.SectionOpener = OpenSectionView;
+            FullView.Viewed += Nav.ViewedInFullView;
+            FullView.SectionLeft += () =>
+            {
+                Layout.SectionViewClosed();
+                if (IsOpen) Stack.ReadAgain();
+            };
             // - a jump moves the card under the full view: the visitor would see nothing of it, so the full view closes (an Open Block
             //   button or a hotspot pin used inside it lands on the card)
             Nav.Jumped += Takeover.Close;
@@ -196,7 +208,9 @@ namespace TileStories
             context.Host ??= this;
             // - a block in the full view stays there over a rebind of the SAME point (a live edit, a language switch): it is drawn again
             //   from the new stack once the card is bound. Another point replaces the full-screen view of the old one
-            string reopen = FullView.IsOpen && context.Poi?.id != null && context.Poi?.id == _context?.Poi?.id ? FullView.BlockKey : null;
+            bool samePoint = FullView.IsOpen && context.Poi?.id != null && context.Poi?.id == _context?.Poi?.id;
+            string reopen = samePoint ? FullView.BlockKey : null;
+            string reopenSection = samePoint ? FullView.SectionKey : null;
             // - and whatever was open over the old card closes
             Takeover.Close();
             Overlay.Close();
@@ -222,8 +236,10 @@ namespace TileStories
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
             Floating.Bind(context);
-            // - a block the rebind dropped (a live edit deleted it) is not reopened: OpenFullView finds no entry
+            // - a block the rebind dropped (a live edit deleted it) is not reopened: OpenFullView finds no entry; a section only while the card
+            //   is still drawn as bento and still has it
             if (reopen != null) OpenFullView(reopen);
+            else if (reopenSection != null) Layout.ReopenSection(reopenSection);
         }
 
         // Build the shown card's navigation model -- with the stack's own reveal predicate, so a block the stack hides is never a target --
@@ -237,6 +253,7 @@ namespace TileStories
             // - the layout first: the controller's spy reads the section tabs shows
             Layout.Bind(model, _context);
             Pager.Bind(model, _context);
+            Bento.Bind(model, _context);
             Nav.Bind(model, _context);
             Slots.Bind(Nav.Model, Nav, _context);
             Floating.Refresh();
@@ -274,6 +291,7 @@ namespace TileStories
             Nav?.Unbind();
             Layout?.Unbind();
             Pager?.Unbind();
+            Bento?.Unbind();
             Slots?.Unbind();
             Floating?.Unbind();
             if (MenuButton != null) ShowMenuButton();
@@ -382,6 +400,23 @@ namespace TileStories
             System.Func<string, string> words = _context.Strings != null ? _context.Strings.Get : null;
             string name = CompactRowRule.Of(entry, _registry, _context.Language, _context.FallbackLanguage, words).Words;
             OpenTakeover(name, 1, 0, FullView.PageFor(entry, _context));
+        }
+
+        // Bento: section `index` of the card's map in the full view -- its targets one under the other, landing on `landingKey` (null: its
+        // top); the breadcrumb ends with the section's words. CardLayoutView asks (SectionOpener); false when nothing could be drawn
+        private bool OpenSectionView(int index, string landingKey)
+        {
+            var model = Nav.Model;
+            if (!IsOpen || _context == null || model == null || index < 0 || index >= model.Sections.Count) return false;
+            var section = model.Sections[index];
+            var entries = new List<BlockStackBuilder.Entry>();
+            foreach (string target in section.Targets)
+                if (Stack.TryGetEntryOfBlock(target, out var entry)) entries.Add(entry);
+            if (entries.Count == 0) return false;
+            string words = _context.Strings != null && section.LabelKey != null ? _context.Strings.Get(section.LabelKey) : "";
+            OpenTakeover(string.IsNullOrEmpty(words) ? section.Key : words, 1, 0,
+                FullView.SectionPageFor(entries, section.Key, Stack.HeadingOfBlock, _context, landingKey));
+            return FullView.IsOpen;
         }
 
         // Rest at `stop` (Dismissed hides)

@@ -11,6 +11,10 @@ namespace TileStories
     //   - pages: tabs' one-section-at-a-time turned sideways -- each section a page that scrolls up and down inside, the next page peeking
     //     at the right edge, a sideways swipe or the Family Pager's chevrons turning it (CardPagerView, SwipePageRule). The top slot always
     //     holds the Family Pager: it names the page and is the way without a swipe (WCAG 2.5.7)
+    //   - bento: the sections as tiles sized by their target counts (CardBentoView, BentoLayoutRule) over EVERY section set aside, and a jump
+    //     to a block of a section -- a tile, a tab, a menu pick, an Open Block button -- opens that section in the full view instead of
+    //     scrolling (one sheet over the card, never a second). A block of no section (the sources) stays under the tiles. The spy names the
+    //     section open in the full view, none on the overview (nothing is being read there)
     public static class CardLayoutRule
     {
         // The layout the wall picked: scroll for anything it does not know (an unset field, a typo, a layout of a later step)
@@ -18,6 +22,7 @@ namespace TileStories
         {
             string layout = settings?.layout;
             return layout == CardOptions.LayoutAccordion || layout == CardOptions.LayoutTabs || layout == CardOptions.LayoutPages
+                || layout == CardOptions.LayoutBento
                 ? layout : CardOptions.LayoutScroll;
         }
 
@@ -31,8 +36,16 @@ namespace TileStories
                 ? layout : CardOptions.LayoutScroll;
         }
 
-        // Whether a layout shows one section at a time and sets the others aside (tabs, pages)
-        public static bool ParksSections(string layout) => layout == CardOptions.LayoutTabs || layout == CardOptions.LayoutPages;
+        // Whether a layout sets sections aside: tabs and pages show one at a time, bento none (its tiles stand for them)
+        public static bool ParksSections(string layout) =>
+            layout == CardOptions.LayoutTabs || layout == CardOptions.LayoutPages || layout == CardOptions.LayoutBento;
+
+        // Whether the card is drawn as tiles that open their sections in the full view (CardBentoView draws them)
+        public static bool OpensSectionsInFullView(string effectiveLayout) => effectiveLayout == CardOptions.LayoutBento;
+
+        // The section shown in the stack when a card is bound: the first in tabs and pages, none in bento
+        public static int FirstShown(string effectiveLayout, int sectionCount) =>
+            OpensSectionsInFullView(effectiveLayout) || sectionCount == 0 ? -1 : 0;
 
         // Whether the card is drawn as sideways pages (CardPagerView turns them)
         public static bool TurnsPages(string effectiveLayout) => effectiveLayout == CardOptions.LayoutPages;
@@ -70,16 +83,25 @@ namespace TileStories
 
         // What a jump does before the stack scrolls to its block (NavController asks; both may apply): in tabs and pages, show the block's
         // section (pages: turn to its page)
-        public static bool ShowsSectionBeforeJump(string effectiveLayout) => ParksSections(effectiveLayout);
+        public static bool ShowsSectionBeforeJump(string effectiveLayout) => ParksSections(effectiveLayout) && !OpensSectionsInFullView(effectiveLayout);
+
+        // Whether a jump to a block of section `section` (-1: none) opens that section in the full view instead of scrolling: bento, for a
+        // block of a section. A block of no section stays on the overview and the stack scrolls to it as in every layout
+        public static bool JumpOpensSection(string effectiveLayout, int section) => OpensSectionsInFullView(effectiveLayout) && section >= 0;
 
         // ...and a block drawn as a CLOSED compact row (an accordion row, an expandable block in any layout) opens: the visitor jumped there
         // to see the block, not its one-line header
         public static bool OpensRowBeforeJump(bool targetIsClosedRow) => targetIsClosedRow;
 
-        // The section the scroll-spy names: in tabs and pages, the section shown (the scroll moves inside it, never to another); else what
-        // was measured
+        // The section the scroll-spy names: in tabs and pages, the section shown (the scroll moves inside it, never to another); in bento the
+        // section open in the full view, -1 on the overview (`shownSection` is that one there); else what was measured
         public static int SpySection(string effectiveLayout, int shownSection, int measured) =>
-            ParksSections(effectiveLayout) && shownSection >= 0 ? shownSection : measured;
+            OpensSectionsInFullView(effectiveLayout) ? shownSection
+            : ParksSections(effectiveLayout) && shownSection >= 0 ? shownSection : measured;
+
+        // The target the block spy names: in bento the block the open full view opened at (none on the overview); else what was measured
+        public static string SpyBlock(string effectiveLayout, string openBlock, string measured) =>
+            OpensSectionsInFullView(effectiveLayout) ? openBlock : measured;
 
         private static bool IsNone(string key) => string.IsNullOrWhiteSpace(key) || key == CardOptions.NavNone;
     }

@@ -335,6 +335,10 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   changes; does a thumb that starts a vertical scroll ON a rail ever move it by mistake (Phase B proves the rule with a 90 degree stroke, not a
   tilted one); does a visitor find the "All 18" card; and do the bento's full-view tiles read as "opens over the card" from the glyph alone. Also
   how the pages layout's arriving page reads on a real swipe: its words as compact rows, then the real blocks at the turn.
+- [bento layout, `_3.2` step 15b] With a thumb, outdoors: is the largest tile what the eye goes to first; are the tiles' block names and counts
+  read at arm's length (caption size, `--ts-ink-2`); is the smallest tile (64 px, Listen / Community) tapped with a thumb; does a visitor expect
+  Back to return to the tiles (it does) or to leave the card; and does the section opening over the card read as "inside the card" or as a new
+  screen.
 - [Portuguese card] Read the PT card on a phone once (accents, wrapping of the longer words) with the visitor language chip.
 - [_3.2 navigation, once built] With a thumb: the radial arc (step 9) and the edge scrubber (10); the pages layout vs vertical scrolling (14:
   disorienting?); Android Back steps the card down (4: `Keyboard.escapeKey`); the placed-model chip at peek (9) answers the Keep Model On
@@ -474,6 +478,10 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   a second plausible cause). That fixture now taps through its own `InViewAndStill` (scroll until in view AND the same rect for three frames).
   If another fixture loses a tap after a scroll, move that precondition into `TapInView` itself (shared ground: a full PlayMode run).
 
+- STILL OPEN (2026-10-20, _3.2 step 15b): NOT seen in either long run of 15b -- the Card / Poi targeted set (892 tests) and the full PlayMode
+  run (1113/1113, wholly in the background): 0 "Layout update is struggling" lines in the Editor log over both, `ARealDragToTheEnd_...` green in
+  both. Two quiet runs after three loud ones: left open, not closed (the brief: never on one quiet run). If it shows again, the entry below says
+  where to start.
 - OPEN AGAIN (2026-10-20, seen at _3.2 step 15a, the entry below): the Card / Poi targeted set (865 tests, 37 fixtures, ~test 612) failed
   `PoiCardBottomElementsSceneTests.ARealDragToTheEnd_...` with six "Layout update is struggling" lines (PanelRootElement 390 x 844, Unity in the
   background); the same fixture passed 16/16 in the next run (595 tests with the galleries) and the step 15a block's own views are not bound
@@ -496,6 +504,12 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   allowed). The developer's call: logged, and the next full run decides -- if it shows again, find the loop (which callback dirties layout
   more than once per frame at the end of the card) and fix it there.
 
+- OPEN (2026-10-20, seen once at _3.2 step 15b): `CardGalleryTests.KnowledgeCheck_TrueFalse_ARealSwipeRightIsTrue_...` failed in the Card /
+  Poi targeted set (892 tests) at "the card came back": `translate.x` read 29.83 right after a short drag of a tenth of the stage (the stage is
+  ~298 px: exactly the drag) -- the assertion reads the resolved style in the same step as the release, with no frame for the snap-back to apply.
+  Passed alone with Unity in the background (149/149 with the gallery fixtures). Step 15b did not touch the knowledge check, SwipeGrab or the
+  gallery harness. If it shows again: wait a frame (or for the stage to rest) before reading `translate`, like `InViewAndStill` waits for a rest.
+
 ## The contents list on a long card (2026-10-18, from _3.2 step 11b)
 
 
@@ -517,3 +531,21 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   About 54, so "sized by target count" barely shows on The Lamp (it does on shorter cards: 190 / 125 / 62 px for 3 / 2 / 1 targets). A
   device check should say whether visitors read it as a map at all with eight pieces; if not, the wall can pick another Top Bar (no code).
 - "Trying to access the DPI setting of a visual element that is not on a panel" is logged (several lines) when a live card edit rebinds the open card in Play Mode (seen in `PoiCardTextTabsSceneTests` runs, green). Find which element reads a style before it is on the panel; harmless today, but it is log noise in every live-edit test.
+
+## From _3.2 step 15b (the bento layout, 2026-10-20)
+
+- QUESTION for the Architect -- **the ONE video owner keeps a paused clip after its last view left the screen.** Measured at 15b on the owners:
+  a video played in a bento section page and the page closed -> `VideoBlockView.Collapsing()` pauses it (step 12's rule) and the owner keeps the
+  clip loaded (`Card.Media` holds `video/castelo_s_jorge_video`, one reference) until another video plays or the card closes. The same holds today
+  for a closed expandable row, a tabs section put away and a page turned: in all four no view on screen shows that video any more, so nothing can
+  resume it but the same block coming back. Either keep it (resuming where the visitor left is cheap and the clip is one file), or let the owner
+  give the clip back once no bound view shows its track (an owner rule, shared ground: a full PlayMode run). `PoiCardBentoLayoutSceneTests.Closing...`
+  asserts today's behaviour exactly, so a change turns it red on purpose.
+- TEST QUALITY: `PoiCardLayoutSceneTests` (step 13, tabs) asserts `Assert.IsFalse(_video.IsCurrent(video.Track), ...)` AFTER the section was put
+  away -- but `VideoBlockView.Unbind` sets its track to null, and `IsCurrent(null)` is always false, so that line proves nothing (the video owner in
+  fact keeps the paused track, item above). Read the track BEFORE the view is unbound, as the bento test does; then decide with the item above
+  what the assertion should be.
+- IDEA (not built; the brief said "filling the card"): a bento card with few sections and few blocks (the gallery's small case: 3 sections, 5 blocks
+  at Full) fills the card with very tall tiles holding one to three names each -- mostly empty plates. A tile could stop at the height its names need
+  (the rest of the card left to the sources under the tiles). It changes "filling the card"; a design decision for `_3.3` / the Architect. With the
+  default Show Navigation From (8) a card that short never gets the bento.

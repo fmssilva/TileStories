@@ -194,6 +194,12 @@
        number across the strip) and a bento tile's picture height */
     --ts-rail-card: 140px;
     --ts-bento-picture: 120px;
+    /* the bento LAYOUT (Navigation.uss, CardBentoView, _3.2 step 15b): a tile's lowest height (its icon and words over its count, more
+       than a touch target) and the gap between tiles, a plain number (panel units, no "px") read by CardBentoView on this card root */
+    --ts-bento-tile-min-height: 64px;
+    --ts-bento-gap: 8;
+    /* ...and the narrowest a tile's list of block names is shown in (a plain number): a name cut to a few letters is noise, not a cue */
+    --ts-bento-names-min-width: 140;
     /* The swipe tracks (timeline, related) with Peek Next Card: the slice of the next card shown at rest, read as a plain number (panel
        units, no "px": a CustomStyleProperty<float> does not parse a dimension) by CardTrackFit on this card root, like --ts-sheet-top-gap;
        small enough that two whole cards still fit the phone strip beside it */

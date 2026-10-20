@@ -1455,3 +1455,96 @@
     margin-left: var(--ts-space-2);
     color: var(--ts-accent-text);
 }
+
+/* ---- the bento LAYOUT (CardBentoView, _3.2 step 15b): the card's sections as tiles where its blocks were, placed by BentoLayoutRule
+   (absolute in the host: the rule gives every rect); the section with the most blocks leads -- larger words, a big count and an accent
+   edge: the screen's one focal point. Every tile: family icon in its colour + words + count, never colour alone ---- */
+
+.card-bento {
+    margin: 0 var(--ts-space-4) var(--ts-block-gap) var(--ts-space-4);
+}
+
+.card-bento__tile {
+    position: absolute;
+    min-width: var(--ts-touch-target);
+    min-height: var(--ts-bento-tile-min-height);
+    margin: 0;
+    padding: var(--ts-space-3);
+    overflow: hidden;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    background-color: var(--ts-surface-2);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-radius-m);
+}
+
+.card-bento__tile:hover,
+.card-bento__tile:active {
+    background-color: var(--ts-surface-2);
+}
+
+.card-bento__line {
+    flex-direction: row;
+    align-items: center;
+}
+
+.card-bento__icon {
+    flex-shrink: 0;
+    margin: 0 var(--ts-space-2) 0 0;
+}
+
+.card-bento__words {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-body);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+    white-space: nowrap;
+    -unity-text-align: middle-left;
+}
+
+/* the names of the section's blocks, as many as the tile holds (CardBentoView hides the rest in place); an empty box takes no height, so a
+   tile at its minimum still holds its title and count */
+.card-bento__names {
+    flex-grow: 1;
+    flex-shrink: 1;
+    align-self: stretch;
+    overflow: hidden;
+    margin: 0;
+}
+
+.card-bento__name {
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -unity-text-align: upper-left;
+}
+
+.card-bento__count {
+    margin: 0;
+    padding: 0;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+    -unity-text-align: lower-left;
+}
+
+.card-bento__tile--lead {
+    border-color: var(--ts-accent);
+    border-width: var(--ts-choice-border);
+}
+
+.card-bento__tile--lead .card-bento__words {
+    font-size: var(--ts-size-heading);
+}
+
+.card-bento__tile--lead .card-bento__count {
+    font-size: var(--ts-size-title);
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
