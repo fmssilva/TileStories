@@ -19,6 +19,8 @@ namespace TileStories
         private float _dragStartOffset;
         // The item to bring into view once the row is laid out (null = none pending)
         private VisualElement _pendingShow;
+        // Whether that item goes to the middle of the strip (ShowCentred) rather than just into view
+        private bool _pendingCentred;
 
         // `name`: the element's name, the strip's parts are named after it ("<name>-viewport", "<name>-row")
         public NavStrip(string name, string viewportClass, string rowClass)
@@ -50,6 +52,16 @@ namespace TileStories
         public void Show(VisualElement item)
         {
             _pendingShow = item;
+            _pendingCentred = false;
+            Relayout();
+        }
+
+        // Bring an item to the middle of the strip (clamped at the ends) -- now if it is laid out, else as soon as it is: a row stepped through
+        // by taps keeps the neighbours on both sides in reach (NavStripRule.OffsetToCentre)
+        public void ShowCentred(VisualElement item)
+        {
+            _pendingShow = item;
+            _pendingCentred = true;
             Relayout();
         }
 
@@ -64,7 +76,9 @@ namespace TileStories
                     return;
                 }
                 _pendingShow = null;
-                SetOffset(NavStripRule.OffsetToShow(box.x, box.width, VisibleWidth, Row.layout.width, Offset));
+                SetOffset(_pendingCentred
+                    ? NavStripRule.OffsetToCentre(box.x, box.width, VisibleWidth, Row.layout.width, Offset)
+                    : NavStripRule.OffsetToShow(box.x, box.width, VisibleWidth, Row.layout.width, Offset));
                 return;
             }
             SetOffset(Offset);

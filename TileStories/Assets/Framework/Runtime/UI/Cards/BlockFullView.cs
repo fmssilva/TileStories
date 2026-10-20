@@ -13,6 +13,8 @@ namespace TileStories
     // closing, the view reopened over a rebind) unbinds the view BEFORE the takeover gives its files back, and returns it to the pool.
     // The page scrolls (a long text reads to its end) and a view that fills the screen -- a video, a 3D / 360 stage -- takes all its height.
     // Owned by the sheet (PoiCardSheetView.OpenFullView decides when; this binds and lets go).
+    // Among its SIBLINGS (_3.2 step 16, FullViewSiblingRule): the block opens as one page of its section's blocks, a swipe or a chip turning to
+    // the next without returning to the card -- each turn hands every owner from one block's view to the next through the takeover's page change.
     // A whole SECTION (the bento layout, _3.2 step 15b: the card's own views of it are set aside, so nothing is bound twice): its targets one
     // under the other, each under the words the stack draws over it, through the takeover's one media scope, all let go when the page leaves.
     // The page lands on the block the jump named, and reports each block the visitor had in view (NavScrollRule.HasViewed, the stack's own
@@ -91,6 +93,30 @@ namespace TileStories
             Scroll.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => MeasureViewed());
             Scroll.RegisterCallback<PointerDownEvent>(_ => _landing = null, TrickleDown.TrickleDown);
             Scroll.RegisterCallback<WheelEvent>(_ => _landing = null, TrickleDown.TrickleDown);
+
+            // - the sibling swipe (_3.2 step 16): the ONE way a part takes a finger, as the pages layout does on the card's stack -- judged once
+            //   past the slop, clearly sideways only (reading down the page stays the scroll's), and a finger that lands on a part that drags by
+            //   itself (a 3D / 360 stage, a slider, a filmstrip) is that part's. The page follows the finger, then turns or slides back
+            var swipe = new SwipeGrab(Scroll.contentViewport, travel => TurnsBetweenBlocks && SwipeGrabRule.ClaimsPointer(travel), leavesToParts: true);
+            swipe.Moved += travel => Scroll.style.translate = new Translate(
+                SwipePageRule.DragOffset(travel.x, _takeover.PageIndex > 0, _takeover.PageIndex < _takeover.PageCount - 1), 0f);
+            swipe.Released += travel =>
+            {
+                Scroll.style.translate = StyleKeyword.Null;
+                int direction = SwipePageRule.Direction(travel, Scroll.contentViewport.layout.width);
+                if (direction != 0) _takeover.Turn(direction);
+            };
+            swipe.Cancelled += () => Scroll.style.translate = StyleKeyword.Null;
+        }
+
+        // Whether the full view shows one block among its siblings now (a page per sibling): what a sideways swipe turns
+        public bool TurnsBetweenBlocks => View != null && _takeover.IsOpen && _takeover.PageCount > 1;
+
+        // The page drawer for a block among its siblings (FullViewSiblingRule): page i binds `entries[i]` exactly as PageFor does, so a turn is
+        // the takeover's own page change -- the leaving view unbinds BEFORE the scope gives its files back, then the next binds
+        public TakeoverPageDrawer PagesFor(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockBindContext context)
+        {
+            return (takeover, container, media, page) => PageFor(entries[page], context)(takeover, container, media, page);
         }
 
         // The block shown in the full view now (null when none: closed, or the takeover shows something else -- a lightbox)
@@ -205,9 +231,12 @@ namespace TileStories
             SectionLeft?.Invoke();
         }
 
-        // Unbind the second view and give it back (the takeover releases its scope right after)
+        // Unbind the second view and give it back (the takeover releases its scope right after). On a TURN to a sibling (the takeover still
+        // open) a view that keeps something going lets it go first -- a playing video pauses: the next sibling covers it, and nothing on screen
+        // would show it or stop it. Closing keeps step 12's rule: the card's own view of the block is right under it, showing the same playback
         private void Release(string kind, IBlockView view)
         {
+            if (_takeover.IsOpen) (view as ICollapsibleBlockView)?.Collapsing();
             view.Unbind();
             view.Root.RemoveFromClassList(BlockClass);
             view.Root.RemoveFromHierarchy();

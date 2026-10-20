@@ -14,7 +14,7 @@ namespace TileStories.Editor.Tests
     //   - every section set aside (no view, no file), a tile per section in the model's order with its words and count, the most-read one leading
     //   - a jump to a block of a section opens THAT section in the full view (its targets in order, a second view each, through the takeover's
     //     scope), one nav_jump; a jump to the sources (no section) scrolls the overview and closes the full view
-    //   - Current: none on the overview, the open section while it is open (a Top Bar marks the same), none again after Back
+    //   - Current: none on the overview, the open section while it is open, none again after Back; no Top Bar over the tiles (step 16)
     //   - no sheet on a sheet: an open menu closes before the full view opens, a second jump replaces the page, ONE Back reaches the bento
     //   - Back and closing give every file back; a rebind of the same point keeps the section open; a short card scrolls
     public class BentoLayoutSheetTests
@@ -114,7 +114,7 @@ namespace TileStories.Editor.Tests
                 Assert.IsNull(sheet.Stack.ViewOfBlock(target), target + ": the card's own stays set aside (bound once)");
             }
             Assert.Greater(sheet.Takeover.HeldMedia, 0, "the page loads its pictures through the takeover's scope");
-            StringAssert.EndsWith(" > " + context.Strings.Get(media1.LabelKey), sheet.Takeover.Crumb.text, "the breadcrumb ends with the section's words");
+            StringAssert.EndsWith(" > " + context.Strings.Get(media1.LabelKey), sheet.Takeover.CrumbText, "the breadcrumb ends with the section's words");
             Assert.AreEqual(mediaIndex, sheet.Nav.Current, "Current: the open section");
             Assert.AreEqual(media1.Targets[0], sheet.Nav.CurrentBlock, "CurrentBlock: the block it opened at");
             Assert.AreEqual(mediaIndex, sheet.Layout.OpenSection);
@@ -193,25 +193,27 @@ namespace TileStories.Editor.Tests
             Assert.Greater(heldBefore, -1);
         }
 
-        // An element bound in a slot must never mark something false: the Text Tabs over the bento mark nothing on the overview, the open
-        // section while it is open (a tab tap opens it), nothing after Back
+        // The tiles ARE the map (step 16, the 15b review): a strip repeating them over them would mark nothing, so under bento the top slot
+        // holds no element whatever the wall's Top Bar says -- the value kept for another layout -- and the same card in Scroll draws it again.
+        // A Bottom Bar is the wall's choice and stays
         [Test]
-        public void ATopBarOverTheBento_MarksNothingOnTheOverview_AndTheOpenSectionWhileItIsOpen()
+        public void UnderBento_TheTopSlotHoldsNothing_WhateverTheTopBarSays_AndScrollDrawsItAgain()
         {
-            var wall = BentoWall(nav => nav.top = BuiltInNavElements.TextTabs);
+            var wall = BentoWall(nav => { nav.top = BuiltInNavElements.TextTabs; nav.bottom = BuiltInNavElements.BottomBar; });
             var media = new ResourcesMediaSource(wall.card_settings.media_resources_path);
             var sheet = Sheet();
             ShowCard(sheet, wall, media, new RecordingCardEvents());
-            var tabs = sheet.Slots.TopView as TextTabsNavView;
-            Assert.IsNotNull(tabs, "precondition: the wall's Top Bar is drawn over the bento");
-            Assert.AreEqual(-1, tabs.CurrentIndex, "the overview: no tab marked");
-            Assert.IsFalse(tabs.Tabs.Any(t => t.Button.ClassListContains(NavTab.CurrentClass)));
+            Assert.IsTrue(sheet.Bento.IsOn, "precondition: the card is drawn as bento");
+            Assert.IsNull(sheet.Slots.TopKey, "no element at the top over the tiles");
+            Assert.IsNull(sheet.Slots.TopView);
+            Assert.AreEqual(BuiltInNavElements.TextTabs, wall.card_settings.navigation.top, "the wall's Top Bar is kept, never rewritten");
+            Assert.AreEqual(BuiltInNavElements.BottomBar, sheet.Slots.BottomKey, "a Bottom Bar is the wall's and stays");
 
-            sheet.Nav.JumpTo(3, BuiltInNavElements.TextTabs);
-            Assert.AreEqual(3, tabs.CurrentIndex, "a tab's jump: its section open, its tab marked");
-            Assert.IsTrue(tabs.Tabs.Single(t => t.Index == 3).Button.ClassListContains(NavTab.CurrentClass));
-            sheet.Back();
-            Assert.AreEqual(-1, tabs.CurrentIndex, "back on the overview: none again");
+            wall.card_settings.navigation.layout = CardOptions.LayoutScroll;
+            ShowCard(sheet, wall, media, new RecordingCardEvents());
+            Assert.AreEqual(BuiltInNavElements.TextTabs, sheet.Slots.TopKey, "the same card in Scroll: the Text Tabs again");
+            sheet.Hide();
+            Assert.AreEqual(0, media.LoadedCount);
         }
 
         // A rebind of the same point (a language switch, a live edit) keeps the section open, drawn again in the new words; another point
@@ -228,7 +230,7 @@ namespace TileStories.Editor.Tests
             var pt = ShowCard(sheet, wall, media, new RecordingCardEvents(), language: "pt");
             Assert.IsTrue(sheet.FullView.IsOpen, "a language switch keeps it open");
             Assert.AreEqual(key, sheet.FullView.SectionKey);
-            StringAssert.EndsWith(" > " + pt.Strings.Get(sheet.Nav.Model.Sections[1].LabelKey), sheet.Takeover.Crumb.text, "in Portuguese");
+            StringAssert.EndsWith(" > " + pt.Strings.Get(sheet.Nav.Model.Sections[1].LabelKey), sheet.Takeover.CrumbText, "in Portuguese");
             Assert.AreEqual(1, sheet.Nav.Current);
 
             ShowCard(sheet, wall, media, new RecordingCardEvents(), LampMilitary);

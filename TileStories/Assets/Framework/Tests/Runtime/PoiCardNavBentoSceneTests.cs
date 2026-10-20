@@ -241,7 +241,7 @@ namespace TileStories.Tests
             Assert.IsTrue(Sheet.FullView.IsOpen, "a real tap on the model tile opened the full view");
             Assert.AreEqual("block_5", Sheet.FullView.BlockKey);
             Assert.IsEmpty(NavJumps, "it is no jump");
-            StringAssert.EndsWith(" > " + Nav.RowOf("block_5").Words, Sheet.Takeover.Crumb.text, "the breadcrumb ends with the block's words");
+            StringAssert.EndsWith(" > " + Nav.RowOf("block_5").Words, Sheet.Takeover.CrumbText, "the breadcrumb ends with the block's words");
             var full = (ModelTurntableBlockView)Sheet.FullView.View;
             CollectionAssert.AreEquivalent(held.Append("block_5::takeover"), Card.PreviewService.HeldKeys, "the block bound twice holds TWO slots: the card's untouched, the full view's own");
             yield return WaitFor(() => full.ShowsSubject, "the full view's model");

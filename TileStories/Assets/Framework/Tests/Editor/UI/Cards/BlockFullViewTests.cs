@@ -66,8 +66,10 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(full.Root.ClassListContains(BlockFullView.BlockClass), "growing to the page's height");
             Assert.AreEqual(cardFiles, sheet.Stack.HeldMediaOf("block_29"), "the card's files are untouched");
             Assert.Greater(sheet.Takeover.HeldMedia, 0, "the full view loads its own through its own scope");
-            Assert.AreEqual(sheet.Stack.HeaderView.TitleText + " > In pictures", sheet.Takeover.Crumb.text,
-                "the breadcrumb: the card's title, then the words its row would show");
+            // - step 16: the breadcrumb climbs the card's own structure -- the title, the block's section (Media: the shipped English words of
+            //   the family, _3.2 section 2.2), then the words its row would show
+            Assert.AreEqual(sheet.Stack.HeaderView.TitleText + " > Media > In pictures", sheet.Takeover.CrumbText,
+                "the breadcrumb: the card's title, its section, then the words its row would show");
 
             Assert.IsTrue(sheet.Back(), "Back closes the full view first");
             Assert.IsFalse(sheet.FullView.IsOpen);
@@ -97,7 +99,7 @@ namespace TileStories.Editor.Tests
             Assert.Greater(picture.Length, 0, "precondition: a real picture of The Lamp");
             var takeover = new TakeoverView(new VisualElement());
             int heldWhenLeaving = -1, shown = 0;
-            takeover.Open("crumb", 2, 0, media, (view, container, scope, page) =>
+            takeover.Open("crumb", _ => "", 2, 0, media, (view, container, scope, page) =>
             {
                 shown++;
                 Assert.IsNotNull(scope.Load<Texture2D>(picture));
@@ -128,7 +130,7 @@ namespace TileStories.Editor.Tests
             ShowCard(sheet, wall, media, language: "pt");
             Assert.IsTrue(sheet.FullView.IsOpen, "still open after the language switch");
             Assert.AreEqual("block_2", sheet.FullView.BlockKey);
-            StringAssert.EndsWith("> A história", sheet.Takeover.Crumb.text, "its breadcrumb in the new language");
+            StringAssert.EndsWith("> A história", sheet.Takeover.CrumbText, "its breadcrumb in the new language");
 
             // - a live edit that turns Reduce Motion on: the same point again, the full view bound with it
             wall.card_settings.container.reduce_motion = true;

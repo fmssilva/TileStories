@@ -97,7 +97,7 @@ namespace TileStories.Tests
             var takeover = Sheet.Takeover;
             Assert.IsTrue(takeover.IsOpen, "a real tap on the second picture opens it full screen");
             Assert.AreEqual(1, takeover.PageIndex);
-            Assert.AreEqual("St George's Castle > Gallery", takeover.Crumb.text, "the card's title > the gallery");
+            Assert.AreEqual("St George's Castle > Gallery", takeover.CrumbText, "the card's title > the gallery");
             Assert.AreEqual(before + 1, Card.Media.RefCount("gallery_2.png"), "the full-screen view loaded its own copy");
             Assert.IsTrue(ScreenUIHit.IsOverAnything(ScreenPointOf(takeover.Page)), "a tap on the full-screen view is on the UI: never 'empty space'");
             Assert.AreEqual("lamp", SelectionEventBus.CurrentPoiId, "the selection stays");

@@ -7285,6 +7285,77 @@
                         ]
                     },
                     {
+                        "key": "block_7",
+                        "kind": "video",
+                        "variant": "inline",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Tiles in motion"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Azulejos em movimento"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "clip",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "default:tile_pattern",
+                                "items": []
+                            },
+                            {
+                                "key": "poster",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "captions",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "A tile pattern in motion"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Um padrão de azulejos em movimento"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
                         "key": "block_5",
                         "kind": "model_3d",
                         "variant": "turntable",

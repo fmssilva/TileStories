@@ -541,11 +541,11 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   resume it but the same block coming back. Either keep it (resuming where the visitor left is cheap and the clip is one file), or let the owner
   give the clip back once no bound view shows its track (an owner rule, shared ground: a full PlayMode run). `PoiCardBentoLayoutSceneTests.Closing...`
   asserts today's behaviour exactly, so a change turns it red on purpose.
-- TEST QUALITY: `PoiCardLayoutSceneTests` (step 13, tabs) asserts `Assert.IsFalse(_video.IsCurrent(video.Track), ...)` AFTER the section was put
-  away -- but `VideoBlockView.Unbind` sets its track to null, and `IsCurrent(null)` is always false, so that line proves nothing (the video owner in
-  fact keeps the paused track, item above). Read the track BEFORE the view is unbound, as the bento test does; then decide with the item above
-  what the assertion should be.
-- IDEA (not built; the brief said "filling the card"): a bento card with few sections and few blocks (the gallery's small case: 3 sections, 5 blocks
-  at Full) fills the card with very tall tiles holding one to three names each -- mostly empty plates. A tile could stop at the height its names need
-  (the rest of the card left to the sources under the tiles). It changes "filling the card"; a design decision for `_3.3` / the Architect. With the
-  default Show Navigation From (8) a card that short never gets the bento.
+- CLOSED at _3.2 step 16 -- the vacuous `IsCurrent(null)` line of `PoiCardLayoutSceneTests` (tabs): the track is read before the section is put away and the line asserts the owner keeps that ONE paused clip (section 7.1); proved load-bearing (Collapsing -> Stop turns exactly that line red).
+- CLOSED at _3.2 step 16 (decided at the 15b review) -- a bento tile never grows past its content; the room left stays empty under the last tile (`BentoLayoutRule` RoomLeft).
+
+## From _3.2 step 16 (the full-view breadcrumb and sibling swipe, 2026-10-20)
+
+- Test harness: `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` failed ONCE in a full EditMode run with Unity in the background ("a whole drag = one history step, expected 2, was 3"), green alone right after and in the next full run (1946/1946). An Editor slider drag with no seam into step 16; logged OPEN, to be watched in the next runs (a focus-dependent drag would be the 4.2.3 case).
+- Fixture fact worth knowing: The Lamp's two videos (block_56, block_57) share ONE clip, so to the one video owner they are the same video (`VideoTrack.SameVideo`: point + clip) -- a test of a handover between them proves nothing. Lamp - Residential's block_4 + block_7 are the pair with two different clips (step 16).
+- Device check (step 16): in the full view a sideways swipe that starts ON a part that drags by itself (a 3D / 360 stage, a slider, a gallery picture -- its tap is a Clickable, which takes the finger at touch-down) is that part's, as in the pages layout; on a Media page much of the page is such a part. Watch whether visitors try to swipe on the picture; the chips are always there (_3.2 TODO at the top).

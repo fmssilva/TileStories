@@ -396,14 +396,14 @@ namespace TileStories.Tests
             yield return Tap(((VideoBlockView)Sheet.FullView.View).Panel.PlayOverlay);
             Advance(2f);
             Assert.AreEqual(CardVideoState.Playing, _video.State, "precondition: playing in the full view");
-            StringAssert.EndsWith("> On film", Sheet.Takeover.Crumb.text);
+            StringAssert.EndsWith("> On film", Sheet.Takeover.CrumbText);
 
             // - the language chip (covered by the full view for a finger: pressed through the panel, the submit path a tap ends in)
             Press(Sheet.LanguageButton);
             yield return CardTestInput.Settle(0.3f);
             Assert.IsTrue(Sheet.FullView.IsOpen, "the language switch kept the full view");
             Assert.AreEqual("block_56", Sheet.FullView.BlockKey);
-            StringAssert.EndsWith("> Em vídeo", Sheet.Takeover.Crumb.text, "redrawn in Portuguese");
+            StringAssert.EndsWith("> Em vídeo", Sheet.Takeover.CrumbText, "redrawn in Portuguese");
             Assert.AreEqual(CardVideoState.Playing, _video.State, "the video plays on");
             Assert.IsTrue(_video.IsCurrent(((VideoBlockView)Sheet.FullView.View).Track), "the full view draws it again");
             Assert.IsTrue(Stack.IsExpanded("block_56"), "and the card's row is still open under it");
@@ -414,7 +414,7 @@ namespace TileStories.Tests
                 heading.text.Single(t => t.lang == "pt").value = "Em filme";
             });
             Assert.IsTrue(Sheet.FullView.IsOpen, "a live edit kept it");
-            StringAssert.EndsWith("> Em filme", Sheet.Takeover.Crumb.text, "with the edited words");
+            StringAssert.EndsWith("> Em filme", Sheet.Takeover.CrumbText, "with the edited words");
 
             yield return Push(c => c.card_settings.container.reduce_motion = true);
             Assert.IsTrue(Sheet.FullView.IsOpen, "Reduce Motion switched on live kept it");

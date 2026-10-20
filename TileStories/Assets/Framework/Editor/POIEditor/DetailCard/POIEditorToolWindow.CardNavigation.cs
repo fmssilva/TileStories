@@ -70,8 +70,9 @@ namespace TileStories.Editor
             nav.show_at = DrawPopupField("Show Navigation At", nav.show_at, CardOptions.ShowNavigationAts, CardOptions.ShowNavigationAtLabels, CardShowNavigationAtHelp);
             var (topKeys, topLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Top);
             // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped.
-            //   Hidden for Pages (it always uses the Family Pager), keeping its value for the day the wall picks another layout
-            if (CardLayoutRule.Layout(nav) != CardOptions.LayoutPages)
+            //   Hidden where the layout picks the top bar itself (Pages: the Family Pager; Bento: none, the tiles are the map), keeping its
+            //   value for the day the wall picks another layout -- the card's own rule, so the row and the card agree
+            if (!CardLayoutRule.LayoutPicksTheTopBar(nav))
                 nav.top = DrawReferencePopupField("Top Bar", nav.top, topKeys, topLabels, allowNone: false, CardTopBarHelp(NavElementRegistry.Shared));
             var (bottomKeys, bottomLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
             nav.bottom = DrawReferencePopupField("Bottom Bar", nav.bottom, bottomKeys, bottomLabels, allowNone: false, CardBottomBarHelp(NavElementRegistry.Shared));

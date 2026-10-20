@@ -95,7 +95,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.15f);
             var page = Sheet.Takeover;
             Assert.IsTrue(page.IsOpen, "a real tap opened the panorama full screen");
-            Assert.IsTrue(page.Crumb.text.EndsWith(" > The tiled room"), "the Lamp's title, then the panorama's authored one");
+            Assert.IsTrue(page.CrumbText.EndsWith(" > The tiled room"), "the Lamp's title, then the panorama's authored one");
             var full = teaser.FullScreenView;
             Assert.IsNotNull(full);
             Assert.IsTrue(full.ShowsPanorama);

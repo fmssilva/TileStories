@@ -258,7 +258,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.15f);
             Assert.IsTrue(takeover.IsOpen, "a real tap on a picture opens it full screen");
             Assert.AreEqual(2, takeover.PageIndex, "...at that picture");
-            Assert.AreEqual("Gate > Gallery", takeover.Crumb.text, "the breadcrumb: card title > the gallery");
+            Assert.AreEqual("Gate > Gallery", takeover.CrumbText, "the breadcrumb: card title > the gallery");
             Assert.AreEqual("Back", takeover.Back.text);
             Assert.AreEqual(4, takeover.Chips.childCount, "a chip per sibling picture");
             Assert.IsTrue(takeover.Chips[2].ClassListContains("card-takeover__chip--current"));
@@ -270,7 +270,7 @@ namespace TileStories.Tests
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(takeover.Back.worldBound.width, takeover.Back.worldBound.height), "Back >= 44");
             foreach (var chip in takeover.Chips.Children())
                 Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(chip.worldBound.width, chip.worldBound.height), "a chip >= 44");
-            Assert.GreaterOrEqual(CardTestInput.Contrast(takeover.Crumb.resolvedStyle.color, CardTestInput.EffectiveBackground(takeover.Crumb)), UIAccessibility.MinRatioNormalText);
+            Assert.GreaterOrEqual(CardTestInput.Contrast(takeover.CrumbTitle.resolvedStyle.color, CardTestInput.EffectiveBackground(takeover.CrumbTitle)), UIAccessibility.MinRatioNormalText);
             yield return Render("Card_gallery_lightbox");
 
             yield return CardTestInput.Tap(takeover.Chips[0].panel, takeover.Chips[0].worldBound.center);

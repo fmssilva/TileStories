@@ -291,12 +291,20 @@ namespace TileStories.Tests
             yield return null;
             Assert.AreEqual(CardVideoState.Playing, _video.State, "a real tap played the video");
             Assert.Greater(Stack.HeldMediaOf("block_56"), 0, "precondition: the video's block holds its files");
+            // - read the track BEFORE the section is put away: the view's Unbind clears its own Track, and IsCurrent(null) is always false
+            //   (the step 16 fix: this line used to read it after, and asserted nothing)
+            var track = video.Track;
+            Assert.IsNotNull(track, "precondition: the bound view has its track");
+            Assert.IsTrue(_video.IsCurrent(track), "precondition: the owner serves that track");
 
             yield return TapTab(about);
             Assert.AreEqual(about, Sheet.Layout.ShownSection, "About shows now");
             Assert.IsNull(Stack.ViewOfBlock("block_56"), "the video's block gave its view back");
-            Assert.AreNotEqual(CardVideoState.Playing, _video.State, "the video stopped playing: nothing on screen shows it");
-            Assert.IsFalse(_video.IsCurrent(video.Track), "and the owner no longer serves that block");
+            // - section 7.1 (decided at the 15b review): the ONE video owner keeps the paused clip until another video plays or the card closes
+            //   -- at most one clip is ever held, and coming back resumes where the visitor left. Proved load-bearing: with Collapsing() calling
+            //   the owner's Stop() instead of Pause(), this line turns red
+            Assert.IsTrue(_video.IsCurrent(track), "the owner still holds that ONE clip, nothing more (section 7.1)");
+            Assert.AreEqual(CardVideoState.Paused, _video.State, "PAUSED: nothing on screen shows it, so it does not play on unseen");
             CollectionAssert.DoesNotContain(Card.PreviewService.HeldKeys, "block_59", "the model's preview slot given back");
             foreach (string key in Nav.Model.Sections[media].Targets)
                 Assert.AreEqual(0, Stack.HeldMediaOf(key), key + ": no file held while Media is put away");

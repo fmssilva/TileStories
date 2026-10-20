@@ -183,7 +183,17 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("block_20", CardLayoutRule.SpyBlock(CardOptions.LayoutBento, "block_20", "block_9"), "the block the full view opened at");
             Assert.AreEqual("block_9", CardLayoutRule.SpyBlock(CardOptions.LayoutTabs, "block_20", "block_9"), "elsewhere what was measured");
 
-            Assert.AreEqual(nav.top, CardLayoutRule.TopElement(nav), "the wall's Top Bar is kept (it marks the open section, nothing on the overview)");
+            // - step 16: the tiles ARE the map -- no Top Bar under bento, whatever the wall picked (its value stays for another layout), the
+            //   same rule that gives pages the Family Pager; every other layout leaves the wall's pick to the wall
+            Assert.AreEqual(BuiltInNavElements.TextTabs, nav.top, "precondition: the shipped wall's Top Bar is Text Tabs");
+            Assert.IsTrue(CardLayoutRule.LayoutPicksTheTopBar(nav), "bento picks the top slot itself");
+            foreach (string top in new[] { BuiltInNavElements.TextTabs, "icon_tabs", "progress_map", CardOptions.NavNone })
+                Assert.AreEqual(CardOptions.NavNone, CardLayoutRule.TopElement(Nav(CardOptions.LayoutBento, top: top)), top + ": nothing at the top under bento");
+            Assert.IsNull(NavSlotRule.TopElement(nav, lamp, key => NavElementRegistry.Shared.TryGet(key, out var e) && e.Slot == NavSlotKeys.Top ? e : null),
+                "the top slot of The Lamp holds no element");
+            Assert.IsTrue(CardLayoutRule.LayoutPicksTheTopBar(Nav(CardOptions.LayoutPages)), "pages: the same rule");
+            foreach (string other in new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs })
+                Assert.IsFalse(CardLayoutRule.LayoutPicksTheTopBar(Nav(other)), other + ": the wall's Top Bar");
             Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(Nav(CardOptions.LayoutBento, top: CardOptions.NavNone, bottom: CardOptions.NavNone)),
                 "no element needed: the tiles are the way between sections");
         }

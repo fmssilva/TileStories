@@ -204,7 +204,7 @@ namespace TileStories.Tests
             yield return CardTestInput.TapInView(Sheet.Stack.Scroll, teaser.TeaserButton);
             yield return CardTestInput.Settle(0.2f);
             Assert.IsTrue(Sheet.Takeover.IsOpen, "a real tap opened it full screen");
-            Assert.AreEqual(Header.TitleText + " > The castle, chapter by chapter", Sheet.Takeover.Crumb.text);
+            Assert.AreEqual(Header.TitleText + " > The castle, chapter by chapter", Sheet.Takeover.CrumbText);
             Assert.AreEqual(CardVideoState.Playing, _video.State, "and started it");
             var full = teaser.FullScreenPanel;
             CollectionAssert.AreEqual(new[] { "0:00  Opening", "0:50  Part two", "1:40  Part three", "2:30  Closing" },
@@ -238,7 +238,7 @@ namespace TileStories.Tests
             Assert.AreEqual("Reproduzir", Inline.Panel.PlayButton.tooltip);
             yield return CardTestInput.TapInView(Sheet.Stack.Scroll, Teaser.TeaserButton);
             yield return CardTestInput.Settle(0.2f);
-            StringAssert.EndsWith("O castelo, capítulo a capítulo", Sheet.Takeover.Crumb.text);
+            StringAssert.EndsWith("O castelo, capítulo a capítulo", Sheet.Takeover.CrumbText);
             CollectionAssert.AreEqual(new[] { "0:00  Abertura", "0:50  Segunda parte", "1:40  Terceira parte", "2:30  Encerramento" },
                 Teaser.FullScreenPanel.ChapterButtons.Select(b => b.text).ToList());
             Assert.AreEqual("Pausar", Teaser.FullScreenPanel.PlayButton.tooltip);

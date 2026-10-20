@@ -9,7 +9,8 @@ namespace TileStories
     // and its block count (never colour alone) with, between them, the names of its blocks (the compact row's words: no view, no file) as many
     // as its size holds, in a tile wide enough to read them -- a larger tile shows more of what it leads to; its size from BentoLayoutRule (the section with the most blocks leads a row of its own, the
     // others share theirs by count, never under a tile's minimum: the touch target, its words); the tiles fill the card's visible part while
-    // their minimums fit, else they keep them and the overview scrolls. A tile tap is NavController.JumpTo(section, "bento"): the same jump
+    // their minimums fit, else they keep them and the overview scrolls -- and never grow past what they hold (step 16: a card with few sections
+    // leaves the room under its tiles empty). A tile tap is NavController.JumpTo(section, "bento"): the same jump
     // every element makes, which in this layout opens the section in the full view (CardLayoutView.OpenSectionView).
     // Sheet-owned beside CardPagerView; it reads the layout, never decides it. The tiles' host is in the stack's scroll ONLY while the card is
     // drawn as bento -- right before the first block (after a picture header's hero), so a block of no section (the sources) stays under the
@@ -206,7 +207,9 @@ namespace TileStories
                 minWidths[i] = MinimumWidth(_tiles.Shown[i]);
                 minHeight = Mathf.Max(minHeight, _tiles.Shown[i].Button.resolvedStyle.minHeight.value);
             }
-            var placed = BentoLayoutRule.Layout(Counts(_model), minWidths, minHeight, width, height, Gap());
+            float namesMinWidth = Token(NamesWidthToken);
+            var placed = BentoLayoutRule.Layout(Counts(_model), minWidths, minHeight, width, height, Gap(),
+                (section, tileWidth) => ContentHeight(_tiles.Shown[section], tileWidth >= namesMinWidth));
             foreach (var tile in _tiles.Shown)
             {
                 var rect = placed.Tiles[tile.Index];
@@ -232,6 +235,24 @@ namespace TileStories
             float min = button.minWidth.value;
             return Mathf.Max(float.IsNaN(min) ? 0f : min, Mathf.Ceil(content));
         }
+
+        // How tall a tile must be to hold everything it shows: its padding and border, the title line (icon or words, the taller), every one of
+        // its block names when its width shows them (each with its margin), and its count -- measured from the text, never from the tile's own
+        // layout (which is what is being decided). What the rule caps a row at, so a plate never grows past its words (_3.2 step 16)
+        private static float ContentHeight(Tile tile, bool showsNames)
+        {
+            var button = tile.Button.resolvedStyle;
+            float line = Mathf.Max(tile.Icon.resolvedStyle.display == DisplayStyle.Flex ? tile.Icon.resolvedStyle.height : 0f, TextHeight(tile.Words));
+            float names = 0f;
+            if (showsNames)
+                foreach (var name in tile.Lines)
+                    if (name.style.display.value != DisplayStyle.None) names += name.resolvedStyle.marginTop + TextHeight(name);
+            float count = TextHeight(tile.Count) + tile.Count.resolvedStyle.marginTop + tile.Count.resolvedStyle.marginBottom;
+            return Mathf.Ceil(button.paddingTop + button.paddingBottom + button.borderTopWidth + button.borderBottomWidth + line + names + count);
+        }
+
+        private static float TextHeight(Label label) =>
+            label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).y;
 
         // The gap between tiles: a plain-number token on the card root (.ts-card), where the tokens are declared
         private float Gap() => Token(GapToken);

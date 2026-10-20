@@ -210,10 +210,12 @@ namespace TileStories.Editor
             "Bento: the card opens on its sections as tiles -- each with its icon, its name and how many blocks it holds -- the " +
             "section with the most blocks the largest, the others sized by their blocks; a tap opens that section over the card, its " +
             "blocks one under the other, and Back returns to the tiles. Nothing of a section is loaded until it is opened. Suits a " +
-            "point visitors explore by topic rather than read from top to bottom. On a phone the tiles fill the card while it has " +
+            "point visitors explore by topic rather than read from top to bottom. The tiles are the card's map, so Bento draws no " +
+            "Top Bar (the row goes and keeps its value for another layout). On a phone the tiles fill the card while it has " +
             "about 13 sections or fewer; with more, every tile keeps its smallest size and the visitor scrolls the tiles. A tile is " +
             "never smaller than a finger and its name, so a section of one or two blocks beside a large one shows the sizes only " +
-            "roughly. At Half the tiles are at their smallest and the card scrolls. " +
+            "roughly, and never taller than what it holds: a card with few sections leaves the room under its tiles empty instead " +
+            "of stretching them. At Half the tiles are at their smallest and the card scrolls. " +
             "A card with fewer blocks than Show Navigation From, or with one section, always scrolls.";
 
         private const string CardTabsWithoutABarWarning =
@@ -269,14 +271,16 @@ namespace TileStories.Editor
             "A diagonal drag keeps doing what it started as. The first page has no left arrow, the last no right arrow and no edge at " +
             "the right. Tap an arrow: the card moves one family. A video playing on a page stops when you turn the page. Swipe a " +
             "filmstrip or turn a 3D model inside a page: the strip or the model moves, the page does not.\n" +
-            "- Set Layout = Bento and open a long card at full: its families are tiles filling the card, the family with the most " +
+            "- Set Layout = Bento (the Top Bar row goes: the tiles are the map) and open a long card at full: its families are tiles " +
+            "filling the card, the family with the most " +
             "blocks a full-width tile at its place with a large count, the others two to a row, a family left alone spanning its row; " +
-            "each tile shows its icon, its name and its number of blocks. The sources stay under the tiles.\n" +
+            "each tile shows its icon, its name and its number of blocks. The sources stay under the tiles. On a card with only a few " +
+            "families each tile is as tall as what it shows and the rest of the card stays empty below them.\n" +
             "- Tap a tile: that family opens over the card, its blocks one under the other with their headings, and the title bar ends " +
             "with the family's name. Press Escape (or Back): the tiles again, the card where it was; press it again: the card lowers. A " +
             "video playing there stops when it closes.\n" +
             "- With a Menu set, open it and pick a family: the menu closes and the family opens -- never two layers over the card. " +
-            "With a Top Bar, nothing is underlined on the tiles; a word opens its family and is underlined while it is open.\n" +
+            "No strip shows under the title, whatever Top Bar the wall had picked for another layout.\n" +
             "- Open a card with fewer blocks than Show Navigation From, or with one family: it scrolls as with Scroll.\n" +
             "- Set Layout = Scroll: every block is back, whole, in one scroll.\n\n" +
             "BLOCK ORDER\n" +

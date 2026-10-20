@@ -1547,8 +1547,8 @@ namespace TileStories.Editor.Tests
 
         // Detail Card > Navigation's step 13 rows on the real window. Layout is drawn FIRST (section 7's order), on its default, Scroll, named
         // Scroll / Accordion / Tabs / Pages / Bento; Open One At A Time shows only for the Accordion, after Placed Model Control, and keeps its
-        // value while hidden; Tabs with both bars None shows its warning under Layout, a Top Bar takes it away; Pages hides Top Bar (step 14),
-        // which keeps its value; Bento (step 15b) keeps the Top Bar row and needs no bar (no warning). Each pick is an undo step and a real
+        // value while hidden; Tabs with both bars None shows its warning under Layout, a Top Bar takes it away; Pages (step 14) and Bento (step
+        // 16) hide Top Bar, which keeps its value; Bento needs no bar (no warning). Each pick is an undo step and a real
         // Ctrl+Z brings the value back. The helps say what each option does and the guide's cautions about tabs, pages and bento (its fill point
         // in a wall author's words); the guides walk the layouts; ASCII
         [UnityTest]
@@ -1622,26 +1622,26 @@ namespace TileStories.Editor.Tests
             yield return DrawnInfoTitles(drawn);
             CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Top Bar", "and the Top Bar row is back");
 
-            // - Bento (step 15b): the tiles are the way between sections -- the Top Bar row stays (the wall's choice), no accordion option,
-            //   and no warning even with both bars None; Ctrl+Z brings Scroll back
-            Pick(() =>
-            {
-                _window.Config.card_settings.navigation.top = CardOptions.NavNone;
-                _window.Config.card_settings.navigation.layout = CardOptions.LayoutBento;
-            });
+            // - Bento (step 16, the 15b review): the tiles ARE the map -- the Top Bar row goes exactly as under Pages (the one rule,
+            //   CardLayoutRule.LayoutPicksTheTopBar) and keeps its value, no accordion option, no warning; Ctrl+Z brings Scroll and the row back
+            Pick(() => _window.Config.card_settings.navigation.layout = CardOptions.LayoutBento);
             yield return DrawnInfoTitles(drawn);
             var bentoTitles = drawn.Select(d => d.Title).ToList();
-            CollectionAssert.Contains(bentoTitles, "Top Bar", "Bento keeps the Top Bar row");
+            CollectionAssert.DoesNotContain(bentoTitles, "Top Bar", "Bento: the Top Bar row goes");
+            Assert.AreEqual(BuiltInNavElements.TextTabs, _window.Config.card_settings.navigation.top, "and Top Bar kept its value while hidden");
+            CollectionAssert.Contains(bentoTitles, "Bottom Bar", "a Bottom Bar keeps its row");
             CollectionAssert.DoesNotContain(bentoTitles, "Open One At A Time", "no accordion option");
             Assert.IsFalse(CardLayoutRule.TabsWithoutAnElement(_window.Config.card_settings.navigation), "no warning: the tiles need no bar");
             yield return _window.PressUndo();
             Assert.AreEqual(CardOptions.LayoutScroll, _window.Config.card_settings.navigation.layout, "Ctrl+Z: Scroll again");
-            Assert.AreEqual(BuiltInNavElements.TextTabs, _window.Config.card_settings.navigation.top, "and the Top Bar with it");
+            yield return DrawnInfoTitles(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Top Bar", "and the Top Bar row is back");
 
             string layoutHelp = (string)help.GetField("CardLayoutHelp", Static).GetValue(null);
             foreach (string word in new[] { "Scroll (the default)", "Accordion: ", "Tabs: ", "compare", "Back", "Open One At A Time", "Show Navigation From",
                          "Pages: ", "sideways", "Family Pager", "never as a wall's only", "lost",
-                         "Bento: ", "tiles", "Back returns to the tiles", "about 13 sections", "smallest size", "never smaller than a finger" })
+                         "Bento: ", "tiles", "Back returns to the tiles", "about 13 sections", "smallest size", "never smaller than a finger",
+                         "draws no Top Bar", "never taller than what it holds" })
                 StringAssert.Contains(word, layoutHelp, "CardLayoutHelp says " + word);
             string oneHelp = (string)help.GetField("CardOpenOneAtATimeHelp", Static).GetValue(null);
             foreach (string word in new[] { "Accordion only", "Unticked (the default)", "keeps its place" })

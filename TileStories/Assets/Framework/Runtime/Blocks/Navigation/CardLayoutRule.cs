@@ -63,14 +63,23 @@ namespace TileStories
         public static bool OneOpenAtATime(CardNavigationSettings settings) =>
             Layout(settings) == CardOptions.LayoutAccordion && (settings?.accordion_one_open ?? false);
 
-        // The Top Bar the card uses: the wall's, except that pages always use the Family Pager (the page's name and its chevrons), and the
-        // tabs layout with neither a Top Bar nor a Bottom Bar uses Text Tabs (a tabs card always has a way between its sections; the Editor
-        // warns about it)
+        // Whether the layout decides the top slot itself, whatever the wall's Top Bar says: pages always use the Family Pager, and bento draws
+        // nothing there -- its tiles ARE the map, and a strip repeating them over them would mark nothing (_3.2 step 16). The card reads it
+        // through TopElement and the Editor hides the Top Bar row by it (keeping the value), so the two can never disagree
+        public static bool LayoutPicksTheTopBar(CardNavigationSettings settings)
+        {
+            string layout = Layout(settings);
+            return layout == CardOptions.LayoutPages || layout == CardOptions.LayoutBento;
+        }
+
+        // The Top Bar the card uses: the wall's, except where the layout picks it (pages: the Family Pager, the page's name and its chevrons;
+        // bento: none), and the tabs layout with neither a Top Bar nor a Bottom Bar uses Text Tabs (a tabs card always has a way between its
+        // sections; the Editor warns about it)
         public static string TopElement(CardNavigationSettings settings)
         {
             var nav = settings ?? new CardNavigationSettings();
             string layout = Layout(nav);
-            if (layout == CardOptions.LayoutPages) return BuiltInNavElements.FamilyPager;
+            if (LayoutPicksTheTopBar(nav)) return layout == CardOptions.LayoutPages ? BuiltInNavElements.FamilyPager : CardOptions.NavNone;
             return layout == CardOptions.LayoutTabs && IsNone(nav.top) && IsNone(nav.bottom) ? BuiltInNavElements.TextTabs : nav.top;
         }
 

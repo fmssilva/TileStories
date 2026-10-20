@@ -27,5 +27,15 @@ namespace TileStories
             else if (itemStart + itemWidth > offset + viewportWidth) target = itemStart + itemWidth - viewportWidth;
             return Clamp(target, contentWidth, viewportWidth);
         }
+
+        // The offset that puts an item in the MIDDLE of the strip (clamped at both ends): for a row a visitor steps through by tapping (the full
+        // view's page chips, _3.2 step 16) -- its neighbours on both sides stay in view, so the next one is always a tap away, never cut at the
+        // edge as the least move leaves it. An item not laid out yet (NaN) leaves the offset where it is
+        public static float OffsetToCentre(float itemStart, float itemWidth, float viewportWidth, float contentWidth, float offset)
+        {
+            if (float.IsNaN(itemStart) || float.IsNaN(itemWidth) || float.IsNaN(viewportWidth) || viewportWidth <= 0f)
+                return Clamp(offset, contentWidth, viewportWidth);
+            return Clamp(itemStart + itemWidth / 2f - viewportWidth / 2f, contentWidth, viewportWidth);
+        }
     }
 }

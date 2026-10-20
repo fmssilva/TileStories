@@ -173,6 +173,7 @@ namespace TileStories
             // - a jump moves the card under the full view: the visitor would see nothing of it, so the full view closes (an Open Block
             //   button or a hotspot pin used inside it lands on the card)
             Nav.Jumped += Takeover.Close;
+            Takeover.SectionTapped += JumpToCrumbSection;
             Overlay = new CardMenuOverlay(this);
             // - over the sheet, under the menu layer (an open drawer covers it) and the full view
             Floating.InsertUnder(Overlay);
@@ -380,26 +381,59 @@ namespace TileStories
             else CloseRequested?.Invoke();
         }
 
-        // A block asked for the full-screen view: the breadcrumb starts with this card's title
-        public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage)
+        // A block asked for the full-screen view: the breadcrumb starts with this card's title and ends with `name`
+        public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage) =>
+            OpenPages(_ => name, pageCount, startPage, drawPage);
+
+        // The full-screen view with a name per page; no section in the breadcrumb until ShowCrumbSection names one
+        private void OpenPages(Func<int, string> nameOfPage, int pageCount, int startPage, TakeoverPageDrawer drawPage)
         {
             if (!IsOpen || _context == null) return;
             string title = Stack.BoundViews.Count > 0 && Stack.BoundViews[0] is HeaderBlockView header ? header.TitleText : "";
-            string crumb = title.Length > 0 && !string.IsNullOrEmpty(name) ? title + " > " + name : title + name;
             // - never stacked: the full view replaces what was open over the card
             Overlay.Close();
-            Takeover.Open(crumb, pageCount, startPage, _context.Media, drawPage, _context.Strings);
+            _crumbSection = -1;
+            Takeover.Open(title, nameOfPage, pageCount, startPage, _context.Media, drawPage, _context.Strings);
         }
 
-        // A block asked for its full view (an open compact row's button; later a bento tile): the breadcrumb ends with the words its compact
-        // row shows (heading, else first words, else its kind's words), the page holds a second view of its kind. A key that is not on this
+        // A block asked for its full view (an open compact row's button, a bento tile): the page holds a second view of its kind, one page per
+        // SIBLING (FullViewSiblingRule: its section's blocks that support the full view, a swipe or a chip away), each named by the words its
+        // compact row shows; the breadcrumb names the section between the card's title and the block (_3.2 step 16). A key that is not on this
         // card opens nothing
         public void OpenFullView(string blockKey)
         {
             if (!IsOpen || _context == null || !Stack.TryGetEntryOfBlock(blockKey, out var entry)) return;
-            System.Func<string, string> words = _context.Strings != null ? _context.Strings.Get : null;
-            string name = CompactRowRule.Of(entry, _registry, _context.Language, _context.FallbackLanguage, words).Words;
-            OpenTakeover(name, 1, 0, FullView.PageFor(entry, _context));
+            var pages = new List<BlockStackBuilder.Entry>();
+            foreach (string sibling in FullViewSiblingRule.Siblings(Nav.Model, _registry, blockKey))
+                if (Stack.TryGetEntryOfBlock(sibling, out var siblingEntry)) pages.Add(siblingEntry);
+            if (pages.Count < 2) pages = new List<BlockStackBuilder.Entry> { entry };
+            int start = Mathf.Max(0, pages.FindIndex(p => p.Instance.key == blockKey));
+            Func<string, string> words = _context.Strings != null ? _context.Strings.Get : null;
+            string language = _context.Language, fallback = _context.FallbackLanguage;
+            OpenPages(page => CompactRowRule.Of(pages[page], _registry, language, fallback, words).Words, pages.Count, start,
+                FullView.PagesFor(pages, _context));
+            ShowCrumbSection(FullViewSiblingRule.SectionOf(Nav.Model, blockKey));
+        }
+
+        // The section the open full view's breadcrumb names (its index in the model; -1 = none): what a tap on it jumps to
+        private int _crumbSection = -1;
+
+        // The breadcrumb's middle segment: section `index` of the card's map, in the card's words, with its family icon
+        private void ShowCrumbSection(int index)
+        {
+            var model = Nav.Model;
+            if (!Takeover.IsOpen || model == null || index < 0 || index >= model.Sections.Count) return;
+            var section = model.Sections[index];
+            string words = _context.Strings != null && section.LabelKey != null ? _context.Strings.Get(section.LabelKey) : "";
+            _crumbSection = index;
+            Takeover.ShowSection(string.IsNullOrEmpty(words) ? section.Key : words, section.IconKey);
+        }
+
+        // The visitor tapped the breadcrumb's section: the card's ONE jump to that section (the full view closes on Jumped; in bento the jump
+        // opens the section's page instead) -- no second path
+        private void JumpToCrumbSection()
+        {
+            if (IsOpen && _crumbSection >= 0) Nav.JumpTo(_crumbSection, TakeoverView.CrumbElementKey);
         }
 
         // Bento: section `index` of the card's map in the full view -- its targets one under the other, landing on `landingKey` (null: its

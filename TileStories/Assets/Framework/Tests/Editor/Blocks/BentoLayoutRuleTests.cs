@@ -25,8 +25,11 @@ namespace TileStories.Editor.Tests
         // A word's minimum: a short word and a long Portuguese one ("Comunidade") alternate
         private static readonly float[] MinWidths = { 110f, 96f, 150f, 104f, 120f, 96f, 140f, 150f, 100f, 112f };
 
+        // A tile whose content is taller than any card (a section with many names): the cap never binds, the share arithmetic is what is tested
+        private static float TallContent(int section, float width) => 10000f;
+
         private static BentoLayoutRule.Result LayoutOf(int n, float height = FullHeight) =>
-            BentoLayoutRule.Layout(Counts.Take(n).ToArray(), MinWidths.Take(n).ToArray(), MinHeight, Width, height, Gap);
+            BentoLayoutRule.Layout(Counts.Take(n).ToArray(), MinWidths.Take(n).ToArray(), MinHeight, Width, height, Gap, TallContent);
 
         [Test]
         public void EverySectionCountFrom1To10_GivesOneTilePerSection_NeverUnderItsMinimum_FillingEachRowAndTheCard()
@@ -79,15 +82,15 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(lamp.Tiles.Max(t => t.Width * t.Height), lamp.Tiles[0].Width * lamp.Tiles[0].Height, Epsilon, "and its tile the largest");
 
             // - a lead in the middle: the tile before it is alone and spans its row, the pairing goes on after it
-            var middle = BentoLayoutRule.Layout(new[] { 2, 3, 9, 4, 1 }, new[] { 100f, 100f, 100f, 100f, 100f }, MinHeight, Width, FullHeight, Gap);
+            var middle = BentoLayoutRule.Layout(new[] { 2, 3, 9, 4, 1 }, new[] { 100f, 100f, 100f, 100f, 100f }, MinHeight, Width, FullHeight, Gap, TallContent);
             CollectionAssert.AreEqual(new[] { new[] { 0, 1 }, new[] { 2 }, new[] { 3, 4 } }, middle.Rows.Select(r => r.ToArray()).ToArray());
-            var leftBeforeLead = BentoLayoutRule.Layout(new[] { 2, 9, 4, 1 }, new[] { 100f, 100f, 100f, 100f }, MinHeight, Width, FullHeight, Gap);
+            var leftBeforeLead = BentoLayoutRule.Layout(new[] { 2, 9, 4, 1 }, new[] { 100f, 100f, 100f, 100f }, MinHeight, Width, FullHeight, Gap, TallContent);
             CollectionAssert.AreEqual(new[] { new[] { 0 }, new[] { 1 }, new[] { 2, 3 } }, leftBeforeLead.Rows.Select(r => r.ToArray()).ToArray());
             Assert.AreEqual(Width, leftBeforeLead.Tiles[0].Width, Epsilon, "alone before the lead: it spans its row");
             Assert.AreEqual(1, BentoLayoutRule.Lead(new[] { 4, 7, 7 }), "the first of equals leads");
 
             // - two words too wide to sit side by side go one per row, each spanning it
-            var wide = BentoLayoutRule.Layout(new[] { 5, 3, 3 }, new[] { 100f, 200f, 200f }, MinHeight, Width, FullHeight, Gap);
+            var wide = BentoLayoutRule.Layout(new[] { 5, 3, 3 }, new[] { 100f, 200f, 200f }, MinHeight, Width, FullHeight, Gap, TallContent);
             CollectionAssert.AreEqual(new[] { new[] { 0 }, new[] { 1 }, new[] { 2 } }, wide.Rows.Select(r => r.ToArray()).ToArray());
         }
 
@@ -96,18 +99,18 @@ namespace TileStories.Editor.Tests
         [Test]
         public void WhereNoMinimumHolds_TheAreaFollowsTheCounts()
         {
-            var even = BentoLayoutRule.Layout(new[] { 6, 3, 3 }, new[] { 80f, 80f, 80f }, MinHeight, Width, FullHeight, Gap);
+            var even = BentoLayoutRule.Layout(new[] { 6, 3, 3 }, new[] { 80f, 80f, 80f }, MinHeight, Width, FullHeight, Gap, TallContent);
             float room = FullHeight - Gap;
             Assert.AreEqual(room * 6 / 12, even.Tiles[0].Height, Epsilon, "the lead's row: 6 of 12");
             Assert.AreEqual(room * 6 / 12, even.Tiles[1].Height, Epsilon, "the pair's row: 3 + 3 of 12");
             Assert.AreEqual((Width - Gap) / 2, even.Tiles[1].Width, Epsilon, "3 and 3 share their row evenly");
             Assert.AreEqual(0, even.RowsAtMinimum);
 
-            var uneven = BentoLayoutRule.Layout(new[] { 9, 6, 2 }, new[] { 60f, 60f, 60f }, MinHeight, Width, FullHeight, Gap);
+            var uneven = BentoLayoutRule.Layout(new[] { 9, 6, 2 }, new[] { 60f, 60f, 60f }, MinHeight, Width, FullHeight, Gap, TallContent);
             Assert.AreEqual((Width - Gap) * 6 / 8, uneven.Tiles[1].Width, Epsilon, "6 of the row's 8");
             Assert.AreEqual((Width - Gap) * 2 / 8, uneven.Tiles[2].Width, Epsilon, "2 of 8");
 
-            var one = BentoLayoutRule.Layout(new[] { 5 }, new[] { 100f }, MinHeight, Width, FullHeight, Gap);
+            var one = BentoLayoutRule.Layout(new[] { 5 }, new[] { 100f }, MinHeight, Width, FullHeight, Gap, TallContent);
             Assert.AreEqual(Width, one.Tiles[0].Width, Epsilon);
             Assert.AreEqual(FullHeight, one.Tiles[0].Height, Epsilon, "one section is the whole card");
         }
@@ -137,17 +140,61 @@ namespace TileStories.Editor.Tests
                 for (int n = 1; n <= 30; n++)
                 {
                     var equal = Enumerable.Repeat(3, n).ToArray();
-                    if (!BentoLayoutRule.Layout(equal, Enumerable.Repeat(100f, n).ToArray(), MinHeight, Width, FullHeight, Gap).Fills) return n - 1;
+                    if (!BentoLayoutRule.Layout(equal, Enumerable.Repeat(100f, n).ToArray(), MinHeight, Width, FullHeight, Gap, TallContent).Fills) return n - 1;
                 }
                 return 30;
             }
             Assert.AreEqual(13, FillPoint(), "past 13 sections every row is at its minimum on a Full card at 390 px");
         }
 
+        // Step 16 (the 15b review): a tile never grows past what its content needs. The gallery's small case -- 3 sections of 3, 2 and 1
+        // blocks at a Full card -- used to stretch three plates over 565 px; now every row is exactly as tall as its tallest tile's content
+        // (a row's tiles share one height: no hole), the tiles stack from the top, and the room under the last one stays empty
+        [Test]
+        public void ATileNeverGrowsPastItsContent_AFewSectionsLeaveTheRoomUnderTheLastTileEmpty()
+        {
+            int[] counts = { 3, 2, 1 };
+            float[] content = { 132f, 108f, 84f };
+            var small = BentoLayoutRule.Layout(counts, new[] { 100f, 96f, 120f }, MinHeight, Width, FullHeight, Gap, (s, w) => content[s]);
+            CollectionAssert.AreEqual(new[] { new[] { 0 }, new[] { 1, 2 } }, small.Rows.Select(r => r.ToArray()).ToArray(), "precondition: lead + a pair");
+            Assert.AreEqual(content[0], small.Tiles[0].Height, Epsilon, "the lead: as tall as its content");
+            Assert.AreEqual(content[1], small.Tiles[1].Height, Epsilon, "the pair's row: as tall as its taller tile's content");
+            Assert.AreEqual(small.Tiles[1].Height, small.Tiles[2].Height, Epsilon, "and both tiles of the row share it");
+            float used = content[0] + Gap + content[1];
+            Assert.AreEqual(used, small.Height, Epsilon, "the tiles take exactly their content");
+            Assert.AreEqual(FullHeight - used, small.RoomLeft, Epsilon, "the rest of the card stays empty, under the last tile");
+            Assert.Greater(small.RoomLeft, 0f);
+            Assert.IsTrue(small.Fills, "the minimums fit: the rows were shared by count, then capped");
+
+            // - only ONE row capped: what it cannot use goes to the others, by their counts, and the card is filled again (no room left)
+            int[] lamp = { 18, 14, 1, 7 };
+            float[] lampContent = { 10000f, 10000f, 10000f, 70f };
+            var some = BentoLayoutRule.Layout(lamp, new[] { 100f, 96f, 120f, 104f }, MinHeight, Width, FullHeight, Gap, (s, w) => lampContent[s]);
+            CollectionAssert.AreEqual(new[] { new[] { 0 }, new[] { 1, 2 }, new[] { 3 } }, some.Rows.Select(r => r.ToArray()).ToArray());
+            Assert.AreEqual(70f, some.Tiles[3].Height, Epsilon, "the capped row keeps its content's height");
+            float shared = FullHeight - 2 * Gap - 70f;
+            Assert.AreEqual(shared * 18 / 33, some.Tiles[0].Height, Epsilon, "the others share the rest by count: 18 of 33");
+            Assert.AreEqual(shared * 15 / 33, some.Tiles[1].Height, Epsilon, "15 of 33");
+            Assert.AreEqual(FullHeight, some.Height, Epsilon, "the card is filled");
+            Assert.AreEqual(0f, some.RoomLeft, Epsilon);
+
+            // - a content lower than the tile minimum keeps the minimum (the touch target, the title over the count)
+            var tiny = BentoLayoutRule.Layout(new[] { 2, 1 }, new[] { 100f, 100f }, MinHeight, Width, FullHeight, Gap, (s, w) => 20f);
+            Assert.IsTrue(tiny.Tiles.All(t => System.Math.Abs(t.Height - MinHeight) < Epsilon), "never under the minimum");
+            Assert.AreEqual(FullHeight - (2 * MinHeight + Gap), tiny.RoomLeft, Epsilon);
+
+            // - the content is asked for the tile's OWN width (whether its names show depends on it)
+            var asked = new List<(int, float)>();
+            BentoLayoutRule.Layout(counts, new[] { 100f, 96f, 120f }, MinHeight, Width, FullHeight, Gap, (s, w) => { asked.Add((s, w)); return 80f; });
+            CollectionAssert.AreEquivalent(new[] { 0, 1, 2 }, asked.Select(a => a.Item1).Distinct(), "every tile's content is asked");
+            Assert.AreEqual(Width, asked.First(a => a.Item1 == 0).Item2, Epsilon, "the lead at the full width");
+            Assert.Less(asked.First(a => a.Item1 == 1).Item2, Width, "a paired tile at its share of the row");
+        }
+
         [Test]
         public void NoSections_NoTiles()
         {
-            var none = BentoLayoutRule.Layout(new int[0], new float[0], MinHeight, Width, FullHeight, Gap);
+            var none = BentoLayoutRule.Layout(new int[0], new float[0], MinHeight, Width, FullHeight, Gap, TallContent);
             Assert.IsEmpty(none.Tiles);
             Assert.AreEqual(0f, none.Height);
             Assert.AreEqual(-1, BentoLayoutRule.Lead(new int[0]));

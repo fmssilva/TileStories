@@ -274,7 +274,7 @@ namespace TileStories.Tests
             yield return CardGalleryChecks.Render("Card_video_fullscreen_opened");
             var takeover = _harness.Sheet.Takeover;
             Assert.IsTrue(takeover.IsOpen, "a real tap opened the full-screen view");
-            Assert.AreEqual("Gate > " + CardGalleryDefinitions.VideoTitle, takeover.Crumb.text, "the card's title, then the video's");
+            Assert.AreEqual("Gate > " + CardGalleryDefinitions.VideoTitle, takeover.CrumbText, "the card's title, then the video's");
             var full = view.FullScreenPanel;
             Assert.IsNotNull(full, "a second panel over the same playback");
             Assert.AreEqual(1, Output.LoadCount, "nothing was loaded again");

@@ -554,7 +554,7 @@ namespace TileStories.Tests
             }
             if (entry.Layout == CardOptions.LayoutBento)
             {
-                yield return BentoKeepsItsPromise(sheet, model, name, onePixel);
+                yield return BentoKeepsItsPromise(sheet, model, name, entry.Case.Key, onePixel);
                 yield break;
             }
             void AssertShown(int shown, string when)
@@ -605,11 +605,12 @@ namespace TileStories.Tests
         }
 
         // Bento's promise on one case (the layout is already Effective: the case has sections to switch between)
-        private static IEnumerator BentoKeepsItsPromise(PoiCardSheetView sheet, CardNavModel model, string name, float onePixel)
+        private static IEnumerator BentoKeepsItsPromise(PoiCardSheetView sheet, CardNavModel model, string name, string caseKey, float onePixel)
         {
             var stack = sheet.Stack;
             var bento = sheet.Bento;
             Assert.IsTrue(bento.IsOn, "the tiles are drawn");
+            Assert.IsNull(sheet.Slots.TopKey, "no Top Bar over the tiles (step 16: they are the map), though the entry's wall picks Text Tabs");
             foreach (string key in model.Targets)
             {
                 Assert.IsTrue(stack.IsParked(key), key + ": set aside");
@@ -621,8 +622,41 @@ namespace TileStories.Tests
             Assert.IsNotNull(placed, "the tiles were placed");
             var host = bento.Host.worldBound;
             float viewport = stack.Scroll.contentViewport.layout.height;
-            if (placed.Fills) Assert.AreEqual(viewport, host.height, onePixel, "filling the room the visitor sees (" + viewport + ")");
+            if (placed.Fills) Assert.AreEqual(viewport, host.height + placed.RoomLeft, onePixel, "the tiles and the room left under them are the room the visitor sees (" + viewport + ")");
             else Assert.Greater(host.height, viewport, "the tiles at their minimum: taller than the room, the overview scrolls");
+            // - step 16: a tile never grows past what it holds -- measured here from its LAID-OUT parts (padding, title line, the names its
+            //   width shows, count), not from the view's own arithmetic. A row's tiles share one height, so the bound is the row's tallest content;
+            //   with room left under the tiles every row is exactly that tall
+            float namesMinWidth = CardTestInput.TokenPx("--ts-bento-names-min-width");
+            float minHeight = CardTestInput.TokenPx("--ts-bento-tile-min-height");
+            float ContentOf(CardBentoView.Tile tile)
+            {
+                var style = tile.Button.resolvedStyle;
+                float names = tile.Button.worldBound.width >= namesMinWidth - onePixel
+                    ? tile.Lines.Where(l => l.resolvedStyle.display == DisplayStyle.Flex).Sum(l => l.layout.height + l.resolvedStyle.marginTop) : 0f;
+                return style.paddingTop + style.paddingBottom + style.borderTopWidth + style.borderBottomWidth + tile.Words.parent.layout.height + names
+                    + tile.Count.layout.height;
+            }
+            foreach (var row in placed.Rows)
+            {
+                var tiles = row.Select(s => bento.Tiles[s]).ToList();
+                float bound = System.Math.Max(tiles.Max(ContentOf), minHeight);
+                foreach (var tile in tiles)
+                    Assert.LessOrEqual(tile.Button.worldBound.height, bound + onePixel, tile.Words.text + ": never taller than its row's content (" + bound + ")");
+                if (placed.RoomLeft > onePixel)
+                    Assert.AreEqual(bound, tiles[0].Button.worldBound.height, onePixel, tiles[0].Words.text + "'s row: exactly as tall as its content");
+            }
+            if (caseKey == "small")
+            {
+                // - the brief's case: 3 sections, 6 blocks -- the plates used to be stretched over the whole card
+                Assert.AreEqual(3, model.Sections.Count, "precondition: the small case's three sections");
+                Assert.Greater(placed.RoomLeft, CardTestInput.TokenPx("--ts-touch-target"), "room left under the tiles");
+                Assert.Greater(stack.Scroll.contentViewport.worldBound.yMax - host.yMax, CardTestInput.TokenPx("--ts-touch-target"),
+                    "and it is EMPTY space at the bottom of the card, under the last tile (" + host + " in " + stack.Scroll.contentViewport.worldBound + ")");
+                foreach (var tile in bento.Tiles)
+                    Assert.AreEqual(tile.Lines.Count(l => l.resolvedStyle.display == DisplayStyle.Flex && tile.Button.worldBound.width >= namesMinWidth),
+                        tile.ShownLines.Count(), tile.Words.text + ": every name it holds is shown (none cut by a short plate)");
+            }
             float touch = CardTestInput.TokenPx("--ts-touch-target");
             int lead = BentoLayoutRule.Lead(model.Sections.Select(s => s.Count).ToArray());
             foreach (var tile in bento.Tiles)

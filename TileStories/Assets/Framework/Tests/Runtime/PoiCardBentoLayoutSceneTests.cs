@@ -24,7 +24,7 @@ namespace TileStories.Tests
     //     inside the full view REPLACES the page (one takeover), never stacks one
     //   - Show After Reading holds in bento: every section read in the full view and the overview read to its end reveal the waiting question
     //     (the Play tile counts it); one section left unread does not
-    //   - a Top Bar marks nothing on the overview; a short card (Lamp - Military) scrolls
+    //   - no Top Bar over the tiles (step 16: the tiles are the map); a short card (Lamp - Military) scrolls
     public class PoiCardBentoLayoutSceneTests : SearchSceneFixture
     {
         private const string Lamp = "lamp";
@@ -194,6 +194,7 @@ namespace TileStories.Tests
                 float viewport = Scroll.contentViewport.layout.height;
                 Assert.IsTrue(placed.Fills, language + ": eight sections fill a Full card");
                 Assert.AreEqual(viewport, host.height, OnePixel, language + ": the tiles are exactly the visible part (" + viewport + " px)");
+                Assert.AreEqual(0f, placed.RoomLeft, OnePixel, language + ": a long card's tiles use all of it (no room left under them)");
                 int about = SectionIndex(BuiltInFamilies.About);
                 Assert.AreEqual(about, BentoLayoutRule.Lead(model.Sections.Select(s => s.Count).ToArray()), "About leads (18 blocks)");
                 Assert.AreEqual(host.width, Bento.Tiles[about].Button.worldBound.width, OnePixel, "the lead spans the card");
@@ -280,7 +281,7 @@ namespace TileStories.Tests
             Assert.AreEqual(CardBentoView.ElementKey, NavJumps[0].Variant);
             Assert.AreEqual(section.Key, NavJumps[0].Value);
             Assert.AreEqual(stories, Nav.Current, "the spy names the open section");
-            StringAssert.EndsWith(" > " + Bento.Tiles[stories].Words.text, Sheet.Takeover.Crumb.text, "the breadcrumb ends with the tile's words");
+            StringAssert.EndsWith(" > " + Bento.Tiles[stories].Words.text, Sheet.Takeover.CrumbText, "the breadcrumb ends with the tile's words");
             // - ONE sheet over the card: what a finger meets at the screen's middle is the full view
             var middle = Sheet.Layer.worldBound.center;
             var picked = Sheet.Layer.panel.Pick(middle);
@@ -428,23 +429,22 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator ATopBarOverTheBento_MarksNothingOnTheOverview_AndAShortCardScrolls()
+        public IEnumerator UnderBento_NoTopBarIsDrawnOverTheTiles_TheyStartUnderTheTitle_AndAShortCardScrolls()
         {
+            // - step 16 (the 15b review): the tiles ARE the map -- the wall's Text Tabs are not drawn over them (an inert duplicate); the value
+            //   stays for another layout, and the first tile sits right under the header with no strip between
             yield return UseBento(nav => nav.top = BuiltInNavElements.TextTabs);
             yield return Open(Lamp, SheetStopRule.Stop.Full);
-            var tabs = Sheet.Slots.TopView as TextTabsNavView;
-            Assert.IsNotNull(tabs, "precondition: Text Tabs over the bento");
-            Assert.AreEqual(-1, tabs.CurrentIndex, "nothing marked on the overview");
-            int visit = SectionIndex(BuiltInFamilies.Visit);
-            var tab = tabs.Tabs.Single(t => t.Index == visit).Button;
-            tabs.Strip.Show(tab);
+            Assert.IsTrue(Bento.IsOn, "precondition: the bento is drawn");
+            Assert.AreEqual(BuiltInNavElements.TextTabs, Session.CardSettings.navigation.top, "precondition: the wall still says Text Tabs");
+            Assert.IsNull(Sheet.Slots.TopKey, "no element in the top slot");
+            Assert.AreEqual(DisplayStyle.None, Sheet.Slots.Top.resolvedStyle.display, "nothing drawn there");
+            Assert.LessOrEqual(Scroll.worldBound.yMin, Stack.HeaderSlot.worldBound.yMax + OnePixel, "the stack (and its tiles) starts right under the title");
+            var first = Bento.Tiles[0].Button;
+            yield return CardTestInput.Tap(first.panel, first.worldBound.center);
             yield return CardTestInput.Settle(0.3f);
-            yield return CardTestInput.Tap(tab.panel, tab.worldBound.center);
-            yield return CardTestInput.Settle(0.3f);
-            Assert.AreEqual(BuiltInFamilies.Visit, Sheet.FullView.SectionKey, "a real tap on the Visit tab opened Visit");
-            Assert.AreEqual(visit, tabs.CurrentIndex, "its tab marked while open");
+            Assert.AreEqual(Nav.Model.Sections[0].Key, Sheet.FullView.SectionKey, "a real tap on a tile still opens its section");
             yield return PressEscape();
-            Assert.AreEqual(-1, tabs.CurrentIndex, "nothing again on the overview");
 
             yield return Open(LampMilitary, SheetStopRule.Stop.Full);
             Assert.AreEqual(CardOptions.LayoutScroll, Sheet.Layout.Effective, "Lamp - Military: nothing to switch between, it scrolls");

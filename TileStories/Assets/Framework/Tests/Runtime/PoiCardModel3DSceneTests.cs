@@ -84,7 +84,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.15f);
             var takeover = Sheet.Takeover;
             Assert.IsTrue(takeover.IsOpen, "a real tap opened the model full screen");
-            Assert.IsTrue(takeover.Crumb.text.EndsWith(" > The stone arch"), "the Lamp's title, then the model's authored one");
+            Assert.IsTrue(takeover.CrumbText.EndsWith(" > The stone arch"), "the Lamp's title, then the model's authored one");
             var full = teaser.FullScreenView;
             Assert.IsNotNull(full);
             Assert.IsTrue(full.ShowsModel);

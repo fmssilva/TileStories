@@ -260,7 +260,7 @@ namespace TileStories.Tests
                 yield return CardTestInput.Settle(0.15f);
                 var takeover = _harness.Sheet.Takeover;
                 Assert.IsTrue(takeover.IsOpen, look + ": a real tap on the teaser's button opened it full screen");
-                Assert.IsTrue(takeover.Crumb.text.EndsWith(" > The tiled room"), look + ": the card's title, then the panorama's own");
+                Assert.IsTrue(takeover.CrumbText.EndsWith(" > The tiled room"), look + ": the card's title, then the panorama's own");
 
                 var full = view.FullScreenView;
                 Assert.IsNotNull(full, look + ": a second instance over a second preview slot");

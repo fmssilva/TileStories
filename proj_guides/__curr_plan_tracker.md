@@ -1,21 +1,25 @@
-# Plan tracker -- _3.2 step 15b (layout `bento`)
+# Plan tracker -- _3.2 step 16 (full-view breadcrumb + sibling swipe) + the three decided 15b findings
 
-GATE (done): UnityMCP answered (telemetry_status); 1 commit pushed (7eaa913..7abf8e2); captures `TestEvidence/Gate/gate_3_2_step15b_{gameview,poieditor}.png`
-opened, window closed; tree compiled (3 old `error CS` lines precede the last build, which succeeded); SDF fonts unmodified (git clean); EditMode baseline
-1928/1928 (99 s, unfocused) on clean 7abf8e2 (trusted).
+GATE (done): UnityMCP answered (telemetry_status); 1 commit pushed (7abf8e2..1193ec4); captures `TestEvidence/Gate/gate_3_2_step16_{gameview,poieditor}.png`
+opened (window closed, 0 left); tree compiled (6 old `error CS` lines precede the last two builds, ExitCode 0); SDF fonts unmodified (git clean);
+EditMode baseline 1938/1938 (95 s, unfocused) on clean 1193ec4 (trusted).
 
-Decisions: CardBentoView (sheet-owned, like CardPagerView) + pure BentoLayoutRule (reuses ProgressMapRule.Widths on both axes: the target wins);
-the largest section leads a full row, the others pair in model order, an odd last one spans; a tap / any jump to a sectioned block opens the SECTION
-in the full view (one page, its targets stacked under their headings, BlockFullView.SectionPageFor); Current = the open section, -1 on the overview;
-Jumped first (closes overlay + takeover), then ONE takeover; Show After Reading: the section page measures HasViewed into the controller.
+Decisions: siblings = the block's model SECTION's targets whose kind lists Expandable (= family under the default Group By), stack order, none for
+a non-target or a section of one; the full view of a block opens ALL its siblings as the takeover's pages (ShowPage already hands media over in the
+right order); the crumb = title > section pill (tappable, 48 px, JumpTo(section, "breadcrumb") -- the one jump path) > name; chips one clipped line
+(NavStrip), current = bold + ring; a TURN pauses the leaving view (Collapsing), closing keeps step 12's rule; Back closes (the card never moved).
+Teaser takeovers a block opens itself (lightbox, video / 3D takeover display) keep "title > name" (IBlockHost.OpenTakeover has no block key: logged).
 
-- [x] P1 BentoLayoutRule + CardLayoutRule bento + CardOptions Bento + config comment; Tier 0 BentoLayoutRuleTests, CardLayoutRuleTests +
-- [x] P2 CardLayoutView bento state, NavController bento jump / spy, BlockFullView.SectionPageFor (+ viewed), sheet wiring, CardBentoView, USS / tokens;
-      EditMode real-sheet test (jump -> section open, nav_jump, Current, sources scroll)
-- [x] P3 Editor: Layout lists Bento, (i) with N, guides; DetailCardEditorTabTests (full EditMode 1938/1938); [x] capture `Editor/290_CardNavigation_Layout_Bento_620.png` judged
-- [x] P4 Phase A gallery bento entries; Phase B PoiCardBentoLayoutSceneTests 6/6 (real taps, Back, owners, no second sheet, reading -- load-bearing, spy, Military);
-      renders judged (fixes from them: block names in the tiles; none in a narrow tile)
-- [x] P5a targeted set 892: 871 + 21 (20 MINE: the hidden bento host shifted the scroll's children -> host only in the scroll while bento; 1 knowledge
-      swipe timing, not reproduced, logged) -> re-run 149/149 (CardNavGalleryTests whole + the swipe + bento scene); full EditMode 1938/1938
-- [x] P5b FULL PlayMode 1113/1113 (3467 s, unfocused at both ends); flake: 0 lines in both long runs (left open); _3.2 status row, RUN TIMES
-- [x] P5c docs: _3.2 (6.1 built 15b, TODO step 17, section 3 + 7), _5.1, 10-structure, __mixed_TODOs (video owner question, vacuous IsCurrent, few-sections idea, device line, swipe sighting)
+- [x] P1.1 CardLayoutRule.LayoutPicksTheTopBar (pages + bento) read by TopElement AND the Editor's Top Bar row; tests: CardLayoutRuleTests,
+      DetailCardEditorTabTests (Bento hides the row, value kept, Ctrl+Z), BentoLayoutSheetTests + PoiCardBentoLayoutSceneTests rewritten; (i) + guides
+- [x] P1.2 BentoLayoutRule caps a row at its tallest tile's content (contentHeight delegate), RoomLeft; CardBentoView measures; tests:
+      BentoLayoutRuleTests (+cap), CardNavGalleryTests bento promise (small case: room under the last tile, every row as tall as its content)
+- [x] P1.3 PoiCardLayoutSceneTests tabs: track read before; owner holds the ONE paused clip; mutation (Collapsing -> Stop) red, restored
+- [x] P2.1 FullViewSiblingRule (pure) + FullViewSiblingRuleTests (Lamp, app kind w/o Expandable, group_by format, family of one)
+- [x] P2.2 TakeoverView crumb row + CrumbText + ShowSection + SectionTapped + chips strip; BlockFullView PagesFor + SwipeGrab + turn pauses;
+      sheet OpenFullView siblings + crumb jump; Media.uss; Crumb.text readers -> CrumbText; EditMode FullViewSiblingsSheetTests
+- [x] P2.3 Phase A CardNavGalleryTests full-view crumb + chips over the 5 cases (renders)
+- [x] P2.4 Phase B PoiCardFullViewSiblingsSceneTests (real swipe, real chip tap, Back at the block, video owner, preview owner, family pill, Listen)
+- [x] P3 captures judged: Card/FullView_Lamp_media_{en,pt}_390.png, Card/FullView_Lamp_listen_en_390.png, Nav_full_view_<case>, Nav_Lamp_bento_{en,pt}_390.png
+- [x] P4 docs: _3.2 (status 16, TODOs removed, 5.7 built, 6.1 bento, 7), _3.1 TakeoverView breadcrumb, _5.1 Top Bar row, 10-structure, __mixed_TODOs
+- [x] P5 full EditMode + PlayMode fixtures named Card / Poi / SizeComparison + grep TakeoverView / BlockFullView; zero failures
