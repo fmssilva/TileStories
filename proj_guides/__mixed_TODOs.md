@@ -478,6 +478,16 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   a second plausible cause). That fixture now taps through its own `InViewAndStill` (scroll until in view AND the same rect for three frames).
   If another fixture loses a tap after a scroll, move that precondition into `TapInView` itself (shared ground: a full PlayMode run).
 
+- ONE CAUSE FOUND AND FIXED, the Lamp / Next Up case STILL OPEN (2026-10-21, _3.2 step 17b): "Layout update is struggling" reproduced
+  ON DEMAND -- every run, alone -- on The Painting's new card under icon_tabs_chips (dragging across a boundary between a section with kind
+  chips and a one-kind section). A probe over navigation variants isolated it (Text Tabs, the framework default and The Lamp under the same
+  preset were clean): the emptied chip row collapsed, the viewport grew, the spy line crossed back and refilled the row -- a loop inside one
+  layout pass. Fixed (USS: the row keeps a touch target's height), test-first (`PoiCardPaintingSceneTests.TheTabsWithChipsStrip_...`: 103 vs
+  55 px red, then green, and the drag test clean). NOT the same as the entry below: that one was The Lamp under Text Tabs with Next Up at the
+  card's end, which has no chip row. It shares the SHAPE, though -- a view that changes its own height from a spy/scroll callback -- so if it
+  shows again, look for a slot or element whose height depends on the section or block being read (Next Up's finished words, the end-of-card
+  reveal) and give it a fixed place, as here.
+
 - STILL OPEN (2026-10-20, _3.2 step 15b): NOT seen in either long run of 15b -- the Card / Poi targeted set (892 tests) and the full PlayMode
   run (1113/1113, wholly in the background): 0 "Layout update is struggling" lines in the Editor log over both, `ARealDragToTheEnd_...` green in
   both. Two quiet runs after three loud ones: left open, not closed (the brief: never on one quiet run). If it shows again, the entry below says
@@ -543,6 +553,28 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   asserts today's behaviour exactly, so a change turns it red on purpose.
 - CLOSED at _3.2 step 16 -- the vacuous `IsCurrent(null)` line of `PoiCardLayoutSceneTests` (tabs): the track is read before the section is put away and the line asserts the owner keeps that ONE paused clip (section 7.1); proved load-bearing (Collapsing -> Stop turns exactly that line red).
 - CLOSED at _3.2 step 16 (decided at the 15b review) -- a bento tile never grows past its content; the room left stays empty under the last tile (`BentoLayoutRule` RoomLeft).
+
+## From _3.2 step 17b (the Card Starter and the demo point, 2026-10-21)
+
+- **For the Architect -- the demo points' own words (measured, nothing changed).** The points a developer opens read as a fixture: The Lamp's
+  summary is "POI_Lamp", its card is titled "St George's Castle"; The Painting's summary "POI_Painting" (its card now titled "The Ribeira
+  Palace"); The Camera "POI_Camera"; every "X - Category" point "POI_<id>". Name and summary are identity fields (`00-process`), and what
+  reads them today:
+  - **Summaries:** `PoiCardSceneTests.APoiWithNoCard_ShowsItsNameAndSummary` ("POI_Camera" since 17b, was "POI_Painting") -- and nothing else
+    asserts a shipped summary (the search fixtures that test summary matches build their own walls: `SearchEngineTests`, the search demo).
+    Every header-only card shows its summary as the subtitle (Lamp - Residential's "POI_lamp_residential" under its bento title, a capture of
+    this block). Cheap to change: one test.
+  - **Names:** `CardConfigRoundTripTests` ("The Lamp", "Lamp - Military"), `PoiCardSceneTests` ("The Lamp", "Lamp - Military", "The Camera"),
+    `PoiCardSceneTests.Visit` ("Lamp - Military"), `FloatingSlotTests` (the chip starts with "The Lamp"), `SearchSceneTests` (the query
+    "military" ranks "Lamp - Military" first; "lamp painting" in every-word / any-word mode -- "Greater than 10" counts the lamp and painting
+    SETS by name; "painting" remembered as a suggestion; "milit" / "militray" typos), `PoiCardSceneTests` "lamp" as a query. Renaming the
+    sets (The Lamp -> a place) re-bases the search scene tests' queries and counts: a block of its own, with the search suite (and the
+    `_2.6` guide's examples) moved in the same change.
+  - The point ids (lamp, painting...) need not change for either.
+- **Idea (POI Editor, not built): apply a starter to every point with no blocks at once** (one undo step, one question naming how many
+  points). A new wall with 40 points would get a first card everywhere in one click; today it is one click per point.
+- **Idea (framework, not built): an app registers its own starter sets** the way it registers kinds (an app with its own kinds -- the
+  LivingRoom's Size Comparison -- would offer them in a set). Not built: no wall needs it yet (`20-code-quality`, no speculative code).
 
 ## From _3.2 step 16 (the full-view breadcrumb and sibling swipe, 2026-10-20)
 

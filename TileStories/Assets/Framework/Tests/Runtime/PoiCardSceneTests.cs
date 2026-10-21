@@ -291,9 +291,10 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator APoiWithNoCard_ShowsItsNameAndSummary()
         {
-            yield return Select("painting");
-            Assert.AreEqual("The Painting", Header.TitleText);
-            Assert.AreEqual("POI_Painting", Header.SubtitleText);
+            // - The Camera: a point with no blocks (The Painting has its own card since _3.2 step 17b)
+            yield return Select("camera");
+            Assert.AreEqual("The Camera", Header.TitleText);
+            Assert.AreEqual("POI_Camera", Header.SubtitleText);
             Assert.AreEqual(1, Sheet.Stack.BoundViews.Count, "header only");
         }
 
@@ -313,7 +314,7 @@ namespace TileStories.Tests
             LiveSettings.container.half_max_ratio = 0.25f;
             // - a header-only point (no authored card): its peek content (title + chip only, no pinned audio chip) is short enough
             //   for the cap to actually bind; a mechanism test should not depend on how tall a specific point's own content is
-            yield return Select("painting");
+            yield return Select("camera");
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "Open At = half");
             Assert.AreEqual(Sheet.Layer.layout.height * 0.25f, Sheet.Root.resolvedStyle.height, 1f, "Half Height Max = 25%");
         }

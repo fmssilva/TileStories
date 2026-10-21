@@ -24,8 +24,8 @@ namespace TileStories.Editor.Tests
         private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
         private const string Lamp = "lamp";
 
-        private static WallConfigData Shipped() =>
-            JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+        // - the shipped wall with the framework navigation: these tests measure the framework
+        private static WallConfigData Shipped() => ShippedWall.WithFrameworkNavigation();
 
         // The shipped wall with `element` as its Bottom Bar, no Top Bar, the blocks Grouped By Family, five slots
         private static WallConfigData With(string element)

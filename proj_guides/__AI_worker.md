@@ -13,75 +13,87 @@
 So start by reading them all. 
 
 
-## `And now: POI Card Navigation (3.2) -- step 17a, the navigation presets and the Editor's owed warnings`
+## `And now: POI Card Navigation (3.2) -- step 17b, the Card Starter and the demo point`
 
-GATE: `git push` if the branch is ahead of origin (2 commits are waiting; report how many you pushed). Take one Unity
+GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
 capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles;
 if not, STOP and report. The SDF fonts are Static since step 13: a modified font is a FINDING, not a `git checkout`.
-Baseline: the tree is clean on commit "Plan a Card Starter and split the presets step" (docs only, on top of full
-EditMode 1946/1946; it rides on 15b's full PlayMode 1113/1113) -- run the full EditMode suite and say which commit you
-trusted.
+Baseline: the tree is clean on commit "Add navigation presets, Editor warnings and per-kind chip icons" (full EditMode
+1972/1972; it rides on 15b's full PlayMode 1113/1113 -- NOT 7a's, which the last report mis-stated) -- run the full
+EditMode suite and say which commit you trusted.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 17] lines are yours:
-the `progress_map` warning, the bento warning from 15b, and the sibling chips) and the status table (1-16 done; step
-17 was split, 17a is yours, 17b is the Card Starter and comes next). Sections 8 (the preset table), 8.1 and 8.2 (read
-8.2 so you leave the seam for 17b, and build none of it), 7 (the Editor's row order and its warnings) and 9.
-REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines" AND its rules on
-warnings and popups -- this block is almost entirely Editor work; .clinerules/40-testing.md 4.2 (no full run this
-block), 4.2.3, 4.5; .clinerules/30-ui-content.md.
+Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 17b] line is yours) and
+the status table (1-17a done; 17b is yours). Sections 8.2 (the Card Starter: READ IT FIRST, it is the whole brief),
+8.1 (why the demo point exists) and 7 (the row order, now corrected).
+REQUIRED READING (all lines): `_3.1_POI_Card_Blocks.md` -- the Card Starter writes `poi.card.blocks`, which is THAT
+domain's data: its facts and its ontology belong there, not in `_3.2`. Read how a block instance is shaped, how looks
+and defaults resolve, and how Card Content draws a point's blocks; _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section
+"0. Guidelines"; .clinerules/40-testing.md 4.2 (no full run this block), 4.2.3, 4.5; .clinerules/00-process.md
+("Framework Completeness": this block is that rule's strongest claim -- a new wall gets good cards with zero authoring).
 Context only: _3.3_POI_Card_Styles.md, .clinerules/10-structure.md.
-WORKER MODEL: Sonnet-class -- Editor rows, a popup that writes data, warnings with conditions, and one view change
-(the chips). No new owner, no container, no runtime rule beyond the chips' labels. STOP and report if you find
-yourself changing `CardChromeRule`, a slot, or the layouts.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run (Editor work plus one view's labels). It
-closes on every PlayMode fixture whose name holds Card, Poi or SizeComparison, plus anything a grep for the changed
-types adds. Green before you call the block done. It rides on 15b's full run (1113/1113); the next full run is step
-19's close-out.
-ONE WATCH ITEM: `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` has now been red once in three separate
-blocks, always green alone. If it goes red in your runs, STOP and investigate it -- what makes a slider drag three
-undo steps -- and report what you find even if you cannot fix it. This block is the right one to catch it: it is all
-Editor rows and undo.
+WORKER MODEL: Opus-class -- it writes a point's content, which is the one thing in this project that is hard to undo
+by hand, and it decides what a good card IS.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: an Editor writer plus fixture content, no
+container, no stops, no harness. It closes on every PlayMode fixture whose name holds Card, Poi or SizeComparison,
+plus anything a grep for the changed types adds. Green before you call the block done. It rides on 15b's full run; the
+next full run is step 19's close-out.
+WATCH ITEM: `PoiCardAudioSceneTests` failed twice in 17a's run and passed 11/11 alone (second sighting of that
+fixture). If it fails in yours, STOP and investigate rather than re-logging it.
 
-PART 1 -- the three owed findings:
-1.1 The sibling chips carry their KIND's icon instead of a number (the icon set exists since step 6); the current chip
-  shows the icon plus its heading, elided. Test: a chip's accessible name is its block's heading in both languages,
-  and the current chip's words are whole at 390 px. Recapture `FullView_Lamp_media_{en,pt}_390.png`.
-1.2 The `progress_map` Editor warning (owed since step 6): it names the family count past which the pieces stop
-  showing their share (about 4-5 at 390 px). Wall-author words; no pixel talk.
-1.3 The bento Editor warning (owed since 15b): it names the section count past which the tiles stop filling the card
-  (about 13 at Full, 17 with the header collapsed).
+PART 1 -- the owed fix:
+1.1 The Preset row moves to the TOP of the Navigation section (section 7's order is already corrected in the guide: a
+  preset is where a wall author starts, not where they finish). One Editor test for the new order, recapture
+  `300_CardNavigation_Preset_620.png`.
 
-PART 2 -- step 17a:
-2.1 The Preset popup in Detail Card > Navigation. A preset is DATA (section 8's table): nine named sets, each writing
-  ONLY its own fields and leaving every other field alone. ACCEPTANCE, and the thing to prove hardest: applying a
-  preset writes exactly the fields the table lists and nothing else (walk the whole `navigation` object by reflection
-  before and after), and ONE Ctrl+Z restores all of them together -- one preset is one undo step, not nine.
-  Order the list with the strongest first: Long read, Rich point, One hand, Over the camera, then the rest under a
-  separator. Each row says in a few words who it suits.
-2.2 The remaining Editor warnings of section 7, each with its condition, each Editor-only with no visitor effect:
-  "more than two bars" (top + bottom + edge on: little reading space at Full), "tabs layout without a top or bottom
-  element", "Bar Slots below the families shown". Prove each appears on its condition AND is absent otherwise -- a
-  warning that is always there is noise.
-2.3 Test > Preview navigation: a row in the section's Test sub-foldout that opens the existing demo card (`_3.1` 8.4)
-  on the chosen point, so a developer can flip presets and watch. Reuse the demo card's plumbing; add no second path.
-  TESTS: Editor tests on the REAL window: a real click on each preset writes its fields and only those (reflection
-  walk), one Ctrl+Z restores, the help texts are ASCII and app-agnostic, each warning's condition. Phase B: a preset
-  applied live changes the open card (the live-sync path every row of this section already uses).
-  VISUALS: the Navigation section at 620 pt with the preset row and each warning showing, and the chips recaptured.
-  Judge item by item.
+PART 2 -- step 17b:
 
-2.4 DOCS: `_3.2` status row 17a + proof and the three TODO lines removed; `_5.1` for the preset row, the warnings and
-  the Test row; `10-structure.md`.
+2.1 THE CARD STARTER (section 8.2). Three or four ready-made sets of BLOCKS applied to a point in one click, plus
+  "start from scratch". A set is DATA -- a list of kinds with their looks -- never code, and it writes ordinary block
+  instances that the author then edits like any other.
+  Candidates to settle WITH THE REAL CARD IN FRONT OF YOU, not on paper: Simple point (header, rich_text, gallery,
+  sources); Rich point (+ timeline, quick_facts, fun_fact, audio_guide, related); AR point (+ model_3d, place_in_ar,
+  show_on_wall). Build each, open it on a real point, LOOK at it, and change the lists until each one is a card you
+  would ship. Say in the report what you changed and why -- that judgement is the deliverable, as much as the code.
+  SAFETY: it applies to a point with NO blocks without asking. On a point that already has blocks it asks first, in a
+  question that names how many blocks it will replace (`EditorDecision`, never a silent overwrite -- and never a modal
+  inside a test, `40-testing` 4.2.2). One Ctrl+Z restores the point exactly as it was: prove it by walking the point's
+  blocks before and after.
+  WHERE ITS FACTS LIVE: `_3.1_POI_Card_Blocks.md` (the sets, their kinds, the rule) and `_5.1` (the Editor row).
+  `_3.2` only points at them -- one home per fact.
+2.2 THE DEMO POINT. The Painting has zero blocks today; give it a real card with a starter plus whatever hand editing
+  makes it worth opening, and give Lamp - Residential all four in-flow nav kinds (`nav_icon_grid`, `nav_contents`,
+  `nav_rails`, `nav_bento`) so one point shows the whole domain at once (section 8.1). Both configs, and The Lamp
+  stays untouched -- its authored card is what the Auto Nav Block and Block Order tests measure.
+  Write the LivingRoom wall's own `navigation` block too, by applying the preset you judge best for this wall: today
+  the wall writes nothing and runs on the framework default. The shipped FRAMEWORK default does not change (section
+  8.2) -- this is the wall's choice, written into the wall's config, which is exactly what a wall author does.
+  Say which preset you chose and why.
+2.3 The POI's own words. `The Lamp`'s summary is literally "POI_Lamp" and its card is titled "St George's Castle".
+  For the demo to read as an app rather than a fixture, the points the developer will open need a real name and
+  summary. CAREFUL: name and summary are IDENTITY-ADJACENT -- `00-process` forbids changing a fixture POI's identity
+  fields (id, name, category, summary, keywords) because the search tests index them. So do NOT edit them here:
+  measure what would break (grep the search fixtures for the names and summaries) and report it as a finding with the
+  list, so the Architect can decide whether it is a block of its own. Build nothing of it.
+  TESTS: Tier 0 on the starter sets (each set's kinds are all registered, every required field it leaves empty is one
+  the author must fill, the "start from scratch" path writes nothing). Editor tests on the REAL window: a real click
+  applies a set to an empty point and writes exactly its blocks; on a point with blocks the question is asked and
+  Cancel changes nothing; one Ctrl+Z restores. Phase B: The Painting's card opens, renders and navigates like any
+  other -- a jump, the spy, and the layout the wall now sets.
+  VISUALS: The Painting's new card at 390 px in EN and PT at Half and Full, Lamp - Residential with its four nav
+  kinds, and the Card Starter row in the Editor. Judge item by item -- and say honestly whether The Painting's card
+  looks like something you would show someone.
+
+2.4 DOCS: `_3.2` status row 17b + proof and the [step 17b] TODO removed; `_3.1` gains the Card Starter's sets and
+  rule (its home); `_5.1` for the Card Starter row and the moved Preset row; `10-structure.md`.
 
 Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII in code, comments, logs and Editor
-labels; Editor rows, popups and WARNINGS name things, never ids; a preset only writes fields -- it never computes
-anything at runtime; no backward-compatibility shim; real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: the Card Starter and the demo point (17b -- read section 8.2, build none of it); the facets (18); the
-domain review (19); any change to the shipped framework default.
+labels (the cards' own words are DATA and keep their Portuguese accents); Editor rows, popups and warnings name
+things, never ids; no backward-compatibility shim; never change a fixture POI's identity fields.
+OUT OF SCOPE: the facets (18); the domain review (19); the framework's shipped default; renaming any point.
 Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are
 judged and 2.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
-If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
-Commit only if the developer asks.
+If the guide disagrees with the real code, STOP and report -- as 17a rightly did about the kind icons.
+Finish with the final report of `.clinerules/60-finishing.md` 6.4. Commit only if the developer asks.
 
 
 

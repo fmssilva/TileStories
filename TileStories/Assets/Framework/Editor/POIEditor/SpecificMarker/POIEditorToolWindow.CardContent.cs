@@ -3,7 +3,8 @@
 // Partial: Specific Marker > "Card Content" (_3.1 section 8.2), one POI's Detail Card blocks, top to bottom. A
 // table (reorder, Kind, Variant, Display, open, delete) whose open rows draw the block's fields through the
 // generic BlockFieldDrawer; under a row that would not show, the reason BlockStackBuilder gives. "+ Add block"
-// appends the kind picked beside it. A delete asks nothing: Ctrl+Z brings the block back.
+// appends the kind picked beside it. A delete asks nothing: Ctrl+Z brings the block back. Above the table, the Card
+// Starter row (POIEditorToolWindow.CardStarter.cs) replaces the blocks with a ready-made set.
 
 using System.Collections.Generic;
 using UnityEditor;
@@ -40,6 +41,8 @@ namespace TileStories.Editor
             GUILayout.Label("Blocks", EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, titleRow - 36f)), GUILayout.ExpandWidth(false));
             HelpInfoButton.Draw("Card Content", CardContentHelp);
             EditorRowEnd();
+            // - the section's first row: a ready-made set of blocks is where an author starts a point's card (_3.2 step 17b)
+            DrawCardStarterRow(poi);
 
             var blocks = poi.card?.blocks ?? new List<BlockInstanceData>();
             var built = BlockStackBuilder.Build(poi, settings, BlockRegistry.Shared, _config.pois);

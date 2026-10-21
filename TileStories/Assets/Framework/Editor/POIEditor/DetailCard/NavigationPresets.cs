@@ -39,6 +39,18 @@ namespace TileStories.Editor
         // How many presets the picker lists first, above its separator: the strongest ones for most walls
         public const int Recommended = 4;
 
+        // The popup kind of the preset picker (NamedOptionPickerPopup): one open picker of this kind at a time
+        public const string PickerKind = "navigation-preset-picker";
+        public const string PickerTitle = "Navigation Presets";
+
+        // The picker's rows, in All's order: each preset's name and who it suits
+        public static IReadOnlyList<NamedOptionPickerPopup.Option> PickerOptions()
+        {
+            var options = new List<NamedOptionPickerPopup.Option>(All.Count);
+            foreach (var preset in All) options.Add(new NamedOptionPickerPopup.Option(preset.Label, preset.Suits));
+            return options;
+        }
+
         // The JSON names of the fields a preset writes -- the ONLY fields a preset may change (a test walks the whole settings object)
         public static readonly IReadOnlyList<string> WrittenFields = new[]
         {

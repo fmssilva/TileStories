@@ -19,7 +19,8 @@ namespace TileStories.Tests
     // its WallSession, mock camera, EventSystem, zoom rig and SearchUI object with SearchUIHost + SearchUI.uss,
     // the shipped config) is loaded, the tests act the way a visitor or the live Editor push does (real
     // raycast taps, real panel events, WallSession.ApplySearchSettings / ApplySearchDemo), and it is unloaded
-    // after. Renders of the real Game view (UI included) are saved as TestEvidence/Search/Search_*.png.
+    // after. Renders of the real Game view (UI included) are saved as TestEvidence/Search/Search_*.png. Two wall settings are pinned for
+    // every test: LOD off, and the card's navigation at the framework default (the wall's own preset stays in ShippedNavigation).
     public abstract class SearchSceneFixture
     {
         private const string ScenePath = "Assets/Apps/LivingRoom/LivingRoomScene.unity";
@@ -28,6 +29,9 @@ namespace TileStories.Tests
         protected SearchUIHost Host;
         // The POI Detail Card of the same scene (PoiCard object, _3.1)
         protected PoiCardHost Card;
+        // The navigation the shipped wall sets (card_settings.navigation, null = the framework default). SetUp pins every fixture to the
+        // framework default instead; a test about the wall's own choice pushes this back
+        protected CardNavigationSettings ShippedNavigation;
         protected Camera Cam;
         private readonly List<string> _unexpectedErrors = new();
         private string _savedRecent;
@@ -85,6 +89,12 @@ namespace TileStories.Tests
             savedLanguage.SetLanguage("");
             // - LOD off: every POI stays visible, so what a test sees is the search's doing alone
             Session.ApplyLodSettings(new LodSettings { enabled = false });
+            // - the card's navigation pinned to the FRAMEWORK default: a fixture measures the framework, never the preset the demo wall
+            //   happens to ship (_3.2 8.2, step 17b). The wall's own choice is kept in ShippedNavigation for the test that is about it
+            var config = ConfigCopy();
+            ShippedNavigation = config.card_settings.navigation;
+            config.card_settings.navigation = new CardNavigationSettings();
+            Session.ApplyCardSettings(config);
             yield return Wait(0.8f);
         }
 

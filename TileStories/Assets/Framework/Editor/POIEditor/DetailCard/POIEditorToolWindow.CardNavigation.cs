@@ -1,7 +1,7 @@
 // POIEditorToolWindow.CardNavigation.cs
 //
 // Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open
-// card. First the Layout (Scroll, Accordion, Tabs: step 13, with a warning for Tabs with no bar to switch sections; its Open One At A
+// card. First the Preset (step 17a; first since 17b: where a wall author starts), then the Layout (Scroll, Accordion, Tabs: step 13, with a warning for Tabs with no bar to switch sections; its Open One At A
 // Time row, accordion only, comes after Placed Model Control). The two rows that order the stack: Block Order and the Families table (Order with reorder arrows, Family,
 // At The End, Group, one (i) on its header); Group By; which cards get navigation, at which heights and what the top strip
 // shows (Show Navigation From, Top Bar: step 5a; Show Navigation At: 5b; Labels, Show Counts: step 6, each only for an element
@@ -53,7 +53,12 @@ namespace TileStories.Editor
                 return busiest.Sections;
             }
 
-            // - section 7's order: the Layout first -- it decides what most rows below mean (step 13). A layout of a later step reads as Scroll
+            // - section 7's order: the Preset first -- it is where a wall author STARTS, then adjusts the rows under it (decided at the 17a
+            //   review); a gap sets it apart, since it writes seven of the rows below rather than being one of them
+            DrawNavigationPresetRow(nav);
+            GUILayout.Space(TableGapBetweenGroups);
+
+            // - then the Layout -- it decides what most rows below mean (step 13). A layout of a later step reads as Scroll
             nav.layout = DrawPopupField("Layout", nav.layout, CardOptions.Layouts, CardOptions.LayoutLabels, CardLayoutHelp);
             if (CardLayoutRule.TabsWithoutAnElement(nav))
                 DrawNavigationMessage(CardTabsWithoutABarWarning, MessageType.Warning);
@@ -148,10 +153,6 @@ namespace TileStories.Editor
                 GUILayout.Space(TableGapBetweenGroups);
                 DrawGroupsTable(nav);
             }
-
-            // - the presets last of the rows (section 7's order): a shortcut that writes seven of the rows above, so the section reads first
-            GUILayout.Space(TableGapBetweenGroups);
-            DrawNavigationPresetRow(nav);
 
             DrawDomainTestSubSection(_cardNavigationTest, CardNavigationSceneTestGuide, CardNavigationPlaymodeTestGuide, CardNavigationDeviceTestGuide,
                 DrawNavigationPreviewRows);

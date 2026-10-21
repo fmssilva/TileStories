@@ -92,8 +92,9 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~65-140 s (1972 tests, 90 s, 2026-10-20, _3.2 step 17a); full PlayMode ~50-60 min (1113 tests, 3467 s, 2026-10-20, _3.2 step 15b:
-1113/1113, wholly in the background); the Card / Poi targeted set (43 fixtures, 901 tests) ~45-55 min (3182 s, 2026-10-20, _3.2 step 16); one
+EditMode ~65-140 s (1984 tests, 94 s, 2026-10-21, _3.2 step 17b); full PlayMode ~50-60 min (1130 tests, 3428 s, 2026-10-21, _3.2 step 17b:
+1130/1130, background for the first ~20 min, then Unity in front); the Card / Poi targeted set (45 fixtures, 945 tests) ~45-55 min (3207 s,
+2026-10-21, _3.2 step 17b); one
 PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
@@ -259,6 +260,12 @@ application is a broken test, not a flaky one.
   `LodWallSceneTests`); everything else is judged at the phone frame. If a test fails only after the Editor layout changed, the
   test is wrong, not the environment: fix the fixture. (2026-09-29: the Default layout's landscape Free Aspect Game view broke
   11 card tests at once; with the run pinned, 5 more showed they had only ever passed at one lucky window size.)
+- **A fixture measures the framework, not the demo wall's choices.** The LivingRoom wall is a demo and ships settings a wall author picked
+  (since `_3.2` step 17b its own navigation preset); a test that loads it measures those unless it pins what it measures. Every scene fixture
+  starts from `SearchSceneFixture.SetUp`'s pins -- LOD off, the card's navigation at the framework default (the wall's own kept in
+  `ShippedNavigation`) -- and an EditMode test of the framework's navigation rows loads `ShippedWall.WithFrameworkNavigation()`. A test whose
+  subject IS the wall's choice pushes it back (`PoiCardPaintingSceneTests`). When a new wall setting starts to differ from the framework default
+  and a fixture breaks on it, pin it in the same place -- never re-baseline the suite to the demo wall's taste.
 - **Measure relative to the thing itself, and prove the precondition.** An offset is measured from the element's own rest
   position, not from a neighbour whose distance depends on the screen (`DisplacementLabelTests`); a tap first scrolls its target
   into view and asserts it is inside the visible part (`CardVideoGalleryTests.TapInView` -- `ScrollTo(block)` on a block taller

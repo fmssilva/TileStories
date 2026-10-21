@@ -61,7 +61,9 @@ namespace TileStories
             ChipsSection = shown ? section : -1;
             if (shown) Chips.Bind(_model.Sections[section].Kinds, _model, _nav, _context);
             else Chips.Unbind();
-            Chips.Root.style.visibility = shown ? Visibility.Visible : Visibility.Hidden;
+            // - with chips the row INHERITS its strip's visibility (never an inline Visible: that beat the hidden strip of CardChromeRule,
+            //   and the chips floated alone over the card's title at Half); without chips it is hidden, keeping its place (Navigation.uss)
+            Chips.Root.style.visibility = shown ? new StyleEnum<Visibility>(StyleKeyword.Null) : Visibility.Hidden;
         }
     }
 }

@@ -298,6 +298,19 @@ namespace TileStories.Editor
             "appear, change or go at once.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
+            "PRESETS\n" +
+            "- The first row of Navigation is the Preset button: it reads the preset the seven rows hold now (Long read on a wall that never " +
+            "changed them), or Custom. Start here, then adjust the rows under it. Click " +
+            "it: a list opens with Long read, Rich point, One hand and Over the camera first, then a line, then the rest, each with who it " +
+            "suits; the one in use is marked.\n" +
+            "- Pick Rich point: Layout, Top Bar, Bottom Bar, Floating Button, Menu, Edge and Auto Nav Block change together and the open " +
+            "card follows at once. Every other row (Block Order, Show Navigation From, Bar Slots, Follow Scroll...) keeps what it had. " +
+            "Press Ctrl+Z once: all seven rows are back.\n" +
+            "- Pick each of the others in turn and read the open card: One hand puts a bar at the bottom and a menu button in the title " +
+            "row; Over the camera has one round button and no bar; Deep dive adds kind chips, edge dots and a contents list; Guided a " +
+            "progress map, an Up Next bar and a contents list; Story turns the card into pages; Quick glance folds every block into a " +
+            "line; Overview shows the sections as tiles.\n" +
+            "- Change one of the seven rows yourself: the button reads Custom. Change it back: the preset's name returns.\n\n" +
             "LAYOUT\n" +
             "- Set Layout = Accordion and open a long card at full: every block is one line (its icon, its heading or first words, its " +
             "kind of content and minutes); the title, a block pinned under it and the bottom buttons stay as they were.\n" +
@@ -519,19 +532,7 @@ namespace TileStories.Editor
             "button is the one way in.\n" +
             "- Open a line and tap its full-view button: the block fills the screen, the card's title and the block's words above it. " +
             "Play the video or turn the model there, press Escape: the card shows the same video at the same moment, and its own " +
-            "player and model still answer. Switch the language or change a field while the full view is open: it stays, redrawn.\n" +
-            "PRESETS\n" +
-            "- Under the last row of Navigation, the Preset button reads Long read (or Custom): the preset the seven rows hold now. Click " +
-            "it: a list opens with Long read, Rich point, One hand and Over the camera first, then a line, then the rest, each with who it " +
-            "suits; the one in use is marked.\n" +
-            "- Pick Rich point: Layout, Top Bar, Bottom Bar, Floating Button, Menu, Edge and Auto Nav Block change together and the open " +
-            "card follows at once. Every other row (Block Order, Show Navigation From, Bar Slots, Follow Scroll...) keeps what it had. " +
-            "Press Ctrl+Z once: all seven rows are back.\n" +
-            "- Pick each of the others in turn and read the open card: One hand puts a bar at the bottom and a menu button in the title " +
-            "row; Over the camera has one round button and no bar; Deep dive adds kind chips, edge dots and a contents list; Guided a " +
-            "progress map, an Up Next bar and a contents list; Story turns the card into pages; Quick glance folds every block into a " +
-            "line; Overview shows the sections as tiles.\n" +
-            "- Change one of the seven rows yourself: the button reads Custom. Change it back: the preset's name returns.\n\n" +
+            "player and model still answer. Switch the language or change a field while the full view is open: it stays, redrawn.\n\n" +
             "WARNINGS\n" +
             "- Top Bar, Bottom Bar and Edge all on (pick Deep dive, then set Bottom Bar to a bar): a warning shows under Edge. Set one " +
             "of the three to None: it goes. Two bars never warn.\n" +

@@ -26,7 +26,7 @@ namespace TileStories.Editor.Tests
         [TearDown]
         public void TearDown()
         {
-            NavigationPresetPickerPopup.RowRectProbe = null;
+            NamedOptionPickerPopup.RowRectProbe = null;
             EditorPopup.CloseAll();
             _window?.Close();
             _window = null;
@@ -56,10 +56,10 @@ namespace TileStories.Editor.Tests
         private IEnumerator PickPreset(int index)
         {
             var seen = new Dictionary<int, Rect>();
-            NavigationPresetPickerPopup.RowRectProbe = (i, r) => seen[i] = r;
+            NamedOptionPickerPopup.RowRectProbe = (i, r) => seen[i] = r;
             yield return _window.ScrollTo("Preset");
             _window.Click("Preset");
-            var popup = EditorPopup.FindOpen(NavigationPresetPickerPopup.PopupKind);
+            var popup = EditorPopup.FindOpen(NavigationPresets.PickerKind);
             Assert.IsNotNull(popup, "a real click on the Preset button opens the picker");
             for (int frame = 0; frame < 90 && seen.Count < NavigationPresets.All.Count; frame++)
             {
@@ -107,14 +107,18 @@ namespace TileStories.Editor.Tests
                 _window.SetWindowField("_selectedTab", Enum.Parse(tabField.FieldType, "DetailCard"));
                 yield return _window.WaitForRepaint();
 
+                // - the wall runs its OWN preset (since _3.2 step 17b the demo wall writes one): every other one is picked from there
+                var start = NavigationPresets.Matching(config.card_settings.navigation);
+                Assert.IsNotNull(start, "precondition: the shipped wall's seven rows are a named preset");
+                AssertCardShows(sheet, session, start, "before any pick (" + start.Label + ")");
+                Assert.IsNotNull(sheet.Slots.TopView, "precondition: the wall's preset shows a strip on this card");
                 var longRead = NavigationPresets.All[0];
-                AssertCardShows(sheet, session, longRead, "before any pick (Long read)");
-                Assert.IsNotNull(sheet.Slots.TopView, "precondition: Long read shows a strip of tabs on this card");
 
-                // - every other preset, one real pick at a time: the card follows, one Ctrl+Z gives Long read back
-                for (int i = 1; i < NavigationPresets.All.Count; i++)
+                // - every other preset, one real pick at a time: the card follows, one Ctrl+Z gives the wall's own back
+                for (int i = 0; i < NavigationPresets.All.Count; i++)
                 {
                     var preset = NavigationPresets.All[i];
+                    if (ReferenceEquals(preset, start)) continue;
                     int steps = _window.UndoStepsLeft;
                     yield return PickPreset(i);
                     Assert.AreEqual(steps + 1, _window.UndoStepsLeft, preset.Label + ": one pick, one undo step");
@@ -125,7 +129,7 @@ namespace TileStories.Editor.Tests
                     yield return _window.PressUndo();
                     yield return Frames(15);
                     Assert.AreEqual(steps, _window.UndoStepsLeft, preset.Label + ": Ctrl+Z took that one step");
-                    AssertCardShows(sheet, session, longRead, preset.Label + " undone");
+                    AssertCardShows(sheet, session, start, preset.Label + " undone");
                 }
 
                 // - from another preset back to Long read: the card returns to its strip of tabs, and Ctrl+Z gives the other one back

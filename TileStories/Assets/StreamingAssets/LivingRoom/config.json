@@ -7389,6 +7389,84 @@
                                 "items": []
                             }
                         ]
+                    },
+                    {
+                        "key": "block_8",
+                        "kind": "nav_icon_grid",
+                        "variant": "",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Sections"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Secções"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_9",
+                        "kind": "nav_contents",
+                        "variant": "",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Contents"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Índice"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_10",
+                        "kind": "nav_rails",
+                        "variant": "",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "More to explore"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Mais para explorar"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
                     }
                 ]
             }
@@ -7537,7 +7615,1012 @@
             "has_custom_symbol": false,
             "custom_symbol_key": "",
             "card": {
-                "blocks": []
+                "blocks": [
+                    {
+                        "key": "block_1",
+                        "kind": "header",
+                        "variant": "image_parallax",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "title",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The Ribeira Palace"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Paço da Ribeira"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "subtitle",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Royal - c. 1700 on the panel"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Real - c. 1700 no painel"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "image",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "damage_before.png",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_2",
+                        "kind": "quick_facts",
+                        "variant": "grid_hairline",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "At a glance"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Num relance"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Built"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Construção"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "From c. 1500"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Desde c. 1500"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Built for"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Mandado por"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "King Manuel I"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "D. Manuel I"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Royal home"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Casa real"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "About 250 years"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Cerca de 250 anos"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "label",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Lost"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Perdido"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "value",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1 November 1755"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1 de novembro de 1755"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_3",
+                        "kind": "rich_text",
+                        "variant": "lede",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The story"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "A história"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "minutes",
+                                "text": [],
+                                "number": 2.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "body",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "When King Manuel I found the old castle on the hill too cramped for a court growing rich on the sea trade, he moved the royal home down to the river, beside the docks where ships unloaded from India and Brazil.\n\nFor about two and a half centuries the palace on the riverside was where Portugal was governed. A great domed tower, added in the 1580s under Philip I, stood over the water and became the city's best-known outline -- the one drawn on the panel.\n\nOn the morning of 1 November 1755 an earthquake, the fire after it and a wave from the river destroyed it, with its library and its collections. It was never rebuilt: the king moved to the hills of Ajuda, and the square laid out in its place is still called Terreiro do Paço, the Palace Yard."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Quando D. Manuel I achou o velho castelo no alto pequeno demais para uma corte que enriquecia com o comércio do mar, levou a casa real para junto do rio, ao lado das docas onde descarregavam os navios da Índia e do Brasil.\n\nDurante cerca de dois séculos e meio, o paço à beira-rio foi o lugar de onde se governava Portugal. Um grande torreão com cúpula, acrescentado na década de 1580 no reinado de Filipe I, erguia-se sobre a água e tornou-se a silhueta mais conhecida da cidade -- a que está desenhada no painel.\n\nNa manhã de 1 de novembro de 1755, o terramoto, o incêndio que se lhe seguiu e uma onda vinda do rio destruíram-no, com a sua biblioteca e as suas coleções. Nunca foi reconstruído: o rei mudou-se para os altos da Ajuda, e a praça aberta no seu lugar ainda se chama Terreiro do Paço."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_4",
+                        "kind": "timeline",
+                        "variant": "vertical",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Timeline"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Cronologia"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "minutes",
+                                "text": [],
+                                "number": 1.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "events",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "c. 1500"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "c. 1500"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The court moves to the river"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A corte muda-se para o rio"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "King Manuel I builds a new palace by the docks."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "D. Manuel I constrói um novo paço junto às docas."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1580s"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Década de 1580"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The domed tower rises"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Ergue-se o torreão"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Philip I, king of Portugal and Spain, gives the palace a new front and its tower over the river."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Filipe I, rei de Portugal e de Espanha, dá ao paço uma nova fachada e o torreão sobre o rio."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "1 Nov 1755"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "1 nov. 1755"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Earthquake, fire and wave"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Terramoto, incêndio e maremoto"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace, its library and its collections are lost in one day."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O paço, a biblioteca e as coleções perdem-se num só dia."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "date",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "After 1755"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Depois de 1755"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A square takes its place"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Uma praça toma o seu lugar"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Lisbon is rebuilt on a new plan, and Praça do Comércio opens onto the river."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Lisboa é reconstruída segundo um novo plano, e a Praça do Comércio abre-se para o rio."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_5",
+                        "kind": "gallery",
+                        "variant": "carousel",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "In pictures"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Em imagens"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "pictures",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_1.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The river front on the panel"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A frente ribeirinha no painel"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_2.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The domed tower"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O torreão"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_3.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace yard"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O terreiro do paço"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "image",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "gallery_4.png"
+                                            },
+                                            {
+                                                "key": "caption",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The docks beside the palace"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "As docas junto ao paço"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_10",
+                        "kind": "zoom_image",
+                        "variant": "pinch",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "The tiles, close up"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Os azulejos de perto"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "image",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "tile_detail.png",
+                                "items": []
+                            },
+                            {
+                                "key": "caption",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Pinch to see how each tile was painted by hand."
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Afaste dois dedos para ver como cada azulejo foi pintado à mão."
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_6",
+                        "kind": "fun_fact",
+                        "variant": "flip",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "facts",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace library is said to have held tens of thousands of books -- almost all of them lost in a single day."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Diz-se que a biblioteca do paço guardava dezenas de milhares de livros -- quase todos perdidos num só dia."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Many people in Lisbon still call Praça do Comércio by the palace's name: Terreiro do Paço."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Muitos lisboetas ainda chamam à Praça do Comércio pelo nome do paço: Terreiro do Paço."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_7",
+                        "kind": "audio_guide",
+                        "variant": "player",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Listen"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Ouvir"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "clip",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "audio/portugal_tourism_guide_en.mp3",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_11",
+                        "kind": "wall_locator",
+                        "variant": "strip",
+                        "display": "inline",
+                        "fields": []
+                    },
+                    {
+                        "key": "block_8",
+                        "kind": "related",
+                        "variant": "carousel",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "source",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "nearest",
+                                "asset": "",
+                                "items": []
+                            },
+                            {
+                                "key": "heading",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Nearby on the panel"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Perto, no painel"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    },
+                    {
+                        "key": "block_9",
+                        "kind": "sources",
+                        "variant": "list",
+                        "display": "inline",
+                        "fields": [
+                            {
+                                "key": "sources",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "items": [
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Ribeira Palace"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Paço da Ribeira"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "author",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Wikipedia"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Wikipédia"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "title",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Praça do Comércio"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Praça do Comércio"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            },
+                                            {
+                                                "key": "author",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Wikipedia"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Wikipédia"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": ""
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "key": "content_status",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "draft",
+                                "asset": "",
+                                "items": []
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {
@@ -8288,7 +9371,33 @@
             "keep_audio_on_close": true,
             "audio_when_another_starts": "switch",
             "audio_android_output_poll": false,
-            "reduce_motion": false
+            "reduce_motion": false,
+            "peek_next_card": true
+        },
+        "navigation": {
+            "block_order": "end_families_last",
+            "families": [],
+            "group_by": "family",
+            "min_blocks": 8,
+            "max_slots": 5,
+            "follow_scroll": true,
+            "jump_raises_to": "full",
+            "jump_motion": "smooth",
+            "back_button": "step_down",
+            "top": "icon_tabs_chips",
+            "bottom": "none",
+            "menu": "drawer_tree",
+            "floating": "none",
+            "edge": "none",
+            "auto_nav_block": "none",
+            "placed_model_control": "chip",
+            "show_at": "half_and_full",
+            "hide_on_scroll": "down",
+            "labels": "icon_and_text",
+            "show_counts": false,
+            "groups": [],
+            "layout": "scroll",
+            "accordion_one_open": false
         },
         "kinds": [],
         "strings": [],
@@ -8337,7 +9446,8 @@
             "enabled": false,
             "poi_id": "",
             "stop": "half"
-        }
+        },
+        "preview_language": ""
     },
     "search_demo": {
         "enabled": false,

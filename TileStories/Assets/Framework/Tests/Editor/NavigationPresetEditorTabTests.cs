@@ -26,14 +26,14 @@ namespace TileStories.Editor.Tests
         public void TearDown()
         {
             POIEditorToolWindow.NavigationMessageProbe = null;
-            NavigationPresetPickerPopup.RowRectProbe = null;
+            NamedOptionPickerPopup.RowRectProbe = null;
             HelpInfoButton.DrawnProbe = null;
             EditorPopup.CloseAll();
             _window?.Close();
         }
 
-        private static WallConfigData ShippedConfig() =>
-            JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+        // - the shipped wall with the framework navigation (Long read): the presets are measured from the framework default
+        private static WallConfigData ShippedConfig() => ShippedWall.WithFrameworkNavigation();
 
         private CardNavigationSettings Nav => _window.Config.card_settings.navigation;
 
@@ -66,10 +66,10 @@ namespace TileStories.Editor.Tests
         {
             rows.Clear();
             var seen = new Dictionary<int, Rect>();
-            NavigationPresetPickerPopup.RowRectProbe = (i, r) => seen[i] = r;
+            NamedOptionPickerPopup.RowRectProbe = (i, r) => seen[i] = r;
             yield return _window.ScrollTo("Preset");
             _window.Click("Preset");
-            var popup = EditorPopup.FindOpen(NavigationPresetPickerPopup.PopupKind);
+            var popup = EditorPopup.FindOpen(NavigationPresets.PickerKind);
             Assert.IsNotNull(popup, "a real click on the Preset button opens the picker");
             for (int frame = 0; frame < 90 && seen.Count < NavigationPresets.All.Count; frame++)
             {
@@ -86,7 +86,7 @@ namespace TileStories.Editor.Tests
         // ---------------- the Preset row ----------------
 
         [UnityTest]
-        public IEnumerator ThePresetRow_IsTheSectionsLastRow_DrawingItWritesNothing_AndEscClosesThePickerWithNoChange()
+        public IEnumerator ThePresetRow_IsTheSectionsFirstRow_DrawingItWritesNothing_AndEscClosesThePickerWithNoChange()
         {
             OpenNavigation(ShippedConfig());
             var titles = new List<(string Title, Rect Rect)>();
@@ -95,18 +95,24 @@ namespace TileStories.Editor.Tests
             HelpInfoButton.DrawnProbe = null;
             Assert.IsFalse(_window.Unsaved, "drawing the section, the Preset row included, writes nothing");
             float Y(string title) => titles.Last(t => t.Title == title).Rect.y;
-            Assert.Less(Y("Placed Model Control"), Y("Preset"), "the Preset row comes after the last of the section's rows (section 7's order)");
-            Assert.Less(Y("Preset"), Y("Preview Navigation"), "and above the Test foldout's own rows");
-            Assert.AreSame(NavigationPresets.All[0], NavigationPresets.Matching(Nav), "the shipped wall's seven rows are Long read");
+            // - section 7's order since the 17a review: a preset is where a wall author starts, so it is read first, above Layout
+            var sectionRows = new[] { "Layout", "Block Order", "Show Navigation From", "Top Bar", "Bottom Bar", "Menu", "Floating Button", "Edge",
+                "Auto Nav Block", "Follow Scroll", "Hide While Scrolling", "Back Button", "Placed Model Control" };
+            foreach (string row in sectionRows)
+                Assert.Less(Y("Preset"), Y(row), "the Preset row comes before " + row + " (the section's first row)");
+            Assert.AreEqual("Preset", titles.Where(t => t.Title == "Preset" || sectionRows.Contains(t.Title)).OrderBy(t => t.Rect.y).First().Title,
+                "no row of the section is drawn above it");
+            Assert.Less(Y("Placed Model Control"), Y("Preview Navigation"), "the Test foldout's own rows still close the section");
+            Assert.AreSame(NavigationPresets.All[0], NavigationPresets.Matching(Nav), "the framework default's seven rows are Long read");
 
             int steps = _window.UndoStepsLeft;
             string before = JsonUtility.ToJson(_window.Config);
             var rows = new List<Rect>();
             yield return OpenThePicker(rows);
-            var popup = EditorPopup.FindOpen(NavigationPresetPickerPopup.PopupKind);
+            var popup = EditorPopup.FindOpen(NavigationPresets.PickerKind);
             popup.SendEvent(new Event { type = EventType.KeyDown, keyCode = KeyCode.Escape });
             yield return null;
-            Assert.IsNull(EditorPopup.FindOpen(NavigationPresetPickerPopup.PopupKind), "Esc closes the picker");
+            Assert.IsNull(EditorPopup.FindOpen(NavigationPresets.PickerKind), "Esc closes the picker");
             Assert.AreEqual(before, JsonUtility.ToJson(_window.Config), "and writes nothing");
             Assert.AreEqual(steps, _window.UndoStepsLeft);
             Assert.IsFalse(_window.Unsaved);
@@ -156,7 +162,7 @@ namespace TileStories.Editor.Tests
                 var before = NavigationPresetsTests.Snapshot(Nav);
 
                 yield return OpenThePicker(rows);
-                var popup = EditorPopup.FindOpen(NavigationPresetPickerPopup.PopupKind);
+                var popup = EditorPopup.FindOpen(NavigationPresets.PickerKind);
                 if (i == 0)
                 {
                     // - the four strongest above a separator: the gap before the fifth row is the separator, no row is spaced like it elsewhere
@@ -170,7 +176,7 @@ namespace TileStories.Editor.Tests
                 yield return _window.WaitForRepaint();
 
                 // - the picker closed on the pick and the rows hold the preset
-                Assert.IsNull(EditorPopup.FindOpen(NavigationPresetPickerPopup.PopupKind), preset.Label + ": a pick closes the picker");
+                Assert.IsNull(EditorPopup.FindOpen(NavigationPresets.PickerKind), preset.Label + ": a pick closes the picker");
                 Assert.AreSame(preset, NavigationPresets.Matching(Nav), preset.Label + ": the seven rows now hold it");
                 Assert.IsTrue(_window.Unsaved, preset.Label + ": a pick is an edit");
                 // - exactly its fields: the walk over every field of the settings, then the WHOLE config against the same config with the preset applied

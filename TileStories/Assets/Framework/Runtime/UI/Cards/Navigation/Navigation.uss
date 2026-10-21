@@ -168,6 +168,13 @@
     padding-bottom: var(--ts-space-1);
 }
 
+/* its row keeps a chip's height when the section read has no chips (emptied, hidden): the strip keeps one height, so the reading space
+   under it never jumps -- an emptied row that collapsed moved the spy line back over the section boundary, which filled the row again,
+   in a loop Unity reported as "Layout update is struggling" (_3.2 step 17b) */
+.nav-tabs-chips .nav-chips__row {
+    min-height: var(--ts-touch-target);
+}
+
 /* ---- segmented (SegmentedNavView): equal segments on one track, always fitting the strip ---- */
 
 .nav-segmented {

@@ -24,8 +24,9 @@ namespace TileStories.Editor.Tests
         [TearDown]
         public void TearDown() => _window?.Close();
 
-        private static WallConfigData ShippedConfig() =>
-            JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+        // - the shipped wall with the framework navigation: the Navigation rows are measured on their defaults, never on the demo
+        //   wall's own preset
+        private static WallConfigData ShippedConfig() => ShippedWall.WithFrameworkNavigation();
 
         private static WallConfigData TwoPoiConfig()
         {
@@ -246,8 +247,8 @@ namespace TileStories.Editor.Tests
             typeof(POIEditorToolWindow).GetMethod("DrawConfigMutationScope", Instance).Invoke(_window.Editor, new object[]
                 { (Action)(() => _window.Editor.SetBlockLibraryVariant(BuiltInBlocks.HeaderKind, BuiltInBlocks.HeaderCompact)), false });
             Assert.AreEqual(1, _window.Config.card_settings.kinds.Count, "the first edit makes the row");
-            var painting = _window.Config.pois.Single(p => p.id == "painting");
-            Assert.AreEqual(BuiltInBlocks.HeaderCompact, BlockStackBuilder.Build(painting, _window.Config.card_settings, BlockRegistry.Shared).Entries[0].Variant,
+            var camera = _window.Config.pois.Single(p => p.id == "camera");
+            Assert.AreEqual(BuiltInBlocks.HeaderCompact, BlockStackBuilder.Build(camera, _window.Config.card_settings, BlockRegistry.Shared).Entries[0].Variant,
                 "a POI without a card now gets the compact header");
             yield return _window.PressUndo();
             CollectionAssert.IsEmpty(_window.Config.card_settings.kinds, "Ctrl+Z removes the row again");
@@ -1562,7 +1563,8 @@ namespace TileStories.Editor.Tests
             var nav = _window.Config.card_settings.navigation;
             Assert.AreEqual(CardOptions.LayoutScroll, nav.layout, "the shipped wall never set Layout: Scroll");
             var titles = drawn.Select(d => d.Title).ToList();
-            Assert.AreEqual("Layout", titles.First(), "Layout is the section's first row");
+            // - section 7's order since step 17b: the Preset (where a wall author starts), then Layout, the first of the rows it writes
+            CollectionAssert.AreEqual(new[] { "Preset", "Layout" }, titles.Take(2).ToList(), "the Preset row first, Layout right under it");
             CollectionAssert.DoesNotContain(titles, "Open One At A Time", "Scroll: no accordion option");
             CollectionAssert.AreEqual(new[] { "Scroll", "Accordion", "Tabs", "Pages", "Bento" }, CardOptions.LayoutLabels, "named, never the stored words");
             CollectionAssert.AreEqual(new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutPages,

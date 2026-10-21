@@ -96,6 +96,15 @@ namespace TileStories.Editor
             "the title or in the footer is always shown whole. Takeover (Video, 3D Model, 360 Panorama) shows a teaser that " +
             "opens straight to the full screen.";
 
+        private const string CardStarterHelp =
+            "A ready-made set of blocks to start this point's card from, in one click. Each set writes ordinary blocks, each in a " +
+            "chosen look, and no content: you then write the texts and pick the pictures and clips in the rows below, which say " +
+            "under each block what it still needs before the card shows it. Blocks that read the point itself -- where it is on " +
+            "the wall, the points nearby, the button that finds it on the wall -- show at once. Start from scratch is the card " +
+            "with no blocks. On a point that already has blocks, the starter asks first and names how many it will replace. One " +
+            "Ctrl+Z gives the point back exactly as it was. The button reads the set the blocks still follow (their kinds and " +
+            "looks, in order), or Custom once you change them.";
+
         private const string CardContentVariantHelp =
             "The look of this block. Block Library default: the Default Variant of Detail Card > Block Library.";
 

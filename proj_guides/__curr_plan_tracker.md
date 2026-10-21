@@ -1,31 +1,42 @@
-# Plan tracker -- _3.2 step 17a (navigation presets, the Editor's owed warnings, the sibling chips)
+# Plan tracker -- _3.2 step 17b (the Card Starter, the demo point, the Preset row first)
 
-GATE (done): UnityMCP answered (telemetry_status, TileStories@d41388e4a2b2ebd4); 2 commits pushed (1193ec4..50c6723); captures
-`TestEvidence/Gate/gate_3_2_step17a_{game,editor}.png` opened (Editor window closed, 0 left); tree compiled (Library dll 13:35, no error CS in the console);
-SDF fonts clean (git); EditMode baseline 1946/1946 (101.9 s) on clean 50c6723 (trusted).
+GATE (done): UnityMCP answered (telemetry_status; execute_code needed its tool group `scripting_ext` activated); 1 commit pushed
+(50c6723..ae1222f); captures `TestEvidence/Gate/gate_3_2_step17b_{gameview,poieditor}.png` opened (a first POI Editor capture showed VS Code:
+deleted, window moved over Unity, recaptured; capture window closed, 0 left); tree compiled (Editor.log 0 `error CS`, ExitCode 0); neither
+SDF font modified; EditMode baseline 1972/1972 (135 s) on clean ae1222f (trusted). Rides on 15b's full PlayMode 1113/1113.
 
-## Finding (STOP item, asked at the end of the other work)
-1.1 sibling chips: the guide says "each chip carries its KIND's icon (the set exists since step 6)". The set holds FAMILY icons (CardIcons: info,
-picture, listen, book, show_on_wall, play, location, people, grid, sources + utility ones); a block KIND has none. Siblings of one section share a
-family, so a family icon cannot tell a gallery from a 360 panorama. Ask the developer which way before touching TakeoverView.
+## Finding at the plan (asked, the developer chose 2026-10-20)
+`_3.2` 8.2 says the wall's own preset avoids re-baselining the suite; the 35 card PlayMode fixtures (all `SearchSceneFixture`) load the
+SHIPPED LivingRoom config, so the wall's config IS what they measure. Chosen: write the preset judged best to the wall AND pin every card
+fixture to the FRAMEWORK default navigation in `SearchSceneFixture.SetUp` (beside the LOD pin); the shipped value kept as
+`ShippedNavigation` for the test of the wall's own choice. Shared ground -> a FULL PlayMode run at the end (background).
 
 ## Decisions (autonomous)
-- Presets = `NavigationPresets` in the EDITOR assembly (data table of section 8 + Apply + Matching); no runtime type. Phase B through the Editor-assembly
-  `LivePlayModeCardTests` family (real window while Play Mode runs), the live-sync path every row uses.
-- Apply = ONE `ApplyPopupEdit` (one mutation scope = one history step = one Ctrl+Z). No confirmation: it is undoable.
-- Preset row at the END of the section (section 7's order), button shows the matching preset or "Custom"; picker = `EditorPopupContent` (working popup).
-- Warnings = pure `NavigationWarningRule` (Editor): counts come from the REAL `CardNavModel` of the busiest card; thresholds 5 (progress map) / 13 (bento);
-  Bar Slots warns only while raising it can still help (slots < min(sections, 3..5 max)); "more than two bars" = effective top + bottom + edge.
-- One `DrawNavigationWarning` reports to a null-in-production probe so tests prove drawn / not drawn; the existing Tabs warning moves onto it.
-- Preview Navigation = toggle + point popup over the demo card's own fields (`demo_card.enabled / poi_id`); turning it on from there sets the stop to Full.
+- Card Starter = `CardStarters` (Editor assembly, Specific Marker folder; the NavigationPresets shape): Starter {Label, Suits, Entries};
+  Entry {kind, variant, preset Choice values}. Data only: no content is written, nothing copied from the point's name / summary.
+- "Start from scratch" = the starter with no blocks (one rule): on an empty point it writes nothing; on a point with blocks it asks like any.
+- Keys: new blocks never reuse a replaced block's key (NextFree over old + new).
+- Row: Specific Marker > Card Content, FIRST row, "Card Starter" popup-styled button (reads the matching starter, else Custom / None).
+- Picker: 17a's NavigationPresetPickerPopup becomes ONE shared named-option picker used by both (uniform pattern), each with its own kind.
+- Point with blocks: ONE EditorDecision naming the point and the count (pure builder), confirm "Replace N Blocks"; apply = ONE ApplyPopupEdit.
+- Tests that use The Painting as "a point with no card" move to The Camera (same shape).
 
 ## Steps
-- [x] GATE
-- [ ] A. `NavigationPresets` + tests (EditMode, pure: table, keys registered, reflection walk, Matching)
-- [ ] B. `NavigationPresetPickerPopup` + Preset row + (i) + guide lines; Editor tests on the REAL window (click, walk, one Ctrl+Z)
-- [ ] C. `NavigationWarningRule` + the three new warnings + bento + progress_map; drawn / not drawn tests
-- [ ] D. Test > Preview Navigation rows + tests
-- [ ] E. Phase B live (LivePlayModeCardTests): a preset applied live changes the open card
-- [ ] F. Captures: Navigation at 620 pt (preset row, each warning), judged
-- [ ] G. 1.1 chips (after the developer's answer) + recapture FullView_Lamp_media_{en,pt}_390
-- [ ] H. Docs: _3.2 row 17a + 3 TODO lines out, _5.1, 10-structure.md; full EditMode + Card/Poi/SizeComparison PlayMode fixtures
+- [x] 1. Part 1: Preset row FIRST in Navigation + Editor test (order) + recapture 300_CardNavigation_Preset_620.png
+- [x] 2. Shared picker (NamedOptionPickerPopup), 17a tests green
+- [x] 3. CardStarters data + Apply + Tier 0 tests (CardStartersTests 6, key rule proved load-bearing)
+- [x] 4. Card Starter row + picker + EditorDecision + real-window tests (CardStarterEditorTabTests 6) -- capture pending (step 7b)
+- [x] 5. Sets judged on the real card: Rich + Wall Locator, Simple + Related (both read the point itself: zero authoring, lead on)
+- [x] 6. Fixture pin in SearchSceneFixture + ShippedNavigation; EditMode twin ShippedWall.WithFrameworkNavigation (6 files);
+        LivePlayModeNavigationPresetTests starts from the wall's own preset
+- [x] 7. Demo content through the real window (Rich point starter on The Painting + hand content EN/PT + Zoom Image + Wall Locator;
+        Residential + Icon Grid / Contents / Rails with headings; wall preset Rich point); Save + Copy; 3 tests re-pointed to The Camera
+- [x] 7b. Captures: Card Starter row + picker (Editor/310, 311), judged
+- [x] 8. Phase B: PoiCardPaintingSceneTests 7/7 + renders judged. FOUND + FIXED (both test-first, red -> green):
+        (a) icon_tabs_chips' emptied chip row collapsed (103 -> 55 px) -> layout loop "Layout update is struggling" (USS min-height);
+        (b) its chip row's inline Visible beat the hidden strip -> chips floating over the title at Half (inherit instead)
+- [x] full EditMode 1984/1984 (94 s, background)
+- [x] 9. 2.3 finding: names / summaries the fixtures read, listed in __mixed_TODOs (nothing renamed)
+- [x] 10. Full EditMode 1984/1984; targeted PlayMode 945/945 (45 fixtures); FULL PlayMode 1130/1130 (3428 s, background ~20 min then front)
+- [x] 11. Docs: _3.1 (8.5 + fixture), _5.1 (rows, popups), _3.2 (17b row, TODO, 8.2 corrected, 5.1 corrected, 7, 8.1), 10-structure,
+        40-testing (pin rule + RUN TIMES), __mixed_TODOs

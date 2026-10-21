@@ -165,7 +165,7 @@ namespace TileStories.Editor.Tests
                 if (file.EndsWith("POIEditorToolWindow.ConfigHistory.cs")) continue;   // the factories themselves
                 string[] lines = File.ReadAllLines(file);
                 for (int i = 0; i < lines.Length; i++)
-                    if (Regex.IsMatch(lines[i], @"new\s+(ExistingSymbolPickerPopup|EntryDetailsPopup|CardMediaDefaultPickerPopup|NavigationPresetPickerPopup)\s*\("))
+                    if (Regex.IsMatch(lines[i], @"new\s+(ExistingSymbolPickerPopup|EntryDetailsPopup|CardMediaDefaultPickerPopup|NamedOptionPickerPopup)\s*\("))
                         offenders.Add(Path.GetFileName(file) + ":" + (i + 1));
             }
             Assert.IsEmpty(offenders, "Build popups with CreateSymbolPickerPopup / CreateDetailsPopup / CreateCardMediaDefaultPickerPopup / CreateNavigationPresetPickerPopup: " + string.Join(", ", offenders));

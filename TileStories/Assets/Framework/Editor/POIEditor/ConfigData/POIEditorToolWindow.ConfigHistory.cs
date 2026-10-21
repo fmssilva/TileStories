@@ -53,11 +53,32 @@ namespace TileStories.Editor
 
         // _3.2 step 17a: the navigation preset picker. A pick applies the whole preset inside ONE mutation scope -- one history step,
         // so one Ctrl+Z puts all seven rows back together
-        private NavigationPresetPickerPopup CreateNavigationPresetPickerPopup()
+        private NamedOptionPickerPopup CreateNavigationPresetPickerPopup()
         {
-            return new NavigationPresetPickerPopup(NavigationPresets.All, () => NavigationPresets.Matching(_config?.card_settings?.navigation),
-                preset => ApplyPopupEdit(() => NavigationPresets.Apply(_config.card_settings.navigation ??= new CardNavigationSettings(), preset)),
+            int InUse()
+            {
+                var matching = NavigationPresets.Matching(_config?.card_settings?.navigation);
+                for (int i = 0; i < NavigationPresets.All.Count; i++)
+                    if (ReferenceEquals(NavigationPresets.All[i], matching)) return i;
+                return -1;
+            }
+            return new NamedOptionPickerPopup(NavigationPresets.PickerKind, NavigationPresets.PickerTitle, NavigationPresets.PickerOptions(),
+                NavigationPresets.Recommended, InUse,
+                index => ApplyPopupEdit(() => NavigationPresets.Apply(_config.card_settings.navigation ??= new CardNavigationSettings(), NavigationPresets.All[index])),
                 IsStillEditing(_config));
+        }
+
+        // _3.2 step 17b: the Card Starter picker of one point. A pick goes through ApplyCardStarter: the question first on a point with
+        // blocks, then the starter inside ONE mutation scope. The point is held by id and found again on every pick; the picker closes once
+        // the config it was opened on is replaced (undo, reload) or the point is gone
+        private NamedOptionPickerPopup CreateCardStarterPickerPopup(string poiId)
+        {
+            POIData Point() => _config?.pois?.Find(p => p != null && p.id == poiId);
+            var stillEditing = IsStillEditing(_config);
+            return new NamedOptionPickerPopup(CardStarters.PickerKind, CardStarters.PickerTitle, CardStarters.PickerOptions(),
+                CardStarters.SeparatorBefore, () => CardStarters.IndexOf(CardStarters.Matching(Point())),
+                index => ApplyCardStarter(poiId, CardStarters.All[index]),
+                () => stillEditing() && Point() != null);
         }
 
         // Same rule for a free-text note popup (one undo step per keystroke: its field lives in another window, see ActiveEditGesture)

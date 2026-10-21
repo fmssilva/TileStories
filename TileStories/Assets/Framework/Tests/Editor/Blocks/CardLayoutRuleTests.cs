@@ -16,8 +16,8 @@ namespace TileStories.Editor.Tests
         private const string LampMilitary = "lamp_military";
         private const string LampReligious = "lamp_religious";
 
-        private static WallConfigData Shipped() =>
-            JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
+        // - the shipped wall with the framework navigation: these tests measure the framework
+        private static WallConfigData Shipped() => ShippedWall.WithFrameworkNavigation();
 
         private static List<BlockStackBuilder.Entry> Stack(WallConfigData config, string poiId) =>
             BlockStackBuilder.Build(config.pois.Single(p => p.id == poiId), config.card_settings, BlockRegistry.Shared, config.pois).Entries;
