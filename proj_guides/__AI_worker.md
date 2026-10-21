@@ -14,68 +14,40 @@ So start by reading them all.
 
 
 
-## `And now: POI Card Navigation (3.2) -- step 18, the in-card facets`
+## `And now: Domain Review -- POI Card Navigation (_3.2), mode AUDIT`
 
-GATE: `git push` if the branch is ahead of origin (1 commit is waiting; report how many you pushed). Take one Unity
-capture (Game view AND the POI Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles;
-if not, STOP and report. The SDF fonts are Static since step 13: a modified font is a FINDING, not a `git checkout`.
-Baseline: the tree is clean on commit "Add a Card Starter and a real card for The Painting" (full EditMode 1984/1984,
-full PlayMode 1130/1130) -- run the full EditMode suite and say which commit you trusted.
+Run proj_guides/skills/Domain_Review.md with:
+- DOMAIN GUIDE: proj_guides/_3.2_POI_Card_Navigation.md (all lines, TODOs and the status table included)
+- FOCUS:
+  1. **Mutation re-proof of the domain's pure rules.** Break each and name the test that catches it, in one table:
+     `NavFacetRule` (its three facets -- owed, step 18 skipped it), `CardChromeRule` (the floor and the scroll),
+     `NavOntologyRule` (rules 3, 4, 5, 7), `NavScrollRule` (the spy line, the end of range), `NavBackRule` (each step),
+     `BlockRefRule`, `BentoLayoutRule`, `CardLayoutRule`. A rule whose break no test catches is a MUST in the fix list.
+  2. **The fifteen elements x the five layouts.** Which combinations has nobody ever rendered? The matrix of section 2
+     should say it per element; name the holes and render the ones that could plausibly break (an edge scrubber in
+     pages, a dock in bento, a progress map in accordion).
+  3. **The open flakes**, with a verdict each, not a re-log: the Lamp / Next Up "Layout update is struggling" (the
+     chip-row cause was fixed at 17b -- is this one the same shape?), `PoiCardAudioSceneTests` timing,
+     `ConfigUndoGroupingTests.DraggingASlider` (three sightings), `KeywordListFieldTypingTests` focus.
+  4. **`PoiCardSheetView`** was 584 lines at step 16 and has grown since: say its size, what it owns, and whether it
+     is still a wiring class (`20-code-quality`'s orchestrator rule).
+  5. **The visitor's first card.** Section 9's product pass on the DEMO point (The Painting / Paco da Ribeira),
+     scrolled end to end at 390 px in EN and PT, judged as a visitor and not as its author: does it read, is it the
+     right size, does it look finished, what would confuse. Say plainly what you would change.
+- SKIP: none.
 
-Domain spec (read ALL lines): proj_guides/_3.2_POI_Card_Navigation.md -- "## TODOs" (the [step 18] line is yours) and
-the status table (1-17b done; 18 is yours and it is the last BUILD step; 19 is the audit). Section 5.8 -- READ IT
-CLOSELY: this step was rescoped by the developer on 2026-10-20 from a search field to FACETS ONLY, and the reasoning
-matters: searching inside a card duplicates the drawer with a keyboard, while the facets are the part nothing else in
-the card can do. Build no text field. Also sections 5.3 (the two menus you extend) and 9.
-REQUIRED READING (all lines): _5.1_Editor_Tab.md "HOW TO USE THIS FILE" + section "0. Guidelines";
-.clinerules/40-testing.md 4.2 (no full run this block), 4.2.3, 4.4, 4.5; .clinerules/30-ui-content.md.
-Context only: `_2.6_Select_Filter_Search.md` -- that domain searches for a POINT across the wall and is NOT this; read
-only enough to be sure you are not duplicating its engine. `_3.3`, `10-structure.md`.
-WORKER MODEL: Sonnet-class -- chips over two elements that exist, a flag on the kind definitions, and one pure rule.
-No new owner, no container. STOP and report if you need a new shared part, a second index, or anything from `_2.6`.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run. It closes on every PlayMode fixture whose
-name holds Card, Poi or SizeComparison, plus anything a grep for the changed types adds. Green before you call the
-block done. It rides on 17b's full run (1130/1130). The next full run is step 19's close-out, which is mandatory --
-so leave the tree in a state you would be happy to see measured.
+TEST PLAN (the skill's own rule): full EditMode AND full PlayMode at the START -- their counts, times and the ten
+slowest fixtures are audit data. Take the PlayMode run in the background and report `editor_is_focused` at both ends.
+This is the domain's mandatory close-out run.
+WORKER MODEL: Opus-class (the skill says so).
+AUDIT MODE WRITES NO FEATURES. Allowed: runs, captures, the report, and only the fixes this brief names -- which is
+none. Everything else goes in the fix list.
 
-PART 1 -- the owed look:
-1.1 Render a point right after each Card Starter set is applied (Simple point, Rich point, AR point), in Play Mode,
-  on an EMPTY point, and judge each item by item. The Tier 0 tests say which blocks are written; nobody has yet seen
-  what the visitor gets, which is the feature's whole promise. If a fresh card looks thin or wrong, say so and fix the
-  SET (it is data) rather than explaining the picture away.
+Also, before the report: the GATE of `__AI_worker.md`, and `git push` if the branch is ahead (1 commit waits).
+The SDF fonts are Static since step 13: a modified font is a FINDING, not a `git checkout`.
 
-PART 2 -- step 18, the facets (`_3.2` 5.8):
-2.1 The `Needs` flag on the KIND definition, never a per-block field: audio_guide -> headphones; place_in_ar and
-  show_on_wall -> camera; anything that streams -> network. A wall author must not have to declare that an audio guide
-  needs headphones. Most kinds need nothing, so the flag is optional and its absence means "nothing needed".
-2.2 The facet chips themselves, over `drawer_tree` and `grid_overlay` -- the two elements that already LIST the card's
-  blocks. A chip narrows what those two show; nothing new is listed and no new element is drawn.
-  The facets: FORMAT (the six of `CardOptions.Formats`, only those present on this card), READING TIME (<= 2 min,
-  <= 5 min, from the field and the clip length step 11b built), and NEEDS (only those present on this card).
-  ACCEPTANCE: a chip only appears when this card has something it would match -- a facet that filters to nothing is
-  noise; chips combine (format AND time AND needs); clearing them returns the full list; and the counts the drawer
-  shows follow the filter, or say why not.
-2.3 One pure rule answers "does this block pass these facets", read by both elements -- not one filter per element.
-  TESTS: Tier 0 for the rule (each facet alone, combined, a card with none of a facet, a block with no reading time).
-  Phase B in LivingRoomScene with real input: real taps on chips in the drawer narrow it to exactly the matching
-  blocks on The Lamp; the same in the grid; a jump from a filtered list still lands the right block. Phase A: both
-  menus with facets over the gallery cases.
-  VISUALS: the drawer and the grid with chips, unfiltered and filtered, EN and PT at 390 px. Judge item by item: the
-  chips are 48 px, they do not crowd out the list, the active chips are marked by more than colour, and the
-  Portuguese words are whole.
-
-2.4 DOCS: `_3.2` status row 18 + proof and the [step 18] TODO removed; `_3.1` for the kinds' `Needs` flag (that is
-  its home, like Format); `_5.1` if any Editor row changed; `10-structure.md`.
-
-Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII in code, comments, logs and Editor
-labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no backward-compatibility shim;
-real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: any text field or search engine (the developer removed it on purpose -- if you think it is needed, say
-so in the report, do not build it); the domain review (19); media sourcing.
-Stop when the full EditMode suite and the named PlayMode fixtures are green with zero failures, the captures are
-judged and 2.4 is written. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
-If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
-Commit only if the developer asks.
+Deliver `proj_guides/_3.2.1_Audit.md` with every section of the skill, the fix list in block-sized chunks, and the
+chat finish the skill describes. Commit only if the developer asks.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

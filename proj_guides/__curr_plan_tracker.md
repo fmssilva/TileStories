@@ -1,30 +1,43 @@
-# Plan tracker -- _3.2 step 18: the in-card facets (the last BUILD step)
+# Plan tracker -- Domain Review _3.2 (POI Card Navigation), mode AUDIT (2026-10-21)
 
-Brief: Needs flag on the KIND, facet chips over `drawer_tree` and `grid_overlay`, ONE pure rule read by both. NO text field.
-Baseline trusted: commit 52fceea ("Add a Card Starter and a real card for The Painting"), full EditMode 1984/1984 (94 s) re-run today.
+Brief: `__AI_worker.md` (Domain Review, AUDIT). Output: `proj_guides/_3.2.1_Audit.md`. AUDIT writes NO features: only runs, captures,
+the report. Temporary tools (mutation switch, runner, matrix fixture) are deleted before the end; the tree ends as it began.
 
-## GATE (done)
-- [x] UnityMCP answered (telemetry_status)
-- [x] git push: 1 commit (ae1222f..52fceea)
-- [x] Game view + POI Editor captures opened (`TestEvidence/Gate/gate_3_2_step18_{gameview,poieditor}.png`), window closed (0 left)
-- [x] tree compiled (0 `error CS`), git status clean under TileStories: neither SDF font modified
-- [x] full EditMode 1984/1984 on 52fceea
+## GATE
+- [x] UnityMCP answered (telemetry_status), 0 compile errors in the console
+- [x] .clinerules 00-60 read, Domain_Review.md read, guide _3.2 read (all 1284 lines)
+- [x] `git push`: branch was ahead by 1 (24849b9), pushed, now level with origin
+- [x] SDF fonts: `git status` shows neither font modified
+- [x] captures opened (Game view + POI Editor) -- at the matrix / visitor step
+- [x] compile verified (Editor.log, no `error CS`) after the temporary tools go in AND after they come out
 
-## Part 1 -- the owed look (done)
-- [x] Simple / Rich / AR point rendered on the empty Camera point, EN + PT, Half + Full (throwaway probe, deleted). Judged in the report; sets unchanged.
+## Runs
+- [x] Full EditMode: 1999 tests, 104.8 s, 3 failures (NavigationPresetEditorTabTests x3) -- to triage
+- [x] Full PlayMode: 1148/1148, 3991 s (focused the first ~6 min, then background)
+- [x] ten slowest fixtures from the PlayMode result
 
-## Part 2 -- the facets
-Decisions: Needs chips are EXCLUSIONS ("No headphones": the visitor's question), Format chip single-select, time chips single-select
-(<= 2, <= 5), untimed blocks do not match a time chip, a chip is offered only if it matches >= 1 and excludes >= 1 of the blocks that pass the
-OTHER active facets, active chips stay (so they can be cleared) + a Clear chip, counts follow the filter, a jump lands the first PASSING block.
-- [ ] 2.1 `CardOptions.Needs*`, `BlockKindDefinition.Needs`, `BlockRegistry.Validate` refuses an unknown need; audio_guide -> headphones,
-      place_in_ar + show_on_wall -> camera (no built-in kind streams: network is in the vocabulary, an app kind may use it)
-- [ ] 2.2 pure `NavFacetRule` + `NavFacets` (state) + `BlockFacts`; `ClipLengthReader` (the clip-length load NavContents had privately, now shared)
-- [ ] 2.3 CardStrings keys (en + pt) + CardStrings.asset rows; `NavFacetBar` (chips, one NavStrip row, 48 px, border + bold when active)
-- [ ] 2.4 drawer_tree + grid_overlay read the bar: filtered counts, hidden empty sections / kinds, jump = first passing block; Navigation.uss
-- [ ] 2.5 Tier 0: `NavFacetRuleTests` (each facet alone, combined, none of a facet on the card, no reading time, offered rule); `KindNeedsTests`
-- [ ] 2.6 Phase A: `CardNavGalleryTests` both menus with facets over the gallery cases
-- [ ] 2.7 Phase B: `PoiCardFacetSceneTests` in LivingRoomScene, real taps: drawer narrows to exactly the matching blocks on The Lamp; the grid too; a jump from a filtered list lands the right block
-- [ ] 2.8 captures: drawer + grid, unfiltered / filtered, EN + PT, 390 px; item-by-item
-- [ ] 2.9 DOCS: `_3.2` row 18 + proof, [step 18] TODO removed; `_3.1` Needs; `_5.1` if a row changed; `10-structure.md`; `40-testing.md` RUN TIMES if moved
-- [ ] close: full EditMode; Card / Poi / SizeComparison PlayMode fixtures named one by one; final report (60-finishing 6.4)
+## Focus 1 -- mutation re-proof (after PlayMode ends: one Unity job at a time)
+- [x] copy `AuditMutation.cs` + `AuditMutationRunner.cs` in, apply `apply_mutations.py` (138 mutations, 8 rules), refresh, no `error CS`
+- [x] baseline 0 per fixture set green, then the sweep (results file), table rule -> mutation -> catching test
+- [x] survivors: re-run against the wider sets (full EditMode, then the named PlayMode fixtures); a rule whose break nothing catches = MUST
+- [x] `git checkout` the 8 rule files, delete the temp files, refresh, no `error CS`, `git status` clean of them
+
+## Focus 2 -- 15 elements x 5 layouts
+- [x] matrix from the tests (grep) + presets; name the holes
+- [x] render the plausible-to-break ones (edge scrubber in pages, dock in bento, progress map in accordion, ...) with a throwaway fixture; captures judged
+
+## Focus 3 -- flakes (verdict each)
+- [x] "Layout update is struggling": count in this run's Editor.log, bisect to the tests, same shape as 17b?
+- [x] PoiCardAudioSceneTests timing, ConfigUndoGroupingTests.DraggingASlider, KeywordListFieldTypingTests focus
+
+## Focus 4 -- PoiCardSheetView: 585 lines (584 at step 16: +1), see report
+
+## Focus 5 -- visitor's first card: The Painting at 390 px, EN + PT, end to end
+- [x] captures scrolled end to end, judged as a visitor
+
+## Skill sections 1-11 (+ focus sections) -> `_3.2.1_Audit.md`
+- [x] 1 flow, 2 matrix, 3 missing features, 4 ontology, 5 editor quality (default width + 620 pt captures), 6 demo, 7 code health,
+      8 test health, 9 product pass, 10 docs vs code + TODO triage, 11 fix list in block-sized chunks
+- [x] chat finish (GATE, suites, matrix headline, top 5, missing features, not verified, plain summary, one commit message)
+
+## Done 2026-10-21: report `_3.2.1_Audit.md`; temp tools removed; close-out EditMode 1999/1999 (115 s). Not committed (the developer's call).
