@@ -291,6 +291,61 @@ namespace TileStories.Editor.Tests
                 "a card nobody timed offers no time chip: it would filter to nothing");
         }
 
+        // _3.2 audit F1 (mutation 11): a block of exactly 5 min is the block that makes "<= 5 min" a different list from "<= 2 min"
+        [Test]
+        public void TheLongerTimeChip_IsOfferedForABlockOfExactlyTheMediumLimit()
+        {
+            BlockFacts Block(int minutes) => new(CardOptions.FormatRead, minutes, null);
+            var chips = Offered(new List<BlockFacts> { Block(1), Block(NavFacetRule.MediumMinutes), Block(0) }, new NavFacets());
+            Assert.IsTrue(Has(chips, NavFacetRule.Dimension.Time, NavFacetRule.MediumMinutes.ToString()),
+                "a 5 min block is within <= 5 and over <= 2: the 5 min chip lists something the 2 min chip does not");
+            var overTheLimit = Offered(new List<BlockFacts> { Block(1), Block(NavFacetRule.MediumMinutes + 1), Block(0) }, new NavFacets());
+            Assert.IsFalse(Has(overTheLimit, NavFacetRule.Dimension.Time, NavFacetRule.MediumMinutes.ToString()), "a 6 min block is over the limit: no news");
+        }
+
+        // _3.2 audit F1 (mutation 13): "No headphones" stays AND-ed while the camera chip is judged. Facts built by hand: no shipped kind
+        // needs two things, and only a block that needs both tells the two pools apart
+        [Test]
+        public void AWithoutChipIsJudgedInsideThePoolTheOtherWithoutsLeave()
+        {
+            var both = new BlockFacts(CardOptions.FormatWatch, 0, new[] { CardOptions.NeedHeadphones, CardOptions.NeedCamera });
+            var headphones = new BlockFacts(CardOptions.FormatListen, 0, new[] { CardOptions.NeedHeadphones });
+            var plain = new BlockFacts(CardOptions.FormatRead, 0, null);
+            var card = new List<BlockFacts> { both, headphones, plain };
+
+            var chips = Offered(card, With(without: CardOptions.NeedHeadphones));
+            Assert.IsTrue(Has(chips, NavFacetRule.Dimension.Without, CardOptions.NeedHeadphones), "the chip that is on stays, so it can be switched off");
+            Assert.IsFalse(Has(chips, NavFacetRule.Dimension.Without, CardOptions.NeedCamera),
+                "without headphones the only block needing the camera is already gone: 'No camera' would change nothing");
+            Assert.IsTrue(Has(Offered(card, new NavFacets()), NavFacetRule.Dimension.Without, CardOptions.NeedCamera), "with no facet on, the same chip is offered");
+        }
+
+        // _3.2 audit F1 (mutation 19): a time chip being on must not hide the OTHER time chip, and the format chips are judged against what
+        // the time limit leaves (never against the whole card)
+        [Test]
+        public void ATimeChipThatIsOn_NeverHidesTheOtherTimeChip_AndTheFormatChipsAreJudgedInsideIt()
+        {
+            BlockFacts Block(string format, int minutes) => new(format, minutes, null);
+            var card = new List<BlockFacts>
+            {
+                Block(CardOptions.FormatRead, 1), Block(CardOptions.FormatRead, 2), Block(CardOptions.FormatRead, 4), Block(CardOptions.FormatRead, 0),
+            };
+            var fast = Offered(card, With(minutes: NavFacetRule.ShortMinutes));
+            Assert.IsTrue(Has(fast, NavFacetRule.Dimension.Time, "2"), "the chip that is on stays");
+            Assert.IsTrue(Has(fast, NavFacetRule.Dimension.Time, "5"),
+                "<= 2 is on: the 5 min chip is judged against the card WITHOUT the time facet, so the 4 min block makes it a real choice");
+
+            var timed = new List<BlockFacts>
+            {
+                Block(CardOptions.FormatRead, 3), Block(CardOptions.FormatRead, 4), Block(CardOptions.FormatLook, 0), Block(CardOptions.FormatWatch, 9),
+            };
+            var chips = Offered(timed, With(minutes: NavFacetRule.MediumMinutes));
+            CollectionAssert.IsEmpty(chips.Where(c => c.Dimension == NavFacetRule.Dimension.Format),
+                "<= 5 leaves only the two Read blocks: no format chip changes that list (Look and Watch would empty it, Read changes nothing)");
+            var all = Offered(timed, new NavFacets());
+            Assert.IsTrue(Has(all, NavFacetRule.Dimension.Format, CardOptions.FormatRead), "precondition: with no time chip on, Read narrows the whole card");
+        }
+
         [Test]
         public void EveryChip_HasItsWords_AndAnUnknownNeedHasNone()
         {

@@ -142,6 +142,21 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(NavScrollRule.HasViewed(true, 0f, 100f, 0f, Content, float.NaN));
         }
 
+        // _3.2 audit F1 (mutation 83): at the peek stop the stack has a 0 px viewport and "peek = never" is the rule's own comment. The
+        // checks above pass without the guard (a block at the top is "off screen" in a 0 px viewport anyway), so these blocks STRADDLE the
+        // offset: only the guard keeps them from counting
+        [Test]
+        public void AZeroPixelViewport_NeverCountsABlockAsViewed_EvenOneStraddlingTheOffset()
+        {
+            const float offset = 500f;
+            Assert.IsFalse(NavScrollRule.HasViewed(true, offset - 100f, offset + 100f, offset, Content, 0f),
+                "a block across the offset, its top above the line: with no viewport nothing is visible");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, offset - 100f, offset + 100f, offset, 0f, 0f), "a stack with no content and no viewport");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, offset - 100f, offset + 100f, offset, Content, -1f), "a negative viewport is none either");
+            Assert.IsTrue(NavScrollRule.HasViewed(true, offset - 100f, offset + 100f, offset, Content, Viewport),
+                "precondition: the same block with a real viewport IS viewed");
+        }
+
         [Test]
         public void WhileAJumpGlides_TheSpyIsFrozenOnItsSection_ThenReleased()
         {

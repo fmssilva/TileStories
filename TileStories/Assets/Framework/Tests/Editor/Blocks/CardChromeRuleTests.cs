@@ -133,6 +133,40 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(CardChromeRule.AtEnd(0f, 50f, 100f), "a stack that does not scroll is at its top, never at its end");
         }
 
+        // _3.2 audit F1 (mutation 23): reaching the top brings the area back on its own, however small the move up was (a small move up
+        // alone is not past ShowAfterTravel); the same at the end after a small move down
+        [Test]
+        public void ReachingTheTopAfterASmallMoveUp_BringsTheBottomAreaBack_AndSoDoesTheEndAfterASmallMoveDown()
+        {
+            var hidden = Scroll(default, CardOptions.HideOnScrollDown, 40f);
+            Assert.IsTrue(hidden.BottomHidden, "precondition: hidden");
+            var small = CardChromeRule.Next(hidden, -(CardChromeRule.ShowAfterTravel - 1f), true, false, CardOptions.HideOnScrollDown);
+            Assert.Greater(small.Travel, -CardChromeRule.ShowAfterTravel, "precondition: the move up alone is not past ShowAfterTravel");
+            Assert.IsFalse(small.BottomHidden, "the stack reached its top: the area is back");
+            var elsewhere = CardChromeRule.Next(hidden, -(CardChromeRule.ShowAfterTravel - 1f), false, false, CardOptions.HideOnScrollDown);
+            Assert.IsTrue(elsewhere.BottomHidden, "the same small move up away from the top: still hidden");
+            var atEnd = CardChromeRule.Next(hidden, 1f, false, true, CardOptions.HideOnScrollDown);
+            Assert.IsFalse(atEnd.BottomHidden, "the stack reached its end: the area is back");
+        }
+
+        // _3.2 audit F1 (mutations 25 and 27): the two travels are exact -- exactly HideAfterTravel down hides nothing, exactly
+        // ShowAfterTravel up brings nothing back; one unit past each does
+        [Test]
+        public void TheTwoTravelsAreExact_TheLimitItselfChangesNothing_OneUnitPastItDoes()
+        {
+            const float past = 0.01f;
+            var atLimit = Scroll(default, CardOptions.HideOnScrollDown, CardChromeRule.HideAfterTravel);
+            Assert.IsFalse(atLimit.BottomHidden, "exactly HideAfterTravel down: not past it");
+            Assert.IsTrue(Scroll(atLimit, CardOptions.HideOnScrollDown, past).BottomHidden, "a hair past it: hidden");
+
+            var hidden = Scroll(default, CardOptions.HideOnScrollDown, CardChromeRule.HideAfterTravel * 2f);
+            Assert.IsTrue(hidden.BottomHidden, "precondition: hidden");
+            var upToLimit = Scroll(hidden, CardOptions.HideOnScrollDown, -CardChromeRule.ShowAfterTravel);
+            Assert.AreEqual(-CardChromeRule.ShowAfterTravel, upToLimit.Travel, 0.0001f, "precondition: the turn restarted the travel at the limit");
+            Assert.IsTrue(upToLimit.BottomHidden, "exactly ShowAfterTravel up: not past it");
+            Assert.IsFalse(Scroll(upToLimit, CardOptions.HideOnScrollDown, -past).BottomHidden, "a hair past it: back");
+        }
+
         // A jump moving the stack is not the reader moving: its scroll never hides the bottom area (the bar a visitor just tapped stays)
         [Test]
         public void AJumpsScroll_IsNoReading_AndHidesNothing()

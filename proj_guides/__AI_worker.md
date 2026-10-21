@@ -13,41 +13,58 @@
 So start by reading them all. 
 
 
+## `And now: Domain Review -- POI Card Navigation (_3.2), mode FIX, chunks A + B`
 
-## `And now: Domain Review -- POI Card Navigation (_3.2), mode AUDIT`
+Run proj_guides/skills/Domain_Review.md in FIX mode with:
+- DOMAIN GUIDE: proj_guides/_3.2_POI_Card_Navigation.md
+- AUDIT: proj_guides/_3.2.1_Audit.md (read section 11 for the chunks, and the focus sections that explain them)
+- FIX LIST: **chunks A and B only** -- every MUST of the audit, and nothing else.
 
-Run proj_guides/skills/Domain_Review.md with:
-- DOMAIN GUIDE: proj_guides/_3.2_POI_Card_Navigation.md (all lines, TODOs and the status table included)
-- FOCUS:
-  1. **Mutation re-proof of the domain's pure rules.** Break each and name the test that catches it, in one table:
-     `NavFacetRule` (its three facets -- owed, step 18 skipped it), `CardChromeRule` (the floor and the scroll),
-     `NavOntologyRule` (rules 3, 4, 5, 7), `NavScrollRule` (the spy line, the end of range), `NavBackRule` (each step),
-     `BlockRefRule`, `BentoLayoutRule`, `CardLayoutRule`. A rule whose break no test catches is a MUST in the fix list.
-  2. **The fifteen elements x the five layouts.** Which combinations has nobody ever rendered? The matrix of section 2
-     should say it per element; name the holes and render the ones that could plausibly break (an edge scrubber in
-     pages, a dock in bento, a progress map in accordion).
-  3. **The open flakes**, with a verdict each, not a re-log: the Lamp / Next Up "Layout update is struggling" (the
-     chip-row cause was fixed at 17b -- is this one the same shape?), `PoiCardAudioSceneTests` timing,
-     `ConfigUndoGroupingTests.DraggingASlider` (three sightings), `KeywordListFieldTypingTests` focus.
-  4. **`PoiCardSheetView`** was 584 lines at step 16 and has grown since: say its size, what it owns, and whether it
-     is still a wiring class (`20-code-quality`'s orchestrator rule).
-  5. **The visitor's first card.** Section 9's product pass on the DEMO point (The Painting / Paco da Ribeira),
-     scrolled end to end at 390 px in EN and PT, judged as a visitor and not as its author: does it read, is it the
-     right size, does it look finished, what would confuse. Say plainly what you would change.
-- SKIP: none.
+GATE: `git push` if the branch is ahead of origin (1 commit waits). Take one Unity capture (Game view AND the POI
+Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles. The SDF fonts are Static since
+step 13: a modified font is a FINDING, not a `git checkout`. Baseline: the tree is clean on commit "Add the navigation
+domain audit and its fix list" (full EditMode 1999/1999, full PlayMode 1148/1148) -- run the full EditMode suite and
+say which commit you trusted.
 
-TEST PLAN (the skill's own rule): full EditMode AND full PlayMode at the START -- their counts, times and the ten
-slowest fixtures are audit data. Take the PlayMode run in the background and report `editor_is_focused` at both ends.
-This is the domain's mandatory close-out run.
-WORKER MODEL: Opus-class (the skill says so).
-AUDIT MODE WRITES NO FEATURES. Allowed: runs, captures, the report, and only the fixes this brief names -- which is
-none. Everything else goes in the fix list.
+WORKER MODEL: Sonnet-class -- these are tests and small rule cases, each named by the audit with its acceptance. No
+new owner, no container, no feature. STOP and report if a fix needs one.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run (tests and light rule cases). It closes on
+every PlayMode fixture whose name holds Card, Poi or SizeComparison. It rides on the audit's full run (1148/1148).
+The next full run is chunk D, which splits the sheet.
 
-Also, before the report: the GATE of `__AI_worker.md`, and `git push` if the branch is ahead (1 commit waits).
-The SDF fonts are Static since step 13: a modified font is a FINDING, not a `git checkout`.
+CHUNK A -- the three options nobody has ever seen work. This is the audit's headline: breaking Follow Scroll, Show
+Counts or Labels left the FULL EditMode suite and the ten PlayMode fixtures that reach them green. A wall author can
+choose three things that nothing proves do anything.
+  For EACH of the three, write the test that fails when the option is broken, on the real scene with real input where
+  the option is visible to a visitor:
+  - Follow Scroll off: the marker stays where the last jump put it while the visitor scrolls past other sections; on:
+    it follows.
+  - Show Counts: the count appears on the items of every element that offers it, and is absent when off.
+  - Labels (icon / text / icon and text): each setting changes what an icon-capable element draws.
+  PROVE each by mutation, the way the audit did: break the option, watch YOUR named test go red, restore it. Say the
+  test name per option in the report. The audit also lists three more with no real-scene test (families, group_by,
+  groups): add them if they fit the session, and say so if they do not.
 
-Deliver `proj_guides/_3.2.1_Audit.md` with every section of the skill, the fix list in block-sized chunks, and the
-chat finish the skill describes. Commit only if the developer asks.
+CHUNK B -- the seven rule gaps the mutation sweep found (audit section 11, chunk B names each): the three facet cases
+(a block of exactly 5 min; "No headphones" combined with the camera facet; the third), the bottom area not coming back
+at the top of the stack, peek counting a block as read, and the two wiring points. Each gets the EditMode test that
+catches its break. Same mutation proof, same reporting.
+
+  TESTS: all of the above, plus the suites of the TEST PLAN.
+  VISUALS: only where a test needs a picture to be judged (Show Counts and Labels do). Judge them item by item.
+  DOCS: `_3.2.1_Audit.md` -- mark chunks A and B closed in section 11, with the test names as proof, and update the
+  coverage matrix cells that are no longer gaps; `_3.2` status (a close-out row for the fix chunks);
+  `10-structure.md` only if a file was added.
+
+Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII in code, comments, logs and Editor
+labels; pure rules decide, views draw; no backward-compatibility shim; real fixtures only -- never change a POI's
+identity fields.
+OUT OF SCOPE: chunks C, D, E, F and G; any feature; the `_3.3` work.
+Stop when the full EditMode suite and the Card / Poi fixtures are green with zero failures, every fix is mutation-
+proven with its test named, and the docs above are written.
+If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
+Commit only if the developer asks.
+
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
@@ -152,7 +169,7 @@ Per ./.clinerules/50-terminal_and_tools.md:
   the tree. Never leave the tree red or half-edited.
 
 ### 2.5. Hard Stop
-When you complete all the Iterative Execution Cycles for each step/task in the plan AND WE ACHIEVE AND TESTED WITH REAL TEST THAT ALL FEATURES WORK, ALL CONFIG PARAMS WORK AND ALL TESTS PASS, so then **STOP immediately**. Output the final learning summary and STOP. 
+When you complete all the Iterative Execution Cycles for each step/task in the plan AND WE ACHIEVE AND TESTED WITH REAL TEST THAT ALL FEATURES WORK, ALL CONFIG PARAMS WORK AND ALL TESTS PASS, so then **STOP immediately**. Output the final learning summary, PUT the "LivingRoom Sene" to be ready to play in unity (not the test scenes tc...), and STOP. 
 
 
 ## `DURING THE WHOLE PROCESS: BE A TEACHER!!! - GIVE LEARNING SUMMARIES`

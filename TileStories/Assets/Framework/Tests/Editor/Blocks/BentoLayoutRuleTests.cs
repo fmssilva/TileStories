@@ -191,6 +191,33 @@ namespace TileStories.Editor.Tests
             Assert.Less(asked.First(a => a.Item1 == 1).Item2, Width, "a paired tile at its share of the row");
         }
 
+        // _3.2 audit F1 (mutation 141): two words whose minimums plus the gap equal the width exactly still sit side by side
+        [Test]
+        public void TwoTilesWhoseMinimumsExactlyFillTheWidth_ShareARow_AndAHairMoreSplitsThem()
+        {
+            float half = (Width - Gap) / 2f;
+            var exact = BentoLayoutRule.Rows(new[] { 5, 3, 3 }, new[] { 100f, half, half }, Width, Gap);
+            CollectionAssert.AreEqual(new[] { new[] { 0 }, new[] { 1, 2 } }, exact.Select(r => r.ToArray()).ToArray(), "minimums + gap == width: a pair");
+            var over = BentoLayoutRule.Rows(new[] { 5, 3, 3 }, new[] { 100f, half, half + 0.01f }, Width, Gap);
+            CollectionAssert.AreEqual(new[] { new[] { 0 }, new[] { 1 }, new[] { 2 } }, over.Select(r => r.ToArray()).ToArray(), "a hair wider: one per row");
+        }
+
+        // _3.2 audit F1 (mutation 144): rows whose minimums exactly equal the room are not shared by count (Fills stays false); a hair more
+        // room does share
+        [Test]
+        public void MinimumsThatExactlyEqualTheRoom_DoNotFill_AHairMoreRoomDoes()
+        {
+            int[] counts = { 5, 3 };
+            float[] widths = { 100f, 100f };
+            float exactHeight = 2 * MinHeight + Gap;
+            var exact = BentoLayoutRule.Layout(counts, widths, MinHeight, Width, exactHeight, Gap, TallContent);
+            Assert.AreEqual(2, exact.Rows.Count, "precondition: two rows (the lead alone, the other alone)");
+            Assert.IsFalse(exact.Fills, "rows' minimums == the room: nothing left to share");
+            Assert.AreEqual(exactHeight, exact.Height, Epsilon, "every row at its minimum fills it exactly all the same");
+            var roomier = BentoLayoutRule.Layout(counts, widths, MinHeight, Width, exactHeight + 1f, Gap, TallContent);
+            Assert.IsTrue(roomier.Fills, "one unit more room: the rows share it by count");
+        }
+
         [Test]
         public void NoSections_NoTiles()
         {
