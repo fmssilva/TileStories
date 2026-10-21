@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.Video;
 
 namespace TileStories
 {
@@ -81,7 +80,7 @@ namespace TileStories
         private readonly NavTint _tint;
         // The visitor's reads in this binding (what a card with no CardLocalState still shows) and the clip lengths loaded for it, by path
         private readonly HashSet<string> _viewedHere = new();
-        private readonly Dictionary<string, float> _clipSeconds = new();
+        private ClipLengthReader _clips;
         // The sections opened in this binding, in the order they were opened (AccordionRule; kept over a redraw of the same binding)
         private readonly List<string> _openSections = new();
         private string _blockKey;
@@ -105,6 +104,8 @@ namespace TileStories
         {
             Unbind();
             _context = context;
+            // - the clips load through this view's own media scope (released with the view), once per path
+            _clips = new ClipLengthReader(context.Media, context.Language, context.FallbackLanguage);
             _nav = context.Nav;
             _blockKey = instance?.key;
             // - nothing to draw yet: the sheet binds the controller to THIS card's model right after the stack (Bound)
@@ -129,7 +130,7 @@ namespace TileStories
             _blockKey = null;
             _openSections.Clear();
             _viewedHere.Clear();
-            _clipSeconds.Clear();
+            _clips = null;
             _rows.ReleaseAll();
             _sections.ReleaseAll();
             _tint.Clear();
@@ -250,31 +251,8 @@ namespace TileStories
         // (released with the view), once per path
         private int MinutesOf(string blockKey)
         {
-            if (!_nav.TryGetEntry(blockKey, out var entry)) return 0;
-            var clipField = ReadingTimeRule.ClipField(entry.Definition);
-            float seconds = clipField != null ? ClipSeconds(entry.Instance, clipField) : 0f;
-            return ReadingTimeRule.Minutes(entry.Definition, entry.Instance, seconds);
-        }
-
-        private float ClipSeconds(BlockInstanceData instance, BlockFieldDefinition clipField)
-        {
-            string path = new BlockFieldReader(instance, _context?.Language, _context?.FallbackLanguage).ValidAsset(clipField.Key, clipField.Media);
-            if (path.Length == 0) return 0f;
-            if (_clipSeconds.TryGetValue(path, out float known)) return known;
-            var media = _context?.Media;
-            float seconds = 0f;
-            if (clipField.Media == MediaKind.Audio)
-            {
-                var clip = media?.Load<AudioClip>(path);
-                seconds = clip != null ? clip.length : 0f;
-            }
-            else if (clipField.Media == MediaKind.Video)
-            {
-                var clip = media?.Load<VideoClip>(path);
-                seconds = clip != null ? (float)clip.length : 0f;
-            }
-            _clipSeconds[path] = seconds;
-            return seconds;
+            if (_clips == null || !_nav.TryGetEntry(blockKey, out var entry)) return 0;
+            return _clips.MinutesOf(entry.Definition, entry.Instance);
         }
 
         private string Words(string key, string fallback)

@@ -19,25 +19,35 @@ namespace TileStories
 
         public VisualElement Root { get; }
         public NavMenuHeader Header { get; }
+        // The facet chips under the title (_3.2 step 18): they narrow the outline in place
+        public NavFacetBar Facets { get; }
         public ScrollView List { get; }
-        // One row per section of the model, in its order (Index = the section's index)
+        // One row per section of the outline now, in the model's order: every section of the model, or with a facet on only the sections
+        // that still hold a block that passes (the row's place = its index here; SectionOf gives the model's index)
         public IReadOnlyList<NavTab> SectionRows => _sections.Shown;
-        // One row per kind listed, in the outline's order (each with the section and kind it stands for)
+        // One row per kind listed, in the outline's order (each with the model's section and kind it stands for)
         public IReadOnlyList<(NavTab Row, int Section, CardNavModel.Kind Kind)> KindRows => _kindRows;
 
         private readonly ElementPool<NavTab> _sections;
         private readonly ElementPool<NavTab> _kinds;
         private readonly List<(NavTab Row, int Section, CardNavModel.Kind Kind)> _kindRows = new();
+        // What a row stands for in the facets' list: the model's section of each section row, the blocks that pass in each section row and kind row
+        private readonly List<int> _sectionOfRow = new();
+        private readonly List<List<string>> _passingOfSection = new();
+        private readonly List<List<string>> _passingOfKind = new();
         private readonly NavTint _tint;
         private CardNavModel _model;
         private NavController _nav;
         private CardMenuOverlay _overlay;
+        private CardStrings _strings;
 
         public DrawerTreeNavView()
         {
             Root = new VisualElement { name = "nav-drawer-tree" };
             Root.AddToClassList("nav-drawer");
             Header = new NavMenuHeader("nav-drawer", () => _overlay?.Close());
+            Facets = new NavFacetBar("nav-drawer-facets");
+            Facets.Changed += Draw;
             // - a finger scrolls it: no desktop scroller, like every scroll of the card
             List = new ScrollView(ScrollViewMode.Vertical)
             {
@@ -47,6 +57,7 @@ namespace TileStories
             };
             List.AddToClassList("nav-drawer__list");
             Root.Add(Header.Root);
+            Root.Add(Facets.Root);
             Root.Add(List);
             _sections = new ElementPool<NavTab>(index => Row(NavTab.Create("nav-drawer-section-", index, true, () => PickSection(index)), "nav-drawer__section"),
                 tab => tab.Button.RemoveFromHierarchy());
@@ -61,59 +72,97 @@ namespace TileStories
             _model = model;
             _nav = nav;
             _overlay = context?.Overlay;
-            var strings = context?.Strings;
-            Header.Words(strings);
-            for (int s = 0; s < model.Sections.Count; s++)
-            {
-                var section = model.Sections[s];
-                var row = _sections.Take();
-                row.Label.text = Words(section.LabelKey, section.Key, strings);
-                row.Button.tooltip = row.Label.text;
-                CardIcons.SetKey(row.Icon, section.IconKey);
-                row.Icon.style.display = section.IconKey != null ? DisplayStyle.Flex : DisplayStyle.None;
-                _tint.Icon(row.Icon, section.ColorToken);
-                // - an outline says how much is behind each line: the counts are its point, so they are always shown
-                NavCount.Set(row.Count, true, section.Count);
-                List.Add(row.Button);
-                if (!NavOntologyRule.OffersAKindChoice(section.Kinds.Count)) continue;
-                foreach (var kind in section.Kinds)
-                {
-                    var kindRow = _kinds.Take();
-                    kindRow.Label.text = Words(kind.LabelKey, kind.Key, strings);
-                    kindRow.Button.tooltip = kindRow.Label.text;
-                    NavCount.Set(kindRow.Count, true, kind.Count);
-                    List.Add(kindRow.Button);
-                    _kindRows.Add((kindRow, s, kind));
-                }
-            }
+            _strings = context?.Strings;
+            Header.Words(_strings);
+            // - every facet off for a new card; the bar reads the card's blocks and draws its chips
+            Facets.Bind(model, nav, context);
             nav.CurrentBlockChanged += OnCurrentBlockChanged;
-            OnCurrentBlockChanged(nav.CurrentBlock);
+            Draw();
         }
 
         public void Unbind()
         {
             if (_nav != null) _nav.CurrentBlockChanged -= OnCurrentBlockChanged;
+            Facets.Unbind();
             _nav = null;
             _model = null;
             _overlay = null;
+            _strings = null;
+            ClearRows();
+        }
+
+        // The outline: a line per section that has a block passing the facets on (all of them with none on), its kinds under it. The counts
+        // are the blocks that pass, so a chip narrows the numbers too; the other sections and kinds are not listed at all
+        private void Draw()
+        {
+            if (_model == null) return;
+            ClearRows();
+            for (int s = 0; s < _model.Sections.Count; s++)
+            {
+                var section = _model.Sections[s];
+                var passing = Facets.Passing(section.Targets);
+                if (passing.Count == 0) continue;
+                var row = _sections.Take();
+                _sectionOfRow.Add(s);
+                _passingOfSection.Add(passing);
+                row.Label.text = Words(section.LabelKey, section.Key, _strings);
+                row.Button.tooltip = row.Label.text;
+                CardIcons.SetKey(row.Icon, section.IconKey);
+                row.Icon.style.display = section.IconKey != null ? DisplayStyle.Flex : DisplayStyle.None;
+                _tint.Icon(row.Icon, section.ColorToken);
+                // - an outline says how much is behind each line: the counts are its point, so they are always shown
+                NavCount.Set(row.Count, true, passing.Count);
+                List.Add(row.Button);
+                var kinds = new List<(CardNavModel.Kind Kind, List<string> Passing)>();
+                foreach (var kind in section.Kinds)
+                {
+                    var ofKind = Facets.Passing(kind.Targets);
+                    if (ofKind.Count > 0) kinds.Add((kind, ofKind));
+                }
+                if (!NavOntologyRule.OffersAKindChoice(kinds.Count)) continue;
+                foreach (var (kind, ofKind) in kinds)
+                {
+                    var kindRow = _kinds.Take();
+                    kindRow.Label.text = Words(kind.LabelKey, kind.Key, _strings);
+                    kindRow.Button.tooltip = kindRow.Label.text;
+                    NavCount.Set(kindRow.Count, true, ofKind.Count);
+                    List.Add(kindRow.Button);
+                    _kindRows.Add((kindRow, s, kind));
+                    _passingOfKind.Add(ofKind);
+                }
+            }
+            List.scrollOffset = UnityEngine.Vector2.zero;
+            OnCurrentBlockChanged(_nav?.CurrentBlock);
+        }
+
+        private void ClearRows()
+        {
             _sections.ReleaseAll();
             _kinds.ReleaseAll();
             _kindRows.Clear();
+            _sectionOfRow.Clear();
+            _passingOfSection.Clear();
+            _passingOfKind.Clear();
             _tint.Clear();
         }
 
-        // A tap on a section's row: its first block (the overlay owner hears the jump and closes the drawer)
+        // The model's section a section row (its place among the rows shown) stands for, -1 when there is none
+        public int SectionOf(int row) => row >= 0 && row < _sectionOfRow.Count ? _sectionOfRow[row] : -1;
+
+        // A tap on a section's row (its place among the rows shown): its first block that passes the facets (the overlay owner hears the jump
+        // and closes the drawer). With no facet on that is the section's first block, as ever
         public void PickSection(int index)
         {
-            if (_model == null || index < 0 || index >= _model.Sections.Count) return;
-            _nav?.JumpTo(index, BuiltInNavElements.DrawerTree);
+            if (_model == null || index < 0 || index >= _sectionOfRow.Count) return;
+            if (Facets.Facets.IsActive) _nav?.JumpToBlock(_passingOfSection[index][0], BuiltInNavElements.DrawerTree);
+            else _nav?.JumpTo(_sectionOfRow[index], BuiltInNavElements.DrawerTree);
         }
 
-        // A tap on a kind's row (its place among the kind rows): that kind's first block
+        // A tap on a kind's row (its place among the kind rows): that kind's first block that passes the facets
         public void PickKind(int index)
         {
             if (index < 0 || index >= _kindRows.Count) return;
-            _nav?.JumpToBlock(_kindRows[index].Kind.Targets[0], BuiltInNavElements.DrawerTree);
+            _nav?.JumpToBlock(_passingOfKind[index][0], BuiltInNavElements.DrawerTree);
         }
 
         // The reader moved: mark the section and the kind of the block being read
@@ -123,7 +172,8 @@ namespace TileStories
             int section = _model.SectionOf(block);
             var kind = _model.KindOf(block);
             if (section < 0) section = _nav?.Current ?? -1;
-            foreach (var row in _sections.Shown) row.Button.EnableInClassList(NavTab.CurrentClass, row.Index == section);
+            for (int i = 0; i < _sections.Shown.Count; i++)
+                _sections.Shown[i].Button.EnableInClassList(NavTab.CurrentClass, _sectionOfRow[i] == section);
             foreach (var (row, s, k) in _kindRows) row.Button.EnableInClassList(NavTab.CurrentClass, s == section && ReferenceEquals(k, kind));
         }
 

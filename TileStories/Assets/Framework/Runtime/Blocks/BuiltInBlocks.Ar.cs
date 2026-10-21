@@ -19,6 +19,8 @@ namespace TileStories
             IconKey = CardIcons.ShowOnWall,
             Family = BuiltInFamilies.Ar,
             Format = CardOptions.FormatModel,
+            // - the button lowers the card to the wall's camera view: nothing to see without the camera
+            Needs = new[] { CardOptions.NeedCamera },
             LabelKey = CardStrings.Keys.KindShowOnWall,
             DisplayName = "Show On Wall",
             Help = "A button that lowers the card to its peek so the visitor can see this point's marker on the wall (the point stays " +
@@ -52,6 +54,8 @@ namespace TileStories
             IconKey = CardIcons.Cube,
             Family = BuiltInFamilies.Ar,
             Format = CardOptions.FormatModel,
+            // - the model stands in the room through the camera
+            Needs = new[] { CardOptions.NeedCamera },
             LabelKey = CardStrings.Keys.KindPlaceInAr,
             DisplayName = "Place In AR",
             Help = "A button that places a 3D model in the room, at this point of the wall, and lowers the card to its peek (scrolled to the " +

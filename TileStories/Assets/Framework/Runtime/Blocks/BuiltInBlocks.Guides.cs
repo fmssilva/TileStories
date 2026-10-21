@@ -22,6 +22,8 @@ namespace TileStories
             IconKey = CardIcons.Listen,
             Family = BuiltInFamilies.Guides,
             Format = CardOptions.FormatListen,
+            // - a recording in a gallery or on a wall is meant for headphones (the filter answers "I have no headphones")
+            Needs = new[] { CardOptions.NeedHeadphones },
             LabelKey = CardStrings.Keys.KindAudioGuide,
             DisplayName = "Audio Guide",
             Help = "A recording the visitor listens to. Player: a play / pause button, a bar to drag to any point, the time, a speed chip and " +

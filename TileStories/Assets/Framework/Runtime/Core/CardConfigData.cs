@@ -328,6 +328,13 @@ namespace TileStories
         public const string FormatInteract = "interact";
         public static readonly string[] Formats = { FormatRead, FormatLook, FormatWatch, FormatListen, FormatModel, FormatInteract };
 
+        // What a kind NEEDS from the visitor's phone or place (BlockKindDefinition.Needs, _3.2 section 5.8): a FIXED list like the formats, set on
+        // the kind and never on a block. The card's menus offer "No headphones / No camera / No network" chips for the ones a card holds.
+        public const string NeedHeadphones = "headphones";
+        public const string NeedCamera = "camera";
+        public const string NeedNetwork = "network";
+        public static readonly string[] Needs = { NeedHeadphones, NeedCamera, NeedNetwork };
+
         // Group By (CardNavigationSettings.group_by): what the card's navigation sections are -- the families (the visitor's
         // intent, the default) or the formats. The same targets either way (CardNavModel)
         public const string GroupByFamily = "family";

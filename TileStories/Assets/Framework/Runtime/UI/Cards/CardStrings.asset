@@ -1225,3 +1225,38 @@ MonoBehaviour:
       value: All {0}
     - lang: pt
       value: Todos {0}
+  - key: nav_facet_up_to
+    where: A chip of the card's menus (the outline, the big tiles) that keeps only the blocks that take this long or less to read, watch or listen to ({0} = minutes).
+    text:
+    - lang: en
+      value: Up to {0} min
+    - lang: pt
+      value: "At\xE9 {0} min"
+  - key: nav_facet_no_headphones
+    where: A chip of the card's menus that leaves out the blocks that need headphones (an audio guide) -- for a visitor who has none with them.
+    text:
+    - lang: en
+      value: No headphones
+    - lang: pt
+      value: Sem auscultadores
+  - key: nav_facet_no_camera
+    where: A chip of the card's menus that leaves out the blocks that need the phone's camera (placing a model in the room, finding the point on the wall).
+    text:
+    - lang: en
+      value: No camera
+    - lang: pt
+      value: "Sem c\xE2mara"
+  - key: nav_facet_no_network
+    where: A chip of the card's menus that leaves out the blocks that need an internet connection to play.
+    text:
+    - lang: en
+      value: No network
+    - lang: pt
+      value: Sem rede
+  - key: nav_facet_clear
+    where: The chip of the card's menus that switches every chip off again and brings back the whole list.
+    text:
+    - lang: en
+      value: Clear
+    - lang: pt
+      value: Limpar

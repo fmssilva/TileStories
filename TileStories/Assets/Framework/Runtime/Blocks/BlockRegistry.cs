@@ -120,6 +120,11 @@ namespace TileStories
             if (string.IsNullOrWhiteSpace(d.Format)) return "no format";
             if (!Contains(CardOptions.Formats, d.Format))
                 return "its format '" + d.Format + "' is not one of " + string.Join(", ", CardOptions.Formats);
+            // - the needs are a fixed list too; a typo would add a chip no visitor could read
+            if (d.Needs != null)
+                foreach (string need in d.Needs)
+                    if (!Contains(CardOptions.Needs, need))
+                        return "its need '" + need + "' is not one of " + string.Join(", ", CardOptions.Needs);
             // - the icon set is one list every registry shares, so a SHAPE check too: a typo would draw an empty chip
             if (string.IsNullOrWhiteSpace(d.IconKey)) return "no icon";
             if (!Contains(CardIcons.All, d.IconKey))

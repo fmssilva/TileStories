@@ -163,6 +163,36 @@
     color: var(--ts-ink);
 }
 
+/* the facet chips of the two menus (_3.2 step 18): ONE row of chips under the menu's title, scrolling sideways when wider than the menu.
+   They reuse the kind chip (a 48 px target holding a pill); a chip that is on has the accent border and bold words of the current kind chip */
+.nav-facets {
+    flex-shrink: 0;
+    border-bottom-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+}
+
+.nav-facets__viewport {
+    flex-direction: row;
+    overflow: hidden;
+    padding: 0 var(--ts-space-2);
+}
+
+.nav-facets__row {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+/* Clear is no filter: no pill, accent words */
+.nav-facets__clear .nav-chip__pill {
+    border-color: var(--ts-clear);
+    background-color: var(--ts-clear);
+}
+
+.nav-facets__clear .nav-chip__label {
+    color: var(--ts-accent);
+    -unity-font-style: bold;
+}
+
 /* icon_tabs_chips: the chip row sits right under the tabs */
 .nav-tabs-chips .nav-chips__viewport {
     padding-bottom: var(--ts-space-1);

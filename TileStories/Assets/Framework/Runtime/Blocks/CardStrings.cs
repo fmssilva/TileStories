@@ -262,6 +262,13 @@ namespace TileStories
             // The last card of a rail that holds fewer cards than its section has blocks (nav_rails, _3.2 step 15a): "All {0}" ({0} = how many
             // blocks the section holds); a tap moves the card to the section
             public const string NavRailsAll = "nav_rails_all";
+            // The facet chips of the card's menus (_3.2 step 18): a reading-time limit ("Up to {0} min", {0} = minutes), what the visitor does
+            // without ("No headphones / camera / network": the blocks that need it are left out) and the chip that switches every facet off
+            public const string NavFacetUpTo = "nav_facet_up_to";
+            public const string NavFacetNoHeadphones = "nav_facet_no_headphones";
+            public const string NavFacetNoCamera = "nav_facet_no_camera";
+            public const string NavFacetNoNetwork = "nav_facet_no_network";
+            public const string NavFacetClear = "nav_facet_clear";
 
             public static readonly IReadOnlyList<string> All = new[]
             {
@@ -294,6 +301,7 @@ namespace TileStories
                 CompactMeta, CompactOpen, CompactClose, FullViewOpen,
                 NavPagerPosition, NavPagerPrevious, NavPagerNext,
                 NavRailsAll,
+                NavFacetUpTo, NavFacetNoHeadphones, NavFacetNoCamera, NavFacetNoNetwork, NavFacetClear,
             };
         }
 

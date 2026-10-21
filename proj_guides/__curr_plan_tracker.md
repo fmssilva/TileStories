@@ -1,42 +1,30 @@
-# Plan tracker -- _3.2 step 17b (the Card Starter, the demo point, the Preset row first)
+# Plan tracker -- _3.2 step 18: the in-card facets (the last BUILD step)
 
-GATE (done): UnityMCP answered (telemetry_status; execute_code needed its tool group `scripting_ext` activated); 1 commit pushed
-(50c6723..ae1222f); captures `TestEvidence/Gate/gate_3_2_step17b_{gameview,poieditor}.png` opened (a first POI Editor capture showed VS Code:
-deleted, window moved over Unity, recaptured; capture window closed, 0 left); tree compiled (Editor.log 0 `error CS`, ExitCode 0); neither
-SDF font modified; EditMode baseline 1972/1972 (135 s) on clean ae1222f (trusted). Rides on 15b's full PlayMode 1113/1113.
+Brief: Needs flag on the KIND, facet chips over `drawer_tree` and `grid_overlay`, ONE pure rule read by both. NO text field.
+Baseline trusted: commit 52fceea ("Add a Card Starter and a real card for The Painting"), full EditMode 1984/1984 (94 s) re-run today.
 
-## Finding at the plan (asked, the developer chose 2026-10-20)
-`_3.2` 8.2 says the wall's own preset avoids re-baselining the suite; the 35 card PlayMode fixtures (all `SearchSceneFixture`) load the
-SHIPPED LivingRoom config, so the wall's config IS what they measure. Chosen: write the preset judged best to the wall AND pin every card
-fixture to the FRAMEWORK default navigation in `SearchSceneFixture.SetUp` (beside the LOD pin); the shipped value kept as
-`ShippedNavigation` for the test of the wall's own choice. Shared ground -> a FULL PlayMode run at the end (background).
+## GATE (done)
+- [x] UnityMCP answered (telemetry_status)
+- [x] git push: 1 commit (ae1222f..52fceea)
+- [x] Game view + POI Editor captures opened (`TestEvidence/Gate/gate_3_2_step18_{gameview,poieditor}.png`), window closed (0 left)
+- [x] tree compiled (0 `error CS`), git status clean under TileStories: neither SDF font modified
+- [x] full EditMode 1984/1984 on 52fceea
 
-## Decisions (autonomous)
-- Card Starter = `CardStarters` (Editor assembly, Specific Marker folder; the NavigationPresets shape): Starter {Label, Suits, Entries};
-  Entry {kind, variant, preset Choice values}. Data only: no content is written, nothing copied from the point's name / summary.
-- "Start from scratch" = the starter with no blocks (one rule): on an empty point it writes nothing; on a point with blocks it asks like any.
-- Keys: new blocks never reuse a replaced block's key (NextFree over old + new).
-- Row: Specific Marker > Card Content, FIRST row, "Card Starter" popup-styled button (reads the matching starter, else Custom / None).
-- Picker: 17a's NavigationPresetPickerPopup becomes ONE shared named-option picker used by both (uniform pattern), each with its own kind.
-- Point with blocks: ONE EditorDecision naming the point and the count (pure builder), confirm "Replace N Blocks"; apply = ONE ApplyPopupEdit.
-- Tests that use The Painting as "a point with no card" move to The Camera (same shape).
+## Part 1 -- the owed look (done)
+- [x] Simple / Rich / AR point rendered on the empty Camera point, EN + PT, Half + Full (throwaway probe, deleted). Judged in the report; sets unchanged.
 
-## Steps
-- [x] 1. Part 1: Preset row FIRST in Navigation + Editor test (order) + recapture 300_CardNavigation_Preset_620.png
-- [x] 2. Shared picker (NamedOptionPickerPopup), 17a tests green
-- [x] 3. CardStarters data + Apply + Tier 0 tests (CardStartersTests 6, key rule proved load-bearing)
-- [x] 4. Card Starter row + picker + EditorDecision + real-window tests (CardStarterEditorTabTests 6) -- capture pending (step 7b)
-- [x] 5. Sets judged on the real card: Rich + Wall Locator, Simple + Related (both read the point itself: zero authoring, lead on)
-- [x] 6. Fixture pin in SearchSceneFixture + ShippedNavigation; EditMode twin ShippedWall.WithFrameworkNavigation (6 files);
-        LivePlayModeNavigationPresetTests starts from the wall's own preset
-- [x] 7. Demo content through the real window (Rich point starter on The Painting + hand content EN/PT + Zoom Image + Wall Locator;
-        Residential + Icon Grid / Contents / Rails with headings; wall preset Rich point); Save + Copy; 3 tests re-pointed to The Camera
-- [x] 7b. Captures: Card Starter row + picker (Editor/310, 311), judged
-- [x] 8. Phase B: PoiCardPaintingSceneTests 7/7 + renders judged. FOUND + FIXED (both test-first, red -> green):
-        (a) icon_tabs_chips' emptied chip row collapsed (103 -> 55 px) -> layout loop "Layout update is struggling" (USS min-height);
-        (b) its chip row's inline Visible beat the hidden strip -> chips floating over the title at Half (inherit instead)
-- [x] full EditMode 1984/1984 (94 s, background)
-- [x] 9. 2.3 finding: names / summaries the fixtures read, listed in __mixed_TODOs (nothing renamed)
-- [x] 10. Full EditMode 1984/1984; targeted PlayMode 945/945 (45 fixtures); FULL PlayMode 1130/1130 (3428 s, background ~20 min then front)
-- [x] 11. Docs: _3.1 (8.5 + fixture), _5.1 (rows, popups), _3.2 (17b row, TODO, 8.2 corrected, 5.1 corrected, 7, 8.1), 10-structure,
-        40-testing (pin rule + RUN TIMES), __mixed_TODOs
+## Part 2 -- the facets
+Decisions: Needs chips are EXCLUSIONS ("No headphones": the visitor's question), Format chip single-select, time chips single-select
+(<= 2, <= 5), untimed blocks do not match a time chip, a chip is offered only if it matches >= 1 and excludes >= 1 of the blocks that pass the
+OTHER active facets, active chips stay (so they can be cleared) + a Clear chip, counts follow the filter, a jump lands the first PASSING block.
+- [ ] 2.1 `CardOptions.Needs*`, `BlockKindDefinition.Needs`, `BlockRegistry.Validate` refuses an unknown need; audio_guide -> headphones,
+      place_in_ar + show_on_wall -> camera (no built-in kind streams: network is in the vocabulary, an app kind may use it)
+- [ ] 2.2 pure `NavFacetRule` + `NavFacets` (state) + `BlockFacts`; `ClipLengthReader` (the clip-length load NavContents had privately, now shared)
+- [ ] 2.3 CardStrings keys (en + pt) + CardStrings.asset rows; `NavFacetBar` (chips, one NavStrip row, 48 px, border + bold when active)
+- [ ] 2.4 drawer_tree + grid_overlay read the bar: filtered counts, hidden empty sections / kinds, jump = first passing block; Navigation.uss
+- [ ] 2.5 Tier 0: `NavFacetRuleTests` (each facet alone, combined, none of a facet on the card, no reading time, offered rule); `KindNeedsTests`
+- [ ] 2.6 Phase A: `CardNavGalleryTests` both menus with facets over the gallery cases
+- [ ] 2.7 Phase B: `PoiCardFacetSceneTests` in LivingRoomScene, real taps: drawer narrows to exactly the matching blocks on The Lamp; the grid too; a jump from a filtered list lands the right block
+- [ ] 2.8 captures: drawer + grid, unfiltered / filtered, EN + PT, 390 px; item-by-item
+- [ ] 2.9 DOCS: `_3.2` row 18 + proof, [step 18] TODO removed; `_3.1` Needs; `_5.1` if a row changed; `10-structure.md`; `40-testing.md` RUN TIMES if moved
+- [ ] close: full EditMode; Card / Poi / SizeComparison PlayMode fixtures named one by one; final report (60-finishing 6.4)

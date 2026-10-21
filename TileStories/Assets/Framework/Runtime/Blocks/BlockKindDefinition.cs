@@ -14,6 +14,10 @@ namespace TileStories
         // How a visitor takes the block in (_3.2 section 2.4): one of CardOptions.Formats (read, look, watch, listen, model,
         // interact). The second axis the card's navigation can group by (group_by = format); required, like Family
         public string Format;
+        // What the kind needs from the visitor (_3.2 section 5.8): any of CardOptions.Needs (headphones, camera, network). Null / empty =
+        // nothing needed, which is most kinds. Set here, never per block: a wall author does not have to say an audio guide needs headphones.
+        // The card's menus filter on it (NavFacetRule)
+        public IReadOnlyList<string> Needs;
         // The kind's own icon (_3.2 step 17a): a CardIcons key, what a sibling chip of the card's full view shows for a block of this kind, so
         // a visitor tells a 360 panorama from a gallery at a glance. Required, like Format: a kind with none would draw an empty chip
         public string IconKey;

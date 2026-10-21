@@ -43,6 +43,8 @@ namespace TileStories
         // The Purpose / Format switch
         public Button ByPurpose { get; }
         public Button ByFormat { get; }
+        // The facet chips under the switch (_3.2 step 18): they narrow the tiles in place, on either axis
+        public NavFacetBar Facets { get; }
         // The way back from one section's kinds to every section, and the open section's words beside it (hidden on the sections level)
         public VisualElement BackRow { get; }
         public Button All { get; }
@@ -58,6 +60,12 @@ namespace TileStories
         public CardNavModel Shown => _model?.By(Axis);
 
         private readonly ElementPool<Tile> _tiles;
+        // What each tile shown stands for: the blocks of it that pass the facets, the model's section (sections level) or kind (kinds level)
+        // it is, and whether a section tile opens its kinds in place (two kinds or more still have a block that passes)
+        private readonly List<List<string>> _tilePassing = new();
+        private readonly List<int> _tileSection = new();
+        private readonly List<CardNavModel.Kind> _tileKind = new();
+        private readonly List<bool> _tileOpensKinds = new();
         private readonly NavTint _tint;
         private CardNavModel _model;
         private NavController _nav;
@@ -75,6 +83,8 @@ namespace TileStories
             ByFormat = Option("nav-grid-by-format", () => ShowAxis(CardOptions.GroupByFormat));
             switchRow.Add(ByPurpose);
             switchRow.Add(ByFormat);
+            Facets = new NavFacetBar("nav-grid-facets");
+            Facets.Changed += Redraw;
             BackRow = new VisualElement { name = "nav-grid-back" };
             BackRow.AddToClassList("nav-grid__back");
             All = new Button(() => OpenKinds(-1)) { name = "nav-grid-all" };
@@ -100,6 +110,7 @@ namespace TileStories
             Scroll.Add(Grid);
             Root.Add(Header.Root);
             Root.Add(switchRow);
+            Root.Add(Facets.Root);
             Root.Add(BackRow);
             Root.Add(Scroll);
             _tiles = new ElementPool<Tile>(CreateTile, tile => tile.Button.RemoveFromHierarchy());
@@ -120,6 +131,8 @@ namespace TileStories
             // - it opens on the wall's own axis
             Axis = model.GroupBy;
             OpenSection = -1;
+            // - every facet off for a new card; the bar reads the card's blocks (the same on both axes) and draws its chips
+            Facets.Bind(model, nav, context);
             nav.CurrentBlockChanged += OnCurrentBlockChanged;
             if (_overlay != null) _overlay.Closed += OnOverlayClosed;
             Redraw();
@@ -129,12 +142,22 @@ namespace TileStories
         {
             if (_nav != null) _nav.CurrentBlockChanged -= OnCurrentBlockChanged;
             if (_overlay != null) _overlay.Closed -= OnOverlayClosed;
+            Facets.Unbind();
             _nav = null;
             _model = null;
             _overlay = null;
             _strings = null;
             OpenSection = -1;
+            ClearTiles();
+        }
+
+        private void ClearTiles()
+        {
             _tiles.ReleaseAll();
+            _tilePassing.Clear();
+            _tileSection.Clear();
+            _tileKind.Clear();
+            _tileOpensKinds.Clear();
             _tint.Clear();
         }
 
@@ -150,18 +173,10 @@ namespace TileStories
         // A tap on a tile (its place in the grid): a section with a choice of kinds opens them in place, any other moves the card
         public void PickTile(int index)
         {
-            var shown = Shown;
-            if (shown == null || index < 0) return;
-            if (OpenSection < 0)
-            {
-                if (index >= shown.Sections.Count) return;
-                var section = shown.Sections[index];
-                if (NavOntologyRule.OffersAKindChoice(section.Kinds.Count)) OpenKinds(index);
-                else Jump(section.Targets[0]);
-                return;
-            }
-            var kinds = shown.Sections[OpenSection].Kinds;
-            if (index < kinds.Count) Jump(kinds[index].Targets[0]);
+            if (Shown == null || index < 0 || index >= _tilePassing.Count) return;
+            // - a tile's first block that passes the facets (with none on, its first block, as ever)
+            if (OpenSection < 0 && _tileOpensKinds[index]) OpenKinds(_tileSection[index]);
+            else Jump(_tilePassing[index][0]);
         }
 
         // Show one section's kinds in place (-1: back to every section)
@@ -184,24 +199,46 @@ namespace TileStories
         // Draw the tiles of the level shown now: every section on the axis, or one section's kinds
         private void Redraw()
         {
-            _tiles.ReleaseAll();
-            _tint.Clear();
+            ClearTiles();
             var shown = Shown;
             if (shown == null) return;
+            // - a facet chip can take the open section's last passing block away: back to every section then
+            if (OpenSection >= 0 && Facets.Passing(shown.Sections[OpenSection].Targets).Count == 0) OpenSection = -1;
             ByPurpose.EnableInClassList(OptionCurrentClass, Axis == CardOptions.GroupByFamily);
             ByFormat.EnableInClassList(OptionCurrentClass, Axis == CardOptions.GroupByFormat);
             BackRow.style.display = OpenSection >= 0 ? DisplayStyle.Flex : DisplayStyle.None;
             if (OpenSection < 0)
             {
-                foreach (var section in shown.Sections)
-                    Fill(_tiles.Take(), section.LabelKey, section.Key, section.IconKey, section.ColorToken, section.Count);
+                for (int s = 0; s < shown.Sections.Count; s++)
+                {
+                    var section = shown.Sections[s];
+                    var passing = Facets.Passing(section.Targets);
+                    if (passing.Count == 0) continue;
+                    int kindsLeft = 0;
+                    foreach (var kind in section.Kinds)
+                        if (Facets.Passing(kind.Targets).Count > 0) kindsLeft++;
+                    Fill(_tiles.Take(), section.LabelKey, section.Key, section.IconKey, section.ColorToken, passing.Count);
+                    _tilePassing.Add(passing);
+                    _tileSection.Add(s);
+                    _tileKind.Add(null);
+                    _tileOpensKinds.Add(NavOntologyRule.OffersAKindChoice(kindsLeft));
+                }
             }
             else
             {
                 var open = shown.Sections[OpenSection];
                 OpenTitle.text = Words(open.LabelKey, open.Key);
                 // - kinds have no icon of their own: their words name them
-                foreach (var kind in open.Kinds) Fill(_tiles.Take(), kind.LabelKey, kind.Key, null, null, kind.Count);
+                foreach (var kind in open.Kinds)
+                {
+                    var passing = Facets.Passing(kind.Targets);
+                    if (passing.Count == 0) continue;
+                    Fill(_tiles.Take(), kind.LabelKey, kind.Key, null, null, passing.Count);
+                    _tilePassing.Add(passing);
+                    _tileSection.Add(OpenSection);
+                    _tileKind.Add(kind);
+                    _tileOpensKinds.Add(false);
+                }
             }
             Scroll.scrollOffset = UnityEngine.Vector2.zero;
             OnCurrentBlockChanged(_nav?.CurrentBlock);
@@ -223,19 +260,14 @@ namespace TileStories
         {
             var shown = Shown;
             if (shown == null) return;
-            int current = OpenSection < 0 ? shown.SectionOf(block) : KindIndex(shown, block);
-            foreach (var tile in _tiles.Shown) tile.Button.EnableInClassList(CurrentClass, tile.Index == current);
-        }
-
-        // The place of the block's kind among the open section's kinds, -1 when it is in another section
-        private int KindIndex(CardNavModel shown, string block)
-        {
-            if (shown.SectionOf(block) != OpenSection) return -1;
-            var kind = shown.KindOf(block);
-            var kinds = shown.Sections[OpenSection].Kinds;
-            for (int i = 0; i < kinds.Count; i++)
-                if (ReferenceEquals(kinds[i], kind)) return i;
-            return -1;
+            int section = shown.SectionOf(block);
+            var kind = OpenSection < 0 ? null : shown.KindOf(block);
+            foreach (var tile in _tiles.Shown)
+            {
+                int i = tile.Index;
+                bool current = i < _tileSection.Count && _tileSection[i] == section && (OpenSection < 0 || (kind != null && ReferenceEquals(_tileKind[i], kind)));
+                tile.Button.EnableInClassList(CurrentClass, current);
+            }
         }
 
         private string Words(string labelKey, string key)
