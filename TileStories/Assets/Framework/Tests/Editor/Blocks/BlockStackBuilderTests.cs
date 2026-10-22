@@ -178,6 +178,35 @@ namespace TileStories.Editor.Tests
                 Keys(BlockStackBuilder.Build(PoiWithFamiliesInterleaved(), keep, RegistryWithMeta())), "nothing is At The End any more");
         }
 
+        // Audit chunk F3: the audit's section 5 called the Families table's At The End box of the `navigation` family meaningless, "a family that is
+        // never a target". It is not: At The End orders EVERY block of the family, targets or not, so an authored nav block really moves to the
+        // end of the card -- the box stays, and this pins why. On The Lamp's real Residential point (an icon grid, a contents list, rails)
+        [Test]
+        public void AtTheEndOnTheNavigationFamily_MovesTheAuthoredNavBlocksToTheEndOfTheCard_SoTheBoxIsARealOption()
+        {
+            var config = ShippedWall.WithFrameworkNavigation();
+            var poi = config.pois.Single(p => p.id == "lamp_residential");
+            config.card_settings.navigation.block_order = CardOptions.BlockOrderEndFamiliesLast;
+            List<BlockStackBuilder.Entry> Entries() => BlockStackBuilder.Build(poi, config.card_settings, BlockRegistry.Shared, config.pois).Entries;
+            bool IsNav(BlockStackBuilder.Entry e) => e.Definition.Family == BuiltInFamilies.Navigation;
+            bool ClosesTheCard(BlockStackBuilder.Entry e) => BlockRegistry.Shared.TryGetFamily(e.Definition.Family, out var f) && f.AtEnd;
+
+            var before = Entries();
+            Assert.GreaterOrEqual(before.Count(IsNav), 2, "precondition: the point authors nav blocks of its own");
+            int firstNav = before.FindIndex(IsNav);
+            Assert.IsTrue(before.Skip(firstNav).Any(e => !IsNav(e) && !ClosesTheCard(e)),
+                "precondition: with the framework's default, blocks of other families follow the first nav block");
+
+            config.card_settings.navigation.families = new List<CardFamilySetting> { new() { family = BuiltInFamilies.Navigation, at_end = true } };
+            var after = Entries();
+            int firstNavAfter = after.FindIndex(IsNav);
+            Assert.AreEqual(before.Count, after.Count, "the same blocks");
+            foreach (var e in after.Take(firstNavAfter))
+                Assert.IsFalse(IsNav(e), "nothing of the navigation family comes before its first block");
+            foreach (var e in after.Where(e => !IsNav(e) && !ClosesTheCard(e)))
+                Assert.Less(after.IndexOf(e), firstNavAfter, e.Instance.key + ": every other block now comes before the nav blocks");
+        }
+
         [Test]
         public void BlockOrder_ACardWithNoAtTheEndBlock_IsUntouched_AndASkippedMetaBlockStaysSkipped()
         {

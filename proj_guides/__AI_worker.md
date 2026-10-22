@@ -13,55 +13,62 @@
 So start by reading them all. 
 
 
-## `And now: Domain Review -- POI Card Navigation (_3.2), mode FIX, chunks A + B`
+## `And now: Domain Review -- POI Card Navigation (_3.2), mode FIX, chunks C + F`
 
 Run proj_guides/skills/Domain_Review.md in FIX mode with:
 - DOMAIN GUIDE: proj_guides/_3.2_POI_Card_Navigation.md
-- AUDIT: proj_guides/_3.2.1_Audit.md (read section 11 for the chunks, and the focus sections that explain them)
-- FIX LIST: **chunks A and B only** -- every MUST of the audit, and nothing else.
+- AUDIT: proj_guides/_3.2.1_Audit.md (section 11 for the chunks; focus item 2 explains the combination bugs, section 5
+  the Editor ontology, and the FIX STATUS block says what A and B already closed)
+- FIX LIST: **chunks C and F**, plus the F6 finding the last session recorded. Nothing else.
 
 GATE: `git push` if the branch is ahead of origin (1 commit waits). Take one Unity capture (Game view AND the POI
-Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles. The SDF fonts are Static since
-step 13: a modified font is a FINDING, not a `git checkout`. Baseline: the tree is clean on commit "Add the navigation
-domain audit and its fix list" (full EditMode 1999/1999, full PlayMode 1148/1148) -- run the full EditMode suite and
-say which commit you trusted.
+Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles. The SDF fonts are Static: a
+modified font is a FINDING, not a `git checkout`. Baseline: the tree is clean on commit "Prove Follow Scroll, Show
+Counts, Labels and the chunk B rule gaps" (full EditMode 2007/2007) -- run the full EditMode suite and say which
+commit you trusted.
 
-WORKER MODEL: Sonnet-class -- these are tests and small rule cases, each named by the audit with its acceptance. No
-new owner, no container, no feature. STOP and report if a fix needs one.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run (tests and light rule cases). It closes on
-every PlayMode fixture whose name holds Card, Poi or SizeComparison. It rides on the audit's full run (1148/1148).
-The next full run is chunk D, which splits the sheet.
+WORKER MODEL: Sonnet-class -- two combination bugs with known causes, one text-fitting bug, and Editor arrangement.
+No new owner, no container. STOP and report if a fix needs one -- chunk D exists for the structural work.
+TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: view fixes inside existing elements plus
+Editor rows moving. It closes on every PlayMode fixture whose name holds Card, Poi or SizeComparison. It rides on the
+audit's full run (1148/1148); chunk D owes the next one, and it is mandatory.
 
-CHUNK A -- the three options nobody has ever seen work. This is the audit's headline: breaking Follow Scroll, Show
-Counts or Labels left the FULL EditMode suite and the ten PlayMode fixtures that reach them green. A wall author can
-choose three things that nothing proves do anything.
-  For EACH of the three, write the test that fails when the option is broken, on the real scene with real input where
-  the option is visible to a visitor:
-  - Follow Scroll off: the marker stays where the last jump put it while the visitor scrolls past other sections; on:
-    it follows.
-  - Show Counts: the count appears on the items of every element that offers it, and is absent when off.
-  - Labels (icon / text / icon and text): each setting changes what an icon-capable element draws.
-  PROVE each by mutation, the way the audit did: break the option, watch YOUR named test go red, restore it. Say the
-  test name per option in the report. The audit also lists three more with no real-scene test (families, group_by,
-  groups): add them if they fit the session, and say so if they do not.
+CHUNK C -- the combinations nobody had rendered until the audit did (audit focus item 2):
+  C1. The edge scrubber's dots sit ON the page-peek in Pages and ON every row's chevron in Accordion. Decide where the
+    scrubber belongs in those two layouts and make it so -- including the honest option that it is not offered there,
+    in which case the Editor says why (the audit's "missing features" asked for exactly that warning). Say which you
+    chose and why; a dot over a control the visitor must hit is not a style problem, it is a broken target.
+  C2. Under Pages with the Story preset, Next Up says "2 of 57: Damage scale" while the pager says "Visit 3 of 8" --
+    two counters on one screen disagreeing about where the visitor is. Make the card show ONE answer. The audit's
+    chunk C says Next Up should follow the shown page; check that reading against section 5.2's promise for the
+    element and say if you disagree.
+  C3 (F6, found at the A+B session). With Show Counts on, Segmented breaks "Discover" mid-word at 390 px ("Discove" /
+    "r 25"), against its own help text, which promises 3-4 groups that always fit. Fix the fit; if a group's words plus
+    its count cannot fit, the count goes, not the word -- and say so in the (i).
+  Each of the three: the test that fails without the fix, proven by mutation, and a recapture.
 
-CHUNK B -- the seven rule gaps the mutation sweep found (audit section 11, chunk B names each): the three facet cases
-(a block of exactly 5 min; "No headphones" combined with the camera facet; the third), the bottom area not coming back
-at the top of the stack, peek counting a block as read, and the two wiring points. Each gets the EditMode test that
-catches its break. Same mutation proof, same reporting.
+CHUNK F -- Editor ontology (audit sections 4 and 5), light and all in the POI Editor:
+  F1. Sub-headings inside Detail Card > Navigation, as the audit's section 4 proposes: the section is now ~25 rows in
+    one list, and a developer reads it top to bottom with no grouping. Group them by responsibility, keep the row
+    ORDER the guide's section 7 gives inside each group, and update section 7 to show the groups.
+  F2. Placed Model Control moves to Card Container, where it belongs -- it is not navigation. The JSON key stays where
+    it is so no config changes; only the row moves. Update `_3.2` section 3 and `_5.1`.
+  F3. Whatever else the audit's section 5 lists as a gap at 620 pt and at the default width.
+  Editor tests for each: the row is where it now says it is, its (i) still answers, undo still works.
 
-  TESTS: all of the above, plus the suites of the TEST PLAN.
-  VISUALS: only where a test needs a picture to be judged (Show Counts and Labels do). Judge them item by item.
-  DOCS: `_3.2.1_Audit.md` -- mark chunks A and B closed in section 11, with the test names as proof, and update the
-  coverage matrix cells that are no longer gaps; `_3.2` status (a close-out row for the fix chunks);
-  `10-structure.md` only if a file was added.
+  TESTS: as above, plus the suites of the TEST PLAN.
+  VISUALS: the Navigation section at 620 pt with its new sub-headings, Card Container with Placed Model Control, the
+  scrubber in Pages and in Accordion, Next Up under Pages, and Segmented with Show Counts at 390 px. Judge item by item.
+  DOCS: `_3.2.1_Audit.md` (chunks C and F closed with proof, F6 closed, matrix cells); `_3.2` sections 3, 5.5, 5.2 and
+  7 for what moved or changed; `_5.1`; `10-structure.md` if a file moved.
 
 Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII in code, comments, logs and Editor
-labels; pure rules decide, views draw; no backward-compatibility shim; real fixtures only -- never change a POI's
-identity fields.
-OUT OF SCOPE: chunks C, D, E, F and G; any feature; the `_3.3` work.
+labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no backward-compatibility shim;
+real fixtures only -- never change a POI's identity fields.
+OUT OF SCOPE: chunk D (the sheet split) and G (the log guard) -- they go together in the next block; chunk E, which
+moved to `_3.3`; anything about media, content or styling.
 Stop when the full EditMode suite and the Card / Poi fixtures are green with zero failures, every fix is mutation-
-proven with its test named, and the docs above are written.
+proven with its test named, the captures are judged and the docs above are written.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
 

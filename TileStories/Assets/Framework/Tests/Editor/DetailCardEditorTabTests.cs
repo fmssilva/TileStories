@@ -1365,10 +1365,10 @@ namespace TileStories.Editor.Tests
         }
 
         // Detail Card > Navigation's Follow Scroll row (its data has been read since step 3; the row arrived at step 6), on the real
-        // window: drawn ticked (the default) without writing, a real click on its checkbox unticks it, Ctrl+Z ticks it again; it sits
-        // between Top Bar and Hide While Scrolling (section 7's order); its (i) says what each state does, in ASCII
+        // window: drawn ticked (the default) without writing, a real click on its checkbox unticks it, Ctrl+Z ticks it again; it opens
+        // What A Jump Does, after the Elements and Hide While Scrolling (section 7's groups); its (i) says what each state does, in ASCII
         [UnityTest]
-        public IEnumerator TheFollowScrollRow_IsARealToggle_BetweenTopBarAndHideWhileScrolling_AndCtrlZTakesItBack()
+        public IEnumerator TheFollowScrollRow_IsARealToggle_OpensWhatAJumpDoes_AndCtrlZTakesItBack()
         {
             _window = new PoiEditorWindowHost(ShippedConfig(), "_showCardNavigation");
             OpenTab("DetailCard");
@@ -1397,7 +1397,8 @@ namespace TileStories.Editor.Tests
             }
             float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
             Assert.Less(Y("Top Bar"), Y("Follow Scroll"), "under Top Bar");
-            Assert.Less(Y("Follow Scroll"), Y("Hide While Scrolling"), "above Hide While Scrolling");
+            Assert.Less(Y("Hide While Scrolling"), Y("Follow Scroll"), "after Hide While Scrolling, which is in When Navigation Shows");
+            Assert.Less(Y("Follow Scroll"), Y("Jump Opens Card To"), "above the jump rows it opens the group of");
 
             string help = (string)typeof(POIEditorToolWindow).GetField("CardFollowScrollHelp", Static).GetValue(null);
             foreach (string word in new[] { "On (the default)", "Off", "scrolls", "taps" }) StringAssert.Contains(word, help);
@@ -1476,7 +1477,9 @@ namespace TileStories.Editor.Tests
             titles = drawn.Select(d => d.Title).ToList();
             CollectionAssert.Contains(titles, "Groups", "Segmented: the Groups table");
             CollectionAssert.DoesNotContain(titles, "Labels", "Segmented draws no icons");
-            Assert.Greater(drawn.Single(d => d.Title == "Groups").Rect.y, drawn.Single(d => d.Title == "Back Button").Rect.y, "the Groups table comes last");
+            float groupsY = drawn.Single(d => d.Title == "Groups").Rect.y;
+            Assert.Greater(groupsY, drawn.Single(d => d.Title == "Group By").Rect.y, "the Groups table closes Shape, under Group By");
+            Assert.Less(groupsY, drawn.Single(d => d.Title == "Show Navigation From").Rect.y, "and above the next group's rows");
             Assert.AreEqual(CardOptions.LabelsText, _window.Config.card_settings.navigation.labels, "the hidden Labels row kept its value");
             var groupCell = _window.RectOf("Family group#0");
             Assert.GreaterOrEqual(groupCell.width, 60f, "the Families table shows its Group column, wide enough for a group's word");
@@ -1576,7 +1579,8 @@ namespace TileStories.Editor.Tests
             yield return DrawnInfoTitles(drawn);
             Assert.IsTrue(_window.Unsaved, "a pick is an edit");
             CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Open One At A Time", "the Accordion shows its option");
-            Assert.Less(Y("Placed Model Control"), Y("Open One At A Time"), "after Placed Model Control (section 7's order)");
+            Assert.Less(Y("Auto Nav Block"), Y("Open One At A Time"), "after the element rows, in How They Look (section 7's order)");
+            Assert.Less(Y("Open One At A Time"), Y("Follow Scroll"), "and before What A Jump Does");
             Pick(() => _window.Config.card_settings.navigation.accordion_one_open = true);
             Pick(() => _window.Config.card_settings.navigation.layout = CardOptions.LayoutTabs);
             yield return DrawnInfoTitles(drawn);
@@ -1663,7 +1667,8 @@ namespace TileStories.Editor.Tests
 
         // Detail Card > Navigation's step 9 rows on the real window. Floating Button is drawn on its default, None, right under Menu (section 7's
         // order), listed from the registry -- None, then the floating slot's elements by their labels; Placed Model Control is drawn on its
-        // default, Chip, under Back Button. The Radial shows Bar Slots (its arc caps like a bar), the Dial does not, and Bar Slots keeps its
+        // default, Chip, in Card Container (not Navigation: audit chunk F), after Peek Next Card, and its JSON key stays under
+        // card_settings.navigation. The Radial shows Bar Slots (its arc caps like a bar), the Dial does not, and Bar Slots keeps its
         // value while hidden. Each pick is an undo step and a real Ctrl+Z brings the default back. Both helps say the default and what each
         // option does, and the Playmode and Device guides walk both rows; all ASCII
         [UnityTest]
@@ -1679,12 +1684,11 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.PlacedModelChip, nav.placed_model_control, "nor Placed Model Control: the Chip");
             var titles = drawn.Select(d => d.Title).ToList();
             CollectionAssert.Contains(titles, "Floating Button", "drawn on its default");
-            CollectionAssert.Contains(titles, "Placed Model Control", "drawn on its default");
+            CollectionAssert.DoesNotContain(titles, "Placed Model Control", "no longer a Navigation row: it is not navigation");
             CollectionAssert.DoesNotContain(titles, "Bar Slots", "no bar and no Radial: no Bar Slots");
             float Y(string title) => drawn.Single(d => d.Title == title).Rect.y;
             Assert.Less(Y("Menu"), Y("Floating Button"), "Floating Button right under Menu (section 7's order)");
             Assert.Less(Y("Floating Button"), Y("Follow Scroll"));
-            Assert.Less(Y("Back Button"), Y("Placed Model Control"), "Placed Model Control under Back Button");
 
             var (keys, labels) = POIEditorToolWindow.SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Floating);
             CollectionAssert.AreEqual(new[] { CardOptions.NavNone, BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial }, keys,
@@ -1705,6 +1709,12 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(CardOptions.NavNone, _window.Config.card_settings.navigation.floating, "Ctrl+Z again: None");
             Assert.AreEqual(5, _window.Config.card_settings.navigation.max_slots, "Bar Slots kept its value while hidden");
 
+            // - Placed Model Control: in Card Container now, drawn on its default under Peek Next Card, above the whole Navigation section
+            _window.SetWindowField("_showCardContainer", true);
+            yield return DrawnInfoTitles(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Placed Model Control", "drawn on its default");
+            Assert.Less(Y("Peek Next Card"), Y("Placed Model Control"), "after the container's last row");
+            Assert.Less(Y("Placed Model Control"), Y("Preset"), "and above the Navigation section");
             Pick(() => _window.Config.card_settings.navigation.placed_model_control = CardOptions.PlacedModelNone);
             yield return DrawnInfoTitles(drawn);
             CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Placed Model Control", "the row stays on None");
@@ -1724,12 +1734,19 @@ namespace TileStories.Editor.Tests
             string guide = (string)help.GetField("CardNavigationPlaymodeTestGuide", Static).GetValue(null);
             foreach (var element in NavElementRegistry.Shared.OfSlot(NavSlotKeys.Floating))
                 StringAssert.Contains("Floating Button = " + element.Label, guide, "the Playmode guide walks " + element.Label);
-            StringAssert.Contains("Placed Model Control = None", guide, "and the chip's option");
             string device = (string)help.GetField("CardNavigationDeviceTestGuide", Static).GetValue(null);
             StringAssert.Contains("Radial", device, "the device guide has the radial with a thumb");
-            StringAssert.Contains("bright patch", device, "and the chip over a bright frame");
             EditorTextChecks.AssertAscii(guide, "CardNavigationPlaymodeTestGuide");
             EditorTextChecks.AssertAscii(device, "CardNavigationDeviceTestGuide");
+            // - the placed model's chip is walked by Card Container's guides now, and no longer by Navigation's
+            string containerGuide = (string)help.GetField("CardPlaymodeTestGuide", Static).GetValue(null);
+            string containerDevice = (string)help.GetField("CardDeviceTestGuide", Static).GetValue(null);
+            StringAssert.Contains("Placed Model Control = None", containerGuide, "Card Container's Playmode guide has the chip's option");
+            StringAssert.Contains("bright patch", containerDevice, "and its Device guide the chip over a bright frame");
+            StringAssert.DoesNotContain("Placed Model Control", guide.Replace("Placed Model Control is not here", ""), "Navigation's Playmode guide no longer walks it");
+            StringAssert.DoesNotContain("Placed Model Control", device, "nor does its Device guide");
+            EditorTextChecks.AssertAscii(containerGuide, "CardPlaymodeTestGuide");
+            EditorTextChecks.AssertAscii(containerDevice, "CardDeviceTestGuide");
         }
 
         // Detail Card > Navigation's step 10 row on the real window. Edge is drawn on its default, None, right under Floating Button (section

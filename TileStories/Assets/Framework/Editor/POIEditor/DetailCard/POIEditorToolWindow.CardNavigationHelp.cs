@@ -43,7 +43,8 @@ namespace TileStories.Editor
 
         private const string CardShowCountsHelp =
             "Whether each tab, chip or segment of the Top Bar shows how many blocks it leads to, as a small number after its word. " +
-            "Off (the default) keeps the bar quiet; on helps a visitor judge where most of a long card is.";
+            "Off (the default) keeps the bar quiet; on helps a visitor judge where most of a long card is. On the Segmented bar, when a " +
+            "group's word and its number do not fit side by side in a segment, no segment shows its number: the numbers go, never the words.";
 
         private const string CardBarSlotsHelp =
             "How many slots the Bottom Bar, the Dock and the Bar With Kinds have, from 3 to 5 (default 5): a bar at the bottom of a phone holds three to five " +
@@ -99,7 +100,9 @@ namespace TileStories.Editor
                 "From blocks, and only where the content area is tall enough for every one of its tap targets: so it is absent when the " +
                 "card is low (at its title height, or at half height under a tall title) and on a card with more sections than fit. It " +
                 "lies over the right edge of any block that reaches it, so it is not on by default; use it beside, not instead of, a bar " +
-                "when a card must be navigable at every height. None (the default): nothing on the edge.");
+                "when a card must be navigable at every height. Under Layout = Pages or Accordion nothing is drawn on the edge, whatever is " +
+                "picked here: Pages turn on a swipe from that edge and show the next page there, and each Accordion line ends in the arrow " +
+                "that says it opens. None (the default): nothing on the edge.");
             foreach (var element in registry.OfSlot(NavSlotKeys.Edge)) text.Append(' ').Append(element.Help);
             return text.ToString();
         }
@@ -121,14 +124,6 @@ namespace TileStories.Editor
                 if (kind.Family == BuiltInFamilies.Navigation && !kind.NeedsAuthoredContent) text.Append(' ').Append(kind.DisplayName).Append(": ").Append(kind.Help);
             return text.ToString();
         }
-
-        private const string CardPlacedModelControlHelp =
-            "What tells a visitor that a model placed in the room with a Place In AR block is standing there. Chip (the default): while " +
-            "a model stands, a small chip floats above the card's top-right edge at every height of the card -- even when the card is " +
-            "lowered to its title, where the block's own line is out of sight. On the card of the point that placed the model it reads " +
-            "Placed by the wall with a Remove button that takes the model away. On another point's card (when Keep Model On Switch " +
-            "kept the model) it names that point instead and offers no Remove: only the card that placed the model does, and a tap on " +
-            "the chip opens that card. None: no chip; the Place In AR block's own button and line still say it.";
 
         private const string CardGroupsHelp =
             "The groups the Segmented Top Bar shows as equal segments that always fit the screen -- three or four work best. " +
@@ -258,6 +253,18 @@ namespace TileStories.Editor
             "The busiest card of this wall (" + cardName + ") has " + sections + " sections: past that every tile keeps its smallest size and the " +
             "visitor scrolls the tiles, so the sizes show only inside a row. Pick another Layout, or keep this wall's cards to fewer sections.";
 
+        // The Edge warning: the layout keeps the card's right edge for itself, so no Edge element is drawn (named by the layout's Editor label)
+        internal static string CardEdgeOwnedByLayoutWarning(string layout)
+        {
+            int at = System.Array.IndexOf(CardOptions.Layouts, layout);
+            string name = at >= 0 && at < CardOptions.LayoutLabels.Length ? CardOptions.LayoutLabels[at] : layout;
+            string why = layout == CardOptions.LayoutPages
+                ? "a sideways swipe starts there and the next page peeks in from it"
+                : "every line ends in the arrow that says it opens";
+            return "Edge is set, but Layout = " + name + " keeps the right edge of the card for itself: " + why + ". The card draws no Edge " +
+                   "element under this layout; the choice is kept for another layout.";
+        }
+
         internal const string CardMoreThanTwoBarsWarning =
             "Top Bar, Bottom Bar and Edge are all on: three bars leave little room to read at full height. " +
             "Set one of them to None (the Edge also lies over the content).";
@@ -292,10 +299,12 @@ namespace TileStories.Editor
             "- Open the wall scene, press Play. Navigation edits are live: pick another Block Order or move a family here " +
             "and the open card reorders in place, keeping its height and its scroll. Ctrl+Z here brings the old order back. " +
             "Jump Opens Card To, Jump Motion and Back Button are live too: the next tap or Back press follows them; so are Show " +
-            "Navigation From, Show Navigation At, Layout, Open One At A Time, Top Bar, Bottom Bar, Menu, Floating Button, Edge, Auto Nav Block, Bar Slots, " +
-            "Placed Model Control and Hide " +
-            "While Scrolling: the open card's strip, bottom bar, menu button, floating button, edge dots, grid, placed-model chip and bottom buttons " +
+            "Navigation From, Show Navigation At, Layout, Open One At A Time, Top Bar, Bottom Bar, Menu, Floating Button, Edge, Auto Nav Block, Bar Slots " +
+            "and Hide While Scrolling: the open card's strip, bottom bar, menu button, floating button, edge dots, grid and bottom buttons " +
             "appear, change or go at once.\n" +
+            "- The rows are in five groups under their own headings: Shape, When Navigation Shows, Elements, How They Look and What A " +
+            "Jump Does. A group whose rows do not apply to the choices above it (How They Look with no element that reads Labels, " +
+            "Show Counts or Bar Slots) shows no heading. Placed Model Control is not here: it is in Card Container.\n" +
             "- Pick a point whose card has blocks of several families and enough of them to scroll; a very short card " +
             "shows the same order in every option, so it proves nothing.\n\n" +
             "PRESETS\n" +
@@ -495,13 +504,6 @@ namespace TileStories.Editor
             "then close and reopen the card: every row is empty again; the notice counts the ticks it cleared.\n" +
             "- Give a block a Reading Time of 3 in Card Content: its row reads 3 min at once. Set it back to 0: the time goes.\n" +
             "- Open a card whose blocks all belong to one family: Contents still shows its rows (it lists blocks, not families).\n\n" +
-            "PLACED MODEL CONTROL\n" +
-            "- Open a card with a Place In AR block and place its model: the card lowers to its title and a chip above its top-right " +
-            "edge reads Placed by the wall with a Remove button. Raise the card: the chip follows it. Click Remove: the model goes and " +
-            "so does the chip.\n" +
-            "- With Keep Model On Switch on for that block, place the model and click another point's marker: the chip names the first " +
-            "point and has no Remove; click the chip: the first point's card opens, with Remove.\n" +
-            "- Set Placed Model Control = None: no chip; the block's own button still reads Remove from room.\n\n" +
             "SHOW NAVIGATION AT AND HIDE WHILE SCROLLING\n" +
             "- Open a long card with a tall title and buttons pinned to its bottom (an Actions block with the sticky_cta look) at half " +
             "height. If the title, the strip and the buttons would leave less than a heading and two lines of content, the strip " +
@@ -588,9 +590,6 @@ namespace TileStories.Editor
             "once with a thumb lands its family. With Contents: read each row's words at the phone's width, tap a row with a thumb, " +
             "and check a ticked row is told apart from an unticked one outdoors in bright light (the filled ring and the lighter " +
             "heading, not only the tick).\n" +
-            "- Placed Model Control: place a model at a real wall and lower the card to its title. Read the chip over the camera image " +
-            "against a bright patch of the wall (a white tile, a window) and against a dark one: its words and its edge stay readable " +
-            "on both, and Remove reaches with a thumb.\n" +
             "- Hide While Scrolling: read a long card at full height with a thumb. The bottom buttons slide away as you read down and " +
             "come back with a small move up; a tap on the content never makes them jump. Check that the half height of a long card " +
             "shows something to read on this phone's screen.\n" +

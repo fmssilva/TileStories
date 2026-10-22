@@ -289,6 +289,18 @@ LOD - lets also add a "add labels" funtionality, so if we have only hierarhcy 4 
 - Proof: the developer closed and reopened Unity; both files kept their SHA-1 through the launch and a Portuguese PlayMode run
   (`PoiCardPortugueseTests` + `MarkerGalleryTests`, 14/14). The GATE step "git checkout -- the fonts" is no longer needed.
 
+## Editor-window tests fail on a screen that cannot give them their width (2026-10-22, from the _3.2 chunk C+F review)
+
+- Four Editor tests that need the POI Editor window at 880 pt failed at that session's baseline because the window was clamped
+  to 849.6 pt: the primary screen reported 1080 x 1920 at 125%. They passed later, on a different screen arrangement. The
+  Worker read it as a machine matter and moved on, which was right for the block but leaves a broken test by the project's own
+  standard -- `40-testing.md` 4.2.3 says a test that passes only in one environment is a broken test, not a flaky one, and the
+  same reasoning applies to a monitor as to window focus.
+- FIX (small, any block): a test that needs a width it cannot get must FAIL WITH THAT SENTENCE ("this test needs the window at
+  880 pt; this screen allows 849.6") or skip with it -- never fail on an assertion about a row's position, which sends the next
+  reader hunting a layout bug that is not there. Decide which (a clear failure is better than a silent skip: a skipped test on
+  the developer's only machine is a test nobody runs). One helper, used by every width-dependent Editor test.
+
 ## Repo (2026-09-30)
 
 - **Git LFS is not in effect.** The `[attr]lfs` macro is defined in `TileStories/.gitattributes`, but git allows macro

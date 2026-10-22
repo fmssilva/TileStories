@@ -54,6 +54,16 @@ namespace TileStories.Editor.Tests
             }
         }
 
+        // Audit F2-3: under Pages the Family Pager's "3 of 8" is the card's counter, so Up next leaves its own "N of 56" out; every other layout
+        // has no other counter and keeps it
+        [Test]
+        public void UpNextShowsItsPlace_EverywhereButUnderPages_WhereThePagerIsTheCardsOneCounter()
+        {
+            Assert.IsFalse(NextUpRule.ShowsPosition(CardOptions.LayoutPages), "pages: the pager counts");
+            foreach (string layout in new[] { CardOptions.LayoutScroll, CardOptions.LayoutAccordion, CardOptions.LayoutTabs, CardOptions.LayoutBento })
+                Assert.IsTrue(NextUpRule.ShowsPosition(layout), layout + ": no other counter on that screen");
+        }
+
         // The last target: nothing to go to, so the answer says the card is finished (no Next that goes nowhere) and keeps the card's size
         [Test]
         public void AtTheLastTarget_TheCardIsFinished_WithNoNextBlock()

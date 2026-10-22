@@ -155,8 +155,15 @@ namespace TileStories
         public int SpySection(int measured) =>
             CardLayoutRule.SpySection(Effective, CardLayoutRule.OpensSectionsInFullView(Effective) ? OpenSection : ShownSection, measured);
 
-        // The target the block spy names, from what it measured (bento: the block the full view opened at)
-        public string SpyBlock(string measured) => CardLayoutRule.SpyBlock(Effective, OpenBlock, measured);
+        // The target the block spy names, from what it measured (bento: the block the full view opened at; tabs and pages: a block of the
+        // section shown, never one of a section set aside)
+        public string SpyBlock(string measured)
+        {
+            bool shownValid = _model != null && ShownSection >= 0 && ShownSection < _model.Sections.Count;
+            string first = shownValid ? _model.Sections[ShownSection].Targets[0] : null;
+            bool onShown = shownValid && measured != null && SectionOf(_model, measured) == ShownSection;
+            return CardLayoutRule.SpyBlock(Effective, OpenBlock, measured, onShown, first);
+        }
 
         // Each section as the card's reading sees it (ContentSeenRule.HasReadCard): shown now, or set aside -- and then read to its end when
         // its last target showing content was viewed earlier in this binding (`viewed`: the controller's memory, NavController.HasViewed)

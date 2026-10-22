@@ -6,7 +6,8 @@ namespace TileStories
     // The segmented navigation element (_3.2 section 5.1, canvas A4, merged L1): the wall's Groups (families merged, rule 2.5.6) as
     // equal segments across the strip that always fit -- no scroll; a long word wraps inside its segment instead of being cut. The segment
     // of the group being read (the controller's CurrentBlock through the model's GroupOf) is filled AND its words are bolder, never colour
-    // alone; a tap jumps to the group's first block through the controller. With Show Counts on a segment shows its block count.
+    // alone; a tap jumps to the group's first block through the controller. With Show Counts on a segment shows its block count -- unless a
+    // word and its count cannot sit side by side in a segment: then NO segment shows a count (NavFitRule: the count goes, never the word).
     public sealed class SegmentedNavView : INavElementView
     {
         public const string CurrentClass = "nav-segment--current";
@@ -31,10 +32,15 @@ namespace TileStories
         public VisualElement Root { get; }
         public VisualElement Track { get; }
         public IReadOnlyList<Segment> Segments => _segments.Shown;
+        // Whether the counts are drawn now: Show Counts is on AND every word holds its count beside it (the strip decides once for all)
+        public bool CountsShown { get; private set; }
         // The marked segment's index in the model's Groups (-1 = none)
         public int CurrentIndex { get; private set; } = -1;
 
         private readonly ElementPool<Segment> _segments;
+        // A hidden bold copy of a segment's words: the width a word and its count take once its segment is the marked one (the widest they get)
+        private readonly Label _ruler;
+        private bool _countsWanted;
         private NavController _nav;
         private CardNavModel _model;
 
@@ -45,6 +51,10 @@ namespace TileStories
             Track = new VisualElement { name = "nav-segmented-track" };
             Track.AddToClassList("nav-segmented__track");
             Root.Add(Track);
+            _ruler = new Label { name = "nav-segmented-ruler", pickingMode = PickingMode.Ignore };
+            _ruler.AddToClassList("nav-segmented__ruler");
+            Root.Add(_ruler);
+            Track.RegisterCallback<GeometryChangedEvent>(_ => FitCounts());
             _segments = new ElementPool<Segment>(NewSegment, segment => segment.Button.RemoveFromHierarchy());
         }
 
@@ -54,6 +64,8 @@ namespace TileStories
             _nav = nav;
             _model = model;
             bool counts = context?.Settings?.navigation?.show_counts ?? false;
+            _countsWanted = counts;
+            CountsShown = counts;
             foreach (var group in model.Groups)
             {
                 var segment = _segments.Take();
@@ -64,6 +76,7 @@ namespace TileStories
             }
             nav.CurrentBlockChanged += OnCurrentBlockChanged;
             OnCurrentBlockChanged(nav.CurrentBlock);
+            FitCounts();
         }
 
         public void Unbind()
@@ -73,6 +86,39 @@ namespace TileStories
             _model = null;
             _segments.ReleaseAll();
             CurrentIndex = -1;
+            _countsWanted = false;
+            CountsShown = false;
+        }
+
+        // Show Counts is on: draw every count only when each word holds its count beside it inside its segment, else none (NavFitRule).
+        // The segments share the track in equal parts whatever they hold, so hiding a count never moves the room: no layout loop
+        private void FitCounts()
+        {
+            if (!_countsWanted || _segments.Shown.Count == 0) return;
+            var shown = _segments.Shown;
+            var first = shown[0];
+            float room = first.Button.resolvedStyle.width - first.Button.resolvedStyle.paddingLeft - first.Button.resolvedStyle.paddingRight;
+            float gap = first.Count.resolvedStyle.marginLeft;
+            if (float.IsNaN(room) || room <= 0f || float.IsNaN(gap)) return;
+            var words = new float[shown.Count];
+            var counts = new float[shown.Count];
+            for (int i = 0; i < shown.Count; i++)
+            {
+                words[i] = Natural(shown[i].Label.text);
+                counts[i] = Natural(shown[i].Count.text);
+                if (float.IsNaN(words[i]) || float.IsNaN(counts[i])) return;
+            }
+            bool fits = NavFitRule.CountsFit(words, counts, gap, room);
+            if (fits == CountsShown) return;
+            CountsShown = fits;
+            foreach (var segment in shown) segment.Count.style.display = fits ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        // A text's width on one line, in the bold the marked segment wears
+        private float Natural(string text)
+        {
+            _ruler.text = text;
+            return _ruler.MeasureTextSize(text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined).x;
         }
 
         private Segment NewSegment(int index)

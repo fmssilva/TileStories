@@ -72,6 +72,17 @@ namespace TileStories
             return layout == CardOptions.LayoutPages || layout == CardOptions.LayoutBento;
         }
 
+        // Whether the layout owns the card's right edge, so the Edge slot holds nothing there whatever the wall picked (_3.2 audit F2, chunk C).
+        // Pages turn on a sideways swipe that starts at that edge and cue the next page in its peek; an accordion's rows end in the chevron that
+        // says they open -- the scrubber's column of dots, one touch target wide, would lie on top of both and take the finger meant for them.
+        // Both already show their sections (the pager, the rows themselves), so the scrubber would add a map nobody lacks. The card reads this
+        // through NavSlotRule.EdgeElement and the Editor warns by it (the Edge row keeps its value for another layout): they never disagree
+        public static bool LayoutOwnsTheEdge(CardNavigationSettings settings)
+        {
+            string layout = Layout(settings);
+            return layout == CardOptions.LayoutPages || layout == CardOptions.LayoutAccordion;
+        }
+
         // The Top Bar the card uses: the wall's, except where the layout picks it (pages: the Family Pager, the page's name and its chevrons;
         // bento: none), and the tabs layout with neither a Top Bar nor a Bottom Bar uses Text Tabs (a tabs card always has a way between its
         // sections; the Editor warns about it)
@@ -108,9 +119,14 @@ namespace TileStories
             OpensSectionsInFullView(effectiveLayout) ? shownSection
             : ParksSections(effectiveLayout) && shownSection >= 0 ? shownSection : measured;
 
-        // The target the block spy names: in bento the block the open full view opened at (none on the overview); else what was measured
-        public static string SpyBlock(string effectiveLayout, string openBlock, string measured) =>
-            OpensSectionsInFullView(effectiveLayout) ? openBlock : measured;
+        // The target the block spy names: in bento the block the open full view opened at (none on the overview); in tabs and pages the measured
+        // target -- unless it is on a section set aside: before any block of the page shown has reached the spy line (the top of a page, below
+        // its title and picture) the measure falls back to the card's FIRST target, which another page holds, and the page's own first block is
+        // the one being read (`measuredIsOnShownSection` false also covers "nothing measured"); else what was measured
+        public static string SpyBlock(string effectiveLayout, string openBlock, string measured, bool measuredIsOnShownSection, string firstOnShownSection) =>
+            OpensSectionsInFullView(effectiveLayout) ? openBlock
+            : ParksSections(effectiveLayout) && firstOnShownSection != null && !measuredIsOnShownSection ? firstOnShownSection
+            : measured;
 
         private static bool IsNone(string key) => string.IsNullOrWhiteSpace(key) || key == CardOptions.NavNone;
     }

@@ -26,6 +26,7 @@ namespace TileStories.Editor.Tests
         public void TearDown()
         {
             POIEditorToolWindow.NavigationMessageProbe = null;
+            POIEditorToolWindow.NavigationGroupProbe = null;
             NamedOptionPickerPopup.RowRectProbe = null;
             HelpInfoButton.DrawnProbe = null;
             EditorPopup.CloseAll();
@@ -83,6 +84,80 @@ namespace TileStories.Editor.Tests
         private static void ClickRow(EditorPopup popup, Rect row) =>
             popup.SendEvent(new Event { type = EventType.MouseDown, button = 0, clickCount = 1, mousePosition = row.center });
 
+        // ---------------- the five groups (audit chunk F1) ----------------
+
+        // The section is five groups under their own sub-headings, one responsibility each: every row sits under ITS heading and above the
+        // next, in section 7's order inside the group; the Preset stays above every heading and the Test foldout closes the section. A group
+        // none of whose rows applies (How They Look with no element that reads Labels, Show Counts or Bar Slots) draws no heading. Read from
+        // what the real window paints (the rows' own seam and the headings'), not from the code's order
+        [UnityTest]
+        public IEnumerator TheSection_IsFiveGroupsUnderTheirHeadings_EachRowInItsGroup_InSectionSevensOrder_AndAnEmptyGroupHasNoHeading()
+        {
+            OpenNavigation(ShippedConfig());
+            var rows = new List<(string Title, Rect Rect)>();
+            var groups = new List<(string Title, Rect Rect)>();
+            IEnumerator Draw()
+            {
+                rows.Clear();
+                groups.Clear();
+                HelpInfoButton.DrawnProbe = (title, rect) => rows.Add((title, rect));
+                POIEditorToolWindow.NavigationGroupProbe = (title, rect) => groups.Add((title, rect));
+                yield return _window.WaitForRepaint();
+                HelpInfoButton.DrawnProbe = null;
+                POIEditorToolWindow.NavigationGroupProbe = null;
+            }
+            float Row(string title) => rows.Last(r => r.Title == title).Rect.y;
+            float Group(string title) => groups.Last(g => g.Title == title).Rect.y;
+
+            yield return Draw();
+            Assert.IsFalse(_window.Unsaved, "drawing the headings writes nothing");
+            // - the framework default (Text Tabs) has no icons, so it reads no Labels, but it shows counts: How They Look has its one row
+            CollectionAssert.DoesNotContain(rows.Select(r => r.Title).ToList(), "Labels", "Text Tabs draws no icons: no Labels row");
+            CollectionAssert.Contains(rows.Select(r => r.Title).ToList(), "Show Counts");
+            Assert.AreEqual(5, groups.Count, "so the group keeps its heading");
+            // - Icon Tabs reads both rows: five headings, in the audit's order
+            Pick(() => Nav.top = BuiltInNavElements.IconTabs);
+            yield return Draw();
+            Assert.IsTrue(NavElementRegistry.Shared.TryGet(BuiltInNavElements.IconTabs, out var tabs) && tabs.ReadsLabels && tabs.ShowsCounts,
+                "precondition: Icon Tabs reads Labels and Show Counts, so How They Look has rows");
+            CollectionAssert.AreEqual(POIEditorToolWindow.NavigationGroupTitles, groups.Select(g => g.Title).ToList(), "five headings, in the audit's order");
+            var layout = new (string Group, string[] Rows)[]
+            {
+                ("Shape", new[] { "Layout", "Block Order", "Families", "Group By" }),
+                ("When Navigation Shows", new[] { "Show Navigation From", "Show Navigation At", "Hide While Scrolling" }),
+                ("Elements", new[] { "Top Bar", "Bottom Bar", "Menu", "Floating Button", "Edge", "Auto Nav Block" }),
+                ("How They Look", new[] { "Labels", "Show Counts" }),
+                ("What A Jump Does", new[] { "Follow Scroll", "Jump Opens Card To", "Jump Motion", "Back Button" }),
+            };
+            Assert.Less(Row("Preset"), Group("Shape"), "the Preset row is above every heading: it writes rows of several groups");
+            for (int g = 0; g < layout.Length; g++)
+            {
+                float top = Group(layout[g].Group);
+                float next = g + 1 < layout.Length ? Group(layout[g + 1].Group) : Row("Preview Navigation");
+                float previous = top;
+                foreach (string row in layout[g].Rows)
+                {
+                    Assert.Greater(Row(row), previous, row + " is under '" + layout[g].Group + "' and after the row before it (section 7's order)");
+                    Assert.Less(Row(row), next, row + " is above the next heading, not in the next group");
+                    previous = Row(row);
+                }
+            }
+            foreach (var title in POIEditorToolWindow.NavigationGroupTitles) EditorTextChecks.AssertAscii(title, "the heading " + title);
+
+            // - no element reads Labels, Show Counts or Bar Slots and the layout is not an accordion: How They Look has nothing to show
+            Pick(() => Nav.top = CardOptions.NavNone);
+            yield return Draw();
+            CollectionAssert.DoesNotContain(groups.Select(g => g.Title).ToList(), "How They Look", "no row of the group applies: no heading over nothing");
+            Assert.AreEqual(4, groups.Count, "the other four stay");
+            CollectionAssert.DoesNotContain(rows.Select(r => r.Title).ToList(), "Labels");
+            // - an accordion brings Open One At A Time, so the group (and its heading) is back, ahead of What A Jump Does
+            Pick(() => Nav.layout = CardOptions.LayoutAccordion);
+            yield return Draw();
+            Assert.Less(Group("How They Look"), Row("Open One At A Time"), "Open One At A Time sits under How They Look");
+            Assert.Less(Row("Open One At A Time"), Group("What A Jump Does"), "and ahead of What A Jump Does");
+            Assert.AreEqual(5, groups.Count);
+        }
+
         // ---------------- the Preset row ----------------
 
         [UnityTest]
@@ -97,12 +172,13 @@ namespace TileStories.Editor.Tests
             float Y(string title) => titles.Last(t => t.Title == title).Rect.y;
             // - section 7's order since the 17a review: a preset is where a wall author starts, so it is read first, above Layout
             var sectionRows = new[] { "Layout", "Block Order", "Show Navigation From", "Top Bar", "Bottom Bar", "Menu", "Floating Button", "Edge",
-                "Auto Nav Block", "Follow Scroll", "Hide While Scrolling", "Back Button", "Placed Model Control" };
+                "Auto Nav Block", "Follow Scroll", "Hide While Scrolling", "Back Button" };
             foreach (string row in sectionRows)
                 Assert.Less(Y("Preset"), Y(row), "the Preset row comes before " + row + " (the section's first row)");
             Assert.AreEqual("Preset", titles.Where(t => t.Title == "Preset" || sectionRows.Contains(t.Title)).OrderBy(t => t.Rect.y).First().Title,
                 "no row of the section is drawn above it");
-            Assert.Less(Y("Placed Model Control"), Y("Preview Navigation"), "the Test foldout's own rows still close the section");
+            Assert.Less(Y("Back Button"), Y("Preview Navigation"), "the Test foldout's own rows still close the section");
+            CollectionAssert.DoesNotContain(titles.Select(t => t.Title).ToList(), "Placed Model Control", "it is a Card Container row now");
             Assert.AreSame(NavigationPresets.All[0], NavigationPresets.Matching(Nav), "the framework default's seven rows are Long read");
 
             int steps = _window.UndoStepsLeft;
@@ -296,6 +372,34 @@ namespace TileStories.Editor.Tests
             Pick(() => Nav.layout = CardOptions.LayoutBento);
             yield return Redraw();
             CollectionAssert.IsEmpty(Drawn(), "Bento on 8 sections: they fill the card, no warning");
+
+            // - an Edge under a layout that owns the card's right edge (audit chunk C): Pages and Accordion say so and name themselves, the
+            //   other layouts say nothing, and an Edge the card never draws is not counted as a third bar
+            Pick(() =>
+            {
+                Nav.layout = CardOptions.LayoutPages;
+                Nav.bottom = BuiltInNavElements.BottomBar;
+                Nav.edge = BuiltInNavElements.EdgeScrubber;
+            });
+            yield return Redraw();
+            CollectionAssert.AreEqual(new[] { POIEditorToolWindow.CardEdgeOwnedByLayoutWarning(CardOptions.LayoutPages) }, Drawn(),
+                "Pages with an Edge: exactly the edge warning, no bars warning");
+            StringAssert.Contains("Layout = Pages", Drawn()[0], "it names the layout by its Editor label");
+            Pick(() => Nav.layout = CardOptions.LayoutAccordion);
+            yield return Redraw();
+            CollectionAssert.AreEqual(new[] { POIEditorToolWindow.CardEdgeOwnedByLayoutWarning(CardOptions.LayoutAccordion) }, Drawn(), "Accordion with an Edge");
+            StringAssert.Contains("Layout = Accordion", Drawn()[0]);
+            Pick(() => Nav.layout = CardOptions.LayoutTabs);
+            yield return Redraw();
+            CollectionAssert.AreEqual(new[] { POIEditorToolWindow.CardMoreThanTwoBarsWarning }, Drawn(), "Tabs draws the Edge: the bars warning, not the edge one");
+            Pick(() =>
+            {
+                Nav.layout = CardOptions.LayoutPages;
+                Nav.edge = CardOptions.NavNone;
+            });
+            yield return Redraw();
+            CollectionAssert.IsEmpty(Drawn(), "Pages with no Edge: nothing to warn about");
+            Assert.AreEqual(BuiltInNavElements.TextTabs, Nav.top, "(the Top Bar the Pages layout hides kept its value throughout)");
         }
 
         // The two warnings about a card with MORE families than the framework ships: only a wall that registers many app families gets them

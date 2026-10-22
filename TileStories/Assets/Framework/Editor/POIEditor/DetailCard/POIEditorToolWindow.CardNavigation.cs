@@ -1,18 +1,17 @@
 // POIEditorToolWindow.CardNavigation.cs
 //
-// Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open
-// card. First the Preset (step 17a; first since 17b: where a wall author starts), then the Layout (Scroll, Accordion, Tabs: step 13, with a warning for Tabs with no bar to switch sections; its Open One At A
-// Time row, accordion only, comes after Placed Model Control). The two rows that order the stack: Block Order and the Families table (Order with reorder arrows, Family,
-// At The End, Group, one (i) on its header); Group By; which cards get navigation, at which heights and what the top strip
-// shows (Show Navigation From, Top Bar: step 5a; Show Navigation At: 5b; Labels, Show Counts: step 6, each only for an element
-// that reads it), what the bar under the stack shows (Bottom Bar and its Bar Slots, step 7a, Bar Slots only for an element that is a
-// bar), what the header's menu button opens over the card (Menu, step 8), the round button above the card's top-right edge (Floating
-// Button, step 9; Bar Slots for the Radial too), the dots down the right edge of the content (Edge, step 10), the nav block every long card
-// gets after its header (Auto Nav Block, step 11a), Follow Scroll (step 6), what hides while the visitor reads (Hide While Scrolling, 5b); then how a jump moves
-// the card (Jump Opens Card To, Jump Motion) and what system Back does (Back Button), step 4; what tells the visitor a model placed in the room
-// stands (Placed Model Control, step 9); the Groups table last (step 6,
-// only for the Segmented bar, POIEditorToolWindow.CardNavigationGroups.cs). The other nav elements, layouts and presets join
-// this same section at later steps. Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
+// Partial: Detail Card > Navigation (_3.2_POI_Card_Navigation.md section 7) -- how a visitor moves inside ONE open card. First the Preset
+// (step 17a; first since 17b: where a wall author starts; it writes rows of several groups, so it sits above them), then five groups, each
+// under a sub-heading and each ONE responsibility (the audit's section 4), the rows inside a group in section 7's order:
+//   - Shape: Layout (with its warnings), Block Order, the Families table (Order with reorder arrows, Family, At The End, Group, one (i) on its
+//     header), Group By, and the Groups table (only for the Segmented bar, POIEditorToolWindow.CardNavigationGroups.cs)
+//   - When Navigation Shows: Show Navigation From, Show Navigation At, Hide While Scrolling
+//   - Elements: Top Bar, Bottom Bar, Menu, Floating Button, Edge (with its warnings), Auto Nav Block -- one row per slot of the card
+//   - How They Look: Labels, Show Counts, Bar Slots, Open One At A Time -- each only for an element or layout that reads it; the group has
+//     no heading when none of its rows shows
+//   - What A Jump Does: Follow Scroll, Jump Opens Card To, Jump Motion, Back Button
+// Placed Model Control is not navigation (an AR placement's chip): it lives in Card Container (POIEditorToolWindow.DetailCard.cs), the
+// JSON key staying under card_settings.navigation. Its (i) texts and Test guides live in POIEditorToolWindow.CardNavigationHelp.cs.
 
 using System.Collections.Generic;
 using UnityEditor;
@@ -32,6 +31,26 @@ namespace TileStories.Editor
         private const float FamilyAtEndColumnX = 300f;
 
         private readonly TestGuideState _cardNavigationTest = new TestGuideState();
+
+        // The titles of the section's groups, in the order they are drawn: one responsibility each (_3.2 audit section 4). The Preset row stays
+        // above them all -- it writes rows of several groups
+        internal static readonly string[] NavigationGroupTitles = { "Shape", "When Navigation Shows", "Elements", "How They Look", "What A Jump Does" };
+        internal const int NavGroupShape = 0, NavGroupWhen = 1, NavGroupElements = 2, NavGroupLook = 3, NavGroupJump = 4;
+
+        // Test seam: told each sub-heading's title and rect as it is painted (the rows' own seam is HelpInfoButton.DrawnProbe, same space)
+        internal static System.Action<string, Rect> NavigationGroupProbe;
+
+        // A group's sub-heading: a small bold line over the rows it names, with a gap above it. It names, it does not explain -- every row
+        // under it keeps its own (i)
+        private void DrawNavigationSubHeading(int group)
+        {
+            GUILayout.Space(TableGapBetweenGroups);
+            DrawEditorRow(out float rowWidth, out _);
+            GUILayout.Label(NavigationGroupTitles[group], EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, rowWidth - 36f)), GUILayout.ExpandWidth(false));
+            if (NavigationGroupProbe != null && Event.current.type == EventType.Repaint)
+                NavigationGroupProbe(NavigationGroupTitles[group], GUILayoutUtility.GetLastRect());
+            EditorRowEnd();
+        }
 
         // card_settings.navigation: the order the card shows its blocks in, and what each family does there.
         // Drawing never writes: a family with no row shows its registered defaults, and its row is created by the
@@ -53,19 +72,9 @@ namespace TileStories.Editor
                 return busiest.Sections;
             }
 
-            // - section 7's order: the Preset first -- it is where a wall author STARTS, then adjusts the rows under it (decided at the 17a
-            //   review); a gap sets it apart, since it writes seven of the rows below rather than being one of them
+            // - the Preset first -- it is where a wall author STARTS, then adjusts the rows under it (decided at the 17a review). It sits above
+            //   the sub-headings: it writes rows of several of them
             DrawNavigationPresetRow(nav);
-            GUILayout.Space(TableGapBetweenGroups);
-
-            // - then the Layout -- it decides what most rows below mean (step 13). A layout of a later step reads as Scroll
-            nav.layout = DrawPopupField("Layout", nav.layout, CardOptions.Layouts, CardOptions.LayoutLabels, CardLayoutHelp);
-            if (CardLayoutRule.TabsWithoutAnElement(nav))
-                DrawNavigationMessage(CardTabsWithoutABarWarning, MessageType.Warning);
-            if (NavigationWarningRule.BentoOutgrown(nav, BusiestSections))
-                DrawNavigationMessage(CardBentoWarning(NavigationCardName(busiest.PoiIndex), busiest.Sections), MessageType.Warning);
-
-            nav.block_order = DrawPopupField("Block Order", nav.block_order, CardOptions.BlockOrders, CardOptions.BlockOrderLabels, CardBlockOrderHelp);
 
             // - which of the wall's options the Top Bar's element reads: a row (or column) it ignores is hidden and keeps its value
             //   (_3.2 section 3). Read from the element's own definition, so an app's element needs no edit here
@@ -79,15 +88,39 @@ namespace TileStories.Editor
             if (floatingElement != null && floatingElement.Slot != NavSlotKeys.Floating) floatingElement = null;
             bool usesGroups = topElement != null && topElement.Choice == NavChoice.Groups;
 
+            // ---- Shape: the layout, the order of the blocks, the families and how they group (section 7's order inside the group) ----
+            DrawNavigationSubHeading(NavGroupShape);
+            // - the Layout decides what most rows below mean (step 13). A layout of a later step reads as Scroll
+            nav.layout = DrawPopupField("Layout", nav.layout, CardOptions.Layouts, CardOptions.LayoutLabels, CardLayoutHelp);
+            if (CardLayoutRule.TabsWithoutAnElement(nav))
+                DrawNavigationMessage(CardTabsWithoutABarWarning, MessageType.Warning);
+            if (NavigationWarningRule.BentoOutgrown(nav, BusiestSections))
+                DrawNavigationMessage(CardBentoWarning(NavigationCardName(busiest.PoiIndex), busiest.Sections), MessageType.Warning);
+
+            nav.block_order = DrawPopupField("Block Order", nav.block_order, CardOptions.BlockOrders, CardOptions.BlockOrderLabels, CardBlockOrderHelp);
+
             DrawFamiliesTable(nav, usesGroups);
             // - a group gap: without it the first row under the table reads as one more family (the 620 pt capture showed it)
             GUILayout.Space(TableGapBetweenGroups);
 
             nav.group_by = DrawPopupField("Group By", nav.group_by, CardOptions.GroupBys, CardOptions.GroupByLabels, CardGroupByHelp);
-            // - which cards get navigation, at which heights, and what the strip under the title shows
+            // - the Groups table only matters to the Segmented Top Bar: it closes the group it belongs to
+            if (usesGroups)
+            {
+                GUILayout.Space(TableGapBetweenGroups);
+                DrawGroupsTable(nav);
+            }
+
+            // ---- When Navigation Shows: which cards get navigation, at which heights, and what hides while the visitor reads ----
+            DrawNavigationSubHeading(NavGroupWhen);
             nav.min_blocks = DrawIntSliderField("Show Navigation From", nav.min_blocks, CardNavigationSettings.MinBlocksMin, CardNavigationSettings.MinBlocksMax,
                 CardShowNavigationFromHelp);
             nav.show_at = DrawPopupField("Show Navigation At", nav.show_at, CardOptions.ShowNavigationAts, CardOptions.ShowNavigationAtLabels, CardShowNavigationAtHelp);
+            nav.hide_on_scroll = DrawPopupField("Hide While Scrolling", nav.hide_on_scroll, CardOptions.HideOnScrolls, CardOptions.HideOnScrollLabels,
+                CardHideWhileScrollingHelp);
+
+            // ---- Elements: what sits in each slot of the card ----
+            DrawNavigationSubHeading(NavGroupElements);
             var (topKeys, topLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Top);
             // - a reference popup: a key no registered element has (an app element taken out) stays as "<key> (missing)", never swapped.
             //   Hidden where the layout picks the top bar itself (Pages: the Family Pager; Bento: none, the tiles are the map), keeping its
@@ -100,59 +133,58 @@ namespace TileStories.Editor
             }
             var (bottomKeys, bottomLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Bottom);
             nav.bottom = DrawReferencePopupField("Bottom Bar", nav.bottom, bottomKeys, bottomLabels, allowNone: false, CardBottomBarHelp(NavElementRegistry.Shared));
-            // - section 7's order: the Menu right after the two bars (its button sits in the header; a bar's More opens it)
+            // - the Menu right after the two bars (its button sits in the header; a bar's More opens it)
             var (menuKeys, menuLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Menu);
             nav.menu = DrawReferencePopupField("Menu", nav.menu, menuKeys, menuLabels, allowNone: false, CardMenuHelp(NavElementRegistry.Shared));
-            // - section 7's order: the Floating Button after the Menu (the round button above the card's top-right edge, step 9)
+            // - the Floating Button after the Menu (the round button above the card's top-right edge, step 9)
             var (floatingKeys, floatingLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Floating);
             nav.floating = DrawReferencePopupField("Floating Button", nav.floating, floatingKeys, floatingLabels, allowNone: false,
                 CardFloatingButtonHelp(NavElementRegistry.Shared));
-            // - section 7's order: the Edge after the Floating Button (the dots down the right edge of the content, step 10)
+            // - the Edge after the Floating Button (the dots down the right edge of the content, step 10)
             var (edgeKeys, edgeLabels) = SlotOptions(NavElementRegistry.Shared, NavSlotKeys.Edge);
             nav.edge = DrawReferencePopupField("Edge", nav.edge, edgeKeys, edgeLabels, allowNone: false, CardEdgeHelp(NavElementRegistry.Shared));
+            // - an Edge the layout keeps off the card says why, right under its row (the value is kept for another layout)
+            if (NavigationWarningRule.EdgeUnderALayoutThatOwnsIt(nav))
+                DrawNavigationMessage(CardEdgeOwnedByLayoutWarning(CardLayoutRule.Layout(nav)), MessageType.Warning);
             // - the third bar: the Edge is the last of the three rows, so the warning sits under it
             if (NavigationWarningRule.MoreThanTwoBars(nav))
                 DrawNavigationMessage(CardMoreThanTwoBarsWarning, MessageType.Warning);
-            // - section 7's order: Auto Nav Block after the Edge (a nav block put after the header of every long card, step 11a). Its choices
+            // - Auto Nav Block after the Edge (a nav block put after the header of every long card, step 11a). Its choices
             //   are the registered kinds of the navigation family, so a nav block an app (or a later step) registers is listed with no edit here
             var (autoKeys, autoLabels) = AutoNavBlockOptions(BlockRegistry.Shared);
             nav.auto_nav_block = DrawReferencePopupField("Auto Nav Block", nav.auto_nav_block, autoKeys, autoLabels, allowNone: false,
                 CardAutoNavBlockHelp(BlockRegistry.Shared));
+
+            // ---- How They Look: what the elements draw (a row an element does not read is hidden, and so is a group left with none) ----
             // - a display option shows while EITHER bar reads it: both bars follow the same wall setting
-            if (topElement != null && topElement.ReadsLabels || bottomElement != null && bottomElement.ReadsLabels)
-                nav.labels = DrawPopupField("Labels", nav.labels, CardOptions.Labels, CardOptions.LabelsLabels, CardLabelsHelp);
-            if (topElement != null && topElement.ShowsCounts || bottomElement != null && bottomElement.ShowsCounts)
-                nav.show_counts = DrawToggleField("Show Counts", nav.show_counts, CardShowCountsHelp);
+            bool showsLabels = topElement != null && topElement.ReadsLabels || bottomElement != null && bottomElement.ReadsLabels;
+            bool showsCounts = topElement != null && topElement.ShowsCounts || bottomElement != null && bottomElement.ShowsCounts;
             // - a bar's slots, or the radial's arc (its items cap at Bar Slots like a bar's)
-            if (bottomElement != null && bottomElement.ReadsBarSlots || floatingElement != null && floatingElement.ReadsBarSlots)
+            bool showsSlots = bottomElement != null && bottomElement.ReadsBarSlots || floatingElement != null && floatingElement.ReadsBarSlots;
+            // - Open One At A Time is an accordion option (hidden elsewhere, keeping its value)
+            bool showsOneOpen = CardLayoutRule.Layout(nav) == CardOptions.LayoutAccordion;
+            if (showsLabels || showsCounts || showsSlots || showsOneOpen) DrawNavigationSubHeading(NavGroupLook);
+            if (showsLabels)
+                nav.labels = DrawPopupField("Labels", nav.labels, CardOptions.Labels, CardOptions.LabelsLabels, CardLabelsHelp);
+            if (showsCounts)
+                nav.show_counts = DrawToggleField("Show Counts", nav.show_counts, CardShowCountsHelp);
+            if (showsSlots)
             {
                 nav.max_slots = DrawIntSliderField("Bar Slots", nav.max_slots, CardNavigationSettings.MaxSlotsMin, CardNavigationSettings.MaxSlotsMax,
                     CardBarSlotsHelp);
                 if (NavigationWarningRule.BarSlotsBelowTheSections(nav, true, BusiestSections))
                     DrawNavigationMessage(CardBarSlotsWarning(NavOntologyRule.MaxSlots(nav), NavigationCardName(busiest.PoiIndex), busiest.Sections), MessageType.Warning);
             }
-            nav.follow_scroll = DrawToggleField("Follow Scroll", nav.follow_scroll, CardFollowScrollHelp);
-            nav.hide_on_scroll = DrawPopupField("Hide While Scrolling", nav.hide_on_scroll, CardOptions.HideOnScrolls, CardOptions.HideOnScrollLabels,
-                CardHideWhileScrollingHelp);
+            if (showsOneOpen)
+                nav.accordion_one_open = DrawToggleField("Open One At A Time", nav.accordion_one_open, CardOpenOneAtATimeHelp);
 
-            // - section 7's order: the jump rows, then Back.
+            // ---- What A Jump Does: how the mark follows the reader, where a jump lands the card, and what system Back does ----
+            DrawNavigationSubHeading(NavGroupJump);
+            nav.follow_scroll = DrawToggleField("Follow Scroll", nav.follow_scroll, CardFollowScrollHelp);
             //   The first option of each is the default the card reads for an unknown value too, so the row and the card always agree
             nav.jump_raises_to = DrawPopupField("Jump Opens Card To", nav.jump_raises_to, CardOptions.JumpRaises, CardOptions.JumpRaiseLabels, CardJumpRaisesHelp);
             nav.jump_motion = DrawPopupField("Jump Motion", nav.jump_motion, CardOptions.JumpMotions, CardOptions.JumpMotionLabels, CardJumpMotionHelp);
             nav.back_button = DrawPopupField("Back Button", nav.back_button, CardOptions.BackButtons, CardOptions.BackButtonLabels, CardBackButtonHelp);
-            // - section 7's order: what tells the visitor a placed model stands, after Back (step 9)
-            nav.placed_model_control = DrawPopupField("Placed Model Control", nav.placed_model_control, CardOptions.PlacedModelControls,
-                CardOptions.PlacedModelControlLabels, CardPlacedModelControlHelp);
-            // - section 7's order: Open One At A Time after Placed Model Control, an accordion option (hidden elsewhere, keeping its value)
-            if (CardLayoutRule.Layout(nav) == CardOptions.LayoutAccordion)
-                nav.accordion_one_open = DrawToggleField("Open One At A Time", nav.accordion_one_open, CardOpenOneAtATimeHelp);
-
-            // - section 7 puts the Groups table last: it only matters to the Segmented Top Bar
-            if (usesGroups)
-            {
-                GUILayout.Space(TableGapBetweenGroups);
-                DrawGroupsTable(nav);
-            }
 
             DrawDomainTestSubSection(_cardNavigationTest, CardNavigationSceneTestGuide, CardNavigationPlaymodeTestGuide, CardNavigationDeviceTestGuide,
                 DrawNavigationPreviewRows);

@@ -32,6 +32,8 @@ namespace TileStories
         private NavController _nav;
         private CardNavModel _model;
         private CardStrings _strings;
+        // Whether this card's layout leaves the place to another counter (NextUpRule.ShowsPosition)
+        private bool _showsPosition = true;
 
         public NextUpNavView()
         {
@@ -68,6 +70,7 @@ namespace TileStories
             _nav = nav;
             _model = model;
             _strings = context?.Strings;
+            _showsPosition = NextUpRule.ShowsPosition(CardLayoutRule.Effective(context?.Settings?.navigation, model));
             nav.CurrentBlockChanged += Refresh;
             Refresh(nav.CurrentBlock);
         }
@@ -92,6 +95,7 @@ namespace TileStories
             Root.EnableInClassList(DoneClass, answer.Finished);
             Caption.text = Words(answer.Finished ? CardStrings.Keys.NavNextUpDone : CardStrings.Keys.NavNextUp);
             Position.text = string.Format(CultureInfo.InvariantCulture, Words(CardStrings.Keys.NavNextUpPosition), answer.Position, answer.Total);
+            Position.style.display = _showsPosition ? DisplayStyle.Flex : DisplayStyle.None;
             Heading.text = answer.NextBlock != null ? HeadingOf(answer.NextBlock) : "";
             NextLabel.text = Words(CardStrings.Keys.NavNextButton);
             Next.tooltip = NextLabel.text;

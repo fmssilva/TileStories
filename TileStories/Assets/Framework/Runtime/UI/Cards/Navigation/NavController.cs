@@ -173,8 +173,15 @@ namespace TileStories
             bool follows = NavScrollRule.FollowsScroll(Settings);
             SetCurrent(NavScrollRule.Spy(follows, -1, MeasuredSection(), start));
             int keptBlock = keptBlockKey != null ? IndexOfTarget(keptBlockKey) : -1;
-            SetCurrentBlock(NavScrollRule.Spy(follows, -1, MeasuredTarget(), keptBlock >= 0 ? keptBlock : Model.Targets.Count > 0 ? 0 : -1));
+            SetCurrentBlock(NavScrollRule.Spy(follows, -1, MeasuredTarget(), keptBlock >= 0 ? keptBlock : FirstTargetToRead()));
             Bound?.Invoke();
+        }
+
+        // The target a card starts being read at: the first of the section shown (tabs, pages: the others are set aside), else the card's first
+        private int FirstTargetToRead()
+        {
+            int shown = IndexOfTarget(Layout?.SpyBlock(null));
+            return shown >= 0 ? shown : Model.Targets.Count > 0 ? 0 : -1;
         }
 
         // The card closed: nothing to drive

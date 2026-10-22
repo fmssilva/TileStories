@@ -179,9 +179,10 @@ namespace TileStories.Editor.Tests
 
             Assert.AreEqual(-1, CardLayoutRule.SpySection(CardOptions.LayoutBento, -1, 5), "the overview: no section, whatever the scroll measured");
             Assert.AreEqual(3, CardLayoutRule.SpySection(CardOptions.LayoutBento, 3, 5), "the section open in the full view");
-            Assert.IsNull(CardLayoutRule.SpyBlock(CardOptions.LayoutBento, null, "block_9"), "the overview: no block");
-            Assert.AreEqual("block_20", CardLayoutRule.SpyBlock(CardOptions.LayoutBento, "block_20", "block_9"), "the block the full view opened at");
-            Assert.AreEqual("block_9", CardLayoutRule.SpyBlock(CardOptions.LayoutTabs, "block_20", "block_9"), "elsewhere what was measured");
+            Assert.IsNull(CardLayoutRule.SpyBlock(CardOptions.LayoutBento, null, "block_9", false, null), "the overview: no block");
+            Assert.AreEqual("block_20", CardLayoutRule.SpyBlock(CardOptions.LayoutBento, "block_20", "block_9", false, null), "the block the full view opened at");
+            Assert.AreEqual("block_9", CardLayoutRule.SpyBlock(CardOptions.LayoutScroll, "block_20", "block_9", false, null), "elsewhere what was measured");
+            Assert.AreEqual("block_9", CardLayoutRule.SpyBlock(CardOptions.LayoutAccordion, null, "block_9", false, "block_2"), "no section is set aside in an accordion");
 
             // - step 16: the tiles ARE the map -- no Top Bar under bento, whatever the wall picked (its value stays for another layout), the
             //   same rule that gives pages the Family Pager; every other layout leaves the wall's pick to the wall
@@ -208,6 +209,31 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(CardLayoutRule.ShowsWith(-1, 4), "a block of no section (sources, a nav block) shows with every section");
             Assert.IsTrue(CardLayoutRule.ShowsWith(4, 4));
             Assert.IsFalse(CardLayoutRule.ShowsWith(2, 4));
+        }
+
+        // Audit F2-3 (the Story preset): with no section of the page measured yet the spy falls back to the card's FIRST target, a block of a
+        // page set aside; the page's own first block is the one being read. Only tabs and pages set sections aside
+        [Test]
+        public void TheBlockSpy_InTabsAndPages_NeverNamesABlockOfASectionSetAside_ButTheShownSectionsFirst()
+        {
+            foreach (string layout in new[] { CardOptions.LayoutTabs, CardOptions.LayoutPages })
+            {
+                Assert.AreEqual("block_28", CardLayoutRule.SpyBlock(layout, null, "block_13", false, "block_28"), layout + ": the measure fell back to the card's first");
+                Assert.AreEqual("block_28", CardLayoutRule.SpyBlock(layout, null, null, false, "block_28"), layout + ": nothing measured");
+                Assert.AreEqual("block_37", CardLayoutRule.SpyBlock(layout, null, "block_37", true, "block_28"), layout + ": a block of the page shown is kept");
+                Assert.AreEqual("block_13", CardLayoutRule.SpyBlock(layout, null, "block_13", false, null), layout + ": with no page shown (none yet) what was measured");
+            }
+        }
+
+        // Audit F2-1 and F2-2: the edge scrubber's dots lay on the next page's peek (pages) and on every row's chevron (accordion)
+        [Test]
+        public void ThePagesAndTheAccordion_OwnTheCardsRightEdge_EveryOtherLayoutLeavesItToTheWall()
+        {
+            Assert.IsTrue(CardLayoutRule.LayoutOwnsTheEdge(Nav(CardOptions.LayoutPages)), "pages: the swipe starts there and the next page peeks there");
+            Assert.IsTrue(CardLayoutRule.LayoutOwnsTheEdge(Nav(CardOptions.LayoutAccordion)), "accordion: each row's chevron is there");
+            foreach (string other in new[] { CardOptions.LayoutScroll, CardOptions.LayoutTabs, CardOptions.LayoutBento, "", "no_such_layout" })
+                Assert.IsFalse(CardLayoutRule.LayoutOwnsTheEdge(Nav(other)), "'" + other + "': the wall's Edge");
+            Assert.IsFalse(CardLayoutRule.LayoutOwnsTheEdge(null), "no settings read as scroll");
         }
 
         // Tabs with neither a Top Bar nor a Bottom Bar uses Text Tabs (and the Editor warns); any bar the wall set is kept

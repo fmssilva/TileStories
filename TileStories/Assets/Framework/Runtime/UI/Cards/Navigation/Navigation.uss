@@ -220,6 +220,19 @@
     overflow: hidden;
 }
 
+/* the measuring copy of a segment's words (FitCounts): bold like the marked segment, never seen, never in the layout */
+.nav-segmented__ruler {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    white-space: nowrap;
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
+}
+
 /* equal shares of the track (basis 0), a whole tap target tall; a long word wraps inside its segment, never cut */
 .nav-segment {
     flex-grow: 1;

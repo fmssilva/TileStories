@@ -94,17 +94,33 @@ namespace TileStories.Editor.Tests
         }
 
         [Test]
-        public void MoreThanTwoBars_NeedsTheTopBarTheBottomBarAndTheEdgeAllOn_AndPagesCountsItsPager()
+        public void MoreThanTwoBars_NeedsTheTopBarTheBottomBarAndTheEdgeAllOn_AndAnEdgeTheLayoutKeepsOffTheCardIsNoBar()
         {
             string top = BuiltInNavElements.TextTabs, bottom = BuiltInNavElements.BottomBar, edge = BuiltInNavElements.EdgeScrubber, none = CardOptions.NavNone;
             Assert.IsTrue(NavigationWarningRule.MoreThanTwoBars(Nav(top: top, bottom: bottom, edge: edge)));
             foreach (var (t, b, e) in new[] { (none, bottom, edge), (top, none, edge), (top, bottom, none), (top, none, none), (none, bottom, none), (none, none, edge), (none, none, none) })
                 Assert.IsFalse(NavigationWarningRule.MoreThanTwoBars(Nav(top: t, bottom: b, edge: e)), "top " + t + ", bottom " + b + ", edge " + e + ": at most two bars");
-            Assert.IsTrue(NavigationWarningRule.MoreThanTwoBars(Nav(CardOptions.LayoutPages, none, bottom, edge)),
-                "Pages always draws its Family Pager at the top, so a bottom bar and an edge make three even with Top Bar None");
+            Assert.IsTrue(NavigationWarningRule.MoreThanTwoBars(Nav(CardOptions.LayoutTabs, top, bottom, edge)), "Tabs draws the Edge: three bars");
+            Assert.IsFalse(NavigationWarningRule.MoreThanTwoBars(Nav(CardOptions.LayoutPages, none, bottom, edge)),
+                "Pages draws its Family Pager at the top, but keeps the right edge for itself: the Edge is never drawn, so two bars (not three)");
+            Assert.IsFalse(NavigationWarningRule.MoreThanTwoBars(Nav(CardOptions.LayoutAccordion, top, bottom, edge)), "the accordion keeps the edge too");
             Assert.IsFalse(NavigationWarningRule.MoreThanTwoBars(Nav(CardOptions.LayoutBento, top, bottom, edge)),
                 "Bento draws no top bar whatever Top Bar says: two");
             Assert.IsFalse(NavigationWarningRule.MoreThanTwoBars(null));
+        }
+
+        [Test]
+        public void TheEdgeWarning_NeedsAnEdgePicked_UnderALayoutThatOwnsTheRightEdge()
+        {
+            string edge = BuiltInNavElements.EdgeScrubber, none = CardOptions.NavNone;
+            foreach (string layout in new[] { CardOptions.LayoutPages, CardOptions.LayoutAccordion })
+            {
+                Assert.IsTrue(NavigationWarningRule.EdgeUnderALayoutThatOwnsIt(Nav(layout, edge: edge)), layout + ": the card draws no scrubber over it");
+                Assert.IsFalse(NavigationWarningRule.EdgeUnderALayoutThatOwnsIt(Nav(layout, edge: none)), layout + " with no Edge: nothing to say");
+            }
+            foreach (string layout in new[] { CardOptions.LayoutScroll, CardOptions.LayoutTabs, CardOptions.LayoutBento })
+                Assert.IsFalse(NavigationWarningRule.EdgeUnderALayoutThatOwnsIt(Nav(layout, edge: edge)), layout + ": the Edge is drawn there");
+            Assert.IsFalse(NavigationWarningRule.EdgeUnderALayoutThatOwnsIt(null));
         }
 
         [Test]

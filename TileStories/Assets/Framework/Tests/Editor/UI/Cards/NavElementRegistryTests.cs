@@ -216,6 +216,34 @@ namespace TileStories.Editor.Tests
             Assert.IsNull(NavSlotRule.TopElement(nav, twoSections, top), "a key no top element has: nothing, never another element");
         }
 
+        // Audit F2 (chunk C): the Edge slot answers the wall's pick in every layout but the two that own the card's right edge -- pages (the
+        // swipe and the next page's peek) and the accordion (every row's chevron): there it holds nothing, however the wall set it
+        [Test]
+        public void NavSlotRule_EdgeElement_IsTheWallsEdge_ExceptWhereTheLayoutOwnsTheRightEdge()
+        {
+            var registry = NavElementRegistry.Shared;
+            Func<string, NavElementDefinition> edge = key => registry.TryGet(key, out var d) && d.Slot == NavSlotKeys.Edge ? d : null;
+            var wall = new WallConfigData { card_settings = new CardSettings() };
+            wall.card_settings.navigation.min_blocks = 3;
+            var twoSections = ModelOf(TextPoi("two", 3, secondFamily: true), wall);
+            Assert.AreEqual(2, twoSections.Sections.Count, "precondition: sections for the scrubber to choose between");
+
+            var nav = new CardNavigationSettings { edge = BuiltInNavElements.EdgeScrubber };
+            foreach (string layout in new[] { CardOptions.LayoutScroll, CardOptions.LayoutTabs, CardOptions.LayoutBento })
+            {
+                nav.layout = layout;
+                Assert.AreEqual(BuiltInNavElements.EdgeScrubber, NavSlotRule.EdgeElement(nav, twoSections, edge), layout + ": the wall's scrubber");
+            }
+            foreach (string layout in new[] { CardOptions.LayoutPages, CardOptions.LayoutAccordion })
+            {
+                nav.layout = layout;
+                Assert.IsNull(NavSlotRule.EdgeElement(nav, twoSections, edge), layout + ": the layout owns the right edge, so no scrubber over it");
+            }
+            nav.layout = CardOptions.LayoutScroll;
+            nav.edge = CardOptions.NavNone;
+            Assert.IsNull(NavSlotRule.EdgeElement(nav, twoSections, edge), "and none stays none");
+        }
+
         // The bottom slot's rule is the top one's on the wall's Bottom Bar: the pick when the card shows navigation and rule 2.5.7 allows,
         // never a key registered for the OTHER slot, and the two slots answer independently
         [Test]

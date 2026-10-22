@@ -59,9 +59,15 @@ namespace TileStories.Editor
         public static bool BentoOutgrown(CardNavigationSettings nav, System.Func<int> sections) =>
             CardLayoutRule.Layout(nav) == CardOptions.LayoutBento && sections() > BentoSectionsThatFill;
 
-        // The Top Bar the card draws, the Bottom Bar and the Edge are all on: three bars share a screen that is mostly for reading
+        // The Top Bar the card draws, the Bottom Bar and the Edge are all on: three bars share a screen that is mostly for reading. An Edge the
+        // layout keeps off the card (EdgeUnderALayoutThatOwnsIt) takes no room, so it is not a third bar
         public static bool MoreThanTwoBars(CardNavigationSettings nav) =>
-            !IsNone(CardLayoutRule.TopElement(nav)) && !IsNone(nav?.bottom) && !IsNone(nav?.edge);
+            !IsNone(CardLayoutRule.TopElement(nav)) && !IsNone(nav?.bottom) && !IsNone(nav?.edge) && !CardLayoutRule.LayoutOwnsTheEdge(nav);
+
+        // An Edge element is picked while the layout owns the card's right edge (pages, accordion): the card draws none there, whatever the
+        // wall picked (CardLayoutRule.LayoutOwnsTheEdge, read by NavSlotRule.EdgeElement) -- so the row warns and names why (_3.2 audit F2)
+        public static bool EdgeUnderALayoutThatOwnsIt(CardNavigationSettings nav) =>
+            !IsNone(nav?.edge) && CardLayoutRule.LayoutOwnsTheEdge(nav);
 
         // A bar (or the radial) is on, its Bar Slots is below the sections of the busiest card AND the row could still be raised: the last
         // slot is More and hides the rest. At the row's own maximum nothing is left for the developer to fix, so no warning

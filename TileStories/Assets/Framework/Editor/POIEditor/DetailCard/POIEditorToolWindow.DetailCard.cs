@@ -73,6 +73,11 @@ namespace TileStories.Editor
                 c.audio_android_output_poll = DrawToggleField("Android Earbud Check", c.audio_android_output_poll, CardAudioAndroidPollHelp);
                 c.reduce_motion = DrawToggleField("Reduce Motion", c.reduce_motion, CardReduceMotionHelp);
                 c.peek_next_card = DrawToggleField("Peek Next Card", c.peek_next_card, CardPeekNextHelp);
+                // - Placed Model Control is the AR placement's chip above the card, not navigation (_3.2 audit section 4): its row lives here,
+                //   its JSON key stays under card_settings.navigation so no config changes
+                var placement = s.navigation ??= new CardNavigationSettings();
+                placement.placed_model_control = DrawPopupField("Placed Model Control", placement.placed_model_control, CardOptions.PlacedModelControls,
+                    CardOptions.PlacedModelControlLabels, CardPlacedModelControlHelp);
             }
 
             DrawDomainTestSubSection(_cardContainerTest, CardSceneTestGuide, CardPlaymodeTestGuide, CardDeviceTestGuide, DrawCardTestRows);

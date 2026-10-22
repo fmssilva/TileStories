@@ -41,6 +41,11 @@ namespace TileStories
             return new Answer(targets[at + 1], at + 2, total, finished: false);
         }
 
+        // Whether the bar shows the block's place ("5 of 13") in this layout: where no other counter is on screen. The pages layout's Family
+        // Pager names the page ("3 of 8") and is the card's one counter there -- a second number of another kind (blocks, not pages) beside it
+        // would be two answers to "where am I". The bar still names the next block and offers Next
+        public static bool ShowsPosition(string effectiveLayout) => !CardLayoutRule.TurnsPages(effectiveLayout);
+
         private static int IndexOf(IReadOnlyList<string> targets, string blockKey)
         {
             if (blockKey == null) return -1;

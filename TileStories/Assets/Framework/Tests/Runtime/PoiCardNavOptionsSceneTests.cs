@@ -216,6 +216,9 @@ namespace TileStories.Tests
                 if (showCounts)
                 {
                     Assert.AreEqual(expected.ToString(), label.text, element + " " + name + ": the count of the blocks it leads to");
+                    // - the Segmented strip leaves its counts out when a word and its count do not fit a segment (NavFitRule, audit F6): the
+                    //   rule is proved on its own in PoiCardNavCombinationsSceneTests; here the view's own answer says what to expect
+                    if (Sheet.Slots.TopView is SegmentedNavView { CountsShown: false }) continue;
                     Assert.IsTrue(CardTestInput.IsShown(label, Sheet.Root), element + " " + name + ": the count is displayed");
                     Assert.Greater(label.worldBound.width, 0f, element + " " + name + ": and has a width on screen");
                 }

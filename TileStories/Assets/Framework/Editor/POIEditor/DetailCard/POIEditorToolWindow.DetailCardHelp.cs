@@ -80,6 +80,15 @@ namespace TileStories.Editor
             "end of a swipe the last card is whole. Off: whole cards only, at rest and at the end. A strip whose cards all fit shows no " +
             "slice either way.";
 
+        // Placed Model Control moved here from Navigation (_3.2 audit section 4): it is the AR placement's chip, not a way to move in the card
+        private const string CardPlacedModelControlHelp =
+            "What tells a visitor that a model placed in the room with a Place In AR block is standing there. Chip (the default): while " +
+            "a model stands, a small chip floats above the card's top-right edge at every height of the card -- even when the card is " +
+            "lowered to its title, where the block's own line is out of sight. On the card of the point that placed the model it reads " +
+            "Placed by the wall with a Remove button that takes the model away. On another point's card (when Keep Model On Switch " +
+            "kept the model) it names that point instead and offers no Remove: only the card that placed the model does, and a tap on " +
+            "the chip opens that card. None: no chip; the Place In AR block's own button and line still say it.";
+
         private const string BlockLibraryHelp =
             "Every block kind this wall can show, wall-wide. Enabled: off hides every block of that kind on every card (Header " +
             "is the card's title and cannot be switched off). Default Variant: the look a block gets when Card Content does not " +
@@ -162,7 +171,12 @@ namespace TileStories.Editor
             "- Sources At The End: with a Sources block in the middle of a point's Card Content, the open card shows it last; untick it and " +
             "the card shows it where Card Content puts it, at once.\n" +
             "- Peek Next Card: open a point with a horizontal Timeline or a Related carousel and scroll to it: a slice of the next card shows " +
-            "at the right edge; swipe to the end: the last card is whole. Untick it: the strip shows whole cards only, at once.\n\n" +
+            "at the right edge; swipe to the end: the last card is whole. Untick it: the strip shows whole cards only, at once.\n" +
+            "- Placed Model Control: open a card with a Place In AR block and place its model: the card lowers to its title and a chip " +
+            "above its top-right edge reads Placed by the wall with a Remove button. Raise the card: the chip follows it. Click Remove: " +
+            "the model goes and so does the chip. With Keep Model On Switch on for that block, place the model and click another " +
+            "point's marker: the chip names the first point and has no Remove; click the chip: the first point's card opens, with " +
+            "Remove. Set Placed Model Control = None: no chip, live; the block's own button still reads Remove from room.\n\n" +
             "AUDIO\n" +
             "- Tap the play button of an Audio Guide: the sound starts. Drag its bar to move to any point, tap the speed chip to change the " +
             "speed, tap Captions to show the line of the moment. A Hero Chip under the title does the same from the Peek stop.\n" +
@@ -216,7 +230,10 @@ namespace TileStories.Editor
             "CARD CONTAINER\n" +
             "- Swipe the card up and down with a real finger: it follows the finger, a quick flick goes one stop further.\n" +
             "- The X and the grabber are easy to reach with one thumb; the card clears the home indicator.\n" +
-            "- Read the title and the chip outdoors in bright light.\n\n" +
+            "- Read the title and the chip outdoors in bright light.\n" +
+            "- Placed Model Control: place a model at a real wall and lower the card to its title. Read the chip over the camera image " +
+            "against a bright patch of the wall (a white tile, a window) and against a dark one: its words and its edge stay readable " +
+            "on both, and Remove reaches with a thumb.\n\n" +
             "AUDIO\n" +
             "- Play an Audio Guide with Bluetooth earbuds on, then switch them off and on again while it plays: the narration must go on " +
             "from the same place. If it stays silent, tick Android Earbud Check and test again.\n" +
