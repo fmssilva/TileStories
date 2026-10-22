@@ -165,11 +165,9 @@ namespace TileStories.Editor.Tests
                 Assert.IsFalse(CardLayoutRule.OpensSectionsInFullView(other), other);
                 Assert.IsFalse(CardLayoutRule.JumpOpensSection(other, 2), other + ": a jump scrolls");
             }
-            Assert.AreEqual(-1, CardLayoutRule.FirstShown(CardOptions.LayoutBento, lamp.Sections.Count), "no section shown in the stack: every block is set aside");
-            Assert.AreEqual(0, CardLayoutRule.FirstShown(CardOptions.LayoutTabs, lamp.Sections.Count), "tabs open on the first");
-            // - with no section shown, ShowsWith keeps exactly the blocks of no section (the sources) on the overview
+            // - with no section shown (-1: what CardLayoutView.ParkedAtBind passes under bento), ShowsWith keeps exactly the blocks of no section (the sources) on the overview
             for (int i = 0; i < lamp.Sections.Count; i++)
-                Assert.IsFalse(CardLayoutRule.ShowsWith(i, CardLayoutRule.FirstShown(CardOptions.LayoutBento, lamp.Sections.Count)), "section " + i + " set aside");
+                Assert.IsFalse(CardLayoutRule.ShowsWith(i, -1), "section " + i + " set aside");
             Assert.IsTrue(CardLayoutRule.ShowsWith(-1, -1), "a block of no section stays");
 
             Assert.IsTrue(CardLayoutRule.JumpOpensSection(CardOptions.LayoutBento, 0), "a block of a section: its section opens in the full view");

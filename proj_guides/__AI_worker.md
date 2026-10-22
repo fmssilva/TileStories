@@ -13,60 +13,45 @@
 So start by reading them all. 
 
 
-## `And now: Domain Review -- POI Card Navigation (_3.2), mode FIX, chunks D + G`
+## `And now: Domain Review -- POI Card Navigation (_3.2), mode AUDIT, the CLOSE-OUT pass`
 
-Run proj_guides/skills/Domain_Review.md in FIX mode with:
+Run proj_guides/skills/Domain_Review.md with:
 - DOMAIN GUIDE: proj_guides/_3.2_POI_Card_Navigation.md
-- AUDIT: proj_guides/_3.2.1_Audit.md (section 11 chunks D and G; focus item 4 explains what the sheet owns today, and
-  focus item 3 has the flake's profile. The FIX STATUS block says A, B, C and F are closed)
-- FIX LIST: **chunks D and G**. Nothing else -- this is the domain's last code block.
+- AUDIT: proj_guides/_3.2.1_Audit.md -- this is a SECOND, SHORT pass over the same file, not a new audit. Do not
+  rebuild the matrix or re-walk the sections; verify the two things below and write them as a new section 13.
+- FOCUS (this is the whole brief):
+  1. **Is the fix list really closed?** For every chunk A-G in section 11, check the claim on DISK, not in the FIX
+     STATUS blocks: the named test exists, it asserts what the status says, and the file it guards is the current one.
+     Three leftovers are known and need a verdict each, not a repeat: `CardLayoutRule.FirstShown` (dead, but removing
+     it deletes test assertions -- say whether those assertions still prove anything, and if not, delete both and say
+     so); "Preview this preset on a point" (never a section 5 gap: fix now, or move it with a destination); chunk E
+     (already moved to `_3.3`, confirm the pointer is there and correct).
+  2. **Triage EVERY open TODO of this domain** -- the 8 in `_3.2`'s "## TODOs", anything left in section 11, and the
+     `_3.2` lines inside `__mixed_TODOs.md`. Each gets ONE destination with a reason: fix now (and it must be small
+     enough to do in THIS session), `_3.3`, `_3.4`, a later stage, the device list, or DROP with why. Nothing may end
+     this pass without a destination -- that is the whole point of the close-out, and the hand-off is written from it.
+     Write the moved lines into their destination files, and remove them from `_3.2`.
+- SKIP: sections 1-10 of the skill. This pass writes section 13 only.
 
 GATE: `git push` if the branch is ahead of origin (1 commit waits). Take one Unity capture (Game view AND the POI
-Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles. The SDF fonts are Static: a
-modified font is a FINDING. Baseline: the tree is clean on commit "Fix card nav combinations and group the Navigation
-Editor rows" (full EditMode 2018/2018) -- run the full EditMode suite and say which commit you trusted. If an Editor
-test fails because the window could not reach 880 pt (the last session saw four), say so and move on: it is logged in
-`__mixed_TODOs.md` and is not yours to fix.
+Editor window) and open it; if none works, say so. Confirm the tree compiles. The SDF fonts are Static: a modified
+font is a FINDING.
+WORKER MODEL: Sonnet-class -- reading, checking claims against the code and moving TODO lines. No features.
+TEST PLAN: full EditMode once, to confirm the tree is green where this pass leaves it (expect 2021). NO PlayMode run
+of any kind: nothing is being changed that a scene could feel, and the domain's close-out full run was taken at D + G
+(1192/1192, two days ago, on this tree). Say in the report which full run the domain closes on, with its counts --
+the hand-off quotes it.
+AUDIT MODE WRITES NO FEATURES. Allowed: the verdicts above, deleting dead code that item 1 concludes is dead, moving
+TODO lines, and the report.
 
-WORKER MODEL: Opus-class -- a refactor of the class the whole card hangs from, with no behaviour change allowed.
-TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: `PoiCardSheetView` is the
-sheet itself (4.2 shared ground), and it is also the domain's CLOSE-OUT run, which `40-testing.md` 4.2 requires before
-a domain closes. Close the Card / Poi / SizeComparison targeted set green FIRST (~949 tests), then the full run, IN
-THE BACKGROUND -- the last four full runs were not clean background runs, and this is the one that goes in the
-hand-off, so get `editor_is_focused: false` at the first poll and at the end, or say exactly when Unity came forward.
-
-CHUNK D -- split `PoiCardSheetView` (audit focus item 4). It is 585 lines and, more to the point, it is NOT a wiring
-class any more: it decides things itself, such as reopening the full view and picking siblings
-(`20-code-quality`'s orchestrator rule: "could you delete every line of this class's own decision logic and replace it
-with calls to smaller classes without changing what the app does?").
-  The audit proposes `SheetDrag` + `CardFullViewOpener`. Treat that as a starting point, not an order: read the class
-  first and say in your plan what it actually owns, then split along the seams you find. Each new piece gets its own
-  one-line purpose comment and its own tests.
-  THE ACCEPTANCE IS THAT NOTHING CHANGES: this is a refactor. The card's three stops stay 195.00 / 337.60 / 796.00
-  (measure them before and after, as every block since 5a has); no test changes its expectations; the full PlayMode
-  count only moves by tests you ADD. If you find yourself editing a test's expectation, STOP -- that means the
-  refactor changed behaviour, and the audit asked for a split, not a redesign.
-  Say in the report what each new file owns and how many lines each ended at.
-
-CHUNK G -- the log guard. The "Layout update is struggling" error appeared 17 times in the first ~15 scene loads of
-the audit's morning run and never since (audit focus item 3): it is NOT the Lamp / Next Up drag and NOT the chip-row
-shape 17b fixed. The reason nobody can name its test is that no fixture FAILS on it -- Unity logs it and the run goes
-green. Fix that: a `LogAssert` guard in `SearchSceneFixture` and the LivingRoom fixtures that turns that line into a
-test failure naming the fixture and the scene load that produced it.
-  Then run the suites and see whether anything goes red. If nothing does, say so -- the guard's value is the next time,
-  not today. If something DOES go red, you have finally caught it: report what, and do NOT chase the fix in this block
-  unless it is small and obvious; a new cause gets its own entry in the audit's fix list.
-
-  DOCS: `_3.2.1_Audit.md` (chunks D and G closed, with each new file and the guard named); `_3.2` status row;
-  `10-structure.md` for every file added or renamed -- this block adds several; the RUN TIMES line after the full run.
-
-Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII everywhere but the data; pure rules
-decide, views draw; no backward-compatibility shim; real fixtures only.
-OUT OF SCOPE: chunk E (it moved to `_3.3`); any feature; any behaviour change; the `_3.3` work; the 880 pt test width.
-Stop when the full EditMode suite is green, the targeted set is green, the FULL PlayMode suite is green with zero
-failures, the stops are measured unchanged, and the docs above are written.
-If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
-Commit only if the developer asks.
+DELIVER, in `_3.2.1_Audit.md` section 13 "Close-out":
+- a table of chunks A-G with CLOSED / MOVED / DROPPED and the one line of evidence for each;
+- the triage table: every open TODO, its destination, its reason;
+- the domain's final numbers: full EditMode and full PlayMode counts and the commit they were taken on, the file
+  count and the line count the domain added, and the ten slowest fixtures if the audit's figures have moved;
+- **a ten-line "state of the domain"** a stranger could read and know what the card's navigation does and what is
+  left undone anywhere in it.
+Then the chat finish the skill describes. Commit only if the developer asks.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

@@ -362,6 +362,14 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   over the live camera against a bright patch (a white tile, a window, sunlight) AND a dark one. Proven in the Editor over a white, a black
   and the room-scan frame (`PoiCardFloatingSceneTests`): the dark surface >= 3:1 on white, the light 2 px edge >= 3:1 on black.
 
+- [full view, `_3.2` step 16 / close-out] A sideways swipe that starts ON a part that drags by itself (a 3D / 360 stage, a before / after
+  slider, a gallery picture: its tap is a Clickable, which takes the finger at touch-down) is that part's, as in the pages layout; on a Media
+  page much of the page is such a part. Watch whether visitors try to swipe on the picture; the chips are always there (WCAG 2.5.7). The video
+  player does swipe (its overlay is a Button). If they do try, `SwipeGrabRule.LeavesToPart` is the one place to change.
+- [pages, `_3.2` step 15a / close-out] DECIDED: the arriving page shows its blocks' WORDS (compact rows) while a drag is claimed, never a
+  second bound stack (a neighbour's media would stay busy to decorate a half-second slide). Only a device reopens it: if the slide reads as
+  empty under a thumb, revisit with that evidence (`Nav_Lamp_pages_midswipe_pt_390.png`).
+
 **Ship blockers (before any build leaves the lab)**
 - [media licences] The Lamp's two narrations (`CardMedia/audio/*.mp3`), the two photos and the castle video (`CardMedia/video/`) have NO
   established licence (the media README says so): replace or license them.
@@ -540,9 +548,6 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   Passed alone with Unity in the background (149/149 with the gallery fixtures). Step 15b did not touch the knowledge check, SwipeGrab or the
   gallery harness. If it shows again: wait a frame (or for the stage to rest) before reading `translate`, like `InViewAndStill` waits for a rest.
 
-## The contents list on a long card (2026-10-18, from _3.2 step 11b)
-
-
 ## A placed model with NO card open (2026-10-17, from the _3.2 step 9 review)
 
 - `_3.2` step 9 closed both AR debts: the placed-model chip now floats above the sheet at every stop, PEEK included, and
@@ -556,7 +561,6 @@ for each is in `_3.1.1_Audit.md` section 12.5.
 
 ## POI Editor (2026-10-16, from _3.2 step 5a)
 
-- Scene Configuration at a narrow window (450 pt, `TestEvidence/Editor/173_CardNavigation_450_DeviceGuide.png`): "Copy to StreamingAssets" is cut to "py to StreamingAsse" and the window shows a horizontal scrollbar -- the top action rows keep a minimum width the window no longer has. Outside the Navigation section; decide whether the window supports widths under ~500 pt.
 - (2026-10-16, _3.2 step 6) The progress map at 390 px with eight families: the 48 px touch minimum holds seven pieces at 48 and gives
   About 54, so "sized by target count" barely shows on The Lamp (it does on shorter cards: 190 / 125 / 62 px for 3 / 2 / 1 targets). A
   device check should say whether visitors read it as a map at all with eight pieces; if not, the wall can pick another Top Bar (no code).
@@ -564,7 +568,7 @@ for each is in `_3.1.1_Audit.md` section 12.5.
 
 ## From _3.2 step 15b (the bento layout, 2026-10-20)
 
-- QUESTION for the Architect -- **the ONE video owner keeps a paused clip after its last view left the screen.** Measured at 15b on the owners:
+- DECIDED at the _3.2 close-out (KEEP; the Architect may overrule) -- **the ONE video owner keeps a paused clip after its last view left the screen.** Measured at 15b on the owners:
   a video played in a bento section page and the page closed -> `VideoBlockView.Collapsing()` pauses it (step 12's rule) and the owner keeps the
   clip loaded (`Card.Media` holds `video/castelo_s_jorge_video`, one reference) until another video plays or the card closes. The same holds today
   for a closed expandable row, a tabs section put away and a page turned: in all four no view on screen shows that video any more, so nothing can
@@ -574,33 +578,10 @@ for each is in `_3.1.1_Audit.md` section 12.5.
 - CLOSED at _3.2 step 16 -- the vacuous `IsCurrent(null)` line of `PoiCardLayoutSceneTests` (tabs): the track is read before the section is put away and the line asserts the owner keeps that ONE paused clip (section 7.1); proved load-bearing (Collapsing -> Stop turns exactly that line red).
 - CLOSED at _3.2 step 16 (decided at the 15b review) -- a bento tile never grows past its content; the room left stays empty under the last tile (`BentoLayoutRule` RoomLeft).
 
-## From _3.2 step 17b (the Card Starter and the demo point, 2026-10-21)
-
-- **For the Architect -- the demo points' own words (measured, nothing changed).** The points a developer opens read as a fixture: The Lamp's
-  summary is "POI_Lamp", its card is titled "St George's Castle"; The Painting's summary "POI_Painting" (its card now titled "The Ribeira
-  Palace"); The Camera "POI_Camera"; every "X - Category" point "POI_<id>". Name and summary are identity fields (`00-process`), and what
-  reads them today:
-  - **Summaries:** `PoiCardSceneTests.APoiWithNoCard_ShowsItsNameAndSummary` ("POI_Camera" since 17b, was "POI_Painting") -- and nothing else
-    asserts a shipped summary (the search fixtures that test summary matches build their own walls: `SearchEngineTests`, the search demo).
-    Every header-only card shows its summary as the subtitle (Lamp - Residential's "POI_lamp_residential" under its bento title, a capture of
-    this block). Cheap to change: one test.
-  - **Names:** `CardConfigRoundTripTests` ("The Lamp", "Lamp - Military"), `PoiCardSceneTests` ("The Lamp", "Lamp - Military", "The Camera"),
-    `PoiCardSceneTests.Visit` ("Lamp - Military"), `FloatingSlotTests` (the chip starts with "The Lamp"), `SearchSceneTests` (the query
-    "military" ranks "Lamp - Military" first; "lamp painting" in every-word / any-word mode -- "Greater than 10" counts the lamp and painting
-    SETS by name; "painting" remembered as a suggestion; "milit" / "militray" typos), `PoiCardSceneTests` "lamp" as a query. Renaming the
-    sets (The Lamp -> a place) re-bases the search scene tests' queries and counts: a block of its own, with the search suite (and the
-    `_2.6` guide's examples) moved in the same change.
-  - The point ids (lamp, painting...) need not change for either.
-- **Idea (POI Editor, not built): apply a starter to every point with no blocks at once** (one undo step, one question naming how many
-  points). A new wall with 40 points would get a first card everywhere in one click; today it is one click per point.
-- **Idea (framework, not built): an app registers its own starter sets** the way it registers kinds (an app with its own kinds -- the
-  LivingRoom's Size Comparison -- would offer them in a set). Not built: no wall needs it yet (`20-code-quality`, no speculative code).
-
 ## From _3.2 step 16 (the full-view breadcrumb and sibling swipe, 2026-10-20)
 
 - Test harness: `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` failed ONCE in a full EditMode run with Unity in the background ("a whole drag = one history step, expected 2, was 3"), green alone right after and in the next full run (1946/1946). An Editor slider drag with no seam into step 16; logged OPEN, to be watched in the next runs (a focus-dependent drag would be the 4.2.3 case).
 - Fixture fact worth knowing: The Lamp's two videos (block_56, block_57) share ONE clip, so to the one video owner they are the same video (`VideoTrack.SameVideo`: point + clip) -- a test of a handover between them proves nothing. Lamp - Residential's block_4 + block_7 are the pair with two different clips (step 16).
-- Device check (step 16): in the full view a sideways swipe that starts ON a part that drags by itself (a 3D / 360 stage, a slider, a gallery picture -- its tap is a Clickable, which takes the finger at touch-down) is that part's, as in the pages layout; on a Media page much of the page is such a part. Watch whether visitors try to swipe on the picture; the chips are always there (_3.2 TODO at the top).
 - OPEN (2026-10-20, seen once at _3.2 step 17a): two more `PoiCardAudioSceneTests` failures (`AnotherPointsAudio_InSwitchMode_...`: the narration did not wait for the tone; `ClosingTheCard_WithKeepAudioPlayingOff_...`: Idle, not Playing) in the 41-fixture Card / Poi run right after a PC restart; both passed alone (11/11). Same family as the 5b entry above: audio timing under a loaded machine.
 
 ## From the _3.2 domain review (AUDIT, 2026-10-21; verdicts in `_3.2.1_Audit.md` F3)
@@ -609,3 +590,43 @@ for each is in `_3.1.1_Audit.md` section 12.5.
 - OPEN, new: `NavigationPresetEditorTabTests` x3 failed in the FIRST full EditMode run of the day only (a "Lamp - Military shows no navigation" note and a "Preview Point" row drawn while the shipped config's demo card is OFF); 6/6 alone at once, green in the two later full runs. A shared-state leak from earlier work in the same Editor session, not focus. Fix: assert the demo card is off before drawing in the first two tests too (chunk G).
 - Seen green in all three full EditMode runs of the day (one focused, two not): `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep`, `KeywordListFieldTypingTests`; `PoiCardAudioSceneTests` green in the full PlayMode run. Left OPEN with their triggers (a utility window driven just before the run; `OpenFull`'s fixed wait).
 - Harness lesson (the audit's own): starting EditMode runs back to back with `TestRunnerApi.Execute` from editor code raised Unity's native "Scene(s) Have Been Modified: Untitled" modal twice and froze the MCP bridge until the developer clicked Don't Save. The MCP runner handles that dialog: never chain test runs from editor code.
+
+## From the _3.2 close-out (2026-10-22; the triage table is `_3.2.1_Audit.md` section 13)
+
+Where every `_3.2` line of this file stands: the DEVICE list ("Device checks" above: radial, rails, bento, chip over the camera, Portuguese card,
+progress map with eight families, the full-view swipe, the pages' arriving page); SHIP BLOCKERS (media licences: `_3.3` step 0 gathers test
+content, the blocker stays open); STAGE 3 (a placed model with no card open: the AR / app shell work); the HARNESS list below; the entries
+moved to `_3.3` (demo words, the header at Half) and to `_5.1` (narrow window, Card Starter on every point).
+
+**Later card features from `_3.2` (no owner; build when a wall asks)**
+- [framework] A per-point navigation override (layout / top for ONE card): today everything is wall-level and a wall's long card and its short
+  ones differ only through Show Navigation From. Cost M (a card-level settings object, a resolve rule, rows). After `_3.3`.
+- [visitor] The breadcrumb of the full screens a BLOCK opens (the gallery's lightbox, a video's or 3D model's Takeover display): they read
+  "<card title> > <name>" while a full view opened by the card climbs the ontology. Needs the block's key through `IBlockHost.OpenTakeover`,
+  an interface every block view calls. Cost S-M.
+- [visitor] Remember where the visitor was (section / scroll) per point on reopen: a `CardLocalState` slot. Cost S.
+- [kiosks] Tablet / landscape behaviour of bento, radial and pages (with the landscape-aware layouts above).
+- [Stage 7] A screen reader for every element (the labels exist).
+- [Stage 6] Four Framework DEFAULT PATHS name the demo app (`WallSession.configPath`, `POIEditorToolWindow.DefaultConfigPath` /
+  `DefaultStreamingConfigPath`, `AssetPaths`): older than `_3.2`; a packaged framework must not name an app.
+- [code health] `NavController` is 414 lines (jumps + spy + seen + layout seams): split when the next block touches it. `CardNavigationHelp.cs`
+  (602, text only) and `BlockStackView` (580, `_3.1`'s) need nothing.
+- DROPPED: "an app registers its own Card Starter sets" (no wall needs it; `20-code-quality`, no speculative code). Build it with the first app
+  that has kinds of its own and asks.
+
+**Harness (shared ground: one block, a full PlayMode run; each entry above keeps its own history)**
+- **The rest wait is copied 14 times.** `Rested()` is a private copy in 14 PlayMode fixtures, `InViewAndStill` in 4 more, `StackAtRest` in one
+  (`PoiCardTopElementsSceneTests`, added at `_3.2` chunk D + G): the "third copy is the cue to move one into `CardTestInput`" of that block is long
+  past. Move ONE condition-based wait into `CardTestInput` (the sheet at its rest height; a target in view AND the same rect for three frames;
+  the stack's offset holding for three frames), delete the copies, and let `PoiCardAudioSceneTests.OpenFull` (fixed 0.45 s) and `CardTestInput
+  .TapInView` (fixed 0.15 s after `ScrollTo`) use it: that closes the audio-timing entries, the lost-tap entry and the step 14 precondition
+  entry in one stroke.
+- `NavigationPresetEditorTabTests` x3 (a shared-state leak, the first full EditMode run of a day): assert the shipped config's `demo_card` is
+  OFF in the first two tests too, as the third does (one line each).
+- Width-dependent Editor tests fail with the sentence "needs the window at N pt; this screen allows M" (entry above, one helper).
+- Watch-only, no action until they recur twice: the `ConfigUndoGroupingTests` slider drag and `KeywordListFieldTypingTests` focus entries
+  (trigger: a utility window opened and closed just before the run); the `CardGalleryTests` before / after and knowledge-check drags (read
+  the resolved style a frame after the release); the 1.7x touch-drag gain (check on a phone first: if the device shows it, it is the card's).
+- The "Layout update is struggling" entries are GUARDED by `LayoutStruggleGuard`; the Lamp / Next Up entry stays open until the guard fails.
+- The idle-Editor audio assertion flood (`Access version should be odd when acquiring lock`, 2026-10-17) is the engine's, not the card's:
+  environment note only, reopen if it returns (Unity 6000.3.19f1).

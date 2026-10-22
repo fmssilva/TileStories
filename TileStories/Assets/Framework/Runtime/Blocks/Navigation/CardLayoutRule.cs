@@ -43,10 +43,6 @@ namespace TileStories
         // Whether the card is drawn as tiles that open their sections in the full view (CardBentoView draws them)
         public static bool OpensSectionsInFullView(string effectiveLayout) => effectiveLayout == CardOptions.LayoutBento;
 
-        // The section shown in the stack when a card is bound: the first in tabs and pages, none in bento
-        public static int FirstShown(string effectiveLayout, int sectionCount) =>
-            OpensSectionsInFullView(effectiveLayout) || sectionCount == 0 ? -1 : 0;
-
         // Whether the card is drawn as sideways pages (CardPagerView turns them)
         public static bool TurnsPages(string effectiveLayout) => effectiveLayout == CardOptions.LayoutPages;
 
