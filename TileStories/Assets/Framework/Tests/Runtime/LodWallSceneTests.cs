@@ -33,6 +33,8 @@ namespace TileStories.Tests
 
         // Errors logged while the wall scene runs, except the AR SDK's own "no device" complaints
         private readonly List<string> _unexpectedErrors = new();
+        // "Layout update is struggling" fails the test that logged it, from the load to the end of the unload (the collector above stops sooner)
+        private readonly LayoutStruggleGuard _layoutGuard = new();
 
         // The wall scene carries the real AR/tracking SDK, which logs an error every frame it finds no
         // device camera (expected in the Editor). Only that is tolerated: any other error fails the test.
@@ -49,6 +51,7 @@ namespace TileStories.Tests
             LogAssert.ignoreFailingMessages = true;
             _unexpectedErrors.Clear();
             Application.logMessageReceived += CollectUnexpectedErrors;
+            _layoutGuard.Begin(ScenePath);
 #if UNITY_EDITOR
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
 #else
@@ -78,6 +81,7 @@ namespace TileStories.Tests
             _camera = Camera.main;
             Assert.IsNotNull(_lod, "the wall scene runs a LODController");
             Assert.IsNotNull(_camera, "the wall scene has a main camera");
+            _layoutGuard.Phase("the test");
         }
 
         [UnityTearDown]
@@ -85,6 +89,7 @@ namespace TileStories.Tests
         {
             LogAssert.ignoreFailingMessages = true;
             Application.logMessageReceived -= CollectUnexpectedErrors;
+            _layoutGuard.Phase("TearDown, while the scene unloads");
             foreach (var o in _tracked) if (o != null) Object.Destroy(o);
             _tracked.Clear();
             ARZoomState.SetZoom(1f, 1f, 4f);
@@ -98,6 +103,7 @@ namespace TileStories.Tests
             if (wallScene.IsValid() && wallScene.isLoaded)
                 yield return SceneManager.UnloadSceneAsync(wallScene);
             yield return null;
+            _layoutGuard.End();
             CollectionAssert.IsEmpty(_unexpectedErrors, "the wall scene logged errors while the demo field ran");
         }
 

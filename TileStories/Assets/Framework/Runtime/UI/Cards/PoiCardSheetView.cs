@@ -49,6 +49,10 @@ namespace TileStories
         // The row just above the sheet's top-right edge at every stop (_3.2 step 9): the placed-model chip and the Floating Button element;
         // a layer between the sheet and the menu layer
         public FloatingSlot Floating { get; }
+        // The vertical drag on the grabber, the header and the top strip: the height follows the finger, the release snaps or closes
+        public SheetDrag Drag { get; }
+        // What opens in the full view (a block among its siblings, a lightbox, a bento section) and what reopens over a same-point rebind
+        public CardFullViewOpener FullViewOpener { get; }
 
         // Raised when the visitor closes the card (the X, or a drag / swipe below peek)
         public event Action CloseRequested;
@@ -64,7 +68,6 @@ namespace TileStories
         public bool IsOpen => Stop != SheetStopRule.Stop.Dismissed;
         // The height the sheet is set to (it animates there); a drag writes it directly
         public float TargetHeight { get; private set; }
-        public bool IsDragging { get; private set; }
 
         private static readonly CustomStyleProperty<float> TopGapProperty = new("--ts-sheet-top-gap");
         private static readonly CustomStyleProperty<float> CollapsedHeaderProperty = new("--ts-header-collapsed-max-height");
@@ -76,20 +79,9 @@ namespace TileStories
         // The language the chip's next tap switches to ("" = the chip is hidden)
         private string _nextLanguage = "";
 
-        // The drag's clock (velocity sampling): Time.unscaledTime in the app. A test sets its own, so a simulated drag's
-        // speed is what the test says -- no real frame rate decides whether it reads as a flick (mirrors PoiCardHost.Clock)
-        internal System.Func<float> Clock { get; set; } = () => Time.unscaledTime;
-
-        private float _dragStartPointerY;
-        private float _dragStartHeight;
-        private float _lastSampleHeight;
-        private float _lastSampleTime;
-        private float _velocity;
-        // A vertical drag on the top navigation strip moves the sheet like one on the header (its sideways drags are the strip's own)
-        private readonly SwipeGrab _stripDrag;
-        private float _stripDragStartY;
         // The shown card's media source and texts: what the full-screen view loads through and words its way back with
         private BlockBindContext _context;
+        internal BlockBindContext Context => _context;
 
         // `navElements`: the navigation elements the slots can show (null = NavElementRegistry.Shared, the app's)
         public PoiCardSheetView(VisualElement parent, BlockRegistry registry, IEnumerable<StyleSheet> styleSheets, NavElementRegistry navElements = null)
@@ -134,7 +126,7 @@ namespace TileStories
             Bento = new CardBentoView(Stack, Layout, Nav);
 
             // - no glyph: the X is two crossed bars drawn by PoiCard.uss; its name (tooltip) comes from CardStrings
-            CloseButton = new Button(() => CloseRequested?.Invoke()) { name = "poi-card-close" };
+            CloseButton = new Button(RequestClose) { name = "poi-card-close" };
             CloseButton.AddToClassList("poi-card__close");
             foreach (string bar in new[] { "poi-card__close-bar--a", "poi-card__close-bar--b" })
             {
@@ -161,36 +153,13 @@ namespace TileStories
             Layer.Add(Root);
             Takeover = new TakeoverView(Layer);
             FullView = new BlockFullView(Takeover, Stack.Views);
-            // - bento: a jump opens its section in the full view; what the visitor reads there counts as read, and closing it is the overview
-            //   again (the reading asked again: the card may now have been read to its end)
-            Layout.SectionOpener = OpenSectionView;
-            FullView.Viewed += Nav.ViewedInFullView;
-            FullView.SectionLeft += () =>
-            {
-                Layout.SectionViewClosed();
-                if (IsOpen) Stack.ReadAgain();
-            };
-            // - a jump moves the card under the full view: the visitor would see nothing of it, so the full view closes (an Open Block
-            //   button or a hotspot pin used inside it lands on the card)
-            Nav.Jumped += Takeover.Close;
-            Takeover.SectionTapped += JumpToCrumbSection;
+            FullViewOpener = new CardFullViewOpener(this, registry);
             Overlay = new CardMenuOverlay(this);
             // - over the sheet, under the menu layer (an open drawer covers it) and the full view
             Floating.InsertUnder(Overlay);
             parent.Add(Layer);
 
-            foreach (var dragArea in new[] { Handle, Stack.HeaderSlot })
-            {
-                dragArea.RegisterCallback<PointerDownEvent>(OnPointerDown);
-                dragArea.RegisterCallback<PointerMoveEvent>(OnPointerMove);
-                dragArea.RegisterCallback<PointerUpEvent>(OnPointerUp);
-            }
-            // - never taken at touch-down: a tap still reaches a tab, a sideways drag the strip; only a clearly vertical one is the sheet's
-            _stripDrag = new SwipeGrab(Slots.Top, SwipeGrabRule.ClaimsVertical);
-            _stripDrag.Claimed += start => { _stripDragStartY = start.y; BeginDrag(start.y); };
-            _stripDrag.Moved += travel => DragTo(_stripDragStartY + travel.y);
-            _stripDrag.Released += _ => EndDrag();
-            _stripDrag.Cancelled += EndDrag;
+            Drag = new SheetDrag(this);
             Root.RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyle);
             Layer.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Stack.HeaderSlot.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
@@ -207,11 +176,8 @@ namespace TileStories
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
             ShowLanguageChip(context);
             context.Host ??= this;
-            // - a block in the full view stays there over a rebind of the SAME point (a live edit, a language switch): it is drawn again
-            //   from the new stack once the card is bound. Another point replaces the full-screen view of the old one
-            bool samePoint = FullView.IsOpen && context.Poi?.id != null && context.Poi?.id == _context?.Poi?.id;
-            string reopen = samePoint ? FullView.BlockKey : null;
-            string reopenSection = samePoint ? FullView.SectionKey : null;
+            // - before the old card's full view closes: what of it stays over a rebind of the same point
+            FullViewOpener.KeepAcrossRebind(context);
             // - and whatever was open over the old card closes
             Takeover.Close();
             Overlay.Close();
@@ -237,10 +203,7 @@ namespace TileStories
             Root.style.display = DisplayStyle.Flex;
             SetStop(IsOpen ? Stop : openStop);
             Floating.Bind(context);
-            // - a block the rebind dropped (a live edit deleted it) is not reopened: OpenFullView finds no entry; a section only while the card
-            //   is still drawn as bento and still has it
-            if (reopen != null) OpenFullView(reopen);
-            else if (reopenSection != null) Layout.ReopenSection(reopenSection);
+            FullViewOpener.ReopenAfterRebind();
         }
 
         // Build the shown card's navigation model -- with the stack's own reveal predicate, so a block the stack hides is never a target --
@@ -299,7 +262,7 @@ namespace TileStories
             Chrome?.Unbind();
             Stack.UnbindAll();
             SetStopState(SheetStopRule.Stop.Dismissed);
-            IsDragging = false;
+            Drag?.Forget();
             ApplyHeight(0f);
             Root.style.display = DisplayStyle.None;
         }
@@ -368,7 +331,7 @@ namespace TileStories
                 case NavBackRule.Step.CollapseRow: Stack.Collapse(AccordionRule.ClosedByBack(Stack.OpenRows)); return true;
                 case NavBackRule.Step.LowerToHalf: SetStop(SheetStopRule.Stop.Half); return true;
                 case NavBackRule.Step.LowerToPeek: SetStop(SheetStopRule.Stop.Peek); return true;
-                case NavBackRule.Step.CloseCard: CloseRequested?.Invoke(); return true;
+                case NavBackRule.Step.CloseCard: RequestClose(); return true;
                 default: return false;
             }
         }
@@ -378,81 +341,18 @@ namespace TileStories
         public void TapOutside()
         {
             if (Overlay.IsOpen) Overlay.Close();
-            else CloseRequested?.Invoke();
+            else RequestClose();
         }
+
+        // Ask the card's owner to close it (the X, Back at peek, a tap outside, a drag pulled away): it decides, then calls Hide
+        internal void RequestClose() => CloseRequested?.Invoke();
 
         // A block asked for the full-screen view: the breadcrumb starts with this card's title and ends with `name`
         public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage) =>
-            OpenPages(_ => name, pageCount, startPage, drawPage);
+            FullViewOpener.OpenTakeover(name, pageCount, startPage, drawPage);
 
-        // The full-screen view with a name per page; no section in the breadcrumb until ShowCrumbSection names one
-        private void OpenPages(Func<int, string> nameOfPage, int pageCount, int startPage, TakeoverPageDrawer drawPage, Func<int, string> iconOfPage = null)
-        {
-            if (!IsOpen || _context == null) return;
-            string title = Stack.BoundViews.Count > 0 && Stack.BoundViews[0] is HeaderBlockView header ? header.TitleText : "";
-            // - never stacked: the full view replaces what was open over the card
-            Overlay.Close();
-            _crumbSection = -1;
-            Takeover.Open(title, nameOfPage, pageCount, startPage, _context.Media, drawPage, _context.Strings, iconOfPage);
-        }
-
-        // A block asked for its full view (an open compact row's button, a bento tile): the page holds a second view of its kind, one page per
-        // SIBLING (FullViewSiblingRule: its section's blocks that support the full view, a swipe or a chip away), each named by the words its
-        // compact row shows; the breadcrumb names the section between the card's title and the block (_3.2 step 16). A key that is not on this
-        // card opens nothing
-        public void OpenFullView(string blockKey)
-        {
-            if (!IsOpen || _context == null || !Stack.TryGetEntryOfBlock(blockKey, out var entry)) return;
-            var pages = new List<BlockStackBuilder.Entry>();
-            foreach (string sibling in FullViewSiblingRule.Siblings(Nav.Model, _registry, blockKey))
-                if (Stack.TryGetEntryOfBlock(sibling, out var siblingEntry)) pages.Add(siblingEntry);
-            if (pages.Count < 2) pages = new List<BlockStackBuilder.Entry> { entry };
-            int start = Mathf.Max(0, pages.FindIndex(p => p.Instance.key == blockKey));
-            Func<string, string> words = _context.Strings != null ? _context.Strings.Get : null;
-            string language = _context.Language, fallback = _context.FallbackLanguage;
-            // - a page with siblings: each chip carries its block's KIND icon (a page alone has no chips to tell apart: its number stays)
-            OpenPages(page => CompactRowRule.Of(pages[page], _registry, language, fallback, words).Words, pages.Count, start,
-                FullView.PagesFor(pages, _context), page => pages[page].Definition?.IconKey);
-            ShowCrumbSection(FullViewSiblingRule.SectionOf(Nav.Model, blockKey));
-        }
-
-        // The section the open full view's breadcrumb names (its index in the model; -1 = none): what a tap on it jumps to
-        private int _crumbSection = -1;
-
-        // The breadcrumb's middle segment: section `index` of the card's map, in the card's words, with its family icon
-        private void ShowCrumbSection(int index)
-        {
-            var model = Nav.Model;
-            if (!Takeover.IsOpen || model == null || index < 0 || index >= model.Sections.Count) return;
-            var section = model.Sections[index];
-            string words = _context.Strings != null && section.LabelKey != null ? _context.Strings.Get(section.LabelKey) : "";
-            _crumbSection = index;
-            Takeover.ShowSection(string.IsNullOrEmpty(words) ? section.Key : words, section.IconKey);
-        }
-
-        // The visitor tapped the breadcrumb's section: the card's ONE jump to that section (the full view closes on Jumped; in bento the jump
-        // opens the section's page instead) -- no second path
-        private void JumpToCrumbSection()
-        {
-            if (IsOpen && _crumbSection >= 0) Nav.JumpTo(_crumbSection, TakeoverView.CrumbElementKey);
-        }
-
-        // Bento: section `index` of the card's map in the full view -- its targets one under the other, landing on `landingKey` (null: its
-        // top); the breadcrumb ends with the section's words. CardLayoutView asks (SectionOpener); false when nothing could be drawn
-        private bool OpenSectionView(int index, string landingKey)
-        {
-            var model = Nav.Model;
-            if (!IsOpen || _context == null || model == null || index < 0 || index >= model.Sections.Count) return false;
-            var section = model.Sections[index];
-            var entries = new List<BlockStackBuilder.Entry>();
-            foreach (string target in section.Targets)
-                if (Stack.TryGetEntryOfBlock(target, out var entry)) entries.Add(entry);
-            if (entries.Count == 0) return false;
-            string words = _context.Strings != null && section.LabelKey != null ? _context.Strings.Get(section.LabelKey) : "";
-            OpenTakeover(string.IsNullOrEmpty(words) ? section.Key : words, 1, 0,
-                FullView.SectionPageFor(entries, section.Key, Stack.HeadingOfBlock, _context, landingKey));
-            return FullView.IsOpen;
-        }
+        // A block asked for its full view (an open compact row's button, a bento tile): it opens among its siblings (CardFullViewOpener)
+        public void OpenFullView(string blockKey) => FullViewOpener.OpenFullView(blockKey);
 
         // Rest at `stop` (Dismissed hides)
         public void SetStop(SheetStopRule.Stop stop)
@@ -484,12 +384,13 @@ namespace TileStories
                 ? 0f
                 : peekPart.worldBound.yMax + peekPart.resolvedStyle.marginBottom - Root.worldBound.yMin;
             Stops = SheetStopRule.Compute(available, peek, _halfMaxRatio, _topGap);
-            if (IsOpen && !IsDragging) ApplyHeight(Stops.HeightOf(Stop));
+            if (IsOpen && !Drag.IsDragging) ApplyHeight(Stops.HeightOf(Stop));
             // - the chrome's room is the stop's height: new stops can give it room, or take it
             Chrome?.Apply();
         }
 
-        private void ApplyHeight(float height)
+        // Set the sheet's height (a rest stop, or the finger's height during a drag -- SheetDrag)
+        internal void ApplyHeight(float height)
         {
             TargetHeight = height;
             Root.style.height = height;
@@ -500,7 +401,7 @@ namespace TileStories
             // - the card's tokens are declared on this root (.ts-card): the stack's header reads its ceiling from here
             if (evt.customStyle.TryGetValue(CollapsedHeaderProperty, out float ceiling)) Stack.CollapsedCeiling = ceiling;
             // - a jump glides as long as the sheet takes to rise: both are --ts-duration (never read mid-drag, where the drag class zeroes it)
-            if (!IsDragging) Nav.Duration = HeightTransitionSeconds();
+            if (!Drag.IsDragging) Nav.Duration = HeightTransitionSeconds();
             if (evt.customStyle.TryGetValue(TopGapProperty, out float gap) && !Mathf.Approximately(gap, _topGap))
             {
                 _topGap = gap;
@@ -515,71 +416,6 @@ namespace TileStories
             foreach (var duration in Root.resolvedStyle.transitionDuration)
                 return duration.unit == TimeUnit.Millisecond ? duration.value / 1000f : duration.value;
             return 0f;
-        }
-
-        // The grabber and the header take the finger at touch-down (a drag there can only move the sheet)
-        private void OnPointerDown(PointerDownEvent evt)
-        {
-            if (!IsOpen || evt.button != 0) return;
-            ((VisualElement)evt.currentTarget).CapturePointer(evt.pointerId);
-            BeginDrag(evt.position.y);
-            evt.StopPropagation();
-        }
-
-        private void OnPointerMove(PointerMoveEvent evt)
-        {
-            if (!IsDragging || !((VisualElement)evt.currentTarget).HasPointerCapture(evt.pointerId)) return;
-            DragTo(evt.position.y);
-            evt.StopPropagation();
-        }
-
-        private void OnPointerUp(PointerUpEvent evt)
-        {
-            var area = (VisualElement)evt.currentTarget;
-            if (!IsDragging || !area.HasPointerCapture(evt.pointerId)) return;
-            area.ReleasePointer(evt.pointerId);
-            EndDrag();
-            evt.StopPropagation();
-        }
-
-        // A drag of the sheet starts with the finger at this panel y (the grabber, the header or the top strip)
-        private void BeginDrag(float pointerY)
-        {
-            if (!IsOpen) return;
-            IsDragging = true;
-            Root.AddToClassList("poi-card--dragging");
-            _dragStartPointerY = pointerY;
-            _dragStartHeight = TargetHeight;
-            _lastSampleHeight = TargetHeight;
-            _lastSampleTime = Clock();
-            _velocity = 0f;
-        }
-
-        private void DragTo(float pointerY)
-        {
-            if (!IsDragging) return;
-            // - panel y grows downward: dragging up (smaller y) makes the sheet taller
-            float height = Mathf.Clamp(_dragStartHeight + (_dragStartPointerY - pointerY), 0f, Stops.Full);
-            float now = Clock();
-            // - several events in one frame have no time between them: keep the last measured speed
-            if (now > _lastSampleTime)
-            {
-                _velocity = (height - _lastSampleHeight) / (now - _lastSampleTime);
-                _lastSampleTime = now;
-                _lastSampleHeight = height;
-            }
-            ApplyHeight(height);
-        }
-
-        // The finger let go: snap to the stop the drag and its speed point at, or close
-        private void EndDrag()
-        {
-            if (!IsDragging) return;
-            IsDragging = false;
-            Root.RemoveFromClassList("poi-card--dragging");
-            var stop = SheetStopRule.Snap(Stops, TargetHeight, _velocity, Layer.layout.height);
-            if (stop == SheetStopRule.Stop.Dismissed) CloseRequested?.Invoke();
-            else SetStop(stop);
         }
     }
 }

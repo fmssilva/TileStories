@@ -13,65 +13,60 @@
 So start by reading them all. 
 
 
-## `And now: Domain Review -- POI Card Navigation (_3.2), mode FIX, chunks C + F`
+## `And now: Domain Review -- POI Card Navigation (_3.2), mode FIX, chunks D + G`
 
 Run proj_guides/skills/Domain_Review.md in FIX mode with:
 - DOMAIN GUIDE: proj_guides/_3.2_POI_Card_Navigation.md
-- AUDIT: proj_guides/_3.2.1_Audit.md (section 11 for the chunks; focus item 2 explains the combination bugs, section 5
-  the Editor ontology, and the FIX STATUS block says what A and B already closed)
-- FIX LIST: **chunks C and F**, plus the F6 finding the last session recorded. Nothing else.
+- AUDIT: proj_guides/_3.2.1_Audit.md (section 11 chunks D and G; focus item 4 explains what the sheet owns today, and
+  focus item 3 has the flake's profile. The FIX STATUS block says A, B, C and F are closed)
+- FIX LIST: **chunks D and G**. Nothing else -- this is the domain's last code block.
 
 GATE: `git push` if the branch is ahead of origin (1 commit waits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles. The SDF fonts are Static: a
-modified font is a FINDING, not a `git checkout`. Baseline: the tree is clean on commit "Prove Follow Scroll, Show
-Counts, Labels and the chunk B rule gaps" (full EditMode 2007/2007) -- run the full EditMode suite and say which
-commit you trusted.
+modified font is a FINDING. Baseline: the tree is clean on commit "Fix card nav combinations and group the Navigation
+Editor rows" (full EditMode 2018/2018) -- run the full EditMode suite and say which commit you trusted. If an Editor
+test fails because the window could not reach 880 pt (the last session saw four), say so and move on: it is logged in
+`__mixed_TODOs.md` and is not yours to fix.
 
-WORKER MODEL: Sonnet-class -- two combination bugs with known causes, one text-fitting bug, and Editor arrangement.
-No new owner, no container. STOP and report if a fix needs one -- chunk D exists for the structural work.
-TEST PLAN: full EditMode at the GATE and at the end. NO full PlayMode run: view fixes inside existing elements plus
-Editor rows moving. It closes on every PlayMode fixture whose name holds Card, Poi or SizeComparison. It rides on the
-audit's full run (1148/1148); chunk D owes the next one, and it is mandatory.
+WORKER MODEL: Opus-class -- a refactor of the class the whole card hangs from, with no behaviour change allowed.
+TEST PLAN: full EditMode at the GATE and at the end. This block OWES the FULL PlayMode run: `PoiCardSheetView` is the
+sheet itself (4.2 shared ground), and it is also the domain's CLOSE-OUT run, which `40-testing.md` 4.2 requires before
+a domain closes. Close the Card / Poi / SizeComparison targeted set green FIRST (~949 tests), then the full run, IN
+THE BACKGROUND -- the last four full runs were not clean background runs, and this is the one that goes in the
+hand-off, so get `editor_is_focused: false` at the first poll and at the end, or say exactly when Unity came forward.
 
-CHUNK C -- the combinations nobody had rendered until the audit did (audit focus item 2):
-  C1. The edge scrubber's dots sit ON the page-peek in Pages and ON every row's chevron in Accordion. Decide where the
-    scrubber belongs in those two layouts and make it so -- including the honest option that it is not offered there,
-    in which case the Editor says why (the audit's "missing features" asked for exactly that warning). Say which you
-    chose and why; a dot over a control the visitor must hit is not a style problem, it is a broken target.
-  C2. Under Pages with the Story preset, Next Up says "2 of 57: Damage scale" while the pager says "Visit 3 of 8" --
-    two counters on one screen disagreeing about where the visitor is. Make the card show ONE answer. The audit's
-    chunk C says Next Up should follow the shown page; check that reading against section 5.2's promise for the
-    element and say if you disagree.
-  C3 (F6, found at the A+B session). With Show Counts on, Segmented breaks "Discover" mid-word at 390 px ("Discove" /
-    "r 25"), against its own help text, which promises 3-4 groups that always fit. Fix the fit; if a group's words plus
-    its count cannot fit, the count goes, not the word -- and say so in the (i).
-  Each of the three: the test that fails without the fix, proven by mutation, and a recapture.
+CHUNK D -- split `PoiCardSheetView` (audit focus item 4). It is 585 lines and, more to the point, it is NOT a wiring
+class any more: it decides things itself, such as reopening the full view and picking siblings
+(`20-code-quality`'s orchestrator rule: "could you delete every line of this class's own decision logic and replace it
+with calls to smaller classes without changing what the app does?").
+  The audit proposes `SheetDrag` + `CardFullViewOpener`. Treat that as a starting point, not an order: read the class
+  first and say in your plan what it actually owns, then split along the seams you find. Each new piece gets its own
+  one-line purpose comment and its own tests.
+  THE ACCEPTANCE IS THAT NOTHING CHANGES: this is a refactor. The card's three stops stay 195.00 / 337.60 / 796.00
+  (measure them before and after, as every block since 5a has); no test changes its expectations; the full PlayMode
+  count only moves by tests you ADD. If you find yourself editing a test's expectation, STOP -- that means the
+  refactor changed behaviour, and the audit asked for a split, not a redesign.
+  Say in the report what each new file owns and how many lines each ended at.
 
-CHUNK F -- Editor ontology (audit sections 4 and 5), light and all in the POI Editor:
-  F1. Sub-headings inside Detail Card > Navigation, as the audit's section 4 proposes: the section is now ~25 rows in
-    one list, and a developer reads it top to bottom with no grouping. Group them by responsibility, keep the row
-    ORDER the guide's section 7 gives inside each group, and update section 7 to show the groups.
-  F2. Placed Model Control moves to Card Container, where it belongs -- it is not navigation. The JSON key stays where
-    it is so no config changes; only the row moves. Update `_3.2` section 3 and `_5.1`.
-  F3. Whatever else the audit's section 5 lists as a gap at 620 pt and at the default width.
-  Editor tests for each: the row is where it now says it is, its (i) still answers, undo still works.
+CHUNK G -- the log guard. The "Layout update is struggling" error appeared 17 times in the first ~15 scene loads of
+the audit's morning run and never since (audit focus item 3): it is NOT the Lamp / Next Up drag and NOT the chip-row
+shape 17b fixed. The reason nobody can name its test is that no fixture FAILS on it -- Unity logs it and the run goes
+green. Fix that: a `LogAssert` guard in `SearchSceneFixture` and the LivingRoom fixtures that turns that line into a
+test failure naming the fixture and the scene load that produced it.
+  Then run the suites and see whether anything goes red. If nothing does, say so -- the guard's value is the next time,
+  not today. If something DOES go red, you have finally caught it: report what, and do NOT chase the fix in this block
+  unless it is small and obvious; a new cause gets its own entry in the audit's fix list.
 
-  TESTS: as above, plus the suites of the TEST PLAN.
-  VISUALS: the Navigation section at 620 pt with its new sub-headings, Card Container with Placed Model Control, the
-  scrubber in Pages and in Accordion, Next Up under Pages, and Segmented with Show Counts at 390 px. Judge item by item.
-  DOCS: `_3.2.1_Audit.md` (chunks C and F closed with proof, F6 closed, matrix cells); `_3.2` sections 3, 5.5, 5.2 and
-  7 for what moved or changed; `_5.1`; `10-structure.md` if a file moved.
+  DOCS: `_3.2.1_Audit.md` (chunks D and G closed, with each new file and the guard named); `_3.2` status row;
+  `10-structure.md` for every file added or renamed -- this block adds several; the RUN TIMES line after the full run.
 
-Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII in code, comments, logs and Editor
-labels; Editor rows and popups name things, never ids; pure rules decide, views draw; no backward-compatibility shim;
-real fixtures only -- never change a POI's identity fields.
-OUT OF SCOPE: chunk D (the sheet split) and G (the log guard) -- they go together in the next block; chunk E, which
-moved to `_3.3`; anything about media, content or styling.
-Stop when the full EditMode suite and the Card / Poi fixtures are green with zero failures, every fix is mutation-
-proven with its test named, the captures are judged and the docs above are written.
+Rules as before: no literal colours, sizes or visitor strings in C#; strict ASCII everywhere but the data; pure rules
+decide, views draw; no backward-compatibility shim; real fixtures only.
+OUT OF SCOPE: chunk E (it moved to `_3.3`); any feature; any behaviour change; the `_3.3` work; the 880 pt test width.
+Stop when the full EditMode suite is green, the targeted set is green, the FULL PlayMode suite is green with zero
+failures, the stops are measured unchanged, and the docs above are written.
 If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
 Commit only if the developer asks.
-
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

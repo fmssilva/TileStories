@@ -21,6 +21,7 @@ namespace TileStories.Tests
     // raycast taps, real panel events, WallSession.ApplySearchSettings / ApplySearchDemo), and it is unloaded
     // after. Renders of the real Game view (UI included) are saved as TestEvidence/Search/Search_*.png. Two wall settings are pinned for
     // every test: LOD off, and the card's navigation at the framework default (the wall's own preset stays in ShippedNavigation).
+    // A "Layout update is struggling" line from the load to the end of the unload fails the test (LayoutStruggleGuard).
     public abstract class SearchSceneFixture
     {
         private const string ScenePath = "Assets/Apps/LivingRoom/LivingRoomScene.unity";
@@ -34,6 +35,8 @@ namespace TileStories.Tests
         protected CardNavigationSettings ShippedNavigation;
         protected Camera Cam;
         private readonly List<string> _unexpectedErrors = new();
+        // "Layout update is struggling" fails the test that logged it, from the load to the end of the unload (the collector above stops sooner)
+        private readonly LayoutStruggleGuard _layoutGuard = new();
         private string _savedRecent;
         private string _wallIdForLanguage;
         private string _savedLanguage = "";
@@ -55,6 +58,7 @@ namespace TileStories.Tests
             PlayerPrefs.DeleteKey(RecentSearchesManager.PREFS_KEY);
             PlayerPrefs.DeleteKey(ViewModeControl.LastViewPrefsKey);
             SelectionEventBus.ResetState();
+            _layoutGuard.Begin(ScenePath);
 #if UNITY_EDITOR
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
 #else
@@ -96,6 +100,7 @@ namespace TileStories.Tests
             config.card_settings.navigation = new CardNavigationSettings();
             Session.ApplyCardSettings(config);
             yield return Wait(0.8f);
+            _layoutGuard.Phase("the test");
         }
 
         [UnityTearDown]
@@ -103,6 +108,7 @@ namespace TileStories.Tests
         {
             LogAssert.ignoreFailingMessages = true;
             Application.logMessageReceived -= CollectUnexpectedErrors;
+            _layoutGuard.Phase("TearDown, while the scene unloads");
             SelectionEventBus.ResetState();
             ARZoomState.SetZoom(1f, 1f, 4f);
             MarkerHierarchyResolver.ResetToDefaults();
@@ -117,6 +123,7 @@ namespace TileStories.Tests
             if (wallScene.IsValid() && wallScene.isLoaded)
                 yield return SceneManager.UnloadSceneAsync(wallScene);
             yield return null;
+            _layoutGuard.End();
             CollectionAssert.IsEmpty(_unexpectedErrors, "the wall scene logged errors");
         }
 

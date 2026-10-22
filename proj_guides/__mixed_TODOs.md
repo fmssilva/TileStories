@@ -490,6 +490,14 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   a second plausible cause). That fixture now taps through its own `InViewAndStill` (scroll until in view AND the same rect for three frames).
   If another fixture loses a tap after a scroll, move that precondition into `TapInView` itself (shared ground: a full PlayMode run).
 
+- GUARDED (2026-10-22, _3.2 chunk G; the Lamp / Next Up entry below stays OPEN): the "count" the entries below ask for exists --
+  `Tests/Runtime/LayoutStruggleGuard.cs`, wired into `SearchSceneFixture`, `LodWallSceneTests` and the app's `SizeComparisonGalleryTests`: the
+  line now fails the test whose scene logged it, naming the test, the scene load # and the phase. Why the audit's 17 named no test: UI Toolkit
+  logs it with Debug.LogError, but the fixtures' TearDown unsubscribed their error collector BEFORE unloading the scene, and the burst sat in
+  exactly that window (`Editor-prev.log` 171452-171512: after "[WallSession] Ready", before the unload). 0 lines from Unity over this session's
+  ~1480 scene loads, so nothing went red yet. If it fails one day: the message's phase says whether the loop is in the card's views (a test phase)
+  or in a panel tearing down (the unload) -- start there, and a new cause gets its own entry.
+
 - ONE CAUSE FOUND AND FIXED, the Lamp / Next Up case STILL OPEN (2026-10-21, _3.2 step 17b): "Layout update is struggling" reproduced
   ON DEMAND -- every run, alone -- on The Painting's new card under icon_tabs_chips (dragging across a boundary between a section with kind
   chips and a one-kind section). A probe over navigation variants isolated it (Text Tabs, the framework default and The Lamp under the same

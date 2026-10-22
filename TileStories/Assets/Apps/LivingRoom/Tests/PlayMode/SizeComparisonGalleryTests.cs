@@ -23,6 +23,8 @@ namespace TileStories.LivingRoom.Tests
         private const string GalleryScene = "Assets/Dev/CardGallery/CardGalleryScene.unity";
         private const string StylePath = "Assets/Apps/LivingRoom/Scripts/SizeComparison/SizeComparison.uss";
         private CardGalleryHarness _harness;
+        // "Layout update is struggling" fails the test that logged it, from the load to the end of the unload
+        private readonly LayoutStruggleGuard _layoutGuard = new();
 
         // One content state: the object, the point's real size, the words, and whether the app's service is registered
         private readonly struct Case
@@ -110,6 +112,7 @@ namespace TileStories.LivingRoom.Tests
         [UnitySetUp]
         public IEnumerator SetUp()
         {
+            _layoutGuard.Begin(GalleryScene);
 #if UNITY_EDITOR
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(GalleryScene, new LoadSceneParameters(LoadSceneMode.Single));
 #else
@@ -128,14 +131,18 @@ namespace TileStories.LivingRoom.Tests
             _harness.Frame.styleSheets.Add(sheet);
 #endif
             yield return null;
+            _layoutGuard.Phase("the test");
         }
 
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            _layoutGuard.Phase("TearDown, while the scene unloads");
             var scene = SceneManager.GetSceneByPath(GalleryScene);
             SceneManager.SetActiveScene(SceneManager.CreateScene("AfterSizeComparisonGalleryTest"));
             if (scene.IsValid() && scene.isLoaded) yield return SceneManager.UnloadSceneAsync(scene);
+            yield return null;
+            _layoutGuard.End();
         }
 
         // Show one case (with or without the app's service on the card) and hand back its view

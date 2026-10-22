@@ -17,7 +17,7 @@ namespace TileStories.Tests
         private const float SlowDragFrameSeconds = 0.1f;
 
         // Drag from the centre of `from` by `deltaY` panel units (negative = up), over `frames` frames. `slowSheet`, when
-        // given, is a PoiCardSheetView whose Clock this drives on a fixed per-frame timestep instead of real time, so a
+        // given, is a PoiCardSheetView whose drag's Clock (SheetDrag.Clock) this drives on a fixed per-frame timestep instead of real time, so a
         // deliberately "slow" drag (the default frame count, no flick intended) reads as slow to SheetStopRule.Snap on any
         // machine: real `yield return null` frames can run faster than intended, which would otherwise misread the same
         // drag as a flick and overshoot a stop (_3.1 [7B], the sheet's own version of PoiCardHost.Clock's fix). Leave it
@@ -28,7 +28,7 @@ namespace TileStories.Tests
             var panel = from.panel;
             Vector2 start = from.worldBound.center;
             float fakeTime = 0f;
-            if (slowSheet != null) slowSheet.Clock = () => fakeTime;
+            if (slowSheet != null) slowSheet.Drag.Clock = () => fakeTime;
             Send(panel, EventType.MouseDown, start);
             yield return null;
             for (int i = 1; i <= frames; i++)
@@ -39,7 +39,7 @@ namespace TileStories.Tests
             }
             Send(panel, EventType.MouseUp, start + new Vector2(0f, deltaY));
             yield return null;
-            if (slowSheet != null) slowSheet.Clock = () => Time.unscaledTime;
+            if (slowSheet != null) slowSheet.Drag.Clock = () => Time.unscaledTime;
         }
 
         // Drag from panel position `start` by `delta` (panel units, any direction), over `frames` frames

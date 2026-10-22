@@ -282,6 +282,25 @@ namespace TileStories.Tests
 
         // ---------------- the mark follows a real drag ----------------
 
+        // A touch drag's stack keeps gliding after the finger lifts (the ScrollView's inertia): 0.6 s after the release it still moved 8-20 px
+        // over the next three frames in all 30 drags measured (2026-10-22), so a check then read a moving target and once named the block
+        // before the one the controller had reached. Wait until the offset holds for three frames -- the stack at rest -- and say so.
+        private IEnumerator StackAtRest(string when)
+        {
+            const int StillFrames = 3;
+            const int MaxFrames = 600;
+            float last = Scroll.scrollOffset.y;
+            int still = 0;
+            for (int frame = 0; frame < MaxFrames && still < StillFrames; frame++)
+            {
+                yield return null;
+                float now = Scroll.scrollOffset.y;
+                still = Mathf.Approximately(now, last) ? still + 1 : 0;
+                last = now;
+            }
+            Assert.AreEqual(StillFrames, still, "precondition, " + when + ": the stack came to rest within " + MaxFrames + " frames");
+        }
+
         [UnityTest]
         public IEnumerator ARealDragOfTheStack_MovesTheMark_ToWhatTheScreenShows([ValueSource(nameof(Elements))] string element)
         {
@@ -294,7 +313,7 @@ namespace TileStories.Tests
             {
                 float before = Scroll.scrollOffset.y;
                 yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(viewport.center.x, viewport.yMax - 40f), new Vector2(0f, -viewport.height * 0.6f));
-                yield return CardTestInput.Settle(0.6f);
+                yield return StackAtRest("drag " + (drag + 1));
                 Assert.Greater(Scroll.scrollOffset.y, before, "precondition: the real drag scrolled the stack");
                 AssertMarksTheScreen(view, "after drag " + (drag + 1));
                 seen.Add(Nav.CurrentBlock);
