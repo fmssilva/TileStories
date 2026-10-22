@@ -362,27 +362,9 @@ d) Quando o for não chega [8 min -> 10:48] ---------------------------------
     Não há contentor para percorrer: só uma condição para parar.
 """
 
-# 1. Quantas vezes cabe o 7 em 50? 
-# (claro que number // 7 é a forma inteligente)
-# Mas usando um ciclo, convém ser um while, porque não sabemos quantas vezes o 7 cabe em 50.
-
-def fit7(number: int) -> int:
-    """ How many times does 7 fit in number?
-        Precondition: number >= 0
-    """
-    how_many = 0
-    while number >= 7:
-        number -= 7
-        how_many += 1
-    return how_many
-
-print(fit7(50), 50 // 7)        # 7 7   
-
-
-
 
 #%%
-# 2. Mini: quantos algarismos tem um número?
+# 1. Quantos algarismos tem um número?
 def count_digits(n: int) -> int:
     """ Number of digits of n.
         Precondition: n > 0
@@ -401,6 +383,34 @@ print(count_digits(1000))
 # o ciclo dá ZERO voltas e devolve 0. Mas o 0 tem 1 algarismo!
 # Por isso a precondição diz n > 0.
 # (o while pode dar zero voltas, tal como o for com range(0))
+
+
+
+
+
+
+
+# %%
+# 2. Quantos anos até um depósito duplicar a 3% ao ano? 
+
+def years_to_double(rate: float) -> int:
+    """ Years until a deposit doubles, at a yearly rate.
+        Precondition: rate > 0
+    """
+    money = 1000.0
+    years = 0
+    while money < 2000.0:
+        money *= 1 + rate
+        years += 1
+    return years
+
+print(years_to_double(0.03))    # 24
+print(years_to_double(0.10))    # 8
+
+# A pergunta a fazer: "sei à partida o que vou percorrer?"
+#   sim (uma lista, um range, uma string) -> for
+#   não, só sei quando parar              -> while
+
 
 
 
@@ -431,6 +441,78 @@ print(euclides(123, 456))      # 3
 
 
 
+# %%
+# 4. Um interpretador de comandos que recebe inputs do user sem limite definido
+
+def command_A(): 
+    print("Comando A executado")
+
+def command_B(): 
+    print("Comando B executado")
+
+# interpreter em que "exit" é uma condição avaliada no corpo
+def interpret() -> None:
+    """ Interpret a sequence of commands until the user types "Q" == exit. """
+    while True:
+        cmd = input("Comando (A, B, C ou exit)? ")
+        if cmd == "A":
+            command_A()
+        elif cmd == "B":
+            command_B()
+        elif cmd == "Q":
+            break
+        else:
+            print("Comando desconhecido")
+
+# interpreter em que "exit" é iniciado antes e avaliado na condição 
+def interpret2() -> None:
+    """ Interpret a sequence of commands until the user types "Q" == exit. """
+    cmd = ""
+    while cmd != "Q":
+        cmd = input("Comando (A, B, C ou Q)? ")
+        if cmd == "A":
+            command_A()
+        elif cmd == "B":
+            command_B()
+        elif cmd != "Q":
+            print("Comando desconhecido")
+
+
+# este caso de iniciar o END_MARK antes e usa-lo na condição no while
+# é preciso ter cuidado, caso o essa marca
+
+
+# Exemplo: Ler inteiros do terminal até user escrever -1, e devolver a soma.
+
+END_MARK = -1
+
+# Correto: lê o input antes do ciclo e dentro do ciclo depois de somar
+def read_and_add() -> int:
+    """ Read and add a sequence of integers with unknown length. """
+    sum = 0
+    v = int(input("> "))     # lê (fora do ciclo)             
+    while v != END_MARK:     # testa
+        sum += v             # soma
+        v = int(input("> ")) # lê (dentro do ciclo)  
+    return sum
+print("correcto:", read_and_add())  # lê inteiros até -1 e devolve a soma
+
+#%%
+# Errado: lê o input só dentro do ciclo, e soma o END_MARK
+def read_and_add_wrong() -> int:
+    """ Read and add a sequence of integers with unknown length. """
+    sum = 0
+    v =  0
+    while v != END_MARK:     
+        v = int(input("> "))  
+        sum += v             # reparem que aqui vamos adicionar o END_MARK à soma, o que não faz sentido
+    return sum
+print("wrong:", read_and_add_wrong()) # lê inteiros até -1 e devolve a soma (mas soma o -1, o que não faz sentido)
+
+
+
+
+
 
 # %%
 """
@@ -453,6 +535,8 @@ def forgot_the_advance() -> int:
 
 
 
+
+
 #%%
 # 2. Avanço não aproxima da condição de paragem  -> CICLO INFINITO
 def advance_wrong() -> int:
@@ -465,6 +549,9 @@ def advance_wrong() -> int:
     return total
 
 # print(advance_wrong())        # nunca acaba: parem com o quadrado vermelho ou Ctrl + C
+
+
+
 
 
 #%%
@@ -487,67 +574,26 @@ def impossible_condition() -> int:
 
 
 
-# %%
-"""
-f) Ler até aparecer uma marca de fim (teórica 4a) [8 min -> 11:02] ----------
-
-    Somar números que o utilizador vai escrevendo, até escrever -1.
-    Ninguém sabe quantos vão ser. As duas soluções do guião (ex 46):
-"""
-
-END_MARK = -1
-
-def read_and_add() -> int:
-    """ Read and add a sequence of integers with unknown length. """
-    sum = 0
-    v = int(input("> "))        # lê (fora do ciclo)
-    while v != END_MARK:        # testa
-        sum += v                # soma
-        v = int(input("> "))    # lê (dentro do ciclo)
-    return sum
-
-def read_and_add2() -> int:
-    """ Read and add a sequence of integers with unknown length. """
-    sum = 0
-    while True:
-        v = int(input("> "))    # lê
-        if v == END_MARK:       # testa
-            break
-        sum += v                # soma
-    return sum
-
-print(read_and_add())           # com 10 20 12 -1 dá 42
-print(read_and_add2())          # com 5 -1 dá 5
-
-# 1ª forma: lê-testa-soma-lê.
-#   Funciona bem, mas o input aparece escrito duas vezes.
-#
-# 2ª forma: while True + break ("ciclo com saída pelo meio").
-#   while True: repete "para sempre"...
-#   ... até chegar ao break, que sai do ciclo na hora.
-#   O input aparece uma vez só, e a ordem é a natural: ler, testar, somar.
-#
-# As duas são aceites na cadeira. A 2ª costuma ficar mais limpa
-# quando a decisão de parar só se pode tomar a meio do corpo.
-#
-# Mas não usar break sem razão: se a condição cabe na linha do while,
-# fica lá (teórica 4a).
-
-
-
-
-
 
 # %%
 """
-g) EXERCICIO 46 (GUIÃO) - Jogo Hi-Lo [14 min -> 11:16] --------------------
+f) EXERCICIO 46 (GUIÃO) - Jogo Hi-Lo [14 min -> 11:16] --------------------
 
     O computador pensa num número secreto entre 0 e 1023.
-    O utilizador vai tentando, e o computador responde:
+    Depois o utilizador tenta adivinhar qual é esse número, no menor número de jogadas que conseguir.
+    
+    O programa gera internamente um número secreto entre 0 e 1023, 
+    e depois vai lendo as tentativas do utilizador do terminal, 
+    e consoante cada tentativa, o computador vai responde:
         ">"  o secreto é MAIOR do que a tentativa
         "<"  o secreto é MENOR
         "="  acertou (e o jogo acaba)
 
+    Cuidado com o sentido dos símbolos:
+        o ">" responde à pergunta "o secreto é maior?".
+        Por isso, se a tentativa é MENOR do que o secreto, escreve-se ">".
+
+    Exemplo de execução:
         JOGO HI-LO
         Já pensei num número...
         Tente adivinhar: 500
@@ -604,48 +650,12 @@ main()
 # Porquê while True + break? A decisão de parar só existe DEPOIS de ler a tentativa.
 # (é o padrão "ler até à marca" da célula anterior: aqui a "marca" é acertar)
 #
-# Cuidado com o sentido dos símbolos:
-#   o ">" responde à pergunta "o secreto é maior?".
-#   Por isso, se a tentativa é MENOR do que o secreto, escreve-se ">".
-#
 # random.randint(lo, hi) dá um inteiro ao calhas, com lo e hi incluídos.
 # (ao contrário do range, aqui o último entra)
 
 
 
 
-
-
-# %%
-"""
-h) for ou while? [4 min -> 11:20] ------------------------------------------
-
-    O resumo da 1ª parte. Para cada caso, qual escolhiam?
-"""
-
-# 1. Escrever os elementos de uma lista             -> for v in l
-# 2. Somar os números de 1 a n                       -> for i in range(1, n + 1)
-# 3. Pedir números até o utilizador escrever -1      -> while
-# 4. Quantos anos até um depósito duplicar a 3% ao ano?
-#    (não se sabe quantos: repete enquanto não duplicou) -> while
-
-def years_to_double(rate: float) -> int:
-    """ Years until a deposit doubles, at a yearly rate.
-        Precondition: rate > 0
-    """
-    money = 1.0
-    years = 0
-    while money < 2.0:
-        money *= 1 + rate
-        years += 1
-    return years
-
-print(years_to_double(0.03))    # 24
-print(years_to_double(0.10))    # 8
-
-# A pergunta a fazer: "sei à partida o que vou percorrer?"
-#   sim (uma lista, um range, uma string) -> for
-#   não, só sei quando parar              -> while
 
 
 
@@ -674,6 +684,31 @@ https://ipce-184ea7.gitlab.io/
     Agora trocam-se os papéis: o UTILIZADOR pensa no número
     e o COMPUTADOR tenta adivinhar.
 
+
+    Eis os detalhes da iteração com o utilizador:
+
+        O programa começa por escrever: "Pense num número secreto entre 0 e 1023.". 
+        Nessa altura o utilizador pensa num número secreto (mas fica calado e não o diz ao computador).
+
+        Depois, durante o jogo, o programa vai tentando adivinhar o número e vai perguntando: 
+        "A minha tentativa é X. Diga-me se o número secreto é maior (>), menor (<) ou igual (=) ? ".
+
+        No final do jogo há duas reações possíveis do programa: 
+        "Viva! Acertei em N tentativas! O número secreto era X!" ou, "Você é batoteiro!".
+
+        Ainda mais um detalhe. Desta vez queremos validação do input! 
+        Quando o programa pede um dos símbolos (>) (<) ou (=), se o utilizador introduzir um símbolo errado, 
+        o programa deve repetir a pergunta. Se o utilizador voltar a enganar-se, o programa repete a pergunta. 
+        E assim sucessivamente, até finalmente o utilizador dar uma resposta com sentido.
+
+        Este programa só precisa de usar inteiros e carateres; 
+        não precisa de listas, nem de manipular strings, etc. 
+        A novidades são só a programação de dois ciclos while: 
+        (1) o ciclo de leitura com validação; (2) o ciclo que efetua a condução do jogo.
+
+
+    Exemplo de interação onde o jogador humano não faz batota:
+
         JOGO HI-LO (REVERSE)
         Pense num número secreto entre 0 e 1023!
         Já pensou? <ENTER>
@@ -682,66 +717,24 @@ https://ipce-184ea7.gitlab.io/
         A minha tentativa é 383. O número secreto é maior (>), menor (<) ou igual (=) ? =
         Viva! Acertei em 3 tentativas! O número secreto era 383!
 
-    Dois ciclos while:
-        1. ler uma resposta ATÉ ela fazer sentido (validação do input)
-        2. conduzir o jogo
+        
+    Exemplo de interação, onde o jogador humano faz batota:
+        JOGO HI-LO (REVERSE)
+        Pense num número secreto entre 0 e 1023!
+        Já pensou? <ENTER> 
+        A minha tentativa é 511. O número secreto é maior (>), menor (<) ou igual (=) ? <
+        A minha tentativa é 255. O número secreto é maior (>), menor (<) ou igual (=) ? <
+        A minha tentativa é 127. O número secreto é maior (>), menor (<) ou igual (=) ? <
+        A minha tentativa é 63. O número secreto é maior (>), menor (<) ou igual (=) ? <
+        A minha tentativa é 31. O número secreto é maior (>), menor (<) ou igual (=) ? <
+        A minha tentativa é 15. O número secreto é maior (>), menor (<) ou igual (=) ? <
+        A minha tentativa é 7. O número secreto é maior (>), menor (<) ou igual (=) ? <
+        A minha tentativa é 3. O número secreto é maior (>), menor (<) ou igual (=) ? <
+        A minha tentativa é 1. O número secreto é maior (>), menor (<) ou igual (=) ? >
+        A minha tentativa é 2. O número secreto é maior (>), menor (<) ou igual (=) ? >
+        Você é batoteiro!
 """
 
-
-
-
-
-
-# %%
-"""
-a) Ciclo 1: repetir a pergunta até a resposta fazer sentido [8 min -> 11:48]
-"""
-
-# Degrau: pedir s ou n, até a resposta ser s ou n
-def ask_yes_no() -> str:
-    """ Read input until "s" or "n". """
-    while True:
-        reply = input("Continuar (s/n)? ")
-        if reply == 's' or reply == 'n':
-            return reply
-
-print(ask_yes_no())             # com "talvez" pergunta outra vez; com "s" devolve 's'
-
-# A pergunta do ex 47
-def ask(guess: int) -> str:
-    """ Read input until "<", ">" ou "=" """
-    while True:
-        prompt = f"A minha tentativa é {guess}. "
-        prompt += "O número secreto é maior (>), menor (<) ou igual (=) ? "
-        reply = input(prompt)
-        if reply in {'>', '<', '='}:
-            return reply
-
-print(ask(511))                 # com "x" repete; com ">" devolve '>'
-
-# É o "ler até à marca" outra vez:
-#   ler, testar, e sair só quando a resposta é boa.
-# Aqui sai-se com return (que também acaba o ciclo, e a função).
-#
-# reply in {'>', '<', '='} é o mesmo que
-#   reply == '>' or reply == '<' or reply == '='
-# mas mais curto. As chavetas são um conjunto (teórica 6b).
-#
-# Repararam que o utilizador NUNCA consegue enganar o programa?
-# Chama-se validar o input: o programa não confia no utilizador.
-
-
-
-
-
-
-# %%
-"""
-b) Ciclo 2: o jogo [12 min -> 12:00] ----------------------------------------
-
-    A ideia: o computador guarda o intervalo onde o secreto ainda pode estar,
-    entre lo e hi. Tenta sempre o MEIO, e corta metade a cada resposta.
-"""
 
 MAX_HILO = 1023
 
@@ -813,7 +806,7 @@ main()
 
 # %%
 """
-c) Porque é que o computador é tão bom? [5 min -> 12:05] ----------------------
+    Porque é que o computador é tão bom? [5 min -> 12:05] ----------------------
 
     Quantas tentativas, no PIOR caso, para um número de 0 a 1023?
 """
@@ -857,6 +850,10 @@ print(worst)                             # 11
 
 
 
+
+
+
+
 # %%
 """
 ===========================================================================
@@ -867,9 +864,6 @@ https://ipce-184ea7.gitlab.io/
 
 
 
-
-
-
 # %%
 """
 a) Uma matriz é uma lista de listas [6 min -> 12:11] -----------------------
@@ -877,23 +871,61 @@ a) Uma matriz é uma lista de listas [6 min -> 12:11] -----------------------
     Antes de correr, prevejam cada print.
 """
 
-m = [[1, 2, 3],
-     [4, 5, 6]]
+m = [[1, 2, 3, 4, 5],
+     [6, 7]
+     [8, 9, 10]]
 
-print(m[0])                     # [1, 2, 3]   a linha 0 (é uma lista)
-print(m[1][2])                  # 6           linha 1, coluna 2
+# No 1º "nível" acedemos às linhas: 
+print(m[0])                     # [1, 2, 3, 4, 5]  a linha 0 (é uma lista)
+print(m[1])                     # [6, 7]           a linha 1 (é uma lista)
+print(m[2])                     # [8, 9, 10]       a linha 2 (é uma lista)
+
+print(m[-1])                    # [4, 5, 6]
+
+# %%
+for r in m:                     # cada linha r da matriz m
+    print(r)                    # [1, 2, 3, 4, 5],
+                                # [6, 7],
+                                # [8, 9, 10]
+
+# %%
 print(len(m))                   # 2           número de linhas
-print(len(m[0]))                # 3           número de colunas (o tamanho de uma linha)
+print(len(m[0]))                # tamanho da linha 0 (número de colunas - se a matriz for quadrada)
 
-# Mini 1: escrever o 5
-print(m[1][1])                  # 5
 
-# Mini 2: trocar o 1 por 100
+
+
+
+# %%
+# No 2º "nível" acedemos às celulas: 
+
+print(m[1][2])                  # 6           linha 1, coluna 2
+
+# para obtermos uma coluna temos que iterar pelas linhas para ir busar o valor de cada coluna
+# Exemplo valores da coluna 1
+for r in m:
+    print(r[1])
+
+
+
+# %%
+# Exercicios
+
+m = [[1, 2, 3, 4, 5],
+     [6, 7]
+     [8, 9, 10]]
+
+
+# Fazer print do valor 7 no terminal 
+print(m[1][1])                  
+
+#%%
+# Trocar o 1 por 100 na matriz
 m[0][0] = 100
 print(m)                        # [[100, 2, 3], [4, 5, 6]]
 
-# Mini 3: a última linha, sem saber quantas há
-print(m[-1])                    # [4, 5, 6]
+
+
 
 # m[i] é a linha i (uma lista normal).
 # m[i][j] é o elemento da linha i, coluna j.
@@ -901,9 +933,6 @@ print(m[-1])                    # [4, 5, 6]
 #
 # Numa matriz a sério, todas as linhas têm o mesmo tamanho.
 # Por isso o número de colunas é len(m[0]).
-
-
-
 
 
 
@@ -915,7 +944,8 @@ b) Percorrer uma matriz: pelos valores ou pelos índices [5 min -> 12:16] ---
 """
 
 m = [[1, 2, 3],
-     [4, 5, 6]]
+     [4, 5, 6],
+     [7, 8, 9]]
 
 # Pelos VALORES: cada linha, e dentro dela cada valor
 total = 0
@@ -930,7 +960,17 @@ for i in range(len(m)):
         print(f"m[{i}][{j}] = {m[i][j]}")
 # m[0][0] = 1   m[0][1] = 2   ...   m[1][2] = 6
 
-# Mini: contar os pares da matriz (pelos valores chega)
+
+
+# %%
+"""
+    c) Exercícios:
+"""
+# 1. Contar os pares da matriz (pelos valores chega)
+m = [[1, 2, 3],
+     [4, 5, 6],
+     [7, 8, 9]]
+
 count = 0
 for r in m:
     for v in r:
@@ -948,90 +988,18 @@ print(count)                    # 3
 
 
 
+#%%
 
-
-
-# %%
-"""
-c) As ferramentas do guião (teórica 6a) [3 min -> 12:19] -------------------
-
-    Corram esta célula ANTES das seguintes: os exercícios usam estas funções.
-"""
-
-type GList = list                # lista genérica
-type GMatrix = list[GList]       # matriz genérica
-
-type IList = list[int]           # lista de inteiros
-type IMatrix = list[IList]       # matriz de inteiros
-
-def create(nr: int, nc: int, value: any) -> GMatrix:
-    """ Create and initialize a matrix with nr rows and nc columns.
-        Precondition: nr >= 0 and nc >= 0
-    """
-    m = [None]*nr         # cria espaço para as linhas
-    for i in range(nr):   # preenche as várias linhas
-        m[i] = [value]*nc
-    return m
-
-def is_valid(m: GMatrix) -> bool:
-    """ Check if all the lines have the same length. """
-    nr = len(m)
-    for i in range(nr-1):  # verifica se todas as linhas têm igual comprimento
-        if len(m[i]) != len(m[i+1]):
-            return False
-    return True
-
-def nrows(m: GMatrix) -> int:
-    """ Number of rows of the matrix
-        Precondition: is_valid(m)
-    """
-    return len(m)             # número de linhas
-
-def is_empty(m: GMatrix) -> bool:
-    """ Is the matrix empty? """
-    return nrows(m) == 0      # testa se matriz vazia
-
-def ncols(m: GMatrix) -> int:
-    """ Number of columns of the matrix.
-        Precondition: is_valid(m)
-    """
-    if is_empty(m):           # a matriz vazia tem 0 colunas
-        return 0
-    else:
-        return len(m[0])      # número de colunas é o comprimento duma linha
-
-def row(m: GMatrix, i: int) -> GList:
-    """ Get the row i of the matrix.
-        Precondition: is_valid(m) and i in range(nrows(m))
-    """
-    return m[i].copy()      # faz cópia porque col também faz cópia
-
-def col(m: GMatrix, j: int) -> GList:
-    """ Get the column j of the matrix.
-        Precondition: is_valid(m) and j in range(ncols(m))
-    """
-    col = []
-    for r in m:             # acumula os vários elementos da coluna j
-        col.append(r[j])
-    return col
-
+# 2. Print a soma dos elementos de cada linha da matriz (pelos valores chega)
 m = [[1, 2, 3],
-     [4, 5, 6]]
-print(create(2, 3, 0))          # [[0, 0, 0], [0, 0, 0]]
-print(nrows(m), ncols(m))       # 2 3
-print(row(m, 1), col(m, 2))     # [4, 5, 6] [3, 6]
+     [4, 5, 6],
+     [7, 8, 9]]
 
-# São as peças de base. Os nomes dizem o que fazem:
-#   create(nr, nc, value) -> uma matriz nova, toda com o mesmo valor
-#   nrows(m), ncols(m)    -> número de linhas e de colunas
-#   row(m, i), col(m, j)  -> uma cópia da linha i, ou da coluna j
-#
-# Com elas, o resto do código lê-se melhor: nrows(m) diz mais do que len(m).
-#
-# (o guião anota is_empty com -> int, mas o resultado é True/False: -> bool)
-
-
-
+for r in m:
+    total = 0
+    for v in r:
+        total += v
+    print(total)
 
 
 
@@ -1042,6 +1010,7 @@ d) EXERCICIO 48 (GUIÃO, Mooshak R) - maximum [5 min -> 12:24] ---------------
     O valor máximo de uma matriz de inteiros não vazia.
         maximum([[1, 2, 3, 4], [5, 6, 7, 8]]) == 8
 """
+type IMatrix = list[IList]       # matriz de inteiros
 
 def maximum(m: IMatrix) -> int:
     """ Maximum of matrix.
@@ -1083,12 +1052,117 @@ print(maximum_bug([[9, 1], [2, 3]]))               # 3   ... mas não está
 
 
 
+# %%
+"""
+c) As ferramentas do guião (teórica 6a) [3 min -> 12:19] -------------------
+
+    Corram esta célula ANTES das seguintes: os exercícios usam estas funções.
+    
+    Estes tipos são para ajudar nas operações com Matrizes,
+    Criando-se algumas funções auxiliares prontas a usar para resover problemas
+    
+"""
+
+
+type GList = list                # lista genérica
+type GMatrix = list[GList]       # matriz genérica
+
+type IList = list[int]           # lista de inteiros
+type IMatrix = list[IList]       # matriz de inteiros
+
+def create(nr: int, nc: int, value: any) -> GMatrix:
+    """ Create and initialize a matrix with nr rows and nc columns.
+        Precondition: nr >= 0 and nc >= 0
+    """
+    m = [None]*nr         # cria espaço para as linhas
+    for i in range(nr):   # preenche as várias linhas
+        m[i] = [value]*nc
+    return m
+
+print(create(2, 5, 0))          # [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+
+#%%
+def is_valid(m: GMatrix) -> bool:
+    """ Check if all the lines have the same length. """
+    nr = len(m)
+    for i in range(nr-1):  # verifica se todas as linhas têm igual comprimento
+        if len(m[i]) != len(m[i+1]):
+            return False
+    return True
+
+# local test
+m = [[1, 2, 3],
+     [4, 5, 6]]
+n = [[1, 2, 3],
+     [4, 5]]
+
+print(is_valid(m))  # True
+print(is_valid(n))  # False
+
+
+def nrows(m: GMatrix) -> int:
+    """ Number of rows of the matrix
+        Precondition: is_valid(m)
+    """
+    return len(m)             # número de linhas
+
+def is_empty(m: GMatrix) -> bool:
+    """ Is the matrix empty? """
+    return nrows(m) == 0      # testa se matriz vazia
+
+def ncols(m: GMatrix) -> int:
+    """ Number of columns of the matrix.
+        Precondition: is_valid(m)
+    """
+    if is_empty(m):           # a matriz vazia tem 0 colunas
+        return 0
+    return len(m[0])      # número de colunas é o comprimento duma linha
+
+def row(m: GMatrix, i: int) -> GList:
+    """ Get the row i of the matrix.
+        Precondition: is_valid(m) and i in range(nrows(m))
+    """
+    return m[i].copy()      # faz cópia porque col também faz cópia
+
+def col(m: GMatrix, j: int) -> GList:
+    """ Get the column j of the matrix.
+        Precondition: is_valid(m) and j in range(ncols(m))
+    """
+    col = []
+    for r in m:             # acumula os vários elementos da coluna j
+        col.append(r[j])
+    return col
+
+m = [[1, 2, 3],
+     [4, 5, 6]]
+print(create(2, 3, 0))          # [[0, 0, 0], [0, 0, 0]]
+print(nrows(m), ncols(m))       # 2 3
+print(row(m, 1), col(m, 2))     # [4, 5, 6] [3, 6]
+
+# São as peças de base. Os nomes dizem o que fazem:
+#   create(nr, nc, value) -> uma matriz nova, toda com o mesmo valor
+#   nrows(m), ncols(m)    -> número de linhas e de colunas
+#   row(m, i), col(m, j)  -> uma cópia da linha i, ou da coluna j
+#
+# Com elas, o resto do código lê-se melhor: nrows(m) diz mais do que len(m).
+#
+# (o guião anota is_empty com -> int, mas o resultado é True/False: -> bool)
+
+
+
+
+
+
+
+
+
 
 # %%
 """
 e) EXERCICIO 48 (GUIÃO) - multiply [6 min -> 12:30] ------------------------
 
-    Multiplicar uma matriz por um número. O resultado é uma NOVA matriz.
+    Multiplicar uma matriz por um número. 
+    O resultado é uma NOVA matriz.
         multiply([[1, 2, 3, 4], [5, 6, 7, 8]], 5) == [[5, 10, 15, 20], [25, 30, 35, 40]]
 """
 
@@ -1128,8 +1202,15 @@ print(m1)                       # [[1, 2, 3, 4], [5, 6, 7, 8]]   a original não
 """
 f) EXERCICIO 48 (GUIÃO) - diagonals [6 min -> 12:36] -----------------------
 
-    As duas diagonais de uma matriz quadrada, num par de listas.
-        diagonals([[1, 2, 3], [4, 5, 6], [7, 8, 9]]) == ([1, 5, 9], [3, 5, 7])
+    Copiar as duas diagonais de uma matriz quadrada, 
+    para um par de listas. 
+    
+    Exemplo: 
+        m = [[1, 2, 3],
+             [4, 5, 6],
+             [7, 8, 9]]
+        
+        »» diagonals(m) == ([1, 5, 9], [3, 5, 7])
 """
 
 def diagonals(m: GMatrix) -> tuple[GList, GList]:
@@ -1147,6 +1228,7 @@ def diagonals(m: GMatrix) -> tuple[GList, GList]:
 m3 = [[1, 2, 3],
       [4, 5, 6],
       [7, 8, 9]]
+
 print(diagonals(m3))            # ([1, 5, 9], [3, 5, 7])
 
 # São as diagonais do CONSOLIDAR da aula 6:
@@ -1203,9 +1285,22 @@ print(transpose(m1))            # [[1, 5], [2, 6], [3, 7], [4, 8]]
 """
 h) EXERCICIO 48 (GUIÃO) - product [8 min -> 12:51] -------------------------
 
-    Produto de duas matrizes. Na posição (i, j) do resultado fica
+    Produto de duas matrizes. 
+    Na posição (i, j) do resultado fica
     o produto da linha i da 1ª pela coluna j da 2ª.
+
+    Exemplo: 
+        m1 = [ [1, 2, 3, 4],
+               [5, 6, 7, 8] ]
+
+        m2 = [ [ 1,  2,  3],
+               [ 4,  5,  6],
+               [ 7,  8,  9],
+               [10, 11, 12] ]
+        
         product(m1, m2) == [[70, 80, 90], [158, 184, 210]]
+
+    https://www.mathsisfun.com/algebra/matrix-multiplying.html
 """
 
 def dot(l1: IList, l2: IList) -> int:
@@ -1318,6 +1413,8 @@ main()
 
 
 
+
+
 # %%
 """
 j) Matrizes por dentro: porque é que o create é assim? [5 min -> 12:58] -----
@@ -1353,14 +1450,9 @@ print(m)                        # [[7, 0, 0], [0, 0, 0], [0, 0, 0]]   assim sim
 
 
 
-# %%
-"""
-k) Para o Mooshak e para casa [2 min -> 13:00] ------------------------------
 
-    Mooshak de hoje: R (ex 48).
-    Os exercícios de CONSOLIDAR, a seguir, são para casa:
-    três de while, três de matrizes e três ao estilo dos testes.
-"""
+
+
 
 
 
@@ -1401,9 +1493,30 @@ def sum_digits(n: int) -> int:
 
 print(sum_digits(1234), sum_digits(7), sum_digits(0))
 
+
+
+
+
+
+
+
+
+
+
 # ======================================================================
 #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
 # ======================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1459,9 +1572,33 @@ def collatz_steps(n: int) -> int:
 
 print(collatz_steps(6), collatz_steps(1), collatz_steps(27))
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 # ======================================================================
 #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
 # ======================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1526,9 +1663,31 @@ def average_grades() -> float:
 
 print(average_grades())
 
+
+
+
+
+
+
+
+
+
+
+
 # ======================================================================
 #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
 # ======================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1596,9 +1755,31 @@ def row_sums(m: list[list[int]]) -> list[int]:
 
 print(row_sums([[1, 2, 3], [4, 5, 6]]), row_sums([]))
 
+
+
+
+
+
+
+
+
+
+
+
 # ======================================================================
 #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
 # ======================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1651,9 +1832,31 @@ def is_symmetric(m: list[list[int]]) -> bool:
 print(is_symmetric([[1, 2], [2, 1]]), is_symmetric([[1, 2], [3, 1]]),
       is_symmetric([[1, 7, 3], [7, 4, 5], [3, 5, 6]]))
 
+
+
+
+
+
+
+
+
+
+
+
 # ======================================================================
 #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
 # ======================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1716,9 +1919,31 @@ def identity(n: int) -> list[list[int]]:
 
 print(identity(3))
 
+
+
+
+
+
+
+
+
+
+
+
 # ======================================================================
 #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
 # ======================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1784,9 +2009,31 @@ def get_month(order: int, leap_year: bool) -> int:
 print(get_month(5, False), get_month(31, False), get_month(60, True),
       get_month(60, False), get_month(366, True))
 
+
+
+
+
+
+
+
+
+
+
+
 # ======================================================================
 #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
 # ======================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1843,9 +2090,31 @@ def index(s: str, c: str, n: int) -> int:
 print(index("trelharlherah", 'h', 1), index("trelharlherah", 'h', 3),
       index("trelharlherah", 'h', 4))
 
+
+
+
+
+
+
+
+
+
+
+
 # ======================================================================
 #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
 # ======================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1916,9 +2185,31 @@ m = [[5,0,0],
 print(compress(m))
 print(expand(compress(m), 3, 3))
 
+
+
+
+
+
+
+
+
+
+
+
 # ======================================================================
 #   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreitem: tentem primeiro!
 # ======================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 

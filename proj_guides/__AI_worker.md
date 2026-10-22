@@ -13,45 +13,58 @@
 So start by reading them all. 
 
 
-## `And now: Domain Review -- POI Card Navigation (_3.2), mode AUDIT, the CLOSE-OUT pass`
+## `And now: _3.3 POI Card Look, Feel & Motion -- P1b real content into the LivingRoom test wall`
 
-Run proj_guides/skills/Domain_Review.md with:
-- DOMAIN GUIDE: proj_guides/_3.2_POI_Card_Navigation.md
-- AUDIT: proj_guides/_3.2.1_Audit.md -- this is a SECOND, SHORT pass over the same file, not a new audit. Do not
-  rebuild the matrix or re-walk the sections; verify the two things below and write them as a new section 13.
-- FOCUS (this is the whole brief):
-  1. **Is the fix list really closed?** For every chunk A-G in section 11, check the claim on DISK, not in the FIX
-     STATUS blocks: the named test exists, it asserts what the status says, and the file it guards is the current one.
-     Three leftovers are known and need a verdict each, not a repeat: `CardLayoutRule.FirstShown` (dead, but removing
-     it deletes test assertions -- say whether those assertions still prove anything, and if not, delete both and say
-     so); "Preview this preset on a point" (never a section 5 gap: fix now, or move it with a destination); chunk E
-     (already moved to `_3.3`, confirm the pointer is there and correct).
-  2. **Triage EVERY open TODO of this domain** -- the 8 in `_3.2`'s "## TODOs", anything left in section 11, and the
-     `_3.2` lines inside `__mixed_TODOs.md`. Each gets ONE destination with a reason: fix now (and it must be small
-     enough to do in THIS session), `_3.3`, `_3.4`, a later stage, the device list, or DROP with why. Nothing may end
-     this pass without a destination -- that is the whole point of the close-out, and the hand-off is written from it.
-     Write the moved lines into their destination files, and remove them from `_3.2`.
-- SKIP: sections 1-10 of the skill. This pass writes section 13 only.
+GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
+Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
+SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. No other Worker may be running
+(the P0 spike must have finished). Re-verify the baseline: full EditMode now (the tree moved since the last green commit).
 
-GATE: `git push` if the branch is ahead of origin (1 commit waits). Take one Unity capture (Game view AND the POI
-Editor window) and open it; if none works, say so. Confirm the tree compiles. The SDF fonts are Static: a modified
-font is a FINDING.
-WORKER MODEL: Sonnet-class -- reading, checking claims against the code and moving TODO lines. No features.
-TEST PLAN: full EditMode once, to confirm the tree is green where this pass leaves it (expect 2021). NO PlayMode run
-of any kind: nothing is being changed that a scene could feel, and the domain's close-out full run was taken at D + G
-(1192/1192, two days ago, on this tree). Say in the report which full run the domain closes on, with its counts --
-the hand-off quotes it.
-AUDIT MODE WRITES NO FEATURES. Allowed: the verdicts above, deleting dead code that item 1 concludes is dead, moving
-TODO lines, and the report.
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- "RE-PLAN IN PROGRESS" R1-R8 and "Before this domain is
+planned" point 2. The status table is OLD: build none of its steps.
+REQUIRED READING (all lines): `proj_guides/detail_card/content/CONTENT_MAP.md` (the checklist: every slot), `SOURCES.md`, both
+`text/*.md`; `TileStories/Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/README.txt`; `proj_guides/_3.2.1_Audit.md` F5;
+`.clinerules/40-testing.md` 4.2, 4.2.4b (precise tests that survive harmless changes), 4.3 (refresh discipline), 4.5.
+Context only: `_3.1_POI_Card_Blocks.md` (block kinds and their fields), `generate_config.py` / `generate_card_media.py` (how the
+wall was generated -- reuse if they are still the way config is produced, else edit `config.json` through the code path the
+Editor uses).
+WORKER MODEL: Opus-class -- the shipped wall is the fixture of ~950 card tests; re-basing them needs judgement.
+TEST PLAN: baseline full EditMode first. This block changes the wall every card test reads -> it OWES a full PlayMode run at the
+end (after the targeted Card / Poi fixtures go green first), and the full EditMode suite.
 
-DELIVER, in `_3.2.1_Audit.md` section 13 "Close-out":
-- a table of chunks A-G with CLOSED / MOVED / DROPPED and the one line of evidence for each;
-- the triage table: every open TODO, its destination, its reason;
-- the domain's final numbers: full EditMode and full PlayMode counts and the commit they were taken on, the file
-  count and the line count the domain added, and the ten slowest fixtures if the audit's figures have moved;
-- **a ten-line "state of the domain"** a stranger could read and know what the card's navigation does and what is
-  left undone anywhere in it.
-Then the chat finish the skill describes. Commit only if the developer asks.
+The developer's rule for this wall (2026-10-22): it is a LOCAL TEST wall, never shipped -- licences and historical accuracy do not
+matter here; what matters is content of REAL shape and size. Keep the README's "not for shipping" line.
+
+PART 1 -- import (number your sub-steps 1b.1 ...):
+1. Copy the media from `proj_guides/detail_card/content/` into `Resources/LivingRoom/CardMedia/` (images/, audio/, video/),
+   with the importer settings the existing files use (audio: Streaming + Vorbis; video: H.264 transcode at the existing bitrate;
+   pictures: the existing texture settings, max size 2048). Measure the build size delta and report it.
+2. FILE NAMES THE TESTS USE (`castle_hero`, `castle_then`, `castle_now`, `castle_map`, `gallery_1..4`, `damage_before/after`,
+   `tile_detail`, `castelo_s_jorge_guide_pt`, `castelo_s_jorge_video`, `portugal_tourism_guide_en`): for EACH, grep the tests and
+   read what they assert. If they assert only that the block shows a picture / plays a clip -> point the block at the real file
+   and update the reference. If they pin a PROPERTY of the placeholder (its length, size, a pixel, a caption text) -> re-base the
+   assertion to the real file's measured property, deliberately, and list every re-based test in the report with old -> new value.
+   Never weaken an assertion; never keep a placeholder only to keep a test green. Delete placeholder files nothing uses any more.
+PART 2 -- The Painting (`painting`): text EN + PT-PT, pictures with captions + credits, the audio guide with its VTT, the F5 text
+fixes that are NOT renames (translated category "Governo Real", fun-fact headings, no doubled "pinch" hint) and the NEW blocks of
+CONTENT_MAP (before_after, hotspot_image with its five spots, knowledge_check x3, person, today_map). New blocks change The
+Painting's block count: find every test that counts or orders its blocks, re-base it deliberately, list them.
+PART 3 -- The Lamp (`lamp`): the castle media, texts, galleries, the video (55 s, poster, EN + PT captions, chapters 0:00 / 0:20 /
+0:28) and the audio guides (EN + PT, each with its VTT). Keep EVERY block id and the block count (62): many tests pin them.
+Pull quotes (blocks 11, 12) stay as they are.
+PART 4 -- docs: rewrite `CardMedia/README.txt` (what each file is, its source line from SOURCES, "local test wall, not for
+shipping"); copy `SOURCES.md` next to it; tick the slots in CONTENT_MAP (`filled -> wired`).
+
+VISUALS: capture The Painting and The Lamp at 390 pt in EN and PT: Peek, Half, Full and every Full screen down to the end;
+open them and judge each in one sentence (do the pictures read, do captions sit right, does any block look broken by the new
+lengths). Note every visual defect for P3 / P5 -- do NOT fix layout or styles here.
+
+OUT OF SCOPE: renaming any point's `name` / summary (P1c, it re-bases the search tests); layout, tokens, styles; 3D / 360 /
+place_in_ar media; the pull quotes.
+Stop when every CONTENT_MAP slot is wired, the targeted Card / Poi PlayMode fixtures and then the full PlayMode run and the full
+EditMode suite are green. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
+Commit only if the developer asks.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

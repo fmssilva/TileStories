@@ -92,7 +92,7 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~65-140 s (2021 tests, 105.4 s, 2026-10-22, _3.2 fix chunks D+G); full PlayMode ~55-70 min (1192 tests, 3311 s, 2026-10-22, _3.2 fix
+EditMode ~65-140 s (2027 tests, 135.5 s, 2026-10-22, _3.3 P0 spike); full PlayMode ~55-70 min (1192 tests, 3311 s, 2026-10-22, _3.2 fix
 chunks D+G: 1192/1192, unfocused at the first poll and the end, Unity in front ~19-47 min; the run before it 1191/1192, 3686 s, wholly background);
 the Card / Poi targeted set (48 fixtures incl. LodWallSceneTests + LayoutStruggleGuardTests, 960 tests) ~45-55 min (3292 s, 2026-10-22, _3.2 fix
 chunks D+G, background); one

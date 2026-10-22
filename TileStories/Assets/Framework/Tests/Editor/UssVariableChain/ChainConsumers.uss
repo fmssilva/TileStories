@@ -1,0 +1,14 @@
+/* Test fixture for UssVariableChainTests (_3.3 P0 S1): the OTHER style sheet. It only reads the chain tokens that
+   ChainTokens.uss defines on an ancestor class, and overrides the primitive on a descendant. Never used by the app. */
+
+.chain-reads-component {
+    background-color: var(--chain-component);
+}
+
+.chain-reads-fallback {
+    background-color: var(--chain-fallback-missing);
+}
+
+.chain-override {
+    --chain-primitive: rgb(220, 40, 70);
+}

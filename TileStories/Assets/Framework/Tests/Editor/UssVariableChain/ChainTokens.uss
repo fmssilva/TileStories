@@ -1,0 +1,13 @@
+/* Test fixture for UssVariableChainTests (_3.3 P0 S1): a token chain the way the card's tiers would write it --
+   a primitive, a semantic role pointing at it, a component token pointing at the role. Every colour is distinct so a
+   wrong resolution can never pass by accident. Never used by the app. */
+
+.chain-root {
+    --chain-primitive: rgb(10, 120, 200);
+    --chain-role: var(--chain-primitive);
+    --chain-component: var(--chain-role);
+
+    /* fallbacks: one whose name is never defined, one whose name is defined (the fallback must lose) */
+    --chain-fallback-missing: var(--chain-never-defined, rgb(30, 60, 90));
+    --chain-fallback-defined: var(--chain-primitive, rgb(30, 60, 90));
+}

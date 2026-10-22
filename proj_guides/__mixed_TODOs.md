@@ -630,3 +630,32 @@ moved to `_3.3` (demo words, the header at Half) and to `_5.1` (narrow window, C
 - The "Layout update is struggling" entries are GUARDED by `LayoutStruggleGuard`; the Lamp / Next Up entry stays open until the guard fails.
 - The idle-Editor audio assertion flood (`Access version should be odd when acquiring lock`, 2026-10-17) is the engine's, not the card's:
   environment note only, reopen if it returns (Unity 6000.3.19f1).
+
+## Themes after the main one (2026-10-22, from the `_3.3` re-plan)
+
+- `_3.3` builds ONE main theme (premium heritage, light default + dark, both high contrast) to the end first. Only then, if time
+  allows, 1-2 more general themes for a wall developer to choose from. The token tiers of `_3.3` P4 exist so that a new theme
+  rewrites the primitive + semantic tiers and nothing in a block.
+- **A children's theme** to think through then: more colour, rounder shapes, illustrations / cartoon characters, playful motion
+  (Duolingo-like), bigger touch targets, simpler words. Probably more than tokens: it may want its own block variants and its own
+  illustration set, so judge it as a product, not a palette.
+- **A visitor profile at RUNTIME** ("premium" / "kids" / later others), chosen by the visitor, not only by the wall developer --
+  with the wall deciding which profiles it offers. Same switch-classes mechanism as light / dark; needs the profile store
+  (`CardLocalState` or an app-level one) and an onboarding question.
+
+## Pin the Immersal SDK (2026-10-22, from the `_3.3` re-plan R7)
+
+`Packages/manifest.json` pulls `com.immersal.core` from `https://github.com/immersal/imdk-unity.git` with no `#tag` or `#commit`:
+only `packages-lock.json` holds today's hash, and any lock refresh (a package resolve, an engine upgrade) can bring a different
+SDK version into the AR stack unnoticed. Pin it to the tag / commit in the lock file now, and move it on purpose with a device
+check. Same for `com.coplaydev.unity-mcp` (`#main`), less critical (dev tool only).
+
+## A USS lint test for every sheet in the project (2026-10-22, from the `_3.3` P0 spike R8)
+
+The P0 spike found three USS mistakes that import WITHOUT a console message and break silently at runtime: a `cubic-bezier()`
+timing function (every style update of a matching element then throws `ArgumentOutOfRangeException`), a
+`-unity-font-definition: url(...)` pointing at a TMP_FontAsset (the label draws nothing), and a `var(--x)` whose name is misspelt
+(the property paints transparent). One EditMode test that scans every `.uss` under `Assets/` (card, search, zoom, onboarding,
+Dev excluded) for the first two patterns and checks each `var(--name)` against the names some sheet defines would catch all three
+before a render does. Cross-domain (every UI Toolkit screen), so not part of `_3.3` alone. `StyleSheet.m_ImportedWithWarnings`
+(reflection) also flags a sheet the importer partly dropped.

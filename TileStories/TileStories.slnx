@@ -3,6 +3,8 @@
   <Project Path="TileStories.csproj" />
   <Project Path="TileStories.Tests.Runtime.csproj" />
   <Project Path="TileStories.Editor.Tests.csproj" />
+  <Project Path="TileStories.Dev.StyleSpike.Tests.csproj" />
+  <Project Path="TileStories.Dev.StyleSpike.csproj" />
   <Project Path="TileStories.LivingRoom.csproj" />
   <Project Path="TileStories.LivingRoom.Tests.Runtime.csproj" />
   <Project Path="Assembly-CSharp.csproj" />

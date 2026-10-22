@@ -1,0 +1,45 @@
+/* DEV-ONLY (_3.3 P0 S6): reveal motion with USS transitions (translate + opacity only: no layout properties while AR runs). */
+
+.s6-block {
+    height: 60px;
+    margin: 0 16px 8px 16px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgb(214, 208, 197);
+    transition-property: opacity, translate;
+    transition-duration: 0.45s, 0.45s;
+    transition-timing-function: ease-out-cubic, ease-out-cubic;
+}
+
+.s6-block--hidden {
+    opacity: 0;
+    translate: 0 16px;
+}
+
+/* a frame with no transitions: a motion's START state is applied under it (else the start itself animates), and an element
+   driven by experimental.animation wears it (else the USS transition smooths every inline write again) */
+.s6-block.s6-no-transition,
+.s6-page.s6-no-transition {
+    transition-duration: 0s;
+}
+
+/* "preview grows into a page": a container transform from the preview's rect to the whole panel */
+.s6-page {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 390px;
+    height: 844px;
+    background-color: rgb(255, 255, 255);
+    transform-origin: 0 0;
+    transition-property: scale, translate, border-radius;
+    transition-duration: 0.36s, 0.36s, 0.36s;
+    transition-timing-function: ease-in-out-cubic, ease-in-out-cubic, ease-in-out-cubic;
+}
+
+.s6-label {
+    font-size: 17px;
+    color: rgb(24, 22, 20);
+    margin: 18px 0 0 16px;
+}

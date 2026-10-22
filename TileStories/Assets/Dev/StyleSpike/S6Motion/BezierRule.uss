@@ -1,0 +1,7 @@
+/* DEV-ONLY (_3.3 P0 S6): the Stitch reveal curve as its code.html writes it. Measured on 6000.3: the importer drops the value with
+   a warning (m_ImportedWithWarnings, nothing in the console) and every style update of a matching element then THROWS
+   (ArgumentOutOfRangeException in ComputedStyle.ApplyGlobalKeyword). Kept apart so only the test that proves it loads it. */
+
+.s6-bezier {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}

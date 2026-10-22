@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- DEV-ONLY (_3.3 P0 S2c): one mock card block in light mode for the font bake-off. The words are real-length demo prose
+         (title, lede, body paragraph, caption, a button); the pair under test is a class on the root (BakeOff.uss). -->
+    <ui:VisualElement name="bakeoff-ground" class="bo-ground">
+        <ui:Label name="bo-pair" class="bo-pair-name" text="pair" />
+        <ui:VisualElement name="bo-block" class="bo-block">
+            <ui:Label name="bo-title" class="bo-title" text="Paço da Ribeira" />
+            <ui:Label name="bo-lede" class="bo-lede" text="For two centuries the royal palace stood right here, on the river's edge, until the morning of 1 November 1755." />
+            <ui:Label name="bo-body" class="bo-body" text="King Manuel I moved the court down from the Castelo de São Jorge around 1500, to watch the ships of the India run come and go. The palace grew into a maze of halls, a library of seventy thousand volumes and an opera house that opened only months before the earthquake. Fire and the tsunami took it all; the Praça do Comércio was laid out over its ruins." />
+            <ui:VisualElement name="bo-figure" class="bo-figure" />
+            <ui:Label name="bo-caption" class="bo-caption" text="Terreiro do Paço before 1755, engraving after Dirk Stoop (detail). Gravura, coleção do Museu de Lisboa." />
+            <ui:Button name="bo-button" class="bo-button" text="Read the whole story · 6 min" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

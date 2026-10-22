@@ -1,0 +1,34 @@
+/* DEV-ONLY (_3.3 P0 S3): USS filter on a picture element (6000.3). The picture is the shared sunny-wall backdrop. */
+
+.s3-picture {
+    height: 190px;
+    margin-bottom: 4px;
+    background-image: url("/Assets/Dev/MarkerGallery/Backdrops/backdrop.png");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.s3-blur-6 { filter: blur(6px); }
+.s3-blur-2 { filter: blur(2px); }
+.s3-blur-16 { filter: blur(16px); }
+.s3-tint { filter: tint(rgb(255, 196, 120)); }
+.s3-grayscale { filter: grayscale(100%); }
+
+/* transition test: from no blur to a strong blur over one second, linear so the midpoint is half the radius */
+.s3-anim {
+    filter: blur(0px);
+    transition-property: filter;
+    transition-duration: 1s;
+    transition-timing-function: linear;
+}
+
+.s3-anim.s3-anim--on { filter: blur(16px); }
+
+.s3-label {
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    font-size: 14px;
+    color: rgb(255, 255, 255);
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 2px 6px;
+}
