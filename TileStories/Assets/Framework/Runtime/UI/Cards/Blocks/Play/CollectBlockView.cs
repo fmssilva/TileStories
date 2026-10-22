@@ -106,7 +106,7 @@ namespace TileStories
             _poiId = context.Poi?.id ?? "";
             _blockKey = instance.key ?? "";
             var read = new BlockFieldReader(instance, context.Language, context.FallbackLanguage);
-            string series = CollectRule.Series(read, context.Poi, context.Taxonomy);
+            string series = CollectRule.Series(read, context.Poi, context.Taxonomy, context.Language);
             Series.text = series;
             Series.style.display = series.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             ItemName.text = CollectRule.ItemName(read, context.Poi, context.Language, context.FallbackLanguage);

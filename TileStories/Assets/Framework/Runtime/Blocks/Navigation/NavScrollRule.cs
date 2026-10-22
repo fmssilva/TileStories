@@ -7,7 +7,8 @@ namespace TileStories
     // Everything is measured in the stack's own content (a slot's layout.y, the scroll offset): the nav chrome sits OUTSIDE the
     // scroll (_3.2 section 4.2), so no offset for it ever enters the arithmetic.
     //   - a jump's target offset = the slot's top, clamped to [0, content - viewport]
-    //   - the current section = the last one whose first target's top is at or above the SPY LINE (a third down the viewport),
+    //   - the current section = the last one whose first target's top is at or above the SPY LINE (a third down the viewport) --
+    //     unless a section past the line still starts on screen: the first such one, the one at the viewport's top (a short section) --
     //     and the LAST section once the stack is scrolled to its end (else a short final family could never be marked)
     //   - while a jump glides, the spy is frozen on the jump's section (else an element's marker flickers through every family
     //     the glide passes), then released
@@ -38,7 +39,10 @@ namespace TileStories
         // CardNavModel gives them); -1 with no section. Before the first section's top reaches the line the first section is
         // named (an element always marks one), and a stack that does not scroll is read from its top, never "at its end". A top that
         // is not laid out (infinite or NaN: a block out of sight -- tabs sets other sections aside) has reached no line, and at the end the
-        // LAST LAID-OUT one is named, never one the visitor cannot see
+        // LAST LAID-OUT one is named, never one the visitor cannot see.
+        // Several tops past the line at once (a section shorter than the line's distance): the FIRST that still starts on screen is the
+        // one being read -- it sits at the top of the viewport -- until its top scrolls away; only when none starts on screen does the
+        // last past the line win. Without it a jump to a short section marked the NEXT one (_3.3 P1b: tap Listen, the bar marked Play)
         public static int CurrentSection(IReadOnlyList<float> sectionTops, float offset, float contentHeight, float viewportHeight)
         {
             if (sectionTops == null || sectionTops.Count == 0) return -1;
@@ -50,9 +54,15 @@ namespace TileStories
             }
             float spyLine = SpyLine(offset, viewportHeight);
             int current = 0;
-            for (int i = 1; i < sectionTops.Count; i++)
-                if (sectionTops[i] <= spyLine) current = i;
-            return current;
+            int firstOnScreen = -1;
+            for (int i = 0; i < sectionTops.Count; i++)
+            {
+                if (!(sectionTops[i] <= spyLine)) continue;
+                current = i;
+                // - a landed top can rest a rounding short of the offset: the landing's own tolerance
+                if (firstOnScreen < 0 && sectionTops[i] >= offset - LandingTolerance) firstOnScreen = i;
+            }
+            return firstOnScreen >= 0 ? firstOnScreen : current;
         }
 
         // Whether a block counts as SEEN at `offset` (_3.2 step 11b, the contents list's tick): it is on screen and the spy line has passed

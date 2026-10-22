@@ -17,6 +17,11 @@ namespace TileStories.Editor
             "SYMBOL (ObjectField cell): lists every Sprite in the whole project. CLICK THE THUMBNAIL PREVIEW: opens the curated picker narrowed to just this wall's symbols plus the framework defaults. All cells write to the same field.\n\n" +
             "TO ADD YOUR OWN IMAGE: drop a PNG anywhere under this wall's Assets/Apps/<Wall>/MarkerAssets/ folder -- Unity auto-imports it as a Sprite. Then pick it from either list; it registers into this wall's icon library automatically. Same flow for badges and outline ring art.";
 
+        private const string CategoryNamesPerLanguageHelp =
+            "What a visitor reading the card in another language sees on the category chip (and as a collectible's series). One column per " +
+            "card language after the first (Detail Card > Card Container > Languages); the first language reads the Category label above. " +
+            "Empty: that language shows the Category label too. Search results, suggestions and filter chips show the Category label.";
+
         private const string MarkerShapeHelp =
             "The silhouette behind every marker's icon: circle, rounded square, hexagon, diamond or star. None draws no backdrop: the icon floats on the wall and only the outline ring and the badge remain. One shape for the whole wall (a per-POI shape is deliberately not offered: a consistent shape is what makes a marker read as 'a point of interest').";
         private const string IconColorHelp =

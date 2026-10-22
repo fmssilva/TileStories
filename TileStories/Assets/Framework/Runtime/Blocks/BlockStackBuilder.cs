@@ -232,6 +232,10 @@ namespace TileStories
                 var value = instance.fields?.Find(v => v != null && v.key == field.Key);
                 if (!BlockFieldReader.HasContent(value, field.Type)) return (field.Key, SkipReason.MissingRequired);
                 if (field.Type == BlockFieldType.Asset && !MediaPathRule.IsValid(value.asset, field.Media)) return (field.Key, SkipReason.InvalidMedia);
+                // - a language's own file must be as valid as the shared one: else that language's card would lose the block silently
+                if (field.Type == BlockFieldType.Asset && value.asset_by_language != null
+                    && value.asset_by_language.Exists(e => e != null && !string.IsNullOrWhiteSpace(e.value) && !MediaPathRule.IsValid(e.value, field.Media)))
+                    return (field.Key, SkipReason.InvalidMedia);
                 if (field.Type == BlockFieldType.Items && !value.items.Exists(item => BlockFieldReader.ItemIsComplete(item, field.ItemFields)))
                     return (field.Key, SkipReason.NoCompleteRow);
             }

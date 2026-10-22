@@ -33,7 +33,12 @@ namespace TileStories
         public bool Stored(string key) => Find(key) != null;
         // A Url field's link when WebLinkRule opens it, else ""
         public string OpenableUrl(string key) => WebLinkRule.Openable(Value(key));
-        public string Asset(string key) => Find(key)?.asset ?? "";
+        // An Asset field's file in the visitor's language: its own file for that language, else the file for every language
+        public string Asset(string key)
+        {
+            var value = Find(key);
+            return value == null ? "" : AssetFor(value.asset_by_language, value.asset, _language);
+        }
         // An image field's path when MediaPathRule accepts it, else "" (the view shows its "unavailable" state)
         public string ValidAsset(string key, MediaKind kind) => MediaPathRule.IsValid(Asset(key), kind) ? Asset(key).Trim() : "";
         public IReadOnlyList<BlockItemData> Items(string key) => (IReadOnlyList<BlockItemData>)Find(key)?.items ?? System.Array.Empty<BlockItemData>();
@@ -47,8 +52,19 @@ namespace TileStories
         // The Asset of one Items row's sub-field when MediaPathRule accepts it, else ""
         public string ItemValidAsset(BlockItemData item, string key, MediaKind kind)
         {
-            string path = FindItemField(item, key)?.asset ?? "";
+            var value = FindItemField(item, key);
+            string path = value == null ? "" : AssetFor(value.asset_by_language, value.asset, _language);
             return MediaPathRule.IsValid(path, kind) ? path.Trim() : "";
+        }
+
+        // language's own file -> the file for every language. Unlike Pick, never another language's file: a Portuguese
+        // narration is not a fallback for an English card, the shared file is
+        public static string AssetFor(List<LocalizedEntry> byLanguage, string shared, string language)
+        {
+            if (byLanguage != null && !string.IsNullOrEmpty(language))
+                foreach (var e in byLanguage)
+                    if (e != null && e.lang == language && !string.IsNullOrWhiteSpace(e.value)) return e.value;
+            return shared ?? "";
         }
 
         // The Toggle of one Items row's sub-field

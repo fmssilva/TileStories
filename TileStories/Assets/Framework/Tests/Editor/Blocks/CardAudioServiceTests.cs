@@ -12,7 +12,7 @@ namespace TileStories.Editor.Tests
     {
         private const string Root = "LivingRoom/CardMedia";
         private const string TonePath = "audio/lamp_tone.wav";
-        private const string GuidePath = "audio/castelo_s_jorge_guide_pt.mp3";
+        private const string GuidePath = "audio/guide_castle_en.mp3";
 
         private ManualAudioOutput _out;
         private ResourcesMediaSource _media;
@@ -173,12 +173,12 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("lamp_tone", _out.Clip.name);
 
             FadeStep(0.25f);
-            Assert.AreEqual("castelo_s_jorge_guide_pt", _out.Clip.name, "the fade is over: the new clip is what the device plays");
+            Assert.AreEqual("guide_castle_en", _out.Clip.name, "the fade is over: the new clip is what the device plays");
             Assert.IsTrue(_out.IsPlaying);
             Assert.AreEqual(1f, _out.Volume, "back at full for the new audio");
             Assert.AreEqual(0, _media.RefCount(TonePath), "the old clip was given back");
             Assert.AreEqual(1, _media.RefCount(GuidePath));
-            Assert.AreEqual(200.39f, _svc.Length, 0.1f);
+            Assert.AreEqual(164.52f, _svc.Length, 0.1f);
             Assert.AreEqual(0f, _svc.Position, 0.01f);
         }
 
@@ -201,11 +201,11 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(_out.IsPlaying);
 
             FadeStep(0.3f);
-            Assert.AreEqual("castelo_s_jorge_guide_pt", _out.Clip.name, "the fade is over: the guide is loaded");
+            Assert.AreEqual("guide_castle_en", _out.Clip.name, "the fade is over: the guide is loaded");
             Assert.IsFalse(_out.IsPlaying, "but NOT started: the pause asked during the fade was kept");
             Assert.AreEqual(CardAudioState.Paused, _svc.State);
             Assert.AreEqual(0f, _svc.Position, 0.01f, "at its start");
-            Assert.AreEqual(200.39f, _svc.Length, 0.1f, "its length is known: the player draws 0:00 / 3:20");
+            Assert.AreEqual(164.52f, _svc.Length, 0.1f, "its length is known: the player draws 0:00 / 2:44");
             Assert.AreEqual(0, _media.RefCount(TonePath), "the old clip was given back");
             Assert.AreEqual(1, _media.RefCount(GuidePath), "the paused guide is held");
             Advance(1f);
@@ -230,7 +230,7 @@ namespace TileStories.Editor.Tests
             _svc.Toggle(Guide("b"));
             Assert.AreEqual(CardAudioState.Playing, _svc.State, "a second tap takes the pause back");
             FadeStep(0.5f);
-            Assert.AreEqual("castelo_s_jorge_guide_pt", _out.Clip.name);
+            Assert.AreEqual("guide_castle_en", _out.Clip.name);
             Assert.IsTrue(_out.IsPlaying, "the guide plays, as first asked");
             Assert.AreEqual(CardAudioState.Playing, _svc.State);
         }
@@ -282,7 +282,7 @@ namespace TileStories.Editor.Tests
             while (_svc.IsCurrent(Tone("a")) && steps++ < 80) Advance(0.5f);
             Assert.IsTrue(_svc.IsCurrent(Guide("b")), "the first ended: the queued one is the current audio");
             Assert.AreEqual(CardAudioState.Playing, _svc.State);
-            Assert.AreEqual("castelo_s_jorge_guide_pt", _out.Clip.name);
+            Assert.AreEqual("guide_castle_en", _out.Clip.name);
             Assert.AreEqual(0, _svc.Queue.Count);
             Assert.AreEqual(0, _media.RefCount(TonePath), "the ended clip was given back");
             Assert.AreEqual(1, _media.RefCount(GuidePath));
@@ -298,7 +298,7 @@ namespace TileStories.Editor.Tests
             _svc.Toggle(Guide("b"));
             Assert.IsTrue(_svc.IsCurrent(Guide("b")));
             Assert.AreEqual(CardAudioState.Playing, _svc.State);
-            Assert.AreEqual("castelo_s_jorge_guide_pt", _out.Clip.name);
+            Assert.AreEqual("guide_castle_en", _out.Clip.name);
             Assert.AreEqual(0, _svc.Queue.Count, "a paused audio the visitor moved on from never blocks a new one");
             Assert.AreEqual(0, _media.RefCount(TonePath));
         }

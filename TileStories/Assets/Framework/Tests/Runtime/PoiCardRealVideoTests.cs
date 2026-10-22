@@ -14,7 +14,7 @@ namespace TileStories.Tests
     // cap -- never for an amount of time -- and asserts no elapsed time.
     public class PoiCardRealVideoTests : SearchSceneFixture
     {
-        private const string ClipPath = "video/castelo_s_jorge_video.mp4";
+        private const string ClipPath = "video/lisbon_square_castle_55s.mp4";
         // - frames, not seconds: generous for a decoder on a busy Editor, and still a fixed bound
         private const int MaxFrames = 1200;
 
@@ -49,17 +49,19 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.2f);
             yield return CardTestInput.Tap(inline.Panel.PlayOverlay.panel, inline.Panel.PlayOverlay.worldBound.center);
             Assert.AreEqual(CardVideoState.Playing, Card.Video.State, "a real tap started it");
-            Assert.AreEqual("castelo_s_jorge_video", player.clip.name, "the real clip");
+            Assert.AreEqual("lisbon_square_castle_55s", player.clip.name, "the real clip");
             Assert.AreSame(player.targetTexture, Card.Video.Texture, "it decodes into the texture the card draws");
 
             yield return Until(() => Card.Video.HasFrame, "the decoder delivered a first frame");
             yield return Until(() => inline.Panel.ShowsFrames, "the panel draws the real frames");
-            Assert.AreEqual(640, player.targetTexture.width, "a texture the clip's size");
+            Assert.AreEqual(854, player.targetTexture.width, "a texture the clip's size");
             yield return CardTestInput.Settle(0.2f);
             yield return Capture("Lamp_Video_RealFrame");
 
-            Card.Video.Seek(100f);
-            yield return Until(() => Mathf.Abs((float)player.time - 100f) < 2f, "the real playhead moved to the sought second");
+            // - the middle of the clip itself (54.9 s since _3.3 P1b), never a typed second that a shorter clip would not reach
+            float sought = (float)player.clip.length / 2f;
+            Card.Video.Seek(sought);
+            yield return Until(() => Mathf.Abs((float)player.time - sought) < 2f, "the real playhead moved to the sought second (" + sought + " s)");
             Card.Video.Pause();
             yield return Until(() => !player.isPlaying, "paused in the engine too");
             Assert.AreEqual(CardVideoState.Paused, Card.Video.State);

@@ -171,6 +171,47 @@ namespace TileStories.Editor.Tests
 
         // ---- the shipped wall: one identity system, every reference resolves ----
 
+        // _3.3 P1b: a category's name per card language. Real typing in the Category Names Per Language cell gives the Portuguese card its
+        // own chip words; English and the search side (no language) keep the one label; emptying the cell takes the name away; Ctrl+Z
+        // brings it back. A one-language card shows no such table.
+        [UnityTest]
+        public IEnumerator CategoryNamePerLanguage_RealTyping_NamesTheChipInThatLanguageOnly_AndEmptyingTheCellFallsBackToTheLabel()
+        {
+            var config = NewConfig();
+            config.card_settings.languages = new List<string> { "en", "pt" };
+            config.category_styles.Add(new CategoryStyleEntry { key = "royal", label = "Royal Government", icon_key = "unknown", search_keywords = new List<string>() });
+            config.pois.Add(new POIData { id = "poi_1", name = "Palace", category = "royal" });
+            _window = new PoiEditorWindowHost(config, "_showGlobalMarker");
+            yield return _window.WaitForRepaint();
+            Assert.IsTrue(_window.ScreenRects.ContainsKey("Category name pt#0"), "precondition: a two-language card shows a pt cell per category");
+            Assert.IsFalse(_window.ScreenRects.ContainsKey("Category name en#0"), "the first language reads the Category label: no cell of its own");
+            Assert.IsEmpty(_window.Config.category_styles[0].label_by_language, "drawing the cells writes nothing");
+
+            yield return _window.ReplaceText("Category name pt#0", "Governo Real");
+            yield return _window.ClickAway();
+            var row = _window.Config.category_styles[0];
+            Assert.AreEqual("Governo Real", POIEditorToolWindow.LanguageEntryValue(row.label_by_language, "pt"), "typing stored the Portuguese name");
+            Assert.AreEqual("Royal Government", row.label, "the label is untouched");
+            var poi = _window.Config.pois[0];
+            Assert.AreEqual("Governo Real", PoiSubtitle.Of(poi, _window.Config, false, "pt"), "a Portuguese card's chip");
+            Assert.AreEqual("Royal Government", PoiSubtitle.Of(poi, _window.Config, false, "en"), "an English card's chip");
+            Assert.AreEqual("Royal Government", PoiSubtitle.Of(poi, _window.Config), "results and search (no visitor language): the one label");
+            Assert.IsTrue(_window.Unsaved);
+
+            yield return _window.ReplaceText("Category name pt#0", "");
+            yield return _window.ClickAway();
+            row = _window.Config.category_styles[0];
+            Assert.IsEmpty(row.label_by_language, "an emptied cell removes the entry: no blank name stays behind");
+            Assert.AreEqual("Royal Government", PoiSubtitle.Of(poi, _window.Config, false, "pt"), "and Portuguese falls back to the label");
+            yield return _window.PressUndo();
+            Assert.AreEqual("Governo Real", POIEditorToolWindow.LanguageEntryValue(_window.Config.category_styles[0].label_by_language, "pt"), "Ctrl+Z brings the name back");
+
+            _window.Config.card_settings.languages = new List<string> { "en" };
+            _window.ScreenRects.Clear();
+            yield return _window.WaitForRepaint();
+            Assert.IsFalse(_window.ScreenRects.Keys.Any(k => k.StartsWith("Category name")), "a one-language card shows no names-per-language table");
+        }
+
         [Test]
         public void ShippedConfig_EveryTaxonomyRowHasAUniqueKeyAndAName_AndEveryPoiReferenceResolves()
         {

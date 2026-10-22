@@ -11,7 +11,7 @@ namespace TileStories.Editor.Tests
     public class VideoMediaTests
     {
         private const string Root = "LivingRoom/CardMedia";
-        private const string FixtureClip = "video/castelo_s_jorge_video.mp4";
+        private const string FixtureClip = "video/lisbon_square_castle_55s.mp4";
         private const string FixtureAssetPath = "Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/" + FixtureClip;
 
         [Test]
@@ -37,9 +37,9 @@ namespace TileStories.Editor.Tests
             var source = new ResourcesMediaSource(Root);
             var clip = source.Load<VideoClip>(FixtureClip);
             Assert.IsNotNull(clip, "the castle video loads through Resources");
-            Assert.AreEqual(200.3, clip.length, 0.2, "its real length");
-            Assert.AreEqual(640u, clip.width);
-            Assert.AreEqual(360u, clip.height);
+            Assert.AreEqual(54.9, clip.length, 0.2, "its real length");
+            Assert.AreEqual(854u, clip.width);
+            Assert.AreEqual(480u, clip.height);
             Assert.AreEqual(1, clip.audioTrackCount, "it has sound: starting it must pause the card's audio");
             Assert.IsTrue(MediaPathRule.IsAssetOfKind(clip, MediaKind.Video));
             Assert.IsFalse(MediaPathRule.IsAssetOfKind(clip, MediaKind.Image));
@@ -61,7 +61,7 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(settings.enableTranscoding, "transcoded on import");
             Assert.AreEqual(VideoCodec.H264, settings.codec, "H.264 plays on every target");
             Assert.AreEqual(VideoBitrateMode.Low, settings.bitrateMode);
-            Assert.Less(importer.outputFileSize, importer.sourceFileSize * 0.75, "the imported clip is well under the 16 MB source");
+            Assert.Less(importer.outputFileSize, importer.sourceFileSize * 0.75, "the imported clip is well under its 5.7 MB source");
         }
 
         [Test]

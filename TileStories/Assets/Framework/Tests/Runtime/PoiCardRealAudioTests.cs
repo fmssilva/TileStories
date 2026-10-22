@@ -41,8 +41,8 @@ namespace TileStories.Tests
             Assert.AreEqual(CardAudioState.Playing, Card.Audio.State);
             Assert.IsTrue(source.isPlaying, "Unity's audio engine is playing");
             Assert.IsNotNull(source.clip);
-            Assert.AreEqual("castelo_s_jorge_guide_pt", source.clip.name, "the real narration");
-            Assert.AreEqual(200.39f, source.clip.length, 0.1f);
+            Assert.AreEqual("guide_castle_en", source.clip.name, "the real narration");
+            Assert.AreEqual(164.52f, source.clip.length, 0.1f);
             Assert.AreEqual(1f, source.volume, "full volume");
 
             Card.Audio.Seek(50f);
@@ -76,7 +76,7 @@ namespace TileStories.Tests
             Card.Audio.Stop();
             yield return null;
             Assert.IsFalse(source.isPlaying, "stopped");
-            Assert.AreEqual(0, Card.Media.RefCount("audio/castelo_s_jorge_guide_pt.mp3"), "and the clip was given back");
+            Assert.AreEqual(0, Card.Media.RefCount("audio/guide_castle_en.mp3"), "and the clip was given back");
         }
     }
 }

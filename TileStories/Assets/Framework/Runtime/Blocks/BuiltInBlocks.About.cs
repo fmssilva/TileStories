@@ -58,6 +58,8 @@ namespace TileStories
         public const string FunFactPostcard = "postcard";
         public const string FunFactItemsField = "facts";
         public const string FunFactTextField = "text";
+        // A fact's own heading ("Lost in a day"): what is behind the tap. Blank = the card's "Did you know?" (Card Texts)
+        public const string FunFactHeadingField = "heading";
 
         public const string PullQuoteKind = "pull_quote";
         public const string PullQuoteSerif = "serif";
@@ -268,7 +270,7 @@ namespace TileStories
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindFunFact,
             DisplayName = "Fun Fact",
-            Help = "Surprising facts about the point, one small card per fact under the heading of Detail Card > Card Texts. " +
+            Help = "Surprising facts about the point, one small card per fact under its own Heading (empty: the heading of Detail Card > Card Texts). " +
                    "Flip: the fact is hidden until the visitor taps the card (a tap on the heading hides it again). Postcard: " +
                    "the fact shown at once on a tilted postcard. " + LongTextHelp,
             Variants = new[] { FunFactFlip, FunFactPostcard },
@@ -282,6 +284,12 @@ namespace TileStories
                     Help = "One row per fact: one or two sentences each.",
                     ItemFields = new[]
                     {
+                        new BlockFieldDefinition
+                        {
+                            Key = FunFactHeadingField, Type = BlockFieldType.LocalizedText, Label = "Heading",
+                            Help = "A few words that say what is behind the card (Lost in a day), so two facts side by side never read alike. " +
+                                   "Empty: the card's own heading (Detail Card > Card Texts, Did you know?).",
+                        },
                         new BlockFieldDefinition { Key = FunFactTextField, Type = BlockFieldType.LocalizedLongText, Label = "Fact", Help = "The fact itself. " + LongTextHelp },
                     },
                 },

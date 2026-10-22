@@ -146,17 +146,20 @@ namespace TileStories.Tests
             Assert.LessOrEqual(Scroll.scrollOffset.y, 1f, "precondition: back at the top of the card");
         }
 
-        // The section the reader is in, read from the SCREEN (each section's first slot against the spy line, or the last at the end)
-        private int SectionUnderTheSpyLine()
+        // Real drags down the card until the stack rests at the END of its range (the range is read again each time: a reveal at the end
+        // grows the card). The end, not the last target, is where the blocks waiting for it are revealed and where Hide While Scrolling
+        // gives the bottom area back -- since _3.3 P1b The Lamp's Sources, under its last target, are taller than the screen
+        private IEnumerator DragToTheEnd()
         {
-            if (Range > 0f && Scroll.scrollOffset.y >= Range - NavScrollRule.EndTolerance) return Model.Sections.Count - 1;
-            var viewport = Scroll.contentViewport.worldBound;
-            float line = viewport.yMin + viewport.height * NavScrollRule.SpyLineFraction;
-            int found = 0;
-            for (int i = 0; i < Model.Sections.Count; i++)
-                if (Sheet.Stack.SlotOfBlock(Model.Sections[i].Targets[0]).worldBound.yMin <= line) found = i;
-            return found;
+            for (int drag = 0; drag < 80 && Scroll.scrollOffset.y < Range - NavScrollRule.EndTolerance; drag++)
+                yield return DragStack(-Scroll.contentViewport.layout.height * 0.7f);
+            Assert.GreaterOrEqual(Scroll.scrollOffset.y, Range - NavScrollRule.EndTolerance,
+                "precondition: the drags reached the end of the card (offset " + Scroll.scrollOffset.y + ", range " + Range + ")");
         }
+
+        // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
+        private int SectionUnderTheSpyLine() =>
+            CardTestInput.UnderTheSpyLine(Scroll, Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
 
         // A block's top meets the viewport's top (+-1 px), or -- a late block -- the stack sits at the end of its range
         private void AssertLanded(string block, string name)
@@ -490,9 +493,15 @@ namespace TileStories.Tests
                 if (Model.TargetCount > firstTotal) grew = true;
                 presses++;
             }
-            Assert.IsTrue(NextUp.Finished, "the walk reached the end of the card (" + presses + " presses)");
+            Assert.IsTrue(NextUp.Finished, "the walk reached the last target (" + presses + " presses)");
             Assert.AreEqual(Model.Targets[Model.TargetCount - 1], Nav.CurrentBlock, "the card is read at its last target");
-            Assert.IsTrue(grew, "the walk reached the end of the card, which revealed the block waiting for it: the total grew from " + firstTotal + " to " + Model.TargetCount);
+            // - the last target is not the end of the card when a taller-than-the-screen block follows it (The Lamp's Sources): the reader
+            //   goes on by hand to the end, which reveals the block waiting for it
+            yield return DragToTheEnd();
+            grew |= Model.TargetCount > firstTotal;
+            Assert.IsTrue(grew, "the end of the card revealed the block waiting for it: the total grew from " + firstTotal + " to " + Model.TargetCount);
+            Assert.IsTrue(NextUp.Finished, "at the end the bar still says the card is finished");
+            Assert.AreEqual(Model.Targets[Model.TargetCount - 1], Nav.CurrentBlock, "read at the last target of the grown card");
             Assert.AreEqual(words.Get(CardStrings.Keys.NavNextUpDone), NextUp.Caption.text, "it says the card is finished");
             Assert.AreEqual(Model.TargetCount + " of " + Model.TargetCount, NextUp.Position.text, "keeping the card's size, as the reveal made it");
             Assert.IsFalse(CardTestInput.IsShown(NextUp.Next, Sheet.Root), "no Next that goes nowhere");
@@ -515,8 +524,9 @@ namespace TileStories.Tests
             Assert.AreEqual("Seguinte", NextUp.NextLabel.text);
             Assert.IsTrue(NextUp.Position.text.Contains(" de "), "the place reads 'N de M': " + NextUp.Position.text);
             yield return CardGalleryChecks.Render("Nav_Lamp_next_up_pt_full_390");
-            for (int drag = 0; drag < 80 && !NextUp.Finished; drag++)
-                yield return DragStack(-Scroll.contentViewport.layout.height * 0.7f);
+            // - to the scroll END, not to the first Finished: the last target comes before The Lamp's taller-than-the-screen Sources, and
+            //   while the reader still drags down Hide While Scrolling keeps the bar away -- the end gives it back
+            yield return DragToTheEnd();
             Assert.IsTrue(NextUp.Finished, "a real drag to the end finishes the bar");
             Assert.AreEqual("Chegou ao fim", NextUp.Caption.text, "in Portuguese");
             Assert.IsFalse(CardTestInput.IsShown(NextUp.Next, Sheet.Root), "no Next at the end");

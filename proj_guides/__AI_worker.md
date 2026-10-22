@@ -13,58 +13,49 @@
 So start by reading them all. 
 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- P1b real content into the LivingRoom test wall`
+## `And now: _3.3 POI Card Look, Feel & Motion -- P1b part 2: the 5 red tests, docs, captures, full runs`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. No other Worker may be running
-(the P0 spike must have finished). Re-verify the baseline: full EditMode now (the tree moved since the last green commit).
+SDF fonts: P1b ADDED 'ł' to both on purpose (122 -> 123 characters, still Static) -- keep that change; `git checkout --` them ONLY
+if they changed beyond it (compare the character table). No baseline run: the tree is P1b's own (full EditMode 2031/2031 on it).
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- "RE-PLAN IN PROGRESS" R1-R8 and "Before this domain is
-planned" point 2. The status table is OLD: build none of its steps.
-REQUIRED READING (all lines): `proj_guides/detail_card/content/CONTENT_MAP.md` (the checklist: every slot), `SOURCES.md`, both
-`text/*.md`; `TileStories/Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/README.txt`; `proj_guides/_3.2.1_Audit.md` F5;
-`.clinerules/40-testing.md` 4.2, 4.2.4b (precise tests that survive harmless changes), 4.3 (refresh discipline), 4.5.
-Context only: `_3.1_POI_Card_Blocks.md` (block kinds and their fields), `generate_config.py` / `generate_card_media.py` (how the
-wall was generated -- reuse if they are still the way config is produced, else edit `config.json` through the code path the
-Editor uses).
-WORKER MODEL: Opus-class -- the shipped wall is the fixture of ~950 card tests; re-basing them needs judgement.
-TEST PLAN: baseline full EditMode first. This block changes the wall every card test reads -> it OWES a full PlayMode run at the
-end (after the targeted Card / Poi fixtures go green first), and the full EditMode suite.
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- the TODO "From P1b" and R1-R8. Your own tracker
+`proj_guides/__curr_plan_tracker.md` is the state of this block: its HANDOFF section (the 5 red tests with their diagnosis), its
+open steps 1b.6 / 1b.7 and the re-based list. Continue in it.
+REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5; `_3.2_POI_Card_Navigation.md` -- the scroll-spy /
+`NavScrollRule` section and the Next / Finished rules (the tests below are `_3.2` behaviour).
+WORKER MODEL: Opus-class -- one of the reds may be a real navigation bug; the rest need test-intent judgement.
+TEST PLAN: the targeted 49 Card / Poi PlayMode fixtures green first, then the FULL PlayMode run (owed: the shipped wall changed),
+then the full EditMode suite. Unity in the background for the full runs.
 
-The developer's rule for this wall (2026-10-22): it is a LOCAL TEST wall, never shipped -- licences and historical accuracy do not
-matter here; what matters is content of REAL shape and size. Keep the README's "not for shipping" line.
+PART 1 -- the 5 red tests. For each, read the test's INTENT first and write it in the tracker in one line, then:
+1-2. `PoiCardBottomElementsSceneTests.ARealTapOnNext_...AllTheWayToTheEnd` and `ARealDragToTheEnd_FinishesTheBar_...InPortuguese`:
+   re-base to the real behaviour (the last block is taller than the viewport): after the walk / drag, a real drag to the scroll
+   END (`scrollOffset.y >= Range - NavScrollRule.EndTolerance`), then assert the reveal / the bar. Do not change the framework.
+3. `PoiCardNavSceneTests.AJumpToABlockInTheFinalScreen_...`: keep its subject (a block whose top cannot reach the viewport top
+   is clamped to the range): choose the case from the measured layout (the lowest block whose top > Range), never a hard-coded key.
+4. `PoiCardPaintingSceneTests.ARealDragOfThePaintingsCard_...`: drag until the end with a cap, instead of a fixed count.
+5. `PoiCardPaintingSceneTests.ARealTapOnEveryTab_...` (after a jump to Listen the spy marks the NEXT tab): DIAGNOSE with numbers
+   before touching anything -- Listen's section height, the spy line's offset, where the jump landed, what the spy names one frame
+   and 0.5 s after the jump. If a short section after a jump loses its mark to the next section, that is a REAL `NavScrollRule`
+   bug a visitor would see (tap "Listen", the bar marks "Play"): fix it in the rule, add a PURE EditMode test with a short-section
+   case, mutation-prove it (break it, the new test goes red, restore). If the rule is right and the test's precondition is what
+   changed, re-base it. Either way say which, with the numbers, as the report's headline.
+Every re-base joins the tracker's old -> new list.
 
-PART 1 -- import (number your sub-steps 1b.1 ...):
-1. Copy the media from `proj_guides/detail_card/content/` into `Resources/LivingRoom/CardMedia/` (images/, audio/, video/),
-   with the importer settings the existing files use (audio: Streaming + Vorbis; video: H.264 transcode at the existing bitrate;
-   pictures: the existing texture settings, max size 2048). Measure the build size delta and report it.
-2. FILE NAMES THE TESTS USE (`castle_hero`, `castle_then`, `castle_now`, `castle_map`, `gallery_1..4`, `damage_before/after`,
-   `tile_detail`, `castelo_s_jorge_guide_pt`, `castelo_s_jorge_video`, `portugal_tourism_guide_en`): for EACH, grep the tests and
-   read what they assert. If they assert only that the block shows a picture / plays a clip -> point the block at the real file
-   and update the reference. If they pin a PROPERTY of the placeholder (its length, size, a pixel, a caption text) -> re-base the
-   assertion to the real file's measured property, deliberately, and list every re-based test in the report with old -> new value.
-   Never weaken an assertion; never keep a placeholder only to keep a test green. Delete placeholder files nothing uses any more.
-PART 2 -- The Painting (`painting`): text EN + PT-PT, pictures with captions + credits, the audio guide with its VTT, the F5 text
-fixes that are NOT renames (translated category "Governo Real", fun-fact headings, no doubled "pinch" hint) and the NEW blocks of
-CONTENT_MAP (before_after, hotspot_image with its five spots, knowledge_check x3, person, today_map). New blocks change The
-Painting's block count: find every test that counts or orders its blocks, re-base it deliberately, list them.
-PART 3 -- The Lamp (`lamp`): the castle media, texts, galleries, the video (55 s, poster, EN + PT captions, chapters 0:00 / 0:20 /
-0:28) and the audio guides (EN + PT, each with its VTT). Keep EVERY block id and the block count (62): many tests pin them.
-Pull quotes (blocks 11, 12) stay as they are.
-PART 4 -- docs: rewrite `CardMedia/README.txt` (what each file is, its source line from SOURCES, "local test wall, not for
-shipping"); copy `SOURCES.md` next to it; tick the slots in CONTENT_MAP (`filled -> wired`).
+PART 2 -- 1b.6 docs: `10-structure.md` (CardMedia tree: images/, video/, audio/, removed files, `generate_card_media.py` gone,
+the new fields and tests of 1b.2-1b.4), `_3.3` (a line under R5: "P1b done" with the commit's counts; the TODOs P1b added),
+CONTENT_MAP slots `wired`, README + SOURCES checked next to the media.
+PART 3 -- 1b.7 captures: The Painting and The Lamp at 390 pt, EN and PT: Peek, Half, Full and every Full screen to the end. Open
+them and judge each in one sentence; list every visual defect the real content exposes (long blocks, picture crops, captions,
+the header at Half) in `_3.3` TODOs tagged [P3] / [P5] -- do NOT fix layout or styles.
+Then the targeted 49 fixtures, the full PlayMode run, the full EditMode suite.
 
-VISUALS: capture The Painting and The Lamp at 390 pt in EN and PT: Peek, Half, Full and every Full screen down to the end;
-open them and judge each in one sentence (do the pictures read, do captions sit right, does any block look broken by the new
-lengths). Note every visual defect for P3 / P5 -- do NOT fix layout or styles here.
-
-OUT OF SCOPE: renaming any point's `name` / summary (P1c, it re-bases the search tests); layout, tokens, styles; 3D / 360 /
-place_in_ar media; the pull quotes.
-Stop when every CONTENT_MAP slot is wired, the targeted Card / Poi PlayMode fixtures and then the full PlayMode run and the full
-EditMode suite are green. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
-If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
-Commit only if the developer asks.
+OUT OF SCOPE: renaming points (P1c); layout / style fixes; changing what Finished means (P3).
+Stop when the full PlayMode run and the full EditMode suite are green and the docs are updated. Ideas outside this domain ->
+proj_guides/__mixed_TODOs.md. If the guide disagrees with the real code, STOP and report. Finish with the final report of
+`.clinerules/60-finishing.md` 6.4. Commit only if the developer asks (the Architect commits after the review).
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

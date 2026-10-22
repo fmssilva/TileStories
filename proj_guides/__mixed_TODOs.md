@@ -659,3 +659,39 @@ timing function (every style update of a matching element then throws `ArgumentO
 Dev excluded) for the first two patterns and checks each `var(--name)` against the names some sheet defines would catch all three
 before a render does. Cross-domain (every UI Toolkit screen), so not part of `_3.3` alone. `StyleSheet.m_ImportedWithWarnings`
 (reflection) also flags a sheet the importer partly dropped.
+
+## From `_3.3` P1b (real content on the test wall, 2026-10-22)
+
+- [`_2.6`] **Search in the visitor's language.** Categories now have a name per card language (Category Names Per Language) and the
+  card's chip reads it, but search has no visitor language: results rows, suggested searches and filter chips show the one Category
+  label, and the search bar's own words (Search, Filters, Map) are English. Give search the card's language (one source of truth for the
+  visitor's language) and pass it to `PoiSubtitle.Of` / `TaxonomyNames.Category`.
+- [`_3.3` P3 / P5] **Caption and credit fields.** The header (hero picture) and before_after have no caption or credit field, so the real
+  pictures' credits only reach the sources block (CC BY / CC BY-SA ask for them next to the picture in a shipped build). Decide where a
+  credit shows (the full-screen picture is a natural place) and add the fields to the kinds that show pictures.
+- [build size] The wall's 21 real pictures are 25.4 MB in an Android build at max 2048 px (ETC2). A card is ~390 pt wide (~1170 px at
+  3x): a 1536 cap (or ASTC) would roughly halve it. Measure on a device first.
+- [config size] Every block field now serialises `asset_by_language: []` (JsonUtility writes empty lists), so `config.json` grew from
+  476 KB to 679 KB with no content change. Harmless today; if load time or diff noise matters, a custom writer that skips empty lists
+  (or a sparse per-language list on the BLOCK) would undo it.
+- [taxonomy names per language, from P1b part 2's captures] Only the CATEGORY gained a name per language (`label_by_language`, P1b).
+  The status scale still shows its English names on a Portuguese card ("Intact", "Partial Damage", "Destroyed" in the status block and
+  in compare_points, both cards): the same per-language name for the Status Types (and Badge / Hierarchy Level names wherever the card
+  shows them), the same Editor row per other card language, the same `TaxonomyNames` lookup.
+- [test harness, from P1b part 2's full runs] `KeywordListFieldTypingTests.TypingTwoKeywordsWithACommaBetween_GivesTwoKeywords` fails at
+  its precondition ("the click must focus the keyword field", keyboardControl 0) in EVERY full EditMode run after a full PlayMode run
+  (3 of 3, 2026-10-22 ~21:58-22:05), though the same code passed the full suite at 19:35. Reproduces on demand with
+  `group_names ^TileStories\.Editor\.Tests\.([H-J]|KeywordListFieldTypingTests)` (22 tests); green ALONE and in every smaller subset
+  (with HierarchyDesignAuthoringTests + HierarchyTableClickTests; with HotspotPinRuleTests). NOT a focus loss: a second `_host.Focus()`
+  right before the click did not help (tried, reverted). Next: log `EditorWindow.focusedWindow`, `GUIUtility.keyboardControl` and
+  `Host.FieldRect` at the click in the red group; check whether a Unity restart clears it (state left by the PlayMode run).
+
+## Editor-window tests depend on focus (2026-10-23, from the `_3.3` P1b review)
+
+Full EditMode on P1b's final tree, run by the Architect: UNFOCUSED -> 2031/2033 (`ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep`
+"a whole drag = one history step: 2 vs 3", `NavigationPresetEditorTabTests.EveryPreset_ARealClick...` "the Preset button opens the picker:
+null"); the same 11 tests alone, focused -> 11/11; the full suite again, FOCUSED -> 2033/2033. The P1b Worker saw a third one
+(`KeywordListFieldTypingTests`, red only after a PlayMode run, in a 22-test group). The reds rotate between runs and are all real-click
+Editor-window tests: the same family as the watched flakes of the `_3.2` hand-off. `40-testing.md` 4.2.3 says tests never depend on
+window focus -- these do. One harness block: find what a real click / drag needs from focus in these fixtures (the window's own focus,
+`EditorWindow.focusedWindow`, a repaint) and make them independent, or make them fail with that sentence instead of an assert.

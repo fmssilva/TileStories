@@ -43,7 +43,7 @@ namespace TileStories.Tests
             Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop, "Open At = peek (the shipped default)");
             Assert.AreEqual("St George's Castle", Header.TitleText, "the authored title in the wall's first language, not the POI name");
             Assert.AreEqual("Royal Government", Header.ChipText, "the category name only: a hierarchy level (Hub) is an authoring word");
-            Assert.AreEqual("Military - c. 1700 on the panel", Header.SubtitleText);
+            Assert.AreEqual("Medieval castle and royal palace", Header.SubtitleText);
 
             Rect card = Sheet.Root.worldBound;
             Assert.LessOrEqual(Header.PeekPart.worldBound.yMax, card.yMax + 1f, "peek shows the whole title and chip");
@@ -325,7 +325,9 @@ namespace TileStories.Tests
             LiveSettings.languages = new System.Collections.Generic.List<string> { "pt", "en" };
             yield return Select("lamp");
             Assert.AreEqual("Castelo de São Jorge", Header.TitleText);
-            Assert.AreEqual("Militar - c. 1700 no painel", Header.SubtitleText);
+            Assert.AreEqual("Castelo medieval e paço real", Header.SubtitleText);
+            // - _3.3 P1b: the category's own Portuguese name (Category Names Per Language), never the English label on a PT card
+            Assert.AreEqual("Governo Real", Header.ChipText, "the category chip in the card's language");
         }
 
         [UnityTest]
@@ -462,7 +464,7 @@ namespace TileStories.Tests
             Assert.AreEqual(cobalt.b, swatches.Swatches[0].Sample.resolvedStyle.backgroundColor.b, 1e-3f, "the sample is the config's colour");
 
             var timelines = Sheet.Stack.BoundViews.OfType<TimelineBlockView>().ToList();
-            CollectionAssert.AreEqual(new[] { "1147", "c. 1300", "1755", "1940", "Now" }, timelines[0].Events.Select(e => e.Date.text), "vertical, with Highlight Now");
+            CollectionAssert.AreEqual(new[] { "11th c.", "1147", "c. 1300", "c. 1500", "1755", "1938 to 1940", "Now" }, timelines[0].Events.Select(e => e.Date.text), "vertical, with Highlight Now");
             Assert.IsFalse(timelines[1].Events.Any(e => e.IsNow), "horizontal, Highlight Now off");
             Assert.AreEqual(timelines[1].Root, timelines[1].Track.parent, "the horizontal one on its swipe track");
 

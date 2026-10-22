@@ -260,7 +260,10 @@ namespace TileStories
         public float number;                        // Number
         public bool flag;                           // Toggle
         public string value = "";                   // Choice option, PoiRef POI id
-        public string asset = "";                   // Asset: path under card_settings.media_resources_path
+        public string asset = "";                   // Asset: path under card_settings.media_resources_path, for every language
+        // A Per Language Asset field's own file for one language (a narration recorded in Portuguese); a language with no
+        // entry, or a blank one, uses `asset` (BlockFieldReader.Asset)
+        public List<LocalizedEntry> asset_by_language = new();
         public List<BlockItemData> items = new();   // Items (a repeater: facts, gallery images, quiz options...)
     }
 
@@ -282,6 +285,7 @@ namespace TileStories
         public bool flag;
         public string value = "";
         public string asset = "";
+        public List<LocalizedEntry> asset_by_language = new();
     }
 
     // One language's text of a localized field

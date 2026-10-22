@@ -1021,20 +1021,20 @@ namespace TileStories.Editor.Tests
             BlockInstanceData Zoom() => _window.Config.pois[0].card.blocks[0];
             Assert.IsNull(Zoom().fields.Find(f => f.key == BuiltInBlocks.ZoomImageImageField), "drawing the picture row writes nothing");
 
-            var inside = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/tile_detail.png");
+            var inside = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/images/azulejo_detail.jpg");
             Assert.IsNotNull(inside, "precondition: the fixture picture exists");
             yield return DropOnto("Block field image#0", inside);
-            Assert.AreEqual("tile_detail.png", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField),
+            Assert.AreEqual("images/azulejo_detail.jpg", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField),
                 "a real drop stores the path inside the Media Folder, not the project path");
             Assert.IsTrue(_window.Unsaved);
-            Assert.AreSame(inside, POIEditorToolWindow.MediaAssetFor("tile_detail.png", MediaFolder), "the row shows the picture the app will load (through Resources)");
+            Assert.AreSame(inside, POIEditorToolWindow.MediaAssetFor("images/azulejo_detail.jpg", MediaFolder), "the row shows the picture the app will load (through Resources)");
             var shown = BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared);
             CollectionAssert.IsEmpty(shown.Skipped, "the card shows the block");
 
             yield return _window.PressUndo();
             Assert.AreEqual("", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField), "one Ctrl+Z takes the drop back");
             yield return _window.PressRedo();
-            Assert.AreEqual("tile_detail.png", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField), "Ctrl+Y");
+            Assert.AreEqual("images/azulejo_detail.jpg", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField), "Ctrl+Y");
 
             const string outsidePath = "Assets/Framework/Runtime/UI/Markers/SymbolCircle.png";
             var outside = AssetDatabase.LoadAssetAtPath<Texture2D>(outsidePath);
@@ -1124,7 +1124,7 @@ namespace TileStories.Editor.Tests
             CollectionAssert.IsEmpty(BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared).Skipped, "the card shows the block");
 
             // - the wrong kind of file on a row: a picture on the clip row, a clip on the captions row, a captions file on the clip row
-            var picture = AssetDatabase.LoadAssetAtPath<Texture2D>(audioFolder + "tile_detail.png");
+            var picture = AssetDatabase.LoadAssetAtPath<Texture2D>(audioFolder + "images/azulejo_detail.jpg");
             yield return DropOnto("Block field clip#0", picture);
             yield return DropOnto("Block field captions#0", clip);
             yield return DropOnto("Block field clip#0", captions);
@@ -1142,6 +1142,67 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideClipField), "and the next the clip's");
             yield return _window.PressRedo();
             Assert.AreEqual("audio/lamp_tone.wav", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideClipField), "Ctrl+Y");
+        }
+
+        // Per Language media (_3.3 P1b): with two wall languages a Per Language field (the audio guide's Clip and Captions) gets one more row
+        // for the second language and no other field does; a real drop on "Clip (pt)" stores that language's own file beside the shared one,
+        // the card reads each language's file, and Ctrl+Z takes the drop back
+        [UnityTest]
+        public IEnumerator APerLanguageMediaField_HasARowPerOtherLanguage_ARealDropStoresThatLanguagesFile_AndTheCardReadsIt()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en", "pt" };
+            config.card_settings.media_resources_path = MediaFolder;
+            config.pois[0].card.blocks.Add(new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.AudioGuideKind });
+            config.pois[0].card.blocks.Add(new BlockInstanceData { key = "block_2", kind = BuiltInBlocks.VideoKind });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            foldouts["poi_1/block_2"] = true;
+            yield return _window.WaitForRepaint();
+            _window.RectOf("Block field clip pt#0");
+            _window.RectOf("Block field captions pt#0");
+            _window.RectOf("Block field clip pt#1");
+            _window.RectOf("Block field poster#1");
+            Assert.IsFalse(_window.ScreenRects.ContainsKey("Block field clip en#0"), "the first language has no row of its own: the shared row is its file");
+            Assert.IsFalse(_window.ScreenRects.ContainsKey("Block field poster pt#1"), "a media field that is not Per Language (the video's poster) gets no language row");
+            BlockInstanceData Audio() => _window.Config.pois[0].card.blocks[0];
+            Assert.IsNull(Audio().fields.Find(f => f.key == BuiltInBlocks.AudioGuideClipField), "drawing the rows writes nothing");
+
+            const string folder = "Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/audio/";
+            var english = AssetDatabase.LoadAssetAtPath<AudioClip>(folder + "guide_castle_en.mp3");
+            var portuguese = AssetDatabase.LoadAssetAtPath<AudioClip>(folder + "guide_castle_pt.mp3");
+            var portugueseCaptions = AssetDatabase.LoadAssetAtPath<TextAsset>(folder + "guide_castle_pt.vtt");
+            Assert.IsNotNull(english, "precondition: the English guide imports as a clip");
+            Assert.IsNotNull(portuguese, "precondition: the Portuguese guide imports as a clip");
+            Assert.IsNotNull(portugueseCaptions, "precondition: its captions import as a TextAsset");
+
+            yield return DropOnto("Block field clip#0", english);
+            yield return DropOnto("Block field clip pt#0", portuguese);
+            yield return DropOnto("Block field captions pt#0", portugueseCaptions);
+            var clip = Audio().fields.Find(f => f.key == BuiltInBlocks.AudioGuideClipField);
+            Assert.AreEqual("audio/guide_castle_en.mp3", clip.asset, "the shared row keeps the file for every language");
+            Assert.AreEqual("audio/guide_castle_pt.mp3", POIEditorToolWindow.LanguageEntryValue(clip.asset_by_language, "pt"), "the pt row stored the Portuguese file");
+            Assert.AreEqual(1, clip.asset_by_language.Count, "one entry: pt only");
+            yield return DropOnto("Block field captions pt#0", english);
+            Assert.AreEqual("audio/guide_castle_pt.vtt",
+                POIEditorToolWindow.LanguageEntryValue(Audio().fields.Find(f => f.key == BuiltInBlocks.AudioGuideCaptionsField).asset_by_language, "pt"),
+                "a language row takes only the field's own kind of file");
+
+            Assert.AreEqual("audio/guide_castle_en.mp3", new BlockFieldReader(Audio(), "en", "en").ValidAsset(BuiltInBlocks.AudioGuideClipField, MediaKind.Audio), "the English card plays the shared file");
+            Assert.AreEqual("audio/guide_castle_pt.mp3", new BlockFieldReader(Audio(), "pt", "en").ValidAsset(BuiltInBlocks.AudioGuideClipField, MediaKind.Audio), "the Portuguese card plays its own");
+            Assert.AreEqual("", new BlockFieldReader(Audio(), "en", "en").ValidAsset(BuiltInBlocks.AudioGuideCaptionsField, MediaKind.Captions),
+                "English has no captions: the Portuguese file is never another language's fallback");
+            CollectionAssert.IsEmpty(BlockStackBuilder.Build(_window.Config.pois[0], _window.Config.card_settings, BlockRegistry.Shared).Skipped
+                .Where(s => s.Instance.key == "block_1"), "the card shows the audio block (the empty video beside it is only there for its rows)");
+
+            yield return _window.PressUndo();
+            // - an undo restores the config from before the drop, when the field itself may not have existed yet: read it null-safe
+            Assert.AreEqual("", POIEditorToolWindow.LanguageEntryValue(Audio().fields.Find(f => f.key == BuiltInBlocks.AudioGuideCaptionsField)?.asset_by_language, "pt"), "one Ctrl+Z takes the captions drop back");
+            yield return _window.PressUndo();
+            Assert.AreEqual("", POIEditorToolWindow.LanguageEntryValue(Audio().fields.Find(f => f.key == BuiltInBlocks.AudioGuideClipField)?.asset_by_language, "pt"), "the next the pt clip's");
+            Assert.AreEqual("audio/guide_castle_en.mp3", POIEditorToolWindow.AssetValue(Audio(), BuiltInBlocks.AudioGuideClipField), "and the shared clip stays");
         }
 
         // The words of a refused audio file, and the speeds list the Choice offers (with its "none" first, as every optional Choice has)

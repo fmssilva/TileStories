@@ -36,6 +36,11 @@ namespace TileStories.Editor
         private const string CardNoLanguageNote =
             "No language: card texts cannot be written. Add at least one language code in Languages.";
 
+        // {0} = the field's label, {1} = the language code
+        private const string PerLanguageAssetRowHelp =
+            "The {0} a visitor reading in '{1}' gets: a file recorded or written in that language, inside the Media Folder. Empty: " +
+            "the {0} above, the same file for every language.";
+
         private const string CardMediaFolderHelp =
             "Where this wall's card images and sounds live: a folder inside a Resources folder of the wall, written as the part " +
             "after Resources/ (a framework default suggestion: <WallName>/CardMedia). A card media field stores a path inside it. " +

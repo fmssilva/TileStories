@@ -21,16 +21,16 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             var quiz = Quizzes()[0];
             Assert.AreEqual("Test yourself", Sheet.Stack.HeadingOf(quiz).text, "no heading written: the card's default");
-            Assert.AreEqual(2, quiz.Count, "two questions authored");
-            Assert.AreEqual("What is the tallest tower of a castle called?", quiz.Prompt.text);
-            CollectionAssert.AreEqual(new[] { "The curtain wall", "The keep", "The gatehouse" }, quiz.Choices.Select(c => c.Text.text).ToList());
-            Assert.AreEqual("Question 1 of 2", quiz.Counter.text);
+            Assert.AreEqual(3, quiz.Count, "three questions authored");
+            Assert.AreEqual("In which year did Afonso Henriques take the castle?", quiz.Prompt.text);
+            CollectionAssert.AreEqual(new[] { "1095", "1147", "1255" }, quiz.Choices.Select(c => c.Text.text).ToList());
+            Assert.AreEqual("Question 1 of 3", quiz.Counter.text);
             Assert.IsFalse(quiz.Answered);
 
             yield return ScrollAndTap(quiz.Choices[0].Button);
             Assert.AreEqual(0, quiz.Chosen);
             Assert.AreEqual("Actually...", quiz.Verdict.text);
-            Assert.AreEqual("The keep is the strongest tower: the last refuge when the walls fell.", quiz.Explanation.text);
+            Assert.AreEqual("The siege of Lisbon lasted about four months and ended in the autumn of 1147.", quiz.Explanation.text);
             Assert.IsTrue(quiz.Choices[1].Button.ClassListContains("card-quiz__choice--correct"), "the right option is marked");
             Assert.AreEqual(0, Card.State.Answer("lamp", "block_43", 0), "remembered under the wall, the POI, the block and the question's row");
             Assert.IsTrue(_cardStore.TryGet("ts.card." + Session.SearchConfig.wall_id + ".lamp.block_43.answer-0", out string stored), "the scoped key");
@@ -43,7 +43,7 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             quiz = Quizzes()[0];
             Assert.AreEqual(1, quiz.Index, "question 1 is answered: it opens on question 2");
-            Assert.AreEqual("Question 2 of 2", quiz.Counter.text);
+            Assert.AreEqual("Question 2 of 3", quiz.Counter.text);
             Assert.IsFalse(quiz.Answered);
 
             // - Portuguese: the authored Portuguese text and the card's Portuguese words; a real tap on the right option
@@ -52,12 +52,12 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             quiz = Quizzes()[0];
             Assert.AreEqual("Teste-se", Sheet.Stack.HeadingOf(quiz).text, "the default heading in Portuguese");
-            Assert.AreEqual("Pergunta 2 de 2", quiz.Counter.text);
-            Assert.AreEqual("Qual destes N\u00c3O existia no antigo pal\u00e1cio?", quiz.Prompt.text);
-            yield return ScrollAndTap(quiz.Choices[2].Button);
+            Assert.AreEqual("Pergunta 2 de 3", quiz.Counter.text);
+            Assert.AreEqual("O que \u00e9 a torre de menagem de um castelo?", quiz.Prompt.text);
+            yield return ScrollAndTap(quiz.Choices[1].Button);
             Assert.AreEqual("Certo!", quiz.Verdict.text);
-            StringAssert.StartsWith("O pal\u00e1cio ficava junto ao rio", quiz.Explanation.text);
-            Assert.AreEqual(2, Card.State.Answer("lamp", "block_43", 1));
+            StringAssert.StartsWith("Quando as muralhas ca\u00edam", quiz.Explanation.text);
+            Assert.AreEqual(1, Card.State.Answer("lamp", "block_43", 1));
         }
 
         // _3.1 step 8A: The Lamp's true / false question waits for the reading (show_after_viewed): hidden on a fresh card, a real
@@ -102,12 +102,12 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             var quiz = Quizzes()[2];
             Assert.AreEqual(2, quiz.Choices.Count);
-            Assert.AreEqual("damage_before", quiz.Choices[0].Image.Texture?.name, "the wall's own picture");
-            Assert.AreEqual("damage_after", quiz.Choices[1].Image.Texture?.name);
-            CollectionAssert.AreEqual(new[] { "Before", "After" }, quiz.Choices.Select(c => c.Text.text).ToList());
+            Assert.AreEqual("paco_before_1755", quiz.Choices[0].Image.Texture?.name, "the wall's own picture");
+            Assert.AreEqual("paco_after_today", quiz.Choices[1].Image.Texture?.name);
+            CollectionAssert.AreEqual(new[] { "The painting", "The photograph" }, quiz.Choices.Select(c => c.Text.text).ToList());
             yield return ScrollAndTap(quiz.Choices[0].Button);
             Assert.AreEqual("Correct!", quiz.Verdict.text);
-            Assert.AreEqual("The earlier picture still has every tile in place.", quiz.Explanation.text);
+            Assert.AreEqual("The painting still shows the palace and its domed tower.", quiz.Explanation.text);
             Assert.AreEqual(0, Card.State.Answer("lamp", "block_45", 0));
             yield return ScrollTo(quiz);
             yield return Capture("Card_Lamp_KnowledgeCheck_ImageChoice");

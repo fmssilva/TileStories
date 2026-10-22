@@ -4,8 +4,7 @@ Writes into Resources/LivingRoom/CardMedia/audio/:
   lamp_tone.wav  -- 20 s, mono, 16-bit, 11.025 kHz: four 5-second sections, each a soft two-note chime on a different pitch,
                     so a seek is audible and the clip length is exactly known. No voice, no music: a placeholder tone.
   lamp_tone.vtt  -- four cues, one per section (placeholder wording: it describes the section, it is not a transcript)
-  castelo_s_jorge_guide_pt.vtt -- PLACEHOLDER captions for the real Portuguese narration (200.4 s): twenty cues of 10 s of
-                    "test caption n" wording. The real clip was not transcribed: these lines only prove the caption machinery.
+(The real narrations and their exact captions came with the real content, _3.3 P1b: see CardMedia/README.txt.)
 Run from the LivingRoom folder:  python generate_card_audio.py
 Placeholders are released CC0 (the tone and the captions were made by this script).
 """
@@ -57,12 +56,6 @@ def main():
         (i * SECTION_SECONDS, (i + 1) * SECTION_SECONDS, "Placeholder caption: tone section %d of %d." % (i + 1, len(PITCHES)))
         for i in range(len(PITCHES))
     ])
-    cues = []
-    total = 20
-    for i in range(total):
-        # - PT wording, proper letters (the file is UTF-8 data; the source stays ASCII through escapes)
-        cues.append((i * 10, (i + 1) * 10, "Legenda de teste %d de %d: texto provisório, não é a transcrição." % (i + 1, total)))
-    write_vtt(os.path.join(OUT, "castelo_s_jorge_guide_pt.vtt"), cues)
     print("written to", OUT)
 
 

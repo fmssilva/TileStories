@@ -73,6 +73,45 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(-1, NavScrollRule.CurrentSection(null, 0f, Content, Viewport));
         }
 
+        // A section SHORTER than the spy line's distance (_3.3 P1b: The Painting's Listen, one audio player, 206 px under a 212 px line):
+        // landed at the viewport's top, the next section's top is past the line too -- the one at the top is read, not the next. Found on
+        // the real card: a tap on Listen marked Play
+        [Test]
+        public void AShortSection_LandedAtTheTop_IsTheOneRead_NotTheNextWhoseTopIsPastTheLineToo()
+        {
+            float spy = Viewport * NavScrollRule.SpyLineFraction;
+            float shortTop = 1100f;
+            float shortHeight = spy * 0.75f;
+            var tops = new[] { 400f, shortTop, shortTop + shortHeight, 2700f };
+            Assert.Less(tops[2], SpyLineAt(shortTop), "precondition: landed on the short section, the next one's top is past the line too");
+            Assert.Less(shortTop, NavScrollRule.Range(Content, Viewport), "precondition: the short section can reach the viewport's top");
+
+            Assert.AreEqual(1, NavScrollRule.CurrentSection(tops, shortTop, Content, Viewport), "landed: the short section, at the viewport's top");
+            Assert.AreEqual(1, NavScrollRule.CurrentSection(tops, shortTop + NavScrollRule.LandingTolerance, Content, Viewport),
+                "a landing that rests a rounding past its top: still the short section");
+            Assert.AreEqual(2, NavScrollRule.CurrentSection(tops, shortTop + NavScrollRule.LandingTolerance + 1f, Content, Viewport),
+                "its top scrolled away: the next section, already past the line, is read");
+            // - read by a drag from above: the line reaches the short top first, the old answer holds until then
+            Assert.AreEqual(1, NavScrollRule.CurrentSection(tops, shortTop - spy, Content, Viewport), "the line exactly on the short top");
+            Assert.AreEqual(0, NavScrollRule.CurrentSection(tops, shortTop - spy - 1f, Content, Viewport), "one unit earlier: still the section above");
+            float bothPast = (tops[2] - spy + shortTop) * 0.5f;
+            Assert.LessOrEqual(tops[2], SpyLineAt(bothPast), "precondition: the next top is past the line");
+            Assert.Greater(shortTop, bothPast, "precondition: the short top sits below the viewport's top");
+            Assert.AreEqual(1, NavScrollRule.CurrentSection(tops, bothPast, Content, Viewport),
+                "the next top past the line while the short one sits lower on screen: the short one, nearer the top");
+        }
+
+        // Two short sections in a row: of the tops past the line, the FIRST still on screen -- never the last one past it
+        [Test]
+        public void TwoShortSectionsInARow_TheOneAtTheViewportTopIsRead()
+        {
+            float spy = Viewport * NavScrollRule.SpyLineFraction;
+            var tops = new[] { 400f, 1100f, 1100f + spy * 0.4f, 1100f + spy * 0.8f, 2700f };
+            Assert.AreEqual(1, NavScrollRule.CurrentSection(tops, tops[1], Content, Viewport), "landed on the first short one");
+            Assert.AreEqual(2, NavScrollRule.CurrentSection(tops, tops[2], Content, Viewport), "landed on the second: the one above it is off screen");
+            Assert.AreEqual(3, NavScrollRule.CurrentSection(tops, tops[3], Content, Viewport), "landed on the third");
+        }
+
         // The contents list's tick (_3.2 step 11b): a block is seen once the SAME spy line passed its top while it is on screen. Every
         // number comes from the rule's own constants and this fixture's stack (3000 seen through 600, range 2400)
         [Test]

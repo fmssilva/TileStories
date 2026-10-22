@@ -91,16 +91,9 @@ namespace TileStories.Tests
         private static bool InTheCard(VisualElement e) =>
             IsShown(e) && e.resolvedStyle.visibility == Visibility.Visible && e.resolvedStyle.position == Position.Relative;
 
-        // The section the reader is in, read from the screen (each section's first slot against a third of the viewport)
-        private int SectionUnderTheSpyLine()
-        {
-            var viewport = Scroll.contentViewport.worldBound;
-            float line = viewport.yMin + viewport.height * NavScrollRule.SpyLineFraction;
-            int found = 0;
-            for (int i = 0; i < Nav.Model.Sections.Count; i++)
-                if (Sheet.Stack.SlotOfBlock(Nav.Model.Sections[i].Targets[0]).worldBound.yMin <= line) found = i;
-            return found;
-        }
+        // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
+        private int SectionUnderTheSpyLine() =>
+            CardTestInput.UnderTheSpyLine(Scroll, Nav.Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
 
         // Exactly one tab is marked, and it is marked twice: its underline shows and its label is bold; every other tab has neither
         private void AssertMarked(int index, string when)

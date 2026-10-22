@@ -312,7 +312,7 @@ namespace TileStories.Tests
             var zoom = System.Linq.Enumerable.Single(System.Linq.Enumerable.OfType<ZoomImageBlockView>(stack.BoundViews));
             stack.Scroll.ScrollTo(stack.SlotOf(zoom));
             yield return CardTestInput.Settle(0.2f);
-            Assert.AreEqual("tile_detail", zoom.Image.Texture.name, "the fixture's detailed picture");
+            Assert.AreEqual("azulejo_detail", zoom.Image.Texture.name, "the fixture's detailed picture (1824 x 1824)");
             Assert.AreEqual(1f, zoom.Scale, "precondition: the whole picture");
             var centre = ScreenPointOf(zoom.Frame);
             Assert.IsTrue(ScreenUIHit.IsOverScreenUI(centre), "precondition: the fingers go down on the card");

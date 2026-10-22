@@ -58,6 +58,42 @@ namespace TileStories.Editor
                 EditorGUILayout.HelpBox(CardMediaMissingText(field.Label, stored, field.Media), MessageType.Warning);
         }
 
+        // A Per Language Asset field's language rows (BlockFieldDefinition.PerLanguage): one asset row per wall language after the
+        // first, labelled "Clip (pt)", holding that language's own file; blank = the row above. The first language never gets a
+        // row: the field's own file already is its file. Drawing never writes.
+        private void DrawPerLanguageAssetRows(BlockFieldDefinition field, System.Collections.Generic.List<string> languages, float indent,
+            string probeName, int probeIndex, Func<string, string> get, Action<string, string> set)
+        {
+            if (languages == null) return;
+            for (int i = 1; i < languages.Count; i++)
+            {
+                string lang = languages[i];
+                var row = new BlockFieldDefinition
+                {
+                    Key = field.Key, Type = BlockFieldType.Asset, Media = field.Media, Label = field.Label + " (" + lang + ")",
+                    Help = string.Format(PerLanguageAssetRowHelp, field.Label, lang),
+                };
+                DrawAssetRow(row, indent, probeName + " " + lang, probeIndex, _config.card_settings?.media_resources_path,
+                    _config.card_settings?.default_media_library_resources_path, () => get(lang), value => set(lang, value));
+            }
+        }
+
+        // One language's own value in a per-language list: a Per Language field's file, a category's name ("" = none: the shared one is used)
+        internal static string LanguageEntryValue(System.Collections.Generic.List<LocalizedEntry> byLanguage, string lang) =>
+            byLanguage?.Find(e => e != null && e.lang == lang)?.value ?? "";
+
+        // Store (or clear, when blank) one language's own value; called only by a real edit
+        internal static void SetLanguageEntry(System.Collections.Generic.List<LocalizedEntry> byLanguage, string lang, string value)
+        {
+            int at = byLanguage.FindIndex(e => e != null && e.lang == lang);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                if (at >= 0) byLanguage.RemoveAt(at);
+            }
+            else if (at >= 0) byLanguage[at].value = value;
+            else byLanguage.Add(new LocalizedEntry { lang = lang, value = value });
+        }
+
         // The asset a stored path names: a "default:<key>" resolves through the wall's own default library (if
         // configured) then the Framework's; a plain path resolves inside the Media Folder through Resources (what
         // the app loads), or as a project path as picked (outside the folder: shown so the developer sees what

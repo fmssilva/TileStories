@@ -42,15 +42,15 @@ namespace TileStories
             {
                 new BlockFieldDefinition
                 {
-                    Key = AudioGuideClipField, Type = BlockFieldType.Asset, Media = MediaKind.Audio, Label = "Clip", Required = true,
+                    Key = AudioGuideClipField, Type = BlockFieldType.Asset, Media = MediaKind.Audio, Label = "Clip", Required = true, PerLanguage = true,
                     Help = "An MP3, WAV or OGG file inside the wall's Media Folder (Detail Card > Card Container). A long recording is best " +
-                           "imported as Streaming in Unity so it is not decoded into memory until played.",
+                           "imported as Streaming in Unity so it is not decoded into memory until played." + PerLanguageHelp,
                 },
                 new BlockFieldDefinition
                 {
-                    Key = AudioGuideCaptionsField, Type = BlockFieldType.Asset, Media = MediaKind.Captions, Label = "Captions",
+                    Key = AudioGuideCaptionsField, Type = BlockFieldType.Asset, Media = MediaKind.Captions, Label = "Captions", PerLanguage = true,
                     Help = "A WebVTT (.vtt) captions file inside the Media Folder, in the language the clip is spoken in. Empty: no captions " +
-                           "switch. The Player shows the caption line of the moment under the bar.",
+                           "switch. The Player shows the caption line of the moment under the bar." + PerLanguageHelp,
                 },
                 new BlockFieldDefinition
                 {

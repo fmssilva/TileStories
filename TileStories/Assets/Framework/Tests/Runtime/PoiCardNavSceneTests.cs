@@ -19,6 +19,7 @@ namespace TileStories.Tests
         // The key a test jump reports as its element (no navigation element exists yet: step 5 adds the first)
         private const string Element = "scene_test_element";
         private const string Lamp = "lamp";
+        private const string Painting = "painting";
 
         private PoiCardSheetView Sheet => Card.Sheet;
         private NavController Nav => Sheet.Nav;
@@ -90,17 +91,9 @@ namespace TileStories.Tests
             return -1;
         }
 
-        // The section the reader is in, read from the screen (each section's first slot against a third of the viewport), never from
-        // the controller's own arithmetic
-        private int SectionUnderTheSpyLine()
-        {
-            var viewport = Scroll.contentViewport.worldBound;
-            float line = viewport.yMin + viewport.height * NavScrollRule.SpyLineFraction;
-            int found = 0;
-            for (int i = 0; i < Nav.Model.Sections.Count; i++)
-                if (Slot(Nav.Model.Sections[i].Targets[0]).worldBound.yMin <= line) found = i;
-            return found;
-        }
+        // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
+        private int SectionUnderTheSpyLine() =>
+            CardTestInput.UnderTheSpyLine(Scroll, Nav.Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
 
         // --ts-duration as CardTokens.uss writes it (seconds): the one place the card's motion length lives
         private static float DurationToken()
@@ -144,13 +137,22 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator AJumpToABlockInTheFinalScreen_IsClampedToTheRange_AndTheSpyNamesTheLastSection()
         {
-            yield return Open(Lamp, SheetStopRule.Stop.Full);
-            // - the lowest block of the scroll -- a navigation target or not (the Sources close the card): since the top navigation strip
-            //   (_3.2 step 5a) took its height from the viewport, the last TARGET's top can reach the viewport's top at Full
-            string block = ConfigCopy().pois.Single(p => p.id == Lamp).card.blocks.Select(b => b.key)
-                .Where(k => Slot(k) != null && Slot(k).parent == Scroll.contentContainer && Slot(k).resolvedStyle.display == DisplayStyle.Flex)
-                .OrderBy(k => Slot(k).layout.y).Last();
-            Assert.Greater(Slot(block).layout.y, Range + OnePixel, "precondition: the block sits in the final screen (its top cannot reach the viewport's)");
+            // - the case comes from the MEASURED layout, never a typed key: the first of the wall's long cards (The Lamp, then The Painting)
+            //   with a block in its final screen, and of those the lowest -- a navigation target or not. Since _3.3 P1b The Lamp's lowest
+            //   block (its Sources) is taller than the screen, so its top CAN reach the viewport's; the top strip (_3.2 step 5a) had already
+            //   done the same to its last TARGET
+            string block = null;
+            foreach (string poi in new[] { Lamp, Painting })
+            {
+                yield return Open(poi, SheetStopRule.Stop.Full);
+                yield return CardTestInput.Settle(0.3f);
+                block = ConfigCopy().pois.Single(p => p.id == poi).card.blocks.Select(b => b.key)
+                    .Where(k => Slot(k) != null && Slot(k).parent == Scroll.contentContainer && Slot(k).resolvedStyle.display == DisplayStyle.Flex)
+                    .Where(k => Slot(k).layout.y > Range + OnePixel)
+                    .OrderBy(k => Slot(k).layout.y).LastOrDefault();
+                if (block != null) break;
+            }
+            Assert.IsNotNull(block, "precondition: a card of the wall has a block in its final screen (its top cannot reach the viewport's)");
 
             Assert.IsTrue(Nav.JumpToBlock(block, Element));
             yield return Landed();

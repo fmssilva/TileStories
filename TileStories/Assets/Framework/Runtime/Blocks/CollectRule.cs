@@ -65,11 +65,11 @@ namespace TileStories
             return own.Length > 0 ? own : BlockStackBuilder.CardTitleOf(poi, language, fallbackLanguage);
         }
 
-        // The series the item belongs to: the block's own label, else the point's category name
-        public static string Series(BlockFieldReader read, POIData poi, WallConfigData taxonomy)
+        // The series the item belongs to: the block's own label, else the point's category name in the card's language
+        public static string Series(BlockFieldReader read, POIData poi, WallConfigData taxonomy, string language)
         {
             string own = read.Text(BuiltInBlocks.CollectSeriesField);
-            return own.Length > 0 ? own : PoiSubtitle.Of(poi, taxonomy, withLevel: false);
+            return own.Length > 0 ? own : PoiSubtitle.Of(poi, taxonomy, withLevel: false, language);
         }
     }
 }

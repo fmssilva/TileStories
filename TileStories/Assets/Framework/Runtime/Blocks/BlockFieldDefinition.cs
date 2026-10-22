@@ -45,6 +45,9 @@ namespace TileStories
         public IReadOnlyList<BlockFieldDefinition> ItemFields;
         // Asset only: what the file must be (MediaPathRule checks the stored path against it)
         public MediaKind Media;
+        // Asset only: the field may hold its own file per wall language (a narration and its captions recorded in each language);
+        // the Editor then adds one row per other language under it, blank = the file above (BlockFieldReader.Asset)
+        public bool PerLanguage;
         // Number only: the value range (the Editor's slider) and the value read while nothing is stored
         public float NumberMin;
         public float NumberMax = 1f;

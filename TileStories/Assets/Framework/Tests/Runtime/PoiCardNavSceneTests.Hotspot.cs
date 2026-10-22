@@ -57,7 +57,7 @@ namespace TileStories.Tests
         public IEnumerator ARealTapOnANumberedPinWithOpensBlock_JumpsToItsBlock_AndOpensNoText_APinWithoutOneStillOpensItsPopup()
         {
             var opens = OpensBlockOf(NumberedHotspots);
-            Assert.AreEqual(4, opens.Count, "precondition: four spots");
+            Assert.AreEqual(5, opens.Count, "precondition: the five authored spots");
             int jumper = opens.FindIndex(o => o.Length > 0);
             int plain = opens.FindIndex(o => o.Length == 0);
             Assert.GreaterOrEqual(jumper, 0, "precondition: the wall's numbered block has a spot that opens a block");

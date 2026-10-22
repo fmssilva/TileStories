@@ -67,9 +67,15 @@ namespace TileStories.Editor
                         () => field.LibraryDefault ? BlockLibraryRule.Flag(_config.card_settings, definition, field, new BlockFieldReader(block, null, null)) : FlagValue(block, field.Key),
                         value => EnsureBlockField(block, field.Key).flag = value);
                 else if (field.Type == BlockFieldType.Asset)
+                {
                     DrawAssetRow(field, IndentLevel1, "Block field " + field.Key, blockIndex, _config.card_settings?.media_resources_path,
                         _config.card_settings?.default_media_library_resources_path,
                         () => AssetValue(block, field.Key), value => EnsureBlockField(block, field.Key).asset = value);
+                    if (field.PerLanguage)
+                        DrawPerLanguageAssetRows(field, languages, IndentLevel1, "Block field " + field.Key, blockIndex,
+                            lang => LanguageEntryValue(block.fields?.Find(f => f != null && f.key == field.Key)?.asset_by_language, lang),
+                            (lang, value) => SetLanguageEntry(EnsureBlockField(block, field.Key).asset_by_language, lang, value));
+                }
                 else if (field.Type == BlockFieldType.Number)
                     DrawNumberRow(field, IndentLevel1, "Block field " + field.Key, blockIndex,
                         () => NumberValue(block, field), value => EnsureBlockField(block, field.Key).number = value);
@@ -170,8 +176,14 @@ namespace TileStories.Editor
             string defaultLibraryPath, List<POIData> pois, BlockRefCard card)
         {
             if (sub.Type == BlockFieldType.Asset)
+            {
                 DrawAssetRow(sub, IndentLevel2, probeName, probeIndex, mediaFolder, defaultLibraryPath,
                     () => ItemAssetValue(item, sub.Key), value => EnsureItemField(item, sub.Key).asset = value);
+                if (sub.PerLanguage)
+                    DrawPerLanguageAssetRows(sub, languages, IndentLevel2, probeName, probeIndex,
+                        lang => LanguageEntryValue(item.fields?.Find(f => f != null && f.key == sub.Key)?.asset_by_language, lang),
+                        (lang, value) => SetLanguageEntry(EnsureItemField(item, sub.Key).asset_by_language, lang, value));
+            }
             else if (sub.Type == BlockFieldType.Choice)
                 // - an empty row reads as the field's default (a tile's On Tap moves the card): the popup says so instead of "(none)"
                 DrawChoiceRow(sub, IndentLevel2, probeName, probeIndex, () => ItemChoiceValue(item, sub.Key), value => SetItemChoiceValue(item, sub.Key, value),

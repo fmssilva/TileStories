@@ -176,6 +176,65 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("castle_hero.png", reader.ValidAsset("image", MediaKind.Image));
         }
 
+        // Per Language media (_3.3 P1b): a language's own file wins for that language only; a blank entry, another language or no
+        // language read the shared file; never another language's file. The same for an Items row's sub-field.
+        [Test]
+        public void APerLanguageAsset_GivesEachLanguageItsOwnFile_ElseTheSharedOne_NeverAnotherLanguages()
+        {
+            var block = Picture("castle_hero.jpg");
+            block.fields[0].asset_by_language = new List<LocalizedEntry> { new() { lang = "pt", value = "castelo.jpg" }, new() { lang = "fr", value = " " } };
+            Assert.AreEqual("castelo.jpg", new BlockFieldReader(block, "pt", "en").ValidAsset("image", MediaKind.Image), "pt reads its own file");
+            Assert.AreEqual("castle_hero.jpg", new BlockFieldReader(block, "en", "en").ValidAsset("image", MediaKind.Image), "en reads the shared file");
+            Assert.AreEqual("castle_hero.jpg", new BlockFieldReader(block, "fr", "en").ValidAsset("image", MediaKind.Image), "a blank entry is no file of its own");
+            Assert.AreEqual("castle_hero.jpg", new BlockFieldReader(block, "de", "pt").ValidAsset("image", MediaKind.Image),
+                "a language with no entry reads the SHARED file, not the fallback language's own one");
+            Assert.AreEqual("castle_hero.jpg", new BlockFieldReader(block, null, null).Asset("image"), "no language: the shared file");
+
+            BlockItemData Row() => new()
+            {
+                fields = new List<BlockItemFieldValue>
+                {
+                    new() { key = "image", asset = "gallery_1.jpg", asset_by_language = new List<LocalizedEntry> { new() { lang = "pt", value = "galeria_1.jpg" } } },
+                },
+            };
+            Assert.AreEqual("galeria_1.jpg", new BlockFieldReader(block, "pt", "en").ItemValidAsset(Row(), "image", MediaKind.Image), "an Items row too");
+            Assert.AreEqual("gallery_1.jpg", new BlockFieldReader(block, "en", "en").ItemValidAsset(Row(), "image", MediaKind.Image));
+        }
+
+        // A language's own file the rule refuses hides the block like a refused shared file (else that language's card would lose it silently);
+        // the registry refuses Per Language on anything but an Asset field; the built-in opt-in list is the four narration / video fields
+        [Test]
+        public void AnInvalidLanguageFile_HidesItsBlockAsInvalidMedia_AndPerLanguageIsForAssetFieldsOnly()
+        {
+            var block = Picture("castle_hero.jpg");
+            block.fields[0].asset_by_language = new List<LocalizedEntry> { new() { lang = "pt", value = "castelo.jpg" } };
+            Assert.IsEmpty(Build(block).Skipped, "a valid language file: the block shows");
+            block.fields[0].asset_by_language[0].value = "castelo.mp3";
+            var skipped = Build(block).Skipped.Single();
+            Assert.AreEqual(BlockStackBuilder.SkipReason.InvalidMedia, skipped.Reason);
+            Assert.AreEqual("image", skipped.FieldKey, "the reason names the field");
+
+            var words = new BlockFieldDefinition { Key = "words", Type = BlockFieldType.LocalizedText, PerLanguage = true };
+            var text = new BlockKindDefinition
+            {
+                Key = "bad", Family = BuiltInFamilies.About, Format = CardOptions.FormatRead, IconKey = CardIcons.Light, Variants = new[] { "plain" },
+                DefaultVariant = "plain", DisplayModes = new[] { CardOptions.DisplayInline }, Fields = new[] { words },
+            };
+            StringAssert.Contains("only an Asset field", BlockRegistry.Validate(text));
+            // - Fields lists the common ones first (the heading): flip the kind's OWN field, held here
+            words.PerLanguage = false;
+            Assert.IsNull(BlockRegistry.Validate(text), "precondition: the same kind without the flag is valid, so the flag is what was refused");
+
+            var perLanguage = new List<string>();
+            var registry = new BlockRegistry();
+            BuiltInBlocks.Register(registry);
+            foreach (var kind in registry.All)
+                foreach (var field in kind.Fields.Concat(kind.Fields.Where(f => f.ItemFields != null).SelectMany(f => f.ItemFields)))
+                    if (field.PerLanguage) perLanguage.Add(kind.Key + "." + field.Key);
+            CollectionAssert.AreEquivalent(new[] { "audio_guide.clip", "audio_guide.captions", "video.clip", "video.captions" }, perLanguage,
+                "a narration and a film are recorded per language; a picture is not (no row per language on every picture)");
+        }
+
         [Test]
         public void ANumberField_ReadsItsDefaultWhileUnset_AndStaysInsideItsRange()
         {

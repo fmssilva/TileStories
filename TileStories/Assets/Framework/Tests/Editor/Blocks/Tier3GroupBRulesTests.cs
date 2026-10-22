@@ -139,12 +139,16 @@ namespace TileStories.Editor.Tests
             var poi = new POIData { id = "gate", name = "Gate", category = "civic" };
             var empty = new BlockInstanceData { key = "b", kind = BuiltInBlocks.CollectKind };
             Assert.AreEqual("Gate", CollectRule.ItemName(Read(empty), poi, "en", "en"), "the point's card title");
-            Assert.AreEqual("Civic Buildings", CollectRule.Series(Read(empty), poi, taxonomy), "the category's name, never its key");
+            Assert.AreEqual("Civic Buildings", CollectRule.Series(Read(empty), poi, taxonomy, "en"), "the category's name, never its key");
+            // - _3.3 P1b: a category's own name in the card's language
+            taxonomy.category_styles[0].label_by_language.Add(new LocalizedEntry { lang = "pt", value = "Edifícios Cívicos" });
+            Assert.AreEqual("Edifícios Cívicos", CollectRule.Series(Read(empty), poi, taxonomy, "pt"), "a Portuguese card names the series in Portuguese");
+            Assert.AreEqual("Civic Buildings", CollectRule.Series(Read(empty), poi, taxonomy, "en"), "an English card keeps its one name");
             var own = new BlockInstanceData { key = "b", kind = BuiltInBlocks.CollectKind };
             own.fields.Add(new BlockFieldValue { key = BuiltInBlocks.CollectItemNameField, text = En("Old gate stamp") });
             own.fields.Add(new BlockFieldValue { key = BuiltInBlocks.CollectSeriesField, text = En("Gates") });
             Assert.AreEqual("Old gate stamp", CollectRule.ItemName(Read(own), poi, "en", "en"));
-            Assert.AreEqual("Gates", CollectRule.Series(Read(own), poi, taxonomy));
+            Assert.AreEqual("Gates", CollectRule.Series(Read(own), poi, taxonomy, "pt"), "the block's own words win in every language");
         }
 
         [Test]

@@ -150,6 +150,19 @@ namespace TileStories.Tests
             return false;
         }
 
+        // Which of `slots` (each section's first slot, or each target's, in the stack's order) the reader is in, read from the SCREEN:
+        // each top is measured where the slot is DRAWN (its distance below the viewport's top, plus the offset) and NavScrollRule's own
+        // spy answers -- the rule is the spec (NavScrollRuleTests), the screen is the input, never the controller's bookkeeping. A slot
+        // not shown (none, display none, set aside) has reached no line. One helper for every fixture: the spy's rule changed once
+        // (_3.3 P1b, a short section at the top is the one read) and nine private copies of the old one had to follow
+        public static int UnderTheSpyLine(ScrollView scroll, System.Collections.Generic.IEnumerable<VisualElement> slots)
+        {
+            var viewport = scroll.contentViewport.worldBound;
+            float offset = scroll.scrollOffset.y;
+            var tops = slots.Select(s => s == null || !IsShown(s, scroll.contentContainer) ? float.PositiveInfinity : s.worldBound.yMin - viewport.yMin + offset).ToList();
+            return NavScrollRule.CurrentSection(tops, offset, scroll.contentContainer.layout.height, scroll.contentViewport.layout.height);
+        }
+
         // A finger's drag from panel position `start` by `delta` (panel units), over `frames` frames: touch pointer events, what a
         // phone sends and what a ScrollView drag-scrolls its content on
         public static IEnumerator TouchDrag(IPanel panel, Vector2 start, Vector2 delta, int frames = 12)

@@ -93,7 +93,43 @@ namespace TileStories.Editor
                 // Deleting a category POIs still reference orphans them, so ask first with the count
                 entry => TaxonomyRowKeys.CountReferences(_config.pois, TaxonomyRowKeys.PoiUsesCategory, entry.key));
 
+            DrawCategoryNamesPerLanguage();
+
             DrawDomainTestSubSection(_markerTest, MarkerSceneTestGuide, MarkerPlaymodeTestGuide, MarkerDeviceTestGuide);
+        }
+
+        // The category's name in each card language after the first (CategoryStyleEntry.label_by_language): a header row with one column
+        // per language, then one row per category -- its label, read-only, beside a text cell per language. Shown only when the card has a
+        // second language. Drawing never writes: an entry is created by typing and removed when its cell is emptied.
+        private void DrawCategoryNamesPerLanguage()
+        {
+            var languages = _config.card_settings?.languages;
+            if (languages == null || languages.Count < 2) return;
+            EditorGUILayout.Space(4f);
+            DrawEditorRow(out float headerWidth, out _, IndentLevel1);
+            GUILayout.Label("Category Names Per Language", EditorStyles.miniBoldLabel, GUILayout.Width(Mathf.Max(40f, headerWidth - 36f)), GUILayout.ExpandWidth(false));
+            HelpInfoButton.Draw("Category Names Per Language", CategoryNamesPerLanguageHelp);
+            EditorRowEnd();
+
+            for (int row = 0; row < _config.category_styles.Count; row++)
+            {
+                var entry = _config.category_styles[row];
+                if (entry == null) continue;
+                entry.label_by_language ??= new List<LocalizedEntry>();
+                DrawEditorRow(out float rowWidth, out _, IndentLevel1);
+                float cell = Mathf.Max(40f, (rowWidth - 36f) / languages.Count);
+                GUILayout.Label(TaxonomyNames.NameOr(entry.label, entry.key), GUILayout.Width(cell), GUILayout.ExpandWidth(false));
+                for (int i = 1; i < languages.Count; i++)
+                {
+                    string lang = languages[i];
+                    string current = LanguageEntryValue(entry.label_by_language, lang);
+                    string edited = EditorGUILayout.TextField(current, GUILayout.Width(cell), GUILayout.ExpandWidth(false));
+                    ReportTableCellRect("Category name " + lang, row);
+                    // - the same store / clear rule as a Per Language media row: a blank cell is no name of its own
+                    if (edited != current) SetLanguageEntry(entry.label_by_language, lang, edited);
+                }
+                EditorRowEnd();
+            }
         }
 
         // ---------------- Badge ----------------

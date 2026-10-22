@@ -8,6 +8,14 @@ namespace TileStories
         public static string Category(WallConfigData config, string key) =>
             NameOr(config?.category_styles?.Find(e => e != null && e.key == key)?.label, key);
 
+        // The category's name in `language` (its own name in that language), else its one name, else the key
+        public static string Category(WallConfigData config, string key, string language)
+        {
+            var row = config?.category_styles?.Find(e => e != null && e.key == key);
+            var own = row?.label_by_language?.Find(e => e != null && e.lang == language && !string.IsNullOrWhiteSpace(e.value));
+            return own != null ? own.value : NameOr(row?.label, key);
+        }
+
         public static string Badge(WallConfigData config, string key) =>
             NameOr(config?.badge_categories?.Find(e => e != null && e.key == key)?.label, key);
 

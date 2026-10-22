@@ -10,6 +10,11 @@ namespace TileStories
             "Leave an empty line between paragraphs. Write [[word]] to link a word to its Glossary entry (Detail Card > " +
             "Glossary): the visitor taps it to read the definition. [[shown words|word]] shows other words for the same entry.";
 
+        // What every Per Language media field's help adds about its language rows
+        private const string PerLanguageHelp =
+            " The rows under it, one per other wall language (Detail Card > Card Container > Languages), take that language's own " +
+            "file; a blank row uses this one.";
+
         // Register every built-in family and then every built-in kind into `registry`. The families go FIRST:
         // Register refuses a kind whose family is not registered yet (_3.2 section 2.2).
         public static void Register(BlockRegistry registry)

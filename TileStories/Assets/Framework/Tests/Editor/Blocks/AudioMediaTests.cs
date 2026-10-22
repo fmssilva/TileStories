@@ -68,7 +68,10 @@ namespace TileStories.Editor.Tests
             var expected = new[]
             {
                 ("audio/lamp_tone.wav", "audio/lamp_tone.vtt", 20f, 4),
-                ("audio/castelo_s_jorge_guide_pt.mp3", "audio/castelo_s_jorge_guide_pt.vtt", 200.39f, 20),
+                ("audio/guide_castle_en.mp3", "audio/guide_castle_en.vtt", 164.52f, 26),
+                ("audio/guide_castle_pt.mp3", "audio/guide_castle_pt.vtt", 128.97f, 26),
+                ("audio/guide_paco_en.mp3", "audio/guide_paco_en.vtt", 191.40f, 30),
+                ("audio/guide_paco_pt.mp3", "audio/guide_paco_pt.vtt", 143.96f, 30),
             };
             foreach (var (clipPath, captionsPath, length, cueCount) in expected)
             {
@@ -83,9 +86,7 @@ namespace TileStories.Editor.Tests
                 for (int i = 1; i < cues.Count; i++) Assert.GreaterOrEqual(cues[i].Start, cues[i - 1].End - 0.001f, captionsPath + ": cues in order, none overlapping");
                 foreach (var cue in cues) VisitorTextChecks.AssertValid(cue.Text, captionsPath + " caption");
             }
-            Assert.IsNotNull(source.Load<AudioClip>("audio/portugal_tourism_guide_en.mp3"), "the long English clip loads too");
-            Assert.AreEqual(232.91f, source.Load<AudioClip>("audio/portugal_tourism_guide_en.mp3").length, 0.1f);
-            Assert.IsTrue(VttRule.Parse(source.Load<TextAsset>("audio/castelo_s_jorge_guide_pt.vtt").text).Any(c => c.Text.Contains("provisório")),
+            Assert.IsTrue(VttRule.Parse(source.Load<TextAsset>("audio/guide_castle_pt.vtt").text).Any(c => c.Text.Contains("São Jorge")),
                 "the Portuguese captions keep their letters");
         }
 
@@ -112,7 +113,7 @@ namespace TileStories.Editor.Tests
         [Test]
         public void TheTwoLongNarrations_StreamFromDisk_SoNothingIsDecodedUntilPlayed()
         {
-            foreach (string name in new[] { "castelo_s_jorge_guide_pt.mp3", "portugal_tourism_guide_en.mp3" })
+            foreach (string name in new[] { "guide_castle_en.mp3", "guide_castle_pt.mp3", "guide_paco_en.mp3", "guide_paco_pt.mp3" })
             {
                 var importer = (AudioImporter)AssetImporter.GetAtPath("Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/audio/" + name);
                 Assert.IsNotNull(importer, name);

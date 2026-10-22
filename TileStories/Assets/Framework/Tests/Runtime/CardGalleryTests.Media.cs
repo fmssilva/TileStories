@@ -200,6 +200,11 @@ namespace TileStories.Tests
             foreach (var corner in new[] { view.Spots[0].Number.worldBound, view.Spots[1].Number.worldBound })
                 Assert.IsTrue(corner.xMin >= frame.xMin - 0.5f && corner.yMin >= frame.yMin - 0.5f && corner.xMax <= frame.xMax + 0.5f && corner.yMax <= frame.yMax + 0.5f,
                     "a corner spot's circle " + corner + " lies whole inside the frame " + frame);
+            // - a spot with no text opens its title alone (moved here from The Lamp's loupes at _3.3 P1b: every real spot has a text now)
+            yield return CardTestInput.Tap(view.Root.panel, view.Spots[1].Pin.worldBound.center);
+            yield return CardTestInput.Settle(0.1f);
+            Assert.AreEqual("Bottom right corner", view.DetailTitle.text, "precondition: the text-less spot is the one open");
+            Assert.AreEqual(0, view.DetailText.Paragraphs.Count, "a spot with no text: its title alone");
 
             yield return ShowBlock("hotspot_image_numbered_missing", v => view = (HotspotImageBlockView)v);
             Assert.IsTrue(view.Image.Root.ClassListContains("card-image--unavailable"), "a missing picture says so");

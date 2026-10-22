@@ -160,7 +160,7 @@ namespace TileStories.Tests
                     Assert.IsNotEmpty(Nav.RowOf(tiles[i].Target).Words, "precondition: the block has words of its own");
                     Assert.AreEqual(Nav.RowOf(tiles[i].Target).Words, tiles[i].Words.text, "tile " + i + ": no words of its own: the block's, in " + language);
                 }
-                Assert.IsTrue(tiles[0].HasPicture && tiles[0].Picture.Texture != null, language + ": castle_then.png loaded from the wall's media folder");
+                Assert.IsTrue(tiles[0].HasPicture && tiles[0].Picture.Texture != null, language + ": images/castle_then.jpg loaded from the wall's media folder");
                 Assert.IsTrue(tiles[1].HasPicture && tiles[1].Picture.Texture != null, language + ": the video tile's photo loaded");
                 Assert.IsFalse(tiles[2].HasPicture || tiles[3].HasPicture, "the other two have none");
                 Assert.AreEqual(BentoTileRule.Opens.Jump, tiles[0].Opens);

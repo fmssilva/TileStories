@@ -23,7 +23,7 @@ namespace TileStories.Tests
 
             StringAssert.StartsWith("<link=\"keep\">", rich[0].Body.Paragraphs[0].text, "plain: the linked word opens the text");
             StringAssert.Contains("crown the highest hill", rich[0].Body.Paragraphs[0].text);
-            Assert.AreEqual(2, rich[0].Body.Paragraphs.Count);
+            Assert.AreEqual(3, rich[0].Body.Paragraphs.Count, "the story's three paragraphs");
             Assert.AreEqual("B", rich[1].Body.DropCap.text, "drop cap");
             StringAssert.Contains("uilt by the Moors", rich[1].Body.Paragraphs[0].text);
             Assert.IsTrue(rich[2].Body.Paragraphs[0].ClassListContains("card-text__lede"), "lede");
@@ -41,7 +41,7 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             var plain = Sheet.Stack.BoundViews.OfType<RichTextBlockView>().First();
             var first = plain.Body.Paragraphs[0];
-            StringAssert.Contains("Torre de menagem", first.text, "the Portuguese words shown for the glossary entry");
+            StringAssert.Contains("Torres de menagem", first.text, "the Portuguese words shown for the glossary entry ([[Torres de menagem|keep]])");
             StringAssert.Contains("coroam a colina", first.text);
 
             Sheet.Stack.Scroll.ScrollTo(plain.Root);
@@ -49,7 +49,7 @@ namespace TileStories.Tests
             var onWord = new Vector2(first.worldBound.xMin + 12f, first.worldBound.yMin + first.resolvedStyle.fontSize * 0.6f);
             yield return CardTestInput.Tap(first.panel, onWord);
             Assert.AreEqual("keep", plain.Body.OpenTerm, "a real tap on the linked word");
-            Assert.AreEqual("Torre de menagem", plain.Body.DefinitionTitle.text);
+            Assert.AreEqual("Torres de menagem", plain.Body.DefinitionTitle.text, "the definition is titled with the words the visitor tapped");
             Assert.AreEqual("A torre mais forte de um castelo, o seu \u00faltimo ref\u00fagio.", plain.Body.DefinitionText.text, "the wall's glossary, in Portuguese");
             yield return Capture("Card_Lamp_Glossary_pt");
         }
@@ -61,8 +61,8 @@ namespace TileStories.Tests
             var facts = Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().ToList();
             Assert.AreEqual(3, facts.Count, "chips, grid_hairline, big_numbers");
             CollectionAssert.AreEqual(new[] { "Style", "Material", "Access" }, facts[0].Facts.Select(f => f.Label.text));
-            CollectionAssert.AreEqual(new[] { "1147", "11", "1511", "c. 1700" }, facts[1].Facts.Select(f => f.Value.text));
-            Assert.AreEqual("364", facts[2].Facts[1].Value.text);
+            CollectionAssert.AreEqual(new[] { "1147", "11", "c. 1500", "1938 to 1940" }, facts[1].Facts.Select(f => f.Value.text));
+            Assert.AreEqual("800+", facts[2].Facts[1].Value.text);
             Assert.IsTrue(facts[2].Root.ClassListContains("card-facts--big_numbers"));
 
             Sheet.Stack.Scroll.ScrollTo(facts[1].Root);
@@ -78,7 +78,7 @@ namespace TileStories.Tests
             var fun = Sheet.Stack.BoundViews.OfType<FunFactBlockView>().ToList();
             Assert.AreEqual(2, fun.Count, "flip and postcard");
             var flip = fun[0].Facts[0];
-            Assert.AreEqual("Sabia que?", flip.Heading.text, "the framework's Portuguese heading");
+            Assert.AreEqual("Pav\u00f5es nos jardins", flip.Heading.text, "the fact's own Portuguese heading (_3.3 P1b), not the card's Sabia que?");
             Assert.AreEqual("Toque para ver", flip.Hint.text);
             Assert.IsFalse(flip.Revealed);
 
@@ -87,9 +87,10 @@ namespace TileStories.Tests
             yield return CardTestInput.Tap(flip.Box.panel, flip.Box.worldBound.center);
             yield return null;
             Assert.IsTrue(flip.Revealed, "a real tap on the card reveals the fact");
-            StringAssert.Contains("n\u00e3o tem porta ao n\u00edvel do ch\u00e3o", flip.Text.Paragraphs[0].text);
+            StringAssert.Contains("H\u00e1 pav\u00f5es nos jardins do castelo", flip.Text.Paragraphs[0].text);
             Assert.IsTrue(fun[1].Facts[0].Revealed, "the postcard shows at once");
-            StringAssert.Contains("uma torre inteira", fun[1].Facts[0].Text.Paragraphs[0].text);
+            StringAssert.Contains("Martim Moniz", fun[1].Facts[0].Text.Paragraphs[0].text);
+            Assert.AreEqual("O cavaleiro na porta", fun[1].Facts[0].Heading.text, "the postcard's own heading too");
             yield return CardTestInput.Settle(0.1f);
             yield return Capture("Card_Lamp_FunFacts");
         }
@@ -228,12 +229,12 @@ namespace TileStories.Tests
         {
             yield return OpenFull("lamp");
             Assert.IsTrue(Header.HasHero, "The Lamp's header is the Image Parallax look");
-            Assert.IsNotNull(Header.Picture.Texture, "castle_hero.png loaded from the wall's Media Folder (Resources)");
+            Assert.IsNotNull(Header.Picture.Texture, "images/castle_hero.jpg loaded from the wall's Media Folder (Resources)");
             Assert.AreEqual("castle_hero", Header.Picture.Texture.name);
             // - The Lamp's today_map bridge shows the header's picture as the wall's side of the bridge (its own copy)
-            int bridges = Sheet.Stack.BoundViews.OfType<TodayMapBlockView>().Count(v => v.ThenPicture.Path == "castle_hero.png");
+            int bridges = Sheet.Stack.BoundViews.OfType<TodayMapBlockView>().Count(v => v.ThenPicture.Path == "images/castle_hero.jpg");
             Assert.AreEqual(1, bridges, "precondition: the fixture's bridge holds the header picture too");
-            Assert.AreEqual(1 + bridges, Card.Media.RefCount("castle_hero.png"), "loaded once by the header, lazily when the card was bound (+ the bridge's copy)");
+            Assert.AreEqual(1 + bridges, Card.Media.RefCount("images/castle_hero.jpg"), "loaded once by the header, lazily when the card was bound (+ the bridge's copy)");
             Assert.AreEqual(0, Sheet.Stack.Scroll.contentContainer.IndexOf(Header.HeroPart), "the hero opens what scrolls");
             yield return Capture("Card_Lamp_Full_Hero");
 
@@ -257,8 +258,8 @@ namespace TileStories.Tests
         {
             var header = Session.SearchPois.First(p => p.id == "lamp").card.blocks[0];
             header.variant = BuiltInBlocks.HeaderSplitThenNow;
-            header.fields.Find(f => f.key == BuiltInBlocks.HeaderImageField).asset = "castle_then.png";
-            header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderSecondImageField, asset = "castle_now.png" });
+            header.fields.Find(f => f.key == BuiltInBlocks.HeaderImageField).asset = "images/castle_then.jpg";
+            header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderSecondImageField, asset = "images/castle_now.jpg" });
             yield return OpenFull("lamp");
             Assert.IsTrue(Header.HasHero);
             Assert.AreEqual("castle_then", Header.Picture.Texture.name);
@@ -270,7 +271,7 @@ namespace TileStories.Tests
 
             SelectionEventBus.Clear();
             header.variant = BuiltInBlocks.HeaderSpotlightCrop;
-            header.fields.Find(f => f.key == BuiltInBlocks.HeaderImageField).asset = "castle_hero.png";
+            header.fields.Find(f => f.key == BuiltInBlocks.HeaderImageField).asset = "images/castle_hero.jpg";
             header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderFocusXField, number = 0.55f });
             header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderFocusYField, number = 0.35f });
             yield return OpenFull("lamp");
@@ -285,7 +286,7 @@ namespace TileStories.Tests
             header.variant = BuiltInBlocks.HeaderTextOnly;
             yield return OpenFull("lamp");
             Assert.IsFalse(Header.HasHero, "the text-only look: no picture");
-            Assert.AreEqual(0, Card.Media.RefCount("castle_hero.png"), "...and none loaded");
+            Assert.AreEqual(0, Card.Media.RefCount("images/castle_hero.jpg"), "...and none loaded");
         }
     }
 }

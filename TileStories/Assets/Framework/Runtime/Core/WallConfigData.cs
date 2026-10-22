@@ -387,6 +387,10 @@ namespace TileStories
         // filter chips, search, suggestions). Blank -> the key is shown.
         public string label;
 
+        // The category's name in another card language (Category Names Per Language, under the Category table): the card
+        // reads the visitor's language here, else `label` (TaxonomyNames.Category with a language)
+        public List<LocalizedEntry> label_by_language = new();
+
         // "#RRGGBB". Empty/omitted -> this category keeps the hash-generated colour.
         public string color_hex;
 

@@ -248,9 +248,9 @@ namespace TileStories
             {
                 new BlockFieldDefinition
                 {
-                    Key = VideoClipField, Type = BlockFieldType.Asset, Media = MediaKind.Video, Label = "Clip", Required = true,
+                    Key = VideoClipField, Type = BlockFieldType.Asset, Media = MediaKind.Video, Label = "Clip", Required = true, PerLanguage = true,
                     Help = "An MP4 (H.264) or WEBM file inside the wall's Media Folder (Detail Card > Card Container). Tick Transcode in " +
-                           "its import settings with a Low bitrate to keep the app small.",
+                           "its import settings with a Low bitrate to keep the app small." + PerLanguageHelp,
                 },
                 new BlockFieldDefinition
                 {
@@ -260,9 +260,9 @@ namespace TileStories
                 },
                 new BlockFieldDefinition
                 {
-                    Key = VideoCaptionsField, Type = BlockFieldType.Asset, Media = MediaKind.Captions, Label = "Captions",
+                    Key = VideoCaptionsField, Type = BlockFieldType.Asset, Media = MediaKind.Captions, Label = "Captions", PerLanguage = true,
                     Help = "A WebVTT (.vtt) captions file inside the Media Folder, in the language the video is spoken in. Empty: no " +
-                           "captions switch.",
+                           "captions switch." + PerLanguageHelp,
                 },
                 new BlockFieldDefinition
                 {

@@ -113,30 +113,13 @@ namespace TileStories.Tests
 
         private static IEnumerator TouchTap(IPanel panel, Vector2 at) => CardTestInput.TouchDrag(panel, at, Vector2.zero, frames: 1);
 
-        // The target block under the spy line, read from the SCREEN: the last target whose slot top is at or above a third of the
-        // viewport -- or the last one at the end of the range (section 4.4)
-        private string BlockUnderTheSpyLine()
-        {
-            if (Range > 0f && Scroll.scrollOffset.y >= Range - NavScrollRule.EndTolerance) return Model.Targets.Last();
-            var viewport = Scroll.contentViewport.worldBound;
-            float line = viewport.yMin + viewport.height * NavScrollRule.SpyLineFraction;
-            string found = Model.Targets[0];
-            foreach (string target in Model.Targets)
-                if (Sheet.Stack.SlotOfBlock(target).worldBound.yMin <= line) found = target;
-            return found;
-        }
+        // The target block the reader is in, read from the SCREEN: the spy's own rule over each target's slot as drawn
+        private string BlockUnderTheSpyLine() =>
+            Model.Targets[CardTestInput.UnderTheSpyLine(Scroll, Model.Targets.Select(t => Sheet.Stack.SlotOfBlock(t)))];
 
-        // The section the reader is in, read from the screen (each section's first slot against the spy line, or the last at the end)
-        private int SectionUnderTheSpyLine()
-        {
-            if (Range > 0f && Scroll.scrollOffset.y >= Range - NavScrollRule.EndTolerance) return Model.Sections.Count - 1;
-            var viewport = Scroll.contentViewport.worldBound;
-            float line = viewport.yMin + viewport.height * NavScrollRule.SpyLineFraction;
-            int found = 0;
-            for (int i = 0; i < Model.Sections.Count; i++)
-                if (Sheet.Stack.SlotOfBlock(Model.Sections[i].Targets[0]).worldBound.yMin <= line) found = i;
-            return found;
-        }
+        // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
+        private int SectionUnderTheSpyLine() =>
+            CardTestInput.UnderTheSpyLine(Scroll, Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
 
         // Every item the element offers now, with the block it leads to and its mark
         private List<Item> ItemsOf(INavElementView view)

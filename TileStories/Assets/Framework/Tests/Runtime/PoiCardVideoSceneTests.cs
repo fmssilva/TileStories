@@ -15,7 +15,7 @@ namespace TileStories.Tests
     // the same card.
     public class PoiCardVideoSceneTests : SearchSceneFixture
     {
-        private const string ClipPath = "video/castelo_s_jorge_video.mp4";
+        private const string ClipPath = "video/lisbon_square_castle_55s.mp4";
 
         private PoiCardSheetView Sheet => Card.Sheet;
         private CardSettings Live => Session.CardSettings;
@@ -89,9 +89,9 @@ namespace TileStories.Tests
             var inline = Inline;
             Assert.AreEqual(BuiltInBlocks.VideoInline, inline.Variant);
             Assert.AreEqual("On film", Sheet.Stack.HeadingOf(inline).text, "the authored heading");
-            Assert.AreEqual("0:00 / 3:20", inline.Panel.TimeText.text, "the real clip's length: 200.3 s");
-            Assert.AreEqual("castelo_s_jorge_2", inline.Panel.Poster.Texture.name, "the real photograph as its poster, from the wall's folder");
-            Assert.AreEqual(20, inline.Panel.Cues.Count, "the captions file loaded and parsed");
+            Assert.AreEqual("0:00 / 0:54", inline.Panel.TimeText.text, "the real clip's length: 54.9 s");
+            Assert.AreEqual("lisbon_square_castle_poster", inline.Panel.Poster.Texture.name, "the clip's own poster frame, from the wall's folder");
+            Assert.AreEqual(3, inline.Panel.Cues.Count, "the English captions file loaded and parsed (one cue per joined clip)");
             Assert.AreEqual(DisplayStyle.None, inline.Panel.ChapterRow.resolvedStyle.display, "the inline look: no chapter buttons");
             Assert.AreEqual(CardVideoState.Idle, _video.State, "opening a card plays nothing by itself");
 
@@ -99,7 +99,7 @@ namespace TileStories.Tests
             //   off and read as a caption-timing failure, 2026-09-29): the timing itself is the stand-in device's, exact to the second
             yield return CardTestInput.TapInView(Sheet.Stack.Scroll, inline.Panel.PlayOverlay);
             Assert.AreEqual(CardVideoState.Playing, _video.State, "a real tap started it");
-            Assert.AreEqual("castelo_s_jorge_video", _videoOut.Clip.name, "the real clip, through the card's media source");
+            Assert.AreEqual("lisbon_square_castle_55s", _videoOut.Clip.name, "the real clip, through the card's media source");
             Assert.IsFalse(_videoOut.Muted, "with its sound");
             Assert.IsFalse(inline.Panel.ShowsFrames, "no frame yet: the poster");
             yield return Capture("Lamp_Video_Inline_Poster");
@@ -114,9 +114,9 @@ namespace TileStories.Tests
             Assert.IsTrue(inline.Panel.CaptionsShown, "a real tap switched the captions on");
             Advance(11f);
             yield return null;
-            Assert.AreEqual("Legenda de teste 2 de 20: texto provisório, não é a transcrição.", inline.Panel.CaptionLine.text,
-                "at 0:12 the second placeholder caption (10 s to 20 s), Portuguese letters intact");
-            Assert.AreEqual("0:12 / 3:20", inline.Panel.TimeText.text);
+            Assert.AreEqual("Walking across the Praça do Comércio, under the yellow arcades, towards the statue of Joseph I.", inline.Panel.CaptionLine.text,
+                "at 0:12 the first cue (0 s to 20.5 s, the square), its accents intact");
+            Assert.AreEqual("0:12 / 0:54", inline.Panel.TimeText.text);
             // - the caption line sits under the bar: bring it on screen for the capture
             Sheet.Stack.Scroll.ScrollTo(inline.Panel.CaptionLine);
             yield return CardTestInput.Settle(0.2f);
@@ -176,7 +176,7 @@ namespace TileStories.Tests
 
             Advance(0.6f);
             yield return null;
-            Assert.AreEqual("castelo_s_jorge_guide_pt", _audioOut.Clip.name, "the fade is over: the Lamp's narration is loaded");
+            Assert.AreEqual("guide_castle_en", _audioOut.Clip.name, "the fade is over: the Lamp's narration is loaded");
             Assert.IsFalse(_audioOut.IsPlaying, "but it does NOT play under the video");
             Assert.AreEqual(CardAudioState.Paused, _audio.State, "the narration ends the fade paused");
             Assert.AreEqual(CardVideoState.Playing, _video.State, "the video plays on");
@@ -192,8 +192,8 @@ namespace TileStories.Tests
             var teaser = Teaser;
             Assert.AreEqual(BuiltInBlocks.VideoChapters, teaser.Variant);
             Assert.AreEqual(DisplayStyle.None, teaser.Panel.Root.resolvedStyle.display, "the takeover display: no player on the card");
-            Assert.AreEqual("3:20", teaser.TeaserLength.text);
-            Assert.AreEqual("castelo_s_jorge_1", teaser.TeaserPoster.Texture.name);
+            Assert.AreEqual("0:54", teaser.TeaserLength.text);
+            Assert.AreEqual("castle_photo_1", teaser.TeaserPoster.Texture.name);
             // - to the teaser's own button (then the tap below finds it in view and scrolls no further: the offset Back must give back)
             Sheet.Stack.Scroll.ScrollTo(teaser.TeaserButton);
             yield return CardTestInput.Settle(0.2f);
@@ -204,15 +204,15 @@ namespace TileStories.Tests
             yield return CardTestInput.TapInView(Sheet.Stack.Scroll, teaser.TeaserButton);
             yield return CardTestInput.Settle(0.2f);
             Assert.IsTrue(Sheet.Takeover.IsOpen, "a real tap opened it full screen");
-            Assert.AreEqual(Header.TitleText + " > The castle, chapter by chapter", Sheet.Takeover.CrumbText);
+            Assert.AreEqual(Header.TitleText + " > The square and the castle, chapter by chapter", Sheet.Takeover.CrumbText);
             Assert.AreEqual(CardVideoState.Playing, _video.State, "and started it");
             var full = teaser.FullScreenPanel;
-            CollectionAssert.AreEqual(new[] { "0:00  Opening", "0:50  Part two", "1:40  Part three", "2:30  Closing" },
-                full.ChapterButtons.Select(b => b.text).ToList(), "the four chapters, EN");
+            CollectionAssert.AreEqual(new[] { "0:00  The square", "0:20  The view", "0:28  In the castle" },
+                full.ChapterButtons.Select(b => b.text).ToList(), "the three chapters, EN (one per joined clip)");
             yield return Tap(full.ChapterButtons[2]);
             Advance(1f);
             yield return null;
-            Assert.AreEqual(101f, _video.Position, 0.01f, "a real tap on Part three jumped to 1:40");
+            Assert.AreEqual(29f, _video.Position, 0.01f, "a real tap on In the castle jumped to 0:28 (+ the 1 s advanced)");
             Assert.IsTrue(full.ChapterButtons[2].ClassListContains("card-video__chapter--current"), "and lights it");
             Assert.IsTrue(full.ShowsFrames);
             yield return Capture("Lamp_Video_Takeover_Chapters");
@@ -235,11 +235,14 @@ namespace TileStories.Tests
             Assert.AreEqual("Capítulo a capítulo", Sheet.Stack.HeadingOf(Teaser).text);
             Assert.AreEqual("Ecrã inteiro", Inline.Panel.FullScreenButton.tooltip);
             Assert.AreEqual("Legendas", Inline.Panel.CaptionsButton.text);
+            // - _3.3 P1b: Per Language media -- the Portuguese card reads the clip's Portuguese captions, not the English file
+            Assert.AreEqual(3, Inline.Panel.Cues.Count, "the Portuguese captions file loaded and parsed");
+            StringAssert.StartsWith("A atravessar a Praça do Comércio", Inline.Panel.Cues[0].Text, "its first cue is Portuguese");
             Assert.AreEqual("Reproduzir", Inline.Panel.PlayButton.tooltip);
             yield return CardTestInput.TapInView(Sheet.Stack.Scroll, Teaser.TeaserButton);
             yield return CardTestInput.Settle(0.2f);
-            StringAssert.EndsWith("O castelo, capítulo a capítulo", Sheet.Takeover.CrumbText);
-            CollectionAssert.AreEqual(new[] { "0:00  Abertura", "0:50  Segunda parte", "1:40  Terceira parte", "2:30  Encerramento" },
+            StringAssert.EndsWith("A praça e o castelo, capítulo a capítulo", Sheet.Takeover.CrumbText);
+            CollectionAssert.AreEqual(new[] { "0:00  A praça", "0:20  A vista", "0:28  No castelo" },
                 Teaser.FullScreenPanel.ChapterButtons.Select(b => b.text).ToList());
             Assert.AreEqual("Pausar", Teaser.FullScreenPanel.PlayButton.tooltip);
             Advance(1f);
@@ -254,7 +257,7 @@ namespace TileStories.Tests
             var header = Header;
             Assert.IsTrue(header.HasHero, "the video loop look has its hero");
             Assert.AreEqual(ClipPath, header.LoopTrack.ClipPath);
-            Assert.AreEqual("castelo_s_jorge_1", header.Picture.Texture.name, "the poster, from the wall's folder");
+            Assert.AreEqual("castle_photo_1", header.Picture.Texture.name, "the poster, from the wall's folder");
             Assert.IsTrue(_video.PlayingLoop, "the header asked for its loop");
             Assert.IsTrue(_videoOut.Muted, "muted");
             Assert.IsTrue(_videoOut.Looping, "looping");
@@ -275,7 +278,7 @@ namespace TileStories.Tests
             yield return OpenFull("lamp_military");
             Assert.AreEqual(CardVideoState.Idle, _video.State, "Reduce Motion: no loop is asked for");
             Assert.IsFalse(Header.LoopShowsFrames);
-            Assert.AreEqual("castelo_s_jorge_1", Header.Picture.Texture.name, "the poster only");
+            Assert.AreEqual("castle_photo_1", Header.Picture.Texture.name, "the poster only");
             Sheet.Stack.Scroll.scrollOffset = Vector2.zero;
             yield return CardTestInput.Settle(0.15f);
             yield return Capture("Military_Header_Loop_ReduceMotion");

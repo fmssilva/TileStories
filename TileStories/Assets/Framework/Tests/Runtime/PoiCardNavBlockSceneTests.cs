@@ -113,16 +113,9 @@ namespace TileStories.Tests
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");
         }
 
-        // The section whose first target's top is the last at or above the spy line (a third down the viewport)
-        private int SectionUnderTheSpyLine()
-        {
-            var viewport = Scroll.contentViewport.worldBound;
-            float line = viewport.yMin + viewport.height * NavScrollRule.SpyLineFraction;
-            int found = 0;
-            for (int i = 0; i < Model.Sections.Count; i++)
-                if (Sheet.Stack.SlotOfBlock(Model.Sections[i].Targets[0]).worldBound.yMin <= line) found = i;
-            return found;
-        }
+        // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
+        private int SectionUnderTheSpyLine() =>
+            CardTestInput.UnderTheSpyLine(Scroll, Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
 
         // A real tap by a touch pointer on a point of the card layer
         private IEnumerator TouchTap(Vector2 at)

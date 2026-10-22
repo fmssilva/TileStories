@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // The fun_fact block (_3.1 Tier 1): one small card per fact, headed "Did you know?" (CardStrings). Two looks --
+    // The fun_fact block (_3.1 Tier 1): one small card per fact, headed by the fact's own Heading, else "Did you know?" (CardStrings). Two looks --
     // flip: the fact is hidden behind an invitation to tap; a tap on the card reveals it, a tap on its heading hides it
     // again (a tap on the revealed text is left to the text: a glossary word opens there); postcard: the fact shown at
     // once on a tilted postcard. The fact text is a CardTextView (paragraphs, glossary words). Only classes here.
@@ -44,14 +44,15 @@ namespace TileStories
             _variantClass = "card-fun--" + context.Variant;
             Root.AddToClassList(_variantClass);
             var read = new BlockFieldReader(instance, context.Language, context.FallbackLanguage);
-            string heading = context.Strings?.Get(CardStrings.Keys.FunFactLabel) ?? "";
+            string cardHeading = context.Strings?.Get(CardStrings.Keys.FunFactLabel) ?? "";
             string hint = context.Strings?.Get(CardStrings.Keys.FunFactHint) ?? "";
             foreach (var item in read.Items(BuiltInBlocks.FunFactItemsField))
             {
                 var paragraphs = GlossaryMarkup.Paragraphs(read.ItemText(item, BuiltInBlocks.FunFactTextField));
                 if (paragraphs.Count == 0) continue;
                 var fact = _facts.Take();
-                fact.Heading.text = heading;
+                string own = read.ItemText(item, BuiltInBlocks.FunFactHeadingField);
+                fact.Heading.text = own.Length > 0 ? own : cardHeading;
                 fact.Hint.text = hint;
                 fact.Text.Bind(paragraphs, context.Glossary);
                 fact.Box.EnableInClassList("card-tap", _flips);

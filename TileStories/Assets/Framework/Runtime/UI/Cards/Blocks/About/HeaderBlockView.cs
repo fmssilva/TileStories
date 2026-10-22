@@ -102,7 +102,7 @@ namespace TileStories
             string title = read.Text(BlockStackBuilder.HeaderTitleField);
             _title.text = title.Length > 0 ? title : context.Poi?.name ?? "";
 
-            _chip.text = PoiSubtitle.Of(context.Poi, context.Taxonomy, read.Flag(BuiltInBlocks.HeaderShowLevelField));
+            _chip.text = PoiSubtitle.Of(context.Poi, context.Taxonomy, read.Flag(BuiltInBlocks.HeaderShowLevelField), context.Language);
             // - a class, not an inline display: the collapsed header hides the chip through USS too
             _chip.EnableInClassList("card-chip--empty", _chip.text.Length == 0);
 

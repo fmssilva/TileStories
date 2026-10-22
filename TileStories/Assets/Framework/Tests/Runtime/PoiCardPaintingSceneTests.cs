@@ -100,17 +100,9 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
         }
 
-        // The section the reader is in, read from the SCREEN: each section's first slot against the spy line, or the last at the end
-        private int SectionUnderTheSpyLine()
-        {
-            if (Range > 0f && Scroll.scrollOffset.y >= Range - NavScrollRule.EndTolerance) return Model.Sections.Count - 1;
-            var viewport = Scroll.contentViewport.worldBound;
-            float line = viewport.yMin + viewport.height * NavScrollRule.SpyLineFraction;
-            int found = 0;
-            for (int i = 0; i < Model.Sections.Count; i++)
-                if (Sheet.Stack.SlotOfBlock(Model.Sections[i].Targets[0]).worldBound.yMin <= line) found = i;
-            return found;
-        }
+        // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
+        private int SectionUnderTheSpyLine() =>
+            CardTestInput.UnderTheSpyLine(Scroll, Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
 
         // A tab wholly inside its strip's visible part, after a real sideways drag of the strip when it is not
         private IEnumerator BringIntoView(TabsNavView tabs, Button tab)
@@ -212,7 +204,8 @@ namespace TileStories.Tests
             Assert.AreEqual(SectionUnderTheSpyLine(), tabs.CurrentIndex, "at the top");
             var viewport = Scroll.contentViewport.worldBound;
             var seen = new HashSet<int> { tabs.CurrentIndex };
-            for (int drag = 0; drag < 8 && Scroll.scrollOffset.y < Range - NavScrollRule.EndTolerance; drag++)
+            // - until the end of the card, whatever its length (P1b's real content doubled it); the cap only stops a drag that never gets there
+            for (int drag = 0; drag < 40 && Scroll.scrollOffset.y < Range - NavScrollRule.EndTolerance; drag++)
             {
                 float before = Scroll.scrollOffset.y;
                 yield return CardTestInput.TouchDrag(Scroll.panel, new Vector2(viewport.center.x, viewport.yMax - 40f), new Vector2(0f, -viewport.height * 0.5f));

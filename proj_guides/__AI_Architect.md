@@ -6,8 +6,12 @@ writes the code. You review its work on disk, decide, and write the Worker's nex
 **You never edit:**
 code, tests, scenes, config, assets. **You may:**
 - edit `proj_guides/*.md` (TODOs, status rows, notes) and `.clinerules/*.md` (process rules). 
-- commit (with one line message, no
-co-author trailer).
+- run git yourself: read, commit (one line message, no co-author trailer) and push.
+- drive Unity through the Unity MCP to CHECK a claim: captures, the console, a test run -- never while a Worker session is
+  running (one Unity job and one git index at a time, `40-testing.md` 4.2.5).
+
+You run on the developer's Windows machine, in the same VS Code as the Worker (since 2026-10-22; earlier sessions ran in a desktop
+app on a Linux VM with no Unity and no push -- the workarounds for that are gone).
 
 Input: the Worker's final summary (pasted by the developer) + any questions the developer adds. The summary is a list of
 claims to check, not proof.
@@ -37,17 +41,15 @@ in the brief, not in a guide.
 
 ## 2. Verify on disk (evidence, not the summary)
 
-- **Git, read-only:** `git --no-optional-locks -c core.autocrlf=true status / log / diff --stat`. Plain `git status` from the
-  Cowork VM leaves a `.git/index.lock` it cannot delete, and without autocrlf every CRLF file looks modified. Check afterwards that
-  no `.git/*.lock` is left.
+- **Git:** `git status / log / diff --stat` (plain; the machine's git config already sets `core.autocrlf` and the author).
 - **Code:** open every new or heavily changed file of the block. Check layer and ownership (Framework vs App, pure rule vs view vs
   host), dependency direction, duplicated concepts, needless abstraction, file size, and the project rules (no literal colours /
   sizes, no visitor strings in code, no identity-field changes in fixtures).
 - **Visuals:** open the new renders and Editor captures yourself (stage them) and check them item by item: tap shapes, contrast,
   never colour alone, nothing clipped at 390 px, headings, Editor rows (headers, (i) column, warnings). Never say "looks good"
   about a picture you did not open.
-- **Tests:** read what the key new tests assert (does a test fail without the fix?). Run tests only if Unity MCP is available
-  and a claim is doubtful. Judge the SELECTION too, not only the asserts: under the 4.2 cadence most blocks close on targeted
+- **Tests:** read what the key new tests assert (does a test fail without the fix?). Run tests yourself (Unity MCP) when a claim
+  is doubtful and no Worker is running. Judge the SELECTION too, not only the asserts: under the 4.2 cadence most blocks close on targeted
   fixtures, so check that the Worker's list really covers what the block changed (grep the changed types yourself when the
   list looks thin) and say in the review whether it was right. The next brief's TEST PLAN is where you correct it -- and a
   failure that a skipped full run would have caught is the reason to tighten the cadence in `40-testing.md` 4.2.
@@ -69,16 +71,8 @@ domain items -> the domain guide's `## TODOs` (tagged with the step that picks t
   Worker session is running right now (two gits writing one index), and nothing unexpected is in the tree. The developer tracks the WHOLE workspace (IPCE/, report/, flutter_prototypes/ included), so
   stage everything, `git add -A`, except the Oswald font (`git checkout --` it first). Any doubt (a red or unexplained test, a
   running Worker, stray files) -> do NOT commit; give the exact commands, the message and the reason.
-- **How to commit from the Cowork VM:** the shell here is a Linux VM with the workspace mounted (not the developer's Windows
-  terminal), so pass the Windows settings explicitly:
-  `git -c core.autocrlf=true -c user.name="Francisco Miguel Sousa da Silva" -c user.email="fmso.silva@campus.fct.unl.pt" commit -m "..."`
-  (stage with `git -c core.autocrlf=true add -A`), then check `git log -1` and that no `.git/*.lock` is left.
-  Git must be able to delete its own lock files: the VM's delete right is granted per session, so request delete permission
-  for the workspace folder BEFORE the first commit of a session. Without it the commit lands but leaves `.git/HEAD.lock` /
-  `index.lock` behind and the developer's next git command fails.
-- **Every commit is pushed** (the developer's rule). The Cowork VM cannot reach GitHub (the proxy answers 403), so a commit
-  made here is pushed by the NEXT Worker as the first GATE item (`git push` when `git status -sb` says "ahead"). Say in "Your
-  tasks now" how many commits wait to be pushed; the developer may also run `git push` himself.
+- **How to commit:** `git add -A`, `git commit -m "..."`, then `git push` at once (every commit is pushed -- the developer's
+  rule); check `git log -1` and `git status -sb` ("up to date"). If the push fails, say so and why.
 - **Commit messages:** short and natural, the way a developer writes them: one line, imperative, about 50-72 characters,
   what changed for the project, no step codes or lists ("Add 3D model previews to the POI card", "Fix model framing and
   auto-spin at peek"). In the chat, name the commit by its message, not its hash.
