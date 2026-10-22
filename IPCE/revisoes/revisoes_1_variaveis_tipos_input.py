@@ -37,6 +37,7 @@ A SÉRIE COMPLETA
   revisoes_3_condicoes_e_if.py          (booleanos, if/elif/else, recursividade, main)
   revisoes_4_ciclos_for_e_listas.py     (for, range, listas, in)
   revisoes_5_valores_referencias_escopo.py  (o que acontece às variáveis: setas e escopo)
+  revisoes_7_programa_completo.py       (programas completos: main + funções; antes dos testes)
   revisoes_6_teste_exemplo_1/2/3.py     (testes completos, ao nível dos testes 1)
 
   A numeração das secções e dos exercícios continua de ficheiro para ficheiro
@@ -251,8 +252,8 @@ print(a, b)
 #
 # Escreve: 5 3
 #
-# "b = a" guardou em b o valor que o a tinha NAQUELE MOMENTO (3).
-# Depois, mudar o a não muda o b. O b não "segue" o a.
+# "b = a" pôs o b a apontar para o valor que o a tinha NAQUELE MOMENTO (3).
+# Depois, "a = 5" só muda o a: o b continua no 3. O b não "segue" o a.
 #
 # (com listas, no ficheiro 4, vais ver que isto tem uma surpresa)
 

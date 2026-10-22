@@ -2240,7 +2240,7 @@ EXERCICIO A - Prever o output -----------------------------------------
 x = 100
 
 def misterio(x):
-    x = x + 1          # este x é o PARÂMETRO, uma caixa só da função
+    x = x + 1          # este x é o PARÂMETRO, um nome que só existe na função
     y = x * 2
     for i in range(3):
         y += i          # y e i sobrevivem ao for, mas são locais à função
@@ -2287,7 +2287,8 @@ print(r, x)
 # Dentro da função, o parâmetro x recebe o valor de fora (100). Como um número
 # não pode ser alterado, é como se fosse uma cópia: o x local passa a 101,
 # e y = 202. O for depois soma 0+1+2 = 3, logo y fica 205 -> é o que é devolvido.
-# O x de fora nunca é tocado: o x da função é outra caixa, só com o mesmo nome
+# O x de fora nunca é tocado: o x da função é outro nome, só da função,
+# que por acaso se escreve igual
 # (tal como vimos no f do início desta secção).
 
 

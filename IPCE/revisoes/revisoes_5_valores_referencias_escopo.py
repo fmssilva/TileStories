@@ -30,7 +30,7 @@ O QUE VAIS APRENDER NESTE FICHEIRO (e porquê)
        Porquê: com listas, "mudar" e "reatribuir" são coisas diferentes,
        e confundi-las dá os bugs mais difíceis de encontrar.
 
- 19. Funções com listas ....................................... [~25 min]
+ 19. Funções com listas ....................................... [~30 min]
        Porquê: uma função pode mudar a lista de quem a chama.
        Às vezes é isso que se quer. Às vezes é um bug.
 
@@ -102,6 +102,22 @@ print(a is b)       # False  -> agora apontam para objetos diferentes
 #   a is b  -> as duas setas apontam para o MESMO objeto?
 # No dia a dia usa-se ==. O is serve aqui para ver as setas
 # (e no futuro para comparar com None: x is None).
+#
+# O MAPA DESTE FICHEIRO (vais vê-lo a funcionar em todas as secções):
+#
+#   REGRA 1: "nome = ..." só muda a SETA desse nome.
+#            Nunca altera nenhum objeto. Vale para números, strings e listas.
+#   REGRA 2: só os objetos MUTÁVEIS (as listas) se alteram por dentro,
+#            com l[i] = ..., append, pop ou +=.
+#            Todos os nomes que apontam para essa lista veem a alteração.
+#   TRUQUE:  chamar f(x) é fazer "parâmetro = x" escondido, no início da função
+#            (secções 16 e 19). Depois disso, valem as regras 1 e 2.
+#
+#   IMUTÁVEIS (nunca mudam):      int, float, bool, str, tuplo
+#   MUTÁVEIS (mudam por dentro):  list
+#
+# Os imutáveis não têm operações da regra 2: com eles só existe a regra 1.
+# Por isso, com números e strings nunca há surpresas. Com listas há.
 
 
 
@@ -334,6 +350,8 @@ print(x, y)             # 5 15
 
 # Na chamada add_ten(x), o parâmetro n passa a apontar para o MESMO objeto 5.
 # (o Python não copia o valor: passa a seta)
+# É como se, no início da função, o Python fizesse "n = x" escondido
+# (o TRUQUE do Ex 15.1). A partir daí é tudo regra 1.
 #
 # Dentro da função, "n = n + 10" cria o 15 e muda a seta do n.
 # O n é um nome LOCAL da função: mudar a seta dele não mexe na seta do x.
@@ -1278,7 +1296,7 @@ Ex 18.9 [SOZINHA] Matriz sem armadilhas -------------------------------
 # %%
 """
 ===========================================================================
-19. FUNÇÕES COM LISTAS [~25 min]
+19. FUNÇÕES COM LISTAS [~30 min]
 ===========================================================================
 
 Ex 19.1 [EXEMPLO] Três funções, três comportamentos ------------------------
@@ -1312,9 +1330,10 @@ nums = [1, 2, 3]
 try_to_replace(nums)
 print(nums)                     # [1, 2, 3]  -> nada mudou
 
+# A chamada double_in_place(nums) faz "l = nums" escondido (o TRUQUE do Ex 15.1).
 # O parâmetro l aponta para a MESMA lista que o nums. Logo:
-#   - l[i] = ... altera essa lista: quem chamou vê a alteração;
-#   - l = [...] só muda a seta do l (que é local): quem chamou não vê nada.
+#   - l[i] = ... altera essa lista (regra 2): quem chamou vê a alteração;
+#   - l = [...] só muda a seta do l, que é local (regra 1): quem chamou não vê nada.
 #
 # É a mesma regra do Ex 18.2, agora entre uma função e quem a chama.
 #
@@ -1389,7 +1408,54 @@ print(r, l)                 # [1, 2, 3] [3, 1, 2]
 
 # %%
 """
-Ex 19.4 [FAZ] O que escreve? ------------------------------------------
+Ex 19.4 [EXEMPLO] Uma lista de FORA, usada sem parâmetro -------------------
+    Só para perceber a regra. Nesta cadeira as listas entram nas funções
+    como parâmetros (como no ex 33), não como variáveis globais.
+"""
+
+history = [1, 2]
+
+def add_three() -> None:
+    """ Append 3 to the global list history (only to see the rule). """
+    history.append(3)           # não há "=": lê o nome de fora e altera a lista
+
+add_three()
+print(history)                  # [1, 2, 3]  -> funcionou
+
+def add_four_wrong() -> None:
+    """ Try to add 4 with + (WITH A BUG). """
+    history = history + [4]     # há "=": history passa a ser LOCAL nesta função
+
+# add_four_wrong()              # <- descomenta: UnboundLocalError
+
+def add_five_wrong() -> None:
+    """ Try to add 5 with += (WITH A BUG). """
+    history += [5]              # o += também é uma atribuição ao nome -> LOCAL
+
+# add_five_wrong()              # <- descomenta: UnboundLocalError
+
+# Lembra o ficheiro 2 (Ex 6.5): se uma função ATRIBUI a um nome ("nome = ..."),
+# esse nome é LOCAL na função toda. É a regra 1 outra vez.
+#
+#   history.append(3)       -> não atribui ao nome. O Python procura o history,
+#                              encontra o de fora, e altera a lista (regra 2).
+#   history = history + [4] -> atribui ao nome: history é local.
+#                              Do lado direito, o history local ainda não tem valor:
+#                              UnboundLocalError.
+#   history += [5]          -> com listas, o += altera a lista, MAS também
+#                              atribui ao nome. Logo, o mesmo erro.
+#
+# Moral: as duas regras explicam tudo. E a forma limpa é a do ex 33:
+# passar a lista como parâmetro (def add_three(l: list[int]) -> None).
+
+
+
+
+
+
+# %%
+"""
+Ex 19.5 [FAZ] O que escreve? ------------------------------------------
 """
 
 def f(l: list[int]) -> None:
@@ -1437,7 +1503,7 @@ print(a)
 
 
 # %%
-# Solução do Ex 19.4
+# Solução do Ex 19.5
 #
 # Escreve: [99, 6, 2, 3]
 #
@@ -1452,7 +1518,7 @@ print(a)
 
 # %%
 """
-Ex 19.5 [FAZ] Somar a todos: alterando e copiando --------------------
+Ex 19.6 [FAZ] Somar a todos: alterando e copiando --------------------
 
     a) add_to_all(l, k): soma k a todos os elementos, ALTERANDO a lista.
     b) added(l, k): devolve uma lista NOVA com k somado, sem mexer em l.
@@ -1507,7 +1573,7 @@ print(added(nums, 10), nums)    # [11, 12, 13] [1, 2, 3]
 
 
 # %%
-# Solução do Ex 19.5
+# Solução do Ex 19.6
 
 def add_to_all(l: list[int], k: int) -> None:
     """ Add k to every element of l (changes l). """
@@ -1540,7 +1606,7 @@ print(added(nums, 10), nums)    # [11, 12, 13] [1, 2, 3]
 
 # %%
 """
-Ex 19.6 [PENSA] Trocar dois elementos (teórica 04b) ---------------------
+Ex 19.7 [PENSA] Trocar dois elementos (teórica 04b) ---------------------
 
     swap(l, i, j): troca os elementos das posições i e j da lista.
         l = [10, 20, 30]
@@ -1587,7 +1653,7 @@ Ex 19.6 [PENSA] Trocar dois elementos (teórica 04b) ---------------------
 
 
 # %%
-# Ideia do Ex 19.6:
+# Ideia do Ex 19.7:
 #
 #   Uma linha: l[i], l[j] = l[j], l[i]
 #   Não precisa de return (cabeçalho -> None).
@@ -1603,7 +1669,7 @@ Ex 19.6 [PENSA] Trocar dois elementos (teórica 04b) ---------------------
 
 # %%
 """
-Ex 19.7 [DESAFIO] Altera e devolve (estilo Teste 1 2025/26, 1c) -----------
+Ex 19.8 [DESAFIO] Altera e devolve (estilo Teste 1 2025/26, 1c) -----------
 
     O accumulation do teste ALTERA a lista e DEVOLVE-A.
     O que escreve este código? Sem correr! Solução no fim do ficheiro.
@@ -1626,7 +1692,7 @@ print(a, b, c, a is b)
 
 # %%
 """
-Ex 19.8 [DESAFIO] Parâmetros de todos os tipos ----------------------------
+Ex 19.9 [DESAFIO] Parâmetros de todos os tipos ----------------------------
 
     Sem correr! Solução no fim do ficheiro.
 """
@@ -1650,7 +1716,7 @@ print(x, k, y)
 
 # %%
 """
-Ex 19.9 [SOZINHA] Negativos a zero ------------------------------------
+Ex 19.10 [SOZINHA] Negativos a zero ------------------------------------
 
     a) zero_negatives(l): põe a 0 todos os elementos negativos, ALTERANDO a lista.
            l = [3, -1, 4, -5]; zero_negatives(l); print(l)   # [3, 0, 4, 0]
@@ -1775,24 +1841,34 @@ Ex 20.4 [SOZINHA] O que escreve? --------------------------------------
 RESUMO: O QUE JÁ SABES
 ===========================================================================
 
+  AS DUAS REGRAS (e o truque)
   [ ] uma variável é um nome com uma seta para um objeto
-  [ ] "nome = ..." muda uma seta; nunca altera o objeto antigo
+  [ ] REGRA 1: "nome = ..." muda uma seta; nunca altera o objeto antigo
+  [ ] REGRA 2: só as listas se alteram por dentro (l[i] = ..., append, pop, +=),
+      e todos os nomes que apontam para elas veem a alteração
+  [ ] números, strings e tuplos são imutáveis: com eles só existe a regra 1
+  [ ] TRUQUE: chamar f(x) é fazer "parâmetro = x" escondido
+
+  O QUE SAI DAS REGRAS
   [ ] == compara valores; is compara setas (o mesmo objeto?)
-  [ ] números, strings e tuplos não mudam; listas mudam
-  [ ] o tipo pertence ao valor (tipagem dinâmica); forte vs fraca é outra pergunta
-  [ ] uma função recebe setas: com imutáveis é como uma cópia;
-      com listas, alterar o conteúdo vê-se cá fora; reatribuir o parâmetro não
   [ ] o único caminho para um número sair de uma função é o return
+  [ ] uma função que altera a lista recebida: vê-se cá fora;
+      reatribuir o parâmetro (l = ...): não se vê
+  [ ] a = a + [x] cria lista nova (regra 1); a += [x] altera a lista (regra 2)
+  [ ] for v in l: v = ... só muda o v (regra 1); para alterar a lista, usar os índices
+  [ ] [[0] * 3] * 3 partilha a mesma linha; usar um ciclo
+  [ ] numa função, atribuir a um nome (=, +=) torna-o local na função toda
+
+  OUTRAS PEÇAS
+  [ ] o tipo pertence ao valor (tipagem dinâmica); forte vs fraca é outra pergunta
   [ ] if e for não criam variáveis locais; só as funções criam
   [ ] a variável do for fica com o último valor; com range vazio não existe
-  [ ] a = a + [x] cria lista nova; a += [x] altera a lista
-  [ ] [[0] * 3] * 3 partilha a mesma linha; usar um ciclo
-  [ ] for v in l: v = ... não altera a lista; usar os índices
 
   Se alguma linha ainda não te parece clara, volta à secção dela
   e usa o Python Tutor.
 
-  PRÓXIMO: os testes de exemplo (revisoes_6_teste_exemplo_1.py)
+  PRÓXIMO: revisoes_7_programa_completo.py (programas completos e bem organizados),
+  e depois os testes de exemplo (revisoes_6_teste_exemplo_1.py)
 """
 
 
@@ -1910,7 +1986,7 @@ SOLUÇÕES DOS DESAFIOS
 
 
 # %%
-# Solução do Ex 19.7
+# Solução do Ex 19.8
 #
 # Escreve: [1, 3, 6] [1, 3, 6] [1, 4, 10] True
 #
@@ -1928,7 +2004,7 @@ SOLUÇÕES DOS DESAFIOS
 
 
 # %%
-# Solução do Ex 19.8
+# Solução do Ex 19.9
 #
 # Escreve: [1, 6] 5 [1, 6, 6, 0]
 #

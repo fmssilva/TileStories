@@ -1,0 +1,380 @@
+
+Introdução à Programação para a Ciência e Engenharia (2026/2027)
+Lista de exercícios
+Artur Miguel Dias
+Prática 07a (Semana de 26-30/out/2026)
+Sumário: Ciclo while. Exercícios de 45 a 47.
+
+45 - O ciclo while foi apresentado e discutido na aula teórica 04a:
+inicialização
+while condição:
+    corpo       # inclui o "avanço"
+Por favor, considere o programa abaixo, que só usa ciclos for. Transforme-o num programa equivalente que só use ciclos while.
+Note bem que este programa fica muito melhor tal como está, escrito com ciclos for. Este é apenas um exercício de treino.
+
+def f(n: int) -> None:
+    for i in range(n):
+        if i % 2 == 0:
+            print(i)
+
+def g(m: int, n: int) -> None:
+    for i in range(m):
+        for j in range(n):
+            if i % 2 == 0 and j % 2 == 0:
+                print((i,j))
+
+def main() -> None:
+    f(7)
+    g(4,5)
+
+main()
+46 - No jogo Hi-Lo o computador pensa num número inteiro secreto no intervalo [0,1023]. Depois o utilizador tenta adivinhar qual é esse número, no menor número de jogadas que conseguir.
+O programa gera internamente um número secreto entre 0 e 1023, e depois vai lendo as tentativas do utilizador. O computador vai respondendo ">", "<" ou "=". Portanto, o programa vai informando o utilizador se a tentativa corrente é maior, menor ou igual ao que o segredo. Quando surge a resposta "=", o programa acaba, claro.
+
+Note que o programa vai precisar de ler uma sequência não vazia de inteiros até ocorrer a condição de vitória. O comprimento desta sequência de inteiros é indeterminado. Só sabemos que é maior do que zero.
+
+Este tipo de situação foi estudado na aula teórica 04a. Para se inspirar, eis as duas soluções que foram vistas para somar uma sequência não vazia de inteiros com comprimento indeterminado:
+
+END_MARK = -1
+
+def read_and_add() -> int:
+    """ Read and add a sequence of integers with unknown length. """
+    sum = 0
+    v = int(input("> "))     # lê (fora do ciclo)             
+    while v != END_MARK:     # testa
+        sum += v             # soma
+        v = int(input("> ")) # lê (dentro do ciclo)  
+    return sum
+END_MARK = -1
+
+def read_and_add() -> int:
+    """ Read and add a sequence of integers with unknown length. """
+    sum = 0
+    while True:
+        v = int(input("> "))  # lê   
+        if v == END_MARK:     # testa                  
+            break
+        sum += v              # soma
+    return sum
+Exemplo de interação:
+
+JOGO HI-LO
+Já pensei num número...
+Tente adivinhar: 500
+<
+Tente adivinhar: 300
+<
+Tente adivinhar: 100
+<
+Tente adivinhar: 50
+>
+Tente adivinhar: 70
+<
+Tente adivinhar: 60
+>
+Tente adivinhar: 65
+>
+Tente adivinhar: 68
+<
+Tente adivinhar: 67
+<
+Tente adivinhar: 66
+=
+Parabéns! Acertou em 10 tentativas! O número secreto era 66!
+Complete o programa:
+
+import random
+
+MAX_HILO = 1023
+
+def ask_guess() -> int:
+    """ Ask the user's guess. """
+    guess = int(input("Tente adivinhar: "))
+    return guess
+
+def final_message(attempts: int, secret: int) -> None:
+    """ Final message, after victory. """
+    print(f"Parabéns! Acertou em {attempts} tentativas! O número secreto era {secret}!")
+
+def play_hilo(lo: int, hi: int) -> None:
+    """ The classic HI-LO game in the closed range lo to hi. """
+    secret = random.randint(lo, hi)    # geração do número secreto!!! É assim que se faz!
+    print("Já pensei num número...")
+    attempts = 0
+    ...
+
+def main() -> None:
+    print("JOGO HI-LO")
+    play_hilo(0, MAX_HILO)
+
+main()
+47 - Programe agora o jogo Hi-Lo com troca de papéis: desta vez é o utilizador a escolher o número secreto e o computador a tentar adivinhar. Agora é mais difícil.
+Eis os detalhes da iteração com o utilizador:
+
+O programa começa por escrever: "Pense num número secreto entre 0 e 1023.". Nessa altura o utilizador pensa num número secreto (mas fica calado e não o diz ao computador).
+Depois, durante o jogo, o programa vai tentando adivinhar o número e vai perguntando: "A minha tentativa é X. Diga-me se o número secreto é maior (>), menor (<) ou igual (=) ? ".
+No final do jogo há duas reações possíveis do programa: "Viva! Acertei em N tentativas! O número secreto era X!" ou, "Você é batoteiro!".
+Ainda mais um detalhe. Desta vez queremos validação do input! Quando o programa pede um dos símbolos (>) (<) ou (=), se o utilizador introduzir um símbolo errado, o programa deve repetir a pergunta. Se o utilizador voltar a enganar-se, o programa repete a pergunta. E assim sucessivamente, até finalmente o utilizador dar uma resposta com sentido.
+Este programa só precisa de usar inteiros e carateres; não precisa de listas, nem de manipular strings, etc. A novidades são só a programação de dois ciclos while: (1) o ciclo de leitura com validação; (2) o ciclo que efetua a condução do jogo.
+
+Exemplo de interação onde o jogador humano não faz batota:
+
+JOGO HI-LO (REVERSE)
+Pense num número secreto entre 0 e 1023!
+Já pensou? <ENTER>
+A minha tentativa é 511. O número secreto é maior (>), menor (<) ou igual (=) ? <
+A minha tentativa é 255. O número secreto é maior (>), menor (<) ou igual (=) ? >
+A minha tentativa é 383. O número secreto é maior (>), menor (<) ou igual (=) ? = 
+Viva! Acertei em 3 tentativas! O número secreto era 383!
+Exemplo de interação, onde o jogador humano faz batota:
+JOGO HI-LO (REVERSE)
+Pense num número secreto entre 0 e 1023!
+Já pensou? <ENTER> 
+A minha tentativa é 511. O número secreto é maior (>), menor (<) ou igual (=) ? <
+A minha tentativa é 255. O número secreto é maior (>), menor (<) ou igual (=) ? <
+A minha tentativa é 127. O número secreto é maior (>), menor (<) ou igual (=) ? <
+A minha tentativa é 63. O número secreto é maior (>), menor (<) ou igual (=) ? <
+A minha tentativa é 31. O número secreto é maior (>), menor (<) ou igual (=) ? <
+A minha tentativa é 15. O número secreto é maior (>), menor (<) ou igual (=) ? <
+A minha tentativa é 7. O número secreto é maior (>), menor (<) ou igual (=) ? <
+A minha tentativa é 3. O número secreto é maior (>), menor (<) ou igual (=) ? <
+A minha tentativa é 1. O número secreto é maior (>), menor (<) ou igual (=) ? >
+A minha tentativa é 2. O número secreto é maior (>), menor (<) ou igual (=) ? >
+Você é batoteiro!
+Complete o programa:
+
+MAX_HILO = 1023
+
+def initial_request(lo: int, hi: int) -> None:
+    """ Start game. """
+    print(f"Pense num número secreto entre {lo} e {hi}!")
+    input("Já pensou? <ENTER> ")    # wait
+
+def ask(guess: int) -> str:
+    """ Read input until "<", ">" ou "=" """
+    ...
+
+def final_message(lo: int, hi: int, attempts: int, guess: int) -> None:
+    """ End game. """
+    if lo > hi:
+        print("Você é batoteiro!")
+    else:
+        print(f"Viva! Acertei em {attempts} tentativas! O número secreto era {guess}!")
+
+
+def play_hilo_reverse(lo: int, hi: int) -> None:
+    """ The classic HI-LO game in the closed range lo to hi. """
+    initial_request(lo, hi)
+    attempts = 0
+    ...
+
+
+def main() -> None:
+    print("JOGO HI-LO (REVERSE)")
+    play_hilo_reverse(0, MAX_HILO)
+
+main()
+
+
+
+
+
+Introdução à Programação para a Ciência e Engenharia (2026/2027)
+Lista de exercícios
+Artur Miguel Dias
+Prática 07b (Semana de 26-30/out/2026)
+Sumário: Matrizes. Exercício 48.
+
+Prólogo: O tema das matrizes foi introduzido e desenvolvido na aula teórica 07a.
+Como se disse na teórica 07a:
+
+Note que há uma diferença importante no processamento de matrizes, quando comparado com o processamento de listas:
+
+Com as listas é frequente ir fazendo crescer as listas em função das nossas necessidades;
+Com matrizes, pelo contrário, trabalhamos quase sempre com matrizes de dimensões fixas - em parte devido à natureza dos problemas que queremos resolver, mas também devido ao facto de, por exemplo, ao fazer crescer uma linha, a matriz deixa de ser matriz.
+Na aula teórica 07a, foi introduzido uma coleção de operações básicas (create, is_valid, nrows, is_empty, ncols, row, col, input_int_matrix), que facilitam o tratamento de matrizes com dimensão fixa. Essas operações são oferecidas no código mais abaixo, pois vai precisar de as usar.
+
+Para sua inspiração, está aqui uma das funções desenvolvidas na teórica 07a - a soma de duas matrizes de inteiros:
+
+type IMatrix = list[list[int]]
+
+def sum(m1: IMatrix, m2: IMatrix) -> IMatrix:
+    """ New matrix with all the corresponding elements of m1 and m2 added.
+        Precondition: is_valid(m1) and is_valid(m2)
+           and nrows(m1) == nrows(m2) and ncols(m1) == ncols(m2)
+    """
+    nr, nc = nrows(m1), ncols(m1)
+    m3 = create(nr, nc, 0)
+    for i in range(nr):
+        for j in range(nc):
+            m3[i][j] = m1[i][j] + m2[i][j]
+    return m3
+R : 48 - Escreva as seguintes 5 funções sobre matrizes:
+Determina o valor máximo que ocorre numa matriz de inteiros não vazia.
+def maximum(m: IMatrix) -> int:
+Multiplica uma matriz de inteiros por um escalar. O resultado é uma nova matriz.
+def multiply(m: IMatrix, scalar: int) -> IMatrix:
+Determina as duas diagonais duma matriz: a diagonal principal e a diagonal secundária. O resultado é um par de listas.
+def diagonals(m: GMatrix) -> tuple[GList, GList]:
+
+
+Efetua a transposição duma matriz, i.e. troca linhas por colunas. O resultado é uma nova matriz.
+def transpose(m: GMatrix) -> GMatrix:
+Efetua o produto de duas matrizes de inteiros: na posição (i, j) na matriz resultado, coloca-se o produto vetorial da linha i da primeira matriz com a coluna j da segunda matriz. O resultado é uma nova matriz.
+def product(m1: IMatrix, m2: IMatrix) -> IMatrix:
+Depois faça um teste simples para cada função.
+Complete o programa:
+
+type GList = list                # lista genérica
+type GMatrix = list[GList]       # matriz genérica
+
+type IList = list[int]           # lista de inteiros
+type IMatrix = list[IList]       # matriz de inteiros
+
+def create(nr: int, nc: int, value: any) -> GMatrix:
+    """ Create and initialize a matrix with nr rows and nc columns.
+        Precondition: nr >= 0 and nc >= 0
+    """
+    m = [None]*nr         # cria espaço para as linhas
+    for i in range(nr):   # preenche as várias linhas
+        m[i] = [value]*nc
+    return m
+
+def is_valid(m: GMatrix) -> bool:
+    """ Check if all the lines have the same length. """
+    nr = len(m)
+    for i in range(nr-1):  # verifica se todas as linhas têm igual comprimento
+        if len(m[i]) != len(m[i+1]):
+            return False
+    return True
+
+def nrows(m: GMatrix) -> int:
+    """ Number of rows of the matrix
+        Precondition: is_valid(m)
+    """
+    return len(m)             # número de linhas
+
+def is_empty(m: GMatrix) -> int:
+    """ Is the matrix empty? """
+    return nrows(m) == 0      # testa se matriz vazia 
+
+def ncols(m: GMatrix) -> int:
+    """ Number of columns of the matrix.
+        Precondition: is_valid(m)
+    """
+    if is_empty(m):           # a matriz vazia tem 0 colunas
+        return 0
+    else:
+        return len(m[0])      # número de colunas é o comprimento duma linha
+
+def row(m: GMatrix, i: int) -> GList:
+    """ Get the row i of the matrix.
+        Precondition: is_valid(m) and i in range(nrows(m))
+    """
+    return m[i].copy()      # faz cópia porque col também faz cópia
+
+def col(m: GMatrix, j: int) -> GList:
+    """ Get the column j of the matrix.
+        Precondition: is_valid(m) and j in range(ncols(m))
+    """
+    col = []
+    for r in m:             # acumula os vários elementos da coluna j
+        col.append(r[j])
+    return col
+
+def input_int_matrix() -> IMatrix:
+    """ Interactive matrix reading. """
+    l = input("ROWS COLS: ").split()
+    nr, rc = int(l[0]), int(l[1])
+    m = []
+    for i in range(nr):
+        l = []
+        for j in range(rc):
+            x = int(input(f"m[{i}][{j}] = "))
+            l.append(x)
+        m.append(l)
+    return m
+
+def maximum(m: IMatrix) -> int:
+    """ Maximum of matrix.
+        Precondition: is_valid(m) and not is_empty(m) """
+    pass # FAZER ...
+
+def multiply(m: IMatrix, scalar: int) -> IMatrix:
+    """ Multiply matriz by scalar.
+        Precondition: is_valid(m)
+    """
+    nr, nc = nrows(m), ncols(m)
+    pass # FAZER ...
+
+def diagonals(m: GMatrix) -> tuple[GList, GList]:
+    """ Get the two diagonals of the matrix.
+        Precondition: is_valid(m) and nrows(m) == ncols(m)
+    """
+    nr = nrows(m)
+    pass # FAZER ...
+
+def transpose(m: GMatrix) -> GMatrix:
+    """ Transpose of matrix .
+        Precondition: is_valid(m)
+    """
+    nr, nc = nrows(m), ncols(m)
+    pass # FAZER ...
+
+def product(m1: IMatrix, m2: IMatrix) -> IMatrix:
+    """ Multiply two matrices.
+        Precondition: is_valid(m1) and is_valid(m2)
+                      and ncols(m1) == nrows(m2)
+    """
+    nr, nc = nrows(m1), ncols(m2)
+    n = ncols(m1)
+    pass # FAZER ...
+
+def main() -> None:
+    m1 = [ [1, 2, 3, 4],
+           [5, 6, 7, 8] ]
+
+    m2 = [ [ 1,  2,  3],
+           [ 4,  5,  6],
+           [ 7,  8,  9],
+           [10, 11, 12] ]
+
+    m3 = [ [1,  2,  3],
+           [4,  5,  6],
+           [7,  8,  9] ]
+    
+    s = input("TESTE: ")
+    if s == "1":
+        max = maximum(m1)
+        print(max)
+    elif s == "2":
+        m = multiply(m1, 5)
+        print(m)
+    elif s == "3":
+        t = diagonals(m3)
+        print(t)
+    elif s == "4":
+        m = transpose(m1)
+        print(m)
+    elif s == "5":
+        m = product(m1, m2)
+        print(m)
+    else:
+        print("No test")
+
+main()
+Exemplo de execução
+TESTE: 1
+8
+Exemplo de execução
+TESTE: 2
+[[5, 10, 15, 20], [25, 30, 35, 40]]
+Exemplo de execução
+TESTE: 3
+([1, 5, 9], [3, 5, 7])
+Exemplo de execução
+TESTE: 4
+[[1, 5], [2, 6], [3, 7], [4, 8]]
+Exemplo de execução
+TESTE: 5
+[[70, 80, 90], [158, 184, 210]]

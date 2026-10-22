@@ -982,7 +982,9 @@ print(a, b)
 #
 # Escreve: 1 10
 #
-# O parâmetro a da função recebe uma cópia do 1, passa a 10 e é devolvido.
+# Na chamada, o parâmetro a da função aponta para o mesmo 1 que o a de fora.
+# Como os números não mudam, é como se fosse uma cópia.
+# Dentro da função, a = a * 10 põe o a LOCAL no 10, que é devolvido.
 # O a de fora nunca muda: continua 1. O b recebe o 10 do return.
 
 

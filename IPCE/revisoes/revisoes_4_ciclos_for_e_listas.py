@@ -23,13 +23,13 @@ O QUE VAIS APRENDER NESTE FICHEIRO (e porquê)
        Porquê: "este valor está lá dentro?" numa só expressão,
        em vez de uma fila de or.
 
- 14. Percorrer listas e strings com for ....................... [~50 min]
+ 14. Percorrer listas e strings com for ....................... [~65 min]
        Porquê: é a combinação dos 3 anteriores, e é o que os testes
        mais pedem: somar, contar, procurar, encontrar o máximo, verificar.
 
   Resumo + soluções dos desafios
 
-  Total: ~3h.
+  Total: ~3h15.
 
 COMO USAR (resumo da secção 0 do ficheiro 1)
   - Ctrl + Enter corre a célula; Shift + Enter corre e salta para a seguinte.
@@ -1500,7 +1500,7 @@ print(month_length(1, 2023), month_length(4, 2023),
 # e month_length(12, ...) dava IndexError.
 #
 # DURATIONS é uma constante LOCAL (só a função precisa dela).
-# É exatamente o que aparece no Teste 1 2025/26, pergunta 4 (Ex 14.17).
+# É exatamente o que aparece no Teste 1 2025/26, pergunta 4 (Ex 14.22).
 
 
 
@@ -1816,7 +1816,7 @@ Ex 13.6 [SOZINHA] Tipo de carácter ------------------------------------
 # %%
 """
 ===========================================================================
-14. PERCORRER LISTAS E STRINGS COM FOR [~50 min]
+14. PERCORRER LISTAS E STRINGS COM FOR [~65 min]
 ===========================================================================
 
 Ex 14.1 [EXEMPLO] for diretamente sobre uma coleção ------------------------
@@ -1872,6 +1872,32 @@ print(has_two_consecutive_equal([1, 2, 2, 3]))      # True
 
 # range(len(l) - 1): o último i é len(l) - 2, e o l[i + 1] é o último elemento.
 # Com range(len(l)), no último i o l[i + 1] dava IndexError.
+
+# Também se pode comparar com o ANTERIOR (l[i - 1] e l[i]). Aí o range começa em 1:
+def count_rises(l: list[int]) -> int:
+    """ How many times an element is greater than the previous one. """
+    count = 0
+    for i in range(1, len(l)):          # o elemento 0 não tem anterior
+        if l[i] > l[i - 1]:
+            count += 1
+    return count
+
+print(count_rises([3, 5, 5, 8, 2]))     # 2   (3 -> 5 e 5 -> 8)
+
+# Os limites, lado a lado:
+#   com o SEGUINTE (i e i + 1): range(len(l) - 1)
+#   com o ANTERIOR (i - 1 e i): range(1, len(l))
+# Cuidado: range(len(l)) com l[i - 1] NÃO dá erro. Na 1ª volta, l[-1] é o
+# ÚLTIMO elemento: o 1º é comparado com o último. Bug silencioso.
+#
+# Regra para escolher a forma de percorrer:
+#   - só USAR os valores (ler, somar, contar, testar)  -> pelos valores
+#   - ALTERAR a lista, ou comparar posições diferentes
+#     (o vizinho, duas listas ao mesmo tempo)          -> pelos índices
+#   (for v in l: v = ... NÃO altera a lista: só muda o v. Ver o ficheiro 5, Ex 19.2)
+#
+# Extra (ainda não dado nas aulas): for i, v in enumerate(l) dá os dois
+# ao mesmo tempo. Mas passa por TODAS as posições: não serve para l[i + 1].
 
 
 
@@ -2046,7 +2072,22 @@ print(all_positive([]))                                     # True (!!)
 #
 # Lista vazia: "todos os elementos são positivos" é verdade
 # (não há nenhum que falhe). Parece estranho, mas é assim na lógica.
-# (o Teste 1 2024/25 usa isto: all_the_same([]) == True, Ex 14.14)
+# (o Teste 1 2024/25 usa isto: all_the_same([]) == True, Ex 14.19)
+
+# Outra forma de fazer o "todos": uma FLAG que começa True e vai sendo confirmada.
+def all_positive_flag(l: list[int]) -> bool:
+    """ Check if all elements are positive (flag version). """
+    all_ok = True
+    for v in l:
+        all_ok = all_ok and v > 0
+    return all_ok
+
+print(all_positive_flag([1, 2, 3]), all_positive_flag([1, -2, 3]))   # True False
+
+# Dá o mesmo resultado, mas percorre SEMPRE a lista toda,
+# mesmo que o 1º elemento já falhe.
+# A versão com o contra-exemplo (return False dentro do for) pára logo.
+# "Quanto menos trabalho desnecessário, melhor": nos testes, preferir essa.
 
 
 
@@ -2055,7 +2096,36 @@ print(all_positive([]))                                     # True (!!)
 
 # %%
 """
-Ex 14.8 [FAZ] Contar e média ------------------------------------------
+Ex 14.8 [EXEMPLO] Duas listas ao mesmo tempo -------------------------------
+"""
+
+def dot_product(l1: list[int], l2: list[int]) -> int:
+    """ Sum of l1[i] * l2[i].
+        Precondition: len(l1) == len(l2)
+    """
+    total = 0
+    for i in range(len(l1)):            # o MESMO i serve para as duas listas
+        total += l1[i] * l2[i]
+    return total
+
+print(dot_product([1, 2, 3], [4, 5, 6]))     # 32   (4 + 10 + 18)
+
+# Para andar em duas listas "lado a lado" é preciso a POSIÇÃO:
+# o for pelos valores só dá os valores de UMA lista.
+# Com o índice i, l1[i] e l2[i] são os dois elementos da mesma posição.
+#
+# A precondição diz que as duas listas têm o mesmo tamanho.
+# Sem ela, se a l2 fosse mais curta, o l2[i] dava IndexError.
+# (É o comando x, "produto interno", do ex 33 dos guiões.)
+
+
+
+
+
+
+# %%
+"""
+Ex 14.9 [FAZ] Contar e média ------------------------------------------
 
     a) count(l, x): quantas vezes x aparece em l (sem usar l.count).
     b) average(l): média dos elementos (precondição: lista não vazia).
@@ -2108,7 +2178,7 @@ print(average([10, 12, 17]))                            # 13.0
 
 
 # %%
-# Solução do Ex 14.8
+# Solução do Ex 14.9
 
 def count(l: list[int], x: int) -> int:
     """ How many times x occurs in l. """
@@ -2140,7 +2210,7 @@ print(average([10, 12, 17]))                            # 13.0
 
 # %%
 """
-Ex 14.9 [FAZ] Pares e vogais ------------------------------------------
+Ex 14.10 [FAZ] Pares e vogais ------------------------------------------
 
     a) evens(l): lista NOVA só com os elementos pares de l.
     b) count_vowels(s): quantas vogais minúsculas (a, e, i, o, u) tem a string s.
@@ -2191,7 +2261,7 @@ print(count_vowels("programar"))    # 3
 
 
 # %%
-# Solução do Ex 14.9
+# Solução do Ex 14.10
 
 def evens(l: list[int]) -> list[int]:
     """ New list with the even elements of l. """
@@ -2224,7 +2294,7 @@ print(count_vowels("programar"))    # 3   (o, a, a)
 
 # %%
 """
-Ex 14.10 [FAZ] Valores pares vs posições pares (ex 38 dos guiões) ----------
+Ex 14.11 [FAZ] Valores pares vs posições pares (ex 38 dos guiões) ----------
 
     a) sum_even_values(l): soma dos elementos que SÃO pares.
     b) sum_values_at_even_positions(l): soma dos elementos nas POSIÇÕES pares
@@ -2277,7 +2347,7 @@ print(sum_values_at_even_positions([5, 2, 7, 4, 1]))    # 13
 
 
 # %%
-# Solução do Ex 14.10
+# Solução do Ex 14.11
 
 def sum_even_values(l: list[int]) -> int:
     """ Sum of the even elements. """
@@ -2311,7 +2381,290 @@ print(sum_values_at_even_positions([5, 2, 7, 4, 1]))    # 13
 
 # %%
 """
-Ex 14.11 [PENSA] Mínimo e a sua posição -------------------------------
+Ex 14.12 [FAZ] Duas listas: iguais? e quantas posições iguais? -------------
+
+    Precondição nas duas: as listas têm o mesmo tamanho.
+    a) equal(l1, l2): True se têm os mesmos valores pela mesma ordem
+       (sem usar l1 == l2).
+    b) count_same_positions(l1, l2): em quantas posições têm o mesmo valor.
+
+        equal([1, 2, 3], [1, 2, 3]) == True
+        equal([1, 2, 3], [1, 5, 3]) == False
+        count_same_positions([1, 2, 3, 4], [1, 5, 3, 0]) == 2
+"""
+
+def equal(l1: list[int], l2: list[int]) -> bool:
+    """ Check if l1 and l2 have the same values in the same order.
+        Precondition: len(l1) == len(l2)
+    """
+    pass        # TODO
+
+def count_same_positions(l1: list[int], l2: list[int]) -> int:
+    """ Number of positions where l1 and l2 have the same value.
+        Precondition: len(l1) == len(l2)
+    """
+    pass        # TODO
+
+print(equal([1, 2, 3], [1, 2, 3]), equal([1, 2, 3], [1, 5, 3]))     # True False
+print(count_same_positions([1, 2, 3, 4], [1, 5, 3, 0]))            # 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreites: faz primeiro por ti!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução do Ex 14.12
+
+def equal(l1: list[int], l2: list[int]) -> bool:
+    """ Check if l1 and l2 have the same values in the same order.
+        Precondition: len(l1) == len(l2)
+    """
+    for i in range(len(l1)):
+        if l1[i] != l2[i]:
+            return False        # uma diferença chega: já sei a resposta
+    return True                 # vi todas as posições e não houve diferenças
+
+def count_same_positions(l1: list[int], l2: list[int]) -> int:
+    """ Number of positions where l1 and l2 have the same value.
+        Precondition: len(l1) == len(l2)
+    """
+    count = 0
+    for i in range(len(l1)):
+        if l1[i] == l2[i]:
+            count += 1
+    return count
+
+print(equal([1, 2, 3], [1, 2, 3]), equal([1, 2, 3], [1, 5, 3]))     # True False
+print(count_same_positions([1, 2, 3, 4], [1, 5, 3, 0]))            # 2
+
+# a) é o padrão "todos?" (Ex 14.7): procurar um CONTRA-EXEMPLO,
+#    uma posição onde sejam diferentes. O return True só DEPOIS do for.
+#    Erro clássico: um else com return True dentro do for.
+#    Isso decidia logo na 1ª posição.
+#
+# b) é um contador (Ex 14.3), com o mesmo i nas duas listas (Ex 14.8).
+#    Aqui não dá para sair mais cedo: é preciso ver todas as posições.
+
+
+
+
+
+
+# %%
+"""
+Ex 14.13 [FAZ] Vizinhos: crescente? e quantas mudanças? --------------------
+
+    a) is_ascending(l): True se cada elemento é MAIOR do que o anterior
+       (estritamente crescente). Usa a forma "i e i + 1".
+    b) count_changes(l): quantas vezes um elemento é DIFERENTE do anterior.
+       Usa a forma "i - 1 e i".
+
+        is_ascending([1, 3, 7]) == True
+        is_ascending([1, 3, 3]) == False
+        is_ascending([5]) == True
+        count_changes([1, 1, 2, 2, 2, 5]) == 2
+        count_changes([4, 4]) == 0
+"""
+
+def is_ascending(l: list[int]) -> bool:
+    """ Check if l is strictly ascending. """
+    pass        # TODO
+
+def count_changes(l: list[int]) -> int:
+    """ How many times an element is different from the previous one. """
+    pass        # TODO
+
+print(is_ascending([1, 3, 7]), is_ascending([1, 3, 3]), is_ascending([5]))   # True False True
+print(count_changes([1, 1, 2, 2, 2, 5]), count_changes([4, 4]))           # 2 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreites: faz primeiro por ti!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução do Ex 14.13
+
+def is_ascending(l: list[int]) -> bool:
+    """ Check if l is strictly ascending. """
+    for i in range(len(l) - 1):         # com o SEGUINTE: até len(l) - 2
+        if l[i] >= l[i + 1]:            # um par que NÃO sobe
+            return False
+    return True
+
+def count_changes(l: list[int]) -> int:
+    """ How many times an element is different from the previous one. """
+    count = 0
+    for i in range(1, len(l)):          # com o ANTERIOR: começa em 1
+        if l[i] != l[i - 1]:
+            count += 1
+    return count
+
+print(is_ascending([1, 3, 7]), is_ascending([1, 3, 3]), is_ascending([5]))   # True False True
+print(count_changes([1, 1, 2, 2, 2, 5]), count_changes([4, 4]))           # 2 0
+
+# Os limites do range (Ex 14.2):
+#   com o SEGUINTE (i e i + 1): range(len(l) - 1)
+#   com o ANTERIOR (i - 1 e i): range(1, len(l))
+#
+# a) é outra vez o "todos?": procurar o par que estraga.
+#    O contrário de "<" é ">=" (e não ">"): com ">", o [1, 3, 3] passava.
+#    Com 1 elemento, o range é vazio e devolve True sem precisar de if.
+#
+# b) mudanças = número de "grupos" menos 1:
+#    [1, 1 | 2, 2, 2 | 5] tem 3 grupos e 2 mudanças.
+
+
+
+
+
+
+# %%
+"""
+Ex 14.14 [FAZ] Lista acumulada: somas parciais -----------------------------
+
+    running_sums(l): lista NOVA em que a posição i tem a soma
+    de l[0] até l[i] (inclusive).
+
+        running_sums([3, 1, 4, 1]) == [3, 4, 8, 9]
+        running_sums([5]) == [5]
+        running_sums([]) == []
+"""
+
+def running_sums(l: list[int]) -> list[int]:
+    """ New list where position i has the sum of l[0..i]. """
+    pass        # TODO
+
+print(running_sums([3, 1, 4, 1]))       # [3, 4, 8, 9]
+print(running_sums([]))                 # []
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreites: faz primeiro por ti!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Solução do Ex 14.14
+
+def running_sums(l: list[int]) -> list[int]:
+    """ New list where position i has the sum of l[0..i]. """
+    result = []
+    total = 0
+    for v in l:
+        total += v                      # o acumulador de sempre...
+        result.append(total)            # ...e, em cada volta, guarda-se o valor dele
+    return result
+
+print(running_sums([3, 1, 4, 1]))       # [3, 4, 8, 9]
+print(running_sums([5]))                # [5]
+print(running_sums([]))                 # []
+
+# Dois acumuladores a crescer juntos: o total (um número) e o result (uma lista).
+# Cada volta faz uma conta (total += v) e guarda o resultado dela (append).
+#
+# Não é preciso voltar a somar tudo desde o início em cada posição:
+# o total da posição i é o total da posição i - 1 mais o l[i].
+# (é o "reaproveitar o que já se calculou" das aulas)
+#
+# Com o mesmo esqueleto: médias parciais (Ex 14.24),
+# o máximo até ali (teste de exemplo 2, pergunta 4).
+
+
+
+
+
+
+# %%
+"""
+Ex 14.15 [PENSA] Mínimo e a sua posição -------------------------------
 
     position_of_min(l): a POSIÇÃO do menor elemento (se houver empate,
     a primeira). Precondição: lista não vazia.
@@ -2354,7 +2707,7 @@ Ex 14.11 [PENSA] Mínimo e a sua posição -------------------------------
 
 
 # %%
-# Ideia do Ex 14.11 (sem código):
+# Ideia do Ex 14.15 (sem código):
 #
 #   Interessa a posição -> for pelos índices.
 #   Guardar a posição do "mínimo até agora", a começar em 0 (o 1º elemento).
@@ -2372,7 +2725,7 @@ Ex 14.11 [PENSA] Mínimo e a sua posição -------------------------------
 
 # %%
 """
-Ex 14.12 [PENSA] Lista ao contrário -----------------------------------
+Ex 14.16 [PENSA] Lista ao contrário -----------------------------------
 
     reversed_copy(l): lista NOVA com os elementos de l pela ordem inversa,
     sem mexer na l (e sem usar l.reverse(), reversed() nem [::-1]).
@@ -2415,7 +2768,7 @@ Ex 14.12 [PENSA] Lista ao contrário -----------------------------------
 
 
 # %%
-# Ideia do Ex 14.12 (sem código), duas formas:
+# Ideia do Ex 14.16 (sem código), duas formas:
 #
 #   1. Percorrer os índices de trás para a frente com um range de passo -1
 #      (de len(l) - 1 até 0, inclusive: o FIM do range tem de ser -1)
@@ -2432,7 +2785,81 @@ Ex 14.12 [PENSA] Lista ao contrário -----------------------------------
 
 # %%
 """
-Ex 14.13 [DESAFIO] Executar à mão (Teste 1 2025/26, pergunta 1b e 1c) -------
+Ex 14.17 [PENSA] Copiar os pares para o início de outra lista --------------
+
+    copy_evens(l1, l2): copia os valores pares de l1 para o INÍCIO de l2,
+    pela mesma ordem. O resto de l2 fica como estava. Não devolve nada.
+    Precondição: len(l2) >= len(l1)
+
+        a = [1, 2, 3, 4, 6]
+        b = [0, 0, 0, 0, 0]
+        copy_evens(a, b)
+        print(b)            # [2, 4, 6, 0, 0]
+
+    (é o comando p do ex 33 dos guiões)
+"""
+
+# TODO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ======================================================================
+#   SOLUÇÃO NA CÉLULA DE BAIXO. Não espreites: faz primeiro por ti!
+# ======================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# %%
+# Ideia do Ex 14.17 (sem código):
+#
+#   São precisos DOIS índices, porque as duas listas andam a ritmos diferentes:
+#     - um percorre a l1 toda (ou um for pelos valores da l1);
+#     - outro, j, diz ONDE escrever na l2. Começa em 0.
+#   Para cada valor v da l1:
+#       se v for par: escrever na l2, na posição j (l2[j] = v), e avançar j (j += 1).
+#   O j só avança quando se escreve. É um contador que serve de índice.
+#
+#   Porquê l2[j] = v e não l2.append(v)?
+#   A l2 já existe com o seu tamanho: queremos TROCAR as primeiras posições,
+#   não acrescentar no fim.
+#
+#   Não há return: a função altera a lista que recebe (Ex 12.5),
+#   e quem a chamou vê a l2 alterada.
+
+
+
+
+
+
+# %%
+"""
+Ex 14.18 [DESAFIO] Executar à mão (Teste 1 2025/26, pergunta 1b e 1c) -------
 
     Escreva o resultado das chamadas:
         b) add([1,2,3,4]) = ____
@@ -2462,7 +2889,7 @@ def accumulation(l: list[int]) -> list[int]:
 
 # %%
 """
-Ex 14.14 [DESAFIO] Todos iguais (Teste 1 2024/25, pergunta 4, 3 valores) ----
+Ex 14.19 [DESAFIO] Todos iguais (Teste 1 2024/25, pergunta 4, 3 valores) ----
 
     Escreva uma função booleana para testar se todos os valores duma lista
     de inteiros são iguais entre si. Exemplos:
@@ -2485,7 +2912,7 @@ Ex 14.14 [DESAFIO] Todos iguais (Teste 1 2024/25, pergunta 4, 3 valores) ----
 
 # %%
 """
-Ex 14.15 [DESAFIO] Há repetidos? (for encaixados sobre uma lista) ----------
+Ex 14.20 [DESAFIO] Há repetidos? (for encaixados sobre uma lista) ----------
 
     has_duplicates(l): True se algum valor aparecer pelo menos 2 vezes.
         has_duplicates([3, 1, 4, 1]) == True
@@ -2504,7 +2931,7 @@ Ex 14.15 [DESAFIO] Há repetidos? (for encaixados sobre uma lista) ----------
 
 # %%
 """
-Ex 14.16 [DESAFIO] Contar em posições pares (Exame de Recurso 2023/24, pergunta 3)
+Ex 14.21 [DESAFIO] Contar em posições pares (Exame de Recurso 2023/24, pergunta 3)
 
     Escreva uma função inteira para contar o número de vezes que um dado
     caráter ocorre em posições de índice par numa lista de carateres.
@@ -2527,7 +2954,7 @@ Ex 14.16 [DESAFIO] Contar em posições pares (Exame de Recurso 2023/24, pergunt
 
 # %%
 """
-Ex 14.17 [DESAFIO] O mês de um dia do ano (Teste 1 2025/26, pergunta 4, 3 valores)
+Ex 14.22 [DESAFIO] O mês de um dia do ano (Teste 1 2025/26, pergunta 4, 3 valores)
 
     Escreva uma função inteira que, dado o número de ordem de um dia dentro
     dum ano, diga qual o mês correspondente. A função tem dois argumentos:
@@ -2559,7 +2986,7 @@ Ex 14.17 [DESAFIO] O mês de um dia do ano (Teste 1 2025/26, pergunta 4, 3 valor
 
 # %%
 """
-Ex 14.18 [DESAFIO] Progressão geométrica (Teste 1 2025/26, pergunta 5, 3 valores)
+Ex 14.23 [DESAFIO] Progressão geométrica (Teste 1 2025/26, pergunta 5, 3 valores)
 
     Uma progressão geométrica é uma sequência de valores reais em que cada
     elemento (exceto o primeiro) é igual ao anterior multiplicado por um
@@ -2590,7 +3017,7 @@ Ex 14.18 [DESAFIO] Progressão geométrica (Teste 1 2025/26, pergunta 5, 3 valor
 
 # %%
 """
-Ex 14.19 [SOZINHA] Médias parciais e posição de uma data ----------------
+Ex 14.24 [SOZINHA] Médias parciais e posição de uma data ----------------
 
     a) (Exame de Recurso 2023/24, pergunta 5, 2.5 valores)
        Escreva uma função que, dada uma lista de inteiros l, retorne uma nova
@@ -2633,7 +3060,11 @@ RESUMO: O QUE JÁ SABES
   [ ] b = a não copia a lista; uma função pode mudar a lista recebida
   [ ] tuplos (imutáveis), conjuntos (sem repetidos), {} é um dicionário
   [ ] in: em listas, tuplos, conjuntos, ranges, strings e dicionários (chaves)
-  [ ] for pelos valores vs pelos índices; range(len(l) - 1) para vizinhos
+  [ ] for pelos valores (só usar) vs pelos índices (alterar, vizinhos, duas listas)
+  [ ] vizinhos: range(len(l) - 1) com i + 1, ou range(1, len(l)) com i - 1
+  [ ] duas listas ao mesmo tempo: o mesmo i nas duas
+  [ ] lista acumulada: acumulador + append em cada volta
+  [ ] escrever noutra lista: um 2º índice que só avança quando se escreve
   [ ] máximo: começar com l[0], não com 0
 
   Se alguma linha ainda não te parece clara, volta à secção dela.
@@ -2909,7 +3340,7 @@ print("" in "abc", "ac" in "abc", 15 in range(0, 15, 5), 15 in range(0, 16, 5),
 
 
 # %%
-# Solução do Ex 14.13 (Teste 1 2025/26, pergunta 1b e 1c)
+# Solução do Ex 14.18 (Teste 1 2025/26, pergunta 1b e 1c)
 #
 # b) add([1,2,3,4]) = 4
 #      v | par? | total
@@ -2951,7 +3382,7 @@ print(accumulation([1, 1, 1, 1, 1, 1, 1, 0]))       # [1, 2, 3, 4, 5, 6, 7, 7]
 
 
 # %%
-# Solução do Ex 14.14 (Teste 1 2024/25, pergunta 4)
+# Solução do Ex 14.19 (Teste 1 2024/25, pergunta 4)
 
 def all_the_same(l: list[int]) -> bool:
     """ Check if all the elements are the same. """
@@ -2979,7 +3410,7 @@ print(all_the_same([5, 5, 5, 5, 5]), all_the_same([5, 5, 6, 5, 5]),
 
 
 # %%
-# Solução do Ex 14.15
+# Solução do Ex 14.20
 
 def has_duplicates(l: list[int]) -> bool:
     """ Check if some value occurs more than once. """
@@ -3008,7 +3439,7 @@ print(has_duplicates([3, 1, 4, 1]), has_duplicates([3, 1, 4]), has_duplicates([]
 
 
 # %%
-# Solução do Ex 14.16 (Exame de Recurso 2023/24, pergunta 3)
+# Solução do Ex 14.21 (Exame de Recurso 2023/24, pergunta 3)
 
 def how_many(c: str, l: list[str]) -> int:
     """ Number of times c occurs at even positions of l. """
@@ -3022,7 +3453,7 @@ print(how_many('a', ['a', 'o', 'l', 'a', 'e', 'o', 'a']))   # 2  (posições 0 e
 print(how_many('a', ['z', 'a', 'o', 'a', 'e', 'a', 'x']))   # 0  (só nas ímpares)
 
 # Interessa a POSIÇÃO -> for pelos índices.
-# O range com passo 2 é o "menos trabalho desnecessário" (como no Ex 14.10).
+# O range com passo 2 é o "menos trabalho desnecessário" (como no Ex 14.11).
 
 
 
@@ -3030,7 +3461,7 @@ print(how_many('a', ['z', 'a', 'o', 'a', 'e', 'a', 'x']))   # 0  (só nas ímpar
 
 
 # %%
-# Solução do Ex 14.17 (Teste 1 2025/26, pergunta 4)
+# Solução do Ex 14.22 (Teste 1 2025/26, pergunta 4)
 
 def get_month(order: int, leap_year: bool) -> int:
     """ Calculate the month corresponding to some day order in a year
@@ -3062,7 +3493,7 @@ print(get_month(5, False), get_month(31, False), get_month(60, True),
 
 
 # %%
-# Solução do Ex 14.18 (Teste 1 2025/26, pergunta 5)
+# Solução do Ex 14.23 (Teste 1 2025/26, pergunta 5)
 
 def is_geometric(l: list[float]) -> bool:
     """ Check whether a list represents a geometric progression.

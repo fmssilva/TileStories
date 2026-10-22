@@ -257,7 +257,15 @@ print("Secção 13 OK")
 # %%
 # ---- Secção 14 ----------------------------------------------------------
 
-# Ex 14.8 [FAZ]
+# Ex 14.8 [EXEMPLO]
+def dot_product(l1: list[int], l2: list[int]) -> int:
+    total = 0
+    for i in range(len(l1)):
+        total += l1[i] * l2[i]
+    return total
+assert dot_product([1, 2, 3], [4, 5, 6]) == 32
+
+# Ex 14.9 [FAZ]
 def count(l: list[int], x: int) -> int:
     c = 0
     for v in l:
@@ -271,7 +279,7 @@ def average(l: list[float]) -> float:
     return total / len(l)
 assert (count([1, 2, 1, 3, 1], 1), count([1, 2], 5), average([10, 12, 17])) == (3, 0, 13.0)
 
-# Ex 14.9 [FAZ]
+# Ex 14.10 [FAZ]
 def evens(l: list[int]) -> list[int]:
     result = []
     for v in l:
@@ -286,7 +294,7 @@ def count_vowels(s: str) -> int:
     return c
 assert evens([1, 2, 3, 4, 6]) == [2, 4, 6] and count_vowels("programar") == 3
 
-# Ex 14.10 [FAZ]
+# Ex 14.11 [FAZ]
 def sum_even_values(l: list[int]) -> int:
     total = 0
     for v in l:
@@ -302,7 +310,47 @@ assert sum_even_values([5, 2, 7, 4, 1]) == 6 and sum_values_at_even_positions([5
 l38 = [34, 56, 1, -4, 3, 2, 7, 6, 66, 666, 77, 777, 978, -2, -2, 56, 7, -1, -2, 88]   # guião 38
 assert sum_even_values(l38) == sum(v for v in l38 if v % 2 == 0)
 
-# Ex 14.11 [PENSA]
+# Ex 14.12 [FAZ]
+def equal(l1: list[int], l2: list[int]) -> bool:
+    for i in range(len(l1)):
+        if l1[i] != l2[i]:
+            return False
+    return True
+def count_same_positions(l1: list[int], l2: list[int]) -> int:
+    count = 0
+    for i in range(len(l1)):
+        if l1[i] == l2[i]:
+            count += 1
+    return count
+assert equal([1, 2, 3], [1, 2, 3]) and not equal([1, 2, 3], [1, 5, 3]) and equal([], [])
+assert count_same_positions([1, 2, 3, 4], [1, 5, 3, 0]) == 2
+
+# Ex 14.13 [FAZ]
+def is_ascending(l: list[int]) -> bool:
+    for i in range(len(l) - 1):
+        if l[i] >= l[i + 1]:
+            return False
+    return True
+def count_changes(l: list[int]) -> int:
+    count = 0
+    for i in range(1, len(l)):
+        if l[i] != l[i - 1]:
+            count += 1
+    return count
+assert [is_ascending(x) for x in ([1, 3, 7], [1, 3, 3], [5], [])] == [True, False, True, True]
+assert count_changes([1, 1, 2, 2, 2, 5]) == 2 and count_changes([4, 4]) == 0 and count_changes([]) == 0
+
+# Ex 14.14 [FAZ]
+def running_sums(l: list[int]) -> list[int]:
+    result = []
+    total = 0
+    for v in l:
+        total += v
+        result.append(total)
+    return result
+assert running_sums([3, 1, 4, 1]) == [3, 4, 8, 9] and running_sums([5]) == [5] and running_sums([]) == []
+
+# Ex 14.15 [PENSA]
 def position_of_min(l: list[int]) -> int:
     """ Position of the (first) smallest element. Precondition: len(l) > 0 """
     pos = 0
@@ -312,7 +360,7 @@ def position_of_min(l: list[int]) -> int:
     return pos
 assert position_of_min([5, 2, 7, 2]) == 1 and position_of_min([3]) == 0
 
-# Ex 14.12 [PENSA]
+# Ex 14.16 [PENSA]
 def reversed_copy(l: list[int]) -> list[int]:
     """ New list with the elements of l in reverse order. """
     result = []
@@ -328,9 +376,20 @@ orig = [1, 2, 3]
 assert reversed_copy(orig) == [3, 2, 1] == reversed_copy_v2(orig) and orig == [1, 2, 3]
 assert reversed_copy([]) == []
 
-# Ex 14.13 [DESAFIO]  b) 4   c) [1, 2, 3, 4, 5, 6, 7, 7]
+# Ex 14.17 [PENSA]
+def copy_evens(l1: list[int], l2: list[int]) -> None:
+    """ Copy the even values of l1 to the beginning of l2. Precondition: len(l2) >= len(l1) """
+    j = 0
+    for v in l1:
+        if v % 2 == 0:
+            l2[j] = v
+            j += 1
+a = [1, 2, 3, 4, 6]; b = [0, 0, 0, 0, 0]; copy_evens(a, b); assert b == [2, 4, 6, 0, 0]
+a = [1, 3]; b = [9, 9]; copy_evens(a, b); assert b == [9, 9]
 
-# Ex 14.14 [DESAFIO]
+# Ex 14.18 [DESAFIO]  b) 4   c) [1, 2, 3, 4, 5, 6, 7, 7]
+
+# Ex 14.19 [DESAFIO]
 def all_the_same(l: list[int]) -> bool:
     for i in range(len(l) - 1):
         if l[i] != l[i + 1]:
@@ -338,7 +397,7 @@ def all_the_same(l: list[int]) -> bool:
     return True
 assert [all_the_same(x) for x in ([5, 5, 5, 5, 5], [5, 5, 6, 5, 5], [], [10])] == [True, False, True, True]
 
-# Ex 14.15 [DESAFIO]
+# Ex 14.20 [DESAFIO]
 def has_duplicates(l: list[int]) -> bool:
     for i in range(len(l)):
         for j in range(i + 1, len(l)):
@@ -348,7 +407,7 @@ def has_duplicates(l: list[int]) -> bool:
 assert (has_duplicates([3, 1, 4, 1]), has_duplicates([3, 1, 4]), has_duplicates([]),
         has_duplicates([7]), has_duplicates([2, 2])) == (True, False, False, False, True)
 
-# Ex 14.16 [DESAFIO]
+# Ex 14.21 [DESAFIO]
 def how_many(c: str, l: list[str]) -> int:
     n = 0
     for i in range(0, len(l), 2):
@@ -357,7 +416,7 @@ def how_many(c: str, l: list[str]) -> int:
     return n
 assert how_many('a', list("aolaeoa")) == 2 and how_many('a', list("zaoaeax")) == 0
 
-# Ex 14.17 [DESAFIO]
+# Ex 14.22 [DESAFIO]
 def get_month(order: int, leap_year: bool) -> int:
     DURATIONS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     for month in range(1, 13):
@@ -371,7 +430,7 @@ def get_month(order: int, leap_year: bool) -> int:
 assert [get_month(5, False), get_month(31, False), get_month(60, True),
         get_month(60, False), get_month(366, True), get_month(365, False)] == [1, 1, 2, 3, 12, 12]
 
-# Ex 14.18 [DESAFIO]
+# Ex 14.23 [DESAFIO]
 def is_geometric(l: list[float]) -> bool:
     if l[0] == 0:
         return False
@@ -383,7 +442,7 @@ def is_geometric(l: list[float]) -> bool:
 assert [is_geometric(x) for x in ([2, 4, 8, 16, 32, 64], [2, 4, 8, 16, 32, 65], [1.1, 5.5],
                                   [0, 5.5], [2.33] + [0] * 9)] == [True, False, True, False, True]
 
-# Ex 14.19 [SOZINHA]
+# Ex 14.24 [SOZINHA]
 def partial_averages(l: list[int]) -> list[float]:
     """ m[i] is the average of l[0..i]. """
     result = []

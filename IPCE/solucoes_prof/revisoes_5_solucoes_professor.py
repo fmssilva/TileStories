@@ -157,7 +157,20 @@ print("Secção 18 OK")
 
 
 # %%
-# Ex 19.4 [FAZ]
+# Ex 19.4 [EXEMPLO] (lista de fora sem parâmetro)
+history = [1, 2]
+def add_three() -> None:
+    history.append(3)
+add_three(); assert history == [1, 2, 3]
+for code in ("history = history + [4]", "history += [5]"):
+    ns = {"history": [1, 2]}
+    exec("def h():\n    " + code, ns)
+    try:
+        ns["h"]()
+        raise AssertionError("expected UnboundLocalError")
+    except UnboundLocalError:
+        pass
+# Ex 19.5 [FAZ]
 assert out('''
 def f(l):
     l.append(len(l))
@@ -166,7 +179,7 @@ a = [5, 6]
 f(a)
 f(a)
 print(a)''') == "[99, 6, 2, 3]\n"
-# Ex 19.5 [FAZ]
+# Ex 19.6 [FAZ]
 def add_to_all(l: list[int], k: int) -> None:
     for i in range(len(l)):
         l[i] += k
@@ -177,11 +190,11 @@ def added(l: list[int], k: int) -> list[int]:
     return result
 nums = [1, 2, 3]; add_to_all(nums, 10); assert nums == [11, 12, 13]
 nums = [1, 2, 3]; assert added(nums, 10) == [11, 12, 13] and nums == [1, 2, 3]
-# Ex 19.6 [PENSA]
+# Ex 19.7 [PENSA]
 def swap(l: list[int], i: int, j: int) -> None:
     l[i], l[j] = l[j], l[i]
 l = [10, 20, 30]; swap(l, 0, 2); assert l == [30, 20, 10]
-# Ex 19.7 [DESAFIO]
+# Ex 19.8 [DESAFIO]
 assert out('''
 def accumulation(l):
     for i in range(1, len(l), 1):
@@ -191,7 +204,7 @@ a = [1, 2, 3]
 b = accumulation(a)
 c = accumulation(a.copy())
 print(a, b, c, a is b)''') == "[1, 3, 6] [1, 3, 6] [1, 4, 10] True\n"
-# Ex 19.8 [DESAFIO]
+# Ex 19.9 [DESAFIO]
 assert out('''
 def g(l, n):
     n += 1
@@ -203,7 +216,7 @@ x = [1]
 k = 5
 y = g(x, k)
 print(x, k, y)''') == "[1, 6] 5 [1, 6, 6, 0]\n"
-# Ex 19.9 [SOZINHA]
+# Ex 19.10 [SOZINHA]
 def zero_negatives(l: list[int]) -> None:
     for i in range(len(l)):
         if l[i] < 0:
