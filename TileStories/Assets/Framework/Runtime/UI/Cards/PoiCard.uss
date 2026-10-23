@@ -137,27 +137,15 @@
     rotate: -45deg;
 }
 
-/* The pinned header slot (never scrolls) and the scrolling rest of the stack */
+/* The pinned header slot (never scrolls): the BAR -- one row as tall as the round buttons and lined up with them (it rises into the grab
+   zone by --ts-bar-overlap), so the peek stop ends where the buttons do and nothing it holds can move a stop (_3.3 P4.4a) */
 .poi-card__header {
     flex-shrink: 0;
-    padding-left: var(--ts-space-4);
-    padding-right: var(--ts-space-6);
-}
-
-/* Blocks pinned right under the header (BlockKindDefinition.PinnedTopVariants: the audio hero chip): they never scroll and count in
-   the peek stop; the header's collapse cannot cut them (they sit outside the header slot); a small gap under them, not the block gap */
-.poi-card__pinned-top {
-    flex-shrink: 0;
-}
-
-.poi-card__pinned-top .card-block-slot {
-    padding-top: var(--ts-space-2);
-    margin-bottom: var(--ts-space-2);
-}
-
-/* the collapsed (scrolled-past) header gives up everything but its one-line title, the pinned block with it */
-.poi-card__header--collapsed .poi-card__pinned-top {
-    display: none;
+    flex-direction: row;
+    height: var(--ts-touch-target);
+    margin-top: var(--ts-bar-overlap);
+    padding-left: var(--ts-space-5);
+    padding-right: var(--ts-header-end);
 }
 
 /* The mini-player on the wall (MiniPlayerView): a small bar at the bottom while audio started in a card plays on after it closed --
@@ -407,32 +395,15 @@
     display: none;
 }
 
-/* In the pinned header the heading is a small kicker above the title (the slot already pads the sides), and the
-   collapsed header gives it up with the subtitle; the header and the footer keep their own spacing */
+/* The bar holds the title alone (_3.3 P4.4a): a heading above it would make it two rows -- the hero's eyebrow is that line now */
 .poi-card__header .card-block-heading {
-    font-size: var(--ts-size-caption);
-    color: var(--ts-accent-text);
-    margin: 0 0 var(--ts-space-1) 0;
-}
-
-/* a block PINNED under the header (the audio hero chip, inside .poi-card__header since Bind() sits it between the title/chip and
-   the subtitle) keeps the stack's ordinary heading look, not the header's own small kicker: same specificity as the rule above,
-   later in the file wins */
-.poi-card__pinned-top .card-block-heading {
-    font-size: var(--ts-size-heading);
-    color: var(--ts-ink);
-    margin: 0 var(--ts-space-4) var(--ts-space-2) var(--ts-space-4);
-}
-
-.poi-card__header--collapsed .card-block-heading {
     display: none;
 }
 
-/* the one-line collapsed header sits on a hairline, so its title never reads as the next block's heading */
-.poi-card__header--collapsed {
-    padding-bottom: var(--ts-space-2);
-    border-bottom-width: var(--ts-line-width);
-    border-bottom-color: var(--ts-line);
+.poi-card__header .card-block-slot {
+    flex-grow: 1;
+    min-width: 0;
+    justify-content: center;
 }
 
 .poi-card__header .card-block-slot,
@@ -485,6 +456,14 @@
 
 /* The bar alone hidden inside a shown area (Show Navigation At = Full Only, at Half): out of the flow but still laid out, like the strip */
 .poi-card__nav-bottom--hidden {
+    position: absolute;
+    left: 0;
+    right: 0;
+    visibility: hidden;
+}
+
+/* the footer while the hero shows its action (_3.3 P4.4a): the bar keeps its place, the footer its measured height */
+.poi-card__footer--hidden {
     position: absolute;
     left: 0;
     right: 0;

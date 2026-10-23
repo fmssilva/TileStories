@@ -84,6 +84,14 @@ namespace TileStories.Tests
             yield return CardGalleryChecks.PixelAt(surface, surface.worldBound.center, got);
         }
 
+        // The hero's picture (poster or loop) where no word or scrim covers it: its upper part (_3.3 P4.4a)
+        private static IEnumerator PictureColourIn(HeaderBlockView header, System.Action<Color> got)
+        {
+            var hero = header.HeroPart.worldBound;
+            Assert.Greater(header.Foot.worldBound.yMin - header.Scrim.worldBound.height - hero.yMin, 24f, "precondition: a band of picture above the scrim");
+            yield return CardGalleryChecks.PixelAt(header.HeroPart, new Vector2(hero.center.x, hero.yMin + 12f), got);
+        }
+
         private static bool Near(Color a, Color b) => Mathf.Abs(a.r - b.r) < 0.05f && Mathf.Abs(a.g - b.g) < 0.05f && Mathf.Abs(a.b - b.b) < 0.05f;
 
         // ---------------- the inline look ----------------
@@ -397,14 +405,14 @@ namespace TileStories.Tests
             Assert.IsTrue(Output.Looping, "looping");
             Assert.IsFalse(header.LoopShowsFrames, "no frame yet: the poster shows first");
             Color seen = default;
-            yield return ColourIn(header.HeroPart, c => seen = c);
+            yield return PictureColourIn(header, c => seen = c);
             Assert.IsTrue(Near(PosterColour, seen), "the poster: " + seen);
             yield return CardGalleryChecks.Render("Card_header_video_loop_poster_first");
 
             _harness.AdvanceVideo(0.5f);
             yield return null;
             Assert.IsTrue(header.LoopShowsFrames, "the loop's first frame arrived");
-            yield return ColourIn(header.HeroPart, c => seen = c);
+            yield return PictureColourIn(header, c => seen = c);
             Assert.IsFalse(Near(PosterColour, seen), "the loop's frames show: " + seen);
             _harness.AdvanceVideo(100f);
             Assert.IsTrue(Video.PlayingLoop, "it loops: still playing 100 s into a 95 s clip");
@@ -436,7 +444,7 @@ namespace TileStories.Tests
             Assert.AreEqual(CardVideoState.Idle, Video.State, "no loop was asked for");
             Assert.IsFalse(header.LoopShowsFrames);
             Color seen = default;
-            yield return ColourIn(header.HeroPart, c => seen = c);
+            yield return PictureColourIn(header, c => seen = c);
             Assert.IsTrue(Near(PosterColour, seen), "only the poster: " + seen);
             yield return CardGalleryChecks.Render("Card_header_video_loop_reduce_motion");
         }

@@ -17,6 +17,9 @@ namespace TileStories
         // The bottom bar inside a shown area, hidden (Show Navigation At = Full Only at Half): out of the flow and invisible, so the
         // footer keeps its place and the bar its measured height (PoiCard.uss)
         public const string BottomNavHiddenClass = "poi-card__nav-bottom--hidden";
+        // The footer inside a shown area, hidden while the hero shows its action (CardChromeRule layer 4): out of the flow and invisible,
+        // so the bottom bar keeps its place and the footer its measured height (PoiCard.uss)
+        public const string FooterHiddenClass = "poi-card__footer--hidden";
         // Reduce motion: the bottom area jumps instead of sliding
         public const string InstantClass = "poi-card--chrome-instant";
         // On the sheet while the top strip shows: the stack's first block keeps a gap under the strip's hairline (PoiCard.uss)
@@ -26,6 +29,7 @@ namespace TileStories
         public bool TopShown { get; private set; }
         public bool BottomShown { get; private set; }
         public bool BottomNavShown { get; private set; }
+        public bool FooterShown { get; private set; }
         // The scroll's memory (how far the reader moved in one direction, whether that hid the bottom area)
         public CardChromeRule.ScrollState Scroll { get; private set; }
 
@@ -83,16 +87,21 @@ namespace TileStories
                 BottomNavHeight = _sheet.Slots.Bottom.layout.height,
                 // - the blocks' own height: the gap under a shown strip is the chrome's, so showing it cannot change this decision
                 ContentHeight = stack.Scroll.contentContainer.layout.height - stack.Scroll.contentContainer.resolvedStyle.paddingTop,
+                // - the hero holds the actions while it is in view (CardChromeRule's 4th layer); its edge in content coordinates
+                HeroBottom = stack.HeaderView?.HeroBottom() ?? float.NaN,
+                ScrollOffset = stack.Scroll.scrollOffset.y,
             };
             var chrome = CardChromeRule.Decide(input);
             TopShown = chrome.Top;
             BottomShown = chrome.Bottom;
             BottomNavShown = chrome.BottomNav;
+            FooterShown = chrome.Footer;
             _sheet.Slots.Top.EnableInClassList(TopHiddenClass, !chrome.Top);
             _sheet.Root.EnableInClassList(TopShownClass, chrome.Top);
             _sheet.BottomArea.EnableInClassList(BottomHiddenClass, !chrome.Bottom);
             // - the bar keeps its place while the whole area slides away (it goes with it); hidden on its own only where the area stays
             _sheet.Slots.Bottom.EnableInClassList(BottomNavHiddenClass, chrome.Bottom && !chrome.BottomNav);
+            stack.Footer.EnableInClassList(FooterHiddenClass, chrome.Bottom && !chrome.Footer);
         }
 
         // The stack scrolled: one more move for the scroll's memory, then a new decision

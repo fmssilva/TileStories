@@ -50,7 +50,7 @@ namespace TileStories.Tests
         private List<VideoBlockView> Videos => Sheet.Stack.BoundViews.OfType<VideoBlockView>().ToList();
         private VideoBlockView Inline => Videos.Single(v => v.Display == CardOptions.DisplayInline);
         private VideoBlockView Teaser => Videos.Single(v => v.Display == CardOptions.DisplayTakeover);
-        private AudioGuideBlockView Chip => Sheet.Stack.BoundViews.OfType<AudioGuideBlockView>().Single(v => v.Variant == BuiltInBlocks.AudioGuideHeroChip);
+        private AudioGuideBlockView Chip => Sheet.Stack.HeroActionViews.OfType<AudioGuideBlockView>().Single(v => v.Variant == BuiltInBlocks.AudioGuideHeroChip);
         private HeaderBlockView Header => (HeaderBlockView)Sheet.Stack.BoundViews[0];
 
         // Video (and audio) time pass in steps the test chooses: the devices move, the owners take their step
@@ -128,6 +128,10 @@ namespace TileStories.Tests
         public IEnumerator TheAudioGuidePauses_WhenARealTapStartsTheVideo_AndTheVideoPauses_WhenARealTapStartsTheAudio()
         {
             yield return Select("lamp");
+            // - the chip is the hero's Listen (_3.3 P4.4a): in view once the sheet rests at Half
+            Sheet.SetStop(SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle();
+            for (int frame = 0; frame < 600 && Mathf.Abs(Sheet.Root.layout.height - Sheet.Stops.Half) > 0.5f; frame++) yield return null;
             yield return Tap(Chip.PlayButton);
             Assert.AreEqual(CardAudioState.Playing, _audio.State, "precondition: the audio guide plays");
             Advance(5f);
@@ -158,6 +162,10 @@ namespace TileStories.Tests
             Assert.AreEqual(CardOptions.AudioSwitch, Live.container.audio_when_another_starts, "precondition: the wall switches audio with a fade");
             Assert.IsTrue(Live.container.keep_audio_on_close, "precondition: an audio plays on when another point's card opens");
             yield return Select("lamp_military");
+            // - the chip is the hero's Listen (_3.3 P4.4a): the hero is in view from Half (the Lamp's card below keeps that stop)
+            Sheet.SetStop(SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle();
+            for (int frame = 0; frame < 600 && Mathf.Abs(Sheet.Root.layout.height - Sheet.Stops.Half) > 0.5f; frame++) yield return null;
             yield return Tap(Chip.PlayButton);
             Assert.AreEqual(CardAudioState.Playing, _audio.State, "precondition: Lamp - Military's narration plays");
             Assert.AreEqual("lamp_tone", _audioOut.Clip.name);

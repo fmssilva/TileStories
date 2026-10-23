@@ -196,11 +196,16 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheLampsStops_DoNotMove_WithTheFacetChipsInTheMenu()
         {
+            // - the card's own stops: measured with no Menu (_3.3 P4.4a: were typed 796 / 337.6 / 195, a Peek two type changes old)
+            yield return UseMenu(CardOptions.NavNone);
+            yield return OpenTheLamp(SheetStopRule.Stop.Full);
+            var own = Sheet.Stops;
             foreach (string menu in new[] { BuiltInNavElements.DrawerTree, BuiltInNavElements.GridOverlay })
             {
                 yield return UseMenu(menu);
-                foreach (var (stop, height) in new[] { (SheetStopRule.Stop.Full, 796.00f), (SheetStopRule.Stop.Half, 337.60f), (SheetStopRule.Stop.Peek, 195.00f) })
+                foreach (var stop in new[] { SheetStopRule.Stop.Full, SheetStopRule.Stop.Half, SheetStopRule.Stop.Peek })
                 {
+                    float height = own.HeightOf(stop);
                     yield return OpenTheLamp(stop);
                     Assert.AreEqual(height, Sheet.Stops.HeightOf(stop), 0.05f, menu + " at " + stop + ": the stops are the card's own (the chips live in the menu layer)");
                     Assert.AreEqual(height, Sheet.Root.layout.height, OnePixel, menu + " at " + stop + ": and the sheet rests there, to the physical pixel");

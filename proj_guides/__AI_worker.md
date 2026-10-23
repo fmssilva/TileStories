@@ -12,66 +12,67 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- P4.3 the app's fonts (Fraunces + Atkinson Hyperlegible Next)`
+
+## `And now: _3.3 POI Card Look, Feel & Motion -- P4.4a the header and the hero`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
-Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Marker SDF
-fonts: `git checkout --` them only if they changed (they hold 'ł' since P1b). The spike's dev fonts get rewritten by some test
-runs: restore `Assets/Dev/StyleSpike/Fonts` with `git checkout --` before you finish. Baseline: none needed (HEAD c558d0b; P4.1
-closed with full PlayMode 1233/1235, the two reds known and unrelated, full EditMode 2045/2046, the known focus flake). Keep Unity
-FOCUSED during EditMode runs.
+Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Fonts: the marker
+SDF fonts and `Assets/Dev/StyleSpike/Fonts` -> `git checkout --` if a run rewrote them. Baseline: none (HEAD 52a152b; P4.3's full
+PlayMode run was green except the two Menu tests this block must close). Ask about Unity's place with `40-testing.md` 4.2.3's
+a / b / c actions, word for word.
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 (this is row 1), R12 (all; R12.3 is this block),
-R8 S2 (one asset cannot serve both systems; a TMP asset in USS BLANKS a label silently; a dynamic asset rewrote itself 5.8 KB ->
-2.1 MB; static atlases), R12 "Build log", R15.2.
-REQUIRED READING (all lines): `proj_guides/_2.0_Labels_And_Fonts_Design.md` (FontKeyLibrary, the wall font library, "Add font"),
-`.clinerules/40-testing.md` 4.2 (fonts are shared ground: a full PlayMode run is owed), 4.2.4b, 4.5; `.clinerules/30-ui-content.md`.
-Context only: `Assets/Dev/StyleSpike/Fonts/` and `S2*` tests (how P0 built the assets), `Runtime/UI/Theme/` (P4.1),
-`ShippedTextGlyphTests`.
-WORKER MODEL: Opus-class -- shared ground (every text of the app), two text systems, atlas generation, a ripple through text-
-measuring tests.
-TEST PLAN: targeted Card / Poi / Search / Theme / Marker fixtures first, then the FULL PlayMode run, then the full EditMode suite.
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 3 (this is "4a"), R10.9 (the header), R11 v3 + v4
+(the hero over its picture, the scrim, the CTAs at its foot, `hero_motion`, the category chip and audio chip out of the header),
+R9 D1 (text on a picture only over a scrim measured >= 7:1 at its worst pixel), D5 (one focal action), R12.3 (type), the P4.3
+Build log (its findings), and the TODOs "Half is mostly header" and "[P5, header text column]".
+The visual target: `proj_guides/_3.3.1_Prototype/Main.dc.html` (v4) -- the hero block and the top bar.
+REQUIRED READING (all lines): `.clinerules/30-ui-content.md`, `40-testing.md` 4.2, 4.2.4b, 4.5; `_3.2_POI_Card_Navigation.md`
+sections on the chrome rule (the sticky CTA's floor) and `HeaderCollapseRule`.
+WORKER MODEL: Opus-class -- the sheet's stops, layout and the header's collapse are shared ground; design judgement on captures.
+TEST PLAN: targeted Card / Poi fixtures first, then the FULL PlayMode run (shared ground), then full EditMode (Unity focused).
 
-GOAL: the app speaks in two faces, from ONE font library serving both text systems: display = Fraunces SemiBold (600), body =
-Atkinson Hyperlegible Next (Regular 400, Medium 500, Bold 700). Sizes, colours and layout DO NOT change in this block (P4.4):
-only the faces. This is the first block whose result is visible.
+GOAL: the card opens like a premium page. The PICTURE header becomes a hero: the picture full-width, the title, one line and
+the card's actions ON it over a graded scrim. The title never wraps beside the round buttons again.
 
-MEASURE FIRST: render the P4.1 pixel set + the real card at Peek / Half / Full on The Painting and The Lamp, EN and PT, and
-record the sheet's three stops and the header's measured heights. After: the same set, side by side, and the same numbers.
+MEASURE FIRST: stops and header heights for The Lamp and The Painting, EN + PT, with and without a Menu (P4.3's numbers), and
+captures at Peek / Half / Full.
 
-PART 1 (number sub-steps 4.3.1 ...):
-1. Fonts into the Framework: `Runtime/UI/Theme/Fonts/<family>/` with the OFL text beside each `.ttf`. Static instances from the
-   official google/fonts variable sources (fontTools, as P0 S2 did): Fraunces SemiBold, Atkinson Hyperlegible Next Regular /
-   Medium / Bold. The spike's copies stay in Dev (do not move them; the spike's tests use them).
-2. `FontKeyLibrary` grows from `{key -> TMP_FontAsset}` to `{key -> TMP asset + TextCore FontAsset}` built from the SAME `.ttf`
-   (`_2.0`'s "Add font" and the wall library keep working: a wall font without a TextCore asset still works for markers and is
-   simply not offered for the card). Framework keys: `fraunces_semibold`, `atkinson_next_regular`, `_medium`, `_bold` beside the 3
-   existing ones. Markers' default font is UNCHANGED (a wall can now pick the new keys).
-3. Static atlases, never dynamic at runtime: each asset holds Latin-1 + Latin Extended-A + the typographic punctuation the app
-   uses (“ ” ‘ ’ – — … · ›), built by an Editor command. `ShippedTextGlyphTests` grows: every character of every shipped string
-   (CardStrings EN + PT, option labels) and of the LivingRoom wall's content is in BOTH body and display assets; a missing glyph
-   fails naming the character and the string. Bold / Medium through the TextCore font weight table, so `-unity-font-style: bold`
-   picks Atkinson Bold (prove it: a bold label renders the Bold face, not a faux bold).
-4. Theme type roles: `ThemeAsset` gets display / body font keys (+ the weights); the generator emits them so EVERY UI Toolkit
-   panel's text is Atkinson by default and the display roles (the card title, block headings, section openers, page titles,
-   menu headers -- list the selectors) are Fraunces. First check whether a USS variable can carry a font definition
-   (`-unity-font-definition: var(--ts-font-body)`) on a real panel; if not, the generator writes the rules directly. A guard: no
-   USS outside the generated theme sets a font definition.
-5. Text-measuring tests will shift (widths, wraps, truncation, heights). Re-base each deliberately (old -> new in the tracker),
-   expected values read from their source (4.2.4b), never weakened; a changed sheet STOP or a layout loop is a FINDING, not a
-   re-base -- report it.
+PART 1 (number sub-steps 4.4a.1 ...):
+1. The top bar (grabber + the round buttons) and the bar TITLE: the bar shows the title (one line, ellipsis only if it truly does
+   not fit) whenever the hero's title is NOT on screen (at Peek, and once the hero scrolls away); at Half / Full top the hero
+   carries it. The hero's title is never in the same row as the buttons, so a Menu / language button can never wrap it.
+2. The hero (header variants image_parallax, split_then_now, spotlight_crop, video_loop, model_turntable): the picture
+   full-width; HEIGHT = the Half stop's visible content height (so at Half the visitor sees the whole hero: picture, title, line,
+   actions), never below 280 pt; at Full the hero keeps that height. Over it: a graded scrim, then at its lower third the
+   eyebrow (place + period, from existing fields; none if none), the title in the display face, the subtitle, and at its foot
+   the card's actions (R11 v3: the primary = the card's sticky / primary action, focal; "Listen m:ss" when the card has an
+   audio guide, replacing the hero_chip). Text over the scrim >= 7:1 at its WORST pixel on every hero picture of the test wall,
+   measured on the render (a failing picture gets a stronger scrim, never weaker text). text_only / compact: the title block on
+   a plain plate, no picture.
+3. `hero_motion`: a wide picture slowly PANS across its width (R11 v4: ~26 s, back and forth), reduce motion = its centre still;
+   the picture moves at ~0.45x the scroll inside its frame; the hero's text rises and fades as the card scrolls. Transform /
+   opacity only (R8 S6). New field `hero_motion` (pan | zoom | none, default pan) with its Editor row (+ (i)).
+4. Type: the category chip leaves the header (the category stays available in About / quick facts -- one line in the report on
+   where). Display headings at 18 pt looked lighter than Atkinson Bold beside them (P4.3): set the heading sizes / weight so the
+   hierarchy reads (block heading 20, page title 30-32, hero 40-46 by width) -- add a Fraunces Bold cut only if SemiBold at those
+   sizes still reads light (judge on captures, say which). Numbers: dates and figures in display roles (timeline dates, years
+   in titles, quick-facts values, big numbers) use Fraunces's figures; body text keeps Atkinson (developer's choice on the slashed
+   zero).
+5. The sticky CTA: once the primary action lives in the hero, the sticky bar appears only after the hero has scrolled out of
+   view -- so the PT Lamp at Half shows its action again (P4.3 finding). `PoiCardMenuSceneTests` / `PoiCardFacetSceneTests` ("a
+   Menu never moves a stop") must go GREEN through the design, not by changing their assertion.
 
-PART 2 -- docs: `10-structure.md`, `_2.0` (the library's new shape, the new keys), `_3.3` R12 Build log (P4.3 done, the stops /
-heights before -> after, the counts).
+PART 2 -- docs: `_3.3` Build log (P4.4a, stops / heights before -> after), `10-structure.md`, the TODOs it closes.
 
-VISUALS: before / after side by side for the pixel set and the real card (EN + PT, Peek / Half / Full), plus the P0 glare
-render of a block in the new faces. Open each and judge: hierarchy, wraps, truncations, PT diacritics (ã õ ç á é í ó ú â ê ô à ł).
+VISUALS: The Lamp and The Painting, EN + PT, Peek / Half / Full, with and without a Menu, before / after side by side; a
+frame sequence of the hero pan and of the text rising on scroll; the scrim's worst-pixel ratios. Open each and judge it as
+design (does it read like the prototype's hero?).
 
-OUT OF SCOPE: sizes, the type scale, colours, light mode, the block frame (all P4.4); markers' default font; any new text.
-Stop when every shipped and content character renders in both faces, the guard and glyph tests are green with mutation proof, the
-targeted fixtures, the full PlayMode run and the full EditMode suite are green. Ideas outside this domain ->
-proj_guides/__mixed_TODOs.md. If the guide disagrees with the real code, STOP and report. Finish with the final report of
-`.clinerules/60-finishing.md` 6.4. Do not commit: the Architect commits after the review.
+OUT OF SCOPE: light mode and new palettes (4b), section glass / rim light (4c), the block frame, any other kind's look.
+Stop when the hero renders on every picture header variant, the two Menu tests and the PT sticky CTA are green by design, the
+targeted fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of `.clinerules/60-finishing.md`
+6.4, and END it with the developer's review questions for this block (does the hero read as premium? Peek / Half right?). Do not
+commit: the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

@@ -10,7 +10,8 @@ namespace TileStories
 
         public const string HeaderCompact = "compact";
         public const string HeaderTextOnly = "text_only";
-        public const string HeaderShowLevelField = "show_level";
+        public const string HeaderEyebrowField = "eyebrow";
+        public const string HeaderHeroMotionField = "hero_motion";
         // Tier 2: the looks with a picture under the title (the hero, BlockStackView puts it at the top of the scroll)
         public const string HeaderImageParallax = "image_parallax";
         public const string HeaderSplitThenNow = "split_then_now";
@@ -42,6 +43,11 @@ namespace TileStories
         public const string QuickFactsItemsField = "facts";
         public const string QuickFactsLabelField = "label";
         public const string QuickFactsValueField = "value";
+        // Show Category (P4.4a: the category left the header): a first fact naming the point's category, with its level or without
+        public const string QuickFactsCategoryField = "show_category";
+        public const string QuickFactsCategoryNone = "none";
+        public const string QuickFactsCategoryOnly = "category";
+        public const string QuickFactsCategoryAndLevel = "category_and_level";
 
         public const string RichTextKind = "rich_text";
         public const string RichTextPlain = "plain";
@@ -106,17 +112,20 @@ namespace TileStories
             Format = CardOptions.FormatRead,
             LabelKey = CardStrings.Keys.KindHeader,
             DisplayName = "Header",
-            Help = "The top of the card: the point's title and its category chip, plus an optional subtitle. The chip names the " +
-                   "point's category only; Show Level adds its hierarchy level. Compact: title and chip. Text only: with the " +
-                   "subtitle. The picture looks show a picture under them, at the top of what scrolls: Image Parallax (the " +
-                   "picture slides slower than the text as the visitor scrolls), Split Then Now (Picture as it was beside Second " +
-                   "Picture as it is), Spotlight Crop (Picture enlarged around a focus point, with a ring on it), Video Loop (Loop " +
-                   "Clip playing silently over and over, Picture as its poster: shown until the first frame, while another video of " +
-                   "the card plays, and always when Detail Card > Card Container > Reduce Motion is on), Model Turntable (Model " +
-                   "auto-spinning and draggable, Picture as its Fallback while it loads). A picture look without what it needs -- " +
-                   "Video Loop without its Loop Clip, Model Turntable without its Model -- shows the text-only look. It is always " +
-                   "shown and always first; a point with no header block gets one made from its name and summary. The peek stop " +
-                   "always shows only the title, whatever the look.",
+            Help = "The top of the card. The bar at the very top always holds the card's title on one line beside the round buttons; " +
+                   "it shows it at the peek stop and once the visitor has scrolled past the hero. Under the bar, first in what scrolls, " +
+                   "the HERO: the Eyebrow (a short line such as a place and a period), the title in the display face, the Subtitle, and " +
+                   "at its foot the card's actions -- the card's sticky call to action (an Actions block in the Sticky look) and " +
+                   "'Listen' with the length of the card's first Audio Guide. The picture looks draw the hero over the picture, full " +
+                   "width, as tall as the Half stop shows, on a graded dark scrim: Image Parallax (the picture moves as Hero Motion " +
+                   "says and slower than the scroll), Split Then Now (Picture as it was beside Second Picture as it is), Spotlight " +
+                   "Crop (Picture enlarged around a focus point, with a ring on it), Video Loop (Loop Clip playing silently over and " +
+                   "over, Picture as its poster: shown until the first frame, while another video of the card plays, and always when " +
+                   "Detail Card > Card Container > Reduce Motion is on), Model Turntable (Model auto-spinning and draggable, Picture as " +
+                   "its Fallback while it loads). Text Only and Compact draw the hero as a plain plate, no picture (Compact without " +
+                   "the Subtitle). A picture look without what it needs -- Video Loop without its Loop Clip, Model Turntable without " +
+                   "its Model -- shows the plate. It is always shown and always first; a point with no header block gets one made from " +
+                   "its name and summary. The point's category is no longer shown here: Quick Facts > Show Category shows it.",
             Variants = new[] { HeaderCompact, HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable },
             DefaultVariant = HeaderTextOnly,
             // - the card's pinned title: never a compact row (_3.2 step 12), whatever a block below it shows as
@@ -132,15 +141,16 @@ namespace TileStories
                 },
                 new BlockFieldDefinition
                 {
-                    Key = BlockStackBuilder.HeaderSubtitleField, Type = BlockFieldType.LocalizedText, Label = "Subtitle",
+                    Key = HeaderEyebrowField, Type = BlockFieldType.LocalizedText, Label = "Eyebrow",
                     ShownWhen = FieldShownWhen.Looks(HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable),
-                    Help = "One short line under the title (a date, a place, a one-line teaser). The Compact variant never shows it.",
+                    Help = "A short line above the hero's title, one per language: where and when (e.g. 'Lisbon - c. 1500 to 1755'). " +
+                           "Blank: no line. The Compact variant never shows it.",
                 },
                 new BlockFieldDefinition
                 {
-                    Key = HeaderShowLevelField, Type = BlockFieldType.Toggle, Label = "Show Level",
-                    Help = "On: the chip under the title names the point's hierarchy level after its category (Category - " +
-                           "Level). Off: the category alone -- a level name is often an authoring word a visitor does not need.",
+                    Key = BlockStackBuilder.HeaderSubtitleField, Type = BlockFieldType.LocalizedText, Label = "Subtitle",
+                    ShownWhen = FieldShownWhen.Looks(HeaderTextOnly, HeaderImageParallax, HeaderSplitThenNow, HeaderSpotlightCrop, HeaderVideoLoop, HeaderModelTurntable),
+                    Help = "One short line under the title (a date, a place, a one-line teaser). The Compact variant never shows it.",
                 },
                 new BlockFieldDefinition
                 {
@@ -149,6 +159,20 @@ namespace TileStories
                     Help = "The picture of the picture looks (in Split Then Now: as it was; in Video Loop: the poster; in Model " +
                            "Turntable: the Fallback, shown while the model loads and if it cannot be loaded). A PNG or JPG inside " +
                            "the wall's Media Folder (Detail Card > Card Container). The text looks do not show it.",
+                },
+                new BlockFieldDefinition
+                {
+                    Key = HeaderHeroMotionField, Type = BlockFieldType.Choice, Label = "Hero Motion",
+                    ShownWhen = FieldShownWhen.Looks(HeaderImageParallax),
+                    Options = new[] { HeroMotionRule.Pan, HeroMotionRule.Zoom, HeroMotionRule.None },
+                    OptionLabels = new[] { "Pan", "Zoom", "None" },
+                    ChoiceDefault = HeroMotionRule.Pan,
+                    LibraryDefault = true,
+                    Help = "Image Parallax only. How the hero's picture moves by itself. Pan (default): a picture wider than the hero " +
+                           "slides slowly across its whole width and back (26 s), so the whole building shows; a picture no wider than " +
+                           "the hero stays still. Zoom: a slow push-in and back. None: still. With Reduce Motion on (Card Container) the " +
+                           "picture always stays still at its centre. Whatever this says, the picture also moves a little slower than " +
+                           "the scroll (parallax), except with Reduce Motion. Empty: the Block Library's default for this kind.",
                 },
                 new BlockFieldDefinition
                 {
@@ -257,6 +281,16 @@ namespace TileStories
                         new BlockFieldDefinition { Key = QuickFactsLabelField, Type = BlockFieldType.LocalizedText, Label = "Label", Help = "What the fact is (Built, Height, Architect)." },
                         new BlockFieldDefinition { Key = QuickFactsValueField, Type = BlockFieldType.LocalizedText, Label = "Value", Help = "The fact itself (1147, 32 m, Unknown)." },
                     },
+                },
+                new BlockFieldDefinition
+                {
+                    Key = QuickFactsCategoryField, Type = BlockFieldType.Choice, Label = "Show Category",
+                    Options = new[] { QuickFactsCategoryNone, QuickFactsCategoryOnly, QuickFactsCategoryAndLevel },
+                    OptionLabels = new[] { "No", "Category", "Category and Level" },
+                    ChoiceDefault = QuickFactsCategoryNone,
+                    Help = "Category: the first fact names the point's category (Global Scene > Marker > Category Symbols, in the " +
+                           "card's language). Category and Level: its hierarchy level after it (Category - Level) -- a level name is often " +
+                           "an authoring word a visitor does not need. No (default): the facts alone. The header shows no category.",
                 },
             },
         };

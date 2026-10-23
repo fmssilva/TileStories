@@ -13,52 +13,55 @@ using UnityEditor.SceneManagement;
 
 namespace TileStories.Tests
 {
-    // The measuring instrument of a change of TYPE (_3.3 P4.3, the app's faces; P4.4 the scale): the same renders and numbers taken before
-    // and after, then put side by side. Not a suite member: it runs only while TestEvidence/Typeface/MEASURING exists, and that file's one
-    // word names the phase ("before" or "after"); each phase writes TestEvidence/Typeface/<phase>/ (renders + measures.txt), and the
+    // The measuring instrument of a change of LOOK (_3.3 P4.3, the app's faces -> TestEvidence/Typeface; P4.4a the header and the hero ->
+    // TestEvidence/Hero, HeroMeasureSceneTests): the same renders and numbers taken before and after, then put side by side. Not a suite
+    // member: it runs only while TestEvidence/<domain>/MEASURING exists, and that file's one
+    // word names the phase ("before" or "after"); each phase writes TestEvidence/<domain>/<phase>/ (renders + measures.txt), and the
     // "after" phase also writes compare/<name>.png = before | after for every render both phases hold. Renders: the P4.1 gallery set
     // (ThemePixelSetTests' entries) and the real card -- The Lamp and The Painting, English and Portuguese, at Peek, Half and Full,
     // cropped to the sheet -- plus one block under the P0 glare layer (35 % white, _3.3 R8 S2c). Numbers: the sheet's three stops and the
     // header's heights, per card and language.
-    internal static class TypefaceMeasure
+    internal static class LookMeasure
     {
-        public const string Domain = "Typeface";
+        // The type change of P4.3 and the header / hero of P4.4a measure into their own folders
+        public const string Typeface = "Typeface";
+        public const string Hero = "Hero";
         private const int Gap = 8;
 
         // The phase the switch file names, or ignore the test when there is none
-        public static string RequirePhase()
+        public static string RequirePhase(string domain)
         {
-            string switchFile = Path.Combine(TestEvidence.Root, Domain, "MEASURING");
+            string switchFile = Path.Combine(TestEvidence.Root, domain, "MEASURING");
             if (!File.Exists(switchFile))
-                Assert.Ignore("A measurement: write before / after into TestEvidence/" + Domain + "/MEASURING to run it (TypefaceMeasure)");
+                Assert.Ignore("A measurement: write before / after into TestEvidence/" + domain + "/MEASURING to run it (LookMeasure)");
             string phase = File.ReadAllText(switchFile).Trim();
-            Assert.IsTrue(phase == "before" || phase == "after", "TestEvidence/" + Domain + "/MEASURING names the phase: before or after, not '" + phase + "'");
+            Assert.IsTrue(phase == "before" || phase == "after", "TestEvidence/" + domain + "/MEASURING names the phase: before or after, not '" + phase + "'");
             return phase;
         }
 
         // Save the still screen (or `cropTo`) as <phase>/<name>.png; in the after phase also compare/<name>.png beside its before
-        public static IEnumerator Render(string phase, string name, VisualElement cropTo = null)
+        public static IEnumerator Render(string domain, string phase, string name, VisualElement cropTo = null)
         {
             Texture2D render = null;
             yield return ThemePixelSet.GrabStill(name, cropTo, r => render = r);
             try
             {
-                File.WriteAllBytes(TestEvidence.PathFor(Domain + "/" + phase, name + ".png"), render.EncodeToPNG());
-                string before = Path.Combine(TestEvidence.Root, Domain, "before", name + ".png");
-                if (phase == "after" && File.Exists(before)) WriteSideBySide(before, render, name);
+                File.WriteAllBytes(TestEvidence.PathFor(domain + "/" + phase, name + ".png"), render.EncodeToPNG());
+                string before = Path.Combine(TestEvidence.Root, domain, "before", name + ".png");
+                if (phase == "after" && File.Exists(before)) WriteSideBySide(domain, before, render, name);
             }
             finally { Object.Destroy(render); }
         }
 
         // One line of measures.txt for this phase
-        public static void Note(string phase, string line)
+        public static void Note(string domain, string phase, string line)
         {
-            File.AppendAllText(TestEvidence.PathFor(Domain + "/" + phase, "measures.txt"), line + "\n");
-            Debug.Log("[Typeface] " + phase + ": " + line);
+            File.AppendAllText(TestEvidence.PathFor(domain + "/" + phase, "measures.txt"), line + "\n");
+            Debug.Log("[" + domain + "] " + phase + ": " + line);
         }
 
         // before | gap | after on one canvas, tops aligned (a taller one keeps its height)
-        private static void WriteSideBySide(string beforePath, Texture2D after, string name)
+        private static void WriteSideBySide(string domain, string beforePath, Texture2D after, string name)
         {
             var before = new Texture2D(2, 2);
             try
@@ -72,7 +75,7 @@ namespace TileStories.Tests
                 sheet.SetPixels(0, h - before.height, before.width, before.height, before.GetPixels());
                 sheet.SetPixels(before.width + Gap, h - after.height, after.width, after.height, after.GetPixels());
                 sheet.Apply();
-                File.WriteAllBytes(TestEvidence.PathFor(Domain + "/compare", name + ".png"), sheet.EncodeToPNG());
+                File.WriteAllBytes(TestEvidence.PathFor(domain + "/compare", name + ".png"), sheet.EncodeToPNG());
                 Object.Destroy(sheet);
             }
             finally { Object.Destroy(before); }
@@ -100,7 +103,7 @@ namespace TileStories.Tests
         [UnitySetUp]
         public IEnumerator SetUp()
         {
-            _phase = TypefaceMeasure.RequirePhase();
+            _phase = LookMeasure.RequirePhase(LookMeasure.Typeface);
 #if UNITY_EDITOR
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
 #else
@@ -124,7 +127,7 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(index, 0, "precondition: the gallery defines " + name);
             _harness.Gallery.Show(index);
             yield return CardTestInput.Settle();
-            yield return TypefaceMeasure.Render(_phase, "block_" + name);
+            yield return LookMeasure.Render(LookMeasure.Typeface, _phase, "block_" + name);
         }
 
         [UnityTest]
@@ -134,7 +137,7 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(index, 0, "precondition: the navigation gallery defines " + name);
             _harness.Show(index);
             yield return CardTestInput.Settle();
-            yield return TypefaceMeasure.Render(_phase, name);
+            yield return LookMeasure.Render(LookMeasure.Typeface, _phase, name);
         }
 
         // The rich text block under the P0 glare layer: a white sheet at 35 % over the whole screen (sun on the glass, _3.3 R8 S2c)
@@ -150,7 +153,7 @@ namespace TileStories.Tests
             glare.style.backgroundColor = Color.white;
             glare.style.opacity = 0.35f;
             root.Add(glare);
-            try { yield return TypefaceMeasure.Render(_phase, "glare_rich_text_drop_cap_long"); }
+            try { yield return LookMeasure.Render(LookMeasure.Typeface, _phase, "glare_rich_text_drop_cap_long"); }
             finally { glare.RemoveFromHierarchy(); }
         }
 
@@ -163,7 +166,7 @@ namespace TileStories.Tests
             sheet.OpenFullView(sheet.Nav.Model.Sections[0].Targets[0]);
             yield return CardTestInput.Settle();
             Assert.IsTrue(sheet.FullView.IsOpen, "precondition: the full view opened");
-            yield return TypefaceMeasure.Render(_phase, "full_view");
+            yield return LookMeasure.Render(LookMeasure.Typeface, _phase, "full_view");
         }
     }
 
@@ -176,7 +179,7 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheCard_AtPeekHalfAndFull([ValueSource(nameof(Pois))] string poi, [ValueSource(nameof(Languages))] string language)
         {
-            string phase = TypefaceMeasure.RequirePhase();
+            string phase = LookMeasure.RequirePhase(LookMeasure.Typeface);
             // - the card opens in the first language of the wall's list
             Session.CardSettings.languages = new List<string> { language, language == "en" ? "pt" : "en" };
             SelectionEventBus.Select(poi);
@@ -190,14 +193,14 @@ namespace TileStories.Tests
             var title = sheet.Root.Q(className: "card-header__title");
             Assert.IsNotNull(title, "precondition: the card has its title");
             var stops = sheet.Stops;
-            TypefaceMeasure.Note(phase, $"{poi} {language}: stops peek {stops.Peek:0.0} half {stops.Half:0.0} full {stops.Full:0.0}; " +
+            LookMeasure.Note(LookMeasure.Typeface, phase, $"{poi} {language}: stops peek {stops.Peek:0.0} half {stops.Half:0.0} full {stops.Full:0.0}; " +
                 $"header (expanded, at Half) {header.layout.height:0.0}; peek part {sheet.Stack.PeekPart.layout.height:0.0}; title {title.layout.height:0.0}");
 
             foreach (var stop in new[] { SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half, SheetStopRule.Stop.Full })
             {
                 sheet.SetStop(stop);
                 yield return CardTestInput.Settle();
-                yield return TypefaceMeasure.Render(phase, $"card_{poi}_{language}_{stop.ToString().ToLowerInvariant()}", sheet.Root);
+                yield return LookMeasure.Render(LookMeasure.Typeface, phase, $"card_{poi}_{language}_{stop.ToString().ToLowerInvariant()}", sheet.Root);
             }
         }
     }

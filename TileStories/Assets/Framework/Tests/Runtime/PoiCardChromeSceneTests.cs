@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -90,6 +91,13 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.6f);
         }
 
+        // The shared reading past the hero (CardTestInput.ReadPastTheHero), then the sheet at rest
+        private IEnumerator ReadPastTheHero()
+        {
+            yield return CardTestInput.ReadPastTheHero(Sheet, DragStack);
+            yield return Rested();
+        }
+
         // The wall's own navigation settings are the defaults: what every assertion here is about
         private void AssertTheDefaults()
         {
@@ -101,53 +109,61 @@ namespace TileStories.Tests
 
         // ---------------- Half: the reading space is back ----------------
 
-        // The Lamp at Half with the DEFAULT settings: header + strip + sticky footer do not fit with any content (step 5a: 0 px). The
-        // strip gives way first (the map is one drag to Full away) and the footer stays -- its "Show me where it is" button is often why
-        // the card was opened -- over a stack of at least one line (the developer's call at the 5b review, built at step 6)
+        // The Lamp at Half with the DEFAULT settings (_3.3 P4.4a): the hero fills what Half shows under the bar -- picture, title, line and
+        // the card's action at its foot -- so neither the strip nor the sticky bar shows; once the visitor reads past the hero the sticky bar
+        // comes (its "Show me where it is" is often why the card was opened) over at least one line, the strip only where the floor allows
         [UnityTest]
-        public IEnumerator TheLampAtHalf_WithTheDefaults_KeepsItsFooter_AndTheStripGivesWay()
+        public IEnumerator TheLampAtHalf_ShowsItsWholeHeroWithItsAction_AndTheStickyBarOnceTheHeroIsRead()
         {
             AssertTheDefaults();
             yield return Open(Lamp, SheetStopRule.Stop.Half);
-            Assert.IsNotNull(Sheet.Slots.TopView, "precondition: the card holds its strip (56 targets, 8 sections)");
+            Assert.IsNotNull(Sheet.Slots.TopView, "precondition: the card holds its strip");
             Assert.Greater(Footer.childCount, 0, "precondition: the card has a sticky footer");
-            float strip = Strip.layout.height, footer = Footer.layout.height, room = Room;
-            Assert.Less(room - strip - footer, CardChromeRule.MinStackViewport, "precondition: strip + footer leave less than the floor: " + Parts());
-            Assert.GreaterOrEqual(room - footer, CardChromeRule.MinStackViewportUnderFooter, "precondition: the footer alone leaves one line: " + Parts());
+            var header = Sheet.Stack.HeaderView;
+            Assert.IsFalse(Chrome.TopShown, "no strip over the hero at Half");
+            Assert.IsFalse(Chrome.BottomShown, "no sticky bar while the hero, which shows the action, is in view");
+            Rect hero = header.HeroPart.worldBound, view = Scroll.contentViewport.worldBound;
+            Assert.AreEqual(view.height, hero.height, OnePixel, "the hero is as tall as what Half shows: " + Parts());
+            Assert.GreaterOrEqual(hero.yMin, view.yMin - OnePixel, "the whole hero in view: its top");
+            Assert.LessOrEqual(hero.yMax, view.yMax + OnePixel, "...and its foot");
+            var heroAction = header.Actions.Q<Button>(className: "card-action");
+            Assert.IsNotNull(heroAction, "the hero shows the card's action");
+            Assert.IsTrue(view.Contains(heroAction.worldBound.min) && view.Contains(heroAction.worldBound.max - Vector2.one * OnePixel), "...wholly on screen: " + heroAction.worldBound);
 
-            Assert.IsFalse(Chrome.TopShown, "the strip gives way first at Half");
-            Assert.IsTrue(Chrome.BottomShown, "the footer stays");
-            Assert.IsFalse(InTheCard(Strip), "the strip takes no place in the card");
-            Assert.IsTrue(InTheCard(Bottom), "the footer does");
+            yield return ReadPastTheHero();
+            float footer = Footer.layout.height, room = Room;
+            Assert.IsTrue(Chrome.BottomShown, "the hero read: the sticky bar comes");
+            Assert.IsTrue(InTheCard(Bottom), "the footer takes its place");
             Assert.IsTrue(FooterOnScreen, "inside the card's visible bottom edge: " + Footer.worldBound + " in " + Sheet.Root.worldBound);
+            Assert.GreaterOrEqual(room - footer, CardChromeRule.MinStackViewportUnderFooter, "over at least one line: " + Parts());
             var button = Footer.Q<Button>();
             Assert.IsNotNull(button, "the footer holds its button");
             Assert.IsTrue(button.worldBound.yMax <= Sheet.Root.worldBound.yMax + OnePixel, "the whole button is on screen: " + button.worldBound);
-            Assert.AreEqual(room - footer, Viewport, OnePixel, "the stack keeps the room the footer leaves: " + Parts());
+            Assert.AreEqual(room - footer - (Chrome.TopShown ? Strip.layout.height : 0f), Viewport, OnePixel, "the stack keeps the room the chrome leaves: " + Parts());
             Assert.GreaterOrEqual(Viewport, CardChromeRule.MinStackViewportUnderFooter - OnePixel, "at least one line: " + Parts());
-            // - and something to read there, really drawn: the first block (or the header's picture) is inside the viewport
-            var first = Scroll.contentContainer[0];
-            Assert.IsTrue(first.worldBound.Overlaps(Scroll.contentViewport.worldBound), "the stack's first element is in view at Half");
+            // - and something to read there, really drawn: a block of the card is inside the viewport
+            Assert.IsTrue(Scroll.contentContainer.Children().Any(c => c.worldBound.Overlaps(Scroll.contentViewport.worldBound) && c != header.HeroPart),
+                "a block is in view at Half");
             yield return CardGalleryChecks.Render("Chrome_Lamp_half_default_390");
         }
 
-        // While reading at Half the header collapses to its one line: that room is enough for the strip again (the map comes back), and
-        // Show Navigation At = Full Only -- live -- hides it there anyway: the wall's option hides more, never less
+        // While the hero fills Half there is no room for the strip; reading past it gives the strip back where the floor allows (the map
+        // comes back), and Show Navigation At = Full Only -- live -- hides it there anyway: the wall's option hides more, never less
         [UnityTest]
-        public IEnumerator ACollapsedHeader_GivesHalfItsStripBack_AndFullOnlyHidesItThere_Live()
+        public IEnumerator TheHeroReadAway_GivesHalfItsStripBack_AndFullOnlyHidesItThere_Live()
         {
             AssertTheDefaults();
             yield return Open(Lamp, SheetStopRule.Stop.Half);
-            Assert.IsFalse(Chrome.TopShown, "precondition: no strip at Half with the header open");
-            yield return DragStack(-60f);
-            Assert.IsTrue(Sheet.Stack.HeaderCollapsed, "precondition: reading collapsed the header (offset " + Scroll.scrollOffset.y + "): " + Parts());
-            Assert.GreaterOrEqual(Room - Strip.layout.height, CardChromeRule.MinStackViewport, "precondition: the collapsed header leaves room for strip + floor");
+            Assert.IsFalse(Chrome.TopShown, "precondition: no strip at Half over the hero");
+            yield return ReadPastTheHero();
+            Assert.GreaterOrEqual(Room - Strip.layout.height - (Chrome.BottomShown ? Bottom.layout.height : 0f), CardChromeRule.MinStackViewport,
+                "precondition: the hero read leaves room for strip + floor: " + Parts());
             Assert.IsTrue(Chrome.TopShown, "the strip is back at Half");
             Assert.IsTrue(InTheCard(Strip), "and takes its place in the card");
             Assert.GreaterOrEqual(Viewport, CardChromeRule.MinStackViewport - OnePixel, "never under the floor");
 
             yield return Push(c => c.card_settings.navigation.show_at = CardOptions.ShowNavFullOnly);
-            Assert.IsTrue(Sheet.Stack.HeaderCollapsed, "precondition: the live edit kept the scroll, the header is still collapsed");
+            Assert.IsFalse(HeroRule.InView(Scroll.scrollOffset.y, Sheet.Stack.HeaderView.HeroBottom()), "precondition: the live edit kept the scroll past the hero");
             Assert.IsFalse(Chrome.TopShown, "Full Only: no strip at Half, room or not");
             Assert.IsFalse(InTheCard(Strip));
             Sheet.SetStop(SheetStopRule.Stop.Full);
@@ -163,7 +179,8 @@ namespace TileStories.Tests
         public IEnumerator NothingShowsAtPeek()
         {
             yield return Open(Lamp, SheetStopRule.Stop.Full);
-            Assert.IsTrue(Chrome.TopShown && Chrome.BottomShown, "precondition: both show at Full");
+            yield return ReadPastTheHero();
+            Assert.IsTrue(Chrome.TopShown && Chrome.BottomShown, "precondition: both show at Full once the hero is read");
             Sheet.SetStop(SheetStopRule.Stop.Peek);
             yield return CardTestInput.Settle();
             yield return Rested();
@@ -182,14 +199,15 @@ namespace TileStories.Tests
         {
             AssertTheDefaults();
             yield return Open(Lamp, SheetStopRule.Stop.Full);
-            Assert.IsTrue(Chrome.BottomShown, "precondition: the footer shows at Full");
+            // - _3.3 P4.4a: at the top the hero shows the action, the footer waits: read past the hero first
+            yield return ReadPastTheHero();
+            Assert.IsTrue(Chrome.BottomShown, "precondition: the footer shows at Full once the hero is read");
             Assert.IsTrue(FooterOnScreen, "precondition: and is on screen " + Footer.worldBound + " in " + Sheet.Root.worldBound);
             Assert.Greater(NavScrollRule.Range(Scroll.contentContainer.layout.height, Viewport), 1000f, "precondition: the stack really scrolls");
             float footer = Footer.layout.height, strip = Strip.layout.height;
             Assert.AreEqual(Room - strip - footer, Viewport, OnePixel, "precondition: the stack has the room the strip and the footer leave");
 
-            // - the drag also collapses the header (its own rule), so the room is re-read: the viewport is measured against it, not
-            //   against the viewport before the drag
+            // - the room is re-read after the drag: the viewport is measured against it, not against the viewport before the drag
             yield return DragStack(-300f);
             Assert.Greater(Scroll.scrollOffset.y, CardChromeRule.HideAfterTravel, "precondition: the drag moved down the card past the threshold");
             Assert.IsFalse(Chrome.BottomShown, "moving down hid the footer");

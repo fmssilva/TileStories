@@ -5,7 +5,8 @@ namespace TileStories
 {
     // The quick_facts block (_3.1 Tier 1): short label + value pairs ("Built" 1147), in three looks -- chips (pills that
     // wrap), grid_hairline (two columns split by thin lines), big_numbers (the value large, the label under it). A row
-    // with neither text is left out; a row with only one of them shows that one. Only classes here.
+    // with neither text is left out; a row with only one of them shows that one. Show Category puts the point's category first (the
+    // header's chip until P4.4a). Only classes here.
     public sealed class QuickFactsBlockView : IBlockView
     {
         public VisualElement Root { get; }
@@ -29,18 +30,25 @@ namespace TileStories
             _variantClass = "card-facts--" + context.Variant;
             Root.AddToClassList(_variantClass);
             var read = new BlockFieldReader(instance, context.Language, context.FallbackLanguage);
+            // - Show Category: the point's category first (the header names none since P4.4a), by its name in the card's language
+            string category = read.Value(BuiltInBlocks.QuickFactsCategoryField);
+            if (category == BuiltInBlocks.QuickFactsCategoryOnly || category == BuiltInBlocks.QuickFactsCategoryAndLevel)
+                AddFact(context.Strings?.Get(CardStrings.Keys.FactsCategory) ?? "",
+                    PoiSubtitle.Of(context.Poi, context.Taxonomy, category == BuiltInBlocks.QuickFactsCategoryAndLevel, context.Language));
             foreach (var item in read.Items(BuiltInBlocks.QuickFactsItemsField))
-            {
-                string label = read.ItemText(item, BuiltInBlocks.QuickFactsLabelField);
-                string value = read.ItemText(item, BuiltInBlocks.QuickFactsValueField);
-                if (label.Length == 0 && value.Length == 0) continue;
-                var fact = _facts.Take();
-                fact.Label.text = label;
-                fact.Label.style.display = label.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
-                fact.Value.text = value;
-                fact.Value.style.display = value.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
-                Root.Add(fact.Cell);
-            }
+                AddFact(read.ItemText(item, BuiltInBlocks.QuickFactsLabelField), read.ItemText(item, BuiltInBlocks.QuickFactsValueField));
+        }
+
+        // One fact: a row with neither text is left out, one with only one of them shows that one
+        private void AddFact(string label, string value)
+        {
+            if (label.Length == 0 && value.Length == 0) return;
+            var fact = _facts.Take();
+            fact.Label.text = label;
+            fact.Label.style.display = label.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            fact.Value.text = value;
+            fact.Value.style.display = value.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            Root.Add(fact.Cell);
         }
 
         public void Unbind()

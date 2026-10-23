@@ -25,6 +25,8 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             Sheet.SetStop(SheetStopRule.Stop.Full);
             yield return CardTestInput.Settle();
+            // - a tap during the rise lands where the chip was: wait for the sheet to REST (an unfocused Editor runs fewer frames per second)
+            for (int frame = 0; frame < 600 && Mathf.Abs(Sheet.Root.layout.height - Sheet.Stops.Full) > 0.5f; frame++) yield return null;
         }
 
         private IEnumerator Push(Action<WallConfigData> edit)

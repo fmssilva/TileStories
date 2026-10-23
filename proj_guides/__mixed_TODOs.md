@@ -772,3 +772,19 @@ event camera, legibility at 1-3 m, sorting against the UGUI markers, a swipe on 
 - **The P4.1 pixel set's baselines are pre-font now.** Its `TestEvidence/ThemePixels/baseline/` renders were drawn in Unity's default face; P4.3
   changed every text on purpose. Before P4.4 uses the set (a "no pixel moves" step), delete `baseline/` and collect anew. The P4.1 note "text
   pixels depend on the font atlas's fill history" should be gone with the static atlases: check it then (run the set after another fixture).
+
+## From _3.3 P4.4a (the header and the hero, 2026-10-23)
+
+- [_3.2, nav] **A jump right after a fling inherits the fling.** A real drag that ends clamped at the top of the stack keeps the ScrollView's
+  velocity; a jump started next (a dock tap) lands, then the leftover velocity carries the stack on (probe: landed 8823, drifted to 8764 over
+  ~70 frames, the block stayed at 8862). NavController should stop the stack's inertia when a jump starts. Test side worked around in
+  PoiCardBottomElementsSceneTests.ScrollToTop (a resting finger stops the fling).
+- [_3.3 P5 / P8, hero] **A long hero title fills the hero.** At 390 x 844 the hero is Half's view (281 px): a two-line title + the line + two
+  action rows leave the picture only a thin band (The Lamp EN), and the gallery's six-line title fills it (the hero grows past Half: words
+  are never squashed). Options for the review: a taller hero than Half's view, one action row (Listen as an icon pill), an Editor warning
+  on long hero titles.
+- [_3.3, scrim] The Lamp's eyebrow over the sky measures 7.06:1 at its worst pixel (the floor is 7): thin margin. If a wall's picture is
+  brighter, the scrim token (--ts-scrim-hero alpha 0.92) or the ramp must strengthen, never the words weaken.
+- [tests] The MCP get_test_job lists at most 25 failures: after a red-heavy targeted run, re-run the fixtures after the 25th by name.
+- [tests, flake?] PoiCardTopElementsSceneTests.ARealDragOfTheStack_MovesTheMark_ToWhatTheScreenShows(progress_map) red once (block_30 vs 31)
+  in a targeted run, green alone and in the full run.

@@ -12,6 +12,14 @@
        frame (about 144) */
     --ts-scrim: rgba(0, 0, 0, 0.7);
     --ts-hero-fade: rgba(26, 21, 16, 0.9);
+    /* The hero's scrim behind its words (solid) and the tint of the ramp above them (hero_scrim.png holds the grade). The
+       project blends in LINEAR light: white words keep 7:1 only over a background of luminance <= 0.1, so over a bright sky
+       (0.8) the scrim needs ~0.9; measured on the render at the worst pixel of every hero picture (PoiCardHeroSceneTests) */
+    --ts-scrim-hero: rgba(10, 8, 6, 0.92);
+    /* The hero's title, line and outline button over the scrim */
+    --ts-on-scrim: rgb(255, 255, 255);
+    /* The hero's eyebrow over the scrim (a warm white) */
+    --ts-on-scrim-2: rgb(241, 233, 218);
     /* Text */
     --ts-ink: rgb(247, 239, 220);
     --ts-ink-2: rgba(247, 239, 220, 0.8);
@@ -56,7 +64,11 @@
     --ts-size-title: 24px;
     --ts-size-caption: 14px;
     --ts-size-lede: 19px;
-    --ts-size-heading: 18px;
+    --ts-size-heading: 20px;
+    /* The hero's title over its picture (_3.3 R11, P4.4a), the display face */
+    --ts-size-hero: 46px;
+    /* The hero's title on a phone (HeroRule.IsNarrow, under 400 pt wide) */
+    --ts-size-hero-narrow: 40px;
     --ts-size-dropcap: 48px;
     --ts-size-quote: 22px;
     /* Shape */
@@ -86,6 +98,9 @@
 }
 
 .ts-app.ts-theme-default .card-header__title,
+.ts-app.ts-theme-default .card-hero__title,
+.ts-app.ts-theme-default .card-facts__value,
+.ts-app.ts-theme-default .card-timeline__date,
 .ts-app.ts-theme-default .poi-card-mini__title,
 .ts-app.ts-theme-default .card-block-heading,
 .ts-app.ts-theme-default .card-rich__heading,

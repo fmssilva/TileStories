@@ -340,13 +340,18 @@ namespace TileStories.Tests
             Assert.AreEqual("See it on the wall", actions.Actions[0].Label.text);
             var sheet = _harness.Sheet;
             Assert.AreEqual(sheet.Stack.Footer, sheet.Stack.SlotOf(actions).parent, "sticky: pinned in the card's footer, outside the scroll");
-            Assert.AreEqual(sheet.Root.worldBound.yMax, sheet.Stack.Footer.worldBound.yMax, 1f, "at the very bottom of the card");
+            // - _3.3 P4.4a: the hero (here the plate) shows the same call to action while it is in view; the footer waits for it
+            var heroAction = ((ActionsBlockView)sheet.Stack.HeroActionViews[0]).Actions.Single();
+            Assert.AreEqual("See it on the wall", heroAction.Label.text, "the hero's action is the sticky one");
+            Assert.IsTrue(sheet.Root.worldBound.Contains(heroAction.Button.worldBound.center), "...in the card");
+            Assert.IsFalse(sheet.Chrome.FooterShown, "the footer waits while the hero shows it");
+            Assert.GreaterOrEqual(sheet.Stack.Footer.worldBound.yMin, sheet.Root.worldBound.yMax - 1f, "it waits below the card's edge, out of reach");
             foreach (var s in actions.Actions)
                 Assert.AreEqual(actions.Root.contentRect.width, s.Button.worldBound.width, 1f, "full-width buttons, a long label wrapping inside");
             sheet.SetStop(SheetStopRule.Stop.Half);
             yield return CardTestInput.Settle();
-            Assert.LessOrEqual(sheet.Stack.Footer.worldBound.yMax, sheet.Root.worldBound.yMax + 1f, "at half too, still at the bottom, in reach");
-            Assert.Greater(sheet.Stack.Footer.worldBound.yMin, sheet.Root.worldBound.yMin, "...and inside the card");
+            Assert.LessOrEqual(heroAction.Button.worldBound.yMax, sheet.Root.worldBound.yMax + 1f, "at half too, the hero's action is in reach");
+            Assert.Greater(heroAction.Button.worldBound.yMin, sheet.Root.worldBound.yMin, "...and inside the card");
             yield return Render("Card_actions_sticky_cta_half");
         }
 
@@ -413,7 +418,8 @@ namespace TileStories.Tests
             var wall = CardGalleryDefinitions.Taxonomy();
             var poi = new POIData
             {
-                id = "header_image_parallax_real_scroll", name = "The Royal Palace of the Kings of Portugal and of the Algarves, before the earthquake",
+                // - a title of ordinary length (_3.3 P4.4a: a six-line title fills the hero with words and their scrim; this test is the picture's)
+                id = "header_image_parallax_real_scroll", name = "The Royal Palace",
                 category = CardGalleryDefinitions.CategoryKey, hierarchy_level_key = CardGalleryDefinitions.LevelKey,
             };
             var headerBlock = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.HeaderKind, variant = BuiltInBlocks.HeaderImageParallax };
@@ -433,9 +439,10 @@ namespace TileStories.Tests
             var stack = _harness.Sheet.Stack;
             Assert.IsTrue(header.HasHero);
             // - a point inside the hero shows the picture itself (its own colour, not the frame's or the card's)
-            yield return PixelAt(header.HeroPart, header.HeroPart.worldBound.center + new Vector2(10f, 10f), c => AssertColour(PictureColour("wide.png"), c, "the hero shows wide.png"));
+            // - in the hero's upper part: its words and their scrim cover its foot (_3.3 P4.4a)
+            yield return PixelAt(header.HeroPart, new Vector2(header.HeroPart.worldBound.center.x + 10f, header.HeroPart.worldBound.yMin + 14f), c => AssertColour(PictureColour("wide.png"), c, "the hero shows wide.png"));
             float scrollRange = stack.Scroll.contentContainer.layout.height - stack.Scroll.contentViewport.layout.height;
-            Assert.Greater(scrollRange, HeaderCollapseRule.CollapseAfter, "precondition: the real body gives the stack genuine scroll range");
+            Assert.Greater(scrollRange, 8f, "precondition: the real body gives the stack genuine scroll range");
             float frameTop = header.HeroPart.worldBound.yMin, pictureTop = header.Picture.Root.worldBound.yMin, titleTop = header.PeekPart.worldBound.yMin;
 
             // A real wheel first, to prove the stack itself really scrolls with a real event (the original bug: a lone
@@ -447,29 +454,22 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.2f);
             Assert.Greater(stack.Scroll.scrollOffset.y, 0f, "precondition: the real wheel scrolled the stack");
 
-            // The real wheel above can land anywhere (Unity's own kinetic deceleration, real elapsed time) and may
-            // overshoot CollapseAfter, collapsing the header; HeaderCollapseRule's hysteresis then only reopens it
-            // back near the very top (OpenAtTop = 0.5), so a known offset set directly afterward would NOT reopen it
-            // on its own. Back to the top first (a real state every card starts from) resets that, then to a KNOWN
-            // small offset -- the same `scrollOffset` property a drag or a wheel both ultimately move -- well inside
-            // the header's open window, so the maths below are checked against a fixed point rather than at the mercy
-            // of Unity's own wheel deceleration timing (the same class of machine-speed dependence `_3.1` step 7B
-            // already had to design out of the sheet's own drag).
+            // The real wheel above can land anywhere (Unity's own kinetic deceleration, real elapsed time), so the maths below are checked
+            // at a KNOWN small offset -- the same `scrollOffset` property a drag or a wheel both move
             stack.Scroll.scrollOffset = Vector2.zero;
             yield return null;
-            Assert.IsFalse(stack.HeaderCollapsed, "precondition: back at the top, the header re-opened");
-            float knownScroll = HeaderCollapseRule.CollapseAfter * 0.5f;
+            const float knownScroll = 4f;
             stack.Scroll.scrollOffset = new Vector2(0f, knownScroll);
             yield return null;
             float scrolled = stack.Scroll.scrollOffset.y;
             Assert.AreEqual(knownScroll, scrolled, 0.5f, "precondition: the known offset actually landed (not clamped away)");
-            Assert.IsFalse(stack.HeaderCollapsed, "precondition: still inside the header's open window");
+            Assert.IsFalse(stack.BarShowsTitle, "precondition: the hero's title is still in view");
             float frameMoved = frameTop - header.HeroPart.worldBound.yMin;
             float pictureMoved = pictureTop - header.Picture.Root.worldBound.yMin;
-            Assert.AreEqual(scrolled * HeaderBlockView.ParallaxFactor, header.ParallaxOffset, 0.5f, "the picture slides by half the scroll inside its frame");
-            Assert.AreEqual(frameMoved * (1f - HeaderBlockView.ParallaxFactor), pictureMoved, OnePixel(stack.Scroll) + 0.5f,
-                "on screen the picture moves at half the frame's speed (" + pictureMoved + " vs " + frameMoved + ")");
-            Assert.AreEqual(titleTop, header.PeekPart.worldBound.yMin, 0.5f, "the title stays pinned");
+            Assert.AreEqual(scrolled * HeroMotionRule.ParallaxFactor, header.ParallaxOffset, 0.5f, "the picture slides by 0.45 of the scroll inside its frame");
+            Assert.AreEqual(frameMoved * (1f - HeroMotionRule.ParallaxFactor), pictureMoved, OnePixel(stack.Scroll) + 0.5f,
+                "on screen the picture moves slower than its frame (" + pictureMoved + " vs " + frameMoved + ")");
+            Assert.AreEqual(titleTop, header.PeekPart.worldBound.yMin, 0.5f, "the bar stays pinned");
             yield return Render("Card_header_image_parallax_scrolled");
 
             stack.Scroll.scrollOffset = Vector2.zero;

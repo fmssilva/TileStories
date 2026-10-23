@@ -68,7 +68,7 @@ namespace TileStories.Tests
         {
             CardGalleryChecks.ShowEntry(_harness, entry);
             yield return CardTestInput.Settle();
-            got(_harness.Sheet.Stack.BoundViews.OfType<AudioGuideBlockView>().ToList());
+            got(_harness.Sheet.Stack.BoundViews.Concat(_harness.Sheet.Stack.HeroActionViews).OfType<AudioGuideBlockView>().ToList());
         }
 
         // A real tap at the centre of `target`
@@ -256,38 +256,33 @@ namespace TileStories.Tests
         // ---------------- the hero chip ----------------
 
         [UnityTest]
-        public IEnumerator TheHeroChip_SitsPinnedUnderTheHeader_CountsInThePeekStop_AndARealTapPlaysAndPauses()
+        public IEnumerator TheHeroChip_IsTheHerosListen_ItsLengthInItsWords_AndARealTapPlaysAndPauses()
         {
             AudioGuideBlockView chip = null;
             yield return Show("audio_guide_hero_chip_short", v => chip = v);
             var stack = _harness.Sheet.Stack;
-            Assert.AreSame(stack.PinnedTop, stack.SlotOf(chip).parent, "a hero chip is pinned, not in the scroll");
             var header = stack.HeaderView;
-            Assert.GreaterOrEqual(stack.PinnedTop.worldBound.yMin, header.PeekPart.worldBound.yMax - 0.5f, "under the title and chip");
-            Assert.LessOrEqual(stack.PinnedTop.worldBound.yMax, stack.Scroll.worldBound.yMin + 0.5f, "above what scrolls");
-            // - this entry's header has no subtitle text (SubtitleShown false: the gallery's generic block entries don't author one), so the
-            //   subtitle-stays-hidden-at-peek claim is proven on the real Lamp instead (it has one): PoiCardAudioSceneTests.TheLamp_HoldsAHeroChipUnderItsTitle_...
-            Assert.IsFalse(header.SubtitleShown, "precondition: nothing to check here");
+            // - _3.3 P4.4a: a hero chip has no slot of its own; it IS the hero's Listen, at the hero's foot
+            Assert.IsNull(stack.SlotOf(chip), "no slot in the stack");
+            Assert.AreSame(header.Actions, chip.Root.parent, "in the hero's action row");
+            Assert.IsTrue(chip.Root.ClassListContains(BlockStackView.HeroListenClass));
+            Assert.AreEqual("Listen 0:12", chip.Title.text, "Listen and the clip's length, before it plays");
+            Assert.AreEqual(DisplayStyle.None, chip.TimeText.resolvedStyle.display, "no running time before it plays");
             Assert.AreEqual(DisplayStyle.None, chip.Root.Q<VisualElement>(className: "card-audio__chips").resolvedStyle.display, "no speed chip or captions switch on the chip");
             Assert.AreEqual(DisplayStyle.None, chip.CaptionLine.resolvedStyle.display, "no caption line either");
-            Assert.AreEqual(PickingMode.Ignore, chip.Scrubber.Root.pickingMode, "its bar is a progress line, not a scrubber");
-
-            // - the peek stop shows the whole chip
-            _harness.Sheet.SetStop(SheetStopRule.Stop.Peek);
-            yield return CardTestInput.Settle(0.3f);
+            Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(chip.PlayButton.worldBound.width, chip.PlayButton.worldBound.height), "a whole tap target");
             Rect card = _harness.Sheet.Root.worldBound;
-            Assert.LessOrEqual(chip.Root.worldBound.yMax, card.yMax + 1f, "the chip is inside the peeking card");
-            Assert.LessOrEqual(stack.PeekPart.worldBound.yMax, card.yMax + 1f);
-            Assert.AreSame(stack.PinnedTop, stack.PeekPart, "the peek stop ends where the pinned strip ends");
+            Assert.LessOrEqual(chip.Root.worldBound.yMax, card.yMax + 1f, "inside the card at Full");
 
             yield return Tap(chip.PlayButton);
             Assert.AreEqual(CardAudioState.Playing, Audio.State, "a tap on the chip at the peek stop plays");
-            Assert.AreEqual(SheetStopRule.Stop.Peek, _harness.Sheet.Stop, "the card did not open");
+            Assert.AreEqual(SheetStopRule.Stop.Full, _harness.Sheet.Stop, "the card stays where it was");
             _harness.AdvanceAudio(6f);
-            Assert.AreEqual("0:06 / 0:12", Words(chip));
-            Assert.AreEqual(0.5f, chip.Scrubber.Fraction, 0.01f, "the thin line shows the progress");
+            Assert.AreEqual("Listen", chip.Title.text, "playing: Listen beside the running time");
+            Assert.AreEqual("0:06 / 0:12", chip.TimeText.text);
+            Assert.AreEqual(0.5f, chip.Scrubber.Fraction, 0.01f, "the progress is kept (the hero hides the line)");
             Assert.AreEqual(CardIcons.Shape.Pause, chip.PlayGlyph.Kind);
-            yield return CardGalleryChecks.Render("Card_audio_hero_chip_peek_playing");
+            yield return CardGalleryChecks.Render("Card_audio_hero_listen_playing");
             yield return Tap(chip.PlayButton);
             Assert.AreEqual(CardAudioState.Paused, Audio.State);
             Assert.AreEqual(CardIcons.Shape.Play, chip.PlayGlyph.Kind);
@@ -380,7 +375,7 @@ namespace TileStories.Tests
             Assert.AreEqual("long.mp3", Output.Clip.name, "the fade over: the second sound plays");
             Assert.AreEqual(1f, Output.Volume);
             Assert.AreEqual("0:00 / 10:15", Words(second));
-            Assert.AreEqual(2, _harness.Media.RefCount("long.mp3"), "held by the open card's block (its length) and by the playing audio");
+            Assert.AreEqual(3, _harness.Media.RefCount("long.mp3"), "held by the open card's block and the hero's Listen (their length) and by the playing audio");
             Assert.AreEqual(0, _harness.Media.RefCount("short.mp3"), "the first block released its own load on unbind, the service its own when the fade ended");
         }
 
@@ -515,7 +510,7 @@ namespace TileStories.Tests
             Assert.AreEqual(2, _harness.Media.HeldCount, "an open card holds its clip (for the length) and its captions");
             yield return Tap(view.PlayButton);
             Assert.AreEqual(2, _harness.Media.HeldCount, "the service shares the clip's one asset: the same load, counted twice");
-            Assert.AreEqual(2, _harness.Media.RefCount("short.mp3"), "the block's load and the service's");
+            Assert.AreEqual(3, _harness.Media.RefCount("short.mp3"), "the block's load, the hero's Listen's and the service's");
             _harness.Sheet.Hide();
             Assert.AreEqual(1, _harness.Media.RefCount("short.mp3"), "the card closed: only the playing audio holds the clip");
             Assert.AreEqual(0, _harness.Media.RefCount("short.vtt"), "the captions went with the card");

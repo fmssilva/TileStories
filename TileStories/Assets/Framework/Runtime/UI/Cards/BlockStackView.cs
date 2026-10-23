@@ -8,11 +8,13 @@ namespace TileStories
     // in order in a ScrollView. Views come from the card's BlockViewPool: switching POIs rebinds, it never instantiates and
     // destroys a view per tap (work plan performance rule 2). Each bound view gets its own ScopedMediaSource over
     // the card's media source: it loads lazily in Bind, and the stack releases the whole scope on unbind. Once the
-    // visitor scrolls the stack, the header collapses to its compact look (a class on the header slot,
-    // HeaderCollapseRule decides) and opens again at the scroll top. Every block sits in a SLOT: the common heading
+    // visitor scrolls the hero's title away, the pinned bar shows the title (HeroRule.BarShowsTitle; the bar never changes size). Every
+    // block sits in a SLOT: the common heading
     // (BlockKindDefinition.HeadingField, or the kind's DefaultHeadingKey) above the view's root, and the one block gap
-    // (--ts-block-gap) under it -- the stack draws both, so every kind has the same heading look and rhythm. A picture
-    // header's hero (HeaderBlockView.HeroPart) opens the scroll, above the first block; the scroll drives its parallax.
+    // (--ts-block-gap) under it -- the stack draws both, so every kind has the same heading look and rhythm. The header's hero
+    // (HeaderBlockView.HeroPart: the picture or the plate) opens the scroll, above the first block; the scroll drives its motion, and the
+    // stack binds the card's actions into its foot (HeroActionsRule: a second view of the sticky Actions block and of the first Audio
+    // Guide, hero_chip look). A block pinned to the top (the hero_chip look) gets no slot of its own: the hero's Listen is its place.
     // A block whose display is Expandable (_3.2 step 12, BlockDisplayRule.ShowsCompact) sits in its slot as a COMPACT ROW (CompactRowView,
     // CompactRowRule's words) and holds NO view and no media: its real view is taken from the pool and bound only when the row is opened
     // (Expand), and unbound -- its scope released -- when it is closed again (Collapse). Rows left open survive a rebind of the same
@@ -26,8 +28,6 @@ namespace TileStories
         public ScrollView Scroll { get; }
         // Pinned under the scroll: the blocks whose variant is a footer (BlockKindDefinition.FooterVariants)
         public VisualElement Footer { get; }
-        // Pinned right under the header, above the scroll: the blocks whose variant is pinned to the top (BlockKindDefinition.PinnedTopVariants)
-        public VisualElement PinnedTop { get; }
         // The card's views, pooled per kind: the stack's and the full view's (BlockFullView takes a SECOND view of a kind from here)
         public BlockViewPool Views { get; }
 
@@ -64,6 +64,8 @@ namespace TileStories
         private readonly Stack<Slot> _slots = new();
         private readonly Stack<Slot> _compactSlots = new();
         private readonly List<Bound> _bound = new();
+        // The views bound into the hero's action row (the sticky action, the Listen button): their kind and media scope, given back on unbind
+        private readonly List<(string Kind, IBlockView View, ScopedMediaSource Media)> _heroViews = new();
         // The block keys this binding revealed itself (a card with no CardLocalState still shows them once read)
         private readonly HashSet<string> _revealedHere = new();
         // The compact rows open now IN THE ORDER THEY WERE OPENED (Back closes the last, AccordionRule), and the point they belong to (kept
@@ -96,18 +98,22 @@ namespace TileStories
         // How many views were ever built (pooling makes this stop growing once every kind was seen)
         public int CreatedViewCount => Views.CreatedCount;
 
-        // The class that turns the pinned header into its compact look (About.uss / PoiCard.uss hide what it gives up)
-        public const string CollapsedHeaderClass = "poi-card__header--collapsed";
         // The class a compact row's slot wears (its heading is the row's words, so the slot's own heading stays hidden)
         public const string CompactSlotClass = "card-block-slot--compact";
 
-        // Whether the header is collapsed now (the stack was scrolled down)
-        public bool HeaderCollapsed { get; private set; }
+        // Whether the pinned bar shows the card's title now (HeroRule.BarShowsTitle: at Peek, or the hero's title scrolled away)
+        public bool BarShowsTitle { get; private set; }
 
-        // --ts-header-collapsed-max-height (CardTokens.uss), handed over by the sheet that reads the card's tokens: the one-line
-        // collapsed header's ceiling, what "freed" is measured against (0 until the styles resolve: then freed = the whole
-        // header, the safe over-estimate)
-        internal float CollapsedCeiling { get; set; }
+        // The views at the foot of the hero, in order (the primary action first, then Listen)
+        public IReadOnlyList<IBlockView> HeroActionViews
+        {
+            get
+            {
+                var views = new List<IBlockView>(_heroViews.Count);
+                foreach (var h in _heroViews) views.Add(h.View);
+                return views;
+            }
+        }
 
         // The bound views in stack order (the header first): a compact row that is closed has none
         public IReadOnlyList<IBlockView> BoundViews
@@ -133,14 +139,15 @@ namespace TileStories
             }
         }
 
-        // How many files the blocks' views hold now, all scopes together (a closed compact row holds none): what "a card of collapsed
-        // rows holds no media" is counted by
+        // How many files the blocks' views hold now, all scopes together (a closed compact row holds none; the hero's action views count
+        // too): what "a card of collapsed rows holds no media" is counted by
         public int HeldMedia
         {
             get
             {
                 int held = 0;
                 foreach (var b in _bound) held += b.Media?.HeldCount ?? 0;
+                foreach (var h in _heroViews) held += h.Media?.HeldCount ?? 0;
                 return held;
             }
         }
@@ -218,14 +225,11 @@ namespace TileStories
         // The bound header view (null when the header is another view type, or nothing is bound)
         public HeaderBlockView HeaderView => _bound.Count > 0 ? _bound[0].View as HeaderBlockView : null;
 
-        // The element the peek stop must show in full: the header's top part (its whole root for another header view) -- or, when a block is
-        // pinned to it, that pinned strip (Bind() sits it between the title/chip and the subtitle, so its bottom edge already
-        // includes the title/chip above it and stays above the subtitle, never dragging the subtitle into the peek stop with it)
+        // The element the peek stop must show in full: the header's bar (its whole root for another header view)
         public VisualElement PeekPart
         {
             get
             {
-                if (PinnedTop.childCount > 0) return PinnedTop;
                 if (_bound.Count == 0 || _bound[0].Kind != BuiltInBlocks.HeaderKind) return HeaderSlot;
                 return _bound[0].View is HeaderBlockView header ? header.PeekPart : _bound[0].View.Root;
             }
@@ -238,11 +242,6 @@ namespace TileStories
             HeaderSlot = new VisualElement { name = "poi-card-header" };
             HeaderSlot.AddToClassList("poi-card__header");
             headerParent.Add(HeaderSlot);
-            // - a placeholder position until the header binds and moves it inside itself (Bind()): between the title/chip and the
-            //   subtitle, so a pinned block (the audio hero chip) counts in the peek stop without dragging the subtitle in with it
-            PinnedTop = new VisualElement { name = "poi-card-pinned-top" };
-            PinnedTop.AddToClassList("poi-card__pinned-top");
-            headerParent.Add(PinnedTop);
             // - a phone card scrolls by dragging its content: no desktop scroll bar (it took width and ignored the tokens)
             Scroll = new ScrollView(ScrollViewMode.Vertical)
             {
@@ -257,8 +256,8 @@ namespace TileStories
             scrollParent.Add(Footer);
             Scroll.verticalScroller.valueChanged += _ =>
             {
-                UpdateHeaderCollapse();
                 HeaderView?.OnStackScrolled(Scroll.scrollOffset.y);
+                UpdateBarTitle();
                 UpdateContentSeen();
             };
             // - the content or the visible part changing size (a sheet dragged to another stop, a picture loading) can also
@@ -297,21 +296,14 @@ namespace TileStories
         // Ask the card's reading again when something outside the stack's scroll was read (a section of the full view, bento)
         internal void ReadAgain() => UpdateContentSeen();
 
-        // Collapse or open the header for the stack's current scroll (HeaderCollapseRule)
-        private void UpdateHeaderCollapse()
+        // Show the title in the bar, or leave it to the hero, for the stop and the scroll now (HeroRule.BarShowsTitle): on every scroll,
+        // and when the sheet changes stop (the sheet calls it). A header that is no HeaderBlockView keeps its own title
+        public void UpdateBarTitle()
         {
-            float range = Scroll.contentContainer.layout.height - Scroll.contentViewport.layout.height;
-            // - what collapsing gives back: the open header down to the one-line look's ceiling (the token). Never an
-            //   under-estimate, so the rule's "can it still scroll afterwards" guard stays safe
-            float freed = HeaderCollapsed || float.IsNaN(range) ? 0f : UnityEngine.Mathf.Max(0f, HeaderSlot.layout.height - CollapsedCeiling);
-            SetHeaderCollapsed(HeaderCollapseRule.Next(HeaderCollapsed, Scroll.scrollOffset.y, float.IsNaN(range) ? 0f : range, freed));
-        }
-
-        private void SetHeaderCollapsed(bool collapsed)
-        {
-            if (collapsed == HeaderCollapsed) return;
-            HeaderCollapsed = collapsed;
-            HeaderSlot.EnableInClassList(CollapsedHeaderClass, collapsed);
+            var header = HeaderView;
+            var stop = _context?.Host?.Stop ?? SheetStopRule.Stop.Peek;
+            BarShowsTitle = header == null || HeroRule.BarShowsTitle(stop, Scroll.scrollOffset.y, header.HeroTitleBottom());
+            header?.SetBarTitleShown(BarShowsTitle);
         }
 
         // Show these entries (BlockStackBuilder's output), each bound with `context` and its own variant -- a compact one (its own display, or
@@ -333,8 +325,10 @@ namespace TileStories
             var navigation = context.Settings?.navigation;
             foreach (var entry in entries)
             {
+                // - a block pinned to the top (the hero_chip look) lives in the hero's action row now (BindHeroActions): no slot
+                if (entry.Definition.IsPinnedTop(entry.Variant)) continue;
                 bool header = _bound.Count == 0 && entry.Definition.Key == BuiltInBlocks.HeaderKind;
-                bool inScroll = !header && !entry.Definition.IsPinnedTop(entry.Variant) && !entry.Definition.IsFooter(entry.Variant);
+                bool inScroll = !header && !entry.Definition.IsFooter(entry.Variant);
                 bool compact = inScroll && CardLayoutRule.ShowsCompact(navigation, entry, _registry);
                 bool parks = inScroll && (parked?.Invoke(entry.Instance.key) ?? false);
                 var b = compact ? BindCompact(entry, context) : parks ? BindParked(entry) : BindView(entry, context);
@@ -348,27 +342,49 @@ namespace TileStories
                 b.Slot.Heading.text = HeadingWords(entry, context);
                 b.Slot.Heading.EnableInClassList("card-block-heading--empty", b.Slot.Heading.text.Length == 0);
                 var parent = header ? HeaderSlot
-                    : entry.Definition.IsPinnedTop(entry.Variant) ? PinnedTop
                     : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;
                 parent.Add(b.Slot.Root);
-                if (header && b.View is HeaderBlockView h)
-                {
-                    // - a picture header's hero opens what scrolls: the title stays pinned while the picture scrolls away
-                    if (h.HasHero) Scroll.contentContainer.Insert(0, h.HeroPart);
-                    // - PinnedTop sits INSIDE the header, between the title/chip and the subtitle (never after the subtitle): a
-                    //   pinned block (the audio hero chip) must count in the peek stop WITHOUT dragging the subtitle into peek
-                    //   with it -- Root's two children are always [PeekPart, subtitle] (HeaderBlockView's constructor), so index 1
-                    //   is exactly between them. Re-inserting an already-attached element just moves it: harmless on every rebind.
-                    h.Root.Insert(1, PinnedTop);
-                }
+                // - the header's hero opens what scrolls: the bar stays pinned while the hero scrolls away
+                if (header && b.View is HeaderBlockView h && h.HasHero) Scroll.contentContainer.Insert(0, h.HeroPart);
                 _bound.Add(b);
             }
+            BindHeroActions(entries, context);
             // - rows open before the rebind open again, in the order they were opened (Back keeps closing the last one first)
             if (reopen != null)
                 foreach (string key in reopen) Expand(key);
             Scroll.scrollOffset = UnityEngine.Vector2.zero;
-            // - a new card starts at the top, header open (the offset may already have been 0: no scroll event then)
-            SetHeaderCollapsed(false);
+            // - a new card starts at the top, its hero whole (the offset may already have been 0: no scroll event then)
+            HeaderView?.OnStackScrolled(0f);
+            UpdateBarTitle();
+        }
+
+        // The card's actions at the foot of the hero (HeroActionsRule): a second view of the sticky Actions block (the primary action, in
+        // its own look) and of the first Audio Guide in the hero_chip look (Listen), each from the pool through a media scope of its own --
+        // the same blocks the footer and the stack draw, so one action and one audio owner, drawn twice
+        private void BindHeroActions(IReadOnlyList<BlockStackBuilder.Entry> entries, BlockBindContext context)
+        {
+            var header = HeaderView;
+            if (header == null) return;
+            var picks = HeroActionsRule.Of(entries);
+            if (picks.HasPrimary) BindHeroView(header, entries[picks.Primary], entries[picks.Primary].Variant, HeroPrimaryClass, context);
+            if (picks.HasListen) BindHeroView(header, entries[picks.Listen], BuiltInBlocks.AudioGuideHeroChip, HeroListenClass, context);
+            header.Actions.style.display = _heroViews.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            header.Actions.EnableInClassList("card-hero__actions--listen-only", picks.HasListen && !picks.HasPrimary);
+        }
+
+        // The roles the hero's two action views wear (Media.uss styles them over the scrim)
+        public const string HeroPrimaryClass = "card-hero__primary";
+        public const string HeroListenClass = "card-hero__listen";
+
+        private void BindHeroView(HeaderBlockView header, BlockStackBuilder.Entry entry, string variant, string role, BlockBindContext context)
+        {
+            var view = Views.Take(entry.Definition.Key);
+            if (view == null) return;
+            var media = new ScopedMediaSource(context.Media);
+            view.Bind(entry.Instance, context.ForBlock(media, variant));
+            view.Root.AddToClassList(role);
+            header.Actions.Add(view.Root);
+            _heroViews.Add((entry.Definition.Key, view, media));
         }
 
         // A block is out of sight while it waits for the card to be read or the layout has set it aside
@@ -508,6 +524,16 @@ namespace TileStories
         // Unbind every view and put it back in its kind's pool
         public void UnbindAll()
         {
+            foreach (var h in _heroViews)
+            {
+                h.View.Unbind();
+                h.Media?.ReleaseAll();
+                h.View.Root.RemoveFromClassList(HeroPrimaryClass);
+                h.View.Root.RemoveFromClassList(HeroListenClass);
+                h.View.Root.RemoveFromHierarchy();
+                Views.Return(h.Kind, h.View);
+            }
+            _heroViews.Clear();
             foreach (var b in _bound)
             {
                 if (b.View is HeaderBlockView h) h.HeroPart.RemoveFromHierarchy();

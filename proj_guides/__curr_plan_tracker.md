@@ -1,84 +1,117 @@
-# Plan tracker -- _3.3 P4.3: the app's fonts (Fraunces + Atkinson Hyperlegible Next)
+# Plan tracker -- _3.3 P4.4a: the header and the hero
 
-Brief: `__AI_worker.md` (P4.3, R16 row 1, R12.3). Worker: Opus-class. Only the FACES change (sizes / colours / layout: P4.4).
-Do not commit (the Architect does). Before finishing: `git checkout -- Assets/Dev/StyleSpike/Fonts` (tests rewrite them).
+Brief: `__AI_worker.md` (P4.4a, R16 row 3, R10.9, R11 v3 + v4, R9 D1 / D5, R12.3). Worker: Opus-class. Do not commit.
+Before finishing: `git checkout -- Assets/Dev/StyleSpike/Fonts` + marker SDF fonts if a run rewrote them; LivingRoomScene open.
 
 ## GATE (done)
-- [x] push: 0 ahead (HEAD c558d0b = origin/master)
-- [x] UnityMCP: telemetry_status ok, console clean of compile errors
-- [x] captures opened: `TestEvidence/Fonts/gate_gameview.png` (Game view: wall, "Ribeira Palace" marker),
-      `TestEvidence/Fonts/gate_poieditor.png` (POI Editor, Global Scene; right ~60 px = VS Code icon bar, no private content); 0 windows left
-- [x] compile: 0 `error CS` in Editor.log, last Tundra build success; marker SDF + spike fonts: git clean -> nothing restored
-- [x] baseline: none (HEAD c558d0b; P4.1 full PlayMode 1233/1235 two known reds, EditMode 2045/2046 focus flake)
+- [x] push: 0 ahead (HEAD 52a152b = origin/master)
+- [x] UnityMCP: telemetry_status ok; console: only the XR-sim duplicate-ID lines
+- [x] captures opened: `TestEvidence/Gate/P4.4a_gate_game.png` (Main Camera render: room scan + painting, Edit Mode, no markers),
+      `TestEvidence/Gate/P4.4a_gate_editor.png` (POI Editor, Detail Card tab; a config-validation notice popped, closed after); 0 windows left, scene not dirty
+- [x] compile: 0 `error CS` in Editor.log, last Tundra build success; fonts: git clean -> nothing restored
+- [x] baseline: none (HEAD 52a152b; P4.3 full PlayMode 1254 with the two Menu reds)
 
-## Findings (verified on disk)
-- No USS in Framework / Apps sets a font (only Dev/StyleSpike): the card draws Unity's default runtime theme font today.
-- No atlas builder in the repo (P0 built its assets ad hoc; the fontTools script was outside the repo).
-- TextCore FontAsset (6.3): CreateFontAsset(Font, size, pad, mode, w, h, population, multiAtlas), TryAddCharacters, public ClearFontAssetData;
-  fontWeightTable has no public setter (-> SerializedObject m_FontWeightTable).
-- Title rules carry `-unity-font-style: bold` -> Fraunces (SemiBold only) would get FAUX bold: display asset's table [7] = itself.
-- USS has no medium style: Medium only through the weight table (rich text font-weight=500). No role uses it before P4.4.
-- `LabelFontKeyOptions` (Editor) hard-codes the 3 marker keys; `LabelsAndFontsAuthoringTests` pins 3.
-- `ShippedTextGlyphTests.ShippedCharacters` lives in the test assembly; the builder needs the same list -> move it to Editor code.
-- Italic (`About.uss` quote) stays synthesized: no Atkinson Italic in the brief -> `__mixed_TODOs.md`.
-
-## Decisions
-- Fonts: `Runtime/UI/Theme/Fonts/<Family>/` (.ttf + OFL.txt + README provenance), assets `<name> TMP.asset` / `<name> UITK.asset` beside.
-- Library: `FontKeyLibrary.Entry.uiFont` (TextCore, optional); keys fraunces_semibold, atkinson_next_regular / _medium / _bold.
-- Atlases: static, SDFAA, sampling 48, padding 6, 1024 x 1024; set = ASCII + Latin-1 + Latin Ext-A + typographic punctuation + shipped chars.
-- Weights: the theme's type roles name the keys; the atlas command wires each UITK asset's weight table from them (display [6], [7] = itself).
-- Type roles in `ThemeAsset.type`; generator emits them (USS var if a real panel resolves it, else direct url rules); display selectors = data.
+## Design (decided)
+- BAR = grabber + one row: header Root = `card-header__title` (one line, ellipsis) beside the round buttons; fixed height, margin-top
+  overlaps the grab zone so the row lines up with the buttons. Peek = the bar's bottom. Title shown (opacity) only when the hero title is
+  off screen: `HeroRules.BarShowsTitle` (Peek, or scrolled past the hero title). Replaces HeaderCollapseRule (removed, tests re-based).
+- HERO = first in the scroll, for EVERY header: picture looks -> full-width picture + scrim (alpha-ramp PNG tinted by a theme token) +
+  text box at the lower third (eyebrow, `card-hero__title` display face, subtitle) + actions row; text_only / compact -> a plain plate.
+  Height (picture looks) = max(--ts-hero-min-height, Half - Peek), set by the sheet (`HeroRules.Height`).
+- ACTIONS: `HeroActionsRule.Of(entries)` -> primary = first footer (sticky) actions entry, listen = first pinned-top audio_guide else first
+  audio_guide. The stack binds a second ActionsBlockView / an AudioGuideBlockView (hero_chip look) into the hero's actions row; the
+  pinned-top hero_chip block gets no slot (PinnedTop container retired). hero_chip words: "Listen m:ss" (CardStrings hero_listen).
+- CHROME: CardChromeRule inputs HeroBottom + ScrollOffset: while the hero is in view the bottom area hides and the strip needs the whole
+  visible hero beside it.
+- MOTION: header Choice `hero_motion` (pan | zoom | none, default pan, image_parallax only, (i)); `HeroMotionRule`: pan 26 s ease in-out
+  back and forth when wider than the frame, zoom 1 -> 1.06, parallax 0.45x, text rise + fade; reduce motion = centre still, no rise.
+  Injectable clock on HeaderBlockView.
+- TYPE: --ts-size-heading 20, --ts-size-hero 46 / -narrow 40, bar title 20; display selectors + hero title, timeline date, facts values,
+  big numbers. Fraunces Bold only if captures demand.
+- CATEGORY: quick_facts Toggle `show_category` (a first fact "Category"); header `show_level` removed. EYEBROW: optional header field
+  `eyebrow` (blank = none); Lamp + Painting filled EN + PT.
 
 ## Steps
-- [x] 4.3.0 Measure first: `TypefaceMeasureTests` (gated by TestEvidence/Fonts/MEASURING, phase in the file): 12 P4.1 gallery renders +
-      Lamp / Painting x EN / PT x Peek / Half / Full sheet crops + stops / header heights -> `TestEvidence/Fonts/before/`. Run "before".
-- [x] 4.3.1 Download google/fonts variable TTFs + OFL; cut static instances (fontTools); README; into Runtime/UI/Theme/Fonts/.
-- [x] 4.3.2 FontKeyLibrary {key -> TMP + TextCore}; FontLibrary.asset + 4 keys; Editor key list 7; tests (library, authoring).
-- [x] 4.3.3 ShippedTextCharacters (Editor) + FontAtlasBuilder (menu command) -> 8 static assets; weight tables; ShippedTextGlyphTests grows
-      (every shipped + content char in all 8; ranges); mutation proof.
-- [x] 4.3.4 Probe var() font on a real panel; ThemeAsset.type + generator + regenerate; font guard test; `ThemeTypeTests` (PlayMode, real
-      scene: body / display everywhere, bold = Bold face not faux, display bold = no faux); mutation proofs.
-- [x] 4.3.5 Targeted fixtures (Card / Poi / Search / Theme / Marker); re-base list below (old -> new, from source); findings.
-- [x] 4.3.6 "after" measurement + side by side + glare render; look item by item.
-- [x] 4.3.7 Full PlayMode (background), full EditMode.
-- [x] Part 2 docs: 10-structure, _2.0, _3.3 R12 Build log, 40-testing RUN TIMES, __mixed_TODOs.
-- [ ] Finish: restore spike fonts, LivingRoom scene open, final report (60-finishing 6.4).
+- [x] 4.4a.0 Measure "before": `LookMeasure` (TypefaceMeasure generalised by domain) + `HeroMeasureSceneTests` (Lamp / Painting x EN / PT
+      x Menu none / drawer_tree; stops, header, title; Peek / Half / Full renders) -> TestEvidence/Hero/before
+- [x] 4.4a.1 Bar: HeaderBlockView bar title, USS bar row, PeekPart, HeroRule.BarShowsTitle, remove HeaderCollapseRule; EditMode tests
+- [x] 4.4a.2 Hero: layout + plate + scrim (foot: solid + ramp) + tokens + HeroRule.Height (a minimum) + HeroActionsRule + stack wiring + Listen
+- [x] 4.4a.3 hero_motion field + HeroMotionRule + view tick (Clock) ; Editor row = generic drawer (check on the real window: TODO)
+- [x] 4.4a.4 Type scale (heading 20, hero 46 / 40 under 400 pt) + display figures (facts values, timeline dates, hero title); category ->
+      quick_facts Show Category; eyebrow field (one line) + content
+- [x] 4.4a.5 Chrome: CardChromeRule layer 4 (bottom area waits for the hero, strip needs the visible hero); re-based chrome tests
+- [x] 4.4a.6 Scrim worst-pixel measure: Painting 7.78 (mid pan) .. Military 10.0, Religious 12.0 (EN); Lamp after the 40 pt title
+- [x] 4.4a.7 Targeted fixtures (Card / Poi regex); re-base log
+- [x] 4.4a.8 "after" measure + side by side + pan / scroll frame sequences; look item by item
+- [x] 4.4a.9 Full PlayMode (background), full EditMode
+- [x] Part 2 docs: _3.3 Build log, 10-structure, TODOs closed, 40-testing RUN TIMES
+- [ ] Finish: restore fonts, LivingRoom scene, final report
 
-## Measurements (before -> after) -- TestEvidence/Typeface/{before,after,compare}/
-- lamp en: peek 195 -> 168, half 337.6 = , full 796 = ; header 206 -> 180; peek part 64 = ; title 59 -> 30 (one line)
-- lamp pt: peek 195 -> 198; header 206 -> 210; title 59 -> 60
-- painting en / pt: peek 102 -> 104; header 113 -> 116; peek part 65 -> 67; title 30 =
+## Measurements (before -> after) -- TestEvidence/Hero/{before,after,compare}/
+- Peek: lamp en 168 (menu 198) -> 57; lamp pt 198 (menu 198) -> 57; painting en 104 / pt 104 (menu 134) -> 57 -- every case one value
+- header at Half: 116..231 -> 48 (the bar row); hero 358 x 200 (inset) -> 390 x 281 (= Half - Peek, full width)
+- Half 337.6 / Full 796 unchanged; Half viewport: lamp en 50, pt 103 (no footer) -> 281, the whole hero, action in it
+
 ## Runs
-- targeted (regex) 1132: 1126 + 6 red (3820 s) -> 4 re-based, 38/38 + 11/11 green; 2 = the Menu finding (left red)
-- full PlayMode 1256 results / 1254 tests, 3577 s, background at every poll: 2 red = the Menu finding
-- full EditMode 2050/2050 (149 s, focused)
+- EditMode targeted (6 fixtures) 144/144; full EditMode 2060/2061 (140 s, focused): the red = KeywordListFieldTypingTests (the documented
+  focus flake, red after a full PlayMode run) -> 1/1 alone.
+- Hero / Menu / Facet / Chrome fixtures green (Menu's TheLampsStops_DoNotMove_WithAMenuSet unchanged).
+- Targeted regex set (Card|Poi|Search|Theme|Zoom|Marker|LodWallScene|LayoutStruggle|LivingRoom|Family|Typeface|Hero): run 1 1172 (3430 s),
+  run 2 1172 (3354 s) -- failures capped at 25 by the tool -> the hidden fixtures re-run (493, then 268, 49, 15): every red re-based
+  (log) or fixed (the empty-subtitle rule); all green on re-run.
+- FULL PlayMode: 1280 results / 1278 tests, 3839 s, background at every poll (front at the end): 2 red, both a tap during the sheet's rise
+  in an unfocused Editor (PoiCardLanguageSceneTests chip, PoiCardRealAudioTests Listen) -> wait on rest, 7/7 (Unity in front: proves the
+  fix, not focus independence).
+- Scrim: 189 measures, worst 7.06:1 (Lamp eyebrow, pan 0); Painting 7.78+ ; Military 10.9; Religious 12.0.
 
-## Re-base log (old -> new, source)
+## Re-base log (old -> new, from source)
+- PoiCardSceneTests.TheLamp_OpensAtPeek: chip "Royal Government" -> no chip in the header; peek shows the bar, bar title shown.
+- PoiCardSceneTests.ScrollingTheStack_CollapsesTheHeader... -> ScrollingTheHeroAway_HandsTheTitleToTheBar_AndTheTopGivesItBack (the
+  collapse is gone by design: bar fixed, title handoff).
+- PoiCardSceneTests lamp_military chip "Military" -> its Video Loop hero over its poster; PT chip "Governo Real" -> the PT quick fact.
+- PoiCardSceneTests.About: TheHeaderChip_... -> QuickFactsShowTheCategory_Alone_WithItsLevel_OrNotAtAll; parallax 0.5 -> 0.45
+  (HeroMotionRule); "header collapsed" -> "bar shows no title".
+- CardGalleryTests header entries: chip -> none; "a hero exactly for a picture look" -> every header a hero, HasPicture for the picture
+  ones, the plate class else; subtitle contrast on the card only for the plate (the picture's words: the scrim test).
+- CardGalleryTests.About parallax: HeaderCollapseRule.CollapseAfter -> a known 4 px offset; 0.5 -> 0.45.
+- CardAudioGalleryTests hero chip pinned / peek -> TheHeroChip_IsTheHerosListen (no slot, in the hero's actions, "Listen 0:12").
+- PoiCardAudioSceneTests Lamp chip pinned -> the hero's Listen ("Listen 2:44"); Views include HeroActionViews (also Video / RealAudio).
+- CardGalleryChecks: SettledBlock takes the hero's Listen for a pinned-top entry; AssertHeadingAndGap: no slot = a hero action.
+- PoiCardChromeSceneTests: Lamp Half "keeps its footer, strip gives way" -> "shows its whole hero with its action, sticky bar once read";
+  "collapsed header gives Half its strip" -> "the hero read away gives it back"; NothingShowsAtPeek precondition read past the hero.
+- PoiCardNavContentsSceneTests: precondition "header collapsed" -> "the hero scrolled away".
+- FieldVisibilityRuleTests header looks: - show_level, + eyebrow (not compact), + hero_motion (image_parallax).
+- CardRulesTests: HeaderCollapseRule test removed with the rule.
+- (targeted run 1-2) CardAudioGalleryTests: clip refcount 2 -> 3 (the hero's Listen loads the length too; 1 after close, unchanged).
+- CardGalleryTests.Actions sticky: "footer at the card's bottom" -> the hero (plate) shows the same action, the footer waits below the edge.
+- CardGalleryTests header entries "long" at Half: "subtitle starts inside the card" -> "the hero's title starts inside the card" (a
+  long title + line grow the hero past Half: words never squashed); "nosubtitle": REAL BUG fixed (the empty-subtitle rule was lost).
+- CardGalleryTests.HeaderImageParallax: its own POI's 6-line title -> "The Royal Palace" (the test is the picture's); sample near the top.
+- CardNavGalleryTests nav blocks: "first in the scroll" index 0 -> 1 (after the header's hero).
+- CardVideoGalleryTests loop poster colour: sampled at the hero's top band (PictureColourIn), not under the words' scrim.
+- PoiCardAudioSceneTests / PoiCardRealAudioTests / PoiCardVideoSceneTests: "tap the chip at Peek" -> at Half (SelectAtHalf); PT chip
+  words "Visita guiada ao castelo" -> "Ouvir 2:08"; Economic: player picked by look, the hero's Listen = the same clip.
+- PoiCardBottomBarSceneTests (2): read past the hero first (shared CardTestInput.ReadPastTheHero, the chrome fixture uses it too).
+- PoiCardEdgeSceneTests: the dot level with the strip = the middle of the strip-column overlap (the taller viewport moved the column).
+- PoiCardExpandableSceneTests / PoiCardLiveUpdateTests / PoiCardSceneTests (full card kinds, every heading, Military): the hero chip
+  is a hero action view, not a stack view (62 -> 61 + the hero's two).
+- PoiCardSceneTests: Drag-up subtitle read from the hero; QuickFacts + "Category" first; split/spotlight "no hero" -> no picture;
+  sticky tap -> the hero's action. PoiCardSheetDragSceneTests: the typed 100 px move -> 60 % of Peek..Half (Peek is 57 now).
+- PoiCardBottomElementsSceneTests dock tap: ScrollToTop ends with a resting finger (see the fling finding).
 
 ## Findings during the build
-- (4.3.3) The GATE's POI Editor capture (LoadConfig) dirtied LivingRoomScene with the Edit-Mode rig; the MCP test run then SAVED it (+23k
-  lines). Restored with git checkout (Unity had it open, not dirty) and reopened. Next capture: reopen the scene without saving after it.
-- (4.3.4) var() CAN carry a font definition (probe: label by var = direct url = inherited child = Fraunces UITK) -> generator emits
-  --ts-font-body / --ts-font-display tokens + `-unity-font-definition: var(...)`.
-- (4.3.4) Mutations: About.uss font rule -> guard red; .card-block-heading dropped from the generated sheet -> 41 headings red;
-  weight [7] emptied -> body bold 387 vs 361 / title 232 vs 204 red; all restored -> green. Widths: regular 337, bold 361 = Bold cut,
-  medium 346 = Medium cut, title "St George's Castle" @24: 204 both.
-- (4.3.6, early after-measure) FINDING: Lamp PT at Half loses the sticky CTA -- header 206 -> 210, room 131.6 -> 127.6 under
-  CardChromeRule.MinStackViewportUnderFooter (24) after the footer. Not re-based; reported (the "Half is mostly header" TODO, P4.4/P5).
-- FINDING: Peek moves: Lamp EN 195 -> 168 (title one line), Lamp PT 195 -> 198, Painting 102 -> 104 (Half / Full unchanged).
-- FINDING (design): Atkinson's slashed zero in dates/times ("1500", "0:00"); the face has no plain-zero alternate (zero, zero.tf only).
-- FINDING (design, P4.4): display headings (Fraunces 600 @18) read lighter than Atkinson Bold values beside them.
-
-## Re-base log (old -> new, from source) -- targeted set 1132: 1126 passed, 6 red (3820 s)
-- PoiCardEdgeSceneTests.TheStops_AreUnchangedWithTheScrubber_...: typed 5a standard 195 / 337.6 / 796 -> the card's own stops measured
-  with edge None first (Peek 168 now: one-line title).
-- PoiCardFloatingSceneTests.TheStops_AreUnchangedWithEachFloatingButton_...: same (own stops measured with None).
-- CardVideoGalleryTests.LongChapters_...: "chip taller than touch + 1" stood for "wraps"; Atkinson's two lines made a 2-line chip exactly
-  49 -> the wrap measured itself: the chip's words at its width > 1.5 lines (37 px vs one line 19; control: "0:00  Gate" < 1.5 lines).
-  (A first try lengthened the fixture name on a wrong diagnosis -- the render showed it already wrapped; reverted, fixture unchanged.)
-- PoiCardPaintingSceneTests.WhereTheChromeHidesTheStrip_...: precondition "Half hides the strip" was an accident of header height (the new
-  faces gave The Painting's Half the room: FINDING, the strip shows at Half now) -> measured at Peek, where the rule always hides it
-  (same class path, CardChromeView.TopShownClass).
-- NOT re-based (developer, 2026-10-23: "leave red, report"): PoiCardMenuSceneTests.TheLampsStops_DoNotMove_WithAMenuSet_... and
-  PoiCardFacetSceneTests.TheLampsStops_DoNotMove_WithTheFacetChipsInTheMenu: a Menu moves The Lamp's EN Peek 168 -> 198 (the menu button
-  narrows the title column; "St George's Castle" wraps). FINDING for P4.4 / P5 header.
+- Pan + GrabStill: a moving hero never holds still -> tests own the clock (HeaderBlockView.Clock), HeroMeasure freezes it.
+- Scrim v1 (a full-frame gradient, the prototype's) failed: 1.04:1 eyebrow over sky (the hero is 281, not 440: words cover ~70 %).
+  Linear blending needs alpha ~0.9 behind white words over a sky -> v2 the scrim FOLLOWS the words (solid foot + 96 px ramp above).
+- Lamp EN: "Show me where it is" + "Listen 2:44" do not fit one row at 390 -> the focal pill keeps one line and takes its own row; with
+  the 46 pt two-line title the words were squashed (subtitle over the pill) -> hero 40 pt under 400 pt wide, hero height = a MINIMUM.
+- Peek read 796 after a live Menu push: Show -> SetStop -> RecomputeStops ran before layout, the re-attached bar's world rect was stale
+  -> the peek is now the header SLOT's own layout (never re-parented).
+- PT Lamp eyebrow wrapped (hero 305) -> the eyebrow is one line (kicker), the Lamp's eyebrow shortened (content).
+- MCP get_test_job caps failures at 25: the first targeted run hid every red after it -> re-ran the hidden fixtures separately.
+- FINDING (_3.2, not fixed): a jump started right after a fling inherits the ScrollView's leftover velocity (probe: landed at 8823, drifted
+  to 8764 over ~70 frames, the block stayed at 8862). Exposed by the dock test once the hero changed the timing.
+- FINDING (design): a very long hero title (the gallery's "long" entries, 6 lines at 40) fills the hero; the hero grows and Half shows
+  only the title. Authors should keep hero titles short; an Editor warning is a P8 candidate.
+- FINDING (flake?): PoiCardTopElementsSceneTests.ARealDragOfTheStack(progress_map) red once (block_30 vs 31), green alone.
+- KNOWN: PoiCardBottomElementsSceneTests.ARealDragToTheEnd "Layout update is struggling" (P4.1's open entry, __mixed_TODOs).

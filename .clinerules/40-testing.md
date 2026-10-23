@@ -92,15 +92,17 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~65-150 s (2050 tests, 149 s, 2026-10-23, _3.3 P4.3, focused); full PlayMode ~55-70 min (1254 tests incl. the gated
-measurements, 3577 s, 2026-10-23, _3.3 P4.3, background at every poll from the first, Unity in front at the end; before it 1235 tests +
+EditMode ~65-150 s (2061 tests, 140 s, 2026-10-23, _3.3 P4.4a, focused); full PlayMode ~55-70 min (1278 tests, 3839 s, 2026-10-23,
+_3.3 P4.4a, background at every poll, Unity in front at the end; before it 1254 tests incl. the gated
+measurements, 3577 s, _3.3 P4.3, background at every poll from the first, Unity in front at the end; before it 1235 tests +
 the gated pixel set, 3521 s, _3.3 P4.1, focused throughout -- the developer could not keep Unity behind; before it 1219 tests, 3582 s, _3.3 P1b
 part 2, unfocused at the first poll, focused at the end; before it 1192 tests, 3311 s, _3.2 fix
 chunks D+G: 1192/1192, unfocused at the first poll and the end, Unity in front ~19-47 min; the run before it 1191/1192, 3686 s, wholly background);
 the Card / Poi targeted set (48 fixtures incl. LodWallSceneTests + LayoutStruggleGuardTests, 960 tests) ~45-55 min (3292 s, 2026-10-22, _3.2 fix
 chunks D+G, background; with Search / Zoom / Theme added: 55 fixtures, 1021 tests, 3177 s, 2026-10-23, _3.3 P4.1, focused; selected by
 the name regex (Card|Poi|Search|Theme|Zoom|Marker|LodWallScene|LayoutStruggle|LivingRoom|Family|Typeface) in `group_names`: 1132 tests,
-3820 s, 2026-10-23, _3.3 P4.3, mostly background); one
+3820 s, 2026-10-23, _3.3 P4.3, mostly background; + Hero: 1172 tests, 3430 / 3354 s, 2026-10-23, _3.3 P4.4a, focused -- the MCP job
+lists at most 25 failures, so a red-heavy run hides the rest: re-run the hidden fixtures); one
 PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures

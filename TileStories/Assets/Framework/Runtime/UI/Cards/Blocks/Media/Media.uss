@@ -38,18 +38,38 @@
     display: flex;
 }
 
-/* ---- the header's hero: a picture under the pinned header, first in what scrolls ---- */
+/* ---- the header's hero (_3.3 R11 v3-v4, P4.4a): first in what scrolls -- the picture full width with the title, a line and the card's
+   actions ON it, over a graded scrim; the text looks draw it as a plain plate. Its height is set by the sheet (HeroRule.Height: what Half
+   shows under the bar); the frame, the moving media and the scrim fill it, the words and the actions sit at its foot ---- */
 
 .card-hero {
-    height: var(--ts-hero-height);
-    margin: 0 var(--ts-space-4) var(--ts-block-gap) var(--ts-space-4);
+    flex-shrink: 0;
+    justify-content: flex-end;
     overflow: hidden;
-    border-radius: var(--ts-radius-m);
-    flex-direction: row;
+    margin: 0 0 var(--ts-block-gap) 0;
+}
+
+/* the picture's window: it clips the picture that pans, zooms and lags behind the scroll (transform only, from C#) */
+.card-hero__frame {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
     background-color: var(--ts-surface-2);
 }
 
-/* the picture fills the frame; parallax slides it down inside (translate, from C#) while the frame scrolls away */
+.card-hero__media {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: row;
+}
+
+/* the picture fills the frame (image_parallax: as wide as its own proportions ask, set from C#, so a wide one can pan) */
 .card-hero .card-hero__picture {
     position: absolute;
     left: 0;
@@ -59,7 +79,174 @@
     border-radius: 0;
 }
 
-/* model_turntable: the SAME preview view fills the hero frame (no block margin, no drag hint), its stage the whole hero */
+/* the FOOT: the words and the actions on the solid scrim, and above it the graded scrim (a white alpha ramp tinted by the same colour)
+   fading into the picture -- the scrim follows the words, so each word sits on the dense part. Both MEASURED on the render: every word
+   keeps 7:1 at its worst pixel on every hero picture (D1 as amended, PoiCardHeroSceneTests) */
+.card-hero__foot {
+    flex-shrink: 0;
+    padding: 0 var(--ts-space-5) var(--ts-space-2) var(--ts-space-5);
+    background-color: var(--ts-scrim-hero);
+}
+
+.card-hero__scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: var(--ts-hero-scrim-fade);
+    background-image: url("hero_scrim.png");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-background-image-tint-color: var(--ts-scrim-hero);
+}
+
+/* the words: eyebrow, the title in the display face, one line */
+.card-hero__text {
+    margin-bottom: var(--ts-space-2);
+}
+
+.card-hero__eyebrow {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    color: var(--ts-on-scrim-2);
+    /* a kicker: one line, cut only when it truly does not fit */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+.card-hero__title {
+    font-size: var(--ts-size-hero);
+    -unity-font-style: bold;
+    color: var(--ts-on-scrim);
+    white-space: normal;
+    margin: 0 0 var(--ts-space-1) 0;
+    padding: 0;
+}
+
+.card-hero--narrow .card-hero__title {
+    font-size: var(--ts-size-hero-narrow);
+}
+
+.card-hero__subtitle {
+    font-size: var(--ts-size-body);
+    color: var(--ts-on-scrim);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.card-hero__eyebrow--empty,
+.card-header__subtitle--empty,
+.card-hero--compact .card-hero__eyebrow,
+.card-hero--compact .card-hero__subtitle {
+    display: none;
+}
+
+/* the actions row at the foot: the card's ONE focal action (accent fill, D5) and Listen as an outline pill */
+/* both pills share the row when they fit; else the focal one takes its own row (its words never wrap) and Listen goes under it */
+.card-hero__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.card-hero__primary {
+    flex-grow: 1;
+    flex-shrink: 0;
+    margin: 0 var(--ts-space-2) var(--ts-space-2) 0;
+    padding: 0;
+    border-top-width: 0;
+    background-color: var(--ts-clear);
+}
+
+.card-hero__primary .card-action {
+    margin: 0;
+    padding: 0 var(--ts-space-4);
+    justify-content: center;
+    border-radius: var(--ts-pill-radius);
+}
+
+.card-hero__primary .card-action__label {
+    white-space: nowrap;
+}
+
+.card-hero__listen {
+    flex-shrink: 0;
+    margin: 0 0 var(--ts-space-2) 0;
+    padding: 0 var(--ts-space-4) 0 0;
+    border-width: var(--ts-hero-outline-width);
+    border-color: var(--ts-on-scrim);
+    border-radius: var(--ts-pill-radius);
+    background-color: var(--ts-clear);
+}
+
+/* Listen alone (no sticky action on the card): it takes the row (the stack marks the row, USS has no :first-child) */
+.card-hero__actions--listen-only .card-hero__listen {
+    flex-grow: 1;
+}
+
+.card-hero__listen .card-audio__play {
+    background-color: var(--ts-clear);
+}
+
+.card-hero__listen .card-audio__glyph {
+    color: var(--ts-on-scrim);
+}
+
+.card-hero__listen .card-audio__title,
+.card-hero__listen .card-audio__time {
+    color: var(--ts-on-scrim);
+    white-space: nowrap;
+}
+
+.card-hero__listen .card-audio__words {
+    flex-grow: 0;
+    margin-left: 0;
+}
+
+.card-hero__listen .card-audio__scrubber,
+.card-hero__listen .card-audio__note {
+    display: none;
+}
+
+/* the plate (Text Only, Compact, a picture look without its picture): no picture, the words in the card's own ink */
+.card-hero--plate .card-hero__foot {
+    padding: var(--ts-space-2) var(--ts-space-4) 0 var(--ts-space-4);
+    background-color: var(--ts-clear);
+}
+
+.card-hero--plate .card-hero__scrim {
+    display: none;
+}
+
+.card-hero--plate .card-hero__eyebrow {
+    color: var(--ts-ink-2);
+}
+
+.card-hero--plate .card-hero__title {
+    font-size: var(--ts-size-title);
+    color: var(--ts-ink);
+}
+
+.card-hero--plate .card-hero__subtitle {
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink-2);
+}
+
+.card-hero--plate .card-hero__listen {
+    border-color: var(--ts-line);
+}
+
+.card-hero--plate .card-hero__listen .card-audio__glyph,
+.card-hero--plate .card-hero__listen .card-audio__title,
+.card-hero--plate .card-hero__listen .card-audio__time {
+    color: var(--ts-ink);
+}
+
+/* model_turntable: the SAME preview view fills the frame (no block margin, no drag hint), its stage the whole frame */
 .card-hero .card-hero__model {
     width: 100%;
     height: 100%;
@@ -85,10 +272,11 @@
     margin-left: var(--ts-slider-line);
 }
 
+/* the Then / Now labels sit at the top of each half: the hero's words take the foot */
 .card-hero__label {
     position: absolute;
     left: var(--ts-space-2);
-    bottom: var(--ts-space-2);
+    top: var(--ts-space-2);
     padding: var(--ts-space-1) var(--ts-space-2);
     border-radius: var(--ts-radius-s);
     background-color: var(--ts-surface);

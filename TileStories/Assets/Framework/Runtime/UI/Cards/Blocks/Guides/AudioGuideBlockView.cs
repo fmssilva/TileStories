@@ -9,8 +9,9 @@ namespace TileStories
     // one audio drawn twice, and the block redraws on the owner's Changed (a state, a seek, the speed, and every tick while playing).
     //   player    -- a round play / pause button, the title and "time / length", the scrubber, a speed chip, a captions switch and the
     //                caption line of the moment (from the clip's .vtt through VttRule)
-    //   hero_chip -- the same button and the time and title in one line with a thin progress line, pinned under the card's header
-    //                (BlockKindDefinition.PinnedTopVariants) so it plays from the peek stop
+    //   hero_chip -- the hero's Listen button (_3.3 P4.4a, HeroActionsRule): the same play / pause button and "Listen m:ss" (the clip's
+    //                length; while it is the owner's current audio, "Listen" and "time / length"); BlockKindDefinition.PinnedTopVariants keeps
+    //                it out of the stack -- the hero is its place, and the hero binds ANY audio guide of the card in this look
     // The clip is loaded through the block's own scope only to know its length; the owner loads it again (through the card's source)
     // when it plays, so it lives on after this block is unbound. A clip that cannot be loaded shows "Audio unavailable" and stays quiet.
     // Only classes here; Guides.uss holds every size and colour.
@@ -131,6 +132,7 @@ namespace TileStories
             CaptionsShown = Cues.Count > 0 && read.Flag(BuiltInBlocks.AudioGuideCaptionsOnField);
 
             Title.text = title;
+            TimeText.style.display = StyleKeyword.Null;
             CaptionsButton.text = _strings?.Get(CardStrings.Keys.AudioCaptions) ?? "";
             CaptionsButton.tooltip = CaptionsButton.text;
             SpeedChip.tooltip = _strings?.Get(CardStrings.Keys.AudioSpeed) ?? "";
@@ -175,6 +177,13 @@ namespace TileStories
             Root.EnableInClassList("card-audio--unavailable", !ClipAvailable);
 
             TimeText.text = length > 0f ? AudioTimeRule.Format(position) + " / " + AudioTimeRule.Format(length) : AudioTimeRule.Format(position);
+            // - the hero's Listen: its length in the words until it is the audio playing, then the running time beside "Listen"
+            if (Variant == BuiltInBlocks.AudioGuideHeroChip)
+            {
+                string listen = _strings?.Get(CardStrings.Keys.HeroListen) ?? "{0}";
+                Title.text = string.Format(listen, current || length <= 0f ? "" : AudioTimeRule.Format(length)).Trim();
+                TimeText.style.display = current ? DisplayStyle.Flex : DisplayStyle.None;
+            }
             Scrubber.SetFraction(AudioTimeRule.Fraction(position, length));
             SpeedChip.text = AudioSpeedRule.Label(_audio != null ? _audio.Speed : AudioSpeedRule.Normal);
 

@@ -102,7 +102,9 @@ namespace TileStories.Editor.Tests
             var wholeSource = new ResourcesMediaSource(folder);
             var whole = Stack();
             whole.Bind(Entries(inline, Lamp), Context(inline, Lamp, wholeSource));
-            Assert.AreEqual(62, whole.BoundViews.Count, "precondition: drawn whole, all 62 views are bound");
+            // - _3.3 P4.4a: the hero chip is drawn in the hero (HeroActionViews), with the sticky action's second view: 61 + 2
+            Assert.AreEqual(61, whole.BoundViews.Count, "precondition: drawn whole, the 61 stack views are bound");
+            Assert.AreEqual(2, whole.HeroActionViews.Count, "precondition: and the hero's two");
             int wholeFiles = wholeSource.LoadedCount;
             Assert.GreaterOrEqual(wholeFiles, 10, "precondition: The Lamp drawn whole holds many files (" + wholeFiles + ")");
             whole.UnbindAll();
@@ -113,24 +115,26 @@ namespace TileStories.Editor.Tests
             stack.Bind(entries, Context(expandable, Lamp, source));
             var rows = entries.Where(e => stack.CompactRowOf(e.Instance.key) != null).Select(e => e.Instance.key).ToList();
             Assert.AreEqual(59, rows.Count, "every scrolling block of The Lamp is a row: 62 less the header, the pinned hero chip and the footer CTA");
-            CollectionAssert.AreEqual(new[] { BuiltInBlocks.HeaderKind, BuiltInBlocks.AudioGuideKind, BuiltInBlocks.ActionsKind },
+            CollectionAssert.AreEqual(new[] { BuiltInBlocks.HeaderKind, BuiltInBlocks.ActionsKind },
                 stack.BoundViews.Select(v => entries.First(e => stack.ViewOfBlock(e.Instance.key) == v).Definition.Key),
-                "the only views bound: the header, the pinned hero chip and the sticky footer");
+                "the only stack views bound: the header and the sticky footer");
+            CollectionAssert.AreEqual(new[] { typeof(ActionsBlockView), typeof(AudioGuideBlockView) }, stack.HeroActionViews.Select(v => v.GetType()),
+                "and the hero's: the sticky action and Listen (the hero chip)");
             foreach (string key in rows)
             {
                 Assert.IsNull(stack.ViewOfBlock(key), key + ": a closed row binds no view");
                 Assert.AreEqual(0, stack.HeldMediaOf(key), key + ": and holds no file");
             }
-            Assert.AreEqual(stack.HeldMedia, source.LoadedCount, "every file the card holds is held by the three whole blocks");
+            Assert.AreEqual(stack.HeldMedia, source.LoadedCount, "every file the card holds is held by the whole blocks and the hero's actions");
             Assert.Less(source.LoadedCount, wholeFiles, "the rows load nothing of what the whole card loads (" + source.LoadedCount + " of " + wholeFiles + ")");
-            Assert.AreEqual(62, stack.BoundKinds.Count, "every block is still on the card, in its order");
+            Assert.AreEqual(61, stack.BoundKinds.Count, "every block of the stack is still on the card, in its order (the hero chip: in the hero)");
 
             // - open the picture gallery: its real view, its own files; close it: everything back
             int before = source.LoadedCount;
-            Assert.AreEqual(3, stack.CreatedViewCount, "only the three whole blocks built a view");
+            Assert.AreEqual(4, stack.CreatedViewCount, "only the whole blocks built a view: header, footer, the hero's action and Listen");
             Assert.IsTrue(stack.Expand("block_29"));
             int created = stack.CreatedViewCount;
-            Assert.AreEqual(4, created, "opening built the gallery's view, the first time only");
+            Assert.AreEqual(5, created, "opening built the gallery's view, the first time only");
             var gallery = stack.ViewOfBlock("block_29");
             Assert.IsInstanceOf<GalleryBlockView>(gallery, "the kind's own view, bound under its row");
             Assert.IsTrue(stack.IsExpanded("block_29"));

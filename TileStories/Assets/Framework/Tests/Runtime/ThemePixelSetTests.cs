@@ -204,11 +204,11 @@ namespace TileStories.Tests
                 }
         }
 
-        private static float PanelUnitsPerPixel(VisualElement e) =>
+        internal static float PanelUnitsPerPixel(VisualElement e) =>
             RuntimePanelUtils.ScreenToPanel(e.panel, Vector2.right).x - RuntimePanelUtils.ScreenToPanel(e.panel, Vector2.zero).x;
 
         // An element's rect in the screenshot's pixels (the texture's y runs bottom-up)
-        private static RectInt ScreenRectOf(VisualElement e, Texture2D shot)
+        internal static RectInt ScreenRectOf(VisualElement e, Texture2D shot)
         {
             var origin = RuntimePanelUtils.ScreenToPanel(e.panel, Vector2.zero);
             float unit = PanelUnitsPerPixel(e);

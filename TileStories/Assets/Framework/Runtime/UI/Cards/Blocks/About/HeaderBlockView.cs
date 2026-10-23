@@ -3,26 +3,42 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // The header block (_3.1 Tiers 1-2): the title and the category chip (the category; "category - level" with Show
-    // Level, PoiSubtitle) in its TOP part -- all the peek stop shows -- and the subtitle below it. Variant "compact" is
-    // the top part only. The picture looks add a HERO: a picture under the pinned header, at the top of what scrolls
-    // (BlockStackView places it), so the title stays in view while the picture scrolls away:
-    //   image_parallax -- the picture slides at half the scroll's speed inside its frame (OnStackScrolled)
-    //   split_then_now -- Picture (then) beside Second Picture (now), each with its CardStrings label
-    //   spotlight_crop -- Picture enlarged around the focus point with a ring on it (SpotlightCropRule)
-    //   video_loop     -- Picture as a poster, the Loop Clip's frames over it: the header asks the card's ONE video owner for its muted loop
-    //                     (ICardVideo.PlayLoop) and shows the frames only while that loop holds the player and has a frame -- the poster
-    //                     shows until the first frame, while a visitor's video holds the player, and always with ReduceMotion (no loop asked)
-    // A picture look without what it needs (HeaderShowsPicture) shows no hero: the text-only look.
-    // Only classes here; About.uss / Media.uss hold every size and colour.
+    // The header block (_3.1 Tiers 1-2; the bar and the hero since _3.3 P4.4a, HeroRule). Two parts:
+    //   - the BAR (Root, pinned in the header slot): the card's title on ONE line beside the round buttons. It never changes size, so no
+    //     language, Menu or title length moves a stop; it shows the title only while the hero's does not (SetBarTitleShown)
+    //   - the HERO (HeroPart, first in what scrolls -- BlockStackView places it): the eyebrow, the title in the display face, the subtitle
+    //     and, at its foot, the card's actions (Actions: the stack binds them, HeroActionsRule). The picture looks draw it over the
+    //     picture, full width, on a graded scrim; Text Only and Compact draw it as a plain plate (Compact: the title alone)
+    //       image_parallax -- the picture moves as Hero Motion says (pan / zoom / none) and slower than the scroll (HeroMotionRule)
+    //       split_then_now -- Picture (then) beside Second Picture (now), each with its CardStrings label
+    //       spotlight_crop -- Picture enlarged around the focus point with a ring on it (SpotlightCropRule)
+    //       video_loop     -- Picture as a poster, the Loop Clip's frames over it: the header asks the card's ONE video owner for its muted
+    //                         loop (ICardVideo.PlayLoop) and shows the frames only while that loop holds the player and has a frame -- the
+    //                         poster shows until the first frame, while a visitor's video holds the player, and always with ReduceMotion
+    //       model_turntable -- the same turntable view a model_3d block uses
+    //     A picture look without what it needs (HeaderShowsPicture) draws the plate. The words rise and fade as the card scrolls.
+    // Only classes here (and the measured sizes / motion numbers the rules give); About.uss / Media.uss hold every size and colour.
     public sealed class HeaderBlockView : IBlockView
     {
+        // The bar: what the peek stop shows (PoiCardSheetView measures its bottom edge)
         public VisualElement Root { get; }
-        // The part the peek stop shows (PoiCardSheetView measures its bottom edge)
-        public VisualElement PeekPart { get; }
-        // The picture under the header (the picture looks); BlockStackView puts it first in the scroll while HasHero
+        public VisualElement PeekPart => Root;
+        // The hero, first in the scroll (always, a plate for the text looks): its frame (picture looks) and the moving part inside it, then
+        // the FOOT -- the words and the actions row on a solid scrim, with a short graded scrim fading into the picture above them (the
+        // scrim follows the words, so every word sits on the dense part whatever the hero's height or the title's lines)
         public VisualElement HeroPart { get; }
+        public VisualElement Frame { get; }
+        public VisualElement Media { get; }
+        public VisualElement Foot { get; }
+        public VisualElement Scrim { get; }
+        public VisualElement Text { get; }
+        public VisualElement Actions { get; }
+        public Label Eyebrow { get; }
+        public Label HeroTitle { get; }
+        // True once bound: every header has a hero (picture or plate)
         public bool HasHero { get; private set; }
+        // True when the look draws a picture (HeaderShowsPicture); false = the plate
+        public bool HasPicture { get; private set; }
         public CardImage Picture { get; }
         public CardImage SecondPicture { get; }
         public Label ThenLabel { get; }
@@ -32,42 +48,82 @@ namespace TileStories
         public VisualElement LoopFrames { get; }
         public VideoTrack LoopTrack { get; private set; }
         public bool LoopShowsFrames { get; private set; }
-        // model_turntable (10A.3.2): the SAME turntable view a model_3d block uses, embedded in the hero -- built once,
-        // added/removed from HeroPart as the variant changes, so drag/pinch/auto-spin never need re-implementing here
+        // model_turntable (10A.3.2): the SAME turntable view a model_3d block uses, embedded in the hero
         public ModelTurntableBlockView ModelView { get; }
 
-        // image_parallax: how far the picture lags behind the scroll (0.5 = half the speed)
-        public const float ParallaxFactor = 0.5f;
+        // The classes the bar and the hero wear (About.uss / Media.uss)
+        public const string BarTitleShownClass = "card-header--title-shown";
+        public const string PlateClass = "card-hero--plate";
+        public const string CompactClass = "card-hero--compact";
+        public const string NarrowClass = "card-hero--narrow";
+
+        // What time it is for the pan / zoom (seconds): the real clock; a test sets its own
+        public System.Func<float> Clock { get; set; } = () => Time.unscaledTime;
+
+        // What the hero's motion did last (HeroMotionRule): the pan's sideways offset, the zoom's scale, the parallax slide, the words'
+        // rise and opacity -- what the tests and the frame sequences read
+        public string Motion { get; private set; } = HeroMotionRule.None;
+        public bool Moving { get; private set; }
+        public float PanOffset { get; private set; }
+        public float ZoomScale { get; private set; } = 1f;
+        public float ParallaxOffset { get; private set; }
+        public float TextRise { get; private set; }
+        public float TextOpacity { get; private set; } = 1f;
+        // How much wider the picture is than its frame (0: no pan possible)
+        public float Overflow { get; private set; }
+        public bool BarTitleShown => Root.ClassListContains(BarTitleShownClass);
 
         private readonly Label _title;
-        private readonly Label _chip;
         private readonly Label _subtitle;
         private string _variant;
+        private bool _reduceMotion;
+        private float _scrollY;
         private Vector2 _focus;
         private float _zoom = 1f;
-        // The frame size the spotlight was last placed for: a layout pass that did not change it places nothing
+        // The frame size the spotlight / the pan was last placed for: a layout pass that did not change it places nothing
         private Vector2 _placedFor;
         private ICardVideo _video;
+        private IVisualElementScheduledItem _tick;
 
         public HeaderBlockView()
         {
             Root = new VisualElement { name = "card-header" };
             Root.AddToClassList("card-header");
-            PeekPart = new VisualElement { name = "card-header-top" };
-            PeekPart.AddToClassList("card-header__top");
-            _title = new Label { name = "card-header-title" };
+            _title = new Label { name = "card-header-title", pickingMode = PickingMode.Ignore };
             _title.AddToClassList("card-header__title");
-            _chip = new Label { name = "card-header-chip" };
-            _chip.AddToClassList("card-chip");
-            _subtitle = new Label { name = "card-header-subtitle" };
-            _subtitle.AddToClassList("card-header__subtitle");
-            PeekPart.Add(_title);
-            PeekPart.Add(_chip);
-            Root.Add(PeekPart);
-            Root.Add(_subtitle);
+            Root.Add(_title);
 
             HeroPart = new VisualElement { name = "card-header-hero" };
             HeroPart.AddToClassList("card-hero");
+            Frame = new VisualElement { name = "card-hero-frame", pickingMode = PickingMode.Ignore };
+            Frame.AddToClassList("card-hero__frame");
+            Media = new VisualElement { name = "card-hero-media", pickingMode = PickingMode.Ignore };
+            Media.AddToClassList("card-hero__media");
+            Frame.Add(Media);
+            Foot = new VisualElement { name = "card-hero-foot", pickingMode = PickingMode.Ignore };
+            Foot.AddToClassList("card-hero__foot");
+            Scrim = new VisualElement { name = "card-hero-scrim", pickingMode = PickingMode.Ignore };
+            Scrim.AddToClassList("card-hero__scrim");
+            Foot.Add(Scrim);
+
+            Text = new VisualElement { name = "card-hero-text", pickingMode = PickingMode.Ignore };
+            Text.AddToClassList("card-hero__text");
+            Eyebrow = new Label { name = "card-hero-eyebrow", pickingMode = PickingMode.Ignore };
+            Eyebrow.AddToClassList("card-hero__eyebrow");
+            HeroTitle = new Label { name = "card-hero-title", pickingMode = PickingMode.Ignore };
+            HeroTitle.AddToClassList("card-hero__title");
+            _subtitle = new Label { name = "card-header-subtitle", pickingMode = PickingMode.Ignore };
+            _subtitle.AddToClassList("card-header__subtitle");
+            _subtitle.AddToClassList("card-hero__subtitle");
+            Text.Add(Eyebrow);
+            Text.Add(HeroTitle);
+            Text.Add(_subtitle);
+            Actions = new VisualElement { name = "card-hero-actions" };
+            Actions.AddToClassList("card-hero__actions");
+            Foot.Add(Text);
+            Foot.Add(Actions);
+            HeroPart.Add(Foot);
+
             Picture = new CardImage("card-hero__picture");
             SecondPicture = new CardImage("card-hero__picture");
             SecondPicture.Root.AddToClassList("card-hero__picture--now");
@@ -81,67 +137,100 @@ namespace TileStories
             LoopFrames.AddToClassList("card-hero__loop");
             ModelView = new ModelTurntableBlockView();
             ModelView.Root.AddToClassList("card-hero__model");
-            HeroPart.RegisterCallback<GeometryChangedEvent>(evt =>
+            Frame.RegisterCallback<GeometryChangedEvent>(evt =>
             {
                 // - only a new frame size re-places the picture (its own new size must never feed back into the frame's)
-                if (evt.newRect.size != evt.oldRect.size) PlaceSpotlight();
+                if (evt.newRect.size != evt.oldRect.size) PlacePicture();
             });
+            HeroPart.RegisterCallback<GeometryChangedEvent>(evt => HeroPart.EnableInClassList(NarrowClass, HeroRule.IsNarrow(evt.newRect.width)));
         }
 
         public string TitleText => _title.text;
-        public string ChipText => _chip.text;
         public string SubtitleText => _subtitle.text;
-        // Laid out as shown: the compact variant, an empty subtitle and the collapsed header (a scrolled stack) all hide it
+        // Laid out as shown: the compact variant and an empty subtitle hide it
         public bool SubtitleShown => _subtitle.resolvedStyle.display != DisplayStyle.None;
-        // image_parallax: the picture's current slide inside its frame (panel units, down)
-        public float ParallaxOffset { get; private set; }
 
         public void Bind(BlockInstanceData instance, BlockBindContext context)
         {
             var read = new BlockFieldReader(instance, context.Language, context.FallbackLanguage);
             string title = read.Text(BlockStackBuilder.HeaderTitleField);
             _title.text = title.Length > 0 ? title : context.Poi?.name ?? "";
+            HeroTitle.text = _title.text;
+            _reduceMotion = context.ReduceMotion;
 
-            _chip.text = PoiSubtitle.Of(context.Poi, context.Taxonomy, read.Flag(BuiltInBlocks.HeaderShowLevelField), context.Language);
-            // - a class, not an inline display: the collapsed header hides the chip through USS too
-            _chip.EnableInClassList("card-chip--empty", _chip.text.Length == 0);
-
-            bool compact = context.Variant == BuiltInBlocks.HeaderCompact;
-            Root.EnableInClassList("card-header--compact", compact);
+            // - classes only, no inline display: the compact look hides the eyebrow and the subtitle through USS
+            Eyebrow.text = read.Text(BuiltInBlocks.HeaderEyebrowField);
+            Eyebrow.EnableInClassList("card-hero__eyebrow--empty", Eyebrow.text.Length == 0);
             _subtitle.text = read.Text(BlockStackBuilder.HeaderSubtitleField);
-            // - classes only, no inline display: the collapsed header hides the subtitle through USS, which an inline
-            //   display would override
             _subtitle.EnableInClassList("card-header__subtitle--empty", _subtitle.text.Length == 0);
+            HeroPart.EnableInClassList(CompactClass, context.Variant == BuiltInBlocks.HeaderCompact);
 
             BindHero(instance, context, read);
+            HasHero = true;
         }
 
         public void Unbind()
         {
             _title.text = "";
-            _chip.text = "";
+            HeroTitle.text = "";
+            Eyebrow.text = "";
             _subtitle.text = "";
+            SetBarTitleShown(false);
             ClearHero();
+            HasHero = false;
         }
 
-        // The stack scrolled to `scrollY`: image_parallax lets its picture lag behind (the frame scrolls away at full speed)
+        // The bar shows the title (HeroRule.BarShowsTitle): at Peek, and once the hero's title scrolled away
+        public void SetBarTitleShown(bool shown) => Root.EnableInClassList(BarTitleShownClass, shown);
+
+        // The hero frame's height (HeroRule.Height, from the sheet's stops) -- a MINIMUM: words that need more make it taller, never squashed
+        // into one another; the plate keeps its own
+        public void SetHeroHeight(float height) =>
+            HeroPart.style.minHeight = HasPicture && !float.IsNaN(height) && height > 0f ? height : StyleKeyword.Null;
+
+        // The bottom of the hero's title as drawn (risen by the scroll), in the stack's content coordinates: what the bar's title waits for
+        public float HeroTitleBottom()
+        {
+            if (HeroPart.panel == null) return float.NaN;
+            float bottom = HeroPart.layout.y + Foot.layout.y + Text.layout.y + HeroTitle.layout.yMax + TextRise;
+            return bottom;
+        }
+
+        // The hero's bottom edge in the stack's content coordinates (NaN when it is not in the stack)
+        public float HeroBottom() => HeroPart.panel == null ? float.NaN : HeroPart.layout.yMax;
+
+        // The stack scrolled to `scrollY`: the picture lags behind (image_parallax), the words rise and fade
         public void OnStackScrolled(float scrollY)
         {
-            if (!HasHero || _variant != BuiltInBlocks.HeaderImageParallax) return;
-            float frame = HeroPart.layout.height;
-            ParallaxOffset = Mathf.Clamp(scrollY * ParallaxFactor, 0f, float.IsNaN(frame) ? 0f : frame);
-            Picture.Root.style.translate = new Translate(0f, ParallaxOffset);
+            _scrollY = scrollY;
+            if (!HasHero) return;
+            TextRise = HeroMotionRule.TextRise(scrollY, _reduceMotion);
+            TextOpacity = HeroMotionRule.TextOpacity(scrollY, _reduceMotion);
+            Text.style.translate = new Translate(0f, TextRise);
+            Text.style.opacity = TextOpacity;
+            if (_variant == BuiltInBlocks.HeaderImageParallax) PlaceMedia();
+        }
+
+        // One frame of the pan / zoom on this header's clock (scheduled while the look moves by itself; a test calls it after moving
+        // its clock)
+        public void Animate()
+        {
+            if (HasPicture && _variant == BuiltInBlocks.HeaderImageParallax) PlaceMedia();
         }
 
         private void BindHero(BlockInstanceData instance, BlockBindContext context, BlockFieldReader read)
         {
             ClearHero();
-            if (!BuiltInBlocks.HeaderShowsPicture(context.Variant, instance)) return;
+            HasPicture = BuiltInBlocks.HeaderShowsPicture(context.Variant, instance);
+            HeroPart.EnableInClassList(PlateClass, !HasPicture);
+            HeroPart.Insert(0, Frame);
+            Frame.style.display = HasPicture ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!HasPicture) return;
             _variant = context.Variant;
             HeroPart.AddToClassList("card-hero--" + _variant);
             if (_variant == BuiltInBlocks.HeaderModelTurntable)
             {
-                HeroPart.Add(ModelView.Root);
+                Media.Add(ModelView.Root);
                 // - the SAME turntable a model_3d block binds, given a synthetic instance keyed off the header's own
                 // fields (Model, Picture-as-Fallback) so ModelView never needs to know it is inside a header. Auto Spin
                 // is always on here (no authored toggle for the header, unlike the block's own field) and the display
@@ -155,17 +244,24 @@ namespace TileStories
                     BuiltInBlocks.Header, BuiltInBlocks.Header.Field(BuiltInBlocks.HeaderModelFitField), read) });
                 ModelView.Bind(modelInstance, context);
                 ModelView.Hint.style.display = DisplayStyle.None; // the hero has no room for a caption line
-                HasHero = true;
                 return;
             }
             string picture = read.ValidAsset(BuiltInBlocks.HeaderImageField, MediaKind.Image);
             // - a video loop may have no poster: a plain frame until its first frame, never the "picture unavailable" words
             if (_variant == BuiltInBlocks.HeaderVideoLoop && picture.Length == 0) Picture.Clear(null);
             else Picture.Show(context.Media, picture, context.Strings);
-            HeroPart.Add(Picture.Root);
-            if (_variant == BuiltInBlocks.HeaderVideoLoop)
+            Media.Add(Picture.Root);
+            if (_variant == BuiltInBlocks.HeaderImageParallax)
             {
-                HeroPart.Add(LoopFrames);
+                // - the look's own motion, against the Block Library's default for the header
+                Motion = BlockLibraryRule.Choice(context.Settings, BuiltInBlocks.Header, BuiltInBlocks.Header.Field(BuiltInBlocks.HeaderHeroMotionField), read);
+                Moving = HeroMotionRule.Moves(Motion, _reduceMotion);
+                // - a frame every ~30 ms only while the picture moves by itself (a still look schedules nothing)
+                if (Moving) _tick = HeroPart.schedule.Execute(Animate).Every(33);
+            }
+            else if (_variant == BuiltInBlocks.HeaderVideoLoop)
+            {
+                Media.Add(LoopFrames);
                 LoopTrack = new VideoTrack(context.Poi?.id, read.ValidAsset(BuiltInBlocks.HeaderLoopClipField, MediaKind.Video), "");
                 _video = context.Video;
                 if (_video != null)
@@ -178,7 +274,7 @@ namespace TileStories
             else if (_variant == BuiltInBlocks.HeaderSplitThenNow)
             {
                 SecondPicture.Show(context.Media, read.ValidAsset(BuiltInBlocks.HeaderSecondImageField, MediaKind.Image), context.Strings);
-                HeroPart.Add(SecondPicture.Root);
+                Media.Add(SecondPicture.Root);
                 ThenLabel.text = context.Strings?.Get(CardStrings.Keys.HeaderThen) ?? "";
                 NowLabel.text = context.Strings?.Get(CardStrings.Keys.HeaderNow) ?? "";
                 Picture.Root.Add(ThenLabel);
@@ -189,11 +285,10 @@ namespace TileStories
                 var header = BuiltInBlocks.Header;
                 _focus = new Vector2(read.Number(header.Field(BuiltInBlocks.HeaderFocusXField)), read.Number(header.Field(BuiltInBlocks.HeaderFocusYField)));
                 _zoom = read.Number(header.Field(BuiltInBlocks.HeaderZoomField));
-                HeroPart.Add(Ring);
-                _placedFor = Vector2.zero;
-                PlaceSpotlight();
+                Media.Add(Ring);
             }
-            HasHero = true;
+            _placedFor = Vector2.zero;
+            PlacePicture();
         }
 
         // video_loop: show the loop's frames while THIS header's loop holds the player and has a frame, else the poster
@@ -208,6 +303,8 @@ namespace TileStories
 
         private void ClearHero()
         {
+            _tick?.Pause();
+            _tick = null;
             ModelView.Unbind();
             if (_video != null)
             {
@@ -220,9 +317,17 @@ namespace TileStories
             LoopFrames.style.backgroundImage = StyleKeyword.Null;
             if (_variant != null) HeroPart.RemoveFromClassList("card-hero--" + _variant);
             _variant = null;
-            HasHero = false;
-            ParallaxOffset = 0f;
-            Picture.Root.style.translate = StyleKeyword.Null;
+            HasPicture = false;
+            Motion = HeroMotionRule.None;
+            Moving = false;
+            PanOffset = ParallaxOffset = TextRise = Overflow = 0f;
+            ZoomScale = TextOpacity = 1f;
+            _scrollY = 0f;
+            Media.style.translate = StyleKeyword.Null;
+            Media.style.scale = StyleKeyword.Null;
+            Text.style.translate = StyleKeyword.Null;
+            Text.style.opacity = StyleKeyword.Null;
+            HeroPart.style.minHeight = StyleKeyword.Null;
             foreach (var e in new[] { Picture.Root.style, SecondPicture.Root.style })
             {
                 e.width = StyleKeyword.Null;
@@ -234,24 +339,45 @@ namespace TileStories
             NowLabel.RemoveFromHierarchy();
             Picture.Clear(null);
             SecondPicture.Clear(null);
-            HeroPart.Clear();
+            Media.Clear();
         }
 
-        // spotlight_crop: size and place the picture around the focus point, the ring on it (SpotlightCropRule)
-        private void PlaceSpotlight()
+        // Size the picture for its frame: the spotlight around its focus (SpotlightCropRule); image_parallax as tall as the frame and as
+        // wide as its own proportions ask, so a wide picture overflows the frame sideways and can pan
+        private void PlacePicture()
         {
-            if (_variant != BuiltInBlocks.HeaderSpotlightCrop) return;
-            var frame = new Vector2(HeroPart.layout.width, HeroPart.layout.height);
-            if (float.IsNaN(frame.x) || frame.x <= 0f || frame == _placedFor) return;
+            var frame = new Vector2(Frame.layout.width, Frame.layout.height);
+            if (float.IsNaN(frame.x) || frame.x <= 0f || frame.y <= 0f || frame == _placedFor) return;
             _placedFor = frame;
-            var place = SpotlightCropRule.Place(frame, Picture.Aspect, _focus, _zoom);
-            var style = Picture.Root.style;
-            style.width = place.Size.x;
-            style.height = place.Size.y;
-            style.left = place.Offset.x;
-            style.top = place.Offset.y;
-            Ring.style.left = place.Focus.x;
-            Ring.style.top = place.Focus.y;
+            if (_variant == BuiltInBlocks.HeaderSpotlightCrop)
+            {
+                var place = SpotlightCropRule.Place(frame, Picture.Aspect, _focus, _zoom);
+                var style = Picture.Root.style;
+                style.width = place.Size.x;
+                style.height = place.Size.y;
+                style.left = place.Offset.x;
+                style.top = place.Offset.y;
+                Ring.style.left = place.Focus.x;
+                Ring.style.top = place.Focus.y;
+            }
+            else if (_variant == BuiltInBlocks.HeaderImageParallax)
+            {
+                float width = Mathf.Max(frame.x, frame.y * Picture.Aspect);
+                Overflow = width - frame.x;
+                Picture.Root.style.width = width;
+                PlaceMedia();
+            }
+        }
+
+        // Move the picture: the pan / zoom of this moment and the parallax of the scroll (HeroMotionRule), transform only
+        private void PlaceMedia()
+        {
+            float now = Clock?.Invoke() ?? 0f;
+            PanOffset = HeroMotionRule.PanOffset(Motion, _reduceMotion, now, Overflow);
+            ZoomScale = HeroMotionRule.Scale(Motion, _reduceMotion, now);
+            ParallaxOffset = HeroMotionRule.Parallax(_scrollY, Frame.layout.height, _reduceMotion);
+            Media.style.translate = new Translate(PanOffset, ParallaxOffset);
+            Media.style.scale = new Scale(new Vector2(ZoomScale, ZoomScale));
         }
     }
 }

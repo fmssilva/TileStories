@@ -345,6 +345,40 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("Puerta", POIEditorToolWindow.LocalizedValue(_window.Config.pois[0].card.blocks[0], "subtitle", "es"));
         }
 
+        // _3.3 P4.4a: a header in the Image Parallax look draws its Hero Motion row with its (i) on the real window (the generic drawer, from
+        // the kind's definition), after its Picture and only for that look; drawing it writes nothing
+        [UnityTest]
+        public IEnumerator TheHeroMotionRow_ShowsForImageParallaxOnly_WithItsHelp()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            config.pois[0].card.blocks.Add(new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.HeaderKind, variant = BuiltInBlocks.HeaderImageParallax });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            var foldouts = (Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor);
+            foldouts["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+
+            var drawn = new List<(string Title, Rect Rect)>();
+            HelpInfoButton.DrawnProbe = (title, rect) => drawn.Add((title, rect));
+            try { yield return _window.WaitForRepaint(); }
+            finally { HelpInfoButton.DrawnProbe = null; }
+            var titles = drawn.Select(d => d.Title).ToList();
+            CollectionAssert.Contains(titles, "Hero Motion", "the row and its (i) for Image Parallax");
+            CollectionAssert.Contains(titles, "Eyebrow");
+            CollectionAssert.DoesNotContain(titles, "Show Level", "the chip's Show Level is gone");
+            Assert.Less(drawn.First(d => d.Title == "Picture").Rect.y, drawn.First(d => d.Title == "Hero Motion").Rect.y, "after the Picture");
+            Assert.IsFalse(_window.Unsaved, "drawing the rows writes nothing");
+            EditorTextChecks.AssertAscii(BuiltInBlocks.Header.Field(BuiltInBlocks.HeaderHeroMotionField).Help, "Hero Motion help");
+
+            _window.Config.pois[0].card.blocks[0].variant = BuiltInBlocks.HeaderTextOnly;
+            drawn.Clear();
+            HelpInfoButton.DrawnProbe = (title, rect) => drawn.Add((title, rect));
+            try { yield return _window.WaitForRepaint(); }
+            finally { HelpInfoButton.DrawnProbe = null; }
+            CollectionAssert.DoesNotContain(drawn.Select(d => d.Title).ToList(), "Hero Motion", "Text Only: no picture, no Hero Motion");
+        }
+
         // ---------------- Items rows (a repeater field) ----------------
 
         [UnityTest]

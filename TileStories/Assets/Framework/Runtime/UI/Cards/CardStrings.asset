@@ -1260,3 +1260,17 @@ MonoBehaviour:
       value: Clear
     - lang: pt
       value: Limpar
+  - key: hero_listen
+    where: The hero's Listen button at the foot of the card's top picture, with the length of the card's audio guide ({0}, e.g. 3:11).
+    text:
+    - lang: en
+      value: Listen {0}
+    - lang: pt
+      value: Ouvir {0}
+  - key: facts_category
+    where: The label of the Category fact a Quick Facts block adds when its Show Category is on (the point's category beside it).
+    text:
+    - lang: en
+      value: Category
+    - lang: pt
+      value: Categoria

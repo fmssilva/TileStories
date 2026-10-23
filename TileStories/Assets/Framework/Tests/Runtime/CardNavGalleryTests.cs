@@ -234,7 +234,7 @@ namespace TileStories.Tests
             var slot = sheet.Stack.SlotOfBlock(autoKey);
             Assert.IsNotNull(slot, "Auto Nav Block put the grid in the stack");
             var content = sheet.Stack.Scroll.contentContainer;
-            Assert.AreEqual(0, content.IndexOf(slot), "the first block of the scroll: right after the (pinned) header");
+            Assert.AreEqual(1, content.IndexOf(slot), "the first block of the scroll: right after the header's hero (_3.3 P4.4a)");
             var grid = slot.Q<VisualElement>("card-nav-icon-grid");
             Assert.IsNotNull(grid);
             var tiles = grid.Query<Button>(className: "nav-icon-grid__tile").ToList().Where(b => b.resolvedStyle.display == DisplayStyle.Flex && b.parent == grid).ToList();
@@ -342,7 +342,7 @@ namespace TileStories.Tests
             string autoKey = BlockStackBuilder.AutoNavBlockKey(entry.ElementKey);
             var slot = sheet.Stack.SlotOfBlock(autoKey);
             Assert.IsNotNull(slot, "Auto Nav Block put the contents in the stack");
-            Assert.AreEqual(0, sheet.Stack.Scroll.contentContainer.IndexOf(slot), "the first block of the scroll: right after the header");
+            Assert.AreEqual(1, sheet.Stack.Scroll.contentContainer.IndexOf(slot), "the first block of the scroll: right after the header's hero (_3.3 P4.4a)");
             CollectionAssert.DoesNotContain(model.Targets, autoKey, "the contents block is no target of its own list");
             var view = sheet.Stack.BoundViews.OfType<NavContentsBlockView>().Single();
             Assert.AreEqual(DisplayStyle.Flex, view.Root.resolvedStyle.display, "shown, whatever the number of sections (it lists blocks)");

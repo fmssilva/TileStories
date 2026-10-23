@@ -37,7 +37,8 @@ namespace TileStories.Tests
             yield break;
         }
 
-        private List<AudioGuideBlockView> Views => Sheet.Stack.BoundViews.OfType<AudioGuideBlockView>().ToList();
+        // - the stack's audio blocks and the hero's Listen (a hero_chip look is drawn only there since _3.3 P4.4a)
+        private List<AudioGuideBlockView> Views => Sheet.Stack.BoundViews.Concat(Sheet.Stack.HeroActionViews).OfType<AudioGuideBlockView>().ToList();
         private AudioGuideBlockView Chip => Views.Single(v => v.Variant == BuiltInBlocks.AudioGuideHeroChip);
         private AudioGuideBlockView Player => Views.Single(v => v.Variant == BuiltInBlocks.AudioGuidePlayer);
         private MiniPlayerView Mini => Card.AudioCoordinator.Mini;
@@ -58,6 +59,18 @@ namespace TileStories.Tests
         {
             SelectionEventBus.Select(poiId);
             yield return CardTestInput.Settle();
+        }
+
+        // The card at Half: the whole hero is in view there, its Listen with it (_3.3 P4.4a; at Peek the hero is below the sheet's edge)
+        private IEnumerator SelectAtHalf(string poiId)
+        {
+            yield return Select(poiId);
+            Sheet.SetStop(SheetStopRule.Stop.Half);
+            yield return CardTestInput.Settle();
+            // - a tap during the rise lands where the button was: wait for the sheet to rest at Half
+            for (int frame = 0; frame < 600 && Mathf.Abs(Sheet.Root.layout.height - Sheet.Stops.Half) > 0.5f; frame++) yield return null;
+            Assert.IsTrue(Sheet.Root.worldBound.Contains(Chip.PlayButton.worldBound.center), "precondition: the hero's Listen is on the card at Half: "
+                + Chip.PlayButton.worldBound + " in " + Sheet.Root.worldBound);
         }
 
         private IEnumerator OpenFull(string poiId)
@@ -84,25 +97,19 @@ namespace TileStories.Tests
         // ---------------- what the wall's cards hold ----------------
 
         [UnityTest]
-        public IEnumerator TheLamp_HoldsAHeroChipUnderItsTitle_AndAPlayerInItsStack_OnTheCastlesRealClip()
+        public IEnumerator TheLamp_HoldsAHeroChipAsItsHerosListen_AndAPlayerInItsStack_OnTheCastlesRealClip()
         {
             yield return Select("lamp");
             Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop, "the shipped card opens at peek");
             Assert.AreEqual(2, Views.Count, "the chip and the player");
             var chip = Chip;
-            Assert.AreSame(Sheet.Stack.PinnedTop, Sheet.Stack.SlotOf(chip).parent, "the chip is pinned under the title");
-            Assert.LessOrEqual(chip.Root.worldBound.yMax, Sheet.Root.worldBound.yMax + 2f, "and it shows at the peek stop, with nothing scrolled");
-            Assert.LessOrEqual(chip.PlayButton.worldBound.yMax, Sheet.Root.worldBound.yMax + 1f, "its play button too");
-            Assert.AreSame(Sheet.Stack.PinnedTop, Sheet.Stack.PeekPart, "the peek stop ends under the chip");
-            // - The Lamp's real subtitle ("Medieval castle and royal palace"): the chip is pinned ABOVE it, so the peek stop -- which
-            //   ends at the chip -- never drags the subtitle in with it (the same claim _3.1 already made for a header with no chip)
-            var subtitle = Header.Root.Q<Label>("card-header-subtitle");
-            Assert.IsTrue(Header.SubtitleShown, "precondition: The Lamp's header has a subtitle");
-            Assert.GreaterOrEqual(subtitle.worldBound.yMin, chip.Root.worldBound.yMax - 1f, "the subtitle sits below the chip");
-            Assert.GreaterOrEqual(subtitle.worldBound.yMin, Sheet.Root.worldBound.yMax - 1f, "...and so stays below the card's bottom edge: hidden at peek");
+            // - _3.3 P4.4a: the hero_chip block is the hero's Listen, at the foot of the hero (the hero is below the peeking card)
+            Assert.AreSame(Header.Actions, chip.Root.parent, "the chip is the hero's Listen");
+            Assert.IsNull(Sheet.Stack.SlotOf(chip), "with no slot of its own");
+            Assert.AreSame(Header.PeekPart, Sheet.Stack.PeekPart, "the peek stop is the bar");
+            Assert.AreEqual("Listen 2:44", chip.Title.text, "Listen and the real length (164.52 s)");
             Assert.IsTrue(chip.ClipAvailable, "the real narration loaded through the wall's Media Folder");
             Assert.AreEqual("0:00 / 2:44", chip.TimeText.text, "its real length: 164.52 s");
-            Assert.AreEqual("Guided tour of the castle", chip.Title.text);
             Assert.AreEqual(CardAudioState.Idle, _audio.State, "opening a card plays nothing by itself");
             Assert.IsFalse(Mini.IsShown, "no mini-player while a card is open");
 
@@ -128,7 +135,9 @@ namespace TileStories.Tests
             Assert.AreEqual(4, chip.Cues.Count, "with its four generated captions");
 
             yield return OpenFull("lamp_economic");
-            var player = Views.Single();
+            // - _3.3 P4.4a: the hero's Listen draws the card's guide too (same clip, one audio)
+            var player = Player;
+            Assert.AreEqual(player.Track.ClipPath, Views.Single(v => v.Variant == BuiltInBlocks.AudioGuideHeroChip).Track.ClipPath, "the hero's Listen is the same guide");
             Assert.AreEqual(BuiltInBlocks.AudioGuidePlayer, player.Variant);
             Assert.AreEqual("0:00 / 3:11", player.TimeText.text, "the other English guide's real length: 191.40 s");
             Assert.AreEqual(0, player.Cues.Count);
@@ -145,19 +154,19 @@ namespace TileStories.Tests
         // ---------------- playing ----------------
 
         [UnityTest]
-        public IEnumerator ARealTapOnTheChipAtPeek_Plays_TheCaptionsFollowTheClipTime_AndARealScrubMovesThemWithIt()
+        public IEnumerator ARealTapOnTheHerosListenAtHalf_Plays_TheCaptionsFollowTheClipTime_AndARealScrubMovesThemWithIt()
         {
-            yield return Select("lamp");
+            yield return SelectAtHalf("lamp");
             yield return Tap(Chip.PlayButton);
             Assert.AreEqual(CardAudioState.Playing, _audio.State, "a real tap on the chip started the narration");
             Assert.AreEqual("lamp", _audio.Current.PoiId);
             Assert.AreEqual(GuidePath, _audio.Current.ClipPath);
             Assert.IsTrue(_out.IsPlaying);
             Assert.AreEqual("guide_castle_en", _out.Clip.name, "the real clip is what the device plays");
-            Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop, "the card stayed at peek");
+            Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "the card stayed at Half");
             Advance(6f);
             Assert.AreEqual("0:06 / 2:44", Chip.TimeText.text);
-            yield return Capture("Lamp_Audio_Peek_Playing");
+            yield return Capture("Lamp_Audio_Half_Playing");
 
             yield return OpenFull("lamp");
             var player = Player;
@@ -181,7 +190,7 @@ namespace TileStories.Tests
         public IEnumerator ClosingTheCard_WithKeepAudioPlayingOn_ShowsTheMiniPlayer_ATapOnItReopensTheLampsCard_TheAudioNeverStopped()
         {
             Assert.IsTrue(Live.container.keep_audio_on_close, "precondition: the shipped setting");
-            yield return Select("lamp");
+            yield return SelectAtHalf("lamp");
             yield return Tap(Chip.PlayButton);
             Advance(8f);
             yield return Tap(Sheet.CloseButton);
@@ -224,7 +233,7 @@ namespace TileStories.Tests
         public IEnumerator TheMiniPlayersStopButton_ARealTapEndsTheAudio_AndSendsTheBarAway()
         {
             Assert.IsTrue(Live.container.keep_audio_on_close, "precondition: the shipped setting");
-            yield return Select("lamp");
+            yield return SelectAtHalf("lamp");
             yield return Tap(Chip.PlayButton);
             Advance(4f);
             yield return Tap(Sheet.CloseButton);
@@ -255,7 +264,7 @@ namespace TileStories.Tests
         public IEnumerator ClosingTheCard_WithKeepAudioPlayingOff_StopsTheAudio_AndNoMiniPlayerAppears()
         {
             Live.container.keep_audio_on_close = false;
-            yield return Select("lamp");
+            yield return SelectAtHalf("lamp");
             yield return Tap(Chip.PlayButton);
             Advance(3f);
             Assert.AreEqual(CardAudioState.Playing, _audio.State);
@@ -266,7 +275,7 @@ namespace TileStories.Tests
             Assert.AreEqual(0, Card.Media.RefCount(GuidePath), "and the clip was given back");
 
             // - switching to another point's card stops it too (the audio belongs to the card that started it)
-            yield return Select("lamp");
+            yield return SelectAtHalf("lamp");
             yield return Tap(Chip.PlayButton);
             Assert.AreEqual(CardAudioState.Playing, _audio.State);
             yield return Select("lamp_military");
@@ -279,7 +288,7 @@ namespace TileStories.Tests
         public IEnumerator AnotherPointsAudio_InSwitchMode_FadesTheLampOutAndPlaysTheTone_InQueueMode_TheToneWaitsAndThenPlays()
         {
             Assert.AreEqual(CardOptions.AudioSwitch, Live.container.audio_when_another_starts, "precondition: the shipped setting is Switch");
-            yield return Select("lamp");
+            yield return SelectAtHalf("lamp");
             yield return Tap(Chip.PlayButton);
             Advance(4f);
 
@@ -302,7 +311,7 @@ namespace TileStories.Tests
 
             // - the same again with the setting on Queue: the tone plays, the Lamp is asked for and waits
             Live.container.audio_when_another_starts = CardOptions.AudioQueue;
-            yield return Select("lamp");
+            yield return SelectAtHalf("lamp");
             yield return Tap(Chip.PlayButton);
             Assert.IsTrue(_audio.IsQueued(Chip.Track), "the narration waits for the tone");
             Assert.AreEqual("Up next", Chip.Note.text, "the chip says so");
@@ -404,7 +413,7 @@ namespace TileStories.Tests
             Assert.AreEqual(1, Card.GetComponents<AudioSource>().Length, "and owns the ONE AudioSource of the card");
             Assert.AreEqual(1, Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None).Count(s => s.GetComponent<PoiCardHost>() != null), "no other audio source belongs to the card");
 
-            yield return Select("lamp_military");
+            yield return SelectAtHalf("lamp_military");
             yield return Tap(Chip.PlayButton);
             Advance(5f);
             int changes = 0;
@@ -439,7 +448,8 @@ namespace TileStories.Tests
         {
             Live.languages = new List<string> { "pt", "en" };
             yield return Select("lamp");
-            Assert.AreEqual("Visita guiada ao castelo", Chip.Title.text, "the authored Portuguese title");
+            // - the chip is the hero's Listen since _3.3 P4.4a: its words are the card's own (Ouvir + the Portuguese guide's length)
+            Assert.AreEqual("Ouvir 2:08", Chip.Title.text, "Listen in Portuguese, with the Portuguese narration's length");
             Assert.AreEqual("Reproduzir", Chip.PlayButton.tooltip);
             yield return OpenFull("lamp");
             var player = Player;

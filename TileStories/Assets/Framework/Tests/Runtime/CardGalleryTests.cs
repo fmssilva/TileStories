@@ -88,49 +88,54 @@ namespace TileStories.Tests
 
             // content
             Assert.AreEqual(entry.Title, header.TitleText);
-            Assert.AreEqual("Civic Buildings", header.ChipText, "the chip names the category (by name, never its key) and no level: Show Level is off");
+            // - _3.3 P4.4a: the header names no category (Quick Facts > Show Category does)
+            Assert.IsNull(header.Root.Q(className: "card-chip"), "no category chip in the header");
             bool subtitleExpected = entry.Variant != BuiltInBlocks.HeaderCompact && entry.Subtitle.Length > 0;
             Assert.AreEqual(subtitleExpected, header.SubtitleShown, "compact never shows a subtitle; every other look does");
             // - the picture looks: a hero first in the scroll, its picture really loaded; without a picture, the text-only look
             bool pictureLook = System.Array.IndexOf(BuiltInBlocks.HeaderImageVariants, entry.Variant) >= 0 || entry.Variant == BuiltInBlocks.HeaderVideoLoop || entry.Variant == BuiltInBlocks.HeaderModelTurntable;
             bool heroExpected = pictureLook && entry.Content != CardGalleryDefinitions.NoPicture;
-            Assert.AreEqual(heroExpected, header.HasHero, "a hero exactly for a picture look that has its picture");
+            // - every header has a hero (P4.4a): over its picture for a picture look that has one, else the plain plate
+            Assert.IsTrue(header.HasHero, "every header has a hero");
+            Assert.AreEqual(0, sheet.Stack.Scroll.contentContainer.IndexOf(header.HeroPart), "the hero opens what scrolls, under the pinned bar");
+            Assert.AreEqual(heroExpected, header.HasPicture, "a picture exactly for a picture look that has its picture");
+            Assert.AreEqual(!heroExpected, header.HeroPart.ClassListContains(HeaderBlockView.PlateClass), "...else the plate");
             if (heroExpected)
             {
-                Assert.AreEqual(0, sheet.Stack.Scroll.contentContainer.IndexOf(header.HeroPart), "the hero opens what scrolls, under the pinned title");
                 if (entry.Variant == BuiltInBlocks.HeaderModelTurntable)
-                    Assert.AreSame(header.HeroPart, header.ModelView.Root.parent, "the hero holds the model view, not a picture");
+                    Assert.AreSame(header.Media, header.ModelView.Root.parent, "the hero holds the model view, not a picture");
                 else
                 {
                     Assert.IsNotNull(header.Picture.Texture, "the picture was loaded (lazily, on bind)");
                     Assert.AreEqual(1, _harness.Media.RefCount(header.Picture.Path), "...once, through the header's own media scope");
                 }
             }
-            else Assert.IsNull(header.HeroPart.parent, "no hero on the card");
 
             // fit: inside the phone-width frame, the title clear of the X
             Rect frame = _harness.Frame.worldBound, card = sheet.Root.worldBound;
             Assert.AreEqual(frame.width, card.width, 0.5f, "the sheet spans the phone-width frame");
             var title = header.Root.Q<Label>("card-header-title");
-            Assert.LessOrEqual(title.worldBound.xMax, sheet.CloseButton.worldBound.xMin + 0.5f, "the title wraps before the X");
-            Assert.LessOrEqual(header.PeekPart.worldBound.yMax, card.yMin + sheet.Stops.Peek + 0.5f, "peek shows the whole title and chip");
+            Assert.LessOrEqual(title.worldBound.xMax, sheet.CloseButton.worldBound.xMin + 0.5f, "the bar's title ends before the X");
+            Assert.AreEqual(WhiteSpace.NoWrap, title.resolvedStyle.whiteSpace, "...on one line");
+            Assert.LessOrEqual(header.PeekPart.worldBound.yMax, card.yMin + sheet.Stops.Peek + 0.5f, "peek shows the whole bar");
             if (entry.Stop != SheetStopRule.Stop.Peek && subtitleExpected)
             {
-                var subtitle = header.Root.Q<Label>("card-header-subtitle");
+                var subtitle = header.HeroPart.Q<Label>("card-header-subtitle");
                 Assert.LessOrEqual(subtitle.worldBound.xMax, card.xMax + 0.5f, "the subtitle wraps inside the card");
-                // - half never passes 40%, so a long header may continue below it: half shows the subtitle start, full all of it
-                Assert.Less(subtitle.worldBound.yMin, card.yMax, "the subtitle starts inside the card at " + entry.Stop);
+                // - the hero fills what Half shows (HeroRule.Height) and grows when its words need more (never squashed): the title always
+                //   starts inside the card; a long title + line may push the line under Half's edge (the gallery's long entries), Full shows it all
+                Assert.Less(header.HeroTitle.worldBound.yMin, card.yMax, "the hero's title starts inside the card at " + entry.Stop);
                 if (entry.Stop == SheetStopRule.Stop.Full)
                     Assert.LessOrEqual(subtitle.worldBound.yMax, card.yMax + 0.5f, "the whole subtitle is visible at full");
             }
 
             // accessibility: contrast from the resolved (token) colours, the X's size
             Color surface = sheet.Root.resolvedStyle.backgroundColor;
-            Assert.GreaterOrEqual(CardTestInput.Contrast(title.resolvedStyle.color, surface), UIAccessibility.MinRatioNormalText, "title on the card");
-            var chip = header.Root.Q<Label>("card-header-chip");
-            Assert.GreaterOrEqual(CardTestInput.Contrast(chip.resolvedStyle.color, chip.resolvedStyle.backgroundColor), UIAccessibility.MinRatioNormalText, "chip text on the chip");
-            var sub = header.Root.Q<Label>("card-header-subtitle");
-            Assert.GreaterOrEqual(CardTestInput.Contrast(sub.resolvedStyle.color, surface), UIAccessibility.MinRatioNormalText, "subtitle (ink-2) on the card");
+            Assert.GreaterOrEqual(CardTestInput.Contrast(title.resolvedStyle.color, surface), UIAccessibility.MinRatioNormalText, "the bar's title on the card");
+            // - the plate's line sits on the card; a picture's words are measured over the scrim on the render (PoiCardHeroSceneTests)
+            var sub = header.HeroPart.Q<Label>("card-header-subtitle");
+            if (!header.HasPicture)
+                Assert.GreaterOrEqual(CardTestInput.Contrast(sub.resolvedStyle.color, surface), UIAccessibility.MinRatioNormalText, "subtitle (ink-2) on the card");
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(sheet.CloseButton.worldBound.width, sheet.CloseButton.worldBound.height),
                 "the X is " + sheet.CloseButton.worldBound.size + ", below 44x44");
             Assert.AreEqual("Close", sheet.CloseButton.tooltip, "the X is named from the framework string table");

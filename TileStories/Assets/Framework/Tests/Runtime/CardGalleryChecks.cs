@@ -67,6 +67,13 @@ namespace TileStories.Tests
         {
             yield return CardTestInput.Settle();
             var views = harness.Sheet.Stack.BoundViews;
+            // - a look pinned to the top (the audio guide's hero_chip) is drawn only in the hero's action row (_3.3 P4.4a): it has no slot
+            if (views.Count == 1 && harness.Sheet.Stack.HeroActionViews.Count == 1)
+            {
+                yield return CardTestInput.Settle(0.15f);
+                got(harness.Sheet.Stack.HeroActionViews[0]);
+                yield break;
+            }
             Assert.AreEqual(2, views.Count, name + ": the header + the block");
             // - a footer block (sticky) is pinned outside the scroll: nothing to scroll to
             if (harness.Sheet.Stack.SlotOf(views[1]).parent == harness.Sheet.Stack.Scroll.contentContainer) harness.Sheet.Stack.Scroll.ScrollTo(harness.Sheet.Stack.SlotOf(views[1]));
@@ -129,6 +136,12 @@ namespace TileStories.Tests
             var stack = harness.Sheet.Stack;
             var heading = stack.HeadingOf(view);
             var slot = stack.SlotOf(view);
+            // - the hero's Listen (a hero_chip look, _3.3 P4.4a) sits in the hero's action row: no slot, no heading, no gap of its own
+            if (slot == null)
+            {
+                Assert.IsTrue(stack.HeaderView.Actions.Contains(view.Root), entry.Name + ": a block with no slot is one of the hero's actions");
+                return;
+            }
             var definition = BlockRegistry.Shared.TryGet(entry.Kind, out var d) ? d : null;
             string expected = CardGalleryDefinitions.HasHeading(entry)
                 ? CardGalleryDefinitions.HeadingFor(entry.Kind)
@@ -138,10 +151,9 @@ namespace TileStories.Tests
             {
                 Assert.IsTrue(CardTestInput.IsShown(heading, slot), entry.Name + ": the heading shows");
                 Assert.LessOrEqual(heading.worldBound.yMax, view.Root.worldBound.yMin + 0.5f, entry.Name + ": above its block");
-                // - the same look in the scroll, the footer and a block pinned under the header (only the header's OWN heading --
-                //   inside HeaderSlot but not inside the pinned strip nested in it -- styles its kicker its own way)
+                // - the same look in the scroll and the footer (the header's own heading is hidden in the bar)
                 var reference = harness.Sheet.Root.Query<Label>(className: "card-block-heading").ToList()
-                    .First(l => !stack.HeaderSlot.Contains(l) || stack.PinnedTop.Contains(l));
+                    .First(l => !stack.HeaderSlot.Contains(l));
                 Assert.AreEqual(reference.resolvedStyle.fontSize, heading.resolvedStyle.fontSize, "one heading look");
                 Assert.GreaterOrEqual(CardTestInput.Contrast(heading.resolvedStyle.color, CardTestInput.EffectiveBackground(heading)), UIAccessibility.MinRatioNormalText,
                     entry.Name + ": heading contrast");

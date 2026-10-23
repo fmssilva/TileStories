@@ -476,9 +476,12 @@ namespace TileStories.Tests
             // - a swipe that starts ON a dot of the column and goes sideways is still the strip's: the scrubber claims only vertical drags
             int jumps = NavJumps.Count;
             float rest = view.Track.scrollOffset.x;
-            int dot = Scrubber.Items.ToList().FindIndex(i => i.Button.worldBound.Contains(new Vector2(column.center.x, strip.center.y)));
-            Assert.GreaterOrEqual(dot, 0, "precondition: a dot's target is level with the strip");
-            yield return CardTestInput.TouchDrag(Sheet.Layer.panel, new Vector2(column.center.x, strip.center.y), new Vector2(-160f, 0f), frames: 10);
+            // - the dot level with the strip: the middle of the part of the strip the column spans (the column is centred on the viewport,
+            //   so where it meets the strip moves with the card's layout -- _3.3 P4.4a's taller viewport moved it off the strip's middle)
+            var onDot = new Vector2(column.center.x, (Mathf.Max(strip.yMin, column.yMin) + Mathf.Min(strip.yMax, column.yMax)) * 0.5f);
+            int dot = Scrubber.Items.ToList().FindIndex(i => i.Button.worldBound.Contains(onDot));
+            Assert.GreaterOrEqual(dot, 0, "precondition: a dot's target is level with the strip at " + onDot);
+            yield return CardTestInput.TouchDrag(Sheet.Layer.panel, onDot, new Vector2(-160f, 0f), frames: 10);
             yield return CardTestInput.Settle(0.3f);
             Assert.Greater(Mathf.Abs(view.Track.scrollOffset.x - rest), OnePixel, "a sideways swipe that starts on a dot still moves the strip: the dots never block it");
             Assert.AreEqual(jumps, NavJumps.Count, "and it jumps nowhere (it left the dot, so it is no tap)");

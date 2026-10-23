@@ -313,7 +313,8 @@ namespace TileStories.Editor.Tests
                 Assert.AreEqual(!revealed, waits, "precondition, " + when + ": block_44 (Show After Reading) waits exactly until it is revealed");
                 Assert.AreEqual(waits, stack.SlotOfBlock("block_44").style.display.value == DisplayStyle.None, when + ": the stack hides it on that answer");
                 Assert.AreEqual(!waits, AllTargets(model).Contains("block_44"), when + ": the model leaves it out on that same answer");
-                foreach (var entry in entries)
+                // - a look pinned to the top (the hero chip) is drawn in the hero since _3.3 P4.4a: it has no slot to hide
+                foreach (var entry in entries.Where(e => !e.Definition.IsPinnedTop(e.Variant)))
                     Assert.AreEqual(NavOntologyRule.WaitsToBeRevealed(entry, stack.IsRevealed),
                         stack.SlotOfBlock(entry.Instance.key).style.display.value == DisplayStyle.None, when + ": every slot, " + entry.Instance.key);
             }

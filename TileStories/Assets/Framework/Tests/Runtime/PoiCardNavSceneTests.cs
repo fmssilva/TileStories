@@ -180,7 +180,7 @@ namespace TileStories.Tests
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "Jump Opens Card To = keep: the card stays at Half");
             Assert.AreEqual(0f, TopInViewport(block), OnePixel, "and the block's top meets the viewport's top at Half (offset " + Scroll.scrollOffset.y
                 + ", slot y " + Slot(block).layout.y + ", viewport " + Scroll.contentViewport.layout + ", content pad " + Scroll.contentContainer.resolvedStyle.paddingTop
-                + ", strip " + Sheet.Chrome.TopShown + ", footer " + Sheet.Chrome.BottomShown + ", header collapsed " + Sheet.Stack.HeaderCollapsed + ")");
+                + ", strip " + Sheet.Chrome.TopShown + ", footer " + Sheet.Chrome.BottomShown + ", bar title " + Sheet.Stack.BarShowsTitle + ")");
         }
 
         [UnityTest]

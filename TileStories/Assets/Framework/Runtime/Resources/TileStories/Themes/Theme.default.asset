@@ -44,9 +44,19 @@ MonoBehaviour:
       note: 
     - name: --ts-size-heading
       value:
-        value: 18
+        value: 20
         unit: 0
       note: 
+    - name: --ts-size-hero
+      value:
+        value: 46
+        unit: 0
+      note: 'The hero''s title over its picture (_3.3 R11, P4.4a), the display face'
+    - name: --ts-size-hero-narrow
+      value:
+        value: 40
+        unit: 0
+      note: 'The hero''s title on a phone (HeroRule.IsNarrow, under 400 pt wide)'
     - name: --ts-size-dropcap
       value:
         value: 48
@@ -145,6 +155,19 @@ MonoBehaviour:
       - name: --ts-hero-fade
         value: {r: 0.101960786, g: 0.08235294, b: 0.0627451, a: 0.9}
         note: 
+      - name: --ts-scrim-hero
+        value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.92}
+        note: 'The hero''s scrim behind its words (solid) and the tint of the ramp above
+          them (hero_scrim.png holds the grade). The project blends in LINEAR light: white
+          words keep 7:1 only over a background of luminance <= 0.1, so over a bright sky
+          (0.8) the scrim needs ~0.9; measured on the render at the worst pixel of every
+          hero picture (PoiCardHeroSceneTests)'
+      - name: --ts-on-scrim
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 'The hero''s title, line and outline button over the scrim'
+      - name: --ts-on-scrim-2
+        value: {r: 0.94509804, g: 0.9137255, b: 0.85490197, a: 1}
+        note: 'The hero''s eyebrow over the scrim (a warm white)'
       - name: --ts-ink
         value: {r: 0.96862745, g: 0.9372549, b: 0.8627451, a: 1}
         note: Text
@@ -251,6 +274,9 @@ MonoBehaviour:
     bodyBoldFont: atkinson_next_bold
     displaySelectors:
     - .card-header__title
+    - .card-hero__title
+    - .card-facts__value
+    - .card-timeline__date
     - .poi-card-mini__title
     - .card-block-heading
     - .card-rich__heading

@@ -80,7 +80,7 @@ namespace TileStories.Tests
             CollectionAssert.DoesNotContain(model.Targets, autoKey, "the rails are no target of the card's own navigation");
             var slot = sheet.Stack.SlotOfBlock(autoKey);
             Assert.IsNotNull(slot, "Auto Nav Block put the rails in the stack");
-            Assert.AreEqual(0, sheet.Stack.Scroll.contentContainer.IndexOf(slot), "the first block of the scroll: right after the header");
+            Assert.AreEqual(1, sheet.Stack.Scroll.contentContainer.IndexOf(slot), "the first block of the scroll: right after the header's hero (_3.3 P4.4a)");
             var view = sheet.Stack.BoundViews.OfType<NavRailsBlockView>().Single();
             Assert.AreEqual(model.Sections.Count, view.Rails.Count, "a rail per section (it lists blocks: a one-family card keeps its rail)");
 
@@ -241,7 +241,7 @@ namespace TileStories.Tests
             CollectionAssert.DoesNotContain(model.Targets, key, "the bento is no target of the card's own navigation");
             var slot = sheet.Stack.SlotOfBlock(key);
             Assert.IsNotNull(slot, "the authored bento is in the stack");
-            Assert.AreEqual(0, sheet.Stack.Scroll.contentContainer.IndexOf(slot), "the first block of the scroll: right after the header");
+            Assert.AreEqual(1, sheet.Stack.Scroll.contentContainer.IndexOf(slot), "the first block of the scroll: right after the header's hero (_3.3 P4.4a)");
             var view = sheet.Stack.BoundViews.OfType<NavBentoBlockView>().Single();
             var strings = Strings(_harness, entry);
             bool portuguese = entry.Case.Language == "pt";

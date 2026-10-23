@@ -1,5 +1,5 @@
 /* The POI Detail Card's OWN tokens (_3.3 R12.2, T3): its sizes -- the sheet's layout, every block's and navigation element's
-   measures -- and the plain numbers C# reads from the card's root (--ts-sheet-top-gap, --ts-header-collapsed-max-height,
+   measures -- and the plain numbers C# reads from the card's root (--ts-sheet-top-gap, --ts-hero-min-height,
    --ts-track-peek, --ts-bento-*, --ts-radial-*, --ts-float-gap). They sit on the card's roots (.ts-card) because a custom property
    is only in the customStyle of the element that DECLARES it (_3.3 R8 S1).
    Every colour and every theme scale (type sizes, radii, spacing, line width, motion) is NOT here: it is the app theme's (T1 / T2),
@@ -76,9 +76,10 @@
     --ts-timeline-now: 16px;
     --ts-timeline-cell: 160px;
 
-    /* The pinned header collapsed by a scrolled stack: one line at most this tall. Read by PoiCardSheetView as a plain
-       number (panel units, like --ts-sheet-top-gap) for the stack's no-loop estimate; a test holds the collapsed look to it */
-    --ts-header-collapsed-max-height: 40;
+    /* The bar (_3.3 P4.4a): the header slot rises into the grab zone by this much so its one row lines up with the round buttons (grab
+       zone 24 - the buttons' top gap 8), and its title keeps clear of the X (X width + both gaps) */
+    --ts-bar-overlap: -16px;
+    --ts-header-end: 64px;
 
     /* A person's monogram (the photo's place until Tier 2 images) */
     --ts-monogram-size: 48px;
@@ -86,9 +87,14 @@
     /* The chapter bar of story_chapters: one segment per chapter */
     --ts-segment-height: 4px;
 
-    /* Tier 2 pictures (Media.uss): the header's hero, a block picture's frame, the gallery's small pictures and prints,
+    /* Tier 2 pictures (Media.uss): a block picture's frame, the gallery's small pictures and prints,
        the spotlight ring, the before / after handle, the full-screen view's picture area */
-    --ts-hero-height: 200px;
+    /* The hero (_3.3 P4.4a): never shorter than this, whatever the Half stop shows (HeroRule.Height). A plain number (panel units) read by
+       PoiCardSheetView on this card root; the outline of its Listen button */
+    --ts-hero-min-height: 280;
+    --ts-hero-outline-width: 2px;
+    /* the graded scrim above the hero's words, fading into the picture (Media.uss, .card-hero__scrim) */
+    --ts-hero-scrim-fade: 96px;
     --ts-media-height: 220px;
     --ts-thumb-size: 64px;
     --ts-grid-cell-height: 120px;

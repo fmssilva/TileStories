@@ -213,6 +213,8 @@ namespace TileStories.Tests
         {
             yield return UseTheBar(withTopBar: true);
             yield return Open(SheetStopRule.Stop.Full);
+            // - _3.3 P4.4a: the footer waits while the hero shows the action: read past it first
+            yield return CardTestInput.ReadPastTheHero(Sheet, DragStack);
             Assert.IsTrue(Chrome.BottomShown && Chrome.BottomNavShown, "precondition: Full shows the area with its bar: " + Parts());
             Assert.Greater(Footer.childCount, 0, "precondition: The Lamp has its sticky footer");
             float footer = Footer.layout.height, bar = BarSlot.layout.height;
@@ -221,11 +223,17 @@ namespace TileStories.Tests
             Assert.AreEqual(Room - Sheet.Slots.Top.layout.height - footer - bar, Viewport, OnePixel, "the stack has what strip, footer and bar leave: " + Parts());
             yield return CardGalleryChecks.Render("Nav_Lamp_bottom_bar_full_390");
 
+            Scroll.scrollOffset = Vector2.zero;
+            yield return null;
             Sheet.SetStop(SheetStopRule.Stop.Half);
             yield return CardTestInput.Settle();
             yield return Rested();
             float room = Room;
-            Assert.Less(room - footer - bar, CardChromeRule.MinStackViewportUnderFooter, "precondition: the pair and one line do not fit: " + Parts());
+            // - _3.3 P4.4a: back at the top, Half shows the whole hero -- the footer waits for it and the bar would cut it, so the pair gives
+            //   way together (once the hero is read, Half's 281 px under the 48 px bar hold both: PoiCardChromeSceneTests)
+            Assert.AreEqual(0f, Scroll.scrollOffset.y, 0.5f, "precondition: at the top of the card");
+            float hero = Sheet.Stack.HeaderView.HeroBottom();
+            Assert.Less(room - bar, Mathf.Min(hero, Scroll.contentContainer.layout.height), "precondition: the bar would cut the hero: " + Parts());
             Assert.IsFalse(Chrome.BottomShown, "the bottom area gives way as ONE");
             Assert.IsFalse(Chrome.BottomNavShown, "with its bar");
             Assert.IsFalse(Chrome.TopShown, "and the strip");
@@ -243,6 +251,8 @@ namespace TileStories.Tests
         {
             yield return UseTheBar();
             yield return Open(SheetStopRule.Stop.Full);
+            // - _3.3 P4.4a: the footer waits while the hero shows the action: read past it first
+            yield return CardTestInput.ReadPastTheHero(Sheet, DragStack);
             Assert.IsTrue(Chrome.BottomShown && Chrome.BottomNavShown, "precondition: both show at Full");
             Assert.IsTrue(OnScreen(Footer) && OnScreen(BarSlot), "precondition: both on screen: " + Parts());
             Assert.Greater(Range, 1000f, "precondition: the stack really scrolls");

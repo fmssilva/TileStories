@@ -154,7 +154,8 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             var views = Sheet.Stack.BoundViews.ToList();
             Assert.AreEqual(2, views.OfType<SourcesBlockView>().Count(), "precondition: both Sources blocks are shown");
-            Assert.AreEqual(lamp.card.blocks.Count, views.Count, "nothing was dropped by ordering them");
+            // - _3.3 P4.4a: the hero chip is the hero's Listen, not a stack view
+            Assert.AreEqual(lamp.card.blocks.Count, views.Count + Sheet.Stack.HeroActionViews.OfType<AudioGuideBlockView>().Count(), "nothing was dropped by ordering them");
             Assert.Greater(ShownFamilies().Distinct().Count(), 3, "precondition: the Lamp's card really spans several families");
 
             // the default behaves exactly as Sources At The End did
@@ -167,7 +168,9 @@ namespace TileStories.Tests
             // authored: every block exactly where Card Content wrote it
             yield return Push(c => c.card_settings.navigation.block_order = CardOptions.BlockOrderAuthored);
             views = Sheet.Stack.BoundViews.ToList();
-            Assert.AreEqual(authoredAt, views.FindIndex(v => v is SourcesBlockView), "authored: the first Sources block is back where the config wrote it");
+            // - _3.3 P4.4a: a pinned-top block written before it (the hero chip) is the hero's Listen, not a stack view
+            int pinnedBefore = lamp.card.blocks.Take(authoredAt).Count(b => b.kind == BuiltInBlocks.AudioGuideKind && b.variant == BuiltInBlocks.AudioGuideHeroChip);
+            Assert.AreEqual(authoredAt - pinnedBefore, views.FindIndex(v => v is SourcesBlockView), "authored: the first Sources block is back where the config wrote it");
             Assert.IsFalse(views[views.Count - 1] is SourcesBlockView, "authored: the card no longer ends with sources");
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the sheet kept its stop");
 
@@ -183,7 +186,8 @@ namespace TileStories.Tests
             // by_family: one contiguous run per family, in the registered family order, Sources last
             yield return Push(c => c.card_settings.navigation.block_order = CardOptions.BlockOrderByFamily);
             var families = ShownFamilies();
-            Assert.AreEqual(lamp.card.blocks.Count, families.Count, "by_family: still every block, only reordered");
+            Assert.AreEqual(lamp.card.blocks.Count, families.Count + Sheet.Stack.HeroActionViews.OfType<AudioGuideBlockView>().Count(),
+                "by_family: still every block, only reordered (the hero chip: the hero's Listen, _3.3 P4.4a)");
             foreach (string family in families.Distinct())
             {
                 var at = PositionsOf(family);

@@ -70,11 +70,13 @@ namespace TileStories
         public float TargetHeight { get; private set; }
 
         private static readonly CustomStyleProperty<float> TopGapProperty = new("--ts-sheet-top-gap");
-        private static readonly CustomStyleProperty<float> CollapsedHeaderProperty = new("--ts-header-collapsed-max-height");
+        private static readonly CustomStyleProperty<float> HeroMinProperty = new("--ts-hero-min-height");
         private readonly BlockRegistry _registry;
         // The shown card's stack entries: what its navigation model is rebuilt from when a waiting block is revealed
         private IReadOnlyList<BlockStackBuilder.Entry> _entries;
         private float _topGap;
+        // --ts-hero-min-height: the hero is never shorter than this, whatever Half shows (HeroRule.Height)
+        private float _heroMin;
         private float _halfMaxRatio = CardContainerSettings.HalfMaxRatioMax;
         // The language the chip's next tap switches to ("" = the chip is hidden)
         private string _nextLanguage = "";
@@ -164,8 +166,6 @@ namespace TileStories
             Root.RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyle);
             Layer.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Stack.HeaderSlot.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
-            // - a block pinned under the header (the audio hero chip) is part of the peek stop: its size moves the stops too
-            Stack.PinnedTop.RegisterCallback<GeometryChangedEvent>(_ => RecomputeStops());
             Hide();
         }
 
@@ -367,6 +367,8 @@ namespace TileStories
         {
             if (stop == Stop) return;
             Stop = stop;
+            // - the bar carries the title at Peek, the hero at the top of Half and Full
+            Stack.UpdateBarTitle();
             Chrome?.Apply();
             Floating?.Refresh();
             StopChanged?.Invoke(stop);
@@ -377,14 +379,14 @@ namespace TileStories
         {
             float available = Layer.layout.height;
             if (float.IsNaN(available) || available <= 0f) return;
-            var peekPart = Stack.PeekPart;
-            // - the peek stop is the OPEN header's top part: a collapsed (one-line) header keeps the last measure, or
-            //   collapsing would move the stops, resize the sheet, change the scroll range... and loop
-            float peek = Stack.HeaderCollapsed ? Stops.Peek
-                : float.IsNaN(peekPart.worldBound.yMax) || float.IsNaN(Root.worldBound.yMin)
-                ? 0f
-                : peekPart.worldBound.yMax + peekPart.resolvedStyle.marginBottom - Root.worldBound.yMin;
+            // - the peek stop is the bar: the header slot's own row, which never changes size, so nothing the card scrolls or shows can move
+            //   it. Measured on the SLOT's layout in the sheet's frame -- the slot is never re-parented, while the bound header view is
+            //   re-attached by every rebind and reads a stale world rect until the next layout pass (Show measures right after the bind)
+            var slot = Stack.HeaderSlot;
+            float peek = float.IsNaN(slot.layout.yMax) ? 0f : slot.layout.yMax + slot.resolvedStyle.marginBottom;
             Stops = SheetStopRule.Compute(available, peek, _halfMaxRatio, _topGap);
+            // - the hero fills what Half shows under the bar (never under its minimum): it follows the stops, never feeds them
+            Stack.HeaderView?.SetHeroHeight(HeroRule.Height(Stops, _heroMin));
             if (IsOpen && !Drag.IsDragging) ApplyHeight(Stops.HeightOf(Stop));
             // - the chrome's room is the stop's height: new stops can give it room, or take it
             Chrome?.Apply();
@@ -399,8 +401,12 @@ namespace TileStories
 
         private void OnCustomStyle(CustomStyleResolvedEvent evt)
         {
-            // - the card's tokens are declared on this root (.ts-card): the stack's header reads its ceiling from here
-            if (evt.customStyle.TryGetValue(CollapsedHeaderProperty, out float ceiling)) Stack.CollapsedCeiling = ceiling;
+            // - the card's tokens are declared on this root (.ts-card): the hero's minimum height is read here
+            if (evt.customStyle.TryGetValue(HeroMinProperty, out float heroMin) && !Mathf.Approximately(heroMin, _heroMin))
+            {
+                _heroMin = heroMin;
+                RecomputeStops();
+            }
             // - a jump glides as long as the sheet takes to rise: both are --ts-duration (never read mid-drag, where the drag class zeroes it)
             if (!Drag.IsDragging) Nav.Duration = HeightTransitionSeconds();
             if (evt.customStyle.TryGetValue(TopGapProperty, out float gap) && !Mathf.Approximately(gap, _topGap))

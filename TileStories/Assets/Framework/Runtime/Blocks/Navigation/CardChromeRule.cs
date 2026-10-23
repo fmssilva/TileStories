@@ -14,6 +14,9 @@ namespace TileStories
     //      shown too) -- it gives way FIRST: the map is one drag to Full away. The bottom area then needs only one line of content
     //      (MinStackViewportUnderFooter), measured on the PAIR (footer + bottom bar): it outlasts the strip, and where the pair does not
     //      leave one line both go -- never half an area. The wall's options sit on top: they hide more, never less
+    //   4. THE HERO (_3.3 P4.4a): the hero holds the card's actions (the sticky one included, HeroActionsRule), so while any of it is in
+    //      view the FOOTER waits (the bottom bar, navigation, does not); and no chrome is shown where it would cut the part of the hero in
+    //      view -- at Half the hero fills the view (HeroRule.Height), so the visitor sees all of it, picture, title, line and actions
     public static class CardChromeRule
     {
         // How far the reader must move down before the bottom area slides away (panel units): about a finger's travel, so the
@@ -68,6 +71,9 @@ namespace TileStories
             public float FooterHeight;
             public float BottomNavHeight;
             public float ContentHeight;
+            // The hero's bottom edge in the stack's content coordinates (NaN: no hero) and the stack's scroll offset
+            public float HeroBottom;
+            public float ScrollOffset;
         }
 
         public readonly struct Chrome
@@ -77,12 +83,15 @@ namespace TileStories
             public readonly bool Bottom;
             // The bottom bar inside that area (only ever with Bottom)
             public readonly bool BottomNav;
+            // The footer inside that area (only ever with Bottom): it waits for the hero, which shows the same action (layer 4)
+            public readonly bool Footer;
 
-            public Chrome(bool top, bool bottom, bool bottomNav)
+            public Chrome(bool top, bool bottom, bool bottomNav, bool footer = true)
             {
                 Top = top;
                 Bottom = bottom;
                 BottomNav = bottom && bottomNav;
+                Footer = bottom && footer;
             }
         }
 
@@ -111,23 +120,29 @@ namespace TileStories
         {
             bool top = input.HasTop && NavShownAt(input.Stop, input.ShowAt);
             bool nav = input.HasBottomNav && NavShownAt(input.Stop, input.ShowAt);
-            bool bottom = (input.HasFooter || nav) && IsAboveTheTitle(input.Stop) && !input.ScrollHidesBottom;
-            float bottomHeight = BottomHeight(input, nav);
+            float heroSeen = HeroRule.VisiblePart(input.ScrollOffset, input.HeroBottom);
+            // - the hero shows the card's actions while it is in view: the sticky footer comes once it scrolled away
+            bool footer = input.HasFooter && heroSeen <= 0f;
+            bool bottom = (footer || nav) && IsAboveTheTitle(input.Stop) && !input.ScrollHidesBottom;
+            float bottomHeight = BottomHeight(input, footer, nav);
             float room = input.SheetHeight - input.HeaderHeight;
             // - not laid out yet: no floor to apply, the next measure decides
-            if (float.IsNaN(room)) return new Chrome(top, bottom, nav);
-            if (top && room - input.TopHeight - (bottom ? bottomHeight : 0f) < Need(input.ContentHeight, MinStackViewport)) top = false;
-            if (bottom && room - bottomHeight < Need(input.ContentHeight, MinStackViewportUnderFooter)) bottom = false;
-            return new Chrome(top, bottom, nav);
+            if (float.IsNaN(room)) return new Chrome(top, bottom, nav, footer);
+            if (top && room - input.TopHeight - (bottom ? bottomHeight : 0f) < Need(input.ContentHeight, Mathf.Max(MinStackViewport, heroSeen))) top = false;
+            if (bottom && room - bottomHeight < Need(input.ContentHeight, Mathf.Max(MinStackViewportUnderFooter, heroSeen))) bottom = false;
+            return new Chrome(top, bottom, nav, footer);
         }
 
         // The stack's viewport a decision leaves (what the visitor reads in)
         public static float Viewport(Input input, Chrome chrome) =>
-            input.SheetHeight - input.HeaderHeight - (chrome.Top ? input.TopHeight : 0f) - (chrome.Bottom ? BottomHeight(input, chrome.BottomNav) : 0f);
+            input.SheetHeight - input.HeaderHeight - (chrome.Top ? input.TopHeight : 0f) - (chrome.Bottom ? BottomHeight(input, chrome.Footer, chrome.BottomNav) : 0f);
 
         // The bottom area's height with or without its bar: the footer (when it holds a block) and the bar under it
-        public static float BottomHeight(Input input, bool withNav) =>
-            (input.HasFooter ? input.FooterHeight : 0f) + (withNav ? input.BottomNavHeight : 0f);
+        public static float BottomHeight(Input input, bool withNav) => BottomHeight(input, true, withNav);
+
+        // ... and with or without its footer (the footer waits for the hero, layer 4)
+        public static float BottomHeight(Input input, bool withFooter, bool withNav) =>
+            (withFooter && input.HasFooter ? input.FooterHeight : 0f) + (withNav ? input.BottomNavHeight : 0f);
 
         // The stop a navigation element (the top strip, the bottom bar) may show at: Full always, Half unless the wall says Full Only,
         // never at peek

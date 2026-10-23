@@ -42,12 +42,14 @@ namespace TileStories.Tests
             Assert.AreEqual("lamp", Card.ShownPoiId);
             Assert.AreEqual(SheetStopRule.Stop.Peek, Sheet.Stop, "Open At = peek (the shipped default)");
             Assert.AreEqual("St George's Castle", Header.TitleText, "the authored title in the wall's first language, not the POI name");
-            Assert.AreEqual("Royal Government", Header.ChipText, "the category name only: a hierarchy level (Hub) is an authoring word");
+            // - _3.3 P4.4a: the header names no category any more (Quick Facts > Show Category does, QuickFactsShowTheCategory...)
+            Assert.IsNull(Header.Root.Q(className: "card-chip"), "no category chip in the header");
             Assert.AreEqual("Medieval castle and royal palace", Header.SubtitleText);
 
             Rect card = Sheet.Root.worldBound;
-            Assert.LessOrEqual(Header.PeekPart.worldBound.yMax, card.yMax + 1f, "peek shows the whole title and chip");
-            Assert.GreaterOrEqual(Header.Root.Q<Label>("card-header-subtitle").worldBound.yMin, card.yMax - 1f, "...and nothing below them");
+            Assert.LessOrEqual(Header.PeekPart.worldBound.yMax, card.yMax + 1f, "peek shows the whole bar");
+            Assert.IsTrue(Header.BarTitleShown, "at Peek the bar carries the title");
+            Assert.GreaterOrEqual(Header.HeroPart.Q<Label>("card-header-subtitle").worldBound.yMin, card.yMax - 1f, "...and nothing of the hero below it");
             Assert.AreEqual(ConfigCopy().pois.Single(p => p.id == "lamp").name, Session.SearchPois.First(p => p.id == "lamp").name, "the card never renames the POI");
             yield return Capture("Card_Lamp_Peek");
         }
@@ -60,8 +62,8 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop);
             Assert.LessOrEqual(Sheet.Root.resolvedStyle.height, Sheet.Layer.layout.height * 0.40f + 1f, "half never passes 40% of the screen");
-            var subtitle = Header.Root.Q<Label>("card-header-subtitle");
-            Assert.LessOrEqual(subtitle.worldBound.yMax, Sheet.Root.worldBound.yMax + 1f, "half shows the subtitle");
+            var subtitle = Header.HeroPart.Q<Label>("card-header-subtitle");
+            Assert.LessOrEqual(subtitle.worldBound.yMax, Sheet.Root.worldBound.yMax + 1f, "half shows the hero's subtitle");
             yield return Capture("Card_Lamp_Half");
 
             yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Full - Sheet.Stops.Half), slowSheet: Sheet);
@@ -123,61 +125,55 @@ namespace TileStories.Tests
 
         private void SetStopFull() => Sheet.SetStop(SheetStopRule.Stop.Full);
 
-        // _3.1 step 6C: the pinned header (title, chip, subtitle) ate the scroll area at full. A real wheel scroll down the
-        // stack collapses it to its compact look -- the same header, one class on its slot -- and scrolling back to the top
-        // opens it again
+        // _3.3 P4.4a (was _3.1 6C's collapse): the pinned header is the BAR -- one row that never changes size. At the top of Full the hero
+        // carries the title and the bar shows none; a real wheel scroll that takes the hero's title away hands it to the bar, and the top
+        // gives it back. Neither ever moves a stop or the bar's height
         [UnityTest]
-        public IEnumerator ScrollingTheStack_CollapsesTheHeaderToItsCompactLook_AndTheTopOpensItAgain()
+        public IEnumerator ScrollingTheHeroAway_HandsTheTitleToTheBar_AndTheTopGivesItBack()
         {
             yield return OpenFull("lamp");
             var stack = Sheet.Stack;
-            float openHeader = stack.HeaderSlot.worldBound.height, openViewport = stack.Scroll.contentViewport.worldBound.height;
             var headerView = Header;
-            Assert.IsTrue(headerView.SubtitleShown && !stack.HeaderCollapsed, "precondition: open, the subtitle shown");
-            float openTitleSize = headerView.Root.Q<Label>("card-header-title").resolvedStyle.fontSize;
+            float bar = stack.HeaderSlot.worldBound.height;
             var openStops = Sheet.Stops;
-            Assert.IsTrue(CardTestInput.IsShown(headerView.Root.Q<Label>("card-header-chip"), stack.HeaderSlot), "precondition: the open header shows its chip");
-
-            yield return CardTestInput.Wheel(stack.Scroll.contentViewport, 12f, frames: 4);
-            yield return CardTestInput.Settle(0.2f);
-            Assert.Greater(stack.Scroll.scrollOffset.y, HeaderCollapseRule.CollapseAfter, "the real wheel scrolled the stack");
-            Assert.IsTrue(stack.HeaderCollapsed, "scrolled: collapsed");
-            Assert.IsTrue(stack.HeaderSlot.ClassListContains(BlockStackView.CollapsedHeaderClass), "a class swap on the slot");
-            Assert.AreSame(headerView, Header, "the same header view, no second header");
-            Assert.IsFalse(headerView.SubtitleShown, "the subtitle steps out");
-            Assert.AreEqual("St George's Castle", headerView.TitleText, "the title stays");
-            // _3.1 [7B]: collapsed = ONE line -- a smaller title, no chip, the whole header under the token
+            Assert.IsFalse(headerView.BarTitleShown, "precondition: at the top of Full the hero carries the title");
+            Assert.IsTrue(CardTestInput.IsShown(headerView.HeroTitle, stack.Scroll.contentViewport), "the hero's title is in view");
             var title = headerView.Root.Q<Label>("card-header-title");
-            Assert.IsTrue(CardTestInput.IsShown(title, stack.HeaderSlot), "the title is the one line left");
-            Assert.IsFalse(CardTestInput.IsShown(headerView.Root.Q<Label>("card-header-chip"), stack.HeaderSlot), "the chip steps out too");
-            Assert.Less(title.resolvedStyle.fontSize, openTitleSize, "a smaller title");
-            Assert.AreEqual(WhiteSpace.NoWrap, title.resolvedStyle.whiteSpace, "one line: a long title is cut, never wrapped");
-            float ceiling = CardTestInput.TokenPx("--ts-header-collapsed-max-height");
-            Assert.AreEqual(ceiling, stack.CollapsedCeiling, 0.01f, "the stack reads the same token (its no-loop estimate is measured against it)");
-            Assert.LessOrEqual(stack.HeaderSlot.worldBound.height, ceiling,
-                "the collapsed header (" + stack.HeaderSlot.worldBound.height + ") is at most --ts-header-collapsed-max-height");
-            Assert.Less(stack.HeaderSlot.worldBound.height, openHeader - 10f, "the header is shorter");
-            Assert.Greater(stack.Scroll.contentViewport.worldBound.height, openViewport + 10f, "...and the scroll area got that room");
-            Assert.AreEqual(openStops.Peek, Sheet.Stops.Peek, 0.5f, "collapsing never moves the peek stop (it is the open header's)");
-            yield return Capture("Card_Lamp_Full_HeaderCollapsed");
+            Assert.AreEqual(WhiteSpace.NoWrap, title.resolvedStyle.whiteSpace, "the bar's title is one line: a long title is cut, never wrapped");
+            Assert.Less(title.resolvedStyle.opacity, 0.01f, "the bar's title is not shown");
 
-            yield return CardTestInput.Wheel(stack.Scroll.contentViewport, -40f, frames: 4);
-            yield return CardTestInput.Settle(0.2f);
+            float heroTitleBottom = headerView.HeroTitleBottom();
+            for (int i = 0; i < 12 && stack.Scroll.scrollOffset.y < heroTitleBottom + 20f; i++)
+            {
+                yield return CardTestInput.Wheel(stack.Scroll.contentViewport, 12f, frames: 4);
+                heroTitleBottom = headerView.HeroTitleBottom();
+            }
+            yield return CardTestInput.Settle(0.4f);
+            Assert.Greater(stack.Scroll.scrollOffset.y, headerView.HeroTitleBottom(), "precondition: the real wheel scrolled the hero's title away (offset "
+                + stack.Scroll.scrollOffset.y + ", title bottom " + headerView.HeroTitleBottom() + ")");
+            Assert.IsTrue(headerView.BarTitleShown && stack.BarShowsTitle, "the bar carries the title now");
+            Assert.AreEqual(1f, title.resolvedStyle.opacity, 0.01f, "...shown whole");
+            Assert.AreEqual("St George's Castle", headerView.TitleText, "the same title");
+            Assert.AreSame(headerView, Header, "the same header view, no second header");
+            Assert.AreEqual(bar, stack.HeaderSlot.worldBound.height, 0.5f, "the bar never changes size");
+            Assert.AreEqual(openStops.Peek, Sheet.Stops.Peek, 0.5f, "...so the stops never move");
+            yield return Capture("Card_Lamp_Full_BarTitle");
+
+            for (int i = 0; i < 12 && stack.Scroll.scrollOffset.y > 0.01f; i++)
+                yield return CardTestInput.Wheel(stack.Scroll.contentViewport, -40f, frames: 4);
+            yield return CardTestInput.Settle(0.4f);
             Assert.AreEqual(0f, stack.Scroll.scrollOffset.y, 0.01f, "wheeled back to the top");
-            Assert.IsFalse(stack.HeaderCollapsed, "at the top: open again");
-            Assert.IsTrue(headerView.SubtitleShown);
-            Assert.IsTrue(CardTestInput.IsShown(headerView.Root.Q<Label>("card-header-chip"), stack.HeaderSlot), "the chip is back");
-            Assert.AreEqual(openTitleSize, headerView.Root.Q<Label>("card-header-title").resolvedStyle.fontSize, 0.01f, "the full-size title is back");
-            Assert.AreEqual(openHeader, stack.HeaderSlot.worldBound.height, 1f, "the header is its full size again");
-            yield return Capture("Card_Lamp_Full_HeaderOpenAgain");
+            Assert.IsFalse(headerView.BarTitleShown, "at the top: the hero carries the title again");
+            Assert.AreEqual(bar, stack.HeaderSlot.worldBound.height, 0.5f, "the bar is the same row");
+            yield return Capture("Card_Lamp_Full_HeroTitle");
 
-            // - a new card always starts open, even after a scrolled one
-            yield return CardTestInput.Wheel(stack.Scroll.contentViewport, 12f, frames: 4);
-            yield return CardTestInput.Settle(0.2f);
-            Assert.IsTrue(stack.HeaderCollapsed, "precondition: collapsed again");
+            // - a new card always starts with its hero whole, even after a scrolled one
+            for (int i = 0; i < 12 && !stack.BarShowsTitle; i++)
+                yield return CardTestInput.Wheel(stack.Scroll.contentViewport, 12f, frames: 4);
+            Assert.IsTrue(stack.BarShowsTitle, "precondition: scrolled away again");
             SelectionEventBus.Select("lamp_military");
             yield return CardTestInput.Settle();
-            Assert.IsFalse(stack.HeaderCollapsed, "another POI's card opens with its header open");
+            Assert.IsFalse(stack.BarShowsTitle, "another POI's card opens with its hero carrying the title");
         }
 
         [UnityTest]
@@ -283,8 +279,8 @@ namespace TileStories.Tests
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "switching POIs keeps the stop");
             Assert.AreEqual("lamp_military", Card.ShownPoiId);
             Assert.AreEqual("Castle Keep", Header.TitleText);
-            Assert.IsFalse(Header.SubtitleShown, "the compact variant has no subtitle");
-            Assert.AreEqual("Military", Header.ChipText, "the category only");
+            Assert.IsFalse(Header.SubtitleShown, "no subtitle authored: none shown");
+            Assert.IsTrue(Header.HasPicture, "its Video Loop hero draws over its poster");
             Assert.AreEqual(built, Sheet.Stack.CreatedViewCount, "the header view was reused, not rebuilt");
         }
 
@@ -327,8 +323,11 @@ namespace TileStories.Tests
             yield return Select("lamp");
             Assert.AreEqual("Castelo de São Jorge", Header.TitleText);
             Assert.AreEqual("Castelo medieval e paço real", Header.SubtitleText);
-            // - _3.3 P1b: the category's own Portuguese name (Category Names Per Language), never the English label on a PT card
-            Assert.AreEqual("Governo Real", Header.ChipText, "the category chip in the card's language");
+            // - _3.3 P1b: the category's own Portuguese name (Category Names Per Language), never the English label on a PT card -- shown by
+            //   the first Quick Facts block's Show Category since P4.4a
+            var facts = Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().First();
+            Assert.AreEqual("Categoria", facts.Facts[0].Label.text, "the Category fact first, its label in the card's language");
+            Assert.AreEqual("Governo Real", facts.Facts[0].Value.text, "the category in the card's language");
         }
 
         [UnityTest]
@@ -378,7 +377,8 @@ namespace TileStories.Tests
                 "gallery", "gallery", "gallery", "gallery", "before_after", "zoom_image",
                 "hotspot_image", "hotspot_image", "video", "video", "wall_locator", "wall_locator", "today_map", "today_map", "related", "related",
                 "knowledge_check", "knowledge_check", "knowledge_check", "poll", "collect", "feedback", "feedback", "dialogue", "show_on_wall", "show_on_wall",
-                "audio_guide", "audio_guide",
+                // - _3.3 P4.4a: the hero_chip audio guide is the hero's Listen (HeroActionViews), only the player is in the stack
+                "audio_guide",
                 "actions", "actions", "actions", "sources", "sources",
                 // - the sources were authored before the actions: the card still ends with them (Sources At The End, 15.2.1)
                 // - Tier 5 (10A.2b.3 on): the Lamp's own model_3d, panorama_360 and place_in_ar fixtures, excluded from THIS list on purpose
@@ -393,6 +393,8 @@ namespace TileStories.Tests
                 CollectionAssert.Contains(variants, look, "each variant on the card");
             var sticky = Sheet.Stack.BoundViews.OfType<ActionsBlockView>().Last();
             Assert.AreEqual(Sheet.Stack.Footer, Sheet.Stack.SlotOf(sticky).parent, "the sticky actions are pinned to the footer");
+            CollectionAssert.AreEqual(new[] { typeof(ActionsBlockView), typeof(AudioGuideBlockView) }, Sheet.Stack.HeroActionViews.Select(v => v.GetType()),
+                "the hero holds the sticky action and Listen (the hero chip)");
         }
 
         // _3.1 step 6C: every block of The Lamp shows its authored heading above it (a kind with a default heading --
@@ -409,8 +411,10 @@ namespace TileStories.Tests
             var stack = Sheet.Stack;
             var views = stack.BoundViews;
             // - the card's order, not the authored one: the sources close the card (Sources At The End)
-            var stackOrder = BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Entries;
-            Assert.AreEqual(lampConfig.card.blocks.Count, stackOrder.Count, "precondition: every authored block is on the card");
+            var built = BlockStackBuilder.Build(lampConfig, LiveSettings, BlockRegistry.Shared, Session.SearchPois).Entries;
+            Assert.AreEqual(lampConfig.card.blocks.Count, built.Count, "precondition: every authored block is on the card");
+            // - _3.3 P4.4a: a pinned-top look (the hero chip) is the hero's Listen, with no slot or heading of its own
+            var stackOrder = built.Where(e => !e.Definition.IsPinnedTop(e.Variant)).ToList();
             Assert.AreEqual(stackOrder.Count, views.Count, "precondition: every block shown, in the card's order");
             float gap = -1f;
             int headed = 0;
@@ -486,9 +490,10 @@ namespace TileStories.Tests
         {
             yield return OpenFull("lamp_military");
             CollectionAssert.AreEqual(
-                new[] { BuiltInBlocks.HeaderKind, BuiltInBlocks.RichTextKind, BuiltInBlocks.QuickFactsKind, BuiltInBlocks.GalleryKind, BuiltInBlocks.AudioGuideKind, BuiltInBlocks.ZoomImageKind },
+                new[] { BuiltInBlocks.HeaderKind, BuiltInBlocks.RichTextKind, BuiltInBlocks.QuickFactsKind, BuiltInBlocks.GalleryKind, BuiltInBlocks.ZoomImageKind },
                 ShownKinds(),
-                "the short card (_3.1 section 9): header, rich_text, quick_facts, gallery, (step 9A) a hero chip on the tone, and (step 13) a zoom_image on a Framework default picture");
+                "the short card (_3.1 section 9): header, rich_text, quick_facts, gallery, and (step 13) a zoom_image on a Framework default picture");
+            Assert.IsInstanceOf<AudioGuideBlockView>(Sheet.Stack.HeroActionViews.Single(), "(step 9A) its hero chip on the tone is the hero's Listen (_3.3 P4.4a)");
             Assert.IsTrue(Sheet.Stack.BoundViews.OfType<GalleryBlockView>().Single().Shots.All(s => s.Image.Texture != null), "its pictures load");
             var facts = Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().Single();
             CollectionAssert.AreEqual(new[] { "Last refuge", "3 m thick" }, facts.Facts.Select(f => f.Value.text));

@@ -3,64 +3,39 @@
    Written ONLY with the --ts-* tokens of CardTokens.uss: no literal colour, size or radius here or in C# (_3.1 section 3,
    _3.3). UI Toolkit USS only: no web-CSS gap / cursor / calc (UI Toolkit drops them with a warning). */
 
-/* ---- header block ---- */
+/* ---- header block: the BAR (_3.3 P4.4a) -- the card's title on ONE line beside the round buttons, cut with an ellipsis only when it
+   truly does not fit; shown at Peek and once the hero's title scrolled away (HeaderBlockView.SetBarTitleShown), else the hero carries
+   it. The hero itself is in Media.uss ---- */
 
-/* the compact variant, an empty subtitle, and the pinned header collapsed by a scrolled stack (BlockStackView) all keep
-   only the top part: title + chip */
-.card-header--compact .card-header__subtitle,
-.card-header__subtitle--empty,
-.poi-card__header--collapsed .card-header__subtitle {
-    display: none;
-}
-
-/* collapsed = ONE line: the title smaller and cut with an ellipsis, the chip gone, the whole header at most
-   --ts-header-collapsed-max-height (a test holds it to that) */
-.card-chip--empty,
-.poi-card__header--collapsed .card-chip {
-    display: none;
-}
-
-.poi-card__header--collapsed .card-header__top {
-    margin-bottom: 0;
-}
-
-.poi-card__header--collapsed .card-header__title {
-    font-size: var(--ts-size-heading);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.card-header__top {
-    margin-bottom: var(--ts-space-3);
-    padding-right: var(--ts-space-6);
+.card-header {
+    flex-grow: 1;
+    justify-content: center;
 }
 
 .card-header__title {
-    font-size: var(--ts-size-title);
+    font-size: var(--ts-size-heading);
     -unity-font-style: bold;
     color: var(--ts-ink);
-    white-space: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     margin: 0;
     padding: 0;
+    opacity: 0;
+    translate: 0 var(--ts-space-2);
+    transition-property: opacity, translate;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: var(--ts-ease);
 }
 
-.card-chip {
-    align-self: flex-start;
-    margin-top: var(--ts-space-2);
-    padding: var(--ts-space-1) var(--ts-space-3);
-    font-size: var(--ts-size-caption);
-    color: var(--ts-on-accent);
-    background-color: var(--ts-accent);
-    border-radius: var(--ts-radius-m);
+.card-header--title-shown .card-header__title {
+    opacity: 1;
+    translate: 0 0;
 }
 
-.card-header__subtitle {
-    font-size: var(--ts-size-body);
-    color: var(--ts-ink-2);
-    white-space: normal;
-    margin: 0 0 var(--ts-space-4) 0;
-    padding: 0;
+/* reduce motion: the title swaps at once */
+.poi-card--chrome-instant .card-header__title {
+    transition-duration: 0s;
 }
 
 /* ---- rich_text ---- */

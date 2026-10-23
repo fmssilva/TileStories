@@ -201,6 +201,19 @@ namespace TileStories.Tests
             using (evt) panel.visualTree.SendEvent(evt);
         }
 
+        // A real finger reads the card down until its hero has left the viewport (_3.3 P4.4a: the footer waits for the hero), then a small
+        // move back up -- reading down hid the bottom area (Hide While Scrolling = down), a move up past ShowAfterTravel is the reader
+        // looking for it -- with the hero still out of view. `dragStack` is the fixture's own real drag of the stack (dy: - = down the card)
+        public static IEnumerator ReadPastTheHero(PoiCardSheetView sheet, System.Func<float, IEnumerator> dragStack)
+        {
+            var header = sheet.Stack.HeaderView;
+            var scroll = sheet.Stack.Scroll;
+            for (int i = 0; i < 10 && scroll.scrollOffset.y < header.HeroBottom() + 120f; i++) yield return dragStack(-120f);
+            yield return dragStack(30f);
+            Assert.IsFalse(HeroRule.InView(scroll.scrollOffset.y, header.HeroBottom()), "precondition: the hero scrolled away (offset "
+                + scroll.scrollOffset.y + ", hero bottom " + header.HeroBottom() + ")");
+        }
+
         // Wait until the sheet's height transition has finished (it animates for --ts-duration)
         public static IEnumerator Settle(float seconds = 0.45f)
         {

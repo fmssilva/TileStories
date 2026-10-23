@@ -188,7 +188,8 @@ namespace TileStories.Tests
             var keys = LampKeys();
             var rows = keys.Where(k => Stack.CompactRowOf(k) != null).ToList();
             Assert.AreEqual(59, rows.Count, "every scrolling block of The Lamp is a row (62 less the header, the pinned chip, the footer CTA)");
-            Assert.AreEqual(3, Stack.BoundViews.Count, "only the header, the hero chip and the sticky CTA bind a view");
+            Assert.AreEqual(2, Stack.BoundViews.Count, "only the header and the sticky CTA bind a stack view");
+            Assert.AreEqual(2, Stack.HeroActionViews.Count, "and the hero its two: the sticky action and Listen (the hero chip, _3.3 P4.4a)");
             foreach (string key in rows)
             {
                 Assert.IsNull(Stack.ViewOfBlock(key), key + ": no view");

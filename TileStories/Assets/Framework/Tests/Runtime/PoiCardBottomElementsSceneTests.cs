@@ -144,6 +144,11 @@ namespace TileStories.Tests
         {
             for (int drag = 0; drag < 80 && Scroll.scrollOffset.y > 1f; drag++) yield return DragStack(Scroll.contentViewport.layout.height * 0.7f);
             Assert.LessOrEqual(Scroll.scrollOffset.y, 1f, "precondition: back at the top of the card");
+            // - a finger resting on the card stops what is left of the last fling (a jump right after a fling inherits its velocity --
+            //   found at _3.3 P4.4a, recorded for _3.2): the reader's next tap starts from a still card
+            var still = Scroll.contentViewport.worldBound.center;
+            yield return CardTestInput.TouchDrag(Scroll.panel, still, Vector2.zero, frames: 1);
+            yield return CardTestInput.Settle(0.3f);
         }
 
         // Real drags down the card until the stack rests at the END of its range (the range is read again each time: a reveal at the end
@@ -166,7 +171,9 @@ namespace TileStories.Tests
         {
             var slot = Sheet.Stack.SlotOfBlock(block);
             if (slot.layout.y <= Range - OnePixel)
-                Assert.AreEqual(0f, slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its block's top meets the viewport's top");
+                Assert.AreEqual(0f, slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its block's top meets the viewport's top (slot y "
+                    + slot.layout.y + ", offset " + Scroll.scrollOffset.y + ", range " + Range + ", viewport " + Scroll.contentViewport.layout.height
+                    + ", footer " + Sheet.Chrome.FooterShown + ", bar " + Sheet.Chrome.BottomNavShown + ", jumping " + Sheet.Nav.IsJumping + ")");
             else
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");
         }

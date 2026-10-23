@@ -72,19 +72,21 @@ namespace TileStories.Tests
             yield return null;
             Assert.IsTrue(Sheet.Drag.IsDragging, "the grabber takes the finger at touch-down");
             Assert.IsTrue(Sheet.Root.ClassListContains(DraggingClass), "the drag class is on: no height transition under the finger");
-            foreach (float up in new[] { 20f, 60f, 100f })
+            // - the last move goes 60 % of the way to Half (P4.4a: Peek is the 57 px bar, so a fixed 100 was nearer Peek)
+            float far = (Sheet.Stops.Half - Sheet.Stops.Peek) * 0.6f;
+            foreach (float up in new[] { 20f, 60f, far })
             {
                 yield return MoveTo(panel, at + new Vector2(0f, -up), SlowStep);
                 Assert.AreEqual(rest + up, Sheet.TargetHeight, Exact, up + " units up: the sheet is exactly that much taller");
             }
             _now += SlowStep;
-            CardTestInput.TouchUp(panel, at + new Vector2(0f, -100f));
+            CardTestInput.TouchUp(panel, at + new Vector2(0f, -far));
             yield return null;
             Assert.IsFalse(Sheet.Drag.IsDragging, "the finger lifted: the drag is over");
             Assert.IsFalse(Sheet.Root.ClassListContains(DraggingClass), "the class is off: the sheet animates to its stop");
 
-            // - 100 up from Peek is nearer Half than Peek (the precondition says by how much)
-            float released = rest + 100f;
+            // - 60 % of the way up from Peek is nearer Half than Peek (the precondition says by how much)
+            float released = rest + far;
             Assert.Less(Mathf.Abs(released - Sheet.Stops.Half), Mathf.Abs(released - Sheet.Stops.Peek),
                 "precondition: " + released + " is nearer Half (" + Sheet.Stops.Half + ") than Peek (" + Sheet.Stops.Peek + ")");
             yield return CardTestInput.Settle();

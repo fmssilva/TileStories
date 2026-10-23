@@ -313,11 +313,12 @@ namespace TileStories.Tests
             yield return UseAuto(BuiltInBlocks.NavContentsKind);
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             var targets = Model.Targets;
-            // - setup: scroll a little first, inside the (long) list, so the header collapses and the viewport -- and with it the spy line,
-            //   a third of it -- stops growing; then the line just above the first target's top (nothing of the card's own blocks read yet)
-            Scroll.scrollOffset = new Vector2(0f, 200f);
+            // - setup: scroll past the hero first, inside the (long) list, so the chrome settles (the sticky bar waits for the hero, _3.3
+            //   P4.4a) and the viewport -- and with it the spy line, a third of it -- keeps its size; then the line just above the first
+            //   target's top (nothing of the card's own blocks read yet)
+            Scroll.scrollOffset = new Vector2(0f, Mathf.Max(200f, Sheet.Stack.HeaderView.HeroBottom() + 1f));
             yield return CardTestInput.Settle(0.5f);
-            Assert.IsTrue(Sheet.Stack.HeaderCollapsed, "precondition: the header collapsed, the viewport is at its reading size");
+            Assert.IsFalse(HeroRule.InView(Scroll.scrollOffset.y, Sheet.Stack.HeaderView.HeroBottom()), "precondition: the hero scrolled away, the viewport is at its reading size");
             Assert.IsEmpty(Ticked, "precondition: the list's top shows no block of the card yet");
             float spy = Viewport * NavScrollRule.SpyLineFraction;
             Scroll.scrollOffset = new Vector2(0f, TopOf(targets[0]) - spy - 10f);

@@ -335,6 +335,25 @@
                         "display": "inline",
                         "fields": [
                             {
+                                "key": "eyebrow",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Lisbon · 11th century to today"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Lisboa · do século XI até hoje"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
                                 "key": "title",
                                 "text": [
                                     {
@@ -444,6 +463,16 @@
                         "variant": "chips",
                         "display": "inline",
                         "fields": [
+                            {
+                                "key": "show_category",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "category",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
                             {
                                 "key": "heading",
                                 "text": [
@@ -8970,6 +8999,25 @@
                         "display": "inline",
                         "fields": [
                             {
+                                "key": "eyebrow",
+                                "text": [
+                                    {
+                                        "lang": "en",
+                                        "value": "Lisbon · c. 1500 to 1755"
+                                    },
+                                    {
+                                        "lang": "pt",
+                                        "value": "Lisboa · c. 1500 a 1755"
+                                    }
+                                ],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
+                            {
                                 "key": "title",
                                 "text": [
                                     {
@@ -9025,6 +9073,16 @@
                         "variant": "grid_hairline",
                         "display": "inline",
                         "fields": [
+                            {
+                                "key": "show_category",
+                                "text": [],
+                                "number": 0.0,
+                                "flag": false,
+                                "value": "category",
+                                "asset": "",
+                                "asset_by_language": [],
+                                "items": []
+                            },
                             {
                                 "key": "heading",
                                 "text": [

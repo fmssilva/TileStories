@@ -153,6 +153,9 @@ namespace TileStories
             public const string PlaceInArNotLocalised = "place_in_ar_not_localised";
             // The language chip beside the close button (15.3.2): its tooltip and accessible name
             public const string LanguageSwitch = "language_switch";
+            // the hero (_3.3 P4.4a): its Listen button ({0} = the guide's length, m:ss) and the Category fact Quick Facts adds when asked
+            public const string HeroListen = "hero_listen";
+            public const string FactsCategory = "facts_category";
 
             // The words a visitor reads for each family of the card's ontology (_3.2 section 2.2, BuiltInFamilies).
             // One per registered family: what a navigation element labels its section with. `guides` reads "Listen"
@@ -285,7 +288,7 @@ namespace TileStories
                 AudioPlay, AudioPause, AudioSpeed, AudioCaptions, AudioSeek, AudioQueued, AudioUnavailable, MiniPlayerOpen,
                 MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters, Model3DHint, Model3DLoading,
                 Panorama360DragHint, Panorama360GyroHint, Panorama360Loading, PlaceInArButton, PlaceInArRemove, PlaceInArPlaced, PlaceInArNotLocalised,
-                LanguageSwitch,
+                LanguageSwitch, HeroListen, FactsCategory,
                 FamilyAbout, FamilyMedia, FamilyGuides, FamilyStories, FamilyAr, FamilyPlay, FamilyVisit, FamilyCommunity, FamilyNavigation, FamilyMeta,
                 FormatRead, FormatLook, FormatWatch, FormatListen, FormatModel, FormatInteract,
                 KindHeader, KindStatus, KindQuickFacts, KindRichText, KindFunFact, KindPullQuote, KindProcessSteps, KindSwatches,

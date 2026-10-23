@@ -60,7 +60,8 @@ namespace TileStories.Tests
             yield return OpenFull("lamp");
             var facts = Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().ToList();
             Assert.AreEqual(3, facts.Count, "chips, grid_hairline, big_numbers");
-            CollectionAssert.AreEqual(new[] { "Style", "Material", "Access" }, facts[0].Facts.Select(f => f.Label.text));
+            // - _3.3 P4.4a: The Lamp's first facts block shows the category first (Show Category)
+            CollectionAssert.AreEqual(new[] { "Category", "Style", "Material", "Access" }, facts[0].Facts.Select(f => f.Label.text));
             CollectionAssert.AreEqual(new[] { "1147", "11", "c. 1500", "1938 to 1940" }, facts[1].Facts.Select(f => f.Value.text));
             Assert.AreEqual("800+", facts[2].Facts[1].Value.text);
             Assert.IsTrue(facts[2].Root.ClassListContains("card-facts--big_numbers"));
@@ -169,27 +170,44 @@ namespace TileStories.Tests
             Assert.Greater(Sheet.Stack.BoundViews.Count, 5, "the rest of the card still is");
         }
 
-        // _3.1 step 6C: the header chip names the category only; the header's Show Level adds the hierarchy level
+        // _3.3 P4.4a (was the header chip, _3.1 6C): the category left the header; a Quick Facts block's Show Category names it as its first
+        // fact -- the category alone (The Lamp's authored choice), with its hierarchy level on Category And Level, and no fact on No
         [UnityTest]
-        public IEnumerator TheHeaderChip_IsTheCategoryAlone_AndShowLevelAddsTheLevel()
+        public IEnumerator QuickFactsShowTheCategory_Alone_WithItsLevel_OrNotAtAll()
         {
             yield return Select("lamp");
-            Assert.AreEqual("Royal Government", Header.ChipText, "default: no hierarchy level word for the visitor");
+            var block = Session.SearchPois.First(p => p.id == "lamp").card.blocks.First(b => b.kind == BuiltInBlocks.QuickFactsKind);
+            var choice = block.fields.Find(f => f.key == BuiltInBlocks.QuickFactsCategoryField);
+            Assert.AreEqual(BuiltInBlocks.QuickFactsCategoryOnly, choice?.value, "precondition: The Lamp's first facts block shows the category");
+            var facts = Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().First();
+            Assert.AreEqual("Category", facts.Facts[0].Label.text);
+            Assert.AreEqual("Royal Government", facts.Facts[0].Value.text, "the category's name, no hierarchy level word for the visitor");
+            int authored = facts.Facts.Count - 1;
+
             SelectionEventBus.Clear();
-            var header = Session.SearchPois.First(p => p.id == "lamp").card.blocks[0];
-            header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderShowLevelField, flag = true });
+            choice.value = BuiltInBlocks.QuickFactsCategoryAndLevel;
             yield return Select("lamp");
-            Assert.AreEqual("Royal Government - Hub", Header.ChipText, "Show Level on: category - level");
+            facts = Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().First();
+            Assert.AreEqual("Royal Government - Hub", facts.Facts[0].Value.text, "Category And Level: category - level");
+
+            SelectionEventBus.Clear();
+            choice.value = BuiltInBlocks.QuickFactsCategoryNone;
+            yield return Select("lamp");
+            facts = Sheet.Stack.BoundViews.OfType<QuickFactsBlockView>().First();
+            Assert.AreEqual(authored, facts.Facts.Count, "No: the authored facts alone");
+            Assert.AreEqual("Style", facts.Facts[0].Label.text, "...the first authored one first");
+            Assert.IsNull(Header.Root.Q(className: "card-chip"), "and the header never names the category");
         }
 
         [UnityTest]
         public IEnumerator ARealTapOnTheStickyAction_ShowsThePointOnTheWall_TheCardLowersAndTheSelectionStays()
         {
             yield return OpenFull("lamp");
-            var sticky = Sheet.Stack.BoundViews.OfType<ActionsBlockView>().Last();
+            // - _3.3 P4.4a: at the top of the card the sticky action is drawn in the hero (the footer waits for it to scroll away)
+            var sticky = (ActionsBlockView)Sheet.Stack.HeroActionViews[0];
             var button = sticky.Actions.Single().Button;
             Assert.AreEqual("Show me where it is", sticky.Actions[0].Label.text);
-            Assert.LessOrEqual(button.worldBound.yMax, Sheet.Root.worldBound.yMax + 1f, "precondition: in reach at the bottom of the full card");
+            Assert.LessOrEqual(button.worldBound.yMax, Sheet.Root.worldBound.yMax + 1f, "precondition: in reach on the full card");
             yield return Capture("Card_Lamp_Actions");
 
             yield return CardTestInput.Tap(button.panel, button.worldBound.center);
@@ -243,10 +261,10 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.2f);
             float scrolled = Sheet.Stack.Scroll.scrollOffset.y;
             Assert.Greater(scrolled, 20f, "the real wheel scrolled the real card");
-            Assert.AreEqual(scrolled * HeaderBlockView.ParallaxFactor, Header.ParallaxOffset, 0.5f, "the picture lags at half the scroll");
+            Assert.AreEqual(scrolled * HeroMotionRule.ParallaxFactor, Header.ParallaxOffset, 0.5f, "the picture lags behind the scroll (0.45 of it)");
             float frameMoved = frameTop - Header.HeroPart.worldBound.yMin, pictureMoved = pictureTop - Header.Picture.Root.worldBound.yMin;
             Assert.AreEqual(Header.ParallaxOffset, frameMoved - pictureMoved, 1f, "on screen the picture moved less than its frame, by exactly its slide");
-            Assert.IsTrue(Sheet.Stack.HeaderCollapsed, "and the pinned header collapsed as for any scroll");
+            Assert.IsFalse(Sheet.Stack.BarShowsTitle, "a small scroll leaves the hero's title in view: the bar shows none (P4.4a)");
 
             SelectionEventBus.Clear();
             yield return null;
@@ -285,7 +303,7 @@ namespace TileStories.Tests
             SelectionEventBus.Clear();
             header.variant = BuiltInBlocks.HeaderTextOnly;
             yield return OpenFull("lamp");
-            Assert.IsFalse(Header.HasHero, "the text-only look: no picture");
+            Assert.IsFalse(Header.HasPicture, "the text-only look: no picture (its hero is the plate)");
             Assert.AreEqual(0, Card.Media.RefCount("images/castle_hero.jpg"), "...and none loaded");
         }
     }
