@@ -746,3 +746,11 @@ rows and the chip through the card's language, with one Editor row per other wal
   started from the SAME first colour and reached (53,91,205) (0.055): the 1.5 s wait is REAL time while the shader turns on game time, which
   lags in the first, slow frames of a run (Unity caps a frame's delta). Fix when the spike is next touched: wait on `Time.time` (or read
   `_Time` back) for a quarter turn, or assert the change over a whole turn. Nothing of the theme reaches it (no `.ts-app` on its stage).
+
+## "On the wall" cards: UI Toolkit blocks drawn in world space (2026-10-23, from `_3.3` R15.4)
+
+The developer wants, later: tap a marker and a compact card (a short description + a picture slider) appears FIXED ON THE WALL
+under it, reusing the card's UI Toolkit components and block previews. World-space UI Toolkit exists since Unity 6.2 (a
+UIDocument with a World Space PanelSettings; input by camera rays against colliders). `_3.3` R15.2 keeps components and block
+views host-agnostic (guard test) so this becomes a hosting job. Its own domain later, starting with a spike: the AR camera as
+event camera, legibility at 1-3 m, sorting against the UGUI markers, a swipe on a world carousel, the cost with the AR session.
