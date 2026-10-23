@@ -18,7 +18,7 @@ All slots are FILLED (status column), except where it says otherwise. Text lives
 | block_6 | fun_fact flip | -- | 2+ facts WITH headings | three facts with headings (P 7) | wired |
 | block_7 | audio_guide player | `audio/portugal_tourism_guide_en.mp3` (232.9 s, no captions) | a real 2 to 4 min guide + exact captions | `audio/guide_paco_en.mp3` 191 s + `.vtt`; `guide_paco_pt.mp3` 144 s + `.vtt` | wired: EN = the clip, PT = its Per Language file (PT voice: Piper pt_PT) |
 | block_11 | wall_locator strip | -- | no content | none | n/a |
-| block_8 | related carousel (nearest) | -- | real neighbours | four real neighbours (P 11); the rename is `_3.3` | text filled, rename out of scope |
+| block_8 | related carousel (nearest) | -- | real neighbours | four real neighbours (P 11); the rename is `_3.3` | text filled; renamed in P1c |
 | block_9 | sources list | Wikipedia x2 | real sources | P 12 / `SOURCES.md` | wired |
 | NEW | before_after slider (the card has none today) | -- | 4:3 pair, same proportion, similar angle | `images/paco_before_1755.jpg` + `images/paco_after_today.jpg`, both 2048x1536, labels (P 8) | wired (new block_12) |
 | NEW | hotspot_image (the card has none today) | -- | 3 to 5 features with positions | `images/paco_hotspots.jpg` 2048x1704, five spots (P 9) | wired |
@@ -56,12 +56,12 @@ All slots are FILLED (status column), except where it says otherwise. Text lives
 
 | Item | Proposal | Where | Status (P1b part 2) |
 |---|---|---|---|
-| 2 one name | marker label = card title: "Ribeira Palace" / "Paço da Ribeira"; subtitle "Royal palace, lost in 1755" / "Palácio real, perdido em 1755". Same rule for the Lamp: "St George's Castle" / "Castelo de São Jorge". Renaming `name` is the `_3.3` rename block | P 0, C 0 | card title + subtitle wired; the marker `name` rename is P1c |
+| 2 one name | marker label = card title: "Ribeira Palace" / "Paço da Ribeira"; subtitle "Royal palace, lost in 1755" / "Palácio real, perdido em 1755". Same rule for the Lamp: "St George's Castle" / "Castelo de São Jorge". Renaming `name` is the `_3.3` rename block | P 0, C 0 | card title + subtitle wired; the marker `name` renamed in P1c (2026-10-23): "Ribeira Palace", "St George's Castle" (PT names = search keywords) |
 | 3 translated category | `royal_government` -> PT "Governo Real" | P 0 | wired (Category label per language; PoiCardSceneTests asserts the PT chip) |
 | 5 fun-fact headings | each fact has a heading ("Lost in a day", "A name that stayed", "Eight months of music") | P 7 | wired (fun_fact item `heading`, P1b 1b.4) |
 | 5 doubled "pinch" | the zoom caption describes the picture only; the card's hint stays | P 6 | wired |
 | 1 placeholders, "PLACEHOLDER DETAIL" | every Painting and castle slot above has a real picture | images | wired; every placeholder file deleted (`placeholder_hero.png` and `lamp_tone.*` stay as seam / seek fixtures) |
-| 7 fixture neighbours | four real neighbours proposed | P 11 | text filled; the rename is P1c |
+| 7 fixture neighbours | four real neighbours proposed | P 11 | DONE in P1c: the five neighbours of each main point are real places (see PACO_RIBEIRA_text.md section 11) |
 | 4, 6, 8 | design / layout items: P3 / P5, not P1a | -- | open, `_3.3` TODOs |
 
 ## Audio

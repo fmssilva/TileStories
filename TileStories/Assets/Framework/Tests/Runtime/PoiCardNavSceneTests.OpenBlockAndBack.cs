@@ -60,9 +60,10 @@ namespace TileStories.Tests
             var cancels = new List<VisualElement>();
             Host.Root.RegisterCallback<NavigationCancelEvent>(e => cancels.Add(e.target as VisualElement), TrickleDown.TrickleDown);
             field.Focus();
-            field.value = "lamp";
+            string typed = ConfigCopy().pois.Single(p => p.id == "lamp").name;   // the wall's own word for the Lamp, read from its config
+            field.value = typed;
             yield return Wait(0.4f);
-            Assert.AreEqual("lamp", Host.Query, "precondition: the search ran on the typed words");
+            Assert.AreEqual(typed, Host.Query, "precondition: the search ran on the typed words");
             var focused = field.panel.focusController.focusedElement;
             Assert.IsNotNull(focused, "precondition: the field holds the focus");
             var results = ListIds();
@@ -73,8 +74,8 @@ namespace TileStories.Tests
 
             Assert.AreEqual(1, cancels.Count, "precondition: the real Escape reached the search's panel, as one Cancel");
             Assert.IsTrue(cancels[0] == field || field.Contains(cancels[0]), "precondition: ... sent to the focused field (its inner text element)");
-            Assert.AreEqual("lamp", field.value, "Escape leaves the typed words");
-            Assert.AreEqual("lamp", Host.Query, "and the search");
+            Assert.AreEqual(typed, field.value, "Escape leaves the typed words");
+            Assert.AreEqual(typed, Host.Query, "and the search");
             CollectionAssert.AreEquivalent(results, ListIds(), "and its results");
             Assert.AreSame(focused, field.panel.focusController.focusedElement, "and the focus");
         }

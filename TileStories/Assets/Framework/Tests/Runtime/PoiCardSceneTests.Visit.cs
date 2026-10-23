@@ -135,7 +135,7 @@ namespace TileStories.Tests
             CollectionAssert.AreEqual(new[] { "lamp_military", "lamp_religious", "lamp_residential" }, carousel.Cards.Select(c => c.PoiId).ToList(),
                 "the Points, in the order written");
             var military = Session.SearchPois.First(p => p.id == "lamp_military");
-            Assert.AreEqual("Lamp - Military", military.name, "the fixture's own name is untouched");
+            Assert.AreEqual(ConfigCopy().pois.Single(p => p.id == "lamp_military").name, military.name, "the point's own name is untouched");
             Assert.AreEqual(BlockStackBuilder.CardTitleOf(military, "en", "en"), carousel.Cards[0].Title.text, "named by its card title");
             foreach (var card in carousel.Cards)
                 Assert.IsTrue(CardTestInput.IsShown(card.Box, carousel.Root), "every picked card can be seen in the strip");

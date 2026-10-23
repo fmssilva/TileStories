@@ -153,7 +153,7 @@ namespace TileStories.Tests
                 SelectionEventBus.Clear();
                 yield return CardTestInput.Settle();
             }
-            Assert.AreEqual("The Painting", Session.SearchPois.Single(p => p.id == Painting).name, "the card never renames the point");
+            Assert.AreEqual(ConfigCopy().pois.Single(p => p.id == Painting).name, Session.SearchPois.Single(p => p.id == Painting).name, "the card never renames the point");
         }
 
         [UnityTest]

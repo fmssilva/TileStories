@@ -264,7 +264,7 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(PlaceTheLampsArch(wall));
             ShowCard(sheet, wall, LampMilitary);
             Assert.AreEqual(PlacedModelChipRule.State.OtherCard, chip.State, "another point's card (the model was kept)");
-            Assert.AreEqual("The Lamp is placed by the wall", chip.Text.text, "names the point by its name");
+            Assert.AreEqual(wall.pois.Single(poi => poi.id == Lamp).name + " is placed by the wall", chip.Text.text, "names the point by its name");
             Assert.AreEqual(DisplayStyle.None, chip.RemoveButton.style.display.value, "and offers NO Remove: only the first card does");
             Assert.AreEqual(PickingMode.Position, chip.Words.pickingMode, "its words lead to the card that placed it");
             chip.Remove();
@@ -272,7 +272,7 @@ namespace TileStories.Editor.Tests
 
             ShowCard(sheet, wall, LampMilitary, "pt");
             StringAssert.Contains("à parede", chip.Text.text, "Portuguese keeps its accents");
-            StringAssert.StartsWith("The Lamp", chip.Text.text, "the point's name");
+            StringAssert.StartsWith(wall.pois.Single(poi => poi.id == Lamp).name, chip.Text.text, "the point's name");
 
             wall.card_settings.navigation.placed_model_control = CardOptions.PlacedModelNone;
             ShowCard(sheet, wall);

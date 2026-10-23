@@ -13,49 +13,39 @@
 So start by reading them all. 
 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- P1b part 2: the 5 red tests, docs, captures, full runs`
+## `And now: _3.3 POI Card Look, Feel & Motion -- P1c real names for the demo points`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
-Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts: P1b ADDED 'ł' to both on purpose (122 -> 123 characters, still Static) -- keep that change; `git checkout --` them ONLY
-if they changed beyond it (compare the character table). No baseline run: the tree is P1b's own (full EditMode 2031/2031 on it).
+Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. The two marker
+SDF fonts carry 'ł' since P1b (123 characters) -- `git checkout --` them only if they changed beyond that. Run the full EditMode
+suite with Unity FOCUSED as the baseline (known: some Editor-window tests fail unfocused -- `__mixed_TODOs.md` "Editor-window
+tests depend on focus"; do not chase them here).
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- the TODO "From P1b" and R1-R8. Your own tracker
-`proj_guides/__curr_plan_tracker.md` is the state of this block: its HANDOFF section (the 5 red tests with their diagnosis), its
-open steps 1b.6 / 1b.7 and the re-based list. Continue in it.
-REQUIRED READING (all lines): `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5; `_3.2_POI_Card_Navigation.md` -- the scroll-spy /
-`NavScrollRule` section and the Next / Finished rules (the tests below are `_3.2` behaviour).
-WORKER MODEL: Opus-class -- one of the reds may be a real navigation bug; the rest need test-intent judgement.
-TEST PLAN: the targeted 49 Card / Poi PlayMode fixtures green first, then the FULL PlayMode run (owed: the shipped wall changed),
-then the full EditMode suite. Unity in the background for the full runs.
+Domain spec: `proj_guides/_3.3_POI_Card_Styles.md` -- the TODOs "[demo content, from `_3.2` step 17b]" and "From P1b".
+REQUIRED READING: `proj_guides/detail_card/content/CONTENT_MAP.md` "The F5 text fixes" row 2 (the names); `_3.2.1_Audit.md` F5
+items 2 and 7; `.clinerules/40-testing.md` 4.2.4b; `_2.6_Select_Filter_Search.md` (the examples that use these names).
+WORKER MODEL: Sonnet-class -- a well-defined rename with test re-bases, no new code.
+TEST PLAN: the search scene fixtures + every Card / Poi fixture that names a point first, then the full EditMode suite. The
+full PlayMode run is NOT owed (identity data only, no shared code): name the targeted fixtures you ran and why.
 
-PART 1 -- the 5 red tests. For each, read the test's INTENT first and write it in the tracker in one line, then:
-1-2. `PoiCardBottomElementsSceneTests.ARealTapOnNext_...AllTheWayToTheEnd` and `ARealDragToTheEnd_FinishesTheBar_...InPortuguese`:
-   re-base to the real behaviour (the last block is taller than the viewport): after the walk / drag, a real drag to the scroll
-   END (`scrollOffset.y >= Range - NavScrollRule.EndTolerance`), then assert the reveal / the bar. Do not change the framework.
-3. `PoiCardNavSceneTests.AJumpToABlockInTheFinalScreen_...`: keep its subject (a block whose top cannot reach the viewport top
-   is clamped to the range): choose the case from the measured layout (the lowest block whose top > Range), never a hard-coded key.
-4. `PoiCardPaintingSceneTests.ARealDragOfThePaintingsCard_...`: drag until the end with a cap, instead of a fixed count.
-5. `PoiCardPaintingSceneTests.ARealTapOnEveryTab_...` (after a jump to Listen the spy marks the NEXT tab): DIAGNOSE with numbers
-   before touching anything -- Listen's section height, the spy line's offset, where the jump landed, what the spy names one frame
-   and 0.5 s after the jump. If a short section after a jump loses its mark to the next section, that is a REAL `NavScrollRule`
-   bug a visitor would see (tap "Listen", the bar marks "Play"): fix it in the rule, add a PURE EditMode test with a short-section
-   case, mutation-prove it (break it, the new test goes red, restore). If the rule is right and the test's precondition is what
-   changed, re-base it. Either way say which, with the numbers, as the report's headline.
-Every re-base joins the tracker's old -> new list.
+WHAT: give the demo points real identity, so the first screen has one name and the neighbour lists read like places:
+1. `painting` -> name "Ribeira Palace", `lamp` -> "St George's Castle" (the marker label = the card title). Read first whether a
+   POI `name` has a per-language form. If it does, add "Paço da Ribeira" / "Castelo de São Jorge" for pt. If it does not, keep
+   the English name and add the PT names as search keywords. Do NOT build per-language POI names: that is a `_2.x` domain item.
+   Write the gap in `__mixed_TODOs.md`.
+2. Summaries "POI_Lamp" / "POI_Painting" / "POI_Camera" and every "X - Category" point's "POI_<id>" -> short real summaries
+   (one line, the kind a visitor reads under a title).
+3. The "X - Category" points ("Painting - Infrastructure" ...): real place names around Lisbon's riverside and the castle hill,
+   so "Nearby" lists places (F5 item 7). Ids stay the same: only names and summaries change.
+HOW: through the config path the POI Editor uses (both config copies). Every search / card test that typed an old name or count:
+re-base it so the expected value comes from the config (4.2.4b), never a re-typed string. List every re-base old -> new.
+VISUALS: Peek of both points at 390 pt, EN and PT, the "Nearby" block, and the search results for "palace" / "castelo". Open each
+capture and judge it in one sentence.
+OUT OF SCOPE: per-language POI names, layout, styles, any other content.
+Stop when the targeted fixtures and the full EditMode suite are green. Update `_2.6` examples and `_3.3` TODOs (mark the rename
+done). Ideas outside this domain -> proj_guides/__mixed_TODOs.md. Finish with the final report of `.clinerules/60-finishing.md`
+6.4. Do not commit: the Architect commits after the review.
 
-PART 2 -- 1b.6 docs: `10-structure.md` (CardMedia tree: images/, video/, audio/, removed files, `generate_card_media.py` gone,
-the new fields and tests of 1b.2-1b.4), `_3.3` (a line under R5: "P1b done" with the commit's counts; the TODOs P1b added),
-CONTENT_MAP slots `wired`, README + SOURCES checked next to the media.
-PART 3 -- 1b.7 captures: The Painting and The Lamp at 390 pt, EN and PT: Peek, Half, Full and every Full screen to the end. Open
-them and judge each in one sentence; list every visual defect the real content exposes (long blocks, picture crops, captions,
-the header at Half) in `_3.3` TODOs tagged [P3] / [P5] -- do NOT fix layout or styles.
-Then the targeted 49 fixtures, the full PlayMode run, the full EditMode suite.
-
-OUT OF SCOPE: renaming points (P1c); layout / style fixes; changing what Finished means (P3).
-Stop when the full PlayMode run and the full EditMode suite are green and the docs are updated. Ideas outside this domain ->
-proj_guides/__mixed_TODOs.md. If the guide disagrees with the real code, STOP and report. Finish with the final report of
-`.clinerules/60-finishing.md` 6.4. Commit only if the developer asks (the Architect commits after the review).
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
@@ -155,9 +145,11 @@ Per ./.clinerules/50-terminal_and_tools.md:
 - Stop ONLY for: (1) a failed GATE; (2) a decision with a real trade-off that the brief and the guides do not settle; (3) the
   brief's stop condition; (4) the session budget below. "The rest looks big" is not a reason to stop: finish the current
   sub-step green and continue with the next.
-- **Session budget:** if the session is past roughly 500K tokens (or the context has been compacted once), finish the current
-  sub-step green, then stop with a HANDOFF: what is done (with commits), what is not, the exact next sub-step, and the state of
-  the tree. Never leave the tree red or half-edited.
+- **Session budget:** past roughly 500K tokens (or once the context has been compacted), START no new sub-step that writes code
+  or changes behaviour. CLOSING work goes on up to roughly 700K: waiting for a running suite, re-running a red test alone or in
+  a small group to see whether it is yours, docs, captures, the final report. Then stop with a HANDOFF: what is done (with
+  commits), what is not, the exact next sub-step, and the state of the tree. Never leave the tree red or half-edited. Wait for
+  long runs without polling (`40-testing.md` 4.2.5 "Wait without burning tokens"): every poll re-reads the whole session.
 
 ### 2.5. Hard Stop
 When you complete all the Iterative Execution Cycles for each step/task in the plan AND WE ACHIEVE AND TESTED WITH REAL TEST THAT ALL FEATURES WORK, ALL CONFIG PARAMS WORK AND ALL TESTS PASS, so then **STOP immediately**. Output the final learning summary, PUT the "LivingRoom Sene" to be ready to play in unity (not the test scenes tc...), and STOP. 

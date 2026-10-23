@@ -15,7 +15,7 @@ Where today's text is a fixture joke about "the panel" (a tile panel that does n
 | Subtitle | Medieval castle and royal palace | Castelo medieval e paço real |
 | Category chip | Military | Militar |
 
-Today the marker says "The Lamp" (the point's `name`, an identity field: renaming it is the `_3.3` rename block, not P1a). The point's
+DONE in P1c (2026-10-23): the marker says "St George's Castle" (the point's `name`; "Castelo de São Jorge" is its search keyword). The point's
 `category` key is `royal_government`; the card's own category chip reads "Military" and is already translated.
 
 ## 1. block_1 `header` image_parallax

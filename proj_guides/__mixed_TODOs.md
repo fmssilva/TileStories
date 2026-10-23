@@ -639,6 +639,8 @@ moved to `_3.3` (demo words, the header at Half) and to `_5.1` (narrow window, C
 - **A children's theme** to think through then: more colour, rounder shapes, illustrations / cartoon characters, playful motion
   (Duolingo-like), bigger touch targets, simpler words. Probably more than tokens: it may want its own block variants and its own
   illustration set, so judge it as a product, not a palette.
+  References the developer collected: `proj_guides/detail_card/kids_styles/` (Duolingo lessons: flat bright cards, chunky
+  rounded buttons, a character with speech bubbles; a low-poly animal "jungle" game).
 - **A visitor profile at RUNTIME** ("premium" / "kids" / later others), chosen by the visitor, not only by the wall developer --
   with the wall deciding which profiles it offers. Same switch-classes mechanism as light / dark; needs the profile store
   (`CardLocalState` or an app-level one) and an onboarding question.
@@ -695,3 +697,22 @@ null"); the same 11 tests alone, focused -> 11/11; the full suite again, FOCUSED
 Editor-window tests: the same family as the watched flakes of the `_3.2` hand-off. `40-testing.md` 4.2.3 says tests never depend on
 window focus -- these do. One harness block: find what a real click / drag needs from focus in these fixtures (the window's own focus,
 `EditorWindow.focusedWindow`, a repaint) and make them independent, or make them fail with that sentence instead of an assert.
+
+## `TileStories/.gitattributes` macros are ignored (2026-10-23, low priority)
+
+Every `git add` warns `[attr]lfs / unity-json / unity-yaml ... not allowed: TileStories/.gitattributes`: git accepts attribute MACROS only
+in the repository's top-level `.gitattributes`, and the repo root is one folder above the Unity project. So the Unity template's LFS
+rules, `eol=lf` for YAML / JSON and the `unityyamlmerge` driver have NEVER applied (`git lfs ls-files` = 0 files). Nothing is broken
+today, but the file promises what it does not do. Decide: drop the macro lines (and keep plain `text` / `binary` rules), or move
+the file to the repo root -- which would turn LFS ON for media and needs `git lfs install` + a history decision. Not before a quiet
+moment between domains.
+
+## Per-language POI names (2026-10-23, from `_3.3` P1c)
+
+`POIData.name` and `POIData.summary` are ONE plain string each (`WallConfigData.cs`), unlike the card header's title / subtitle, which are
+`LocalizedText`. P1c gave the demo points real English names ("Ribeira Palace", "St George's Castle") and carried the Portuguese names as
+`search_keywords` ("Paço da Ribeira", "Castelo de São Jorge"), so the search finds them in both languages but the MARKER label, the search
+result rows, the "Nearby" cards of points without a header title and the placed-model chip ("X is placed by the wall") stay English on a
+Portuguese card. Same family as the search having no visitor language (`_2.6`) and the status names (`_3.3` TODOs). A `_2.x` domain item:
+`name_by_language` / `summary_by_language` on `POIData` (like `label_by_language` on the category), read by the marker label, the search
+rows and the chip through the card's language, with one Editor row per other wall language under the name.

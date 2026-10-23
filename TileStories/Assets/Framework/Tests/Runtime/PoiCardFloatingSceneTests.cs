@@ -440,7 +440,7 @@ namespace TileStories.Tests
             Assert.AreEqual(LampMilitary, Card.ShownPoiId, "precondition: another point's card");
             Assert.IsNotNull(Placement.Placed, "Keep Model On Switch kept the model");
             Assert.AreEqual(PlacedModelChipRule.State.OtherCard, Chip.State);
-            Assert.AreEqual("The Lamp is placed by the wall", Chip.Text.text, "names the point by its name");
+            Assert.AreEqual(ConfigCopy().pois.Single(p => p.id == Lamp).name + " is placed by the wall", Chip.Text.text, "names the point by its name");
             Assert.IsFalse(CardTestInput.IsShown(Chip.RemoveButton, Sheet.Layer), "no Remove on another card");
             AssertWhollyOnScreen(Chip.Root.worldBound, "the chip on another card");
             Assert.LessOrEqual(Chip.Root.worldBound.yMax, Sheet.Root.worldBound.yMin + OnePixel, "above the sheet at peek");

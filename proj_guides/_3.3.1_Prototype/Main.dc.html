@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ribeira Palace card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&amp;family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Inter:wght@400;500;600&amp;family=Source+Serif+4:opsz,wght@8..60,600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+.ts-root *{box-sizing:border-box}
+.ts-root button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:left}
+.press{transition:transform 140ms ease-out}
+.press:active{transform:scale(.97)}
+.scroll,.strip{scrollbar-width:none}
+.scroll::-webkit-scrollbar,.strip::-webkit-scrollbar{display:none}
+.strip.snapx{scroll-snap-type:x mandatory}
+.snap{scroll-snap-align:start}
+
+/* the camera: the wall the phone points at, drifting like a hand-held view */
+@keyframes heropan{from{transform:translateX(0)}to{transform:translateX(calc(-100% + 390px))}}
+.heropan{animation:heropan 26s ease-in-out infinite alternate}
+.rm .heropan{animation:none !important}
+@keyframes cam{0%{transform:scale(1.25) translate(0,0) rotate(0deg)}33%{transform:scale(1.28) translate(-4%,2%) rotate(-.6deg)}66%{transform:scale(1.25) translate(3%,-1.5%) rotate(.5deg)}100%{transform:scale(1.27) translate(-1%,1%) rotate(0deg)}}
+.cam{animation:cam 16s ease-in-out infinite alternate}
+
+/* living glass: a section is a sheet of tinted glass laid over the one before, with soft coloured light moving inside it */
+.sect{position:relative;border-radius:30px;padding:16px 12px 22px;overflow:hidden;border:1px solid var(--glassEdge);box-shadow:inset 0 1px 0 var(--glassHi),0 -14px 30px var(--glassShadow)}
+.sect + .sect{margin-top:-14px}
+.sect .blob{position:absolute;border-radius:50%;pointer-events:none;filter:blur(26px)}
+.sect .b1{width:300px;height:300px;top:-90px;left:-70px;animation:blobA 13s ease-in-out infinite alternate}
+.sect .b2{width:280px;height:280px;bottom:-110px;right:-90px;animation:blobB 17s ease-in-out infinite alternate}
+.sect .b3{width:200px;height:200px;top:40%;left:30%;animation:blobC 11s ease-in-out infinite alternate}
+@keyframes blobA{to{transform:translate(150px,170px) scale(1.25)}}
+@keyframes blobB{to{transform:translate(-140px,-190px) scale(.8)}}
+@keyframes blobC{to{transform:translate(-90px,60px) scale(1.4)}}
+.sect > .in-sect{position:relative;z-index:1}
+
+/* a block: an opaque surface inside a lit metal rim; the block being read catches a moving light */
+.rim{position:relative;border-radius:21px;padding:2px;overflow:hidden;background:var(--metal);box-shadow:var(--shadow)}
+.rim::before{content:"";position:absolute;left:-30%;right:-30%;top:-120%;bottom:-120%;background:conic-gradient(from 0deg,transparent 0deg,transparent 268deg,var(--sweep) 306deg,transparent 330deg);opacity:0;transition:opacity .5s}
+.rim.lit::before{opacity:var(--sweepO);animation:spin 5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.blk{position:relative;border-radius:19.5px;background:var(--surface);overflow:hidden}
+.cover{position:absolute;inset:0;z-index:0;border-radius:19.5px}
+.cover:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+.content{position:relative;z-index:1;pointer-events:none}
+.content .live{pointer-events:auto}
+
+/* entering on scroll: the block rises, then its parts follow one by one */
+.wrap{opacity:0;transform:translateY(34px) scale(.96);transition:opacity .6s ease-out,transform .75s cubic-bezier(.2,.8,.2,1)}
+.wrap.in{opacity:1;transform:none}
+.wrap .stg{opacity:0;transform:translateY(12px);transition:opacity .5s ease-out,transform .6s cubic-bezier(.2,.8,.2,1)}
+.wrap.in .stg{opacity:1;transform:none}
+.wrap.in .d1{transition-delay:.12s}.wrap.in .d2{transition-delay:.22s}.wrap.in .d3{transition-delay:.32s}.wrap.in .d4{transition-delay:.42s}
+
+/* the focal call to action */
+.focal{position:relative;border-radius:999px;padding:2.5px;overflow:hidden;display:flex}
+.focal::before{content:"";position:absolute;left:-20%;right:-20%;top:-260%;bottom:-260%;background:conic-gradient(from 0deg,var(--c1),var(--c2),var(--c3),var(--c1));animation:spin 5s linear infinite}
+.focal > *{position:relative}
+
+/* affordance demos: each block shows what it can do until the visitor touches it */
+@keyframes baclip{0%{clip-path:inset(0 70% 0 0)}100%{clip-path:inset(0 22% 0 0)}}
+@keyframes baknob{0%{left:30%}100%{left:78%}}
+.ba-demo .ba-top{animation:baclip 3.2s ease-in-out infinite alternate}
+.ba-demo .ba-line,.ba-demo .ba-knob{animation:baknob 3.2s ease-in-out infinite alternate}
+@keyframes ripple{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+.spot .ring{animation:ripple 1.8s ease-out infinite}
+@keyframes finger{0%,8%{transform:translate(150px,120px) scale(1);opacity:0}18%{opacity:1}35%{transform:translate(var(--fx1),var(--fy1)) scale(1)}42%{transform:translate(var(--fx1),var(--fy1)) scale(.82)}50%{transform:translate(var(--fx1),var(--fy1)) scale(1)}70%{transform:translate(var(--fx2),var(--fy2)) scale(1)}77%{transform:translate(var(--fx2),var(--fy2)) scale(.82)}85%{transform:translate(var(--fx2),var(--fy2)) scale(1);opacity:1}100%{transform:translate(var(--fx2),var(--fy2));opacity:0}}
+.finger{animation:finger 4.6s ease-in-out infinite}
+@keyframes peel{0%,72%,100%{transform:scale(1)}80%{transform:scale(1.55)}88%{transform:scale(1.15)}}
+.dogear{animation:peel 3.6s ease-in-out infinite;transform-origin:100% 0}
+@keyframes breathe{0%{box-shadow:0 0 0 0 var(--breath)}100%{box-shadow:0 0 0 16px transparent}}
+.breathe{animation:breathe 1.9s ease-out infinite}
+@keyframes bar{0%{transform:scaleY(.3)}100%{transform:scaleY(1)}}
+.bars .bar{transform-origin:50% 100%}
+.bars.on .bar{animation:bar .7s ease-in-out infinite alternate}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.shake{animation:shake .3s ease-in-out 2}
+@keyframes pop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+.pop{animation:pop .36s cubic-bezier(.2,.8,.2,1)}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fadein{animation:fadein .32s ease-out .1s both}
+.flip{transition:transform .6s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.face{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.ul{transition:left 280ms cubic-bezier(.2,.8,.2,1)}
+.clipper{transition:clip-path 420ms cubic-bezier(.2,.8,.2,1)}
+.title-in{transition:opacity 220ms,transform 260ms cubic-bezier(.2,.8,.2,1)}
+input.ba{-webkit-appearance:none;appearance:none;background:transparent;touch-action:pan-y;margin:0}
+input.ba::-webkit-slider-thumb{-webkit-appearance:none;width:52px;height:300px;background:transparent}
+input.ba::-moz-range-thumb{width:52px;height:300px;background:transparent;border:0}
+input.ba:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+
+/* reduce motion: nothing moves, every state change is instant */
+.rm .cam,.rm .blob,.rm .rim.lit::before,.rm .focal::before,.rm .ba-demo .ba-top,.rm .ba-demo .ba-line,.rm .ba-demo .ba-knob,.rm .spot .ring,.rm .finger,.rm .dogear,.rm .breathe,.rm .bars.on .bar,.rm .shake,.rm .pop,.rm .fadein{animation:none !important}
+.rm .finger{display:none}
+.rm .wrap,.rm .wrap .stg{opacity:1 !important;transform:none !important;transition:none !important}
+.rm .flip,.rm .ul,.rm .press,.rm .clipper,.rm .title-in,.rm .rim::before{transition:none !important}
+.rm .press:active{transform:none}
+</style>
+</helmet>
+<div class="{{rootClass}}" style="{{rootVars}} width: 390px; height: 844px; position: relative; overflow: hidden; background: #2a2622; font-family: var(--body); color: var(--ink);">
+
+  <img class="cam" src="/_blob/e1597e92cba3082ab7b7c3f019938252" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+
+  <div id="ts-sheet" style="position: absolute; left: 0; right: 0; top: 48px; bottom: 0; border-radius: 24px 24px 0 0; overflow: hidden; display: flex; flex-direction: column; {{groundStyle}}">
+
+    <div style="flex: none; position: relative; z-index: 5; background: var(--bar); border-bottom: 1px solid var(--hair);">
+      <div style="display: flex; justify-content: center; padding-top: 8px;"><div style="width: 40px; height: 4px; border-radius: 2px; background: var(--line);"></div></div>
+      <div style="display: flex; align-items: center; gap: 8px; padding: 2px 12px 2px 20px; height: 50px;">
+        <div class="title-in" style="flex: 1; min-width: 0; font-family: var(--display); font-weight: 600; font-size: 19px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: {{titleOpacity}}; transform: translateY({{titleShift}});">Ribeira Palace</div>
+        <button class="press" aria-label="Portuguese" style="width: 44px; height: 44px; border-radius: 22px; border: 1.5px solid var(--line); font-size: 14px; font-weight: 700; text-align: center;">PT</button>
+        <button class="press" aria-label="Close the card" style="width: 44px; height: 44px; border-radius: 22px; border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div style="position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); height: 58px;">
+        <button class="press" onClick="{{jump0}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{tc0}}; font-size: 13px; font-weight: {{tw0}};">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{fc.about}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>About</button>
+        <button class="press" onClick="{{jump1}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{tc1}}; font-size: 13px; font-weight: {{tw1}};">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{fc.stories}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6c3-1.5 6-1.5 9 0v13c-3-1.5-6-1.5-9 0zM21 6c-3-1.5-6-1.5-9 0v13c3-1.5 6-1.5 9 0z"/></svg>Stories</button>
+        <button class="press" onClick="{{jump2}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{tc2}}; font-size: 13px; font-weight: {{tw2}};">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{fc.media}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>Media</button>
+        <button class="press" onClick="{{jump3}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{tc3}}; font-size: 13px; font-weight: {{tw3}};">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{fc.listen}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15v-3a8 8 0 0116 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>Listen</button>
+        <button class="press" onClick="{{jump4}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{tc4}}; font-size: 13px; font-weight: {{tw4}};">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{fc.play}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L12 15.4 7 18.2l1.2-5.6L4 8.8l5.6-.6z"/></svg>Play</button>
+        <button class="press" onClick="{{jump5}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{tc5}}; font-size: 13px; font-weight: {{tw5}};">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{fc.visit}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11A6.5 6.5 0 0118.5 10c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Visit</button>
+        <div class="ul" style="position: absolute; bottom: 0; height: 3px; width: 16.6667%; left: {{ulLeft}}; display: flex; justify-content: center;"><div style="width: 32px; height: 3px; border-radius: 2px; background: {{ulColor}};"></div></div>
+      </div>
+    </div>
+
+    <div id="ts-scroll" class="scroll" onScroll="{{onScroll}}" style="flex: 1; overflow-y: auto; position: relative; padding: 0 0 140px;">
+
+      <div style="position: relative; height: 440px; overflow: hidden;">
+        <div style="position: absolute; inset: 0; transform: {{heroT}}; transform-origin: 50% 40%;">
+          <img class="{{heroPan}}" src="/_blob/62ec38f082ea17147941c71b371b2836" alt="The Terreiro do Paço in 1662, with the Ribeira Palace along the river front. Oil painting by Dirk Stoop." style="position: absolute; left: 0; top: 0; height: 100%; width: auto; min-width: 100%; max-width: none; transform: {{heroStill}};">
+        </div>
+        <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(10,8,6,.05) 0%, rgba(10,8,6,.10) 30%, rgba(10,8,6,.62) 52%, rgba(10,8,6,.84) 70%, rgba(10,8,6,.92) 100%);"></div>
+        <div style="position: absolute; inset: 0; padding: 0 22px 22px; display: flex; flex-direction: column; justify-content: flex-end; color: #FFFFFF;">
+          <div style="margin-bottom: 18px; transform: {{heroTextT}}; opacity: {{heroTextO}};">
+            <div style="font-size: 14px; font-weight: 700; letter-spacing: .06em; color: #F1E9DA;">LISBON · C. 1500 TO 1755</div>
+            <h1 style="margin: 8px 0 8px; font-family: var(--display); font-weight: 600; font-size: 46px; line-height: 1.02; letter-spacing: -0.02em; text-shadow: 0 2px 18px rgba(0,0,0,.45);">Ribeira Palace</h1>
+            <div style="font-size: 18px; line-height: 1.4; color: #FFFFFF;">The royal palace on the river, lost to the earthquake of 1755.</div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <div class="focal" style="flex: 1;">
+              <button class="press" style="flex: 1; height: 52px; border-radius: 999px; background: var(--heroCta); color: var(--heroCtaInk); font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>See it here in AR</button>
+            </div>
+            <button class="press" onClick="{{listenFromHero}}" style="height: 57px; padding: 0 18px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.9); background: rgba(10,8,6,.35); color: #FFFFFF; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 6px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Listen 3:11</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="height: 22px;"></div>
+
+      <!-- ABOUT -->
+      <section id="sec-about" class="sect" style="background: {{glass.about}};">
+        <div class="blob b1" style="background: radial-gradient(circle, {{hue.about}} 0%, transparent 68%);"></div>
+        <div class="blob b2" style="background: radial-gradient(circle, {{hue2.about}} 0%, transparent 68%);"></div>
+        <div class="blob b3" style="background: radial-gradient(circle, {{hue.about}} 0%, transparent 70%); opacity: .7;"></div>
+        <div class="in-sect">
+          <div style="display: flex; align-items: center; gap: 10px; margin: 2px 4px 14px;">
+            <span style="display: inline-flex; align-items: center; gap: 8px; background: {{fc.about}}; color: {{fcInk}}; border-radius: 999px; padding: 7px 14px 7px 10px; flex: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
+              <span style="font-family: var(--display); font-weight: 600; font-size: 19px;">About</span>
+              <span style="font-size: 14px;">· 3 min</span>
+            </span>
+            <span style="flex: 1; height: 2px; border-radius: 1px; background: {{fc.about}};"></span>
+          </div>
+
+          <div data-block="facts" class="{{wrap.facts}}">
+            <div class="{{rim.facts}}" style="--sweep: {{sweep.about}};">
+              <div class="blk" style="padding: 16px 18px;">
+                <div class="stg" style="font-family: var(--display); font-weight: 600; font-size: 20px; margin-bottom: 6px;">At a glance</div>
+                <div class="stg d1" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px;">
+                  <sc-for list="{{facts}}" as="f" hint-placeholder-count="6">
+                    <div style="border-top: 1px solid var(--hair); padding: 10px 0;">
+                      <div style="font-size: 14px; color: var(--ink2);">{{f.label}}</div>
+                      <div style="font-size: 17px; font-weight: 700; line-height: 1.3;">{{f.value}}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="blk-story" data-block="story" class="{{wrap.story}}" style="margin-top: 16px;">
+            <div class="{{rim.story}}" style="--sweep: {{sweep.about}};">
+              <div class="blk">
+                <button class="cover" onClick="{{openStory}}" aria-label="Read the whole story, 2 minutes"></button>
+                <div class="content">
+                  <div class="stg" style="display: flex; align-items: center; gap: 10px; padding: 16px 18px 6px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{fc.about}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4h14v16H5zM9 8h6M9 12h6M9 16h4"/></svg>
+                    <span style="flex: 1; font-family: var(--display); font-weight: 600; font-size: 20px;">The story</span>
+                    <span style="font-size: 14px; color: var(--ink2);">Read · 2 min</span>
+                  </div>
+                  <div class="stg d1" style="position: relative; margin: 6px 18px 12px; height: 150px; border-radius: 14px; overflow: hidden;">
+                    <img src="/_blob/51b55b7a570249d27e29be2d883cfbbd" alt="The palace front and its formal garden, 1687" style="position: absolute; left: 0; top: -18%; width: 100%; height: 136%; object-fit: cover; transform: {{storyT}};">
+                  </div>
+                  <div class="stg d2" style="position: relative; max-height: {{storyMax}}; overflow: hidden; padding: 0 18px;">
+                    <p style="margin: 0 0 10px; font-size: 19px; line-height: 1.4; font-weight: 500;">For about 250 years the kings of Portugal lived by the river, in a palace that opened straight onto the Tagus. It is gone now, but the square that took its place still carries its name.</p>
+                    <p style="margin: 0; font-size: 17px; line-height: 1.5; color: var(--ink2);">When King Manuel I found the old castle on the hill too cramped for a court that was growing rich on the sea trade, he moved down to the water's edge. The new palace stood beside the docks where ships from India and Brazil unloaded spices, sugar and gold.</p>
+                    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 70px; background: linear-gradient(to bottom, var(--surface0), var(--surface));"></div>
+                  </div>
+                  <div class="stg d3" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 16px; font-weight: 700; font-size: 16px; color: var(--accentText); min-height: 48px;">Read the whole story · 2 min<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div data-block="fact" class="{{wrap.fact}}" style="margin-top: 16px; perspective: 1000px;">
+            <button class="flip" onClick="{{flip}}" aria-label="Did you know? Lost in a day. Tap to turn the card." style="position: relative; width: 100%; height: 158px; display: block; transform: rotateY({{flipDeg}}deg);">
+              <div class="face {{rim.fact}}" style="position: absolute; inset: 0; --sweep: {{sweep.about}};">
+                <div class="blk" style="height: 100%; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px;">
+                  <span style="font-size: 14px; font-weight: 700; color: var(--ink2);">Did you know?</span>
+                  <span style="font-family: var(--display); font-weight: 600; font-size: 23px;">Lost in a day</span>
+                  <span style="margin-top: auto; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 700; color: var(--accentText);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 12a8 8 0 0114-5.3M20 12a8 8 0 01-14 5.3M18 3v4h-4M6 21v-4h4"/></svg>Turn the card</span>
+                  <div class="dogear" style="position: absolute; top: 0; right: 0; width: 38px; height: 38px; background: linear-gradient(225deg, var(--groundSolid) 0%, var(--groundSolid) 48%, var(--earFold) 50%, var(--earLight) 100%); border-bottom-left-radius: 10px; box-shadow: -3px 3px 6px rgba(0,0,0,.18);"></div>
+                </div>
+              </div>
+              <div class="face" style="position: absolute; inset: 0; transform: rotateY(180deg); border-radius: 21px; padding: 2px; background: var(--metal);">
+                <div style="height: 100%; border-radius: 19.5px; background: var(--surface2); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px;">
+                  <span style="font-family: var(--display); font-weight: 600; font-size: 18px;">Lost in a day</span>
+                  <span style="font-size: 16px; line-height: 1.45;">The royal library is said to have held around 70,000 books, one of the richest collections in Europe. Almost none survived 1 November 1755.</span>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- STORIES -->
+      <section id="sec-stories" class="sect" style="background: {{glass.stories}};">
+        <div class="blob b1" style="background: radial-gradient(circle, {{hue.stories}} 0%, transparent 68%);"></div>
+        <div class="blob b2" style="background: radial-gradient(circle, {{hue2.stories}} 0%, transparent 68%);"></div>
+        <div class="blob b3" style="background: radial-gradient(circle, {{hue.stories}} 0%, transparent 70%); opacity: .7;"></div>
+        <div class="in-sect">
+          <div style="display: flex; align-items: center; gap: 10px; margin: 2px 4px 14px;">
+            <span style="display: inline-flex; align-items: center; gap: 8px; background: {{fc.stories}}; color: {{fcInk}}; border-radius: 999px; padding: 7px 14px 7px 10px; flex: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6c3-1.5 6-1.5 9 0v13c-3-1.5-6-1.5-9 0zM21 6c-3-1.5-6-1.5-9 0v13c3-1.5 6-1.5 9 0z"/></svg>
+              <span style="font-family: var(--display); font-weight: 600; font-size: 19px;">Stories</span>
+              <span style="font-size: 14px;">· 6 events</span>
+            </span>
+            <span style="flex: 1; height: 2px; border-radius: 1px; background: {{fc.stories}};"></span>
+          </div>
+
+          <div id="blk-timeline" data-block="timeline" class="{{wrap.timeline}}">
+            <div class="{{rim.timeline}}" style="--sweep: {{sweep.stories}};">
+              <div class="blk">
+                <button class="cover" onClick="{{openTimeline}}" aria-label="Open the timeline, 6 events"></button>
+                <div class="content">
+                  <div class="stg" style="display: flex; align-items: center; gap: 10px; padding: 16px 18px 10px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{fc.stories}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h10M12 8v8"/></svg>
+                    <span style="flex: 1; font-family: var(--display); font-weight: 600; font-size: 20px;">Timeline</span>
+                    <span style="font-size: 14px; color: var(--ink2);">Swipe · 6 events</span>
+                  </div>
+                  <div id="tl-strip" class="strip live stg d1 {{tlSnap}}" onPointerDown="{{touchTimeline}}" onTouchStart="{{touchTimeline}}" style="position: relative; display: flex; gap: 10px; overflow-x: auto; padding: 4px 18px 6px;">
+                    <div style="position: absolute; left: 18px; top: 123px; height: 2px; width: 1040px; background: var(--hair);"></div>
+                    <sc-for list="{{events}}" as="ev" hint-placeholder-count="6">
+                      <button class="snap press" onClick="{{openTimeline}}" style="position: relative; flex: none; width: 168px; display: flex; flex-direction: column; gap: 4px;">
+                        <img src="{{ev.img}}" alt="" style="width: 168px; height: 100px; object-fit: cover; border-radius: 10px; display: block;">
+                        <span style="width: 14px; height: 14px; border-radius: 7px; background: var(--accent); border: 3px solid var(--surface); box-shadow: 0 0 0 1.5px var(--accent); margin: 12px 0 6px;"></span>
+                        <span style="font-size: 14px; font-weight: 700; color: var(--accentText);">{{ev.date}}</span>
+                        <span style="font-size: 17px; font-weight: 700; line-height: 1.25;">{{ev.title}}</span>
+                      </button>
+                    </sc-for>
+                    <div style="flex: none; width: 8px;"></div>
+                  </div>
+                  <div class="stg d2" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 18px 16px; font-weight: 700; font-size: 16px; color: var(--accentText); min-height: 48px;">Open the timeline<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEDIA -->
+      <section id="sec-media" class="sect" style="background: {{glass.media}};">
+        <div class="blob b1" style="background: radial-gradient(circle, {{hue.media}} 0%, transparent 68%);"></div>
+        <div class="blob b2" style="background: radial-gradient(circle, {{hue2.media}} 0%, transparent 68%);"></div>
+        <div class="blob b3" style="background: radial-gradient(circle, {{hue.media}} 0%, transparent 70%); opacity: .7;"></div>
+        <div class="in-sect">
+          <div style="display: flex; align-items: center; gap: 10px; margin: 2px 4px 14px;">
+            <span style="display: inline-flex; align-items: center; gap: 8px; background: {{fc.media}}; color: {{fcInk}}; border-radius: 999px; padding: 7px 14px 7px 10px; flex: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>
+              <span style="font-family: var(--display); font-weight: 600; font-size: 19px;">Media</span>
+              <span style="font-size: 14px;">· all pictures</span>
+            </span>
+            <span style="flex: 1; height: 2px; border-radius: 1px; background: {{fc.media}};"></span>
+          </div>
+
+          <div id="blk-gallery" data-block="gallery" class="{{wrap.gallery}}">
+            <div class="{{rim.gallery}}" style="--sweep: {{sweep.media}};">
+              <div class="blk">
+                <button class="cover" onClick="{{openGallery}}" aria-label="See all 8 pictures"></button>
+                <div class="content">
+                  <div class="stg" style="display: flex; align-items: center; gap: 10px; padding: 16px 18px 10px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{fc.media}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>
+                    <span style="flex: 1; font-family: var(--display); font-weight: 600; font-size: 20px;">All pictures</span>
+                    <span style="font-size: 14px; color: var(--ink2);">Swipe · 8 pictures</span>
+                  </div>
+                  <div id="gal-strip" class="strip live stg d1 {{galSnap}}" onScroll="{{onStrip}}" onPointerDown="{{touchGallery}}" onTouchStart="{{touchGallery}}" style="display: flex; gap: 10px; overflow-x: auto; padding: 0 18px;">
+                    <sc-for list="{{gallery}}" as="g" hint-placeholder-count="4">
+                      <button class="snap press" onClick="{{openGallery}}" style="flex: none; width: 262px; height: 190px; border-radius: 14px; overflow: hidden; background: var(--surface2); position: relative;">
+                        <img src="{{g.src}}" alt="{{g.caption}}" style="position: absolute; left: -10%; top: -10%; width: 120%; height: 120%; object-fit: cover; transform: {{galT}};">
+                      </button>
+                    </sc-for>
+                    <div style="flex: none; width: 8px;"></div>
+                  </div>
+                  <div class="stg d2" style="padding: 10px 18px 0; display: flex; gap: 10px; align-items: baseline; min-height: 52px;">
+                    <span style="font-size: 14px; font-weight: 700; color: var(--ink2); flex: none;">{{galleryPos}}</span>
+                    <span style="font-size: 15px; line-height: 1.4;">{{galleryCaption}}</span>
+                  </div>
+                  <div class="stg d3" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 18px 16px; font-weight: 700; font-size: 16px; color: var(--accentText); min-height: 48px;">See all 8 pictures<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div data-block="ba" class="{{wrap.ba}}" style="margin-top: 16px;">
+            <div class="{{rim.ba}}" style="--sweep: {{sweep.media}};">
+              <div class="blk" style="padding-bottom: 14px;">
+                <div class="stg" style="display: flex; align-items: center; gap: 10px; padding: 16px 18px 10px;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{fc.media}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14"/></svg>
+                  <span style="flex: 1; font-family: var(--display); font-weight: 600; font-size: 20px;">Palace then, square now</span>
+                </div>
+                <div class="stg d1 {{baClass}}" style="position: relative; margin: 0 18px; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden;">
+                  <img src="/_blob/859a087ab6c150825c75994ed346be9a" alt="The Praça do Comércio today" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+                  <img class="ba-top" src="/_blob/be43abe742fafb818d3027d854eac4d0" alt="The river front before 1755" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; clip-path: {{baClip}};">
+                  <div class="ba-line" style="position: absolute; top: 0; bottom: 0; left: {{baLeft}}; width: 3px; margin-left: -1.5px; background: #FFFFFF; box-shadow: 0 0 10px rgba(0,0,0,.35);"></div>
+                  <div class="ba-knob" style="position: absolute; top: 50%; left: {{baLeft}}; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 24px; background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #EFEAE1 55%, #CFC6B6 100%); box-shadow: 0 1px 0 #FFFFFF inset, 0 -2px 4px rgba(0,0,0,.12) inset, 0 6px 14px rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; color: #14110D;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg>
+                  </div>
+                  <div style="position: absolute; left: 10px; top: 10px; background: #14110D; color: #FFFFFF; font-size: 13px; font-weight: 700; padding: 5px 8px; border-radius: 6px;">Before 1755</div>
+                  <div style="position: absolute; right: 10px; top: 10px; background: #14110D; color: #FFFFFF; font-size: 13px; font-weight: 700; padding: 5px 8px; border-radius: 6px;">Today</div>
+                  <input class="ba" type="range" min="0" max="100" value="{{ba}}" onChange="{{setBa}}" onPointerDown="{{touchBa}}" onTouchStart="{{touchBa}}" aria-label="Compare the river front before 1755 and today" style="position: absolute; inset: 0; width: 100%; height: 100%;">
+                </div>
+                <div class="stg d2" style="padding: 10px 18px 0; font-size: 15px; color: var(--ink2); display: flex; align-items: center; gap: 6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg>Drag to compare</div>
+              </div>
+            </div>
+          </div>
+
+          <div data-block="hotspots" class="{{wrap.hotspots}}" style="margin-top: 16px;">
+            <div class="{{rim.hotspots}}" style="--sweep: {{sweep.media}};">
+              <div class="blk" style="padding-bottom: 14px;">
+                <div class="stg" style="display: flex; align-items: center; gap: 10px; padding: 16px 18px 10px;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{fc.media}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>
+                  <span style="flex: 1; font-family: var(--display); font-weight: 600; font-size: 20px;">Explore the painting</span>
+                  <span style="font-size: 14px; color: var(--ink2);">Tap · 5 spots</span>
+                </div>
+                <div class="stg d1" style="position: relative; margin: 0 18px; aspect-ratio: 900 / 749; border-radius: 14px; overflow: hidden;">
+                  <img src="/_blob/7dbc2ef927d7c937fe6394bf2a6e007c" alt="The palace before 1755, with five marked details" style="position: absolute; left: -6%; top: -6%; width: 112%; height: 112%; object-fit: cover; transform: {{hotT}};">
+                  <sc-for list="{{spots}}" as="s" hint-placeholder-count="5">
+                    <button class="spot press" onClick="{{s.pick}}" aria-label="{{s.title}}" style="position: absolute; left: {{s.x}}; top: {{s.y}}; width: 44px; height: 44px; margin: -22px 0 0 -22px; display: flex; align-items: center; justify-content: center;">
+                      <span class="ring" style="position: absolute; width: 26px; height: 26px; border-radius: 13px; border: 2px solid #FFFFFF;"></span>
+                      <span style="position: relative; width: 26px; height: 26px; border-radius: 13px; background: {{s.bg}}; color: {{s.fg}}; border: 2px solid #FFFFFF; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.4);">{{s.n}}</span>
+                    </button>
+                  </sc-for>
+                  <sc-if value="{{showFinger}}" hint-placeholder-val="{{ true }}">
+                    <div class="finger" style="position: absolute; left: 0; top: 0; width: 40px; height: 40px; margin: -6px 0 0 -10px; pointer-events: none; --fx1: 78px; --fy1: 66px; --fx2: 205px; --fy2: 168px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.45));">
+                      <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V4.5a1.5 1.5 0 013 0V10l.5-.1a1.5 1.5 0 011.9 1.2l.1.4.4-.1a1.5 1.5 0 011.8 1.1l.1.5.3-.1a1.5 1.5 0 011.9 1.4V17a5 5 0 01-5 5h-1.2a5 5 0 01-4.2-2.3l-2.9-4.6a1.4 1.4 0 012.1-1.8L9 14.6z" fill="#FFFFFF" stroke="#14110D" stroke-width="1.2" stroke-linejoin="round"/></svg>
+                    </div>
+                  </sc-if>
+                </div>
+                <div class="stg d2" style="padding: 10px 18px 0; min-height: 70px;">
+                  <sc-if value="{{spotPicked}}" hint-placeholder-val="{{ false }}">
+                    <div class="fadein">
+                      <div style="font-size: 17px; font-weight: 700;">{{spot.n}}. {{spot.title}}</div>
+                      <div style="font-size: 15px; line-height: 1.45; color: var(--ink2);">{{spot.text}}</div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{spotNone}}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size: 15px; color: var(--ink2);">Tap a number to see what it is.</div>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LISTEN -->
+      <section id="sec-listen" class="sect" style="background: {{glass.listen}};">
+        <div class="blob b1" style="background: radial-gradient(circle, {{hue.listen}} 0%, transparent 68%);"></div>
+        <div class="blob b2" style="background: radial-gradient(circle, {{hue2.listen}} 0%, transparent 68%);"></div>
+        <div class="blob b3" style="background: radial-gradient(circle, {{hue.listen}} 0%, transparent 70%); opacity: .7;"></div>
+        <div class="in-sect">
+          <div style="display: flex; align-items: center; gap: 10px; margin: 2px 4px 14px;">
+            <span style="display: inline-flex; align-items: center; gap: 8px; background: {{fc.listen}}; color: {{fcInk}}; border-radius: 999px; padding: 7px 14px 7px 10px; flex: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15v-3a8 8 0 0116 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>
+              <span style="font-family: var(--display); font-weight: 600; font-size: 19px;">Listen</span>
+              <span style="font-size: 14px;">· 3:11</span>
+            </span>
+            <span style="flex: 1; height: 2px; border-radius: 1px; background: {{fc.listen}};"></span>
+          </div>
+
+          <div id="blk-audio" data-block="audio" class="{{wrap.audio}}">
+            <div class="{{rim.audio}}" style="--sweep: {{sweep.listen}};">
+              <div class="blk">
+                <button class="cover" onClick="{{togglePlay}}" aria-label="{{playLabel}}"></button>
+                <div class="content" style="padding: 16px 18px;">
+                  <div class="stg" style="font-family: var(--display); font-weight: 600; font-size: 20px;">Guided tour of the Ribeira Palace</div>
+                  <div class="stg" style="font-size: 15px; color: var(--ink2); margin-top: 2px;">Narrated guide · English · tap to {{playVerb}}</div>
+                  <div class="stg d1 {{barsClass}}" style="display: flex; align-items: flex-end; gap: 3px; height: 46px; margin: 16px 0 10px;">
+                    <sc-for list="{{bars}}" as="b" hint-placeholder-count="30">
+                      <div class="bar" style="flex: 1; height: {{b.h}}; border-radius: 2px; background: {{b.color}}; animation-delay: {{b.d}};"></div>
+                    </sc-for>
+                  </div>
+                  <div class="stg d2" style="display: flex; align-items: center; gap: 14px;">
+                    <div class="{{playRing}}" style="width: 58px; height: 58px; border-radius: 29px; background: var(--ink); color: var(--surface); display: flex; align-items: center; justify-content: center; flex: none;">
+                      <sc-if value="{{playing}}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></sc-if>
+                      <sc-if value="{{paused}}" hint-placeholder-val="{{ true }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></sc-if>
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="height: 4px; border-radius: 2px; background: var(--hair); overflow: hidden;"><div style="height: 100%; width: {{progress}}; background: var(--ink);"></div></div>
+                      <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 14px; color: var(--ink2); font-variant-numeric: tabular-nums;"><span>{{timeNow}}</span><span>3:11</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PLAY -->
+      <section id="sec-play" class="sect" style="background: {{glass.play}};">
+        <div class="blob b1" style="background: radial-gradient(circle, {{hue.play}} 0%, transparent 68%);"></div>
+        <div class="blob b2" style="background: radial-gradient(circle, {{hue2.play}} 0%, transparent 68%);"></div>
+        <div class="blob b3" style="background: radial-gradient(circle, {{hue.play}} 0%, transparent 70%); opacity: .7;"></div>
+        <div class="in-sect">
+          <div style="display: flex; align-items: center; gap: 10px; margin: 2px 4px 14px;">
+            <span style="display: inline-flex; align-items: center; gap: 8px; background: {{fc.play}}; color: {{fcInk}}; border-radius: 999px; padding: 7px 14px 7px 10px; flex: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L12 15.4 7 18.2l1.2-5.6L4 8.8l5.6-.6z"/></svg>
+              <span style="font-family: var(--display); font-weight: 600; font-size: 19px;">Play</span>
+              <span style="font-size: 14px;">· 3 questions</span>
+            </span>
+            <span style="flex: 1; height: 2px; border-radius: 1px; background: {{fc.play}};"></span>
+          </div>
+
+          <div id="blk-quiz" data-block="quiz" class="{{wrap.quiz}}">
+            <div class="{{rim.quiz}}" style="--sweep: {{sweep.play}};">
+              <div class="blk">
+                <button class="cover" onClick="{{openQuiz}}" aria-label="Open the quiz, 3 questions"></button>
+                <div class="content">
+                  <div class="stg" style="display: flex; align-items: center; gap: 10px; padding: 16px 18px 4px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{fc.play}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.2M12 17v.5"/></svg>
+                    <span style="flex: 1; font-family: var(--display); font-weight: 600; font-size: 20px;">Test yourself</span>
+                    <span style="font-size: 14px; color: var(--ink2);">1 of 3</span>
+                  </div>
+                  <div class="stg d1" style="padding: 6px 18px 0; font-size: 18px; font-weight: 700; line-height: 1.35;">{{q0.q}}</div>
+                  <div class="stg d2 live" style="padding: 12px 18px 0; display: flex; flex-direction: column; gap: 8px;">
+                    <sc-for list="{{q0.choices}}" as="c" hint-placeholder-count="3">
+                      <button class="press {{c.cls}}" onClick="{{c.pick}}" style="min-height: 48px; padding: 10px 14px; border-radius: 12px; border: {{c.border}}; background: {{c.bg}}; display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 500;">
+                        <span style="flex: 1;">{{c.text}}</span>
+                        <span class="pop" style="font-size: 14px; font-weight: 700; color: {{c.markColor}};">{{c.mark}}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{q0.answered}}" hint-placeholder-val="{{ false }}">
+                    <div class="fadein" style="padding: 10px 18px 0; font-size: 15px; line-height: 1.45; color: var(--ink2);">{{q0.explain}}</div>
+                  </sc-if>
+                  <div class="stg d3" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 18px 16px; font-weight: 700; font-size: 16px; color: var(--accentText); min-height: 48px;">Two more questions<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISIT -->
+      <section id="sec-visit" class="sect" style="background: {{glass.visit}};">
+        <div class="blob b1" style="background: radial-gradient(circle, {{hue.visit}} 0%, transparent 68%);"></div>
+        <div class="blob b2" style="background: radial-gradient(circle, {{hue2.visit}} 0%, transparent 68%);"></div>
+        <div class="in-sect">
+          <div style="display: flex; align-items: center; gap: 10px; margin: 2px 4px 14px;">
+            <span style="display: inline-flex; align-items: center; gap: 8px; background: {{fc.visit}}; color: {{fcInk}}; border-radius: 999px; padding: 7px 14px 7px 10px; flex: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11A6.5 6.5 0 0118.5 10c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>
+              <span style="font-family: var(--display); font-weight: 600; font-size: 19px;">Visit</span>
+              <span style="font-size: 14px;">· 6 sources</span>
+            </span>
+            <span style="flex: 1; height: 2px; border-radius: 1px; background: {{fc.visit}};"></span>
+          </div>
+
+          <div id="blk-sources" data-block="sources" class="{{wrap.sources}}">
+            <div class="{{rim.sources}}" style="--sweep: {{sweep.visit}};">
+              <div class="blk">
+                <button class="cover" onClick="{{openSources}}" aria-label="See all 6 sources"></button>
+                <div class="content">
+                  <div class="stg" style="display: flex; align-items: center; gap: 10px; padding: 16px 18px 6px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{fc.visit}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 5h11l5 5v9H4zM15 5v5h5"/></svg>
+                    <span style="flex: 1; font-family: var(--display); font-weight: 600; font-size: 20px;">Sources</span>
+                    <span style="font-size: 14px; color: var(--ink2);">6 sources</span>
+                  </div>
+                  <div class="stg d1" style="padding: 0 18px;">
+                    <sc-for list="{{sourcesPreview}}" as="s" hint-placeholder-count="2">
+                      <div style="border-top: 1px solid var(--hair); padding: 10px 0;">
+                        <div style="font-size: 16px; font-weight: 700; line-height: 1.35;">{{s.title}}</div>
+                        <div style="font-size: 14px; color: var(--ink2);">{{s.by}}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div class="stg d2" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 18px 16px; font-weight: 700; font-size: 16px; color: var(--accentText); min-height: 48px;">See all 6 sources<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <sc-if value="{{pageOpen}}" hint-placeholder-val="{{ false }}">
+      <div class="clipper" style="position: absolute; inset: 0; z-index: 10; background: var(--surface); display: flex; flex-direction: column; clip-path: {{clip}};">
+        <div style="flex: none; height: 4px; background: {{pageColor}};"></div>
+        <div style="flex: none; display: flex; align-items: center; gap: 6px; padding: 10px 12px 10px 8px; border-bottom: 1px solid var(--hair);">
+          <button class="press" onClick="{{closePage}}" aria-label="Back to the card" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; flex: none;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+          <div style="flex: 1; min-width: 0; font-size: 14px; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Ribeira Palace › {{page.family}} › <span style="color: var(--ink); font-weight: 700;">{{page.title}}</span></div>
+        </div>
+        <div id="page-scroll" class="scroll" style="flex: 1; overflow-y: auto; padding: 18px 20px 40px;">
+          <div class="fadein" style="{{pageKey}}">
+            <div style="font-size: 14px; color: var(--ink2); font-weight: 700;">{{page.meta}}</div>
+            <h2 style="margin: 4px 0 14px; font-family: var(--display); font-weight: 600; font-size: 31px; line-height: 1.1;">{{page.title}}</h2>
+
+            <sc-if value="{{isStory}}" hint-placeholder-val="{{ false }}">
+              <div>
+                <p style="margin: 0 0 14px; font-size: 20px; line-height: 1.4; font-weight: 500;">For about 250 years the kings of Portugal lived by the river, in a palace that opened straight onto the Tagus. It is gone now, but the square that took its place still carries its name.</p>
+                <p style="margin: 0 0 14px; font-size: 17px; line-height: 1.55;">When King Manuel I found the old castle on the hill too cramped for a court that was growing rich on the sea trade, he moved down to the water's edge. The new palace stood beside the docks where ships from India and Brazil unloaded spices, sugar and gold, so the king could watch the fleet come in from his own windows. Offices, a chapel, workshops and the royal archive grew around it, and the palace became the true centre of the kingdom.</p>
+                <p style="margin: 0 0 14px; font-size: 17px; line-height: 1.55;">Later kings kept adding to it. In the 1580s, under Philip I, who ruled Portugal and Spain together, the river front received a new facade and a domed corner tower, the Torreão, that sailors saw long before they saw the city. Inside were a famous library of tens of thousands of books, paintings, maps, and a royal opera house, the Ópera do Tejo, opened only eight months before the end.</p>
+                <p style="margin: 0; font-size: 17px; line-height: 1.55;">On the morning of 1 November 1755, All Saints' Day, an earthquake shook the palace, a wave came up the river and fire finished what was left. The royal family was away from the building that morning, but the library, the archive and almost everything inside were lost. Lisbon was rebuilt on a strict new plan, and where the palace had stood an open square was laid out, facing the river like a grand front door: the Praça do Comércio.</p>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isTimeline}}" hint-placeholder-val="{{ false }}">
+              <div>
+                <sc-for list="{{events}}" as="ev" hint-placeholder-count="6">
+                  <div style="display: flex; gap: 14px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 14px; flex: none;">
+                      <div style="width: 12px; height: 12px; border-radius: 6px; background: var(--accent); margin-top: 5px;"></div>
+                      <div style="flex: 1; width: 2px; background: var(--hair);"></div>
+                    </div>
+                    <div style="padding-bottom: 18px;">
+                      <div style="font-size: 14px; font-weight: 700; color: var(--accentText);">{{ev.date}}</div>
+                      <div style="font-size: 18px; font-weight: 700;">{{ev.title}}</div>
+                      <div style="font-size: 16px; line-height: 1.45; color: var(--ink2); margin-top: 2px;">{{ev.text}}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isGallery}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 22px;">
+                <sc-for list="{{gallery}}" as="g" hint-placeholder-count="4">
+                  <figure style="margin: 0;">
+                    <img src="{{g.src}}" alt="{{g.caption}}" style="width: 100%; border-radius: 14px; display: block;">
+                    <figcaption style="margin-top: 8px; font-size: 16px; line-height: 1.45;">{{g.caption}}</figcaption>
+                    <div style="font-size: 14px; color: var(--ink2); margin-top: 2px;">{{g.credit}}</div>
+                  </figure>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isQuiz}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 26px;">
+                <sc-for list="{{quiz}}" as="qq" hint-placeholder-count="3">
+                  <div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--ink2);">Question {{qq.n}} of 3</div>
+                    <div style="font-size: 18px; font-weight: 700; line-height: 1.35; margin: 4px 0 10px;">{{qq.q}}</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <sc-for list="{{qq.choices}}" as="c" hint-placeholder-count="3">
+                        <button class="press {{c.cls}}" onClick="{{c.pick}}" style="min-height: 48px; padding: 10px 14px; border-radius: 12px; border: {{c.border}}; background: {{c.bg}}; display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 500;">
+                          <span style="flex: 1;">{{c.text}}</span>
+                          <span class="pop" style="font-size: 14px; font-weight: 700; color: {{c.markColor}};">{{c.mark}}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                    <sc-if value="{{qq.answered}}" hint-placeholder-val="{{ false }}">
+                      <div class="fadein" style="padding-top: 8px; font-size: 15px; line-height: 1.45; color: var(--ink2);">{{qq.explain}}</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isSources}}" hint-placeholder-val="{{ false }}">
+              <div>
+                <sc-for list="{{sources}}" as="s" hint-placeholder-count="6">
+                  <div style="border-top: 1px solid var(--hair); padding: 12px 0;">
+                    <div style="font-size: 16px; font-weight: 700; line-height: 1.35;">{{s.title}}</div>
+                    <div style="font-size: 14px; color: var(--ink2);">{{s.by}}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <div style="margin-top: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+              <sc-if value="{{page.hasPrev}}" hint-placeholder-val="{{ true }}">
+                <button class="press" onClick="{{goPrev}}" style="min-height: 60px; border-radius: 14px; border: 1.5px solid var(--line); padding: 10px 12px; display: flex; align-items: center; gap: 8px;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+                  <span style="display: flex; flex-direction: column; min-width: 0;"><span style="font-size: 14px; color: var(--ink2);">Previous</span><span style="font-size: 16px; font-weight: 700;">{{page.prevTitle}}</span></span>
+                </button>
+              </sc-if>
+              <sc-if value="{{page.noPrev}}" hint-placeholder-val="{{ false }}"><div></div></sc-if>
+              <sc-if value="{{page.hasNext}}" hint-placeholder-val="{{ true }}">
+                <button class="press" onClick="{{goNext}}" style="min-height: 60px; border-radius: 14px; border: 1.5px solid var(--line); padding: 10px 12px; display: flex; align-items: center; justify-content: flex-end; gap: 8px; text-align: right;">
+                  <span style="display: flex; flex-direction: column; align-items: flex-end; min-width: 0;"><span style="font-size: 14px; color: var(--ink2);">Next</span><span style="font-size: 16px; font-weight: 700;">{{page.nextTitle}}</span></span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+                </button>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["light","dark"],"default":"light","section":"Theme"},"glass":{"editor":"enum","options":["tinted","frosted","solid"],"default":"tinted","section":"Theme"},"fonts":{"editor":"enum","options":["Fraunces + Atkinson Next","Source Serif 4 + Inter"],"default":"Fraunces + Atkinson Next","section":"Type"},"previewCap":{"editor":"range","min":0.4,"max":0.7,"step":0.05,"default":0.5,"section":"Layout"},"reduceMotion":{"editor":"boolean","default":false,"section":"Motion"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { active: 0, scrollTop: 0, seen: {}, focus: "facts", par: {}, flipped: false, ba: 50, baTouched: false, playing: false, t: 0, strip: 0, galTouched: false, tlTouched: false, spot: -1, answers: {}, page: null, phase: "from", inset: null };
+    this.jumping = false;
+    this.drift = { gal: 1, tl: 1 };
+    this.vis = { gallery: false, timeline: false };
+  }
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      if (this.state.playing) this.setState({ t: Math.min(191, this.state.t + 1) });
+    }, 1000);
+    setTimeout(() => this.measure(), 60);
+    setTimeout(() => this.measure(), 400);
+    const tick = () => {
+      this.raf = requestAnimationFrame(tick);
+      if (this.rm() || this.state.page) return;
+      this.driftStrip("gal-strip", "gal", this.vis.gallery && !this.state.galTouched, 0.45);
+      this.driftStrip("tl-strip", "tl", this.vis.timeline && !this.state.tlTouched, 0.4);
+    };
+    this.raf = requestAnimationFrame(tick);
+  }
+
+  componentWillUnmount() { clearInterval(this.timer); cancelAnimationFrame(this.raf); }
+
+  rm() { return !!this.props.reduceMotion; }
+
+  driftStrip(id, key, on, speed) {
+    if (!on) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    if (max <= 0) return;
+    let x = el.scrollLeft + this.drift[key] * speed;
+    if (x >= max - 1) { x = max; this.drift[key] = -1; }
+    if (x <= 0) { x = 0; this.drift[key] = 1; }
+    el.scrollLeft = x;
+  }
+
+  sections() { return ["about", "stories", "media", "listen", "play", "visit"]; }
+
+  rel(sc, el) {
+    const s = sc.getBoundingClientRect(), r = el.getBoundingClientRect();
+    const k = s.height ? sc.clientHeight / s.height : 1;
+    return { top: (r.top - s.top) * k, bottom: (r.bottom - s.top) * k };
+  }
+
+  measure() {
+    const sc = document.getElementById("ts-scroll");
+    if (!sc) return;
+    const view = sc.clientHeight;
+    const upd = { scrollTop: sc.scrollTop };
+    const seen = { ...this.state.seen };
+    let best = null, bestD = 1e9;
+    const par = {};
+    const blocks = sc.querySelectorAll("[data-block]");
+    blocks.forEach((el) => {
+      const key = el.getAttribute("data-block");
+      const r = this.rel(sc, el);
+      if (r.top < view * 0.9) seen[key] = true;
+      const c = (r.top + r.bottom) / 2;
+      const d = Math.abs(c - view * 0.45);
+      if (r.bottom > 0 && r.top < view && d < bestD) { bestD = d; best = key; }
+      par[key] = Math.max(-26, Math.min(26, (c - view / 2) * -0.09));
+      if (key === "gallery") this.vis.gallery = r.top >= -20 && r.bottom <= view + 20;
+      if (key === "timeline") this.vis.timeline = r.top >= -20 && r.bottom <= view + 20;
+    });
+    upd.seen = seen; upd.focus = best; upd.par = par;
+    if (!this.jumping) {
+      const tops = this.sections().map((k) => { const el = document.getElementById("sec-" + k); return el ? this.rel(sc, el).top : 1e9; });
+      let active;
+      if (sc.scrollTop + view >= sc.scrollHeight - 4) active = tops.length - 1;
+      else {
+        const line = view / 3;
+        let current = 0, firstOnScreen = -1;
+        for (let i = 0; i < tops.length; i++) {
+          if (tops[i] > line) continue;
+          current = i;
+          if (firstOnScreen < 0 && tops[i] >= -2) firstOnScreen = i;
+        }
+        active = firstOnScreen >= 0 ? firstOnScreen : current;
+      }
+      upd.active = active;
+    }
+    this.setState(upd);
+  }
+
+  jump(i) {
+    const sc = document.getElementById("ts-scroll");
+    const el = document.getElementById("sec-" + this.sections()[i]);
+    if (!sc || !el) return;
+    this.jumping = true;
+    this.setState({ active: i });
+    const target = sc.scrollTop + this.rel(sc, el).top - 10;
+    sc.scrollTo({ top: Math.max(0, target), behavior: this.rm() ? "auto" : "smooth" });
+    clearTimeout(this.jumpTimer);
+    this.jumpTimer = setTimeout(() => { this.jumping = false; this.measure(); }, 800);
+  }
+
+  insetOf(key) {
+    const sheet = document.getElementById("ts-sheet");
+    const card = document.getElementById("blk-" + key);
+    if (!sheet || !card) return { t: 20, r: 4, b: 30, l: 4 };
+    const s = sheet.getBoundingClientRect(), c = card.getBoundingClientRect();
+    const clamp = (v) => Math.max(0, Math.min(100, v));
+    return { t: clamp((c.top - s.top) / s.height * 100), r: clamp((s.right - c.right) / s.width * 100), b: clamp((s.bottom - c.bottom) / s.height * 100), l: clamp((c.left - s.left) / s.width * 100) };
+  }
+
+  openPage(key) {
+    const inset = this.insetOf(key);
+    if (this.rm()) { this.setState({ page: key, inset, phase: "open" }); return; }
+    this.setState({ page: key, inset, phase: "from" });
+    requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ phase: "open" })));
+  }
+
+  closePage() {
+    if (this.rm()) { this.setState({ page: null }); return; }
+    this.setState({ inset: this.insetOf(this.state.page), phase: "from" });
+    clearTimeout(this.closeTimer);
+    this.closeTimer = setTimeout(() => { this.setState({ page: null }); this.measure(); }, 430);
+  }
+
+  order() { return ["story", "timeline", "gallery", "quiz", "sources"]; }
+
+  goTo(key) {
+    const sc = document.getElementById("ts-scroll");
+    const el = document.getElementById("blk-" + key);
+    if (sc && el) sc.scrollTop = Math.max(0, sc.scrollTop + this.rel(sc, el).top - 140);
+    const ps = document.getElementById("page-scroll");
+    if (ps) ps.scrollTop = 0;
+    this.setState({ page: key });
+  }
+
+  quizData() {
+    return [
+      { q: "Which king moved the royal court from the castle to the river?", choices: ["Afonso Henriques", "Manuel I", "João V"], right: 1, explain: "Manuel I built his palace by the docks around 1500, where the ships arrived." },
+      { q: "What was the royal opera house beside the palace called?", choices: ["Teatro de São Carlos", "Ópera do Tejo", "Coliseu dos Recreios"], right: 1, explain: "The Ópera do Tejo opened in March 1755 and was destroyed eight months later." },
+      { q: "What stands where the palace used to be?", choices: ["The Rossio", "The Praça do Comércio", "The Praça da Figueira"], right: 1, explain: "The open square was laid out facing the river after the earthquake." }
+    ];
+  }
+
+  renderVals() {
+    const dark = this.props.mode === "dark";
+    const glassMode = this.props.glass || "tinted";
+    const rm = this.rm();
+    const cap = this.props.previewCap ?? 0.5;
+    const serifPair = this.props.fonts === "Source Serif 4 + Inter";
+    const T = dark
+      ? { g: "16,15,13", surface: "#1C1A17", surface0: "rgba(28,26,23,0)", surface2: "#26231F", ink: "#F6F1E8", ink2: "#D9D1C3", line: "#6E6659", hair: "#3A362F", accent: "#F2B544", onAccent: "#1A1206", accentText: "#F2B544", shadow: "0 10px 26px rgba(0,0,0,.45)", focus: "#F2B544", c1: "#F2B544", c2: "#8DB8EA", c3: "#FFE3A3", good: "#8FD19E", bad: "#F2A38F", goodBg: "#16301C", badBg: "#3A1A14", rimHi: "rgba(255,255,255,.55)", rimMid: "#4A443B", rimLo: "#7A705F", glassEdge: "rgba(255,255,255,.14)", glassHi: "rgba(255,255,255,.18)", glassShadow: "rgba(0,0,0,.35)", bar: "rgba(28,26,23,.96)", groundSolid: "#2A2622", earFold: "#4A443B", earLight: "#8A7F6E", breath: "rgba(246,241,232,.35)", fcInk: "#14110D" }
+      : { g: "244,240,232", surface: "#FFFFFF", surface0: "rgba(255,255,255,0)", surface2: "#F4F0E8", ink: "#14110D", ink2: "#3D362D", line: "#857A6B", hair: "#D9D2C6", accent: "#1E3A8A", onAccent: "#FFFFFF", accentText: "#1E3A8A", shadow: "0 1px 2px rgba(20,17,13,.10), 0 12px 26px rgba(20,17,13,.16)", focus: "#1E3A8A", c1: "#1E3A8A", c2: "#C9A227", c3: "#5B8DEF", good: "#1B5E20", bad: "#8E1B12", goodBg: "#E7F2E8", badBg: "#F8E6E3", rimHi: "#FFFFFF", rimMid: "#C9BFAF", rimLo: "#6E6455", glassEdge: "rgba(255,255,255,.75)", glassHi: "rgba(255,255,255,.9)", glassShadow: "rgba(20,17,13,.16)", bar: "rgba(255,255,255,.97)", groundSolid: "#E9E3D8", earFold: "#D6CCBB", earLight: "#FFFFFF", breath: "rgba(20,17,13,.30)", fcInk: "#FFFFFF" };
+    const fc = dark
+      ? { about: "#E8A85A", stories: "#E3A3C8", media: "#8DB8EA", listen: "#8FD19E", play: "#F2A38F", visit: "#C3B5F0" }
+      : { about: "#8A4B08", stories: "#7A2E5C", media: "#1E4E8C", listen: "#2D6A3E", play: "#9A2F1F", visit: "#5A4A8A" };
+    const H = { about: [226, 140, 50], stories: [170, 90, 190], media: [70, 125, 220], listen: [70, 165, 100], play: [222, 95, 70], visit: [125, 105, 210] };
+    const H2 = { about: [240, 200, 110], stories: [235, 140, 170], media: [110, 200, 230], listen: [190, 210, 110], play: [240, 170, 90], visit: [180, 150, 235] };
+    const hueA = dark ? 0.42 : 0.55, hueB = dark ? 0.30 : 0.45;
+    const hue = {}, hue2 = {}, glass = {}, sweep = {};
+    Object.keys(H).forEach((k) => {
+      hue[k] = "rgba(" + H[k].join(",") + "," + hueA + ")";
+      hue2[k] = "rgba(" + H2[k].join(",") + "," + hueB + ")";
+      const tint = dark ? "rgba(" + T.g + ",.62)" : "rgba(" + T.g + ",.42)";
+      const deep = dark ? "rgba(" + T.g + ",.82)" : "rgba(" + T.g + ",.70)";
+      glass[k] = glassMode === "solid"
+        ? "rgb(" + T.g + ")"
+        : "linear-gradient(170deg, " + tint + " 0%, rgba(" + H[k].join(",") + "," + (dark ? 0.16 : 0.14) + ") 45%, " + deep + " 100%)" + (glassMode === "frosted" ? "; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px)" : "");
+      sweep[k] = dark ? "rgba(" + H2[k].join(",") + ",.9)" : "rgba(255,255,255,1)";
+    });
+    T.metal = dark
+      ? "linear-gradient(135deg, #6A6358 0%, #2C2823 20%, #4E483F 38%, #24211D 58%, #5C564C 78%, #2A2622 100%)"
+      : "linear-gradient(135deg, #F4F1EC 0%, #9E968A 18%, #E6E2DB 34%, #7D7569 54%, #CFC9BF 74%, #6E6659 100%)";
+    T.sweepO = dark ? ".5" : "1";
+    T.heroCta = dark ? "#F2B544" : "#FFFFFF";
+    T.heroCtaInk = dark ? "#1A1206" : "#1E3A8A";
+    const display = serifPair ? "'Source Serif 4', Georgia, serif" : "'Fraunces', Georgia, serif";
+    const body = serifPair ? "'Inter', system-ui, sans-serif" : "'Atkinson Hyperlegible Next', system-ui, sans-serif";
+    const vars = ["surface", "surface0", "surface2", "ink", "ink2", "line", "hair", "accent", "onAccent", "accentText", "shadow", "focus", "c1", "c2", "c3", "rimHi", "rimMid", "rimLo", "glassEdge", "glassHi", "glassShadow", "bar", "groundSolid", "earFold", "earLight", "breath", "metal", "sweepO", "heroCta", "heroCtaInk"];
+    const rootVars = vars.map((v) => "--" + v + ":" + T[v] + ";").join("") + "--display:" + display + ";--body:" + body + ";";
+    let groundStyle;
+    if (glassMode === "solid") groundStyle = "background: rgb(" + T.g + ");";
+    else if (glassMode === "frosted") groundStyle = "background: rgba(" + T.g + ",.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);";
+    else groundStyle = "background: linear-gradient(to bottom, rgba(" + T.g + "," + (dark ? ".40" : ".25") + ") 0px, rgba(" + T.g + "," + (dark ? ".55" : ".40") + ") 260px, rgba(" + T.g + "," + (dark ? ".75" : ".62") + ") 100%);";
+
+    const keys = ["facts", "story", "fact", "timeline", "gallery", "ba", "hotspots", "audio", "quiz", "sources"];
+    const wrap = {}, rim = {};
+    keys.forEach((k) => {
+      wrap[k] = "wrap" + (rm || this.state.seen[k] ? " in" : "");
+      rim[k] = "rim" + (!rm && this.state.focus === k ? " lit" : "");
+    });
+    const sweepHero = dark ? "rgba(242,181,68,.95)" : "rgba(255,255,255,1)";
+    const par = this.state.par || {};
+    const pt = (k, s) => rm ? "none" : "translateY(" + ((par[k] || 0)).toFixed(1) + "px) scale(" + s + ")";
+    const st = this.state.scrollTop;
+    const heroT = rm ? "none" : "translateY(" + (st * 0.45).toFixed(1) + "px) scale(" + (1.12 - Math.min(st, 330) / 3300).toFixed(4) + ")";
+    const heroTextT = rm ? "none" : "translateY(" + (st * -0.18).toFixed(1) + "px)";
+    const heroTextO = rm ? 1 : Math.max(0, 1 - st / 300).toFixed(3);
+
+    const tab = (i) => ({ c: this.state.active === i ? T.ink : T.ink2, w: this.state.active === i ? 700 : 500 });
+    const famOrder = ["about", "stories", "media", "listen", "play", "visit"];
+
+    const gallery = [
+      { src: "/_blob/580b9bc2a3dfa2b20c025043eb2531f3", caption: "A royal procession crosses the Terreiro do Paço, 23 April 1662. Anonymous painter.", credit: "Public domain" },
+      { src: "/_blob/1a15b527dc4fc1b9ab50aa5004dc1eb8", caption: "The ruins of the Ópera do Tejo after the earthquake. Engraving by Jacques-Philippe Le Bas, 1757.", credit: "Public domain" },
+      { src: "/_blob/51b55b7a570249d27e29be2d883cfbbd", caption: "The palace front and its formal garden, drawn for a firework display in 1687. Print by João dos Reis.", credit: "Public domain" },
+      { src: "/_blob/9e3151f0d2f8f36bf0762a6d42d4ec3b", caption: "The Praça do Comércio seen from the river today, with the castle hill behind.", credit: "Jakub Hałun, CC BY 4.0" },
+      { src: "/_blob/62ec38f082ea17147941c71b371b2836", caption: "The Terreiro do Paço in 1662, with the palace along the river front. Oil painting by Dirk Stoop.", credit: "Public domain" },
+      { src: "/_blob/be43abe742fafb818d3027d854eac4d0", caption: "The river front before the earthquake of 1755. Anonymous painting, 18th century.", credit: "Public domain" },
+      { src: "/_blob/859a087ab6c150825c75994ed346be9a", caption: "The same river front today, from close to the same viewpoint.", credit: "Dguendel, CC BY 4.0" },
+      { src: "/_blob/e1597e92cba3082ab7b7c3f019938252", caption: "Ships at the royal dockyard beside the palace, on the Great Panorama of Lisbon, a tile panel from about 1700.", credit: "RickMorais, CC BY-SA 4.0" }
+    ];
+
+    const events = [
+      { date: "c. 1500", title: "The king moves to the river", text: "Manuel I builds a new palace beside the docks, away from the old castle on the hill.", img: "/_blob/e1597e92cba3082ab7b7c3f019938252" },
+      { date: "1580s", title: "The domed tower rises", text: "Philip I, king of Portugal and Spain, gives the palace a new river front and its corner tower, the Torreão.", img: "/_blob/51b55b7a570249d27e29be2d883cfbbd" },
+      { date: "23 Apr 1662", title: "A royal procession", text: "The yard fills for the departure of Catherine of Braganza, who sailed to England to marry Charles II.", img: "/_blob/580b9bc2a3dfa2b20c025043eb2531f3" },
+      { date: "2 Mar 1755", title: "The opera opens", text: "The Ópera do Tejo, the royal opera house beside the palace, opens its doors.", img: "/_blob/1a15b527dc4fc1b9ab50aa5004dc1eb8" },
+      { date: "1 Nov 1755", title: "Earthquake, fire and wave", text: "The palace, its library and its collections are lost in one day.", img: "/_blob/be43abe742fafb818d3027d854eac4d0" },
+      { date: "1775", title: "A square takes its place", text: "The statue of Joseph I is unveiled in the new Praça do Comércio, the heart of the rebuilt city.", img: "/_blob/9e3151f0d2f8f36bf0762a6d42d4ec3b" }
+    ];
+
+    const spotData = [
+      { x: 31, y: 30, title: "The domed tower", text: "The Torreão, the corner tower with its dome, was the palace's landmark from the river." },
+      { x: 56, y: 33, title: "A slender tower", text: "A slim tower rises behind the long palace front." },
+      { x: 30, y: 68, title: "The stone quay", text: "A stone quay reached out into the river, where royal and merchant boats landed." },
+      { x: 82, y: 68, title: "Coaches in the yard", text: "Coaches cross the open yard, where the court showed itself to the city." },
+      { x: 88, y: 22, title: "The town on the hill", text: "Behind the palace the old town climbs the hill in towers and roofs." }
+    ];
+    const spots = spotData.map((s, i) => ({ n: i + 1, title: s.title, x: s.x + "%", y: s.y + "%", bg: this.state.spot === i ? T.accent : "#14110D", fg: this.state.spot === i ? T.onAccent : "#FFFFFF", pick: () => this.setState({ spot: i }) }));
+
+    const sources = [
+      { title: "Terreiro do Paço em 1662 (painting)", by: "Dirk Stoop · Public domain" },
+      { title: "Terreiro do Paço before the earthquake of 1755 (painting)", by: "Unknown, 18th century · Public domain" },
+      { title: "Ruins of the Ópera do Tejo, 1757 (engraving)", by: "Jacques-Philippe Le Bas · Public domain" },
+      { title: "Grande Panorama de Lisboa, detail (tile panel, photo)", by: "RickMorais · CC BY-SA 4.0" },
+      { title: "Praça do Comércio today (photos)", by: "Dguendel; Jakub Hałun · CC BY 4.0" },
+      { title: "Text", by: "Written for this wall in the writers' own words" }
+    ];
+
+    const quiz = this.quizData().map((d, qi) => {
+      const a = this.state.answers[qi];
+      const answered = a !== undefined;
+      return {
+        n: qi + 1, q: d.q, answered,
+        explain: answered ? (a === d.right ? "Correct. " : "Not quite: the answer is " + d.choices[d.right] + ". ") + d.explain : "",
+        choices: d.choices.map((text, ci) => {
+          const isRight = ci === d.right, picked = a === ci;
+          let border = "1.5px solid " + T.line, bg = "transparent", mark = "", markColor = T.ink, cls = "";
+          if (answered && isRight) { border = "2px solid " + T.good; bg = T.goodBg; mark = "✓ Correct"; markColor = T.good; }
+          else if (answered && picked) { border = "2px solid " + T.bad; bg = T.badBg; mark = "✕ Not this one"; markColor = T.bad; cls = rm ? "" : "shake"; }
+          return { text, border, bg, mark, markColor, cls, pick: () => { if (this.state.answers[qi] === undefined) this.setState({ answers: { ...this.state.answers, [qi]: ci } }); } };
+        })
+      };
+    });
+
+    const pages = {
+      story: { family: "About", fam: "about", title: "The story", meta: "Read · 2 min" },
+      timeline: { family: "Stories", fam: "stories", title: "Timeline", meta: "6 events" },
+      gallery: { family: "Media", fam: "media", title: "All pictures", meta: "8 pictures" },
+      quiz: { family: "Play", fam: "play", title: "Test yourself", meta: "3 questions" },
+      sources: { family: "Visit", fam: "visit", title: "Sources", meta: "6 sources" }
+    };
+    const order = this.order();
+    const pk = this.state.page;
+    const pi = pk ? order.indexOf(pk) : -1;
+    const p = pk ? pages[pk] : { family: "", fam: "about", title: "", meta: "" };
+    const prevKey = pi > 0 ? order[pi - 1] : null, nextKey = pi >= 0 && pi < order.length - 1 ? order[pi + 1] : null;
+    const page = { family: p.family, title: p.title, meta: p.meta, hasPrev: !!prevKey, noPrev: !prevKey, hasNext: !!nextKey, prevTitle: prevKey ? pages[prevKey].title : "", nextTitle: nextKey ? pages[nextKey].title : "" };
+    const ins = this.state.inset || { t: 0, r: 0, b: 0, l: 0 };
+    const clip = rm || this.state.phase === "open" ? "inset(0% 0% 0% 0% round 24px 24px 0 0)" : "inset(" + ins.t.toFixed(2) + "% " + ins.r.toFixed(2) + "% " + ins.b.toFixed(2) + "% " + ins.l.toFixed(2) + "% round 20px)";
+
+    const heights = [14, 22, 30, 18, 36, 26, 40, 20, 32, 44, 28, 16, 34, 24, 38, 30, 18, 42, 26, 22, 36, 14, 30, 40, 20, 28, 34, 18, 24, 16];
+    const played = this.state.t / 191;
+    const bars = heights.map((h, i) => ({ h: h + "px", d: (i % 7) * 0.09 + "s", color: i / heights.length <= played ? T.ink : T.hair }));
+    const mm = Math.floor(this.state.t / 60), ss = this.state.t % 60;
+    const baDemo = !rm && !this.state.baTouched;
+
+    return {
+      rootClass: "ts-root" + (rm ? " rm" : ""),
+      rootVars, groundStyle, fc, fcInk: T.fcInk, hue, hue2, glass, sweep, sweepHero, wrap, rim,
+      titleOpacity: st > 280 ? 1 : 0, titleShift: st > 280 ? "0px" : "8px",
+      ulLeft: (this.state.active * 16.6667).toFixed(4) + "%",
+      ulColor: fc[famOrder[this.state.active]],
+      tc0: tab(0).c, tw0: tab(0).w, tc1: tab(1).c, tw1: tab(1).w, tc2: tab(2).c, tw2: tab(2).w,
+      tc3: tab(3).c, tw3: tab(3).w, tc4: tab(4).c, tw4: tab(4).w, tc5: tab(5).c, tw5: tab(5).w,
+      jump0: () => this.jump(0), jump1: () => this.jump(1), jump2: () => this.jump(2), jump3: () => this.jump(3), jump4: () => this.jump(4), jump5: () => this.jump(5),
+      onScroll: () => this.measure(),
+      heroT, heroTextT, heroTextO,
+      heroPan: rm ? "" : "heropan", heroStill: rm ? "translateX(calc(-50% + 195px))" : "none",
+      storyT: pt("story", 1),
+      galT: pt("gallery", 1), hotT: pt("hotspots", 1),
+      facts: [
+        { label: "Built", value: "From c. 1500" }, { label: "Built for", value: "King Manuel I" },
+        { label: "Remodelled", value: "1580s, under Philip I" }, { label: "Royal home for", value: "About 250 years" },
+        { label: "Lost", value: "1 November 1755" }, { label: "Stood where", value: "Today's Praça do Comércio" }
+      ],
+      storyMax: Math.max(112, Math.round(cap * 796) - 300) + "px",
+      openStory: () => this.openPage("story"), openTimeline: () => this.openPage("timeline"),
+      openGallery: () => this.openPage("gallery"), openQuiz: () => this.openPage("quiz"), openSources: () => this.openPage("sources"),
+      flip: () => this.setState({ flipped: !this.state.flipped }),
+      flipDeg: this.state.flipped ? 180 : 0,
+      events, gallery,
+      tlSnap: this.state.tlTouched || rm ? "snapx" : "",
+      galSnap: this.state.galTouched || rm ? "snapx" : "",
+      touchTimeline: () => { if (!this.state.tlTouched) this.setState({ tlTouched: true }); },
+      touchGallery: () => { if (!this.state.galTouched) this.setState({ galTouched: true }); },
+      onStrip: (e) => { const i = Math.max(0, Math.min(7, Math.round(e.currentTarget.scrollLeft / 272))); if (i !== this.state.strip) this.setState({ strip: i }); },
+      galleryPos: (this.state.strip + 1) + " / 8",
+      galleryCaption: gallery[this.state.strip].caption,
+      ba: this.state.ba, baLeft: this.state.ba + "%", baClip: "inset(0 " + (100 - this.state.ba) + "% 0 0)",
+      baClass: baDemo ? "ba-demo" : "",
+      setBa: (e) => this.setState({ ba: Number(e.target.value), baTouched: true }),
+      touchBa: () => { if (!this.state.baTouched) this.setState({ baTouched: true }); },
+      spots, spotPicked: this.state.spot >= 0, spotNone: this.state.spot < 0,
+      spot: this.state.spot >= 0 ? { n: this.state.spot + 1, title: spotData[this.state.spot].title, text: spotData[this.state.spot].text } : { n: "", title: "", text: "" },
+      showFinger: !rm && this.state.spot < 0,
+      bars, barsClass: "bars" + (this.state.playing ? " on" : ""),
+      playing: this.state.playing, paused: !this.state.playing,
+      playLabel: this.state.playing ? "Pause the guide" : "Play the guide",
+      playVerb: this.state.playing ? "pause" : "play",
+      playRing: this.state.playing || rm ? "" : "breathe",
+      togglePlay: () => this.setState({ playing: !this.state.playing }),
+      listenFromHero: () => { this.jump(3); this.setState({ playing: true }); },
+      progress: (played * 100).toFixed(1) + "%",
+      timeNow: mm + ":" + (ss < 10 ? "0" : "") + ss,
+      q0: quiz[0], quiz,
+      sourcesPreview: sources.slice(0, 2), sources,
+      pageOpen: !!pk, page, clip, pageColor: fc[p.fam], pageKey: "",
+      isStory: pk === "story", isTimeline: pk === "timeline", isGallery: pk === "gallery", isQuiz: pk === "quiz", isSources: pk === "sources",
+      closePage: () => this.closePage(),
+      goNext: () => { if (nextKey) this.goTo(nextKey); },
+      goPrev: () => { if (prevKey) this.goTo(prevKey); }
+    };
+  }
+}
+</script>
+</body>
+</html>

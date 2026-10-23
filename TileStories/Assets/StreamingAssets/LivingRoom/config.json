@@ -302,7 +302,7 @@
     "pois": [
         {
             "id": "lamp",
-            "name": "The Lamp",
+            "name": "St George's Castle",
             "category": "royal_government",
             "editor_rotation_deg": 151.98159790039063,
             "editor_rotation_x_deg": 342.31494140625,
@@ -313,8 +313,10 @@
                 "z": -3.8570001125335695
             },
             "position_verified": false,
-            "summary": "POI_Lamp",
-            "search_keywords": [],
+            "summary": "Medieval castle and royal palace above Lisbon",
+            "search_keywords": [
+                "Castelo de São Jorge"
+            ],
             "search_keyword_fields": [],
             "status_pct": 0.0,
             "has_status": true,
@@ -7699,7 +7701,7 @@
         },
         {
             "id": "lamp_religious",
-            "name": "Lamp - Religious",
+            "name": "Lisbon Cathedral",
             "category": "religious",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -7710,7 +7712,7 @@
                 "z": -4.179999828338623
             },
             "position_verified": true,
-            "summary": "POI_lamp_religious",
+            "summary": "Romanesque cathedral begun in 1147, below the castle hill",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 100.0,
@@ -7775,7 +7777,7 @@
         },
         {
             "id": "lamp_military",
-            "name": "Lamp - Military",
+            "name": "Castle Keep",
             "category": "military",
             "editor_rotation_deg": 335.6123962402344,
             "editor_rotation_x_deg": 345.4466857910156,
@@ -7786,7 +7788,7 @@
                 "z": -3.880000114440918
             },
             "position_verified": true,
-            "summary": "POI_lamp_military",
+            "summary": "The castle's keep, the last refuge of its garrison",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 20.0,
@@ -8259,7 +8261,7 @@
         },
         {
             "id": "lamp_residential",
-            "name": "Lamp - Residential",
+            "name": "Alfama",
             "category": "residential",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -8270,7 +8272,7 @@
                 "z": -4.179999828338623
             },
             "position_verified": true,
-            "summary": "POI_lamp_residential",
+            "summary": "Lisbon's oldest quarter, a maze of lanes below the castle",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 20.0,
@@ -8812,7 +8814,7 @@
         },
         {
             "id": "lamp_economic",
-            "name": "Lamp - Economic",
+            "name": "Feira da Ladra",
             "category": "economic",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -8823,7 +8825,7 @@
                 "z": -4.480000019073486
             },
             "position_verified": true,
-            "summary": "POI_lamp_economic",
+            "summary": "Lisbon's open-air flea market, on Tuesdays and Saturdays",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 100.0,
@@ -8907,7 +8909,7 @@
         },
         {
             "id": "lamp_infrastructure",
-            "name": "Lamp - Infrastructure",
+            "name": "Tram 28",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -8918,7 +8920,7 @@
                 "z": -4.179999828338623
             },
             "position_verified": true,
-            "summary": "POI_lamp_infrastructure",
+            "summary": "The yellow tram that climbs the castle hill",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 100.0,
@@ -8935,7 +8937,7 @@
         },
         {
             "id": "painting",
-            "name": "The Painting",
+            "name": "Ribeira Palace",
             "category": "royal_government",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -8946,8 +8948,10 @@
                 "z": 0.0
             },
             "position_verified": true,
-            "summary": "POI_Painting",
-            "search_keywords": [],
+            "summary": "Royal palace on the river, lost in 1755",
+            "search_keywords": [
+                "Paço da Ribeira"
+            ],
             "search_keyword_fields": [],
             "status_pct": 0.0,
             "has_status": true,
@@ -11838,7 +11842,7 @@
         },
         {
             "id": "painting_religious",
-            "name": "Painting - Religious",
+            "name": "Igreja da Conceição Velha",
             "category": "religious",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -11849,7 +11853,7 @@
                 "z": -0.30000001192092898
             },
             "position_verified": true,
-            "summary": "POI_painting_religious",
+            "summary": "Rebuilt after 1755; its Manueline doorway survived",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 0.0,
@@ -11866,7 +11870,7 @@
         },
         {
             "id": "painting_military",
-            "name": "Painting - Military",
+            "name": "Ribeira das Naus",
             "category": "military",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -11877,7 +11881,7 @@
                 "z": 0.2750000059604645
             },
             "position_verified": false,
-            "summary": "POI_painting_military",
+            "summary": "The royal dockyard that built the ships of the age of discovery",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 20.0,
@@ -11894,7 +11898,7 @@
         },
         {
             "id": "painting_residential",
-            "name": "Painting - Residential",
+            "name": "Casa dos Bicos",
             "category": "residential",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -11905,7 +11909,7 @@
                 "z": -0.7289999723434448
             },
             "position_verified": false,
-            "summary": "POI_painting_residential",
+            "summary": "A 16th-century house with a front of diamond points",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 20.0,
@@ -11922,7 +11926,7 @@
         },
         {
             "id": "painting_economic",
-            "name": "Painting - Economic",
+            "name": "Café Martinho da Arcada",
             "category": "economic",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -11933,7 +11937,7 @@
                 "z": 0.0
             },
             "position_verified": true,
-            "summary": "POI_painting_economic",
+            "summary": "Lisbon's oldest café, open under the square's arcades since 1782",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 100.0,
@@ -11950,7 +11954,7 @@
         },
         {
             "id": "painting_infrastructure",
-            "name": "Painting - Infrastructure",
+            "name": "Cais das Colunas",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -11961,7 +11965,7 @@
                 "z": 0.0
             },
             "position_verified": true,
-            "summary": "POI_painting_infrastructure",
+            "summary": "The stone quay where the square meets the river, between two columns",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 100.0,
@@ -11989,7 +11993,7 @@
                 "z": 2.2300000190734865
             },
             "position_verified": true,
-            "summary": "POI_Camera",
+            "summary": "Viewpoint over the Tagus riverfront",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 0.0,
@@ -12006,7 +12010,7 @@
         },
         {
             "id": "camera_religious",
-            "name": "Camera - Religious",
+            "name": "Jerónimos Monastery",
             "category": "religious",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -12017,7 +12021,7 @@
                 "z": 1.9300000667572022
             },
             "position_verified": true,
-            "summary": "POI_camera_religious",
+            "summary": "A Manueline monastery funded by the spice trade, in Belém",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 0.0,
@@ -12034,7 +12038,7 @@
         },
         {
             "id": "camera_military",
-            "name": "Camera - Military",
+            "name": "Torre de Belém",
             "category": "military",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -12045,7 +12049,7 @@
                 "z": 2.5299999713897707
             },
             "position_verified": true,
-            "summary": "POI_camera_military",
+            "summary": "A fortified lookout guarding the river mouth since 1519",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 20.0,
@@ -12062,7 +12066,7 @@
         },
         {
             "id": "camera_residential",
-            "name": "Camera - Residential",
+            "name": "Madragoa",
             "category": "residential",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -12073,7 +12077,7 @@
                 "z": 2.2300000190734865
             },
             "position_verified": true,
-            "summary": "POI_camera_residential",
+            "summary": "A quiet riverside quarter once home to fishwives",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 20.0,
@@ -12090,7 +12094,7 @@
         },
         {
             "id": "camera_economic",
-            "name": "Camera - Economic",
+            "name": "Mercado da Ribeira",
             "category": "economic",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -12101,7 +12105,7 @@
                 "z": 2.2300000190734865
             },
             "position_verified": true,
-            "summary": "POI_camera_economic",
+            "summary": "The riverside food market of Cais do Sodré",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 100.0,
@@ -12118,7 +12122,7 @@
         },
         {
             "id": "camera_infrastructure",
-            "name": "Camera - Infrastructure",
+            "name": "Ponte 25 de Abril",
             "category": "infrastructure",
             "editor_rotation_deg": 0.0,
             "editor_rotation_x_deg": 0.0,
@@ -12129,7 +12133,7 @@
                 "z": 2.2300000190734865
             },
             "position_verified": true,
-            "summary": "POI_camera_infrastructure",
+            "summary": "The suspension bridge over the Tagus, opened in 1966",
             "search_keywords": [],
             "search_keyword_fields": [],
             "status_pct": 100.0,

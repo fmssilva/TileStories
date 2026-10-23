@@ -44,7 +44,6 @@ namespace TileStories.Tests
             yield return Wait(0.5f);
             var ids = new HashSet<string>(Host.State.Ids);
             CollectionAssert.AreEquivalent(Military, ids, "the category word finds every military POI");
-            Assert.AreEqual("Lamp - Military", Host.List.Rows[0].Name, "a name match ranks above a category match");
             CollectionAssert.AreEquivalent(ids, ListIds(), "the list shows the set");
             CollectionAssert.AreEquivalent(ids, DotIds(), "the map shows the set");
             CollectionAssert.AreEquivalent(ids, MarkersAt(1f), "only the set's markers stay");
@@ -56,6 +55,44 @@ namespace TileStories.Tests
             yield return null;
             Assert.IsFalse(Host.State.Active, "clearing the field clears the search (it once kept the old results)");
             Assert.AreEqual(Session.SpawnedMarkers.Count, MarkersAt(1f).Count, "every marker back");
+        }
+
+        // The wall's own words, read from the running config (never re-typed): a point, and the words its name and keywords hold
+        private POIData PoiOf(string id) => ConfigCopy().pois.Single(p => p.id == id);
+
+        private static string LastWordOf(string text) => text.Split(' ').Last().ToLowerInvariant();
+
+        // The same word without its accents, the way a visitor types it on a keyboard without them
+        private static string Unaccented(string text) =>
+            new string(text.Normalize(System.Text.NormalizationForm.FormD)
+                .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark).ToArray());
+
+        [UnityTest]
+        public IEnumerator ANameWord_AndAPortugueseKeyword_FindTheirPointFirst_WithOrWithoutAccents()
+        {
+            var painting = PoiOf("painting");
+            Host.SetQuery(LastWordOf(painting.name));
+            yield return Wait(0.3f);
+            Assert.IsNotEmpty(Host.List.Rows, "the last word of the name finds something");
+            Assert.AreEqual("painting", Host.List.Rows[0].PoiId, "a name match ranks first: '" + LastWordOf(painting.name) + "' -> " + Host.List.Rows[0].Name);
+            Assert.AreEqual(painting.name, Host.List.Rows[0].Name, "the row is named by the POI name, the marker's label");
+            yield return Capture("Query_PalaceByName");
+
+            // - the Portuguese names are keywords (a POI name has no per-language form yet): first word, with and without accents
+            foreach (var id in new[] { "lamp", "painting" })
+            {
+                var poi = PoiOf(id);
+                Assert.IsNotEmpty(poi.search_keywords, "precondition: " + id + " carries its Portuguese name as a keyword");
+                string word = poi.search_keywords[0].Split(' ')[0];
+                foreach (var typed in new[] { word.ToLowerInvariant(), Unaccented(word).ToLowerInvariant() })
+                {
+                    Host.SetQuery(typed);
+                    yield return Wait(0.3f);
+                    Assert.IsNotEmpty(Host.List.Rows, "'" + typed + "' finds something");
+                    Assert.AreEqual(id, Host.List.Rows[0].PoiId, "the keyword '" + typed + "' finds its own point first");
+                }
+                if (id == "lamp") yield return Capture("Query_CasteloByKeyword");
+            }
         }
 
         [UnityTest]
@@ -187,12 +224,15 @@ namespace TileStories.Tests
             Host.SetQuery("milit");
             Assert.IsNotEmpty(Host.State.Ids, "Partial Words All fields");
 
+            // - two category words: no point is in both categories, so Every word finds none and Any word finds the union
             yield return ApplySearch(s => s.search.match_mode = "all");
-            Host.SetQuery("lamp painting");
+            Host.SetQuery("military religious");
             Assert.IsEmpty(Host.State.Ids, "Every word: nothing is both");
             yield return ApplySearch(s => s.search.match_mode = "any");
-            Host.SetQuery("lamp painting");
-            Assert.Greater(Host.State.Ids.Count, 10, "Any word: the lamp and the painting sets");
+            Host.SetQuery("military religious");
+            var either = ConfigCopy().pois.Where(p => p.category == "military" || p.category == "religious").Select(p => p.id).ToList();
+            Assert.Greater(either.Count, 5, "precondition: the wall holds many points of the two categories");
+            CollectionAssert.AreEquivalent(either, Host.State.Ids, "Any word: the points of both categories");
 
             yield return ApplySearch(s => s.filter.status_facet = false);
             Assert.IsNull(Host.Tray.Root.Q("facet-group-Status"), "Status Filter off: its group leaves the tray");
@@ -251,11 +291,12 @@ namespace TileStories.Tests
         public IEnumerator ARememberedSearch_BecomesASuggestion()
         {
             yield return ApplySearch(s => { s.results.suggestion_source = "recent_first"; s.results.recent_count = 3; });
-            Host.SetQuery("painting");
+            string remembered = LastWordOf(PoiOf("painting").name);
+            Host.SetQuery(remembered);
             SelectionEventBus.Select("painting");       // picking a result remembers the query
             SelectionEventBus.Clear();
             yield return ApplySearch(s => { });          // any rebuild re-reads the suggestions
-            Assert.AreEqual("painting", Host.SearchBar.SuggestionTerms[0], "Recent first: the device's last search first");
+            Assert.AreEqual(remembered, Host.SearchBar.SuggestionTerms[0], "Recent first: the device's last search first");
             yield return ApplySearch(s => s.results.suggestions_enabled = false);
             CollectionAssert.IsEmpty(Host.SearchBar.SuggestionTerms, "Suggestions off");
         }

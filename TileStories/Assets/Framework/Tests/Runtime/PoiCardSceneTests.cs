@@ -48,7 +48,7 @@ namespace TileStories.Tests
             Rect card = Sheet.Root.worldBound;
             Assert.LessOrEqual(Header.PeekPart.worldBound.yMax, card.yMax + 1f, "peek shows the whole title and chip");
             Assert.GreaterOrEqual(Header.Root.Q<Label>("card-header-subtitle").worldBound.yMin, card.yMax - 1f, "...and nothing below them");
-            Assert.AreEqual("The Lamp", Session.SearchPois.First(p => p.id == "lamp").name, "the card never renames the POI");
+            Assert.AreEqual(ConfigCopy().pois.Single(p => p.id == "lamp").name, Session.SearchPois.First(p => p.id == "lamp").name, "the card never renames the POI");
             yield return Capture("Card_Lamp_Peek");
         }
 
@@ -78,7 +78,7 @@ namespace TileStories.Tests
         public IEnumerator AtFull_TheSearchBarStepsAside_BelowFullTheCardNeverOverlapsIt_AndItComesBackOnClose()
         {
             var top = Host.Root.Q("search-top");
-            Host.SetQuery("lamp");
+            Host.SetQuery(ConfigCopy().pois.Single(p => p.id == "lamp").name);
             yield return Select("lamp");
             Assert.IsTrue(Host.TopShown, "peek: the search bar shows");
             yield return CardTestInput.Drag(Sheet.Handle, -(Sheet.Stops.Half - Sheet.Stops.Peek), slowSheet: Sheet);
@@ -97,7 +97,7 @@ namespace TileStories.Tests
             var inOverlap = new Vector2(bar.center.x, (Sheet.Root.worldBound.yMin + bar.yMax) / 2f);
             var picked = top.panel.Pick(inOverlap);
             Assert.IsTrue(picked != null && Sheet.Root.Contains(picked), "a tap where card and bar overlapped lands on the card, nothing else");
-            Assert.AreEqual("lamp", Host.Query, "the query is kept while the bar is away");
+            Assert.AreEqual(ConfigCopy().pois.Single(p => p.id == "lamp").name, Host.Query, "the query is kept while the bar is away");
             yield return Capture("Card_Lamp_Full_SearchAside");
 
             SelectionEventBus.Select("lamp_military");
@@ -118,7 +118,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             Assert.IsFalse(Sheet.IsOpen);
             Assert.IsTrue(Host.TopShown, "the card closed at full: the bar is back");
-            Assert.AreEqual("lamp", Host.Root.Q<TextField>("search-field").value, "with the visitor's query still in it");
+            Assert.AreEqual(ConfigCopy().pois.Single(p => p.id == "lamp").name, Host.Root.Q<TextField>("search-field").value, "with the visitor's query still in it");
         }
 
         private void SetStopFull() => Sheet.SetStop(SheetStopRule.Stop.Full);
@@ -293,8 +293,9 @@ namespace TileStories.Tests
         {
             // - The Camera: a point with no blocks (The Painting has its own card since _3.2 step 17b)
             yield return Select("camera");
-            Assert.AreEqual("The Camera", Header.TitleText);
-            Assert.AreEqual("POI_Camera", Header.SubtitleText);
+            var camera = ConfigCopy().pois.Single(p => p.id == "camera");
+            Assert.AreEqual(camera.name, Header.TitleText, "no header block: the point's name");
+            Assert.AreEqual(camera.summary, Header.SubtitleText, "and its summary");
             Assert.AreEqual(1, Sheet.Stack.BoundViews.Count, "header only");
         }
 
@@ -495,7 +496,7 @@ namespace TileStories.Tests
             var rich = Sheet.Stack.BoundViews.OfType<RichTextBlockView>().ToList();
             Assert.AreEqual(1, rich.Count);
             StringAssert.Contains("last refuge of the garrison", rich[0].Body.Paragraphs[0].text);
-            Assert.AreEqual("Lamp - Military", Session.SearchPois.First(p => p.id == "lamp_military").name, "the card never renames the POI");
+            Assert.AreEqual(ConfigCopy().pois.Single(p => p.id == "lamp_military").name, Session.SearchPois.First(p => p.id == "lamp_military").name, "the card never renames the POI");
         }
 
         [UnityTest]

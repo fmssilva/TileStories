@@ -16,11 +16,10 @@ Accuracy is approximate (the wall is a fixture); the SHAPE and LENGTH are real. 
 | Card title (header `title`) | Ribeira Palace | Paço da Ribeira |
 | Card subtitle (header `subtitle`) | Royal palace, lost in 1755 | Palácio real, perdido em 1755 |
 
-Today the marker says "The Painting" (the point's `name`, an identity field) and the card says "The Ribeira Palace". Renaming `name`
-re-bases the search tests (`_3.3` TODO "demo content"), so P1a only PROPOSES the pair. The 14 / 15 character title also fits the
-collapsed header next to its three round buttons (today's 18 characters were cut to "The Ribeira Pal...").
-The summary "POI_Painting" (the subtitle on header-only cards) would read: EN "Royal palace on the river, lost in the 1755 earthquake" /
-PT "Palácio real à beira-rio, destruído no terramoto de 1755".
+DONE in P1c (2026-10-23): the point's `name` is now "Ribeira Palace" (the marker label = the card title). A POI `name` has ONE form (no
+per-language name yet, `__mixed_TODOs.md`), so "Paço da Ribeira" is a search keyword of the point; the card title is per language.
+The 14 / 15 character title also fits the collapsed header next to its three round buttons (the old 18 characters were cut to
+"The Ribeira Pal..."). The summary "POI_Painting" became EN "Royal palace on the river, lost in 1755" (a POI summary has one form too).
 
 **F5-3 Translated category.** `royal_government` shows "Royal Government" in PT. Proposal: PT "Governo Real". (The same key is used by
 `lamp`; its header subtitle says "Military", PT "Militar", which is already translated.)
@@ -159,8 +158,10 @@ Scripts, audio and exact captions: `content/audio/` (`guide_paco_en.*`, `guide_p
 
 ## 11. block_8 `related` -- "Nearby on the panel" (F5 item 7: real neighbours)
 
-The block shows the nearest POIs, which are fixtures ("Painting - Infrastructure"). Identity fields are not renamed here; this is the list of
-REAL neighbours the demo points should become, for the `_3.3` rename block:
+The block shows the nearest POIs. P1c (2026-10-23) renamed the fixtures ("Painting - Infrastructure" ...) to real places and chose the
+five that fit the five categories (Igreja da Conceição Velha, Ribeira das Naus, Casa dos Bicos, Café Martinho da Arcada, Cais das
+Colunas); the Arco da Rua Augusta and the Statue of Joseph I below fit no category (religious / military / residential / economic /
+infrastructure) and were left out; the wall's points hold one summary line each, not the one-liners below. The original proposal:
 
 | place | one-liner EN | one-liner PT |
 |---|---|---|
