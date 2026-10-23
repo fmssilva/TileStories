@@ -62,6 +62,7 @@ namespace TileStories
             _root.style.flexGrow = 1f;
             _root.pickingMode = PickingMode.Ignore;
             SafeAreaHelper.ApplyToRoot(_root);
+            ThemeController.Apply(document.rootVisualElement);
             document.rootVisualElement.Add(_root);
             BindButtons();
         }

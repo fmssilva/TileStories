@@ -12,40 +12,73 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-
-## `And now: _3.3 POI Card Look, Feel & Motion -- P1c real names for the demo points`
+## `And now: _3.3 POI Card Look, Feel & Motion -- P4.1 the theme pipeline (behaviour-free)`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
-Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. The two marker
-SDF fonts carry 'ł' since P1b (123 characters) -- `git checkout --` them only if they changed beyond that. Run the full EditMode
-suite with Unity FOCUSED as the baseline (known: some Editor-window tests fail unfocused -- `__mixed_TODOs.md` "Editor-window
-tests depend on focus"; do not chase them here).
+Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. The two marker SDF
+fonts are committed with 'ł' since P1b: `git checkout --` them only if they changed. Baseline: no full run needed (HEAD 9375c94
+= last green state: EditMode 2039/2039 at P1c, full PlayMode 1219/1219 at P1b part 2). Keep Unity FOCUSED during EditMode runs
+(known focus flakes: `__mixed_TODOs.md` "Editor-window tests depend on focus").
 
-Domain spec: `proj_guides/_3.3_POI_Card_Styles.md` -- the TODOs "[demo content, from `_3.2` step 17b]" and "From P1b".
-REQUIRED READING: `proj_guides/detail_card/content/CONTENT_MAP.md` "The F5 text fixes" row 2 (the names); `_3.2.1_Audit.md` F5
-items 2 and 7; `.clinerules/40-testing.md` 4.2.4b; `_2.6_Select_Filter_Search.md` (the examples that use these names).
-WORKER MODEL: Sonnet-class -- a well-defined rename with test re-bases, no new code.
-TEST PLAN: the search scene fixtures + every Card / Poi fixture that names a point first, then the full EditMode suite. The
-full PlayMode run is NOT owed (identity data only, no shared code): name the targeted fixtures you ran and why.
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- above all R12 (the whole section: this block is R12.7
+step 1), R8 S1 (var chains, `customStyle` holds only an element's OWN declarations, a broken var paints transparent silently)
+and S2, R1, and section 2 (today's token table + the LINEAR-colour scrim note). The old status table and sections 3-8 are being
+replaced by the re-plan: build none of them.
+REQUIRED READING (all lines): `.clinerules/20-code-quality.md`, `30-ui-content.md`; `.clinerules/40-testing.md` 4.2 (this block
+touches the tokens and PanelSettings: a full PlayMode run is owed), 4.2.3, 4.2.4, 4.2.4b, 4.4, 4.5; `_3.1_POI_Card_Blocks.md`
+section 3 "Styles" (`CardStyleSheets`, how the card's sheets load).
+Context only: `Runtime/UI/Cards/CardTokens.uss`, `CardTokenColours.cs`, `PoiCardHost.cs`, `DevTools/CardGalleryHarness.cs`,
+`Runtime/UI/Shared/PanelSettings.asset`, `UI Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss`.
+WORKER MODEL: Opus-class -- a new architectural piece (a theme pipeline every panel reads) that must change no pixel.
+TEST PLAN: no baseline run. Targeted Card / Poi PlayMode fixtures green first, then the FULL PlayMode run (background), then the
+full EditMode suite (focused).
 
-WHAT: give the demo points real identity, so the first screen has one name and the neighbour lists read like places:
-1. `painting` -> name "Ribeira Palace", `lamp` -> "St George's Castle" (the marker label = the card title). Read first whether a
-   POI `name` has a per-language form. If it does, add "Paço da Ribeira" / "Castelo de São Jorge" for pt. If it does not, keep
-   the English name and add the PT names as search keywords. Do NOT build per-language POI names: that is a `_2.x` domain item.
-   Write the gap in `__mixed_TODOs.md`.
-2. Summaries "POI_Lamp" / "POI_Painting" / "POI_Camera" and every "X - Category" point's "POI_<id>" -> short real summaries
-   (one line, the kind a visitor reads under a title).
-3. The "X - Category" points ("Painting - Infrastructure" ...): real place names around Lisbon's riverside and the castle hill,
-   so "Nearby" lists places (F5 item 7). Ids stay the same: only names and summaries change.
-HOW: through the config path the POI Editor uses (both config copies). Every search / card test that typed an old name or count:
-re-base it so the expected value comes from the config (4.2.4b), never a re-typed string. List every re-base old -> new.
-VISUALS: Peek of both points at 390 pt, EN and PT, the "Nearby" block, and the search results for "palace" / "castelo". Open each
-capture and judge it in one sentence.
-OUT OF SCOPE: per-language POI names, layout, styles, any other content.
-Stop when the targeted fixtures and the full EditMode suite are green. Update `_2.6` examples and `_3.3` TODOs (mark the rename
-done). Ideas outside this domain -> proj_guides/__mixed_TODOs.md. Finish with the final report of `.clinerules/60-finishing.md`
-6.4. Do not commit: the Architect commits after the review.
+GOAL: one source of truth for the app's look, generated into USS, reaching every UI Toolkit panel, with C# colour reads off USS --
+and the card looks EXACTLY as it does today. Visual changes come in later blocks (P4.3 fonts, P4.4 palettes).
 
+MEASURE FIRST (before any edit): pick a fixed set of renders that covers the card's colours -- e.g. 8-10 `CardGalleryTests`
+entries (header, a text block, a media block, nav chips with family colours, the menu overlay with its scrim, the mini-player,
+the takeover / full view) plus the real card at Half and Full on The Lamp -- render them, and keep the PNGs as the baseline. At
+the end, render the same set and diff them pixel by pixel: the expected diff is ZERO (state the max channel delta; any non-zero
+pixel is a finding to explain, never to wave away).
+
+PART 1 -- the pipeline (number sub-steps 4.1.1 ...):
+1. `ThemeAsset` (ScriptableObject, `Runtime/UI/Theme/`): the T1 + T2 values of R12.2 that `CardTokens.uss` holds TODAY
+   (surfaces, text, accent, lines, focus, status ramp, family colours, type sizes, radii, spacing, durations / easings, glass
+   opacity). One theme `default`, one mode `dark` (today's Stone & Gold values, exactly). The shape must already allow a second
+   mode and the R12.4 knob sets (empty lists now): P4.4 / P4.5 fill them. Values are data in the asset, never re-typed in code.
+2. Generator (Editor): writes `Runtime/UI/Theme/Generated/Theme.default.uss` with the tokens on `.ts-app.ts-theme-default.ts-mode-dark`
+   (deterministic order, a header saying it is generated and from which asset). A menu item / a button on the asset regenerates.
+   `ThemeUssStaleTests` (EditMode): the committed USS equals the generator's output from the committed asset; mutation proof
+   (change one asset value, the test goes red, restore).
+3. `TileStoriesTheme.tss` imports `unity-theme://default` AND the generated theme; `PanelSettings.themeUss` points to it.
+   `ThemeController` puts `ts-app ts-theme-default ts-mode-dark` on every runtime UIDocument root (the card's panel, search, zoom
+   -- they all share the one PanelSettings) and on every host that draws the card outside the wall: `CardGalleryHarness` and any
+   Editor window / preview that hosts a `.ts-card` (find them all; list them in the report).
+4. `CardTokens.uss` keeps ONLY what is not T1 / T2 (sheet layout, the numbers C# reads -- top gap, collapsed header, track peek,
+   bento, radial, float gap -- and every block / nav size), declared as today on `.ts-card` so `customStyle` still finds them.
+   The T1 / T2 lines are deleted from it: they now arrive by inheritance from the app root. Same token NAMES (views keep reading
+   `var(--ts-*)` unchanged). The six roots that add `ts-theme-default` today (`PoiCardSheetView`, `MiniPlayerView`,
+   `CardMenuOverlay`, `FloatingSlot` + its scrim, `TakeoverView`) must still resolve every token: check each, and make sure
+   none of them depended on re-declaring the colours themselves.
+5. `ThemeResolver` (Runtime, plain C#): role + mode -> value from the active `ThemeAsset`. `CardTokenColours` (family colours
+   read BY NAME from `.ts-card`'s custom style) is rewritten to read through it -- same results. Grep for every other C# read of a
+   T1 / T2 COLOUR token by name and move it too; layout numbers stay as they are (step 4).
+6. A guard test: every token NAME any USS file of the card / search / zoom uses as `var(--ts-...)` is defined somewhere it can
+   resolve (theme or the component), so a deleted line can never paint transparent silently (S1). Mutation proof.
+
+PART 2 -- docs: `10-structure.md` (the new files), `_3.3` R12 "Build log" (P4.1 done + the commit's counts + the pixel diff
+result), the Editor-tab rule only if an Editor row was added (none expected).
+
+VISUALS: the baseline set and the after set side by side, opened and judged (they must be indistinguishable; say so with the
+measured diff). Plus one Game-view capture of the wall with the card open and one with search open.
+
+OUT OF SCOPE: any visual change (fonts, light mode, new colours, metal, glass); SearchUI / Zoom / markers moving onto the theme
+(P4.2); the knob classes and Editor rows (P4.5); renaming tokens.
+Stop when the pixel diff is zero, the stale and guard tests are green with mutation proof, the targeted fixtures, the full
+PlayMode run and the full EditMode suite are green. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
+If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
+Do not commit: the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

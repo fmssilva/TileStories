@@ -83,7 +83,8 @@ namespace TileStories
         public TakeoverView(VisualElement layer)
         {
             Root = new VisualElement { name = "poi-card-takeover" };
-            // - the token set lives on these classes (CardTokens.uss); the view is the sheet's sibling, not its child
+            // - the card's own tokens live on these classes (CardTokens.uss), the theme's arrive from the app root; the view is the
+            //   sheet's sibling, not its child
             Root.AddToClassList("ts-card");
             Root.AddToClassList("ts-theme-default");
             Root.AddToClassList("card-takeover");

@@ -1,0 +1,244 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d566dd9c2f67aa4494efb3c620d23e5, type: 3}
+  m_Name: Theme.default
+  m_EditorClassIdentifier: TileStories::TileStories.ThemeAsset
+  key: default
+  defaultMode: dark
+  shared:
+    colours: []
+    lengths:
+    - name: --ts-line-width
+      value:
+        value: 1
+        unit: 0
+      note: 
+    - name: --ts-size-body
+      value:
+        value: 16
+        unit: 0
+      note: Type
+    - name: --ts-size-title
+      value:
+        value: 24
+        unit: 0
+      note: 
+    - name: --ts-size-caption
+      value:
+        value: 14
+        unit: 0
+      note: 
+    - name: --ts-size-lede
+      value:
+        value: 19
+        unit: 0
+      note: 
+    - name: --ts-size-heading
+      value:
+        value: 18
+        unit: 0
+      note: 
+    - name: --ts-size-dropcap
+      value:
+        value: 48
+        unit: 0
+      note: 
+    - name: --ts-size-quote
+      value:
+        value: 22
+        unit: 0
+      note: 
+    - name: --ts-radius-s
+      value:
+        value: 6
+        unit: 0
+      note: Shape
+    - name: --ts-radius-m
+      value:
+        value: 12
+        unit: 0
+      note: 
+    - name: --ts-radius-l
+      value:
+        value: 20
+        unit: 0
+      note: 
+    - name: --ts-radius-round
+      value:
+        value: 50
+        unit: 1
+      note: 
+    - name: --ts-space-1
+      value:
+        value: 4
+        unit: 0
+      note: 
+    - name: --ts-space-2
+      value:
+        value: 8
+        unit: 0
+      note: 
+    - name: --ts-space-3
+      value:
+        value: 12
+        unit: 0
+      note: 
+    - name: --ts-space-4
+      value:
+        value: 16
+        unit: 0
+      note: 
+    - name: --ts-space-5
+      value:
+        value: 24
+        unit: 0
+      note: 
+    - name: --ts-space-6
+      value:
+        value: 32
+        unit: 0
+      note: 
+    numbers:
+    - name: --ts-glass-opacity
+      value: 0.88
+      note: Effects
+    durations:
+    - name: --ts-duration
+      value: 0.22
+      note: Motion
+    easings:
+    - name: --ts-ease
+      value: 9
+      note: 
+    fontStyles:
+    - name: --ts-weight-body
+      value: 0
+      note: 
+  modes:
+  - key: dark
+    tokens:
+      colours:
+      - name: --ts-bg
+        value: {r: 0.101960786, g: 0.08235294, b: 0.0627451, a: 1}
+        note: Surfaces
+      - name: --ts-surface
+        value: {r: 0.13725491, g: 0.10980392, b: 0.08235294, a: 1}
+        note: 
+      - name: --ts-surface-2
+        value: {r: 0.1882353, g: 0.15294118, b: 0.11764706, a: 1}
+        note: 
+      - name: --ts-scrim
+        value: {r: 0, g: 0, b: 0, a: 0.7}
+        note: 'The scrim under a menu over the card (_3.2 step 8). The project renders
+          in LINEAR colour, so an alpha blends in linear light: 0.5 left the card''s
+          text behind at 181 of 247 (measured), still competing with the menu; 0.7
+          recedes it to a frame (about 144)'
+      - name: --ts-hero-fade
+        value: {r: 0.101960786, g: 0.08235294, b: 0.0627451, a: 0.9}
+        note: 
+      - name: --ts-ink
+        value: {r: 0.96862745, g: 0.9372549, b: 0.8627451, a: 1}
+        note: Text
+      - name: --ts-ink-2
+        value: {r: 0.96862745, g: 0.9372549, b: 0.8627451, a: 0.8}
+        note: 
+      - name: --ts-ink-3
+        value: {r: 0.96862745, g: 0.9372549, b: 0.8627451, a: 0.6}
+        note: 
+      - name: --ts-on-accent
+        value: {r: 0.101960786, g: 0.08235294, b: 0.0627451, a: 1}
+        note: 
+      - name: --ts-accent
+        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+        note: Accent
+      - name: --ts-accent-text
+        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+        note: 
+      - name: --ts-accent-2
+        value: {r: 0.7058824, g: 0.47058824, b: 0.15686275, a: 1}
+        note: 
+      - name: --ts-line
+        value: {r: 0.96862745, g: 0.9372549, b: 0.8627451, a: 0.16}
+        note: Lines
+      - name: --ts-focus
+        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+        note: 
+      - name: --ts-status-0
+        value: {r: 0.43529412, g: 0.7490196, b: 0.4509804, a: 1}
+        note: Status ramp (the markers' outline levels, intact -> destroyed)
+      - name: --ts-status-1
+        value: {r: 0.7882353, g: 0.7058824, b: 0.34509805, a: 1}
+        note: 
+      - name: --ts-status-2
+        value: {r: 0.8784314, g: 0.5686275, b: 0.22745098, a: 1}
+        note: 
+      - name: --ts-status-3
+        value: {r: 0.8235294, g: 0.33333334, b: 0.24705882, a: 1}
+        note: 
+      - name: --ts-status-4
+        value: {r: 0.5568628, g: 0.5568628, b: 0.5568628, a: 1}
+        note: 
+      - name: --ts-family-meta
+        value: {r: 0.76862746, g: 0.7294118, b: 0.65882355, a: 1}
+        note: 'Family colours (_3.2 navigation: FamilyDefinition.ColorToken, one
+          per registered family, read by name through CardTokenColours; each at least
+          3:1 on --ts-surface, and never shown without the family''s icon or words)'
+      - name: --ts-family-about
+        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+        note: 
+      - name: --ts-family-media
+        value: {r: 0.49803922, g: 0.7019608, b: 0.8352941, a: 1}
+        note: 
+      - name: --ts-family-guides
+        value: {r: 0.6392157, g: 0.77254903, b: 0.52156866, a: 1}
+        note: 
+      - name: --ts-family-stories
+        value: {r: 0.84313726, g: 0.6509804, b: 0.78431374, a: 1}
+        note: 
+      - name: --ts-family-ar
+        value: {r: 0.49803922, g: 0.81960785, b: 0.7882353, a: 1}
+        note: 
+      - name: --ts-family-play
+        value: {r: 0.9490196, g: 0.77254903, b: 0.4862745, a: 1}
+        note: 
+      - name: --ts-family-visit
+        value: {r: 0.6901961, g: 0.65882355, b: 0.8784314, a: 1}
+        note: 
+      - name: --ts-family-community
+        value: {r: 0.9098039, g: 0.65882355, b: 0.4862745, a: 1}
+        note: 
+      - name: --ts-family-navigation
+        value: {r: 0.76862746, g: 0.8392157, b: 0.47058824, a: 1}
+        note: 
+      - name: --ts-correct
+        value: {r: 0.43529412, g: 0.7490196, b: 0.4509804, a: 1}
+        note: 
+      - name: --ts-wrong
+        value: {r: 0.8235294, g: 0.33333334, b: 0.24705882, a: 1}
+        note: 
+      - name: --ts-result-fill
+        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 0.28}
+        note: 'poll (Play.uss): the tint of a results bar behind an option''s words
+          (only drawn when an app supplies results)'
+      - name: --ts-video-letterbox
+        value: {r: 0, g: 0, b: 0, a: 1}
+        note: the bars around a playing video whose shape differs from its frame's
+      - name: --ts-clear
+        value: {r: 0, g: 0, b: 0, a: 0}
+        note: 'no colour at all: a border kept for layout that shows only when marked
+          (the filmstrip''s current picture)'
+      lengths: []
+      numbers: []
+      durations: []
+      easings: []
+      fontStyles: []
+  knobs: []

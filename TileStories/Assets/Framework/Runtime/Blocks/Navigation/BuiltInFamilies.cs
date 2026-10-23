@@ -7,7 +7,7 @@ namespace TileStories
     // Order = the canvas order, in gaps of 10 so an app can slot its own family between two built-in ones.
     // The labels themselves are data, not code: LabelKey names a CardStrings row (CardStrings.asset, en + pt),
     // so a visitor reads them in their language and a wall can reword them in Card Texts. IconKey names a CardIcons
-    // drawing and ColorToken a CardTokens.uss token (_3.2 step 6): the values stay in the stylesheet.
+    // drawing and ColorToken a theme colour (_3.2 step 6, _3.3 R12.1): the values stay in the theme asset.
     //
     // The `navigation` family (order 85, _3.2 step 11a) arrived with its first kind, nav_icon_grid: its blocks move the visitor inside
     // the card, so it is never a navigation target itself (In Nav off) -- no tab, bar or menu ever lists a nav block.

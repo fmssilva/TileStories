@@ -127,13 +127,18 @@ namespace TileStories.Tests
             return bg.sprite != null ? bg.sprite.name : bg.texture != null ? bg.texture.name : null;
         }
 
-        // A --ts-* size token as CardTokens.uss defines it (the one place the value lives): "24px", or a plain number the C#
+        // The text of the two places a --ts-* token is defined: the card's own (CardTokens.uss) and the app theme (generated from the theme
+        // asset; ThemeUssStaleTests holds it equal to the asset). One place each, never both (ThemeTokenGuardTests)
+        public static string TokenFiles() =>
+            System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Cards/CardTokens.uss") + "\n" +
+            System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Theme/Generated/Theme.default.uss");
+
+        // A --ts-* size token as its one source defines it (the card's tokens or the theme): "24px", or a plain number the C#
         // reads (panel units, like --ts-sheet-top-gap)
         public static float TokenPx(string token)
         {
-            var match = System.Text.RegularExpressions.Regex.Match(
-                System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Cards/CardTokens.uss"), token + @":\s*([0-9.]+)(px)?\s*;");
-            Assert.IsTrue(match.Success, token + " is defined in CardTokens.uss");
+            var match = System.Text.RegularExpressions.Regex.Match(TokenFiles(), token + @":\s*([0-9.]+)(px)?\s*;");
+            Assert.IsTrue(match.Success, token + " is defined in CardTokens.uss or the theme");
             float value = float.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
             Assert.Greater(value, 0f, token);
             return value;

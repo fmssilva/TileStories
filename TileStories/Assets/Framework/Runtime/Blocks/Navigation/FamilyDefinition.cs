@@ -18,9 +18,10 @@ namespace TileStories
         public string LabelKey;
         // The family's icon: one of CardIcons.All (a line icon drawn by the card's stylesheet, no picture). An app family picks one too
         public string IconKey;
-        // The family's colour, as the name of a card token ("--ts-family-about", CardTokens.uss): a view reads it from the card's resolved
-        // style, so the value stays in the stylesheet. An app family names a token its own stylesheet defines. Never shown alone: an icon
-        // or the family's words always travel with it (30-ui-content)
+        // The family's colour, as the name of a THEME colour ("--ts-family-about", Theme.default.asset): a view reads it through
+        // CardTokenColours (the theme it sits under), so the value stays data. An app family names one of the theme's colours
+        // (ThemeTokenGuardTests holds every registered family to one). Never shown alone: an icon or the family's words always travel
+        // with it (30-ui-content)
         public string ColorToken;
         // Whether the family is offered as a navigation target at all (a nav block is never a nav target)
         public bool InNav = true;

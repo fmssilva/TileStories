@@ -44,7 +44,8 @@ namespace TileStories
         {
             _sheet = sheet;
             Root = new VisualElement { name = "poi-card-menu", pickingMode = PickingMode.Ignore };
-            // - the token set lives on these classes (CardTokens.uss); the layer is the sheet's sibling, like the full view
+            // - the card's own tokens live on these classes (CardTokens.uss), the theme's arrive from the app root; the layer is the
+            //   sheet's sibling, like the full view
             Root.AddToClassList("ts-card");
             Root.AddToClassList("ts-theme-default");
             Root.AddToClassList("card-menu");

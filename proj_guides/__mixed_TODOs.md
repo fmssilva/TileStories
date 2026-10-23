@@ -516,6 +516,10 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   shows again, look for a slot or element whose height depends on the section or block being read (Next Up's finished words, the end-of-card
   reveal) and give it a fixed place, as here.
 
+- SEEN AGAIN (2026-10-23, `_3.3` P4.1, the theme pipeline): the full PlayMode run (1237 results, Unity focused throughout) failed
+  `ARealDragToTheEnd_...` with 2 "Layout update is struggling" lines (PanelRootElement 390 x 844, scene load #503); the same test passed in the
+  Card / Poi targeted set an hour earlier on the same tree (1021/1021) and 8/8 alone right after (Unity in the background). P4.1 changed no
+  geometry callback and no layout value (pixel set: 0 px), but the next long run should still say whether it shows again.
 - STILL OPEN (2026-10-20, _3.2 step 15b): NOT seen in either long run of 15b -- the Card / Poi targeted set (892 tests) and the full PlayMode
   run (1113/1113, wholly in the background): 0 "Layout update is struggling" lines in the Editor log over both, `ARealDragToTheEnd_...` green in
   both. Two quiet runs after three loud ones: left open, not closed (the brief: never on one quiet run). If it shows again, the entry below says
@@ -716,3 +720,29 @@ result rows, the "Nearby" cards of points without a header title and the placed-
 Portuguese card. Same family as the search having no visitor language (`_2.6`) and the status names (`_3.3` TODOs). A `_2.x` domain item:
 `name_by_language` / `summary_by_language` on `POIData` (like `label_by_language` on the category), read by the marker label, the search
 rows and the chip through the card's language, with one Editor row per other wall language under the name.
+
+## From `_3.3` P4.1 (the theme pipeline, 2026-10-23)
+
+- **An app's own family colour.** A family's `ColorToken` must now be a THEME colour (`ThemeResolver`; `FamilyIconAndWordsTests` and the
+  `FamilyDefinition` comment say so). Before P4.1 the contract said "an app family names a token its own stylesheet defines" (read from the
+  card root's `customStyle`); no app did, no test covered it, and keeping that path would have been a second colour source beside the theme.
+  When an app first needs a family colour of its own: let an app add values to the theme (an app theme overlay asset merged by
+  `ThemeController.Load`, generated with the framework's), not a USS read in C#.
+- **The real audio chip lays out a sub-pixel apart with Unity in front / in the background.** The Lamp's hero audio chip (title + time
+  lines) renders 1256 px a hair apart (max channel delta 213, same colours, stable within each state) depending on `Application.isFocused`
+  during the run -- found by `ThemePixelSetTests`, on the tree BEFORE P4.1. Harmless to a visitor; a test that compares text pixels of the
+  real card across runs must key by focus (the pixel set does). Worth one look when the header is redesigned (P5): what in the chip depends
+  on focus (the real clip's load timing on a throttled Editor?).
+- **Text pixels depend on the font atlas's fill history.** The Editor's dynamic font atlas is shared by every scene and filled in the order
+  text is drawn since it was last reset: twice, in a job right after a re-import, the Lamp card drawn first (`ThemePipelineTests`) moved 1-10
+  text pixels of 7 gallery renders by 1-2 levels (A/B proven at P4.1 with the old and the new token file alike; resolved colours of 120
+  elements bit-identical); in the full run, with the whole suite before it, the gallery matched exactly. P4.3's STATIC TextCore atlases
+  (R12.3) should remove this: re-run the pixel set after another fixture then, and drop the "run it alone" note from `ThemePixelSetTests`.
+- **`[Explicit]` does not keep a fixture out of an unfiltered MCP full run** (P4.1: the pixel set ran inside the full PlayMode run). The pixel
+  set is now gated by a local switch file (`TestEvidence/ThemePixels/MEASURING`) and is ignored without it. Any other fixture marked
+  `[Explicit]` to stay out of full runs needs the same kind of gate (grep `Explicit(` under `Tests/`).
+- **`S4ContourTests.TheRing_DrawsAndTurns_AndAnimateZeroFreezesIt` (dev spike) is phase-and-frame-rate sensitive.** Red once in the P4.1
+  full PlayMode run (8th test after Play Mode started: ring top pixel (39,89,206) -> (46,90,206), 0.031 < 0.05), green alone. A passing run
+  started from the SAME first colour and reached (53,91,205) (0.055): the 1.5 s wait is REAL time while the shader turns on game time, which
+  lags in the first, slow frames of a run (Unity caps a frame's delta). Fix when the spike is next touched: wait on `Time.time` (or read
+  `_Time` back) for a quarter turn, or assert the change over a whole turn. Nothing of the theme reaches it (no `.ts-app` on its stage).

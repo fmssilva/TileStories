@@ -101,6 +101,8 @@ namespace TileStories
             if (Sheet != null) return;
             var document = GetComponent<UIDocument>();
             var root = document.rootVisualElement;
+            // - the app theme, exactly as on the wall's card (PoiCardHost)
+            ThemeController.Apply(root);
             // - a phone-width column in the middle: the panel's own reference width, whatever the Game view's shape
             Frame = new VisualElement { name = "card-gallery-frame", pickingMode = PickingMode.Ignore };
             Frame.style.position = Position.Absolute;

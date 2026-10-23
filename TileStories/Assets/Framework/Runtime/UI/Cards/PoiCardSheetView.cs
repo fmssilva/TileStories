@@ -91,7 +91,8 @@ namespace TileStories
             foreach (var sheet in styleSheets)
                 if (sheet != null) Layer.styleSheets.Add(sheet);
 
-            // - the token classes sit on the sheet itself, so its own custom style carries every --ts-* token
+            // - the token classes sit on the sheet itself, so its own custom style carries the card's own --ts-* tokens (CardTokens.uss: the
+            //   numbers C# reads here); the theme's colours and scales are inherited from the app root (ThemeController)
             Root = new VisualElement { name = "poi-card" };
             Root.AddToClassList("ts-card");
             Root.AddToClassList("ts-theme-default");

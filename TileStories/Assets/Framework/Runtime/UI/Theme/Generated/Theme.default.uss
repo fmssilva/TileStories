@@ -1,0 +1,79 @@
+/* GENERATED from Assets/Framework/Runtime/Resources/TileStories/Themes/Theme.default.asset by ThemeUssGenerator -- do not edit by hand: change the asset and
+   press Regenerate USS in its Inspector (ThemeUssStaleTests fails while this file is stale).
+   The theme's T1 / T2 tokens (_3.3 R12.2) on the app root ThemeController marks; every screen inherits them. */
+
+.ts-app.ts-theme-default.ts-mode-dark {
+    /* Surfaces */
+    --ts-bg: rgb(26, 21, 16);
+    --ts-surface: rgb(35, 28, 21);
+    --ts-surface-2: rgb(48, 39, 30);
+    /* The scrim under a menu over the card (_3.2 step 8). The project renders in LINEAR colour, so an alpha blends in linear
+       light: 0.5 left the card's text behind at 181 of 247 (measured), still competing with the menu; 0.7 recedes it to a
+       frame (about 144) */
+    --ts-scrim: rgba(0, 0, 0, 0.7);
+    --ts-hero-fade: rgba(26, 21, 16, 0.9);
+    /* Text */
+    --ts-ink: rgb(247, 239, 220);
+    --ts-ink-2: rgba(247, 239, 220, 0.8);
+    --ts-ink-3: rgba(247, 239, 220, 0.6);
+    --ts-on-accent: rgb(26, 21, 16);
+    /* Accent */
+    --ts-accent: rgb(245, 158, 11);
+    --ts-accent-text: rgb(245, 158, 11);
+    --ts-accent-2: rgb(180, 120, 40);
+    /* Lines */
+    --ts-line: rgba(247, 239, 220, 0.16);
+    --ts-focus: rgb(245, 158, 11);
+    /* Status ramp (the markers' outline levels, intact -> destroyed) */
+    --ts-status-0: rgb(111, 191, 115);
+    --ts-status-1: rgb(201, 180, 88);
+    --ts-status-2: rgb(224, 145, 58);
+    --ts-status-3: rgb(210, 85, 63);
+    --ts-status-4: rgb(142, 142, 142);
+    /* Family colours (_3.2 navigation: FamilyDefinition.ColorToken, one per registered family, read by name through
+       CardTokenColours; each at least 3:1 on --ts-surface, and never shown without the family's icon or words) */
+    --ts-family-meta: rgb(196, 186, 168);
+    --ts-family-about: rgb(245, 158, 11);
+    --ts-family-media: rgb(127, 179, 213);
+    --ts-family-guides: rgb(163, 197, 133);
+    --ts-family-stories: rgb(215, 166, 200);
+    --ts-family-ar: rgb(127, 209, 201);
+    --ts-family-play: rgb(242, 197, 124);
+    --ts-family-visit: rgb(176, 168, 224);
+    --ts-family-community: rgb(232, 168, 124);
+    --ts-family-navigation: rgb(196, 214, 120);
+    --ts-correct: rgb(111, 191, 115);
+    --ts-wrong: rgb(210, 85, 63);
+    /* poll (Play.uss): the tint of a results bar behind an option's words (only drawn when an app supplies results) */
+    --ts-result-fill: rgba(245, 158, 11, 0.28);
+    /* the bars around a playing video whose shape differs from its frame's */
+    --ts-video-letterbox: rgb(0, 0, 0);
+    /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
+    --ts-clear: rgba(0, 0, 0, 0);
+    --ts-line-width: 1px;
+    /* Type */
+    --ts-size-body: 16px;
+    --ts-size-title: 24px;
+    --ts-size-caption: 14px;
+    --ts-size-lede: 19px;
+    --ts-size-heading: 18px;
+    --ts-size-dropcap: 48px;
+    --ts-size-quote: 22px;
+    /* Shape */
+    --ts-radius-s: 6px;
+    --ts-radius-m: 12px;
+    --ts-radius-l: 20px;
+    --ts-radius-round: 50%;
+    --ts-space-1: 4px;
+    --ts-space-2: 8px;
+    --ts-space-3: 12px;
+    --ts-space-4: 16px;
+    --ts-space-5: 24px;
+    --ts-space-6: 32px;
+    /* Effects */
+    --ts-glass-opacity: 0.88;
+    /* Motion */
+    --ts-duration: 0.22s;
+    --ts-ease: ease-out-cubic;
+    --ts-weight-body: normal;
+}

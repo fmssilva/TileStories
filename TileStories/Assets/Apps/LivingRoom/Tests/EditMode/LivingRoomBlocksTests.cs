@@ -361,8 +361,10 @@ namespace TileStories.LivingRoom.Tests
                 StringAssert.DoesNotContain("Color.", source, file);
                 StringAssert.DoesNotContain("Color32", source, file);
             }
-            // - the style sheet: every value is a token of CardTokens.uss (or a unitless keyword), no colour or size of its own
-            string tokens = File.ReadAllText("Assets/Framework/Runtime/UI/Cards/CardTokens.uss");
+            // - the style sheet: every value is a framework token -- the card's own (CardTokens.uss) or the app theme's (generated) -- or a
+            //   unitless keyword, no colour or size of its own
+            string tokens = File.ReadAllText("Assets/Framework/Runtime/UI/Cards/CardTokens.uss") + "\n" +
+                            File.ReadAllText("Assets/Framework/Runtime/UI/Theme/Generated/Theme.default.uss");
             string uss = Regex.Replace(File.ReadAllText(AppFolder + "/Scripts/SizeComparison/SizeComparison.uss"), @"/\*.*?\*/", "", RegexOptions.Singleline);
             StringAssert.DoesNotMatch(@"\d+(\.\d+)?(px|%|em|deg|s)\b", uss, "no literal size");
             StringAssert.DoesNotMatch(@"#[0-9a-fA-F]{3,8}\b|rgba?\(", uss, "no literal colour");

@@ -95,11 +95,11 @@ namespace TileStories.Tests
         private int SectionUnderTheSpyLine() =>
             CardTestInput.UnderTheSpyLine(Scroll, Nav.Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
 
-        // --ts-duration as CardTokens.uss writes it (seconds): the one place the card's motion length lives
+        // --ts-duration as the theme writes it (seconds): the one place the card's motion length lives
         private static float DurationToken()
         {
-            var match = Regex.Match(System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Cards/CardTokens.uss"), @"--ts-duration:\s*([0-9.]+)s\s*;");
-            Assert.IsTrue(match.Success, "--ts-duration is defined in CardTokens.uss");
+            var match = Regex.Match(CardTestInput.TokenFiles(), @"--ts-duration:\s*([0-9.]+)s\s*;");
+            Assert.IsTrue(match.Success, "--ts-duration is defined in the theme");
             return float.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
         }
 

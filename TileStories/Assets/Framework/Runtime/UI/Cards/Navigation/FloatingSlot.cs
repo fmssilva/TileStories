@@ -38,7 +38,8 @@ namespace TileStories
             _sheet = sheet;
             // - never takes a finger itself: a tap beside the chip and the button reaches the camera view under it
             Root = new VisualElement { name = "poi-card-floating", pickingMode = PickingMode.Ignore };
-            // - the token set lives on these classes (CardTokens.uss): the slot is the sheet's sibling, like the menu layer
+            // - the card's own tokens live on these classes (CardTokens.uss: its gap is read here), the theme's arrive from the app root;
+            //   the slot is the sheet's sibling, like the menu layer
             Root.AddToClassList("ts-card");
             Root.AddToClassList("ts-theme-default");
             Root.AddToClassList("poi-card-floating");

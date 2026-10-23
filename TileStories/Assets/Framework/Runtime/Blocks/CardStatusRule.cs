@@ -7,7 +7,7 @@ namespace TileStories
     // marker's outline ring, resolved by the MARKERS' OWN RULE (MarkerVisualResolver: outline mode uniform / per type /
     // same hue, the Outline Types row the POI picked, the unknown row) -- never a second copy of it -- so the card and
     // the marker can never disagree. Only when the wall draws no ring for it (no Outline Types rows, outline mode
-    // "none") does the card fall back to its own status tokens (--ts-status-0..4, CardTokens.uss). Pure; the static
+    // "none") does the card fall back to the theme's status tokens (--ts-status-0..4, Theme.default.asset). Pure; the static
     // palettes it reads are the ones WallSession configured for the running markers.
     public static class CardStatusRule
     {

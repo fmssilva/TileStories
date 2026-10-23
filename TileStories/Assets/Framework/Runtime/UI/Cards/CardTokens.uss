@@ -1,90 +1,19 @@
-/* The POI Detail Card's design tokens (_3.3 section 2): the ONE place a card colour, size, radius or duration is
-   written. PoiCard.uss and every block style read them as var(--ts-*); the C# views only add classes.
-   ".ts-card" carries the token set on the sheet itself (so its own custom style holds them, and every block
-   inherits them). This is the minimal default preset (Stone & Gold, dark); _3.3 adds the other presets, light
-   mode and the sunlight expansion as more classes over the same names.
-   Font tokens (--ts-font-display / -body / -mono) arrive with _3.3 step 2 (fonts as UI Toolkit font assets). */
+/* The POI Detail Card's OWN tokens (_3.3 R12.2, T3): its sizes -- the sheet's layout, every block's and navigation element's
+   measures -- and the plain numbers C# reads from the card's root (--ts-sheet-top-gap, --ts-header-collapsed-max-height,
+   --ts-track-peek, --ts-bento-*, --ts-radial-*, --ts-float-gap). They sit on the card's roots (.ts-card) because a custom property
+   is only in the customStyle of the element that DECLARES it (_3.3 R8 S1).
+   Every colour and every theme scale (type sizes, radii, spacing, line width, motion) is NOT here: it is the app theme's (T1 / T2),
+   generated from Resources/TileStories/Themes/Theme.default.asset into Theme/Generated/Theme.default.uss and inherited from the
+   app root ThemeController marks. PoiCard.uss and every block style read both as var(--ts-*); ThemeTokenGuardTests holds every
+   name they use to a definition. */
 
 .ts-card.ts-theme-default {
-    /* Surfaces */
-    --ts-bg: rgb(26, 21, 16);
-    --ts-surface: rgb(35, 28, 21);
-    --ts-surface-2: rgb(48, 39, 30);
-    /* The scrim under a menu over the card (_3.2 step 8). The project renders in LINEAR colour, so an alpha blends in linear light: 0.5
-       left the card's text behind at 181 of 247 (measured), still competing with the menu; 0.7 recedes it to a frame (about 144) */
-    --ts-scrim: rgba(0, 0, 0, 0.7);
-    --ts-hero-fade: rgba(26, 21, 16, 0.9);
-
-    /* Text */
-    --ts-ink: rgb(247, 239, 220);
-    --ts-ink-2: rgba(247, 239, 220, 0.8);
-    --ts-ink-3: rgba(247, 239, 220, 0.6);
-    --ts-on-accent: rgb(26, 21, 16);
-
-    /* Accent */
-    --ts-accent: rgb(245, 158, 11);
-    --ts-accent-text: rgb(245, 158, 11);
-    --ts-accent-2: rgb(180, 120, 40);
-
-    /* Lines */
-    --ts-line: rgba(247, 239, 220, 0.16);
-    --ts-line-width: 1px;
-    --ts-focus: rgb(245, 158, 11);
-
-    /* Status ramp (the markers' outline levels, intact -> destroyed) */
-    --ts-status-0: rgb(111, 191, 115);
-    --ts-status-1: rgb(201, 180, 88);
-    --ts-status-2: rgb(224, 145, 58);
-    --ts-status-3: rgb(210, 85, 63);
-    --ts-status-4: rgb(142, 142, 142);
-
-    /* Family colours (_3.2 navigation: FamilyDefinition.ColorToken, one per registered family, read by name through
-       CardTokenColours; each at least 3:1 on --ts-surface, and never shown without the family's icon or words) */
-    --ts-family-meta: rgb(196, 186, 168);
-    --ts-family-about: rgb(245, 158, 11);
-    --ts-family-media: rgb(127, 179, 213);
-    --ts-family-guides: rgb(163, 197, 133);
-    --ts-family-stories: rgb(215, 166, 200);
-    --ts-family-ar: rgb(127, 209, 201);
-    --ts-family-play: rgb(242, 197, 124);
-    --ts-family-visit: rgb(176, 168, 224);
-    --ts-family-community: rgb(232, 168, 124);
-    --ts-family-navigation: rgb(196, 214, 120);
-
-    /* Type */
-    --ts-size-body: 16px;
-    --ts-size-title: 24px;
-    --ts-size-caption: 14px;
-    --ts-size-lede: 19px;
-    --ts-size-heading: 18px;
-    --ts-size-dropcap: 48px;
-    --ts-size-quote: 22px;
-    --ts-weight-body: normal;
-
-    /* Shape */
-    --ts-radius-s: 6px;
-    --ts-radius-m: 12px;
-    --ts-radius-l: 20px;
-    --ts-radius-round: 50%;
-    --ts-space-1: 4px;
-    --ts-space-2: 8px;
-    --ts-space-3: 12px;
-    --ts-space-4: 16px;
-    --ts-space-5: 24px;
-    --ts-space-6: 32px;
     /* The pill button (CardParts.uss .card-pill): its corner radius is HALF the touch target, so a one-word pill stays a
        stadium, never an egg (a radius larger than half the height is shrunk unevenly), and it never gets narrower than this */
     --ts-pill-radius: 24px;
     --ts-pill-min-width: 96px;
     /* The one gap between two blocks of the stack (BlockStackView's slots, _3.1 step 6C) */
     --ts-block-gap: 24px;
-
-    /* Effects */
-    --ts-glass-opacity: 0.88;
-
-    /* Motion */
-    --ts-duration: 0.22s;
-    --ts-ease: ease-out-cubic;
 
     /* Sheet layout: the smallest tap target (WCAG 2.5.5 asks 44), the grabber bar, and the gap the full stop
        leaves above the sheet. --ts-sheet-top-gap is read by PoiCardSheetView as a plain number (panel units). */
@@ -207,14 +136,10 @@
        units, no "px": a CustomStyleProperty<float> does not parse a dimension) by CardTrackFit on this card root, like --ts-sheet-top-gap;
        small enough that two whole cards still fit the phone strip beside it */
     --ts-track-peek: 32;
-    --ts-correct: rgb(111, 191, 115);
-    --ts-wrong: rgb(210, 85, 63);
     --ts-choice-border: 2px;
     --ts-choice-picture: 96px;
     --ts-vote-size: 64px;
     --ts-vote-glyph: 28px;
-    /* poll (Play.uss): the tint of a results bar behind an option's words (only drawn when an app supplies results) */
-    --ts-result-fill: rgba(245, 158, 11, 0.28);
     /* collect (Play.uss): the stamp's round badge, and the thin progress bar under the count */
     --ts-stamp-size: 56px;
     --ts-stamp-radius: 28px;
@@ -235,8 +160,6 @@
     --ts-video-overlay-glyph: 28px;
     --ts-video-icon: 20px;
     --ts-video-chapter-max: 200px;
-    /* the bars around a playing video whose shape differs from its frame's */
-    --ts-video-letterbox: rgb(0, 0, 0);
     /* the mini-player on the wall (PoiCard.uss): its distance from the bottom edge -- above the AR zoom buttons (ZoomControlView: 14 px from
        the edge, a 60 px strip) so it never covers them -- and how wide it grows */
     --ts-mini-bottom: 88px;
@@ -266,6 +189,4 @@
     --ts-edge-fill: 12px;
     --ts-edge-disc-current: 32px;
     --ts-edge-fill-current: 18px;
-    /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
-    --ts-clear: rgba(0, 0, 0, 0);
 }

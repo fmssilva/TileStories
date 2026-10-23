@@ -17,7 +17,7 @@ namespace TileStories
         [Tooltip("The wall whose POIs this card shows")]
         [SerializeField] private WallSession wallSession;
 
-        [Tooltip("CardTokens.uss: the --ts-* design tokens")]
+        [Tooltip("CardTokens.uss: the card's own --ts-* tokens (its sizes; the colours and scales are the app theme's)")]
         [SerializeField] private StyleSheet tokens;
 
         [Tooltip("PoiCard.uss: the card's container, written only with the tokens")]
@@ -121,6 +121,8 @@ namespace TileStories
         {
             if (Sheet != null) return;
             var root = GetComponent<UIDocument>().rootVisualElement;
+            // - the app theme's colours and scales arrive on this root (TileStoriesTheme.tss); the card's own tokens sit on its sheet
+            ThemeController.Apply(root);
             Sheet = new PoiCardSheetView(root, BlockRegistry.Shared, CardStyleSheets.InOrder(tokens, cardStyle, blockStyles));
             Sheet.CloseRequested += SelectionEventBus.Clear;
             Sheet.LanguageRequested += SwitchLanguage;

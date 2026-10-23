@@ -1,57 +1,50 @@
-# Plan tracker -- _3.3 P1c: real names for the demo points
+# Plan tracker -- _3.3 P4.1: the theme pipeline (behaviour-free)
 
-Brief: `__AI_worker.md` (P1c). Worker: Sonnet-class. Identity data only (config + test re-bases), no new runtime code.
+Brief: `__AI_worker.md` (P4.1, R12.7 step 1). Worker: Opus-class. No pixel may change. Do not commit (the Architect does).
 
 ## GATE (done)
-- [x] push: 0 ahead (HEAD 2351b29 = origin)
-- [x] UnityMCP confirmed: telemetry_status ok, console readable
-- [x] captures opened: `TestEvidence/Card/P1c_gate_game.png` (Game view, Edit Mode: room scan + painting),
-      `TestEvidence/Editor/P1c_gate_editor.png` (POI Editor window, Scene Configuration + 3 tabs); window closed, 0 left
-- [x] compile: console clean (only XR Simulation duplicate-ID noise); fonts: git status clean -> nothing to restore
-- [x] baseline full EditMode, Unity focused: 2033 tests, 1 FAILED = `KeywordListFieldTypingTests.TypingTwoKeywordsWithACommaBetween_GivesTwoKeywords`
-      ("the click must focus the keyword field") -- an Editor-window focus test, not chased (to re-check alone after the edit)
+- [x] push: 0 ahead (HEAD 9375c94 = origin)
+- [x] UnityMCP: telemetry_status ok
+- [x] captures opened: `TestEvidence/Gate/P4.1_gate_game.png` (Game view, Edit Mode: room scan + painting),
+      `TestEvidence/Gate/P4.1_gate_editor.png` (POI Editor window; a first try caught a mail inbox -> deleted, retaken at 800x640); 0 windows left
+- [x] compile: 0 `error CS` in Editor.log, last builds ExitCode 0; fonts: git status clean -> nothing restored
+- [x] baseline: none run (HEAD 9375c94 = last green: EditMode 2039/2039 P1c, PlayMode 1219/1219 P1b part 2)
 
 ## Findings (verified on disk)
-- `POIData.name` is ONE plain string (`WallConfigData.cs:540`), no per-language form -> keep EN name, PT names as `search_keywords`
-  (gap goes to `__mixed_TODOs.md`). The card header title is already per-language and authored (St George's Castle / Ribeira Palace).
-- Config lives in `Apps/LivingRoom/config.json` and `StreamingAssets/LivingRoom/config.json` (identical, LF, JsonUtility pretty print).
-  `generate_config.py` is the OLD generator (not the source of truth any more): not touched.
-- `00-process.md` says "never change an existing POI's identity fields"; the brief is the explicit approval for this one rename block.
-- Search index words: name, keywords, summary, category/badge/status/level labels. New names/summaries must avoid words the search
-  tests use as queries: military, religious, residential, economic, infrastructure, lamp, painting, church, chapel, tower, lantern, crowd.
+- Only C# COLOUR read by name: `CardTokenColours` (caller `NavTint`). Layout numbers read from `.ts-card`'s customStyle (stay):
+  PoiCardSheetView (top gap, collapsed header), CardTrackFit (track peek), CardBentoView (gap, names width), FabRadialNavView (4), FloatingSlot (float gap).
+- UIDocument hosts: PoiCardHost, CardGalleryHarness (CardGallery + CardNavGallery scenes), SearchUIHost, ZoomControlView; SpikeStage = dev-only, untouched.
+  One PanelSettings (5 UIDocuments, 3 scenes). NO Editor window / preview hosts a `.ts-card` (0 hits in Framework/Editor).
+- Six token roots (sheet, mini, menu, floating + scrim, takeover) all live under the card's UIDocument root -> inherit from `.ts-app`.
+- Tests that parse CardTokens.uss text: CardTestInput.TokenPx, PoiCardNavSceneTests.DurationToken, FamilyIconAndWordsTests (family colours),
+  LivingRoomBlocksTests (SizeComparison.uss tokens).
 
-## Names (EN; PT for the two mains goes in keywords)
-| id | name | summary |
-|---|---|---|
-| lamp | St George's Castle (kw: Castelo de Sao Jorge) | Medieval castle and royal palace above Lisbon |
-| lamp_religious | Lisbon Cathedral | Romanesque cathedral begun in 1147, below the castle hill |
-| lamp_military | Castle Keep | The castle's keep, the last refuge of its garrison |
-| lamp_residential | Alfama | Lisbon's oldest quarter, a maze of lanes below the castle |
-| lamp_economic | Feira da Ladra | Lisbon's open-air flea market, on Tuesdays and Saturdays |
-| lamp_infrastructure | Tram 28 | The yellow tram that climbs the castle hill |
-| painting | Ribeira Palace (kw: Paco da Ribeira) | Royal palace on the river, lost in 1755 |
-| painting_religious | Igreja da Conceicao Velha | Rebuilt after 1755; its Manueline doorway survived |
-| painting_military | Ribeira das Naus | The royal dockyard that built the ships of the age of discovery |
-| painting_residential | Casa dos Bicos | A 16th-century house with a front of diamond points |
-| painting_economic | Cafe Martinho da Arcada | Lisbon's oldest cafe, open under the square's arcades since 1782 |
-| painting_infrastructure | Cais das Colunas | The stone quay where the square meets the river, between two columns |
-| camera | The Camera (name kept: not in the brief) | Viewpoint over the Tagus riverfront |
-| camera_religious | Jeronimos Monastery | A Manueline monastery funded by the spice trade, in Belem |
-| camera_military | Torre de Belem | A fortified lookout guarding the river mouth since 1519 |
-| camera_residential | Madragoa | A quiet riverside quarter once home to fishwives |
-| camera_economic | Mercado da Ribeira | The riverside food market of Cais do Sodre |
-| camera_infrastructure | Ponte 25 de Abril | The suspension bridge over the Tagus, opened in 1966 |
-(the config carries the real accents; the table is ASCII only)
+## Decisions
+- Every COLOUR token -> theme (incl. correct / wrong / result-fill / video-letterbox / clear); type sizes, radii s/m/l/round, space 1-6, line width,
+  weight, glass opacity, duration, ease -> theme. Everything else stays in CardTokens.uss on `.ts-card.ts-theme-default` (selector unchanged).
+- Asset at `Runtime/Resources/TileStories/Themes/Theme.default.asset`, filled by parsing today's CardTokens.uss once (execute_code, not committed).
+- Typed lists in a ThemeTokenSet (shared / per mode / per knob option); knobs empty and not generated (P4.5).
+- C# finds the theme from the nearest `.ts-app` root's classes; ThemeController.Apply(root) called by each host.
+- Pixel set = permanent [Explicit] PlayMode fixture: baseline/ then latest/ with a zero-diff assert; scene renders cropped to the card.
 
 ## Steps
-- [x] 1 Config: JsonUtility load (round trip checked byte-exact first) -> edit -> pretty ToJson -> BOTH copies; 18 points, 2 PT keywords
-- [x] 2 New EditMode fixture `DemoWallIdentityTests` (6 tests, passed by name)
-- [x] 3 Re-bases (see the final report): CardConfigRoundTripTests, SearchSceneTests (3 places + a new test), PoiCardSceneTests (5 asserts),
-      PoiCardSceneTests.Visit, PoiCardPaintingSceneTests, PoiCardFloatingSceneTests, FloatingSlotTests (2), PoiCardNavSceneTests.OpenBlockAndBack (4)
-- [x] 4 Full EditMode 2039/2039 (focused); the KeywordList flake red once in the baseline, green after (it is the documented one)
-- [x] 5 Targeted PlayMode: 17 fixtures 172/173 (1 red = my missed assert) -> fixed + PoiCardNavSceneTests found by grep -> re-run of
-      PoiCardSceneTests + PoiCardNavSceneTests + SearchSceneTests 86/86
-- [x] 6 Captures opened and judged: P1c_{painting,lamp}_{en,pt}_peek_390, P1c_painting_{en,pt}_nearby_390, Search_Query_PalaceByName,
-      Search_Query_CasteloByKeyword (TestEvidence/Card, TestEvidence/Search)
-- [x] 7 Docs: _3.3 TODOs, CONTENT_MAP, PACO / CASTELO text notes, __mixed_TODOs (per-language POI names), 10-structure (new test file)
-- [ ] 8 final full EditMode after the scratch fixture was deleted; LivingRoomScene active; final report (no commit)
+- [x] 4.1.0 Measure: ThemePixelSetTests (12 gallery renders + Lamp Half / Full), [Explicit]. Noise floor found and fixed: rounded corners
+      (painted out), AutoAdvanceAudio (off), frame-count waits (grab until still), focus state (.fg/.bg baselines), real-card text AA
+      (several baselines + COLLECT + noise mask). Judge run on the unchanged tree: 14/14 exact
+- [x] 4.1.1 ThemeAsset + ThemeTokenSet / ThemeToken<T> / ThemeMode / ThemeKnobOption; ThemeResolver; asset filled by parsing CardTokens.uss (56 tokens)
+- [x] 4.1.2 ThemeUssGenerator + ThemeAssetEditor (Regenerate USS); generated lines == old lines (56/56 text-identical);
+      ThemeUssStaleTests 4/4; mutation (surface-2 -> red at line 9, restored -> green)
+- [x] 4.1.3 TileStoriesTheme.tss; PanelSettings.themeUss (one-line diff); ThemeController.Apply in PoiCardHost, CardGalleryHarness, SearchUIHost, ZoomControlView
+- [x] 4.1.4 CardTokens.uss: 160 declarations before = 104 card + 56 theme after, text-identical, 0 overlap, 0 colours; 7 stale comments fixed
+- [x] 4.1.5 CardTokenColours through ThemeController.TryResolverFor; TokenPx / DurationToken / FamilyIconAndWords / LivingRoomBlocks re-pointed (EditMode 11 + 19 green)
+- [x] 4.1.6 ThemeTokenGuardTests 3/3 + 2 mutations (deleted --ts-touch-target -> red; --ts-ink re-declared -> red; restored -> green);
+      ThemePipelineTests 3/3
+- [x] 4.1.7 Pixel set after: 14/14 EXACT (0 px, max delta 0). Finding: text pixels depend on the font atlas's fill history (A/B with old
+      and new token file alike; resolved colours of 120 elements bit-identical, probe deleted). Side-by-side
+      `TestEvidence/ThemePixels/P4.1_before_top_after_bottom.png` judged; Game captures `Search/Search_Card_Lamp_Half.png` (card open),
+      `Search/Search_Field_search_match_any.png` (search open) judged
+- [x] 4.1.8 Targeted 55 fixtures 1021/1021 (3177 s); full PlayMode 1237 results, 2 red not from P4.1 (S4 spike timing, green alone;
+      ARealDragToTheEnd layout-struggle entry, 8/8 alone); [Explicit] leaked into the full run -> MEASURING gate (13 skipped off / 13 green on);
+      full EditMode 2046, 1 red = KeywordListFieldTypingTests (documented focus flake, green alone); spike Fraunces TMP asset restored
+- [x] 4.1.9 Docs: 10-structure, _3.3 build log + section 2 + family row, _3.1 Styles, _3.2 families line, 40-testing RUN TIMES, __mixed_TODOs
+- [ ] final: LivingRoomScene active; final report (no commit)

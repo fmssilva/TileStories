@@ -92,11 +92,12 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~65-140 s (2033 tests, 115 s, 2026-10-22, _3.3 P1b part 2); full PlayMode ~55-70 min (1219 tests, 3582 s, 2026-10-22, _3.3 P1b
+EditMode ~65-140 s (2046 tests, 111 s, 2026-10-23, _3.3 P4.1); full PlayMode ~55-70 min (1235 tests + the gated pixel set, 3521 s,
+2026-10-23, _3.3 P4.1, focused throughout -- the developer could not keep Unity behind; before it 1219 tests, 3582 s, _3.3 P1b
 part 2, unfocused at the first poll, focused at the end; before it 1192 tests, 3311 s, _3.2 fix
 chunks D+G: 1192/1192, unfocused at the first poll and the end, Unity in front ~19-47 min; the run before it 1191/1192, 3686 s, wholly background);
 the Card / Poi targeted set (48 fixtures incl. LodWallSceneTests + LayoutStruggleGuardTests, 960 tests) ~45-55 min (3292 s, 2026-10-22, _3.2 fix
-chunks D+G, background); one
+chunks D+G, background; with Search / Zoom / Theme added: 55 fixtures, 1021 tests, 3177 s, 2026-10-23, _3.3 P4.1, focused); one
 PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures

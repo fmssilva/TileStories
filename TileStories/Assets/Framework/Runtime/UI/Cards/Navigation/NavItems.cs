@@ -205,9 +205,9 @@ namespace TileStories
         }
     }
 
-    // Paints parts of an element in colours named by card TOKENS (a family's ColorToken), read from the card's resolved style
-    // (CardTokenColours) -- so the values stay in the stylesheet. A token resolves only once the element sits in the card and its style
-    // is resolved, so the paint is (re)applied when the element is attached and every time it is laid out.
+    // Paints parts of an element in colours named by theme TOKENS (a family's ColorToken), read from the theme the element sits under
+    // (CardTokenColours) -- so the values stay data. A token resolves only once the element sits under the app's marked root, so the
+    // paint is (re)applied when the element is attached and every time it is laid out.
     public sealed class NavTint
     {
         private enum Paint { Icon, Fill }

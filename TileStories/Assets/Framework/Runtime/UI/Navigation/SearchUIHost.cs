@@ -152,6 +152,7 @@ namespace TileStories
             Tray.Changed += Refresh;
             ViewModes.Changed += _ => ApplyPanels();
 
+            ThemeController.Apply(_document.rootVisualElement);
             _document.rootVisualElement.Add(_root);
             _root.RegisterCallback<GeometryChangedEvent>(_ => SafeAreaHelper.ApplyAsOffsets(_root));
         }
