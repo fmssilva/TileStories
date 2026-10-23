@@ -28,8 +28,12 @@ namespace TileStories
         [Tooltip("A wall's closed choices (accent, roundness, motion level, R12.4): each option a set of values laid over the theme's. Not generated yet (_3.3 P4.5)")]
         [SerializeField] private List<ThemeKnobOption> knobs = new();
 
+        [Tooltip("The two type roles (display, body): font keys of the font library and the selectors that speak in the display face")]
+        [SerializeField] private ThemeType type = new();
+
         public string Key => key;
         public string DefaultMode => defaultMode;
+        public ThemeType Type => type;
         public ThemeTokenSet Shared => shared;
         public IReadOnlyList<ThemeMode> Modes => modes;
         public IReadOnlyList<ThemeKnobOption> Knobs => knobs;
@@ -95,6 +99,30 @@ namespace TileStories
     {
         public string key;
         public ThemeTokenSet tokens = new();
+    }
+
+    // The theme's two faces (_3.3 R12.3): each role is a KEY of a font library, whose entry holds the TextCore asset UI Toolkit draws with.
+    // Body is every panel's text (the app root inherits it); display is the text of the listed selectors (titles, headings, openers). The
+    // weights: USS knows only normal / bold, so a role's other weights are reached through its UI asset's weight table, which
+    // FontAtlasBuilder writes from these keys -- body: 400 regular, 500 medium, 700 bold; display: its one cut at its own weight AND at 700,
+    // so a bold display title draws the real face instead of a synthesized bold on top of it
+    [Serializable]
+    public sealed class ThemeType
+    {
+        [Tooltip("The library the keys below are read from (the framework's FontLibrary)")]
+        public FontKeyLibrary fontLibrary;
+        [Tooltip("The display face: titles, headings, section openers")]
+        public string displayFont = "fraunces_semibold";
+        [Tooltip("The display face's weight (100-900): a bold display title draws this cut, never a synthesized bold")]
+        public int displayWeight = 600;
+        [Tooltip("The body face (400): every other text of every panel")]
+        public string bodyFont = "atkinson_next_regular";
+        [Tooltip("The body face at 500 (rich text font-weight=500)")]
+        public string bodyMediumFont = "atkinson_next_medium";
+        [Tooltip("The body face at 700: what -unity-font-style: bold draws on body text")]
+        public string bodyBoldFont = "atkinson_next_bold";
+        [Tooltip("The elements that speak in the display face: USS selectors under the app root (one class each)")]
+        public List<string> displaySelectors = new();
     }
 
     // One option of a wall knob (R12.4: knob "roundness", option "round"): the values it lays over the theme's, shared and per mode

@@ -92,12 +92,15 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~65-140 s (2046 tests, 111 s, 2026-10-23, _3.3 P4.1); full PlayMode ~55-70 min (1235 tests + the gated pixel set, 3521 s,
-2026-10-23, _3.3 P4.1, focused throughout -- the developer could not keep Unity behind; before it 1219 tests, 3582 s, _3.3 P1b
+EditMode ~65-150 s (2050 tests, 149 s, 2026-10-23, _3.3 P4.3, focused); full PlayMode ~55-70 min (1254 tests incl. the gated
+measurements, 3577 s, 2026-10-23, _3.3 P4.3, background at every poll from the first, Unity in front at the end; before it 1235 tests +
+the gated pixel set, 3521 s, _3.3 P4.1, focused throughout -- the developer could not keep Unity behind; before it 1219 tests, 3582 s, _3.3 P1b
 part 2, unfocused at the first poll, focused at the end; before it 1192 tests, 3311 s, _3.2 fix
 chunks D+G: 1192/1192, unfocused at the first poll and the end, Unity in front ~19-47 min; the run before it 1191/1192, 3686 s, wholly background);
 the Card / Poi targeted set (48 fixtures incl. LodWallSceneTests + LayoutStruggleGuardTests, 960 tests) ~45-55 min (3292 s, 2026-10-22, _3.2 fix
-chunks D+G, background; with Search / Zoom / Theme added: 55 fixtures, 1021 tests, 3177 s, 2026-10-23, _3.3 P4.1, focused); one
+chunks D+G, background; with Search / Zoom / Theme added: 55 fixtures, 1021 tests, 3177 s, 2026-10-23, _3.3 P4.1, focused; selected by
+the name regex (Card|Poi|Search|Theme|Zoom|Marker|LodWallScene|LayoutStruggle|LivingRoom|Family|Typeface) in `group_names`: 1132 tests,
+3820 s, 2026-10-23, _3.3 P4.3, mostly background); one
 PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
@@ -242,17 +245,17 @@ application is a broken test, not a flaky one.
   `Resources.FindObjectsOfTypeAll<EditorWindow>()` holds none of its windows. Captures and test runs never overlap: close every
   capture window before starting a run (an open utility window takes focus from real-click Editor tests).
 - Blank windows the developer finds are safe to close with their X; they hold nothing.
-- **What the developer can do while a Worker runs** (tell them in the brief's summary which case the block is):
-  - *Test runs (EditMode, PlayMode, Phase A / B, Game view captures in tests):* Unity may be covered by other windows or in the
-    background; the developer works in other apps. `ScreenCapture` in a PlayMode test reads Unity's own render, not the
-    desktop, and real input ignores focus (above). Unity jumps to the front when Play Mode starts ("Play Focused"); that is
-    expected. Do not minimise Unity (never tested here) and never touch Unity itself (no Play, no edits, no saves) during a run.
-  - *POI Editor window captures (the Worker's screenshot of an Editor window):* they read the DESKTOP, so the captured window must
-    be visible and not covered on screen (Unity need not be the active app). The developer keeps Unity uncovered on one screen or
-    half of it and works in the other half / screen.
-  - *A full PlayMode run (every one of them is taken in the background, 4.2):* the developer clicks into another app about
-    5 s after the Worker starts it. A run Unity pulled to the front partway is still green, but it proves nothing about focus:
-    say so in the report instead of calling it a background run.
+- **Where the developer puts Unity: exactly ONE of three short actions, in Portuguese, word for word, no explanation**
+  (the developer reads only the action; the reasons below are for the agent):
+  - **a)** "Mete o Unity destapado e com a janela ativa." -- EditMode runs (some real-click Editor-window tests still depend on
+    focus, `__mixed_TODOs.md`) and anything that types or clicks into an Editor window.
+  - **b)** "Mete o Unity destapado; podes trabalhar noutras apps ao lado." -- the GATE capture and every POI Editor window
+    capture: they read the DESKTOP, so the window must be visible, not active.
+  - **c)** "Mete o Unity em background (se saltar para a frente, clica noutra app; não minimizes)." -- PlayMode runs, Phase A /
+    B, Game-view captures in tests (they read Unity's own render; real input ignores focus) and every full PlayMode run (taken
+    in the background, 4.2). Unity jumps to the front when Play Mode starts: expected. A run Unity pulled to the front partway is
+    still green but proves nothing about focus: say so in the report instead of calling it a background run.
+  In every case the developer never touches Unity itself during a run (no Play, no edits, no saves).
 - **Pixel and layout assertions never depend on the Editor's window sizes.** Every PlayMode run lays out in ONE frame: 390 x 844,
   the PanelSettings reference resolution (a phone in portrait), pinned for the whole run by an assembly-wide NUnit `[SetUpFixture]`
   (`Tests/Runtime/FixedFrameForTheRun.cs`, and `LivingRoomFixedFrameForTheRun.cs` for the app's PlayMode assembly -- a SetUpFixture
@@ -328,9 +331,10 @@ sent while a PlayMode job was still going cost two Editor restarts.
   600000 ms, the Bash tool's cap) per ~10 min, checking `get_test_job` once after each; (3) from the expected end, poll every
   ~2 min. No narration between waits. After the run, update RUN TIMES if it moved by more than ~10 %.
 - **Ask the developer ONCE before a run or capture that needs Unity in a given place** (the GATE capture, POI Editor captures, a
-  background run), with the AskUserQuestion tool so the session waits for the answer: what runs, how long, and what to do with
-  Unity (4.2.3 "What the developer can do"); options e.g. "Ready, start" / "Wait". Ordinary runs (Unity may be covered) only
-  get the one chat line above: a blocking question there would stall the block while the developer is away.
+  background run), with the AskUserQuestion tool so the session waits for the answer. The question is ONLY the action of 4.2.3
+  (a, b or c, word for word) plus, at most, how long ("~2 min", "~60 min"); no explanation of why. Options: "Pronto" / "Espera".
+  Ordinary runs (Unity may be covered) only get the one chat line above: a blocking question there would stall the block while
+  the developer is away.
 - **Check before every compile.** Read `editor_state`: `tests.is_running` false and `compilation.is_compiling` false. If a job
   is running, wait for it; do not cancel it to go faster (stopping Play Mode aborts the run and loses its results).
 - **Unity preference, set once per machine:** Edit > Preferences > Asset Pipeline > Auto Refresh = "Enabled Outside

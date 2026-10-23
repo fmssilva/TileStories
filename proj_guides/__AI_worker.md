@@ -12,73 +12,66 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- P4.1 the theme pipeline (behaviour-free)`
+## `And now: _3.3 POI Card Look, Feel & Motion -- P4.3 the app's fonts (Fraunces + Atkinson Hyperlegible Next)`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
-Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. The two marker SDF
-fonts are committed with 'ł' since P1b: `git checkout --` them only if they changed. Baseline: no full run needed (HEAD 9375c94
-= last green state: EditMode 2039/2039 at P1c, full PlayMode 1219/1219 at P1b part 2). Keep Unity FOCUSED during EditMode runs
-(known focus flakes: `__mixed_TODOs.md` "Editor-window tests depend on focus").
+Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Marker SDF
+fonts: `git checkout --` them only if they changed (they hold 'ł' since P1b). The spike's dev fonts get rewritten by some test
+runs: restore `Assets/Dev/StyleSpike/Fonts` with `git checkout --` before you finish. Baseline: none needed (HEAD c558d0b; P4.1
+closed with full PlayMode 1233/1235, the two reds known and unrelated, full EditMode 2045/2046, the known focus flake). Keep Unity
+FOCUSED during EditMode runs.
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- above all R12 (the whole section: this block is R12.7
-step 1), R8 S1 (var chains, `customStyle` holds only an element's OWN declarations, a broken var paints transparent silently)
-and S2, R1, and section 2 (today's token table + the LINEAR-colour scrim note). The old status table and sections 3-8 are being
-replaced by the re-plan: build none of them.
-REQUIRED READING (all lines): `.clinerules/20-code-quality.md`, `30-ui-content.md`; `.clinerules/40-testing.md` 4.2 (this block
-touches the tokens and PanelSettings: a full PlayMode run is owed), 4.2.3, 4.2.4, 4.2.4b, 4.4, 4.5; `_3.1_POI_Card_Blocks.md`
-section 3 "Styles" (`CardStyleSheets`, how the card's sheets load).
-Context only: `Runtime/UI/Cards/CardTokens.uss`, `CardTokenColours.cs`, `PoiCardHost.cs`, `DevTools/CardGalleryHarness.cs`,
-`Runtime/UI/Shared/PanelSettings.asset`, `UI Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss`.
-WORKER MODEL: Opus-class -- a new architectural piece (a theme pipeline every panel reads) that must change no pixel.
-TEST PLAN: no baseline run. Targeted Card / Poi PlayMode fixtures green first, then the FULL PlayMode run (background), then the
-full EditMode suite (focused).
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 (this is row 1), R12 (all; R12.3 is this block),
+R8 S2 (one asset cannot serve both systems; a TMP asset in USS BLANKS a label silently; a dynamic asset rewrote itself 5.8 KB ->
+2.1 MB; static atlases), R12 "Build log", R15.2.
+REQUIRED READING (all lines): `proj_guides/_2.0_Labels_And_Fonts_Design.md` (FontKeyLibrary, the wall font library, "Add font"),
+`.clinerules/40-testing.md` 4.2 (fonts are shared ground: a full PlayMode run is owed), 4.2.4b, 4.5; `.clinerules/30-ui-content.md`.
+Context only: `Assets/Dev/StyleSpike/Fonts/` and `S2*` tests (how P0 built the assets), `Runtime/UI/Theme/` (P4.1),
+`ShippedTextGlyphTests`.
+WORKER MODEL: Opus-class -- shared ground (every text of the app), two text systems, atlas generation, a ripple through text-
+measuring tests.
+TEST PLAN: targeted Card / Poi / Search / Theme / Marker fixtures first, then the FULL PlayMode run, then the full EditMode suite.
 
-GOAL: one source of truth for the app's look, generated into USS, reaching every UI Toolkit panel, with C# colour reads off USS --
-and the card looks EXACTLY as it does today. Visual changes come in later blocks (P4.3 fonts, P4.4 palettes).
+GOAL: the app speaks in two faces, from ONE font library serving both text systems: display = Fraunces SemiBold (600), body =
+Atkinson Hyperlegible Next (Regular 400, Medium 500, Bold 700). Sizes, colours and layout DO NOT change in this block (P4.4):
+only the faces. This is the first block whose result is visible.
 
-MEASURE FIRST (before any edit): pick a fixed set of renders that covers the card's colours -- e.g. 8-10 `CardGalleryTests`
-entries (header, a text block, a media block, nav chips with family colours, the menu overlay with its scrim, the mini-player,
-the takeover / full view) plus the real card at Half and Full on The Lamp -- render them, and keep the PNGs as the baseline. At
-the end, render the same set and diff them pixel by pixel: the expected diff is ZERO (state the max channel delta; any non-zero
-pixel is a finding to explain, never to wave away).
+MEASURE FIRST: render the P4.1 pixel set + the real card at Peek / Half / Full on The Painting and The Lamp, EN and PT, and
+record the sheet's three stops and the header's measured heights. After: the same set, side by side, and the same numbers.
 
-PART 1 -- the pipeline (number sub-steps 4.1.1 ...):
-1. `ThemeAsset` (ScriptableObject, `Runtime/UI/Theme/`): the T1 + T2 values of R12.2 that `CardTokens.uss` holds TODAY
-   (surfaces, text, accent, lines, focus, status ramp, family colours, type sizes, radii, spacing, durations / easings, glass
-   opacity). One theme `default`, one mode `dark` (today's Stone & Gold values, exactly). The shape must already allow a second
-   mode and the R12.4 knob sets (empty lists now): P4.4 / P4.5 fill them. Values are data in the asset, never re-typed in code.
-2. Generator (Editor): writes `Runtime/UI/Theme/Generated/Theme.default.uss` with the tokens on `.ts-app.ts-theme-default.ts-mode-dark`
-   (deterministic order, a header saying it is generated and from which asset). A menu item / a button on the asset regenerates.
-   `ThemeUssStaleTests` (EditMode): the committed USS equals the generator's output from the committed asset; mutation proof
-   (change one asset value, the test goes red, restore).
-3. `TileStoriesTheme.tss` imports `unity-theme://default` AND the generated theme; `PanelSettings.themeUss` points to it.
-   `ThemeController` puts `ts-app ts-theme-default ts-mode-dark` on every runtime UIDocument root (the card's panel, search, zoom
-   -- they all share the one PanelSettings) and on every host that draws the card outside the wall: `CardGalleryHarness` and any
-   Editor window / preview that hosts a `.ts-card` (find them all; list them in the report).
-4. `CardTokens.uss` keeps ONLY what is not T1 / T2 (sheet layout, the numbers C# reads -- top gap, collapsed header, track peek,
-   bento, radial, float gap -- and every block / nav size), declared as today on `.ts-card` so `customStyle` still finds them.
-   The T1 / T2 lines are deleted from it: they now arrive by inheritance from the app root. Same token NAMES (views keep reading
-   `var(--ts-*)` unchanged). The six roots that add `ts-theme-default` today (`PoiCardSheetView`, `MiniPlayerView`,
-   `CardMenuOverlay`, `FloatingSlot` + its scrim, `TakeoverView`) must still resolve every token: check each, and make sure
-   none of them depended on re-declaring the colours themselves.
-5. `ThemeResolver` (Runtime, plain C#): role + mode -> value from the active `ThemeAsset`. `CardTokenColours` (family colours
-   read BY NAME from `.ts-card`'s custom style) is rewritten to read through it -- same results. Grep for every other C# read of a
-   T1 / T2 COLOUR token by name and move it too; layout numbers stay as they are (step 4).
-6. A guard test: every token NAME any USS file of the card / search / zoom uses as `var(--ts-...)` is defined somewhere it can
-   resolve (theme or the component), so a deleted line can never paint transparent silently (S1). Mutation proof.
+PART 1 (number sub-steps 4.3.1 ...):
+1. Fonts into the Framework: `Runtime/UI/Theme/Fonts/<family>/` with the OFL text beside each `.ttf`. Static instances from the
+   official google/fonts variable sources (fontTools, as P0 S2 did): Fraunces SemiBold, Atkinson Hyperlegible Next Regular /
+   Medium / Bold. The spike's copies stay in Dev (do not move them; the spike's tests use them).
+2. `FontKeyLibrary` grows from `{key -> TMP_FontAsset}` to `{key -> TMP asset + TextCore FontAsset}` built from the SAME `.ttf`
+   (`_2.0`'s "Add font" and the wall library keep working: a wall font without a TextCore asset still works for markers and is
+   simply not offered for the card). Framework keys: `fraunces_semibold`, `atkinson_next_regular`, `_medium`, `_bold` beside the 3
+   existing ones. Markers' default font is UNCHANGED (a wall can now pick the new keys).
+3. Static atlases, never dynamic at runtime: each asset holds Latin-1 + Latin Extended-A + the typographic punctuation the app
+   uses (“ ” ‘ ’ – — … · ›), built by an Editor command. `ShippedTextGlyphTests` grows: every character of every shipped string
+   (CardStrings EN + PT, option labels) and of the LivingRoom wall's content is in BOTH body and display assets; a missing glyph
+   fails naming the character and the string. Bold / Medium through the TextCore font weight table, so `-unity-font-style: bold`
+   picks Atkinson Bold (prove it: a bold label renders the Bold face, not a faux bold).
+4. Theme type roles: `ThemeAsset` gets display / body font keys (+ the weights); the generator emits them so EVERY UI Toolkit
+   panel's text is Atkinson by default and the display roles (the card title, block headings, section openers, page titles,
+   menu headers -- list the selectors) are Fraunces. First check whether a USS variable can carry a font definition
+   (`-unity-font-definition: var(--ts-font-body)`) on a real panel; if not, the generator writes the rules directly. A guard: no
+   USS outside the generated theme sets a font definition.
+5. Text-measuring tests will shift (widths, wraps, truncation, heights). Re-base each deliberately (old -> new in the tracker),
+   expected values read from their source (4.2.4b), never weakened; a changed sheet STOP or a layout loop is a FINDING, not a
+   re-base -- report it.
 
-PART 2 -- docs: `10-structure.md` (the new files), `_3.3` R12 "Build log" (P4.1 done + the commit's counts + the pixel diff
-result), the Editor-tab rule only if an Editor row was added (none expected).
+PART 2 -- docs: `10-structure.md`, `_2.0` (the library's new shape, the new keys), `_3.3` R12 Build log (P4.3 done, the stops /
+heights before -> after, the counts).
 
-VISUALS: the baseline set and the after set side by side, opened and judged (they must be indistinguishable; say so with the
-measured diff). Plus one Game-view capture of the wall with the card open and one with search open.
+VISUALS: before / after side by side for the pixel set and the real card (EN + PT, Peek / Half / Full), plus the P0 glare
+render of a block in the new faces. Open each and judge: hierarchy, wraps, truncations, PT diacritics (ã õ ç á é í ó ú â ê ô à ł).
 
-OUT OF SCOPE: any visual change (fonts, light mode, new colours, metal, glass); SearchUI / Zoom / markers moving onto the theme
-(P4.2); the knob classes and Editor rows (P4.5); renaming tokens.
-Stop when the pixel diff is zero, the stale and guard tests are green with mutation proof, the targeted fixtures, the full
-PlayMode run and the full EditMode suite are green. Ideas outside this domain -> proj_guides/__mixed_TODOs.md.
-If the guide disagrees with the real code, STOP and report. Finish with the final report of `.clinerules/60-finishing.md` 6.4.
-Do not commit: the Architect commits after the review.
+OUT OF SCOPE: sizes, the type scale, colours, light mode, the block frame (all P4.4); markers' default font; any new text.
+Stop when every shipped and content character renders in both faces, the guard and glyph tests are green with mutation proof, the
+targeted fixtures, the full PlayMode run and the full EditMode suite are green. Ideas outside this domain ->
+proj_guides/__mixed_TODOs.md. If the guide disagrees with the real code, STOP and report. Finish with the final report of
+`.clinerules/60-finishing.md` 6.4. Do not commit: the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

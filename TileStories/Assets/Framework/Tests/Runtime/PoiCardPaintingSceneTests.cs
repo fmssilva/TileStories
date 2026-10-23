@@ -253,16 +253,18 @@ namespace TileStories.Tests
             Assert.AreEqual(viewport[withChips], viewport[without], OnePixel, "so the reading space under it never jumps");
         }
 
-        // Where the chrome hides the strip (Half on this card), nothing of it paints: the chip row hides WITH its strip. Found at 17b on
-        // The Painting's Half render: the row set its own visibility to Visible when it had chips, which beat the strip's inherited hidden,
-        // so the chips floated alone over the card's title
+        // Where the chrome hides the strip, nothing of it paints: the chip row hides WITH its strip. Found at 17b on The Painting's Half
+        // render: the row set its own visibility to Visible when it had chips, which beat the strip's inherited hidden, so the chips floated
+        // alone over the card's title. Measured at Peek, where the rule ALWAYS hides the strip (CardChromeRule.NavShownAt: never at peek) --
+        // the same class path as a hide for room (CardChromeView.TopShownClass). _3.3 P4.3: Half used to be that state on this card only
+        // because the header left no room; the new faces gave it the room
         [UnityTest]
         public IEnumerator WhereTheChromeHidesTheStrip_TheChipRowHidesWithIt_AndShowsWithItAtFull()
         {
-            yield return Open(Painting, SheetStopRule.Stop.Half);
+            yield return Open(Painting, SheetStopRule.Stop.Peek);
             Assume.That(Sheet.Slots.TopView, Is.InstanceOf<IconTabsChipsNavView>(), "the wall's top element is tabs with chips");
             var both = (IconTabsChipsNavView)Sheet.Slots.TopView;
-            Assert.IsFalse(Sheet.Chrome.TopShown, "precondition: at Half the chrome hides this card's strip (the header takes the room)");
+            Assert.IsFalse(Sheet.Chrome.TopShown, "precondition: at Peek the chrome hides the strip (never at peek)");
             Assert.GreaterOrEqual(both.ChipsSection, 0, "precondition: the first section has chips bound");
             Assert.AreEqual(Visibility.Hidden, both.Tabs.Root.resolvedStyle.visibility, "the tabs are hidden with the strip");
             Assert.AreEqual(Visibility.Hidden, both.Chips.Root.resolvedStyle.visibility, "and so is the chip row: nothing floats over the title");

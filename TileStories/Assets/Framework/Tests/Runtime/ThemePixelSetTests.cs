@@ -43,6 +43,16 @@ namespace TileStories.Tests
         public static IEnumerator Capture(string name, VisualElement cropTo = null)
         {
             Texture2D render = null;
+            yield return GrabStill(name, cropTo, r => render = r);
+            try { Judge(name, render); }
+            finally { Object.Destroy(render); }
+        }
+
+        // The screen (or `cropTo`'s rect, top corners painted out) once it holds still; `done` gets the render and destroys it after use.
+        // Shared with the type measurement (TypefaceMeasureTests), which saves renders instead of judging them
+        public static IEnumerator GrabStill(string name, VisualElement cropTo, System.Action<Texture2D> done)
+        {
+            Texture2D render = null;
             for (int attempt = 0; attempt < MaxAttempts; attempt++)
             {
                 if (attempt > 0) for (int f = 0; f < StableFrames; f++) yield return null;
@@ -54,8 +64,7 @@ namespace TileStories.Tests
                 if (still) break;
                 Assert.Less(attempt, MaxAttempts - 1, name + ": the picture never held still for " + StableFrames + " frames");
             }
-            try { Judge(name, render); }
-            finally { Object.Destroy(render); }
+            done(render);
         }
 
         private const int StableFrames = 10;

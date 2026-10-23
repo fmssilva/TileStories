@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Story magazine</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&amp;family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+.st-root *{box-sizing:border-box}
+.st-root button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:left}
+.press{transition:transform 140ms ease-out}
+.press:active{transform:scale(.97)}
+.scroll,.strip{scrollbar-width:none}
+.scroll::-webkit-scrollbar,.strip::-webkit-scrollbar{display:none}
+.strip{scroll-snap-type:x mandatory}
+.snap{scroll-snap-align:start}
+@keyframes cam{0%{transform:scale(1.25) translate(0,0)}100%{transform:scale(1.28) translate(-3%,2%)}}
+.cam{animation:cam 16s ease-in-out infinite alternate}
+@keyframes blobA{to{transform:translate(150px,170px) scale(1.25)}}
+@keyframes blobB{to{transform:translate(-140px,-190px) scale(.8)}}
+.blob{position:absolute;border-radius:50%;pointer-events:none;filter:blur(26px)}
+.b1{width:300px;height:300px;top:-90px;left:-70px;animation:blobA 13s ease-in-out infinite alternate}
+.b2{width:280px;height:280px;bottom:-110px;right:-90px;animation:blobB 17s ease-in-out infinite alternate}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rim{position:relative;border-radius:21px;padding:2px;overflow:hidden;background:var(--metal);box-shadow:var(--shadow)}
+.rim::before{content:"";position:absolute;left:-30%;right:-30%;top:-120%;bottom:-120%;background:conic-gradient(from 0deg,transparent 0deg,transparent 268deg,var(--sweep) 306deg,transparent 330deg);opacity:var(--sweepO);animation:spin 5s linear infinite}
+.blk{position:relative;border-radius:19px;background:var(--surface);overflow:hidden}
+.cover{position:absolute;inset:0;z-index:0}
+.content{position:relative;z-index:1;pointer-events:none}
+@keyframes kb{from{transform:scale(1.04) translate(0,0)}to{transform:scale(1.14) translate(-3%,-2%)}}
+.kb{animation:kb 14s ease-in-out infinite alternate}
+.el{position:relative;opacity:0;transform:translateY(22px);transition:opacity .6s ease-out,transform .7s cubic-bezier(.2,.8,.2,1)}
+.el.in{opacity:1;transform:none}
+.tag{position:absolute;right:0;top:-10px;z-index:3;font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:700;padding:2px 6px;border-radius:5px;background:#FFE14D;color:#14110D;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none}
+.clipper{transition:clip-path 420ms cubic-bezier(.2,.8,.2,1)}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fadein{animation:fadein .32s ease-out .1s both}
+.shine{background:linear-gradient(100deg,var(--accentText) 0%,var(--accentText) 38%,var(--shineHi) 50%,var(--accentText) 62%,var(--accentText) 100%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 3.4s linear infinite}
+@keyframes shine{from{background-position:100% 0}to{background-position:-160% 0}}
+@keyframes nudge{0%,60%,100%{transform:translateX(0)}70%{transform:translateX(6px)}80%{transform:translateX(0)}90%{transform:translateX(4px)}}
+.nudge{animation:nudge 2.6s ease-in-out infinite}
+.rm .shine{animation:none !important;background:none;color:var(--accentText)}
+.rm .cam,.rm .blob,.rm .rim::before,.rm .kb,.rm .fadein,.rm .nudge{animation:none !important}
+.rm .el{opacity:1 !important;transform:none !important;transition:none !important}
+.rm .clipper,.rm .press{transition:none !important}
+</style>
+</helmet>
+<div class="{{rootClass}}" style="{{rootVars}} width: 390px; height: 844px; position: relative; overflow: hidden; background: #2a2622; font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif; color: var(--ink);">
+
+  <img class="cam" src="/_blob/e1597e92cba3082ab7b7c3f019938252" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+
+  <div id="st-sheet" style="position: absolute; left: 0; right: 0; top: 48px; bottom: 0; border-radius: 24px 24px 0 0; overflow: hidden; display: flex; flex-direction: column; {{ground}}">
+    <div style="flex: none; background: var(--bar); border-bottom: 1px solid var(--hair);">
+      <div style="display: flex; justify-content: center; padding-top: 8px;"><div style="width: 40px; height: 4px; border-radius: 2px; background: var(--line);"></div></div>
+      <div style="display: flex; align-items: center; gap: 8px; padding: 4px 12px 8px 20px; height: 56px;">
+        <div style="flex: 1; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 19px;">Ribeira Palace</div>
+        <button class="press" aria-label="Close the card" style="width: 44px; height: 44px; border-radius: 22px; border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="scroll" style="flex: 1; overflow-y: auto; padding: 22px 0 120px;">
+      <section style="position: relative; margin: 0 0; border-radius: 30px; overflow: hidden; padding: 16px 12px 22px; border: 1px solid var(--glassEdge); background: {{aboutGlass}};">
+        <div class="blob b1" style="background: radial-gradient(circle, {{hueA}} 0%, transparent 68%);"></div>
+        <div class="blob b2" style="background: radial-gradient(circle, {{hueB}} 0%, transparent 68%);"></div>
+        <div style="position: relative; z-index: 1;">
+          <div style="display: flex; align-items: center; gap: 10px; margin: 2px 4px 14px;">
+            <span style="display: inline-flex; align-items: center; gap: 8px; background: var(--fam); color: var(--famInk); border-radius: 999px; padding: 7px 14px 7px 10px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
+              <span style="font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 19px;">About</span>
+            </span>
+            <span style="flex: 1; height: 2px; border-radius: 1px; background: var(--fam);"></span>
+          </div>
+
+          <div id="st-block" class="rim">
+            <div class="blk">
+              <button class="cover" onClick="{{open}}" aria-label="Read the story, 4 minutes"></button>
+              <div class="content">
+                <div style="position: relative; height: 196px; overflow: hidden;">
+                  <img class="{{kb}}" src="/_blob/62ec38f082ea17147941c71b371b2836" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;">
+                  <div style="position: absolute; left: 12px; top: 12px; background: var(--surface); color: var(--ink); font-size: 13px; font-weight: 700; padding: 5px 10px; border-radius: 999px; display: flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 4h14v16H5zM9 8h6M9 12h6M9 16h4"/></svg>Story · 4 min</div>
+                </div>
+                <div style="padding: 14px 16px 4px;">
+                  <div style="font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--famText);">THE PALACE ON THE WATER</div>
+                  <div style="font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 25px; line-height: 1.12; margin-top: 4px;">Two hundred and fifty years by the river</div>
+                  <div style="position: relative; max-height: 74px; overflow: hidden; margin-top: 8px; font-size: 17px; line-height: 1.45; color: var(--ink2);">For about 250 years the kings of Portugal lived by the river, in a palace that opened straight onto the Tagus. It is gone now, but the square that took its place still carries its name.
+                    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(to bottom, var(--surface0), var(--surface));"></div>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px 16px; font-weight: 700; font-size: 16px; color: var(--accentText); min-height: 48px;"><span class="{{affText}}">Read the story · 4 min</span><svg class="{{affChev}}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin: 14px 6px 0; font-size: 14px; color: var(--ink2); background: var(--surface); border-radius: 12px; padding: 10px 12px; border: 1px solid var(--hair);">The preview: the story's first picture, its eyebrow, title and lede, capped at half the sheet. Tap it to open the magazine page.</div>
+        </div>
+      </section>
+    </div>
+
+    <sc-if value="{{pageOpen}}" hint-placeholder-val="{{ false }}">
+      <div class="clipper" style="position: absolute; inset: 0; z-index: 10; background: var(--surface); display: flex; flex-direction: column; clip-path: {{clip}};">
+        <div style="flex: none; height: 4px; background: var(--fam);"></div>
+        <div style="flex: none; display: flex; align-items: center; gap: 6px; padding: 10px 12px 10px 8px; border-bottom: 1px solid var(--hair); background: var(--surface);">
+          <button class="press" onClick="{{close}}" aria-label="Back to the card" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+          <div style="flex: 1; min-width: 0; font-size: 14px; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Ribeira Palace › About › <span style="color: var(--ink); font-weight: 700;">The story</span></div>
+        </div>
+        <div id="st-page" class="scroll" onScroll="{{onScroll}}" style="flex: 1; overflow-y: auto; padding-bottom: 60px;">
+
+          <div data-el="1" class="{{el.e1}}" style="position: relative; height: 300px; overflow: hidden;">
+            <img src="/_blob/62ec38f082ea17147941c71b371b2836" alt="The Terreiro do Paço in 1662, with the palace along the river front" style="position: absolute; left: 0; top: -12%; width: 100%; height: 124%; object-fit: cover; transform: {{par.p1}};">
+            <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(10,8,6,0) 45%, rgba(10,8,6,.86) 100%);"></div>
+            <div style="position: absolute; left: 20px; right: 20px; bottom: 16px; color: #FFFFFF;">
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: .08em; color: #F1E9DA;">THE PALACE ON THE WATER</div>
+              <div style="font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 33px; line-height: 1.08; margin-top: 6px;">Two hundred and fifty years by the river</div>
+            </div>
+            <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag" style="top: 8px; right: 8px;">picture · full-bleed · parallax  +  eyebrow  +  title</span></sc-if>
+          </div>
+
+          <div style="padding: 20px 20px 0;">
+            <div data-el="2" class="{{el.e2}}" style="font-size: 14px; color: var(--ink2); display: flex; gap: 10px; align-items: center;">
+              <span>By the TileStories test wall</span><span>·</span><span>4 min read</span>
+              <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">byline</span></sc-if>
+            </div>
+
+            <p data-el="3" class="{{el.e3}}" style="margin: 16px 0 0; font-size: 21px; line-height: 1.42; font-weight: 500;">For about 250 years the kings of Portugal lived by the river, in a palace that opened straight onto the Tagus. It is gone now, but the square that took its place still carries its name.<sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">lede</span></sc-if></p>
+
+            <p data-el="4" class="{{el.e4}}" style="margin: 18px 0 0; font-size: 17px; line-height: 1.6;"><span style="float: left; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 64px; line-height: .86; margin: 6px 10px 0 0; color: var(--famText);">W</span>hen King Manuel I found the old castle on the hill too cramped for a court that was growing rich on the sea trade, he moved down to the water's edge. The new palace stood beside the docks where ships from India and Brazil unloaded spices, sugar and gold, so the king could watch the fleet come in from his own windows.<sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">paragraph · drop cap</span></sc-if></p>
+
+            <figure data-el="5" class="{{el.e5}}" style="margin: 24px 0 0;">
+              <div style="border-radius: 14px; overflow: hidden; height: 330px; position: relative;">
+                <img src="/_blob/51b55b7a570249d27e29be2d883cfbbd" alt="The palace front and its formal garden, 1687" style="position: absolute; left: 0; top: -8%; width: 100%; height: 116%; object-fit: cover; transform: {{par.p5}};">
+              </div>
+              <figcaption style="margin-top: 8px; font-size: 15px; line-height: 1.45; color: var(--ink2);"><b style="color: var(--ink);">The palace front and its garden,</b> drawn for a firework display in 1687. Print by João dos Reis. <span style="opacity: 1;">Public domain.</span></figcaption>
+              <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">picture · inset · caption</span></sc-if>
+            </figure>
+
+            <h3 data-el="6" class="{{el.e6}}" style="margin: 30px 0 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 25px; line-height: 1.15;">Two centuries of additions<sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">heading</span></sc-if></h3>
+
+            <p data-el="7" class="{{el.e7}}" style="margin: 10px 0 0; font-size: 17px; line-height: 1.6;">Later kings kept adding to it. In the 1580s, under Philip I, who ruled Portugal and Spain together, the river front received a new facade and a domed corner tower, the Torreão, that sailors saw long before they saw the city.<sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">paragraph</span></sc-if></p>
+
+            <div data-el="8" class="{{el.e8}}" style="margin: 22px 0 0; border-radius: 16px; padding: 16px 18px; background: var(--calloutBg); border-left: 0; position: relative; overflow: hidden;">
+              <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--fam);"></div>
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--famText);">WHAT WAS INSIDE</div>
+              <ul style="margin: 8px 0 0; padding-left: 20px; font-size: 17px; line-height: 1.55;">
+                <li>A library of some 70,000 books</li>
+                <li>Paintings, maps and the royal archive</li>
+                <li>A chapel, offices and workshops</li>
+                <li>The Ópera do Tejo, next door</li>
+              </ul>
+              <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag" style="top: 6px; right: 6px;">callout · tone: family  +  list</span></sc-if>
+            </div>
+
+            <p data-el="9" class="{{el.e9}}" style="margin: 22px 0 0; font-size: 17px; line-height: 1.6;">Inside were a famous library of tens of thousands of books, paintings and maps, and a royal opera house, the Ópera do Tejo, opened only eight months before the end.<sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">paragraph</span></sc-if></p>
+          </div>
+
+          <div data-el="10" class="{{el.e10}}" style="margin: 26px 0 0; position: relative; height: 260px; overflow: hidden;">
+            <img src="/_blob/1a15b527dc4fc1b9ab50aa5004dc1eb8" alt="The ruins of the Ópera do Tejo after the earthquake, engraving, 1757" style="position: absolute; left: 0; top: -15%; width: 100%; height: 130%; object-fit: cover; transform: {{par.p10}};">
+            <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag" style="top: 8px; right: 8px;">picture · full-bleed · parallax</span></sc-if>
+          </div>
+          <div style="padding: 8px 20px 0; font-size: 15px; color: var(--ink2);">The ruins of the Ópera do Tejo after the earthquake. Engraving by Jacques-Philippe Le Bas, 1757.</div>
+
+          <div style="padding: 0 20px;">
+            <h3 data-el="11" class="{{el.e11}}" style="margin: 30px 0 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 25px; line-height: 1.15;">One morning in November<sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">heading</span></sc-if></h3>
+
+            <p data-el="12" class="{{el.e12}}" style="margin: 10px 0 0; font-size: 17px; line-height: 1.6;">On the morning of 1 November 1755, All Saints' Day, an earthquake shook the palace, a wave came up the river and fire finished what was left. The library, the archive and almost everything inside were lost.<sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">paragraph</span></sc-if></p>
+
+            <blockquote data-el="13" class="{{el.e13}}" style="margin: 26px 0 0; padding: 4px 0 4px 0; text-align: center;">
+              <div style="font-family: 'Fraunces', Georgia, serif; font-size: 54px; line-height: .5; color: var(--famText); height: 26px;">“</div>
+              <div style="font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 24px; line-height: 1.3;">Where the palace had stood, an open square was laid out, facing the river like a grand front door.</div>
+              <div style="margin: 10px auto 0; width: 48px; height: 3px; border-radius: 2px; background: var(--fam);"></div>
+              <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">pull quote</span></sc-if>
+            </blockquote>
+
+            <div data-el="14" class="{{el.e14}}" style="margin: 28px 0 0;">
+              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+                <figure style="margin: 0;"><div style="border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 3;"><img src="/_blob/be43abe742fafb818d3027d854eac4d0" alt="The river front before 1755" style="width: 100%; height: 100%; object-fit: cover; display: block;"></div><figcaption style="margin-top: 6px; font-size: 14px; font-weight: 700;">Before 1755</figcaption></figure>
+                <figure style="margin: 0;"><div style="border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 3;"><img src="/_blob/859a087ab6c150825c75994ed346be9a" alt="The same river front today" style="width: 100%; height: 100%; object-fit: cover; display: block;"></div><figcaption style="margin-top: 6px; font-size: 14px; font-weight: 700;">Today</figcaption></figure>
+              </div>
+              <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">picture pair</span></sc-if>
+            </div>
+
+            <div data-el="15" class="{{el.e15}}" style="margin: 30px 0 0; display: flex; align-items: center; gap: 12px; justify-content: center;">
+              <span style="flex: 1; height: 1.5px; background: var(--hair);"></span>
+              <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="32" height="32" rx="3" fill="none" stroke="var(--famText)" stroke-width="1.6"/><path d="M17 4 C21 11 23 13 30 17 C23 21 21 23 17 30 C13 23 11 21 4 17 C11 13 13 11 17 4Z" fill="none" stroke="var(--famText)" stroke-width="1.6"/><circle cx="17" cy="17" r="3" fill="var(--famText)"/></svg>
+              <span style="flex: 1; height: 1.5px; background: var(--hair);"></span>
+              <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">divider · azulejo</span></sc-if>
+            </div>
+
+            <h3 data-el="16" class="{{el.e16}}" style="margin: 26px 0 0; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 25px; line-height: 1.15;">A square takes its place<sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">heading</span></sc-if></h3>
+            <p data-el="17" class="{{el.e17}}" style="margin: 10px 0 0; font-size: 17px; line-height: 1.6;">Lisbon was rebuilt on a strict new plan, and the Praça do Comércio was laid out where the palace had been. Many Lisboetas still call it by its old name, Terreiro do Paço: the palace yard.<sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag">paragraph</span></sc-if></p>
+          </div>
+
+          <div data-el="18" class="{{el.e18}}" style="margin: 22px 0 0;">
+            <div class="strip" style="display: flex; gap: 10px; overflow-x: auto; padding: 0 20px;">
+              <sc-for list="{{carousel}}" as="c" hint-placeholder-count="3">
+                <figure class="snap" style="margin: 0; flex: none; width: 280px;">
+                  <div style="border-radius: 12px; overflow: hidden; height: 190px;"><img src="{{c.src}}" alt="{{c.cap}}" style="width: 100%; height: 100%; object-fit: cover; display: block;"></div>
+                  <figcaption style="margin-top: 6px; font-size: 14px; line-height: 1.4; color: var(--ink2);">{{c.cap}}</figcaption>
+                </figure>
+              </sc-for>
+              <div style="flex: none; width: 10px;"></div>
+            </div>
+            <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag" style="right: 20px;">carousel</span></sc-if>
+          </div>
+
+          <div style="padding: 0 20px;">
+            <div data-el="19" class="{{el.e19}}" style="margin: 26px 0 0; border-radius: 16px; overflow: hidden; position: relative; height: 210px; background: #14110D;">
+              <img src="/_blob/9e3151f0d2f8f36bf0762a6d42d4ec3b" alt="" style="width: 100%; height: 100%; object-fit: cover; opacity: .8; display: block;">
+              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                <span style="width: 64px; height: 64px; border-radius: 32px; background: rgba(255,255,255,.95); display: flex; align-items: center; justify-content: center; color: #14110D; box-shadow: 0 6px 18px rgba(0,0,0,.4);"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+              </div>
+              <div style="position: absolute; left: 12px; bottom: 12px; background: rgba(10,8,6,.8); color: #FFFFFF; font-size: 13px; font-weight: 700; padding: 5px 9px; border-radius: 8px;">The square today · 0:55</div>
+              <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag" style="top: 8px; right: 8px;">video · poster</span></sc-if>
+            </div>
+
+            <div data-el="20" class="{{el.e20}}" style="margin: 26px 0 0; border-radius: 16px; padding: 16px 18px; background: var(--inverseBg); color: var(--inverseInk); position: relative;">
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--inverseAccent);">VISIT TODAY</div>
+              <div style="margin-top: 6px; font-size: 17px; line-height: 1.5;">The Praça do Comércio is open all day. Stand by the river steps, the Cais das Colunas, and look back: the palace's front ran along where the arcades are now.</div>
+              <sc-if value="{{tags}}" hint-placeholder-val="{{ false }}"><span class="tag" style="top: 6px; right: 6px;">callout · tone: inverse</span></sc-if>
+            </div>
+          </div>
+
+          <div style="padding: 30px 20px 0; font-size: 14px; color: var(--ink2);">Text written for the TileStories test wall. Pictures: see Sources.</div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["light","dark"],"default":"light","section":"Theme"},"showElementNames":{"editor":"boolean","default":true,"section":"Story"},"openRowEmphasis":{"editor":"enum","options":["plain","nudge","shine"],"default":"shine","section":"Story"},"reduceMotion":{"editor":"boolean","default":false,"section":"Motion"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { page: false, phase: "from", inset: null, seen: {}, par: {} };
+  }
+
+  rm() { return !!this.props.reduceMotion; }
+
+  insetOf() {
+    const sheet = document.getElementById("st-sheet"), card = document.getElementById("st-block");
+    if (!sheet || !card) return { t: 20, r: 4, b: 30, l: 4 };
+    const s = sheet.getBoundingClientRect(), c = card.getBoundingClientRect();
+    const k = (v) => Math.max(0, Math.min(100, v));
+    return { t: k((c.top - s.top) / s.height * 100), r: k((s.right - c.right) / s.width * 100), b: k((s.bottom - c.bottom) / s.height * 100), l: k((c.left - s.left) / s.width * 100) };
+  }
+
+  open() {
+    const inset = this.insetOf();
+    if (this.rm()) { this.setState({ page: true, phase: "open", inset }); return; }
+    this.setState({ page: true, phase: "from", inset, seen: {} });
+    requestAnimationFrame(() => requestAnimationFrame(() => { this.setState({ phase: "open" }); setTimeout(() => this.measure(), 60); }));
+  }
+
+  close() {
+    if (this.rm()) { this.setState({ page: false }); return; }
+    this.setState({ phase: "from", inset: this.insetOf() });
+    setTimeout(() => this.setState({ page: false }), 430);
+  }
+
+  measure() {
+    const sc = document.getElementById("st-page");
+    if (!sc) return;
+    const s = sc.getBoundingClientRect(), k = s.height ? sc.clientHeight / s.height : 1, view = sc.clientHeight;
+    const seen = { ...this.state.seen }, par = {};
+    sc.querySelectorAll("[data-el]").forEach((el) => {
+      const id = el.getAttribute("data-el"), r = el.getBoundingClientRect();
+      const top = (r.top - s.top) * k, bottom = (r.bottom - s.top) * k;
+      if (top < view * 0.92) seen[id] = true;
+      par["p" + id] = Math.max(-30, Math.min(30, (((top + bottom) / 2) - view / 2) * -0.12));
+    });
+    this.setState({ seen, par });
+  }
+
+  renderVals() {
+    const dark = this.props.mode === "dark";
+    const rm = this.rm();
+    const T = dark
+      ? { g: "16,15,13", surface: "#1C1A17", surface0: "rgba(28,26,23,0)", ink: "#F6F1E8", ink2: "#D9D1C3", line: "#6E6659", hair: "#3A362F", accentText: "#F2B544", bar: "rgba(28,26,23,.96)", glassEdge: "rgba(255,255,255,.14)", shadow: "0 10px 26px rgba(0,0,0,.45)", fam: "#E8A85A", famInk: "#14110D", famText: "#E8A85A", calloutBg: "#2B231A", inverseBg: "#F6F1E8", inverseInk: "#14110D", inverseAccent: "#8A4B08", sweep: "rgba(240,200,110,.9)", sweepO: ".5", metal: "linear-gradient(135deg, #6A6358 0%, #2C2823 20%, #4E483F 38%, #24211D 58%, #5C564C 78%, #2A2622 100%)" }
+      : { g: "244,240,232", surface: "#FFFFFF", surface0: "rgba(255,255,255,0)", ink: "#14110D", ink2: "#3D362D", line: "#857A6B", hair: "#D9D2C6", accentText: "#1E3A8A", bar: "rgba(255,255,255,.97)", glassEdge: "rgba(255,255,255,.75)", shadow: "0 1px 2px rgba(20,17,13,.10), 0 12px 26px rgba(20,17,13,.16)", fam: "#8A4B08", famInk: "#FFFFFF", famText: "#8A4B08", calloutBg: "#FBF1E2", inverseBg: "#1C1A17", inverseInk: "#F6F1E8", inverseAccent: "#F2B544", sweep: "rgba(255,255,255,1)", sweepO: "1", metal: "linear-gradient(135deg, #F4F1EC 0%, #9E968A 18%, #E6E2DB 34%, #7D7569 54%, #CFC9BF 74%, #6E6659 100%)" };
+    T.shineHi = dark ? "#FFF1C8" : "#3F6AE0";
+    const vars = ["surface", "surface0", "ink", "ink2", "line", "hair", "accentText", "bar", "glassEdge", "shadow", "fam", "famInk", "famText", "calloutBg", "inverseBg", "inverseInk", "inverseAccent", "sweep", "sweepO", "metal", "shineHi"];
+    const aff = this.props.openRowEmphasis || "shine";
+    const rootVars = vars.map((v) => "--" + v + ":" + T[v] + ";").join("");
+    const ground = "background: linear-gradient(to bottom, rgba(" + T.g + "," + (dark ? ".40" : ".25") + ") 0px, rgba(" + T.g + "," + (dark ? ".75" : ".62") + ") 100%);";
+    const aboutGlass = "linear-gradient(170deg, rgba(" + T.g + "," + (dark ? ".62" : ".42") + ") 0%, rgba(226,140,50," + (dark ? ".16" : ".14") + ") 45%, rgba(" + T.g + "," + (dark ? ".82" : ".70") + ") 100%)";
+    const el = {};
+    for (let i = 1; i <= 20; i++) el["e" + i] = "el" + (rm || this.state.seen[String(i)] ? " in" : "");
+    const par = {};
+    ["p1", "p5", "p10"].forEach((p) => { par[p] = rm ? "none" : "translateY(" + ((this.state.par[p] || 0)).toFixed(1) + "px)"; });
+    const ins = this.state.inset || { t: 0, r: 0, b: 0, l: 0 };
+    const clip = rm || this.state.phase === "open" ? "inset(0% 0% 0% 0% round 24px 24px 0 0)" : "inset(" + ins.t.toFixed(2) + "% " + ins.r.toFixed(2) + "% " + ins.b.toFixed(2) + "% " + ins.l.toFixed(2) + "% round 20px)";
+    return {
+      rootClass: "st-root" + (rm ? " rm" : ""), rootVars, ground, aboutGlass,
+      hueA: dark ? "rgba(226,140,50,.42)" : "rgba(226,140,50,.55)", hueB: dark ? "rgba(240,200,110,.30)" : "rgba(240,200,110,.45)",
+      kb: rm ? "" : "kb",
+      affText: aff === "shine" && !rm ? "shine" : "", affChev: (aff === "nudge" || aff === "shine") && !rm ? "nudge" : "",
+      open: () => this.open(), close: () => this.close(),
+      pageOpen: this.state.page, clip, el, par,
+      tags: this.props.showElementNames ?? true,
+      onScroll: () => this.measure(),
+      carousel: [
+        { src: "/_blob/580b9bc2a3dfa2b20c025043eb2531f3", cap: "A royal procession crosses the yard, 23 April 1662." },
+        { src: "/_blob/62ec38f082ea17147941c71b371b2836", cap: "The palace along the river front, c. 1662. Dirk Stoop." },
+        { src: "/_blob/9e3151f0d2f8f36bf0762a6d42d4ec3b", cap: "The Praça do Comércio from the river today." }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

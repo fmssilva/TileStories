@@ -15,7 +15,22 @@ MonoBehaviour:
   entries:
   - key: liberation_sans
     font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    uiFont: {fileID: 0}
   - key: roboto_bold
     font: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+    uiFont: {fileID: 0}
   - key: oswald_bold
     font: {fileID: 11400000, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
+    uiFont: {fileID: 0}
+  - key: fraunces_semibold
+    font: {fileID: 11400000, guid: 7880f1ec2d55bbc4983622eb32e37025, type: 2}
+    uiFont: {fileID: 11400000, guid: f9b29b7307cd2354d83d8bbdf05c5e7f, type: 2}
+  - key: atkinson_next_regular
+    font: {fileID: 11400000, guid: f7d0263d63ebaed4c868101695eb7d2a, type: 2}
+    uiFont: {fileID: 11400000, guid: 99a2fb6db07c124499413b2615ad14cf, type: 2}
+  - key: atkinson_next_medium
+    font: {fileID: 11400000, guid: 36b187271195ff84bb721eb6b41903ef, type: 2}
+    uiFont: {fileID: 11400000, guid: 2f827a5e78d03e44596c294b0ca73556, type: 2}
+  - key: atkinson_next_bold
+    font: {fileID: 11400000, guid: 93ef2d334f73b8a4bae84b3644faac36, type: 2}
+    uiFont: {fileID: 11400000, guid: 164231b698ae4c045b251252c396a6fc, type: 2}

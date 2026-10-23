@@ -43,7 +43,49 @@ namespace TileStories.Editor
                 AppendSet(text, theme.Shared, written, theme.Key + "/shared", skip: Names(mode.tokens));
                 text.Append("}\n");
             }
+            AppendType(text, theme);
             return text.ToString();
+        }
+
+        private static readonly Regex OneClass = new(@"^\.[a-z0-9_-]+$");
+
+        // The type roles (_3.3 R12.3), the same in every mode: the two faces as tokens on the marked root -- a USS variable carries a font
+        // definition on 6.3 (probed on a real panel, P4.3), so a later knob class can swap a face by overriding one token -- the body face
+        // as the root's font (every text of every panel inherits it), the display face on the listed selectors. Nothing is written for a
+        // theme with no font library: its panels keep Unity's default font
+        private static void AppendType(StringBuilder text, ThemeAsset theme)
+        {
+            var type = theme.Type;
+            if (type == null || type.fontLibrary == null) return;
+            string root = ".ts-app." + ThemeController.ThemeClassPrefix + theme.Key;
+            text.Append('\n').Append("/* Type: body = ").Append(type.bodyFont).Append(" (bold: ").Append(type.bodyBoldFont)
+                .Append(", through its weight table), display = ").Append(type.displayFont).Append(" */\n");
+            text.Append(root).Append(" {\n");
+            text.Append("    --ts-font-body: ").Append(FontUrl(theme, type.bodyFont)).Append(";\n");
+            text.Append("    --ts-font-display: ").Append(FontUrl(theme, type.displayFont)).Append(";\n");
+            text.Append("    -unity-font-definition: var(--ts-font-body);\n");
+            text.Append("}\n");
+            if (type.displaySelectors.Count == 0) return;
+            text.Append('\n');
+            for (int i = 0; i < type.displaySelectors.Count; i++)
+            {
+                string selector = type.displaySelectors[i];
+                if (selector == null || !OneClass.IsMatch(selector))
+                    throw new ArgumentException(theme.Key + "/type: display selector '" + selector + "' is not one class (.lowercase-words)");
+                text.Append(root).Append(' ').Append(selector).Append(i < type.displaySelectors.Count - 1 ? ",\n" : " {\n");
+            }
+            text.Append("    -unity-font-definition: var(--ts-font-display);\n");
+            text.Append("}\n");
+        }
+
+        // url("/Assets/...") of the UI Toolkit face of `key` -- refused when the key has none (a TMP asset given to UI Toolkit blanks the
+        // label silently, R8 S2; a markers-only key cannot be a type role)
+        private static string FontUrl(ThemeAsset theme, string key)
+        {
+            var asset = theme.Type.fontLibrary.GetUiFont(key);
+            if (asset == null)
+                throw new ArgumentException(theme.Key + "/type: font key '" + key + "' has no UI Toolkit font in " + theme.Type.fontLibrary.name);
+            return "url(\"/" + AssetDatabase.GetAssetPath(asset) + "\")";
         }
 
         // Write the generated stylesheet of `theme` beside the others and import it

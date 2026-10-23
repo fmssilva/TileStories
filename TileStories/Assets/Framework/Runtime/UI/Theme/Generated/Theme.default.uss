@@ -77,3 +77,22 @@
     --ts-ease: ease-out-cubic;
     --ts-weight-body: normal;
 }
+
+/* Type: body = atkinson_next_regular (bold: atkinson_next_bold, through its weight table), display = fraunces_semibold */
+.ts-app.ts-theme-default {
+    --ts-font-body: url("/Assets/Framework/Runtime/UI/Theme/Fonts/AtkinsonHyperlegibleNext/AtkinsonHyperlegibleNext-Regular UITK.asset");
+    --ts-font-display: url("/Assets/Framework/Runtime/UI/Theme/Fonts/Fraunces/Fraunces-SemiBold UITK.asset");
+    -unity-font-definition: var(--ts-font-body);
+}
+
+.ts-app.ts-theme-default .card-header__title,
+.ts-app.ts-theme-default .poi-card-mini__title,
+.ts-app.ts-theme-default .card-block-heading,
+.ts-app.ts-theme-default .card-rich__heading,
+.ts-app.ts-theme-default .card-story__title,
+.ts-app.ts-theme-default .card-text__dropcap,
+.ts-app.ts-theme-default .nav-menu__title,
+.ts-app.ts-theme-default .nav-grid__open-title,
+.ts-app.ts-theme-default .nav-rails__title-words {
+    -unity-font-definition: var(--ts-font-display);
+}

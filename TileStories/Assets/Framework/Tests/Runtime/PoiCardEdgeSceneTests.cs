@@ -152,21 +152,25 @@ namespace TileStories.Tests
 
         // ---------------- the slot and the stops ----------------
 
-        // Section 4.2: the edge slot takes no room in the flow and changes no stop (5a's standard at 390 x 844: peek 195.00 / half 337.60 /
-        // full 796.00). The rail is drawn only where the viewport holds every dot's full target: at Full yes, one per family; at The Lamp's
-        // Half (a 106 px viewport) and at Peek no -- and the hidden rail takes no finger
+        // Section 4.2: the edge slot takes no room in the flow and changes no stop: with the scrubber, every stop is the card's own (measured
+        // with no edge element first; _3.3 P4.3 re-based it from the typed 5a standard, 195.00 / 337.60 / 796.00, which the new faces moved to
+        // 168 at Peek -- a title on one line). The rail is drawn only where the viewport holds every dot's full target: at Full yes, one per
+        // family; at The Lamp's Half and at Peek no -- and the hidden rail takes no finger
         [UnityTest]
         public IEnumerator TheStops_AreUnchangedWithTheScrubber_AndTheRailIsDrawnOnlyWhereEveryDotGetsAFullTarget()
         {
+            var own = new Dictionary<SheetStopRule.Stop, float>();
             foreach (string edge in new[] { CardOptions.NavNone, BuiltInNavElements.EdgeScrubber })
             {
                 yield return UseScrubber(edge: edge);
-                foreach (var (stop, height) in new[] { (SheetStopRule.Stop.Peek, 195f), (SheetStopRule.Stop.Half, 337.6f), (SheetStopRule.Stop.Full, 796f) })
+                foreach (var stop in new[] { SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half, SheetStopRule.Stop.Full })
                 {
                     yield return Open(stop);
-                    Assert.AreEqual(height, Sheet.Stops.HeightOf(stop), 0.01f, edge + ": the " + stop + " stop did not move");
+                    if (edge == CardOptions.NavNone) own[stop] = Sheet.Stops.HeightOf(stop);
+                    else Assert.AreEqual(own[stop], Sheet.Stops.HeightOf(stop), 0.01f, edge + ": the " + stop + " stop did not move");
                 }
             }
+            Assert.Less(own[SheetStopRule.Stop.Peek], own[SheetStopRule.Stop.Half], "precondition: three distinct stops were measured");
 
             yield return Open(SheetStopRule.Stop.Full);
             float touch = CardTestInput.TokenPx("--ts-touch-target");

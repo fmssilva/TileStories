@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Story element table</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#7CB6FF}a:hover{color:#A9CEFF}
+.ed *{box-sizing:border-box}
+.ed button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:left}
+.ibtn{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:#C8C8C8}
+.ibtn:hover{background:#4A4A4A;color:#FFFFFF}
+.row:hover{background:#414141}
+.chip{padding:3px 9px;border-radius:4px;border:1px solid #555;background:#3C3C3C;font-size:12px;color:#D2D2D2}
+.chip.on{background:#2C5D87;border-color:#4C8BC2;color:#FFFFFF}
+.menuitem:hover{background:#2C5D87}
+.fold{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;background:#2B2B2B;border-bottom:1px solid #222}
+.fold:hover{background:#333}
+.acc:hover{background:#3A3A3A}
+.scroll{scrollbar-width:thin}
+.badge{font-size:11px;padding:1px 6px;border-radius:3px;background:#4A3F2A;color:#F2C879}
+</style>
+</helmet>
+<div class="ed" style="width: 560px; height: 844px; background: #383838; color: #D2D2D2; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; position: relative; overflow: hidden; display: flex; flex-direction: column;">
+
+  <div style="flex: none; height: 30px; background: #282828; display: flex; align-items: center; padding: 0 10px; gap: 8px; border-bottom: 1px solid #1E1E1E;">
+    <span style="background: #383838; padding: 6px 12px; border-radius: 4px 4px 0 0; color: #FFFFFF;">POI Editor</span>
+    <span style="color: #9A9A9A;">Global Scene</span><span style="color: #9A9A9A;">Detail Card</span><span style="color: #FFFFFF; font-weight: 600;">Specific Marker</span>
+  </div>
+
+  <div class="scroll" style="flex: 1; overflow-y: auto; padding: 10px 12px 60px;">
+    <div style="color: #9A9A9A; font-size: 12px;">Specific Marker &gt; Ribeira Palace &gt; Card Content</div>
+
+    <div style="margin-top: 8px; background: #2F2F2F; border: 1px solid #232323; border-radius: 5px; overflow: hidden;">
+      <button class="fold" onClick="{{toggleShared}}"><span>{{sharedChev}}</span><span style="color: #FFFFFF; font-weight: 600;">Shared elements</span><span style="color: #9A9A9A;">(this POI)</span><span style="flex: 1;"></span><span class="badge">phase 2</span></button>
+      <sc-if value="{{sharedOpen}}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 8px 12px; color: #B0B0B0; line-height: 1.5;">
+          <div style="display: flex; gap: 8px; align-items: center; padding: 4px 0;"><span style="width: 22px; height: 22px; border-radius: 4px; background: #1E4E8C; color: #FFF; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">⟷</span><span style="color: #FFF;">carousel</span><span>Palace views (3 pictures)</span><span style="flex: 1;"></span><span style="color: #8E8E8E;">used in: The story #13, In pictures</span></div>
+          <div style="display: flex; gap: 8px; align-items: center; padding: 4px 0;"><span style="width: 22px; height: 22px; border-radius: 4px; background: #8A4B08; color: #FFF; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">C</span><span style="color: #FFF;">callout</span><span>Lost in a day</span><span style="flex: 1;"></span><span style="color: #8E8E8E;">used in: Did you know?, Timeline</span></div>
+          <div style="color: #8E8E8E; font-size: 12px; margin-top: 4px;">Any row: "Promote to shared". Any block: "+ Add" › "From shared". Built after the story slice.</div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="margin-top: 8px; background: #2F2F2F; border: 1px solid #232323; border-radius: 5px; overflow: hidden;">
+      <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #262626;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A85A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4h14v16H5zM9 8h6M9 12h6M9 16h4"/></svg>
+        <span style="color: #FFFFFF; font-weight: 600;">The story</span><span style="color: #9A9A9A;">(story · About)</span>
+        <span style="flex: 1;"></span>
+        <span style="font-size: 12px; color: {{blockValColor}};">{{blockVal}}</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 7px 10px; background: #333; border-bottom: 1px solid #262626;">
+        <span style="color: #9A9A9A;">Template</span><span style="color: #FFFFFF;">Story — magazine</span><button class="chip">Re-apply</button>
+        <span style="color: #9A9A9A;">Emphasis</span><span class="chip">Normal ▾</span>
+        <span style="color: #9A9A9A;">Reading time</span><span class="chip">Auto · {{minutes}} min ▾</span>
+      </div>
+
+      <button class="fold" onClick="{{togglePage}}" style="background: #263240;"><span>{{pageChev}}</span><span style="color: #FFFFFF; font-weight: 700;">Page</span><span style="color: #9A9A9A;">the block's own page · {{count}} rows</span></button>
+      <sc-if value="{{pageOpen}}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="display: flex; align-items: center; padding: 6px 10px; color: #9A9A9A; font-size: 12px; border-bottom: 1px solid #262626;">
+            <span style="width: 40px;"></span><span style="width: 24px;">#</span><span style="flex: 1;">Element</span><span style="width: 56px; text-align: center;">Preview</span><span style="width: 62px; text-align: center;">Validated</span><span style="width: 96px; text-align: right;">Actions</span>
+          </div>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="12">
+            <div>
+              <div class="row" style="display: flex; align-items: center; padding: 5px 10px; min-height: 34px; border-bottom: 1px solid #2A2A2A; background: {{r.bg}};">
+                <span style="width: 18px; color: #6E6E6E; cursor: grab;" aria-hidden="true">⋮⋮</span>
+                <button onClick="{{r.toggle}}" aria-label="Open the row" style="width: 22px; color: #BDBDBD;">{{r.chev}}</button>
+                <span style="width: 24px; color: #9A9A9A;">{{r.n}}</span>
+                <button onClick="{{r.toggle}}" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px;">
+                  <span style="width: 22px; height: 22px; border-radius: 4px; background: {{r.iconBg}}; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex: none;">{{r.icon}}</span>
+                  <span style="color: #FFFFFF; flex: none;">{{r.name}}</span>
+                  <span style="color: #8E8E8E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{r.summary}}</span>
+                </button>
+                <span style="width: 56px; text-align: center; color: #7CB6FF; font-weight: 700;">{{r.inPreview}}</span>
+                <button onClick="{{r.val}}" aria-label="Validated" style="width: 62px; text-align: center; font-weight: 700; color: {{r.valColor}};">{{r.valMark}}</button>
+                <span style="width: 96px; display: flex; justify-content: flex-end; gap: 2px;">
+                  <button class="ibtn" onClick="{{r.up}}" aria-label="Move up">↑</button>
+                  <button class="ibtn" onClick="{{r.down}}" aria-label="Move down">↓</button>
+                  <button class="ibtn" onClick="{{r.dup}}" aria-label="Duplicate">⧉</button>
+                  <button class="ibtn" onClick="{{r.del}}" aria-label="Delete">✕</button>
+                </span>
+              </div>
+              <sc-if value="{{r.open}}" hint-placeholder-val="{{ false }}">
+                <div style="padding: 8px 12px 10px 74px; background: #303030; border-bottom: 1px solid #262626;">
+                  <sc-for list="{{r.fields}}" as="f" hint-placeholder-count="2">
+                    <div style="display: flex; gap: 8px; align-items: flex-start; margin-bottom: 6px;">
+                      <span style="width: 92px; color: #B0B0B0; padding-top: 4px;">{{f.label}}</span>
+                      <div style="flex: 1; background: #2A2A2A; border: 1px solid #212121; border-radius: 3px; padding: 4px 7px; color: {{f.color}}; min-height: 24px; line-height: 1.4;">{{f.value}}</div>
+                      <span style="color: #7CB6FF; font-size: 12px; padding-top: 4px;">(i)</span>
+                    </div>
+                  </sc-for>
+                  <sc-for list="{{r.sections}}" as="sec" hint-placeholder-count="3">
+                    <div>
+                      <button class="acc" onClick="{{sec.toggle}}" style="width: 100%; display: flex; align-items: center; gap: 8px; margin-top: 4px; padding: 5px 8px; border: 1px solid #444; border-radius: 4px; background: #343434;">
+                        <span style="color: #BDBDBD; width: 14px;">{{sec.chev}}</span>
+                        <span style="color: #FFFFFF; font-weight: 600; width: 52px;">{{sec.name}}</span>
+                        <span style="color: #9A9A9A; flex: 1;">{{sec.summary}}</span>
+                      </button>
+                      <sc-if value="{{sec.open}}" hint-placeholder-val="{{ false }}">
+                        <div style="padding: 8px 8px 4px 30px; border: 1px solid #444; border-top: 0; border-radius: 0 0 4px 4px; background: #313131;">
+                          <sc-for list="{{sec.rows}}" as="s" hint-placeholder-count="2">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                              <span style="width: 70px; color: #B0B0B0;">{{s.label}}</span>
+                              <span style="display: flex; gap: 4px; flex-wrap: wrap;"><sc-for list="{{s.opts}}" as="o" hint-placeholder-count="3"><button class="{{o.cls}}" onClick="{{o.pick}}">{{o.name}}</button></sc-for></span>
+                            </div>
+                          </sc-for>
+                          <div style="color: #8E8E8E; font-size: 12px; margin: 2px 0 4px;">{{sec.note}}</div>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <div style="position: relative; padding: 8px 10px; border-bottom: 1px solid #262626;">
+            <button class="chip" onClick="{{toggleAdd}}" style="color: #FFFFFF; padding: 5px 12px;">+ Add element</button>
+            <sc-if value="{{addOpen}}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; left: 10px; top: 38px; width: 420px; background: #2A2A2A; border: 1px solid #1A1A1A; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.6); padding: 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; z-index: 5;">
+                <sc-for list="{{palette}}" as="g" hint-placeholder-count="3">
+                  <div>
+                    <div style="color: #9A9A9A; font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 4px 6px;">{{g.cat}}</div>
+                    <sc-for list="{{g.items}}" as="it" hint-placeholder-count="5">
+                      <button class="menuitem" onClick="{{it.add}}" style="display: flex; width: 100%; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 4px; color: #E6E6E6;">
+                        <span style="width: 18px; height: 18px; border-radius: 3px; background: {{it.bg}}; color: #FFFFFF; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;">{{it.icon}}</span>{{it.name}}
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid #262626;"><span style="width: 110px; color: #B0B0B0;">Page chrome</span><span class="chip on">Inherit the wall's</span><span class="chip">Override</span><span style="color: #8E8E8E; font-size: 12px;">Back + breadcrumb, Previous / Next</span></div>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid #262626;"><span style="width: 110px; color: #B0B0B0;">Opening</span><span class="chip on">Grow from the preview</span><span class="chip">Slide up</span><span class="chip">Fade</span></div>
+          <button class="fold" onClick="{{toggleMotion}}" style="background: #2E2E2E;"><span>{{motionChev}}</span><span style="color: #FFFFFF; font-weight: 600;">Motion</span><span style="color: #9A9A9A;">the page's choreography · one line per row</span></button>
+          <sc-if value="{{motionOpen}}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 4px 10px 8px;">
+              <div style="display: flex; color: #9A9A9A; font-size: 12px; padding: 4px 0;"><span style="width: 24px;">#</span><span style="width: 130px;">Row</span><span style="flex: 1;">Effect (click to change)</span><span style="width: 120px;">Reduced motion</span></div>
+              <div style="display: flex; align-items: center; padding: 3px 0; color: #FFFFFF;"><span style="width: 24px;"></span><span style="width: 130px;">The page</span><span style="flex: 1;"><span class="chip on">Rows rise one by one</span></span><span style="width: 120px; color: #8E8E8E;">all at once, still</span></div>
+              <sc-for list="{{motionRows}}" as="m" hint-placeholder-count="8">
+                <div style="display: flex; align-items: center; padding: 3px 0;">
+                  <span style="width: 24px; color: #9A9A9A;">{{m.n}}</span>
+                  <span style="width: 130px; color: #FFFFFF;">{{m.name}}</span>
+                  <span style="flex: 1;"><button class="chip" onClick="{{m.cycle}}">{{m.effect}}</button></span>
+                  <span style="width: 120px; color: #8E8E8E;">{{m.reduced}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <button class="fold" onClick="{{togglePrev}}" style="background: #263240;"><span>{{prevChev}}</span><span style="color: #FFFFFF; font-weight: 700;">Preview</span><span style="color: #9A9A9A;">what the card shows before it is opened</span></button>
+      <sc-if value="{{prevOpen}}" hint-placeholder-val="{{ true }}">
+        <div style="padding: 8px 10px 10px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;"><span style="width: 100px; color: #B0B0B0;">Mode</span><button class="{{modeAuto}}" onClick="{{setAuto}}">Automatic</button><button class="{{modeCustom}}" onClick="{{setCustom}}">Custom</button></div>
+          <sc-if value="{{isAuto}}" hint-placeholder-val="{{ true }}">
+            <div style="background: #2A2A2A; border: 1px solid #222; border-radius: 4px; padding: 8px 10px; line-height: 1.5;">
+              <div style="color: #FFFFFF;">Shows: <b>{{autoSummary}}</b></div>
+              <div style="color: #8E8E8E; font-size: 12px;">Follows the Page: reorder or delete a row above and this changes with it (rows marked P in the Page table).</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{isCustom}}" hint-placeholder-val="{{ false }}">
+            <div style="background: #2A2A2A; border: 1px solid #222; border-radius: 4px; padding: 4px 8px;">
+              <sc-for list="{{customRows}}" as="c" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #333;">
+                  <span style="color: {{c.color}}; width: 16px; text-align: center;">{{c.mark}}</span>
+                  <span style="color: #FFFFFF; flex: none;">{{c.name}}</span>
+                  <span style="color: #8E8E8E; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{c.detail}}</span>
+                  <button class="chip" onClick="{{c.unlink}}">{{c.unlinkLabel}}</button>
+                  <button class="ibtn" onClick="{{c.remove}}" aria-label="Remove">✕</button>
+                </div>
+              </sc-for>
+              <div style="display: flex; gap: 6px; padding: 6px 0;"><button class="chip" onClick="{{linkMore}}">+ Link a Page row</button><button class="chip" onClick="{{addOwn}}">+ Own row</button></div>
+            </div>
+          </sc-if>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;"><span style="width: 100px; color: #B0B0B0;">Open Row</span><button class="{{orInherit}}" onClick="{{orSetInherit}}">Inherit the wall's</button><button class="{{orOverride}}" onClick="{{orSetOverride}}">Override</button></div>
+          <sc-if value="{{orIsOverride}}" hint-placeholder-val="{{ false }}">
+            <div style="margin: 6px 0 0 108px; display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; gap: 6px; align-items: center;"><span style="width: 70px; color: #B0B0B0;">Words</span><span style="background: #2A2A2A; border: 1px solid #222; padding: 3px 7px; border-radius: 3px; color: #E6E6E6;">Read the story</span><span style="color: #8E8E8E;">EN · PT</span></div>
+              <div style="display: flex; gap: 6px; align-items: center;"><span style="width: 70px; color: #B0B0B0;">Emphasis</span><span class="chip">Plain</span><span class="chip">Nudge</span><span class="chip on">Shine</span></div>
+            </div>
+          </sc-if>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;"><span style="width: 100px; color: #B0B0B0;">Tap</span><span class="chip on">Open the page</span><span class="chip">Nothing</span></div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;"><span style="width: 100px; color: #B0B0B0;">Idle demo</span><span class="chip on">Slow zoom on the picture</span><span class="chip">None</span></div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;"><span style="width: 100px; color: #B0B0B0;">Motion</span><span class="chip on">Block rises in</span><span class="chip">None</span><span style="color: #8E8E8E; font-size: 12px;">reduced: appears still</span></div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="margin-top: 10px; color: #9A9A9A; font-size: 12px; line-height: 1.5;">The wall's defaults for Open Row, Page chrome, buttons, captions...: Detail Card › Card Components. Every edit: undo / redo, unsaved flag, live Play Mode.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":560,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.nextId = 100;
+    const r = (id, kind, summary, valid, extra) => ({ id, kind, summary, valid, open: {}, motion: "Auto", ...(extra || {}) });
+    this.state = {
+      open: 9, addOpen: false, pageOpen: true, prevOpen: true, motionOpen: false, sharedOpen: false,
+      mode: "auto", orMode: "inherit", custom: null,
+      rows: [
+        r(1, "picture", "paco_hero.jpg · full-bleed", true),
+        r(2, "eyebrow", "THE PALACE ON THE WATER", true),
+        r(3, "title", "Two hundred and fifty years by the river", true),
+        r(4, "lede", "For about 250 years the kings of Portugal lived by…", true),
+        r(5, "paragraph", "When King Manuel I found the old castle on the hill…", true, { dropcap: "On" }),
+        r(6, "picture", "paco_gallery_3.jpg · inset · caption", true),
+        r(7, "heading", "Two centuries of additions", true),
+        r(8, "paragraph", "Later kings kept adding to it. In the 1580s…", false),
+        r(9, "callout", "WHAT WAS INSIDE", false, { tone: "Family", open: { Look: true } }),
+        r(10, "pull quote", "Where the palace had stood, an open square…", true),
+        r(11, "picture pair", "paco_before_1755.jpg + paco_after_today.jpg", true),
+        r(12, "divider", "azulejo ornament", true),
+        r(13, "carousel", "3 pictures", false),
+        r(14, "video", "lisbon_square_castle_55s.mp4 · poster", false),
+        r(15, "callout", "VISIT TODAY", true, { tone: "Inverse" })
+      ]
+    };
+  }
+
+  meta(kind) {
+    const M = { "title": ["T", "#6B5A3E"], "eyebrow": ["E", "#6B5A3E"], "heading": ["H", "#6B5A3E"], "lede": ["L", "#6B5A3E"], "paragraph": ["¶", "#6B5A3E"], "callout": ["C", "#8A4B08"], "pull quote": ["“", "#6B5A3E"], "list": ["•", "#6B5A3E"], "picture": ["P", "#1E4E8C"], "picture pair": ["P2", "#1E4E8C"], "carousel": ["⟷", "#1E4E8C"], "video": ["▶", "#1E4E8C"], "divider": ["—", "#555555"], "spacer": ["␣", "#555555"] };
+    return M[kind] || ["?", "#555"];
+  }
+  isText(k) { return ["title", "eyebrow", "heading", "lede", "paragraph", "pull quote", "list", "callout"].indexOf(k) >= 0; }
+  isMedia(k) { return ["picture", "picture pair", "carousel", "video"].indexOf(k) >= 0; }
+
+  autoPicks() {
+    const rows = this.state.rows;
+    const pic = rows.find((x) => x.kind === "picture" || x.kind === "carousel");
+    const title = rows.find((x) => x.kind === "title" || x.kind === "heading");
+    const text = rows.find((x) => x.kind === "lede" || x.kind === "paragraph");
+    return [pic, title, text].filter(Boolean);
+  }
+
+  fieldsOf(r) {
+    const empty = r.summary.indexOf("(empty") === 0, c = empty ? "#E8A06A" : "#E6E6E6";
+    if (r.kind === "callout") return [{ label: "Label (EN)", value: empty ? "(write the label)" : r.summary, color: c }, { label: "Text (EN)", value: empty ? "(write the text)" : "A library of some 70,000 books / …", color: c }, { label: "PT", value: empty ? "(português)" : "O QUE HAVIA LÁ DENTRO / …", color: c }];
+    if (this.isText(r.kind)) return [{ label: "Text (EN)", value: empty ? "(write the text)" : r.summary, color: c }, { label: "Text (PT)", value: empty ? "(escreve o texto)" : "(Portuguese text)", color: c }];
+    if (r.kind === "carousel") return [{ label: "Pictures", value: empty ? "(+ Add picture)" : "paco_gallery_1.jpg · paco_hero.jpg · paco_gallery_4.jpg", color: c }];
+    if (r.kind === "divider") return [{ label: "Look", value: "Azulejo ornament", color: c }];
+    return [{ label: "File", value: empty ? "(drop or pick a file)" : r.summary.split(" · ")[0], color: c }, { label: "Caption", value: "(EN · PT)", color: c }, { label: "Credit", value: "(credit)", color: c }];
+  }
+
+  setRow(id, patch) { this.setState({ rows: this.state.rows.map((x) => x.id === id ? { ...x, ...patch } : x) }); }
+
+  sectionsOf(r) {
+    const opt = (key, list, def) => ({ label: key, opts: list.map((n) => ({ name: n, cls: "chip" + ((r[key.toLowerCase()] || def) === n ? " on" : ""), pick: () => this.setRow(r.id, { [key.toLowerCase()]: n }) })) });
+    const look = [];
+    if (this.isText(r.kind)) { look.push(opt("Tone", ["Neutral", "Family", "Accent", "Inverse"], "Neutral")); look.push(opt("Size", ["S", "M", "L"], "M")); }
+    if (r.kind === "paragraph") look.push(opt("Dropcap", ["Off", "On"], "Off"));
+    if (this.isMedia(r.kind)) { look.push(opt("Width", ["Inset", "Full-bleed"], "Inset")); look.push(opt("Frame", ["Rectangle", "Arch"], "Rectangle")); }
+    const motion = [opt("Motion", this.isMedia(r.kind) ? ["Auto", "None", "Reveal", "Parallax", "Slow zoom", "Pan"] : ["Auto", "None", "Reveal", "Slide in"], "Auto")];
+    const tap = this.isMedia(r.kind) ? [opt("Tap", r.kind === "video" ? ["Play in place", "Open the player"] : ["Open the viewer", "Nothing"], r.kind === "video" ? "Open the player" : "Open the viewer")] : null;
+    const summ = (rows) => rows.map((s) => s.label + ": " + (s.opts.find((o) => o.cls.indexOf(" on") > 0) || { name: "?" }).name).join(" · ");
+    const sec = (name, rows, note) => ({ name, rows, note, summary: summ(rows), open: !!r.open[name], chev: r.open[name] ? "▾" : "▸", toggle: () => this.setRow(r.id, { open: { ...r.open, [name]: !r.open[name] } }) });
+    const list = [];
+    if (look.length) list.push(sec("Look", look, "Only the theme's options: every tone is measured for contrast in light and dark."));
+    list.push(sec("Motion", motion, "Auto = the theme's default for this element. Reduced motion: still."));
+    if (tap) list.push(sec("Tap", tap, "What a visitor's tap on this element does in the page."));
+    return list;
+  }
+
+  move(i, d) { const rows = this.state.rows.slice(); const j = i + d; if (j < 0 || j >= rows.length) return; const t = rows[i]; rows[i] = rows[j]; rows[j] = t; this.setState({ rows }); }
+
+  renderVals() {
+    const picks = this.autoPicks();
+    const pickIds = picks.map((p) => p.id);
+    const isAuto = this.state.mode === "auto";
+    const rows = this.state.rows.map((r, i) => {
+      const m = this.meta(r.kind);
+      return {
+        n: i + 1, name: r.kind, summary: r.summary, icon: m[0], iconBg: m[1],
+        chev: this.state.open === r.id ? "▾" : "▸", open: this.state.open === r.id,
+        inPreview: isAuto ? (pickIds.indexOf(r.id) >= 0 ? "P" : "") : ((this.state.custom || []).some((c) => c.ref === r.id) ? "↗" : ""),
+        valMark: r.valid ? "✓" : "✕", valColor: r.valid ? "#5BC27A" : "#E2554A",
+        bg: this.state.open === r.id ? "#3F4A55" : "transparent",
+        fields: this.fieldsOf(r), sections: this.sectionsOf(r),
+        toggle: () => this.setState({ open: this.state.open === r.id ? 0 : r.id }),
+        val: () => this.setRow(r.id, { valid: !r.valid }),
+        up: () => this.move(i, -1), down: () => this.move(i, 1),
+        dup: () => { const rows2 = this.state.rows.slice(); rows2.splice(i + 1, 0, { ...r, id: this.nextId++, valid: false }); this.setState({ rows: rows2 }); },
+        del: () => this.setState({ rows: this.state.rows.filter((x) => x.id !== r.id) })
+      };
+    });
+    const add = (kind) => () => { const id = this.nextId++; this.setState({ rows: this.state.rows.concat([{ id, kind, summary: "(empty: fill it in)", valid: false, motion: "Auto", open: { Look: true, Motion: true, Tap: true } }]), addOpen: false, open: id }); };
+    const cat = (name, list) => ({ cat: name, items: list.map((k) => ({ name: k, icon: this.meta(k)[0], bg: this.meta(k)[1], add: add(k) })) });
+    const valid = this.state.rows.filter((x) => x.valid).length, all = valid === this.state.rows.length;
+    const effects = ["Auto", "Reveal", "Parallax", "Slide in", "None"];
+    const motionRows = this.state.rows.map((r, i) => {
+      const e = r.motion || "Auto";
+      const shown = e === "Auto" ? "Auto · " + (this.isMedia(r.kind) ? "subtle parallax" : "reveal") : e;
+      return { n: i + 1, name: r.kind, effect: shown, reduced: e === "None" ? "—" : "still", cycle: () => this.setRow(r.id, { motion: effects[(effects.indexOf(e) + 1) % effects.length] }) };
+    });
+    const custom = (this.state.custom || []).map((c, i) => {
+      const src = c.ref ? this.state.rows.find((x) => x.id === c.ref) : null;
+      const broken = c.ref && !src;
+      return {
+        mark: broken ? "!" : (c.ref ? "↗" : "•"), color: broken ? "#E2554A" : (c.ref ? "#7CB6FF" : "#BDBDBD"),
+        name: broken ? "missing row" : (c.ref ? src.kind : c.kind),
+        detail: broken ? "its Page row was deleted: unlink or remove" : (c.ref ? "from Page #" + (this.state.rows.indexOf(src) + 1) + ": " + src.summary : c.summary),
+        unlinkLabel: c.ref ? "Unlink (copy)" : "Own",
+        unlink: () => { if (!c.ref || !src) return; const list = this.state.custom.slice(); list[i] = { kind: src.kind, summary: src.summary + " (copy)" }; this.setState({ custom: list }); },
+        remove: () => this.setState({ custom: this.state.custom.filter((_, j) => j !== i) })
+      };
+    });
+    return {
+      rows, count: this.state.rows.length, minutes: Math.max(1, Math.round(this.state.rows.length * 0.27)),
+      blockVal: all ? "✓ all validated" : "✕ " + (this.state.rows.length - valid) + " to validate", blockValColor: all ? "#5BC27A" : "#E2554A",
+      addOpen: this.state.addOpen, toggleAdd: () => this.setState({ addOpen: !this.state.addOpen }),
+      palette: [cat("TEXT", ["title", "eyebrow", "heading", "lede", "paragraph", "callout", "pull quote", "list"]), cat("MEDIA", ["picture", "picture pair", "carousel", "video"]), cat("STRUCTURE", ["divider", "spacer"])],
+      pageOpen: this.state.pageOpen, pageChev: this.state.pageOpen ? "▾" : "▸", togglePage: () => this.setState({ pageOpen: !this.state.pageOpen }),
+      prevOpen: this.state.prevOpen, prevChev: this.state.prevOpen ? "▾" : "▸", togglePrev: () => this.setState({ prevOpen: !this.state.prevOpen }),
+      motionOpen: this.state.motionOpen, motionChev: this.state.motionOpen ? "▾" : "▸", toggleMotion: () => this.setState({ motionOpen: !this.state.motionOpen }),
+      sharedOpen: this.state.sharedOpen, sharedChev: this.state.sharedOpen ? "▾" : "▸", toggleShared: () => this.setState({ sharedOpen: !this.state.sharedOpen }),
+      motionRows,
+      isAuto, isCustom: !isAuto,
+      modeAuto: "chip" + (isAuto ? " on" : ""), modeCustom: "chip" + (!isAuto ? " on" : ""),
+      setAuto: () => this.setState({ mode: "auto" }),
+      setCustom: () => this.setState({ mode: "custom", custom: this.state.custom || this.autoPicks().map((p) => ({ ref: p.id })) }),
+      autoSummary: picks.map((p) => p.kind + " #" + (this.state.rows.indexOf(p) + 1)).join(" · ") || "nothing yet",
+      customRows: custom,
+      linkMore: () => { const used = (this.state.custom || []).map((c) => c.ref); const next = this.state.rows.find((x) => used.indexOf(x.id) < 0); if (next) this.setState({ custom: (this.state.custom || []).concat([{ ref: next.id }]) }); },
+      addOwn: () => this.setState({ custom: (this.state.custom || []).concat([{ kind: "paragraph", summary: "A teaser only the preview shows" }]) }),
+      orInherit: "chip" + (this.state.orMode === "inherit" ? " on" : ""), orOverride: "chip" + (this.state.orMode === "override" ? " on" : ""),
+      orSetInherit: () => this.setState({ orMode: "inherit" }), orSetOverride: () => this.setState({ orMode: "override" }), orIsOverride: this.state.orMode === "override"
+    };
+  }
+}
+</script>
+</body>
+</html>

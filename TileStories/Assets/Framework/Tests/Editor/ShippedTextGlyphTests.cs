@@ -1,106 +1,92 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using NUnit.Framework;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using FontAsset = UnityEngine.TextCore.Text.FontAsset;
+using TextCoreAtlasPopulationMode = UnityEngine.TextCore.Text.AtlasPopulationMode;
 
 namespace TileStories.Editor.Tests
 {
-    // The guard of the project's two STATIC marker fonts (__mixed_TODOs "The two SDF fonts dirty themselves"): a static TMP font asset adds
-    // no glyph at run time, so every character a visitor can be shown must already sit in its character table. The test walks every
-    // visitor-facing string the project ships -- the framework's card string table, the app's own table and the wall's config.json -- and
-    // asserts each character is in both fonts. The day someone types a new accent (or a language arrives) it fails, naming the character
-    // and where it came from, instead of the marker showing an empty box.
+    // The guard of the project's STATIC fonts (__mixed_TODOs "The two SDF fonts dirty themselves"; _3.3 R12.3): a static font asset adds no
+    // glyph at run time, so every character a visitor can be shown must already sit in its character table. The characters are walked from
+    // what the project ships -- the framework's card string table, the app's own table, the block kinds' option labels and the wall's
+    // config.json (ShippedTextCharacters, the same list FontAtlasBuilder builds from). The day someone types a new accent (or a language
+    // arrives) a test fails, naming the character, where it came from and the font, instead of a label showing an empty box.
     public class ShippedTextGlyphTests
     {
-        public static readonly string[] FontPaths =
+        public static readonly string[] MarkerFontPaths =
         {
             "Assets/Framework/Runtime/UI/Markers/Fonts/Oswald Bold SDF.asset",
             "Assets/Framework/Runtime/UI/Markers/Fonts/Roboto-Bold SDF.asset",
         };
 
-        private const string FrameworkTablePath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
-        private const string AppTablePath = "Assets/Apps/LivingRoom/Resources/LivingRoom/LivingRoomCardStrings.asset";
-        private const string WallConfigPath = "Assets/Apps/LivingRoom/config.json";
-
-        // Printable ASCII and the Portuguese letters, upper and lower case: what any marker label of a Latin / Portuguese wall may hold even
-        // before a config types it (a POI renamed live in the POI Editor must not need a font rebuild)
-        public const string BaseCharacters =
-            " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" +
-            "ÀÁÂÃÇÉÊÍÓÔÕÚÜ" +
-            "àáâãçéêíóôõúü";
-
-        // Every character a visitor can be shown, with one place it comes from: the base set, then each string of the three sources.
-        // Public: the one-off atlas rebuild reads the same list, so the font and its guard can never disagree on the set
-        public static Dictionary<char, string> ShippedCharacters()
+        private static Dictionary<char, string> Shipped()
         {
-            var found = new Dictionary<char, string>();
-            Add(found, BaseCharacters, "the base set");
-            foreach (var (path, label) in new[] { (FrameworkTablePath, "CardStrings.asset"), (AppTablePath, "LivingRoomCardStrings.asset") })
-            {
-                var table = AssetDatabase.LoadAssetAtPath<CardStringTable>(path);
-                Assert.IsNotNull(table, "precondition: the string table loads: " + path);
-                foreach (var row in table.rows)
-                    foreach (var entry in row.text)
-                        Add(found, entry.value, label + " row " + row.key + " (" + entry.lang + ")");
-            }
-            var config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText(WallConfigPath));
-            Assert.IsNotNull(config, "precondition: the wall's config.json parses");
-            WalkStrings(config, s => Add(found, s, "config.json"));
-            return found;
+            var characters = ShippedTextCharacters.Collect();
+            // - the walk really read Portuguese: a test that collected ASCII only would pass on any font
+            Assert.IsTrue(characters.ContainsKey('ç') && characters.ContainsKey('ã'),
+                "precondition: the shipped text holds Portuguese (a c-cedilla and an a-tilde)");
+            Assert.Greater(characters.Count, ShippedTextCharacters.BaseCharacters.Length, "precondition: the shipped text adds characters beyond the base set");
+            return characters;
+        }
+
+        // Every shipped character `inFont` lacks, as "'x' (U+0078, from <source>)"
+        private static List<string> MissingShipped(Dictionary<char, string> shipped, IEnumerable<uint> inFont)
+        {
+            var have = new HashSet<uint>(inFont);
+            return shipped.Where(c => !have.Contains(c.Key)).Select(c => "'" + c.Key + "' (U+" + ((int)c.Key).ToString("X4") + ", from " + c.Value + ")").ToList();
         }
 
         [Test]
         public void EveryShippedCharacter_IsInBothMarkerFonts_AndBothAreStatic()
         {
-            var characters = ShippedCharacters();
-            // - the walk really read Portuguese: a test that collected ASCII only would pass on any font
-            Assert.IsTrue(characters.ContainsKey('ç') && characters.ContainsKey('ã'),
-                "precondition: the shipped text holds Portuguese (a c-cedilla and an a-tilde)");
-            Assert.Greater(characters.Count, BaseCharacters.Length, "precondition: the shipped text adds characters beyond the base set");
-            foreach (string path in FontPaths)
+            var characters = Shipped();
+            foreach (string path in MarkerFontPaths)
             {
                 var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
                 Assert.IsNotNull(font, "precondition: the font asset loads: " + path);
                 Assert.AreEqual(AtlasPopulationMode.Static, font.atlasPopulationMode,
                     path + " is Static: a Dynamic font writes every new glyph back into the asset (git sees it change on every Editor launch)");
-                var inFont = new HashSet<uint>(font.characterTable.Select(c => c.unicode));
-                var missing = characters.Where(c => !inFont.Contains(c.Key)).Select(c => "'" + c.Key + "' (U+" + ((int)c.Key).ToString("X4") + ", from " + c.Value + ")").ToList();
+                var missing = MissingShipped(characters, font.characterTable.Select(c => c.unicode));
                 Assert.IsEmpty(missing, path + " lacks " + missing.Count + " shipped character(s): " + string.Join(", ", missing.Take(12)));
             }
         }
 
-        private static void Add(Dictionary<char, string> found, string text, string where)
+        // The app's faces (_3.3 P4.3): every .ttf under the theme's font folder has its two assets, both static; every shipped and content
+        // character is in BOTH (the markers may pick the key, the card draws it); and every character of the built set is there unless the
+        // face itself lacks it (read from the .ttf's own cmap, not from a typed list)
+        [Test]
+        public void EveryThemeFace_HasStaticTmpAndUiAssets_HoldingEveryShippedCharacter_AndTheWholeSetTheFaceHas()
         {
-            if (string.IsNullOrEmpty(text)) return;
-            foreach (char c in text)
+            var characters = Shipped();
+            string set = FontAtlasBuilder.CharacterSet();
+            var sources = FontAtlasBuilder.SourceFonts();
+            Assert.AreEqual(4, sources.Length, "precondition: the theme ships 4 faces (Fraunces SemiBold, Atkinson Next Regular / Medium / Bold)");
+            foreach (string ttf in sources)
             {
-                // - a line break or a tab is layout, never a glyph
-                if (char.IsControl(c) || found.ContainsKey(c)) continue;
-                found[c] = where;
-            }
-        }
+                var face = AssetDatabase.LoadAssetAtPath<Font>(ttf);
+                var tmp = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAtlasBuilder.TmpPathFor(ttf));
+                var ui = AssetDatabase.LoadAssetAtPath<FontAsset>(FontAtlasBuilder.UiPathFor(ttf));
+                Assert.IsNotNull(tmp, ttf + ": its TMP asset exists (TileStories > Fonts > Rebuild Theme Font Atlases)");
+                Assert.IsNotNull(ui, ttf + ": its UI Toolkit asset exists (TileStories > Fonts > Rebuild Theme Font Atlases)");
+                Assert.AreEqual(AtlasPopulationMode.Static, tmp.atlasPopulationMode, tmp.name + " is Static");
+                Assert.AreEqual(TextCoreAtlasPopulationMode.Static, ui.atlasPopulationMode, ui.name + " is Static");
 
-        // Every string field reachable from `node` (the config's serializable classes and their lists: a JsonUtility tree, no cycles)
-        private static void WalkStrings(object node, Action<string> visit)
-        {
-            if (node == null) return;
-            foreach (var field in node.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                object value = field.GetValue(node);
-                if (value is string s) visit(s);
-                else if (value is IList list)
+                var tmpCodes = tmp.characterTable.Select(c => c.unicode).ToList();
+                var uiCodes = ui.characterTable.Select(c => c.unicode).ToList();
+                var missing = MissingShipped(characters, tmpCodes).Select(m => tmp.name + ": " + m)
+                    .Concat(MissingShipped(characters, uiCodes).Select(m => ui.name + ": " + m)).ToList();
+                Assert.IsEmpty(missing, missing.Count + " shipped character(s) missing: " + string.Join(", ", missing.Take(12)));
+
+                var faceHas = set.Where(c => FontAtlasBuilder.FaceHas(face, c)).ToList();
+                Assert.Greater(faceHas.Count, 250, ttf + ": precondition: the face holds most of Latin-1 + Latin Extended-A");
+                foreach (var (name, codes) in new[] { (tmp.name, tmpCodes), (ui.name, uiCodes) })
                 {
-                    foreach (object item in list)
-                        if (item is string si) visit(si);
-                        else if (item != null && item.GetType().IsClass) WalkStrings(item, visit);
+                    var notBuilt = faceHas.Where(c => !codes.Contains(c)).Select(c => "U+" + ((int)c).ToString("X4")).ToList();
+                    Assert.IsEmpty(notBuilt, name + " lacks " + notBuilt.Count + " character(s) its face has: " + string.Join(", ", notBuilt.Take(12)));
                 }
-                else if (value != null && field.FieldType.IsClass && field.FieldType.IsSerializable) WalkStrings(value, visit);
             }
         }
     }

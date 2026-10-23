@@ -14,12 +14,20 @@ namespace TileStories.Editor
         // Slider ranges are NOT here: they live once on MarkerVisualSettings (LabelGapRatioMin/Max,
         // LabelFontSizeRatioMin/Max), shared by the runtime clamp and every label slider in the window.
 
-        // The framework default FontLibrary.asset's 3 keys. GetAvailableFontKeyOptions
-        // (AssetPaths/POIEditorToolWindow.AssetPaths.cs) unions these with any extra keys the wall's
-        // own font library defines, so a wall that added a 4th font can actually select it in the
-        // popup instead of only being reachable by hand-editing config.json.
-        private static readonly string[] LabelFontKeyOptions = { "liberation_sans", "roboto_bold", "oswald_bold" };
-        private static readonly string[] LabelFontKeyLabels = { "Liberation Sans (default)", "Roboto Bold", "Oswald Bold" };
+        // The framework default FontLibrary.asset's 7 keys: the 3 marker fonts and the app's 4 faces (_3.3 P4.3, the theme's display and
+        // body roles). GetAvailableFontKeyOptions (AssetPaths/POIEditorToolWindow.AssetPaths.cs) unions these with any extra keys the
+        // wall's own font library defines, so a wall that added a font can actually select it in the popup instead of only being
+        // reachable by hand-editing config.json.
+        private static readonly string[] LabelFontKeyOptions =
+        {
+            "liberation_sans", "roboto_bold", "oswald_bold",
+            "fraunces_semibold", "atkinson_next_regular", "atkinson_next_medium", "atkinson_next_bold",
+        };
+        private static readonly string[] LabelFontKeyLabels =
+        {
+            "Liberation Sans (default)", "Roboto Bold", "Oswald Bold",
+            "Fraunces SemiBold", "Atkinson Hyperlegible Next", "Atkinson Hyperlegible Next Medium", "Atkinson Hyperlegible Next Bold",
+        };
 
         // ---------------- (i) help ----------------
 

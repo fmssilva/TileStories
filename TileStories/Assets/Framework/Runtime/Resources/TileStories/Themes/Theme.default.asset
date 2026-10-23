@@ -242,3 +242,20 @@ MonoBehaviour:
       easings: []
       fontStyles: []
   knobs: []
+  type:
+    fontLibrary: {fileID: 11400000, guid: d9e4cf2e49910fc44b7a352fc834c9f4, type: 2}
+    displayFont: fraunces_semibold
+    displayWeight: 600
+    bodyFont: atkinson_next_regular
+    bodyMediumFont: atkinson_next_medium
+    bodyBoldFont: atkinson_next_bold
+    displaySelectors:
+    - .card-header__title
+    - .poi-card-mini__title
+    - .card-block-heading
+    - .card-rich__heading
+    - .card-story__title
+    - .card-text__dropcap
+    - .nav-menu__title
+    - .nav-grid__open-title
+    - .nav-rails__title-words

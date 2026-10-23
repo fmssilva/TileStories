@@ -79,6 +79,57 @@ namespace TileStories.Tests
                     mode.key + ": one rule on the root ThemeController marks");
         }
 
+        // The type roles (_3.3 P4.3, R12.3): the two faces as tokens on the marked root, pointing at the UI Toolkit assets of the theme's
+        // keys (read from the library, not re-typed); the body face as the root's font; the display face on exactly the asset's selectors
+        [Test]
+        public void TheTypeRoles_AreGenerated_BodyOnTheRoot_DisplayOnExactlyItsSelectors()
+        {
+            var theme = Theme();
+            var type = theme.Type;
+            Assert.IsNotNull(type.fontLibrary, "precondition: the default theme names its font library");
+            string body = AssetDatabase.GetAssetPath(type.fontLibrary.GetUiFont(type.bodyFont));
+            string display = AssetDatabase.GetAssetPath(type.fontLibrary.GetUiFont(type.displayFont));
+            StringAssert.EndsWith(" UITK.asset", body, "precondition: the body key has its UI Toolkit asset");
+            StringAssert.EndsWith(" UITK.asset", display, "precondition: the display key has its UI Toolkit asset");
+
+            var lines = Committed(theme).Split('\n').ToList();
+            string root = ".ts-app.ts-theme-" + theme.Key;
+            int rule = lines.IndexOf(root + " {");
+            Assert.GreaterOrEqual(rule, 0, "one rule on the theme's root, whatever the mode");
+            CollectionAssert.AreEqual(new[]
+            {
+                "    --ts-font-body: url(\"/" + body + "\");",
+                "    --ts-font-display: url(\"/" + display + "\");",
+                "    -unity-font-definition: var(--ts-font-body);",
+                "}",
+            }, lines.Skip(rule + 1).Take(4).ToList(), "the root rule: both faces as tokens, the body face as every text's font");
+
+            var displayed = lines.Where(l => l.StartsWith(root + " .")).Select(l => l.Substring(root.Length + 1).TrimEnd(',', ' ', '{')).ToList();
+            CollectionAssert.AreEqual(type.displaySelectors, displayed, "the display rule lists exactly the asset's selectors, in order");
+            Assert.Greater(displayed.Count, 5, "precondition: titles, headings and menu headers speak in the display face");
+            Assert.AreEqual(1, lines.Count(l => l == "    -unity-font-definition: var(--ts-font-display);"), "one display rule");
+        }
+
+        // A markers-only key (a TMP asset, no UI Toolkit face) cannot be a type role: given to a label it would blank it silently (R8 S2);
+        // a display selector must be one class
+        [Test]
+        public void TheGenerator_RefusesAMarkersOnlyFontKey_AndASelectorThatIsNotOneClass()
+        {
+            var copy = Object.Instantiate(Theme());
+            try
+            {
+                Assert.IsNull(copy.Type.fontLibrary.GetUiFont(MarkerVisualSettings.DefaultLabelFontKey), "precondition: the markers' default font is TMP only");
+                copy.Type.bodyFont = MarkerVisualSettings.DefaultLabelFontKey;
+                var markersOnly = Assert.Throws<System.ArgumentException>(() => ThemeUssGenerator.Generate(copy, AssetPath));
+                StringAssert.Contains("font key '" + MarkerVisualSettings.DefaultLabelFontKey + "' has no UI Toolkit font", markersOnly.Message);
+                copy.Type.bodyFont = Theme().Type.bodyFont;
+                copy.Type.displaySelectors.Add(".card-header .card-title");
+                var twoClasses = Assert.Throws<System.ArgumentException>(() => ThemeUssGenerator.Generate(copy, AssetPath));
+                StringAssert.Contains("'.card-header .card-title' is not one class", twoClasses.Message);
+            }
+            finally { Object.DestroyImmediate(copy); }
+        }
+
         [Test]
         public void TheGenerator_RefusesATokenDefinedTwice_AndANameThatIsNotACustomProperty()
         {

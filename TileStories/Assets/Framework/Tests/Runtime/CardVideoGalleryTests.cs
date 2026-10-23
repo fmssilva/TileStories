@@ -239,7 +239,16 @@ namespace TileStories.Tests
             Rect card = _harness.Sheet.Root.worldBound;
             foreach (var chip in panel.ChapterButtons)
                 Assert.LessOrEqual(chip.worldBound.xMax, card.xMax + 0.5f, chip.text + " stays inside the card");
-            Assert.Greater(panel.ChapterButtons[0].worldBound.height, CardTestInput.TokenPx("--ts-touch-target") + 1f, "a long name wraps onto a second line");
+            // - the wrap itself: the chip's words laid out at the chip's own width are more than one of its lines tall (_3.3 P4.3: "taller than
+            //   a touch target" stood for it until Atkinson's shorter lines made a two-line chip exactly 48 + 1 px)
+            var first = panel.ChapterButtons[0];
+            float line = first.MeasureTextSize("0:00", 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).y;
+            float words = first.MeasureTextSize(first.text, first.contentRect.width, VisualElement.MeasureMode.Exactly, 0, VisualElement.MeasureMode.Undefined).y;
+            Assert.Greater(line, 0f, "precondition: one line of the chip has a height");
+            float shortWords = first.MeasureTextSize("0:00  Gate", first.contentRect.width, VisualElement.MeasureMode.Exactly, 0, VisualElement.MeasureMode.Undefined).y;
+            Assert.Less(shortWords, 1.5f * line, "precondition: the measure tells one line from two (a short name at the same width is one line)");
+            // - halfway between one line and two: a second line adds a line's advance (18.5 of a 19 px first line in Atkinson), not a whole box
+            Assert.Greater(words, 1.5f * line, "a long name wraps onto a second line (" + words + " px of text, one line " + line + ")");
             _harness.Sheet.Stack.Scroll.ScrollTo(panel.ChapterButtons[7]);
             yield return CardTestInput.Settle(0.15f);
             yield return Tap(panel.ChapterButtons[7]);

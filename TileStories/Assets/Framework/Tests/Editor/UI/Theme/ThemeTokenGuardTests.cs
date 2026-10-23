@@ -73,6 +73,26 @@ namespace TileStories.Tests
             }
         }
 
+        private static readonly Regex FontProperty = new(@"-unity-font(-definition)?\s*:");
+
+        // The app's faces are the THEME's (_3.3 P4.3, R12.3): only the generated theme names a font. A sheet that set one itself would
+        // fork the type (a theme or knob change would skip it), and a TMP asset given by USS blanks a label silently (R8 S2). The
+        // dev-only spike (Assets/Dev) is not the app and keeps its own bake-off sheets
+        [Test]
+        public void NoStylesheetOutsideTheGeneratedTheme_SetsAFont()
+        {
+            var sheets = new[] { "Assets/Framework", "Assets/Apps" }
+                .SelectMany(root => new[] { "*.uss", "*.uxml", "*.tss" }.SelectMany(p => Directory.GetFiles(root, p, SearchOption.AllDirectories)))
+                .Select(p => p.Replace('\\', '/')).Where(p => !p.StartsWith(ThemeFolder + "/")).ToList();
+            var screens = Components().Values.SelectMany(f => f).Select(p => p.Replace('\\', '/')).ToList();
+            CollectionAssert.IsSubsetOf(screens, sheets, "precondition: every stylesheet a screen is drawn with is scanned");
+            CollectionAssert.Contains(sheets, "Assets/Framework/Runtime/UI/Theme/TileStoriesTheme.tss", "precondition: ...and the panel's theme");
+            var offenders = sheets.Where(p => FontProperty.IsMatch(Text(p))).ToList();
+            Assert.IsEmpty(offenders, "these set a font themselves (the theme's type roles decide every face): " + string.Join(", ", offenders));
+            // - not vacuous: the generated theme does set the faces, and the pattern finds it there
+            Assert.IsTrue(Directory.GetFiles(ThemeFolder, "*.uss").Any(p => FontProperty.IsMatch(Text(p))), "the generated theme sets the faces");
+        }
+
         [Test]
         public void TheCardsOwnTokens_HoldNoColour()
         {

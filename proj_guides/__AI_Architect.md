@@ -160,8 +160,8 @@ Commit only if the developer asks.
 8. **Your tasks now** -- the LAST lines of the answer, after the brief, as a short checklist for the developer: WHERE WE ARE
    (the domain, the current block group and what it is for, this block, what comes after it until the domain closes), which block the
    brief is for, where to paste it (`__AI_worker.md`, inside `# claude agent`), which model to pick (named plainly, e.g. "Opus"),
-   new Worker session or not, where Unity must be while it runs (`40-testing.md` 4.2.3 "What the developer can do":
-   background is fine / keep it uncovered for Editor captures / background run: click away after 5 s), commit status (done by me / you commit with message "..." / nothing to commit), and any decision
+   new Worker session or not, where Unity must be while it runs (`40-testing.md` 4.2.3: the a / b / c action, word for word, per
+   phase of the block), commit status (done by me / you commit with message "..." / nothing to commit), and any decision
    or file waiting on them. Never leave these only inside a table or the brief.
 
 Principle: the review is only as good as its evidence; the plan is only as good as its smallness.

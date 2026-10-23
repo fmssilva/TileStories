@@ -1,14 +1,19 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using FontAsset = UnityEngine.TextCore.Text.FontAsset;
 
 namespace TileStories
 {
-    // A plain "key -> TMP_FontAsset" lookup asset. Same shape as SpriteKeyLibrary
+    // A plain "key -> font" lookup asset. Same shape as SpriteKeyLibrary
     // (_2.2.1_Marker_Design.md), kept as its own class rather than a shared generic:
     // a font asset is a genuinely different resource type, and Unity's own generic
     // ScriptableObject serialization would cost more machinery than this small
     // duplication does -- see _2.0_Labels_And_Fonts_Design.md.
+    // One key serves BOTH text systems (_3.3 R12.3): `font` is the TextMeshPro asset the markers draw with, `uiFont` the TextCore asset
+    // every UI Toolkit panel draws with, both built from the same .ttf -- one asset cannot serve both (a TMP asset given to UI Toolkit
+    // blanks the label, _3.3 R8 S2). `uiFont` is optional: a wall font added for its markers only still works there, and simply cannot
+    // be a type role of the theme.
     [CreateAssetMenu(fileName = "FontKeyLibrary", menuName = "TileStories/Font Key Library")]
     public class FontKeyLibrary : ScriptableObject
     {
@@ -17,6 +22,8 @@ namespace TileStories
         {
             public string key;
             public TMP_FontAsset font;
+            [Tooltip("The same face for UI Toolkit (a TextCore Font Asset); empty = markers only")]
+            public FontAsset uiFont;
         }
 
         [SerializeField] private List<Entry> entries = new();
@@ -42,6 +49,15 @@ namespace TileStories
         {
             if (string.IsNullOrEmpty(key)) return null;
             return BuildLookup().TryGetValue(key, out var font) ? font : null;
+        }
+
+        // The UI Toolkit face of `key` (its TextCore asset), or null when the key is unknown or serves markers only
+        public FontAsset GetUiFont(string key)
+        {
+            if (string.IsNullOrEmpty(key) || entries == null) return null;
+            foreach (var e in entries)
+                if (e.key == key) return e.uiFont;
+            return null;
         }
 
         public IReadOnlyList<string> Keys()

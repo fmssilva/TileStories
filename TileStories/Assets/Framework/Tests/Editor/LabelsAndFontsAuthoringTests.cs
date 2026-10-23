@@ -31,16 +31,29 @@ namespace TileStories.Editor.Tests
             labels = (string[])args[1];
         }
 
+        private const string FrameworkFontLibraryPath = "Assets/Framework/Runtime/UI/Markers/FontLibrary.asset";
+
+        // The keys the framework's own library really holds (the source the popup's list must match)
+        private static string[] FrameworkKeys()
+        {
+            var library = UnityEditor.AssetDatabase.LoadAssetAtPath<FontKeyLibrary>(FrameworkFontLibraryPath);
+            Assert.IsNotNull(library, "precondition: the framework font library loads");
+            return System.Linq.Enumerable.ToArray(library.Keys());
+        }
+
+        // - (_3.3 P4.3: 3 -> 7 keys, the app's 4 faces joined the marker fonts) the popup offers EXACTLY the framework library's keys, read
+        //   from the asset: a key added to the library but not to the popup (or the reverse) fails here
         [Test]
-        public void GetAvailableFontKeyOptions_WithNoWallLibrary_OffersOnlyTheThreeFrameworkKeys()
+        public void GetAvailableFontKeyOptions_WithNoWallLibrary_OffersExactlyTheFrameworkLibrarysKeys()
         {
             var window = NewWindow(new WallConfigData());
             try
             {
                 GetAvailableFontKeyOptions(window, out string[] keys, out string[] labels);
-                Assert.AreEqual(3, keys.Length, "Precondition: liberation_sans, roboto_bold, oswald_bold.");
+                CollectionAssert.AreEquivalent(FrameworkKeys(), keys, "the popup's framework keys are the framework library's keys");
                 Assert.AreEqual(keys.Length, labels.Length, "Every key must have a matching label.");
-                CollectionAssert.Contains(keys, "liberation_sans");
+                CollectionAssert.Contains(keys, MarkerVisualSettings.DefaultLabelFontKey, "the markers' default font stays offered");
+                CollectionAssert.Contains(keys, "fraunces_semibold", "a wall can pick the app's display face for its markers");
             }
             finally { Object.DestroyImmediate(window); }
         }
@@ -66,7 +79,7 @@ namespace TileStories.Editor.Tests
             {
                 GetAvailableFontKeyOptions(window, out string[] keys, out string[] labels);
 
-                Assert.AreEqual(4, keys.Length, "3 framework keys plus the wall's own 1 extra key, no duplicate liberation_sans.");
+                Assert.AreEqual(FrameworkKeys().Length + 1, keys.Length, "the framework keys plus the wall's own 1 extra key, no duplicate liberation_sans.");
                 CollectionAssert.Contains(keys, "wall_house_style", "The wall's own font key must be selectable.");
                 int idx = System.Array.IndexOf(keys, "wall_house_style");
                 StringAssert.Contains("wall", labels[idx], "A wall-added key's label should mark it as wall-specific.");

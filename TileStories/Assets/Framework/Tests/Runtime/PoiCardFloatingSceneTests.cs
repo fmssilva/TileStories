@@ -177,25 +177,29 @@ namespace TileStories.Tests
 
         // ---------------- the slot ----------------
 
-        // Section 4.2: the floating slot is a layer of its own -- the stops never move with a Floating Button set (5a's standard: peek 195.00 /
-        // half 337.60 / full 796.00 at 390 x 844) -- and the slot rests a gap above the sheet's top edge at peek and half, flush in the top gap
+        // Section 4.2: the floating slot is a layer of its own -- the stops never move with a Floating Button set: each is the card's own,
+        // measured with None first (_3.3 P4.3 re-based it from the typed 5a standard, 195.00 / 337.60 / 796.00, which the new faces moved to
+        // 168 at Peek -- a title on one line) -- and the slot rests a gap above the sheet's top edge at peek and half, flush in the top gap
         // at Full, the button whole on screen; after a real drag of the sheet it rests above the sheet's new edge
         [UnityTest]
         public IEnumerator TheStops_AreUnchangedWithEachFloatingButton_AndTheSlotRestsAboveTheSheetAtEveryStop_AndFollowsARealDrag()
         {
             float gap = float.NaN;
+            var own = new Dictionary<SheetStopRule.Stop, float>();
             foreach (string floating in new[] { CardOptions.NavNone, BuiltInNavElements.FabDial, BuiltInNavElements.FabRadial })
             {
                 yield return UseNavigation(floating);
-                foreach (var (stop, height) in new[] { (SheetStopRule.Stop.Peek, 195f), (SheetStopRule.Stop.Half, 337.6f), (SheetStopRule.Stop.Full, 796f) })
+                foreach (var stop in new[] { SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half, SheetStopRule.Stop.Full })
                 {
                     yield return Open(stop);
-                    Assert.AreEqual(height, Sheet.Stops.HeightOf(stop), 0.01f, floating + ": the " + stop + " stop did not move");
                     if (floating == CardOptions.NavNone)
                     {
+                        own[stop] = Sheet.Stops.HeightOf(stop);
                         Assert.IsFalse(Floating.IsShown, "None and nothing standing: no slot");
                         continue;
                     }
+                    Assert.Less(own[SheetStopRule.Stop.Peek], own[SheetStopRule.Stop.Half], "precondition: three distinct stops were measured");
+                    Assert.AreEqual(own[stop], Sheet.Stops.HeightOf(stop), 0.01f, floating + ": the " + stop + " stop did not move");
                     Assert.IsTrue(Floating.IsShown, floating + " at " + stop + ": the slot shows");
                     var slot = Floating.Root.worldBound;
                     var sheet = Sheet.Root.worldBound;

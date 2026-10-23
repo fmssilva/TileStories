@@ -754,3 +754,21 @@ under it, reusing the card's UI Toolkit components and block previews. World-spa
 UIDocument with a World Space PanelSettings; input by camera rays against colliders). `_3.3` R15.2 keeps components and block
 views host-agnostic (guard test) so this becomes a hosting job. Its own domain later, starting with a spike: the AR camera as
 event camera, legibility at 1-3 m, sorting against the UGUI markers, a swipe on a world carousel, the cost with the AR session.
+
+## From `_3.3` P4.3 (the app's fonts, 2026-10-23)
+
+- **Italic is synthesized.** The quote's `-unity-font-style: italic` (`About.uss`) draws a slanted Atkinson Regular: the build ships no
+  italic cut (the brief named 400 / 500 / 700 upright). google/fonts has `AtkinsonHyperlegibleNext-Italic[wght].ttf`: cut its 400 (and 700)
+  like the uprights, build its assets, and let `FontAtlasBuilder.WireWeights` fill the weight table's `italicTypeface` slots -- when the quote
+  look is designed (P5), not before.
+- **Characters the faces lack.** Atkinson Hyperlegible Next has no glyph for 36 characters of Latin-1 + Latin Extended-A (the soft hyphen
+  U+00AD, the micro sign U+00B5, Esperanto / Latvian / Sami letters such as C / G / H / J / S with circumflex and O / U with macron); Fraunces
+  lacks only U+0149 and U+017F (both deprecated). Today no shipped text uses them (`ShippedTextGlyphTests` would name the character and its
+  source). When a wall's content needs one: give the body UI asset a FALLBACK face (TextCore `fallbackFontAssetTable`, a static asset of a
+  face that has it) rather than a dynamic atlas.
+- **`FontKeyLibrary` is Shared now, but lives in `Runtime/UI/Markers/`.** Since P4.3 it serves both text systems (R15.1: "Shared"). It
+  moves with the R16 "3b UI folder layout" step (`AssetDatabase.MoveAsset`, GUID kept), with `FontLibrary.asset`; nothing references it by
+  path except the tests' `FrameworkFontLibraryPath` constants and the POI Editor's `DefaultFontLibraryPath`.
+- **The P4.1 pixel set's baselines are pre-font now.** Its `TestEvidence/ThemePixels/baseline/` renders were drawn in Unity's default face; P4.3
+  changed every text on purpose. Before P4.4 uses the set (a "no pixel moves" step), delete `baseline/` and collect anew. The P4.1 note "text
+  pixels depend on the font atlas's fill history" should be gone with the static atlases: check it then (run the set after another fixture).
