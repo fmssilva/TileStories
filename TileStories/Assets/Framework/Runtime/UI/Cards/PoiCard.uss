@@ -543,6 +543,117 @@
     font-size: var(--ts-size-body);
 }
 
+/* ---- the section sheets (_3.3 P4.4c1, R11, R10.7; SectionSheets): the scroll's blocks of one family on ONE sheet of tinted glass ----
+   The sheet's tint is painted inline (the theme's --ts-family-<k>-glass, NavTint), its edges here. Padding: 16 at the sides -- the frame's
+   old side margin, so a block keeps its width (358 at 390) and no track, rail or bento fit moves; 16 at the top over the opener; at the
+   foot the block gap, so the space from a section's last block to the next opener is twice the gap (24 + 24 - 16 + 16, R10.7). */
+.card-section {
+    padding: var(--ts-space-4) var(--ts-space-4) var(--ts-block-gap) var(--ts-space-4);
+    border-radius: var(--ts-radius-xl);
+}
+
+/* the sheet's edge -- a light line, lit along the top -- drawn by a part laid over the sheet, so the line takes none of the width the
+   blocks get (a border on the sheet itself cost them 2 px: The Lamp's vertical timeline wrapped one more line) */
+.card-section__edge {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-glass-edge);
+    border-top-color: var(--ts-glass-hi);
+    border-radius: var(--ts-radius-xl);
+}
+
+/* laid over the sheet before it: it starts above that sheet's foot, and its shadow falls up over it */
+.card-section--over {
+    margin-top: var(--ts-section-overlap);
+}
+
+/* the same family again after a set-aside run (tabs / pages): one chapter, no second opener */
+.card-section--continues {
+    padding-top: 0;
+}
+
+/* the navigation family's blocks: no sheet (SectionSheets paints it no tint), the plain ground */
+.card-section--bare {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.card-section--bare > .card-section__edge {
+    display: none;
+}
+
+/* inside a sheet its padding is a block's side margin */
+.card-section > .card-block-slot--framed {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* the shadow a sheet LAID OVER another casts up over it: the blocks' outer-only 9-slice, reaching out above and at the sides (off the
+   screen) but never below the sheet's own foot -- a part reaching past the last sheet grew the scroll's real range by 16 px past the
+   content's layout height (PoiCardNavSceneTests: the drags ended 16 px past NavScrollRule.Range); its foot band sits under the next
+   sheet's overlap. The first sheet casts none: the glass starts below the hero, never shadows it (R11 v4) */
+.card-section__shadow {
+    display: none;
+    position: absolute;
+    left: var(--ts-frame-shadow-out);
+    top: var(--ts-frame-shadow-out);
+    right: var(--ts-frame-shadow-out);
+    bottom: 0;
+    background-image: url("card_block_shadow.png");
+    -unity-background-image-tint-color: var(--ts-glass-shadow);
+    -unity-slice-left: var(--ts-frame-shadow-slice);
+    -unity-slice-top: var(--ts-frame-shadow-slice);
+    -unity-slice-right: var(--ts-frame-shadow-slice);
+    -unity-slice-bottom: var(--ts-frame-shadow-slice);
+}
+
+.card-section--over > .card-section__shadow {
+    display: flex;
+}
+
+/* the opener (SectionOpenerView): the family's FILLED pill (icon, name in the display face, meta) and a full-width line in its colour;
+   the colours are painted inline (the family's fill and the ink on it) */
+.card-section-opener {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--ts-space-3);
+}
+
+.card-section-opener__pill {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    padding: var(--ts-space-2) var(--ts-space-4) var(--ts-space-2) var(--ts-space-3);
+    border-radius: var(--ts-pill-radius);
+}
+
+.card-section-opener__icon {
+    margin-right: var(--ts-space-2);
+}
+
+.card-section-opener__name {
+    font-size: var(--ts-size-heading);
+    -unity-font-style: bold;
+    margin: 0 var(--ts-space-2) 0 0;
+    padding: 0;
+}
+
+.card-section-opener__meta {
+    font-size: var(--ts-size-caption);
+    margin: 0;
+    padding: 0;
+}
+
+.card-section-opener__line {
+    flex-grow: 1;
+    height: var(--ts-section-line);
+    margin-left: var(--ts-space-3);
+}
+
 /* The common heading every kind may have (BlockKindDefinition.HeadingField): one look for every block */
 .card-block-heading {
     font-size: var(--ts-size-heading);

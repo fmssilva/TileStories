@@ -156,8 +156,8 @@ namespace TileStories.Tests
             yield return TouchTap(Sheet.Root.panel, button.worldBound.center);
             yield return Landed();
             var slot = Sheet.Stack.SlotOfBlock(block);
-            if (slot.layout.y <= Range - OnePixel)
-                Assert.AreEqual(0f, slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its block's top meets the viewport's top");
+            if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
+                Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its block's top meets the viewport's top");
             else
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");
             Assert.AreEqual(jumpsBefore + 1, NavJumps.Count, name + ": one nav_jump");

@@ -32,6 +32,9 @@ namespace TileStories
         public BlockViewPool Views { get; }
 
         private readonly BlockRegistry _registry;
+        // The scroll's chapters: every scroll slot sits in its family's glass sheet (_3.3 P4.4c1), so a slot's layout is relative to its
+        // sheet -- TopInScroll is the one way to its place in the scroll
+        public SectionSheets Sheets { get; }
         // One block's place in the stack: its heading, then its view -- or, for an expandable block, its compact row and (once opened) its
         // view under it. Slots are pooled apart from the views, one pool for each shape
         private sealed class Slot
@@ -174,11 +177,54 @@ namespace TileStories
         public CompactRowRule.Row RowOfBlock(string blockKey, string language, string fallback, System.Func<string, string> words) =>
             CompactRowRule.Of(TryGetEntryOfBlock(blockKey, out var entry) ? entry : default, _registry, language, fallback, words);
 
-        // The slot element holding a bound view and its heading (the block's full footprint in the stack)
+        // The slot element holding a bound view and its heading (the block's full footprint in the stack). In the scroll its layout is
+        // relative to its section sheet: its place in the scroll is TopInScroll(slot)
         public VisualElement SlotOf(IBlockView view) => BoundOf(view)?.Slot.Root;
 
-        // The slot of the block with this instance key (null when no such block is bound): its compact row's too
+        // The slot of the block with this instance key (null when no such block is bound): its compact row's too (see SlotOf)
         public VisualElement SlotOfBlock(string blockKey) => BoundOf(blockKey)?.Slot.Root;
+
+        // Whether this element sits in the scrolling stack (a scroll slot inside its sheet), not the pinned header or the footer
+        public bool IsInScroll(VisualElement element)
+        {
+            for (var e = element?.parent; e != null; e = e.parent)
+                if (e == Scroll.contentContainer) return true;
+            return false;
+        }
+
+        // Where an element of the scroll starts, in the scroll's content coordinates: its layout's y summed up its parents to the content
+        // (a slot is laid out in its sheet, the sheet in the content). Layout, not worldBound: a transform (a block rising in) never moves it.
+        // NaN when the element is not in the scroll or not laid out yet
+        public float TopInScroll(VisualElement element)
+        {
+            float top = 0f;
+            for (var e = element; e != null; e = e.parent)
+            {
+                if (e == Scroll.contentContainer) return top;
+                top += e.layout.y;
+            }
+            return float.NaN;
+        }
+
+        // Where the scroll rests for a jump to this slot (its top meets the viewport's top): the first block a sheet shows lands on the
+        // SHEET's top, its opener in view (R10.7: the opener names the chapter it opens); any other block on its own top. NaN when not in
+        // the scroll
+        public float LandingTop(VisualElement slot) => TopInScroll(LandingElement(slot));
+
+        // The element whose top a jump to this slot puts at the viewport's top: its section sheet for the sheet's first shown block, else
+        // the slot itself
+        public VisualElement LandingElement(VisualElement slot)
+        {
+            var sheet = Sheets.SheetOf(slot);
+            return sheet != null && Sheets.IsFirstShown(slot) ? sheet.Root : slot;
+        }
+
+        // LandingTop of the block with this instance key (NaN when it is not bound in the scroll)
+        public float LandingTopOf(string blockKey)
+        {
+            var slot = SlotOfBlock(blockKey);
+            return slot != null && IsInScroll(slot) ? LandingTop(slot) : float.NaN;
+        }
 
         // What of this block the visitor can read now, in the stack's content coordinates: a block drawn whole -- its whole slot; an open
         // compact row -- the view bound under its line (the line alone says nothing of the block); a closed row -- nothing (`shown` false).
@@ -189,15 +235,17 @@ namespace TileStories
             shown = false;
             top = bottom = float.NaN;
             if (b == null) return false;
-            var slot = b.Slot.Root.layout;
-            if (!b.Compact) { shown = true; top = slot.y; bottom = slot.yMax; return true; }
+            // - in the scroll's coordinates (the slot is laid out in its sheet)
+            float slotTop = IsInScroll(b.Slot.Root) ? TopInScroll(b.Slot.Root) : b.Slot.Root.layout.y;
+            float slotBottom = slotTop + b.Slot.Root.layout.height;
+            if (!b.Compact) { shown = true; top = slotTop; bottom = slotBottom; return true; }
             // - a closed row: its line's real box, with nothing of the block shown -- the RULE says that is never seen, not a missing measure
-            if (b.View == null) { top = slot.y; bottom = slot.yMax; return true; }
+            if (b.View == null) { top = slotTop; bottom = slotBottom; return true; }
             // - the view is the slot's child: its box is relative to the slot
             var view = b.View.Root.layout;
             shown = true;
-            top = slot.y + view.y;
-            bottom = slot.y + view.yMax;
+            top = slotTop + view.y;
+            bottom = slotTop + view.yMax;
             return true;
         }
 
@@ -251,6 +299,7 @@ namespace TileStories
             };
             Scroll.AddToClassList("poi-card__stack");
             scrollParent.Add(Scroll);
+            Sheets = new SectionSheets(Scroll.contentContainer, registry);
             Footer = new VisualElement { name = "poi-card-footer" };
             Footer.AddToClassList("poi-card__footer");
             scrollParent.Add(Footer);
@@ -290,7 +339,9 @@ namespace TileStories
                 _state?.MarkSeen(_poiId, b.Key);
                 revealed = true;
             }
-            if (revealed) Revealed?.Invoke();
+            if (!revealed) return;
+            Sheets.Refresh();
+            Revealed?.Invoke();
         }
 
         // Ask the card's reading again when something outside the stack's scroll was read (a section of the full view, bento)
@@ -323,6 +374,9 @@ namespace TileStories
             var state = context.State;
             IsRevealed = key => _revealedHere.Contains(key) || (state?.Seen(poiId, key) ?? false);
             var navigation = context.Settings?.navigation;
+            // - the scroll's slots go into their section sheets once they are all bound (Sheets.Build), in stack order
+            var scrollSlots = new List<VisualElement>();
+            var scrollEntries = new List<BlockStackBuilder.Entry>();
             foreach (var entry in entries)
             {
                 // - a block pinned to the top (the hero_chip look) lives in the hero's action row now (BindHeroActions): no slot
@@ -345,11 +399,17 @@ namespace TileStories
                     : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;
                 // - a block of the scroll sits in its frame; the bar and the footer are chrome, not blocks
                 BlockFrame.Apply(b.Slot.Root, inScroll, entry.Instance?.emphasis);
-                parent.Add(b.Slot.Root);
+                if (inScroll)
+                {
+                    scrollSlots.Add(b.Slot.Root);
+                    scrollEntries.Add(entry);
+                }
+                else parent.Add(b.Slot.Root);
                 // - the header's hero opens what scrolls: the bar stays pinned while the hero scrolls away
                 if (header && b.View is HeaderBlockView h && h.HasHero) Scroll.contentContainer.Insert(0, h.HeroPart);
                 _bound.Add(b);
             }
+            Sheets.Build(scrollSlots, scrollEntries, context);
             BindHeroActions(entries, context);
             // - rows open before the rebind open again, in the order they were opened (Back keeps closing the last one first)
             if (reopen != null)
@@ -478,7 +538,7 @@ namespace TileStories
         {
             var b = BoundOf(blockKey);
             if (b == null || !b.Compact || b.View == null) return false;
-            float rowTop = b.Slot.Root.layout.y;
+            float rowTop = TopInScroll(b.Slot.Root);
             float removed = b.View.Root.layout.height;
             (b.View as ICollapsibleBlockView)?.Collapsing();
             ReleaseView(b);
@@ -488,7 +548,7 @@ namespace TileStories
             float offset = offsetAfter switch
             {
                 OffsetAfter.OwnRow => AccordionRule.OffsetAfterCollapse(now, rowTop),
-                OffsetAfter.KeepOpened => AccordionRule.OffsetAfterClosingFor(now, rowTop, removed, BoundOf(openedKey)?.Slot.Root.layout.y ?? float.NaN),
+                OffsetAfter.KeepOpened => AccordionRule.OffsetAfterClosingFor(now, rowTop, removed, BoundOf(openedKey) is { } opened ? TopInScroll(opened.Slot.Root) : float.NaN),
                 _ => now,
             };
             if (!offset.Equals(now)) Scroll.scrollOffset = new UnityEngine.Vector2(Scroll.scrollOffset.x, offset);
@@ -521,6 +581,7 @@ namespace TileStories
                 if (!parks && !b.Compact) AttachView(b, _context);
                 ApplyDisplay(b);
             }
+            Sheets.Refresh();
         }
 
         // Unbind every view and put it back in its kind's pool
@@ -545,6 +606,7 @@ namespace TileStories
                 (b.Compact ? _compactSlots : _slots).Push(b.Slot);
             }
             _bound.Clear();
+            Sheets.Release();
             _revealedHere.Clear();
             _open.Clear();
             _context = null;

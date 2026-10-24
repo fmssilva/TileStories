@@ -184,15 +184,15 @@ namespace TileStories.Tests
                 yield return CardTestInput.TouchDrag(Sheet.Root.panel, tab.Button.worldBound.center, Vector2.zero, frames: 1);
                 yield return Landed();
                 var slot = Sheet.Stack.SlotOfBlock(block);
-                if (slot.layout.y <= Range - OnePixel)
-                    Assert.AreEqual(0f, slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, tab.Label.text + ": its section's top meets the viewport's top");
+                if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
+                    Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, tab.Label.text + ": its section's top meets the viewport's top");
                 else
                     Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, tab.Label.text + ": a late section clamps at the end of the range");
                 Assert.AreEqual(jumps + 1, NavJumps.Count, tab.Label.text + ": one nav_jump");
                 Assert.AreEqual(block, NavJumps.Last().BlockKey, tab.Label.text + ": to its section's first block");
                 // - the mark is the section on SCREEN (section 4.4): a late section's jump clamps at the end, where the spy marks the last
                 Assert.AreEqual(SectionUnderTheSpyLine(), tabs.CurrentIndex, tab.Label.text + ": the tab of the section on screen is marked");
-                if (slot.layout.y <= Range - OnePixel) Assert.AreEqual(tab.Index, tabs.CurrentIndex, tab.Label.text + ": a section that reaches the top is its own tab");
+                if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel) Assert.AreEqual(tab.Index, tabs.CurrentIndex, tab.Label.text + ": a section that reaches the top is its own tab");
             }
         }
 

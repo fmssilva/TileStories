@@ -160,11 +160,23 @@ namespace TileStories.Tests
         // spy answers -- the rule is the spec (NavScrollRuleTests), the screen is the input, never the controller's bookkeeping. A slot
         // not shown (none, display none, set aside) has reached no line. One helper for every fixture: the spy's rule changed once
         // (_3.3 P1b, a short section at the top is the one read) and nine private copies of the old one had to follow
+        // The element a slot's chapter starts at: its section sheet when the slot is the first block the sheet shows, else the slot (read
+        // from the tree itself, not from the stack's own answer)
+        public static VisualElement ChapterStart(VisualElement slot)
+        {
+            var sheet = slot.parent;
+            if (sheet == null || !sheet.ClassListContains(SectionSheets.SheetClass)) return slot;
+            var first = sheet.Children().FirstOrDefault(c => c.ClassListContains("card-block-slot") && c.resolvedStyle.display == DisplayStyle.Flex);
+            return first == slot ? sheet : slot;
+        }
+
         public static int UnderTheSpyLine(ScrollView scroll, System.Collections.Generic.IEnumerable<VisualElement> slots)
         {
             var viewport = scroll.contentViewport.worldBound;
             float offset = scroll.scrollOffset.y;
-            var tops = slots.Select(s => s == null || !IsShown(s, scroll.contentContainer) ? float.PositiveInfinity : s.worldBound.yMin - viewport.yMin + offset).ToList();
+            // - _3.3 P4.4c1: a section's place is where its chapter starts -- the sheet's top, when its first block is the sheet's first shown
+            var tops = slots.Select(s => s == null || !IsShown(s, scroll.contentContainer) ? float.PositiveInfinity
+                : ChapterStart(s).worldBound.yMin - viewport.yMin + offset).ToList();
             return NavScrollRule.CurrentSection(tops, offset, scroll.contentContainer.layout.height, scroll.contentViewport.layout.height);
         }
 

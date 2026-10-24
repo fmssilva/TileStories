@@ -170,9 +170,9 @@ namespace TileStories.Tests
         private void AssertLanded(string block, string name)
         {
             var slot = Sheet.Stack.SlotOfBlock(block);
-            if (slot.layout.y <= Range - OnePixel)
-                Assert.AreEqual(0f, slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its block's top meets the viewport's top (slot y "
-                    + slot.layout.y + ", offset " + Scroll.scrollOffset.y + ", range " + Range + ", viewport " + Scroll.contentViewport.layout.height
+            if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
+                Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its block's top meets the viewport's top (slot y "
+                    + Sheet.Stack.LandingTop(slot) + ", offset " + Scroll.scrollOffset.y + ", range " + Range + ", viewport " + Scroll.contentViewport.layout.height
                     + ", footer " + Sheet.Chrome.FooterShown + ", bar " + Sheet.Chrome.BottomNavShown + ", jumping " + Sheet.Nav.IsJumping + ")");
             else
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");

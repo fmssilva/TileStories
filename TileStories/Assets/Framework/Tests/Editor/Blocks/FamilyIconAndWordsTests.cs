@@ -61,6 +61,32 @@ namespace TileStories.Editor.Tests
             }
         }
 
+        // A section sheet (_3.3 P4.4c1) paints its family's colours BY NAME: the pill's ink and the sheet's glass are derived from the family's
+        // colour token (SectionSheetRule.InkOf / GlassOf). A name the theme lacks would paint transparent with no warning (R8 S1), so every
+        // registered family -- an app's own included -- must find both in every mode: the ink >= 7:1 on its fill (the opener's words), the
+        // glass translucent (the camera stays present, D8)
+        [Test]
+        public void EveryRegisteredFamily_FindsItsSectionColours_InEveryMode()
+        {
+            var theme = Theme();
+            foreach (var mode in theme.Modes)
+            {
+                var colours = theme.ResolverFor(mode.key);
+                foreach (string part in new[] { "--ts-glass-edge", "--ts-glass-hi", "--ts-glass-shadow" })
+                    Assert.IsTrue(colours.TryColour(part, out _), mode.key + ": the theme holds " + part);
+                foreach (var family in BlockRegistry.Shared.Families)
+                {
+                    Assert.IsTrue(colours.TryColour(family.ColorToken, out var fill), mode.key + ": the theme holds " + family.ColorToken);
+                    string ink = SectionSheetRule.InkOf(family.ColorToken), glass = SectionSheetRule.GlassOf(family.ColorToken);
+                    Assert.IsTrue(colours.TryColour(ink, out var words), mode.key + ": the theme holds " + ink);
+                    Assert.IsTrue(colours.TryColour(glass, out var sheet), mode.key + ": the theme holds " + glass);
+                    float ratio = UIAccessibility.ContrastRatio(words, fill);
+                    Assert.GreaterOrEqual(ratio, UIAccessibility.MinRatioEnhancedText, mode.key + ": " + ink + " on " + family.ColorToken + ": " + ratio.ToString("F2"));
+                    Assert.That(sheet.a, Is.GreaterThan(0f).And.LessThan(1f), mode.key + ": " + glass + " is translucent glass, alpha " + sheet.a);
+                }
+            }
+        }
+
         [Test]
         public void EveryIconOfTheSet_IsDrawnByTheStylesheet()
         {

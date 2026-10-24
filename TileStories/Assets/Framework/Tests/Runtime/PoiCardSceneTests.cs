@@ -436,7 +436,7 @@ namespace TileStories.Tests
                     Assert.LessOrEqual(heading.worldBound.yMax, views[i].Root.worldBound.yMin + 0.5f, block.kind + " #" + i + ": above its block");
                 }
                 else Assert.AreEqual(DisplayStyle.None, heading.resolvedStyle.display, block.kind + " #" + i + ": no heading, no empty line");
-                if (slot.parent != stack.Scroll.contentContainer) continue;
+                if (!stack.IsInScroll(slot)) continue;
                 Assert.AreEqual(0f, views[i].Root.resolvedStyle.marginBottom, 0.01f, block.kind + " #" + i + ": no margin of its own");
                 if (gap < 0f) gap = slot.resolvedStyle.marginBottom;
                 Assert.AreEqual(gap, slot.resolvedStyle.marginBottom, onePixel + 0.01f, block.kind + " #" + i + ": the one gap");

@@ -334,8 +334,8 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(before.Count, 5, "precondition: several families");
             string last = before.Last(), first = before.First();
             Assert.AreNotEqual(first, last);
-            Assert.Greater(Sheet.Stack.SlotOfBlock(Model.Sections.Single(s => s.Key == last).Targets[0]).layout.y,
-                Sheet.Stack.SlotOfBlock(Model.Sections.Single(s => s.Key == first).Targets[0]).layout.y, "precondition: " + last + " is below " + first);
+            Assert.Greater(Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(Model.Sections.Single(s => s.Key == last).Targets[0])),
+                Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(Model.Sections.Single(s => s.Key == first).Targets[0])), "precondition: " + last + " is below " + first);
 
             // - Order: the last family's row puts it before every other
             yield return PushConfig(c => c.card_settings.navigation.families = new List<CardFamilySetting> { new() { family = last, order = -1000 } });
@@ -343,9 +343,9 @@ namespace TileStories.Tests
             var tabs = ((TabsNavView)Sheet.Slots.TopView).Tabs;
             Assert.AreEqual(Model.Sections.Count, tabs.Count, "the strip has one tab per section");
             Assert.AreEqual(Model.Sections[0].Key, Model.Sections[tabs[0].Index].Key, "its tab is the first");
-            float lastTop = Sheet.Stack.SlotOfBlock(Model.Sections[0].Targets[0]).layout.y;
+            float lastTop = Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(Model.Sections[0].Targets[0]));
             foreach (var section in Model.Sections.Skip(1))
-                Assert.Less(lastTop, Sheet.Stack.SlotOfBlock(section.Targets[0]).layout.y, section.Key + ": on the card, " + last + " now comes before it");
+                Assert.Less(lastTop, Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(section.Targets[0])), section.Key + ": on the card, " + last + " now comes before it");
 
             // - At The End (read by the End Families Last block order; By Family reads Order): the first family's row sends it behind every
             //   family that does not close the card by default
@@ -357,9 +357,9 @@ namespace TileStories.Tests
             var after = Model.Sections.Select(s => s.Key).ToList();
             foreach (string key in after.Where(k => k != first && !(BlockRegistry.Shared.TryGetFamily(k, out var f) && f.AtEnd)))
                 Assert.Greater(after.IndexOf(first), after.IndexOf(key), "At The End: " + first + " now closes the card, behind " + key);
-            float firstTop = Sheet.Stack.SlotOfBlock(Model.Sections.Single(s => s.Key == first).Targets[0]).layout.y;
+            float firstTop = Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(Model.Sections.Single(s => s.Key == first).Targets[0]));
             foreach (var section in Model.Sections.Where(s => s.Key != first && !(BlockRegistry.Shared.TryGetFamily(s.Key, out var f) && f.AtEnd)))
-                Assert.Greater(firstTop, Sheet.Stack.SlotOfBlock(section.Targets[0]).layout.y, section.Key + ": on the card, " + first + " is below it");
+                Assert.Greater(firstTop, Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(section.Targets[0])), section.Key + ": on the card, " + first + " is below it");
         }
 
         [UnityTest]

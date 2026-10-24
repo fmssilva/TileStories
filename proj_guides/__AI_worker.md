@@ -12,46 +12,54 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- P4.4b part 2: the six reds, the hero row, the settings button, close`
+
+## `And now: _3.3 POI Card Look, Feel & Motion -- P4.4c1 section glass sheets and section openers (static)`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Fonts: the marker
-SDF fonts and `Assets/Dev/StyleSpike/Fonts` -> `git checkout --` if a run rewrote them. The tree is P4.4b part 1's, UNCOMMITTED:
-continue it (do not reset). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word.
+SDF fonts and `Assets/Dev/StyleSpike/Fonts` -> `git checkout --` if a run rewrote them. Baseline: none (HEAD 5e2b2dc; P4.4b closed
+with a full PlayMode run, 0 failed). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word.
 
-Domain spec: `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 3 ("4b") + the P4.4a review row, R12, R13.1, R9 D1 / D2; your own
-tracker `proj_guides/__curr_plan_tracker.md` (P4.4b part 1's HANDOFF: the six reds, what was done, what was not) -- continue in it.
-REQUIRED READING: `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5; `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0.
-WORKER MODEL: Opus-class -- three real regressions to root-cause in shared ground (audio owner, nav landing, the frame).
-TEST PLAN: the six red fixtures first, then the targeted set, then the FULL PlayMode run (owed), then full EditMode (focused).
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 3 (4c, now split: this is "4c1"), R11 (a section
+= a glass sheet laid over the previous one, tinted with its family's hue; the opener = a FILLED family pill + a full-width line),
+R10.7 (openers where the family changes, NOT sticky; interleaved families; twice the block gap before an opener; pages layout:
+the opener is the page's title), R17.5 (Section Opener is a shared chrome component), R12.5, R9 D1 / D2 / D8, the P4.4b
+Build log and review rows.
+The visual target: `proj_guides/_3.3.1_Prototype/Main.dc.html` (v4): `.sect`, the opener markup, the `glass` / `hue` values.
+REQUIRED READING: `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5; `_3.2_POI_Card_Navigation.md` -- the stack, the scroll spy and every
+measurement that reads a slot's position (the jump landing, `TryGetReadablePart`, the rails / bento fit): P4.4b's rails red came
+from exactly such a shift.
+WORKER MODEL: Opus-class -- a wrapper in the stack's layout that every nav measurement reads.
+TEST PLAN: targeted Card / Poi / Theme fixtures first, then the FULL PlayMode run (the stack is shared ground), then full EditMode.
 
-PART 1 -- the six reds (each: root cause FIRST, with numbers, then the fix; never loosen an assertion):
-1. Audio (2): a live edit while a guide plays stops it; the hero's Listen shows Play instead of Pause. Find what the frame /
-   hero change re-binds (a re-created view losing the owner's playing state?) and fix it at the owner / binding level.
-2. Nav rails (1): a rail card's tap lands 1713 px off. Find which measurement the new frame wrapper shifted (slot vs frame
-   offset, `TryGetReadablePart`, the jump target) and fix the measurement, not the test.
-3. Track gallery (2): DECIDED (Architect, reversible): text keeps the 16 pt padding inside the frame; pictures, carousels,
-   strips and tracks run edge to edge to the frame's INNER edge (no side padding), like an App Store card -- the content width
-   goes back to ~354 pt, so a short timeline and a 2-card carousel fit again. Implement it as a frame rule (a media / track
-   region class), then re-run them.
-4. Feedback stars (1): explain why the outlined star's centre reads as filled in light, with the pixel values, and fix the
-   token or the drawing so empty / filled stay distinct in both modes (and >= 3:1 non-text contrast).
-PART 2 -- the unfinished sub-step 4.4b.4: the hero's actions in ONE row (the focal + a compact "▶ m:ss" Listen pill); an Editor
-notice when a hero title would need 3 lines (measured with the real font).
-PART 3 -- the settings button (developer, 2026-10-24): the "Aa" button becomes a GEAR icon (the universal "settings" sign; ⋮
-would read "more actions" and sit beside the ≡ Menu), accessible name "Card settings" / "Definições do cartão"; the panel shows
-languages by their NATIVE names ("English", "Português"). Real-window Editor tests + captures for the two new rows (Default Mode,
-Emphasis), which part 1 did not take.
-PART 4 -- close: the targeted set, the FULL PlayMode run, full EditMode; `_3.3` Build log (P4.4b: the measured table per mode,
-the edge measures 3.58 / 3.21), `10-structure.md`, `_5.1`, `_3.1` 15.3.
+GOAL: the card reads as chapters: each family's blocks sit on their own sheet of tinted glass, laid over the previous one, opened
+by a filled family pill and a line. Static in this block (no moving light, no blobs): 4c2 brings the life.
 
-VISUALS: the fixed tracks (before / after width), the stars in both modes, the hero row, the gear + panel in both modes; open
-the glare renders part 1 wrote but never opened, and judge them.
-OUT OF SCOPE: section glass sheets, the moving rim light (4c); text size and reduce-motion switches.
-Stop when every red is fixed by its cause, the targeted set, the full PlayMode run and full EditMode are green. Finish with the
-final report of `.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the Architect
-commits after the review.
+MEASURE FIRST: the nav landings (every target's jump offset), the stops, the rails / bento fits and the spy's section per scroll
+offset on The Lamp and The Painting -- so you can prove which numbers the sheets move and that every move is intended.
 
+PART 1:
+1. Section sheets in the scroll layout: consecutive blocks of the same family are wrapped in ONE sheet (rounded 30, its own
+   tint = the mode's glass + the family's hue at low alpha, a light top edge, a shadow upward so it reads as laid OVER the one
+   before, the next sheet overlapping the previous by ~14 pt). Interleaved families (a non-family block order): a new sheet
+   wherever the family changes. Text never sits on the glass (D8): openers are filled plates, blocks are opaque.
+2. The Section Opener component (`Components/`-ready, R17.5; host-agnostic, R15.2): the family's icon + name in the display face +
+   one meta line (block count, minutes) on a FILLED pill in the family colour (text on it >= 7:1, measured, both modes) + a
+   full-width line in the same colour. Not sticky. Pages layout: the opener is the page's title; tabs / accordion / bento: decide
+   per layout with captures (state what you chose and why).
+3. Every measurement that reads a slot's position keeps working: jump landings, the spy, readable parts, the rails / bento fits,
+   Next / Finished. Any shifted number is either an intended change (stated, re-based from its source) or a bug you fix.
+4. Contrast: a render test -- the block edge against its SECTION sheet (not the plain ground) over the sunny-wall stand-in >= 3:1
+   in both modes; the opener's text >= 7:1.
+
+PART 2 -- docs: `_3.3` Build log (P4.4c1, the before / after numbers), `10-structure.md`, the R10.7 TODOs it closes.
+VISUALS: The Lamp and The Painting, light + dark, Half / Full and two scroll positions crossing a section boundary; the pages
+layout. Open each and judge it against the prototype.
+OUT OF SCOPE: moving blobs inside the sheets, the moving rim light, reduce-motion switches (all 4c2); the hero; other layouts'
+redesign beyond placing the opener.
+Stop when the sheets and openers render in both modes, every nav measurement is green or deliberately re-based, the targeted
+fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4 and
+END with the developer's review questions. Do not commit: the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

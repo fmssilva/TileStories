@@ -116,7 +116,7 @@ namespace TileStories.Tests
             Assert.AreNotEqual(targets[0], targets[1]);
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             // - at Full's geometry (where the jump lands): the first target lands without the clamp, the second one is the card's end
-            Assert.Less(Slot(targets[0]).layout.y, Range - OnePixel, "precondition: " + targets[0] + " can land at the top without the clamp");
+            Assert.Less(Sheet.Stack.LandingTop(Slot(targets[0])), Range - OnePixel, "precondition: " + targets[0] + " can land at the top without the clamp");
             var view = Sheet.Stack.BoundViews.OfType<ActionsBlockView>().Single(v => Sheet.Stack.SlotOf(v) == Slot(actions));
             CollectionAssert.AreEqual(new[] { BuiltInBlocks.ActionShowOnWall, BuiltInBlocks.ActionOpenBlock, BuiltInBlocks.ActionOpenBlock },
                 view.Actions.Select(a => a.Kind), "every row drawn: both targets are blocks the card scrolls to");
@@ -140,7 +140,7 @@ namespace TileStories.Tests
 
             yield return CardTestInput.TapInView(Scroll, OpenBlockButton(actions, targets[1]).Button);
             yield return Landed();
-            Assert.AreEqual(Mathf.Min(Slot(targets[1]).layout.y, Range), Scroll.scrollOffset.y, OnePixel, targets[1] + ": landed, clamped to the range");
+            Assert.AreEqual(Mathf.Min(Sheet.Stack.LandingTop(Slot(targets[1])), Range), Scroll.scrollOffset.y, OnePixel, targets[1] + ": landed, clamped to the range");
             Assert.AreEqual(targets[1], NavJumps.Last().BlockKey);
             Assert.AreEqual(2, NavJumps.Count, "one nav_jump per tap");
         }

@@ -284,9 +284,10 @@ namespace TileStories
             UpdateSpy();
         }
 
-        // Where the stack must rest for this slot's top to meet the viewport's top
+        // Where the stack must rest for this slot's landing top to meet the viewport's top (BlockStackView.LandingTop: the first block of
+        // a section sheet lands on the sheet's top, its opener in view; the slot's own layout is relative to its sheet)
         private float Landing(VisualElement slot) =>
-            NavScrollRule.TargetOffset(slot.layout.y, Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+            NavScrollRule.TargetOffset(_stack.LandingTop(slot), Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
 
         private void SetOffset(float y) => Scroll.scrollOffset = new Vector2(Scroll.scrollOffset.x, y);
 
@@ -337,7 +338,9 @@ namespace TileStories
             _targetTops.Clear();
             foreach (string target in Model.Targets)
             {
-                float top = ScrollingSlot(target)?.layout.y ?? float.NaN;
+                // - the same top a jump lands on: a landed jump reads its own target
+                var slot = ScrollingSlot(target);
+                float top = slot != null ? _stack.LandingTop(slot) : float.NaN;
                 _targetTops.Add(float.IsNaN(top) ? float.PositiveInfinity : top);
             }
             return NavScrollRule.CurrentSection(_targetTops, offset, Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
@@ -373,17 +376,19 @@ namespace TileStories
             foreach (var section in Model.Sections)
             {
                 // - a first target not laid out yet has not reached any line
-                float top = ScrollingSlot(section.Targets[0])?.layout.y ?? float.NaN;
+                var slot = ScrollingSlot(section.Targets[0]);
+                float top = slot != null ? _stack.LandingTop(slot) : float.NaN;
                 _sectionTops.Add(float.IsNaN(top) ? float.PositiveInfinity : top);
             }
             return NavScrollRule.CurrentSection(_sectionTops, offset, Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
         }
 
-        // The slot of a block that sits shown in the scrolling stack, else null (the stack hides a waiting block inline)
+        // The slot of a block that sits shown in the scrolling stack (inside its section sheet), else null (the stack hides a waiting block
+        // inline; the header and the footer are not in the scroll)
         private VisualElement ScrollingSlot(string blockKey)
         {
             var slot = _stack.SlotOfBlock(blockKey);
-            return slot != null && slot.parent == Scroll.contentContainer && slot.style.display.value != DisplayStyle.None ? slot : null;
+            return slot != null && _stack.IsInScroll(slot) && slot.style.display.value != DisplayStyle.None ? slot : null;
         }
 
         private int SectionOfBlock(string blockKey)

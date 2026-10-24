@@ -237,7 +237,7 @@ namespace TileStories.Tests
                 var tab = Tabs(both.Tabs).ElementAt(section);
                 yield return TapAndLand(tab, element);
                 // - a late section's tab clamps at the range end, where the spy names the LAST section: its chips are reached by scrolling
-                if (Sheet.Stack.SlotOfBlock(Model.Sections[section].Targets[0]).layout.y > Range - OnePixel) continue;
+                if (Sheet.Stack.LandingTop(Sheet.Stack.SlotOfBlock(Model.Sections[section].Targets[0])) > Range - OnePixel) continue;
                 Assert.AreEqual(section, both.ChipsSection, Model.Sections[section].Key + ": its tab shows its kinds as chips");
                 foreach (var chip in Chips(both.Chips).ToList()) yield return TapAndLand(chip, element);
             }
@@ -253,8 +253,8 @@ namespace TileStories.Tests
             yield return Landed();
             var slot = Sheet.Stack.SlotOfBlock(item.Block);
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, item.Name + ": the card stays at Full");
-            if (slot.layout.y <= Range - OnePixel)
-                Assert.AreEqual(0f, slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, item.Name + ": its block's top meets the viewport's top");
+            if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
+                Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, item.Name + ": its block's top meets the viewport's top");
             else
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, item.Name + ": a late block clamps at the end of the range");
             Assert.AreEqual(jumpsBefore + 1, NavJumps.Count, item.Name + ": one nav_jump");

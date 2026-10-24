@@ -234,7 +234,7 @@ namespace TileStories.Tests
             var slot = sheet.Stack.SlotOfBlock(autoKey);
             Assert.IsNotNull(slot, "Auto Nav Block put the grid in the stack");
             var content = sheet.Stack.Scroll.contentContainer;
-            Assert.AreEqual(1, content.IndexOf(slot), "the first block of the scroll: right after the header's hero (_3.3 P4.4a)");
+            Assert.AreEqual(1, content.IndexOf(sheet.Stack.Sheets.SheetOf(slot).Root), "the first block of the scroll (its sheet): right after the header's hero (_3.3 P4.4a)");
             var grid = slot.Q<VisualElement>("card-nav-icon-grid");
             Assert.IsNotNull(grid);
             var tiles = grid.Query<Button>(className: "nav-icon-grid__tile").ToList().Where(b => b.resolvedStyle.display == DisplayStyle.Flex && b.parent == grid).ToList();
@@ -308,7 +308,7 @@ namespace TileStories.Tests
             foreach (string key in targets)
             {
                 var slot = sheet.Stack.SlotOfBlock(key);
-                if (slot != null && NavScrollRule.HasViewed(true, slot.layout.y, slot.layout.yMax, 0f, scroll.contentContainer.layout.height,
+                if (slot != null && NavScrollRule.HasViewed(true, sheet.Stack.TopInScroll(slot), sheet.Stack.TopInScroll(slot) + slot.layout.height, 0f, scroll.contentContainer.layout.height,
                         scroll.contentViewport.layout.height)) found.Add(key);
             }
             return found;
@@ -342,7 +342,7 @@ namespace TileStories.Tests
             string autoKey = BlockStackBuilder.AutoNavBlockKey(entry.ElementKey);
             var slot = sheet.Stack.SlotOfBlock(autoKey);
             Assert.IsNotNull(slot, "Auto Nav Block put the contents in the stack");
-            Assert.AreEqual(1, sheet.Stack.Scroll.contentContainer.IndexOf(slot), "the first block of the scroll: right after the header's hero (_3.3 P4.4a)");
+            Assert.AreEqual(1, sheet.Stack.Scroll.contentContainer.IndexOf(sheet.Stack.Sheets.SheetOf(slot).Root), "the first block of the scroll: right after the header's hero (_3.3 P4.4a)");
             CollectionAssert.DoesNotContain(model.Targets, autoKey, "the contents block is no target of its own list");
             var view = sheet.Stack.BoundViews.OfType<NavContentsBlockView>().Single();
             Assert.AreEqual(DisplayStyle.Flex, view.Root.resolvedStyle.display, "shown, whatever the number of sections (it lists blocks)");
@@ -479,7 +479,7 @@ namespace TileStories.Tests
             foreach (var row in view.Rows)
             {
                 var rowSlot = sheet.Stack.SlotOfBlock(row.BlockKey);
-                if (rowSlot.layout.yMax <= offset && !atTop.Contains(row.BlockKey))
+                if (sheet.Stack.TopInScroll(rowSlot) + rowSlot.layout.height <= offset && !atTop.Contains(row.BlockKey))
                     Assert.IsFalse(row.IsRead, row.Heading.text + ": flown past by the jump, never on screen -- no tick");
             }
         }
@@ -1229,8 +1229,8 @@ namespace TileStories.Tests
             float range = NavScrollRule.Range(scroll.contentContainer.layout.height, scroll.contentViewport.layout.height);
             Assert.Greater(range, 100f, "precondition: the stack really scrolls (range " + range.ToString("F0") + ")");
             var slot = sheet.Stack.SlotOfBlock(block);
-            if (slot.layout.y <= range - onePixel)
-                Assert.AreEqual(0f, slot.worldBound.yMin - scroll.contentViewport.worldBound.yMin, onePixel, what + ": its top meets the viewport's top");
+            if (sheet.Stack.LandingTop(slot) <= range - onePixel)
+                Assert.AreEqual(0f, sheet.Stack.LandingElement(slot).worldBound.yMin - scroll.contentViewport.worldBound.yMin, onePixel, what + ": its top meets the viewport's top");
             else
                 Assert.AreEqual(range, scroll.scrollOffset.y, onePixel, what + ": a late block clamps at the end of the range");
         }

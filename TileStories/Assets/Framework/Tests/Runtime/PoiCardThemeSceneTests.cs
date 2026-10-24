@@ -51,7 +51,7 @@ namespace TileStories.Tests
             AssertEveryScreenIn(CardOptions.ModeLight);
             Color lightSurface = default, darkSurface = default;
             Assert.IsTrue(ThemeController.TryResolverFor(Sheet.Stack.Scroll, out var light) && light.TryColour("--ts-surface", out lightSurface), "precondition: under the theme");
-            var slot = Sheet.Stack.Scroll.contentContainer.Children().First(c => c.ClassListContains(BlockFrame.FramedClass));
+            var slot = Sheet.Stack.Scroll.contentContainer.Query(className: BlockFrame.FramedClass).First();
             Assert.AreEqual(lightSurface, slot.resolvedStyle.backgroundColor, "precondition: a block wears the light surface");
 
             Sheet.Stack.Scroll.scrollOffset = new Vector2(0f, 900f);

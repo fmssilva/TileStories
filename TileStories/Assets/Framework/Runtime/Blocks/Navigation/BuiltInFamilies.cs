@@ -40,6 +40,8 @@ namespace TileStories
             // - the nav blocks (an icon grid, a contents list): in the card's flow, never a target of its navigation
             var navigation = Family(Navigation, 85, CardStrings.Keys.FamilyNavigation, CardIcons.Grid);
             navigation.InNav = false;
+            // - and no section of the card: an icon grid or the rails sit on the plain ground, not on a sheet of their own (R10.7)
+            navigation.OpensSection = false;
             registry.RegisterFamily(navigation);
             // - the credits close the card and are no navigation target: the two flags that make Sources last
             var meta = Family(Meta, 90, CardStrings.Keys.FamilyMeta, CardIcons.Sources);

@@ -28,5 +28,8 @@ namespace TileStories
         // Whether the family's blocks close the card, whatever order they were authored in (meta: Sources).
         // Read by the Block Order option end_families_last (_3.2 section 2.3).
         public bool AtEnd;
+        // Whether a run of the family's blocks in the scroll is a SECTION of the card: its own tinted glass sheet, opened by the family's
+        // pill (_3.3 R10.7, SectionSheetRule). False for a family whose blocks are the card's navigation itself: they sit on the plain ground
+        public bool OpensSection = true;
     }
 }

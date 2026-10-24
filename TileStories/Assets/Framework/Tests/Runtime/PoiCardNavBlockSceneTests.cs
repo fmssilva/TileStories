@@ -107,8 +107,8 @@ namespace TileStories.Tests
         private void AssertLanded(string block, string name)
         {
             var slot = Sheet.Stack.SlotOfBlock(block);
-            if (slot.layout.y <= Range - OnePixel)
-                Assert.AreEqual(0f, slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its top meets the viewport's top");
+            if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
+                Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its top meets the viewport's top");
             else
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");
         }
@@ -141,10 +141,10 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
             Assert.IsNotNull(GridSlot, "Icon Grid, live: The Lamp's open card gains the grid");
             // - a picture header's hero opens the scroll (it is the header's own part), so "first" = before the slot of every block of the card
-            int gridAt = Scroll.contentContainer.IndexOf(GridSlot);
+            int gridAt = Scroll.contentContainer.IndexOf(Sheet.Stack.Sheets.SheetOf(GridSlot).Root);
             foreach (string target in Model.Targets)
-                Assert.Less(gridAt, Scroll.contentContainer.IndexOf(Sheet.Stack.SlotOfBlock(target)), "the grid comes before " + target);
-            Assert.AreEqual(Scroll.contentContainer.IndexOf(Sheet.Stack.SlotOfBlock(Model.Targets[0])), gridAt + 1,
+                Assert.Less(gridAt, Scroll.contentContainer.IndexOf(Sheet.Stack.Sheets.SheetOf(Sheet.Stack.SlotOfBlock(target)).Root), "the grid comes before " + target);
+            Assert.AreEqual(Scroll.contentContainer.IndexOf(Sheet.Stack.Sheets.SheetOf(Sheet.Stack.SlotOfBlock(Model.Targets[0])).Root), gridAt + 1,
                 "right before the card's first block");
             Assert.AreEqual(blocksWithout + 1, Scroll.contentContainer.childCount, "exactly one block more");
             var tiles = Tiles(GridSlot);

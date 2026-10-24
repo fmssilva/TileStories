@@ -68,7 +68,7 @@ namespace TileStories.Tests
 
         private List<string> Ticked => View.Rows.Where(r => r.IsRead).Select(r => r.BlockKey).ToList();
 
-        private float TopOf(string block) => Sheet.Stack.SlotOfBlock(block).layout.y;
+        private float TopOf(string block) => Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(block));
 
         // The wall's navigation for a test: Auto Nav Block `auto`, the card in `language`, pushed through the live seam
         private IEnumerator UseAuto(string auto, string language = "en")
@@ -127,8 +127,8 @@ namespace TileStories.Tests
         private void AssertLanded(string block, string name)
         {
             var slot = Sheet.Stack.SlotOfBlock(block);
-            if (slot.layout.y <= Range - OnePixel)
-                Assert.AreEqual(0f, slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its top meets the viewport's top");
+            if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
+                Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its top meets the viewport's top");
             else
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");
         }
@@ -195,8 +195,8 @@ namespace TileStories.Tests
             yield return UseAuto(BuiltInBlocks.NavContentsKind);
             var slot = Sheet.Stack.SlotOfBlock(AutoKey);
             Assert.IsNotNull(slot, "Contents, live: The Lamp's open card gains the list");
-            int at = Scroll.contentContainer.IndexOf(slot);
-            Assert.AreEqual(Scroll.contentContainer.IndexOf(Sheet.Stack.SlotOfBlock(Model.Targets[0])), at + 1, "right before the card's first block");
+            int at = Scroll.contentContainer.IndexOf(Sheet.Stack.Sheets.SheetOf(slot).Root);
+            Assert.AreEqual(Scroll.contentContainer.IndexOf(Sheet.Stack.Sheets.SheetOf(Sheet.Stack.SlotOfBlock(Model.Targets[0])).Root), at + 1, "right before the card's first block");
             Assert.AreEqual(56, Model.TargetCount, "precondition: The Lamp's 56 targets");
             // - grouped by family: The Lamp's authored order mixes families (15 runs for 9 families), so a family's rows gather under its title,
             //   each family in the order its first block comes, its rows in the card's order
@@ -283,7 +283,7 @@ namespace TileStories.Tests
             // - a real finger carries the line past every row: the whole block ticks, no closed row does
             float LineNow() => Scroll.scrollOffset.y + Viewport * NavScrollRule.SpyLineFraction;
             var lastRow = Sheet.Stack.SlotOfBlock("block_4");
-            yield return DragUntil(() => LineNow() > lastRow.layout.yMax + 4f, "the spy line past the last row");
+            yield return DragUntil(() => LineNow() > Sheet.Stack.TopInScroll(lastRow) + lastRow.layout.height + 4f, "the spy line past the last row");
             CollectionAssert.Contains(Ticked, Whole, "the whole block the line passed is read (the drag counts at all)");
             foreach (string row in rows) CollectionAssert.DoesNotContain(Ticked, row, row + ": closed, it showed none of its block -- never read");
             Assert.IsFalse(_state.Viewed(Lamp, "block_3"), "and nothing was remembered for it");
@@ -297,9 +297,9 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
             Assert.IsTrue(Sheet.Stack.IsExpanded("block_3"), "the real tap opened it");
             var content = Sheet.Stack.ViewOfBlock("block_3").Root;
-            float contentTop = Sheet.Stack.SlotOfBlock("block_3").layout.y + content.layout.y;
+            float contentTop = Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock("block_3")) + content.layout.y;
             if (contentTop > LineNow()) CollectionAssert.DoesNotContain(Ticked, "block_3", "open, its content still under the line: not read yet");
-            yield return DragUntil(() => LineNow() > Sheet.Stack.SlotOfBlock("block_3").layout.y + content.layout.y + 4f, "the line past the opened content's top");
+            yield return DragUntil(() => LineNow() > Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock("block_3")) + content.layout.y + 4f, "the line past the opened content's top");
             yield return CardTestInput.Settle(0.3f);
             CollectionAssert.Contains(Ticked, "block_3", "opened and its content passed the line: read");
             Assert.IsTrue(_state.Viewed(Lamp, "block_3"), "and remembered");
@@ -387,8 +387,8 @@ namespace TileStories.Tests
                 foreach (string block in Ticked)
                 {
                     var slot = Sheet.Stack.SlotOfBlock(block);
-                    Assert.Greater(slot.layout.yMax, offset, block + " is ticked, so it must be on screen -- never a block the jump flew past");
-                    Assert.LessOrEqual(slot.layout.y, offset + Viewport, block + ": on screen");
+                    Assert.Greater(Sheet.Stack.TopInScroll(slot) + slot.layout.height, offset, block + " is ticked, so it must be on screen -- never a block the jump flew past");
+                    Assert.LessOrEqual(Sheet.Stack.TopInScroll(slot), offset + Viewport, block + ": on screen");
                 }
             }
         }
@@ -480,7 +480,7 @@ namespace TileStories.Tests
             }
             foreach (var row in View.Rows) Assert.AreEqual(DisplayStyle.None, row.Button.resolvedStyle.display, row.Heading.text + ": folded away");
             float folded = Sheet.Stack.SlotOfBlock(AutoKey).layout.height;
-            Scroll.scrollOffset = new Vector2(0f, Sheet.Stack.SlotOfBlock(AutoKey).layout.y);
+            Scroll.scrollOffset = new Vector2(0f, Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(AutoKey)));
             yield return CardTestInput.Settle(0.3f);
             yield return Capture("NavContents_Lamp_folded_" + language);
 
@@ -507,7 +507,7 @@ namespace TileStories.Tests
                 }
             }
             // - the list's top on screen: the rows under the header's hero picture
-            float listTop = Sheet.Stack.SlotOfBlock(AutoKey).layout.y;
+            float listTop = Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(AutoKey));
             Scroll.scrollOffset = new Vector2(0f, listTop);
             yield return CardTestInput.Settle(0.3f);
             yield return Capture("NavContents_Lamp_full_" + language);

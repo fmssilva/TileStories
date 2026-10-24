@@ -134,7 +134,7 @@ namespace TileStories.Tests
             Assert.IsNotNull(slot, "precondition: that block has a slot in the stack");
             float range = Mathf.Max(0f, Sheet.Stack.Scroll.contentContainer.layout.height - Sheet.Stack.Scroll.contentViewport.layout.height);
             Assert.Greater(range, 0f, "precondition: the card is taller than its viewport, so there is something to scroll");
-            Sheet.Stack.Scroll.scrollOffset = new Vector2(0f, Mathf.Clamp(slot.layout.y, 0f, range));
+            Sheet.Stack.Scroll.scrollOffset = new Vector2(0f, Mathf.Clamp(Sheet.Stack.TopInScroll(slot), 0f, range));
             yield return CardTestInput.Settle();
         }
 

@@ -266,8 +266,8 @@ namespace TileStories.Tests
             Assert.AreEqual(BuiltInFamilies.Media, jump.Value, "to Media");
             Assert.AreEqual(media, Nav.Current, "the card is at Media");
             string firstOfMedia = Nav.Model.Sections[media].Targets[0];
-            Assert.AreEqual(Scroll.contentViewport.worldBound.yMin, Stack.SlotOfBlock(firstOfMedia).worldBound.yMin, OnePixel,
-                "Media's first block at the top of the card");
+            Assert.AreEqual(Scroll.contentViewport.worldBound.yMin, Stack.LandingElement(Stack.SlotOfBlock(firstOfMedia)).worldBound.yMin, OnePixel,
+                "Media's chapter (its sheet, its first block's landing: _3.3 P4.4c1) at the top of the card");
         }
 
         // _3.2 step 17a: every icon of the card's set at three times its size, once on the surface of an unread chip and once on the accent fill of

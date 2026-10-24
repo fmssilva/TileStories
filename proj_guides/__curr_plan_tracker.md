@@ -1,44 +1,43 @@
-# Plan tracker -- _3.3 P4.4b part 2: the six reds, the hero row, the settings gear, close
+# Plan tracker -- _3.3 P4.4c1: section glass sheets and section openers (static)
 
-GATE (done): push not needed (0 ahead of origin); compile ExitCode 0, 0 error CS (forced); fonts clean (no Fonts/SDF in git status);
-captures TestEvidence/Gate/P4.4b2_gate_gameview.png + P4.4b2_gate_poieditor.png (opened; the first editor capture caught another app ->
-deleted, retaken at 640 x 620). Unity place asked (b) for the capture. Tree = part 1's, uncommitted on 4cbb4dd (continued, not reset).
+Brief: proj_guides/__AI_worker.md. Baseline: HEAD 5e2b2dc (P4.4b closed green: full PlayMode 1288 / 0 failed, EditMode 2078/2079 flake).
+GATE (done): 0 commits ahead (no push); Game view + POI Editor captures opened (TestEvidence/Gate/); compile = DLLs newer than every .cs,
+last build ExitCode 0; fonts untouched (git status: only __AI_worker.md).
 
-## Root causes (measured, before any fix)
-- Rails (1713 px): the strip is 324 px (x 33..357); CardTrackFit gives ONE 280 px card per view, so card 1 sits at x 325..605 and the
-  test's tap (465, 581) is off the strip and off the 390 px screen: Pick = nothing, no jump. Before the frame: 358 px, two cards. Same
-  cause as the tracks (the frame's 2 x 16 padding + border). The jump's own measure (slot.layout.y in the content) is right.
-- Tracks (260 px range): the same 34 px; the short timeline / 2-card carousel no longer fit 324.
-- Audio (Idle): NOT the live edit. Diag: state Idle BEFORE the push in the red runs (the tap on the hero's Listen never started it);
-  in 7/7 runs where it started, the live edit kept Playing at the same second. OpenFull taps without the rest wait SelectAtHalf has.
-- Stars (ink-2 at the centre): the probe, not the drawing. PixelAt returns the DARKEST pixel of a 7 x 7 window; it was centred 1.4 px
-  above the star's centre (y 0.55 of the 28 px glyph), and the hollow is only ~3.3 px to the stroke: the window reaches the ink-2
-  outline (61,54,45), darker than white in light (in dark the ground is the darkest, so it passed). The render shows white inside.
+## Design (decided)
+- WRAPPER: contentContainer > [hero, sheet(opener, slots...), sheet...]. A sheet = consecutive scroll blocks of one FAMILY (R10.7), bare
+  (no tint / opener / overlap) for a family with OpensSection = false (navigation).
+- ONE source for positions: BlockStackView.TopInScroll(element) (sum of layout.y up to the contentContainer, transform-free),
+  LandingTopOf(blockKey) (the sheet's top for a sheet's first shown block, else the slot's), TryGetReadablePart in scroll space,
+  IsInScroll(blockKey). NavController Landing / TargetAtOffset / SectionAtOffset / ScrollingSlot read them. Tests re-base to them.
+- Widths unchanged: sheet padding-x 16 = the old slot margin; slot side margins 0 inside a sheet (block 358 at 390).
+- Opener shown unless the previous VISIBLE sheet has the same family (interleaved + tabs / pages); a sheet with no visible slot hides.
+- Colours inline through NavTint (+ Ink paint): --ts-family-<k>-glass (sheet), --ts-family-<k> (pill, line), --ts-family-<k>-ink (words).
 
 ## Steps
-- [x] 1 Remove the three __Diag tests
-- [x] 2 Edge-to-edge regions: BlockFrame.BleedClass + one PoiCard.uss rule (--ts-frame-bleed = -padding) on the timeline / related /
-      gallery tracks + main picture (+ grid in the grid look only: the stack keeps its print offset), the rails' strips, before/after,
-      hotspot, zoom, preview, video surface; ThemeFrameSceneTests.PicturesAndTracks_... (margins = -padding, region = frame's inner edge)
-- [x] 3 Rails test: precondition "the tapped card is inside the strip"; rails + tracks green (36-test run)
-- [x] 4 Audio: OpenFull waits for rest; TapListenAndPlay precondition; the audio fixture green
-- [x] 5 Stars: CardIcons.StarCentre; CardGalleryChecks.PixelExactlyAt; both modes; >= 3:1 checks; green
-- [x] 6 Hero row: one row (nowrap, focal shrinks), Listen = play + m:ss, name "Listen 2:44" / Pause; FOUND: Lamp eyebrow 6.69:1 (words
-      lower) -> --ts-scrim-hero 0.92 -> 0.94 (>= 7:1 over pure white, ThemeContrastTests pair); hero fixture green
-- [x] 7 HeroTitleFitRule (+ AdvanceWidth) + Editor HeroTitleMeasure + Card Content notice; EditMode green; PlayMode agreement green
-      (1 / 2 / 5 lines)
-- [x] 8 Gear + "Card settings" + native names (en, pt; es dropped: n-tilde not in the static marker atlases, falls back to "ES");
-      LanguageLabel prefix kept out of CardStrings.Keys (the key-scan guard); the panel's mode mark follows ModeChanged (capture found it)
-- [x] 9 Real-window Editor tests (Default Mode, Emphasis, 3-line notice with real typing) green
-- [x] 10 Targeted 1182 (0 failed, 37 gated skips, 3601 s) -> full PlayMode 1288 (0 failed, 37 skipped, 4002 s) -> full EditMode 2078/2079
-      (KeywordListFieldTypingTests order flake, green alone)
-- [x] 11 Visuals judged (tracks + the timeline's words given air, stars both modes, hero row EN/PT, gear + panel both modes, glare)
-- [x] 12 Docs: _3.3 Build log P4.4b part 2, 10-structure, _5.1 (notice + two rows), _3.1 15.3 + replacement row, __mixed_TODOs (scrim
-      closed), RUN TIMES; Fraunces spike TMP asset restored (git checkout --); final report; scene
+- [x] S0 measure first: SectionSheetMeasureSceneTests (gated, LookMeasure.Sections), "before" numbers + renders (6/6, background)
+- [x] S1 data: theme colours (family glass x10, glass edge / hi / shadow, radius-xl), display selector, regenerated USS (additions only);
+      FamilyDefinition.OpensSection (navigation false); CardStrings section_opener_block / _blocks; FamilyIconAndWordsTests +1
+- [x] S2 SectionSheetRule (pure) + SectionSheetRuleTests (EditMode, 5/5 by name)
+- [x] S3 SectionOpenerView + SectionSheets + BlockStackView (Sheets, IsInScroll, TopInScroll, LandingTop, LandingElement, LandingTopOf,
+      TryGetReadablePart / CollapseRow in scroll space) + NavController (Landing, TargetAtOffset, SectionAtOffset, ScrollingSlot) + NavTint.Ink
+      + CardBentoView.PutHostBeforeTheBlocks + PoiCard.uss / CardTokens.uss. Found + fixed: a border ON the sheet cost the blocks 2 px
+      (358 -> 356, The Lamp's vertical timeline +22 px): the edge is an absolute part now
+- [x] S4 re-based: 25 runtime test files + BentoLayoutSheetTests + CardTestInput.UnderTheSpyLine (ChapterStart) + CardGalleryChecks / PoiCardSceneTests (IsInScroll)
+      + FullViewSiblings / NavContents; targeted 1188: 14 red -> every one by cause (incl. a REAL bug: the last sheet's shadow grew the scroll range 16 px) -> re-run 660/660 green
+- [x] S5 SectionSheetSceneTests 13/13 + ThemeFrameSceneTests edge vs its own sheet (5.81 / 3.27) + opener words render (8.85 / 9.27); captures judged
+- [x] S6 full PlayMode 1307: 1270 passed, 0 failed, 37 gated skipped (3995 s, mostly focused); full EditMode 2085: 2084 + the KeywordListFieldTypingTests flake (1/1 alone); Build log, 10-structure.md
 
 ## Re-base log (old -> new, from source)
-- Hero Listen pill: Title "Listen 2:44" -> "2:44" + PlayButton.tooltip "Listen 2:44" (CardAudioGalleryTests, PoiCardAudioSceneTests x2,
-  PoiCardHeroSceneTests x2); playing: "Listen" + TimeText -> the running time alone, name "Pause"; PT "Reproduzir" -> "Ouvir 2:08"
-- Settings button: text "Aa" / tooltip "Reading settings" -> gear glyph, no text, tooltip "Card settings" (CardSettingsGalleryTests);
-  language buttons "EN" / "PT" / "ES" -> "English" / "Portugues" / "ES"
-- Stars: PixelAt (darkest of 7 x 7 at the box centre) -> PixelExactlyAt at CardIcons.StarCentre, both modes
+- every "its top meets the viewport's top" landing check (17 fixtures, the copied AssertLanded shape): slot.layout.y / slot.worldBound
+  -> Stack.LandingTop(slot) / Stack.LandingElement(slot) (a section's first block lands on its SHEET's top: R10.7, intended)
+- a block's place in the scroll (readable part, order, offsets: CardNavGalleryTests, NavContents, NavOptions, NavRails, LiveUpdate)
+  -> Stack.TopInScroll(slot); "parent == contentContainer" -> Stack.IsInScroll (CardGalleryChecks, PoiCardNavSceneTests)
+- order of the scroll's children (IndexOf: NavBlock, NavContents, NavRails, CardNavGallery x3, BentoLayoutSheetTests) -> the slot's
+  SHEET's index (Stack.Sheets.SheetOf(slot).Root); ThemeFrame / Theme scene: framed slots found by Query (descendants), not Children()
+
+## Measures (before -> after; TestEvidence/Sections/{before,after}/measures.txt)
+- stops 57 / 337.6 / 796 both cards: unchanged. Rails (strip x 17 w 356, cards 150 / 166, 2 whole in view): identical. Bento tiles: identical.
+- landings: a section's first block lands on its sheet's top = the previous shift + 8 (24 foot pad - 16 overlap); the section's other
+  blocks + 69 more (16 top pad + 41 opener + 12). The Lamp's first block 317 -> 317, its last 16822 -> 17823 (+1001, 16 sheets);
+  The Painting 317 -> 317 ... 6336 -> 6867 (+531, 8 sheets). Content: Lamp 17980 -> 19151, Painting 7063 -> 7695.

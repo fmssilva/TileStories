@@ -28,6 +28,8 @@ namespace TileStories.Tests
         public const string Hero = "Hero";
         // The palettes of P4.4b: phases before (today's dark), light and dark -- the same renders in each mode
         public const string Palette = "Palette";
+        // The section sheets of P4.4c1: the navigation's numbers (landings, spy, fits) before and after the sheets
+        public const string Sections = "Sections";
         private const int Gap = 8;
 
         // The domain the gallery and card renders measure into: Palette while its switch file exists, else Typeface

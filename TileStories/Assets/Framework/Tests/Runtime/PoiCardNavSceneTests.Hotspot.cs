@@ -88,7 +88,7 @@ namespace TileStories.Tests
             Assert.AreEqual(target, jump.BlockKey, "nav_jump: the block landed on");
             Assert.AreEqual(BuiltInBlocks.HotspotImageKind, jump.Variant, "nav_jump: the asking block's kind");
             float top = TopInViewport(target);
-            if (Slot(target).layout.y <= Range - OnePixel) Assert.AreEqual(0f, top, OnePixel, target + "'s slot top meets the viewport's top (offset " + Scroll.scrollOffset.y + ")");
+            if (Sheet.Stack.LandingTop(Slot(target)) <= Range - OnePixel) Assert.AreEqual(0f, top, OnePixel, target + "'s slot top meets the viewport's top (offset " + Scroll.scrollOffset.y + ")");
             else Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, target + ": a late block clamps at the end of the range");
             Assert.AreEqual(-1, view.OpenIndex, "the pin moved the card and opened no text of its own");
             Assert.IsFalse(view.Detail.ClassListContains("card-hotspot__detail--open"), "the detail stays closed");

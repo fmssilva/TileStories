@@ -167,13 +167,14 @@ namespace TileStories
             Place();
         }
 
-        // The host right before the first block slot of the scroll (after a picture header's hero, which the stack inserts first), or last
+        // The host right before the blocks of the scroll -- the first section sheet holding them (_3.3 P4.4c1) -- after a picture header's hero,
+        // which the stack inserts first; or last
         private void PutHostBeforeTheBlocks()
         {
             var content = _scroll.contentContainer;
             Host.RemoveFromHierarchy();
             for (int i = 0; i < content.childCount; i++)
-                if (content[i].ClassListContains("card-block-slot"))
+                if (content[i].ClassListContains(SectionSheets.SheetClass) || content[i].ClassListContains("card-block-slot"))
                 {
                     content.Insert(i, Host);
                     return;

@@ -268,6 +268,10 @@ namespace TileStories
             public const string CompactOpen = "compact_open";
             public const string CompactClose = "compact_close";
             public const string FullViewOpen = "full_view_open";
+            // A section opener's meta line (_3.3 P4.4c1, R10.7: SectionSheetRule.Meta): how many blocks the section holds ("{0} block" for
+            // one, "{0} blocks" for more), joined to its minutes by compact_meta
+            public const string SectionOpenerBlock = "section_opener_block";
+            public const string SectionOpenerBlocks = "section_opener_blocks";
             // The Family Pager (_3.2 step 14, the pages layout's header): "{0} of {1}" (the section's place, how many) and its two chevrons' names
             public const string NavPagerPosition = "nav_pager_position";
             public const string NavPagerPrevious = "nav_pager_previous";
@@ -311,7 +315,7 @@ namespace TileStories
                 NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,
                 NavFab, PlacedModelRemove, PlacedModelOther,
                 NavContentsMinutes, NavContentsRead, NavContentsSectionRead,
-                CompactMeta, CompactOpen, CompactClose, FullViewOpen,
+                CompactMeta, CompactOpen, CompactClose, FullViewOpen, SectionOpenerBlock, SectionOpenerBlocks,
                 NavPagerPosition, NavPagerPrevious, NavPagerNext,
                 NavRailsAll,
                 NavFacetUpTo, NavFacetNoHeadphones, NavFacetNoCamera, NavFacetNoNetwork, NavFacetClear,

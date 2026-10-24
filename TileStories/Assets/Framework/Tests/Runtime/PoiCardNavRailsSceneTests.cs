@@ -103,8 +103,8 @@ namespace TileStories.Tests
         private void AssertLanded(string block, string name)
         {
             var slot = Sheet.Stack.SlotOfBlock(block);
-            if (slot.layout.y <= Range - OnePixel)
-                Assert.AreEqual(0f, slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its top meets the viewport's top");
+            if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
+                Assert.AreEqual(0f, Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin, OnePixel, name + ": its top meets the viewport's top");
             else
                 Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, name + ": a late block clamps at the end of the range");
         }
@@ -154,7 +154,7 @@ namespace TileStories.Tests
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             Assert.IsNotNull(View, "Rails, live: The Lamp's open card gains the block");
             var slot = Sheet.Stack.SlotOfBlock(AutoKey);
-            Assert.AreEqual(Scroll.contentContainer.IndexOf(Sheet.Stack.SlotOfBlock(Model.Targets[0])), Scroll.contentContainer.IndexOf(slot) + 1,
+            Assert.AreEqual(Scroll.contentContainer.IndexOf(Sheet.Stack.Sheets.SheetOf(Sheet.Stack.SlotOfBlock(Model.Targets[0])).Root), Scroll.contentContainer.IndexOf(Sheet.Stack.Sheets.SheetOf(slot).Root) + 1,
                 "right before the card's first block (after the header's own hero)");
             Assert.AreEqual(Model.Sections.Count, View.Rails.Count, "a rail per family of The Lamp");
             Assert.AreEqual(8, View.Rails.Count, "precondition: The Lamp's eight families that navigate");
@@ -364,7 +364,7 @@ namespace TileStories.Tests
                 yield return Open(Lamp, SheetStopRule.Stop.Full);
                 var rail = View.Rails[0];
                 // - the rails block's top at the top of the visible part: the picture shows the rails, not the header's hero
-                Scroll.scrollOffset = new Vector2(0f, Mathf.Min(Sheet.Stack.SlotOfBlock(AutoKey).layout.y, Range));
+                Scroll.scrollOffset = new Vector2(0f, Mathf.Min(Sheet.Stack.TopInScroll(Sheet.Stack.SlotOfBlock(AutoKey)), Range));
                 yield return CardTestInput.Settle(0.4f);
                 yield return BringIntoView(rail);
                 yield return CardGalleryChecks.Render("Nav_Lamp_rails_rest_" + language + "_390");

@@ -53,7 +53,7 @@ namespace TileStories.Tests
         private VisualElement Slot(string blockKey) => Sheet.Stack.SlotOfBlock(blockKey);
 
         // Where a slot's top sits in the viewport (0 = at its top), from the two elements' own screen rects
-        private float TopInViewport(string blockKey) => Slot(blockKey).worldBound.yMin - Scroll.contentViewport.worldBound.yMin;
+        private float TopInViewport(string blockKey) => Sheet.Stack.LandingElement(Slot(blockKey)).worldBound.yMin - Scroll.contentViewport.worldBound.yMin;
 
         private List<CardEvent> NavJumps => _events.Raised.Where(e => e.Kind == CardEventKinds.NavJump).ToList();
 
@@ -87,7 +87,7 @@ namespace TileStories.Tests
         private int LatestUnclampedSection()
         {
             for (int i = Nav.Model.Sections.Count - 1; i >= 0; i--)
-                if (Slot(Nav.Model.Sections[i].Targets[0]).layout.y < Range - OnePixel) return i;
+                if (Sheet.Stack.LandingTop(Slot(Nav.Model.Sections[i].Targets[0])) < Range - OnePixel) return i;
             return -1;
         }
 
@@ -147,9 +147,9 @@ namespace TileStories.Tests
                 yield return Open(poi, SheetStopRule.Stop.Full);
                 yield return CardTestInput.Settle(0.3f);
                 block = ConfigCopy().pois.Single(p => p.id == poi).card.blocks.Select(b => b.key)
-                    .Where(k => Slot(k) != null && Slot(k).parent == Scroll.contentContainer && Slot(k).resolvedStyle.display == DisplayStyle.Flex)
-                    .Where(k => Slot(k).layout.y > Range + OnePixel)
-                    .OrderBy(k => Slot(k).layout.y).LastOrDefault();
+                    .Where(k => Slot(k) != null && Sheet.Stack.IsInScroll(Slot(k)) && Slot(k).resolvedStyle.display == DisplayStyle.Flex)
+                    .Where(k => Sheet.Stack.LandingTop(Slot(k)) > Range + OnePixel)
+                    .OrderBy(k => Sheet.Stack.LandingTop(Slot(k))).LastOrDefault();
                 if (block != null) break;
             }
             Assert.IsNotNull(block, "precondition: a card of the wall has a block in its final screen (its top cannot reach the viewport's)");
@@ -175,11 +175,11 @@ namespace TileStories.Tests
             string block = Nav.Model.Sections[index].Targets[0];
 
             Assert.IsTrue(Nav.JumpTo(index, Element));
-            Assert.AreEqual(Slot(block).layout.y, Scroll.scrollOffset.y, OnePixel, "instant: the offset is set at once, no frame in between");
+            Assert.AreEqual(Sheet.Stack.LandingTop(Slot(block)), Scroll.scrollOffset.y, OnePixel, "instant: the offset is set at once, no frame in between");
             yield return Landed();
             Assert.AreEqual(SheetStopRule.Stop.Half, Sheet.Stop, "Jump Opens Card To = keep: the card stays at Half");
             Assert.AreEqual(0f, TopInViewport(block), OnePixel, "and the block's top meets the viewport's top at Half (offset " + Scroll.scrollOffset.y
-                + ", slot y " + Slot(block).layout.y + ", viewport " + Scroll.contentViewport.layout + ", content pad " + Scroll.contentContainer.resolvedStyle.paddingTop
+                + ", slot y " + Sheet.Stack.LandingTop(Slot(block)) + ", viewport " + Scroll.contentViewport.layout + ", content pad " + Scroll.contentContainer.resolvedStyle.paddingTop
                 + ", strip " + Sheet.Chrome.TopShown + ", footer " + Sheet.Chrome.BottomShown + ", bar title " + Sheet.Stack.BarShowsTitle + ")");
         }
 
@@ -192,7 +192,7 @@ namespace TileStories.Tests
             int index = LatestUnclampedSection();
 
             Assert.IsTrue(Nav.JumpTo(index, Element));
-            Assert.AreEqual(Slot(Nav.Model.Sections[index].Targets[0]).layout.y, Scroll.scrollOffset.y, OnePixel, "reduce motion: set at once, no glide");
+            Assert.AreEqual(Sheet.Stack.LandingTop(Slot(Nav.Model.Sections[index].Targets[0])), Scroll.scrollOffset.y, OnePixel, "reduce motion: set at once, no glide");
             yield return Landed();
         }
 
@@ -204,7 +204,7 @@ namespace TileStories.Tests
             yield return Open(Lamp, SheetStopRule.Stop.Full);
             Assert.AreEqual(DurationToken(), Nav.Duration, 1e-4f, "a jump glides over the card's --ts-duration token");
             int target = Nav.Model.Sections.Count - 2;
-            Assert.Less(Slot(Nav.Model.Sections[target].Targets[0]).layout.y, Range - OnePixel, "precondition: the target lands unclamped");
+            Assert.Less(Sheet.Stack.LandingTop(Slot(Nav.Model.Sections[target].Targets[0])), Range - OnePixel, "precondition: the target lands unclamped");
             Assert.AreEqual(0, Nav.Current, "precondition: the card starts in its first section");
             var changes = new List<int>();
             Nav.CurrentChanged += changes.Add;
@@ -216,7 +216,7 @@ namespace TileStories.Tests
                 now = Nav.Duration * 0.5f;
                 for (int frame = 0; frame < 5; frame++) yield return null;
                 Assert.IsTrue(Nav.IsJumping, "half its time in, the jump still glides");
-                Assert.That(Scroll.scrollOffset.y, Is.GreaterThan(OnePixel).And.LessThan(Slot(Nav.Model.Sections[target].Targets[0]).layout.y - OnePixel),
+                Assert.That(Scroll.scrollOffset.y, Is.GreaterThan(OnePixel).And.LessThan(Sheet.Stack.LandingTop(Slot(Nav.Model.Sections[target].Targets[0])) - OnePixel),
                     "precondition: the stack is part way there");
                 int passing = SectionUnderTheSpyLine();
                 Assert.AreNotEqual(target, passing, "precondition: the glide is passing ANOTHER section (" + passing + ")");
@@ -365,7 +365,7 @@ namespace TileStories.Tests
             host.ScrollToBlock(sources, "actions");
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the host's jump raises the card like any other");
             yield return Landed();
-            float expected = Mathf.Min(Slot(sources).layout.y, Range);
+            float expected = Mathf.Min(Sheet.Stack.LandingTop(Slot(sources)), Range);
             Assert.AreEqual(expected, Scroll.scrollOffset.y, OnePixel, "it lands on the block (clamped to the range)");
             var jump = NavJumps.Single();
             Assert.AreEqual(sources, jump.BlockKey);

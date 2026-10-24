@@ -65,7 +65,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(8, model.Sections.Count, "precondition: The Lamp's eight sections");
             Assert.AreEqual(CardOptions.LayoutBento, sheet.Layout.Effective);
             Assert.IsTrue(sheet.Bento.IsOn);
-            var firstSlot = sheet.Stack.Scroll.contentContainer.Children().First(c => c.ClassListContains("card-block-slot"));
+            var firstSlot = sheet.Stack.Scroll.contentContainer.Children().First(c => c.ClassListContains(SectionSheets.SheetClass));
             Assert.AreEqual(sheet.Stack.Scroll.contentContainer.IndexOf(firstSlot) - 1, sheet.Stack.Scroll.contentContainer.IndexOf(sheet.Bento.Host),
                 "the tiles' host right before the first block");
             Assert.AreSame(sheet.Stack.Scroll.contentContainer, sheet.Bento.Host.hierarchy.parent, "in the stack's scroll, where the blocks were");

@@ -189,16 +189,16 @@ namespace TileStories.Tests
 
                 var section = Nav.Model.Sections[i];
                 var slot = Sheet.Stack.SlotOfBlock(section.Targets[0]);
-                float top = slot.worldBound.yMin - Scroll.contentViewport.worldBound.yMin;
+                float top = Sheet.Stack.LandingElement(slot).worldBound.yMin - Scroll.contentViewport.worldBound.yMin;
                 Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, section.Key + ": the card stays at Full");
-                if (slot.layout.y <= Range - OnePixel)
+                if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel)
                     Assert.AreEqual(0f, top, OnePixel, section.Key + ": its first block's top meets the viewport's top");
                 else
                     Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, section.Key + ": a late section clamps at the end of the range");
                 Assert.AreEqual(jumpsBefore + 1, NavJumps.Count, section.Key + ": one nav_jump");
                 Assert.AreEqual(BuiltInNavElements.TextTabs, NavJumps.Last().Variant, "the event names the element");
                 Assert.AreEqual(section.Key, NavJumps.Last().Value);
-                if (slot.layout.y <= Range - OnePixel) AssertMarked(i, section.Key);
+                if (Sheet.Stack.LandingTop(slot) <= Range - OnePixel) AssertMarked(i, section.Key);
             }
         }
 

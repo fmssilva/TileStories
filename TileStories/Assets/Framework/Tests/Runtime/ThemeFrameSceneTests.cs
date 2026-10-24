@@ -48,14 +48,14 @@ namespace TileStories.Tests
 
         // The framed slots of the stack (the scroll's blocks), in order
         private List<VisualElement> FramedSlots() =>
-            Card.Sheet.Stack.Scroll.contentContainer.Children().Where(c => c.ClassListContains(BlockFrame.FramedClass)).ToList();
+            Card.Sheet.Stack.Scroll.contentContainer.Query(className: BlockFrame.FramedClass).ToList();
 
         [UnityTest]
         public IEnumerator EveryBlockOfTheScroll_SitsInAnOpaqueFrame_TheBarAndTheFooterDoNot()
         {
             yield return OpenAtFull("lamp");
             var stack = Card.Sheet.Stack;
-            var scrollSlots = stack.Scroll.contentContainer.Children().Where(c => c.ClassListContains("card-block-slot")).ToList();
+            var scrollSlots = stack.Scroll.contentContainer.Query(className: "card-block-slot").ToList();
             Assert.Greater(scrollSlots.Count, 20, "precondition: The Lamp's scroll holds its blocks");
             float padding = CardTestInput.TokenPx("--ts-space-4");
             Color surface = default;
@@ -170,6 +170,10 @@ namespace TileStories.Tests
                 foreach (var slot in slots)
                     foreach (var (outside, line, inside) in EdgeSamples(slot.worldBound))
                     {
+                        // - _3.3 P4.4c1: the ground just outside a block is its OWN section sheet (its family's tinted glass) over the wall
+                        var sheet = Card.Sheet.Stack.Sheets.SheetOf(slot);
+                        Assert.IsNotNull(sheet, slot.name + ": precondition -- a block of the scroll sits on its section sheet");
+                        Assert.IsTrue(sheet.Root.worldBound.Contains(outside), slot.name + ": the ground sampled at " + outside + " is its own sheet's glass");
                         Color ground = PixelAt(shot, outside), rim = PixelAt(shot, line), surface = PixelAt(shot, inside);
                         float edge = Mathf.Max(UIAccessibility.ContrastRatio(rim, ground), UIAccessibility.ContrastRatio(surface, ground));
                         if (edge < worst) { worst = edge; worstAt = $"{slot.name} at {line} (rim {(Color32)rim}, surface {(Color32)surface}, ground {(Color32)ground})"; }

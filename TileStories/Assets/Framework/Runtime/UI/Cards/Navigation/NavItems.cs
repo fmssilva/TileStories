@@ -210,7 +210,7 @@ namespace TileStories
     // paint is (re)applied when the element is attached and every time it is laid out.
     public sealed class NavTint
     {
-        private enum Paint { Icon, Fill }
+        private enum Paint { Icon, Fill, Ink }
 
         private readonly VisualElement _root;
         private readonly List<(VisualElement Target, string Token, Paint How)> _parts = new();
@@ -243,13 +243,22 @@ namespace TileStories
             Apply();
         }
 
+        // A text's colour, in the token's colour (the words on a family's filled pill: the section opener)
+        public void Ink(VisualElement text, string token)
+        {
+            _parts.Add((text, token, Paint.Ink));
+            Apply();
+        }
+
         public void Apply()
         {
             foreach (var (target, token, how) in _parts)
             {
                 bool resolved = CardTokenColours.TryResolve(_root, token, out Color colour);
+                var paint = resolved ? new StyleColor(colour) : new StyleColor(StyleKeyword.Null);
                 if (how == Paint.Icon) CardIcons.Tint(target, resolved ? colour : (Color?)null);
-                else target.style.backgroundColor = resolved ? new StyleColor(colour) : new StyleColor(StyleKeyword.Null);
+                else if (how == Paint.Ink) target.style.color = paint;
+                else target.style.backgroundColor = paint;
             }
         }
     }

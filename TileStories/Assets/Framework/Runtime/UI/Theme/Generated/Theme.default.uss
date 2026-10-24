@@ -87,6 +87,24 @@
     --ts-family-visit-ink: rgb(255, 255, 255);
     --ts-family-community-ink: rgb(255, 255, 255);
     --ts-family-navigation-ink: rgb(255, 255, 255);
+    /* A section's glass sheet (R11, P4.4c1): the mode's glass ground mixed with the family's hue, translucent; blocks stay
+       opaque on it, text never sits on it (D8) */
+    --ts-family-meta-glass: rgba(223, 218, 208, 0.55);
+    --ts-family-about-glass: rgba(240, 218, 192, 0.55);
+    --ts-family-media-glass: rgba(206, 215, 229, 0.55);
+    --ts-family-guides-glass: rgba(206, 224, 203, 0.55);
+    --ts-family-stories-glass: rgba(228, 207, 223, 0.55);
+    --ts-family-ar-glass: rgba(204, 225, 216, 0.55);
+    --ts-family-play-glass: rgba(239, 208, 196, 0.55);
+    --ts-family-visit-glass: rgba(218, 210, 227, 0.55);
+    --ts-family-community-glass: rgba(237, 222, 194, 0.55);
+    --ts-family-navigation-glass: rgba(221, 222, 194, 0.55);
+    /* A section sheet's edge line */
+    --ts-glass-edge: rgba(255, 255, 255, 0.75);
+    /* A section sheet's lit top edge */
+    --ts-glass-hi: rgba(255, 255, 255, 0.9);
+    /* The shadow a section sheet casts UP over the one before it (tints card_block_shadow.png) */
+    --ts-glass-shadow: rgba(20, 17, 13, 0.16);
     /* The good / bad roles (R12.2 -good / -bad): a right and a wrong answer */
     --ts-correct: rgb(23, 84, 27);
     --ts-wrong: rgb(142, 27, 18);
@@ -113,6 +131,8 @@
     --ts-radius-s: 6px;
     --ts-radius-m: 12px;
     --ts-radius-l: 20px;
+    /* A section's glass sheet (R12.2 radius 30) */
+    --ts-radius-xl: 30px;
     --ts-radius-round: 50%;
     --ts-space-1: 4px;
     --ts-space-2: 8px;
@@ -213,6 +233,24 @@
     --ts-family-visit-ink: rgb(20, 17, 13);
     --ts-family-community-ink: rgb(20, 17, 13);
     --ts-family-navigation-ink: rgb(20, 17, 13);
+    /* A section's glass sheet (R11, P4.4c1): the mode's glass ground mixed with the family's hue, translucent; blocks stay
+       opaque on it, text never sits on it (D8) */
+    --ts-family-meta-glass: rgba(40, 38, 33, 0.7);
+    --ts-family-about-glass: rgba(54, 38, 20, 0.7);
+    --ts-family-media-glass: rgba(26, 35, 50, 0.7);
+    --ts-family-guides-glass: rgba(26, 42, 29, 0.7);
+    --ts-family-stories-glass: rgba(44, 28, 45, 0.7);
+    --ts-family-ar-glass: rgba(24, 43, 39, 0.7);
+    --ts-family-play-glass: rgba(53, 29, 23, 0.7);
+    --ts-family-visit-glass: rgba(36, 31, 48, 0.7);
+    --ts-family-community-glass: rgba(51, 41, 21, 0.7);
+    --ts-family-navigation-glass: rgba(38, 41, 21, 0.7);
+    /* A section sheet's edge line */
+    --ts-glass-edge: rgba(255, 255, 255, 0.14);
+    /* A section sheet's lit top edge */
+    --ts-glass-hi: rgba(255, 255, 255, 0.18);
+    /* The shadow a section sheet casts UP over the one before it (tints card_block_shadow.png) */
+    --ts-glass-shadow: rgba(0, 0, 0, 0.35);
     /* The good / bad roles (R12.2 -good / -bad): a right and a wrong answer */
     --ts-correct: rgb(143, 209, 158);
     --ts-wrong: rgb(242, 163, 143);
@@ -239,6 +277,8 @@
     --ts-radius-s: 6px;
     --ts-radius-m: 12px;
     --ts-radius-l: 20px;
+    /* A section's glass sheet (R12.2 radius 30) */
+    --ts-radius-xl: 30px;
     --ts-radius-round: 50%;
     --ts-space-1: 4px;
     --ts-space-2: 8px;
@@ -272,6 +312,7 @@
 .ts-app.ts-theme-default .card-text__dropcap,
 .ts-app.ts-theme-default .nav-menu__title,
 .ts-app.ts-theme-default .nav-grid__open-title,
-.ts-app.ts-theme-default .nav-rails__title-words {
+.ts-app.ts-theme-default .nav-rails__title-words,
+.ts-app.ts-theme-default .card-section-opener__name {
     -unity-font-definition: var(--ts-font-display);
 }

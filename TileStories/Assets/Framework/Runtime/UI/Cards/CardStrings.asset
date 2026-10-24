@@ -1314,3 +1314,17 @@ MonoBehaviour:
       value: Category
     - lang: pt
       value: Categoria
+  - key: section_opener_block
+    where: The meta line of a section opener (the family's filled pill over its glass sheet) when the section holds ONE block ({0} = 1).
+    text:
+    - lang: en
+      value: '{0} block'
+    - lang: pt
+      value: '{0} bloco'
+  - key: section_opener_blocks
+    where: The meta line of a section opener (the family's filled pill over its glass sheet) when the section holds several blocks ({0} = how many).
+    text:
+    - lang: en
+      value: '{0} blocks'
+    - lang: pt
+      value: '{0} blocos'

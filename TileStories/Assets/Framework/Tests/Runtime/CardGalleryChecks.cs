@@ -92,7 +92,7 @@ namespace TileStories.Tests
             }
             Assert.AreEqual(2, views.Count, name + ": the header + the block");
             // - a footer block (sticky) is pinned outside the scroll: nothing to scroll to
-            if (harness.Sheet.Stack.SlotOf(views[1]).parent == harness.Sheet.Stack.Scroll.contentContainer) harness.Sheet.Stack.Scroll.ScrollTo(harness.Sheet.Stack.SlotOf(views[1]));
+            if (harness.Sheet.Stack.IsInScroll(harness.Sheet.Stack.SlotOf(views[1]))) harness.Sheet.Stack.Scroll.ScrollTo(harness.Sheet.Stack.SlotOf(views[1]));
             yield return CardTestInput.Settle(0.15f);
             got(views[1]);
         }
@@ -176,7 +176,8 @@ namespace TileStories.Tests
             }
             else Assert.AreEqual(DisplayStyle.None, heading.resolvedStyle.display, entry.Name + ": no heading, no empty line");
 
-            if (slot.parent != stack.Scroll.contentContainer) return;
+            // - only a block of the scroll (inside its section sheet since _3.3 P4.4c1): the header and the footer are chrome
+            if (!stack.IsInScroll(slot)) return;
             Assert.AreEqual(0f, view.Root.resolvedStyle.marginTop, 0.01f, entry.Name + ": the block adds no top margin of its own");
             Assert.AreEqual(0f, view.Root.resolvedStyle.marginBottom, 0.01f, entry.Name + ": ...nor a bottom one");
             Assert.AreEqual(CardTestInput.TokenPx("--ts-block-gap"), slot.resolvedStyle.marginBottom, OnePixel(slot) + 0.01f, entry.Name + ": the gap under it is the token (snapped to a screen pixel)");
