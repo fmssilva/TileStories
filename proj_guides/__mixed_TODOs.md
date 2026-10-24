@@ -788,3 +788,11 @@ event camera, legibility at 1-3 m, sorting against the UGUI markers, a swipe on 
 - [tests] The MCP get_test_job lists at most 25 failures: after a red-heavy targeted run, re-run the fixtures after the 25th by name.
 - [tests, flake?] PoiCardTopElementsSceneTests.ARealDragOfTheStack_MovesTheMark_ToWhatTheScreenShows(progress_map) red once (block_30 vs 31)
   in a targeted run, green alone and in the full run.
+
+## The glyph test asks card strings to be in the MARKER fonts (2026-10-24, from `_3.3` P4.4b)
+
+P4.4b dropped Spanish's native name ("Español") from the card's settings panel because "ñ" is not in the marker fonts' fixed
+character set -- but the panel draws in the CARD fonts (Atkinson / Fraunces, Latin-1 + Latin Extended-A: "ñ" is there).
+`ShippedTextGlyphTests` checks every shipped string against both marker fonts. Scope it: strings a MARKER can show (POI names, level
+names, marker labels) -> the marker fonts; card strings -> the card fonts. Then the framework can ship native names for more
+languages (es, fr, de, it...) without rebuilding the marker atlases.
