@@ -262,6 +262,16 @@ namespace TileStories.Editor
                     || variant == BuiltInBlocks.HeaderVideoLoop || variant == BuiltInBlocks.HeaderModelTurntable)
                 && !BuiltInBlocks.HeaderShowsPicture(variant, block))
                 warnings.Add(CardHeaderNeedsPictureText(variant));
+            // - a hero title of 3+ lines on a phone, per language (the hero's own face and size; the picture looks only: there the words
+            //   sit over the picture and every extra line pushes it out of view at Half)
+            if (definition.Key == BuiltInBlocks.HeaderKind && BuiltInBlocks.HeaderShowsPicture(variant, block) && settings?.languages != null)
+                foreach (string language in settings.languages)
+                {
+                    string title = new BlockFieldReader(block, language, FirstLanguageOf(settings.languages)).Text(BlockStackBuilder.HeaderTitleField);
+                    if (title.Length == 0) title = poi?.name ?? "";
+                    int lines = HeroTitleMeasure.Lines(title);
+                    if (HeroTitleFitRule.NeedsNotice(lines)) warnings.Add(CardHeroTitleLinesText(language, title, lines));
+                }
             // - a block that waits for the reading, in the middle of the card, is revealed above the visitor
             if (definition.ShowAfterViewedField != null && new BlockFieldReader(block, null, null).Flag(definition.ShowAfterViewedField))
             {

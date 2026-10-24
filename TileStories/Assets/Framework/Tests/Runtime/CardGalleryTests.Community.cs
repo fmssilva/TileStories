@@ -91,12 +91,27 @@ namespace TileStories.Tests
                 "the stars up to the vote are filled");
             CollectionAssert.AreEqual(new[] { true, true, true, true, false }, feedback.Votes.Select(v => v.Glyph.Filled).ToList(),
                 "filled is a property of the drawn star, not only of the button's class");
-            // - a real render: the inside of a filled star is the star's colour, the inside of an outlined one is the card behind it
+            // - a real render, in BOTH modes (_3.3 P4.4b): the centre of a filled star is the star's colour, the centre of an outlined one is
+            //   the card behind it -- read at the star's own centre (CardIcons.StarCentre), one pixel; both marks >= 3:1 on that ground
             var on = feedback.Votes[0].Glyph;
             var off = feedback.Votes[4].Glyph;
-            Color onColour = on.resolvedStyle.color;
-            yield return PixelAt(on, on.worldBound.center, c => AssertColour(onColour, c, "a filled star is solid"));
-            yield return PixelAt(off, off.worldBound.center, c => Assert.Less(c.grayscale, onColour.grayscale - 0.05f, "an outlined star's inside is hollow"));
+            try
+            {
+                foreach (string mode in CardOptions.Modes)
+                {
+                    ThemeController.SetMode(mode);
+                    yield return CardTestInput.Settle(0.1f);
+                    Color onColour = on.resolvedStyle.color, offColour = off.resolvedStyle.color;
+                    Color ground = CardTestInput.EffectiveBackground(off);
+                    Assert.GreaterOrEqual(UIAccessibility.ContrastRatio(onColour, ground), UIAccessibility.MinRatioLargeTextOrUIComponent, mode + ": a filled star >= 3:1 on its ground");
+                    Assert.GreaterOrEqual(UIAccessibility.ContrastRatio(offColour, ground), UIAccessibility.MinRatioLargeTextOrUIComponent, mode + ": an outlined star's line >= 3:1 on its ground");
+                    yield return CardGalleryChecks.PixelExactlyAt(on, StarCentreOf(on), c => AssertColour(onColour, c, mode + ": a filled star is solid at its centre"));
+                    yield return CardGalleryChecks.PixelExactlyAt(off, StarCentreOf(off), c => AssertColour(ground, c,
+                        mode + ": an outlined star's centre is its ground (hollow), " + (Color32)c + " vs ground " + (Color32)ground + " and its line " + (Color32)offColour));
+                    yield return Render("Card_feedback_stars_voted_" + mode);
+                }
+            }
+            finally { ThemeController.SetMode(""); }
             Assert.AreEqual(1, events.Raised.Count);
             Assert.AreEqual("4", events.Raised[0].Value);
             Assert.AreEqual("stars", events.Raised[0].Variant);

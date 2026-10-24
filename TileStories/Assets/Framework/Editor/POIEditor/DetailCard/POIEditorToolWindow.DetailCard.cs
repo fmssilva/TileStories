@@ -63,6 +63,7 @@ namespace TileStories.Editor
             {
                 var c = s.container ??= new CardContainerSettings();
                 DrawCardLanguagesRow(s);
+                s.default_mode = DrawPopupField("Default Mode", s.default_mode, CardOptions.Modes, CardOptions.ModeLabels, CardDefaultModeHelp);
                 s.media_resources_path = DrawTextRow("Media Folder", s.media_resources_path, CardMediaFolderHelp, IndentLevel0);
                 c.open_stop = DrawPopupField("Open At", c.open_stop, CardOptions.OpenStops, CardOpenStopLabels, CardOpenAtHelp);
                 c.half_max_ratio = DrawSliderField("Half Height Max", c.half_max_ratio, CardContainerSettings.HalfMaxRatioMin,

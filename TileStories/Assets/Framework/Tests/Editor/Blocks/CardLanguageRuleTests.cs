@@ -57,36 +57,6 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("", CardLanguageRule.Shown(null, "pt", "pt", true), "a wall with no language shows none");
         }
 
-        [Test]
-        public void Next_StepsThroughTheChoices_AndWraps_AndIsEmptyWithOnlyOne()
-        {
-            Assert.AreEqual("pt", CardLanguageRule.Next(EnPt, "en"));
-            Assert.AreEqual("en", CardLanguageRule.Next(EnPt, "pt"), "wraps round");
-            var three = new[] { "en", "pt", "es" };
-            Assert.AreEqual("es", CardLanguageRule.Next(three, "pt"));
-            Assert.AreEqual("en", CardLanguageRule.Next(three, "es"));
-            Assert.AreEqual("", CardLanguageRule.Next(new[] { "en" }, "en"), "one language: nothing to switch to");
-            Assert.AreEqual("", CardLanguageRule.Next(new[] { "en", "en" }, "en"), "a repeated language is still one");
-        }
-
-        // 15.4.5: what the chip says, for one / two / three languages -- the cases the Phase A chip tests ran once per header entry
-        [Test]
-        public void TheChipLabel_NamesWhereATapGoes_InCapitals_AndIsEmptyWithNothingToChoose()
-        {
-            Assert.AreEqual("", CardLanguageRule.ChipLabel(new[] { "en" }, "en"), "one language: no chip");
-            Assert.AreEqual("", CardLanguageRule.ChipLabel(new[] { " en ", "", "en" }, "en"), "blanks and repeats leave one: still no chip");
-            Assert.AreEqual("", CardLanguageRule.ChipLabel(null, ""), "no Languages at all");
-
-            Assert.AreEqual("PT", CardLanguageRule.ChipLabel(EnPt, "en"), "an English card offers Portuguese");
-            Assert.AreEqual("EN", CardLanguageRule.ChipLabel(EnPt, "pt"), "a Portuguese card offers English");
-
-            var three = new[] { "en", "pt", "es" };
-            Assert.AreEqual("PT", CardLanguageRule.ChipLabel(three, "en"), "three: each tap names the next one");
-            Assert.AreEqual("ES", CardLanguageRule.ChipLabel(three, "pt"));
-            Assert.AreEqual("EN", CardLanguageRule.ChipLabel(three, "es"), "and the last wraps to the first");
-            Assert.AreEqual("EN", CardLanguageRule.ChipLabel(three, "fr"), "a shown language the wall no longer lists: the chip offers the wall's first");
-        }
-
         // ---- the text pick: shown language -> the wall's FIRST -> the first language the field has
 
         [Test]

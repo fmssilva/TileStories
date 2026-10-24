@@ -343,6 +343,8 @@ namespace TileStories
                 b.Slot.Heading.EnableInClassList("card-block-heading--empty", b.Slot.Heading.text.Length == 0);
                 var parent = header ? HeaderSlot
                     : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;
+                // - a block of the scroll sits in its frame; the bar and the footer are chrome, not blocks
+                BlockFrame.Apply(b.Slot.Root, inScroll, entry.Instance?.emphasis);
                 parent.Add(b.Slot.Root);
                 // - the header's hero opens what scrolls: the bar stays pinned while the hero scrolls away
                 if (header && b.View is HeaderBlockView h && h.HasHero) Scroll.contentContainer.Insert(0, h.HeroPart);
@@ -584,6 +586,7 @@ namespace TileStories
             var slot = new Slot { Root = new VisualElement(), Heading = new Label() };
             slot.Root.AddToClassList("card-block-slot");
             slot.Heading.AddToClassList("card-block-heading");
+            BlockFrame.Build(slot.Root);
             slot.Root.Add(slot.Heading);
             if (compact)
             {

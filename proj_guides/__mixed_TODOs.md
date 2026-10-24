@@ -783,8 +783,8 @@ event camera, legibility at 1-3 m, sorting against the UGUI markers, a swipe on 
   action rows leave the picture only a thin band (The Lamp EN), and the gallery's six-line title fills it (the hero grows past Half: words
   are never squashed). Options for the review: a taller hero than Half's view, one action row (Listen as an icon pill), an Editor warning
   on long hero titles.
-- [_3.3, scrim] The Lamp's eyebrow over the sky measures 7.06:1 at its worst pixel (the floor is 7): thin margin. If a wall's picture is
-  brighter, the scrim token (--ts-scrim-hero alpha 0.92) or the ramp must strengthen, never the words weaken.
+- [x] [_3.3, scrim] (closed P4.4b part 2) The Lamp's eyebrow fell to 6.69:1 once the hero's actions took one row; --ts-scrim-hero alpha
+  0.92 -> 0.94 is chosen against a pure-white pixel, so every picture keeps the eyebrow >= 7.75:1 and the title >= 9.34:1 (ThemeContrastTests).
 - [tests] The MCP get_test_job lists at most 25 failures: after a red-heavy targeted run, re-run the fixtures after the 25th by name.
 - [tests, flake?] PoiCardTopElementsSceneTests.ARealDragOfTheStack_MovesTheMark_ToWhatTheScreenShows(progress_map) red once (block_30 vs 31)
   in a targeted run, green alone and in the full run.

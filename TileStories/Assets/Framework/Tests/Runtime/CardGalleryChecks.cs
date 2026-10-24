@@ -53,6 +53,22 @@ namespace TileStories.Tests
             finally { Object.Destroy(tex); }
         }
 
+        // The ONE pixel a real render shows at a panel position -- for a small shape whose parts are a few pixels apart (a star's hollow,
+        // ~3 px to its stroke): PixelAt's 7x7 "darkest" patch would reach the stroke there, and on a light ground read it instead
+        public static IEnumerator PixelExactlyAt(VisualElement inPanel, Vector2 panelPoint, System.Action<Color> got)
+        {
+            yield return new WaitForEndOfFrame();
+            var tex = ScreenCapture.CaptureScreenshotAsTexture();
+            try
+            {
+                var origin = RuntimePanelUtils.ScreenToPanel(inPanel.panel, Vector2.zero);
+                float unit = RuntimePanelUtils.ScreenToPanel(inPanel.panel, Vector2.right).x - origin.x;
+                var screen = (panelPoint - origin) / unit;
+                got(tex.GetPixel(Mathf.FloorToInt(screen.x), tex.height - 1 - Mathf.FloorToInt(screen.y)));
+            }
+            finally { Object.Destroy(tex); }
+        }
+
         // Show a block entry that is NOT in CardGalleryDefinitions.All (an app's own), exactly as the harness shows one of its own
         public static void ShowEntry(CardGalleryHarness harness, CardGalleryDefinitions.Entry entry)
         {
@@ -164,7 +180,9 @@ namespace TileStories.Tests
             Assert.AreEqual(0f, view.Root.resolvedStyle.marginTop, 0.01f, entry.Name + ": the block adds no top margin of its own");
             Assert.AreEqual(0f, view.Root.resolvedStyle.marginBottom, 0.01f, entry.Name + ": ...nor a bottom one");
             Assert.AreEqual(CardTestInput.TokenPx("--ts-block-gap"), slot.resolvedStyle.marginBottom, OnePixel(slot) + 0.01f, entry.Name + ": the gap under it is the token (snapped to a screen pixel)");
-            Assert.AreEqual(slot.worldBound.yMax, view.Root.worldBound.yMax, OnePixel(slot) + 0.01f, entry.Name + ": the block ends where its slot ends");
+            // - a block of the scroll sits in its frame (_3.3 P4.4b): it ends where the frame's CONTENT ends, inside its padding and rim
+            float contentEnd = slot.worldBound.yMax - slot.resolvedStyle.paddingBottom - slot.resolvedStyle.borderBottomWidth;
+            Assert.AreEqual(contentEnd, view.Root.worldBound.yMax, OnePixel(slot) + 0.01f, entry.Name + ": the block ends where its frame's content ends");
         }
 
         // _3.2 step 12: `entry`'s block shown Display Expandable on the gallery card, compact and then opened by a real tap, for ANY kind (the

@@ -130,7 +130,8 @@ namespace TileStories.Tests
             }
 
             // accessibility: contrast from the resolved (token) colours, the X's size
-            Color surface = sheet.Root.resolvedStyle.backgroundColor;
+            // - the bar's own ground (the sheet itself is clear since _3.3 P4.4b: the glass shows between blocks)
+            Color surface = CardTestInput.EffectiveBackground(title);
             Assert.GreaterOrEqual(CardTestInput.Contrast(title.resolvedStyle.color, surface), UIAccessibility.MinRatioNormalText, "the bar's title on the card");
             // - the plate's line sits on the card; a picture's words are measured over the scrim on the render (PoiCardHeroSceneTests)
             var sub = header.HeroPart.Q<Label>("card-header-subtitle");
@@ -230,6 +231,15 @@ namespace TileStories.Tests
 
         // Save what the Game view shows under TestEvidence/Card
         private static IEnumerator Render(string name) => CardGalleryChecks.Render(name);
+
+        // A star glyph's own centre in panel units: CardIcons.StarCentre inside the largest centred square of the glyph (as Draw paints it)
+        private static Vector2 StarCentreOf(VisualElement glyph)
+        {
+            Rect box = glyph.worldBound;
+            float side = Mathf.Min(box.width, box.height);
+            var origin = new Vector2(box.x + (box.width - side) * 0.5f, box.y + (box.height - side) * 0.5f);
+            return origin + CardIcons.StarCentre * side;
+        }
             // ---------------- Tier 2: pictures (_3.1 step 7) ----------------
 
         // The colour a real render shows at a panel position (the shared helper)

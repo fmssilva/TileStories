@@ -43,6 +43,24 @@ namespace TileStories.Tests
 
         // - not vacuous: a value changed in the asset changes exactly its own line of the output (a generator that ignored the asset, or
         //   wrote a constant, would pass the test above forever)
+        // A colour one mode lacks would paint transparent in that mode only, silently (R8 S1): the generator refuses it, naming it
+        [Test]
+        public void TheGenerator_RefusesModesThatDoNotDefineTheSameColours()
+        {
+            var copy = Object.Instantiate(Theme());
+            try
+            {
+                var dark = copy.Mode(CardOptions.ModeDark).tokens.colours;
+                int hair = dark.FindIndex(t => t.name == "--ts-hair");
+                Assert.GreaterOrEqual(hair, 0, "precondition: dark holds --ts-hair");
+                dark.RemoveAt(hair);
+                var refused = Assert.Throws<System.ArgumentException>(() => ThemeUssGenerator.Generate(copy, AssetPath));
+                StringAssert.Contains("--ts-hair", refused.Message, "the refusal names the colour");
+                StringAssert.Contains("'dark'", refused.Message, "and the mode that lacks it");
+            }
+            finally { Object.DestroyImmediate(copy); }
+        }
+
         [Test]
         public void AValueChangedInTheAsset_ChangesExactlyItsOwnLine()
         {
@@ -66,12 +84,13 @@ namespace TileStories.Tests
         }
 
         [Test]
-        public void TheDefaultTheme_OpensInItsDarkMode_OneRuleOnTheMarkedAppRoot()
+        public void TheDefaultTheme_OpensInItsLightMode_OneRulePerModeOnTheMarkedAppRoot()
         {
             var theme = Theme();
             Assert.AreEqual(ThemeController.DefaultThemeKey, theme.Key, "the asset is the framework's default theme");
             Assert.IsNotNull(theme.Mode(theme.DefaultMode), "its default mode is one of its modes");
-            Assert.AreEqual("dark", theme.DefaultMode, "today's Stone & Gold dark (_3.3 P4.1: no visual change)");
+            Assert.AreEqual(CardOptions.ModeLight, theme.DefaultMode, "light is the default (_3.3 R1)");
+            CollectionAssert.AreEquivalent(CardOptions.Modes, theme.ModeKeys, "the theme has exactly the modes the Default Mode row offers");
             string text = Committed(theme);
             StringAssert.StartsWith("/* GENERATED from " + AssetPath, text, "the header names the asset it was generated from");
             foreach (var mode in theme.Modes)

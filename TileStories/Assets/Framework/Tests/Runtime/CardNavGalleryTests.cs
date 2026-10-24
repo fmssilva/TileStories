@@ -1507,11 +1507,12 @@ namespace TileStories.Tests
 
             // - contrast of a dot against a light and a dark block behind it (non-text, WCAG 1.4.11): the dark disc over white, its light edge over black
             var disc = view.Items[1].Disc;
-            Assert.GreaterOrEqual(UIAccessibility.ContrastRatio(disc.resolvedStyle.backgroundColor, Color.white), UIAccessibility.MinRatioLargeTextOrUIComponent,
-                "the dark disc reads over a white block");
-            var edge = disc.resolvedStyle.borderTopColor;
-            Assert.GreaterOrEqual(UIAccessibility.ContrastRatio(new Color(edge.r * edge.a, edge.g * edge.a, edge.b * edge.a, 1f), Color.black), UIAccessibility.MinRatioLargeTextOrUIComponent,
-                "its light edge reads over a black block");
+            // - in either mode (_3.3 P4.4b) the fill and the edge are opposite tones: over each block ONE of them clears 3:1
+            Color fill = disc.resolvedStyle.backgroundColor, edgeRaw = disc.resolvedStyle.borderTopColor;
+            var edge = new Color(edgeRaw.r * edgeRaw.a, edgeRaw.g * edgeRaw.a, edgeRaw.b * edgeRaw.a, 1f);
+            foreach (var block in new[] { Color.white, Color.black })
+                Assert.GreaterOrEqual(Mathf.Max(UIAccessibility.ContrastRatio(fill, block), UIAccessibility.ContrastRatio(edge, block)),
+                    UIAccessibility.MinRatioLargeTextOrUIComponent, "the disc (fill or edge) reads over a " + (block == Color.white ? "white" : "black") + " block");
 
             // - the section read is marked twice: a larger disc AND a larger colour disc with an accent edge; no other dot, no bubble at rest
             var first = view.Items[0];

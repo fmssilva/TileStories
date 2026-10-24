@@ -636,7 +636,7 @@ namespace TileStories.Tests
                 yield return OpenFull(Lamp);
                 if (language == "pt")
                 {
-                    yield return CardTestInput.Tap(Sheet.LanguageButton.panel, Sheet.LanguageButton.worldBound.center);
+                    yield return CardTestInput.TapNextLanguage(Sheet);
                     yield return CardTestInput.Settle(0.3f);
                 }
                 // - a rebind of the same point keeps its page (the language switch): start this language on the first one
@@ -679,7 +679,7 @@ namespace TileStories.Tests
                 yield return CardGalleryChecks.Render("Nav_Lamp_pages_second_" + language + "_390");
                 if (language == "pt")
                 {
-                    yield return CardTestInput.Tap(Sheet.LanguageButton.panel, Sheet.LanguageButton.worldBound.center);
+                    yield return CardTestInput.TapNextLanguage(Sheet);
                     yield return CardTestInput.Settle(0.3f);
                 }
             }

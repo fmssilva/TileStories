@@ -129,6 +129,10 @@ namespace TileStories.Tests
             AssertNoneCut(track, boxes, "at rest");
             AssertStripEndsOnACard(track, boxes, 0f, "at rest");
             Assert.Greater(boxes.Count(b => b.worldBound.xMax <= track.contentViewport.worldBound.xMax + 1f && b.worldBound.xMin >= track.contentViewport.worldBound.xMin - 1f), 0, "at least one whole event");
+            // - P4.4b part 2: the track runs to the frame's edge, its words never touch it -- the first event's date and title keep air
+            float air = CardTestInput.TokenPx("--ts-space-3");
+            foreach (var words in new VisualElement[] { timeline.Events[0].Date, timeline.Events[0].Title })
+                Assert.GreaterOrEqual(words.worldBound.xMin - track.contentViewport.worldBound.xMin, air - onePixel, name + ": the first event's words start inside the strip's edge");
             yield return CardGalleryChecks.Render("Card_" + name + "_rest");
 
             if (!scrolls) yield break;

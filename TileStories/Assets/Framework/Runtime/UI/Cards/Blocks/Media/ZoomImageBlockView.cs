@@ -25,6 +25,7 @@ namespace TileStories
             Root.AddToClassList("card-block");
             Root.AddToClassList("card-zoom");
             Frame.name = "card-zoom-frame";
+            BlockFrame.Bleed(Frame);
             Caption = new Label();
             Caption.AddToClassList("card-zoom__caption");
             Hint = new Label();

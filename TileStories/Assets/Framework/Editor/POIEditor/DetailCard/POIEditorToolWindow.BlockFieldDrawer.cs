@@ -37,6 +37,9 @@ namespace TileStories.Editor
                 return;
             }
             var card = new BlockRefCard { Poi = poi, Holder = block, Built = built, Languages = languages };
+            // - the frame's variant is every block's, not a field of its kind: the first row of an open block
+            block.emphasis = DrawPopupField("Emphasis", BlockFrame.EmphasisOf(block.emphasis), CardOptions.Emphases, CardOptions.EmphasisLabels,
+                CardBlockEmphasisHelp, IndentLevel1);
             foreach (var field in definition.Fields)
             {
                 // - a field the block's look or options do not use is not drawn; its value stays (hiding is drawing, never writing)

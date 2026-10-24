@@ -151,8 +151,18 @@ namespace TileStories
             public const string PlaceInArRemove = "place_in_ar_remove";
             public const string PlaceInArPlaced = "place_in_ar_placed";
             public const string PlaceInArNotLocalised = "place_in_ar_not_localised";
-            // The language chip beside the close button (15.3.2): its tooltip and accessible name
+            // The title of the Language group in the card's settings (_3.3 P4.4b; the language chip of 15.3.2 before)
             public const string LanguageSwitch = "language_switch";
+            // A language as its own speakers name it ("English", "Portugues" with its accents) -- the same words in every column, so a visitor
+            // finds their language whatever the card is in (P4.4b part 2). A code with no row shows the code (CardVisitorSettingsView.LanguageLabel)
+            public const string LanguageNameEn = "language_name_en";
+            public const string LanguageNamePt = "language_name_pt";
+            // The card's settings (_3.3 P4.4b; the gear since part 2): the button's name and the panel's title, the Appearance group and
+            // its two modes
+            public const string VisitorSettings = "visitor_settings";
+            public const string SettingsAppearance = "settings_appearance";
+            public const string ModeLight = "mode_light";
+            public const string ModeDark = "mode_dark";
             // the hero (_3.3 P4.4a): its Listen button ({0} = the guide's length, m:ss) and the Category fact Quick Facts adds when asked
             public const string HeroListen = "hero_listen";
             public const string FactsCategory = "facts_category";
@@ -288,7 +298,7 @@ namespace TileStories
                 AudioPlay, AudioPause, AudioSpeed, AudioCaptions, AudioSeek, AudioQueued, AudioUnavailable, MiniPlayerOpen,
                 MiniPlayerStop, VideoFullScreen, VideoUnavailable, VideoChapters, Model3DHint, Model3DLoading,
                 Panorama360DragHint, Panorama360GyroHint, Panorama360Loading, PlaceInArButton, PlaceInArRemove, PlaceInArPlaced, PlaceInArNotLocalised,
-                LanguageSwitch, HeroListen, FactsCategory,
+                LanguageSwitch, LanguageNameEn, LanguageNamePt, VisitorSettings, SettingsAppearance, ModeLight, ModeDark, HeroListen, FactsCategory,
                 FamilyAbout, FamilyMedia, FamilyGuides, FamilyStories, FamilyAr, FamilyPlay, FamilyVisit, FamilyCommunity, FamilyNavigation, FamilyMeta,
                 FormatRead, FormatLook, FormatWatch, FormatListen, FormatModel, FormatInteract,
                 KindHeader, KindStatus, KindQuickFacts, KindRichText, KindFunFact, KindPullQuote, KindProcessSteps, KindSwatches,

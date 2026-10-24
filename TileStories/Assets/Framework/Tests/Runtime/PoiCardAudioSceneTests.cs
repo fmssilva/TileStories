@@ -79,6 +79,16 @@ namespace TileStories.Tests
             if (SelectionEventBus.CurrentPoiId != poiId) yield return Select(poiId);
             Sheet.SetStop(SheetStopRule.Stop.Full);
             yield return CardTestInput.Settle();
+            // - a tap during the rise lands where the button was (_3.3 P4.4b: the hero's Listen missed, and the later "live edit" read Idle)
+            for (int frame = 0; frame < 600 && Mathf.Abs(Sheet.Root.layout.height - Sheet.Stops.Full) > 0.5f; frame++) yield return null;
+        }
+
+        // A real tap on the hero's Listen that must start the narration: a missed tap names the setup, not the feature tested after it
+        private IEnumerator TapListenAndPlay()
+        {
+            yield return Tap(Chip.PlayButton);
+            Assert.AreEqual(CardAudioState.Playing, _audio.State, "precondition: the real tap on the hero's Listen at " + Chip.PlayButton.worldBound
+                + " started the narration (sheet " + Sheet.Root.layout.height + " of Full " + Sheet.Stops.Full + ")");
         }
 
         private IEnumerator ScrollTo(IBlockView view)
@@ -107,7 +117,8 @@ namespace TileStories.Tests
             Assert.AreSame(Header.Actions, chip.Root.parent, "the chip is the hero's Listen");
             Assert.IsNull(Sheet.Stack.SlotOf(chip), "with no slot of its own");
             Assert.AreSame(Header.PeekPart, Sheet.Stack.PeekPart, "the peek stop is the bar");
-            Assert.AreEqual("Listen 2:44", chip.Title.text, "Listen and the real length (164.52 s)");
+            Assert.AreEqual("2:44", chip.Title.text, "the compact pill: the real length (164.52 s)");
+            Assert.AreEqual("Listen 2:44", chip.PlayButton.tooltip, "its name: Listen and the length");
             Assert.IsTrue(chip.ClipAvailable, "the real narration loaded through the wall's Media Folder");
             Assert.AreEqual("0:00 / 2:44", chip.TimeText.text, "its real length: 164.52 s");
             Assert.AreEqual(CardAudioState.Idle, _audio.State, "opening a card plays nothing by itself");
@@ -341,7 +352,7 @@ namespace TileStories.Tests
         public IEnumerator ALiveEditOfTheBlockWhilePlaying_KeepsThePlaybackSane_TextEditsChangeNothingOfTheSound()
         {
             yield return OpenFull("lamp");
-            yield return Tap(Chip.PlayButton);
+            yield return TapListenAndPlay();
             Advance(7f);
             float position = _audio.Position;
             int loads = _out.LoadCount;
@@ -383,7 +394,7 @@ namespace TileStories.Tests
         public IEnumerator ALiveEditOfTheClipWhilePlaying_MakesItAnotherAudio_TheOldOnePlaysOn_UntilTheNewOneIsAsked()
         {
             yield return OpenFull("lamp");
-            yield return Tap(Chip.PlayButton);
+            yield return TapListenAndPlay();
             Advance(3f);
             yield return Push(config => Block(config, "lamp", BuiltInBlocks.AudioGuidePlayer).fields.Single(f => f.key == BuiltInBlocks.AudioGuideClipField).asset = EnglishPath);
             var player = Player;
@@ -449,8 +460,8 @@ namespace TileStories.Tests
             Live.languages = new List<string> { "pt", "en" };
             yield return Select("lamp");
             // - the chip is the hero's Listen since _3.3 P4.4a: its words are the card's own (Ouvir + the Portuguese guide's length)
-            Assert.AreEqual("Ouvir 2:08", Chip.Title.text, "Listen in Portuguese, with the Portuguese narration's length");
-            Assert.AreEqual("Reproduzir", Chip.PlayButton.tooltip);
+            Assert.AreEqual("2:08", Chip.Title.text, "the Portuguese narration's length on the pill");
+            Assert.AreEqual("Ouvir 2:08", Chip.PlayButton.tooltip, "its name in Portuguese");
             yield return OpenFull("lamp");
             var player = Player;
             Assert.AreEqual("Ouça", Sheet.Stack.HeadingOf(player).text);

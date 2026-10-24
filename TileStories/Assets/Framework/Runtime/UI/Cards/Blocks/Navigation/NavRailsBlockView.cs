@@ -224,6 +224,7 @@ namespace TileStories
             title.Add(words);
             title.Add(count);
             var strip = new NavStrip("nav-rails-strip-" + index, "nav-rails__viewport", "nav-rails__row");
+            BlockFrame.Bleed(strip.Viewport);
             root.Add(title);
             root.Add(strip.Viewport);
             Rail rail = null;

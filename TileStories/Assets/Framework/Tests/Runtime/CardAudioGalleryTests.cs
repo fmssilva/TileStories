@@ -266,8 +266,10 @@ namespace TileStories.Tests
             Assert.IsNull(stack.SlotOf(chip), "no slot in the stack");
             Assert.AreSame(header.Actions, chip.Root.parent, "in the hero's action row");
             Assert.IsTrue(chip.Root.ClassListContains(BlockStackView.HeroListenClass));
-            Assert.AreEqual("Listen 0:12", chip.Title.text, "Listen and the clip's length, before it plays");
-            Assert.AreEqual(DisplayStyle.None, chip.TimeText.resolvedStyle.display, "no running time before it plays");
+            // - _3.3 P4.4b part 2: a compact pill -- the play mark and the clip's length; the words live in its name
+            Assert.AreEqual("0:12", chip.Title.text, "the clip's length, before it plays");
+            Assert.AreEqual("Listen 0:12", chip.PlayButton.tooltip, "its name: Listen and the length");
+            Assert.AreEqual(DisplayStyle.None, chip.TimeText.resolvedStyle.display, "one time on the pill, never a second line");
             Assert.AreEqual(DisplayStyle.None, chip.Root.Q<VisualElement>(className: "card-audio__chips").resolvedStyle.display, "no speed chip or captions switch on the chip");
             Assert.AreEqual(DisplayStyle.None, chip.CaptionLine.resolvedStyle.display, "no caption line either");
             Assert.IsTrue(UIAccessibility.MeetsMinTapTarget(chip.PlayButton.worldBound.width, chip.PlayButton.worldBound.height), "a whole tap target");
@@ -278,8 +280,8 @@ namespace TileStories.Tests
             Assert.AreEqual(CardAudioState.Playing, Audio.State, "a tap on the chip at the peek stop plays");
             Assert.AreEqual(SheetStopRule.Stop.Full, _harness.Sheet.Stop, "the card stays where it was");
             _harness.AdvanceAudio(6f);
-            Assert.AreEqual("Listen", chip.Title.text, "playing: Listen beside the running time");
-            Assert.AreEqual("0:06 / 0:12", chip.TimeText.text);
+            Assert.AreEqual("0:06", chip.Title.text, "playing: the running time on the pill");
+            Assert.AreEqual(DisplayStyle.None, chip.TimeText.resolvedStyle.display, "still one time");
             Assert.AreEqual(0.5f, chip.Scrubber.Fraction, 0.01f, "the progress is kept (the hero hides the line)");
             Assert.AreEqual(CardIcons.Shape.Pause, chip.PlayGlyph.Kind);
             yield return CardGalleryChecks.Render("Card_audio_hero_listen_playing");

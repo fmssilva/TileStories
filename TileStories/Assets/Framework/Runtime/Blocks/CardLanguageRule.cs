@@ -37,19 +37,5 @@ namespace TileStories
             if (previewAllowed && !string.IsNullOrEmpty(previewLanguage) && choices.Contains(previewLanguage)) return previewLanguage;
             return choices[0];
         }
-
-        // The language a tap on the card's language chip switches to: the next choice after the shown one, wrapping round
-        // ("" when the visitor has nothing to choose between)
-        public static string Next(IReadOnlyList<string> languages, string shown)
-        {
-            var choices = Choices(languages);
-            if (choices.Count < 2) return "";
-            int at = choices.IndexOf(shown);
-            return choices[(at + 1) % choices.Count];
-        }
-
-        // What the language chip says: the code of the language a tap switches to, in capitals ("PT"), so the chip names where it goes,
-        // not where the card is; "" when there is nothing to choose between (the chip hides)
-        public static string ChipLabel(IReadOnlyList<string> languages, string shown) => Next(languages, shown).ToUpperInvariant();
     }
 }

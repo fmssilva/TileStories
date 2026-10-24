@@ -400,7 +400,8 @@ namespace TileStories.Tests
             StringAssert.EndsWith("> On film", Sheet.Takeover.CrumbText);
 
             // - the language chip (covered by the full view for a finger: pressed through the panel, the submit path a tap ends in)
-            Press(Sheet.LanguageButton);
+            Press(Sheet.SettingsButton);
+            Press(Sheet.Settings.Choice(CardTestInput.NextLanguage(Sheet)));
             yield return CardTestInput.Settle(0.3f);
             Assert.IsTrue(Sheet.FullView.IsOpen, "the language switch kept the full view");
             Assert.AreEqual("block_56", Sheet.FullView.BlockKey);
@@ -438,7 +439,8 @@ namespace TileStories.Tests
             {
                 if (language == "pt")
                 {
-                    Press(Sheet.LanguageButton);
+                    Press(Sheet.SettingsButton);
+            Press(Sheet.Settings.Choice(CardTestInput.NextLanguage(Sheet)));
                     yield return CardTestInput.Settle(0.3f);
                 }
                 yield return OpenFull(Lamp);

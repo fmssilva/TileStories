@@ -280,6 +280,9 @@ namespace TileStories.Tests
                 var rail = View.Rails[railIndex];
                 var card = rail.ShownCards.ElementAt(Mathf.Min(1, rail.ShownCards.Count() - 1));
                 yield return BringIntoView(rail);
+                // - a card the strip does not show cannot be tapped (_3.3 P4.4b: a narrower frame left card 1 off the screen, at x 465)
+                Assert.IsTrue(rail.Strip.Viewport.worldBound.Contains(card.Button.worldBound.center), "precondition: rail " + railIndex + "'s card "
+                    + card.Button.worldBound + " shows inside its strip " + rail.Strip.Viewport.worldBound);
                 _events.Raised.Clear();
                 yield return TouchTap(card.Button.worldBound.center);
                 yield return Landed();

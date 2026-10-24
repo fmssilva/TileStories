@@ -45,6 +45,9 @@ namespace TileStories
         // "" = the wall's first language, the default. A visitor's own pick on the card wins; release builds ignore it (CardLanguageRule.Shown,
         // CardDemoRule.IsAllowed) and DevFeatureBuildGuard warns when a value other than the default is left in the config
         public string preview_language = "";
+        // The mode the app opens in on this wall (Detail Card > Card Container > Default Mode, _3.3 P4.4b): "light" (default) | "dark"
+        // (CardOptions.Modes). A visitor's own pick in the card's Aa settings wins (ThemeModeRule); a config that never wrote it opens light
+        public string default_mode = CardOptions.ModeLight;
     }
 
     // Detail Card > Navigation (_3.2 section 3): how a visitor moves inside ONE open card. Each field lands with the code
@@ -248,6 +251,8 @@ namespace TileStories
         public string variant = "";
         // "inline" | "expandable" | "takeover" (CardOptions)
         public string display = CardOptions.DisplayInline;
+        // "normal" | "featured" | "quiet" (CardOptions.Emphases): the block frame's variant (Card Content > the block's Emphasis row)
+        public string emphasis = CardOptions.EmphasisNormal;
         public List<BlockFieldValue> fields = new();
     }
 
@@ -376,6 +381,12 @@ namespace TileStories
         public static readonly string[] PlacedModelControls = { PlacedModelChip, PlacedModelNone };
         public static readonly string[] PlacedModelControlLabels = { "Chip", "None" };
 
+        // Default Mode (CardSettings.default_mode, _3.3 P4.4b): the theme's two modes, light first (the default), and the Editor's words
+        public const string ModeLight = "light";
+        public const string ModeDark = "dark";
+        public static readonly string[] Modes = { ModeLight, ModeDark };
+        public static readonly string[] ModeLabels = { "Light", "Dark" };
+
         // Show Navigation At (CardNavigationSettings.show_at, _3.2 section 4.3): the stops the Top Bar may show at (never at peek)
         public const string ShowNavHalfAndFull = "half_and_full";
         public const string ShowNavFullOnly = "full_only";
@@ -411,5 +422,14 @@ namespace TileStories
         public const string DisplayInline = "inline";
         public const string DisplayExpandable = "expandable";
         public const string DisplayTakeover = "takeover";
+
+        // A block's Emphasis (BlockInstanceData.emphasis, _3.3 R13.1, P4.4b): the frame's named variants -- normal, featured (a stronger
+        // shadow, a larger title: the 1-2 blocks a wall pushes), quiet (a hairline edge, no rim light or shadow, a smaller title: meta
+        // blocks such as sources). The first is the default the card reads for an unknown value too
+        public const string EmphasisNormal = "normal";
+        public const string EmphasisFeatured = "featured";
+        public const string EmphasisQuiet = "quiet";
+        public static readonly string[] Emphases = { EmphasisNormal, EmphasisFeatured, EmphasisQuiet };
+        public static readonly string[] EmphasisLabels = { "Normal", "Featured", "Quiet" };
     }
 }

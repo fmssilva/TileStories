@@ -221,6 +221,25 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(state.Viewed("p", "b1"));
         }
 
+        // The visitor's mode (_3.3 P4.4b, the Aa button): one pick per wall, beside the language, forgotten by a blank and by the reset
+        [Test]
+        public void TheVisitorsMode_IsKeptPerWall_ForgottenByABlank_AndByTheReset()
+        {
+            var store = new MemoryCardStateStore();
+            var state = new CardLocalState(store, "w");
+            Assert.AreEqual("", state.Mode(), "never picked: the wall's Default Mode shows");
+            state.SetMode("dark");
+            state.SetLanguage("pt");
+            Assert.AreEqual("dark", new CardLocalState(store, "w").Mode(), "read back by a new instance (the app restarted)");
+            Assert.AreEqual("", new CardLocalState(store, "other").Mode(), "another wall's pick is its own");
+            Assert.AreEqual("pt", state.Language(), "the mode and the language are separate slots");
+            state.SetMode(" ");
+            Assert.AreEqual("", state.Mode(), "a blank forgets it");
+            state.SetMode("light");
+            Assert.AreEqual(2, state.ResetAll(), "the reset finds it: mode + language");
+            Assert.AreEqual("", state.Mode());
+        }
+
         [Test]
         public void OnPlayerPrefs_AViewedTick_SurvivesARestart_UnderAColonKey_AndTheResetRemovesIt()
         {

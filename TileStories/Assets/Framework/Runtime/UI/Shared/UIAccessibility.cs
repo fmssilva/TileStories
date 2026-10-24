@@ -28,6 +28,32 @@ namespace TileStories
             return (lighter + 0.05f) / (darker + 0.05f);
         }
 
+        // WCAG 2.1 SC 1.4.6 (AAA): the card's bar for every text role in both modes (_3.3 D1)
+        public const float MinRatioEnhancedText = 7.0f;
+
+        // APCA lightness contrast Lc of `text` on `background` (APCA-W3 0.0.98G-4g, the WCAG 3 candidate), as a magnitude: ~106 for black on
+        // white, 0 for a colour on itself. Body text wants >= 75 (_3.3 R12.6). Unlike the WCAG ratio it is not symmetric: polarity counts
+        public static float ApcaLc(Color text, Color background)
+        {
+            float yt = ApcaClamp(ApcaY(text)), yb = ApcaClamp(ApcaY(background));
+            if (Mathf.Abs(yb - yt) < 0.0005f) return 0f;
+            if (yb > yt)
+            {
+                // - dark text on a light background
+                float s = (Mathf.Pow(yb, 0.56f) - Mathf.Pow(yt, 0.57f)) * 1.14f;
+                return s < 0.1f ? 0f : (s - 0.027f) * 100f;
+            }
+            float r = (Mathf.Pow(yb, 0.65f) - Mathf.Pow(yt, 0.62f)) * 1.14f;
+            return r > -0.1f ? 0f : -(r + 0.027f) * 100f;
+        }
+
+        // APCA's screen luminance: a plain 2.4 power per channel (not the sRGB piecewise curve), its own coefficients
+        private static float ApcaY(Color c) =>
+            0.2126729f * Mathf.Pow(c.r, 2.4f) + 0.7151522f * Mathf.Pow(c.g, 2.4f) + 0.0721750f * Mathf.Pow(c.b, 2.4f);
+
+        // - near black, APCA soft-clamps the luminance (flare): below 0.022 it is lifted
+        private static float ApcaClamp(float y) => y < 0.022f ? y + Mathf.Pow(0.022f - y, 1.414f) : y;
+
         // WCAG AA pass for normal text (4.5:1) or large text / UI components (3:1).
         public static bool MeetsContrastAA(Color foreground, Color background, bool largeOrUIC = false) =>
             ContrastRatio(foreground, background) >= (largeOrUIC ? MinRatioLargeTextOrUIComponent : MinRatioNormalText);

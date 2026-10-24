@@ -26,20 +26,26 @@ namespace TileStories.Tests
         // The type change of P4.3 and the header / hero of P4.4a measure into their own folders
         public const string Typeface = "Typeface";
         public const string Hero = "Hero";
+        // The palettes of P4.4b: phases before (today's dark), light and dark -- the same renders in each mode
+        public const string Palette = "Palette";
         private const int Gap = 8;
+
+        // The domain the gallery and card renders measure into: Palette while its switch file exists, else Typeface
+        public static string ActiveLook => File.Exists(Path.Combine(TestEvidence.Root, Palette, "MEASURING")) ? Palette : Typeface;
 
         // The phase the switch file names, or ignore the test when there is none
         public static string RequirePhase(string domain)
         {
             string switchFile = Path.Combine(TestEvidence.Root, domain, "MEASURING");
             if (!File.Exists(switchFile))
-                Assert.Ignore("A measurement: write before / after into TestEvidence/" + domain + "/MEASURING to run it (LookMeasure)");
+                Assert.Ignore("A measurement: write the phase into TestEvidence/" + domain + "/MEASURING to run it (LookMeasure)");
             string phase = File.ReadAllText(switchFile).Trim();
-            Assert.IsTrue(phase == "before" || phase == "after", "TestEvidence/" + domain + "/MEASURING names the phase: before or after, not '" + phase + "'");
+            var phases = domain == Palette ? new[] { "before", "light", "dark" } : new[] { "before", "after" };
+            Assert.Contains(phase, phases, "TestEvidence/" + domain + "/MEASURING names the phase: " + string.Join(" / ", phases));
             return phase;
         }
 
-        // Save the still screen (or `cropTo`) as <phase>/<name>.png; in the after phase also compare/<name>.png beside its before
+        // Save the still screen (or `cropTo`) as <phase>/<name>.png; in a later phase also compare/<phase>/<name>.png beside its before
         public static IEnumerator Render(string domain, string phase, string name, VisualElement cropTo = null)
         {
             Texture2D render = null;
@@ -48,9 +54,23 @@ namespace TileStories.Tests
             {
                 File.WriteAllBytes(TestEvidence.PathFor(domain + "/" + phase, name + ".png"), render.EncodeToPNG());
                 string before = Path.Combine(TestEvidence.Root, domain, "before", name + ".png");
-                if (phase == "after" && File.Exists(before)) WriteSideBySide(domain, before, render, name);
+                if (phase != "before" && File.Exists(before)) WriteSideBySide(domain, before, render, phase == "after" ? name : phase + "_" + name);
             }
             finally { Object.Destroy(render); }
+        }
+
+        // Hold the hero's pan still for a render (since P4.4a a wide hero picture pans: the picture would never hold still)
+        public static void FreezeHero(PoiCardSheetView sheet)
+        {
+            var header = sheet.Stack.HeaderView;
+            if (header != null) header.Clock = () => 0f;
+            CardTestInput.HoldTheWallStill(sheet);
+            // - the palette phases render the card in their own mode (before = today's tree, untouched)
+            if (ActiveLook == Palette)
+            {
+                string phase = File.ReadAllText(Path.Combine(TestEvidence.Root, Palette, "MEASURING")).Trim();
+                if (phase != "before") ThemeController.SetMode(phase);
+            }
         }
 
         // One line of measures.txt for this phase
@@ -103,7 +123,7 @@ namespace TileStories.Tests
         [UnitySetUp]
         public IEnumerator SetUp()
         {
-            _phase = LookMeasure.RequirePhase(LookMeasure.Typeface);
+            _phase = LookMeasure.RequirePhase(LookMeasure.ActiveLook);
 #if UNITY_EDITOR
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
 #else
@@ -117,6 +137,7 @@ namespace TileStories.Tests
             Assert.IsNotNull(_harness, "the navigation gallery scene holds CardNavGalleryHarness");
             _harness.Gallery.AutoAdvanceAudio = false;
             _harness.Gallery.AutoAdvanceVideo = false;
+            LookMeasure.FreezeHero(_harness.Gallery.Sheet);
             yield return null;
         }
 
@@ -126,8 +147,9 @@ namespace TileStories.Tests
             int index = CardGalleryDefinitions.All.ToList().FindIndex(e => e.Name == name);
             Assert.GreaterOrEqual(index, 0, "precondition: the gallery defines " + name);
             _harness.Gallery.Show(index);
+            LookMeasure.FreezeHero(_harness.Gallery.Sheet);
             yield return CardTestInput.Settle();
-            yield return LookMeasure.Render(LookMeasure.Typeface, _phase, "block_" + name);
+            yield return LookMeasure.Render(LookMeasure.ActiveLook, _phase, "block_" + name);
         }
 
         [UnityTest]
@@ -137,7 +159,7 @@ namespace TileStories.Tests
             Assert.GreaterOrEqual(index, 0, "precondition: the navigation gallery defines " + name);
             _harness.Show(index);
             yield return CardTestInput.Settle();
-            yield return LookMeasure.Render(LookMeasure.Typeface, _phase, name);
+            yield return LookMeasure.Render(LookMeasure.ActiveLook, _phase, name);
         }
 
         // The rich text block under the P0 glare layer: a white sheet at 35 % over the whole screen (sun on the glass, _3.3 R8 S2c)
@@ -153,7 +175,7 @@ namespace TileStories.Tests
             glare.style.backgroundColor = Color.white;
             glare.style.opacity = 0.35f;
             root.Add(glare);
-            try { yield return LookMeasure.Render(LookMeasure.Typeface, _phase, "glare_rich_text_drop_cap_long"); }
+            try { yield return LookMeasure.Render(LookMeasure.ActiveLook, _phase, "glare_rich_text_drop_cap_long"); }
             finally { glare.RemoveFromHierarchy(); }
         }
 
@@ -166,7 +188,7 @@ namespace TileStories.Tests
             sheet.OpenFullView(sheet.Nav.Model.Sections[0].Targets[0]);
             yield return CardTestInput.Settle();
             Assert.IsTrue(sheet.FullView.IsOpen, "precondition: the full view opened");
-            yield return LookMeasure.Render(LookMeasure.Typeface, _phase, "full_view");
+            yield return LookMeasure.Render(LookMeasure.ActiveLook, _phase, "full_view");
         }
     }
 
@@ -179,13 +201,14 @@ namespace TileStories.Tests
         [UnityTest]
         public IEnumerator TheCard_AtPeekHalfAndFull([ValueSource(nameof(Pois))] string poi, [ValueSource(nameof(Languages))] string language)
         {
-            string phase = LookMeasure.RequirePhase(LookMeasure.Typeface);
+            string phase = LookMeasure.RequirePhase(LookMeasure.ActiveLook);
             // - the card opens in the first language of the wall's list
             Session.CardSettings.languages = new List<string> { language, language == "en" ? "pt" : "en" };
             SelectionEventBus.Select(poi);
             yield return CardTestInput.Settle();
             var sheet = Card.Sheet;
             Assert.IsTrue(sheet.IsOpen, "precondition: " + poi + "'s card is open");
+            LookMeasure.FreezeHero(sheet);
 
             sheet.SetStop(SheetStopRule.Stop.Half);
             yield return CardTestInput.Settle();
@@ -193,14 +216,14 @@ namespace TileStories.Tests
             var title = sheet.Root.Q(className: "card-header__title");
             Assert.IsNotNull(title, "precondition: the card has its title");
             var stops = sheet.Stops;
-            LookMeasure.Note(LookMeasure.Typeface, phase, $"{poi} {language}: stops peek {stops.Peek:0.0} half {stops.Half:0.0} full {stops.Full:0.0}; " +
+            LookMeasure.Note(LookMeasure.ActiveLook, phase, $"{poi} {language}: stops peek {stops.Peek:0.0} half {stops.Half:0.0} full {stops.Full:0.0}; " +
                 $"header (expanded, at Half) {header.layout.height:0.0}; peek part {sheet.Stack.PeekPart.layout.height:0.0}; title {title.layout.height:0.0}");
 
             foreach (var stop in new[] { SheetStopRule.Stop.Peek, SheetStopRule.Stop.Half, SheetStopRule.Stop.Full })
             {
                 sheet.SetStop(stop);
                 yield return CardTestInput.Settle();
-                yield return LookMeasure.Render(LookMeasure.Typeface, phase, $"card_{poi}_{language}_{stop.ToString().ToLowerInvariant()}", sheet.Root);
+                yield return LookMeasure.Render(LookMeasure.ActiveLook, phase, $"card_{poi}_{language}_{stop.ToString().ToLowerInvariant()}", sheet.Root);
             }
         }
     }

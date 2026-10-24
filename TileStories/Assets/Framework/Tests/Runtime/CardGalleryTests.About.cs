@@ -182,11 +182,13 @@ namespace TileStories.Tests
             yield return ShowBlock("status_ring_tokens", v => status = (StatusBlockView)v);
             Assert.IsFalse(status.Status.FromWall, "no row: nothing to borrow from the markers");
             Assert.IsTrue(status.Ring.ClassListContains("card-status__ring--tone-2"), "60% -> --ts-status-2");
-            // - --ts-status-2 in CardTokens.uss is rgb(224, 145, 58)
+            // - --ts-status-2 as the theme holds it in the mode the ring is shown in (read from its source, never typed: _3.3 P4.4b)
+            Color expected = default;
+            Assert.IsTrue(ThemeController.TryResolverFor(status.Ring, out var theme) && theme.TryColour("--ts-status-2", out expected), "the ring sits under the theme");
             var tint = status.Ring.resolvedStyle.unityBackgroundImageTintColor;
-            Assert.AreEqual(224f / 255f, tint.r, 0.01f);
-            Assert.AreEqual(145f / 255f, tint.g, 0.01f);
-            Assert.AreEqual(58f / 255f, tint.b, 0.01f);
+            Assert.AreEqual(expected.r, tint.r, 0.01f);
+            Assert.AreEqual(expected.g, tint.g, 0.01f);
+            Assert.AreEqual(expected.b, tint.b, 0.01f);
             Assert.AreEqual("RingSolid", RingPicture(status.Ring), "a known condition keeps a solid line");
             Assert.AreEqual("60% damaged", status.Level.text, "the card string names the percentage, never a key");
         }

@@ -229,8 +229,7 @@ namespace TileStories.Tests
                 Assert.AreEqual(touch, button.height, OnePixel, "and tall");
                 Assert.IsTrue(Sheet.Root.worldBound.Contains(button.center), "inside the card");
                 Assert.LessOrEqual(button.xMax, Sheet.CloseButton.worldBound.xMin + OnePixel, "left of the X");
-                if (Sheet.LanguageButton.resolvedStyle.display == DisplayStyle.Flex)
-                    Assert.LessOrEqual(button.xMax, Sheet.LanguageButton.worldBound.xMin + OnePixel, "left of the language chip");
+                Assert.LessOrEqual(button.xMax, Sheet.SettingsButton.worldBound.xMin + OnePixel, "left of the Aa button");
                 Assert.AreEqual(Sheet.CloseButton.worldBound.yMin, button.yMin, OnePixel, "in the X's row");
                 var title = ((HeaderBlockView)Sheet.Stack.BoundViews[0]).Root.Q<Label>(className: "card-header__title");
                 Assert.IsNotNull(title, "precondition: the header's title");
@@ -245,7 +244,7 @@ namespace TileStories.Tests
         {
             yield return UseNavigation(BuiltInNavElements.TextTabs, CardOptions.NavNone, BuiltInNavElements.DrawerTree, language);
             yield return Open(SheetStopRule.Stop.Full);
-            Assert.AreEqual(DisplayStyle.Flex, Sheet.LanguageButton.resolvedStyle.display, "precondition: the wall offers two languages: the chip shows");
+            Assert.AreEqual(DisplayStyle.Flex, Sheet.SettingsButton.resolvedStyle.display, "precondition: the Aa button shows");
             yield return CardGalleryChecks.Render("Nav_Lamp_menu_button_" + language + "_390");
             yield return Tap(Sheet.MenuButton, "the menu button");
             Assert.AreEqual(BuiltInNavElements.DrawerTree, Overlay.OpenKey, "precondition: the drawer is open");

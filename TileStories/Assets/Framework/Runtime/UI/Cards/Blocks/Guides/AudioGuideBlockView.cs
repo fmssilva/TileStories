@@ -177,12 +177,14 @@ namespace TileStories
             Root.EnableInClassList("card-audio--unavailable", !ClipAvailable);
 
             TimeText.text = length > 0f ? AudioTimeRule.Format(position) + " / " + AudioTimeRule.Format(length) : AudioTimeRule.Format(position);
-            // - the hero's Listen: its length in the words until it is the audio playing, then the running time beside "Listen"
+            // - the hero's Listen is a compact pill (_3.3 P4.4b part 2, one action row): the play mark and ONE time -- the guide's length, then
+            //   the running time while it is the audio; its name keeps the words ("Listen 2:44") for a screen reader and a long press
             if (Variant == BuiltInBlocks.AudioGuideHeroChip)
             {
-                string listen = _strings?.Get(CardStrings.Keys.HeroListen) ?? "{0}";
-                Title.text = string.Format(listen, current || length <= 0f ? "" : AudioTimeRule.Format(length)).Trim();
-                TimeText.style.display = current ? DisplayStyle.Flex : DisplayStyle.None;
+                string lengthWords = length > 0f ? AudioTimeRule.Format(length) : "";
+                Title.text = current ? AudioTimeRule.Format(position) : lengthWords;
+                TimeText.style.display = DisplayStyle.None;
+                if (!playing) PlayButton.tooltip = string.Format(_strings?.Get(CardStrings.Keys.HeroListen) ?? "{0}", lengthWords).Trim();
             }
             Scrubber.SetFraction(AudioTimeRule.Fraction(position, length));
             SpeedChip.text = AudioSpeedRule.Label(_audio != null ? _audio.Speed : AudioSpeedRule.Normal);

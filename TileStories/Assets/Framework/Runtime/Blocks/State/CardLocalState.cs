@@ -106,6 +106,20 @@ namespace TileStories
 
         private string LanguageKey => KeyPrefix + Escape(WallId) + ".language";
 
+        // The mode (light / dark) the visitor picked in the card's Aa settings ("" = never picked: the wall's Default Mode shows). Keyed
+        // by the wall alone, like the language (_3.3 P4.4b)
+        public string Mode() => _store.TryGet(ModeKey, out string mode) ? mode : "";
+
+        // Remember the picked mode ("" or blank forgets it)
+        public void SetMode(string mode)
+        {
+            if (string.IsNullOrWhiteSpace(mode)) { _store.Remove(ModeKey); return; }
+            _store.Set(ModeKey, mode.Trim());
+            AddToIndex(ModeKey);
+        }
+
+        private string ModeKey => KeyPrefix + Escape(WallId) + ".mode";
+
         // Forget everything this wall's cards stored (the POI Editor's reset); how many entries went
         public int ResetAll()
         {

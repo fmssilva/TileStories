@@ -20,7 +20,8 @@
     right: 0;
     bottom: 0;
     overflow: hidden;
-    background-color: var(--ts-surface);
+    /* no ground of its own (_3.3 P4.4b): the chrome rows are opaque (--ts-bar), the stack between them is the glass */
+    background-color: var(--ts-clear);
     border-top-left-radius: var(--ts-radius-l);
     border-top-right-radius: var(--ts-radius-l);
     border-top-width: var(--ts-line-width);
@@ -38,9 +39,12 @@
 /* The grab zone at the top: a full-width, finger-sized drag target with a small bar in its middle */
 .poi-card__handle {
     flex-shrink: 0;
+    background-color: var(--ts-bar);
     height: var(--ts-space-5);
     align-items: center;
-    justify-content: center;
+    /* the bar (opaque since _3.3 P4.4b) overlaps the zone's foot by --ts-bar-overlap: the grabber hangs at its top, above the bar */
+    justify-content: flex-start;
+    padding-top: var(--ts-space-1);
 }
 
 .poi-card__grabber {
@@ -65,17 +69,17 @@
     border-radius: var(--ts-touch-target);
 }
 
-/* The language chip: the same round button as the X, left of it; its text is the code of the language a tap switches to */
-.poi-card__language {
+/* The card's settings (P4.4b; a gear since part 2): the same round button as the X, left of it, the gear the size of the X's mark */
+.poi-card__settings {
     position: absolute;
     top: var(--ts-space-2);
-    right: var(--ts-language-chip-right);
+    right: var(--ts-settings-button-right);
     width: var(--ts-touch-target);
     height: var(--ts-touch-target);
     margin: 0;
     padding: 0;
-    font-size: var(--ts-size-caption);
-    -unity-font-style: bold;
+    align-items: center;
+    justify-content: center;
     color: var(--ts-ink);
     background-color: var(--ts-surface-2);
     border-color: var(--ts-line);
@@ -83,9 +87,15 @@
     border-radius: var(--ts-touch-target);
 }
 
-/* With the chip the header's end stays clear of it, so a long title wraps before the chip, not under it */
-.poi-card--has-language .poi-card__header {
-    padding-right: var(--ts-header-end-with-language);
+.poi-card__settings-glyph {
+    width: var(--ts-icon-size);
+    height: var(--ts-icon-size);
+    color: var(--ts-ink);
+}
+
+/* With the button the header's end stays clear of it, so a long title wraps before it, not under it */
+.poi-card--has-settings .poi-card__header {
+    padding-right: var(--ts-header-end-with-settings);
 }
 
 /* The menu button (_3.2 step 8): the same round button as the X, left of it -- or left of the language chip -- with three bars; it is
@@ -106,16 +116,75 @@
     border-radius: var(--ts-touch-target);
 }
 
-.poi-card--has-language .poi-card__menu-button {
-    right: var(--ts-menu-button-right-with-language);
+.poi-card--has-settings .poi-card__menu-button {
+    right: var(--ts-menu-button-right-with-settings);
 }
 
 .poi-card--has-menu .poi-card__header {
     padding-right: var(--ts-header-end-with-menu);
 }
 
-.poi-card--has-menu.poi-card--has-language .poi-card__header {
-    padding-right: var(--ts-header-end-with-language-and-menu);
+.poi-card--has-menu.poi-card--has-settings .poi-card__header {
+    padding-right: var(--ts-header-end-with-settings-and-menu);
+}
+
+/* ---- the visitor's settings (_3.3 P4.4b, CardVisitorSettingsView): a small panel hanging from the Aa button, in the overlay layer ---- */
+
+/* a popover's scrim catches the tap beside it but stays clear: the card behind shows what a pick changes */
+.card-menu--popover > .card-menu__scrim {
+    background-color: var(--ts-clear);
+}
+
+.card-settings {
+    position: absolute;
+    width: var(--ts-settings-width);
+    padding: var(--ts-space-4);
+    background-color: var(--ts-surface);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-metal-edge);
+    border-radius: var(--ts-radius-l);
+}
+
+.card-settings__title {
+    font-size: var(--ts-size-caption);
+    -unity-font-style: bold;
+    color: var(--ts-ink-2);
+}
+
+.card-settings__group {
+    margin-top: var(--ts-space-3);
+}
+
+.card-settings__group-title {
+    font-size: var(--ts-size-caption);
+    color: var(--ts-ink-2);
+    margin-bottom: var(--ts-space-1);
+}
+
+.card-settings__row {
+    flex-direction: row;
+}
+
+.card-settings__choice {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: var(--ts-touch-target);
+    margin: 0 var(--ts-space-1) 0 0;
+    font-size: var(--ts-size-body);
+    color: var(--ts-ink);
+    background-color: var(--ts-surface-2);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-line);
+    border-radius: var(--ts-touch-target);
+}
+
+/* the current choice: an outline in the accent, never a fill (one accent fill per screen, D5) */
+.card-settings__choice--chosen {
+    -unity-font-style: bold;
+    color: var(--ts-accent-text);
+    background-color: var(--ts-surface);
+    border-color: var(--ts-accent);
+    border-width: var(--ts-chosen-border);
 }
 
 /* The X: two bars crossed at the button's centre (no text glyph, so no visitor string) */
@@ -141,6 +210,7 @@
    zone by --ts-bar-overlap), so the peek stop ends where the buttons do and nothing it holds can move a stop (_3.3 P4.4a) */
 .poi-card__header {
     flex-shrink: 0;
+    background-color: var(--ts-bar);
     flex-direction: row;
     height: var(--ts-touch-target);
     margin-top: var(--ts-bar-overlap);
@@ -363,6 +433,11 @@
 }
 
 .poi-card__stack {
+    /* the sheet's ground between the blocks: tinted translucent glass (_3.3 R11, R12.5), clearer at the top -- card_glass.png is the
+       vertical alpha ramp, --ts-glass-ground its tint (light clear, dark smoked); USS 6.3 has no gradients */
+    background-image: url("card_glass.png");
+    -unity-background-image-tint-color: var(--ts-glass-ground);
+    -unity-background-scale-mode: stretch-to-fill;
     flex-grow: 1;
     flex-shrink: 1;
     /* the scroll gives up its space first, so a pinned footer stays inside the card at every stop */
@@ -379,6 +454,93 @@
    Blocks have no bottom margin of their own, so every gap is this token. */
 .card-block-slot {
     margin-bottom: var(--ts-block-gap);
+}
+
+/* ---- the block frame (_3.3 R13.1, R12.5, P4.4b; BlockFrame): a block of the scroll is an opaque surface inside a metal rim ----
+   The slot carries the surface and the rim's OUTER line (dark metal in light, light metal in dark: the edge against the glass over a
+   sunny wall, measured by ThemeFrameSceneTests); the rim part the inner band, the shadow part the elevation (light only: its tint is
+   transparent in dark, where the surface tone gives the depth, R8 S7). Padding 16 on the 8 grid. */
+.card-block-slot--framed {
+    margin: 0 var(--ts-space-4) var(--ts-block-gap) var(--ts-space-4);
+    padding: var(--ts-space-4);
+    background-color: var(--ts-surface);
+    border-width: var(--ts-line-width);
+    border-color: var(--ts-metal-edge);
+    border-radius: var(--ts-radius-l);
+}
+
+/* inside the frame its padding is the block's margin */
+.card-block-slot--framed > .card-block {
+    margin: 0;
+}
+
+.card-block-slot--framed > .card-block-heading {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* a picture, carousel, strip or track (BlockFrame.BleedClass) runs edge to edge to the frame's inner edge: words keep the padding,
+   media gets the width back. --ts-frame-bleed is minus the frame's side padding (a USS length cannot be negated: the pair is checked
+   by ThemeFrameSceneTests) */
+.card-block-slot--framed .card-block-bleed {
+    margin-left: var(--ts-frame-bleed);
+    margin-right: var(--ts-frame-bleed);
+}
+
+.card-block-frame__shadow,
+.card-block-frame__rim {
+    display: none;
+    position: absolute;
+}
+
+/* the inner band: light where the light falls (top, left), shade opposite -- the brushed-metal edge, 1 px inside the outer line */
+.card-block-slot--framed > .card-block-frame__rim {
+    display: flex;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-width: var(--ts-line-width);
+    border-top-color: var(--ts-metal-hi);
+    border-left-color: var(--ts-metal-hi);
+    border-bottom-color: var(--ts-metal-lo);
+    border-right-color: var(--ts-metal-lo);
+    border-radius: var(--ts-radius-l);
+}
+
+/* the shadow: an outer-only 9-slice (card_block_shadow.png: transparent over the block, so it never greys the surface) laid around
+   the slot; its corners are sliced at the texture's margin + the block radius */
+.card-block-slot--framed > .card-block-frame__shadow {
+    display: flex;
+    left: var(--ts-frame-shadow-out);
+    top: var(--ts-frame-shadow-out);
+    right: var(--ts-frame-shadow-out);
+    bottom: var(--ts-frame-shadow-out);
+    background-image: url("card_block_shadow.png");
+    -unity-background-image-tint-color: var(--ts-elevation-1);
+    -unity-slice-left: var(--ts-frame-shadow-slice);
+    -unity-slice-top: var(--ts-frame-shadow-slice);
+    -unity-slice-right: var(--ts-frame-shadow-slice);
+    -unity-slice-bottom: var(--ts-frame-shadow-slice);
+}
+
+/* featured: a deeper shadow and a larger title (the 1-2 blocks a wall pushes) */
+.card-block-slot--featured > .card-block-frame__shadow {
+    -unity-background-image-tint-color: var(--ts-elevation-2);
+}
+
+.card-block-slot--featured > .card-block-heading {
+    font-size: var(--ts-size-title);
+}
+
+/* quiet: the hairline edge alone -- no rim band, no shadow -- and a smaller title (meta blocks such as sources) */
+.card-block-slot--quiet > .card-block-frame__rim,
+.card-block-slot--quiet > .card-block-frame__shadow {
+    display: none;
+}
+
+.card-block-slot--quiet > .card-block-heading {
+    font-size: var(--ts-size-body);
 }
 
 /* The common heading every kind may have (BlockKindDefinition.HeadingField): one look for every block */
@@ -423,6 +585,7 @@
 
 .poi-card__footer {
     flex-shrink: 0;
+    background-color: var(--ts-bar);
 }
 
 /* The bottom navigation slot (NavSlots): opaque, with a line above it so the content never reads as running into the bar. Its element's

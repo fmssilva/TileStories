@@ -12,67 +12,46 @@
   .clinerules\60-finishing.md
 So start by reading them all. 
 
-
-## `And now: _3.3 POI Card Look, Feel & Motion -- P4.4a the header and the hero`
+## `And now: _3.3 POI Card Look, Feel & Motion -- P4.4b part 2: the six reds, the hero row, the settings button, close`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Fonts: the marker
-SDF fonts and `Assets/Dev/StyleSpike/Fonts` -> `git checkout --` if a run rewrote them. Baseline: none (HEAD 52a152b; P4.3's full
-PlayMode run was green except the two Menu tests this block must close). Ask about Unity's place with `40-testing.md` 4.2.3's
-a / b / c actions, word for word.
+SDF fonts and `Assets/Dev/StyleSpike/Fonts` -> `git checkout --` if a run rewrote them. The tree is P4.4b part 1's, UNCOMMITTED:
+continue it (do not reset). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word.
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 3 (this is "4a"), R10.9 (the header), R11 v3 + v4
-(the hero over its picture, the scrim, the CTAs at its foot, `hero_motion`, the category chip and audio chip out of the header),
-R9 D1 (text on a picture only over a scrim measured >= 7:1 at its worst pixel), D5 (one focal action), R12.3 (type), the P4.3
-Build log (its findings), and the TODOs "Half is mostly header" and "[P5, header text column]".
-The visual target: `proj_guides/_3.3.1_Prototype/Main.dc.html` (v4) -- the hero block and the top bar.
-REQUIRED READING (all lines): `.clinerules/30-ui-content.md`, `40-testing.md` 4.2, 4.2.4b, 4.5; `_3.2_POI_Card_Navigation.md`
-sections on the chrome rule (the sticky CTA's floor) and `HeaderCollapseRule`.
-WORKER MODEL: Opus-class -- the sheet's stops, layout and the header's collapse are shared ground; design judgement on captures.
-TEST PLAN: targeted Card / Poi fixtures first, then the FULL PlayMode run (shared ground), then full EditMode (Unity focused).
+Domain spec: `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 3 ("4b") + the P4.4a review row, R12, R13.1, R9 D1 / D2; your own
+tracker `proj_guides/__curr_plan_tracker.md` (P4.4b part 1's HANDOFF: the six reds, what was done, what was not) -- continue in it.
+REQUIRED READING: `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5; `_5.1_Editor_Tab.md` "HOW TO USE THIS FILE" + section 0.
+WORKER MODEL: Opus-class -- three real regressions to root-cause in shared ground (audio owner, nav landing, the frame).
+TEST PLAN: the six red fixtures first, then the targeted set, then the FULL PlayMode run (owed), then full EditMode (focused).
 
-GOAL: the card opens like a premium page. The PICTURE header becomes a hero: the picture full-width, the title, one line and
-the card's actions ON it over a graded scrim. The title never wraps beside the round buttons again.
+PART 1 -- the six reds (each: root cause FIRST, with numbers, then the fix; never loosen an assertion):
+1. Audio (2): a live edit while a guide plays stops it; the hero's Listen shows Play instead of Pause. Find what the frame /
+   hero change re-binds (a re-created view losing the owner's playing state?) and fix it at the owner / binding level.
+2. Nav rails (1): a rail card's tap lands 1713 px off. Find which measurement the new frame wrapper shifted (slot vs frame
+   offset, `TryGetReadablePart`, the jump target) and fix the measurement, not the test.
+3. Track gallery (2): DECIDED (Architect, reversible): text keeps the 16 pt padding inside the frame; pictures, carousels,
+   strips and tracks run edge to edge to the frame's INNER edge (no side padding), like an App Store card -- the content width
+   goes back to ~354 pt, so a short timeline and a 2-card carousel fit again. Implement it as a frame rule (a media / track
+   region class), then re-run them.
+4. Feedback stars (1): explain why the outlined star's centre reads as filled in light, with the pixel values, and fix the
+   token or the drawing so empty / filled stay distinct in both modes (and >= 3:1 non-text contrast).
+PART 2 -- the unfinished sub-step 4.4b.4: the hero's actions in ONE row (the focal + a compact "▶ m:ss" Listen pill); an Editor
+notice when a hero title would need 3 lines (measured with the real font).
+PART 3 -- the settings button (developer, 2026-10-24): the "Aa" button becomes a GEAR icon (the universal "settings" sign; ⋮
+would read "more actions" and sit beside the ≡ Menu), accessible name "Card settings" / "Definições do cartão"; the panel shows
+languages by their NATIVE names ("English", "Português"). Real-window Editor tests + captures for the two new rows (Default Mode,
+Emphasis), which part 1 did not take.
+PART 4 -- close: the targeted set, the FULL PlayMode run, full EditMode; `_3.3` Build log (P4.4b: the measured table per mode,
+the edge measures 3.58 / 3.21), `10-structure.md`, `_5.1`, `_3.1` 15.3.
 
-MEASURE FIRST: stops and header heights for The Lamp and The Painting, EN + PT, with and without a Menu (P4.3's numbers), and
-captures at Peek / Half / Full.
+VISUALS: the fixed tracks (before / after width), the stars in both modes, the hero row, the gear + panel in both modes; open
+the glare renders part 1 wrote but never opened, and judge them.
+OUT OF SCOPE: section glass sheets, the moving rim light (4c); text size and reduce-motion switches.
+Stop when every red is fixed by its cause, the targeted set, the full PlayMode run and full EditMode are green. Finish with the
+final report of `.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the Architect
+commits after the review.
 
-PART 1 (number sub-steps 4.4a.1 ...):
-1. The top bar (grabber + the round buttons) and the bar TITLE: the bar shows the title (one line, ellipsis only if it truly does
-   not fit) whenever the hero's title is NOT on screen (at Peek, and once the hero scrolls away); at Half / Full top the hero
-   carries it. The hero's title is never in the same row as the buttons, so a Menu / language button can never wrap it.
-2. The hero (header variants image_parallax, split_then_now, spotlight_crop, video_loop, model_turntable): the picture
-   full-width; HEIGHT = the Half stop's visible content height (so at Half the visitor sees the whole hero: picture, title, line,
-   actions), never below 280 pt; at Full the hero keeps that height. Over it: a graded scrim, then at its lower third the
-   eyebrow (place + period, from existing fields; none if none), the title in the display face, the subtitle, and at its foot
-   the card's actions (R11 v3: the primary = the card's sticky / primary action, focal; "Listen m:ss" when the card has an
-   audio guide, replacing the hero_chip). Text over the scrim >= 7:1 at its WORST pixel on every hero picture of the test wall,
-   measured on the render (a failing picture gets a stronger scrim, never weaker text). text_only / compact: the title block on
-   a plain plate, no picture.
-3. `hero_motion`: a wide picture slowly PANS across its width (R11 v4: ~26 s, back and forth), reduce motion = its centre still;
-   the picture moves at ~0.45x the scroll inside its frame; the hero's text rises and fades as the card scrolls. Transform /
-   opacity only (R8 S6). New field `hero_motion` (pan | zoom | none, default pan) with its Editor row (+ (i)).
-4. Type: the category chip leaves the header (the category stays available in About / quick facts -- one line in the report on
-   where). Display headings at 18 pt looked lighter than Atkinson Bold beside them (P4.3): set the heading sizes / weight so the
-   hierarchy reads (block heading 20, page title 30-32, hero 40-46 by width) -- add a Fraunces Bold cut only if SemiBold at those
-   sizes still reads light (judge on captures, say which). Numbers: dates and figures in display roles (timeline dates, years
-   in titles, quick-facts values, big numbers) use Fraunces's figures; body text keeps Atkinson (developer's choice on the slashed
-   zero).
-5. The sticky CTA: once the primary action lives in the hero, the sticky bar appears only after the hero has scrolled out of
-   view -- so the PT Lamp at Half shows its action again (P4.3 finding). `PoiCardMenuSceneTests` / `PoiCardFacetSceneTests` ("a
-   Menu never moves a stop") must go GREEN through the design, not by changing their assertion.
-
-PART 2 -- docs: `_3.3` Build log (P4.4a, stops / heights before -> after), `10-structure.md`, the TODOs it closes.
-
-VISUALS: The Lamp and The Painting, EN + PT, Peek / Half / Full, with and without a Menu, before / after side by side; a
-frame sequence of the hero pan and of the text rising on scroll; the scrim's worst-pixel ratios. Open each and judge it as
-design (does it read like the prototype's hero?).
-
-OUT OF SCOPE: light mode and new palettes (4b), section glass / rim light (4c), the block frame, any other kind's look.
-Stop when the hero renders on every picture header variant, the two Menu tests and the PT sticky CTA are green by design, the
-targeted fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of `.clinerules/60-finishing.md`
-6.4, and END it with the developer's review questions for this block (does the hero read as premium? Peek / Half right?). Do not
-commit: the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

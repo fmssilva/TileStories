@@ -105,7 +105,9 @@
     margin: 0 0 0 var(--ts-space-1);
 }
 
+/* the words keep air on both sides: the track runs to the frame's edge (P4.4b part 2) and its rail and dots with it, never the words */
 .card-timeline--horizontal .card-timeline__body {
+    padding-left: var(--ts-space-3);
     padding-right: var(--ts-space-3);
 }
 

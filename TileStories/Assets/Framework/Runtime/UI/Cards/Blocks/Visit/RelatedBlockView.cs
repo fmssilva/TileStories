@@ -52,6 +52,7 @@ namespace TileStories
                 verticalScrollerVisibility = ScrollerVisibility.Hidden,
             };
             Track.AddToClassList("card-related__track");
+            BlockFrame.Bleed(Track);
             Track.contentContainer.AddToClassList("card-related__track-content");
 
             Next = new Button(() => Pick(NextPoiId)) { name = "card-related-next" };

@@ -57,6 +57,7 @@ namespace TileStories
 
             Surface = new VisualElement { name = "card-video-surface" };
             Surface.AddToClassList("card-video__surface");
+            BlockFrame.Bleed(Surface);
             Poster = new CardImage("card-video__poster");
             Frames = new VisualElement { name = "card-video-frames", pickingMode = PickingMode.Ignore };
             Frames.AddToClassList("card-video__frames");

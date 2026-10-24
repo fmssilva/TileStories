@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Theme.default
   m_EditorClassIdentifier: TileStories::TileStories.ThemeAsset
   key: default
-  defaultMode: dark
+  defaultMode: light
   shared:
     colours: []
     lengths:
@@ -134,137 +134,553 @@ MonoBehaviour:
       value: 0
       note: 
   modes:
-  - key: dark
+  - key: light
     tokens:
       colours:
       - name: --ts-bg
-        value: {r: 0.101960786, g: 0.08235294, b: 0.0627451, a: 1}
-        note: Surfaces
+        value: {r: 0.956862745, g: 0.941176471, b: 0.909803922, a: 1}
+        note: 'Surfaces (_3.3 P4.4b, measured: ThemeContrastTests)'
       - name: --ts-surface
-        value: {r: 0.13725491, g: 0.10980392, b: 0.08235294, a: 1}
-        note: 
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 'A block: the opaque surface inside its rim (R12.5)'
       - name: --ts-surface-2
-        value: {r: 0.1882353, g: 0.15294118, b: 0.11764706, a: 1}
-        note: 
+        value: {r: 0.956862745, g: 0.941176471, b: 0.909803922, a: 1}
+        note: 'Buttons, chips and wells on a block'
       - name: --ts-scrim
         value: {r: 0, g: 0, b: 0, a: 0.7}
-        note: 'The scrim under a menu over the card (_3.2 step 8). The project renders
-          in LINEAR colour, so an alpha blends in linear light: 0.5 left the card''s
-          text behind at 181 of 247 (measured), still competing with the menu; 0.7
-          recedes it to a frame (about 144)'
+        note: 'The scrim under a menu over the card (_3.2 step 8). The project renders in LINEAR colour, so an alpha blends in linear light: 0.5 left the card''s text behind at 181 of 247 (measured), still competing with the menu; 0.7 recedes it to a frame (about 144)'
       - name: --ts-hero-fade
-        value: {r: 0.101960786, g: 0.08235294, b: 0.0627451, a: 0.9}
+        value: {r: 0.956862745, g: 0.941176471, b: 0.909803922, a: 0.9}
         note: 
       - name: --ts-scrim-hero
-        value: {r: 0.039215688, g: 0.03137255, b: 0.023529412, a: 0.92}
-        note: 'The hero''s scrim behind its words (solid) and the tint of the ramp above
-          them (hero_scrim.png holds the grade). The project blends in LINEAR light: white
-          words keep 7:1 only over a background of luminance <= 0.1, so over a bright sky
-          (0.8) the scrim needs ~0.9; measured on the render at the worst pixel of every
-          hero picture (PoiCardHeroSceneTests)'
+        value: {r: 0.039215686, g: 0.031372549, b: 0.023529412, a: 0.94}
+        note: 'The hero''s scrim behind its words (solid) and the tint of the ramp above them (hero_scrim.png holds the grade). The project blends in LINEAR light, so the alpha is chosen against the WORST pixel any picture can have, pure white: at 0.94 the ground stays at luminance 0.062 and the eyebrow (--ts-on-scrim-2) keeps 7.7:1, the title 9.3:1, over any picture (ThemeContrastTests; 0.92 left the eyebrow 6.7:1 over The Lamp''s sky once its actions took one row, P4.4b part 2). The same in both modes: the hero is a picture'
       - name: --ts-on-scrim
         value: {r: 1, g: 1, b: 1, a: 1}
         note: 'The hero''s title, line and outline button over the scrim'
       - name: --ts-on-scrim-2
-        value: {r: 0.94509804, g: 0.9137255, b: 0.85490197, a: 1}
+        value: {r: 0.945098039, g: 0.91372549, b: 0.854901961, a: 1}
         note: 'The hero''s eyebrow over the scrim (a warm white)'
+      - name: --ts-bar
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 'The card''s chrome ground: the grabber row, the bar, the top strip, the footer -- opaque, so their words never sit on the glass'
+      - name: --ts-glass-ground
+        value: {r: 0.956862745, g: 0.941176471, b: 0.909803922, a: 0.62}
+        note: 'The sheet''s ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical alpha ramp, so the top is clearer; this alpha is the ramp''s foot'
       - name: --ts-ink
-        value: {r: 0.96862745, g: 0.9372549, b: 0.8627451, a: 1}
-        note: Text
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 'Text: solid ink only (D1: no alpha on text), every role >= 7:1 on every surface it sits on'
       - name: --ts-ink-2
-        value: {r: 0.96862745, g: 0.9372549, b: 0.8627451, a: 0.8}
+        value: {r: 0.239215686, g: 0.211764706, b: 0.176470588, a: 1}
         note: 
       - name: --ts-ink-3
-        value: {r: 0.96862745, g: 0.9372549, b: 0.8627451, a: 0.6}
+        value: {r: 0.309803922, g: 0.278431373, b: 0.235294118, a: 1}
         note: 
       - name: --ts-on-accent
-        value: {r: 0.101960786, g: 0.08235294, b: 0.0627451, a: 1}
+        value: {r: 1, g: 1, b: 1, a: 1}
         note: 
       - name: --ts-accent
-        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
-        note: Accent
+        value: {r: 0.117647059, g: 0.22745098, b: 0.541176471, a: 1}
+        note: 'Accent: the heritage option of the accent knob (light cobalt, dark gold)'
       - name: --ts-accent-text
-        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+        value: {r: 0.117647059, g: 0.22745098, b: 0.541176471, a: 1}
         note: 
       - name: --ts-accent-2
-        value: {r: 0.7058824, g: 0.47058824, b: 0.15686275, a: 1}
+        value: {r: 0.788235294, g: 0.635294118, b: 0.152941176, a: 1}
         note: 
       - name: --ts-line
-        value: {r: 0.96862745, g: 0.9372549, b: 0.8627451, a: 0.16}
-        note: Lines
+        value: {r: 0.435294118, g: 0.4, b: 0.352941176, a: 1}
+        note: 'Lines: a border that means something (>= 4.5:1 on the surfaces)'
       - name: --ts-focus
-        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+        value: {r: 0.117647059, g: 0.22745098, b: 0.541176471, a: 1}
         note: 
+      - name: --ts-hair
+        value: {r: 0.850980392, g: 0.823529412, b: 0.776470588, a: 1}
+        note: 'A decorative hairline inside a block (separators): never the only cue'
+      - name: --ts-metal-edge
+        value: {r: 0.262745098, g: 0.235294118, b: 0.196078431, a: 1}
+        note: 'The block frame (R13.1, R12.5): the rim''s outer line, measured against the sheet ground over the sunny-wall photo (ThemeFrameSceneTests). Dark metal in light, light metal in dark: the line or the surface beside it clears 3:1 against ANY ground -- light: the white surface up to ground luminance 0.30, this line (L 0.048) from 0.24; dark: the surface from 0.13, this line (L 0.52) below it'
+      - name: --ts-metal-hi
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 'The rim''s inner band where the light falls (top, left)'
+      - name: --ts-metal-lo
+        value: {r: 0.788235294, g: 0.749019608, b: 0.68627451, a: 1}
+        note: 'The rim''s inner band in shade (bottom, right)'
+      - name: --ts-elevation-1
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 0.2}
+        note: 'A block''s shadow (tints card_block_shadow.png). Light only: a shadow is invisible on a dark ground (R8 S7), dark gets its depth from the surface tone'
+      - name: --ts-elevation-2
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 0.32}
+        note: 'A featured block''s shadow'
       - name: --ts-status-0
-        value: {r: 0.43529412, g: 0.7490196, b: 0.4509804, a: 1}
-        note: Status ramp (the markers' outline levels, intact -> destroyed)
+        value: {r: 0.180392157, g: 0.490196078, b: 0.196078431, a: 1}
+        note: 'Status ramp (the markers'' outline levels, intact -> destroyed)'
       - name: --ts-status-1
-        value: {r: 0.7882353, g: 0.7058824, b: 0.34509805, a: 1}
+        value: {r: 0.478431373, g: 0.384313725, b: 0, a: 1}
         note: 
       - name: --ts-status-2
-        value: {r: 0.8784314, g: 0.5686275, b: 0.22745098, a: 1}
+        value: {r: 0.639215686, g: 0.329411765, b: 0, a: 1}
         note: 
       - name: --ts-status-3
-        value: {r: 0.8235294, g: 0.33333334, b: 0.24705882, a: 1}
+        value: {r: 0.650980392, g: 0.168627451, b: 0.121568627, a: 1}
         note: 
       - name: --ts-status-4
-        value: {r: 0.5568628, g: 0.5568628, b: 0.5568628, a: 1}
+        value: {r: 0.419607843, g: 0.419607843, b: 0.419607843, a: 1}
         note: 
       - name: --ts-family-meta
-        value: {r: 0.76862746, g: 0.7294118, b: 0.65882355, a: 1}
-        note: 'Family colours (_3.2 navigation: FamilyDefinition.ColorToken, one
-          per registered family, read by name through CardTokenColours; each at least
-          3:1 on --ts-surface, and never shown without the family''s icon or words)'
+        value: {r: 0.368627451, g: 0.341176471, b: 0.298039216, a: 1}
+        note: 'Family colours (_3.2 navigation: FamilyDefinition.ColorToken, read by name through CardTokenColours): the FILL -- each >= 4.5:1 on the surfaces, never shown without the family''s icon or words'
       - name: --ts-family-about
-        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+        value: {r: 0.494117647, g: 0.258823529, b: 0.023529412, a: 1}
         note: 
       - name: --ts-family-media
-        value: {r: 0.49803922, g: 0.7019608, b: 0.8352941, a: 1}
+        value: {r: 0.117647059, g: 0.305882353, b: 0.549019608, a: 1}
         note: 
       - name: --ts-family-guides
-        value: {r: 0.6392157, g: 0.77254903, b: 0.52156866, a: 1}
+        value: {r: 0.141176471, g: 0.341176471, b: 0.2, a: 1}
         note: 
       - name: --ts-family-stories
-        value: {r: 0.84313726, g: 0.6509804, b: 0.78431374, a: 1}
+        value: {r: 0.478431373, g: 0.180392157, b: 0.360784314, a: 1}
         note: 
       - name: --ts-family-ar
-        value: {r: 0.49803922, g: 0.81960785, b: 0.7882353, a: 1}
+        value: {r: 0.058823529, g: 0.368627451, b: 0.352941176, a: 1}
         note: 
       - name: --ts-family-play
-        value: {r: 0.9490196, g: 0.77254903, b: 0.4862745, a: 1}
+        value: {r: 0.603921569, g: 0.184313725, b: 0.121568627, a: 1}
         note: 
       - name: --ts-family-visit
-        value: {r: 0.6901961, g: 0.65882355, b: 0.8784314, a: 1}
+        value: {r: 0.352941176, g: 0.290196078, b: 0.541176471, a: 1}
         note: 
       - name: --ts-family-community
-        value: {r: 0.9098039, g: 0.65882355, b: 0.4862745, a: 1}
+        value: {r: 0.478431373, g: 0.294117647, b: 0, a: 1}
         note: 
       - name: --ts-family-navigation
-        value: {r: 0.76862746, g: 0.8392157, b: 0.47058824, a: 1}
+        value: {r: 0.290196078, g: 0.352941176, b: 0.070588235, a: 1}
+        note: 
+      - name: --ts-family-meta-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 'The ink on a family fill (a filled family pill): >= 7:1 on its fill'
+      - name: --ts-family-about-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-media-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-guides-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-stories-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-ar-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-play-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-visit-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-community-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-navigation-ink
+        value: {r: 1, g: 1, b: 1, a: 1}
         note: 
       - name: --ts-correct
-        value: {r: 0.43529412, g: 0.7490196, b: 0.4509804, a: 1}
-        note: 
+        value: {r: 0.090196078, g: 0.329411765, b: 0.105882353, a: 1}
+        note: 'The good / bad roles (R12.2 -good / -bad): a right and a wrong answer'
       - name: --ts-wrong
-        value: {r: 0.8235294, g: 0.33333334, b: 0.24705882, a: 1}
+        value: {r: 0.556862745, g: 0.105882353, b: 0.070588235, a: 1}
         note: 
       - name: --ts-result-fill
-        value: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 0.28}
-        note: 'poll (Play.uss): the tint of a results bar behind an option''s words
-          (only drawn when an app supplies results)'
+        value: {r: 0.117647059, g: 0.22745098, b: 0.541176471, a: 0.14}
+        note: 'poll (Play.uss): the tint of a results bar behind an option''s words (only drawn when an app supplies results)'
       - name: --ts-video-letterbox
         value: {r: 0, g: 0, b: 0, a: 1}
-        note: the bars around a playing video whose shape differs from its frame's
+        note: 'the bars around a playing video whose shape differs from its frame''s'
       - name: --ts-clear
         value: {r: 0, g: 0, b: 0, a: 0}
-        note: 'no colour at all: a border kept for layout that shows only when marked
-          (the filmstrip''s current picture)'
+        note: 'no colour at all: a border kept for layout that shows only when marked (the filmstrip''s current picture)'
       lengths: []
       numbers: []
       durations: []
       easings: []
       fontStyles: []
-  knobs: []
+  - key: dark
+    tokens:
+      colours:
+      - name: --ts-bg
+        value: {r: 0.062745098, g: 0.058823529, b: 0.050980392, a: 1}
+        note: 'Surfaces (_3.3 P4.4b, measured: ThemeContrastTests)'
+      - name: --ts-surface
+        value: {r: 0.109803922, g: 0.101960784, b: 0.090196078, a: 1}
+        note: 'A block: the opaque surface inside its rim (R12.5)'
+      - name: --ts-surface-2
+        value: {r: 0.149019608, g: 0.137254902, b: 0.121568627, a: 1}
+        note: 'Buttons, chips and wells on a block'
+      - name: --ts-scrim
+        value: {r: 0, g: 0, b: 0, a: 0.7}
+        note: 'The scrim under a menu over the card (_3.2 step 8). The project renders in LINEAR colour, so an alpha blends in linear light: 0.5 left the card''s text behind at 181 of 247 (measured), still competing with the menu; 0.7 recedes it to a frame (about 144)'
+      - name: --ts-hero-fade
+        value: {r: 0.062745098, g: 0.058823529, b: 0.050980392, a: 0.9}
+        note: 
+      - name: --ts-scrim-hero
+        value: {r: 0.039215686, g: 0.031372549, b: 0.023529412, a: 0.94}
+        note: 'The hero''s scrim behind its words (solid) and the tint of the ramp above them (hero_scrim.png holds the grade). The project blends in LINEAR light, so the alpha is chosen against the WORST pixel any picture can have, pure white: at 0.94 the ground stays at luminance 0.062 and the eyebrow (--ts-on-scrim-2) keeps 7.7:1, the title 9.3:1, over any picture (ThemeContrastTests; 0.92 left the eyebrow 6.7:1 over The Lamp''s sky once its actions took one row, P4.4b part 2). The same in both modes: the hero is a picture'
+      - name: --ts-on-scrim
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 'The hero''s title, line and outline button over the scrim'
+      - name: --ts-on-scrim-2
+        value: {r: 0.945098039, g: 0.91372549, b: 0.854901961, a: 1}
+        note: 'The hero''s eyebrow over the scrim (a warm white)'
+      - name: --ts-bar
+        value: {r: 0.109803922, g: 0.101960784, b: 0.090196078, a: 1}
+        note: 'The card''s chrome ground: the grabber row, the bar, the top strip, the footer -- opaque, so their words never sit on the glass'
+      - name: --ts-glass-ground
+        value: {r: 0.062745098, g: 0.058823529, b: 0.050980392, a: 0.8}
+        note: 'The sheet''s ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical alpha ramp, so the top is clearer; this alpha is the ramp''s foot'
+      - name: --ts-ink
+        value: {r: 0.964705882, g: 0.945098039, b: 0.909803922, a: 1}
+        note: 'Text: solid ink only (D1: no alpha on text), every role >= 7:1 on every surface it sits on'
+      - name: --ts-ink-2
+        value: {r: 0.850980392, g: 0.819607843, b: 0.764705882, a: 1}
+        note: 
+      - name: --ts-ink-3
+        value: {r: 0.760784314, g: 0.725490196, b: 0.658823529, a: 1}
+        note: 
+      - name: --ts-on-accent
+        value: {r: 0.101960784, g: 0.070588235, b: 0.023529412, a: 1}
+        note: 
+      - name: --ts-accent
+        value: {r: 0.949019608, g: 0.709803922, b: 0.266666667, a: 1}
+        note: 'Accent: the heritage option of the accent knob (light cobalt, dark gold)'
+      - name: --ts-accent-text
+        value: {r: 0.949019608, g: 0.709803922, b: 0.266666667, a: 1}
+        note: 
+      - name: --ts-accent-2
+        value: {r: 0.705882353, g: 0.470588235, b: 0.156862745, a: 1}
+        note: 
+      - name: --ts-line
+        value: {r: 0.603921569, g: 0.568627451, b: 0.505882353, a: 1}
+        note: 'Lines: a border that means something (>= 4.5:1 on the surfaces)'
+      - name: --ts-focus
+        value: {r: 0.949019608, g: 0.709803922, b: 0.266666667, a: 1}
+        note: 
+      - name: --ts-hair
+        value: {r: 0.22745098, g: 0.211764706, b: 0.184313725, a: 1}
+        note: 'A decorative hairline inside a block (separators): never the only cue'
+      - name: --ts-metal-edge
+        value: {r: 0.811764706, g: 0.776470588, b: 0.709803922, a: 1}
+        note: 'The block frame (R13.1, R12.5): the rim''s outer line, measured against the sheet ground over the sunny-wall photo (ThemeFrameSceneTests). Dark metal in light, light metal in dark: the line or the surface beside it clears 3:1 against ANY ground -- light: the white surface up to ground luminance 0.30, this line (L 0.048) from 0.24; dark: the surface from 0.13, this line (L 0.52) below it'
+      - name: --ts-metal-hi
+        value: {r: 0.290196078, g: 0.266666667, b: 0.231372549, a: 1}
+        note: 'The rim''s inner band where the light falls (top, left)'
+      - name: --ts-metal-lo
+        value: {r: 0.141176471, g: 0.129411765, b: 0.11372549, a: 1}
+        note: 'The rim''s inner band in shade (bottom, right)'
+      - name: --ts-elevation-1
+        value: {r: 0, g: 0, b: 0, a: 0}
+        note: 'A block''s shadow (tints card_block_shadow.png). Light only: a shadow is invisible on a dark ground (R8 S7), dark gets its depth from the surface tone'
+      - name: --ts-elevation-2
+        value: {r: 0, g: 0, b: 0, a: 0}
+        note: 'A featured block''s shadow'
+      - name: --ts-status-0
+        value: {r: 0.435294118, g: 0.749019608, b: 0.450980392, a: 1}
+        note: 'Status ramp (the markers'' outline levels, intact -> destroyed)'
+      - name: --ts-status-1
+        value: {r: 0.788235294, g: 0.705882353, b: 0.345098039, a: 1}
+        note: 
+      - name: --ts-status-2
+        value: {r: 0.878431373, g: 0.568627451, b: 0.22745098, a: 1}
+        note: 
+      - name: --ts-status-3
+        value: {r: 0.88627451, g: 0.450980392, b: 0.360784314, a: 1}
+        note: 
+      - name: --ts-status-4
+        value: {r: 0.556862745, g: 0.556862745, b: 0.556862745, a: 1}
+        note: 
+      - name: --ts-family-meta
+        value: {r: 0.768627451, g: 0.729411765, b: 0.658823529, a: 1}
+        note: 'Family colours (_3.2 navigation: FamilyDefinition.ColorToken, read by name through CardTokenColours): the FILL -- each >= 4.5:1 on the surfaces, never shown without the family''s icon or words'
+      - name: --ts-family-about
+        value: {r: 0.909803922, g: 0.658823529, b: 0.352941176, a: 1}
+        note: 
+      - name: --ts-family-media
+        value: {r: 0.552941176, g: 0.721568627, b: 0.917647059, a: 1}
+        note: 
+      - name: --ts-family-guides
+        value: {r: 0.560784314, g: 0.819607843, b: 0.619607843, a: 1}
+        note: 
+      - name: --ts-family-stories
+        value: {r: 0.890196078, g: 0.639215686, b: 0.784313725, a: 1}
+        note: 
+      - name: --ts-family-ar
+        value: {r: 0.498039216, g: 0.819607843, b: 0.788235294, a: 1}
+        note: 
+      - name: --ts-family-play
+        value: {r: 0.949019608, g: 0.639215686, b: 0.560784314, a: 1}
+        note: 
+      - name: --ts-family-visit
+        value: {r: 0.764705882, g: 0.709803922, b: 0.941176471, a: 1}
+        note: 
+      - name: --ts-family-community
+        value: {r: 0.909803922, g: 0.760784314, b: 0.48627451, a: 1}
+        note: 
+      - name: --ts-family-navigation
+        value: {r: 0.768627451, g: 0.839215686, b: 0.470588235, a: 1}
+        note: 
+      - name: --ts-family-meta-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 'The ink on a family fill (a filled family pill): >= 7:1 on its fill'
+      - name: --ts-family-about-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 
+      - name: --ts-family-media-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 
+      - name: --ts-family-guides-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 
+      - name: --ts-family-stories-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 
+      - name: --ts-family-ar-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 
+      - name: --ts-family-play-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 
+      - name: --ts-family-visit-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 
+      - name: --ts-family-community-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 
+      - name: --ts-family-navigation-ink
+        value: {r: 0.078431373, g: 0.066666667, b: 0.050980392, a: 1}
+        note: 
+      - name: --ts-correct
+        value: {r: 0.560784314, g: 0.819607843, b: 0.619607843, a: 1}
+        note: 'The good / bad roles (R12.2 -good / -bad): a right and a wrong answer'
+      - name: --ts-wrong
+        value: {r: 0.949019608, g: 0.639215686, b: 0.560784314, a: 1}
+        note: 
+      - name: --ts-result-fill
+        value: {r: 0.949019608, g: 0.709803922, b: 0.266666667, a: 0.1}
+        note: 'poll (Play.uss): the tint of a results bar behind an option''s words (only drawn when an app supplies results)'
+      - name: --ts-video-letterbox
+        value: {r: 0, g: 0, b: 0, a: 1}
+        note: 'the bars around a playing video whose shape differs from its frame''s'
+      - name: --ts-clear
+        value: {r: 0, g: 0, b: 0, a: 0}
+        note: 'no colour at all: a border kept for layout that shows only when marked (the filmstrip''s current picture)'
+      lengths: []
+      numbers: []
+      durations: []
+      easings: []
+      fontStyles: []
+  knobs:
+  - knob: accent
+    option: heritage
+    shared:
+      colours: []
+      lengths: []
+      numbers: []
+      durations: []
+      easings: []
+      fontStyles: []
+    modes:
+    - key: light
+      tokens:
+        colours:
+        - name: --ts-accent
+          value: {r: 0.117647059, g: 0.22745098, b: 0.541176471, a: 1}
+          note: 
+        - name: --ts-accent-text
+          value: {r: 0.117647059, g: 0.22745098, b: 0.541176471, a: 1}
+          note: 
+        - name: --ts-on-accent
+          value: {r: 1, g: 1, b: 1, a: 1}
+          note: 
+        - name: --ts-focus
+          value: {r: 0.117647059, g: 0.22745098, b: 0.541176471, a: 1}
+          note: 
+        lengths: []
+        numbers: []
+        durations: []
+        easings: []
+        fontStyles: []
+    - key: dark
+      tokens:
+        colours:
+        - name: --ts-accent
+          value: {r: 0.949019608, g: 0.709803922, b: 0.266666667, a: 1}
+          note: 
+        - name: --ts-accent-text
+          value: {r: 0.949019608, g: 0.709803922, b: 0.266666667, a: 1}
+          note: 
+        - name: --ts-on-accent
+          value: {r: 0.101960784, g: 0.070588235, b: 0.023529412, a: 1}
+          note: 
+        - name: --ts-focus
+          value: {r: 0.949019608, g: 0.709803922, b: 0.266666667, a: 1}
+          note: 
+        lengths: []
+        numbers: []
+        durations: []
+        easings: []
+        fontStyles: []
+  - knob: accent
+    option: azulejo
+    shared:
+      colours: []
+      lengths: []
+      numbers: []
+      durations: []
+      easings: []
+      fontStyles: []
+    modes:
+    - key: light
+      tokens:
+        colours:
+        - name: --ts-accent
+          value: {r: 0.090196078, g: 0.270588235, b: 0.498039216, a: 1}
+          note: 
+        - name: --ts-accent-text
+          value: {r: 0.090196078, g: 0.270588235, b: 0.498039216, a: 1}
+          note: 
+        - name: --ts-on-accent
+          value: {r: 1, g: 1, b: 1, a: 1}
+          note: 
+        - name: --ts-focus
+          value: {r: 0.090196078, g: 0.270588235, b: 0.498039216, a: 1}
+          note: 
+        lengths: []
+        numbers: []
+        durations: []
+        easings: []
+        fontStyles: []
+    - key: dark
+      tokens:
+        colours:
+        - name: --ts-accent
+          value: {r: 0.552941176, g: 0.721568627, b: 0.917647059, a: 1}
+          note: 
+        - name: --ts-accent-text
+          value: {r: 0.552941176, g: 0.721568627, b: 0.917647059, a: 1}
+          note: 
+        - name: --ts-on-accent
+          value: {r: 0.043137255, g: 0.08627451, b: 0.149019608, a: 1}
+          note: 
+        - name: --ts-focus
+          value: {r: 0.552941176, g: 0.721568627, b: 0.917647059, a: 1}
+          note: 
+        lengths: []
+        numbers: []
+        durations: []
+        easings: []
+        fontStyles: []
+  - knob: accent
+    option: terracotta
+    shared:
+      colours: []
+      lengths: []
+      numbers: []
+      durations: []
+      easings: []
+      fontStyles: []
+    modes:
+    - key: light
+      tokens:
+        colours:
+        - name: --ts-accent
+          value: {r: 0.556862745, g: 0.184313725, b: 0.078431373, a: 1}
+          note: 
+        - name: --ts-accent-text
+          value: {r: 0.556862745, g: 0.184313725, b: 0.078431373, a: 1}
+          note: 
+        - name: --ts-on-accent
+          value: {r: 1, g: 1, b: 1, a: 1}
+          note: 
+        - name: --ts-focus
+          value: {r: 0.556862745, g: 0.184313725, b: 0.078431373, a: 1}
+          note: 
+        lengths: []
+        numbers: []
+        durations: []
+        easings: []
+        fontStyles: []
+    - key: dark
+      tokens:
+        colours:
+        - name: --ts-accent
+          value: {r: 0.941176471, g: 0.643137255, b: 0.529411765, a: 1}
+          note: 
+        - name: --ts-accent-text
+          value: {r: 0.941176471, g: 0.643137255, b: 0.529411765, a: 1}
+          note: 
+        - name: --ts-on-accent
+          value: {r: 0.164705882, g: 0.054901961, b: 0.019607843, a: 1}
+          note: 
+        - name: --ts-focus
+          value: {r: 0.941176471, g: 0.643137255, b: 0.529411765, a: 1}
+          note: 
+        lengths: []
+        numbers: []
+        durations: []
+        easings: []
+        fontStyles: []
+  - knob: accent
+    option: garden
+    shared:
+      colours: []
+      lengths: []
+      numbers: []
+      durations: []
+      easings: []
+      fontStyles: []
+    modes:
+    - key: light
+      tokens:
+        colours:
+        - name: --ts-accent
+          value: {r: 0.090196078, g: 0.309803922, b: 0.2, a: 1}
+          note: 
+        - name: --ts-accent-text
+          value: {r: 0.090196078, g: 0.309803922, b: 0.2, a: 1}
+          note: 
+        - name: --ts-on-accent
+          value: {r: 1, g: 1, b: 1, a: 1}
+          note: 
+        - name: --ts-focus
+          value: {r: 0.090196078, g: 0.309803922, b: 0.2, a: 1}
+          note: 
+        lengths: []
+        numbers: []
+        durations: []
+        easings: []
+        fontStyles: []
+    - key: dark
+      tokens:
+        colours:
+        - name: --ts-accent
+          value: {r: 0.560784314, g: 0.819607843, b: 0.619607843, a: 1}
+          note: 
+        - name: --ts-accent-text
+          value: {r: 0.560784314, g: 0.819607843, b: 0.619607843, a: 1}
+          note: 
+        - name: --ts-on-accent
+          value: {r: 0.043137255, g: 0.141176471, b: 0.070588235, a: 1}
+          note: 
+        - name: --ts-focus
+          value: {r: 0.560784314, g: 0.819607843, b: 0.619607843, a: 1}
+          note: 
+        lengths: []
+        numbers: []
+        durations: []
+        easings: []
+        fontStyles: []
   type:
     fontLibrary: {fileID: 11400000, guid: d9e4cf2e49910fc44b7a352fc834c9f4, type: 2}
     displayFont: fraunces_semibold

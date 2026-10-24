@@ -93,6 +93,40 @@ namespace TileStories.Editor.Tests
             }
         }
 
+        // P4.4b part 2: the card's settings button is a gear -- eight teeth (four points each: base, tip, tip, base) around a centred hole
+        [Test]
+        public void TheGear_HasEightTeethAroundACentredHole()
+        {
+            var gear = CardIcons.OutlinesOf(CardIcons.Shape.Gear);
+            Assert.AreEqual(2, gear.Count, "the wheel and the hole");
+            Assert.IsTrue(gear.All(o => o.Closed));
+            var wheel = gear[0].Points;
+            Assert.AreEqual(8 * 4, wheel.Length, "eight teeth");
+            var centre = new UnityEngine.Vector2(0.5f, 0.5f);
+            for (int tooth = 0; tooth < 8; tooth++)
+            {
+                float baseRadius = (wheel[tooth * 4] - centre).magnitude, tipRadius = (wheel[tooth * 4 + 1] - centre).magnitude;
+                Assert.Greater(tipRadius, baseRadius, "tooth " + tooth + " stands out of the wheel");
+                Assert.Less((wheel[tooth * 4 + 1] - wheel[tooth * 4 + 2]).magnitude, (wheel[tooth * 4] - wheel[tooth * 4 + 3]).magnitude, "its tip narrower than its base");
+            }
+            var hole = gear[1].Points;
+            float holeRadius = (hole[0] - centre).magnitude;
+            Assert.IsTrue(hole.All(p => UnityEngine.Mathf.Abs((p - centre).magnitude - holeRadius) < 1e-4f), "a round hole, centred");
+            Assert.Less(holeRadius, (wheel[0] - centre).magnitude, "inside the wheel");
+        }
+
+        // P4.4b part 2: a language in the card's settings is named as its speakers name it; a code with no such row shows the code
+        [Test]
+        public void ALanguage_IsNamedByItsNativeName_ACodeWithNoRowShowsTheCode()
+        {
+            var strings = new CardStrings(CardStringTableChecks.FrameworkEntries(), null, null, "pt", "en");
+            Assert.AreEqual("English", CardVisitorSettingsView.LanguageLabel("en", strings.Get));
+            Assert.AreEqual("Português", CardVisitorSettingsView.LanguageLabel("pt", strings.Get), "the native name, accent and all");
+            Assert.AreEqual("ES", CardVisitorSettingsView.LanguageLabel("es", strings.Get), "no wall ships Spanish: no row, its code");
+            Assert.AreEqual("FR", CardVisitorSettingsView.LanguageLabel("fr", strings.Get), "no row: the code, never the raw key");
+            Assert.AreEqual("FR", CardVisitorSettingsView.LanguageLabel("fr", null));
+        }
+
         [Test]
         public void TheStar_HasFivePoints_TheTickAndCrossAreOpenLines_TheThumbsAreClosedAndMirrored()
         {

@@ -19,6 +19,9 @@ namespace TileStories
     {
         // On the layer while a MENU is open (the scrim shows)
         public const string ModalClass = "card-menu--modal";
+        // On the layer while a POPOVER is open (the Aa settings, _3.3 P4.4b): modal like a menu -- a tap beside it closes it -- but the
+        // scrim is clear, so the card behind shows what a pick changes (a new mode re-colours it live)
+        public const string PopoverClass = "card-menu--popover";
 
         // The layer (fills the card layer; hidden while nothing modal is open), its scrim and the panel host the menu element is drawn in
         public VisualElement Root { get; }
@@ -95,6 +98,13 @@ namespace TileStories
             Changed?.Invoke();
         }
 
+        // Open `panel` as a popover over the card (a clear scrim: see PopoverClass); whatever was open closes first
+        public void OpenPopover(string key, VisualElement panel)
+        {
+            Open(key, panel, null);
+            Root.AddToClassList(PopoverClass);
+        }
+
         // Close whatever is open (nothing open: nothing happens)
         public void Close()
         {
@@ -106,6 +116,7 @@ namespace TileStories
             if (IsModal) Panel.Clear();
             IsModal = false;
             Root.EnableInClassList(ModalClass, false);
+            Root.RemoveFromClassList(PopoverClass);
             Root.style.display = DisplayStyle.None;
             onClose?.Invoke();
             Closed?.Invoke();

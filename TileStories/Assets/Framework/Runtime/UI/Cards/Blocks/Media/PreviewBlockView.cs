@@ -73,6 +73,7 @@ namespace TileStories
 
             Frame = new VisualElement { name = "card-preview-frame" };
             Frame.AddToClassList("card-preview__frame");
+            BlockFrame.Bleed(Frame);
             Surface = new VisualElement { name = "card-preview-surface", pickingMode = PickingMode.Ignore };
             Surface.AddToClassList("card-preview__surface");
             Fallback = new CardImage("card-preview__fallback");

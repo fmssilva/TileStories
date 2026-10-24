@@ -2,58 +2,222 @@
    press Regenerate USS in its Inspector (ThemeUssStaleTests fails while this file is stale).
    The theme's T1 / T2 tokens (_3.3 R12.2) on the app root ThemeController marks; every screen inherits them. */
 
-.ts-app.ts-theme-default.ts-mode-dark {
-    /* Surfaces */
-    --ts-bg: rgb(26, 21, 16);
-    --ts-surface: rgb(35, 28, 21);
-    --ts-surface-2: rgb(48, 39, 30);
+.ts-app.ts-theme-default.ts-mode-light {
+    /* Surfaces (_3.3 P4.4b, measured: ThemeContrastTests) */
+    --ts-bg: rgb(244, 240, 232);
+    /* A block: the opaque surface inside its rim (R12.5) */
+    --ts-surface: rgb(255, 255, 255);
+    /* Buttons, chips and wells on a block */
+    --ts-surface-2: rgb(244, 240, 232);
     /* The scrim under a menu over the card (_3.2 step 8). The project renders in LINEAR colour, so an alpha blends in linear
        light: 0.5 left the card's text behind at 181 of 247 (measured), still competing with the menu; 0.7 recedes it to a
        frame (about 144) */
     --ts-scrim: rgba(0, 0, 0, 0.7);
-    --ts-hero-fade: rgba(26, 21, 16, 0.9);
+    --ts-hero-fade: rgba(244, 240, 232, 0.9);
     /* The hero's scrim behind its words (solid) and the tint of the ramp above them (hero_scrim.png holds the grade). The
-       project blends in LINEAR light: white words keep 7:1 only over a background of luminance <= 0.1, so over a bright sky
-       (0.8) the scrim needs ~0.9; measured on the render at the worst pixel of every hero picture (PoiCardHeroSceneTests) */
-    --ts-scrim-hero: rgba(10, 8, 6, 0.92);
+       project blends in LINEAR light, so the alpha is chosen against the WORST pixel any picture can have, pure white: at 0.94
+       the ground stays at luminance 0.062 and the eyebrow (--ts-on-scrim-2) keeps 7.7:1, the title 9.3:1, over any picture
+       (ThemeContrastTests; 0.92 left the eyebrow 6.7:1 over The Lamp's sky once its actions took one row, P4.4b part 2). The
+       same in both modes: the hero is a picture */
+    --ts-scrim-hero: rgba(10, 8, 6, 0.94);
     /* The hero's title, line and outline button over the scrim */
     --ts-on-scrim: rgb(255, 255, 255);
     /* The hero's eyebrow over the scrim (a warm white) */
     --ts-on-scrim-2: rgb(241, 233, 218);
-    /* Text */
-    --ts-ink: rgb(247, 239, 220);
-    --ts-ink-2: rgba(247, 239, 220, 0.8);
-    --ts-ink-3: rgba(247, 239, 220, 0.6);
-    --ts-on-accent: rgb(26, 21, 16);
-    /* Accent */
-    --ts-accent: rgb(245, 158, 11);
-    --ts-accent-text: rgb(245, 158, 11);
+    /* The card's chrome ground: the grabber row, the bar, the top strip, the footer -- opaque, so their words never sit on the
+       glass */
+    --ts-bar: rgb(255, 255, 255);
+    /* The sheet's ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical
+       alpha ramp, so the top is clearer; this alpha is the ramp's foot */
+    --ts-glass-ground: rgba(244, 240, 232, 0.62);
+    /* Text: solid ink only (D1: no alpha on text), every role >= 7:1 on every surface it sits on */
+    --ts-ink: rgb(20, 17, 13);
+    --ts-ink-2: rgb(61, 54, 45);
+    --ts-ink-3: rgb(79, 71, 60);
+    --ts-on-accent: rgb(255, 255, 255);
+    /* Accent: the heritage option of the accent knob (light cobalt, dark gold) */
+    --ts-accent: rgb(30, 58, 138);
+    --ts-accent-text: rgb(30, 58, 138);
+    --ts-accent-2: rgb(201, 162, 39);
+    /* Lines: a border that means something (>= 4.5:1 on the surfaces) */
+    --ts-line: rgb(111, 102, 90);
+    --ts-focus: rgb(30, 58, 138);
+    /* A decorative hairline inside a block (separators): never the only cue */
+    --ts-hair: rgb(217, 210, 198);
+    /* The block frame (R13.1, R12.5): the rim's outer line, measured against the sheet ground over the sunny-wall photo
+       (ThemeFrameSceneTests). Dark metal in light, light metal in dark: the line or the surface beside it clears 3:1 against
+       ANY ground -- light: the white surface up to ground luminance 0.30, this line (L 0.048) from 0.24; dark: the surface
+       from 0.13, this line (L 0.52) below it */
+    --ts-metal-edge: rgb(67, 60, 50);
+    /* The rim's inner band where the light falls (top, left) */
+    --ts-metal-hi: rgb(255, 255, 255);
+    /* The rim's inner band in shade (bottom, right) */
+    --ts-metal-lo: rgb(201, 191, 175);
+    /* A block's shadow (tints card_block_shadow.png). Light only: a shadow is invisible on a dark ground (R8 S7), dark gets
+       its depth from the surface tone */
+    --ts-elevation-1: rgba(20, 17, 13, 0.2);
+    /* A featured block's shadow */
+    --ts-elevation-2: rgba(20, 17, 13, 0.32);
+    /* Status ramp (the markers' outline levels, intact -> destroyed) */
+    --ts-status-0: rgb(46, 125, 50);
+    --ts-status-1: rgb(122, 98, 0);
+    --ts-status-2: rgb(163, 84, 0);
+    --ts-status-3: rgb(166, 43, 31);
+    --ts-status-4: rgb(107, 107, 107);
+    /* Family colours (_3.2 navigation: FamilyDefinition.ColorToken, read by name through CardTokenColours): the FILL -- each
+       >= 4.5:1 on the surfaces, never shown without the family's icon or words */
+    --ts-family-meta: rgb(94, 87, 76);
+    --ts-family-about: rgb(126, 66, 6);
+    --ts-family-media: rgb(30, 78, 140);
+    --ts-family-guides: rgb(36, 87, 51);
+    --ts-family-stories: rgb(122, 46, 92);
+    --ts-family-ar: rgb(15, 94, 90);
+    --ts-family-play: rgb(154, 47, 31);
+    --ts-family-visit: rgb(90, 74, 138);
+    --ts-family-community: rgb(122, 75, 0);
+    --ts-family-navigation: rgb(74, 90, 18);
+    /* The ink on a family fill (a filled family pill): >= 7:1 on its fill */
+    --ts-family-meta-ink: rgb(255, 255, 255);
+    --ts-family-about-ink: rgb(255, 255, 255);
+    --ts-family-media-ink: rgb(255, 255, 255);
+    --ts-family-guides-ink: rgb(255, 255, 255);
+    --ts-family-stories-ink: rgb(255, 255, 255);
+    --ts-family-ar-ink: rgb(255, 255, 255);
+    --ts-family-play-ink: rgb(255, 255, 255);
+    --ts-family-visit-ink: rgb(255, 255, 255);
+    --ts-family-community-ink: rgb(255, 255, 255);
+    --ts-family-navigation-ink: rgb(255, 255, 255);
+    /* The good / bad roles (R12.2 -good / -bad): a right and a wrong answer */
+    --ts-correct: rgb(23, 84, 27);
+    --ts-wrong: rgb(142, 27, 18);
+    /* poll (Play.uss): the tint of a results bar behind an option's words (only drawn when an app supplies results) */
+    --ts-result-fill: rgba(30, 58, 138, 0.14);
+    /* the bars around a playing video whose shape differs from its frame's */
+    --ts-video-letterbox: rgb(0, 0, 0);
+    /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
+    --ts-clear: rgba(0, 0, 0, 0);
+    --ts-line-width: 1px;
+    /* Type */
+    --ts-size-body: 16px;
+    --ts-size-title: 24px;
+    --ts-size-caption: 14px;
+    --ts-size-lede: 19px;
+    --ts-size-heading: 20px;
+    /* The hero's title over its picture (_3.3 R11, P4.4a), the display face */
+    --ts-size-hero: 46px;
+    /* The hero's title on a phone (HeroRule.IsNarrow, under 400 pt wide) */
+    --ts-size-hero-narrow: 40px;
+    --ts-size-dropcap: 48px;
+    --ts-size-quote: 22px;
+    /* Shape */
+    --ts-radius-s: 6px;
+    --ts-radius-m: 12px;
+    --ts-radius-l: 20px;
+    --ts-radius-round: 50%;
+    --ts-space-1: 4px;
+    --ts-space-2: 8px;
+    --ts-space-3: 12px;
+    --ts-space-4: 16px;
+    --ts-space-5: 24px;
+    --ts-space-6: 32px;
+    /* Effects */
+    --ts-glass-opacity: 0.88;
+    /* Motion */
+    --ts-duration: 0.22s;
+    --ts-ease: ease-out-cubic;
+    --ts-weight-body: normal;
+}
+
+.ts-app.ts-theme-default.ts-mode-dark {
+    /* Surfaces (_3.3 P4.4b, measured: ThemeContrastTests) */
+    --ts-bg: rgb(16, 15, 13);
+    /* A block: the opaque surface inside its rim (R12.5) */
+    --ts-surface: rgb(28, 26, 23);
+    /* Buttons, chips and wells on a block */
+    --ts-surface-2: rgb(38, 35, 31);
+    /* The scrim under a menu over the card (_3.2 step 8). The project renders in LINEAR colour, so an alpha blends in linear
+       light: 0.5 left the card's text behind at 181 of 247 (measured), still competing with the menu; 0.7 recedes it to a
+       frame (about 144) */
+    --ts-scrim: rgba(0, 0, 0, 0.7);
+    --ts-hero-fade: rgba(16, 15, 13, 0.9);
+    /* The hero's scrim behind its words (solid) and the tint of the ramp above them (hero_scrim.png holds the grade). The
+       project blends in LINEAR light, so the alpha is chosen against the WORST pixel any picture can have, pure white: at 0.94
+       the ground stays at luminance 0.062 and the eyebrow (--ts-on-scrim-2) keeps 7.7:1, the title 9.3:1, over any picture
+       (ThemeContrastTests; 0.92 left the eyebrow 6.7:1 over The Lamp's sky once its actions took one row, P4.4b part 2). The
+       same in both modes: the hero is a picture */
+    --ts-scrim-hero: rgba(10, 8, 6, 0.94);
+    /* The hero's title, line and outline button over the scrim */
+    --ts-on-scrim: rgb(255, 255, 255);
+    /* The hero's eyebrow over the scrim (a warm white) */
+    --ts-on-scrim-2: rgb(241, 233, 218);
+    /* The card's chrome ground: the grabber row, the bar, the top strip, the footer -- opaque, so their words never sit on the
+       glass */
+    --ts-bar: rgb(28, 26, 23);
+    /* The sheet's ground between the blocks (R11 tinted glass: light clear, dark smoked): tints card_glass.png, a vertical
+       alpha ramp, so the top is clearer; this alpha is the ramp's foot */
+    --ts-glass-ground: rgba(16, 15, 13, 0.8);
+    /* Text: solid ink only (D1: no alpha on text), every role >= 7:1 on every surface it sits on */
+    --ts-ink: rgb(246, 241, 232);
+    --ts-ink-2: rgb(217, 209, 195);
+    --ts-ink-3: rgb(194, 185, 168);
+    --ts-on-accent: rgb(26, 18, 6);
+    /* Accent: the heritage option of the accent knob (light cobalt, dark gold) */
+    --ts-accent: rgb(242, 181, 68);
+    --ts-accent-text: rgb(242, 181, 68);
     --ts-accent-2: rgb(180, 120, 40);
-    /* Lines */
-    --ts-line: rgba(247, 239, 220, 0.16);
-    --ts-focus: rgb(245, 158, 11);
+    /* Lines: a border that means something (>= 4.5:1 on the surfaces) */
+    --ts-line: rgb(154, 145, 129);
+    --ts-focus: rgb(242, 181, 68);
+    /* A decorative hairline inside a block (separators): never the only cue */
+    --ts-hair: rgb(58, 54, 47);
+    /* The block frame (R13.1, R12.5): the rim's outer line, measured against the sheet ground over the sunny-wall photo
+       (ThemeFrameSceneTests). Dark metal in light, light metal in dark: the line or the surface beside it clears 3:1 against
+       ANY ground -- light: the white surface up to ground luminance 0.30, this line (L 0.048) from 0.24; dark: the surface
+       from 0.13, this line (L 0.52) below it */
+    --ts-metal-edge: rgb(207, 198, 181);
+    /* The rim's inner band where the light falls (top, left) */
+    --ts-metal-hi: rgb(74, 68, 59);
+    /* The rim's inner band in shade (bottom, right) */
+    --ts-metal-lo: rgb(36, 33, 29);
+    /* A block's shadow (tints card_block_shadow.png). Light only: a shadow is invisible on a dark ground (R8 S7), dark gets
+       its depth from the surface tone */
+    --ts-elevation-1: rgba(0, 0, 0, 0);
+    /* A featured block's shadow */
+    --ts-elevation-2: rgba(0, 0, 0, 0);
     /* Status ramp (the markers' outline levels, intact -> destroyed) */
     --ts-status-0: rgb(111, 191, 115);
     --ts-status-1: rgb(201, 180, 88);
     --ts-status-2: rgb(224, 145, 58);
-    --ts-status-3: rgb(210, 85, 63);
+    --ts-status-3: rgb(226, 115, 92);
     --ts-status-4: rgb(142, 142, 142);
-    /* Family colours (_3.2 navigation: FamilyDefinition.ColorToken, one per registered family, read by name through
-       CardTokenColours; each at least 3:1 on --ts-surface, and never shown without the family's icon or words) */
+    /* Family colours (_3.2 navigation: FamilyDefinition.ColorToken, read by name through CardTokenColours): the FILL -- each
+       >= 4.5:1 on the surfaces, never shown without the family's icon or words */
     --ts-family-meta: rgb(196, 186, 168);
-    --ts-family-about: rgb(245, 158, 11);
-    --ts-family-media: rgb(127, 179, 213);
-    --ts-family-guides: rgb(163, 197, 133);
-    --ts-family-stories: rgb(215, 166, 200);
+    --ts-family-about: rgb(232, 168, 90);
+    --ts-family-media: rgb(141, 184, 234);
+    --ts-family-guides: rgb(143, 209, 158);
+    --ts-family-stories: rgb(227, 163, 200);
     --ts-family-ar: rgb(127, 209, 201);
-    --ts-family-play: rgb(242, 197, 124);
-    --ts-family-visit: rgb(176, 168, 224);
-    --ts-family-community: rgb(232, 168, 124);
+    --ts-family-play: rgb(242, 163, 143);
+    --ts-family-visit: rgb(195, 181, 240);
+    --ts-family-community: rgb(232, 194, 124);
     --ts-family-navigation: rgb(196, 214, 120);
-    --ts-correct: rgb(111, 191, 115);
-    --ts-wrong: rgb(210, 85, 63);
+    /* The ink on a family fill (a filled family pill): >= 7:1 on its fill */
+    --ts-family-meta-ink: rgb(20, 17, 13);
+    --ts-family-about-ink: rgb(20, 17, 13);
+    --ts-family-media-ink: rgb(20, 17, 13);
+    --ts-family-guides-ink: rgb(20, 17, 13);
+    --ts-family-stories-ink: rgb(20, 17, 13);
+    --ts-family-ar-ink: rgb(20, 17, 13);
+    --ts-family-play-ink: rgb(20, 17, 13);
+    --ts-family-visit-ink: rgb(20, 17, 13);
+    --ts-family-community-ink: rgb(20, 17, 13);
+    --ts-family-navigation-ink: rgb(20, 17, 13);
+    /* The good / bad roles (R12.2 -good / -bad): a right and a wrong answer */
+    --ts-correct: rgb(143, 209, 158);
+    --ts-wrong: rgb(242, 163, 143);
     /* poll (Play.uss): the tint of a results bar behind an option's words (only drawn when an app supplies results) */
-    --ts-result-fill: rgba(245, 158, 11, 0.28);
+    --ts-result-fill: rgba(242, 181, 68, 0.1);
     /* the bars around a playing video whose shape differs from its frame's */
     --ts-video-letterbox: rgb(0, 0, 0);
     /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */

@@ -64,12 +64,14 @@ namespace TileStories
                 verticalScrollerVisibility = ScrollerVisibility.Hidden,
             };
             Track.AddToClassList("card-gallery__track");
+            BlockFrame.Bleed(Track);
             Track.contentContainer.AddToClassList("card-gallery__track-content");
             Track.horizontalScroller.valueChanged += _ => FollowTrack();
             Dots = new VisualElement { pickingMode = PickingMode.Ignore };
             Dots.AddToClassList("card-gallery__dots");
             Main = new CardImage("card-gallery__main");
             Main.Root.AddToClassList("card-tap");
+            BlockFrame.Bleed(Main.Root);
             Main.Root.AddManipulator(new Clickable(() => OpenLightbox(Current)));
             MainCaption = new Label();
             MainCaption.AddToClassList("card-gallery__caption");
@@ -94,6 +96,8 @@ namespace TileStories
                     read.ItemText(item, BuiltInBlocks.GalleryCaptionField), read.ItemText(item, BuiltInBlocks.GalleryCreditField)));
             }
 
+            // - the grid runs to the frame's edge like any picture; the stack keeps its own inset (its prints' offset IS the look)
+            Grid.EnableInClassList(BlockFrame.BleedClass, context.Variant == BuiltInBlocks.GalleryGrid);
             switch (context.Variant)
             {
                 case BuiltInBlocks.GalleryGrid:

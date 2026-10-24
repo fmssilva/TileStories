@@ -106,7 +106,7 @@ namespace TileStories
         // ---- vector glyphs (8A-fix): shapes USS borders cannot draw, painted with Painter2D ----
 
         // The shapes a VectorGlyph draws
-        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown, Play, Pause, Stop, FullScreen, Chevron }
+        public enum Shape { Tick, Cross, Star, ThumbUp, ThumbDown, Play, Pause, Stop, FullScreen, Chevron, Gear }
 
         // One outline of a shape, in 0..1 units of the glyph's square. `Points` are joined in order; a `Closed` outline can be filled.
         public readonly struct Outline
@@ -163,6 +163,8 @@ namespace TileStories
                 case Shape.Chevron:
                     // - an open "v" pointing down: "there is more below, tap to open" (a compact row turns it over once open)
                     return new[] { new Outline(new[] { new Vector2(0.18f, 0.36f), new Vector2(0.50f, 0.68f), new Vector2(0.82f, 0.36f) }, false) };
+                case Shape.Gear:
+                    return GearOutlines();
                 case Shape.ThumbUp:
                     return ThumbOutlines(false);
                 default:
@@ -170,10 +172,13 @@ namespace TileStories
             }
         }
 
+        // The star's own centre in 0..1 units of the glyph's square: a hair below the box's middle (its points weigh the top). A pixel read
+        // of an outlined star's hollow is taken here, never at the box's middle (that is 0.05 of a side off, near the stroke)
+        public static readonly Vector2 StarCentre = new(0.5f, 0.55f);
+
         // A five-pointed star: ten points alternating the outer and the inner radius, the first straight up
         private static Vector2[] StarPoints()
         {
-            const float centreY = 0.55f;
             const float outer = 0.46f;
             const float inner = 0.19f;
             var points = new Vector2[10];
@@ -181,10 +186,34 @@ namespace TileStories
             {
                 float radius = i % 2 == 0 ? outer : inner;
                 float angle = (-90f + 36f * i) * Mathf.Deg2Rad;
-                points[i] = new Vector2(0.5f + radius * Mathf.Cos(angle), centreY + radius * Mathf.Sin(angle));
+                points[i] = new Vector2(StarCentre.x + radius * Mathf.Cos(angle), StarCentre.y + radius * Mathf.Sin(angle));
             }
             return points;
         }
+
+        // The card's settings (_3.3 P4.4b part 2, the universal "settings" sign): a wheel of eight teeth -- each a trapezoid from the root
+        // circle out to the tip, its base wider than its tip -- around a round hole, both centred; outlined like the other line icons
+        private static Outline[] GearOutlines()
+        {
+            const int teeth = 8;
+            const float root = 0.33f, tip = 0.45f, hole = 0.14f;
+            const float baseHalf = 13f, tipHalf = 8f;
+            var wheel = new Vector2[teeth * 4];
+            for (int i = 0; i < teeth; i++)
+            {
+                float centre = i * 360f / teeth - 90f;
+                wheel[i * 4] = GearPoint(centre - baseHalf, root);
+                wheel[i * 4 + 1] = GearPoint(centre - tipHalf, tip);
+                wheel[i * 4 + 2] = GearPoint(centre + tipHalf, tip);
+                wheel[i * 4 + 3] = GearPoint(centre + baseHalf, root);
+            }
+            var circle = new Vector2[16];
+            for (int i = 0; i < circle.Length; i++) circle[i] = GearPoint(i * 360f / circle.Length, hole);
+            return new[] { new Outline(wheel, true), new Outline(circle, true) };
+        }
+
+        private static Vector2 GearPoint(float degrees, float radius) =>
+            new(0.5f + radius * Mathf.Cos(degrees * Mathf.Deg2Rad), 0.5f + radius * Mathf.Sin(degrees * Mathf.Deg2Rad));
 
         // A thumb: the cuff (a bar at the left) and the hand with its thumb pointing up; the thumb down is the same turned over
         private static Outline[] ThumbOutlines(bool down)

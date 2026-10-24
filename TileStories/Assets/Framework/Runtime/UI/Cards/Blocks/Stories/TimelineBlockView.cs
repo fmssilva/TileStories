@@ -52,6 +52,7 @@ namespace TileStories
                 verticalScrollerVisibility = ScrollerVisibility.Hidden,
             };
             Track.AddToClassList("card-timeline__track");
+            BlockFrame.Bleed(Track);
             Track.contentContainer.AddToClassList("card-timeline__track-content");
             // - the strip only has a width once the card lays it out (and a new one when the sheet changes): fit the events then
             Track.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => FitEvents());

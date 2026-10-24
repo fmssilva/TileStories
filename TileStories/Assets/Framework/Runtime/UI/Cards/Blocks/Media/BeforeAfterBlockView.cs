@@ -32,6 +32,7 @@ namespace TileStories
             Root.AddToClassList("card-before-after");
             Frame = new VisualElement { name = "card-before-after-frame" };
             Frame.AddToClassList("card-before-after__frame");
+            BlockFrame.Bleed(Frame);
             After = new CardImage("card-before-after__after");
             BeforeClip = new VisualElement { pickingMode = PickingMode.Ignore };
             BeforeClip.AddToClassList("card-before-after__clip");

@@ -43,8 +43,26 @@ namespace TileStories.Editor
                 AppendSet(text, theme.Shared, written, theme.Key + "/shared", skip: Names(mode.tokens));
                 text.Append("}\n");
             }
+            // - after every token passed its own checks: a bad name is named as such, not as a difference between modes
+            RequireSameColours(theme);
             AppendType(text, theme);
             return text.ToString();
+        }
+
+        // Every mode defines the same colours (_3.3 P4.4b): a colour one mode lacks would paint TRANSPARENT in that mode only, with no
+        // warning (R8 S1) -- refused here, naming the first mode and colour that differ
+        private static void RequireSameColours(ThemeAsset theme)
+        {
+            var first = theme.Modes[0];
+            var expected = new HashSet<string>(first.tokens.colours.Select(t => t.name));
+            foreach (var mode in theme.Modes.Skip(1))
+            {
+                var names = new HashSet<string>(mode.tokens.colours.Select(t => t.name));
+                string missing = expected.FirstOrDefault(n => !names.Contains(n)) ?? names.FirstOrDefault(n => !expected.Contains(n));
+                if (missing != null)
+                    throw new ArgumentException(theme.Key + ": modes '" + first.key + "' and '" + mode.key + "' differ at colour " + missing +
+                        " -- every mode defines the same colours");
+            }
         }
 
         private static readonly Regex OneClass = new(@"^\.[a-z0-9_-]+$");

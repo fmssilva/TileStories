@@ -114,7 +114,7 @@ namespace TileStories.Editor.Tests
             foreach (var f in typeof(CardSettings).GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (f.FieldType == typeof(bool)) edits.Add((f.Name, s => f.SetValue(s, !(bool)f.GetValue(s))));
-                else if (f.FieldType == typeof(string)) edits.Add((f.Name, s => f.SetValue(s, "Wall/CardMedia")));
+                else if (f.FieldType == typeof(string)) edits.Add((f.Name, s => f.SetValue(s, f.Name == "default_mode" ? CardOptions.ModeDark : "Wall/CardMedia")));
                 else if (f.FieldType == typeof(List<string>)) edits.Add((f.Name, s => f.SetValue(s, new List<string> { "pt", "en", "es" })));
                 else if (f.FieldType == typeof(List<BlockKindSetting>)) edits.Add((f.Name, s => s.kinds.Add(new BlockKindSetting { kind = "header", default_variant = "compact" })));
                 else if (f.FieldType == typeof(List<CardStringEntry>)) edits.Add((f.Name, s => POIEditorToolWindow.SetCardTextOverride(s, CardStrings.Keys.Close, "pt", "Sair")));
@@ -170,8 +170,8 @@ namespace TileStories.Editor.Tests
                     }
                 else Assert.Fail("no edit for card_settings field " + f.Name);
             }
-            Assert.AreEqual(8 + 8 + 23 + 3, edits.Count,
-                "every card_settings field (walked by reflection) has an edit: 8 wall-level + 8 container + 23 navigation + 3 demo card");
+            Assert.AreEqual(9 + 8 + 23 + 3, edits.Count,
+                "every card_settings field (walked by reflection) has an edit: 9 wall-level + 8 container + 23 navigation + 3 demo card");
 
             foreach (var (name, change) in edits)
             {
@@ -377,6 +377,96 @@ namespace TileStories.Editor.Tests
             try { yield return _window.WaitForRepaint(); }
             finally { HelpInfoButton.DrawnProbe = null; }
             CollectionAssert.DoesNotContain(drawn.Select(d => d.Title).ToList(), "Hero Motion", "Text Only: no picture, no Hero Motion");
+        }
+
+        // ---------------- P4.4b: the two modes and the block frame's rows ----------------
+
+        // Every (i) the next repaint draws, by its title
+        private IEnumerator HelpTitlesDrawn(List<(string Title, Rect Rect)> drawn)
+        {
+            drawn.Clear();
+            HelpInfoButton.DrawnProbe = (title, rect) => drawn.Add((title, rect));
+            try { yield return _window.WaitForRepaint(); }
+            finally { HelpInfoButton.DrawnProbe = null; }
+        }
+
+        // Detail Card > Card Container on the REAL window: the Default Mode row and its (i) are drawn, drawing writes nothing, a pick of Dark
+        // (the popup's own setter, inside the window's mutation scope) is an unsaved edit, and Ctrl+Z gives Light back
+        [UnityTest]
+        public IEnumerator TheDefaultModeRow_IsDrawnWithItsHelp_APickIsAnEdit_AndCtrlZUndoesIt()
+        {
+            var config = TwoPoiConfig();
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenTab("DetailCard");
+            yield return _window.WaitForRepaint();
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return HelpTitlesDrawn(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Default Mode", "Card Container draws the Default Mode row with its (i)");
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.AreEqual(CardOptions.ModeLight, _window.Config.card_settings.default_mode, "a new wall opens light (D1)");
+            CollectionAssert.AreEqual(new[] { "Light", "Dark" }, CardOptions.ModeLabels, "the popup names the modes, never their keys");
+
+            Pick(() => _window.Config.card_settings.default_mode = CardOptions.ModeDark);
+            Assert.AreEqual(CardOptions.ModeDark, _window.Config.card_settings.default_mode);
+            Assert.IsTrue(_window.Unsaved, "the pick is an edit");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.ModeLight, _window.Config.card_settings.default_mode, "Ctrl+Z: light again");
+        }
+
+        // Specific Marker > Card Content on the REAL window: an open block draws the Emphasis row with its (i) after its Display; a pick of
+        // Quiet is an edit the block keeps, Ctrl+Z gives Normal back
+        [UnityTest]
+        public IEnumerator TheEmphasisRow_IsDrawnOnAnOpenBlock_APickIsAnEdit_AndCtrlZUndoesIt()
+        {
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            config.pois[0].card.blocks.Add(new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.SourcesKind, variant = BuiltInBlocks.SourcesWithConfidence });
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            ((Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor))["poi_1/block_1"] = true;
+            yield return _window.WaitForRepaint();
+            var drawn = new List<(string Title, Rect Rect)>();
+            yield return HelpTitlesDrawn(drawn);
+            CollectionAssert.Contains(drawn.Select(d => d.Title).ToList(), "Emphasis", "the open block draws its Emphasis row with its (i)");
+            Assert.IsFalse(_window.Unsaved, "drawing the row writes nothing");
+            Assert.AreEqual(CardOptions.EmphasisNormal, BlockFrame.EmphasisOf(_window.Config.pois[0].card.blocks[0].emphasis), "a new block is normal");
+            Assert.AreEqual(CardOptions.Emphases.Length, CardOptions.EmphasisLabels.Length, "a label per option");
+
+            Pick(() => _window.Config.pois[0].card.blocks[0].emphasis = CardOptions.EmphasisQuiet);
+            Assert.AreEqual(CardOptions.EmphasisQuiet, _window.Config.pois[0].card.blocks[0].emphasis);
+            Assert.IsTrue(_window.Unsaved, "the pick is an edit");
+            yield return _window.PressUndo();
+            Assert.AreEqual(CardOptions.EmphasisNormal, BlockFrame.EmphasisOf(_window.Config.pois[0].card.blocks[0].emphasis), "Ctrl+Z: normal again");
+        }
+
+        // P4.4b part 2 on the REAL window: a picture header whose title needs 3+ lines on a phone draws the notice under the block; REAL typing
+        // of a shorter title clears it, and Ctrl+Z brings it back
+        [UnityTest]
+        public IEnumerator AHeroTitleOfThreeLines_DrawsTheNotice_RealTypingOfAShorterTitleClearsIt_AndCtrlZBringsItBack()
+        {
+            const string longTitle = "The Royal Ribeira Palace and its Great Earthquake Ruins";
+            Assert.GreaterOrEqual(HeroTitleMeasure.Lines(longTitle), HeroTitleFitRule.NoticeAtLines, "precondition: the title needs 3+ lines in the real face");
+            var config = TwoPoiConfig();
+            config.card_settings.languages = new List<string> { "en" };
+            var header = new BlockInstanceData { key = "block_1", kind = BuiltInBlocks.HeaderKind, variant = BuiltInBlocks.HeaderImageParallax };
+            header.fields.Add(new BlockFieldValue { key = BuiltInBlocks.HeaderImageField, asset = "images/castle_hero.png" });
+            header.fields.Add(new BlockFieldValue { key = BlockStackBuilder.HeaderTitleField, text = new List<LocalizedEntry> { new() { lang = "en", value = longTitle } } });
+            config.pois[0].card.blocks.Add(header);
+            _window = new PoiEditorWindowHost(config, "_showCardContainer");
+            OpenPoiCardContent("poi_1");
+            ((Dictionary<string, bool>)typeof(POIEditorToolWindow).GetField("_cardBlockFoldouts", Instance).GetValue(_window.Editor))["poi_1/block_1"] = true;
+
+            yield return Redraw();
+            Assert.IsTrue(Drawn("Card block warning#0"), "the notice is drawn under the header");
+            Assert.IsFalse(_window.Unsaved, "drawing writes nothing");
+            yield return _window.ReplaceText("Block field title en#0", "The Lamp");
+            yield return _window.ClickAway();
+            yield return Redraw();
+            Assert.AreEqual("The Lamp", new BlockFieldReader(_window.Config.pois[0].card.blocks[0], "en", "en").Text(BlockStackBuilder.HeaderTitleField), "real typing stored the title");
+            Assert.IsFalse(Drawn("Card block warning#0"), "one line: no notice");
+            yield return _window.PressUndo();
+            yield return Redraw();
+            Assert.IsTrue(Drawn("Card block warning#0"), "Ctrl+Z: the long title and its notice are back");
         }
 
         // ---------------- Items rows (a repeater field) ----------------

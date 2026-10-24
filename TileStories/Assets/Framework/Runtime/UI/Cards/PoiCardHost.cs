@@ -93,6 +93,7 @@ namespace TileStories
             if (_subscribed || wallSession == null) return;
             _subscribed = true;
             BuildOnce();
+            ApplyMode();
             SelectionEventBus.OnMarkerSelected += Show;
             SelectionEventBus.OnSelectionCleared += Close;
             wallSession.SearchDataChanged += OnWallDataChanged;
@@ -126,6 +127,7 @@ namespace TileStories
             Sheet = new PoiCardSheetView(root, BlockRegistry.Shared, CardStyleSheets.InOrder(tokens, cardStyle, blockStyles));
             Sheet.CloseRequested += SelectionEventBus.Clear;
             Sheet.LanguageRequested += SwitchLanguage;
+            Sheet.ModeRequested += SwitchMode;
             Sheet.Viewer = ViewerOnTheWall;
             // - the full card would cover the search bar half-way (neither readable nor tappable): the bar steps aside
             Sheet.StopChanged += stop => { if (searchUI != null) searchUI.SetTopCoveredByCard(SheetStopRule.CoversScreenTop(stop)); };
@@ -197,7 +199,15 @@ namespace TileStories
             _owners.CardShown(poiId, context.Strings);
         }
 
-        // The visitor tapped the language chip: remember the pick for this wall on this device and show the open card again in it
+        // The visitor picked a mode in the Aa settings: remember it for this wall on this device and show every screen in it -- a class
+        // swapped on the marked roots, so the open card keeps its views, its stop and its scroll
+        private void SwitchMode(string mode)
+        {
+            StateOfThisWall().SetMode(mode);
+            ApplyMode();
+        }
+
+        // The visitor picked a language in the Aa settings: remember the pick for this wall on this device and show the open card again in it
         // (Rebind keeps the sheet's stop and the stack's scroll)
         private void SwitchLanguage(string code)
         {
@@ -225,8 +235,18 @@ namespace TileStories
         // developer-only demo card gets its turn
         private void OnWallDataChanged()
         {
+            ApplyMode();
             Rebind();
             ApplyDemo();
+        }
+
+        // The app's mode (_3.3 P4.4b): the visitor's pick on this device, else the wall's Default Mode, else the theme's (ThemeModeRule) --
+        // swapped on every marked screen, nothing rebuilt
+        private void ApplyMode()
+        {
+            var theme = ThemeController.Load(ThemeController.DefaultThemeKey);
+            if (theme == null || wallSession == null) return;
+            ThemeController.SetMode(ThemeModeRule.Shown(theme.ModeKeys, StateOfThisWall().Mode(), wallSession.CardSettings?.default_mode, theme.DefaultMode));
         }
 
         // Show the open card's POI again with the data as it is now, keeping the sheet's stop and the stack's scroll (a live edit must not throw the

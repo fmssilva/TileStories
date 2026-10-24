@@ -215,6 +215,46 @@ namespace TileStories.Tests
         }
 
         // Wait until the sheet's height transition has finished (it animates for --ts-duration)
+        // Since _3.3 P4.4b the sheet's ground between blocks is translucent glass: the live scene behind it (animated markers) shows through
+        // and a render of the sheet never holds still. A measurement of the CARD puts a still backdrop behind it (where the camera feed
+        // would be), once per card layer; it stays for the test's scene
+        public static void HoldTheWallStill(PoiCardSheetView sheet)
+        {
+            var root = sheet.Layer.parent;
+            if (root == null || root.Q("test-still-backdrop") != null) return;
+            var backdrop = new VisualElement { name = "test-still-backdrop", pickingMode = PickingMode.Ignore };
+            backdrop.style.position = Position.Absolute;
+            backdrop.style.left = 0; backdrop.style.top = 0; backdrop.style.right = 0; backdrop.style.bottom = 0;
+            backdrop.style.backgroundColor = new Color(0.42f, 0.4f, 0.37f);
+            root.Insert(0, backdrop);
+        }
+
+        // The language the old chip's one tap switched to: the wall's next language after the shown one (wrapping round)
+        public static string NextLanguage(PoiCardSheetView sheet)
+        {
+            var choices = CardLanguageRule.Choices(sheet.Context?.Settings?.languages);
+            Assert.GreaterOrEqual(choices.Count, 2, "precondition: the wall offers two languages to switch between");
+            return choices[(choices.IndexOf(sheet.Context.Language) + 1) % choices.Count];
+        }
+
+        // Switch the card to its next language with REAL taps (_3.3 P4.4b): the Aa button -- checked to be what a finger at its centre
+        // touches -- then that language in the visitor's settings
+        public static IEnumerator TapNextLanguage(PoiCardSheetView sheet)
+        {
+            string next = NextLanguage(sheet);
+            var aa = sheet.SettingsButton;
+            var touched = aa.panel.Pick(aa.worldBound.center);
+            Assert.IsTrue(touched == aa || aa.Contains(touched), "precondition: a tap at Aa's centre lands on it, not on '" + touched?.name + "'");
+            yield return Tap(aa.panel, aa.worldBound.center);
+            yield return null;
+            Assert.AreEqual(PoiCardSheetView.SettingsKey, sheet.Overlay.OpenKey, "the tap on Aa opened the visitor's settings");
+            var choice = sheet.Settings.Choice(next);
+            Assert.IsNotNull(choice, "the settings list " + next);
+            yield return Tap(choice.panel, choice.worldBound.center);
+            yield return Settle();
+            Assert.AreEqual(next, sheet.Context?.Language, "the tap on " + next + " switched the card");
+        }
+
         public static IEnumerator Settle(float seconds = 0.45f)
         {
             float end = Time.realtimeSinceStartup + seconds;

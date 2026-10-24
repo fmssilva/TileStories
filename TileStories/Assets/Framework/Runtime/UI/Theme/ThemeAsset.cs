@@ -17,7 +17,7 @@ namespace TileStories
         [SerializeField] private string key = "default";
 
         [Tooltip("The mode a screen opens in (ts-mode-<mode>) until a wall or a visitor picks another")]
-        [SerializeField] private string defaultMode = "dark";
+        [SerializeField] private string defaultMode = "light";
 
         [Tooltip("The values every mode shares: the type, space and radius scales, motion")]
         [SerializeField] private ThemeTokenSet shared = new();
@@ -25,7 +25,7 @@ namespace TileStories
         [Tooltip("One entry per mode (dark, light): that mode's colours")]
         [SerializeField] private List<ThemeMode> modes = new();
 
-        [Tooltip("A wall's closed choices (accent, roundness, motion level, R12.4): each option a set of values laid over the theme's. Not generated yet (_3.3 P4.5)")]
+        [Tooltip("A wall's closed choices (accent, roundness, motion level, R12.4): each option a set of values laid over the theme's, measured in every mode (ThemeContrastTests). Not generated yet (_3.3 P4.5)")]
         [SerializeField] private List<ThemeKnobOption> knobs = new();
 
         [Tooltip("The two type roles (display, body): font keys of the font library and the selectors that speak in the display face")]
@@ -37,6 +37,8 @@ namespace TileStories
         public ThemeTokenSet Shared => shared;
         public IReadOnlyList<ThemeMode> Modes => modes;
         public IReadOnlyList<ThemeKnobOption> Knobs => knobs;
+        // The keys of the theme's modes, in the asset's order (what ThemeModeRule chooses among)
+        public IReadOnlyList<string> ModeKeys => modes.ConvertAll(m => m.key);
 
         // Built once per mode on first use; an edit in the Inspector drops them (OnValidate)
         [NonSerialized] private Dictionary<string, ThemeResolver> _resolvers;

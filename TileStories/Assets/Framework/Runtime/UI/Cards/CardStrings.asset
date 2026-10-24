@@ -634,14 +634,54 @@ MonoBehaviour:
     - lang: pt
       value: "Aponta primeiro a câmara para a parede e depois coloca-o."
   - key: language_switch
-    where: The name of the small language chip beside the close button (its tooltip and
-      accessible name; the chip itself shows the code of the language a tap switches to).
-      The chip is hidden when the wall offers only one language.
+    where: 'The title of the Language group in the card''s Aa settings (the wall''s languages as buttons under it; the group is hidden when the wall offers only one language).'
     text:
     - lang: en
       value: Language
     - lang: pt
       value: Idioma
+  - key: language_name_en
+    where: 'English as its own speakers name it: a choice in the Language group of the card''s settings (the same word in every column, so a visitor finds their language whatever the card is in).'
+    text:
+    - lang: en
+      value: English
+    - lang: pt
+      value: English
+  - key: language_name_pt
+    where: 'Portuguese as its own speakers name it: a choice in the Language group of the card''s settings (the same word in every column).'
+    text:
+    - lang: en
+      value: Português
+    - lang: pt
+      value: Português
+  - key: visitor_settings
+    where: 'The name of the gear button in the card''s top bar, beside the close button (its tooltip and accessible name: the gear has no words), and the title of the small settings panel it opens.'
+    text:
+    - lang: en
+      value: Card settings
+    - lang: pt
+      value: Definições do cartão
+  - key: settings_appearance
+    where: 'The title of the group in the card''s Aa settings that switches the app between its light and dark colours.'
+    text:
+    - lang: en
+      value: Appearance
+    - lang: pt
+      value: Aspeto
+  - key: mode_light
+    where: 'The button in the Aa settings'' Appearance group that shows the app in its light colours (dark text on light surfaces).'
+    text:
+    - lang: en
+      value: Light
+    - lang: pt
+      value: Claro
+  - key: mode_dark
+    where: 'The button in the Aa settings'' Appearance group that shows the app in its dark colours (light text on dark surfaces).'
+    text:
+    - lang: en
+      value: Dark
+    - lang: pt
+      value: Escuro
   - key: family_about
     where: The words a visitor reads for the About family, which holds the description of
       the point itself, its facts and its quotes. A navigation element shows it as the name of that section.

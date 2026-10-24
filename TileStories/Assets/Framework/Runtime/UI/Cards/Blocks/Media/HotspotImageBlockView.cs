@@ -71,6 +71,7 @@ namespace TileStories
             _spots = new ElementPool<Spot>(NewSpot, ReleaseSpot);
             Frame = new VisualElement { name = "card-hotspot-frame" };
             Frame.AddToClassList("card-hotspot__frame");
+            BlockFrame.Bleed(Frame);
             Image = new CardImage("card-hotspot__picture");
             Image.Root.pickingMode = PickingMode.Ignore;
             Frame.Add(Image.Root);

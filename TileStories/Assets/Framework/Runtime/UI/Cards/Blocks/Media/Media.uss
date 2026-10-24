@@ -145,17 +145,19 @@
     display: none;
 }
 
-/* the actions row at the foot: the card's ONE focal action (accent fill, D5) and Listen as an outline pill */
-/* both pills share the row when they fit; else the focal one takes its own row (its words never wrap) and Listen goes under it */
+/* the actions row at the foot: the card's ONE focal action (accent fill, D5) and Listen as a compact outline pill ("play m:ss") */
+/* ONE row always (P4.4b part 2: two stacked rows hid the Lamp's picture): the pill keeps its size, the focal action takes the rest and
+   cuts its words with "..." only when they truly cannot fit */
 .card-hero__actions {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
 }
 
 .card-hero__primary {
     flex-grow: 1;
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 0;
     margin: 0 var(--ts-space-2) var(--ts-space-2) 0;
     padding: 0;
     border-top-width: 0;
@@ -171,6 +173,8 @@
 
 .card-hero__primary .card-action__label {
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .card-hero__listen {
@@ -215,7 +219,8 @@
 /* the plate (Text Only, Compact, a picture look without its picture): no picture, the words in the card's own ink */
 .card-hero--plate .card-hero__foot {
     padding: var(--ts-space-2) var(--ts-space-4) 0 var(--ts-space-4);
-    background-color: var(--ts-clear);
+    /* opaque, the bar continued: the sheet is glass since _3.3 P4.4b, and the plate's words never sit on the camera */
+    background-color: var(--ts-bar);
 }
 
 .card-hero--plate .card-hero__scrim {

@@ -86,6 +86,18 @@ namespace TileStories.Editor
             "slice either way.";
 
         // Placed Model Control moved here from Navigation (_3.2 audit section 4): it is the AR placement's chip, not a way to move in the card
+        private const string CardDefaultModeHelp =
+            "The colours the app opens in on this wall: Light (the default) or Dark. Both are measured high-contrast, every text at least " +
+            "7:1, for reading outdoors. A visitor can switch at any time with the Aa button in the card's top bar; their own choice is " +
+            "remembered on their device and wins over this row (Card Container > Test > Reset Saved Card State clears it). Applies to every " +
+            "screen of the app at once, without rebuilding the open card.";
+
+        internal const string CardBlockEmphasisHelp =
+            "How this block's frame stands out among the others. Normal (the default): an opaque surface inside a metal rim, with a soft " +
+            "shadow in Light. Featured: a deeper shadow and a larger title -- for the one or two blocks the card should push. Quiet: a " +
+            "hairline edge only, no rim band or shadow, and a smaller title -- for meta blocks such as Sources. Every block keeps a visible " +
+            "edge in every choice.";
+
         private const string CardPlacedModelControlHelp =
             "What tells a visitor that a model placed in the room with a Place In AR block is standing there. Chip (the default): while " +
             "a model stands, a small chip floats above the card's top-right edge at every height of the card -- even when the card is " +
@@ -527,6 +539,11 @@ namespace TileStories.Editor
             ? "The " + variant + " look needs a Loop Clip (an MP4 or WEBM inside the Media Folder): until then the card shows the text-only look."
             : "The " + variant + " look needs " + (variant == BuiltInBlocks.HeaderSplitThenNow ? "Picture and Second Picture" : "Picture") +
               " (pictures inside the Media Folder): until then the card shows the text-only look.";
+
+        // _3.3 P4.4b part 2: a hero title that wraps to 3 or more lines on a phone (HeroTitleFitRule, measured in the real display face)
+        internal static string CardHeroTitleLinesText(string language, string title, int lines) =>
+            "Title (" + language + ") \"" + title + "\" takes " + lines + " lines in the card's picture on a phone: its words push the picture up and out of view. "
+            + "Shorten it to two lines (the Subtitle can carry the rest).";
 
         // A picture path that is fine by the rule but has no file behind it (deleted or renamed after it was picked)
         internal static string CardMediaMissingText(string label, string path, MediaKind kind = MediaKind.Image) => kind == MediaKind.Image

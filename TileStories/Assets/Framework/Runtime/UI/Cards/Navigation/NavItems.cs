@@ -218,7 +218,10 @@ namespace TileStories
         public NavTint(VisualElement root)
         {
             _root = root;
-            root.RegisterCallback<AttachToPanelEvent>(_ => Apply());
+            // - a colour painted inline does not follow a mode class: it paints again when the mode changes (only while on a panel)
+            root.RegisterCallback<AttachToPanelEvent>(_ => { ThemeController.ModeChanged -= Apply; ThemeController.ModeChanged += Apply; Apply(); });
+            root.RegisterCallback<DetachFromPanelEvent>(_ => ThemeController.ModeChanged -= Apply);
+            if (root.panel != null) ThemeController.ModeChanged += Apply;
             root.RegisterCallback<GeometryChangedEvent>(_ => Apply());
         }
 

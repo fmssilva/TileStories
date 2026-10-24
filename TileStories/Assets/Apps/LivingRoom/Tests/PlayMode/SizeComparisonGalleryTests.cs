@@ -220,7 +220,8 @@ namespace TileStories.LivingRoom.Tests
             Assert.AreEqual(c.Height >= familiar.HeightCm, poi.height >= obj.height - tol, content + ": the drawing orders the sizes as the real ones");
 
             // - the shapes read against the card (non-text parts of an interface: 3:1)
-            Color surface = _harness.Sheet.Root.resolvedStyle.backgroundColor;
+            // - the block's own ground: its frame (_3.3 P4.4b; the sheet itself is clear)
+            Color surface = CardTestInput.EffectiveBackground(view.Root);
             Assert.GreaterOrEqual(CardTestInput.Contrast(view.PoiShape.resolvedStyle.borderTopColor, surface), UIAccessibility.MinRatioLargeTextOrUIComponent, content + ": the point's outline");
             Assert.GreaterOrEqual(CardTestInput.Contrast(OverSurface(view.ObjectShape.resolvedStyle.backgroundColor, surface), surface), UIAccessibility.MinRatioLargeTextOrUIComponent, content + ": the object's fill");
         }

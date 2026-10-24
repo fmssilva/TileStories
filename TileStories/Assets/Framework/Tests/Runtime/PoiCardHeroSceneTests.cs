@@ -40,6 +40,7 @@ namespace TileStories.Tests
         private IEnumerator Open(string poi, string language, SheetStopRule.Stop stop)
         {
             Session.CardSettings.languages = new List<string> { language, language == "en" ? "pt" : "en" };
+            CardTestInput.HoldTheWallStill(Sheet);
             SelectionEventBus.Select(poi);
             yield return CardTestInput.Settle();
             Assert.IsTrue(Sheet.IsOpen, "precondition: " + poi + "'s card is open");
@@ -73,6 +74,47 @@ namespace TileStories.Tests
             field.value = value;
         }
 
+        // ---------------- the title's lines (P4.4b part 2) ----------------
+
+        // The Editor's 3-line notice predicts the hero's lines with HeroTitleFitRule over the display face's glyph advances, on a 390 pt
+        // phone's line less the foot's padding: held here against the REAL hero label -- its own resolved face and size, its own width, the
+        // lines it really draws -- for titles of one, two and three lines
+        [UnityTest]
+        public IEnumerator TheTitleFitRule_CountsTheLinesTheRealHeroDraws_OnThePhonesLine()
+        {
+            var titles = new[] { "The Lamp", "The Palace of the Ribeira in Lisbon", "The Royal Ribeira Palace and its Great Earthquake Ruins" };
+            float oneLine = float.NaN;
+            var counted = new List<int>();
+            foreach (string title in titles)
+            {
+                yield return Push(config =>
+                {
+                    var header = config.pois.First(p => p.id == "lamp").card.blocks.First(b => b.kind == BuiltInBlocks.HeaderKind);
+                    header.fields.First(f => f.key == BlockStackBuilder.HeaderTitleField).text.First(t => t.lang == "en").value = title;
+                });
+                if (!Sheet.IsOpen) yield return Open("lamp", "en", SheetStopRule.Stop.Half);
+                yield return CardTestInput.Settle(0.2f);
+                var label = Header.HeroTitle;
+                Assert.AreEqual(title, label.text, "precondition: the pushed title is on the hero");
+                var font = label.resolvedStyle.unityFontDefinition.fontAsset;
+                Assert.IsNotNull(font, "precondition: the hero's title draws in a UI Toolkit font asset");
+                StringAssert.StartsWith("Fraunces", font.faceInfo.familyName, "the display face (R12.3)");
+                float size = label.resolvedStyle.fontSize, width = label.contentRect.width;
+                // - what the Editor assumes (HeroTitleMeasure): the narrow hero size, the 390 pt line less --ts-space-5 each side
+                Assert.AreEqual(CardTestInput.TokenPx("--ts-size-hero-narrow"), size, 0.01f, "a phone's hero uses the narrow size");
+                Assert.AreEqual(Sheet.Root.worldBound.width - 2f * CardTestInput.TokenPx("--ts-space-5"), width, OnePixel, "the line is the phone less the foot's padding");
+                int predicted = HeroTitleFitRule.Lines(title, width, run => HeroTitleFitRule.AdvanceWidth(font, size, run));
+                if (float.IsNaN(oneLine)) oneLine = label.contentRect.height;
+                int drawn = Mathf.RoundToInt(label.contentRect.height / oneLine);
+                Assert.AreEqual(drawn, predicted, "\"" + title + "\": the rule says " + predicted + " lines, the hero draws " + drawn
+                    + " (" + label.contentRect.height + " px of " + oneLine + " per line)");
+                counted.Add(drawn);
+            }
+            Assert.AreEqual(1, counted[0], "precondition: a one-line title");
+            Assert.AreEqual(2, counted[1], "precondition: a two-line title");
+            Assert.GreaterOrEqual(counted[2], HeroTitleFitRule.NoticeAtLines, "precondition: a title past the notice's threshold (" + counted[2] + " lines)");
+        }
+
         // ---------------- the bar ----------------
 
         [UnityTest]
@@ -87,7 +129,7 @@ namespace TileStories.Tests
             Assert.IsTrue(Header.BarTitleShown, "at Peek the bar shows the title");
             Assert.AreEqual(WhiteSpace.NoWrap, title.resolvedStyle.whiteSpace, "one line");
             Assert.Less(title.worldBound.height, title.resolvedStyle.fontSize * 2f, "...drawn as one line");
-            Assert.LessOrEqual(title.worldBound.xMax, Sheet.LanguageButton.worldBound.xMin + OnePixel, "it ends before the buttons");
+            Assert.LessOrEqual(title.worldBound.xMax, Sheet.SettingsButton.worldBound.xMin + OnePixel, "it ends before the buttons");
 
             yield return Push(c => c.card_settings.navigation.menu = BuiltInNavElements.DrawerTree);
             Assert.AreEqual(DisplayStyle.Flex, Sheet.MenuButton.resolvedStyle.display, "precondition: the Menu's button shows");
@@ -136,8 +178,22 @@ namespace TileStories.Tests
             }
             var listen = actions.OfType<AudioGuideBlockView>().Single();
             Assert.AreEqual(BuiltInBlocks.AudioGuideHeroChip, listen.Variant);
-            StringAssert.StartsWith(language == "en" ? "Listen " : "Ouvir ", listen.Title.text, "Listen with the guide's length");
+            // - P4.4b part 2: the compact pill -- the play mark and the guide's length, the words in its name
+            StringAssert.IsMatch(@"^\d+:\d\d$", listen.Title.text, "the pill shows the guide's length, m:ss");
+            Assert.AreEqual((language == "en" ? "Listen " : "Ouvir ") + listen.Title.text, listen.PlayButton.tooltip, "its name says Listen");
             Assert.IsTrue(view.Contains(listen.PlayButton.worldBound.center), "Listen is on screen");
+            if (lamp)
+            {
+                // - ONE action row (the Architect's review of P4.4a: two stacked rows hid the Lamp's picture)
+                var primary = actions[0].Root;
+                var words = ((ActionsBlockView)actions[0]).Actions.Single().Label;
+                Assert.AreEqual(primary.worldBound.center.y, listen.Root.worldBound.center.y, OnePixel, "the focal action and Listen share one row: "
+                    + primary.worldBound + " / " + listen.Root.worldBound);
+                Assert.LessOrEqual(primary.worldBound.xMax, listen.Root.worldBound.xMin + OnePixel, "Listen sits beside it, never over it");
+                Assert.IsTrue(hero.Contains(primary.worldBound.min) && hero.Contains(listen.Root.worldBound.max - Vector2.one * OnePixel), "both inside the hero");
+                float wants = words.MeasureTextSize(words.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined).x;
+                Assert.LessOrEqual(wants, words.contentRect.width + OnePixel, "the focal words are whole at 390 pt (" + wants + " in " + words.contentRect.width + ")");
+            }
             yield return LookMeasure.Render(Domain, "check", $"half_{poi}_{language}", Sheet.Root);
         }
 
@@ -165,8 +221,10 @@ namespace TileStories.Tests
             yield return CardTestInput.Tap(listen.PlayButton.panel, listen.PlayButton.worldBound.center);
             Assert.AreEqual(CardAudioState.Playing, _audio.State, "a real tap plays");
             Assert.IsTrue(_audio.IsCurrent(player.Track), "the card's guide: one audio, drawn by the player too");
-            Assert.AreEqual("Listen", listen.Title.text, "playing: Listen beside the running time");
-            Assert.AreEqual(DisplayStyle.Flex, listen.TimeText.resolvedStyle.display);
+            // - P4.4b part 2: the compact pill shows the running time alone while it plays, and its name becomes Pause
+            Assert.AreEqual(AudioTimeRule.Format(_audio.Position), listen.Title.text, "playing: the running time on the pill");
+            Assert.AreEqual(DisplayStyle.None, listen.TimeText.resolvedStyle.display, "one time, never a second line");
+            Assert.AreEqual("Pause", listen.PlayButton.tooltip, "its name while it plays");
             yield return CardTestInput.Tap(listen.PlayButton.panel, listen.PlayButton.worldBound.center);
             Assert.AreEqual(CardAudioState.Paused, _audio.State, "a second tap pauses");
         }

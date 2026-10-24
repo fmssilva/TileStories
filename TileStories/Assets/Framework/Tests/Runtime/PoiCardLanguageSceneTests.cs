@@ -37,20 +37,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle(0.3f);
         }
 
-        private IEnumerator TapTheChip()
-        {
-            var chip = Sheet.LanguageButton;
-            Assert.AreEqual(DisplayStyle.Flex, chip.resolvedStyle.display, "precondition: the chip shows");
-            Assert.IsTrue(Sheet.Layer.worldBound.Contains(chip.worldBound.center), "precondition: the chip is on screen: " + chip.worldBound);
-            // - what a finger there touches is the chip itself, not something over it (seen once, 15.4.2: a tap that never reached the chip)
-            var touched = chip.panel.Pick(chip.worldBound.center);
-            Assert.IsTrue(touched == chip || chip.Contains(touched), "precondition: a tap at the chip's centre lands on the chip, not on '"
-                + touched?.name + "' (" + touched?.GetType().Name + ")");
-            string before = chip.text;
-            yield return CardTestInput.Tap(chip.panel, chip.worldBound.center);
-            yield return CardTestInput.Settle();
-            Assert.AreNotEqual(before, Sheet.LanguageButton.text, "the tap reached the chip: it now offers the other language");
-        }
+        private IEnumerator TapTheChip() => CardTestInput.TapNextLanguage(Sheet);
 
         private IEnumerator ScrollToSources()
         {
@@ -83,7 +70,7 @@ namespace TileStories.Tests
             string portuguese = new BlockFieldReader(block, "pt", "en").Text(BlockKindDefinition.HeadingField);
             Assert.AreNotEqual(english, portuguese, "precondition: The Lamp's Quick Facts has both an English and a Portuguese heading");
             Assert.AreEqual(english, FactsHeading(), "precondition: the card opens in the wall's first language");
-            Assert.AreEqual("PT", Sheet.LanguageButton.text, "the chip offers Portuguese");
+            Assert.AreEqual("en", Sheet.Context.Language, "the card opens in English");
 
             yield return ScrollToSources();
             float scrolled = Sheet.Stack.Scroll.scrollOffset.y;
@@ -94,7 +81,7 @@ namespace TileStories.Tests
             Assert.AreEqual("pt", Card.State.Language(), "the tap was remembered for this wall");
             Assert.AreEqual(portuguese, FactsHeading(), "the open card now speaks Portuguese");
             Assert.AreEqual("Fechar", Sheet.CloseButton.tooltip, "and so do the card's own words");
-            Assert.AreEqual("EN", Sheet.LanguageButton.text, "the chip now offers English");
+            Assert.AreEqual("pt", Sheet.Context.Language, "the card is in Portuguese now");
             Assert.AreEqual(SheetStopRule.Stop.Full, Sheet.Stop, "the sheet kept its stop");
             Assert.AreEqual(scrolled, Sheet.Stack.Scroll.scrollOffset.y, 2f, "and the reader kept their place");
             Assert.AreEqual("lamp", Card.ShownPoiId);
@@ -120,7 +107,7 @@ namespace TileStories.Tests
             yield return CardTestInput.Settle();
             Assert.AreEqual(other.id, Card.ShownPoiId, "another point's card is open");
             Assert.AreEqual("Fechar", Sheet.CloseButton.tooltip, "it speaks Portuguese too: the pick belongs to the wall, not to a point");
-            Assert.AreEqual("EN", Sheet.LanguageButton.text);
+            Assert.AreEqual("pt", Sheet.Context.Language);
 
             SelectionEventBus.Clear();
             yield return CardTestInput.Settle();
@@ -158,7 +145,7 @@ namespace TileStories.Tests
 
             yield return Push(c => c.card_settings.preview_language = "pt");
             Assert.AreEqual("Fechar", Sheet.CloseButton.tooltip, "the developer's preview opens the card in Portuguese, live");
-            Assert.AreEqual("EN", Sheet.LanguageButton.text, "the chip offers the way back");
+            Assert.AreEqual("pt", Sheet.Context.Language, "the preview's language");
 
             yield return TapTheChip();
             Assert.AreEqual("Close", Sheet.CloseButton.tooltip, "a visitor's tap beats the preview: English");
@@ -170,18 +157,20 @@ namespace TileStories.Tests
         }
 
         [UnityTest]
-        public IEnumerator AWallWithOneLanguage_HasNoChip()
+        public IEnumerator AWallWithOneLanguage_KeepsAa_ItsSettingsDropTheLanguageGroup_Live()
         {
             UseMemoryState();
             yield return OpenFull("lamp");
-            Assert.AreEqual(DisplayStyle.Flex, Sheet.LanguageButton.resolvedStyle.display, "precondition: two languages, a chip");
-
             yield return Push(c => c.card_settings.languages = new List<string> { "en" });
-            Assert.AreEqual(DisplayStyle.None, Sheet.LanguageButton.resolvedStyle.display, "one language: nothing to choose, no chip");
-            Assert.IsFalse(Sheet.Root.ClassListContains("poi-card--has-language"));
+            Assert.AreEqual(DisplayStyle.Flex, Sheet.SettingsButton.resolvedStyle.display, "one language: the mode is still a choice, Aa stays");
+            yield return CardTestInput.Tap(Sheet.SettingsButton.panel, Sheet.SettingsButton.worldBound.center);
+            yield return null;
+            Assert.AreEqual(DisplayStyle.None, Sheet.Settings.Choice("en").parent.parent.resolvedStyle.display, "no Language group to choose in");
+            Sheet.Overlay.Close();
 
             yield return Push(c => c.card_settings.languages = new List<string> { "en", "pt" });
-            Assert.AreEqual(DisplayStyle.Flex, Sheet.LanguageButton.resolvedStyle.display, "two again: the chip is back, live");
+            yield return CardTestInput.TapNextLanguage(Sheet);
+            Assert.AreEqual("Fechar", Sheet.CloseButton.tooltip, "two again: the language is a choice again, live");
         }
 
         [UnityTest]

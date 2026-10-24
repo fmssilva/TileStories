@@ -17,8 +17,13 @@ namespace TileStories
         public VisualElement Root { get; }
         public VisualElement Handle { get; }
         public Button CloseButton { get; }
-        // The language chip beside the X (15.3.2): shows the code of the language a tap switches to; hidden when the wall offers one language
-        public Button LanguageButton { get; }
+        // The settings button beside the X (_3.3 P4.4b, replaces the language chip of 15.3.2; a gear since part 2): opens the visitor's
+        // settings -- language, light / dark
+        public Button SettingsButton { get; }
+        // The gear drawn on it (CardIcons.Shape.Gear, coloured by USS)
+        public CardIcons.VectorGlyph SettingsGlyph { get; }
+        // The visitor's settings panel the settings button opens over the card (in the overlay layer)
+        public CardVisitorSettingsView Settings { get; }
         public BlockStackView Stack { get; }
         // Moving inside the card (_3.2 step 3): jumps and the scroll-spy over the card's navigation model, rebuilt on every Show and reveal
         public NavController Nav { get; }
@@ -57,8 +62,14 @@ namespace TileStories
         // Raised when the visitor closes the card (the X, or a drag / swipe below peek)
         public event Action CloseRequested;
 
-        // Raised when the visitor taps the language chip: the language code to switch to
+        // Raised when the visitor picks a language in the Aa settings: the language code to switch to
         public event Action<string> LanguageRequested;
+
+        // Raised when the visitor picks a mode in the Aa settings: the mode to show (CardOptions.Modes)
+        public event Action<string> ModeRequested;
+
+        // The overlay key the Aa settings open under
+        public const string SettingsKey = "visitor-settings";
 
         // Raised when the sheet comes to rest at another stop (Dismissed when it closes)
         public event Action<SheetStopRule.Stop> StopChanged;
@@ -78,8 +89,6 @@ namespace TileStories
         // --ts-hero-min-height: the hero is never shorter than this, whatever Half shows (HeroRule.Height)
         private float _heroMin;
         private float _halfMaxRatio = CardContainerSettings.HalfMaxRatioMax;
-        // The language the chip's next tap switches to ("" = the chip is hidden)
-        private string _nextLanguage = "";
 
         // The shown card's media source and texts: what the full-screen view loads through and words its way back with
         private BlockBindContext _context;
@@ -140,10 +149,17 @@ namespace TileStories
             }
             Root.Add(CloseButton);
 
-            // - the chip's words are the language code (data), its name comes from CardStrings
-            LanguageButton = new Button(() => { if (_nextLanguage.Length > 0) LanguageRequested?.Invoke(_nextLanguage); }) { name = "poi-card-language" };
-            LanguageButton.AddToClassList("poi-card__language");
-            Root.Add(LanguageButton);
+            // - a gear (the universal "settings" sign, P4.4b part 2: a "more" mark would read "more actions" beside the Menu's bars); its
+            //   name comes from CardStrings; a second tap while its settings are open closes them
+            SettingsButton = new Button(ToggleSettings) { name = "poi-card-settings" };
+            SettingsButton.AddToClassList("poi-card__settings");
+            SettingsGlyph = CardIcons.CreateVector(CardIcons.Shape.Gear);
+            SettingsGlyph.AddToClassList("poi-card__settings-glyph");
+            SettingsButton.Add(SettingsGlyph);
+            Root.Add(SettingsButton);
+            Settings = new CardVisitorSettingsView();
+            Settings.LanguagePicked += code => LanguageRequested?.Invoke(code);
+            Settings.ModePicked += mode => ModeRequested?.Invoke(mode);
 
             // - no glyph text: three bars drawn by the icon set; its name (tooltip) comes from CardStrings
             MenuButton = new Button(() => Overlay.OpenMenu()) { name = "poi-card-menu-button" };
@@ -175,7 +191,7 @@ namespace TileStories
         {
             _halfMaxRatio = halfMaxRatio;
             CloseButton.tooltip = context.Strings?.Get(CardStrings.Keys.Close) ?? "";
-            ShowLanguageChip(context);
+            ShowSettingsButton(context);
             context.Host ??= this;
             // - before the old card's full view closes: what of it stays over a rebind of the same point
             FullViewOpener.KeepAcrossRebind(context);
@@ -235,15 +251,36 @@ namespace TileStories
             Root.EnableInClassList("poi-card--has-menu", shown);
         }
 
-        // The chip names the language a tap switches to; with fewer than two languages there is nothing to choose and it is hidden
-        private void ShowLanguageChip(BlockBindContext context)
+        // The settings button is on every card: even with one language there is the mode to choose. No words on it: the gear says it,
+        // its name ("Card settings") is for a screen reader and a long press
+        private void ShowSettingsButton(BlockBindContext context)
         {
-            _nextLanguage = CardLanguageRule.Next(context.Settings?.languages, context.Language);
-            LanguageButton.text = CardLanguageRule.ChipLabel(context.Settings?.languages, context.Language);
-            bool shown = LanguageButton.text.Length > 0;
-            LanguageButton.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
-            LanguageButton.tooltip = context.Strings?.Get(CardStrings.Keys.LanguageSwitch) ?? "";
-            Root.EnableInClassList("poi-card--has-language", shown);
+            SettingsButton.tooltip = context.Strings?.Get(CardStrings.Keys.VisitorSettings) ?? "";
+            Root.AddToClassList("poi-card--has-settings");
+        }
+
+        // The settings button: open the visitor's settings over the card, or close them when they are open
+        private void ToggleSettings()
+        {
+            if (_context == null) return;
+            if (Overlay.OpenKey == SettingsKey) { Overlay.Close(); return; }
+            var strings = _context.Strings;
+            Settings.Bind(_context.Settings?.languages, _context.Language, ThemeController.CurrentMode, key => strings?.Get(key) ?? key);
+            Overlay.OpenPopover(SettingsKey, Settings.Root);
+            PlaceSettings();
+        }
+
+        // The panel hangs from the Aa button's right edge: under it while the bar is in the upper half of the screen, above it when the
+        // sheet is low (at Peek the bar sits near the screen's foot) -- kept the button's own inset from the edges (its top)
+        private void PlaceSettings()
+        {
+            var button = Layer.WorldToLocal(SettingsButton.worldBound);
+            float gap = CloseButton.resolvedStyle.top, height = Layer.layout.height;
+            var style = Settings.Root.style;
+            style.right = Layer.layout.width - button.xMax;
+            bool below = button.center.y < height / 2f;
+            style.top = below ? button.yMax + gap : StyleKeyword.Auto;
+            style.bottom = below ? StyleKeyword.Auto : height - button.yMin + gap;
         }
 
         // Close: unbind every block (views go back to their pool) and collapse

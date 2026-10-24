@@ -350,7 +350,7 @@ namespace TileStories.Tests
                 yield return OpenFull(Lamp);
                 if (language == "pt")
                 {
-                    yield return CardTestInput.Tap(Sheet.LanguageButton.panel, Sheet.LanguageButton.worldBound.center);
+                    yield return CardTestInput.TapNextLanguage(Sheet);
                     yield return CardTestInput.Settle(0.3f);
                 }
                 Scroll.scrollOffset = Vector2.zero;
@@ -376,7 +376,7 @@ namespace TileStories.Tests
                 yield return Capture("Layout_Lamp_tabs_media_" + language);
                 if (language == "pt")
                 {
-                    yield return CardTestInput.Tap(Sheet.LanguageButton.panel, Sheet.LanguageButton.worldBound.center);
+                    yield return CardTestInput.TapNextLanguage(Sheet);
                     yield return CardTestInput.Settle(0.3f);
                 }
             }

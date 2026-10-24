@@ -14,6 +14,13 @@
     --ts-pill-min-width: 96px;
     /* The one gap between two blocks of the stack (BlockStackView's slots, _3.1 step 6C) */
     --ts-block-gap: 24px;
+    /* The block frame's shadow (_3.3 P4.4b): how far the 9-slice reaches outside the slot, and where card_block_shadow.png is sliced
+       (its 16 px margin + the 20 px block radius, --ts-radius-l) */
+    --ts-frame-shadow-out: -16px;
+    --ts-frame-shadow-slice: 36;
+    /* how far a picture / carousel / strip / track reaches past the frame's side padding (--ts-space-4): minus that padding, so it
+       meets the frame's inner edge (P4.4b part 2) */
+    --ts-frame-bleed: -16px;
 
     /* Sheet layout: the smallest tap target (WCAG 2.5.5 asks 44), the grabber bar, and the gap the full stop
        leaves above the sheet. --ts-sheet-top-gap is read by PoiCardSheetView as a plain number (panel units). */
@@ -34,14 +41,17 @@
     --ts-ahead-opacity: 0.35;
     /* The language chip sits left of the close X (X width + both gaps); with it the header keeps its end clear of the chip (chip right
        offset + chip width + a gap) */
-    --ts-language-chip-right: 64px;
-    --ts-header-end-with-language: 120px;
+    --ts-settings-button-right: 64px;
+    /* The Aa settings panel's width and the outline of its current choice (_3.3 P4.4b) */
+    --ts-settings-width: 240px;
+    --ts-chosen-border: 2px;
+    --ts-header-end-with-settings: 120px;
     /* The menu button (_3.2 step 8) sits left of the X, or left of the language chip when there is one (one more button width + gap);
        the header keeps its end clear of it the same way */
     --ts-menu-button-right: 64px;
-    --ts-menu-button-right-with-language: 120px;
+    --ts-menu-button-right-with-settings: 120px;
     --ts-header-end-with-menu: 120px;
-    --ts-header-end-with-language-and-menu: 176px;
+    --ts-header-end-with-settings-and-menu: 176px;
     /* The menus over the card (_3.2 step 8). The drawer takes most of a phone's width and never more than a comfortable reading column
        (so on a tablet it stays a drawer); a kind's line starts under its section's words (row padding + icon + its gap). The grid's tiles
        are two touch targets tall: big thumbs, a kiosk's size */
