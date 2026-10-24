@@ -92,7 +92,10 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~65-150 s (2079 tests, 146 s, 2026-10-24, _3.3 P4.4b part 2, focused); full PlayMode ~55-70 min (1288 tests, 4002 s, 2026-10-24,
+EditMode ~65-160 s (2098 tests, 156 s, 2026-10-24, harness H1, wholly in the background: 0 focus gains; before it 2079 tests, 146 s, _3.3 P4.4b
+part 2, focused); full PlayMode ~70-80 min (1307 tests incl. 43 gated skips, 4326 s, 2026-10-24, harness H1, WHOLLY in the background: 0 focus
+gains from start to end, nothing polled during the run -- the first run that was really background all the way; the MEASURE run before it,
+4641 s, polled, 3 gains in its first 22 s; before them 1288 tests, 4002 s, 2026-10-24,
 _3.3 P4.4b part 2, unfocused at the first and the last poll, Unity in front in the middle; before it 1278 tests, 3839 s, _3.3 P4.4a, background at every poll, Unity in front at the end; before it 1254 tests incl. the gated
 measurements, 3577 s, _3.3 P4.3, background at every poll from the first, Unity in front at the end; before it 1235 tests +
 the gated pixel set, 3521 s, _3.3 P4.1, focused throughout -- the developer could not keep Unity behind; before it 1219 tests, 3582 s, _3.3 P1b
@@ -238,10 +241,25 @@ application is a broken test, not a flaky one.
 - **A failure that goes away on rerun is investigated, not dismissed.** Before calling a failure "focus" or "flaky", reproduce it
   on purpose (e.g. run the fixture with Unity in the background). If it reproduces, fix the harness; "passed on the second run" is
   not a finish.
-- **How to make a run really "in the background".** The Game view's Enter Play Mode setting is "Play Focused", so entering Play Mode
-  brings Unity back to the front: leaving Unity behind BEFORE `run_tests` is not enough (2026-09-29: four "background" runs were in
-  fact focused). Start the run, then ask the developer to click into another application about 5 seconds later, and count only a
-  run whose `get_test_job` progress reads `editor_is_focused: false` both early (first poll, `wait_timeout` ~25) and at the end.
+- **What raises Unity during a run: the MCP server, never the run.** The UnityMCP server's focus nudge (`utils/focus_nudge.py`)
+  runs on EVERY `get_test_job` call, with or without `wait_timeout`: when Unity reports itself unfocused and the job has had no progress
+  for 3 s (any test longer than that, or the start of a run) it brings Unity to the front with `SetForegroundWindow` for 3-12 s, then
+  backs off. No setting turns it off. Measured with `TestRunRecorder` (harness H1, 2026-10-24): the same fixture with Unity behind,
+  polled = 2 jumps, not polled = 0; the Game view's "Play Focused", profiler recorders, asset imports and the LodWall Game-view re-size
+  raise nothing on their own (the "~10 jumps per full run" were the agent's ~10 polls). So a background run stays behind as long as
+  nothing asks the MCP server about it while it runs: wait as 4.2.5 says.
+- **What a background run guarantees.** Unity is not raised from the start to the end (the developer can work beside it), every
+  test is green unfocused as well as focused, and the two Editor log lines `TestRunBoundary` writes say where Unity was at each end
+  (`[TestRun] started (Unity behind)` ... `[TestRun] ended (Unity behind)`): count a run as background only when both say behind.
+  With **TileStories > Dev > Record Test Runs** ticked (off by default), `TestEvidence/Harness/TestRunRecorder_report.txt` lists every
+  focus gain after the start with the test that was running and what happened in the 3 s before it -- one run measures a regression.
+- **An Editor-window gesture runs inside ONE editor tick.** Unity switching to or from another application, a focus change and a real
+  mouse event are handled only BETWEEN editor ticks; a deactivation ends a text field's editing session for good (what was typed after it
+  is lost), while a drag's `hotControl` and a button click survive it. So a real-click Editor test sends a whole gesture -- click and
+  typed word, press / drags / release -- as events with `PoiEditorWindowHost.PaintNow` (Layout + Repaint of the window, now) between
+  them, never one event per `yield` (`ConfigUndoGroupingTests`, `KeywordListFieldTypingTests`, `PoiEditorWindowHost.ReplaceText`). IMGUI
+  state is read inside the window's own `OnGUI`: Unity swaps `GUIUtility.keyboardControl` per window around each `OnGUI`, so a test's
+  coroutine reads whichever window painted last (0 one frame, the field the next).
 - **Tools leave no windows.** A capture or helper script that opens an Editor window closes it with `window.Close()` (never only
   `DestroyImmediate`, which can leave an empty native shell -- the blank "POI Editor capture" / "gate" windows) and then checks
   `Resources.FindObjectsOfTypeAll<EditorWindow>()` holds none of its windows. Captures and test runs never overlap: close every
@@ -249,14 +267,15 @@ application is a broken test, not a flaky one.
 - Blank windows the developer finds are safe to close with their X; they hold nothing.
 - **Where the developer puts Unity: exactly ONE of three short actions, in Portuguese, word for word, no explanation**
   (the developer reads only the action; the reasons below are for the agent):
-  - **a)** "Mete o Unity destapado e com a janela ativa." -- EditMode runs (some real-click Editor-window tests still depend on
-    focus, `__mixed_TODOs.md`) and anything that types or clicks into an Editor window.
+  - **a)** "Mete o Unity destapado e com a janela ativa." -- anything the AGENT types or clicks into an Editor window by hand
+    (an `execute_code` that drives a window); test runs no longer need it.
   - **b)** "Mete o Unity destapado; podes trabalhar noutras apps ao lado." -- the GATE capture and every POI Editor window
     capture: they read the DESKTOP, so the window must be visible, not active.
   - **c)** "Mete o Unity em background (se saltar para a frente, clica noutra app; não minimizes)." -- PlayMode runs, Phase A /
     B, Game-view captures in tests (they read Unity's own render; real input ignores focus) and every full PlayMode run (taken
-    in the background, 4.2). Unity jumps to the front when Play Mode starts: expected. A run Unity pulled to the front partway is
-    still green but proves nothing about focus: say so in the report instead of calling it a background run.
+    in the background, 4.2), and full EditMode runs (their real-click tests no longer need the focus). Unity does not jump to the front
+    when nothing polls the MCP server during the run (above); a run that ends "(Unity in front)" is still green but proves nothing
+    about focus: say so in the report instead of calling it a background run.
   In every case the developer never touches Unity itself during a run (no Play, no edits, no saves).
 - **Pixel and layout assertions never depend on the Editor's window sizes.** Every PlayMode run lays out in ONE frame: 390 x 844,
   the PanelSettings reference resolution (a phone in portrait), pinned for the whole run by an assembly-wide NUnit `[SetUpFixture]`
@@ -324,14 +343,18 @@ and a domain reload in the middle of a test run does not pause it: it destroys i
 the aborted run leaves `Assets/InitTestScene<guid>.unity` behind. Found in the Editor log on 2026-09-29: a `refresh_unity`
 sent while a PlayMode job was still going cost two Editor restarts.
 
-- **Serialize.** Edit -> `refresh_unity` -> `run_tests` -> `get_test_job` (with `wait_timeout` 60, repeated) until the job
-  says `succeeded` / `failed` -> only then the next edit, refresh, `execute_code` that saves assets, or run. A `get_test_job`
-  that timed out means "still running", never "go on".
-- **Wait without burning tokens.** Every poll is a full model turn that re-reads the whole session, so polling a 30 min run
-  every 25-60 s costs dozens of turns for nothing. For any run expected to take over 3 min: (1) say in ONE chat line what runs
-  and its expected time (from RUN TIMES above) and when you will check; (2) wait with ONE Bash call `sleep 540` (timeout
-  600000 ms, the Bash tool's cap) per ~10 min, checking `get_test_job` once after each; (3) from the expected end, poll every
-  ~2 min. No narration between waits. After the run, update RUN TIMES if it moved by more than ~10 %.
+- **Serialize.** Edit -> `refresh_unity` -> `run_tests` -> wait for the run's end (the next bullet: the Editor log's
+  `[TestRun] ended`; a short run with Unity in FRONT may use `get_test_job` with `wait_timeout` 60, which nudges nothing while
+  Unity is focused) -> `get_test_job` says `succeeded` / `failed` -> only then the next edit, refresh, `execute_code` that saves
+  assets, or run. A `get_test_job` that timed out means "still running", never "go on".
+- **Wait without polling the MCP server.** A `get_test_job` call while a run goes raises Unity to the front (the MCP server's focus
+  nudge, 4.2.3), and every poll is a full model turn that re-reads the session. For any run Unity is behind for, and any run over
+  ~1 min: (1) BEFORE `run_tests`, save the Editor log's size (`stat -c %s "$LOCALAPPDATA/Unity/Editor/Editor.log"`); (2) start the
+  run and say in ONE chat line what runs and its expected time (RUN TIMES above); (3) start ONE background Bash watcher
+  (`run_in_background`) that waits until the bytes AFTER that offset hold `[TestRun] ended` (a watcher reading from before the
+  offset finds the previous run's line); (4) when it wakes you, call `get_test_job` ONCE for the counts. Never `get_test_job`, with or
+  without `wait_timeout`, before the end line. Reading the `mcpforunity://editor/state` resource (`tests.is_running`) does not nudge.
+  After the run, update RUN TIMES if it moved by more than ~10 %.
 - **Ask the developer ONCE before a run or capture that needs Unity in a given place** (the GATE capture, POI Editor captures, a
   background run), with the AskUserQuestion tool so the session waits for the answer. The question is ONLY the action of 4.2.3
   (a, b or c, word for word) plus, at most, how long ("~2 min", "~60 min"); no explanation of why. Options: "Pronto" / "Espera".

@@ -69,9 +69,13 @@ namespace TileStories.Editor.Tests
             var seen = new Dictionary<int, Rect>();
             NamedOptionPickerPopup.RowRectProbe = (i, r) => seen[i] = r;
             yield return _window.ScrollTo("Preset");
+            // - the click is one tick (press + release sent together) and opens the picker whether Unity is active or not (measured
+            //   across real activation changes, harness H1); if it ever does not, the message says where the focus was around it
+            string focusBefore = PoiEditorWindowHost.FocusNow;
             _window.Click("Preset");
             var popup = EditorPopup.FindOpen(NavigationPresets.PickerKind);
-            Assert.IsNotNull(popup, "a real click on the Preset button opens the picker");
+            Assert.IsNotNull(popup, "a real click on the Preset button opens the picker (before the click: " + focusBefore
+                + "; after: " + PoiEditorWindowHost.FocusNow + ")");
             for (int frame = 0; frame < 90 && seen.Count < NavigationPresets.All.Count; frame++)
             {
                 popup.Repaint();

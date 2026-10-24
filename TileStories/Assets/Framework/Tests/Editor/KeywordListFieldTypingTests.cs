@@ -23,6 +23,7 @@ namespace TileStories.Editor.Tests
             public static List<string> Keywords = new();
             public static Rect FieldRect;
             public static int Repaints;
+            public static bool Editing;
 
             private void OnGUI()
             {
@@ -30,6 +31,10 @@ namespace TileStories.Editor.Tests
                 if (Event.current.type == EventType.Repaint)
                 {
                     FieldRect = GUILayoutUtility.GetLastRect();
+                    // - read HERE, inside this window's own OnGUI: Unity swaps GUIUtility.keyboardControl per window around each
+                    //   window's OnGUI, so read from the test's coroutine it holds whichever window painted last (0 one frame, the
+                    //   field the next, with no focus change at all -- measured 2026-10-24, harness H1)
+                    Editing = EditorGUIUtility.editingTextField && GUIUtility.keyboardControl != 0;
                     Repaints++;
                 }
             }
@@ -67,12 +72,20 @@ namespace TileStories.Editor.Tests
             Assert.Greater(Host.Repaints, before, "the host window must have repainted");
         }
 
-        private IEnumerator Type(string text)
+        // Click into the field and type `text`, one real key event per character with the field laid out and painted after each
+        // (every key still goes through the re-parse), ALL inside one editor tick: Unity switching to or from another
+        // application ends a text field's editing session, and that can only happen between ticks (40-testing 4.2.3)
+        private void ClickAndType(string text)
         {
+            Vector2 centre = Host.FieldRect.center;
+            _host.SendEvent(new Event { type = EventType.MouseDown, button = 0, clickCount = 1, mousePosition = centre });
+            _host.SendEvent(new Event { type = EventType.MouseUp, button = 0, clickCount = 1, mousePosition = centre });
+            PoiEditorWindowHost.PaintNow(_host);
+            Assert.IsTrue(Host.Editing, "precondition: the click must start editing the keyword field (" + PoiEditorWindowHost.FocusNow + ")");
             foreach (char c in text)
             {
                 _host.SendEvent(new Event { type = EventType.KeyDown, character = c, keyCode = KeyCode.None });
-                yield return Repaint();
+                PoiEditorWindowHost.PaintNow(_host);
             }
         }
 
@@ -80,13 +93,10 @@ namespace TileStories.Editor.Tests
         public IEnumerator TypingTwoKeywordsWithACommaBetween_GivesTwoKeywords()
         {
             yield return Repaint();
-            Vector2 centre = Host.FieldRect.center;
-            _host.SendEvent(new Event { type = EventType.MouseDown, button = 0, clickCount = 1, mousePosition = centre });
-            _host.SendEvent(new Event { type = EventType.MouseUp, button = 0, clickCount = 1, mousePosition = centre });
-            yield return Repaint();
-            Assert.AreNotEqual(0, GUIUtility.keyboardControl, "precondition: the click must focus the keyword field");
-
-            yield return Type("castle, tower");
+            int paintsBefore = Host.Repaints;
+            ClickAndType("castle, tower");
+            Assert.GreaterOrEqual(Host.Repaints - paintsBefore, 1 + "castle, tower".Length,
+                "precondition: the field was painted after the click and after every key, inside the tick");
 
             CollectionAssert.AreEqual(new[] { "castle", "tower" }, Host.Keywords,
                 "typing 'castle, tower' must give two keywords (the comma must survive until the next word)");

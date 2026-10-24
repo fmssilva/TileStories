@@ -348,6 +348,7 @@ namespace TileStories.Tests
                         property.SetValue(gameView, existing, null);
                         gameView.Repaint();
                         _pinned.Add(new PinnedWindow { Window = gameView, SelectedSizeIndexProperty = property, PreviousIndex = previous });
+                        TestRunRecorder.Write(TestRunRecorder.GameViewSize, "pinned " + label + " (index " + previous + " -> " + existing + ")");
                     }
                     catch (System.Exception e)
                     {
@@ -376,6 +377,7 @@ namespace TileStories.Tests
                     if (pinned.Window == null) continue; // a window closed mid-run: nothing left to restore
                     pinned.SelectedSizeIndexProperty.SetValue(pinned.Window, pinned.PreviousIndex, null);
                     pinned.Window.Repaint();
+                    TestRunRecorder.Write(TestRunRecorder.GameViewSize, "restored index " + pinned.PreviousIndex);
                 }
                 _pinned.Clear();
             }

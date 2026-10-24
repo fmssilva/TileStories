@@ -3,7 +3,7 @@ using TileStories.Tests;
 
 // No namespace on purpose: wraps every test of the style spike's PlayMode assembly in the Framework's fixed 390 x 844 frame
 // (an NUnit SetUpFixture only covers its own assembly; same as LivingRoomFixedFrameForTheRun)
-[SetUpFixture]
+[SetUpFixture, RecordEachTest]
 public class StyleSpikeFixedFrameForTheRun
 {
     private CardTestInput.FixedGameViewSize _frame;

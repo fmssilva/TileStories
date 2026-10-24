@@ -79,20 +79,23 @@ namespace TileStories.Editor.Tests
             int stepsBefore = _window.UndoStepsLeft;
 
             // A real drag along the slider track: press near its right end, move left in steps, release
+            // - the whole drag inside one editor tick, the window laid out and painted between its events: Unity switching to or
+            //   from another application, or a real pointer, can only act between ticks, never in the middle of the gesture
             Rect row = _window.RectOf("Badge size");
             float y = row.center.y;
             float startX = row.xMax - 70f;
             var seen = new HashSet<float>();
             _window.Send(new Event { type = EventType.MouseDown, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX, y)) });
-            yield return _window.WaitForRepaint();
+            _window.PaintNow();
             seen.Add(_window.Config.badge_size_ratio);
             for (int i = 1; i <= 6; i++)
             {
                 _window.Send(new Event { type = EventType.MouseDrag, button = 0, mousePosition = _window.Local(new Vector2(startX - 12f * i, y)), delta = new Vector2(-12f, 0f) });
-                yield return _window.WaitForRepaint();
+                _window.PaintNow();
                 seen.Add(_window.Config.badge_size_ratio);
             }
             _window.Send(new Event { type = EventType.MouseUp, button = 0, clickCount = 1, mousePosition = _window.Local(new Vector2(startX - 72f, y)) });
+            _window.PaintNow();
             yield return _window.WaitForRepaint();
 
             Assert.GreaterOrEqual(seen.Count, 3, "precondition: the drag must have changed the value several times");

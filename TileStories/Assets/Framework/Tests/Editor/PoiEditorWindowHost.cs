@@ -77,6 +77,26 @@ namespace TileStories.Editor.Tests
             if (Editor != null) Object.DestroyImmediate(Editor);
         }
 
+        // Lay out and paint `window` NOW, inside this editor tick (EditorWindow.RepaintImmediately, internal): a gesture sent as
+        // events + PaintNow between them is the event sequence a person's gesture makes, with no tick boundary inside it -- an
+        // activation change, a focus change and a real mouse event are only handled BETWEEN ticks, so none can split it
+        // (2026-10-24, harness H1: Unity switching to another application ends a text field's editing session)
+        public static void PaintNow(EditorWindow window)
+        {
+            Assert.IsNotNull(RepaintImmediately, "UnityEditor.EditorWindow has no RepaintImmediately in this Unity version: find its new "
+                + "name and update PoiEditorWindowHost.PaintNow");
+            RepaintImmediately.Invoke(window, null);
+        }
+
+        private static readonly MethodInfo RepaintImmediately = typeof(EditorWindow).GetMethod("RepaintImmediately", Instance | BindingFlags.Public);
+
+        // This host, painted now (see the static PaintNow)
+        public void PaintNow() => PaintNow(_host);
+
+        // Where Unity's focus is, for a precondition's message: a gesture that went wrong says what happened around it
+        public static string FocusNow => "Unity " + (UnityEditorInternal.InternalEditorUtility.isApplicationActive ? "active" : "not active")
+            + ", focused window " + (EditorWindow.focusedWindow != null ? EditorWindow.focusedWindow.GetType().Name : "none");
+
         public IEnumerator WaitForRepaint()
         {
             int before = Host.Repaints;

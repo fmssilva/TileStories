@@ -457,7 +457,7 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   instead of 107 in the 5b closing run, in the background; it has waited for the measured rest height since and stayed green unfocused --
   the likely cause, a sheet not yet at rest, was not proven by a measure of the root at the time).
 
-- OPEN (2026-10-16, seen once at _3.2 step 7b): `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` read 3 history steps instead of 2
+- CLOSED (2026-10-24, harness H1, see "Editor-window tests depend on focus") -- was: OPEN (2026-10-16, seen once at _3.2 step 7b): `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` read 3 history steps instead of 2
   ("a whole drag = one history step") in ONE full EditMode run (Unity focused, 1798 tests, my first run of the block); the same fixture passed
   alone (3/3) at once and in both later full runs (1795/1795, 1795/1795), and in the baseline (1769/1769, Unity not focused). Not reproduced,
   so not yet a finding. It is a real-window drag, so a stray real pointer or focus change during the run is the first hypothesis (same family as
@@ -584,7 +584,7 @@ for each is in `_3.1.1_Audit.md` section 12.5.
 
 ## From _3.2 step 16 (the full-view breadcrumb and sibling swipe, 2026-10-20)
 
-- Test harness: `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` failed ONCE in a full EditMode run with Unity in the background ("a whole drag = one history step, expected 2, was 3"), green alone right after and in the next full run (1946/1946). An Editor slider drag with no seam into step 16; logged OPEN, to be watched in the next runs (a focus-dependent drag would be the 4.2.3 case).
+- Test harness: `ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep` failed ONCE in a full EditMode run with Unity in the background ("a whole drag = one history step, expected 2, was 3"), green alone right after and in the next full run (1946/1946). An Editor slider drag with no seam into step 16; logged OPEN, to be watched in the next runs (a focus-dependent drag would be the 4.2.3 case). CLOSED (2026-10-24, harness H1): see "Editor-window tests depend on focus" below.
 - Fixture fact worth knowing: The Lamp's two videos (block_56, block_57) share ONE clip, so to the one video owner they are the same video (`VideoTrack.SameVideo`: point + clip) -- a test of a handover between them proves nothing. Lamp - Residential's block_4 + block_7 are the pair with two different clips (step 16).
 - OPEN (2026-10-20, seen once at _3.2 step 17a): two more `PoiCardAudioSceneTests` failures (`AnotherPointsAudio_InSwitchMode_...`: the narration did not wait for the tone; `ClosingTheCard_WithKeepAudioPlayingOff_...`: Idle, not Playing) in the 41-fixture Card / Poi run right after a PC restart; both passed alone (11/11). Same family as the 5b entry above: audio timing under a loaded machine.
 
@@ -628,7 +628,7 @@ moved to `_3.3` (demo words, the header at Half) and to `_5.1` (narrow window, C
 - `NavigationPresetEditorTabTests` x3 (a shared-state leak, the first full EditMode run of a day): assert the shipped config's `demo_card` is
   OFF in the first two tests too, as the third does (one line each).
 - Width-dependent Editor tests fail with the sentence "needs the window at N pt; this screen allows M" (entry above, one helper).
-- Watch-only, no action until they recur twice: the `ConfigUndoGroupingTests` slider drag and `KeywordListFieldTypingTests` focus entries
+- CLOSED for the slider drag and the keyword typing (2026-10-24, harness H1); the rest stays watch-only -- was: Watch-only, no action until they recur twice: the `ConfigUndoGroupingTests` slider drag and `KeywordListFieldTypingTests` focus entries
   (trigger: a utility window opened and closed just before the run); the `CardGalleryTests` before / after and knowledge-check drags (read
   the resolved style a frame after the release); the 1.7x touch-drag gain (check on a phone first: if the device shows it, it is the card's).
 - The "Layout update is struggling" entries are GUARDED by `LayoutStruggleGuard`; the Lamp / Next Up entry stays open until the guard fails.
@@ -684,7 +684,7 @@ before a render does. Cross-domain (every UI Toolkit screen), so not part of `_3
   The status scale still shows its English names on a Portuguese card ("Intact", "Partial Damage", "Destroyed" in the status block and
   in compare_points, both cards): the same per-language name for the Status Types (and Badge / Hierarchy Level names wherever the card
   shows them), the same Editor row per other card language, the same `TaxonomyNames` lookup.
-- [test harness, from P1b part 2's full runs] `KeywordListFieldTypingTests.TypingTwoKeywordsWithACommaBetween_GivesTwoKeywords` fails at
+- CLOSED (2026-10-24, harness H1: the precondition read keyboardControl outside the host's OnGUI, see below) -- was: [test harness, from P1b part 2's full runs] `KeywordListFieldTypingTests.TypingTwoKeywordsWithACommaBetween_GivesTwoKeywords` fails at
   its precondition ("the click must focus the keyword field", keyboardControl 0) in EVERY full EditMode run after a full PlayMode run
   (3 of 3, 2026-10-22 ~21:58-22:05), though the same code passed the full suite at 19:35. Reproduces on demand with
   `group_names ^TileStories\.Editor\.Tests\.([H-J]|KeywordListFieldTypingTests)` (22 tests); green ALONE and in every smaller subset
@@ -693,6 +693,20 @@ before a render does. Cross-domain (every UI Toolkit screen), so not part of `_3
   `Host.FieldRect` at the click in the red group; check whether a Unity restart clears it (state left by the PlayMode run).
 
 ## Editor-window tests depend on focus (2026-10-23, from the `_3.3` P1b review)
+
+**CLOSED (2026-10-24, harness H1).** Measured with `TestRunRecorder`, each flaky test's vulnerable state held across REAL
+activation changes: (1) what raised Unity and flipped its activation mid-run was the UnityMCP server's focus nudge on every
+`get_test_job` (Unity unfocused + no progress for 3 s -> `SetForegroundWindow`), and with Unity raised the 1800 pt test host sat under
+the developer's real cursor; with no MCP poll during a run nothing raises Unity (40-testing 4.2.3 / 4.2.5). (2) A deactivation ENDS a
+text field's editing session for good (the keyword word typed one key per repaint was lost); a drag's hotControl survived six changes;
+the Preset click opened the picker 9/9 in every state. (3) `KeywordListFieldTypingTests`' precondition read `GUIUtility.keyboardControl`
+from the coroutine, which Unity swaps per window around each OnGUI: 0 one frame, the field the next, with no focus change -- its
+"after a PlayMode run, in a 22-test group" failures. Fixed: every real-click gesture runs inside ONE editor tick
+(`PoiEditorWindowHost.PaintNow` between its events; KeywordList and the slider drag), the keyword precondition is read inside the
+host's OnGUI, the Preset failure message names where the focus was. Green: the 63-test targeted group incl. the [H-J] reproducer,
+then the full runs of the block. The `NavigationPresetEditorTabTests` demo-card leak (below, a different cause) stays open.
+
+The original entry:
 
 Full EditMode on P1b's final tree, run by the Architect: UNFOCUSED -> 2031/2033 (`ConfigUndoGroupingTests.DraggingASlider_IsOneUndoStep`
 "a whole drag = one history step: 2 vs 3", `NavigationPresetEditorTabTests.EveryPreset_ARealClick...` "the Preset button opens the picker:

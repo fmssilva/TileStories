@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using TileStories.Editor;
+using TileStories.Tests;
 
 // Runs once around EVERY test of this EditMode assembly. It sits outside any namespace on
 // purpose: an NUnit [SetUpFixture] only covers fixtures in its own namespace and below, and
@@ -9,7 +10,8 @@ using TileStories.Editor;
 //    by code under test gets a Cancel from here instead of a real dialog. A test that needs a
 //    different answer sets EditorDecision.Responder itself and restores the guard's afterwards.
 //  - Notices queued by code under test stay in the queue (observable) instead of opening popups.
-[SetUpFixture]
+//  - RecordEachTest: the top suite is where a test action reaches every test of the assembly (TestRunRecorder).
+[SetUpFixture, RecordEachTest]
 public class TestDialogGuard
 {
     // Every question asked without a test's own responder is answered Cancel: the safe default

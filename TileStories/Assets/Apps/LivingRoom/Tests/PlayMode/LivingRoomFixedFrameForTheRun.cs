@@ -3,7 +3,7 @@ using TileStories.Tests;
 
 // No namespace on purpose: wraps every test of the LivingRoom PlayMode assembly in the Framework's fixed 390 x 844 frame,
 // exactly like the Framework's own FixedFrameForTheRun (an NUnit SetUpFixture only covers its own assembly)
-[SetUpFixture]
+[SetUpFixture, RecordEachTest]
 public class LivingRoomFixedFrameForTheRun
 {
     private CardTestInput.FixedGameViewSize _frame;

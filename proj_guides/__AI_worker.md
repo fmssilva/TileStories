@@ -13,53 +13,48 @@
 So start by reading them all. 
 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- P4.4c1 section glass sheets and section openers (static)`
+## `And now: test harness H1 -- a background run stays in the background; Editor-window tests stop depending on focus`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Fonts: the marker
-SDF fonts and `Assets/Dev/StyleSpike/Fonts` -> `git checkout --` if a run rewrote them. Baseline: none (HEAD 5e2b2dc; P4.4b closed
+SDF fonts and `Assets/Dev/StyleSpike/Fonts` -> `git checkout --` if a run rewrote them. Baseline: none (HEAD fd856cb; P4.4c1 closed
 with a full PlayMode run, 0 failed). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word.
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 3 (4c, now split: this is "4c1"), R11 (a section
-= a glass sheet laid over the previous one, tinted with its family's hue; the opener = a FILLED family pill + a full-width line),
-R10.7 (openers where the family changes, NOT sticky; interleaved families; twice the block gap before an opener; pages layout:
-the opener is the page's title), R17.5 (Section Opener is a shared chrome component), R12.5, R9 D1 / D2 / D8, the P4.4b
-Build log and review rows.
-The visual target: `proj_guides/_3.3.1_Prototype/Main.dc.html` (v4): `.sect`, the opener markup, the `glass` / `hue` values.
-REQUIRED READING: `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5; `_3.2_POI_Card_Navigation.md` -- the stack, the scroll spy and every
-measurement that reads a slot's position (the jump landing, `TryGetReadablePart`, the rails / bento fit): P4.4b's rails red came
-from exactly such a shift.
-WORKER MODEL: Opus-class -- a wrapper in the stack's layout that every nav measurement reads.
-TEST PLAN: targeted Card / Poi / Theme fixtures first, then the FULL PlayMode run (the stack is shared ground), then full EditMode.
+Spec: `.clinerules/40-testing.md` (ALL of 4.2 -- 4.2.6, above all 4.2.3 and the RUN TIMES notes "Unity in front ~19-47 min",
+"mostly in front"), `proj_guides/__mixed_TODOs.md` "Editor-window tests depend on focus" and every harness / flake entry, the
+memories in `.clinerules` about modal dialogs (4.2.2) and `never-chain-testrunnerapi`.
+WORKER MODEL: Opus-class -- Editor internals, focus, the test runner, reflection; a diagnosis before any fix.
+TEST PLAN: two full PlayMode runs (one to MEASURE, one to PROVE), with the developer away from Unity (action c), plus full
+EditMode with Unity behind (action c) at the end.
 
-GOAL: the card reads as chapters: each family's blocks sit on their own sheet of tinted glass, laid over the previous one, opened
-by a filled family pill and a line. Static in this block (no moving light, no blobs): 4c2 brings the life.
+THE PROBLEM (the developer, 2026-10-24): during a full PlayMode run Unity jumps to the front about 10 times, so no run is a real
+background run and the developer cannot work beside it. Nothing in the test code obviously asks for focus (checked: no Focus(),
+GetWindow, Enter / ExitPlayMode, dialogs in the PlayMode tests). Suspects, unproven: entering Play Mode with the Game view's
+"Play Focused"; asset imports / progress bars when a test writes an asset (the spike's dynamic `Fraunces-SemiBold TMP.asset`
+is rewritten by every run; P4.4a saw a test save `LivingRoomScene`); `LodWallSceneTests` re-sizing the Game view mid-run; anything
+else the measurement finds.
 
-MEASURE FIRST: the nav landings (every target's jump offset), the stops, the rails / bento fits and the spy's section per scroll
-offset on The Lamp and The Painting -- so you can prove which numbers the sheets move and that every move is intended.
+PART 1 -- MEASURE (no fix yet): an Editor-only recorder for the run: every `EditorApplication.focusChanged` (true / false) with a
+timestamp, every asset import during the run (an `AssetPostprocessor`, paths), play-mode state changes, and the name + start /
+end time of every test (an assembly-wide NUnit `ITestAction` / `[SetUpFixture]` -- NOT a TestRunnerApi callback). One full PlayMode
+run with the developer in another app (action c, and they do not touch Unity). Output: a table "jump #, time, the test running,
+what happened just before (import / play-mode / window)". Report it before fixing.
+PART 2 -- FIX each cause at its source, e.g.: the run enters Play Mode unfocused (the Game view's "Play Unfocused" option, set by
+the run's setup and restored after, if the Editor exposes it -- prove it); no test writes an asset under `Assets/` during a run
+(the spike font: static atlas, or move its writes out of the run); the Game view is pinned ONCE per run (no mid-run re-size, or a
+re-size that cannot activate the window). Keep the recorder as a permanent dev tool, OFF by default (one switch), so a future
+regression can be measured in one run.
+PART 3 -- the Editor-window focus flakes (`KeywordListFieldTypingTests`, `ConfigUndoGroupingTests.DraggingASlider`,
+`NavigationPresetEditorTabTests` real click): find what a real click / drag / typing needs from focus (window focus, keyboard
+control, a repaint) and make them independent of it; if one truly cannot be, it must fail with that sentence, not with an assert.
+PART 4 -- PROVE: a second full PlayMode run with the developer away: the recorder shows ZERO focus gains after the start, all
+green. Then full EditMode with Unity behind (action c): green. Update `40-testing.md` 4.2.3 (what a background run now guarantees),
+RUN TIMES, and close the `__mixed_TODOs.md` entries it fixes.
 
-PART 1:
-1. Section sheets in the scroll layout: consecutive blocks of the same family are wrapped in ONE sheet (rounded 30, its own
-   tint = the mode's glass + the family's hue at low alpha, a light top edge, a shadow upward so it reads as laid OVER the one
-   before, the next sheet overlapping the previous by ~14 pt). Interleaved families (a non-family block order): a new sheet
-   wherever the family changes. Text never sits on the glass (D8): openers are filled plates, blocks are opaque.
-2. The Section Opener component (`Components/`-ready, R17.5; host-agnostic, R15.2): the family's icon + name in the display face +
-   one meta line (block count, minutes) on a FILLED pill in the family colour (text on it >= 7:1, measured, both modes) + a
-   full-width line in the same colour. Not sticky. Pages layout: the opener is the page's title; tabs / accordion / bento: decide
-   per layout with captures (state what you chose and why).
-3. Every measurement that reads a slot's position keeps working: jump landings, the spy, readable parts, the rails / bento fits,
-   Next / Finished. Any shifted number is either an intended change (stated, re-based from its source) or a bug you fix.
-4. Contrast: a render test -- the block edge against its SECTION sheet (not the plain ground) over the sunny-wall stand-in >= 3:1
-   in both modes; the opener's text >= 7:1.
+OUT OF SCOPE: any card / theme feature; changing what a test asserts.
+Stop when a full PlayMode run AND full EditMode run in the background with zero focus gains and green. Finish with the final
+report of `.clinerules/60-finishing.md` 6.4. Do not commit: the Architect commits after the review.
 
-PART 2 -- docs: `_3.3` Build log (P4.4c1, the before / after numbers), `10-structure.md`, the R10.7 TODOs it closes.
-VISUALS: The Lamp and The Painting, light + dark, Half / Full and two scroll positions crossing a section boundary; the pages
-layout. Open each and judge it against the prototype.
-OUT OF SCOPE: moving blobs inside the sheets, the moving rim light, reduce-motion switches (all 4c2); the hero; other layouts'
-redesign beyond placing the opener.
-Stop when the sheets and openers render in both modes, every nav measurement is green or deliberately re-based, the targeted
-fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4 and
-END with the developer's review questions. Do not commit: the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`
