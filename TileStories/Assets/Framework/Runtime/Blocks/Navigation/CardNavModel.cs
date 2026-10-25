@@ -70,6 +70,23 @@ namespace TileStories
             }
         }
 
+        // One RUN of the stack (_3.3 R10.7): consecutive targets of one section, named by its section and its first target. Under a block
+        // order grouped by section a section is one run; under an interleaved order a section that comes back has a run for each stretch.
+        // What the scroll-spy reads, so the bar marks the section of the stretch being read (NavScrollRule.SectionAt)
+        public readonly struct Run
+        {
+            // The index in Sections of the run's section
+            public readonly int Section;
+            // The run's first target: where its stretch starts in the stack
+            public readonly string FirstTarget;
+
+            public Run(int section, string firstTarget)
+            {
+                Section = section;
+                FirstTarget = firstTarget;
+            }
+        }
+
         // One of the wall's Groups that has a target on this card (rule 6): its words and the targets of every family in it
         public sealed class Group
         {
@@ -94,6 +111,8 @@ namespace TileStories
         // Every target, in the stack's order (what a spy that follows single blocks reads)
         public readonly IReadOnlyList<string> Targets;
         public int TargetCount => Targets.Count;
+        // The targets cut into runs of one section, in the stack's order (every target in exactly one run, two neighbours never alike)
+        public readonly IReadOnlyList<Run> Runs;
         // Rule 3: false = the card shows no navigation element at all (fewer targets than Show Navigation From)
         public readonly bool ShowsNavigation;
         // Rule 5: what a bar's slots show by themselves, and what its More slot lists (empty when every section fits)
@@ -114,6 +133,7 @@ namespace TileStories
             Groups = groups;
             Targets = targets;
             _place = place;
+            Runs = RunsOf(targets, place);
             ShowsNavigation = NavOntologyRule.ShowsNavigation(targets.Count, settings);
             int inBar = NavOntologyRule.SectionsInBar(sections.Count, NavOntologyRule.MaxSlots(settings));
             BarSections = sections.GetRange(0, inBar);
@@ -233,6 +253,20 @@ namespace TileStories
             {
                 _buildOn = axis => Build(entries, registry, settings, isRevealed, axis),
             };
+        }
+
+        // Cut the targets (stack order) into runs: a new run wherever the section changes from the target before
+        private static List<Run> RunsOf(List<string> targets, Dictionary<string, (int Section, int Kind, int Group)> place)
+        {
+            var runs = new List<Run>();
+            int previous = -1;
+            foreach (string target in targets)
+            {
+                int section = place[target].Section;
+                if (section != previous) runs.Add(new Run(section, target));
+                previous = section;
+            }
+            return runs;
         }
 
         // The CardStrings key a section is labelled with: the registered family's own, or the format's

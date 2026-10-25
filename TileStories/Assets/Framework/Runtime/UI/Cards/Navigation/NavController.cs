@@ -7,7 +7,8 @@ namespace TileStories
 {
     // The ONE driver of moving inside the open card (_3.2 sections 4.1 and 4.4): every navigation element (tabs, bars, a menu, a
     // block asking through IBlockHost.ScrollToBlock) jumps through it, and every element marks the section it names (the
-    // scroll-spy). The sheet owns one, next to its stack, and binds it to each card's CardNavModel; it owns no element and no
+    // scroll-spy: the section of the RUN being read, CardNavModel.Runs -- under an interleaved block order a family that comes back is
+    // marked again, _3.3 R10.7). The sheet owns one, next to its stack, and binds it to each card's CardNavModel; it owns no element and no
     // element owns it. The arithmetic is NavScrollRule's; this class only applies it to the stack's ScrollView:
     //   - a jump raises the sheet to Full first (Jump Opens Card To), then sets the stack's scroll offset so the target block's slot
     //     top meets the viewport's top (clamped to the range) -- at once (instant / reduce motion) or gliding over --ts-duration on
@@ -19,7 +20,8 @@ namespace TileStories
     {
         private readonly BlockStackView _stack;
         private readonly Action _raiseToFull;
-        private readonly List<float> _sectionTops = new();
+        private readonly List<float> _runTops = new();
+        private readonly List<int> _runSections = new();
         private readonly List<float> _targetTops = new();
         private BlockBindContext _context;
         private string _currentKey;
@@ -370,17 +372,21 @@ namespace TileStories
             CurrentBlockChanged?.Invoke(key);
         }
 
+        // The section of the run the spy line reads at `offset` (_3.3 R10.7): each run's first target's top, so a family that comes back
+        // under an interleaved order is marked again
         private int SectionAtOffset(float offset)
         {
-            _sectionTops.Clear();
-            foreach (var section in Model.Sections)
+            _runTops.Clear();
+            _runSections.Clear();
+            foreach (var run in Model.Runs)
             {
-                // - a first target not laid out yet has not reached any line
-                var slot = ScrollingSlot(section.Targets[0]);
+                // - a first target not laid out yet (or set aside) has not reached any line
+                var slot = ScrollingSlot(run.FirstTarget);
                 float top = slot != null ? _stack.LandingTop(slot) : float.NaN;
-                _sectionTops.Add(float.IsNaN(top) ? float.PositiveInfinity : top);
+                _runTops.Add(float.IsNaN(top) ? float.PositiveInfinity : top);
+                _runSections.Add(run.Section);
             }
-            return NavScrollRule.CurrentSection(_sectionTops, offset, Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
+            return NavScrollRule.SectionAt(_runTops, _runSections, offset, Scroll.contentContainer.layout.height, Scroll.contentViewport.layout.height);
         }
 
         // The slot of a block that sits shown in the scrolling stack (inside its section sheet), else null (the stack hides a waiting block

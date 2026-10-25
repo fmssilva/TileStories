@@ -10,6 +10,8 @@ namespace TileStories
     //   - the current section = the last one whose first target's top is at or above the SPY LINE (a third down the viewport) --
     //     unless a section past the line still starts on screen: the first such one, the one at the viewport's top (a short section) --
     //     and the LAST section once the stack is scrolled to its end (else a short final family could never be marked)
+    //   - the section the bar marks = the section of the RUN being read (SectionAt): the same rule over each run's first top, so a family
+    //     that comes back under an interleaved order is marked again; with one run per section nothing changes
     //   - while a jump glides, the spy is frozen on the jump's section (else an element's marker flickers through every family
     //     the glide passes), then released
     public static class NavScrollRule
@@ -63,6 +65,16 @@ namespace TileStories
                 if (firstOnScreen < 0 && sectionTops[i] >= offset - LandingTolerance) firstOnScreen = i;
             }
             return firstOnScreen >= 0 ? firstOnScreen : current;
+        }
+
+        // The SECTION the reader is in at `offset` (_3.3 R10.7), from the stack's runs (CardNavModel.Runs): the run being read is found by
+        // CurrentSection over each run's first top, and its section is named. So under an interleaved block order the bar marks the family of
+        // the stretch on screen -- a family that comes back is marked again -- and with one run per section (a block order grouped by
+        // section) the tops are the sections' own first tops: exactly the answer CurrentSection gave on them. -1 with no run
+        public static int SectionAt(IReadOnlyList<float> runTops, IReadOnlyList<int> runSections, float offset, float contentHeight, float viewportHeight)
+        {
+            int run = CurrentSection(runTops, offset, contentHeight, viewportHeight);
+            return run >= 0 && runSections != null && run < runSections.Count ? runSections[run] : -1;
         }
 
         // Whether a block counts as SEEN at `offset` (_3.2 step 11b, the contents list's tick): it is on screen and the spy line has passed

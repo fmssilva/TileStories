@@ -119,7 +119,7 @@ namespace TileStories.Tests
 
         // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
         private int SectionUnderTheSpyLine() =>
-            CardTestInput.UnderTheSpyLine(Scroll, Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
+            CardTestInput.SectionUnderTheSpyLine(Scroll, Model, Sheet.Stack.SlotOfBlock);
 
         // Every item the element offers now, with the block it leads to and its mark
         private List<Item> ItemsOf(INavElementView view)

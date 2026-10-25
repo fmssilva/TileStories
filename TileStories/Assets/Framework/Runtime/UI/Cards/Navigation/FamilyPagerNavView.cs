@@ -5,7 +5,8 @@ namespace TileStories
 {
     // The family_pager navigation element (_3.2 section 6.1, step 14): the section being read, named between two chevrons -- the pages
     // layout's own header (CardLayoutRule.TopElement puts it in the top slot of every pages card) and a Top Bar any layout may pick. It shows
-    // the section's family icon in its colour, its words and "2 of 8"; a chevron moves the card to the section before / after through the
+    // the section's family icon in its colour, its words and "2 of 8" -- in pages only "2 of 8": the page's opener is its title (_3.3 R16);
+    // a chevron moves the card to the section before / after through the
     // controller (in pages: that page), and is hidden -- keeping its place -- at the first / last section, so it never offers a way to
     // nothing. It follows the controller's Current (the spy), so the name is always the section on screen. Views only: the sections, their
     // words, icons and colours come from the CardNavModel.
@@ -20,6 +21,9 @@ namespace TileStories
         // The section named now (-1 = none)
         public int CurrentIndex { get; private set; } = -1;
 
+        // The section's name (its icon and words): hidden in the pages layout, where the page's opener is its title (_3.3 R16)
+        public VisualElement NameRow { get; }
+
         private readonly NavTint _tint;
         private NavController _nav;
         private CardNavModel _model;
@@ -32,18 +36,18 @@ namespace TileStories
             Previous = Chevron("nav-pager-previous", "nav-pager__chevron--previous", -1);
             var middle = new VisualElement { pickingMode = PickingMode.Ignore };
             middle.AddToClassList("nav-pager__middle");
-            var name = new VisualElement { pickingMode = PickingMode.Ignore };
-            name.AddToClassList("nav-pager__name");
+            NameRow = new VisualElement { pickingMode = PickingMode.Ignore };
+            NameRow.AddToClassList("nav-pager__name");
             Icon = CardIcons.Create();
             Icon.AddToClassList("nav-pager__icon");
             Icon.pickingMode = PickingMode.Ignore;
             Words = new Label { pickingMode = PickingMode.Ignore };
             Words.AddToClassList("nav-pager__words");
-            name.Add(Icon);
-            name.Add(Words);
+            NameRow.Add(Icon);
+            NameRow.Add(Words);
             Position = new Label { pickingMode = PickingMode.Ignore };
             Position.AddToClassList("nav-pager__position");
-            middle.Add(name);
+            middle.Add(NameRow);
             middle.Add(Position);
             Next = Chevron("nav-pager-next", "nav-pager__chevron--next", +1);
             Root.Add(Previous);
@@ -60,6 +64,9 @@ namespace TileStories
             _strings = context?.Strings;
             Previous.tooltip = _strings?.Get(CardStrings.Keys.NavPagerPrevious) ?? "";
             Next.tooltip = _strings?.Get(CardStrings.Keys.NavPagerNext) ?? "";
+            // - pages: the opener names the page, the pager keeps its place ("2 of 8") and its chevrons
+            bool names = CardLayoutRule.PagerNamesTheSection(CardLayoutRule.Effective(context?.Settings?.navigation, model));
+            NameRow.style.display = names ? DisplayStyle.Flex : DisplayStyle.None;
             nav.CurrentChanged += OnCurrentChanged;
             OnCurrentChanged(nav.Current);
         }

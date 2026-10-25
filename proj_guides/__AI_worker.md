@@ -13,47 +13,38 @@
 So start by reading them all. 
 
 
-## `And now: test harness H1 -- a background run stays in the background; Editor-window tests stop depending on focus`
+## `And now: _3.3 POI Card Look, Feel & Motion -- 4c1b the interleaved-family spy rule and the opener in pages / tabs`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Fonts: the marker
-SDF fonts and `Assets/Dev/StyleSpike/Fonts` -> `git checkout --` if a run rewrote them. Baseline: none (HEAD fd856cb; P4.4c1 closed
-with a full PlayMode run, 0 failed). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word.
+SDF fonts and `Assets/Dev/StyleSpike/Fonts` -> `git checkout --` if a run rewrote them. Baseline: none (HEAD 45e11b2; H1 closed with
+full PlayMode 1307 and full EditMode 2098, both background, 0 failed). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c
+actions, word for word. WAIT for every run as `40-testing.md` 4.2.5 now says (the Editor log's `[TestRun] ended`, ONE
+`get_test_job` at the end: polling raises Unity).
 
-Spec: `.clinerules/40-testing.md` (ALL of 4.2 -- 4.2.6, above all 4.2.3 and the RUN TIMES notes "Unity in front ~19-47 min",
-"mostly in front"), `proj_guides/__mixed_TODOs.md` "Editor-window tests depend on focus" and every harness / flake entry, the
-memories in `.clinerules` about modal dialogs (4.2.2) and `never-chain-testrunnerapi`.
-WORKER MODEL: Opus-class -- Editor internals, focus, the test runner, reflection; a diagnosis before any fix.
-TEST PLAN: two full PlayMode runs (one to MEASURE, one to PROVE), with the developer away from Unity (action c), plus full
-EditMode with Unity behind (action c) at the end.
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R10.7 (interleaved families: the bar marks the family of
+the block being read), the "P4.4c1 review + the new order" row of R16 (the decisions of this block), the P4.4c1 Build log entry.
+REQUIRED READING: `_3.2_POI_Card_Navigation.md` -- the scroll spy (`NavScrollRule.CurrentSection`, `CurrentBlock`, the short-section
+fix of P1b), every element that marks a section, the pages and tabs layouts; `.clinerules/40-testing.md` 4.2, 4.2.4b.
+WORKER MODEL: Opus-class -- a pure rule the whole nav domain reads.
+TEST PLAN: targeted nav / Card / Poi fixtures first, then the FULL PlayMode run (a rule a whole domain reads), then full EditMode.
 
-THE PROBLEM (the developer, 2026-10-24): during a full PlayMode run Unity jumps to the front about 10 times, so no run is a real
-background run and the developer cannot work beside it. Nothing in the test code obviously asks for focus (checked: no Focus(),
-GetWindow, Enter / ExitPlayMode, dialogs in the PlayMode tests). Suspects, unproven: entering Play Mode with the Game view's
-"Play Focused"; asset imports / progress bars when a test writes an asset (the spike's dynamic `Fraunces-SemiBold TMP.asset`
-is rewritten by every run; P4.4a saw a test save `LivingRoomScene`); `LodWallSceneTests` re-sizing the Game view mid-run; anything
-else the measurement finds.
+PART 1 -- the spy (R10.7): under a block order that is not grouped by family (The Lamp's default: 16 sheets, Visit twice), the
+bar, chips and every element that marks a section mark **the family of the block being read** (the block under the spy line,
+`CurrentBlock`), not the section of its first target. Under the by-family order nothing changes (prove it: the same marks on the
+same scroll offsets as today). A jump to a section lands on the FIRST sheet of that family. Pure rule first (EditMode tests on an
+interleaved fixture: every boundary, a short sheet, the end of the card; mutation proof), then the real card with real drags.
+PART 2 -- the opener in other layouts (decided): pages: the opener IS the page's title; the page header keeps only its counter
+("1 of 6"), no repeated words. Tabs: the sheet stays, the opener shows no words (the strip names the section); accordion and bento
+as P4.4c1 left them.
+PART 3 -- docs: `_3.3` Build log, `_3.2` (the spy rule's new meaning under an interleaved order), `10-structure.md`.
 
-PART 1 -- MEASURE (no fix yet): an Editor-only recorder for the run: every `EditorApplication.focusChanged` (true / false) with a
-timestamp, every asset import during the run (an `AssetPostprocessor`, paths), play-mode state changes, and the name + start /
-end time of every test (an assembly-wide NUnit `ITestAction` / `[SetUpFixture]` -- NOT a TestRunnerApi callback). One full PlayMode
-run with the developer in another app (action c, and they do not touch Unity). Output: a table "jump #, time, the test running,
-what happened just before (import / play-mode / window)". Report it before fixing.
-PART 2 -- FIX each cause at its source, e.g.: the run enters Play Mode unfocused (the Game view's "Play Unfocused" option, set by
-the run's setup and restored after, if the Editor exposes it -- prove it); no test writes an asset under `Assets/` during a run
-(the spike font: static atlas, or move its writes out of the run); the Game view is pinned ONCE per run (no mid-run re-size, or a
-re-size that cannot activate the window). Keep the recorder as a permanent dev tool, OFF by default (one switch), so a future
-regression can be measured in one run.
-PART 3 -- the Editor-window focus flakes (`KeywordListFieldTypingTests`, `ConfigUndoGroupingTests.DraggingASlider`,
-`NavigationPresetEditorTabTests` real click): find what a real click / drag / typing needs from focus (window focus, keyboard
-control, a repaint) and make them independent of it; if one truly cannot be, it must fail with that sentence, not with an assert.
-PART 4 -- PROVE: a second full PlayMode run with the developer away: the recorder shows ZERO focus gains after the start, all
-green. Then full EditMode with Unity behind (action c): green. Update `40-testing.md` 4.2.3 (what a background run now guarantees),
-RUN TIMES, and close the `__mixed_TODOs.md` entries it fixes.
-
-OUT OF SCOPE: any card / theme feature; changing what a test asserts.
-Stop when a full PlayMode run AND full EditMode run in the background with zero focus gains and green. Finish with the final
-report of `.clinerules/60-finishing.md` 6.4. Do not commit: the Architect commits after the review.
+VISUALS: The Lamp (interleaved), light + dark, scrolled across a Media -> Visit -> Media boundary: the bar's mark at each step;
+The Painting (by family) unchanged; the pages and tabs layouts. Open each and judge.
+OUT OF SCOPE: moving light, blobs, reduce motion (4c2); changing the block order itself.
+Stop when the spy marks the block's family on the interleaved card, nothing moved on a by-family card, the targeted fixtures, the
+full PlayMode run and full EditMode are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4 and END with the
+developer's review questions. Do not commit: the Architect commits after the review.
 
 
 

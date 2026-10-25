@@ -83,7 +83,7 @@ namespace TileStories.Tests
 
         // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
         private int SectionUnderTheSpyLine() =>
-            CardTestInput.UnderTheSpyLine(Scroll, Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
+            CardTestInput.SectionUnderTheSpyLine(Scroll, Model, Sheet.Stack.SlotOfBlock);
 
         // Real finger drags of the stack, upward (the reader goes down the card) until the screen shows `minSection` or a later one
         private IEnumerator DragDownTheCardUntilTheScreenShows(int minSection)

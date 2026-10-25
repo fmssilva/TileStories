@@ -520,6 +520,11 @@ for each is in `_3.1.1_Audit.md` section 12.5.
   `ARealDragToTheEnd_...` with 2 "Layout update is struggling" lines (PanelRootElement 390 x 844, scene load #503); the same test passed in the
   Card / Poi targeted set an hour earlier on the same tree (1021/1021) and 8/8 alone right after (Unity in the background). P4.1 changed no
   geometry callback and no layout value (pixel set: 0 px), but the next long run should still say whether it shows again.
+- SEEN AGAIN (2026-10-24, _3.3 P4.4c1b): the 27-fixture targeted set (391 tests, background) failed `ARealDragToTheEnd_...` with 3
+  "Layout update is struggling" lines (scene load #17); re-run at once with its whole fixture + PoiCardNavSceneTests + the new
+  PoiCardInterleavedSpySceneTests (33 tests, background): 33/33 and 0 struggling lines. P4.4c1b changes what the SECTION spy names at
+  the end of an interleaved card; Next Up follows the BLOCK spy, untouched. Still only in long runs; the full PlayMode run of P4.4c1b
+  said: 1314 tests, 0 failed, `ARealDragToTheEnd_...` green, 0 real struggling lines (the 5 in the log are LayoutStruggleGuardTests' own). Still OPEN, not closed on one quiet run.
 - STILL OPEN (2026-10-20, _3.2 step 15b): NOT seen in either long run of 15b -- the Card / Poi targeted set (892 tests) and the full PlayMode
   run (1113/1113, wholly in the background): 0 "Layout update is struggling" lines in the Editor log over both, `ARealDragToTheEnd_...` green in
   both. Two quiet runs after three loud ones: left open, not closed (the brief: never on one quiet run). If it shows again, the entry below says

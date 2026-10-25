@@ -53,6 +53,10 @@ namespace TileStories
         // The sheets of the bound card, in scroll order
         public IReadOnlyList<Sheet> All => _sheets;
 
+        // Whether the openers say their words (the family's name, its count and minutes): the card's layout decides it
+        // (CardLayoutRule.OpenerShowsWords, set by CardLayoutView before it sets blocks aside -- which refreshes); the next Refresh applies it
+        public bool OpenerWords { get; set; } = true;
+
         // Wrap the scroll's blocks -- their slots and entries, in stack order -- into sheets appended to the scroll, then show them as the
         // slots are shown now
         public void Build(IReadOnlyList<VisualElement> slots, IReadOnlyList<BlockStackBuilder.Entry> entries, BlockBindContext context)
@@ -102,7 +106,9 @@ namespace TileStories
                 for (int s = 0; s < sheet.Slots.Count; s++)
                     if (IsShown(sheet.Slots[s])) minutes += sheet.Minutes[s];
                 string name = sheet.Family.LabelKey != null && _words != null ? _words(sheet.Family.LabelKey) : sheet.Family.Key;
-                sheet.Opener.Show(sheet.Family.IconKey, sheet.Family.ColorToken, name, SectionSheetRule.Meta(CountShown(sheet), minutes, _words));
+                // - tabs: the strip names the section, the opener keeps only its colour (pill, icon, line)
+                sheet.Opener.Show(sheet.Family.IconKey, sheet.Family.ColorToken, OpenerWords ? name : "",
+                    OpenerWords ? SectionSheetRule.Meta(CountShown(sheet), minutes, _words) : "");
             }
         }
 

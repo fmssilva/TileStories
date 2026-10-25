@@ -92,8 +92,8 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~65-160 s (2098 tests, 156 s, 2026-10-24, harness H1, wholly in the background: 0 focus gains; before it 2079 tests, 146 s, _3.3 P4.4b
-part 2, focused); full PlayMode ~70-80 min (1307 tests incl. 43 gated skips, 4326 s, 2026-10-24, harness H1, WHOLLY in the background: 0 focus
+EditMode ~65-160 s (2108 tests, 144 s, 2026-10-24, _3.3 P4.4c1b, background both ends; before it 2098 tests, 156 s, harness H1, wholly in the background: 0 focus gains; before it 2079 tests, 146 s, _3.3 P4.4b
+part 2, focused); full PlayMode ~70-80 min (1314 tests incl. 43 gated skips, 4711 s, 2026-10-24, _3.3 P4.4c1b, background from start to end, nothing polled; before it 1307 tests incl. 43 gated skips, 4326 s, harness H1, WHOLLY in the background: 0 focus
 gains from start to end, nothing polled during the run -- the first run that was really background all the way; the MEASURE run before it,
 4641 s, polled, 3 gains in its first 22 s; before them 1288 tests, 4002 s, 2026-10-24,
 _3.3 P4.4b part 2, unfocused at the first and the last poll, Unity in front in the middle; before it 1278 tests, 3839 s, _3.3 P4.4a, background at every poll, Unity in front at the end; before it 1254 tests incl. the gated

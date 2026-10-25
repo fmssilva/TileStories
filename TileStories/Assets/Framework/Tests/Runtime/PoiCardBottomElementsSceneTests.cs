@@ -164,7 +164,7 @@ namespace TileStories.Tests
 
         // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
         private int SectionUnderTheSpyLine() =>
-            CardTestInput.UnderTheSpyLine(Scroll, Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
+            CardTestInput.SectionUnderTheSpyLine(Scroll, Model, Sheet.Stack.SlotOfBlock);
 
         // A block's top meets the viewport's top (+-1 px), or -- a late block -- the stack sits at the end of its range
         private void AssertLanded(string block, string name)

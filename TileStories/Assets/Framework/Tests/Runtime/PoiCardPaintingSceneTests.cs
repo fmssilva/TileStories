@@ -102,7 +102,7 @@ namespace TileStories.Tests
 
         // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
         private int SectionUnderTheSpyLine() =>
-            CardTestInput.UnderTheSpyLine(Scroll, Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
+            CardTestInput.SectionUnderTheSpyLine(Scroll, Model, Sheet.Stack.SlotOfBlock);
 
         // A tab wholly inside its strip's visible part, after a real sideways drag of the strip when it is not
         private IEnumerator BringIntoView(TabsNavView tabs, Button tab)

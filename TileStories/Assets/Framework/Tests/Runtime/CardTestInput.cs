@@ -180,6 +180,25 @@ namespace TileStories.Tests
             return NavScrollRule.CurrentSection(tops, offset, scroll.contentContainer.layout.height, scroll.contentViewport.layout.height);
         }
 
+        // The SECTION the reader is in, read from the screen (_3.3 R10.7): the card's targets cut by hand into runs (a new run wherever the
+        // section changes, from the model's own Targets and SectionOf -- never Model.Runs, the code under test), the run under the spy line
+        // found by UnderTheSpyLine over each run's first slot, and its section named. With one run per section it is the old per-section
+        // reading exactly; under an interleaved order a family that comes back is named again
+        public static int SectionUnderTheSpyLine(ScrollView scroll, CardNavModel model, System.Func<string, VisualElement> slotOf)
+        {
+            var firsts = new System.Collections.Generic.List<string>();
+            var sections = new System.Collections.Generic.List<int>();
+            foreach (string target in model.Targets)
+            {
+                int section = model.SectionOf(target);
+                if (sections.Count > 0 && sections[sections.Count - 1] == section) continue;
+                firsts.Add(target);
+                sections.Add(section);
+            }
+            int run = UnderTheSpyLine(scroll, firsts.Select(slotOf));
+            return run >= 0 ? sections[run] : -1;
+        }
+
         // A finger's drag from panel position `start` by `delta` (panel units), over `frames` frames: touch pointer events, what a
         // phone sends and what a ScrollView drag-scrolls its content on
         public static IEnumerator TouchDrag(IPanel panel, Vector2 start, Vector2 delta, int frames = 12)

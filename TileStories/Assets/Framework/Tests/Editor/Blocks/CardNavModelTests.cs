@@ -394,5 +394,79 @@ namespace TileStories.Editor.Tests
             CollectionAssert.AreEqual(Keys(military.Sections), Keys(military.BarSections), "2 sections always fit");
             CollectionAssert.IsEmpty(military.MoreSections);
         }
+
+        // ---------------- runs (_3.3 R10.7: what the spy reads) ----------------
+
+        // The wall's config at the framework's default Block Order (end_families_last: authored, the Sources last)
+        private static WallConfigData ShippedEndFamiliesLast()
+        {
+            var config = Shipped();
+            config.card_settings.navigation.block_order = CardOptions.BlockOrderEndFamiliesLast;
+            return config;
+        }
+
+        // The runs cut by hand from the model's own targets and SectionOf: a new run wherever the section changes
+        private static List<(int Section, string First)> RunsByHand(CardNavModel model)
+        {
+            var runs = new List<(int, string)>();
+            int previous = -1;
+            foreach (string target in model.Targets)
+            {
+                int section = model.SectionOf(target);
+                if (section != previous) runs.Add((section, target));
+                previous = section;
+            }
+            return runs;
+        }
+
+        private static List<string> RunKeys(CardNavModel model) => model.Runs.Select(r => model.Sections[r.Section].Key).ToList();
+
+        // The Lamp at the default order interleaves its families: Visit (block_28) before Media, Visit back at block_37, Media back at
+        // block_58 -- each comeback a run of its own, every target in exactly one run, two neighbouring runs never of one section
+        [Test]
+        public void TheLamp_AtTheDefaultOrder_IsCutIntoRuns_AFamilyThatComesBackHasARunPerStretch()
+        {
+            var model = Model(ShippedEndFamiliesLast(), Lamp);
+            CollectionAssert.AreEqual(RunsByHand(model), model.Runs.Select(r => (r.Section, r.FirstTarget)).ToList(), "the runs are the targets cut where the section changes");
+            for (int i = 1; i < model.Runs.Count; i++)
+                Assert.AreNotEqual(model.Runs[i - 1].Section, model.Runs[i].Section, "runs " + (i - 1) + " and " + i + ": two neighbours are two sections");
+            var keys = RunKeys(model);
+            Assert.Greater(model.Runs.Count, model.Sections.Count, "precondition: interleaved -- more runs than sections");
+            Assert.AreEqual(2, keys.Count(k => k == "visit"), "Visit comes back once: two runs");
+            Assert.AreEqual(2, keys.Count(k => k == "media"), "Media comes back once: two runs");
+            CollectionAssert.AreEqual(new[] { "block_28", "block_37" }, model.Runs.Where((r, i) => keys[i] == "visit").Select(r => r.FirstTarget), "Visit's runs start at its practical info and its wall locator");
+            CollectionAssert.AreEqual(new[] { "block_29", "block_58" }, model.Runs.Where((r, i) => keys[i] == "media").Select(r => r.FirstTarget), "Media's at its first gallery and its first 3D model");
+            Assert.AreEqual("visit", keys[keys.IndexOf("media") - 1], "the first Media run follows the first Visit run (a Visit -> Media -> Visit stretch)");
+            Assert.AreEqual("visit", keys[keys.IndexOf("media") + 1]);
+            // - a section's first target is its first run's: a jump to the section lands on its FIRST stretch
+            for (int s = 0; s < model.Sections.Count; s++)
+                Assert.AreEqual(model.Sections[s].Targets[0], model.Runs.First(r => r.Section == s).FirstTarget, model.Sections[s].Key + ": its first target opens its first run");
+        }
+
+        // The Painting at the default order: its fun fact (About) comes back after Media -- interleaved too, by one block
+        [Test]
+        public void ThePainting_AtTheDefaultOrder_AboutComesBackForItsFunFact()
+        {
+            var model = Model(ShippedEndFamiliesLast(), "painting");
+            var keys = RunKeys(model);
+            Assert.AreEqual(2, keys.Count(k => k == "about"), "About: its facts and story, then the fun fact after the pictures");
+            Assert.AreEqual("block_6", model.Runs.Where((r, i) => keys[i] == "about").Last().FirstTarget, "the second About run is the fun fact");
+            Assert.AreEqual("media", keys[keys.LastIndexOf("about") - 1], "right after Media");
+        }
+
+        // Grouped by family: one run per section, run i = section i opening at its first target -- the spy reads the very same tops as
+        // before runs existed, so nothing moves on a by-family card
+        [Test]
+        public void ByFamily_EverySectionIsOneRun_RunIIsSectionIAtItsFirstTarget([Values("lamp", "painting")] string poi)
+        {
+            var model = Model(ShippedByFamily(), poi);
+            Assert.Greater(model.Sections.Count, 3, "precondition: " + poi + " has several sections");
+            Assert.AreEqual(model.Sections.Count, model.Runs.Count, poi + ": one run per section");
+            for (int i = 0; i < model.Runs.Count; i++)
+            {
+                Assert.AreEqual(i, model.Runs[i].Section, poi + " run " + i + ": section " + i);
+                Assert.AreEqual(model.Sections[i].Targets[0], model.Runs[i].FirstTarget, poi + " run " + i + ": at its section's first target");
+            }
+        }
     }
 }

@@ -46,6 +46,15 @@ namespace TileStories
         // Whether the card is drawn as sideways pages (CardPagerView turns them)
         public static bool TurnsPages(string effectiveLayout) => effectiveLayout == CardOptions.LayoutPages;
 
+        // Whether a section's opener says its words -- the family's name and its count / minutes (_3.3 R16, the P4.4c1 review): not in tabs,
+        // where the strip already names the section shown (the sheet and the opener's coloured pill and line stay). Everywhere else it does:
+        // in pages the opener IS the page's title, so the Family Pager says only its place there (PagerNamesTheSection)
+        public static bool OpenerShowsWords(string effectiveLayout) => effectiveLayout != CardOptions.LayoutTabs;
+
+        // Whether the Family Pager names the section (its icon and words) beside its place ("2 of 8"): not in pages, where the page's opener
+        // is its title -- the header keeps only its counter, no word said twice. Picked as a Top Bar in any other layout, it names it
+        public static bool PagerNamesTheSection(string effectiveLayout) => !TurnsPages(effectiveLayout);
+
         // Whether the stack draws this block as a compact row: its own display says so (Expandable, BlockDisplayRule), or the card is an
         // accordion and the block is a navigation target -- counted with its reveal gate open, so a block waiting for Show After Reading is
         // a (hidden) row too, and becomes visible as a row, never as a whole block in a card of rows

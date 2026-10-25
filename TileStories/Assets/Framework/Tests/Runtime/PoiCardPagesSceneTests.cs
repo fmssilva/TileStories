@@ -406,7 +406,10 @@ namespace TileStories.Tests
                 Assert.AreEqual(expected, Page);
                 Assert.AreEqual(expected, Nav.Current, "the spy names the page shown");
                 Assert.AreEqual(expected, FamilyPager.CurrentIndex, "and the pager follows the spy");
-                Assert.AreEqual(strings.Get(section.LabelKey), FamilyPager.Words.text, "the pager names the section in the visitor's words");
+                // - _3.3 R16: the page's opener is its title, named in the visitor's words; the pager keeps only its place
+                var opener = Sheet.Stack.Sheets.All.First(s => s.Look.Shown).Opener;
+                Assert.AreEqual(strings.Get(section.LabelKey), opener.Name.text, "the page's opener names the section in the visitor's words");
+                Assert.AreEqual(DisplayStyle.None, FamilyPager.NameRow.resolvedStyle.display, "the pager says no name: the opener does");
                 StringAssert.StartsWith((expected + 1).ToString(), FamilyPager.Position.text, "its place: " + FamilyPager.Position.text);
                 StringAssert.EndsWith(Nav.Model.Sections.Count.ToString(), FamilyPager.Position.text);
                 // - the next page's cue: its words, a peek's width inside the viewport's right edge
@@ -643,7 +646,7 @@ namespace TileStories.Tests
                 Nav.JumpTo(0, "test", landsAtOnce: true);
                 yield return Rested();
                 Assert.AreEqual(0, Page, "precondition: the first page");
-                // - every section's name whole between the chevrons, in this language
+                // - every page's counter whole between the chevrons, and its title (the opener's name) whole, in this language
                 for (int i = 0; i < Nav.Model.Sections.Count; i++)
                 {
                     if (i > 0)
@@ -651,12 +654,17 @@ namespace TileStories.Tests
                         yield return CardTestInput.Tap(FamilyPager.Next.panel, FamilyPager.Next.worldBound.center);
                         yield return Rested();
                     }
-                    var middle = FamilyPager.Words.parent.parent.worldBound;
-                    Assert.GreaterOrEqual(FamilyPager.Words.worldBound.xMin, FamilyPager.Previous.worldBound.xMax - 0.5f, language + " page " + i + ": the name starts after the left chevron");
-                    Assert.LessOrEqual(FamilyPager.Words.worldBound.xMax, FamilyPager.Next.worldBound.xMin + 0.5f, language + " page " + i + ": and ends before the right one");
-                    var size = FamilyPager.Words.MeasureTextSize(FamilyPager.Words.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined);
-                    Assert.LessOrEqual(size.x, FamilyPager.Words.worldBound.width + 0.5f, language + " '" + FamilyPager.Words.text + "' is whole (" + size.x + " in " + FamilyPager.Words.worldBound.width + ")");
+                    var middle = FamilyPager.Position.parent.worldBound;
+                    var position = FamilyPager.Position;
+                    Assert.GreaterOrEqual(position.worldBound.xMin, FamilyPager.Previous.worldBound.xMax - 0.5f, language + " page " + i + ": the counter starts after the left chevron");
+                    Assert.LessOrEqual(position.worldBound.xMax, FamilyPager.Next.worldBound.xMin + 0.5f, language + " page " + i + ": and ends before the right one");
+                    var size = position.MeasureTextSize(position.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined);
+                    Assert.LessOrEqual(size.x, position.worldBound.width + 0.5f, language + " '" + position.text + "' is whole (" + size.x + " in " + position.worldBound.width + ")");
                     Assert.IsTrue(middle.width > 0f);
+                    var title = Sheet.Stack.Sheets.All.First(s => s.Look.Shown).Opener.Name;
+                    var titleSize = title.MeasureTextSize(title.text, 0f, VisualElement.MeasureMode.Undefined, 0f, VisualElement.MeasureMode.Undefined);
+                    Assert.IsNotEmpty(title.text, language + " page " + i + ": titled by its opener");
+                    Assert.LessOrEqual(titleSize.x, title.worldBound.width + 0.5f, language + " '" + title.text + "': the page's title is whole");
                     if (i == 0) yield return CardGalleryChecks.Render("Nav_Lamp_pages_rest_" + language + "_390");
                 }
                 // - back to the first page, then hold a swipe half way

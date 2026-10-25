@@ -332,5 +332,24 @@ namespace TileStories.Editor.Tests
                 "every section laid out (scroll): the last, as before");
             Assert.AreEqual(0, NavScrollRule.CurrentSection(new List<float> { 0f, float.NaN }, 900f, 1500f, 600f), "a NaN top counts as not laid out");
         }
+
+        // The opener in each layout (_3.3 R16, the P4.4c1 review): tabs -- the strip names the section, the opener says no words; pages -- the
+        // opener IS the page's title, so the Family Pager says only its place; scroll, accordion and bento as P4.4c1 left them. Every layout
+        // the Editor offers is answered (an unknown one reads as scroll through Layout / Effective first)
+        [Test]
+        public void TheOpenersWordsAndThePagersName_PerLayout_TabsDropTheOpenersWords_PagesDropThePagersName()
+        {
+            foreach (string layout in CardOptions.Layouts)
+            {
+                bool tabs = layout == CardOptions.LayoutTabs, pages = layout == CardOptions.LayoutPages;
+                Assert.AreEqual(!tabs, CardLayoutRule.OpenerShowsWords(layout), layout + ": the opener says its words unless the strip names the section");
+                Assert.AreEqual(!pages, CardLayoutRule.PagerNamesTheSection(layout), layout + ": the pager names the section unless the opener is the page's title");
+            }
+            // - a card too short for tabs / pages falls back to scroll (Effective): its openers speak and a pager picked there names its section
+            var fallback = CardLayoutRule.Effective(new CardNavigationSettings { layout = CardOptions.LayoutTabs }, null);
+            Assert.AreEqual(CardOptions.LayoutScroll, fallback, "precondition: no model, no choice between sections -> scroll");
+            Assert.IsTrue(CardLayoutRule.OpenerShowsWords(fallback));
+            Assert.IsTrue(CardLayoutRule.PagerNamesTheSection(CardLayoutRule.Effective(new CardNavigationSettings { layout = CardOptions.LayoutPages }, null)));
+        }
     }
 }

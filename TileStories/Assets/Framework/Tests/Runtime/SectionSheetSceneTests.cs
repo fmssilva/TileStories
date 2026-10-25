@@ -220,26 +220,61 @@ namespace TileStories.Tests
 
         // ---------------- layouts ----------------
 
+        // The opener in each layout (_3.3 R16, decided at the P4.4c1 review): pages -- the opener IS the page's title and the Family Pager keeps
+        // only its counter ("1 of 6"), a real chevron tap turns to the next page titled by ITS opener; tabs -- the sheet stays, the opener says no
+        // words (the strip names the section): no name, no meta, its coloured pill, icon and line; accordion and bento as P4.4c1 left them
         [UnityTest]
-        public IEnumerator Pages_TheOpenerIsThePagesTitle_TabsAndAccordion_KeepTheirSheets_BentoShowsNone()
+        public IEnumerator Pages_TheOpenerIsThePagesTitle_ThePagerKeepsItsCounter_TabsOpenerSaysNoWords_AccordionAndBentoAsBefore()
         {
+            var words = new CardStrings(Card.StringTable.Entries(), CardStringSources.Shared.Entries(), null, "en", "en");
             yield return UseLayout(CardOptions.LayoutPages);
             yield return Open("painting");
-            var shown = Shown;
-            Assert.Greater(shown.Count, 0, "precondition: a page is shown");
-            var page = Sheet.Nav.Model.Sections[Sheet.Nav.Current];
-            Assert.AreEqual(page.Key, shown[0].Run.Family, "pages: the page's first sheet is its own section's");
-            Assert.IsTrue(shown[0].Look.Opener, "pages: the page opens with its opener -- the page's title");
-            // - what else shows on a page is no navigation target (the layout sets aside only targets: the Sources stay on every page)
-            foreach (var other in shown.Where(s => s.Run.Family != page.Key))
-                Assert.IsTrue(other.Slots.All(slot => Sheet.Nav.Model.Targets.All(t => Stack.SlotOfBlock(t) != slot)),
-                    other.Run.Family + ": a sheet of another family on the page holds no target");
+            int count = Sheet.Nav.Model.Sections.Count;
+            var pager = Sheet.Slots.TopView as FamilyPagerNavView;
+            Assert.IsNotNull(pager, "precondition: pages draws the Family Pager");
+            for (int expected = 0; expected < 2; expected++)
+            {
+                if (expected > 0)
+                {
+                    yield return CardTestInput.Tap(pager.Next.panel, pager.Next.worldBound.center);
+                    for (int frame = 0; frame < 600 && Sheet.Nav.IsJumping; frame++) yield return null;
+                    yield return CardTestInput.Settle(0.3f);
+                }
+                Assert.AreEqual(expected, Sheet.Nav.Current, "precondition: page " + (expected + 1));
+                var shown = Shown;
+                var page = Sheet.Nav.Model.Sections[expected];
+                Assert.AreEqual(page.Key, shown[0].Run.Family, "pages: the page's first sheet is its own section's");
+                Assert.IsTrue(shown[0].Look.Opener, "pages: the page opens with its opener");
+                Assert.AreEqual(words.Get(page.LabelKey), shown[0].Opener.Name.text, page.Key + ": the opener names the page -- its title");
+                Assert.AreEqual(DisplayStyle.Flex, shown[0].Opener.Name.resolvedStyle.display, page.Key + ": and shows it");
+                Assert.AreEqual(DisplayStyle.None, pager.NameRow.resolvedStyle.display, page.Key + ": the pager says no name (no word said twice)");
+                Assert.AreEqual(string.Format(words.Get(CardStrings.Keys.NavPagerPosition), expected + 1, count), pager.Position.text, page.Key + ": the pager keeps its counter");
+                Assert.AreEqual(DisplayStyle.Flex, pager.Position.resolvedStyle.display, page.Key + ": shown");
+                // - what else shows on a page is no navigation target (the layout sets aside only targets: the Sources stay on every page)
+                foreach (var other in shown.Where(s => s.Run.Family != page.Key))
+                    Assert.IsTrue(other.Slots.All(slot => Sheet.Nav.Model.Targets.All(t => Stack.SlotOfBlock(t) != slot)),
+                        other.Run.Family + ": a sheet of another family on the page holds no target");
+            }
 
             yield return UseLayout(CardOptions.LayoutTabs);
             yield return Open("painting");
             Assert.AreEqual(Sheet.Nav.Model.Sections[Sheet.Nav.Current].Key, Shown[0].Run.Family, "tabs: the sheet shown first is the tab's own section");
             Assert.IsTrue(Shown.Where(s => s.Run.Family != Shown[0].Run.Family).All(s => s.Slots.All(slot => Sheet.Nav.Model.Targets.All(t => Stack.SlotOfBlock(t) != slot))),
                 "tabs: any other sheet holds no target (the Sources stay on every tab)");
+            Assert.IsTrue(ThemeController.TryResolverFor(Scroll, out var theme), "precondition: the card sits under the theme");
+            foreach (var sheet in Shown.Where(s => s.Look.Opener))
+            {
+                string family = sheet.Run.Family;
+                Assert.AreEqual(DisplayStyle.None, sheet.Opener.Name.resolvedStyle.display, "tabs " + family + ": the opener says no name (the strip does)");
+                Assert.AreEqual(DisplayStyle.None, sheet.Opener.Meta.resolvedStyle.display, "tabs " + family + ": and no count");
+                Assert.AreEqual(DisplayStyle.Flex, sheet.Opener.Root.resolvedStyle.display, "tabs " + family + ": the opener itself stays");
+                Assert.IsTrue(theme.TryColour(sheet.Family.ColorToken, out var fill), "precondition: the fill");
+                Assert.IsTrue(theme.TryColour(SectionSheetRule.GlassOf(sheet.Family.ColorToken), out var glass), "precondition: the glass");
+                Assert.AreEqual(fill, sheet.Opener.Pill.resolvedStyle.backgroundColor, "tabs " + family + ": its filled pill");
+                Assert.AreEqual(DisplayStyle.Flex, sheet.Opener.Icon.resolvedStyle.display, "tabs " + family + ": with its icon");
+                Assert.AreEqual(fill, sheet.Opener.Line.resolvedStyle.backgroundColor, "tabs " + family + ": and its line");
+                Assert.AreEqual(glass, sheet.Root.resolvedStyle.backgroundColor, "tabs " + family + ": the sheet stays, in its glass");
+            }
 
             yield return UseLayout(CardOptions.LayoutAccordion);
             yield return Open("painting");
@@ -248,6 +283,8 @@ namespace TileStories.Tests
             Assert.Greater(rows.Count, 4, "precondition: the accordion draws the targets as compact rows");
             Assert.IsTrue(rows.All(row => Stack.Sheets.SheetOf(row) != null), "every compact row sits on its family's sheet");
             Assert.IsTrue(Shown.All(s => s.Look.Opener || s.Look.Continues), "each family's rows open with its opener");
+            foreach (var sheet in Shown.Where(s => s.Look.Opener))
+                Assert.AreEqual(words.Get(sheet.Family.LabelKey), sheet.Opener.Name.text, "accordion " + sheet.Run.Family + ": the opener names its family, as before");
 
             yield return UseLayout(CardOptions.LayoutBento);
             yield return Open("painting");

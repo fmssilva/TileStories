@@ -62,6 +62,8 @@ namespace TileStories
             _settings = context?.Settings?.navigation;
             _poi = poi;
             Effective = CardLayoutRule.Effective(_settings, model);
+            // - the openers' words follow the layout (tabs: none); the parking below refreshes the sheets with it
+            _stack.Sheets.OpenerWords = CardLayoutRule.OpenerShowsWords(Effective);
             // - bento: no section in the stack; a section open in the full view is found again by key (a reveal rebuilt the model)
             if (CardLayoutRule.OpensSectionsInFullView(Effective))
             {
@@ -92,6 +94,7 @@ namespace TileStories
             ShownSection = -1;
             ClearOpen();
             Effective = CardOptions.LayoutScroll;
+            _stack.Sheets.OpenerWords = true;
         }
 
         // Bento: open section `index` in the full view, landing on `blockKey` (null: its top). False in any other layout or when nothing opened

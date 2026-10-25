@@ -93,7 +93,7 @@ namespace TileStories.Tests
 
         // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
         private int SectionUnderTheSpyLine() =>
-            CardTestInput.UnderTheSpyLine(Scroll, Nav.Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
+            CardTestInput.SectionUnderTheSpyLine(Scroll, Nav.Model, Sheet.Stack.SlotOfBlock);
 
         // --ts-duration as the theme writes it (seconds): the one place the card's motion length lives
         private static float DurationToken()
@@ -158,7 +158,18 @@ namespace TileStories.Tests
             yield return Landed();
             Assert.AreEqual(Range, Scroll.scrollOffset.y, OnePixel, "clamped: the stack rests at the end of its range");
             Assert.Greater(TopInViewport(block), 0f, "so the block's top sits lower in the viewport");
-            Assert.AreEqual(Nav.Model.Sections.Count - 1, Nav.Current, "at the end of the range the LAST section is named");
+            // - _3.3 P4.4c1b: the LAST RUN's section -- the section of the card's last target laid out in the scroll (on an interleaved order
+            //   not the section whose first target comes last: The Lamp ends In AR, not Listen)
+            Assert.AreEqual(LastRunsSection(), Nav.Current, "at the end of the range the last run's section is named: " + Nav.Model.Sections[LastRunsSection()].Key);
+        }
+
+        // The section of the card's last target that sits shown in the scroll -- the last run the spy can name (read from the model and the
+        // stack's slots, never from Model.Runs)
+        private int LastRunsSection()
+        {
+            var shown = Nav.Model.Targets.Where(t => Slot(t) != null && Sheet.Stack.IsInScroll(Slot(t)) && Slot(t).resolvedStyle.display == DisplayStyle.Flex).ToList();
+            Assert.IsNotEmpty(shown, "precondition: the card shows a target");
+            return Nav.Model.SectionOf(shown[shown.Count - 1]);
         }
 
         [UnityTest]
@@ -275,7 +286,7 @@ namespace TileStories.Tests
             }
             yield return CardTestInput.Settle(0.6f);
             Assert.AreEqual(Range, Scroll.scrollOffset.y, NavScrollRule.EndTolerance, "precondition: the drags reached the end");
-            Assert.AreEqual(Nav.Model.Sections.Count - 1, Nav.Current, "at the end: the last section");
+            Assert.AreEqual(LastRunsSection(), Nav.Current, "at the end: the last run's section (" + Nav.Model.Sections[LastRunsSection()].Key + ")");
             named.Add(Nav.Current);
 
             Assert.AreEqual(3, named.Distinct().Count(), "three offsets, three different sections named (" + string.Join(", ", named) + ")");

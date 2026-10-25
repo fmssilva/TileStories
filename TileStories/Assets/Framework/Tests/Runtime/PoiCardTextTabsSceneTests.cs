@@ -93,7 +93,7 @@ namespace TileStories.Tests
 
         // The section the reader is in, read from the SCREEN: the spy's own rule over each section's first slot as drawn
         private int SectionUnderTheSpyLine() =>
-            CardTestInput.UnderTheSpyLine(Scroll, Nav.Model.Sections.Select(s => Sheet.Stack.SlotOfBlock(s.Targets[0])));
+            CardTestInput.SectionUnderTheSpyLine(Scroll, Nav.Model, Sheet.Stack.SlotOfBlock);
 
         // Exactly one tab is marked, and it is marked twice: its underline shows and its label is bold; every other tab has neither
         private void AssertMarked(int index, string when)

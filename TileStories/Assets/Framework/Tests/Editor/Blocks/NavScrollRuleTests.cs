@@ -247,5 +247,96 @@ namespace TileStories.Editor.Tests
             Assert.IsTrue(NavScrollRule.FollowsScroll(null));
             Assert.IsFalse(NavScrollRule.FollowsScroll(new CardNavigationSettings { follow_scroll = false }));
         }
+
+        // ---------------- interleaved families (_3.3 R10.7): the section of the RUN being read ----------------
+
+        // An interleaved stack (the same 3000 seen through 600): sections About 0, Visit 1, Media 2, Play 3; Visit and Media come back.
+        // Runs (stretches of one section) start at these tops, each taller than the spy line's distance
+        private static readonly float[] RunTops = { 400f, 800f, 1200f, 1600f, 2000f, 2700f };
+        private static readonly int[] RunSections = { 0, 1, 2, 1, 3, 2 };
+        private const int Visit = 1, Media = 2, Play = 3;
+
+        // Every boundary: the line on a run's top names that run's section, one unit earlier the run before -- a family that comes back
+        // is marked again (the old rule, over each SECTION's first top, kept Media over the second Visit run and Play over the last Media)
+        [Test]
+        public void Interleaved_EveryRunBoundary_TheLineOnARunsTop_NamesItsSection_OneUnitEarlier_TheRunBefore()
+        {
+            float spy = Viewport * NavScrollRule.SpyLineFraction;
+            for (int i = 1; i < RunTops.Length; i++)
+            {
+                float onTop = RunTops[i] - spy;
+                if (onTop >= NavScrollRule.Range(Content, Viewport) - NavScrollRule.EndTolerance) continue;
+                Assert.AreEqual(RunSections[i], NavScrollRule.SectionAt(RunTops, RunSections, onTop, Content, Viewport),
+                    "run " + i + ": the line exactly on its top names its section");
+                Assert.AreEqual(RunSections[i - 1], NavScrollRule.SectionAt(RunTops, RunSections, onTop - 1f, Content, Viewport),
+                    "run " + i + ": one unit earlier, still the run before");
+            }
+            Assert.AreEqual(0, NavScrollRule.SectionAt(RunTops, RunSections, 0f, Content, Viewport), "before any run reaches the line: the first");
+            Assert.AreEqual(Visit, NavScrollRule.SectionAt(RunTops, RunSections, RunTops[3], Content, Viewport),
+                "mid-way into Visit's second run: Visit, not Media (the section of the last FIRST top passed)");
+        }
+
+        // A short run (shorter than the line's distance) landed at the viewport's top: it is the one read -- the P1b fix, kept for runs
+        [Test]
+        public void Interleaved_AShortRun_LandedAtTheTop_IsTheOneRead()
+        {
+            float spy = Viewport * NavScrollRule.SpyLineFraction;
+            // - Visit comes back as one short block between two Media runs
+            var tops = new[] { 400f, 1200f, 1300f, 1300f + spy * 0.75f };
+            var sections = new[] { 0, Media, Visit, Media };
+            Assert.LessOrEqual(tops[3], SpyLineAt(tops[2]), "precondition: landed on the short Visit run, the Media run after it is past the line too");
+            Assert.AreEqual(Visit, NavScrollRule.SectionAt(tops, sections, tops[2], Content, Viewport), "landed on the short Visit run: Visit");
+            Assert.AreEqual(Media, NavScrollRule.SectionAt(tops, sections, tops[2] + NavScrollRule.LandingTolerance + 1f, Content, Viewport),
+                "its top scrolled away: the Media run after it, already past the line");
+            Assert.AreEqual(Visit, NavScrollRule.SectionAt(tops, sections, (tops[3] - spy + tops[2]) * 0.5f, Content, Viewport),
+                "the next run's top past the line while the short one still sits on screen: the short one");
+        }
+
+        // The end of the card: the LAST RUN's section, whatever came first -- the old rule named the last section by first top (Play)
+        [Test]
+        public void Interleaved_AtTheEnd_TheLastRunsSectionIsNamed()
+        {
+            float range = NavScrollRule.Range(Content, Viewport);
+            Assert.Greater(RunTops[5], SpyLineAt(range), "precondition: the last run is short -- its top never reaches the line");
+            Assert.AreEqual(Media, NavScrollRule.SectionAt(RunTops, RunSections, range, Content, Viewport), "at the end: the last run's section, Media");
+            Assert.AreEqual(Play, NavScrollRule.SectionAt(RunTops, RunSections, range - NavScrollRule.EndTolerance - 1f, Content, Viewport),
+                "just before the end: the line's answer, Play");
+        }
+
+        // A run not laid out (tabs / pages set it aside: an infinite top) is never named -- at the end, the last LAID-OUT run's section
+        [Test]
+        public void Interleaved_ARunNotLaidOut_IsNeverNamed()
+        {
+            float inf = float.PositiveInfinity;
+            // - tabs shows Visit: its two runs are laid out, every other run set aside
+            var tops = new[] { inf, 800f, inf, 1100f, inf, inf };
+            float range = NavScrollRule.Range(Content, Viewport);
+            // - from the moment Visit's first run reaches the line (before it the rule names the first run, as CurrentSection always did;
+            //   tabs names its shown section then, CardLayoutRule.SpySection)
+            for (float offset = tops[1] - Viewport * NavScrollRule.SpyLineFraction; offset <= range; offset += 50f)
+                Assert.AreEqual(Visit, NavScrollRule.SectionAt(tops, RunSections, offset, Content, Viewport), "offset " + offset + ": only Visit is on screen");
+            Assert.AreEqual(-1, NavScrollRule.SectionAt(new float[0], new int[0], 0f, Content, Viewport), "no run: no section");
+            Assert.AreEqual(-1, NavScrollRule.SectionAt(null, null, 0f, Content, Viewport));
+        }
+
+        // One run per section (a block order grouped by section): the runs' tops ARE the sections' first tops, so the answer is exactly
+        // CurrentSection's on them -- at every offset of the range, the short-section fixture included. Nothing moves on a by-family card
+        [Test]
+        public void ByFamily_OneRunPerSection_NamesExactlyWhatTheSectionsFirstTopsName_AtEveryOffset()
+        {
+            float spy = Viewport * NavScrollRule.SpyLineFraction;
+            var fixtures = new[] { Tops, new[] { 400f, 1100f, 1100f + spy * 0.75f, 2700f }, new[] { 400f, 1100f, 1100f + spy * 0.4f, 1100f + spy * 0.8f, 2700f } };
+            float range = NavScrollRule.Range(Content, Viewport);
+            foreach (var tops in fixtures)
+            {
+                var oneRunEach = new int[tops.Length];
+                for (int i = 0; i < tops.Length; i++) oneRunEach[i] = i;
+                int compared = 0;
+                for (float offset = 0f; offset <= range; offset += 1f, compared++)
+                    Assert.AreEqual(NavScrollRule.CurrentSection(tops, offset, Content, Viewport), NavScrollRule.SectionAt(tops, oneRunEach, offset, Content, Viewport),
+                        tops.Length + " sections, offset " + offset);
+                Assert.Greater(compared, 2000, "precondition: the whole range was swept");
+            }
+        }
     }
 }
