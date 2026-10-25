@@ -155,10 +155,25 @@ namespace TileStories
         // The stack is at its top / at its end (one pixel of rounding, NavScrollRule's)
         public static bool AtTop(float offset) => offset <= NavScrollRule.EndTolerance;
 
-        public static bool AtEnd(float offset, float contentHeight, float viewportHeight)
+        // At the end, for the chrome, is measured on the range the stack has WITHOUT the bottom area (`bottomShown`: the area's height while
+        // it is shown, else 0): so the area that came back at the end never hides again within its own height of the end. Hiding there gave
+        // the visitor nothing more to read -- the grown viewport clamped the stack back and the area came again, a loop that left real drags
+        // resting short of the end under the area (_3.3: 125 px on The Lamp with Next Up) or at the end with the area still away
+        public static bool AtEnd(float offset, float contentHeight, float viewportHeight, float bottomShown = 0f)
         {
-            float range = NavScrollRule.Range(contentHeight, viewportHeight);
+            float range = NavScrollRule.Range(contentHeight, viewportHeight + bottomShown);
             return range > 0f && offset >= range - NavScrollRule.EndTolerance;
+        }
+
+        // Where the stack rests once the bottom area came back at the end and took its height off the viewport (`viewportBefore` ->
+        // `viewportAfter`): at the end of the NEW range, so the card's end stays in view above the area -- the end a visitor reaches is the
+        // range with the chrome shown, the one NavScrollRule reads. A stack that was not at its end, or a viewport that did not shrink, stays
+        public static float KeepTheEnd(float offset, float contentHeight, float viewportBefore, float viewportAfter)
+        {
+            if (!(viewportAfter < viewportBefore)) return offset;
+            float before = NavScrollRule.Range(contentHeight, viewportBefore);
+            if (!(before > 0f) || offset < before - NavScrollRule.EndTolerance) return offset;
+            return NavScrollRule.Range(contentHeight, viewportAfter);
         }
 
         // A stack shorter than the floor needs only its own height; one not measured yet, the whole floor

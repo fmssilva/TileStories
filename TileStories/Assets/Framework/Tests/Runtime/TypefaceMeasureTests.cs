@@ -30,6 +30,8 @@ namespace TileStories.Tests
         public const string Palette = "Palette";
         // The section sheets of P4.4c1: the navigation's numbers (landings, spy, fits) before and after the sheets
         public const string Sections = "Sections";
+        // The card's resting end: where real drags rest at the end, with the bottom chrome back, and what the navigation says there
+        public const string RestingEnd = "RestingEnd";
         private const int Gap = 8;
 
         // The domain the gallery and card renders measure into: Palette while its switch file exists, else Typeface

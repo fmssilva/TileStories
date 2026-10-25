@@ -126,6 +126,12 @@ PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs
   developer's machine for the half hour and keeps the focus-independence of 4.2.3 continuously proven, which is what the
   old "one background full run every third block" bought separately.
 
+- **What the full run holds:** every PlayMode assembly's tests, except the MEASUREMENTS, which skip themselves (reported as skipped)
+  unless their local switch file `TestEvidence/<domain>/MEASURING` exists -- the gated look / cost instruments, and the whole style spike
+  (`TileStories.Dev.StyleSpike.Tests`, gated once in its `StyleSpikeFixedFrameForTheRun`: its fixtures time themselves in real time and
+  what they proved lives in `UssVariableChainTests` and `_3.3` R8). `[Explicit]` does not keep a test out of the unfiltered MCP run, and
+  MCP cannot exclude a category. To run the spike by hand: create `TestEvidence/StyleSpike/MEASURING`, `run_tests` PlayMode with
+  `assembly_names: ["TileStories.Dev.StyleSpike.Tests"]`, delete the file.
 - **A full PlayMode run confirms, it never discovers.** Before starting one, the block must already be green on its own
   targeted set (the fixtures the brief named, plus what a grep for the changed types finds). A full run started on a block
   that was never run against its own card fixtures spends half an hour finding what twelve minutes would have found, and it

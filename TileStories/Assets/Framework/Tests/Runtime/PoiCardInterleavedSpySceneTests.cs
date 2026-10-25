@@ -61,14 +61,9 @@ namespace TileStories.Tests
         // The section of the card's last target: the last run's (cut by hand from the model's targets, never Model.Runs)
         private int LastRunsSection() => Model.SectionOf(Model.Targets[Model.Targets.Count - 1]);
 
-        // Whether the stack rests at its end: the range's end, less the bottom area when it came back at the end (it takes its height off the
-        // viewport, so the range grows by it under a stack that did not move)
-        private bool AtTheEnd()
-        {
-            var bottom = Sheet.BottomArea;
-            float area = bottom.resolvedStyle.position == Position.Relative && bottom.resolvedStyle.visibility == Visibility.Visible ? bottom.layout.height : 0f;
-            return Scroll.scrollOffset.y >= Range - area - OnePixel;
-        }
+        // Whether the stack rests at its end: the end of the range with the bottom area shown -- the area that comes back at the end keeps
+        // the end in view (CardChromeRule.KeepTheEnd), so that is where a visitor's drags rest
+        private bool AtTheEnd() => Scroll.scrollOffset.y >= Range - OnePixel;
 
         private string KeyOf(int section) => section >= 0 && section < Model.Sections.Count ? Model.Sections[section].Key : "(none)";
 
@@ -124,8 +119,7 @@ namespace TileStories.Tests
 
             var marks = new List<string> { KeyOf(Nav.Current) };
             int drags = 0, stillAtTheEnd = 0;
-            // - until the card's end is in view and the stack stops moving: at the end the footer and the bottom bar come back, the viewport
-            //   shrinks by them and the range grows (CardChromeRule), so "offset = Range" is not where a visitor's drags rest
+            // - until the card's end is in view and the stack stops moving
             while (stillAtTheEnd < 3 && drags < 200)
             {
                 // - measured before every drag: near the end the footer and the bottom bar come back and the viewport shrinks, so a finger

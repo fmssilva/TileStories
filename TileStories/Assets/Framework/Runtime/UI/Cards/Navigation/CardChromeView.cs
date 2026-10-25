@@ -1,3 +1,4 @@
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace TileStories
@@ -36,6 +37,11 @@ namespace TileStories
         private readonly PoiCardSheetView _sheet;
         private CardNavigationSettings _nav;
         private float _lastOffset;
+        // The bottom area just came back at the end: the next viewport resize keeps the end in view (CardChromeRule.KeepTheEnd)
+        private bool _keepTheEnd;
+        // A finger is on the stack, and the viewport it shrank from when the area came back under it (NaN: nothing waits for the finger)
+        private bool _fingerOnStack;
+        private float _endToKeepFrom = float.NaN;
 
         public CardChromeView(PoiCardSheetView sheet)
         {
@@ -44,6 +50,13 @@ namespace TileStories
             stack.Scroll.verticalScroller.valueChanged += OnScrolled;
             foreach (var part in new[] { stack.HeaderSlot, sheet.Slots.Top, stack.Footer, sheet.Slots.Bottom, stack.Scroll.contentContainer })
                 part.RegisterCallback<GeometryChangedEvent>(_ => Apply());
+            // - registered after the ScrollView's own handler, so its range is already the new one when the end is kept
+            stack.Scroll.contentViewport.RegisterCallback<GeometryChangedEvent>(OnViewportResized);
+            // - a dragging ScrollView sets its offset from the finger on every move: an end kept under a finger is undone on the next move and
+            //   the jump back reads as a fling up the card, so the end waits for the finger to lift
+            stack.Scroll.RegisterCallback<PointerDownEvent>(_ => _fingerOnStack = true, TrickleDown.TrickleDown);
+            stack.Scroll.RegisterCallback<PointerUpEvent>(_ => FingerLifted(), TrickleDown.TrickleDown);
+            stack.Scroll.RegisterCallback<PointerCancelEvent>(_ => FingerLifted(), TrickleDown.TrickleDown);
         }
 
         // A card was shown (or rebound by a live edit, a reveal, a language switch): its settings, a fresh scroll memory
@@ -51,6 +64,8 @@ namespace TileStories
         {
             _nav = nav;
             Scroll = default;
+            _keepTheEnd = false;
+            _endToKeepFrom = float.NaN;
             _lastOffset = _sheet.Stack.Scroll.scrollOffset.y;
             _sheet.Root.EnableInClassList(InstantClass, reduceMotion);
             Apply();
@@ -61,6 +76,8 @@ namespace TileStories
         {
             _nav = null;
             Scroll = default;
+            _keepTheEnd = false;
+            _endToKeepFrom = float.NaN;
             _lastOffset = 0f;
             Apply();
         }
@@ -92,6 +109,10 @@ namespace TileStories
                 ScrollOffset = stack.Scroll.scrollOffset.y,
             };
             var chrome = CardChromeRule.Decide(input);
+            // - the area comes back at the end: its height leaves the viewport on the next layout, and the end must stay in view above it
+            var scroll = stack.Scroll;
+            if (chrome.Bottom && !BottomShown && CardChromeRule.AtEnd(input.ScrollOffset, scroll.contentContainer.layout.height, scroll.contentViewport.layout.height))
+                _keepTheEnd = true;
             TopShown = chrome.Top;
             BottomShown = chrome.Bottom;
             BottomNavShown = chrome.BottomNav;
@@ -110,9 +131,40 @@ namespace TileStories
             float delta = offset - _lastOffset;
             _lastOffset = offset;
             var scroll = _sheet.Stack.Scroll;
+            // - the end is the range without the area: once back at the end it stays within its own height of it
+            float area = BottomShown ? _sheet.BottomArea.layout.height : 0f;
             Scroll = CardChromeRule.Next(Scroll, CardChromeRule.ReaderDelta(delta, _sheet.Nav.IsJumping), CardChromeRule.AtTop(offset),
-                CardChromeRule.AtEnd(offset, scroll.contentContainer.layout.height, scroll.contentViewport.layout.height), _nav?.hide_on_scroll);
+                CardChromeRule.AtEnd(offset, scroll.contentContainer.layout.height, scroll.contentViewport.layout.height, area), _nav?.hide_on_scroll);
             Apply();
+        }
+
+        // The viewport changed size: right after the bottom area came back at the end, the stack follows it so the end stays in view --
+        // at once, or once the finger dragging the stack lifts
+        private void OnViewportResized(GeometryChangedEvent evt)
+        {
+            if (!_keepTheEnd) return;
+            _keepTheEnd = false;
+            if (_fingerOnStack) _endToKeepFrom = evt.oldRect.height;
+            else KeepTheEnd(evt.oldRect.height);
+        }
+
+        // The finger left the stack: an end that waited for it is kept on the next frame, after the ScrollView took the release
+        private void FingerLifted()
+        {
+            _fingerOnStack = false;
+            if (float.IsNaN(_endToKeepFrom)) return;
+            float from = _endToKeepFrom;
+            _endToKeepFrom = float.NaN;
+            _sheet.Stack.Scroll.schedule.Execute(() => KeepTheEnd(from));
+        }
+
+        // The stack rests at the end of its range once more if it sat at the end it had before the viewport shrank from `viewportBefore`
+        private void KeepTheEnd(float viewportBefore)
+        {
+            var scroll = _sheet.Stack.Scroll;
+            float viewport = scroll.contentViewport.layout.height;
+            float kept = CardChromeRule.KeepTheEnd(scroll.scrollOffset.y, scroll.contentContainer.layout.height, viewportBefore, viewport);
+            if (!Mathf.Approximately(kept, scroll.scrollOffset.y)) scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, kept);
         }
     }
 }

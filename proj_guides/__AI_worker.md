@@ -14,51 +14,45 @@ So start by reading them all.
 
 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- 4c2 living glass and the moving rim light`
+## `And now: _3.3 POI Card Look, Feel & Motion -- the card's resting end (Finished) + the spike out of the full run`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
 SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `Assets/Dev/StyleSpike/Fonts`: `git checkout --` them if modified.
-Baseline: none (HEAD ed2886c; 4c1b closed with full PlayMode 1314 and full EditMode 2108, background, 0 failed). Ask about Unity's
-place with `40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5 says (never poll `get_test_job`).
+Baseline: none (HEAD c4b3f3a; 4c2 closed with full PlayMode 1322 -- 1 spike timing red, green alone -- and full EditMode 2115).
+Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5 says.
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R11 (v2-v3: the section glass with moving coloured light;
-the brushed-metal rim and the light that sweeps the edge of the block being read; their UI Toolkit 6.3 mapping table), R8 S4 (a
-UI Shader Graph contour: a material on a PARENT also paints its children -> the effect is a SIBLING layer; `_Animate` 0 freezes it;
-batches 3 -> 5) and S7, R6 (motion rules: transform / opacity only, one moving thing in view), R17.3 (reduce motion is a rule),
-R12.5, the P4.4b + P4.4c1 Build log entries, and the R16 rows "P4.4b review" + "4c1b review" (the ride-alongs below).
-The visual target: `proj_guides/_3.3.1_Prototype/Main.dc.html` (v4): `.blob` / `.b1-3`, `.rim.lit::before`, the `hue` / `sweep`
-values per mode.
-REQUIRED READING: `.clinerules/40-testing.md` 4.2, 4.2.4b, 4.5; `_3.1_POI_Card_Blocks.md` the `container.reduce_motion` setting
-(the switch this block obeys).
-Context only: `Assets/Dev/StyleSpike/S4Contour/` (the spike's Shader Graph and its tests).
-WORKER MODEL: Opus-class -- new Shader Graph materials on the stack's elements, cost measurement, motion rules.
-TEST PLAN: no baseline. Targeted Card / Poi / Theme / Section fixtures first, then the FULL PlayMode run (the stack's elements
-change), then full EditMode. Background runs (action c).
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R10.8 ("Finished" = the scroll has reached its end), the R16
+rows "4c1b review" (item 3: the 133 px gap) and "4c2 review" (the spike ride-along), the TODO "[P3, preview cap] A block taller than
+the screen breaks 'the last target is the end of the card'".
+REQUIRED READING: `_3.2_POI_Card_Navigation.md` -- `NavScrollRule` (Range, EndTolerance, CurrentSection at the end, HasViewed), the
+bottom elements (Next / Up next, the progress bar, Finished), the chrome rule (what hides while scrolling and comes back at the end);
+`.clinerules/40-testing.md` 4.2, 4.2.4b.
+WORKER MODEL: Opus-class -- a pure rule the whole nav domain reads, and the chrome that changes the viewport under it.
+TEST PLAN: no baseline. Targeted nav / Card / Poi fixtures first, then the FULL PlayMode run (a rule a whole domain reads), then full
+EditMode. Background runs (action c).
 
-PART 1 -- living glass: each section sheet gets a UI Shader Graph material as a SIBLING layer behind its content (R8 S4): two or
-three soft blobs of the family's hue drifting slowly (13-17 s, the prototype's paths), at the alpha of the sheet's tint, per mode
-(clear light glass, smoked dark). Colours come from the THEME through `ThemeResolver` (never typed in the graph). Text never sits on
-it (openers are filled plates, blocks are opaque: unchanged).
-PART 2 -- the rim light: ONE sweep layer (a conic highlight, ~5 s per turn) on the block being read (the spy's block nearest a
-line ~45 % down the viewport), moved from block to block as the visitor scrolls (fade out / in, no jump); full strength on light
-metal, about half and narrower in dark (R11 v3). The rim's static metal stays as P4.4b built it.
-PART 3 -- reduce motion: `container.reduce_motion` on = every blob and the sweep freeze (`_Animate` 0, a still frame that still
-reads as glass / metal), proven on the real card. (The visitor's switch in the gear panel and the OS flag come later; do not build them.)
-PART 4 -- cost: measured in the Editor with markers (R8 S6 method, not frame time): batches and UI repaint ms on The Lamp at Full,
-before / after, with 6 sheets in view and the sweep running. Written in the Build log; the device check stays owed (S9).
-PART 5 -- ride-alongs (R16 "4c1b review"): (1) tabs layout: the opener shows only the family's coloured line (no icon-only pill);
-(2) The Painting's wall preset Block Order = By Family (config through the Editor's path; re-base any test that typed the old order
-from its source).
-DOCS: `_3.3` Build log (4c2, the cost table), `10-structure.md` (the entries you touch), the TODOs closed.
-VISUALS: frame sequences (every 0.5 s over 6 s) of a sheet's blobs and of the sweep, light + dark; the sweep moving from one
-block to the next on scroll; reduce motion = still frames; the tabs opener. Open each and judge it against the prototype.
-OUT OF SCOPE: the visitor's reduce-motion switch and the OS flag; the end-of-card resting end (its own block); block entry /
-parallax animations (the story slice); the hero.
-Stop when the glass moves, the sweep follows the reader, reduce motion freezes both, the cost is measured, the targeted fixtures, the
-full PlayMode run and full EditMode are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4 and END with the
-developer's review questions. Do not commit: the Architect commits after the review.
+THE PROBLEM (4c1b's finding): at the end of a card the footer / bottom bar come back, the viewport shrinks, and the stack RESTS
+133 px short of `NavScrollRule.Range` -- so `IsAtEnd` is false exactly where a visitor's drags stop, and "Finished", the last
+section's mark and the "seen" ticks are judged against an end the visitor never reaches.
 
+PART 1 -- measure first: on The Lamp and The Painting, both layouts that show bottom chrome, the viewport and Range before and after the
+chrome comes back, where a real drag to the end rests, and what IsAtEnd / Finished / the spy say there. Write the numbers down.
+PART 2 -- the fix at its source: the END is the end the visitor can reach -- the range seen with the chrome that is on screen at the
+end (decide whether the rule should read the resting viewport, or the chrome must stop changing the viewport at the end; say which
+and why, with the numbers). Next walks to Finished, the bar marks the last run, the last blocks count as seen, all where the drag rests.
+Pure EditMode tests (the chrome's two viewports, a short last block, a tall last block) with mutation proof; the real card with real
+drags. Re-check the tests P1b re-based for "a block taller than the screen" and say whether they now read the visitor's end.
+PART 3 -- ride-along: the dev spike's PlayMode tests (`TileStories.Dev.StyleSpike.Tests`) leave the full run (they time themselves in
+real time; what they proved lives in `UssVariableChainTests` and `_3.3` R8). Runnable by hand. Say how (category, explicit, assembly
+filter) and update `40-testing.md` where the full run is described, as current truth (no history, `00-process.md`).
+DOCS: `_3.3` Build log, `_3.2` (the end's meaning), `10-structure.md` (only the lines you touch, current truth).
+
+VISUALS: the end of The Lamp and The Painting at rest, before / after, with the bar's mark and the Next / Finished state visible.
+OUT OF SCOPE: the block preview cap (the story slice), any look.
+Stop when the end is the visitor's end on both cards, the targeted fixtures, the full PlayMode run and full EditMode are green. Finish
+with the final report of `.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the Architect
+commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

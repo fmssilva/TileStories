@@ -133,6 +133,92 @@ namespace TileStories.Editor.Tests
             Assert.IsFalse(CardChromeRule.AtEnd(0f, 50f, 100f), "a stack that does not scroll is at its top, never at its end");
         }
 
+        // ---------------- the resting end (_3.3 R10.8: Finished = the scroll has reached its end) ----------------
+
+        // The Lamp with Next Up at Full, measured by PoiCardRestingEndSceneTests (phase before): the content once the waiting block is
+        // revealed, the viewport with the bottom area away and back (the footer 81 + the bar 66 = 147)
+        private const float EndContent = 19151f;
+        private const float AwayViewport = 690f;
+        private const float BackViewport = 543f;
+        private const float EndArea = AwayViewport - BackViewport;
+        // Where the area comes back: the end of the range with the area AWAY (147 short of the real one). Left there (before the fix) the
+        // stack rested short under the area -- measured at true rest 125 short after the loop's last turn
+        private static float OldRest => NavScrollRule.Range(EndContent, AwayViewport);
+        private static float RealEnd => NavScrollRule.Range(EndContent, BackViewport);
+
+        private static bool IsAtEnd(float offset, float viewport) => offset >= NavScrollRule.Range(EndContent, viewport) - NavScrollRule.EndTolerance;
+
+        // The chrome's two viewports: the area comes back at the end and takes 147 px off the viewport -- the stack follows, so it rests at
+        // the end of the range with the area shown (the one NavScrollRule reads); anywhere else, or a viewport that grew, nothing moves
+        [Test]
+        public void TheBottomAreaComingBackAtTheEnd_KeepsTheEnd_InTheViewportItLeaves()
+        {
+            Assert.AreEqual(18461f, OldRest, 0.01f, "precondition: the measured rest");
+            Assert.IsFalse(IsAtEnd(OldRest, BackViewport), "precondition: left where it was, the stack rests 147 short of the end");
+            float kept = CardChromeRule.KeepTheEnd(OldRest, EndContent, AwayViewport, BackViewport);
+            Assert.AreEqual(RealEnd, kept, 0.01f, "kept at the end of the range with the area shown");
+            Assert.AreEqual(EndArea, kept - OldRest, 0.01f, "moved by exactly the area's height");
+            Assert.IsTrue(IsAtEnd(kept, BackViewport), "so the stack is at its end");
+            Assert.AreEqual(RealEnd, CardChromeRule.KeepTheEnd(OldRest - 0.5f, EndContent, AwayViewport, BackViewport), 0.01f, "within the end's pixel of rounding");
+            Assert.AreEqual(OldRest - 2f, CardChromeRule.KeepTheEnd(OldRest - 2f, EndContent, AwayViewport, BackViewport), "short of the end: the stack stays");
+            Assert.AreEqual(9000f, CardChromeRule.KeepTheEnd(9000f, EndContent, AwayViewport, BackViewport), "mid-card: the stack stays");
+            Assert.AreEqual(RealEnd, CardChromeRule.KeepTheEnd(RealEnd, EndContent, BackViewport, AwayViewport), "a viewport that grew: nothing to keep");
+            Assert.AreEqual(0f, CardChromeRule.KeepTheEnd(0f, 500f, AwayViewport, BackViewport), "a stack that does not scroll stays at its top");
+        }
+
+        // The end zone: with the area shown, "at the end" is the range WITHOUT it, so the area never hides within its own height of the end
+        // -- before, a move down there hid it, the grown viewport clamped the stack back and the area came again: drags rested 147 short
+        [Test]
+        public void TheEnd_ForTheChrome_IsTheRangeWithoutTheArea_SoItNeverHidesWithinItsOwnHeightOfTheEnd()
+        {
+            Assert.IsTrue(CardChromeRule.AtEnd(RealEnd, EndContent, BackViewport, EndArea), "the real end");
+            Assert.IsTrue(CardChromeRule.AtEnd(RealEnd - EndArea, EndContent, BackViewport, EndArea), "one area up from it: still the end zone");
+            Assert.IsFalse(CardChromeRule.AtEnd(RealEnd - EndArea - 2f, EndContent, BackViewport, EndArea), "past the area's height: not the end");
+            Assert.AreEqual(CardChromeRule.AtEnd(OldRest, EndContent, AwayViewport), CardChromeRule.AtEnd(OldRest, EndContent, BackViewport, EndArea),
+                "the same point whether the area is away (its own viewport) or shown (its height given back)");
+            // - a reader at the kept end moves up 50 and down 40: the area stays (the old end, read on the shown viewport, hid it)
+            var state = CardChromeRule.Next(default, EndArea, false, true, CardOptions.HideOnScrollDown);
+            float offset = RealEnd;
+            foreach (float delta in new[] { -50f, 40f })
+            {
+                offset += delta;
+                state = CardChromeRule.Next(state, delta, false, CardChromeRule.AtEnd(offset, EndContent, BackViewport, EndArea), CardOptions.HideOnScrollDown);
+                Assert.IsFalse(state.BottomHidden, "moved " + delta + " to " + offset + ": the area stays");
+            }
+            Assert.IsTrue(CardChromeRule.Next(state, 40f, false, CardChromeRule.AtEnd(offset, EndContent, BackViewport), CardOptions.HideOnScrollDown).BottomHidden,
+                "the old reading of the end (the shown viewport's range) hides it there");
+        }
+
+        // A SHORT last block (120 px, under The Lamp's real numbers): at the old rest it is still under the area -- not on screen, never seen,
+        // its section not read; at the kept end it is seen and its section is the one read (NavScrollRule's own end rule)
+        [Test]
+        public void AtTheKeptEnd_AShortLastBlock_IsSeenAndItsSectionRead_WhereTheOldRestHidItUnderTheArea()
+        {
+            float top = EndContent - 120f;
+            var sectionTops = new[] { 0f, 9000f, top };
+            float kept = CardChromeRule.KeepTheEnd(OldRest, EndContent, AwayViewport, BackViewport);
+            Assert.Greater(top, OldRest + BackViewport, "precondition: at the old rest the block starts below the viewport, under the area");
+            Assert.IsFalse(NavScrollRule.HasViewed(true, top, EndContent, OldRest, EndContent, BackViewport), "old rest: never on screen, never seen");
+            Assert.AreEqual(1, NavScrollRule.CurrentSection(sectionTops, OldRest, EndContent, BackViewport), "old rest: the section above is read");
+            Assert.IsTrue(NavScrollRule.HasViewed(true, top, EndContent, kept, EndContent, BackViewport), "kept end: seen");
+            Assert.AreEqual(2, NavScrollRule.CurrentSection(sectionTops, kept, EndContent, BackViewport), "kept end: its section is the one read");
+        }
+
+        // A TALL last block (951 px, taller than the 543 px viewport -- The Lamp's Sources): already on screen and past the spy line at the old
+        // rest, but the scroll's END (R10.8: Finished, the reading of the card) is reached only at the kept end
+        [Test]
+        public void AtTheKeptEnd_ATallLastBlock_IsTheScrollsEnd_WhereTheOldRestWasNot()
+        {
+            float top = EndContent - 951f;
+            Assert.Greater(951f, BackViewport, "precondition: the block is taller than the viewport");
+            float kept = CardChromeRule.KeepTheEnd(OldRest, EndContent, AwayViewport, BackViewport);
+            float range = NavScrollRule.Range(EndContent, BackViewport);
+            Assert.IsTrue(NavScrollRule.HasViewed(true, top, EndContent, OldRest, EndContent, BackViewport), "precondition: its top passed the line at the old rest");
+            Assert.IsFalse(ContentSeenRule.HasSeenAll(OldRest, range, BackViewport), "old rest: the scroll's end is not reached (its last 147 px under the area)");
+            Assert.IsTrue(ContentSeenRule.HasSeenAll(kept, range, BackViewport), "kept end: the scroll's end");
+            Assert.AreEqual(2, NavScrollRule.CurrentSection(new[] { 0f, 9000f, top }, kept, EndContent, BackViewport), "and its section read");
+        }
+
         // _3.2 audit F1 (mutation 23): reaching the top brings the area back on its own, however small the move up was (a small move up
         // alone is not past ShowAfterTravel); the same at the end after a small move down
         [Test]

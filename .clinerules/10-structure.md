@@ -185,7 +185,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
       - S5Glass/  -- SpikeFrost.shadergraph (screen-space lookup of the low-res copy, 5x5 tent, tint; Layout UV is bottom-up) + SpikeFrost.mat
       - S6Motion/  -- Motion.uss (reveal by translate + opacity, the page container transform, .s6-no-transition), BezierRule.uss
       - S7Shadow/  -- SpikeShadow.shadergraph (rounded-box SDF soft shadow) + SpikeShadow.mat
-      - Tests/  -- TileStories.Dev.StyleSpike.Tests.asmdef (PlayMode, defineConstraints UNITY_EDITOR): StyleSpikeFixedFrameForTheRun (its own 390 x 844 pin)
+      - Tests/  -- TileStories.Dev.StyleSpike.Tests.asmdef (PlayMode, defineConstraints UNITY_EDITOR): StyleSpikeFixedFrameForTheRun (its own 390 x 844 pin; the whole assembly skipped unless TestEvidence/StyleSpike/MEASURING exists)
     - PoiEditorLayout/  [EMPTY SCAFFOLD]  -- saved POI Editor window layouts
   - Framework/
     - Runtime/  -- ships to device
@@ -282,7 +282,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - INavElementView.cs  -- The navigation element view contract: Root, Bind(CardNavModel, NavController, BlockBindContext), Unbind; views only
             - NavElementRegistry.cs  -- NavElementDefinition (key, slot, Editor label, (i) help), NavSlotKeys (Top; Built = the slots the sheet draws) and NavElementRegistry
             - BuiltInNavElements.cs  -- The framework's elements registered into Shared: text_tabs (top), with their Editor label and help
-            - CardChromeView.cs  -- Shows / hides the card's chrome (the top strip, the bottom area = the sticky footer) as CardChromeRule decides: measures the stop's rest height, the
+            - CardChromeView.cs  -- Shows / hides the card's chrome (the top strip, the bottom area = the sticky footer) as CardChromeRule decides, and keeps the stack's end in view when the bottom area comes back at the end (KeepTheEnd): measures the stop's rest height, the
             - NavSlots.cs  -- The sheet's navigation slots (top today): a strip inserted in the sheet root between the header and the stack ScrollView
             - TextTabsNavView.cs  -- text_tabs: one Button per model section (its CardStrings word), the current one underlined AND bold (CurrentClass), a tap = NavController.JumpTo
             - TabsNavView.cs  -- The tabs text_tabs and icon_tabs share: a NavStrip of NavTabs, one per section, its word (and its family's icon, tinted by NavTint, per Labels), Show
@@ -574,7 +574,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - FullViewSiblingRule.cs  -- Pure: which blocks the full view swipes between -- Siblings(model, registry, key) = the key's SECTION's targets whose kind lists Expandable
           - NavContentsRule.cs  -- Pure: SectionsFirst(entry, settings) -- a synthesized contents block always, an authored one by its Rows field, else the Block Library's, else
           - NavBackRule.cs  -- Pure: _3.2 4.5 -- Next(settings, fullViewOpen, stop) -> LeaveToApp / CloseFullView / LowerToHalf / LowerToPeek / CloseCard; StepsDown
-          - CardChromeRule.cs  -- Pure: what chrome the card shows -- ScrollState / Next
+          - CardChromeRule.cs  -- Pure: what chrome the card shows -- ScrollState / Next; the end: AtEnd on the range without the bottom area (it never hides within its own height of the end), KeepTheEnd (the stack follows the viewport the area shrinks there)
           - NavSlotRule.cs  -- Pure: TopElement(nav settings, model, topElement) -- the wall's Top Bar pick, only when the model shows navigation, the key is a registered top
           - NavStripRule.cs  -- Pure: a sideways strip's offset -- MaxOffset, Clamp, OffsetToShow (the least move that shows a whole item)
           - NavRailRule.cs  -- Pure: SwipesToEnd (one swipe = one viewport of travel), MostCells(step, viewport, maxSwipes), Of(targets, ...) -> Plan(Cards, HasAll): every block
@@ -845,7 +845,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - KindFormatTests.cs  -- The Format facet: every kind of BlockRegistry.Shared (the app's size_comparison included) declares one of the six, the kinds the guide names carry
           - KindIconTests.cs  -- Every kind of BlockRegistry.Shared has an icon the set draws, the registry refuses none or an unknown one (named), the kinds of one section never
           - NavOntologyRuleTests.cs  -- The collapse rules case by case on the REAL built-in definitions: the header, a pinned-top / footer look vs the same kind's other look, a Show After
-          - CardChromeRuleTests.cs  -- CardChromeRule: every stop x both Show Navigation At options, no element / no footer, the travel thresholds (23 vs 25 down, 7 vs 9 up), a turn
+          - CardChromeRuleTests.cs  -- CardChromeRule: every stop x both Show Navigation At options, no element / no footer, the travel thresholds (23 vs 25 down, 7 vs 9 up), a turn; the resting end at The Lamp's measured numbers (the two viewports, the end zone, a short and a tall last block through NavScrollRule)
           - HeroRulesTests.cs  -- HeroRule (height, bar title, in view, narrow), HeroMotionRule
           - HeroTitleFitRuleTests.cs  -- HeroTitleFitRule (greedy wrap, long words, empty, the 3-line notice), HeroTitleMeasure (the theme's display face, the phone's size and line), every
           - NavScrollRuleTests.cs  -- Tier 0 of NavScrollRule on a 3000 / 600 stack: the range, landings and the clamp, the spy line at three offsets, the end of the range, a stack that
@@ -1033,6 +1033,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - PoiCardBentoLayoutSceneTests.cs  -- Phase B of the bento layout on LivingRoomScene, real touches and Escape, the real owners: The Lamp's tiles where the rule says at 390 px EN + PT
         - PoiCardFullViewSiblingsSceneTests.cs  -- Phase B of the sibling swipe on LivingRoomScene with real touches, Escape and the real owners: VIDEO
         - PoiCardPagesSceneTests.cs  -- Phase B of the pages layout on LivingRoomScene with real touches and the real owners: a vertical drag scrolls and never turns, a sideways one turns
+        - PoiCardRestingEndSceneTests.cs  -- Phase B of the card's end on the real scene: real small strokes and flings to the end of The Lamp and The Painting with Next Up / Bottom Bar (+ the Lamp's footer alone) rest at Range with the last pixel above the bottom area, Finished / bar mark / spy / tick / card read there; no hide within the area's height; the gated RestingEnd measurement
         - PoiCardInterleavedSpySceneTests.cs  -- Phase B of the interleaved-family spy on the real scene: 62 real drags down The Lamp (default order) with Text Tabs + Bottom Bar + Edge Scrubber
         - PoiCardShowAfterReadingSceneTests.cs  -- Show After Reading in scroll, tabs and pages on The Lamp (block_44, fresh state): the end of one short section (Listen) is not the card; every
         - PoiCardEdgeSceneTests.cs  -- Phase B of the scrubber on the REAL LivingRoomScene with real touches: stops unchanged and the rail drawn only at Full; a real tap on each of The
