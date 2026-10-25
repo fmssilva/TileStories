@@ -114,6 +114,43 @@
     --ts-video-letterbox: rgb(0, 0, 0);
     /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
     --ts-clear: rgba(0, 0, 0, 0);
+    /* The living glass (R11, P4.4c2): the soft lights drifting inside a section's sheet -- light 1 the family's hue, light 2
+       its second hue (the prototype's H / H2), clearer in light glass, dimmer in smoked dark glass (CardLight paints them into
+       the sheet's material) */
+    --ts-family-about-light: rgba(226, 140, 50, 0.549019635);
+    --ts-family-about-light-2: rgba(240, 200, 110, 0.4509804);
+    /* The light that sweeps the rim of the block being read (R11 v3): white at full strength on light metal, the family's
+       second hue at about half strength on dark metal */
+    --ts-family-about-sweep: rgb(255, 255, 255);
+    --ts-family-stories-light: rgba(170, 90, 190, 0.549019635);
+    --ts-family-stories-light-2: rgba(235, 140, 170, 0.4509804);
+    --ts-family-stories-sweep: rgb(255, 255, 255);
+    --ts-family-media-light: rgba(70, 125, 220, 0.549019635);
+    --ts-family-media-light-2: rgba(110, 200, 230, 0.4509804);
+    --ts-family-media-sweep: rgb(255, 255, 255);
+    --ts-family-guides-light: rgba(70, 165, 100, 0.549019635);
+    --ts-family-guides-light-2: rgba(190, 210, 110, 0.4509804);
+    --ts-family-guides-sweep: rgb(255, 255, 255);
+    --ts-family-play-light: rgba(222, 95, 70, 0.549019635);
+    --ts-family-play-light-2: rgba(240, 170, 90, 0.4509804);
+    --ts-family-play-sweep: rgb(255, 255, 255);
+    --ts-family-visit-light: rgba(125, 105, 210, 0.549019635);
+    --ts-family-visit-light-2: rgba(180, 150, 235, 0.4509804);
+    --ts-family-visit-sweep: rgb(255, 255, 255);
+    --ts-family-community-light: rgba(215, 160, 60, 0.549019635);
+    --ts-family-community-light-2: rgba(240, 205, 120, 0.4509804);
+    --ts-family-community-sweep: rgb(255, 255, 255);
+    --ts-family-ar-light: rgba(50, 170, 160, 0.549019635);
+    --ts-family-ar-light-2: rgba(120, 215, 200, 0.4509804);
+    --ts-family-ar-sweep: rgb(255, 255, 255);
+    --ts-family-meta-light: rgba(160, 145, 120, 0.549019635);
+    --ts-family-meta-light-2: rgba(205, 195, 170, 0.4509804);
+    --ts-family-meta-sweep: rgb(255, 255, 255);
+    --ts-family-navigation-light: rgba(150, 175, 60, 0.549019635);
+    --ts-family-navigation-light-2: rgba(200, 215, 120, 0.4509804);
+    --ts-family-navigation-sweep: rgb(255, 255, 255);
+    /* The rim light's width in degrees of its turn (R11 v3: narrower on dark metal) */
+    --ts-rim-sweep-arc: 62;
     --ts-line-width: 1px;
     /* Type */
     --ts-size-body: 16px;
@@ -260,6 +297,43 @@
     --ts-video-letterbox: rgb(0, 0, 0);
     /* no colour at all: a border kept for layout that shows only when marked (the filmstrip's current picture) */
     --ts-clear: rgba(0, 0, 0, 0);
+    /* The living glass (R11, P4.4c2): the soft lights drifting inside a section's sheet -- light 1 the family's hue, light 2
+       its second hue (the prototype's H / H2), clearer in light glass, dimmer in smoked dark glass (CardLight paints them into
+       the sheet's material) */
+    --ts-family-about-light: rgba(226, 140, 50, 0.419607848);
+    --ts-family-about-light-2: rgba(240, 200, 110, 0.298039228);
+    /* The light that sweeps the rim of the block being read (R11 v3): white at full strength on light metal, the family's
+       second hue at about half strength on dark metal */
+    --ts-family-about-sweep: rgba(240, 200, 110, 0.4509804);
+    --ts-family-stories-light: rgba(170, 90, 190, 0.419607848);
+    --ts-family-stories-light-2: rgba(235, 140, 170, 0.298039228);
+    --ts-family-stories-sweep: rgba(235, 140, 170, 0.4509804);
+    --ts-family-media-light: rgba(70, 125, 220, 0.419607848);
+    --ts-family-media-light-2: rgba(110, 200, 230, 0.298039228);
+    --ts-family-media-sweep: rgba(110, 200, 230, 0.4509804);
+    --ts-family-guides-light: rgba(70, 165, 100, 0.419607848);
+    --ts-family-guides-light-2: rgba(190, 210, 110, 0.298039228);
+    --ts-family-guides-sweep: rgba(190, 210, 110, 0.4509804);
+    --ts-family-play-light: rgba(222, 95, 70, 0.419607848);
+    --ts-family-play-light-2: rgba(240, 170, 90, 0.298039228);
+    --ts-family-play-sweep: rgba(240, 170, 90, 0.4509804);
+    --ts-family-visit-light: rgba(125, 105, 210, 0.419607848);
+    --ts-family-visit-light-2: rgba(180, 150, 235, 0.298039228);
+    --ts-family-visit-sweep: rgba(180, 150, 235, 0.4509804);
+    --ts-family-community-light: rgba(215, 160, 60, 0.419607848);
+    --ts-family-community-light-2: rgba(240, 205, 120, 0.298039228);
+    --ts-family-community-sweep: rgba(240, 205, 120, 0.4509804);
+    --ts-family-ar-light: rgba(50, 170, 160, 0.419607848);
+    --ts-family-ar-light-2: rgba(120, 215, 200, 0.298039228);
+    --ts-family-ar-sweep: rgba(120, 215, 200, 0.4509804);
+    --ts-family-meta-light: rgba(160, 145, 120, 0.419607848);
+    --ts-family-meta-light-2: rgba(205, 195, 170, 0.298039228);
+    --ts-family-meta-sweep: rgba(205, 195, 170, 0.4509804);
+    --ts-family-navigation-light: rgba(150, 175, 60, 0.419607848);
+    --ts-family-navigation-light-2: rgba(200, 215, 120, 0.298039228);
+    --ts-family-navigation-sweep: rgba(200, 215, 120, 0.4509804);
+    /* The rim light's width in degrees of its turn (R11 v3: narrower on dark metal) */
+    --ts-rim-sweep-arc: 40;
     --ts-line-width: 1px;
     /* Type */
     --ts-size-body: 16px;

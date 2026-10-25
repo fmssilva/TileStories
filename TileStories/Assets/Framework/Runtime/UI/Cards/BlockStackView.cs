@@ -35,6 +35,9 @@ namespace TileStories
         // The scroll's chapters: every scroll slot sits in its family's glass sheet (_3.3 P4.4c1), so a slot's layout is relative to its
         // sheet -- TopInScroll is the one way to its place in the scroll
         public SectionSheets Sheets { get; }
+        // The card's moving light (_3.3 P4.4c2): the sheets' living glass and the rim light of the block being read
+        public CardLight Light { get; }
+        public RimLightView RimLight { get; }
         // One block's place in the stack: its heading, then its view -- or, for an expandable block, its compact row and (once opened) its
         // view under it. Slots are pooled apart from the views, one pool for each shape
         private sealed class Slot
@@ -299,7 +302,9 @@ namespace TileStories
             };
             Scroll.AddToClassList("poi-card__stack");
             scrollParent.Add(Scroll);
-            Sheets = new SectionSheets(Scroll.contentContainer, registry);
+            Light = new CardLight(Scroll);
+            Sheets = new SectionSheets(Scroll.contentContainer, registry, Light);
+            RimLight = new RimLightView(this, Light);
             Footer = new VisualElement { name = "poi-card-footer" };
             Footer.AddToClassList("poi-card__footer");
             scrollParent.Add(Footer);
@@ -374,6 +379,7 @@ namespace TileStories
             var state = context.State;
             IsRevealed = key => _revealedHere.Contains(key) || (state?.Seen(poiId, key) ?? false);
             var navigation = context.Settings?.navigation;
+            Light.SetReduceMotion(context.ReduceMotion);
             // - the scroll's slots go into their section sheets once they are all bound (Sheets.Build), in stack order
             var scrollSlots = new List<VisualElement>();
             var scrollEntries = new List<BlockStackBuilder.Entry>();
@@ -418,6 +424,7 @@ namespace TileStories
             // - a new card starts at the top, its hero whole (the offset may already have been 0: no scroll event then)
             HeaderView?.OnStackScrolled(0f);
             UpdateBarTitle();
+            RimLight.Update();
         }
 
         // The card's actions at the foot of the hero (HeroActionsRule): a second view of the sticky Actions block (the primary action, in
@@ -597,6 +604,7 @@ namespace TileStories
                 Views.Return(h.Kind, h.View);
             }
             _heroViews.Clear();
+            RimLight.Clear();
             foreach (var b in _bound)
             {
                 if (b.View is HeaderBlockView h) h.HeroPart.RemoveFromHierarchy();

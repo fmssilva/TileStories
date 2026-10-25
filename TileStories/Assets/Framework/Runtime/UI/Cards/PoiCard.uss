@@ -566,6 +566,39 @@
     border-radius: var(--ts-radius-xl);
 }
 
+/* the living glass (_3.3 P4.4c2, CardLight): the soft lights drifting inside the sheet, a SIBLING layer under the edge, the opener and
+   the blocks (a material on the sheet itself would paint its children too, R8 S4). Its material paints every pixel: the background
+   colour only makes UI Toolkit draw the layer at all (a transparent element draws nothing) */
+.card-section__light {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--ts-radius-xl);
+    background-color: var(--ts-surface);
+}
+
+/* the navigation family's run is no sheet: no glass, no light */
+.card-section--bare > .card-section__light {
+    display: none;
+}
+
+/* the rim light (RimLightView): ONE layer in the block being read, behind its heading and content, INSIDE the rim's outer line -- that
+   line is the block's measured edge against the glass over a sunny wall (>= 3:1, ThemeFrameSceneTests): a white light over it took the
+   edge to 1.6:1. Its material draws only the band just inside it (the rim's inner band). It fades out of one block and into the next */
+.card-rim-light {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--ts-surface);
+    transition-property: opacity;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: ease-in-out;
+}
+
 /* laid over the sheet before it: it starts above that sheet's foot, and its shadow falls up over it */
 .card-section--over {
     margin-top: var(--ts-section-overlap);
@@ -652,6 +685,11 @@
     flex-grow: 1;
     height: var(--ts-section-line);
     margin-left: var(--ts-space-3);
+}
+
+/* the tabs layout's opener (no words: the strip names the section): the line alone, the sheet's full width */
+.card-section-opener--line-only > .card-section-opener__line {
+    margin-left: 0;
 }
 
 /* The common heading every kind may have (BlockKindDefinition.HeadingField): one look for every block */

@@ -101,6 +101,10 @@ namespace TileStories
         // on its filled pill and its sheet's glass
         public static string InkOf(string colorToken) => colorToken + "-ink";
         public static string GlassOf(string colorToken) => colorToken + "-glass";
+        // The living glass (_3.3 P4.4c2, R11): the two lights drifting inside its sheet, and the light that sweeps the rim of the block read
+        public static string LightOf(string colorToken) => colorToken + "-light";
+        public static string Light2Of(string colorToken) => colorToken + "-light-2";
+        public static string SweepOf(string colorToken) => colorToken + "-sweep";
 
         private static string Words(System.Func<string, string> words, string key) => words?.Invoke(key) ?? "";
     }

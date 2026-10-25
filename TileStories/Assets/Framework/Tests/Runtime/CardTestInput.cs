@@ -249,8 +249,12 @@ namespace TileStories.Tests
         // Since _3.3 P4.4b the sheet's ground between blocks is translucent glass: the live scene behind it (animated markers) shows through
         // and a render of the sheet never holds still. A measurement of the CARD puts a still backdrop behind it (where the camera feed
         // would be), once per card layer; it stays for the test's scene
+        // ...and the card's own moving light (_3.3 P4.4c2: the glass lights and the rim light run on CardLight.Clock) stands at time 0
         public static void HoldTheWallStill(PoiCardSheetView sheet)
         {
+            var light = sheet.Stack.Light;
+            light.Clock = () => 0f;
+            light.Tick();
             var root = sheet.Layer.parent;
             if (root == null || root.Q("test-still-backdrop") != null) return;
             var backdrop = new VisualElement { name = "test-still-backdrop", pickingMode = PickingMode.Ignore };

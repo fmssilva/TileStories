@@ -329,8 +329,13 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - CardAudioCoordinator.cs  -- Joins the audio owner to the card's comings and goings so PoiCardHost stays thin: CardShown / CardClosed apply MiniPlayerRule.StopsWithCard
           - PoiCardSheetView.cs  -- Plain C#: the card's bottom sheet, a WIRING class: builds the layer, the grabber, the bar with the title, the settings gear and the X
           - BlockFrame.cs  -- the universal block frame: Build adds the rim band + the outer-only shadow parts to a slot, Apply frames a scroll slot with its emphasis
-          - SectionSheets.cs  -- the card's chapters in the scroll: SectionSheetRule cuts the scroll's blocks into runs of one family, each WRAPPED in one pooled glass sheet
-          - SectionOpenerView.cs  -- the Section Opener: the family's FILLED pill (icon, name in the display face, meta "4 blocks - 9 min") + a full-width line in its colour, painted
+          - SectionSheets.cs  -- the card's chapters in the scroll: SectionSheetRule cuts the scroll's blocks into runs of one family, each WRAPPED in one pooled glass sheet with its living-glass layer (CardLight; ShowLightsNear draws it only near the view)
+          - Light/  -- the card's moving light: two UI Shader Graphs and their owners
+            - CardLight.cs  -- Plain C#, one per BlockStackView: a material copy per painted element (Glass / Sweep), theme colours by name in linear + repaint on a mode switch, size, the injectable Clock into _Clock every 33 ms, ReduceMotion = _Animate 0
+            - RimLightView.cs  -- Plain C#: ONE rim light in the block LitBlockRule names, moved on scroll with a fade (out, move, in), behind the block's content
+            - SectionGlass.shadergraph  -- generated JSON (the S4 spike's shape): the prototype's three drifting lights per ~720 pt band of a sheet, _Hue / _Hue2 / _Size / _Clock / _Animate / _Seed
+            - RimSweep.shadergraph  -- generated JSON: a conic highlight (268 / 306 / 330 deg, Arc wide) turning per _Period, drawn only in the rim's band inside the rounded edge (SDF)
+          - SectionOpenerView.cs  -- the Section Opener: the family's FILLED pill (icon, name in the display face, meta "4 blocks - 9 min") + a full-width line in its colour; with no words (tabs) the line alone (LineOnlyClass), painted
           - CardVisitorSettingsView.cs  -- the card's settings panel the gear opens: Language
           - card_block_shadow.png  -- 96 x 96 outer-only soft shadow (transparent over the block), 9-sliced at 36 (16 margin + 20 radius), tinted by --ts-elevation-1/2; written by a script
           - card_glass.png  -- 4 x 256 white alpha ramp (0.45 top -> 1 foot), the stack's glass, tinted by --ts-glass-ground; written by a script
@@ -433,7 +438,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - MinimapView.cs  -- plain C# view: one dot per running marker at its true world position (percent placement), three dot styles, result-set filtering, selection
         - Theme/  -- The app theme: ONE source (a ThemeAsset) of every colour and scale the UI Toolkit screens draw with, generated into USS and read by C#
           - ThemeAsset.cs  -- the ScriptableObject: key, default mode, shared ThemeTokenSet
-          - ThemeResolver.cs  -- plain C#: a theme's values in one mode for C# (TryColour; a mode's value wins over a shared one), read from the asset, never from a stylesheet
+          - ThemeResolver.cs  -- plain C#: a theme's values in one mode for C# (TryColour, TryNumber; a mode's value wins over a shared one), read from the asset, never from a stylesheet
           - ThemeModeRule.cs  -- Pure: the mode shown -- the visitor's pick > the wall's Default Mode > the theme's, each only when the theme has it
           - ThemeController.cs  -- marks a UIDocument root ts-app ts-theme-<key> ts-mode-<mode> (Apply: PoiCardHost, SearchUIHost, ZoomControlView, CardGalleryHarness); Load(key) from
           - TileStoriesTheme.tss  -- PanelSettings.themeUss: imports unity-theme://default + Generated/Theme.default.uss
@@ -561,7 +566,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - NavFacetRule.cs  -- Pure: BlockFacts (format, minutes, needs), NavFacets (the visitor's format / time limit / withouts), the ONE rule drawer_tree and grid_overlay read
           - NavFitRule.cs  -- Pure: CountsFit(words, counts, gap, room) -- the Segmented element's Show Counts: a count goes when it cannot sit beside its word, never the word
           - CompactRowRule.cs  -- Pure: the compact row's words for a stack entry -- heading, else the kind's default heading, else BlockSummaryRule's first words (FromFirstWords)
-          - SectionSheetRule.cs  -- Pure: the scroll's chapters -- Runs (consecutive blocks of one family; bare for a family that opens no section), Looks
+          - SectionSheetRule.cs  -- Pure: the scroll's chapters -- Runs (consecutive blocks of one family; bare for a family that opens no section), Looks; a family's colour names (InkOf, GlassOf, LightOf, Light2Of, SweepOf)
+          - LitBlockRule.cs  -- Pure: Pick -- the shown block whose centre is nearest 45 % down the viewport (the block whose rim catches the moving light)
           - AccordionRule.cs  -- Pure: the card's ONE accordion mechanism (the stack's rows, nav_contents' titles) -- ClosedByOpening (One At A Time), ClosedByBack
           - CardLayoutRule.cs  -- + LayoutOwnsTheEdge (pages, accordion: the Edge slot holds nothing, read by NavSlotRule.EdgeElement and the Editor warning), SpyBlock
           - BentoLayoutRule.cs  -- Pure: the bento tiles -- Lead (the most targets, first of equals), Rows
@@ -647,6 +653,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - TileStories/
           - CardMediaLibrary.asset  -- the Framework's own default media library (CardMediaLibraryGenerator), resolved at runtime by CardMediaLibraryLookup.Framework
           - Themes/Theme.default.asset  -- The framework's default ThemeAsset (ThemeController.Load("default")): the light (default) and dark palettes, accents, type roles and scales
+          - Card/  -- SectionGlass.mat, RimSweep.mat: the base materials of the card's moving light (CardLight copies one per painted element)
           - PanoramaUnlit.mat  -- The URP Unlit material CardPreviewStage copies per panorama handle (a Resources asset, so the shader is not stripped from a build).
           - CardMedia/  -- the generated default media itself, all CC0 (README.txt says so)
             - pictures/  -- azulejo_blue.png, azulejo_ochre.png, azulejo_detail.png, panel_plain.png, poster_plain.png, map_plan.png -- plain geometric patterns, app-agnostic
@@ -847,6 +854,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - NavFitRuleTests.cs  -- Tier 0 of NavFitRule: a word, its gap and its count inside the room show the counts; one segment that does not fit takes every segment's count away
           - ExpandableBlocksTests.cs  -- A real BlockStackView over The Lamp with every block Expandable and the wall's real media folder: every kind but the header lists expandable
           - CompactRowRuleTests.cs  -- Tier 0 on the shipped Lamp + the real string table: the one-line summary (moved from DetailCardEditorTabTests), the compact row's words in EN / PT
+          - LitBlockRuleTests.cs  -- Tier 0 LitBlockRule: the first block at the top, the move at the centres' midpoint, a whole-range sweep lights each block once in order, out of view never lit, a tall block keeps it
           - SectionSheetRuleTests.cs  -- Tier 0: runs by family and interleaved, the bare navigation run, opener / overlap / continues when a layout sets runs aside, the meta line in the
           - CardLayoutRuleTests.cs  -- Tier 0 on the shipped wall: the layout defaults, tabs only where sections switch (Lamp yes, Military / Religious scroll), the accordion's rows = the
           - BentoLayoutRuleTests.cs  -- The tile arithmetic: every section count 1..10
@@ -993,6 +1001,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - ThemePipelineTests.cs  -- The theme end to end on the REAL LivingRoomScene: every UIDocument marked ts-app / default / dark on a panel whose theme is TileStoriesTheme; every
         - ThemeFrameSceneTests.cs  -- the block frame on the REAL card (every scroll slot framed and opaque, the bar / footer not; emphasis quiet / featured live) and the render half of
         - SectionSheetSceneTests.cs  -- Phase B on the real scene: The Lamp's blocks one sheet per run of a family (interleaved: a family that comes back opens a new sheet), the frame's
+        - CardLightSceneTests.cs  -- Phase B of the moving light on the REAL scene (injected clock, pixels): glass layers + theme colours + a real tap on Dark, the gating; glass drifts / stands still under Reduce Motion; one rim light following real finger strokes; light vs dark sweep; TestEvidence/Light/ frame sequences
+        - CardLightMeasureSceneTests.cs  -- the light's cost (gated by TestEvidence/Light/MEASURING): batches, SetPass, UI CPU before / after on The Lamp at Full -> cost.txt
         - SectionSheetMeasureSceneTests.cs  -- the gated measuring instrument (LookMeasure.Sections): stops, every target's landing, the spy every 120 px, the rails' fit and the bento tiles
         - PoiCardThemeSceneTests.cs  -- real taps Aa -> Dark: every UIDocument root re-classed, the same views, scroll and stop kept, the pick remembered over Default Mode; Default Mode live
         - ThemeTypeTests.cs  -- The faces end to end on the REAL LivingRoomScene: every shown text of every UIDocument (card at Full, search, zoom) draws the body face, and exactly

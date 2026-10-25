@@ -10,6 +10,7 @@ namespace TileStories
     public sealed class ThemeResolver
     {
         private readonly Dictionary<string, Color> _colours = new();
+        private readonly Dictionary<string, float> _numbers = new();
 
         public ThemeResolver(ThemeTokenSet shared, ThemeTokenSet mode)
         {
@@ -22,6 +23,15 @@ namespace TileStories
             if (set == null) return;
             foreach (var token in set.colours)
                 if (!string.IsNullOrEmpty(token.name)) _colours[token.name] = token.value;
+            foreach (var token in set.numbers)
+                if (!string.IsNullOrEmpty(token.name)) _numbers[token.name] = token.value;
+        }
+
+        // The number `token` has in this mode (a material's setting: the rim light's arc); false when the theme holds no such number
+        public bool TryNumber(string token, out float number)
+        {
+            number = 0f;
+            return !string.IsNullOrEmpty(token) && _numbers.TryGetValue(token, out number);
         }
 
         // The colour `token` ("--ts-accent") has in this mode; false when the theme holds no such colour

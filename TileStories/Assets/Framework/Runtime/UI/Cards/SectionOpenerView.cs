@@ -42,11 +42,18 @@ namespace TileStories
             _tint = new NavTint(Root);
         }
 
+        // An opener with no words (the tabs layout): only the family's coloured line -- an icon alone on a pill read as a stray badge
+        public const string LineOnlyClass = RootClass + "--line-only";
+
         // Show a family's opener: its icon, its colour token (the fill; the ink is the theme's "<token>-ink"), its words and its meta line
-        // (an empty name or meta is not drawn: the tabs layout's opener says no words, CardLayoutRule.OpenerShowsWords)
+        // (an empty name or meta is not drawn; with no name at all the pill goes and the line stays -- the tabs layout's opener says no
+        // words, CardLayoutRule.OpenerShowsWords)
         public void Show(string iconKey, string colorToken, string name, string meta)
         {
             CardIcons.SetKey(Icon, iconKey);
+            bool lineOnly = string.IsNullOrEmpty(name);
+            Root.EnableInClassList(LineOnlyClass, lineOnly);
+            Pill.style.display = lineOnly ? DisplayStyle.None : DisplayStyle.Flex;
             Name.text = name ?? "";
             Name.style.display = Name.text.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             Meta.text = meta ?? "";

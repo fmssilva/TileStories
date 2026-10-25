@@ -333,6 +333,7 @@
                         "kind": "header",
                         "variant": "image_parallax",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "eyebrow",
@@ -408,6 +409,7 @@
                         "kind": "status",
                         "variant": "ring",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -435,6 +437,7 @@
                         "kind": "status",
                         "variant": "scale",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -462,6 +465,7 @@
                         "kind": "quick_facts",
                         "variant": "chips",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "show_category",
@@ -630,6 +634,7 @@
                         "kind": "quick_facts",
                         "variant": "grid_hairline",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -828,6 +833,7 @@
                         "kind": "quick_facts",
                         "variant": "big_numbers",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -946,6 +952,7 @@
                         "kind": "rich_text",
                         "variant": "plain",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "minutes",
@@ -1002,6 +1009,7 @@
                         "kind": "rich_text",
                         "variant": "drop_cap",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -1048,6 +1056,7 @@
                         "kind": "rich_text",
                         "variant": "lede",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -1094,6 +1103,7 @@
                         "kind": "rich_text",
                         "variant": "sections",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "minutes",
@@ -1281,6 +1291,7 @@
                         "kind": "fun_fact",
                         "variant": "flip",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "facts",
@@ -1380,6 +1391,7 @@
                         "kind": "fun_fact",
                         "variant": "postcard",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "facts",
@@ -1439,6 +1451,7 @@
                         "kind": "pull_quote",
                         "variant": "serif",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -1523,6 +1536,7 @@
                         "kind": "pull_quote",
                         "variant": "minimal",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "quote",
@@ -1569,6 +1583,7 @@
                         "kind": "process_steps",
                         "variant": "numbered",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -1767,6 +1782,7 @@
                         "kind": "swatches",
                         "variant": "grid",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -2001,6 +2017,7 @@
                         "kind": "timeline",
                         "variant": "vertical",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "minutes",
@@ -2407,6 +2424,7 @@
                         "kind": "timeline",
                         "variant": "horizontal",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -2605,6 +2623,7 @@
                         "kind": "person",
                         "variant": "row",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -2689,6 +2708,7 @@
                         "kind": "person",
                         "variant": "card",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -2773,6 +2793,7 @@
                         "kind": "story_chapters",
                         "variant": "segmented",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "minutes",
@@ -2941,6 +2962,7 @@
                         "kind": "compare_points",
                         "variant": "rings",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "other",
@@ -2969,6 +2991,7 @@
                         "kind": "practical_info",
                         "variant": "rows",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -3301,6 +3324,7 @@
                         "kind": "gallery",
                         "variant": "carousel",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -3535,6 +3559,7 @@
                         "kind": "gallery",
                         "variant": "grid",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "pictures",
@@ -3750,6 +3775,7 @@
                         "kind": "gallery",
                         "variant": "filmstrip",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "pictures",
@@ -3965,6 +3991,7 @@
                         "kind": "gallery",
                         "variant": "stack",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "pictures",
@@ -4180,6 +4207,7 @@
                         "kind": "before_after",
                         "variant": "slider",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -4265,6 +4293,7 @@
                         "kind": "zoom_image",
                         "variant": "pinch",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -4321,6 +4350,7 @@
                         "kind": "hotspot_image",
                         "variant": "numbered",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -4668,6 +4698,7 @@
                         "kind": "hotspot_image",
                         "variant": "loupes",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -5015,6 +5046,7 @@
                         "kind": "video",
                         "variant": "inline",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -5096,6 +5128,7 @@
                         "kind": "video",
                         "variant": "chapters",
                         "display": "takeover",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -5281,6 +5314,7 @@
                         "kind": "wall_locator",
                         "variant": "strip",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": []
                     },
                     {
@@ -5288,6 +5322,7 @@
                         "kind": "wall_locator",
                         "variant": "neighbours",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -5315,6 +5350,7 @@
                         "kind": "today_map",
                         "variant": "static",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "map",
@@ -5363,6 +5399,7 @@
                         "kind": "today_map",
                         "variant": "bridge",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -5430,6 +5467,7 @@
                         "kind": "related",
                         "variant": "carousel",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -5517,6 +5555,7 @@
                         "kind": "related",
                         "variant": "next_along_wall",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "source",
@@ -5535,6 +5574,7 @@
                         "kind": "knowledge_check",
                         "variant": "multiple_choice",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "questions",
@@ -5863,6 +5903,7 @@
                         "kind": "knowledge_check",
                         "variant": "true_false_swipe",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "questions",
@@ -5990,6 +6031,7 @@
                         "kind": "knowledge_check",
                         "variant": "image_choice",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "questions",
@@ -6112,6 +6154,7 @@
                         "kind": "poll",
                         "variant": "bars",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "question",
@@ -6216,6 +6259,7 @@
                         "kind": "collect",
                         "variant": "add_to_story",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "item_name",
@@ -6262,6 +6306,7 @@
                         "kind": "feedback",
                         "variant": "thumbs",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "question",
@@ -6289,6 +6334,7 @@
                         "kind": "feedback",
                         "variant": "stars",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": []
                     },
                     {
@@ -6296,6 +6342,7 @@
                         "kind": "dialogue",
                         "variant": "choices",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "lines",
@@ -6507,6 +6554,7 @@
                         "kind": "show_on_wall",
                         "variant": "button",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": []
                     },
                     {
@@ -6514,6 +6562,7 @@
                         "kind": "show_on_wall",
                         "variant": "with_neighbours",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": []
                     },
                     {
@@ -6521,6 +6570,7 @@
                         "kind": "size_comparison",
                         "variant": "",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -6616,6 +6666,7 @@
                         "kind": "audio_guide",
                         "variant": "hero_chip",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "clip",
@@ -6673,6 +6724,7 @@
                         "kind": "audio_guide",
                         "variant": "player",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -6749,6 +6801,7 @@
                         "kind": "sources",
                         "variant": "list",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "sources",
@@ -7040,6 +7093,7 @@
                         "kind": "sources",
                         "variant": "with_confidence",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "sources",
@@ -7341,6 +7395,7 @@
                         "kind": "actions",
                         "variant": "circles",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "actions",
@@ -7391,6 +7446,7 @@
                         "kind": "actions",
                         "variant": "pill_row",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "actions",
@@ -7512,6 +7568,7 @@
                         "kind": "actions",
                         "variant": "sticky_cta",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "actions",
@@ -7553,6 +7610,7 @@
                         "kind": "model_3d",
                         "variant": "turntable",
                         "display": "takeover",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "model",
@@ -7590,6 +7648,7 @@
                         "kind": "model_3d",
                         "variant": "turntable",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "model",
@@ -7628,6 +7687,7 @@
                         "kind": "panorama_360",
                         "variant": "drag",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "panorama",
@@ -7646,6 +7706,7 @@
                         "kind": "panorama_360",
                         "variant": "gyro",
                         "display": "takeover",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "panorama",
@@ -7693,6 +7754,7 @@
                         "kind": "place_in_ar",
                         "variant": "button",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -7759,6 +7821,7 @@
                         "kind": "header",
                         "variant": "model_turntable",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "title",
@@ -7835,6 +7898,7 @@
                         "kind": "header",
                         "variant": "video_loop",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "title",
@@ -7882,6 +7946,7 @@
                         "kind": "rich_text",
                         "variant": "plain",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "body",
@@ -7909,6 +7974,7 @@
                         "kind": "quick_facts",
                         "variant": "grid_hairline",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "facts",
@@ -8008,6 +8074,7 @@
                         "kind": "gallery",
                         "variant": "carousel",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -8206,6 +8273,7 @@
                         "kind": "audio_guide",
                         "variant": "hero_chip",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "clip",
@@ -8253,6 +8321,7 @@
                         "kind": "zoom_image",
                         "variant": "pinch",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "image",
@@ -8319,6 +8388,7 @@
                         "kind": "nav_bento",
                         "variant": "tiles",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -8481,6 +8551,7 @@
                         "kind": "rich_text",
                         "variant": "plain",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -8527,6 +8598,7 @@
                         "kind": "fun_fact",
                         "variant": "flip",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "facts",
@@ -8568,6 +8640,7 @@
                         "kind": "video",
                         "variant": "inline",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -8649,6 +8722,7 @@
                         "kind": "video",
                         "variant": "inline",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -8725,6 +8799,7 @@
                         "kind": "model_3d",
                         "variant": "turntable",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "model",
@@ -8762,6 +8837,7 @@
                         "kind": "nav_icon_grid",
                         "variant": "",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -8789,6 +8865,7 @@
                         "kind": "nav_contents",
                         "variant": "",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -8816,6 +8893,7 @@
                         "kind": "nav_rails",
                         "variant": "",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -8872,6 +8950,7 @@
                         "kind": "audio_guide",
                         "variant": "player",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -8997,6 +9076,7 @@
                         "kind": "header",
                         "variant": "image_parallax",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "eyebrow",
@@ -9072,6 +9152,7 @@
                         "kind": "quick_facts",
                         "variant": "grid_hairline",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "show_category",
@@ -9360,6 +9441,7 @@
                         "kind": "rich_text",
                         "variant": "lede",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -9416,6 +9498,7 @@
                         "kind": "person",
                         "variant": "card",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -9500,6 +9583,7 @@
                         "kind": "timeline",
                         "variant": "vertical",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -9896,6 +9980,7 @@
                         "kind": "gallery",
                         "variant": "carousel",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -10130,6 +10215,7 @@
                         "kind": "before_after",
                         "variant": "slider",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -10215,6 +10301,7 @@
                         "kind": "hotspot_image",
                         "variant": "numbered",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -10553,6 +10640,7 @@
                         "kind": "zoom_image",
                         "variant": "pinch",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -10609,6 +10697,7 @@
                         "kind": "fun_fact",
                         "variant": "flip",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "facts",
@@ -10748,6 +10837,7 @@
                         "kind": "audio_guide",
                         "variant": "player",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "heading",
@@ -10824,6 +10914,7 @@
                         "kind": "knowledge_check",
                         "variant": "multiple_choice",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "questions",
@@ -11152,6 +11243,7 @@
                         "kind": "knowledge_check",
                         "variant": "true_false_swipe",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "questions",
@@ -11269,6 +11361,7 @@
                         "kind": "knowledge_check",
                         "variant": "image_choice",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "questions",
@@ -11391,6 +11484,7 @@
                         "kind": "today_map",
                         "variant": "static",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "map",
@@ -11439,6 +11533,7 @@
                         "kind": "wall_locator",
                         "variant": "strip",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": []
                     },
                     {
@@ -11446,6 +11541,7 @@
                         "kind": "related",
                         "variant": "carousel",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "source",
@@ -11483,6 +11579,7 @@
                         "kind": "sources",
                         "variant": "list",
                         "display": "inline",
+                        "emphasis": "normal",
                         "fields": [
                             {
                                 "key": "sources",
@@ -12650,7 +12747,7 @@
             "peek_next_card": true
         },
         "navigation": {
-            "block_order": "end_families_last",
+            "block_order": "by_family",
             "families": [],
             "group_by": "family",
             "min_blocks": 8,
@@ -12722,7 +12819,8 @@
             "poi_id": "",
             "stop": "half"
         },
-        "preview_language": ""
+        "preview_language": "",
+        "default_mode": "light"
     },
     "search_demo": {
         "enabled": false,

@@ -7,7 +7,8 @@ namespace TileStories
     // family, each run WRAPPED in one glass sheet -- its opener (SectionOpenerView), then its blocks' slots -- the sheets one after the other
     // in the scroll, each laid over the one before (a negative top margin and a shadow cast up). The sheet is tinted with its family's glass
     // (the theme's "<colour token>-glass", painted by NavTint so a mode switch repaints it); its blocks stay opaque frames (BlockFrame) and
-    // its words sit on the opener's filled pill: no text on the glass (D8). A bare run (the navigation family) is a plain wrapper.
+    // its words sit on the opener's filled pill: no text on the glass (D8). Inside the glass a sibling layer under the opener and the blocks
+    // carries its living light (CardLight, P4.4c2). A bare run (the navigation family) is a plain wrapper.
     //   - Build wraps once per bind (a view is never moved between parents while bound); Refresh re-reads which slots are shown (a layout
     //     sets blocks aside, a block is revealed) and shows / hides each sheet and its opener, with its count and minutes, by the rule.
     //   - A slot's layout is now relative to its SHEET: anything that needs a block's place in the scroll asks BlockStackView.TopInScroll.
@@ -20,12 +21,15 @@ namespace TileStories
         public const string ContinuesClass = "card-section--continues";
         public const string ShadowClass = "card-section__shadow";
         public const string EdgeClass = "card-section__edge";
+        public const string LightClass = "card-section__light";
 
         // One sheet: its element, its shadow part, its opener, its colours, and the blocks it holds now
         public sealed class Sheet
         {
             public VisualElement Root;
             public VisualElement Shadow;
+            // The living glass: the soft lights of its family drifting inside it (CardLight; none on a bare run)
+            public VisualElement Light;
             public SectionOpenerView Opener;
             public NavTint Tint;
             public SectionSheetRule.Run Run;
@@ -38,16 +42,18 @@ namespace TileStories
 
         private readonly VisualElement _content;
         private readonly BlockRegistry _registry;
+        private readonly CardLight _light;
         private readonly Stack<Sheet> _pool = new();
         private readonly List<Sheet> _sheets = new();
         private System.Func<string, string> _words;
         private readonly List<bool> _shown = new();
         private readonly List<SectionSheetRule.Run> _runs = new();
 
-        public SectionSheets(VisualElement content, BlockRegistry registry)
+        public SectionSheets(VisualElement content, BlockRegistry registry, CardLight light)
         {
             _content = content;
             _registry = registry;
+            _light = light;
         }
 
         // The sheets of the bound card, in scroll order
@@ -81,6 +87,8 @@ namespace TileStories
                 }
                 sheet.Tint.Clear();
                 if (!run.Bare && sheet.Family != null) sheet.Tint.Fill(sheet.Root, SectionSheetRule.GlassOf(sheet.Family.ColorToken));
+                // - each sheet's lights start their drift at their own place in the card, so two sheets in view never move in step
+                _light.Glass(sheet.Light, run.Bare ? null : sheet.Family?.ColorToken, _sheets.Count);
                 _content.Add(sheet.Root);
                 _sheets.Add(sheet);
             }
@@ -109,6 +117,20 @@ namespace TileStories
                 // - tabs: the strip names the section, the opener keeps only its colour (pill, icon, line)
                 sheet.Opener.Show(sheet.Family.IconKey, sheet.Family.ColorToken, OpenerWords ? name : "",
                     OpenerWords ? SectionSheetRule.Meta(CountShown(sheet), minutes, _words) : "");
+            }
+        }
+
+        // Draw a sheet's living glass only while the sheet is within half a viewport of the visible part (offset, viewport: the scroll's): an
+        // off-screen material still costs a SetPass and a batch every frame (P4.4c2, measured on The Lamp: 15 sheets lit 7.9 -> 40 SetPass,
+        // only those in view 13.8). Null hands the decision back to the stylesheet (a bare sheet stays without one)
+        public void ShowLightsNear(float offset, float viewport)
+        {
+            float margin = viewport * 0.5f;
+            foreach (var sheet in _sheets)
+            {
+                var r = sheet.Root.layout;
+                bool near = !float.IsNaN(r.height) && r.yMax > offset - margin && r.yMin < offset + viewport + margin;
+                sheet.Light.style.display = near ? StyleKeyword.Null : DisplayStyle.None;
             }
         }
 
@@ -164,14 +186,17 @@ namespace TileStories
             root.AddToClassList(SheetClass);
             var shadow = new VisualElement { name = "card-section-shadow", pickingMode = PickingMode.Ignore };
             shadow.AddToClassList(ShadowClass);
-            // - the edge is laid over the sheet's ground but under its content (the opener and the blocks come after it)
+            // - the lights and the edge are laid over the sheet's ground but under its content (the opener and the blocks come after them)
+            var light = new VisualElement { name = "card-section-light", pickingMode = PickingMode.Ignore };
+            light.AddToClassList(LightClass);
             var edge = new VisualElement { name = "card-section-edge", pickingMode = PickingMode.Ignore };
             edge.AddToClassList(EdgeClass);
             var opener = new SectionOpenerView();
             root.Add(shadow);
+            root.Add(light);
             root.Add(edge);
             root.Add(opener.Root);
-            return new Sheet { Root = root, Shadow = shadow, Opener = opener, Tint = new NavTint(root) };
+            return new Sheet { Root = root, Shadow = shadow, Light = light, Opener = opener, Tint = new NavTint(root) };
         }
     }
 }

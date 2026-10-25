@@ -126,8 +126,9 @@ namespace TileStories.Editor.Tests
         [Test]
         public void TheLampInTheDefaultBlockOrder_HasTheSameTargets_AndItsSectionsFollowWhatTheVisitorScrolls()
         {
-            var config = Shipped();
-            Assert.AreEqual(CardOptions.BlockOrderEndFamiliesLast, config.card_settings.navigation.block_order, "precondition: the shipped default");
+            // - the demo wall ships By Family (its own preset); this test is about the framework's default
+            var config = ShippedEndFamiliesLast();
+            Assert.AreEqual(new CardNavigationSettings().block_order, config.card_settings.navigation.block_order, "precondition: the framework's default");
             var entries = Stack(config, Lamp);
             var model = CardNavModel.Build(entries, BlockRegistry.Shared, config.card_settings);
             var byFamily = Model(ShippedByFamily(), Lamp);

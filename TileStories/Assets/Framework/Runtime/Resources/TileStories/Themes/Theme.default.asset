@@ -374,8 +374,107 @@ MonoBehaviour:
         value: {r: 0, g: 0, b: 0, a: 0}
         note: 'no colour at all: a border kept for layout that shows only when marked
           (the filmstrip''s current picture)'
+      - name: --ts-family-about-light
+        value: {r: 0.8862745, g: 0.54901963, b: 0.19607843, a: 0.54901963}
+        note: 'The living glass (R11, P4.4c2): the soft lights drifting inside a
+          section''s sheet -- light 1 the family''s hue, light 2 its second hue (the
+          prototype''s H / H2), clearer in light glass, dimmer in smoked dark glass
+          (CardLight paints them into the sheet''s material)'
+      - name: --ts-family-about-light-2
+        value: {r: 0.9411765, g: 0.78431374, b: 0.43137255, a: 0.4509804}
+        note: 
+      - name: --ts-family-about-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 'The light that sweeps the rim of the block being read (R11 v3): white
+          at full strength on light metal, the family''s second hue at about half
+          strength on dark metal'
+      - name: --ts-family-stories-light
+        value: {r: 0.6666667, g: 0.3529412, b: 0.74509805, a: 0.54901963}
+        note: 
+      - name: --ts-family-stories-light-2
+        value: {r: 0.92156863, g: 0.54901963, b: 0.6666667, a: 0.4509804}
+        note: 
+      - name: --ts-family-stories-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-media-light
+        value: {r: 0.27450982, g: 0.49019608, b: 0.8627451, a: 0.54901963}
+        note: 
+      - name: --ts-family-media-light-2
+        value: {r: 0.43137255, g: 0.78431374, b: 0.9019608, a: 0.4509804}
+        note: 
+      - name: --ts-family-media-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-guides-light
+        value: {r: 0.27450982, g: 0.64705884, b: 0.39215687, a: 0.54901963}
+        note: 
+      - name: --ts-family-guides-light-2
+        value: {r: 0.74509805, g: 0.8235294, b: 0.43137255, a: 0.4509804}
+        note: 
+      - name: --ts-family-guides-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-play-light
+        value: {r: 0.87058824, g: 0.37254903, b: 0.27450982, a: 0.54901963}
+        note: 
+      - name: --ts-family-play-light-2
+        value: {r: 0.9411765, g: 0.6666667, b: 0.3529412, a: 0.4509804}
+        note: 
+      - name: --ts-family-play-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-visit-light
+        value: {r: 0.49019608, g: 0.4117647, b: 0.8235294, a: 0.54901963}
+        note: 
+      - name: --ts-family-visit-light-2
+        value: {r: 0.7058824, g: 0.5882353, b: 0.92156863, a: 0.4509804}
+        note: 
+      - name: --ts-family-visit-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-community-light
+        value: {r: 0.84313726, g: 0.627451, b: 0.23529412, a: 0.54901963}
+        note: 
+      - name: --ts-family-community-light-2
+        value: {r: 0.9411765, g: 0.8039216, b: 0.47058824, a: 0.4509804}
+        note: 
+      - name: --ts-family-community-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-ar-light
+        value: {r: 0.19607843, g: 0.6666667, b: 0.627451, a: 0.54901963}
+        note: 
+      - name: --ts-family-ar-light-2
+        value: {r: 0.47058824, g: 0.84313726, b: 0.78431374, a: 0.4509804}
+        note: 
+      - name: --ts-family-ar-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-meta-light
+        value: {r: 0.627451, g: 0.5686275, b: 0.47058824, a: 0.54901963}
+        note: 
+      - name: --ts-family-meta-light-2
+        value: {r: 0.8039216, g: 0.7647059, b: 0.6666667, a: 0.4509804}
+        note: 
+      - name: --ts-family-meta-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
+      - name: --ts-family-navigation-light
+        value: {r: 0.5882353, g: 0.6862745, b: 0.23529412, a: 0.54901963}
+        note: 
+      - name: --ts-family-navigation-light-2
+        value: {r: 0.78431374, g: 0.84313726, b: 0.47058824, a: 0.4509804}
+        note: 
+      - name: --ts-family-navigation-sweep
+        value: {r: 1, g: 1, b: 1, a: 1}
+        note: 
       lengths: []
-      numbers: []
+      numbers:
+      - name: --ts-rim-sweep-arc
+        value: 62
+        note: 'The rim light''s width in degrees of its turn (R11 v3: narrower on
+          dark metal)'
       durations: []
       easings: []
       fontStyles: []
@@ -614,8 +713,107 @@ MonoBehaviour:
         value: {r: 0, g: 0, b: 0, a: 0}
         note: 'no colour at all: a border kept for layout that shows only when marked
           (the filmstrip''s current picture)'
+      - name: --ts-family-about-light
+        value: {r: 0.8862745, g: 0.54901963, b: 0.19607843, a: 0.41960785}
+        note: 'The living glass (R11, P4.4c2): the soft lights drifting inside a
+          section''s sheet -- light 1 the family''s hue, light 2 its second hue (the
+          prototype''s H / H2), clearer in light glass, dimmer in smoked dark glass
+          (CardLight paints them into the sheet''s material)'
+      - name: --ts-family-about-light-2
+        value: {r: 0.9411765, g: 0.78431374, b: 0.43137255, a: 0.29803923}
+        note: 
+      - name: --ts-family-about-sweep
+        value: {r: 0.9411765, g: 0.78431374, b: 0.43137255, a: 0.4509804}
+        note: 'The light that sweeps the rim of the block being read (R11 v3): white
+          at full strength on light metal, the family''s second hue at about half
+          strength on dark metal'
+      - name: --ts-family-stories-light
+        value: {r: 0.6666667, g: 0.3529412, b: 0.74509805, a: 0.41960785}
+        note: 
+      - name: --ts-family-stories-light-2
+        value: {r: 0.92156863, g: 0.54901963, b: 0.6666667, a: 0.29803923}
+        note: 
+      - name: --ts-family-stories-sweep
+        value: {r: 0.92156863, g: 0.54901963, b: 0.6666667, a: 0.4509804}
+        note: 
+      - name: --ts-family-media-light
+        value: {r: 0.27450982, g: 0.49019608, b: 0.8627451, a: 0.41960785}
+        note: 
+      - name: --ts-family-media-light-2
+        value: {r: 0.43137255, g: 0.78431374, b: 0.9019608, a: 0.29803923}
+        note: 
+      - name: --ts-family-media-sweep
+        value: {r: 0.43137255, g: 0.78431374, b: 0.9019608, a: 0.4509804}
+        note: 
+      - name: --ts-family-guides-light
+        value: {r: 0.27450982, g: 0.64705884, b: 0.39215687, a: 0.41960785}
+        note: 
+      - name: --ts-family-guides-light-2
+        value: {r: 0.74509805, g: 0.8235294, b: 0.43137255, a: 0.29803923}
+        note: 
+      - name: --ts-family-guides-sweep
+        value: {r: 0.74509805, g: 0.8235294, b: 0.43137255, a: 0.4509804}
+        note: 
+      - name: --ts-family-play-light
+        value: {r: 0.87058824, g: 0.37254903, b: 0.27450982, a: 0.41960785}
+        note: 
+      - name: --ts-family-play-light-2
+        value: {r: 0.9411765, g: 0.6666667, b: 0.3529412, a: 0.29803923}
+        note: 
+      - name: --ts-family-play-sweep
+        value: {r: 0.9411765, g: 0.6666667, b: 0.3529412, a: 0.4509804}
+        note: 
+      - name: --ts-family-visit-light
+        value: {r: 0.49019608, g: 0.4117647, b: 0.8235294, a: 0.41960785}
+        note: 
+      - name: --ts-family-visit-light-2
+        value: {r: 0.7058824, g: 0.5882353, b: 0.92156863, a: 0.29803923}
+        note: 
+      - name: --ts-family-visit-sweep
+        value: {r: 0.7058824, g: 0.5882353, b: 0.92156863, a: 0.4509804}
+        note: 
+      - name: --ts-family-community-light
+        value: {r: 0.84313726, g: 0.627451, b: 0.23529412, a: 0.41960785}
+        note: 
+      - name: --ts-family-community-light-2
+        value: {r: 0.9411765, g: 0.8039216, b: 0.47058824, a: 0.29803923}
+        note: 
+      - name: --ts-family-community-sweep
+        value: {r: 0.9411765, g: 0.8039216, b: 0.47058824, a: 0.4509804}
+        note: 
+      - name: --ts-family-ar-light
+        value: {r: 0.19607843, g: 0.6666667, b: 0.627451, a: 0.41960785}
+        note: 
+      - name: --ts-family-ar-light-2
+        value: {r: 0.47058824, g: 0.84313726, b: 0.78431374, a: 0.29803923}
+        note: 
+      - name: --ts-family-ar-sweep
+        value: {r: 0.47058824, g: 0.84313726, b: 0.78431374, a: 0.4509804}
+        note: 
+      - name: --ts-family-meta-light
+        value: {r: 0.627451, g: 0.5686275, b: 0.47058824, a: 0.41960785}
+        note: 
+      - name: --ts-family-meta-light-2
+        value: {r: 0.8039216, g: 0.7647059, b: 0.6666667, a: 0.29803923}
+        note: 
+      - name: --ts-family-meta-sweep
+        value: {r: 0.8039216, g: 0.7647059, b: 0.6666667, a: 0.4509804}
+        note: 
+      - name: --ts-family-navigation-light
+        value: {r: 0.5882353, g: 0.6862745, b: 0.23529412, a: 0.41960785}
+        note: 
+      - name: --ts-family-navigation-light-2
+        value: {r: 0.78431374, g: 0.84313726, b: 0.47058824, a: 0.29803923}
+        note: 
+      - name: --ts-family-navigation-sweep
+        value: {r: 0.78431374, g: 0.84313726, b: 0.47058824, a: 0.4509804}
+        note: 
       lengths: []
-      numbers: []
+      numbers:
+      - name: --ts-rim-sweep-arc
+        value: 40
+        note: 'The rim light''s width in degrees of its turn (R11 v3: narrower on
+          dark metal)'
       durations: []
       easings: []
       fontStyles: []

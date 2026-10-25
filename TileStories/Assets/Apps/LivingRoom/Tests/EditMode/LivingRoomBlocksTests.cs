@@ -305,7 +305,9 @@ namespace TileStories.LivingRoom.Tests
             var kinds = built.Entries.Select(e => e.Definition.Key).ToList();
             Assert.AreEqual(1, kinds.Count(k => k == SizeComparisonBlock.Kind), "one on The Lamp");
             Assert.Less(kinds.IndexOf(SizeComparisonBlock.Kind), kinds.IndexOf("sources"), "before the sources, which always close the card");
-            Assert.Greater(kinds.IndexOf(SizeComparisonBlock.Kind), kinds.LastIndexOf("show_on_wall"), "after the group that comes before it");
+            // - where it is AUTHORED (the wall's Block Order, By Family, may group it elsewhere on the card)
+            var authored = lamp.card.blocks.Select(b => b.kind).ToList();
+            Assert.Greater(authored.IndexOf(SizeComparisonBlock.Kind), authored.LastIndexOf("show_on_wall"), "authored after the group that comes before it");
             var block = lamp.card.blocks.Single(b => b.kind == SizeComparisonBlock.Kind);
             var read = new BlockFieldReader(block, "en", "en");
             Assert.AreEqual(FamiliarObjects.Smartphone, read.Value(SizeComparisonBlock.ObjectField));

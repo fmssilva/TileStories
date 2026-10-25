@@ -222,7 +222,8 @@ namespace TileStories.Tests
 
         // The opener in each layout (_3.3 R16, decided at the P4.4c1 review): pages -- the opener IS the page's title and the Family Pager keeps
         // only its counter ("1 of 6"), a real chevron tap turns to the next page titled by ITS opener; tabs -- the sheet stays, the opener says no
-        // words (the strip names the section): no name, no meta, its coloured pill, icon and line; accordion and bento as P4.4c1 left them
+        // words (the strip names the section): no name, no meta, no pill -- the family's coloured line alone, the sheet's full width (the 4c1b
+        // review: an icon-only pill read as a stray badge); accordion and bento as P4.4c1 left them
         [UnityTest]
         public IEnumerator Pages_TheOpenerIsThePagesTitle_ThePagerKeepsItsCounter_TabsOpenerSaysNoWords_AccordionAndBentoAsBefore()
         {
@@ -270,9 +271,13 @@ namespace TileStories.Tests
                 Assert.AreEqual(DisplayStyle.Flex, sheet.Opener.Root.resolvedStyle.display, "tabs " + family + ": the opener itself stays");
                 Assert.IsTrue(theme.TryColour(sheet.Family.ColorToken, out var fill), "precondition: the fill");
                 Assert.IsTrue(theme.TryColour(SectionSheetRule.GlassOf(sheet.Family.ColorToken), out var glass), "precondition: the glass");
-                Assert.AreEqual(fill, sheet.Opener.Pill.resolvedStyle.backgroundColor, "tabs " + family + ": its filled pill");
-                Assert.AreEqual(DisplayStyle.Flex, sheet.Opener.Icon.resolvedStyle.display, "tabs " + family + ": with its icon");
-                Assert.AreEqual(fill, sheet.Opener.Line.resolvedStyle.backgroundColor, "tabs " + family + ": and its line");
+                // - 4c1b review: an icon alone on a pill read as a stray badge -- the opener is the family's coloured line alone
+                Assert.AreEqual(DisplayStyle.None, sheet.Opener.Pill.resolvedStyle.display, "tabs " + family + ": no pill (no icon-only badge)");
+                Assert.AreEqual(fill, sheet.Opener.Line.resolvedStyle.backgroundColor, "tabs " + family + ": its line, in the family's colour");
+                float inner = sheet.Root.worldBound.xMin + sheet.Root.resolvedStyle.paddingLeft;
+                Assert.AreEqual(inner, sheet.Opener.Line.worldBound.xMin, CardGalleryChecks.OnePixel(sheet.Root), "tabs " + family + ": the line starts at the sheet's padding");
+                Assert.AreEqual(sheet.Root.worldBound.xMax - sheet.Root.resolvedStyle.paddingRight, sheet.Opener.Line.worldBound.xMax, CardGalleryChecks.OnePixel(sheet.Root),
+                    "tabs " + family + ": and runs its full width");
                 Assert.AreEqual(glass, sheet.Root.resolvedStyle.backgroundColor, "tabs " + family + ": the sheet stays, in its glass");
             }
 

@@ -87,6 +87,44 @@ namespace TileStories.Editor.Tests
             }
         }
 
+        // The living glass and the rim light (_3.3 P4.4c2) read their colours BY NAME too (SectionSheetRule.LightOf / Light2Of / SweepOf), and
+        // a missing one paints nothing with no warning: every registered family finds all three in every mode, the lights translucent (the
+        // glass stays glass). R11 v3: the rim light is full strength on light metal and about half, and narrower, on dark
+        [Test]
+        public void EveryRegisteredFamily_FindsItsLights_InEveryMode_TheRimLightHalfAndNarrowerOnDark()
+        {
+            var theme = Theme();
+            var light = theme.ResolverFor(CardOptions.ModeLight);
+            var dark = theme.ResolverFor(CardOptions.ModeDark);
+            Assert.IsNotNull(light, "precondition: a light mode");
+            Assert.IsNotNull(dark, "precondition: a dark mode");
+            foreach (var mode in theme.Modes)
+            {
+                var colours = theme.ResolverFor(mode.key);
+                Assert.IsTrue(colours.TryNumber(CardLight.SweepArcToken, out float arc), mode.key + ": the theme holds " + CardLight.SweepArcToken);
+                Assert.That(arc, Is.GreaterThan(0f).And.LessThan(360f), mode.key + ": the rim light's arc is part of a turn");
+                foreach (var family in BlockRegistry.Shared.Families)
+                {
+                    foreach (string token in new[] { SectionSheetRule.LightOf(family.ColorToken), SectionSheetRule.Light2Of(family.ColorToken) })
+                    {
+                        Assert.IsTrue(colours.TryColour(token, out var glow), mode.key + ": the theme holds " + token);
+                        Assert.That(glow.a, Is.GreaterThan(0f).And.LessThan(1f), mode.key + ": " + token + " is a translucent light, alpha " + glow.a);
+                    }
+                    Assert.IsTrue(colours.TryColour(SectionSheetRule.SweepOf(family.ColorToken), out _), mode.key + ": the theme holds " + SectionSheetRule.SweepOf(family.ColorToken));
+                }
+            }
+            foreach (var family in BlockRegistry.Shared.Families)
+            {
+                light.TryColour(SectionSheetRule.SweepOf(family.ColorToken), out var onLight);
+                dark.TryColour(SectionSheetRule.SweepOf(family.ColorToken), out var onDark);
+                Assert.AreEqual(1f, onLight.a, family.Key + ": full strength on light metal");
+                Assert.That(onDark.a, Is.InRange(0.35f * onLight.a, 0.55f * onLight.a), family.Key + ": about half strength on dark metal");
+            }
+            light.TryNumber(CardLight.SweepArcToken, out float lightArc);
+            dark.TryNumber(CardLight.SweepArcToken, out float darkArc);
+            Assert.Less(darkArc, lightArc, "the rim light is narrower on dark metal");
+        }
+
         [Test]
         public void EveryIconOfTheSet_IsDrawnByTheStylesheet()
         {
