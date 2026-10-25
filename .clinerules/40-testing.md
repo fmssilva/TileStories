@@ -91,22 +91,12 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 (e.g. "59/59") as the acceptance criterion — counts change as tests are added; zero
 failures does not.
 
-**Which tests, when (three levels).** RUN TIMES (the one record; the Worker updates this line after every full run): full
-EditMode ~65-160 s (2108 tests, 144 s, 2026-10-24, _3.3 P4.4c1b, background both ends; before it 2098 tests, 156 s, harness H1, wholly in the background: 0 focus gains; before it 2079 tests, 146 s, _3.3 P4.4b
-part 2, focused); full PlayMode ~70-80 min (1314 tests incl. 43 gated skips, 4711 s, 2026-10-24, _3.3 P4.4c1b, background from start to end, nothing polled; before it 1307 tests incl. 43 gated skips, 4326 s, harness H1, WHOLLY in the background: 0 focus
-gains from start to end, nothing polled during the run -- the first run that was really background all the way; the MEASURE run before it,
-4641 s, polled, 3 gains in its first 22 s; before them 1288 tests, 4002 s, 2026-10-24,
-_3.3 P4.4b part 2, unfocused at the first and the last poll, Unity in front in the middle; before it 1278 tests, 3839 s, _3.3 P4.4a, background at every poll, Unity in front at the end; before it 1254 tests incl. the gated
-measurements, 3577 s, _3.3 P4.3, background at every poll from the first, Unity in front at the end; before it 1235 tests +
-the gated pixel set, 3521 s, _3.3 P4.1, focused throughout -- the developer could not keep Unity behind; before it 1219 tests, 3582 s, _3.3 P1b
-part 2, unfocused at the first poll, focused at the end; before it 1192 tests, 3311 s, _3.2 fix
-chunks D+G: 1192/1192, unfocused at the first poll and the end, Unity in front ~19-47 min; the run before it 1191/1192, 3686 s, wholly background);
-the Card / Poi targeted set (48 fixtures incl. LodWallSceneTests + LayoutStruggleGuardTests, 960 tests) ~45-55 min (3292 s, 2026-10-22, _3.2 fix
-chunks D+G, background; with Search / Zoom / Theme added: 55 fixtures, 1021 tests, 3177 s, 2026-10-23, _3.3 P4.1, focused; selected by
-the name regex (Card|Poi|Search|Theme|Zoom|Marker|LodWallScene|LayoutStruggle|LivingRoom|Family|Typeface) in `group_names`: 1132 tests,
-3820 s, 2026-10-23, _3.3 P4.3, mostly background; + Hero: 1172 tests, 3430 / 3354 s, 2026-10-23, _3.3 P4.4a, focused; 1180 tests, 4228 s, 2026-10-24, _3.3 P4.4b, background; 1182 tests, 3601 s, 2026-10-24, _3.3 P4.4b part 2, focused -- the MCP job
-lists at most 25 failures, so a red-heavy run hides the rest: re-run the hidden fixtures); one
-PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
+**Which tests, when (three levels).** RUN TIMES (the Worker REPLACES these numbers after a full run when one moved by more than
+~10 %; no history, `00-process.md`): full EditMode ~2.5 min (2108 tests); full PlayMode ~75-80 min (1314 tests incl. 43 gated
+skips), in the background; the targeted set selected by the name regex (Card|Poi|Search|Theme|Zoom|Marker|LodWallScene|
+LayoutStruggle|LivingRoom|Family|Typeface|Hero|Section) in `group_names` ~60-70 min (~1180 tests) -- the MCP job lists at most 25
+failures, so a red-heavy run hides the rest: re-run the hidden fixtures; one PlayMode fixture 15-60 s (CardGalleryTests ~9 min,
+PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs at the points where its answer matters:
 
 - **Inner loop -- after each change:** compile, then the FULL EditMode suite (it is cheap), then only the PlayMode fixtures
   that exercise the changed code: the fixture(s) of the feature itself plus any fixture that reaches it through a seam
@@ -139,7 +129,7 @@ PlayMode fixture 15-60 s (CardGalleryTests ~9 min, PoiCardSceneTests ~4 min). On
 - **A full PlayMode run confirms, it never discovers.** Before starting one, the block must already be green on its own
   targeted set (the fixtures the brief named, plus what a grep for the changed types finds). A full run started on a block
   that was never run against its own card fixtures spends half an hour finding what twelve minutes would have found, and it
-  ends the block red (2026-10-15, `_3.2` step 5a). If the targeted set is red, fix it and re-run it -- then start the full run.
+  ends the block red. If the targeted set is red, fix it and re-run it -- then start the full run.
 
 A targeted run replaces the block-end full run only where the rule above allows it. It never replaces the shared-ground run,
 the fourth-block run or a run the brief asks for: a fixture you did not think of is exactly what the full run is for.
@@ -235,7 +225,7 @@ application is a broken test, not a flaky one.
   device off and every finger reads "no touch"). `PoiCardTapZoomTests.AddFinger` is the reference; the second fixture that needs it
   moves it into one shared test helper instead of copying it.
 - **A real drag's distance is not the stack's distance.** A `CardTestInput` touch stroke moves the card's stack by more than
-  the finger travels (measured 1.7x at `_3.2` step 11b, and more the longer the hold is held). Assert what the drag ACHIEVED --
+  the finger travels (measured ~1.7x, more the longer the hold). Assert what the drag ACHIEVED --
   the spy moved to that section, the block is in view, the chrome hid -- never "N px of finger scrolled N px". A test written
   the other way is measuring the harness, not the card.
 - **A failure that goes away on rerun is investigated, not dismissed.** Before calling a failure "focus" or "flaky", reproduce it
@@ -244,9 +234,9 @@ application is a broken test, not a flaky one.
 - **What raises Unity during a run: the MCP server, never the run.** The UnityMCP server's focus nudge (`utils/focus_nudge.py`)
   runs on EVERY `get_test_job` call, with or without `wait_timeout`: when Unity reports itself unfocused and the job has had no progress
   for 3 s (any test longer than that, or the start of a run) it brings Unity to the front with `SetForegroundWindow` for 3-12 s, then
-  backs off. No setting turns it off. Measured with `TestRunRecorder` (harness H1, 2026-10-24): the same fixture with Unity behind,
+  backs off. No setting turns it off. Measured with `TestRunRecorder`: the same fixture with Unity behind,
   polled = 2 jumps, not polled = 0; the Game view's "Play Focused", profiler recorders, asset imports and the LodWall Game-view re-size
-  raise nothing on their own (the "~10 jumps per full run" were the agent's ~10 polls). So a background run stays behind as long as
+  raise nothing on their own. So a background run stays behind as long as
   nothing asks the MCP server about it while it runs: wait as 4.2.5 says.
 - **What a background run guarantees.** Unity is not raised from the start to the end (the developer can work beside it), every
   test is green unfocused as well as focused, and the two Editor log lines `TestRunBoundary` writes say where Unity was at each end
@@ -285,10 +275,10 @@ application is a broken test, not a flaky one.
   real Game view). A test whose subject is built for the Editor's desktop view (a dev-only demo on its Editor stage) says so and
   takes its own landscape frame for its lifetime (`using var desktopFrame = new CardTestInput.FixedGameViewSize(1280, 720);`,
   `LodWallSceneTests`); everything else is judged at the phone frame. If a test fails only after the Editor layout changed, the
-  test is wrong, not the environment: fix the fixture. (2026-09-29: the Default layout's landscape Free Aspect Game view broke
-  11 card tests at once; with the run pinned, 5 more showed they had only ever passed at one lucky window size.)
+  test is wrong, not the environment: fix the fixture (an unpinned run lets a landscape Free Aspect Game view break tests that only ever passed at
+  one lucky window size).
 - **A fixture measures the framework, not the demo wall's choices.** The LivingRoom wall is a demo and ships settings a wall author picked
-  (since `_3.2` step 17b its own navigation preset); a test that loads it measures those unless it pins what it measures. Every scene fixture
+  (its own navigation preset); a test that loads it measures those unless it pins what it measures. Every scene fixture
   starts from `SearchSceneFixture.SetUp`'s pins -- LOD off, the card's navigation at the framework default (the wall's own kept in
   `ShippedNavigation`) -- and an EditMode test of the framework's navigation rows loads `ShippedWall.WithFrameworkNavigation()`. A test whose
   subject IS the wall's choice pushes it back (`PoiCardPaintingSceneTests`). When a new wall setting starts to differ from the framework default
@@ -331,8 +321,7 @@ Precision is kept by asserting the right thing exactly, not by loosening toleran
 5. **Time is the test's.** Event times, `ManualVideoOutput` / manual audio devices, injected clocks (`Card.Clock`,
    `slowSheet`); waits end on a condition or a frame count, not on seconds of real time.
 6. **Every tolerance has a named reason** (one physical pixel, a finger's radius, a float epsilon). A tolerance is never
-   widened to make a red test green; a test that fails by a hair at a new frame is measuring the wrong thing (as
-   `DisplacementLabelTests` did, 2026-09-29).
+   widened to make a red test green; a test that fails by a hair at a new frame is measuring the wrong thing.
 7. **Real input stays real** (panel events, Input System devices); only its timing and its target point are the test's.
 
 ### 4.2.5 One Unity job at a time (never compile under a running test)
@@ -340,8 +329,7 @@ Precision is kept by asserting the right thing exactly, not by loosening toleran
 A compile (`refresh_unity` with a compile request, a saved `.cs`, an asset import that triggers one) reloads the C# domain,
 and a domain reload in the middle of a test run does not pause it: it destroys it. The Test Framework throws inside
 `TestJobRunner`, the MCP job stays "running" with nothing behind it (an orphan: every later `run_tests` is refused), and
-the aborted run leaves `Assets/InitTestScene<guid>.unity` behind. Found in the Editor log on 2026-09-29: a `refresh_unity`
-sent while a PlayMode job was still going cost two Editor restarts.
+the aborted run leaves `Assets/InitTestScene<guid>.unity` behind; a `refresh_unity` sent while a PlayMode job is still going can cost Editor restarts.
 
 - **Serialize.** Edit -> `refresh_unity` -> `run_tests` -> wait for the run's end (the next bullet: the Editor log's
   `[TestRun] ended`; a short run with Unity in FRONT may use `get_test_job` with `wait_timeout` 60, which nudges nothing while
@@ -375,8 +363,8 @@ sent while a PlayMode job was still going cost two Editor restarts.
 
 `%LOCALAPPDATA%\Unity\Editor\Editor.log` (and `Editor-prev.log`, the previous session) is where a stuck run, a compile in
 the middle of a job or a crash shows up -- read it before guessing (rank repeated lines: strip digits, `sort | uniq -c | sort -rn`).
-Writing it is not free: before 2026-09-29 one session's log reached 823 MB, 91% of it stack-trace frames of `Debug.Log`
-lines repeated per POI on every wall build of every test.
+Writing it is not free: `Debug.Log` lines repeated per POI on every wall build of every test, with their stack traces, have
+grown one session's log to 823 MB.
 
 - Player Settings keep **Stack Trace for Log = None** (`m_StackTraceTypes`, the fourth pair = 00): an info line is one line.
   Warnings, errors and exceptions keep their stack traces.

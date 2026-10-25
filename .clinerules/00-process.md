@@ -31,6 +31,18 @@ before continuing.
 * **Real fixtures.** Tests run on the LivingRoom wall's POI sets (The Lamp's 12+ POIs, The Painting, The Camera); add a POI
   when an edge case needs one, never change an existing POI's identity fields (id, name, category, summary, keywords).
 
+### Guidelines and the structure map are "version 0", never logs
+* **What this covers:** every file in `.clinerules/` (the structure map `10-structure.md` included), `proj_guides/__AI_*.md` and
+  `proj_guides/skills/`. They describe how to work and what exists NOW, as if written today for a newcomer.
+* **When something changes, REWRITE the line in place** so it states the current truth. Never append what was done, when, by which
+  step or block: no dates, no "(added at step X)", no "was / used to / now", no "verified on". History lives in git, in the domain
+  guides' status rows and Build logs, and in the plan tracker -- never in a guideline or the structure map.
+* **A lesson learned enters a guideline only as a better rule**: the simplest wording that makes the mistake unlikely, placed where
+  an agent reads it at the moment it matters. Add a short "why" only when the rule would look arbitrary without it.
+* **The structure map:** one concise line per file -- what it IS and does, so an agent can find what exists before creating
+  anything. Before you create a file, a class, a function or a document, search this map and the code for one that already does
+  the job, and extend it instead of adding a duplicate.
+
 ### Evidence Discipline (Mandatory Verification)
 Never report a feature, fix, rendering, visual, or behavioral task as completed or passing without providing explicit, un-paraphrased mechanical proof:
 * **Valid Evidence:** Raw CLI/Test output showing an `Assert` that passed, or specific itemized observations detailing what was measured or verified.

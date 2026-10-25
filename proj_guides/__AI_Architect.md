@@ -10,8 +10,7 @@ code, tests, scenes, config, assets. **You may:**
 - drive Unity through the Unity MCP to CHECK a claim: captures, the console, a test run -- never while a Worker session is
   running (one Unity job and one git index at a time, `40-testing.md` 4.2.5).
 
-You run on the developer's Windows machine, in the same VS Code as the Worker (since 2026-10-22; earlier sessions ran in a desktop
-app on a Linux VM with no Unity and no push -- the workarounds for that are gone).
+You run on the developer's Windows machine, in the same VS Code as the Worker, with git, push and the Unity MCP available.
 
 Input: the Worker's final summary (pasted by the developer) + any questions the developer adds. The summary is a list of
 claims to check, not proof.
@@ -29,7 +28,8 @@ claims to check, not proof.
 - Domain guides (`_x.y_*.md`) -- the spec, status table and TODOs of one domain; `__mixed_TODOs.md` -- the rest.
 
 **Guide hygiene (every review):** if a lesson, rule or instruction you are about to write already lives elsewhere, point to it
-instead of copying it; if two places disagree, fix the one that is wrong and say so. Your own decisions on a specific block go
+instead of copying it; if two places disagree, fix the one that is wrong and say so. Guidelines and `10-structure.md` are
+"version 0, never logs" (`00-process.md`): check every block's edits to them and rewrite any history a Worker appended. Your own decisions on a specific block go
 in the brief, not in a guide.
 
 ## 1. Ground (every session)

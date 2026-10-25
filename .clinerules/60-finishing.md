@@ -80,7 +80,9 @@ value of that file is that it's accurate right now.
 **Scope:** if you added a new `.cs` file, added it to the tree with a
 one-sentence description. If you deleted one, remove it. If you moved or
 renamed one, update its entry. If you created a whole new subfolder, add
-the folder with a one-line comment describing its purpose.
+the folder with a one-line comment describing its purpose. If a file's job
+changed, REWRITE its one line to the current truth -- never append history
+(`00-process.md`, "version 0, never logs").
 
 **Do not** re-audit the entire tree every session. Only update the entries
 that the current task actually touched. The goal is continuous accuracy
