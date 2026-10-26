@@ -30,8 +30,8 @@ namespace TileStories.Tests
     [Category("Integration/ClusterPipeline/Real")]
     public class ClusterPipelineIntegrationTests
     {
-        private const string MarkerPrefab  = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
-        private const string ClusterPrefab = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string MarkerPrefab  = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
+        private const string ClusterPrefab = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
 
         // Real lamp_* family: all position, clustered near the wall origin
         // (-0.95, -0.87, -4.18), each a distinct heritage category -> exactly one

@@ -1160,7 +1160,7 @@ namespace TileStories.Editor.Tests
             yield return _window.PressRedo();
             Assert.AreEqual("images/azulejo_detail.jpg", POIEditorToolWindow.AssetValue(Zoom(), BuiltInBlocks.ZoomImageImageField), "Ctrl+Y");
 
-            const string outsidePath = "Assets/Framework/Runtime/UI/Markers/SymbolCircle.png";
+            const string outsidePath = "Assets/Framework/Runtime/UI/World/Markers/SymbolCircle.png";
             var outside = AssetDatabase.LoadAssetAtPath<Texture2D>(outsidePath);
             Assert.IsNotNull(outside, "precondition: a picture outside the Media Folder");
             yield return DropOnto("Block field image#0", outside);

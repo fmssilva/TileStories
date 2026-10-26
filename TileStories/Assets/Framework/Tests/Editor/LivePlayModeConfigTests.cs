@@ -14,7 +14,7 @@ namespace TileStories.Editor.Tests
     // is proven in PlayMode (EffectsPreviewSpawnerTests); these tests keep the grid off.
     public class LivePlayModeConfigTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         private readonly List<Object> _created = new();
 
@@ -506,7 +506,7 @@ namespace TileStories.Editor.Tests
             var labelRect = (RectTransform)marker.transform.Find("Label");
             var labelText = labelRect.GetComponent("TextMeshProUGUI");
             var fontProp = labelText.GetType().GetProperty("font");
-            var fontLib = AssetDatabase.LoadAssetAtPath<FontKeyLibrary>("Assets/Framework/Runtime/UI/Markers/FontLibrary.asset");
+            var fontLib = AssetDatabase.LoadAssetAtPath<FontKeyLibrary>("Assets/Framework/Runtime/UI/World/Markers/FontLibrary.asset");
             var dispatcher = new LivePlayModeConfigDispatcher(new ILivePlayModeApplier[] { new LivePlayModeMarkerApplier() });
 
             authoring.label_font_key = "roboto_bold";
@@ -540,7 +540,7 @@ namespace TileStories.Editor.Tests
             var labelText = labelRect.GetComponent("TextMeshProUGUI");
             var fontSizeProp = labelText.GetType().GetProperty("fontSize");
             var fontProp = labelText.GetType().GetProperty("font");
-            var fontLib = AssetDatabase.LoadAssetAtPath<FontKeyLibrary>("Assets/Framework/Runtime/UI/Markers/FontLibrary.asset");
+            var fontLib = AssetDatabase.LoadAssetAtPath<FontKeyLibrary>("Assets/Framework/Runtime/UI/World/Markers/FontLibrary.asset");
             float symbolDiameter = level.size_cm / 100f;
             float symbolRadius = symbolDiameter * 0.5f;
             float FontSize() => (float)fontSizeProp.GetValue(labelText);

@@ -17,7 +17,7 @@ namespace TileStories.Editor.Tests
     // Real taps on the row are Phase A / B's (CardGalleryTests.Expandable, PoiCardExpandableSceneTests): Edit Mode has no panel to tap on.
     public class ExpandableBlocksTests
     {
-        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         private const string Lamp = "lamp";
         private const string LampMilitary = "lamp_military";
 

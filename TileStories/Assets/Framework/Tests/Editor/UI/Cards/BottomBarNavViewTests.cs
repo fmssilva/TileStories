@@ -14,7 +14,7 @@ namespace TileStories.Editor.Tests
     // area, under the sticky footer. What a real finger does with it is PoiCardBottomBarSceneTests'.
     public class BottomBarNavViewTests
     {
-        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
 
         // - the shipped wall with the framework navigation: these tests measure the framework
         private static WallConfigData Shipped() => ShippedWall.WithFrameworkNavigation();

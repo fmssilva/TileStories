@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace TileStories.Editor.Tests
 {
     // The card's two hard rules (_3.1 section 3, 30-ui-content.md), enforced on the source of every card view
-    // (Runtime/UI/Cards/**/*.cs) and of the card's 3D/360 preview and AR placement owners (Runtime/Blocks/Preview, Runtime/Blocks/Ar:
+    // (Runtime/UI/Screen/Cards/**/*.cs, Runtime/UI/Blocks/**/*.cs) and of the card's 3D/360 preview and AR placement owners (Runtime/Blocks/Preview, Runtime/Blocks/Ar:
     // they build what the card draws and places, so a colour or a word written there would bypass the tokens and the strings table too)
     // so a later edit cannot slip past them:
     //   - no literal colour or size: views add CLASSES, the card stylesheets + CardTokens.uss hold every value (_3.3 section 1)
@@ -15,7 +15,8 @@ namespace TileStories.Editor.Tests
     {
         private static readonly string[] ScannedFolders =
         {
-            "Assets/Framework/Runtime/UI/Cards",
+            "Assets/Framework/Runtime/UI/Screen/Cards",
+            "Assets/Framework/Runtime/UI/Blocks",
             "Assets/Framework/Runtime/Blocks/Preview",
             "Assets/Framework/Runtime/Blocks/Ar",
         };

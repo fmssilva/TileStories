@@ -16,7 +16,7 @@ namespace TileStories.Editor.Tests
     //   - a closed card opens nothing, by either door; a section outside the card's map opens no page and says so
     public class CardFullViewOpenerTests
     {
-        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         private const string Lamp = "lamp";
         private const string OpenBlock = "block_58";
 

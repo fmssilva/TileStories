@@ -14,7 +14,7 @@ namespace TileStories.Tests
 
         [SetUp]
         public void LoadTheCardsWords() =>
-            _table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Cards/CardStrings.asset").Entries();
+            _table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset").Entries();
 
         private System.Func<string, string> Words(string language) => new CardStrings(_table, null, null, language, "en").Get;
 

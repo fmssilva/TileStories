@@ -16,8 +16,8 @@ namespace TileStories.Tests
     // Mirrors MarkerGalleryTests' fixture+Spawn/TearDown shape.
     internal static class ClusterGalleryTestFixture
     {
-        public const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
-        public const string IconLibraryPath   = "Assets/Framework/Runtime/UI/Markers/IconLibrary.asset";
+        public const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
+        public const string IconLibraryPath   = "Assets/Framework/Runtime/UI/World/Markers/IconLibrary.asset";
 
         public static GameObject LoadClusterPrefab()
         {
@@ -31,7 +31,7 @@ namespace TileStories.Tests
 #endif
         }
 
-        public const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        public const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         public static GameObject LoadMarkerPrefab()
         {

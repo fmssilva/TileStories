@@ -115,7 +115,6 @@ namespace TileStories.Editor.Tests
         // would be missing from the table (a new test assembly adds its own fixture AND the attribute)
         [TestCase("TileStories.Tests.Runtime", "FixedFrameForTheRun")]
         [TestCase("TileStories.LivingRoom.Tests.Runtime", "LivingRoomFixedFrameForTheRun")]
-        [TestCase("TileStories.Dev.StyleSpike.Tests", "StyleSpikeFixedFrameForTheRun")]
         [TestCase("TileStories.Editor.Tests", "TestDialogGuard")]
         public void EveryTestAssemblysTopSuite_CarriesRecordEachTest(string assembly, string fixture)
         {

@@ -14,45 +14,53 @@ So start by reading them all.
 
 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- the card's resting end (Finished) + the spike out of the full run`
+
+
+## `And now: _3.3 POI Card Look, Feel & Motion -- the UI folder layout, the render-target guard, the spike out of the repo`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`) and `Assets/Dev/StyleSpike/Fonts`: `git checkout --` them if modified.
-Baseline: none (HEAD c4b3f3a; 4c2 closed with full PlayMode 1322 -- 1 spike timing red, green alone -- and full EditMode 2115).
-Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5 says.
+SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD b505825; the
+last block closed with full PlayMode 1336 and full EditMode 2119, background, 0 failed). Ask about Unity's place with
+`40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5 says.
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R10.8 ("Finished" = the scroll has reached its end), the R16
-rows "4c1b review" (item 3: the 133 px gap) and "4c2 review" (the spike ride-along), the TODO "[P3, preview cap] A block taller than
-the screen breaks 'the last target is the end of the card'".
-REQUIRED READING: `_3.2_POI_Card_Navigation.md` -- `NavScrollRule` (Range, EndTolerance, CurrentSection at the end, HasViewed), the
-bottom elements (Next / Up next, the progress bar, Finished), the chrome rule (what hides while scrolling and comes back at the end);
-`.clinerules/40-testing.md` 4.2, 4.2.4b.
-WORKER MODEL: Opus-class -- a pure rule the whole nav domain reads, and the chrome that changes the viewport under it.
-TEST PLAN: no baseline. Targeted nav / Card / Poi fixtures first, then the FULL PlayMode run (a rule a whole domain reads), then full
-EditMode. Background runs (action c).
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R15 (render targets: World-UGUI, Screen-UITK, Any-UITK, Shared;
+R15.2 the guard; R15.3), R16 row 3b (this block: move INSIDE Unity, then fix every path written as a string), the "Resting-end review"
+row (item 3: the spike leaves). `.clinerules/00-process.md` "version 0, never logs" and `60-finishing.md` 6.3 (how `10-structure.md`
+is updated).
+REQUIRED READING: `.clinerules/10-structure.md` (all), `.clinerules/40-testing.md` 4.2.
+WORKER MODEL: Sonnet-class -- mechanical moves with a clear target tree, string-path fixes, one guard test with an explicit rule.
+TEST PLAN: no baseline. After the moves: full EditMode, then the FULL PlayMode run (test infrastructure and paths are shared
+ground). Background runs (action c).
 
-THE PROBLEM (4c1b's finding): at the end of a card the footer / bottom bar come back, the viewport shrinks, and the stack RESTS
-133 px short of `NavScrollRule.Range` -- so `IsAtEnd` is false exactly where a visitor's drags stop, and "Finished", the last
-section's mark and the "seen" ticks are judged against an end the visitor never reaches.
+THE TARGET TREE (`Assets/Framework/Runtime/UI/`; namespaces do NOT change -- C# binds by type, not path):
+- `Screen/` (UI Toolkit, screen panels): `Cards/` (today's `Cards/` WITHOUT `Cards/Blocks/`), `Search/` (today's `Navigation/`: search,
+  voice, view modes -- renamed so it is never confused with the card's own navigation), `Zoom/`, `Filter/`, `Minimap/`, `Results/`,
+  and the empty scaffolds `Onboarding/`, `Scanning/`, `Sharing/`, `Gamification/`, `Circuits/`.
+- `World/` (UGUI on world canvases): `Markers/`, and the empty scaffold `GuideCharacter/`.
+- `Blocks/` (UI Toolkit, ANY panel -- screen or world): today's `Cards/Blocks/` (every family's views + USS).
+- `Components/` (UI Toolkit, ANY panel): new, empty but for a README line (S2 fills it).
+- `Theme/`, `Shared/`: stay at the UI root (shared by both systems / every panel).
 
-PART 1 -- measure first: on The Lamp and The Painting, both layouts that show bottom chrome, the viewport and Range before and after the
-chrome comes back, where a real drag to the end rests, and what IsAtEnd / Finished / the spy say there. Write the numbers down.
-PART 2 -- the fix at its source: the END is the end the visitor can reach -- the range seen with the chrome that is on screen at the
-end (decide whether the rule should read the resting viewport, or the chrome must stop changing the viewport at the end; say which
-and why, with the numbers). Next walks to Finished, the bar marks the last run, the last blocks count as seen, all where the drag rests.
-Pure EditMode tests (the chrome's two viewports, a short last block, a tall last block) with mutation proof; the real card with real
-drags. Re-check the tests P1b re-based for "a block taller than the screen" and say whether they now read the visitor's end.
-PART 3 -- ride-along: the dev spike's PlayMode tests (`TileStories.Dev.StyleSpike.Tests`) leave the full run (they time themselves in
-real time; what they proved lives in `UssVariableChainTests` and `_3.3` R8). Runnable by hand. Say how (category, explicit, assembly
-filter) and update `40-testing.md` where the full run is described, as current truth (no history, `00-process.md`).
-DOCS: `_3.3` Build log, `_3.2` (the end's meaning), `10-structure.md` (only the lines you touch, current truth).
+PART 1 -- move with Unity's own API (`AssetDatabase.MoveAsset` / `MoveAssetToTrash` through the MCP, one folder at a time, `.meta`
+and GUIDs kept; NEVER a file-system move). Then grep the WHOLE repo (code, USS `url()`, UXML, `.asset` / `.unity` text, tests that scan
+folders, `Resources.Load` paths, the Editor's asset paths, `.clinerules/`, `proj_guides/`) for every old path and fix it. Compile clean,
+0 missing references (check the console and the scene / prefab references).
+PART 2 -- the R15.2 guard (EditMode, one test file): files under `Blocks/` and `Components/` never name a sheet / host type
+(`PoiCardSheetView`, `PoiCardHost`, `NavController`, `TakeoverView`, `BlockStackView`, `CardChromeView`, the screen PanelSettings) nor
+`Screen.width / height`; no `UnityEngine.UI` / `TMPro` in any UI Toolkit folder; no `UnityEngine.UIElements` in `World/`. Each EXISTING
+violation the scan finds goes into ONE explicit allow-list with a reason per line (they are S2's work to remove) -- do not refactor
+views here. Mutation proof (add a forbidden reference, red with the file name; remove it).
+PART 3 -- delete `Assets/Dev/StyleSpike/` (and its gate code / `MEASURING` mention in the tests and in `40-testing.md`) with Unity's API;
+`UssVariableChainTests` and anything Framework uses must not depend on it (prove: compile + the suites).
+PART 4 -- docs, as CURRENT TRUTH (no history): `10-structure.md` (the moved tree, one line per folder / file, each UI folder tagged
+World-UGUI / Screen-UITK / Any-UITK / Shared), `_3.3` R15 (the folders now exist; drop "No mass move of folders now"), every guide path
+your grep found.
 
-VISUALS: the end of The Lamp and The Painting at rest, before / after, with the bar's mark and the Next / Finished state visible.
-OUT OF SCOPE: the block preview cap (the story slice), any look.
-Stop when the end is the visitor's end on both cards, the targeted fixtures, the full PlayMode run and full EditMode are green. Finish
-with the final report of `.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the Architect
-commits after the review.
+OUT OF SCOPE: renaming namespaces or types; refactoring any view; any look or behaviour change.
+Stop when the tree matches the target, nothing references an old path, the guard is green with its allow-list, the spike is gone,
+full EditMode and the full PlayMode run are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4. Do not commit:
+the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

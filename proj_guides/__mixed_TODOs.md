@@ -785,7 +785,7 @@ event camera, legibility at 1-3 m, sorting against the UGUI markers, a swipe on 
   lacks only U+0149 and U+017F (both deprecated). Today no shipped text uses them (`ShippedTextGlyphTests` would name the character and its
   source). When a wall's content needs one: give the body UI asset a FALLBACK face (TextCore `fallbackFontAssetTable`, a static asset of a
   face that has it) rather than a dynamic atlas.
-- **`FontKeyLibrary` is Shared now, but lives in `Runtime/UI/Markers/`.** Since P4.3 it serves both text systems (R15.1: "Shared"). It
+- **`FontKeyLibrary` is Shared now, but lives in `Runtime/UI/World/Markers/`.** Since P4.3 it serves both text systems (R15.1: "Shared"). It
   moves with the R16 "3b UI folder layout" step (`AssetDatabase.MoveAsset`, GUID kept), with `FontLibrary.asset`; nothing references it by
   path except the tests' `FrameworkFontLibraryPath` constants and the POI Editor's `DefaultFontLibraryPath`.
 - **The P4.1 pixel set's baselines are pre-font now.** Its `TestEvidence/ThemePixels/baseline/` renders were drawn in Unity's default face; P4.3

@@ -16,7 +16,7 @@ namespace TileStories.Editor.Tests
     // the card closes. Real layout, real fingers and the visible rect are PoiCardFloatingSceneTests'.
     public class FloatingSlotTests
     {
-        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         private const string Lamp = "lamp";
         private const string LampMilitary = "lamp_military";
 

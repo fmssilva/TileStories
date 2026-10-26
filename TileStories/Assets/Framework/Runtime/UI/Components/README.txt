@@ -1,0 +1,1 @@
+Components: UI Toolkit pieces that draw on ANY panel (screen or world), built from theme tokens and bound only through BlockBindContext; never the card's sheet or host types (UiRenderTargetGuardTests).

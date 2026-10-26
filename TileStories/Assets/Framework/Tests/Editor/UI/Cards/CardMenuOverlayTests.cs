@@ -16,7 +16,7 @@ namespace TileStories.Editor.Tests
     // (a stop change, a rebind, the full view opening, the opener's own toggle) are here.
     public class CardMenuOverlayTests
     {
-        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         private const string Lamp = "lamp";
 
         private static WallConfigData Shipped() =>

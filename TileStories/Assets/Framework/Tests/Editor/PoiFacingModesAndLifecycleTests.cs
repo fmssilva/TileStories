@@ -19,7 +19,7 @@ namespace TileStories.Tests
     // No mocks: real window instance, real prefab, real rig, real Selection, real resolver.
     public class PoiFacingModesAndLifecycleTests
     {
-        private const string PrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string PrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
         private const string PoiId = "poi_facing";
 
         private POIEditorToolWindow _window;

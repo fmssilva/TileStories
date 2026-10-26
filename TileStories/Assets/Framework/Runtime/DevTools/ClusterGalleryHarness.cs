@@ -26,9 +26,9 @@ namespace TileStories
         [SerializeField] private float rowSpacing = 2.2f;
         [SerializeField] private int columns = 3;
 
-        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
-        private const string MarkerPrefabPath  = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
-        private const string IconLibraryPath   = "Assets/Framework/Runtime/UI/Markers/IconLibrary.asset";
+        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
+        private const string MarkerPrefabPath  = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
+        private const string IconLibraryPath   = "Assets/Framework/Runtime/UI/World/Markers/IconLibrary.asset";
 
         // Configure the shared category palette once so dominant-category icon
         // resolution matches the Authoring Tool / WallSession path (spec 2.2 Marker

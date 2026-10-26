@@ -22,8 +22,8 @@ namespace TileStories.Tests
     // Harness mirrors ClusterPipelineIntegrationTests.cs's proven real-config approach.
     public class OrientationClusterIntegrationTests
     {
-        private const string MarkerPrefab = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
-        private const string ClusterPrefab = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string MarkerPrefab = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
+        private const string ClusterPrefab = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
 
         private static readonly (string id, string category)[] LampFamily =
         {

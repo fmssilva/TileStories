@@ -21,7 +21,7 @@ namespace TileStories.Editor.Tests
     //     the targets, the Next button -- in English and Portuguese
     public class BottomElementsNavViewTests
     {
-        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         private const string Lamp = "lamp";
 
         // - the shipped wall with the framework navigation: these tests measure the framework

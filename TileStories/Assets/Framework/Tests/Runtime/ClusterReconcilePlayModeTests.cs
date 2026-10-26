@@ -13,7 +13,7 @@ namespace TileStories.Tests
     // Destroy() in SweepStaleClusterViews must run here (Destroy is illegal in EditMode).
     public class ClusterReconcilePlayModeTests
     {
-        private const string ClusterPrefab = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string ClusterPrefab = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
         private readonly List<GameObject> _tracked = new();
 
         [SetUp] public void SetUp() => ARZoomState.SetZoom(1f, 1f, 100f);

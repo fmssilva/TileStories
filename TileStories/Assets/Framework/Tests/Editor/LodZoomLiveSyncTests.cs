@@ -20,7 +20,7 @@ namespace TileStories.Editor.Tests
     // below, and ARZoom tests.
     public class LodZoomLiveSyncTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
         private readonly List<UnityEngine.Object> _created = new();
 
         // Main cameras of the scene the EditMode run happens in, switched off while a test owns Camera.main

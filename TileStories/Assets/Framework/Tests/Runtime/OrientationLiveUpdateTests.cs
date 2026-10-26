@@ -20,8 +20,8 @@ namespace TileStories.Tests
     // Harness = OrientationWallSessionIntegrationTests / OrientationClusterIntegrationTests idioms.
     public class OrientationLiveUpdateTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
-        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
+        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
         private const float Settle = 1.2f;       // seconds: >> the 0.12 s smoothing constant
         private const float AngleTolerance = 2f; // degrees
 

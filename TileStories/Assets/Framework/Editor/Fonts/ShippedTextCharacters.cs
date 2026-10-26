@@ -14,7 +14,7 @@ namespace TileStories.Editor
     // naming the character and its source the day a text holds one an atlas lacks (_3.3 R12.3; the marker fonts since _3.2 step 13).
     public static class ShippedTextCharacters
     {
-        public const string FrameworkTablePath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        public const string FrameworkTablePath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         public const string AppTablePath = "Assets/Apps/LivingRoom/Resources/LivingRoom/LivingRoomCardStrings.asset";
         public const string WallConfigPath = "Assets/Apps/LivingRoom/config.json";
 

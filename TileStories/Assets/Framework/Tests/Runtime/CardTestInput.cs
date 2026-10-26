@@ -130,7 +130,7 @@ namespace TileStories.Tests
         // The text of the two places a --ts-* token is defined: the card's own (CardTokens.uss) and the app theme (generated from the theme
         // asset; ThemeUssStaleTests holds it equal to the asset). One place each, never both (ThemeTokenGuardTests)
         public static string TokenFiles() =>
-            System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Cards/CardTokens.uss") + "\n" +
+            System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Screen/Cards/CardTokens.uss") + "\n" +
             System.IO.File.ReadAllText("Assets/Framework/Runtime/UI/Theme/Generated/Theme.default.uss");
 
         // A --ts-* size token as its one source defines it (the card's tokens or the theme): "24px", or a plain number the C#

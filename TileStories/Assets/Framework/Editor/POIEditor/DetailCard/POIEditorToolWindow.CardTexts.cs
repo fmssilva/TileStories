@@ -13,7 +13,7 @@ namespace TileStories.Editor
     {
         // The framework's default card texts (CardStrings.asset, next to PoiCard.uss), loaded once per domain reload. By its own path, never
         // "the first CardStringTable found": an app's table is a CardStringTable too (CardStringSources) and must not pass for the framework's.
-        private const string FrameworkCardStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkCardStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         private static CardStringTable _frameworkCardStrings;
         internal static CardStringTable FrameworkCardStrings() =>
             _frameworkCardStrings != null ? _frameworkCardStrings : _frameworkCardStrings = AssetDatabase.LoadAssetAtPath<CardStringTable>(FrameworkCardStringsPath);

@@ -14,6 +14,10 @@
   - If a tool execution fails or returns an error response, analyze the error output immediately.
   - Do NOT repeat the exact same failing tool call with identical arguments.
   - If a tool continuously fails, pivot to an alternative tool or execute a shell command via `execute_command` (e.g., fallback file inspection).
+- **Never switch off a tool's safety check on your own** (e.g. UnityMCP `execute_code` with `safety_checks: false`): ask the
+  developer first, naming the exact call and why the safe path cannot do it. A brief that authorizes an action (a delete, a move)
+  does not authorize disabling a guard to perform it; look for the tool's own safe API first (`AssetDatabase.MoveAssetToTrash`
+  through `manage_asset`, for instance).
 
 
 ## 5.3. Read File:

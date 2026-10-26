@@ -20,8 +20,8 @@ namespace TileStories.Tests
     // -- the same seam the POI Editor's live push calls -- so every test also exercises the demo.
     public abstract class DisplacementDemoFixture
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
-        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
+        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
         protected const int Width = 1280;
         protected const int Height = 720;
 

@@ -30,7 +30,7 @@ namespace TileStories
         [SerializeField] private float orbitRollDeg = 0f;
         [SerializeField] private float orbitDistance = 3f;
 
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         [ContextMenu("Populate Orientation Gallery")]
         private void Start()

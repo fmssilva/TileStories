@@ -23,7 +23,7 @@ namespace TileStories.Editor.Tests
     // explicit, reasoned exclusion, so a new config field cannot silently skip the live path.
     public class LiveSyncFieldMatrixTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
         private const string DefaultPoi = "lamp";      // shipped: level_1 (label, ripple discs, halo ring, pulse, spin), badge + status
         private const BindingFlags AllInstance = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 

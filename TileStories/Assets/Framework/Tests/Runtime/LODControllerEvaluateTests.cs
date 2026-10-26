@@ -470,7 +470,7 @@ namespace TileStories.Tests
             yield return null;
         }
 
-        private const string MarkerPrefab = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefab = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         // Real lamp_* family in LivingRoom/config.json: all position_verified=true,
         // clustered near the wall origin, 6 distinct heritage categories -> one overlap

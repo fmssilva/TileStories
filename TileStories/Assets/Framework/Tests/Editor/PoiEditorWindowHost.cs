@@ -51,7 +51,7 @@ namespace TileStories.Editor.Tests
             type.GetMethod("InitializeConfigHistory", Instance).Invoke(Editor, null);
             // The framework library is already an asset: a section then never has to create a wall library file
             type.GetField("_wallIconLibrary", Instance).SetValue(Editor,
-                AssetDatabase.LoadAssetAtPath<SpriteKeyLibrary>("Assets/Framework/Runtime/UI/Markers/IconLibrary.asset"));
+                AssetDatabase.LoadAssetAtPath<SpriteKeyLibrary>("Assets/Framework/Runtime/UI/World/Markers/IconLibrary.asset"));
             type.GetField(sectionFoldoutField, Instance).SetValue(Editor, true);
 
             POIEditorToolWindow.TableCellRectProbe = (table, row, rect) => ScreenRects[table + "#" + row] = GUIUtility.GUIToScreenRect(rect);

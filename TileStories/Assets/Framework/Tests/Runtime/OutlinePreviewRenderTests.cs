@@ -22,7 +22,7 @@ namespace TileStories.Tests
     // mode, and that only the level cells spin.
     public class OutlinePreviewRenderTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         private GameObject _wsGO;
         private GameObject _correctionAnchorGO;

@@ -11,7 +11,7 @@ namespace TileStories.Editor.Tests
     public class MarkerDesignAuthoringTests
     {
         private const BindingFlags Static = BindingFlags.NonPublic | BindingFlags.Static;
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         // Regression for a real bug found via OrientationWallSessionIntegrationTests: the Ring and
         // Badge Images defaulted to raycastTarget=true, and their bounding RECTANGLE (not their

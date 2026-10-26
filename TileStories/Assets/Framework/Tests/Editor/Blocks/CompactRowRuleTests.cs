@@ -23,7 +23,7 @@ namespace TileStories.Editor.Tests
         {
             _config = JsonUtility.FromJson<WallConfigData>(File.ReadAllText("Assets/Apps/LivingRoom/config.json"));
             _entries = BlockStackBuilder.Build(_config.pois.Single(p => p.id == Lamp), _config.card_settings, BlockRegistry.Shared, _config.pois).Entries;
-            _table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Cards/CardStrings.asset").Entries();
+            _table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset").Entries();
             Assert.AreEqual(62, _entries.Count, "precondition: every one of The Lamp's blocks builds");
         }
 

@@ -19,7 +19,7 @@ namespace TileStories.Tests
     // (fabricated data instead of the real config).
     public class MarkerConfigDrivesMarkerTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         private GameObject _wsGO;
         private GameObject _correctionAnchorGO;

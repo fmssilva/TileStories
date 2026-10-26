@@ -1,5 +1,5 @@
 The app's two faces (_3.3 R12.3, P4.3): display = Fraunces SemiBold, body = Atkinson Hyperlegible Next Regular / Medium / Bold.
-Each key of the framework font library (Runtime/UI/Markers/FontLibrary.asset) points at TWO assets built from the same .ttf here:
+Each key of the framework font library (Runtime/UI/World/Markers/FontLibrary.asset) points at TWO assets built from the same .ttf here:
 "<name> TMP.asset" (TextMeshPro, the markers) and "<name> UITK.asset" (TextCore, every UI Toolkit panel) -- one asset cannot serve
 both systems (_3.3 R8 S2). Both are STATIC atlases, built by TileStories > Fonts > Rebuild Theme Font Atlases (FontAtlasBuilder):
 never switch them to Dynamic (a dynamic asset writes every glyph it meets back into the file).

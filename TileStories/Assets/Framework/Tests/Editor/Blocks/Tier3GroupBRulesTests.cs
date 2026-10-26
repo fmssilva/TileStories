@@ -408,7 +408,7 @@ namespace TileStories.Editor.Tests
         [Test]
         public void ActionsRule_AnOpenBlockButtonsWords_AreItsOwn_ElseItsTargetsHeading_ElseTheCardText_InEveryLanguage()
         {
-            var table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Cards/CardStrings.asset");
+            var table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset");
             Assert.IsNotNull(table, "precondition: the framework's card texts load");
             var poi = CardWith(Story("block_7", "The siege"), Story("block_8"));
             foreach (string lang in new[] { "en", "pt" })
@@ -526,7 +526,7 @@ namespace TileStories.Editor.Tests
         [Test]
         public void AnActionsButtonWithNoWords_ReadsTheSameCardTextAsTheShowOnWallKind_InEveryLanguageTheTableHas()
         {
-            var table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Cards/CardStrings.asset");
+            var table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset");
             Assert.IsNotNull(table, "precondition: the framework's card texts load");
             foreach (string lang in new[] { "en", "pt" })
             {

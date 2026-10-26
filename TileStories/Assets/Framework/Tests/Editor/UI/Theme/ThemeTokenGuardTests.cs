@@ -13,7 +13,7 @@ namespace TileStories.Tests
     public class ThemeTokenGuardTests
     {
         private const string ThemeFolder = "Assets/Framework/Runtime/UI/Theme/Generated";
-        private const string CardTokens = "Assets/Framework/Runtime/UI/Cards/CardTokens.uss";
+        private const string CardTokens = "Assets/Framework/Runtime/UI/Screen/Cards/CardTokens.uss";
 
         private static readonly Regex Comment = new(@"/\*.*?\*/", RegexOptions.Singleline);
         private static readonly Regex Use = new(@"var\(\s*(--[a-z0-9-]+)");
@@ -23,10 +23,11 @@ namespace TileStories.Tests
         // sheets, which the card loads after its own), the search UI, the zoom buttons
         private static Dictionary<string, string[]> Components() => new()
         {
-            ["card"] = Directory.GetFiles("Assets/Framework/Runtime/UI/Cards", "*.uss", SearchOption.AllDirectories)
+            ["card"] = Directory.GetFiles("Assets/Framework/Runtime/UI/Screen/Cards", "*.uss", SearchOption.AllDirectories)
+                .Concat(Directory.GetFiles("Assets/Framework/Runtime/UI/Blocks", "*.uss", SearchOption.AllDirectories))
                 .Concat(Directory.GetFiles("Assets/Apps", "*.uss", SearchOption.AllDirectories)).ToArray(),
-            ["search"] = Directory.GetFiles("Assets/Framework/Runtime/UI/Navigation", "*.uss", SearchOption.AllDirectories),
-            ["zoom"] = Directory.GetFiles("Assets/Framework/Runtime/UI/Zoom", "*.uss", SearchOption.AllDirectories),
+            ["search"] = Directory.GetFiles("Assets/Framework/Runtime/UI/Screen/Search", "*.uss", SearchOption.AllDirectories),
+            ["zoom"] = Directory.GetFiles("Assets/Framework/Runtime/UI/Screen/Zoom", "*.uss", SearchOption.AllDirectories),
         };
 
         private static string Text(string path) => Comment.Replace(File.ReadAllText(path), "");
@@ -76,8 +77,7 @@ namespace TileStories.Tests
         private static readonly Regex FontProperty = new(@"-unity-font(-definition)?\s*:");
 
         // The app's faces are the THEME's (_3.3 P4.3, R12.3): only the generated theme names a font. A sheet that set one itself would
-        // fork the type (a theme or knob change would skip it), and a TMP asset given by USS blanks a label silently (R8 S2). The
-        // dev-only spike (Assets/Dev) is not the app and keeps its own bake-off sheets
+        // fork the type (a theme or knob change would skip it), and a TMP asset given by USS blanks a label silently (R8 S2)
         [Test]
         public void NoStylesheetOutsideTheGeneratedTheme_SetsAFont()
         {

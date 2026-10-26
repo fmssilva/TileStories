@@ -365,7 +365,7 @@ namespace TileStories.LivingRoom.Tests
             }
             // - the style sheet: every value is a framework token -- the card's own (CardTokens.uss) or the app theme's (generated) -- or a
             //   unitless keyword, no colour or size of its own
-            string tokens = File.ReadAllText("Assets/Framework/Runtime/UI/Cards/CardTokens.uss") + "\n" +
+            string tokens = File.ReadAllText("Assets/Framework/Runtime/UI/Screen/Cards/CardTokens.uss") + "\n" +
                             File.ReadAllText("Assets/Framework/Runtime/UI/Theme/Generated/Theme.default.uss");
             string uss = Regex.Replace(File.ReadAllText(AppFolder + "/Scripts/SizeComparison/SizeComparison.uss"), @"/\*.*?\*/", "", RegexOptions.Singleline);
             StringAssert.DoesNotMatch(@"\d+(\.\d+)?(px|%|em|deg|s)\b", uss, "no literal size");

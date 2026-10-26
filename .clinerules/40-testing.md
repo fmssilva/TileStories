@@ -92,7 +92,7 @@ Acceptance gate: **zero failed tests in both suites**. Never use a fixed pass co
 failures does not.
 
 **Which tests, when (three levels).** RUN TIMES (the Worker REPLACES these numbers after a full run when one moved by more than
-~10 %; no history, `00-process.md`): full EditMode ~2.5 min (2115 tests); full PlayMode ~68 min (1320 tests incl. gated
+~10 %; no history, `00-process.md`): full EditMode ~2.5 min (2121 tests); full PlayMode ~80 min (1310 tests incl. gated
 skips), in the background; the targeted set selected by the name regex (Card|Poi|Search|Theme|Zoom|Marker|LodWallScene|
 LayoutStruggle|LivingRoom|Family|Typeface|Hero|Section) in `group_names` ~60-70 min (~1180 tests) -- the MCP job lists at most 25
 failures, so a red-heavy run hides the rest: re-run the hidden fixtures; one PlayMode fixture 15-60 s (CardGalleryTests ~9 min,
@@ -127,11 +127,8 @@ PoiCardSceneTests ~4 min). Only the full PlayMode suite is expensive, so it runs
   old "one background full run every third block" bought separately.
 
 - **What the full run holds:** every PlayMode assembly's tests, except the MEASUREMENTS, which skip themselves (reported as skipped)
-  unless their local switch file `TestEvidence/<domain>/MEASURING` exists -- the gated look / cost instruments, and the whole style spike
-  (`TileStories.Dev.StyleSpike.Tests`, gated once in its `StyleSpikeFixedFrameForTheRun`: its fixtures time themselves in real time and
-  what they proved lives in `UssVariableChainTests` and `_3.3` R8). `[Explicit]` does not keep a test out of the unfiltered MCP run, and
-  MCP cannot exclude a category. To run the spike by hand: create `TestEvidence/StyleSpike/MEASURING`, `run_tests` PlayMode with
-  `assembly_names: ["TileStories.Dev.StyleSpike.Tests"]`, delete the file.
+  unless their local switch file `TestEvidence/<domain>/MEASURING` exists -- the gated look / cost instruments. `[Explicit]` does not
+  keep a test out of the unfiltered MCP run, and MCP cannot exclude a category.
 - **A full PlayMode run confirms, it never discovers.** Before starting one, the block must already be green on its own
   targeted set (the fixtures the brief named, plus what a grep for the changed types finds). A full run started on a block
   that was never run against its own card fixtures spends half an hour finding what twelve minutes would have found, and it

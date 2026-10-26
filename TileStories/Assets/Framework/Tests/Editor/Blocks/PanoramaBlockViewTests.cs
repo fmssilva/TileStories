@@ -18,7 +18,7 @@ namespace TileStories.Editor.Tests
         private PanoramaBlockView _view;
         // The framework's real card words (CardStrings.asset), so the hint tests read what a visitor would read
         private static CardStrings Words() =>
-            new(AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Cards/CardStrings.asset").Entries(), null, null, "en", "en");
+            new(AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset").Entries(), null, null, "en", "en");
 
         [SetUp]
         public void SetUp()

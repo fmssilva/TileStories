@@ -31,7 +31,7 @@ namespace TileStories.Editor.Tests
             labels = (string[])args[1];
         }
 
-        private const string FrameworkFontLibraryPath = "Assets/Framework/Runtime/UI/Markers/FontLibrary.asset";
+        private const string FrameworkFontLibraryPath = "Assets/Framework/Runtime/UI/World/Markers/FontLibrary.asset";
 
         // The keys the framework's own library really holds (the source the popup's list must match)
         private static string[] FrameworkKeys()

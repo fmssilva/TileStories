@@ -12,7 +12,7 @@ namespace TileStories.Editor.Tests
     // view can never show a raw key.
     public class CardStringsTests
     {
-        private const string AssetPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string AssetPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
 
         private static CardStringEntry Entry(string key, params (string Lang, string Value)[] texts) =>
             new() { key = key, text = texts.Select(t => new LocalizedEntry { lang = t.Lang, value = t.Value }).ToList() };

@@ -20,8 +20,8 @@ namespace TileStories.Tests
     // dispatch is Unity's responsibility, not ours.
     public class ZoomControlViewEditModeTests
     {
-        private const string UxmlPath = "Assets/Framework/Runtime/UI/Zoom/ZoomControlView.uxml";
-        private const string UssPath = "Assets/Framework/Runtime/UI/Zoom/ZoomControlView.uss";
+        private const string UxmlPath = "Assets/Framework/Runtime/UI/Screen/Zoom/ZoomControlView.uxml";
+        private const string UssPath = "Assets/Framework/Runtime/UI/Screen/Zoom/ZoomControlView.uss";
 
         // --- 1d gating (pure) ---
         [Test]

@@ -19,7 +19,7 @@ namespace TileStories.Editor.Tests
     //   - Back and closing give every file back; a rebind of the same point keeps the section open; a short card scrolls
     public class BentoLayoutSheetTests
     {
-        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         private const string Lamp = "lamp";
         private const string LampMilitary = "lamp_military";
 

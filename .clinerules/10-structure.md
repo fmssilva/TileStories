@@ -58,9 +58,11 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
 ### 1.5 The UI system boundary is spatial
 
 - World-space, physically anchored to the AR wall -> uGUI World-Space Canvas.
-  In practice this is `Runtime/UI/Markers/` and nothing else.
-- Everything screen-space -> UI Toolkit (`UIDocument` + `.uxml` + `.uss`).
-  Every other folder under `Runtime/UI/` follows this.
+  In practice this is `Runtime/UI/World/` (the markers) and nothing else.
+- Everything screen-space -> UI Toolkit (`UIDocument` + `.uxml` + `.uss`): `Runtime/UI/Screen/`.
+- UI Toolkit that must draw on ANY panel, screen or world -> `Runtime/UI/Blocks/` (the block views) and `Runtime/UI/Components/`;
+  they never name the card's sheet or host (`UiRenderTargetGuardTests`).
+- `Runtime/UI/Theme/` and `Runtime/UI/Shared/` serve both systems.
 
 ## 2. How to read this structure
 
@@ -75,9 +77,9 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
 ## 3. Stage-by-stage construction sequence
 
 - Stage 0: docs, mock deliverables, sketches
-- Stage 1: Core, Tracking, POI, UI/Scanning, UI/Cards scaffold, UI/Onboarding, Telemetry scaffold, first wall app
-- Stage 2: Blocks, UI/Markers, LOD, Zoom, Lapse timeline, state manager
-- Stage 3: Circuits, UI/Circuits, UI/Gamification, UI/GuideCharacter, UI/Navigation, UI/Sharing, optional AI
+- Stage 1: Core, Tracking, POI, UI/Screen/Scanning, UI/Screen/Cards scaffold, UI/Screen/Onboarding, Telemetry scaffold, first wall app
+- Stage 2: Blocks, UI/World/Markers, LOD, Zoom, Lapse timeline, state manager
+- Stage 3: Circuits, UI/Screen/Circuits, UI/Screen/Gamification, UI/World/GuideCharacter, UI/Screen/Search, UI/Screen/Sharing, optional AI
 - Stage 4: Editor/Validation, Editor/Baker, Tests
 - Stage 5: Editor/Wizard
 - Stage 6: package extraction
@@ -169,23 +171,6 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
       - ClusterGalleryScene.unity  -- grid of cluster-aggregate variants
     - OrientationGallery/
       - OrientationGalleryScene.unity  -- rotatable camera rig (orbit/pitch/roll) for hand-testing every Vertical Alignment / Facing Options combination live; drives
-    - StyleSpike/  -- DEV-ONLY: wh, measured; nothing in Framework references it
-      - TileStories.Dev.StyleSpike.asmdef  -- the spike's own assembly, defineConstraints UNITY_EDITOR || DEVELOPMENT_BUILD (never in a release build); refs TMP, UGUI, URP
-      - SpikeStage.cs  -- a camera + a UIDocument on the card's PanelSettings: the ground every rig stands on
-      - SpikeCost.cs  -- CostSample + Measure: batches / SetPass / draw calls, UI CPU (UIElementsUpdatePanels + RepaintPanels markers), GPU frame over N frames
-      - SpikeGlassRig.cs  -- S5: the AR camera stand-in (a photo on a quad the camera renders, behind the UI) + a 1/N copy camera into a RenderTexture
-      - SpikeCubicBezier.cs  -- S6: a CSS cubic-bezier as a Func<float, float> for experimental.animation (USS takes named curves only)
-      - SpikeShadowSprite.cs  -- S7: a soft rounded-rect shadow texture generated in code, for 9-slice use
-      - SpikeReduceMotion.cs  -- S8: OsMotionPreference + Read()
-      - Plugins/iOS/SpikeReduceMotion.mm  -- S8: UIAccessibilityIsReduceMotionEnabled(); its importer is OFF for every platform (enable for iOS + the define to try it)
-      - Fonts/  -- S2: nine static OFL cuts from google/fonts
-      - S2Fonts/  -- FontByUss.uss (a font given four ways by USS, S2a), BakeOffBlock.uxml + BakeOff.uss (the light mock block of the bake-off, the pair as a root class)
-      - S3Filter/Filter.uss  -- blur / tint / grayscale on a picture, a transition on filter
-      - S4Contour/  -- SpikeContour.shadergraph
-      - S5Glass/  -- SpikeFrost.shadergraph (screen-space lookup of the low-res copy, 5x5 tent, tint; Layout UV is bottom-up) + SpikeFrost.mat
-      - S6Motion/  -- Motion.uss (reveal by translate + opacity, the page container transform, .s6-no-transition), BezierRule.uss
-      - S7Shadow/  -- SpikeShadow.shadergraph (rounded-box SDF soft shadow) + SpikeShadow.mat
-      - Tests/  -- TileStories.Dev.StyleSpike.Tests.asmdef (PlayMode, defineConstraints UNITY_EDITOR): StyleSpikeFixedFrameForTheRun (its own 390 x 844 pin; the whole assembly skipped unless TestEvidence/StyleSpike/MEASURING exists)
     - PoiEditorLayout/  [EMPTY SCAFFOLD]  -- saved POI Editor window layouts
   - Framework/
     - Runtime/  -- ships to device
@@ -232,211 +217,225 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - SearchTokenizer.cs  -- shared tokenisation for index build and query time (accent folding, lowercase, split, dedup)
         - SearchTextDistance.cs  -- for typo tolerance
         - SynonymGroup.cs  -- one synonym group (word + synonyms, all equal members; no key: nothing points at a group), stored in WallConfigData.synonym_groups
-      - UI/
-        - Markers/  -- the ONLY uGUI World-Space Canvas domain in the project
-          - POI_Marker.prefab  -- the marker outer container. Root holds Canvas + POIAnchor + MarkerView + MarkerBillboard + MarkerRevealEffect + MarkerSelectable + MarkerLeaderLine
-          - POI_Cluster.prefab  -- LOD aggregate marker; children PieContainer, CountLabel, BackgroundImage, DominantIcon
-          - POIAnchor.cs  -- holds this marker's POIData so other components can read it
-          - MarkerView.cs  -- applies all visual state to the prefab's children; owns label and marker displacement write-back; ReapplyEffects re-applies only the effects; label
-          - MarkerBillboard.cs  -- orientation of the marker root, Vertical Alignment + Facing Options; ReapplySettings swaps settings on a running marker without losing the authored
-          - MarkerOrientationResolver.cs  -- pure, stateless orientation math: ScreenUpWorld, ResolveVerticalUp, ResolveRootRotation, ResolveChildLocalRotation, RootRollDeg, Rotate2D
-          - MarkerChildOrientation.cs  -- per-child (Label/Badge) independent vertical-alignment counter-rotation; baked onto POI_Marker.prefab's Label and Badge children
-          - MarkerLayout.cs  -- symbol/ring/badge/label sizing ratios
-          - FontKeyLibrary.cs  -- CopyFrom
-          - FontLibrary.asset  -- framework default FontKeyLibrary: liberation_sans / roboto_bold / oswald_bold (TMP only, the markers)
-          - Fonts/  -- Both SDF assets STATIC (atlas population mode 0) with the 122 characters the project ships
-          - MarkerCircleGlyphView.cs  -- draws one circular glyph (symbol or badge) from a sprite + tint; SetIconSizeRatio
-          - MarkerCircleSpriteFactory.cs  -- generates circle and ring textures once, shared by every effect
-          - MarkerRingView.cs  -- the status contour ring, including its optional continuous spin
-          - MarkerClusterView.cs  -- builds a cluster's pie chart, count label and dominant icon; world-space size from its largest member x cluster_size_ratio
-          - MarkerLeaderLine.cs  -- the leader line of a displaced label or marker, recomputed every LateUpdate from MarkerView.TryGetLeaderLineEnds; straight / dashed
-          - LeaderLine.mat  -- without it URP drew magenta
-          - MarkerSelectable.cs  -- tap target on POI_Marker: SelectionEventBus.Select(PoiId) (re-tap deselects)
-          - MarkerClusterSelectable.cs  -- a cluster is never the selection
-          - SelectionEventBus.cs  -- the one selection state: Select (re-selecting clears, decided before any listener), Clear, SelectCluster, CurrentPoiId, ResetState; events
-          - SelectionHighlightController.cs  -- the ONLY writer of the selection alpha channel: selected id (bus) + result set (SetResultSet) through SelectionAlphaRule, settings read live from the
-          - SelectionAlphaRule.cs  -- 
-          - ZoomOnSelectController.cs  -- zoom-on-select: counts the visible markers within Crowd Radius of the tapped one at their true places (CountNeighbours, independent of LOD), a
-          - MarkerEffect.cs  -- base class for optional per-marker animated effects
-          - MarkerEffectFlags.cs  -- the six selectable effects as bitflags, plus MarkerEffectNames (display names shared by the editor and the preview grid)
-          - MarkerPulseEffect.cs  -- gentle scale pulse
-          - MarkerRippleEffect.cs  -- three staggered waves flowing outward, rings or discs, each style with its own parameter block
-          - MarkerHaloEffect.cs  -- one extra layer behind the symbol: halo ring or halo disc (breathing) or beacon (grow and fade), each variant with its own parameter block
-          - MarkerRevealEffect.cs  -- delayed fade and scale-in on spawn toward the marker's current resting look (SetRest, so a reveal never overrides a LOD decision); SkipToEnd for
-          - SpriteKeyLibrary.cs  -- the sprite-key lookup contract shared by icon and shape libraries
-          - IconLibrary.asset  -- framework default category and badge icons
-          - ShapeLibrary.asset  -- framework default symbol silhouettes
-          - SymbolCircle.png  -- the default circular symbol sprite
-          - Icons/  -- 14 default category and damage-state icon PNGs
-          - Rings/  -- 5 contour ring PNGs: solid, long/medium/short dash, dotted
-          - Shapes/  -- 4 non-circle symbol silhouettes: diamond, hexagon, rounded square, star
-        - Cards/  -- the POI Detail Card, a bottom sheet of content blocks
-          - CardIcons.cs  -- that PoiCard.uss shows and places per key (show_on_wall, time, access, location, info, ticket, light); Create / SetKey / KeyOf; used by the actions
-          - CardTokenColours.cs  -- TryResolve(from, token): a colour token read BY NAME (a family's ColorToken is data)
-          - CardImage.cs  -- Plain C#: one picture of the card -- a clipped frame, the picture as a background image, the "picture unavailable" words (CardStrings) instead of a
-          - Navigation/  -- moving inside the open card: the controller every nav element drives, and the elements
-            - NavController.cs  -- Plain C#, one per sheet: Bind(CardNavModel, context) / Unbind, JumpTo(section, elementKey), JumpToBlock(blockKey, elementKey), Current /
-            - CardLayoutView.cs  -- Plain C#, sheet-owned: applies CardLayoutRule to the stack -- ParkedAtBind (tabs: the blocks set aside from the first frame), Bind / Unbind
-            - CardPagerView.cs  -- Plain C#, sheet-owned: the pages layout's sideways turn -- a SwipeGrab (leavesToParts) on the stack's viewport, the WHOLE scroll slid by
-            - CardBentoView.cs  -- Plain C#, sheet-owned: the bento layout's tiles where the blocks were (a host first in the stack scroll): per section a button with the family icon
-            - INavElementView.cs  -- The navigation element view contract: Root, Bind(CardNavModel, NavController, BlockBindContext), Unbind; views only
-            - NavElementRegistry.cs  -- NavElementDefinition (key, slot, Editor label, (i) help), NavSlotKeys (Top; Built = the slots the sheet draws) and NavElementRegistry
-            - BuiltInNavElements.cs  -- The framework's elements registered into Shared: text_tabs (top), with their Editor label and help
-            - CardChromeView.cs  -- Shows / hides the card's chrome (the top strip, the bottom area = the sticky footer) as CardChromeRule decides, and keeps the stack's end in view when the bottom area comes back at the end (KeepTheEnd): measures the stop's rest height, the
-            - NavSlots.cs  -- The sheet's navigation slots (top today): a strip inserted in the sheet root between the header and the stack ScrollView
-            - TextTabsNavView.cs  -- text_tabs: one Button per model section (its CardStrings word), the current one underlined AND bold (CurrentClass), a tap = NavController.JumpTo
-            - TabsNavView.cs  -- The tabs text_tabs and icon_tabs share: a NavStrip of NavTabs, one per section, its word (and its family's icon, tinted by NavTint, per Labels), Show
-            - IconTabsNavView.cs  -- icon_tabs: TabsNavView with icons (an element key of its own when icon_tabs_chips holds one)
-            - IconTabsChipsNavView.cs  -- icon_tabs_chips: icon tabs + a NavChipRow of the marked section's kinds
-            - KindChipsNavView.cs  -- kind_chips: one NavChipRow of every kind of the card (NavChoice.Blocks: a one-family card gets it too)
-            - SegmentedNavView.cs  -- Show Counts all or none by NavFitRule: a hidden bold ruler label measures every word and count, CountsShown says which
-            - ProgressMapNavView.cs  -- progress_map: a piece per section, widths from ProgressMapRule (minimum = the stylesheet's min-width or a word's width), family icon + tinted bar
-            - FamilyPagerNavView.cs  -- family_pager: the section read named between two chevron Buttons (family icon tinted by NavTint, CardStrings words, nav_pager_position "2 of 8")
-            - BottomBarNavView.cs  -- bottom_bar: up to Bar Slots icon tabs (NavTab) sharing the bar equally, the last one More when the sections overflow
-            - DockNavView.cs  -- dock: the bottom bar as an icon pill -- a BottomBarNavView with the nav-bar--dock class; the stylesheet alone widens the marked item
-            - BarSheetNavView.cs  -- bar_sheet: the bar whose Tap asks BarSheetRule -- the first tap jumps, a second tap on the current section opens KindsList
-            - NextUpNavView.cs  -- next_up: "Up next", the next block's heading (NavController.HeadingOf, else its kind's words), its place
-            - CardMenuOverlay.cs  -- The card's ONE overlay owner (BlockBindContext.Overlay): a layer in the card layer right before TakeoverView (over the sheet, under the full view)
-            - FloatingSlot.cs  -- The card's FLOATING slot: a layer in the card layer right before the menu layer (InsertUnder) -- a right-aligned row of the placed-model chip and the
-            - FabDialNavView.cs  -- fab_dial ("Dial"): a NavFab that opens a column of NavTab pills (family icon in its colour beside its words, the section read marked), up over the
-            - EdgeScrubberNavView.cs  -- edge_scrubber ("Scrubber"), the Edge slot's element: a column of 48 px transparent dot buttons
-            - FabRadialNavView.cs  -- fab_radial ("Radial"): a NavFab whose sections open on an arc
-            - DrawerTreeNavView.cs  -- drawer_tree ("Drawer"): a drawer from the left, NavMenuHeader + a vertical ScrollView outline -- a line per section (icon, words, count), its kinds
-            - GridOverlayNavView.cs  -- grid_overlay ("Big Tiles"): a panel inset over the scrim, NavMenuHeader, a By Purpose / By Format switch (CardNavModel.By, opens on Group By), big
-            - NavStrip.cs  -- The sideways strip lifted out of text_tabs: clipped viewport + row moved by NavStripRule, dragged by a SwipeGrab, Show(item) brings an item into view
-            - NavItems.cs  -- NavTab (button, optional icon, words, count, underline), NavChip (button around a pill: dot, words, count), NavCount, NavTint
-            - NavChipRow.cs  -- A NavStrip of NavChips for given kinds: marks the kind of CurrentBlock, a tap = JumpToBlock(kind's first target)
-            - NavFacetBar.cs  -- The facet chips of drawer_tree and grid_overlay: one NavStrip row of 48 px chips (Up to 2 / 5 min, No headphones / camera / network, the formats) +
-            - Navigation.uss  -- The navigation elements' look, --ts-* tokens only (the tabs: touch-token minimums, nowrap words, the underline bar, the bold current label); in every
-          - TakeoverView.cs  -- Plain C#: the full-screen view over the card (the sheet's sibling in the layer, carrying the token classes): Back + breadcrumb (card title > name), a
-          - BlockFullView.cs  -- Plain C#, sheet-owned: "open in full view" for ANY block -- PageFor(entry, context) binds a SECOND view of the kind from the BlockViewPool into the
-          - ZoomPanSurface.cs  -- Plain C#: the pinch-zoom + pan surface zoom_image already drew, factored out so the gallery lightbox reuses it (ZoomPanRule underneath, unchanged)
-          - IBlockView.cs  -- + BlockBindContext
-          - PoiCardHost.cs  -- selection bus -> BlockStackBuilder -> the sheet; closes through the bus
-          - CardOwners.cs  -- Plain C#: the wall card's owners kept together so PoiCardHost only wires them -- the ONE audio owner + its mini-player (CardAudioCoordinator), the
-          - CardTapOutside.cs  -- Plain C#: a tap on empty camera space closes the card -- remembers a press, judges the release (CardTapRule, ScreenUIHit), waits out the zoom's
-          - CardDemoOpener.cs  -- Plain C#: the developer-only demo card (CardDemoRule) -- acts only when the request (point + stop) changes, selects the point through the bus or
-          - CardStyleSheets.cs  -- The card's stylesheets in the order they apply (tokens, container, the blocks'); both hosts use InOrder
-          - ElementPool.cs  -- Pure, generic: the rows a view draws for its items -- row i made once (create(i)) and reused by every bind, Take() the next in order, ReleaseAll()
-          - SwipeGrab.cs  -- Plain C#: the ONE way a swipeable part of the card takes a finger (the true / false card, the tab strip; rails, pager, scrubber later) -- never
-          - CardTrackFit.cs  -- The one fit of the swipe tracks (timeline events, related cards): CardTrackRule's width from the cell's USS (min-width, margin-right) and, with Peek
-          - CardVideoPlayer.cs  -- The MonoBehaviour side of the card's video, like CardAudioPlayer: the ONE VideoPlayer (RequireComponent) and its UnityVideoOutput
-          - CardPreviewStage.cs  -- The MonoBehaviour side of the card's 3D preview (IPreviewStage): a disabled camera + 2 directional lights on their own CardPreview Unity layer, far
-          - CardPreviewStage.Handles.cs  -- The partial of CardPreviewStage holding what a handle keeps: HandleBase
-          - CardAudioPlayer.cs  -- The MonoBehaviour side of the card's audio: the ONE AudioSource (RequireComponent), the service's per-frame Tick, forwards OnApplicationPause /
-          - MiniPlayerView.cs  -- The mini-player bar on the wall while a card's audio plays on after the card closed (Keep Audio Playing): play/pause, title + time as one tap target
-          - PlacedModelChipView.cs  -- The placed-model chip in the card's floating slot, mirroring the mini-player: no placement state, draws the ONE ICardArPlacement through
-          - CardAudioCoordinator.cs  -- Joins the audio owner to the card's comings and goings so PoiCardHost stays thin: CardShown / CardClosed apply MiniPlayerRule.StopsWithCard
-          - PoiCardSheetView.cs  -- Plain C#: the card's bottom sheet, a WIRING class: builds the layer, the grabber, the bar with the title, the settings gear and the X
-          - BlockFrame.cs  -- the universal block frame: Build adds the rim band + the outer-only shadow parts to a slot, Apply frames a scroll slot with its emphasis
-          - SectionSheets.cs  -- the card's chapters in the scroll: SectionSheetRule cuts the scroll's blocks into runs of one family, each WRAPPED in one pooled glass sheet with its living-glass layer (CardLight; ShowLightsNear draws it only near the view)
-          - Light/  -- the card's moving light: two UI Shader Graphs and their owners
-            - CardLight.cs  -- Plain C#, one per BlockStackView: a material copy per painted element (Glass / Sweep), theme colours by name in linear + repaint on a mode switch, size, the injectable Clock into _Clock every 33 ms, ReduceMotion = _Animate 0
-            - RimLightView.cs  -- Plain C#: ONE rim light in the block LitBlockRule names, moved on scroll with a fade (out, move, in), behind the block's content
-            - SectionGlass.shadergraph  -- generated JSON (the S4 spike's shape): the prototype's three drifting lights per ~720 pt band of a sheet, _Hue / _Hue2 / _Size / _Clock / _Animate / _Seed
-            - RimSweep.shadergraph  -- generated JSON: a conic highlight (268 / 306 / 330 deg, Arc wide) turning per _Period, drawn only in the rim's band inside the rounded edge (SDF)
-          - SectionOpenerView.cs  -- the Section Opener: the family's FILLED pill (icon, name in the display face, meta "4 blocks - 9 min") + a full-width line in its colour; with no words (tabs) the line alone (LineOnlyClass), painted
-          - CardVisitorSettingsView.cs  -- the card's settings panel the gear opens: Language
-          - card_block_shadow.png  -- 96 x 96 outer-only soft shadow (transparent over the block), 9-sliced at 36 (16 margin + 20 radius), tinted by --ts-elevation-1/2; written by a script
-          - card_glass.png  -- 4 x 256 white alpha ramp (0.45 top -> 1 foot), the stack's glass, tinted by --ts-glass-ground; written by a script
-          - SheetDrag.cs  -- Plain C#: the sheet's vertical drag -- the grabber and the header capture the finger at touch-down, the top slot's SwipeGrab only once a move is
-          - CardFullViewOpener.cs  -- Plain C#: what opens in the full view over the card -- OpenFullView
-          - BlockStackView.cs  -- + a pinned Footer for FooterVariants (sticky actions), views pooled per kind, one ScopedMediaSource per bound view released on unbind; (6C) every
-          - CompactRowView.cs  -- The generic compact row: one button for the line
-          - ClipLengthReader.cs  -- The length of the audio / video clip a block names, loaded through the caller's media scope, once per path; MinutesOf = ReadingTimeRule over it
-          - BlockViewPool.cs  -- The card's block views pooled per kind (Take / Return / CreatedCount): the stack's and the full view's second view come from the one pool.
-          - CardTextView.cs  -- its paragraphs come from an ElementPool.
-          - CardStringTable.cs  -- 
-          - CardStrings.asset  -- The framework CardStringTable (en + pt): close, fun_fact_label/hint, status_heading/unknown_mark/unknown/percent, sources_heading/verified/draft
-          - PoiCard.uss  -- The card CONTAINER only (6C split): layer, sheet, grabber, close X, header slot (collapsed look), stack, block slot + heading + gap, footer; written
-          - CardParts.uss  -- The parts several families share: CardTextView's text, the chip, CardIcons' parts, the .card-pill button shape
-          - CardTokens.uss  -- The --ts-* design tokens on .ts-card.ts-theme-default: the default Stone & Gold dark preset
-          - Blocks/  -- one view per block kind, grouped by family
-            - About/
-              - About.uss  -- The about family's looks (header, status, facts, texts, fun facts, quotes, steps, swatches, actions)
-              - HeaderBlockView.cs  -- and subtitle; variants compact / text_only; (7A) the picture looks' HeroPart
-              - StatusBlockView.cs  -- "?" for unknown; ring / scale (every known outline type, this POI's marked); Paint / NameOf shared with compare_points (6B)
-              - QuickFactsBlockView.cs  -- Show Category: the point's category (with its level on Category And Level) as the first fact.
-              - RichTextBlockView.cs  -- 
-              - FunFactBlockView.cs  -- / postcard (tilted, shown at once)
-              - PullQuoteBlockView.cs  -- / minimal
-              - ActionsBlockView.cs  -- circles / pill_row / sticky_cta (ONE call to action in the footer); a button with no words reads its action's card text (ActionsRule), unknown
-              - ProcessStepsBlockView.cs  -- process_steps: numbered -- the number in a circle, a rail to the next step, title + CardTextView; the card numbers the shown (complete) rows
-              - SwatchesBlockView.cs  -- swatches: grid -- a sample in the config's own colour (content, TryParseColor), name, note; the #RRGGBB code only with Show Code (6C); incomplete or
-            - Stories/  -- The stories family
-              - Stories.uss  -- The stories family's looks (timeline, person, story chapters, compare)
-              - TimelineBlockView.cs  -- timeline: dated events (dot + rail, date, title, text) in the authored order; vertical / horizontal (a horizontal ScrollView swipe track); Highlight
-              - PersonBlockView.cs  -- person: name, role, text beside the name's initial; row / card (own panel, larger name); InitialOf
-              - StoryChaptersBlockView.cs  -- story_chapters: segmented -- a segment bar, Chapter n of m, title, text, Previous / Next buttons in the shared .card-pill (6C); the chapter shown is
-              - DialogueBlockView.cs  -- dialogue (choices): chat bubbles revealed one Continue tap at a time; a line may offer up to three replies
-              - ComparePointsBlockView.cs  -- compare_points: rings -- this POI and the other side by side, each ring through CardStatusRule + StatusBlockView.Paint, named by CardTitleOf
-            - Visit/  -- The visit family
-              - Visit.uss  -- The visit family's looks (practical info rows)
-              - PracticalInfoBlockView.cs  -- practical_info: rows -- a CardIcons icon (practical keys only; none = hidden, words stay in line), label, value, hairlines
-              - WallLocatorBlockView.cs  -- wall_locator: strip -- a dot per wall POI at its WallAxisRule place, this one marked, the visitor's own mark (IBlockHost.TryGetViewer) following
-              - TodayMapBlockView.cs  -- today_map: static -- the map picture, lat/lng (shown only with both), a Directions button (WebLinkRule + IBlockHost.OpenUrl); bridge -- the point as
-              - RelatedBlockView.cs  -- related: carousel -- a strip of RelatedPoisRule.Of's picks, each its header picture (if any) + title, a tap selects it through the bus
-            - Meta/  -- The meta family ("always last")
-              - Meta.uss  -- the sources looks
-              - SourcesBlockView.cs  -- sources: title + author + licence rows under the stack's heading (default: CardStrings sources_heading); list / with_confidence
-            - Media/  -- The media family
-              - Media.uss  -- CardImage, the header hero looks, the gallery looks, TakeoverView, before / after, zoom
-              - hero_scrim.png  -- 4 x 256 white alpha ramp (0 -> 1, smoothstep), the graded scrim above the hero's words, tinted by --ts-scrim-hero; written by a script
-              - GalleryBlockView.cs  -- gallery: carousel (swipe track + dots) / grid (two per row) / filmstrip (large + strip; a small one picks, the old large picture given back at once)
-              - BeforeAfterBlockView.cs  -- before_after: slider -- After under Before cut at the handle, a pointer-captured drag moves it (Position, never scrolls the stack), labels from the
-              - ZoomImageBlockView.cs  -- zoom_image: pinch -- two pointers pinch about their midpoint, Ctrl + wheel zooms at the pointer, one finger pans only while enlarged; ZoomPanRule
-              - VideoPanel.cs  -- One video player drawn on the card (plain class): surface
-              - VideoBlockView.cs  -- video: inline / chapters looks; display inline = the VideoPanel on the card, takeover = a teaser (poster, play, length) whose tap starts the video
-              - ModelTurntableBlockView.cs  -- model_3d, turntable look only (takeover + header model_turntable are 10A.3): draws the card's preview slot (BlockBindContext.Preview) as a
-              - PreviewBlockView.cs  -- Abstract base of model_3d and panorama_360: the stage (Frame / Surface / Fallback / Loading / Hint), one-finger drag, two-finger pinch and Ctrl +
-              - PanoramaBlockView.cs  -- panorama_360 on PreviewBlockView: the PanoramaViewState, the drag look (scene follows the finger, scaled by fov / shorter side), the pinch, the gyro
-              - HotspotImageBlockView.cs  -- a spot with an Opens Block the card can scroll to (HotspotPinRule) calls IBlockHost.ScrollToBlock and wears an open_block arrow badge
-            - Play/  -- The play family
-              - Play.uss  -- the play family's looks
-              - KnowledgeCheckBlockView.cs  -- knowledge_check: one question at a time (KnowledgeCheckRule.Questions for the look), multiple_choice buttons / image_choice pictures /
-              - PollBlockView.cs  -- poll (bars): the question and 2-6 tappable options; the vote goes to CardLocalState (PollVote, by authored row) + ONE poll CardEvent; after it the
-              - CollectBlockView.cs  -- collect (add_to_story): the stamp tile (a ring with an outlined / filled star), the item's series and name, Add to my story, "n of m collected" with
-            - Community/  -- The community family
-              - Community.uss  -- the community family's looks (the vote buttons, the painted thumb / star glyphs' size and colour, the thank-you)
-              - FeedbackBlockView.cs  -- feedback: thumbs (up / down with words) or stars (1..5); a vote is remembered through CardLocalState, raised ONCE as a feedback CardEvent through
-            - Ar/  -- The ar family
-              - Ar.uss  -- the ar family's looks
-              - ShowOnWallBlockView.cs  -- show_on_wall: one button -> IBlockHost.ShowOnWall (the card drops to peek, the selection and its marker stay); with_neighbours adds the three nearest
-              - PlaceInArBlockView.cs  -- place_in_ar: one button -> ICardArPlacement.Place, then IBlockHost.ShowHeaderAtPeek; while THIS block's model stands the same button reads Remove
-            - Navigation/  -- The navigation family: in-flow nav blocks (styles in Cards/Navigation/Navigation.uss)
-              - NavIconGridBlockView.cs  -- nav_icon_grid: the card's sections as NavTab tiles (icon in the family's colour, words, count), drawn on NavController.Bound from
-              - NavContentsBlockView.cs  -- nav_contents: under each section's title (family icon in its colour + words) a row per TARGET in the stack's order -- marker, heading
-              - NavRailsBlockView.cs  -- nav_rails: one rail per model section (title + count), a NavStrip each (SwipeGrab: sideways moves the rail, vertical the card) of cards
-              - NavBentoBlockView.cs  -- nav_bento: the authored Tiles as big tiles (BentoTileRule.Tiles over BlockBindContext.JumpTargets, BentoTileRule.Wide spans), a picture or the
-            - Guides/  -- The guides family
-              - Guides.uss  -- the guides family's looks (the round play/pause button, scrubber, speed chip, captions line, the hero_chip's thin progress line)
-              - AudioGuideBlockView.cs  -- audio_guide: player
-              - AudioScrubber.cs  -- the player look's seek bar: a pointer-captured drag seeks (Position, never scrolls the stack), the fill tracks AudioTimeRule's fraction
-        - Filter/  -- facet filter tray (UI Toolkit)
-          - FilterFacetEvaluator.cs  -- pure: FacetGroup
-          - FilterTrayView.cs  -- plain C# view: the tray (a ScrollView of facet groups, one chip per row by its label), SetFacet, ClearAll, Changed; BuildOptions
-        - Results/  -- search results list (UI Toolkit)
-          - ResultsListView.cs  -- plain C# view: virtualised ListView rows (name + "category - level"), a row tap selects through the bus, the no-results message + one relax button
-        - Navigation/  -- the search UI host and stylesheet, the search bar, the result-set rules, view switching, voice (UI Toolkit)
-          - SearchOverlayView.cs  -- plain C# view: the search bar (field with placeholder, Mic, Filters (n), Map), suggestions under an empty field, the listen bar; dynamic = scheduler
-          - RecentSearchesManager.cs  -- persists and replays recent queries
-          - SuggestedSearchesManager.cs  -- derives suggestions from the live POI set so they never go stale
-          - ResultSetCoordinator.cs  -- pure: Compute(index, pois, query, facets, settings) -> ResultSetState (active, ranked results, ids, no-results message, relax suggestion) -- the ONE
-          - SearchPanelsRule.cs  -- + the ViewMode enum
-          - SearchUIHost.cs  -- builds the six views into its own UIDocument, rebuilds them on WallSession.SearchDataChanged, applies ResultSetCoordinator / SearchPanelsRule, pushes
-          - SearchUI.uss  -- replaced the six unused per-view .uxml/.uss files
-          - ViewModeControl.cs  -- plain C# view: List | Map | Highlight segments; the start view from default_view or (remember_last_view) PlayerPrefs; Map only with a minimap
-          - ViewModeParser.cs  -- pure config string <-> ViewMode
-          - ITranscriber.cs  -- the speech-to-text seam
-          - TranscriberFactory.cs  -- the Editor gets DebugTranscriber, a device none (no fake mic) until a real backend is added
-          - DebugTranscriber.cs  -- editor stand-in that fakes transcription without a device; hears EditorPhrase
-          - VoiceSearchController.cs  -- plain C#: listen once, hand the transcript to the typed-query path; IsAvailable needs a backend
-          - VoiceStateMachine.cs  -- idle/listening/processing states and their transitions
-          - VoiceActivityIndicatorView.cs  -- the listening indicator bar
-        - Minimap/  -- wall overview map (UI Toolkit)
-          - MinimapLayout.cs  -- and bounds (auto fit + margin, manual), world -> 0..1 map position
-          - MinimapView.cs  -- plain C# view: one dot per running marker at its true world position (percent placement), three dot styles, result-set filtering, selection
-        - Theme/  -- The app theme: ONE source (a ThemeAsset) of every colour and scale the UI Toolkit screens draw with, generated into USS and read by C#
+      - UI/  -- the visitor-facing UI, one folder per render target (_3.3 R15): World-UGUI, Screen-UITK, Any-UITK, Shared
+        - Screen/  [Screen-UITK]  -- UI Toolkit on the screen panel (a UIDocument on the one PanelSettings): what the visitor sees laid over the camera
+          - Cards/  [Screen-UITK]  -- the POI Detail Card, a bottom sheet of content blocks
+            - CardIcons.cs  -- that PoiCard.uss shows and places per key (show_on_wall, time, access, location, info, ticket, light); Create / SetKey / KeyOf; used by the actions
+            - CardTokenColours.cs  -- TryResolve(from, token): a colour token read BY NAME (a family's ColorToken is data)
+            - CardImage.cs  -- Plain C#: one picture of the card -- a clipped frame, the picture as a background image, the "picture unavailable" words (CardStrings) instead of a
+            - Navigation/  -- moving inside the open card: the controller every nav element drives, and the elements
+              - NavController.cs  -- Plain C#, one per sheet: Bind(CardNavModel, context) / Unbind, JumpTo(section, elementKey), JumpToBlock(blockKey, elementKey), Current /
+              - CardLayoutView.cs  -- Plain C#, sheet-owned: applies CardLayoutRule to the stack -- ParkedAtBind (tabs: the blocks set aside from the first frame), Bind / Unbind
+              - CardPagerView.cs  -- Plain C#, sheet-owned: the pages layout's sideways turn -- a SwipeGrab (leavesToParts) on the stack's viewport, the WHOLE scroll slid by
+              - CardBentoView.cs  -- Plain C#, sheet-owned: the bento layout's tiles where the blocks were (a host first in the stack scroll): per section a button with the family icon
+              - INavElementView.cs  -- The navigation element view contract: Root, Bind(CardNavModel, NavController, BlockBindContext), Unbind; views only
+              - NavElementRegistry.cs  -- NavElementDefinition (key, slot, Editor label, (i) help), NavSlotKeys (Top; Built = the slots the sheet draws) and NavElementRegistry
+              - BuiltInNavElements.cs  -- The framework's elements registered into Shared: text_tabs (top), with their Editor label and help
+              - CardChromeView.cs  -- Shows / hides the card's chrome (the top strip, the bottom area = the sticky footer) as CardChromeRule decides, and keeps the stack's end in view when the bottom area comes back at the end (KeepTheEnd): measures the stop's rest height, the
+              - NavSlots.cs  -- The sheet's navigation slots (top today): a strip inserted in the sheet root between the header and the stack ScrollView
+              - TextTabsNavView.cs  -- text_tabs: one Button per model section (its CardStrings word), the current one underlined AND bold (CurrentClass), a tap = NavController.JumpTo
+              - TabsNavView.cs  -- The tabs text_tabs and icon_tabs share: a NavStrip of NavTabs, one per section, its word (and its family's icon, tinted by NavTint, per Labels), Show
+              - IconTabsNavView.cs  -- icon_tabs: TabsNavView with icons (an element key of its own when icon_tabs_chips holds one)
+              - IconTabsChipsNavView.cs  -- icon_tabs_chips: icon tabs + a NavChipRow of the marked section's kinds
+              - KindChipsNavView.cs  -- kind_chips: one NavChipRow of every kind of the card (NavChoice.Blocks: a one-family card gets it too)
+              - SegmentedNavView.cs  -- Show Counts all or none by NavFitRule: a hidden bold ruler label measures every word and count, CountsShown says which
+              - ProgressMapNavView.cs  -- progress_map: a piece per section, widths from ProgressMapRule (minimum = the stylesheet's min-width or a word's width), family icon + tinted bar
+              - FamilyPagerNavView.cs  -- family_pager: the section read named between two chevron Buttons (family icon tinted by NavTint, CardStrings words, nav_pager_position "2 of 8")
+              - BottomBarNavView.cs  -- bottom_bar: up to Bar Slots icon tabs (NavTab) sharing the bar equally, the last one More when the sections overflow
+              - DockNavView.cs  -- dock: the bottom bar as an icon pill -- a BottomBarNavView with the nav-bar--dock class; the stylesheet alone widens the marked item
+              - BarSheetNavView.cs  -- bar_sheet: the bar whose Tap asks BarSheetRule -- the first tap jumps, a second tap on the current section opens KindsList
+              - NextUpNavView.cs  -- next_up: "Up next", the next block's heading (NavController.HeadingOf, else its kind's words), its place
+              - CardMenuOverlay.cs  -- The card's ONE overlay owner (BlockBindContext.Overlay): a layer in the card layer right before TakeoverView (over the sheet, under the full view)
+              - FloatingSlot.cs  -- The card's FLOATING slot: a layer in the card layer right before the menu layer (InsertUnder) -- a right-aligned row of the placed-model chip and the
+              - FabDialNavView.cs  -- fab_dial ("Dial"): a NavFab that opens a column of NavTab pills (family icon in its colour beside its words, the section read marked), up over the
+              - EdgeScrubberNavView.cs  -- edge_scrubber ("Scrubber"), the Edge slot's element: a column of 48 px transparent dot buttons
+              - FabRadialNavView.cs  -- fab_radial ("Radial"): a NavFab whose sections open on an arc
+              - DrawerTreeNavView.cs  -- drawer_tree ("Drawer"): a drawer from the left, NavMenuHeader + a vertical ScrollView outline -- a line per section (icon, words, count), its kinds
+              - GridOverlayNavView.cs  -- grid_overlay ("Big Tiles"): a panel inset over the scrim, NavMenuHeader, a By Purpose / By Format switch (CardNavModel.By, opens on Group By), big
+              - NavStrip.cs  -- The sideways strip lifted out of text_tabs: clipped viewport + row moved by NavStripRule, dragged by a SwipeGrab, Show(item) brings an item into view
+              - NavItems.cs  -- NavTab (button, optional icon, words, count, underline), NavChip (button around a pill: dot, words, count), NavCount, NavTint
+              - NavChipRow.cs  -- A NavStrip of NavChips for given kinds: marks the kind of CurrentBlock, a tap = JumpToBlock(kind's first target)
+              - NavFacetBar.cs  -- The facet chips of drawer_tree and grid_overlay: one NavStrip row of 48 px chips (Up to 2 / 5 min, No headphones / camera / network, the formats) +
+              - Navigation.uss  -- The navigation elements' look, --ts-* tokens only (the tabs: touch-token minimums, nowrap words, the underline bar, the bold current label); in every
+            - TakeoverView.cs  -- Plain C#: the full-screen view over the card (the sheet's sibling in the layer, carrying the token classes): Back + breadcrumb (card title > name), a
+            - BlockFullView.cs  -- Plain C#, sheet-owned: "open in full view" for ANY block -- PageFor(entry, context) binds a SECOND view of the kind from the BlockViewPool into the
+            - ZoomPanSurface.cs  -- Plain C#: the pinch-zoom + pan surface zoom_image already drew, factored out so the gallery lightbox reuses it (ZoomPanRule underneath, unchanged)
+            - IBlockView.cs  -- + BlockBindContext
+            - PoiCardHost.cs  -- selection bus -> BlockStackBuilder -> the sheet; closes through the bus
+            - CardOwners.cs  -- Plain C#: the wall card's owners kept together so PoiCardHost only wires them -- the ONE audio owner + its mini-player (CardAudioCoordinator), the
+            - CardTapOutside.cs  -- Plain C#: a tap on empty camera space closes the card -- remembers a press, judges the release (CardTapRule, ScreenUIHit), waits out the zoom's
+            - CardDemoOpener.cs  -- Plain C#: the developer-only demo card (CardDemoRule) -- acts only when the request (point + stop) changes, selects the point through the bus or
+            - CardStyleSheets.cs  -- The card's stylesheets in the order they apply (tokens, container, the blocks'); both hosts use InOrder
+            - ElementPool.cs  -- Pure, generic: the rows a view draws for its items -- row i made once (create(i)) and reused by every bind, Take() the next in order, ReleaseAll()
+            - SwipeGrab.cs  -- Plain C#: the ONE way a swipeable part of the card takes a finger (the true / false card, the tab strip; rails, pager, scrubber later) -- never
+            - CardTrackFit.cs  -- The one fit of the swipe tracks (timeline events, related cards): CardTrackRule's width from the cell's USS (min-width, margin-right) and, with Peek
+            - CardVideoPlayer.cs  -- The MonoBehaviour side of the card's video, like CardAudioPlayer: the ONE VideoPlayer (RequireComponent) and its UnityVideoOutput
+            - CardPreviewStage.cs  -- The MonoBehaviour side of the card's 3D preview (IPreviewStage): a disabled camera + 2 directional lights on their own CardPreview Unity layer, far
+            - CardPreviewStage.Handles.cs  -- The partial of CardPreviewStage holding what a handle keeps: HandleBase
+            - CardAudioPlayer.cs  -- The MonoBehaviour side of the card's audio: the ONE AudioSource (RequireComponent), the service's per-frame Tick, forwards OnApplicationPause /
+            - MiniPlayerView.cs  -- The mini-player bar on the wall while a card's audio plays on after the card closed (Keep Audio Playing): play/pause, title + time as one tap target
+            - PlacedModelChipView.cs  -- The placed-model chip in the card's floating slot, mirroring the mini-player: no placement state, draws the ONE ICardArPlacement through
+            - CardAudioCoordinator.cs  -- Joins the audio owner to the card's comings and goings so PoiCardHost stays thin: CardShown / CardClosed apply MiniPlayerRule.StopsWithCard
+            - PoiCardSheetView.cs  -- Plain C#: the card's bottom sheet, a WIRING class: builds the layer, the grabber, the bar with the title, the settings gear and the X
+            - BlockFrame.cs  -- the universal block frame: Build adds the rim band + the outer-only shadow parts to a slot, Apply frames a scroll slot with its emphasis
+            - SectionSheets.cs  -- the card's chapters in the scroll: SectionSheetRule cuts the scroll's blocks into runs of one family, each WRAPPED in one pooled glass sheet with its living-glass layer (CardLight; ShowLightsNear draws it only near the view)
+            - Light/  -- the card's moving light: two UI Shader Graphs and their owners
+              - CardLight.cs  -- Plain C#, one per BlockStackView: a material copy per painted element (Glass / Sweep), theme colours by name in linear + repaint on a mode switch, size, the injectable Clock into _Clock every 33 ms, ReduceMotion = _Animate 0
+              - RimLightView.cs  -- Plain C#: ONE rim light in the block LitBlockRule names, moved on scroll with a fade (out, move, in), behind the block's content
+              - SectionGlass.shadergraph  -- generated JSON (the S4 spike's shape): the prototype's three drifting lights per ~720 pt band of a sheet, _Hue / _Hue2 / _Size / _Clock / _Animate / _Seed
+              - RimSweep.shadergraph  -- generated JSON: a conic highlight (268 / 306 / 330 deg, Arc wide) turning per _Period, drawn only in the rim's band inside the rounded edge (SDF)
+            - SectionOpenerView.cs  -- the Section Opener: the family's FILLED pill (icon, name in the display face, meta "4 blocks - 9 min") + a full-width line in its colour; with no words (tabs) the line alone (LineOnlyClass), painted
+            - CardVisitorSettingsView.cs  -- the card's settings panel the gear opens: Language
+            - card_block_shadow.png  -- 96 x 96 outer-only soft shadow (transparent over the block), 9-sliced at 36 (16 margin + 20 radius), tinted by --ts-elevation-1/2; written by a script
+            - card_glass.png  -- 4 x 256 white alpha ramp (0.45 top -> 1 foot), the stack's glass, tinted by --ts-glass-ground; written by a script
+            - SheetDrag.cs  -- Plain C#: the sheet's vertical drag -- the grabber and the header capture the finger at touch-down, the top slot's SwipeGrab only once a move is
+            - CardFullViewOpener.cs  -- Plain C#: what opens in the full view over the card -- OpenFullView
+            - BlockStackView.cs  -- + a pinned Footer for FooterVariants (sticky actions), views pooled per kind, one ScopedMediaSource per bound view released on unbind; (6C) every
+            - CompactRowView.cs  -- The generic compact row: one button for the line
+            - ClipLengthReader.cs  -- The length of the audio / video clip a block names, loaded through the caller's media scope, once per path; MinutesOf = ReadingTimeRule over it
+            - BlockViewPool.cs  -- The card's block views pooled per kind (Take / Return / CreatedCount): the stack's and the full view's second view come from the one pool.
+            - CardTextView.cs  -- its paragraphs come from an ElementPool.
+            - CardStringTable.cs  -- 
+            - CardStrings.asset  -- The framework CardStringTable (en + pt): close, fun_fact_label/hint, status_heading/unknown_mark/unknown/percent, sources_heading/verified/draft
+            - PoiCard.uss  -- The card CONTAINER only (6C split): layer, sheet, grabber, close X, header slot (collapsed look), stack, block slot + heading + gap, footer; written
+            - CardParts.uss  -- The parts several families share: CardTextView's text, the chip, CardIcons' parts, the .card-pill button shape
+            - CardTokens.uss  -- The --ts-* design tokens on .ts-card.ts-theme-default: the default Stone & Gold dark preset
+          - Search/  [Screen-UITK]  -- the search UI host and stylesheet, the search bar, the result-set rules, view switching, voice (UI Toolkit)
+            - SearchOverlayView.cs  -- plain C# view: the search bar (field with placeholder, Mic, Filters (n), Map), suggestions under an empty field, the listen bar; dynamic = scheduler
+            - RecentSearchesManager.cs  -- persists and replays recent queries
+            - SuggestedSearchesManager.cs  -- derives suggestions from the live POI set so they never go stale
+            - ResultSetCoordinator.cs  -- pure: Compute(index, pois, query, facets, settings) -> ResultSetState (active, ranked results, ids, no-results message, relax suggestion) -- the ONE
+            - SearchPanelsRule.cs  -- + the ViewMode enum
+            - SearchUIHost.cs  -- builds the six views into its own UIDocument, rebuilds them on WallSession.SearchDataChanged, applies ResultSetCoordinator / SearchPanelsRule, pushes
+            - SearchUI.uss  -- replaced the six unused per-view .uxml/.uss files
+            - ViewModeControl.cs  -- plain C# view: List | Map | Highlight segments; the start view from default_view or (remember_last_view) PlayerPrefs; Map only with a minimap
+            - ViewModeParser.cs  -- pure config string <-> ViewMode
+            - ITranscriber.cs  -- the speech-to-text seam
+            - TranscriberFactory.cs  -- the Editor gets DebugTranscriber, a device none (no fake mic) until a real backend is added
+            - DebugTranscriber.cs  -- editor stand-in that fakes transcription without a device; hears EditorPhrase
+            - VoiceSearchController.cs  -- plain C#: listen once, hand the transcript to the typed-query path; IsAvailable needs a backend
+            - VoiceStateMachine.cs  -- idle/listening/processing states and their transitions
+            - VoiceActivityIndicatorView.cs  -- the listening indicator bar
+          - Zoom/  [Screen-UITK]  -- on-screen zoom buttons (UI Toolkit)
+            - ZoomControlView.cs  -- zoom in/out/reset buttons routed to ARZoomController; mounts into its UIDocument on Start and shows only while Enable Zoom and Show On-Screen Buttons
+            - ZoomControlView.uxml  -- button layout; links ZoomControlView.uss with a ui:Style element
+            - ZoomControlView.uss  -- button styling, UI Toolkit USS only (no web-CSS gap/border/cursor/calc: UI Toolkit drops them with an import warning)
+          - Filter/  [Screen-UITK]  -- facet filter tray (UI Toolkit)
+            - FilterFacetEvaluator.cs  -- pure: FacetGroup
+            - FilterTrayView.cs  -- plain C# view: the tray (a ScrollView of facet groups, one chip per row by its label), SetFacet, ClearAll, Changed; BuildOptions
+          - Minimap/  [Screen-UITK]  -- wall overview map (UI Toolkit)
+            - MinimapLayout.cs  -- and bounds (auto fit + margin, manual), world -> 0..1 map position
+            - MinimapView.cs  -- plain C# view: one dot per running marker at its true world position (percent placement), three dot styles, result-set filtering, selection
+          - Results/  [Screen-UITK]  -- search results list (UI Toolkit)
+            - ResultsListView.cs  -- plain C# view: virtualised ListView rows (name + "category - level"), a row tap selects through the bus, the no-results message + one relax button
+          - Onboarding/  [Screen-UITK] [EMPTY SCAFFOLD]  -- first-run flow and profile selection
+          - Scanning/  [Screen-UITK] [EMPTY SCAFFOLD]  -- looking-for-the-wall state
+          - Sharing/  [Screen-UITK] [EMPTY SCAFFOLD]  -- screenshot and social sharing
+          - Gamification/  [Screen-UITK] [EMPTY SCAFFOLD]  -- badges, toasts, discovery counter
+          - Circuits/  [Screen-UITK] [EMPTY SCAFFOLD]  -- guided route UI
+        - World/  [World-UGUI]  -- uGUI + TextMeshPro on world-space canvases, physically anchored to the AR wall
+          - Markers/  [World-UGUI]  -- the ONLY uGUI World-Space Canvas domain in the project
+            - POI_Marker.prefab  -- the marker outer container. Root holds Canvas + POIAnchor + MarkerView + MarkerBillboard + MarkerRevealEffect + MarkerSelectable + MarkerLeaderLine
+            - POI_Cluster.prefab  -- LOD aggregate marker; children PieContainer, CountLabel, BackgroundImage, DominantIcon
+            - POIAnchor.cs  -- holds this marker's POIData so other components can read it
+            - MarkerView.cs  -- applies all visual state to the prefab's children; owns label and marker displacement write-back; ReapplyEffects re-applies only the effects; label
+            - MarkerBillboard.cs  -- orientation of the marker root, Vertical Alignment + Facing Options; ReapplySettings swaps settings on a running marker without losing the authored
+            - MarkerOrientationResolver.cs  -- pure, stateless orientation math: ScreenUpWorld, ResolveVerticalUp, ResolveRootRotation, ResolveChildLocalRotation, RootRollDeg, Rotate2D
+            - MarkerChildOrientation.cs  -- per-child (Label/Badge) independent vertical-alignment counter-rotation; baked onto POI_Marker.prefab's Label and Badge children
+            - MarkerLayout.cs  -- symbol/ring/badge/label sizing ratios
+            - FontKeyLibrary.cs  -- CopyFrom
+            - FontLibrary.asset  -- framework default FontKeyLibrary: liberation_sans / roboto_bold / oswald_bold (TMP only, the markers)
+            - Fonts/  -- Both SDF assets STATIC (atlas population mode 0) with the 122 characters the project ships
+            - MarkerCircleGlyphView.cs  -- draws one circular glyph (symbol or badge) from a sprite + tint; SetIconSizeRatio
+            - MarkerCircleSpriteFactory.cs  -- generates circle and ring textures once, shared by every effect
+            - MarkerRingView.cs  -- the status contour ring, including its optional continuous spin
+            - MarkerClusterView.cs  -- builds a cluster's pie chart, count label and dominant icon; world-space size from its largest member x cluster_size_ratio
+            - MarkerLeaderLine.cs  -- the leader line of a displaced label or marker, recomputed every LateUpdate from MarkerView.TryGetLeaderLineEnds; straight / dashed
+            - LeaderLine.mat  -- without it URP drew magenta
+            - MarkerSelectable.cs  -- tap target on POI_Marker: SelectionEventBus.Select(PoiId) (re-tap deselects)
+            - MarkerClusterSelectable.cs  -- a cluster is never the selection
+            - SelectionEventBus.cs  -- the one selection state: Select (re-selecting clears, decided before any listener), Clear, SelectCluster, CurrentPoiId, ResetState; events
+            - SelectionHighlightController.cs  -- the ONLY writer of the selection alpha channel: selected id (bus) + result set (SetResultSet) through SelectionAlphaRule, settings read live from the
+            - SelectionAlphaRule.cs  -- 
+            - ZoomOnSelectController.cs  -- zoom-on-select: counts the visible markers within Crowd Radius of the tapped one at their true places (CountNeighbours, independent of LOD), a
+            - MarkerEffect.cs  -- base class for optional per-marker animated effects
+            - MarkerEffectFlags.cs  -- the six selectable effects as bitflags, plus MarkerEffectNames (display names shared by the editor and the preview grid)
+            - MarkerPulseEffect.cs  -- gentle scale pulse
+            - MarkerRippleEffect.cs  -- three staggered waves flowing outward, rings or discs, each style with its own parameter block
+            - MarkerHaloEffect.cs  -- one extra layer behind the symbol: halo ring or halo disc (breathing) or beacon (grow and fade), each variant with its own parameter block
+            - MarkerRevealEffect.cs  -- delayed fade and scale-in on spawn toward the marker's current resting look (SetRest, so a reveal never overrides a LOD decision); SkipToEnd for
+            - SpriteKeyLibrary.cs  -- the sprite-key lookup contract shared by icon and shape libraries
+            - IconLibrary.asset  -- framework default category and badge icons
+            - ShapeLibrary.asset  -- framework default symbol silhouettes
+            - SymbolCircle.png  -- the default circular symbol sprite
+            - Icons/  -- 14 default category and damage-state icon PNGs
+            - Rings/  -- 5 contour ring PNGs: solid, long/medium/short dash, dotted
+            - Shapes/  -- 4 non-circle symbol silhouettes: diamond, hexagon, rounded square, star
+          - GuideCharacter/  [World-UGUI] [EMPTY SCAFFOLD]  -- the guide character overlay
+        - Blocks/  [Any-UITK]  -- one view per block kind, grouped by family
+          - About/
+            - About.uss  -- The about family's looks (header, status, facts, texts, fun facts, quotes, steps, swatches, actions)
+            - HeaderBlockView.cs  -- and subtitle; variants compact / text_only; (7A) the picture looks' HeroPart
+            - StatusBlockView.cs  -- "?" for unknown; ring / scale (every known outline type, this POI's marked); Paint / NameOf shared with compare_points (6B)
+            - QuickFactsBlockView.cs  -- Show Category: the point's category (with its level on Category And Level) as the first fact.
+            - RichTextBlockView.cs  -- 
+            - FunFactBlockView.cs  -- / postcard (tilted, shown at once)
+            - PullQuoteBlockView.cs  -- / minimal
+            - ActionsBlockView.cs  -- circles / pill_row / sticky_cta (ONE call to action in the footer); a button with no words reads its action's card text (ActionsRule), unknown
+            - ProcessStepsBlockView.cs  -- process_steps: numbered -- the number in a circle, a rail to the next step, title + CardTextView; the card numbers the shown (complete) rows
+            - SwatchesBlockView.cs  -- swatches: grid -- a sample in the config's own colour (content, TryParseColor), name, note; the #RRGGBB code only with Show Code (6C); incomplete or
+          - Stories/  -- The stories family
+            - Stories.uss  -- The stories family's looks (timeline, person, story chapters, compare)
+            - TimelineBlockView.cs  -- timeline: dated events (dot + rail, date, title, text) in the authored order; vertical / horizontal (a horizontal ScrollView swipe track); Highlight
+            - PersonBlockView.cs  -- person: name, role, text beside the name's initial; row / card (own panel, larger name); InitialOf
+            - StoryChaptersBlockView.cs  -- story_chapters: segmented -- a segment bar, Chapter n of m, title, text, Previous / Next buttons in the shared .card-pill (6C); the chapter shown is
+            - DialogueBlockView.cs  -- dialogue (choices): chat bubbles revealed one Continue tap at a time; a line may offer up to three replies
+            - ComparePointsBlockView.cs  -- compare_points: rings -- this POI and the other side by side, each ring through CardStatusRule + StatusBlockView.Paint, named by CardTitleOf
+          - Visit/  -- The visit family
+            - Visit.uss  -- The visit family's looks (practical info rows)
+            - PracticalInfoBlockView.cs  -- practical_info: rows -- a CardIcons icon (practical keys only; none = hidden, words stay in line), label, value, hairlines
+            - WallLocatorBlockView.cs  -- wall_locator: strip -- a dot per wall POI at its WallAxisRule place, this one marked, the visitor's own mark (IBlockHost.TryGetViewer) following
+            - TodayMapBlockView.cs  -- today_map: static -- the map picture, lat/lng (shown only with both), a Directions button (WebLinkRule + IBlockHost.OpenUrl); bridge -- the point as
+            - RelatedBlockView.cs  -- related: carousel -- a strip of RelatedPoisRule.Of's picks, each its header picture (if any) + title, a tap selects it through the bus
+          - Meta/  -- The meta family ("always last")
+            - Meta.uss  -- the sources looks
+            - SourcesBlockView.cs  -- sources: title + author + licence rows under the stack's heading (default: CardStrings sources_heading); list / with_confidence
+          - Media/  -- The media family
+            - Media.uss  -- CardImage, the header hero looks, the gallery looks, TakeoverView, before / after, zoom
+            - hero_scrim.png  -- 4 x 256 white alpha ramp (0 -> 1, smoothstep), the graded scrim above the hero's words, tinted by --ts-scrim-hero; written by a script
+            - GalleryBlockView.cs  -- gallery: carousel (swipe track + dots) / grid (two per row) / filmstrip (large + strip; a small one picks, the old large picture given back at once)
+            - BeforeAfterBlockView.cs  -- before_after: slider -- After under Before cut at the handle, a pointer-captured drag moves it (Position, never scrolls the stack), labels from the
+            - ZoomImageBlockView.cs  -- zoom_image: pinch -- two pointers pinch about their midpoint, Ctrl + wheel zooms at the pointer, one finger pans only while enlarged; ZoomPanRule
+            - VideoPanel.cs  -- One video player drawn on the card (plain class): surface
+            - VideoBlockView.cs  -- video: inline / chapters looks; display inline = the VideoPanel on the card, takeover = a teaser (poster, play, length) whose tap starts the video
+            - ModelTurntableBlockView.cs  -- model_3d, turntable look only (takeover + header model_turntable are 10A.3): draws the card's preview slot (BlockBindContext.Preview) as a
+            - PreviewBlockView.cs  -- Abstract base of model_3d and panorama_360: the stage (Frame / Surface / Fallback / Loading / Hint), one-finger drag, two-finger pinch and Ctrl +
+            - PanoramaBlockView.cs  -- panorama_360 on PreviewBlockView: the PanoramaViewState, the drag look (scene follows the finger, scaled by fov / shorter side), the pinch, the gyro
+            - HotspotImageBlockView.cs  -- a spot with an Opens Block the card can scroll to (HotspotPinRule) calls IBlockHost.ScrollToBlock and wears an open_block arrow badge
+          - Play/  -- The play family
+            - Play.uss  -- the play family's looks
+            - KnowledgeCheckBlockView.cs  -- knowledge_check: one question at a time (KnowledgeCheckRule.Questions for the look), multiple_choice buttons / image_choice pictures /
+            - PollBlockView.cs  -- poll (bars): the question and 2-6 tappable options; the vote goes to CardLocalState (PollVote, by authored row) + ONE poll CardEvent; after it the
+            - CollectBlockView.cs  -- collect (add_to_story): the stamp tile (a ring with an outlined / filled star), the item's series and name, Add to my story, "n of m collected" with
+          - Community/  -- The community family
+            - Community.uss  -- the community family's looks (the vote buttons, the painted thumb / star glyphs' size and colour, the thank-you)
+            - FeedbackBlockView.cs  -- feedback: thumbs (up / down with words) or stars (1..5); a vote is remembered through CardLocalState, raised ONCE as a feedback CardEvent through
+          - Ar/  -- The ar family
+            - Ar.uss  -- the ar family's looks
+            - ShowOnWallBlockView.cs  -- show_on_wall: one button -> IBlockHost.ShowOnWall (the card drops to peek, the selection and its marker stay); with_neighbours adds the three nearest
+            - PlaceInArBlockView.cs  -- place_in_ar: one button -> ICardArPlacement.Place, then IBlockHost.ShowHeaderAtPeek; while THIS block's model stands the same button reads Remove
+          - Navigation/  -- The navigation family: in-flow nav blocks (styles in Screen/Cards/Navigation/Navigation.uss)
+            - NavIconGridBlockView.cs  -- nav_icon_grid: the card's sections as NavTab tiles (icon in the family's colour, words, count), drawn on NavController.Bound from
+            - NavContentsBlockView.cs  -- nav_contents: under each section's title (family icon in its colour + words) a row per TARGET in the stack's order -- marker, heading
+            - NavRailsBlockView.cs  -- nav_rails: one rail per model section (title + count), a NavStrip each (SwipeGrab: sideways moves the rail, vertical the card) of cards
+            - NavBentoBlockView.cs  -- nav_bento: the authored Tiles as big tiles (BentoTileRule.Tiles over BlockBindContext.JumpTargets, BentoTileRule.Wide spans), a picture or the
+          - Guides/  -- The guides family
+            - Guides.uss  -- the guides family's looks (the round play/pause button, scrubber, speed chip, captions line, the hero_chip's thin progress line)
+            - AudioGuideBlockView.cs  -- audio_guide: player
+            - AudioScrubber.cs  -- the player look's seek bar: a pointer-captured drag seeks (Position, never scrolls the stack), the fill tracks AudioTimeRule's fraction
+        - Components/  [Any-UITK]  -- UI Toolkit pieces that draw on ANY panel, screen or world; filled by the story slice (S2)
+          - README.txt  -- what a component is and the rule it keeps (UiRenderTargetGuardTests)
+        - Theme/  [Shared]  -- The app theme: ONE source (a ThemeAsset) of every colour and scale the UI Toolkit screens draw with, generated into USS and read by C#
           - ThemeAsset.cs  -- the ScriptableObject: key, default mode, shared ThemeTokenSet
           - ThemeResolver.cs  -- plain C#: a theme's values in one mode for C# (TryColour, TryNumber; a mode's value wins over a shared one), read from the asset, never from a stylesheet
           - ThemeModeRule.cs  -- Pure: the mode shown -- the visitor's pick > the wall's Default Mode > the theme's, each only when the theme has it
@@ -447,22 +446,12 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - Fonts/  -- The app's faces: static instances cut with fontTools from google/fonts' variable fonts, OFL.txt beside each family, README.txt
             - Fraunces/  -- Fraunces-SemiBold.ttf (wght 600, opsz 28, SOFT 0, WONK 0): the display face; 325 glyphs
             - AtkinsonHyperlegibleNext/  -- Regular / Medium / Bold .ttf (wght 400 / 500 / 700): the body face; 291 glyphs each (the face lacks 36 of Latin-1 + Ext-A)
-        - Zoom/  -- on-screen zoom buttons (UI Toolkit)
-          - ZoomControlView.cs  -- zoom in/out/reset buttons routed to ARZoomController; mounts into its UIDocument on Start and shows only while Enable Zoom and Show On-Screen Buttons
-          - ZoomControlView.uxml  -- button layout; links ZoomControlView.uss with a ui:Style element
-          - ZoomControlView.uss  -- button styling, UI Toolkit USS only (no web-CSS gap/border/cursor/calc: UI Toolkit drops them with an import warning)
-        - Shared/  -- cross-screen UI Toolkit support
+        - Shared/  [Shared]  -- cross-screen UI Toolkit support
           - PanelSettings.asset  -- the one runtime panel; 390x844 reference resolution; themeUss = Theme/TileStoriesTheme.tss
           - SafeAreaHelper.cs  -- notch and home-indicator padding; pure math exposed for testing; ApplyAsOffsets
           - ScreenUIHit.cs  -- IsOverScreenUI: an EventSystem raycast hit by a PanelRaycaster (a UI Toolkit element takes pointer input there; world-space markers do not count)
           - UrlOpener.cs  -- IUrlOpener (Open(url)) + ApplicationUrlOpener (Application.OpenURL); the seam PoiCardSheetView.OpenUrl calls through, so a test can see the call
           - UIAccessibility.cs  -- contrast and tap-target helpers used by the accessibility tests
-        - Scanning/  [EMPTY SCAFFOLD]  -- looking-for-the-wall state
-        - Onboarding/  [EMPTY SCAFFOLD]  -- first-run flow and profile selection
-        - Circuits/  [EMPTY SCAFFOLD]  -- guided route UI
-        - Gamification/  [EMPTY SCAFFOLD]  -- badges, toasts, discovery counter
-        - GuideCharacter/  [EMPTY SCAFFOLD]  -- the guide character overlay
-        - Sharing/  [EMPTY SCAFFOLD]  -- screenshot and social sharing
       - DevTools/  -- Phase A harnesses and their data lists; one list drives both harness and tests
         - MarkerGalleryDefinitions.cs  -- data list of every marker visual variant
         - MarkerGalleryHarness.cs  -- spawns that list into the gallery scene, no AR or config
@@ -945,7 +934,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - EditorPopupTests.cs  -- opens a floating draggable popup, a second (i) retargets it, Esc closes, no Close button on a working popup, real typing in a Details note is
         - POIEditorTableLayoutTests.cs, POIEditorAddButtonRowRenderTests.cs, POIEditorCoordinateRowRenderTests.cs, POIEditorColorGroupRenderTests.cs, POIEditorVisualHierarchyTests.cs, POIEditorWindowChromeTests.cs  -- real IMGUI geometry measurement
         - MarkerSymbolTexturePostprocessorTests.cs, PanelSettingsTests.cs, SafeAreaHelperTests.cs, ZoomControlViewEditModeTests.cs  -- assorted contracts
-        - UI/  -- UI Toolkit view tests, mirroring Runtime/UI's folder names
+        - UI/  -- UI Toolkit view tests, grouped by the Runtime/UI domain they test
+          - UiRenderTargetGuardTests.cs  -- _3.3 R15.2 on the source: Blocks/ + Components/ never name the sheet / host types, the screen PanelSettings or Screen.width / height; no UnityEngine.UI / TMPro in Screen/ Blocks/ Components/; no UIElements in World/; ONE allow-list with a reason per line (a stale line fails); planted violations proven red by file and rule
           - Cards/  -- 
             - ElementPoolTests.cs  -- ElementPool: rows made once per place, reused after ReleaseAll, only the shown ones released
             - NavElementRegistryTests.cs  -- NavElementRegistry's refusals, the framework's elements (ASCII words, views), an app's own element listed for its slot AND bound by a real

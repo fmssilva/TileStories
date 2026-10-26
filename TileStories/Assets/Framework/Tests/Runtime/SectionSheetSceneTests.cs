@@ -123,7 +123,7 @@ namespace TileStories.Tests
         {
             Session.CardSettings.languages = new List<string> { language, language == "en" ? "pt" : "en" };
             yield return Open("painting");
-            var table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Cards/CardStrings.asset").Entries();
+            var table = AssetDatabase.LoadAssetAtPath<CardStringTable>("Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset").Entries();
             var words = new CardStrings(table, null, null, language, "en");
             foreach (var sheet in Shown)
             {

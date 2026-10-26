@@ -13,7 +13,7 @@ namespace TileStories.Tests
     // component/structure contract.
     public class ClusterPrefabTests
     {
-        private const string PrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string PrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
 
         [Test]
         public void ClusterPrefab_declares_required_components()
@@ -98,8 +98,8 @@ namespace TileStories.Tests
         public void DominantIcon_only_active_in_dominant_category_mode()
         {
             var iconLibrary = AssetDatabase.LoadAssetAtPath<SpriteKeyLibrary>(
-                "Assets/Framework/Runtime/UI/Markers/IconLibrary.asset");
-            Assert.IsNotNull(iconLibrary, "IconLibrary.asset missing (expected at Assets/Framework/Runtime/UI/Markers/IconLibrary.asset)");
+                "Assets/Framework/Runtime/UI/World/Markers/IconLibrary.asset");
+            Assert.IsNotNull(iconLibrary, "IconLibrary.asset missing (expected at Assets/Framework/Runtime/UI/World/Markers/IconLibrary.asset)");
 
             CategoryPalette.Configure(ClusterGalleryDefinitions.Overrides);
             try

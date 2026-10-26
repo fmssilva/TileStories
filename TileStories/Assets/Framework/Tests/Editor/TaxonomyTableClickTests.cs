@@ -58,7 +58,7 @@ namespace TileStories.Editor.Tests
             type.GetField("_config", Instance).SetValue(_editor, _config);
             // The framework library is already an asset: the Marker section then never has to create a wall library file
             type.GetField("_wallIconLibrary", Instance).SetValue(_editor,
-                AssetDatabase.LoadAssetAtPath<SpriteKeyLibrary>("Assets/Framework/Runtime/UI/Markers/IconLibrary.asset"));
+                AssetDatabase.LoadAssetAtPath<SpriteKeyLibrary>("Assets/Framework/Runtime/UI/World/Markers/IconLibrary.asset"));
             type.GetField(sectionFoldoutField, Instance).SetValue(_editor, true);
 
             _screenRects.Clear();

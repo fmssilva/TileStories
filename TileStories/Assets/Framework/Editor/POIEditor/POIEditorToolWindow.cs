@@ -26,9 +26,9 @@ namespace TileStories.Editor
 
         private const string DefaultConfigPath = "Assets/Apps/LivingRoom/config.json";
         private const string DefaultStreamingConfigPath = "Assets/StreamingAssets/LivingRoom/config.json";
-        private const string DefaultPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
-        private const string DefaultIconLibraryPath = "Assets/Framework/Runtime/UI/Markers/IconLibrary.asset";
-        private const string DefaultFontLibraryPath = "Assets/Framework/Runtime/UI/Markers/FontLibrary.asset";
+        private const string DefaultPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
+        private const string DefaultIconLibraryPath = "Assets/Framework/Runtime/UI/World/Markers/IconLibrary.asset";
+        private const string DefaultFontLibraryPath = "Assets/Framework/Runtime/UI/World/Markers/FontLibrary.asset";
         private const float SyncPositionTolerance = 0.001f;
 
         // EditorPrefs key for the "Don't show again" toggle on un-verifying confirmed positions.

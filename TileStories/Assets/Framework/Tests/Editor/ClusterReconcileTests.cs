@@ -15,7 +15,7 @@ namespace TileStories.Tests
     // grouping is Screen.width-independent and centroid distance maps to FindBand rows.
     public class ClusterReconcileTests
     {
-        private const string ClusterPrefab = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string ClusterPrefab = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
         private readonly List<GameObject> _tracked = new();
 
         [SetUp] public void SetUp() => ARZoomState.SetZoom(1f, 1f, 100f); // pin zoom=1

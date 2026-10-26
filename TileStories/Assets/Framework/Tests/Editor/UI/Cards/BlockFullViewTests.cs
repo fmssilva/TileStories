@@ -15,7 +15,7 @@ namespace TileStories.Editor.Tests
     // a lowered card and a block not on the card. The owners handed over and back with real input are PoiCardExpandableSceneTests'.
     public class BlockFullViewTests
     {
-        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
         private const string Lamp = "lamp";
         private const string LampMilitary = "lamp_military";
 

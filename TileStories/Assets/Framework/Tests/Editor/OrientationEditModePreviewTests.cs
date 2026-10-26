@@ -182,7 +182,7 @@ namespace TileStories.Tests
         [Test]
         public void ApplyOrientationPreview_TicksLabelAndBadge_AndRestoreResetsThem()
         {
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab");
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab");
             Assert.IsNotNull(prefab, "The real marker prefab must load.");
             Object.DestroyImmediate(_childA);
             Object.DestroyImmediate(_childB);

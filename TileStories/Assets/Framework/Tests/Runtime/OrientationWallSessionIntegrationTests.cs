@@ -25,7 +25,7 @@ namespace TileStories.Tests
     // codebase also avoids for the same reason.
     public class OrientationWallSessionIntegrationTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         private GameObject _wsGO;
         private GameObject _correctionAnchorGO;

@@ -17,7 +17,7 @@ namespace TileStories.Tests
     // this actually runs).
     internal static class MarkerGalleryTestFixture
     {
-        private const string PrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string PrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         public static GameObject LoadPrefab()
         {

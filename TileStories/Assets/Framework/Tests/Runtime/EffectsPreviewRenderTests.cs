@@ -27,7 +27,7 @@ namespace TileStories.Tests
     // Animated effects are sampled over ~2 s (longer than every effect period) and judged on their best frame.
     public class EffectsPreviewRenderTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
         private const int TexWidth = 600;
         private const int TexHeight = 680;
         private const int SampleFrames = 16;

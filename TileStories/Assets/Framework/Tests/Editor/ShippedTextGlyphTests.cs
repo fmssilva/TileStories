@@ -18,8 +18,8 @@ namespace TileStories.Editor.Tests
     {
         public static readonly string[] MarkerFontPaths =
         {
-            "Assets/Framework/Runtime/UI/Markers/Fonts/Oswald Bold SDF.asset",
-            "Assets/Framework/Runtime/UI/Markers/Fonts/Roboto-Bold SDF.asset",
+            "Assets/Framework/Runtime/UI/World/Markers/Fonts/Oswald Bold SDF.asset",
+            "Assets/Framework/Runtime/UI/World/Markers/Fonts/Roboto-Bold SDF.asset",
         };
 
         private static Dictionary<char, string> Shipped()

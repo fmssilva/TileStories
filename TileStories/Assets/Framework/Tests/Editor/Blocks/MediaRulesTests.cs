@@ -103,7 +103,7 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual("castle_hero.png", MediaPathRule.StoredPathFor("Assets/Apps/LivingRoom/Resources/LivingRoom/CardMedia/castle_hero.png", "LivingRoom/CardMedia"));
             Assert.AreEqual("sub/a.png", MediaPathRule.StoredPathFor("Assets/Apps/X/Resources/X/Media/sub/a.png", "/X/Media/"), "slashes around the folder");
             Assert.AreEqual("Media/a.png", MediaPathRule.StoredPathFor("Assets/Apps/X/Resources/Media/a.png", ""), "no folder: relative to Resources");
-            string outside = "Assets/Framework/Runtime/UI/Markers/SymbolCircle.png";
+            string outside = "Assets/Framework/Runtime/UI/World/Markers/SymbolCircle.png";
             Assert.AreEqual(outside, MediaPathRule.StoredPathFor(outside, "LivingRoom/CardMedia"), "outside: stored as picked...");
             Assert.AreEqual(MediaPathProblem.OutsideFolder, MediaPathRule.Check(MediaPathRule.StoredPathFor(outside, "LivingRoom/CardMedia"), MediaKind.Image),
                 "...so the rule reports it (the Editor never refuses a pick silently)");

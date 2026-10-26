@@ -18,7 +18,7 @@ namespace TileStories
     // ClusterPrefabWiring.WireDominantIcon() if the prefab is ever re-baked.
     internal static class ClusterPrefabWiring
     {
-        private const string PrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string PrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
 
         public static void WireDominantIcon()
         {

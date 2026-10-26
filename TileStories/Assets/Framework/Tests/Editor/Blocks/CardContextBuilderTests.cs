@@ -13,7 +13,7 @@ namespace TileStories.Editor.Tests
     public class CardContextBuilderTests
     {
         private const string ConfigPath = "Assets/Apps/LivingRoom/config.json";
-        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Cards/CardStrings.asset";
+        private const string FrameworkStringsPath = "Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset";
 
         private static WallConfigData Wall() => JsonUtility.FromJson<WallConfigData>(File.ReadAllText(ConfigPath));
 
@@ -120,7 +120,7 @@ namespace TileStories.Editor.Tests
         {
             // - the two hosts once copied the same words / glossary / fallback wiring by hand; one copy drifting is how a block reads
             //   one language on the wall and another in the gallery
-            foreach (string path in new[] { "Assets/Framework/Runtime/UI/Cards/PoiCardHost.cs", "Assets/Framework/Runtime/DevTools/CardGalleryHarness.cs" })
+            foreach (string path in new[] { "Assets/Framework/Runtime/UI/Screen/Cards/PoiCardHost.cs", "Assets/Framework/Runtime/DevTools/CardGalleryHarness.cs" })
             {
                 string code = Regex.Replace(File.ReadAllText(path), @"//.*", "");
                 StringAssert.Contains("CardContextBuilder.Build(", code, path + " builds its context through CardContextBuilder");

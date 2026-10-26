@@ -21,7 +21,7 @@ namespace TileStories.Tests
     // config switch and the spawner is what these tests exist to prove.
     public class EffectsPreviewSpawnerTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
 
         private GameObject _wsGO;
         private GameObject _anchorGO;

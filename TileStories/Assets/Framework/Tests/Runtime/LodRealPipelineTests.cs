@@ -19,8 +19,8 @@ namespace TileStories.Tests
     // Every assertion reads what the visitor would see: CanvasGroup alpha, root scale, cluster views.
     public class LodRealPipelineTests
     {
-        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Marker.prefab";
-        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string MarkerPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Marker.prefab";
+        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
         private static readonly string[] LampFamily =
             { "lamp", "lamp_religious", "lamp_military", "lamp_residential", "lamp_economic", "lamp_infrastructure" };
 

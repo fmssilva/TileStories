@@ -16,7 +16,7 @@ namespace TileStories.Tests
     public class LivingRoomSceneWiringTests
     {
         private const string ScenePath = "Assets/Apps/LivingRoom/LivingRoomScene.unity";
-        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/Markers/POI_Cluster.prefab";
+        private const string ClusterPrefabPath = "Assets/Framework/Runtime/UI/World/Markers/POI_Cluster.prefab";
 
         private static T Only<T>(Scene scene) where T : Component
         {
@@ -77,9 +77,9 @@ namespace TileStories.Tests
                 var card = Only<PoiCardHost>(scene);
                 Assert.AreEqual("PoiCard", card.gameObject.name);
                 Assert.AreSame(wall, Ref(card, "wallSession"), "the card shows this wall's POIs");
-                Assert.AreEqual("Assets/Framework/Runtime/UI/Cards/CardTokens.uss", AssetDatabase.GetAssetPath(Ref(card, "tokens")));
-                Assert.AreEqual("Assets/Framework/Runtime/UI/Cards/PoiCard.uss", AssetDatabase.GetAssetPath(Ref(card, "cardStyle")));
-                Assert.AreEqual("Assets/Framework/Runtime/UI/Cards/CardStrings.asset", AssetDatabase.GetAssetPath(Ref(card, "strings")),
+                Assert.AreEqual("Assets/Framework/Runtime/UI/Screen/Cards/CardTokens.uss", AssetDatabase.GetAssetPath(Ref(card, "tokens")));
+                Assert.AreEqual("Assets/Framework/Runtime/UI/Screen/Cards/PoiCard.uss", AssetDatabase.GetAssetPath(Ref(card, "cardStyle")));
+                Assert.AreEqual("Assets/Framework/Runtime/UI/Screen/Cards/CardStrings.asset", AssetDatabase.GetAssetPath(Ref(card, "strings")),
                     "the card's UI texts come from the framework string table (+ the wall's Card Texts)");
 
                 var cardDocument = card.GetComponent<UIDocument>();
@@ -101,8 +101,9 @@ namespace TileStories.Tests
         [Test]
         public void BothCardHosts_AddEveryBlockStylesheet_InTheSameOrder()
         {
-            const string cards = "Assets/Framework/Runtime/UI/Cards";
-            var onDisk = System.IO.Directory.GetFiles(cards, "*.uss", System.IO.SearchOption.AllDirectories)
+            const string cards = "Assets/Framework/Runtime/UI/Screen/Cards";
+            const string blocks = "Assets/Framework/Runtime/UI/Blocks";
+            var onDisk = new[] { cards, blocks }.SelectMany(folder => System.IO.Directory.GetFiles(folder, "*.uss", System.IO.SearchOption.AllDirectories))
                 .Select(p => p.Replace('\\', '/'))
                 .Where(p => p != cards + "/CardTokens.uss" && p != cards + "/PoiCard.uss")
                 .OrderBy(p => p).ToList();

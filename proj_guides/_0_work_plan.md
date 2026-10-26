@@ -545,7 +545,7 @@ decoupled, non-thesis-critical editorial project already described in §5.
   **The practical hybrid in the file structure (updated from the earlier version):**
   Every file listed under `UI/` in §A that renders screen-space content uses
   UI Toolkit (`UIDocument` component + UXML + USS). Every file listed under
-  `UI/Markers/` and the `NextStopArrow.cs` uses uGUI Canvas World-Space. That is
+  `UI/World/Markers/` and the `NextStopArrow.cs` uses uGUI Canvas World-Space. That is
   the entire boundary — two files and their folder use uGUI; everything else uses
   UI Toolkit. Coexistence between the two systems is fully supported and stable in
   Unity 6.3 LTS [^w36a] — there is no rendering conflict, no event-system conflict,
@@ -2571,7 +2571,7 @@ re-explaining them on every use.
   voice keyword search (structured per-POI keyword fields plus a
   three-tier synonym system — manual, offline WordNet-assisted, optional
   AI-assisted), and three result views (list, minimap, camera-highlight).
-  Builds the first real content in `Runtime/UI/Cards/` (a deliberately
+  Builds the first real content in `Runtime/UI/Screen/Cards/` (a deliberately
   minimal proof-of-life detail card, not the future full content card)
   and reuses the UI Toolkit foundation `_2.4` §9b built.
 - **Hierarchy level** — a wall-defined, developer-labelled tier (as many as the wall
