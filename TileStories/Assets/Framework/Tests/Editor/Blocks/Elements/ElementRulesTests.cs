@@ -120,8 +120,8 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(ElementOptions.MotionAuto, _s.Paragraph.Motion, "an unknown stored effect reads as Auto");
             Assert.AreEqual(ElementOptions.StrengthSubtle, _s.Paragraph.Strength);
 
-            Assert.AreEqual(ElementMotionRule.Reduced.CrossFade, ElementMotionRule.ReducedOf(ElementOptions.MotionReveal));
-            foreach (string moving in new[] { ElementOptions.MotionNone, ElementOptions.MotionSlideIn, ElementOptions.MotionParallax, ElementOptions.MotionSlowZoom, ElementOptions.MotionPan })
+            // - Reduce Motion: every effect still, the reveal included (the row is simply there: identical frames, _3.3 S2b)
+            foreach (string moving in new[] { ElementOptions.MotionNone, ElementOptions.MotionReveal, ElementOptions.MotionSlideIn, ElementOptions.MotionParallax, ElementOptions.MotionSlowZoom, ElementOptions.MotionPan })
                 Assert.AreEqual(ElementMotionRule.Reduced.Still, ElementMotionRule.ReducedOf(moving), moving);
         }
 

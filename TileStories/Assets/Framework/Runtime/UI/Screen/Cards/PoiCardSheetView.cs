@@ -366,7 +366,7 @@ namespace TileStories
         {
             switch (NavBackRule.Next(_context?.Settings?.navigation, Takeover.IsOpen, Overlay.IsOpen, Stack.OpenRows.Count > 0, Stop))
             {
-                case NavBackRule.Step.CloseFullView: Takeover.Close(); return true;
+                case NavBackRule.Step.CloseFullView: Takeover.GoBack(); return true;
                 case NavBackRule.Step.CloseOverlay: Overlay.Close(); return true;
                 case NavBackRule.Step.CollapseRow: Stack.Collapse(AccordionRule.ClosedByBack(Stack.OpenRows)); return true;
                 case NavBackRule.Step.LowerToHalf: SetStop(SheetStopRule.Stop.Half); return true;

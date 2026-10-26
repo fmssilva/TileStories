@@ -18,7 +18,8 @@ namespace TileStories.Tests
     // >= 7:1 on the RENDER, each option drawing what it says (the tone's token colour, sizes in order, the alignment, the drop cap's lines,
     // the numbers, the ornament, the spacer's heights); the PREVIEW capped at --ts-preview-max of the card's full height with the fade and
     // the Open Row (a whole touch target, its words and minutes from their sources), a short story whole; the Open Row's plain / nudge /
-    // shine as frame sequences with the brightest frame's ratio; a Custom preview; the media rows' gallery-only plates. Renders in
+    // shine as frame sequences with the brightest frame's ratio; a Custom preview. Every render is judged with the rows' motion settled
+    // (ElementMotion.Finish: a reveal starts transparent); the media elements and the motion are CardStoryMediaGalleryTests'. Renders in
     // TestEvidence/Card/Story/.
     public class CardStoryGalleryTests
     {
@@ -72,6 +73,7 @@ namespace TileStories.Tests
             Assert.IsInstanceOf<ComposedBlockView>(view, content + ": the story kind is drawn by the composed view");
             var composed = (ComposedBlockView)view;
             Assert.IsFalse(composed.IsPage, content + ": on the card it is the preview");
+            composed.Motion.Finish();
             got(composed);
         }
 
@@ -87,6 +89,7 @@ namespace TileStories.Tests
             var page = (ComposedBlockView)full.View;
             Assert.IsTrue(page.IsPage, "...bound as the page");
             Assert.AreNotSame(preview, page, "a second view: the card's preview stays bound under it");
+            page.Motion.Finish();
             got(page);
         }
 
@@ -318,8 +321,12 @@ namespace TileStories.Tests
             yield return ShowStory(CardGalleryDefinitions.StoryMagazine, mode, v => preview = v);
             CollectionAssert.AreEqual(new[] { BuiltInElements.Picture, BuiltInElements.Eyebrow, BuiltInElements.Title, BuiltInElements.Lede },
                 preview.Shown.Select(s => s.Content.Kind), "Automatic: the Page's picture, its eyebrow + title, its first text");
-            Assert.IsNull(preview.Shown[0].Component, "the picture's component is S2b's: a gallery plate");
-            foreach (var (_, _, component) in preview.Shown.Where(s => s.Component != null))
+            Assert.IsInstanceOf<PictureElement>(preview.Shown[0].Component, "the picture drawn by its component");
+            // - the review fix (S2b): no slot heading over a composed block -- its own title is its heading
+            var heading = _harness.Sheet.Stack.HeadingOf(preview);
+            Assert.IsTrue(heading.ClassListContains(BlockStackView.OwnTitleClass) && heading.resolvedStyle.display == DisplayStyle.None,
+                "no slot heading above the story's own title");
+            foreach (var (_, _, component) in preview.Shown.Where(s => !(s.Component is PictureElement)))
                 Assert.IsTrue(component.Root.ClassListContains("ts-el--size-s") && component.Root.ClassListContains(ElementStyle.PreviewClass),
                     component.Root.name + ": an Automatic preview draws every text at its smallest size");
             float room = preview.Cap - preview.OpenRow.layout.height - preview.OpenRow.resolvedStyle.marginTop;
@@ -464,7 +471,7 @@ namespace TileStories.Tests
             Assert.AreEqual(1, tints.Count, "the words keep one colour");
         }
 
-        // ---------------- Custom preview, media rows, reuse ----------------
+        // ---------------- Custom preview, reuse ----------------
 
         // Custom: the listed rows -- an own row, a link to the Page's title drawn in the LINK's style (large, not the compact size), and a
         // link whose Page row is gone, which draws nothing
@@ -480,29 +487,6 @@ namespace TileStories.Tests
             Assert.IsTrue(title.ClassListContains("ts-el--size-l"), "...in the link's own size (Custom keeps each row's style)");
             Assert.AreEqual("TEASER OF THE PREVIEW ONLY", ((LineElement)preview.Shown[0].Component).Text.text.Substring(((LineElement)preview.Shown[0].Component).Text.text.IndexOf('>') + 1));
             yield return Capture("custom_preview_light", null);
-        }
-
-        // A row of an element whose component is not built yet (the media elements, S2b): a "not built yet" plate in this gallery; on a
-        // visitor's card (no DevGallery) the same rows draw nothing -- never a hole, never a stray label
-        [UnityTest]
-        public IEnumerator MediaRows_AreGalleryPlates_AndNothingOnAVisitorsCard()
-        {
-            ComposedBlockView preview = null, page = null;
-            yield return ShowStory(CardGalleryDefinitions.StoryMedia, CardOptions.ModeLight, v => preview = v);
-            yield return OpenPage(preview, v => page = v);
-            var plates = page.Root.Query<Label>(className: ComposedBlockView.UnbuiltClass).ToList();
-            Assert.AreEqual(4, plates.Count, "picture, pair, carousel, video: a plate each");
-            StringAssert.Contains("not built yet", plates[0].text);
-            yield return Capture("media_page_light", null);
-
-            // - the same block bound as a visitor's card binds it: the four rows leave nothing behind
-            var visitor = new ComposedBlockView(BlockRegistry.Shared, ElementRegistry.Shared);
-            var entry = EntryOf(CardGalleryDefinitions.StoryMedia);
-            var context = new BlockBindContext { Poi = CardGalleryDefinitions.Poi(entry), Language = "en", FallbackLanguage = "en", FullView = true };
-            visitor.Bind(context.Poi.card.blocks[1], context);
-            Assert.AreEqual(0, visitor.Root.Query<Label>(className: ComposedBlockView.UnbuiltClass).ToList().Count, "a visitor's card shows no plate");
-            CollectionAssert.AreEqual(new[] { BuiltInElements.Title, BuiltInElements.Paragraph }, visitor.Shown.Select(s => s.Content.Kind), "only the built rows");
-            visitor.Unbind();
         }
 
         // The components are pooled: showing the magazine again, and another story, makes no new component of a kind it already made

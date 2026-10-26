@@ -71,9 +71,6 @@ namespace TileStories
         // BlockFullView). A view whose owner is keyed by the block (a 3D / 360 preview slot) asks for a slot of its own, and a view that offers
         // its own full screen (a video) does not offer it again from there. Every other view binds exactly as on the card
         public bool FullView;
-        // Developer-only: this card is the Phase A gallery's (CardGalleryHarness, Editor only). A composed block then marks each row whose
-        // element has no component yet with a "not built yet" plate; a visitor's card leaves such a row out. Never set by the wall's host
-        public bool DevGallery;
 
         // The registered service of type T, or null when there is none: a kind that needs a service treats null as "nothing to show"
         public T Service<T>() where T : class => Services?.Get<T>();
@@ -134,6 +131,18 @@ namespace TileStories
         // scope; the card's own view of it stays bound. A block that is not on this card is not opened
         void OpenFullView(string blockKey);
     }
+
+    // What a page drawn in the full-screen view may ask of it (_3.3 S2b, R15.2: a block or a component never names the card's TakeoverView):
+    // turn to another of its pages (a page that pages itself: the picture viewer's swipe), and run something when the page leaves the screen
+    // -- another page shown or the view closed -- before the view's media scope gives its files back
+    public interface ITakeoverPage
+    {
+        void Turn(int direction);
+        void WhenPageLeaves(System.Action release);
+    }
+
+    // Draws page `page` of the full-screen view into `container`, loading its media through `media` (the view's own scope)
+    public delegate void TakeoverPageDrawer(ITakeoverPage view, VisualElement container, IMediaSource media, int page);
 
     // A block view that keeps something going for the card through an owner -- a video it started -- and lets it go when its compact row is
     // closed (_3.2 step 12, BlockStackView.Collapse): nothing would be left on screen to show it or stop it. Called right before Unbind, and

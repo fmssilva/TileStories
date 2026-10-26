@@ -44,6 +44,18 @@
     --ts-el-space-l: 48px;
     /* A whole touch target (the Open Row) */
     --ts-el-touch: 48px;
+    /* The media rows: the gap around them, the frame's corner, the caption and credit sizes, the page's top padding a first full-bleed
+       picture takes back (minus the page's top padding below), how far a moving picture overhangs its frame on each side (10 % each side of
+       a 120 % picture), the carousel's item width and gap (the prototype's 280 / 10) */
+    --ts-el-gap-media: var(--ts-space-5);
+    --ts-el-media-radius: var(--ts-radius-m);
+    --ts-el-caption: 15px;
+    --ts-el-credit: 13px;
+    --ts-el-page-top-bleed: -24px;
+    --ts-el-media-overscan-start: -10%;
+    --ts-el-media-overscan-size: 120%;
+    --ts-el-carousel-cell: 280px;
+    --ts-el-carousel-gap: 10px;
     /* The preview's cap: a share of the card's full height (_3.3 R10.2), read by ComposedBlockView */
     --ts-preview-max: 0.5;
 }
@@ -362,19 +374,156 @@
 .ts-el-spacer.ts-el--size-m { height: var(--ts-el-space-m); }
 .ts-el-spacer.ts-el--size-l { height: var(--ts-el-space-l); }
 
-/* ---------------- the developer's gallery: an element whose component is not built yet ---------------- */
+/* ---------------- the media elements: picture, picture pair, carousel, video ---------------- */
 
-.ts-el-unbuilt {
-    margin: var(--ts-el-gap) 0 0 0;
-    padding: var(--ts-space-4);
-    border-width: 1px;
-    border-color: var(--ts-line);
-    border-radius: var(--ts-radius-m);
-    background-color: var(--ts-surface-2);
+/* A media row sits a little further from its neighbours than text does (the prototype's 24 pt around a figure) */
+.ts-el.ts-el-media {
+    margin-top: var(--ts-el-gap-media);
+}
+
+/* The frame: clipped, rounded (a rectangle; an arch rounds its top from code, MediaFrame), its proportion from code (aspect-ratio) */
+.ts-el-media__frame {
+    width: 100%;
+    border-radius: var(--ts-el-media-radius);
+}
+
+/* Full bleed: edge to edge -- on the card the block frame's own bleed (card-block-bleed), on the page the page's margin taken back; square
+   corners there, the picture IS the page's width */
+.ts-composed__page .ts-el--width-full-bleed {
+    margin-left: var(--ts-el-page-bleed);
+    margin-right: var(--ts-el-page-bleed);
+}
+
+.ts-el--width-full-bleed > .ts-el-media__frame,
+.ts-el--width-full-bleed .ts-el-video__teaser > .ts-el-media__frame {
+    border-radius: 0;
+}
+
+/* A full-bleed picture that opens the page runs to its top too (the prototype's hero): it takes back the page's top padding */
+.ts-composed__page .ts-el--first.ts-el--width-full-bleed {
+    margin-top: var(--ts-el-page-top-bleed);
+}
+
+/* A full bleed row's words keep the text's margin */
+.ts-el--width-full-bleed > .ts-el-media__words {
+    margin-left: var(--ts-el-page-inset);
+    margin-right: var(--ts-el-page-inset);
+}
+
+/* A row whose pictures move (parallax, slow zoom, pan: ElementMotion): the picture overhangs its frame on every side, so it never shows an
+   edge as it moves */
+.ts-el--moves-picture .card-image__picture {
+    left: var(--ts-el-media-overscan-start);
+    top: var(--ts-el-media-overscan-start);
+    width: var(--ts-el-media-overscan-size);
+    height: var(--ts-el-media-overscan-size);
+}
+
+.ts-el-media__words {
+    margin-top: var(--ts-space-2);
+}
+
+.ts-el-media__caption {
+    font-size: var(--ts-el-caption);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.ts-el-media__credit {
+    font-size: var(--ts-el-credit);
+    color: var(--ts-ink-2);
+    white-space: normal;
+    margin: var(--ts-space-1) 0 0 0;
+    padding: 0;
+}
+
+/* The pair: two figures of one width side by side, the gap between them; each caption bold (a label: "Before 1755") */
+.ts-el-picture-pair {
+    flex-direction: row;
+}
+
+.ts-el-picture-pair__side {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+}
+
+.ts-el-picture-pair__side--second {
+    margin-left: var(--ts-space-2);
+}
+
+.ts-el-picture-pair .ts-el-media__caption {
+    -unity-font-style: bold;
+    color: var(--ts-ink);
+}
+
+/* The carousel: the strip clips at the row's edges; full bleed it runs to the page's (the card frame's) edges while its first item lines
+   up with the text's margin -- the row's own padding -- so items bleed off the edges as it moves */
+.ts-el-carousel__viewport {
+    overflow: hidden;
+    padding: 0;
+}
+
+.ts-el-carousel__row {
+    flex-direction: row;
+    align-self: flex-start;
+    padding: 0;
+}
+
+.ts-el--width-full-bleed .ts-el-carousel__row {
+    padding-left: var(--ts-el-page-inset);
+    padding-right: var(--ts-el-page-inset);
+}
+
+/* A released swipe glides onto its item (not under Reduce Motion: CarouselElement leaves the glide class off) */
+.ts-el-carousel__row--glides.ts-strip--settling {
+    transition-property: translate;
+    transition-duration: var(--ts-duration);
+    transition-timing-function: var(--ts-ease);
+}
+
+/* every item but the last keeps the gap after it (USS has no sibling selector: the last one wears --last) */
+.ts-el-carousel__item {
+    width: var(--ts-el-carousel-cell);
+    flex-shrink: 0;
+    margin-right: var(--ts-el-carousel-gap);
+}
+
+.ts-el-carousel__item--last {
+    margin-right: 0;
+}
+
+/* The video teaser: the poster in its frame, the round play button in its middle, the caption + length badge at its foot */
+.ts-el-video__teaser .ts-el-media__frame {
+    align-items: center;
+    justify-content: center;
+}
+
+.ts-el-video__play {
+    position: absolute;
+}
+
+.ts-el-video__badge {
+    position: absolute;
+    left: var(--ts-space-3);
+    bottom: var(--ts-space-3);
+    max-width: 80%;
+    padding: var(--ts-space-1) var(--ts-space-2);
+    border-radius: var(--ts-radius-s);
+    background-color: var(--ts-surface);
+}
+
+.ts-el-video__badge-words {
     color: var(--ts-ink);
     font-size: var(--ts-size-caption);
-    -unity-text-align: middle-center;
-    white-space: normal;
+    -unity-font-style: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+    padding: 0;
 }
 
 /* ---------------- the Open Row ---------------- */
@@ -416,6 +565,13 @@
 
 .ts-composed__rows {
     flex-shrink: 0;
+}
+
+/* On the card the clip runs to the block frame's inner edge (card-block-bleed): its rows take the text's margin back, so a full-bleed row
+   (card-block-bleed, the frame's own rule) reaches the frame's edge and every other row keeps the margin */
+.card-block-slot--framed .ts-composed__clip > .ts-composed__rows {
+    padding-left: var(--ts-el-page-inset);
+    padding-right: var(--ts-el-page-inset);
 }
 
 /* The cut: the surface's colour ramping in over the last lines (hero_scrim.png's 0 -> 1 alpha ramp, tinted) */

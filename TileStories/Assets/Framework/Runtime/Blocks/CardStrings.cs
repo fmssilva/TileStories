@@ -235,6 +235,8 @@ namespace TileStories
             // story"), and the line "{0} · {1}" joining them to the reading time
             public const string OpenRowStory = "open_row_story";
             public const string OpenRowMeta = "open_row_meta";
+            // A composed block's video poster: its caption joined to its length ("The square today · 0:55", _3.3 S2b)
+            public const string MediaBadge = "media_badge";
 
             // The words a visitor reads for each of the framework's default navigation Groups (_3.2 section 3, the segmented element): a
             // wall's own Groups row reads its own label first; these name the four rows a wall gets with no Groups of its own
@@ -315,7 +317,7 @@ namespace TileStories
                 KindActions, KindGallery, KindBeforeAfter, KindZoomImage, KindHotspotImage, KindVideo, KindModel3D, KindPanorama360,
                 KindAudioGuide, KindTimeline, KindPerson, KindStoryChapters, KindComparePoints, KindDialogue, KindShowOnWall, KindPlaceInAr,
                 KindKnowledgeCheck, KindPoll, KindCollect, KindPracticalInfo, KindWallLocator, KindTodayMap, KindRelated, KindFeedback, KindNavIconGrid,
-                KindNavContents, KindNavRails, KindNavBento, KindSources, KindStory, OpenRowStory, OpenRowMeta,
+                KindNavContents, KindNavRails, KindNavBento, KindSources, KindStory, OpenRowStory, OpenRowMeta, MediaBadge,
                 NavGroupDiscover, NavGroupWatch, NavGroupExplore, NavGroupVisit,
                 NavMore, NavNextUp, NavNextUpPosition, NavNextButton, NavNextUpDone,
                 NavMenu, NavMenuByPurpose, NavMenuByFormat, NavMenuAll,

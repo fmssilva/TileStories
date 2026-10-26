@@ -4,9 +4,6 @@ using UnityEngine.UIElements;
 
 namespace TileStories
 {
-    // Draws page `page` of the full-screen `view` into `container`, loading its media through `media` (the view's own
-    // scope); a page that pages itself (the lightbox's swipe) turns through view.Turn
-    public delegate void TakeoverPageDrawer(TakeoverView view, VisualElement container, IMediaSource media, int page);
 
     // The full-screen view over the card (_3.1 section 4, "Takeover"; first user: the gallery's lightbox, step 7). It
     // covers the whole card layer above the sheet: a bar with the way back and the breadcrumb, one chip per sibling page, and the page itself,
@@ -17,8 +14,10 @@ namespace TileStories
     //     the page shown ("Castle > Media > 360"); it wraps, never clips
     //   - the chips are ONE line clipped at the screen's width (NavStrip: the current chip is centred, so the next one is always a tap away), each a whole touch
     //     target named by its page; the current one is bold with a ring as well as filled -- never colour alone
+    //   - Back (the button, the system Back: GoBack) returns to what the view was opened over when its opener named it -- a picture's viewer
+    //     or a video's player opened from a block's page goes back to that page (_3.3 S2b); Close (a jump, the card closing) never returns
     // Plain C#: built into the layer it is handed; Media.uss styles it.
-    public sealed class TakeoverView
+    public sealed class TakeoverView : ITakeoverPage
     {
         // What a tap on the breadcrumb's section reports as its element (nav_jump's Variant)
         public const string CrumbElementKey = "breadcrumb";
@@ -79,6 +78,11 @@ namespace TileStories
         private ScopedMediaSource _media;
         private TakeoverPageDrawer _draw;
         private Func<int, string> _nameOfPage;
+        // What Back returns to (null = the card): set by the opener of THIS opening, forgotten by any close
+        private Action _returnTo;
+
+        // Whether Back returns to something over the card (a block's page) rather than to the card itself
+        public bool ReturnsToAPage => IsOpen && _returnTo != null;
 
         public TakeoverView(VisualElement layer)
         {
@@ -90,7 +94,7 @@ namespace TileStories
             Root.AddToClassList("card-takeover");
             var bar = new VisualElement();
             bar.AddToClassList("card-takeover__bar");
-            Back = new Button(Close) { name = "poi-card-takeover-back" };
+            Back = new Button(GoBack) { name = "poi-card-takeover-back" };
             Back.AddToClassList("card-takeover__back");
             Back.AddToClassList("card-pill");
             Crumb = new VisualElement { name = "poi-card-takeover-crumb" };
@@ -150,12 +154,14 @@ namespace TileStories
         // Open over the card: the breadcrumb starts with `title` and ends with `nameOfPage(page)` for the page shown; `pageCount` pages (a chip
         // each when more than one, named by its page), at `start`. No section until ShowSection names one. `iconOfPage` (optional) gives a
         // CardIcons key per page: such a chip shows that icon instead of a number, and the chip of the page being read adds the page's name
-        // beside it (a block's siblings: its kind's icon says what each one is); null or a null key keeps the page number
+        // beside it (a block's siblings: its kind's icon says what each one is); null or a null key keeps the page number. `returnTo` (optional):
+        // what Back opens again once this view closes (the block's page it was opened over)
         public void Open(string title, Func<int, string> nameOfPage, int pageCount, int start, IMediaSource cardMedia, TakeoverPageDrawer draw,
-            CardStrings strings, Func<int, string> iconOfPage = null)
+            CardStrings strings, Func<int, string> iconOfPage = null, Action returnTo = null)
         {
             Close();
             if (pageCount <= 0 || draw == null) return;
+            _returnTo = returnTo;
             _media = new ScopedMediaSource(cardMedia);
             _draw = draw;
             _nameOfPage = nameOfPage;
@@ -267,9 +273,19 @@ namespace TileStories
             foreach (var release in leaving) release();
         }
 
-        // Back to the card: every file of the view given back, the card as it was
+        // The visitor's Back (the button, the system Back): the view closes, then what it was opened over opens again (a block's page), else
+        // the card shows as it was
+        public void GoBack()
+        {
+            var returnTo = _returnTo;
+            Close();
+            returnTo?.Invoke();
+        }
+
+        // Back to the card: every file of the view given back, the card as it was (nothing reopened: a jump, the card closing)
         public void Close()
         {
+            _returnTo = null;
             if (!IsOpen) return;
             IsOpen = false;
             LeavePage();

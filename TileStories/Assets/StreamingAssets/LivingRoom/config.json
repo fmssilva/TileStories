@@ -9522,6 +9522,100 @@
                                                 "text": [],
                                                 "number": 0.0,
                                                 "flag": false,
+                                                "value": "el_12",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "element",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "picture",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "width",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "full_bleed",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "frame",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "rectangle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "motion",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "auto",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "strength",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "subtle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "tap",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "open_viewer",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "validated",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "media",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The Terreiro do Paço in 1662, the palace along the river front."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O Terreiro do Paço em 1662, com o paço ao longo do rio."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "Dirk Stoop, c. 1662",
+                                                "asset": "images/paco_hero.jpg",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "id",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
                                                 "value": "el_1",
                                                 "asset": "",
                                                 "asset_by_language": []
@@ -9907,6 +10001,100 @@
                                                 "text": [],
                                                 "number": 0.0,
                                                 "flag": false,
+                                                "value": "el_13",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "element",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "picture",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "width",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "inset",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "frame",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "rectangle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "motion",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "auto",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "strength",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "subtle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "tap",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "open_viewer",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "validated",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "media",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace front and its garden, drawn for a firework display in 1687."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A fachada do paço e o seu jardim, desenhados para um fogo de artifício em 1687."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "João dos Reis, 1687",
+                                                "asset": "images/paco_gallery_3.jpg",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "id",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
                                                 "value": "el_5",
                                                 "asset": "",
                                                 "asset_by_language": []
@@ -10207,7 +10395,7 @@
                                                 "text": [],
                                                 "number": 0.0,
                                                 "flag": false,
-                                                "value": "el_8",
+                                                "value": "el_14",
                                                 "asset": "",
                                                 "asset_by_language": []
                                             },
@@ -10216,34 +10404,25 @@
                                                 "text": [],
                                                 "number": 0.0,
                                                 "flag": false,
-                                                "value": "pull_quote",
+                                                "value": "picture",
                                                 "asset": "",
                                                 "asset_by_language": []
                                             },
                                             {
-                                                "key": "tone",
+                                                "key": "width",
                                                 "text": [],
                                                 "number": 0.0,
                                                 "flag": false,
-                                                "value": "family",
+                                                "value": "full_bleed",
                                                 "asset": "",
                                                 "asset_by_language": []
                                             },
                                             {
-                                                "key": "size",
+                                                "key": "frame",
                                                 "text": [],
                                                 "number": 0.0,
                                                 "flag": false,
-                                                "value": "l",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "align",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "center",
+                                                "value": "rectangle",
                                                 "asset": "",
                                                 "asset_by_language": []
                                             },
@@ -10266,6 +10445,15 @@
                                                 "asset_by_language": []
                                             },
                                             {
+                                                "key": "tap",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "open_viewer",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
                                                 "key": "validated",
                                                 "text": [],
                                                 "number": 0.0,
@@ -10275,79 +10463,21 @@
                                                 "asset_by_language": []
                                             },
                                             {
-                                                "key": "text",
+                                                "key": "media",
                                                 "text": [
                                                     {
                                                         "lang": "en",
-                                                        "value": "Where the palace had stood, an open square was laid out, facing the river like a grand front door."
+                                                        "value": "The ruins of the Ópera do Tejo after the earthquake."
                                                     },
                                                     {
                                                         "lang": "pt",
-                                                        "value": "No lugar do paço, traçou-se uma praça aberta ao rio, como uma grande porta de entrada."
+                                                        "value": "As ruínas da Ópera do Tejo depois do terramoto."
                                                     }
                                                 ],
                                                 "number": 0.0,
                                                 "flag": false,
-                                                "value": "",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "fields": [
-                                            {
-                                                "key": "id",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "el_9",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "element",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "divider",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "ornament",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "azulejo",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "motion",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "auto",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "strength",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "subtle",
-                                                "asset": "",
-                                                "asset_by_language": []
-                                            },
-                                            {
-                                                "key": "validated",
-                                                "text": [],
-                                                "number": 0.0,
-                                                "flag": false,
-                                                "value": "",
-                                                "asset": "",
+                                                "value": "Jacques-Philippe Le Bas, 1757",
+                                                "asset": "images/paco_gallery_2.jpg",
                                                 "asset_by_language": []
                                             }
                                         ]
@@ -10548,13 +10678,501 @@
                                                 "asset_by_language": []
                                             }
                                         ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "id",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "el_8",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "element",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "pull_quote",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "tone",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "family",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "size",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "l",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "align",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "center",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "motion",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "auto",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "strength",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "subtle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "validated",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "text",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Where the palace had stood, an open square was laid out, facing the river like a grand front door."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "No lugar do paço, traçou-se uma praça aberta ao rio, como uma grande porta de entrada."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "id",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "el_15",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "element",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "picture_pair",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "width",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "inset",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "frame",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "rectangle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "motion",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "auto",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "strength",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "subtle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "tap",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "open_viewer",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "validated",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "media",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Before 1755"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Antes de 1755"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "images/paco_before_1755.jpg",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "media",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "Today"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Hoje"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "Dguendel, CC BY 4.0",
+                                                "asset": "images/paco_after_today.jpg",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "id",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "el_9",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "element",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "divider",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "ornament",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "azulejo",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "motion",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "auto",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "strength",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "subtle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "validated",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "id",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "el_16",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "element",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "carousel",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "width",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "full_bleed",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "frame",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "rectangle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "motion",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "auto",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "strength",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "subtle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "validated",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "media",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "A royal procession crosses the yard, 23 April 1662."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "Um cortejo real atravessa o terreiro, 23 de abril de 1662."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "images/paco_gallery_1.jpg",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "media",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The palace by the river, c. 1662."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "O paço junto ao rio, c. 1662."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "Dirk Stoop",
+                                                "asset": "images/paco_hero.jpg",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "media",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The Praça do Comércio from the river today."
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A Praça do Comércio vista do rio, hoje."
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "Jakub Hałun, CC BY 4.0",
+                                                "asset": "images/paco_gallery_4.jpg",
+                                                "asset_by_language": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "fields": [
+                                            {
+                                                "key": "id",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "el_17",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "element",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "video",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "width",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "inset",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "frame",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "rectangle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "motion",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "auto",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "strength",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "subtle",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "tap",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "open_player",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "validated",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "media",
+                                                "text": [
+                                                    {
+                                                        "lang": "en",
+                                                        "value": "The square today"
+                                                    },
+                                                    {
+                                                        "lang": "pt",
+                                                        "value": "A praça hoje"
+                                                    }
+                                                ],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "deror_avi, CC BY-SA 3.0",
+                                                "asset": "video/lisbon_square_castle_55s.mp4",
+                                                "asset_by_language": []
+                                            },
+                                            {
+                                                "key": "poster",
+                                                "text": [],
+                                                "number": 0.0,
+                                                "flag": false,
+                                                "value": "",
+                                                "asset": "video/lisbon_square_castle_poster.jpg",
+                                                "asset_by_language": []
+                                            }
+                                        ]
                                     }
                                 ]
                             },
                             {
                                 "key": "element_last_id",
                                 "text": [],
-                                "number": 11.0,
+                                "number": 17.0,
                                 "flag": false,
                                 "value": "",
                                 "asset": "",

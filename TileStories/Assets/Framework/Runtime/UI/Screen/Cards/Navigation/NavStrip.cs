@@ -14,6 +14,11 @@ namespace TileStories
         public VisualElement Row { get; }
         // How far the row is moved left now (NavStripRule's offset)
         public float Offset { get; private set; }
+        // A released drag rests the row on the nearest item's start (NavStripRule.SnapOffset: the story's carousel, App Store style); off for
+        // the navigation strips, which stop where the finger leaves them
+        public bool SnapsToItems { get; set; }
+        // The row wears this while it settles on an item after a release (a stylesheet may glide it there); a new drag takes it off
+        public const string SettlingClass = "ts-strip--settling";
 
         private readonly SwipeGrab _drag;
         private float _dragStartOffset;
@@ -31,8 +36,13 @@ namespace TileStories
             Row.AddToClassList(rowClass);
             Viewport.Add(Row);
             _drag = new SwipeGrab(Viewport, SwipeGrabRule.ClaimsPointer);
-            _drag.Claimed += _ => _dragStartOffset = Offset;
+            _drag.Claimed += _ =>
+            {
+                Row.RemoveFromClassList(SettlingClass);
+                _dragStartOffset = Offset;
+            };
             _drag.Moved += travel => SetOffset(_dragStartOffset - travel.x);
+            _drag.Released += _ => Snap();
             // - a new width (another card's words, a rotated screen) can leave the row past its end, or the marked item out of view
             Row.RegisterCallback<GeometryChangedEvent>(_ => Relayout());
             Viewport.RegisterCallback<GeometryChangedEvent>(_ => Relayout());
@@ -82,6 +92,18 @@ namespace TileStories
                 return;
             }
             SetOffset(Offset);
+        }
+
+        // A released drag of a snapping strip: rest on the nearest item's start -- measured from the row's own inset (its left padding), so a
+        // row that starts its first item at the text's margin rests every item there
+        private void Snap()
+        {
+            if (!SnapsToItems) return;
+            float inset = Row.resolvedStyle.paddingLeft;
+            var starts = new System.Collections.Generic.List<float>();
+            foreach (var item in Row.Children()) starts.Add(item.layout.x - inset);
+            Row.AddToClassList(SettlingClass);
+            SetOffset(NavStripRule.SnapOffset(starts, Offset, Row.layout.width, VisibleWidth));
         }
 
         private void SetOffset(float offset)

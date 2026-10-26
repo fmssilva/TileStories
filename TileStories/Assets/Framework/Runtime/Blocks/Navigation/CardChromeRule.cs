@@ -176,6 +176,17 @@ namespace TileStories
             return NavScrollRule.Range(contentHeight, viewportAfter);
         }
 
+        // The stack's offset `elapsed` seconds into its glide from `from` to the kept end `to` (_3.3 S2b, the resting-end review): the content
+        // rises WITH the bottom area as it slides in, over the area's own `duration` and curve (the theme's --ts-ease: ease-out cubic), instead
+        // of jumping by the area's height in one frame. No duration (Reduce Motion: the area jumps too), or the glide over: the end
+        public static float GlideOffset(float from, float to, float elapsed, float duration)
+        {
+            if (!(duration > 0f) || float.IsNaN(elapsed) || elapsed >= duration) return to;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float u = 1f - t;
+            return Mathf.Lerp(from, to, 1f - u * u * u);
+        }
+
         // A stack shorter than the floor needs only its own height; one not measured yet, the whole floor
         private static float Need(float contentHeight, float floor) =>
             float.IsNaN(contentHeight) || contentHeight < 0f ? floor : Mathf.Min(floor, contentHeight);

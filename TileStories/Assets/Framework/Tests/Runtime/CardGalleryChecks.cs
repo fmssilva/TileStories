@@ -193,7 +193,10 @@ namespace TileStories.Tests
                 ? CardGalleryDefinitions.HeadingFor(entry.Kind)
                 : definition?.DefaultHeadingKey != null ? new CardStrings(harness.StringTable.Entries(), harness.StringSources.Entries(), null, harness.Language, harness.Language).Get(definition.DefaultHeadingKey) : "";
             Assert.AreEqual(expected, heading.text, entry.Name + ": the heading the stack draws");
-            if (expected.Length > 0)
+            // - a composed block draws its own title (_3.3 S2b): its slot heading keeps the words for navigation and is never drawn
+            if (expected.Length > 0 && BlockSurfaces.Composes(definition))
+                Assert.IsFalse(CardTestInput.IsShown(heading, slot), entry.Name + ": a composed block's own title is its heading: the slot's is not drawn");
+            else if (expected.Length > 0)
             {
                 Assert.IsTrue(CardTestInput.IsShown(heading, slot), entry.Name + ": the heading shows");
                 Assert.LessOrEqual(heading.worldBound.yMax, view.Root.worldBound.yMin + 0.5f, entry.Name + ": above its block");

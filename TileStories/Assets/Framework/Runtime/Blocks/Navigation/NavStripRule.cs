@@ -28,6 +28,27 @@ namespace TileStories
             return Clamp(target, contentWidth, viewportWidth);
         }
 
+        // Where a released strip that snaps to its items comes to rest (_3.3 S2b, the story's carousel, App Store style): the item start
+        // (`itemStarts`, from the row's start) nearest the offset it was let go at, clamped -- so an item always lines up with the strip's
+        // inset, and the last ones rest against the end. No items, or a strip that fits: the clamped offset
+        public static float SnapOffset(System.Collections.Generic.IReadOnlyList<float> itemStarts, float offset, float contentWidth, float viewportWidth)
+        {
+            float target = offset;
+            float nearest = float.MaxValue;
+            if (itemStarts != null)
+                foreach (float start in itemStarts)
+                {
+                    if (float.IsNaN(start)) continue;
+                    float d = Mathf.Abs(start - offset);
+                    if (d < nearest)
+                    {
+                        nearest = d;
+                        target = start;
+                    }
+                }
+            return Clamp(target, contentWidth, viewportWidth);
+        }
+
         // The offset that puts an item in the MIDDLE of the strip (clamped at both ends): for a row a visitor steps through by tapping (the full
         // view's page chips, _3.2 step 16) -- its neighbours on both sides stay in view, so the next one is always a tap away, never cut at the
         // edge as the least move leaves it. An item not laid out yet (NaN) leaves the offset where it is

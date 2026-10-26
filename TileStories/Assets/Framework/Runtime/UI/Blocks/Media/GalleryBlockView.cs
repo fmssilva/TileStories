@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 namespace TileStories
 {
     // The gallery block (_3.1 Tier 2): the POI's pictures in one of four looks, and in every look a tap on a picture opens
-    // it full screen (the lightbox: IBlockHost.OpenTakeover, one page per picture, caption + credit under it).
+    // it full screen (the lightbox: the shared PictureViewer, one page per picture, caption + credit under it).
     //   carousel  -- one picture at a time on a horizontal swipe track, dots under it following the scroll
     //   grid      -- small pictures two per row
     //   filmstrip -- one large picture + caption, the others as a strip of small ones; a tap on a small one shows it large
@@ -183,32 +183,13 @@ namespace TileStories
             foreach (var shot in _shown) shot.Box.EnableInClassList("card-gallery__thumb--current", shot.Page == index);
         }
 
-        // Open picture `page` full screen (the card stays as it is underneath)
+        // Open picture `page` full screen in the shared picture viewer (the card stays as it is underneath)
         public void OpenLightbox(int page)
         {
             if (_context?.Host == null || _pictures.Count == 0) return;
-            var pictures = new List<Picture>(_pictures);
-            var strings = _context.Strings;
-            _context.Host.OpenTakeover(strings?.Get(CardStrings.Keys.GalleryName) ?? "", pictures.Count, page,
-                (view, container, media, index) => DrawLightboxPage(view, container, media, strings, pictures[index]));
-        }
-
-        // One lightbox page: the picture fitted to the screen -- a swipe sideways turns the page, two fingers look closer
-        // (ZoomPanSurface, as zoom_image) -- its caption and credit under it
-        private static void DrawLightboxPage(TakeoverView view, VisualElement container, IMediaSource media, CardStrings strings, Picture picture)
-        {
-            var surface = new ZoomPanSurface("card-gallery__full", "card-gallery__full-picture") { Swipes = true };
-            surface.Frame.name = "card-gallery-full";
-            surface.Swiped += view.Turn;
-            container.Add(surface.Frame);
-            surface.Show(media, picture.Path, strings);
-            foreach (var (text, cls) in new[] { (picture.Caption, "card-gallery__full-caption"), (picture.Credit, "card-gallery__full-credit") })
-            {
-                if (text.Length == 0) continue;
-                var label = new Label(text);
-                label.AddToClassList(cls);
-                container.Add(label);
-            }
+            var pictures = new List<PictureViewer.Picture>();
+            foreach (var p in _pictures) pictures.Add(new PictureViewer.Picture(p.Path, p.Caption, p.Credit));
+            PictureViewer.Open(_context.Host, _context.Strings?.Get(CardStrings.Keys.GalleryName) ?? "", pictures, page, _context.Strings);
         }
 
         private Shot TakeShot(int page, bool withCaption)

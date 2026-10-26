@@ -166,6 +166,29 @@ namespace TileStories.Editor.Tests
             Assert.AreEqual(0f, CardChromeRule.KeepTheEnd(0f, 500f, AwayViewport, BackViewport), "a stack that does not scroll stays at its top");
         }
 
+        // The glide (_3.3 S2b): from the old rest to the kept end over the area's own duration and curve -- starts where it was, ends exactly
+        // at the end, ease-out (more than half the way in the first third), never past the end; no duration (Reduce Motion) = the end at once
+        [Test]
+        public void TheKeptEnd_IsReachedByAGlide_OverTheAreasDuration_OrAtOnceWithNoDuration()
+        {
+            const float duration = 0.22f;
+            Assert.AreEqual(OldRest, CardChromeRule.GlideOffset(OldRest, RealEnd, 0f, duration), 0.01f, "it starts where the stack was");
+            Assert.AreEqual(RealEnd, CardChromeRule.GlideOffset(OldRest, RealEnd, duration, duration), "it ends exactly at the end");
+            Assert.AreEqual(RealEnd, CardChromeRule.GlideOffset(OldRest, RealEnd, 5f, duration), "and stays there");
+            float third = CardChromeRule.GlideOffset(OldRest, RealEnd, duration / 3f, duration);
+            Assert.Greater(third - OldRest, EndArea * 0.5f, "decelerating: more than half the way in the first third (the bar's ease-out)");
+            float last = OldRest;
+            for (int i = 1; i <= 22; i++)
+            {
+                float now = CardChromeRule.GlideOffset(OldRest, RealEnd, i * 0.01f, duration);
+                Assert.GreaterOrEqual(now, last, "it only moves towards the end (frame " + i + ")");
+                Assert.LessOrEqual(now, RealEnd, "never past it");
+                last = now;
+            }
+            Assert.AreEqual(RealEnd, CardChromeRule.GlideOffset(OldRest, RealEnd, 0f, 0f), "no duration: at once");
+            Assert.AreEqual(RealEnd, CardChromeRule.GlideOffset(OldRest, RealEnd, float.NaN, duration), "an unknown time: the end");
+        }
+
         // The end zone: with the area shown, "at the end" is the range WITHOUT it, so the area never hides within its own height of the end
         // -- before, a move down there hid it, the grown viewport clamped the stack back and the area came again: drags rested 147 short
         [Test]

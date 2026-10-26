@@ -40,6 +40,13 @@ namespace TileStories
         }
     }
 
+    // A component that shows pictures in clipped frames (the media elements, _3.3 S2b): the pictures a row's parallax, slow zoom or pan moves
+    // inside their frames (each one's parent is its frame); empty when nothing is shown
+    public interface IFramedPictures
+    {
+        System.Collections.Generic.IReadOnlyList<VisualElement> Pictures { get; }
+    }
+
     // One element kind's component (_3.3 R14.2): a VisualElement built once, then bound to a row and unbound as the block's rows change
     // (pooled per kind by ElementComponentPool -- never made and thrown away per bind). Styled only by theme tokens and its own --ts-el-*
     // tokens (Components.uss), every closed style option a class.

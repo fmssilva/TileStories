@@ -59,10 +59,12 @@ namespace TileStories
 
         // A block asked for the full-screen view: the breadcrumb starts with this card's title and ends with `name`
         public void OpenTakeover(string name, int pageCount, int startPage, TakeoverPageDrawer drawPage) =>
-            OpenPages(_ => name, pageCount, startPage, drawPage);
+            OpenPages(_ => name, pageCount, startPage, drawPage, returnTo: ReturnToThePageOpenNow());
 
-        // The full-screen view with a name per page; no section in the breadcrumb until ShowCrumbSection names one
-        private void OpenPages(Func<int, string> nameOfPage, int pageCount, int startPage, TakeoverPageDrawer drawPage, Func<int, string> iconOfPage = null)
+        // The full-screen view with a name per page; no section in the breadcrumb until ShowCrumbSection names one. `returnTo`: what Back opens
+        // again once it closes (null: the card)
+        private void OpenPages(Func<int, string> nameOfPage, int pageCount, int startPage, TakeoverPageDrawer drawPage, Func<int, string> iconOfPage = null,
+            Action returnTo = null)
         {
             var context = _sheet.Context;
             if (!_sheet.IsOpen || context == null) return;
@@ -71,7 +73,22 @@ namespace TileStories
             // - never stacked: the full view replaces what was open over the card
             _sheet.Overlay.Close();
             _crumbSection = -1;
-            _sheet.Takeover.Open(title, nameOfPage, pageCount, startPage, context.Media, drawPage, context.Strings, iconOfPage);
+            _sheet.Takeover.Open(title, nameOfPage, pageCount, startPage, context.Media, drawPage, context.Strings, iconOfPage, returnTo);
+        }
+
+        // What Back returns to when a block asks for the full-screen view from inside its page (_3.3 S2b: a story's picture opens its viewer, its
+        // video its player): that block's page again, at the scroll the visitor left it -- one level, never a chain. Null over the card itself
+        private Action ReturnToThePageOpenNow()
+        {
+            var fullView = _sheet.FullView;
+            string block = fullView.IsOpen ? fullView.BlockKey : null;
+            if (block == null) return null;
+            float offset = fullView.Scroll.scrollOffset.y;
+            return () =>
+            {
+                OpenFullView(block);
+                if (fullView.BlockKey == block) fullView.ReturnTo(offset);
+            };
         }
 
         // A block asked for its full view (an open compact row's button, a bento tile): the page holds a second view of its kind, one page per
@@ -129,7 +146,7 @@ namespace TileStories
                 if (stack.TryGetEntryOfBlock(target, out var entry)) entries.Add(entry);
             if (entries.Count == 0) return false;
             string words = context.Strings != null && section.LabelKey != null ? context.Strings.Get(section.LabelKey) : "";
-            OpenTakeover(string.IsNullOrEmpty(words) ? section.Key : words, 1, 0,
+            OpenPages(_ => string.IsNullOrEmpty(words) ? section.Key : words, 1, 0,
                 _sheet.FullView.SectionPageFor(entries, section.Key, stack.HeadingOfBlock, context, landingKey));
             return _sheet.FullView.IsOpen;
         }

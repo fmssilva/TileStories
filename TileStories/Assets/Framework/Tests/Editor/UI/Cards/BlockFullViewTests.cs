@@ -103,7 +103,7 @@ namespace TileStories.Editor.Tests
             {
                 shown++;
                 Assert.IsNotNull(scope.Load<Texture2D>(picture));
-                view.WhenPageLeaves(() => heldWhenLeaving = view.HeldMedia);
+                view.WhenPageLeaves(() => heldWhenLeaving = takeover.HeldMedia);
             }, null);
             Assert.AreEqual(1, takeover.HeldMedia);
             takeover.ShowPage(1);

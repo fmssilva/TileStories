@@ -88,11 +88,12 @@ namespace TileStories
             Scroll.contentContainer.RegisterCallback<GeometryChangedEvent>(_ =>
             {
                 Land();
+                KeepReturnOffset();
                 MeasureViewed();
             });
             Scroll.contentViewport.RegisterCallback<GeometryChangedEvent>(_ => MeasureViewed());
-            Scroll.RegisterCallback<PointerDownEvent>(_ => _landing = null, TrickleDown.TrickleDown);
-            Scroll.RegisterCallback<WheelEvent>(_ => _landing = null, TrickleDown.TrickleDown);
+            Scroll.RegisterCallback<PointerDownEvent>(_ => StopHolding(), TrickleDown.TrickleDown);
+            Scroll.RegisterCallback<WheelEvent>(_ => StopHolding(), TrickleDown.TrickleDown);
 
             // - the sibling swipe (_3.2 step 16): the ONE way a part takes a finger, as the pages layout does on the card's stack -- judged once
             //   past the slop, clearly sideways only (reading down the page stays the scroll's), and a finger that lands on a part that drags by
@@ -167,6 +168,7 @@ namespace TileStories
                     var heading = new Label(headingOf?.Invoke(entry.Instance.key) ?? "");
                     heading.AddToClassList("card-block-heading");
                     heading.EnableInClassList("card-block-heading--empty", heading.text.Length == 0);
+                    heading.EnableInClassList(BlockStackView.OwnTitleClass, BlockSurfaces.Composes(entry.Definition));
                     slot.Add(heading);
                     slot.Add(view.Root);
                     Scroll.Add(slot);
@@ -180,6 +182,30 @@ namespace TileStories
                 _viewed.Clear();
                 takeover.WhenPageLeaves(ReleaseSection);
             };
+        }
+
+        // The page the visitor comes BACK to (a picture's viewer or a video's player opened from it, _3.3 S2b): its scroll is put back where they
+        // left it, held while the page lays out (its pictures load) until it is reached or the visitor touches the page
+        public void ReturnTo(float offset)
+        {
+            _returnOffset = offset;
+            KeepReturnOffset();
+        }
+
+        private float _returnOffset = float.NaN;
+
+        private void KeepReturnOffset()
+        {
+            if (float.IsNaN(_returnOffset) || View == null) return;
+            Scroll.scrollOffset = new UnityEngine.Vector2(0f, _returnOffset);
+            if (UnityEngine.Mathf.Abs(Scroll.scrollOffset.y - _returnOffset) < 0.5f) _returnOffset = float.NaN;
+        }
+
+        // The visitor touched the page: nothing is held for them any more
+        private void StopHolding()
+        {
+            _landing = null;
+            _returnOffset = float.NaN;
         }
 
         // Keep the landing block's top at the page's top while the page lays out (a picture loading moves it) -- until the visitor touches it
@@ -244,6 +270,7 @@ namespace TileStories
             if (View != view) return;
             View = null;
             BlockKey = null;
+            _returnOffset = float.NaN;
         }
     }
 }

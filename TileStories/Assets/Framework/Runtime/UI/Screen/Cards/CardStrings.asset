@@ -1084,6 +1084,13 @@ MonoBehaviour:
       value: "{0} \xB7 {1}"
     - lang: pt
       value: "{0} \xB7 {1}"
+  - key: media_badge
+    where: On a video's poster inside a story page, its caption and its length ({0} = the caption, e.g. The square today; {1} = the length, e.g. 0:55).
+    text:
+    - lang: en
+      value: "{0} \xB7 {1}"
+    - lang: pt
+      value: "{0} \xB7 {1}"
   - key: nav_group_discover
     where: The name of the default navigation group that joins the About and Stories families. A segment of the Segmented navigation shows it.
     text:

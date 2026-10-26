@@ -74,8 +74,7 @@ namespace TileStories
             foreach (var element in All()) registry.Register(element, ComponentOf(element.Key));
         }
 
-        // The factory of an element's component (_3.3 S2a: the text and structure elements); null for the media elements, whose components
-        // are _3.3 S2b's -- a row of one draws nothing on a visitor's card until then
+        // The factory of an element's component (Runtime/UI/Components): every v1 element has one; null for a key this set does not hold
         public static System.Func<IElementComponent> ComponentOf(string key) => key switch
         {
             Title or Eyebrow or Heading => () => new LineElement(key),
@@ -83,6 +82,10 @@ namespace TileStories
             Callout => () => new CalloutElement(),
             PullQuote => () => new PullQuoteElement(),
             List => () => new ListElement(),
+            Picture => () => new PictureElement(),
+            PicturePair => () => new PicturePairElement(),
+            Carousel => () => new CarouselElement(),
+            Video => () => new VideoElement(),
             Divider => () => new DividerElement(),
             Spacer => () => new SpacerElement(),
             _ => null,

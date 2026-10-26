@@ -10,16 +10,16 @@ namespace TileStories
     //     (IBlockHost.FullHeight, the measured full stop: a USS percentage does not resolve inside the ScrollView, R10.2) and cut with a
     //     fade into the surface when it is taller, then the Open Row. A tap anywhere on it opens the page (R17.4)
     //   - in the full view (BlockBindContext.FullView): the PAGE -- every row in order
-    // Each row is drawn by its element's component (ElementRegistry, pooled per kind); a row of an element with no component yet (the media
-    // elements before S2b) draws nothing for a visitor and a "not built yet" plate in the developer's gallery (BlockBindContext.DevGallery);
-    // a broken reference draws nothing. The rhythm between rows is the stylesheet's, by pair: each row wears the class of the kind before it
-    // (ts-el--after-heading), USS having no sibling selector. Host-agnostic (R15.2): it asks the host for the full height and the full view.
+    // Each row is drawn by its element's component (ElementRegistry, pooled per kind); a row of an element with no component, or a broken
+    // reference, draws nothing. The rhythm between rows is the stylesheet's, by pair: each row wears the class of the kind before it
+    // (ts-el--after-heading), USS having no sibling selector. Every row moves as its motion value says (ElementMotion, R17.3): on the page
+    // each row's own effect; on the card the preview rises onto the card as ONE (the block's entry carries its rows' reveals) while its
+    // pictures keep their parallax / zoom / pan. Host-agnostic (R15.2): it asks the host for the full height and the full view.
     public sealed class ComposedBlockView : IBlockView
     {
         public const string RootClass = "ts-composed";
         public const string AfterClassPrefix = "ts-el--after-";
         public const string FirstClass = "ts-el--first";
-        public const string UnbuiltClass = "ts-el-unbuilt";
         // The preview's cap: a share of the card's full height (the view's own token, Components.uss)
         private static readonly CustomStyleProperty<float> PreviewMaxProperty = new("--ts-preview-max");
 
@@ -35,19 +35,20 @@ namespace TileStories
 
         // Whether this binding draws the page (the full view) or the preview (the card)
         public bool IsPage { get; private set; }
-        // The bound rows in order: the row on its surface, the content it shows, its component (null for an unbuilt plate)
+        // The bound rows in order: the row on its surface, the content it shows, its component
         public IReadOnlyList<(ElementRow Row, ElementRow Content, IElementComponent Component)> Shown => _shown;
         // The preview's cap in panel units (NaN while there is none: no host height yet, or the page) and whether the rows were cut at it
         public float Cap { get; private set; } = float.NaN;
         public bool IsCut { get; private set; }
         // The pool of this view's components (what a test reads to see reuse)
         public ElementComponentPool Components { get; }
+        // The rows' motion (and, on the card, the block's entry): what a test drives through its Clock / Tick / Finish
+        public ElementMotion Motion { get; }
 
         private readonly BlockRegistry _blocks;
         private readonly ElementRegistry _elements;
         private readonly List<(ElementRow Row, ElementRow Content, IElementComponent Component)> _shown = new();
         private readonly List<(string Kind, IElementComponent Component)> _bound = new();
-        private readonly ElementPool<Label> _plates;
         private BlockInstanceData _instance;
         private BlockBindContext _context;
         private float _previewMax;
@@ -57,7 +58,6 @@ namespace TileStories
             _blocks = blocks;
             _elements = elements;
             Components = new ElementComponentPool(elements);
-            _plates = new ElementPool<Label>(_ => NewPlate(), plate => plate.RemoveFromHierarchy());
             Root = new VisualElement { name = "ts-composed" };
             Root.AddToClassList("card-block");
             Root.AddToClassList(RootClass);
@@ -66,6 +66,9 @@ namespace TileStories
             Preview.AddToClassList(RootClass + "__preview");
             Clip = new VisualElement { name = "ts-composed-clip", pickingMode = PickingMode.Ignore };
             Clip.AddToClassList(RootClass + "__clip");
+            // - the clip runs to the card frame's inner edge (its rows take the text's margin back), so a full-bleed row is not cut at the
+            //   margin by the clip that caps the preview
+            BlockFrame.Bleed(Clip);
             Rows = new VisualElement { name = "ts-composed-rows", pickingMode = PickingMode.Ignore };
             Rows.AddToClassList(RootClass + "__rows");
             Fade = new VisualElement { name = "ts-composed-fade", pickingMode = PickingMode.Ignore };
@@ -82,6 +85,7 @@ namespace TileStories
             Page.AddToClassList(RootClass + "__page");
             Root.Add(Preview);
             Root.Add(Page);
+            Motion = new ElementMotion(Root);
 
             Root.RegisterCallback<CustomStyleResolvedEvent>(_ =>
             {
@@ -106,13 +110,18 @@ namespace TileStories
 
             var scope = ElementScope.Of(context.Poi, instance, _blocks);
             string familyToken = FamilyTokenOf(scope.HolderKind);
+            Motion.Bind(context.ReduceMotion);
+            // - the block's entry: the preview rises onto the card as one (R17.1 "Block entry: Rise")
+            if (!IsPage) Motion.Add(Root, null, ElementOptions.MotionReveal, ElementOptions.StrengthSubtle);
             if (IsPage) DrawPage(scope, familyToken);
             else DrawPreview(scope, familyToken);
             Fit();
+            Motion.Start();
         }
 
         public void Unbind()
         {
+            Motion.Unbind();
             foreach (var (kind, component) in _bound)
             {
                 component.Unbind();
@@ -123,7 +132,6 @@ namespace TileStories
             }
             _bound.Clear();
             _shown.Clear();
-            _plates.ReleaseAll();
             _instance = null;
             _context = null;
             IsCut = false;
@@ -163,16 +171,8 @@ namespace TileStories
             string kind = content.Kind;
             if (!_elements.TryGet(kind, out var element)) return;
             var component = Components.Take(kind);
-            if (component == null)
-            {
-                // - a visitor never sees a hole in the story; the developer's gallery sees what is missing
-                if (!_context.DevGallery) return;
-                var plate = _plates.Take();
-                plate.text = element.DisplayName + " -- not built yet";
-                into.Add(plate);
-                _shown.Add((row, content, null));
-                return;
-            }
+            // - a visitor never sees a hole in the story: a row with nothing to draw it leaves no gap
+            if (component == null) return;
             string before = _shown.Count == 0 ? null : _shown[_shown.Count - 1].Content.Kind;
             component.Bind(content, new ElementBindContext
             {
@@ -183,6 +183,10 @@ namespace TileStories
             into.Add(component.Root);
             _bound.Add((kind, component));
             _shown.Add((row, content, component));
+            // - the row's ONE motion value (R17.3); on the preview an entering effect is the block's entry's, its pictures still move
+            string effect = ElementMotionRule.EffectOf(row, element);
+            if (surface == ElementSurface.Preview && ElementMotionRule.Enters(effect)) return;
+            Motion.Add(component.Root, (component as IFramedPictures)?.Pictures, effect, row.Strength);
         }
 
         // The Open Row: the block's own words (its Component Overrides row) else its kind's, joined to the reading time; its emphasis the
@@ -245,11 +249,5 @@ namespace TileStories
         private string FamilyTokenOf(BlockKindDefinition kind) =>
             kind != null && _blocks.TryGetFamily(kind.Family, out var family) ? family.ColorToken : "";
 
-        private static Label NewPlate()
-        {
-            var plate = new Label { pickingMode = PickingMode.Ignore };
-            plate.AddToClassList(UnbuiltClass);
-            return plate;
-        }
     }
 }

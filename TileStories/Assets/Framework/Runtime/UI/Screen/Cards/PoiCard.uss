@@ -706,6 +706,11 @@
     display: none;
 }
 
+/* A block that draws its own title (a composed kind, _3.3 S2b): its title IS the heading, so the slot's words are not drawn twice */
+.card-block-heading--own-title {
+    display: none;
+}
+
 /* The bar holds the title alone (_3.3 P4.4a): a heading above it would make it two rows -- the hero's eyebrow is that line now */
 .poi-card__header .card-block-heading {
     display: none;

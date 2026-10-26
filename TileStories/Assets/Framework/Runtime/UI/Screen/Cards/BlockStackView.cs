@@ -106,6 +106,8 @@ namespace TileStories
 
         // The class a compact row's slot wears (its heading is the row's words, so the slot's own heading stays hidden)
         public const string CompactSlotClass = "card-block-slot--compact";
+        // The class a slot heading wears over a block that draws its own title (a composed kind): hidden, its words kept for navigation
+        public const string OwnTitleClass = "card-block-heading--own-title";
 
         // Whether the pinned bar shows the card's title now (HeroRule.BarShowsTitle: at Peek, or the hero's title scrolled away)
         public bool BarShowsTitle { get; private set; }
@@ -401,6 +403,8 @@ namespace TileStories
                 ApplyDisplay(b);
                 b.Slot.Heading.text = HeadingWords(entry, context);
                 b.Slot.Heading.EnableInClassList("card-block-heading--empty", b.Slot.Heading.text.Length == 0);
+                // - a composed block draws its own title (the title IS its heading, _3.3 S2b): the words stay for navigation, unseen
+                b.Slot.Heading.EnableInClassList(OwnTitleClass, BlockSurfaces.Composes(entry.Definition));
                 var parent = header ? HeaderSlot
                     : entry.Definition.IsFooter(entry.Variant) ? Footer : Scroll.contentContainer;
                 // - a block of the scroll sits in its frame; the bar and the footer are chrome, not blocks

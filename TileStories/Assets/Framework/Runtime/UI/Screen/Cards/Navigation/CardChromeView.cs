@@ -54,7 +54,14 @@ namespace TileStories
             stack.Scroll.contentViewport.RegisterCallback<GeometryChangedEvent>(OnViewportResized);
             // - a dragging ScrollView sets its offset from the finger on every move: an end kept under a finger is undone on the next move and
             //   the jump back reads as a fling up the card, so the end waits for the finger to lift
-            stack.Scroll.RegisterCallback<PointerDownEvent>(_ => _fingerOnStack = true, TrickleDown.TrickleDown);
+            // - a finger on the stack ends a glide where it is: the visitor holds the card now
+            stack.Scroll.RegisterCallback<PointerDownEvent>(_ =>
+            {
+                _fingerOnStack = true;
+                StopGliding();
+            }, TrickleDown.TrickleDown);
+            _glide = stack.Scroll.schedule.Execute(Glide).Every(16);
+            _glide.Pause();
             stack.Scroll.RegisterCallback<PointerUpEvent>(_ => FingerLifted(), TrickleDown.TrickleDown);
             stack.Scroll.RegisterCallback<PointerCancelEvent>(_ => FingerLifted(), TrickleDown.TrickleDown);
         }
@@ -64,6 +71,7 @@ namespace TileStories
         {
             _nav = nav;
             Scroll = default;
+            StopGliding();
             _keepTheEnd = false;
             _endToKeepFrom = float.NaN;
             _lastOffset = _sheet.Stack.Scroll.scrollOffset.y;
@@ -76,6 +84,7 @@ namespace TileStories
         {
             _nav = null;
             Scroll = default;
+            StopGliding();
             _keepTheEnd = false;
             _endToKeepFrom = float.NaN;
             _lastOffset = 0f;
@@ -158,13 +167,54 @@ namespace TileStories
             _sheet.Stack.Scroll.schedule.Execute(() => KeepTheEnd(from));
         }
 
-        // The stack rests at the end of its range once more if it sat at the end it had before the viewport shrank from `viewportBefore`
+        // The stack rests at the end of its range once more if it sat at the end it had before the viewport shrank from `viewportBefore` --
+        // gliding there WITH the bottom area as it slides in (_3.3 S2b), over the area's own transition (none under Reduce Motion: at once)
         private void KeepTheEnd(float viewportBefore)
         {
             var scroll = _sheet.Stack.Scroll;
             float viewport = scroll.contentViewport.layout.height;
-            float kept = CardChromeRule.KeepTheEnd(scroll.scrollOffset.y, scroll.contentContainer.layout.height, viewportBefore, viewport);
-            if (!Mathf.Approximately(kept, scroll.scrollOffset.y)) scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, kept);
+            float from = scroll.scrollOffset.y;
+            float kept = CardChromeRule.KeepTheEnd(from, scroll.contentContainer.layout.height, viewportBefore, viewport);
+            if (Mathf.Approximately(kept, from)) return;
+            _glideFrom = from;
+            _glideTo = kept;
+            _glideStart = Clock();
+            _glideDuration = AreaDuration();
+            Glide();
+            if (!float.IsNaN(_glideTo)) _glide.Resume();
+        }
+
+        // The time the glide reads (real time unless a test hands its own)
+        public System.Func<float> Clock { get; set; } = () => Time.realtimeSinceStartup;
+        // Whether the stack is gliding to the kept end now
+        public bool Gliding => !float.IsNaN(_glideTo);
+
+        private float _glideFrom, _glideTo = float.NaN, _glideStart, _glideDuration;
+        private IVisualElementScheduledItem _glide;
+
+        // One frame of the glide: the offset of this moment (CardChromeRule.GlideOffset), until it is at the end
+        private void Glide()
+        {
+            if (float.IsNaN(_glideTo)) return;
+            var scroll = _sheet.Stack.Scroll;
+            float offset = CardChromeRule.GlideOffset(_glideFrom, _glideTo, Clock() - _glideStart, _glideDuration);
+            scroll.scrollOffset = new Vector2(scroll.scrollOffset.x, offset);
+            if (offset == _glideTo) StopGliding();
+        }
+
+        private void StopGliding()
+        {
+            _glideTo = float.NaN;
+            _glide?.Pause();
+        }
+
+        // The bottom area's own slide time (its resolved transition, --ts-duration; 0 under Reduce Motion's instant class)
+        private float AreaDuration()
+        {
+            var durations = _sheet.BottomArea.resolvedStyle.transitionDuration;
+            if (durations == null) return 0f;
+            foreach (var d in durations) return d.unit == TimeUnit.Millisecond ? d.value / 1000f : d.value;
+            return 0f;
         }
     }
 }

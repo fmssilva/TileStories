@@ -13,61 +13,58 @@
 So start by reading them all. 
 
 
-## `And now: _3.3 POI Card Look, Feel & Motion -- S2a the text components, the story kind and the Open Row`
+## `And now: _3.3 POI Card Look, Feel & Motion -- S2b the media components and every row's motion`
 
 GATE: `git push` if the branch is ahead of origin (report how many commits). Take one Unity capture (Game view AND the POI
 Editor window) and open it; if none works, STOP and say so. Confirm the tree compiles; if not, STOP and report. Check the two
-SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD 2ddd76f; S1
-closed with full EditMode 2192 and 277 targeted PlayMode, 0 failed). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c
-actions, word for word; WAIT for runs as 4.2.5 says. Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2).
+SDF fonts (`Oswald Bold SDF.asset`, `Roboto-Bold SDF.asset`): `git checkout --` them if modified. Baseline: none (HEAD 0ed5b7c; S2a
+closed with its targeted set 1120/0 failed; its full runs each had one non-reproduced red, logged as watched flakes in
+`__mixed_TODOs.md`). Ask about Unity's place with `40-testing.md` 4.2.3's a / b / c actions, word for word; WAIT for runs as 4.2.5
+says. Never disable a tool's safety check (`50-terminal_and_tools.md` 5.2).
 
-Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 5 (S2a: this block), R14 (all), R14.8 (Open Row:
-words, reading time, emphasis plain / nudge / shine -- shine = a per-glyph tint sweep, its brightest frame >= 7:1), R17 (all), R15
-(Components / Blocks are ANY-panel: the guard), R13.1 (the block frame), R10.2 (the preview cap), R12 (tokens only), R9 D1-D7, the S1
-Build log (the element data, `ElementRow`, `BlockSurfaces`, the rules -- build ON them, do not re-model).
-The visual target: `proj_guides/_3.3.1_Prototype/Story.dc.html` (the magazine page and its preview) -- the text and structure
-elements' look, sizes and spacing; read the CSS and the markup, not only the picture.
-REQUIRED READING: `_3.1_POI_Card_Blocks.md` (registering a kind + its view, `BlockViewPool`, the full view, `IBlockView`, §5.5 element
-data), `.clinerules/30-ui-content.md`, `40-testing.md` 4.2, 4.2.4b, 4.4, 4.5.
-WORKER MODEL: Opus-class -- a new component layer, a new kind with two surfaces, a shared component, design judgement on captures.
-TEST PLAN: no baseline. Phase A gallery entries + targeted Card / Poi / Theme / Section fixtures first, then the FULL PlayMode run (a
-new kind in the registry), then full EditMode. Background runs (action c).
+Domain spec (read ALL lines): `proj_guides/_3.3_POI_Card_Styles.md` -- R16 row 5b (this block + its review fix), R14.2 (media elements
+and their style options: width inset / full-bleed, frame rectangle / arch), R17.3 (one motion value per row: Auto / None / Reveal /
+Slide in / Parallax / Slow zoom / Pan + strength; Auto = the theme's default per element; Reduce Motion = the rule: movement off,
+pictures still, glass and rim frozen), R17.4 (tap per element: picture -> the viewer, video -> play in place / the player), R6 (motion
+rules: transform / opacity only, one moving thing in view, durations from the scale), R10.5 (gesture rule: horizontal belongs to the
+block), R11 v4 (pictures move inside their frames), the P4.4b review row (carousels App Store style: the first item aligned with the
+text inset, the strip full width so items bleed when scrolled), the "Resting-end review" row (the content glides with the returning
+bar), the S1 + S2a Build log entries.
+The visual target: `proj_guides/_3.3.1_Prototype/Story.dc.html` and `Main.dc.html` (v4): the media markup, `.kb`, `par.*`, the `.el`
+reveal, the carousel strip.
+REQUIRED READING: `_3.1_POI_Card_Blocks.md` (the media scope and owners: video one at a time, the takeover; `CardImage`),
+`.clinerules/40-testing.md` 4.2, 4.2.4b, 4.4, 4.5.
+WORKER MODEL: Opus-class -- media owners, motion on the stack, gestures, frame sequences.
+TEST PLAN: no baseline. Phase A gallery + targeted Card / Poi / Theme / Section fixtures first, then the FULL PlayMode run (row motion
+touches the stack's elements), then full EditMode. Background runs (action c).
 
-PART 1 -- review fix (S1 finding): block keys are NEVER reused -- `TaxonomyRowKeys.NextFree` hands a deleted last key out again, so a
-`BlockRef` or a visitor's per-block local state (seen / read) can silently point at a new block. A per-POI high-water mark like the
-element ids; pure test that a deleted last key is never handed out again; mutation proof.
-PART 2 -- the component layer (`Runtime/UI/Components/`, host-agnostic: the R15.2 guard covers it): one `VisualElement` per element
-kind with `Bind(ElementRow, context)` / `Unbind`, pooled; styled ONLY by theme tokens + its own T3 tokens in `Components.uss`; light
-and dark; every closed style option drawn (tone neutral / family / accent / inverse measured >= 7:1; size s / m / l; drop cap; the
-divider's line / azulejo ornament as a vector image).
-Elements in this block: title, eyebrow, heading, lede, paragraph, callout, pull quote, list, divider, spacer. Media elements
-(picture, picture pair, carousel, video) are S2b: a story row of a media kind draws a clear "not built yet" placeholder in the Editor
-gallery only, never on a visitor's card.
-PART 3 -- `ComposedBlockView` + the `story` kind (About family, Format Read): the Page = every row in order, in the block's page
-(the existing full view: breadcrumb, Previous / Next); the Preview = `ElementPreviewRule` (Automatic / Custom, linked rows with their
-own style) inside the block frame, CAPPED at `--ts-preview-max` (0.5) of the sheet's full height, computed from the measured
-viewport (R10.2), cut with a fade into the surface, then the Open Row. Tap the preview = open the page (R17.4). Reading time from
-`ElementRules` unless the block sets minutes.
-PART 4 -- the Open Row as a SHARED component (`Components/`, R17.5): verb + object + reading time + chevron, min 48 pt; words per
-kind (CardStrings EN / PT, "Read the story"), emphasis plain / nudge / shine from the wall's default and the block's override
-(`BlockSurfaces` component overrides). Reduce motion = plain.
-PART 5 -- the test wall: The Painting gets a `story` block (About) composed from its real text (`proj_guides/detail_card/content/text/
-PACO_RIBEIRA_text.md`) as the prototype's magazine: eyebrow, title, lede, paragraph with drop cap, heading, paragraph, callout
-("What was inside", tone family), pull quote, divider (azulejo), heading, paragraph -- its media rows wait for S2b. Written through
-the config path the Editor uses; EN + PT.
-TESTS: pure (none new beyond PART 1 unless a rule moves); Phase A: every element x every style option x light / dark in the card
-gallery (fit, contrast >= 7:1 on the render, tap targets, nothing clipped at 390); the story's preview and page; the Open Row's
-three emphases (shine: a frame sequence + the brightest frame's ratio). Phase B: The Painting's real card -- the preview capped, a
-real tap opens the page, Previous / Next, Back; EN + PT; light + dark.
-VISUALS: the story's preview and page side by side with the prototype's (light + dark); every element sheet. Open each and judge it
-against the prototype as design, not only "renders".
+PART 1 -- review fix: a composed block's preview shows no slot heading above its own title (`TestEvidence/Card/Story/
+magazine_preview_dark.png`: "About the Story" over "Two hundred and fifty years by the river").
+PART 2 -- media components (`Runtime/UI/Components/`, host-agnostic, the R15.2 guard): picture (caption + credit; inset / full-bleed;
+rectangle / arch frame; `aspect-ratio`), picture pair, carousel (App Store style; swipe = the block's gesture), video (poster + play +
+duration; a tap plays through the EXISTING video owner and its takeover -- never a second player). Media read through the element's
+media list (`ElementRow.Media`) and the card's media scope (released when unbound). The "not built yet" plate goes away.
+PART 3 -- motion on every row (one value per row, R17.3): Reveal (fade + rise as the row enters, rows following one by one), Slide in,
+Parallax (a picture inside its clipped frame, ~0.1x of the distance to the viewport centre, strength subtle / strong), Slow zoom and Pan
+(pictures only, slow, stop off-screen); Auto = the theme's default per element. Only transform / opacity; one moving thing per view;
+Reduce Motion = all still (the rule, no per-row switch). The block's entry (rise + fade) and the content gliding with the returning
+bottom bar (the resting-end jump). Pure rules for the maths (parallax offset, reveal threshold, stagger) with EditMode tests.
+PART 4 -- the test wall: The Painting's story gets its media rows from the real content (the hero picture full-bleed with parallax, the
+palace front inset with caption, the opera ruins full-bleed, the picture pair before / today, the carousel, the video poster), as in
+the prototype's magazine.
+TESTS: Phase A: every media element x its styles x light / dark (fit, nothing clipped at 390, captions >= 7:1); frame sequences (every
+0.1 s over 1 s) of a reveal, a parallax scroll, a slow zoom; reduce motion = identical frames. Phase B on The Painting's real card: the
+preview with its picture, the page with all rows, a real swipe on the carousel (horizontal = the block, vertical = the card), a real
+tap on the video poster opens the existing takeover and Back returns; EN + PT; light + dark. Cost: batches and UI ms with the page's
+motion running (the Build log), the device check still owed.
+VISUALS: the story's page and preview side by side with the prototype's, light + dark; the frame sequences. Open each and judge it as
+design.
 
-DOCS as current truth: `_3.1` (the story kind, the component layer), `_3.3` Build log, `10-structure.md` (only your lines).
-OUT OF SCOPE: media elements and all motion (S2b); the Editor's element table (S3); templates (S3).
-Stop when the story reads as the prototype's magazine (text elements) on the real card in both modes, the Open Row works, block
-keys are never reused, the targeted fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of
-`.clinerules/60-finishing.md` 6.4 and END with the developer's review questions. Do not commit: the Architect commits after the review.
-
+DOCS as current truth: `_3.1`, `_3.3` Build log, `10-structure.md` (only your lines).
+OUT OF SCOPE: the Page Chrome (S2c), the Editor (S3), 3D / 360 elements (later sets), the visitor's reduce-motion switch.
+Stop when the story's page reads as the prototype's magazine WITH its media and motion on the real card in both modes, the targeted
+fixtures, the full PlayMode run and full EditMode are green. Finish with the final report of `.clinerules/60-finishing.md` 6.4 and END
+with the developer's review questions. Do not commit: the Architect commits after the review.
 
 
 ## `DO THIS IN 2 MAIN STEPS: PLAN AND ACT`

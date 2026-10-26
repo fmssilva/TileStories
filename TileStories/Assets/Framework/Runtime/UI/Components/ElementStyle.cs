@@ -3,7 +3,8 @@ using UnityEngine.UIElements;
 namespace TileStories
 {
     // An element row's closed style options as classes on its component (_3.3 R14.2): ts-el--tone-<tone>, ts-el--size-<size>,
-    // ts-el--align-<align>, and ts-el--preview on a block's preview -- Components.uss gives each its look from theme tokens. The Family
+    // ts-el--align-<align>, a media row's ts-el--width-<inset | full-bleed> and ts-el--frame-<rectangle | arch>, and ts-el--preview on a
+    // block's preview -- Components.uss gives each its look from theme tokens. The Family
     // tone's colour is the BLOCK's family, so it cannot be a class: it is painted by name (NavTint, repainted on a mode switch).
     public static class ElementStyle
     {
@@ -34,7 +35,20 @@ namespace TileStories
                 root.AddToClassList(RootClass + "--size-" + SizeOf(row, context));
             if (context.Element?.Field(BuiltInElements.AlignStyle) != null)
                 root.AddToClassList(RootClass + "--align-" + context.StyleOf(BuiltInElements.AlignStyle, row));
+            if (context.Element?.Field(BuiltInElements.WidthStyle) != null)
+            {
+                bool fullBleed = context.StyleOf(BuiltInElements.WidthStyle, row) == BuiltInElements.WidthFullBleed;
+                root.AddToClassList(RootClass + "--width-" + (fullBleed ? "full-bleed" : "inset"));
+                // - on the card, edge to edge is the block frame's inner edge (its own bleed); on the page, the page's (Components.uss)
+                root.EnableInClassList(BlockFrame.BleedClass, fullBleed);
+            }
+            if (context.Element?.Field(BuiltInElements.FrameStyle) != null)
+                root.AddToClassList(RootClass + "--frame-" + context.StyleOf(BuiltInElements.FrameStyle, row));
         }
+
+        // Whether a media row's frame is the arch
+        public static bool IsArch(ElementRow row, ElementBindContext context) =>
+            context.Element?.Field(BuiltInElements.FrameStyle) != null && context.StyleOf(BuiltInElements.FrameStyle, row) == BuiltInElements.FrameArch;
 
         // A component's line height (its own --ts-el-leading token, percent of the type size; 0 = the face's own): USS has no line height,
         // so the component reads its token and the text carries it (WithLeading)
@@ -67,7 +81,8 @@ namespace TileStories
         {
             var stale = new System.Collections.Generic.List<string>();
             foreach (string c in root.GetClasses())
-                if (c.StartsWith(RootClass + "--tone-") || c.StartsWith(RootClass + "--size-") || c.StartsWith(RootClass + "--align-")) stale.Add(c);
+                if (c.StartsWith(RootClass + "--tone-") || c.StartsWith(RootClass + "--size-") || c.StartsWith(RootClass + "--align-")
+                    || c.StartsWith(RootClass + "--width-") || c.StartsWith(RootClass + "--frame-")) stale.Add(c);
             foreach (string c in stale) root.RemoveFromClassList(c);
         }
     }

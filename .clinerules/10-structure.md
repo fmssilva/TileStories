@@ -231,7 +231,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
               - INavElementView.cs  -- The navigation element view contract: Root, Bind(CardNavModel, NavController, BlockBindContext), Unbind; views only
               - NavElementRegistry.cs  -- NavElementDefinition (key, slot, Editor label, (i) help), NavSlotKeys (Top; Built = the slots the sheet draws) and NavElementRegistry
               - BuiltInNavElements.cs  -- The framework's elements registered into Shared: text_tabs (top), with their Editor label and help
-              - CardChromeView.cs  -- Shows / hides the card's chrome (the top strip, the bottom area = the sticky footer) as CardChromeRule decides, and keeps the stack's end in view when the bottom area comes back at the end (KeepTheEnd): measures the stop's rest height, the
+              - CardChromeView.cs  -- Shows / hides the card's chrome (the top strip, the bottom area = the sticky footer) as CardChromeRule decides, and keeps the stack's end in view when the bottom area comes back at the end (KeepTheEnd): the content GLIDES there with the area, over the area's own transition (CardChromeRule.GlideOffset; at once under Reduce Motion; a finger ends it)
               - NavSlots.cs  -- The sheet's navigation slots (top today): a strip inserted in the sheet root between the header and the stack ScrollView
               - TextTabsNavView.cs  -- text_tabs: one Button per model section (its CardStrings word), the current one underlined AND bold (CurrentClass), a tap = NavController.JumpTo
               - TabsNavView.cs  -- The tabs text_tabs and icon_tabs share: a NavStrip of NavTabs, one per section, its word (and its family's icon, tinted by NavTint, per Labels), Show
@@ -252,15 +252,15 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
               - FabRadialNavView.cs  -- fab_radial ("Radial"): a NavFab whose sections open on an arc
               - DrawerTreeNavView.cs  -- drawer_tree ("Drawer"): a drawer from the left, NavMenuHeader + a vertical ScrollView outline -- a line per section (icon, words, count), its kinds
               - GridOverlayNavView.cs  -- grid_overlay ("Big Tiles"): a panel inset over the scrim, NavMenuHeader, a By Purpose / By Format switch (CardNavModel.By, opens on Group By), big
-              - NavStrip.cs  -- The sideways strip lifted out of text_tabs: clipped viewport + row moved by NavStripRule, dragged by a SwipeGrab, Show(item) brings an item into view
+              - NavStrip.cs  -- The sideways strip lifted out of text_tabs: clipped viewport + row moved by NavStripRule, dragged by a SwipeGrab, Show(item) brings an item into view; SnapsToItems (the story's carousel) rests a released drag on the nearest item start (SnapOffset, from the row's own inset), the row wearing SettlingClass meanwhile
               - NavItems.cs  -- NavTab (button, optional icon, words, count, underline), NavChip (button around a pill: dot, words, count), NavCount, NavTint
               - NavChipRow.cs  -- A NavStrip of NavChips for given kinds: marks the kind of CurrentBlock, a tap = JumpToBlock(kind's first target)
               - NavFacetBar.cs  -- The facet chips of drawer_tree and grid_overlay: one NavStrip row of 48 px chips (Up to 2 / 5 min, No headphones / camera / network, the formats) +
               - Navigation.uss  -- The navigation elements' look, --ts-* tokens only (the tabs: touch-token minimums, nowrap words, the underline bar, the bold current label); in every
-            - TakeoverView.cs  -- Plain C#: the full-screen view over the card (the sheet's sibling in the layer, carrying the token classes): Back + breadcrumb (card title > name), a
-            - BlockFullView.cs  -- Plain C#, sheet-owned: "open in full view" for ANY block -- PageFor(entry, context) binds a SECOND view of the kind from the BlockViewPool into the
+            - TakeoverView.cs  -- Plain C#: the full-screen view over the card (the sheet's sibling in the layer, carrying the token classes): Back + breadcrumb (card title > section > name), a chip per sibling page, the page drawn through ITakeoverPage; GoBack (the button, the system Back) returns to the block page it was opened over (Open's returnTo), Close never does
+            - BlockFullView.cs  -- Plain C#, sheet-owned: "open in full view" for ANY block -- PageFor(entry, context) binds a SECOND view of the kind from the BlockViewPool into the takeover's page, among its siblings; a section page (bento); ReturnTo(offset) puts a page the visitor comes back to at the scroll they left it; a composing kind's section heading hidden (its own title)
             - ZoomPanSurface.cs  -- Plain C#: the pinch-zoom + pan surface zoom_image already drew, factored out so the gallery lightbox reuses it (ZoomPanRule underneath, unchanged)
-            - IBlockView.cs  -- IBlockView + BlockBindContext (DevGallery: the Phase A gallery's card only) + IBlockHost (FullHeight: what a preview's cap is a share of)
+            - IBlockView.cs  -- IBlockView + BlockBindContext + IBlockHost (FullHeight: what a preview's cap is a share of) + ITakeoverPage (Turn, WhenPageLeaves) + the TakeoverPageDrawer delegate it is handed (a block never names the TakeoverView, R15.2)
             - PoiCardHost.cs  -- selection bus -> BlockStackBuilder -> the sheet; closes through the bus
             - CardOwners.cs  -- Plain C#: the wall card's owners kept together so PoiCardHost only wires them -- the ONE audio owner + its mini-player (CardAudioCoordinator), the
             - CardTapOutside.cs  -- Plain C#: a tap on empty camera space closes the card -- remembers a press, judges the release (CardTapRule, ScreenUIHit), waits out the zoom's
@@ -289,7 +289,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - card_block_shadow.png  -- 96 x 96 outer-only soft shadow (transparent over the block), 9-sliced at 36 (16 margin + 20 radius), tinted by --ts-elevation-1/2; written by a script
             - card_glass.png  -- 4 x 256 white alpha ramp (0.45 top -> 1 foot), the stack's glass, tinted by --ts-glass-ground; written by a script
             - SheetDrag.cs  -- Plain C#: the sheet's vertical drag -- the grabber and the header capture the finger at touch-down, the top slot's SwipeGrab only once a move is
-            - CardFullViewOpener.cs  -- Plain C#: what opens in the full view over the card -- OpenFullView
+            - CardFullViewOpener.cs  -- Plain C#: what opens in the full view over the card -- OpenFullView among siblings, OpenTakeover (a takeover asked from inside a block's page returns to that page on Back, at its scroll: ReturnToThePageOpenNow), the bento section page, the breadcrumb's section jump, reopening over a rebind
             - BlockStackView.cs  -- + a pinned Footer for FooterVariants (sticky actions), views pooled per kind, one ScopedMediaSource per bound view released on unbind; (6C) every
             - CompactRowView.cs  -- The generic compact row: one button for the line
             - ClipLengthReader.cs  -- The length of the audio / video clip a block names, loaded through the caller's media scope, once per path; MinutesOf = ReadingTimeRule over it
@@ -373,7 +373,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - Shapes/  -- 4 non-circle symbol silhouettes: diamond, hexagon, rounded square, star
           - GuideCharacter/  [World-UGUI] [EMPTY SCAFFOLD]  -- the guide character overlay
         - Blocks/  [Any-UITK]  -- one view per block kind, grouped by family
-          - ComposedBlockView.cs  -- the view of every composed kind (the story): on the card its Preview (ElementPreviewRule's rows capped at --ts-preview-max of IBlockHost.FullHeight, cut with a fade, the Open Row; a tap opens the page), in the full view its Page (every row); rows drawn by their element components, pooled; a row with no component draws nothing (a plate in the gallery)
+          - ComposedBlockView.cs  -- the view of every composed kind (the story): on the card its Preview (ElementPreviewRule's rows capped at --ts-preview-max of IBlockHost.FullHeight, cut with a fade, the Open Row; a tap opens the page; the clip runs to the frame's edge so full-bleed rows reach it), in the full view its Page (every row); rows drawn by their element components, pooled; each row's motion and the preview's entry through ElementMotion (Motion); a row with no component draws nothing
           - About/
             - About.uss  -- The about family's looks (header, status, facts, texts, fun facts, quotes, steps, swatches, actions)
             - HeaderBlockView.cs  -- and subtitle; variants compact / text_only; (7A) the picture looks' HeroPart
@@ -404,7 +404,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - Media/  -- The media family
             - Media.uss  -- CardImage, the header hero looks, the gallery looks, TakeoverView, before / after, zoom
             - hero_scrim.png  -- 4 x 256 white alpha ramp (0 -> 1, smoothstep), the graded scrim above the hero's words, tinted by --ts-scrim-hero; written by a script
-            - GalleryBlockView.cs  -- gallery: carousel (swipe track + dots) / grid (two per row) / filmstrip (large + strip; a small one picks, the old large picture given back at once)
+            - GalleryBlockView.cs  -- gallery: carousel (swipe track + dots) / grid (two per row) / filmstrip (large + strip; a small one picks, the old large picture given back at once) / stack; a tap opens the shared PictureViewer
             - BeforeAfterBlockView.cs  -- before_after: slider -- After under Before cut at the handle, a pointer-captured drag moves it (Position, never scrolls the stack), labels from the
             - ZoomImageBlockView.cs  -- zoom_image: pinch -- two pointers pinch about their midpoint, Ctrl + wheel zooms at the pointer, one finger pans only while enlarged; ZoomPanRule
             - VideoPanel.cs  -- One video player drawn on the card (plain class): surface
@@ -434,11 +434,11 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - Guides.uss  -- the guides family's looks (the round play/pause button, scrubber, speed chip, captions line, the hero_chip's thin progress line)
             - AudioGuideBlockView.cs  -- audio_guide: player
             - AudioScrubber.cs  -- the player look's seek bar: a pointer-captured drag seeks (Position, never scrolls the stack), the fill tracks AudioTimeRule's fraction
-        - Components/  [Any-UITK]  -- UI Toolkit pieces that draw on ANY panel, screen or world (UiRenderTargetGuardTests): the element components and the Open Row
+        - Components/  [Any-UITK]  -- UI Toolkit pieces that draw on ANY panel, screen or world (UiRenderTargetGuardTests): the element components (text, structure, media), their motion driver, the picture viewer and the Open Row
           - README.txt  -- what a component is and the rule it keeps (UiRenderTargetGuardTests)
-          - IElementComponent.cs  -- the element component contract (a VisualElement: Bind(ElementRow, ElementBindContext) / Unbind) + ElementBindContext (block context, element, style row, surface, compact, family token; StyleOf) + ElementSurface
+          - IElementComponent.cs  -- the element component contract (a VisualElement: Bind(ElementRow, ElementBindContext) / Unbind) + ElementBindContext (block context, element, style row, surface, compact, family token; StyleOf) + ElementSurface + IFramedPictures (the pictures a row's parallax / zoom / pan moves)
           - ElementComponentPool.cs  -- a composed view's components pooled per element kind (Take / Return / CreatedCount)
-          - ElementStyle.cs  -- a row's closed style options as classes (tone, size, alignment, preview), SizeOf (compact = small), the --ts-el-leading token reader and WithLeading, Capitals
+          - ElementStyle.cs  -- a row's closed style options as classes (tone, size, alignment, a media row's width + frame -- full bleed also the frame's bleed class -- preview), SizeOf (compact = small), IsArch, the --ts-el-leading token reader and WithLeading, Capitals
           - LineElement.cs  -- title, eyebrow (tracked capitals), heading: one run of words, the display face for title / heading
           - ProseElement.cs  -- lede and paragraph over CardTextView (glossary words), the paragraph's flowing drop cap in the family colour
           - CalloutElement.cs  -- callout: a box with a leading bar, an optional small-capitals title and its text; the tone is the box's
@@ -447,7 +447,14 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - DividerElement.cs  -- divider: a hairline, or the azulejo ornament (a vector) in the family colour between two hairlines
           - SpacerElement.cs  -- spacer: room on the spacing scale
           - OpenRowView.cs  -- the shared Open Row: words + minutes + chevron, a whole touch target; emphasis plain / nudge (the chevron steps) / shine (a per-glyph tint sweep, PostProcessTextVertices, to --ts-accent-shine); Clock; Reduce Motion = plain
-          - Components.uss  -- the components' looks, theme tokens + their own --ts-el-* tokens (sizes, leading, gaps, page inset, --ts-preview-max); every option a class; the rhythm between rows by pair
+          - MediaFrame.cs  -- MediaFrame (one media item's clipped frame: a CardImage in its proportion -- ElementMediaRule.FrameAspect or a fixed one -- rectangle or arch, its Picture what motion moves) + MediaCaption (caption + credit, each hidden when empty)
+          - PictureElement.cs  -- picture: one MediaFrame + its words; inset / full bleed, rectangle / arch; on the page a tap opens the PictureViewer (the row's Tap); an Automatic preview without its words
+          - PicturePairElement.cs  -- picture pair: two frames at ElementMediaRule.PairAspect side by side with their words; on the page a tap opens both in the viewer at the one tapped
+          - CarouselElement.cs  -- carousel: a snapping NavStrip of frames at CarouselAspect with their words (App Store style: full bleed, the first item on the text's margin; sideways = the strip, up / down = the page); a swipe is its only gesture
+          - VideoElement.cs  -- video: a teaser (poster frame of the clip's proportion, play disc, caption + length badge on its own plate, credit); on the page a tap plays through the card's ONE video owner -- in place (VideoPanel) or in the full-screen player (the takeover); leaving pauses what it played
+          - PictureViewer.cs  -- the shared full-screen picture viewer (the gallery's lightbox page): Open(host, name, pictures, start) -- a ZoomPanSurface per page (a swipe turns, two fingers look closer), caption + credit under it
+          - ElementMotion.cs  -- one composed view's motion on its own Clock (Tick / Finish / Start for tests): entering rows hidden until past the enter line then revealed one by one, parallax pictures with the scroll, the ONE slow zoom / pan nearest the centre (Mover), the preview's entry; transform / opacity only; Reduce Motion = all still
+          - Components.uss  -- the components' looks, theme tokens + their own --ts-el-* tokens (sizes, leading, gaps, page inset, the media's radius / caption / credit / overscan / carousel cell, --ts-preview-max); every option a class; a moving picture overhangs its frame (ts-el--moves-picture); the rhythm between rows by pair
         - Theme/  [Shared]  -- The app theme: ONE source (a ThemeAsset) of every colour and scale the UI Toolkit screens draw with, generated into USS and read by C#
           - ThemeAsset.cs  -- the ScriptableObject: key, default mode, shared ThemeTokenSet
           - ThemeResolver.cs  -- plain C#: a theme's values in one mode for C# (TryColour, TryNumber; a mode's value wins over a shared one), read from the asset, never from a stylesheet
@@ -498,7 +505,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - CardGalleryDefinitions.Ar.cs  -- show_on_wall entries
         - CardGalleryDefinitions.Meta.cs  -- sources entries
         - CardGalleryDefinitions.Navigation.cs  -- nav_bento's one entry (a Required Tiles field: a heading-only block would show nothing) with two companion Rich Text blocks added by Setup as closed
-        - CardGalleryDefinitions.Story.cs  -- the story entries: the magazine, a short and a tall story, a sheet per text and structure element (a row per style option, SheetRowsOf), the Open Row's three emphases, a Custom preview, the media rows (gallery plates)
+        - CardGalleryDefinitions.Story.cs  -- the story entries: the magazine (a full-bleed picture first), a short and a tall story, a sheet per element (text, structure AND media: a row per style option, SheetRowsOf; media with captions + credits), the Open Row's three emphases, a Custom preview, the four media rows (video in place / player), a story per motion (reveal, parallax, slow zoom beside a pan)
         - CardGalleryHarness.cs  -- Shows one gallery entry at a time on the real PoiCardSheetView in a phone-width frame (the PanelSettings reference width); Left/Right step, Space
         - HotspotPinRule.cs  -- Pure (Runtime/Blocks): JumpTarget(opensBlock, jumpTargets) -- the block a hotspot pin jumps to, "" when it opens its own text
         - CardNavGalleryDefinitions.cs  -- + edge_scrubber in ElementKeys and the edge slot in Wall
@@ -577,9 +584,9 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - FullViewSiblingRule.cs  -- Pure: which blocks the full view swipes between -- Siblings(model, registry, key) = the key's SECTION's targets whose kind lists Expandable
           - NavContentsRule.cs  -- Pure: SectionsFirst(entry, settings) -- a synthesized contents block always, an authored one by its Rows field, else the Block Library's, else
           - NavBackRule.cs  -- Pure: _3.2 4.5 -- Next(settings, fullViewOpen, stop) -> LeaveToApp / CloseFullView / LowerToHalf / LowerToPeek / CloseCard; StepsDown
-          - CardChromeRule.cs  -- Pure: what chrome the card shows -- ScrollState / Next; the end: AtEnd on the range without the bottom area (it never hides within its own height of the end), KeepTheEnd (the stack follows the viewport the area shrinks there)
+          - CardChromeRule.cs  -- Pure: what chrome the card shows -- ScrollState / Next; the end: AtEnd on the range without the bottom area (it never hides within its own height of the end), KeepTheEnd (the stack follows the viewport the area shrinks there), GlideOffset (the content's ease-out glide to it over the area's duration)
           - NavSlotRule.cs  -- Pure: TopElement(nav settings, model, topElement) -- the wall's Top Bar pick, only when the model shows navigation, the key is a registered top
-          - NavStripRule.cs  -- Pure: a sideways strip's offset -- MaxOffset, Clamp, OffsetToShow (the least move that shows a whole item)
+          - NavStripRule.cs  -- Pure: a sideways strip's offset -- MaxOffset, Clamp, OffsetToShow (the least move that shows a whole item), OffsetToCentre, SnapOffset (the nearest item start a released snapping strip rests on)
           - NavRailRule.cs  -- Pure: SwipesToEnd (one swipe = one viewport of travel), MostCells(step, viewport, maxSwipes), Of(targets, ...) -> Plan(Cards, HasAll): every block
           - BentoTileRule.cs  -- Pure: Tiles(rows, selfKey, jumpTargets) drops a row with no block, the bento itself, or a block BlockRefRule's jump targets lack; OpensOf
           - NavGroupRule.cs  -- Pure: the navigation Groups -- Groups(nav): the wall's rows or the four defaults
@@ -653,14 +660,15 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
           - ElementOptions.cs  -- every shared option string + Editor labels: preview modes, motions, strengths, taps, ref scopes, components, Open Row emphases; OneOf
           - ElementKindDefinition.cs  -- one element kind (key, name, icon, category, sub-fields, closed style lists, media kind + count, motion / tap choices, weight, preview role, search fields)
           - ElementRegistry.cs  -- the BlockRegistry pattern for elements: Shared (BuiltInElements), Register(definition, component factory) refuses broken / duplicate, TryGet, HasComponent / CreateComponent, Validate
-          - BuiltInElements.cs  -- the 14 v1 elements (title ... spacer) with their style options and defaults; ComponentOf (the text and structure elements' components; none for the media elements until S2b)
+          - BuiltInElements.cs  -- the 14 v1 elements (title ... spacer) with their style options and defaults; ComponentOf (every v1 element's component, the media ones included)
           - ElementRow.cs  -- ElementRow (typed view of a BlockItemData row: id, element, motion, strength, tap, validated, ref, media; Create / CreateRef / Duplicate) + ElementMedia
           - ElementRef.cs  -- a reference {scope page | block | shared, block, row}
           - BlockSurfaces.cs  -- the Preview surface's common fields, Page / Preview rows, mode, hand-set minutes, OverrideOf (ComponentOverride), RowsToValidate, TakeRowId (never reused)
           - ElementRefRule.cs  -- ElementScope (holder, the POI's blocks, the shared pool) + Resolve / ContentOf: one level, Broken with its reason
           - ElementPreviewRule.cs  -- Automatic (first picture + title -- the eyebrow right before it with it, TitleLead -- + text in Page order) / Custom (own, linked, broken); UsedPageRows
           - ElementRules.cs  -- Minutes (200 wpm + media weights, hand-set wins), FirstWords (the first title row, else the first words), SearchWords (not indexed), TapOf
-          - ElementMotionRule.cs  -- EffectOf (Auto = the element's own) and ReducedOf (Reduce Motion: reveal -> cross-fade, else still)
+          - ElementMotionRule.cs  -- the motion maths: EffectOf (Auto = the element's own), ReducedOf (Reduce Motion: every effect still), Entered (the 92 % enter line), StaggerDelay, RevealProgress / EnterPose (reveal, slide in), ParallaxOffset, ZoomScale, PanOffset, Mover (the one row that moves by itself)
+          - ElementMediaRule.cs  -- a media frame's shape: FrameAspect (the picture's own proportion, 4:5 to 2:1), PairAspect 4:3, CarouselAspect 3:2, ArchRadius (a half circle as wide as the frame)
           - ElementValidation.cs  -- problems named by surface + row (unknown element, required empty, media, broken ref, blank / repeated id); RowIsComplete
           - DropCapRule.cs  -- Split: the words of N lines beside a drop cap and the rest under it (greedy, by a measure; a glossary mark one word); Words
           - OpenRowMotionRule.cs  -- the Open Row's motion: Effective (Reduce Motion = plain), the nudge's keyframes, the shine band's centre and amount
@@ -912,6 +920,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
             - ElementRulesTests.cs  -- minutes counted from the source texts, first words, search words, tap, motion + reduce; ReadingTimeRule / BlockSummaryRule / CompactRowRule / BlockStackBuilder on the story
             - ElementValidationTests.cs  -- each problem named by surface, row, element and field; ids unique across Page and Preview; an id problem never hides content
             - DropCapRuleTests.cs  -- the cut by lines, a short paragraph whole, a glossary mark one word, a word wider than the line
+            - ElementMotionRuleTests.cs  -- the enter line (+-0.5 px), stagger and its cap, a reveal frame by frame (0.1 s over 1 s), parallax inside its room, zoom / pan there and back, the one Mover, Reduce Motion still; FrameAspect / ArchRadius; NavStripRule.SnapOffset
         - MarkerHierarchyResolverTests.cs (incl. Marker Label Style resolution and StyleOf clamping), MarkerLayoutTests.cs, MarkerLayoutPxConversionTests.cs  -- size and layout math
         - ClusterGroupingTests.cs, ClusterReconcileTests.cs, ClusterPrefabTests.cs  -- cluster grouping and prefab contract
         - DisplacementComputeTests.cs, DisplacementAlgorithmTest.cs, DisplacementHysteresisTests.cs, DisplacementTieBreakStrategyTests.cs, DisplacementSettingsDefaultsTests.cs  -- displacement math and defaults
@@ -973,7 +982,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - POIEditorTableLayoutTests.cs, POIEditorAddButtonRowRenderTests.cs, POIEditorCoordinateRowRenderTests.cs, POIEditorColorGroupRenderTests.cs, POIEditorVisualHierarchyTests.cs, POIEditorWindowChromeTests.cs  -- real IMGUI geometry measurement
         - MarkerSymbolTexturePostprocessorTests.cs, PanelSettingsTests.cs, SafeAreaHelperTests.cs, ZoomControlViewEditModeTests.cs  -- assorted contracts
         - UI/  -- UI Toolkit view tests, grouped by the Runtime/UI domain they test
-          - UiRenderTargetGuardTests.cs  -- _3.3 R15.2 on the source: Blocks/ + Components/ never name the sheet / host types, the screen PanelSettings or Screen.width / height; no UnityEngine.UI / TMPro in Screen/ Blocks/ Components/; no UIElements in World/; ONE allow-list with a reason per line (a stale line fails); planted violations proven red by file and rule
+          - UiRenderTargetGuardTests.cs  -- _3.3 R15.2 on the source: Blocks/ + Components/ never name the sheet / host types, the screen PanelSettings or Screen.width / height; no UnityEngine.UI / TMPro in Screen/ Blocks/ Components/; no UIElements in World/; ONE allow-list with a reason per line (the four navigation blocks' NavController; a stale line fails); planted violations proven red by file and rule
           - Cards/  -- 
             - ElementPoolTests.cs  -- ElementPool: rows made once per place, reused after ReleaseAll, only the shown ones released
             - NavElementRegistryTests.cs  -- NavElementRegistry's refusals, the framework's elements (ASCII words, views), an app's own element listed for its slot AND bound by a real
@@ -1074,7 +1083,8 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - CardNavGalleryTests.FullView.cs  -- partial: Phase A of the full view's breadcrumb and chips over the five cases
         - CardNavGalleryTests.Facets.cs  -- partial: Phase A of the facet chips on drawer_tree and grid_overlay over the five cases
         - CardGalleryTests.cs  -- 
-        - CardStoryGalleryTests.cs  -- Phase A of the story on the gallery card: every element x every option x light / dark on its page (real tap), fit and >= 7:1 on the render; the preview's cap, fade and Open Row; the three emphases as frame sequences; Custom preview; media plates; reuse
+        - CardStoryGalleryTests.cs  -- Phase A of the story on the gallery card: every text element x every option x light / dark on its page (real tap), fit and >= 7:1 on the render (motion settled first); the preview's cap, fade, Open Row and no slot heading; the three emphases as frame sequences; Custom preview; reuse
+        - CardStoryMediaGalleryTests.cs  -- Phase A of the story's media and motion on the gallery card: every media element x width x frame x mode on its page (proportion, shape, bleed, >= 7:1 words); real taps (picture -> viewer -> Back to the page at its scroll, the pair, video in place / player through the one owner) and swipes (carousel h / v); frame sequences of a reveal, a parallax scroll, a slow zoom, the preview's entry; Reduce Motion = identical frames
         - CardSettingsGalleryTests.cs  -- Phase A of the language chip: finger-sized, readable, level with and left of the X, a real tap re-shows the entry in the other language (and back)
         - CardTrackGalleryTests.cs  -- Phase A of the swipe tracks: the horizontal timeline and the related carousel never show a card cut in half at rest or at the end of the swipe, the
         - PoiCardLanguageSceneTests.cs  -- Phase B on the REAL LivingRoomScene: a real tap on the chip shows The Lamp's card in Portuguese in place (stop and scroll kept) and back, the pick
@@ -1096,7 +1106,7 @@ project as it is NOW. History lives in git and in each domain guide's "Design hi
         - BackgroundSafeInput.cs  -- Test helper: a copy of InputSystem.settings that keeps real devices working whichever application has the focus
         - PoiCardRealAudioTests.cs  -- The REAL AudioSource + the real ~200s PT clip (castelo_s_jorge_guide_pt.mp3): real taps play / pause / seek / change speed, closing the card with
         - PoiCardPortugueseTests.cs  -- The Lamp's PT render read item by item: every non-ASCII glyph its PT card content uses (c-cedilla, a / e / i / o / u with accents, A with an accent)
-        - PoiCardStorySceneTests.cs  -- Phase B on the REAL scene: The Painting's story preview capped with its Open Row in EN / PT, light / dark; a real tap opens the page, sibling chips turn, Back returns
+        - PoiCardStorySceneTests.cs  -- Phase B on the REAL scene: The Painting's story preview (hero picture edge to edge, eyebrow + title + lede, no slot heading) capped with its Open Row in EN / PT, light / dark; a real tap opens the page (17 rows drawn, pictures loaded, captions in the card's language), sibling chips turn, Back returns; real carousel swipes; a real tap on the video poster opens the existing player and Back returns to the page; the gated motion cost (TestEvidence/Story/MEASURING)
       - EditMode/  [EMPTY SCAFFOLD]  -- legacy folder, superseded by Tests/Editor
   - StreamingAssets/
     - LivingRoom/
